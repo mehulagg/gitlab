@@ -23,11 +23,11 @@ module QA
             # Alias QA::Runtime::Scenario.gitlab_address to @address since
             # some components depends on QA::Runtime::Scenario.gitlab_address.
             QA::Runtime::Scenario.define(:gitlab_address, QA::Runtime::Scenario.geo_primary_address)
+            QA::Runtime::Scenario.define(:network, 'geo')
 
             unless options[:geo_skip_setup?]
               Geo::Primary.act do
                 add_license
-                enable_hashed_storage
                 set_replication_password
                 set_primary_node
                 add_secondary_node
@@ -61,14 +61,6 @@ module QA
 
               QA::Runtime::Browser.visit(:geo_primary, QA::Page::Main::Login) do
                 Resource::License.fabricate!(ENV['EE_LICENSE'])
-              end
-            end
-
-            def enable_hashed_storage
-              puts 'Enabling hashed repository storage setting ...'
-
-              QA::Runtime::Browser.visit(:geo_primary, QA::Page::Main::Login) do
-                QA::Resource::Settings::HashedStorage.fabricate!(:enabled)
               end
             end
 
@@ -116,6 +108,20 @@ module QA
               QA::Service::Omnibus.new(@name).act do
                 require 'uri'
 
+                # At this stage of the workflow, the 'geo-logcursor' service will
+                # be 'flapping' because the Secondary DB has not been replicated
+                # and is known to timeout when a `gitlab-ctl stop` is issued
+                # (it is called as part of the `replicate-geo-database`
+                # command).
+                #
+                # The timeout occurs because it can take longer than 60 secs for
+                # 'geo-logcursor' to stop, which is the maximum length of time
+                # runit will wait before deeming the service to 'timeout' and
+                # then returns a non-zero exit code.
+                #
+                # Let's always ensure we return a zero exit code here.
+                gitlab_ctl "stop || true"
+
                 host = URI(QA::Runtime::Scenario.geo_primary_address).host
                 slot = QA::Runtime::Scenario.geo_primary_name.tr('-', '_')
 
@@ -127,7 +133,7 @@ module QA
             def reconfigure
               # Without this step, the /var/opt/gitlab/postgresql/data/pg_hba.conf
               # that is left behind from 'gitlab_ctl "replicate-geo-database ..'
-              # does not allow FDW to work.
+              # does not allow PostgreSQL to work.
               puts 'Reconfiguring ...'
 
               QA::Service::Omnibus.new(@name).act do
@@ -154,9 +160,6 @@ module QA
                 QA::Page::Main::OAuth.perform do |oauth|
                   oauth.authorize! if oauth.needs_authorization?
                 end
-
-                # Log out so that tests are in an initially unauthenticated state
-                QA::Page::Main::Menu.perform(&:sign_out)
               end
             end
 

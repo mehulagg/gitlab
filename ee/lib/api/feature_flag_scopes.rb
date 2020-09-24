@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 module API
-  class FeatureFlagScopes < Grape::API
+  class FeatureFlagScopes < Grape::API::Instance
     include PaginationParams
 
-    ENVIRONMENT_SCOPE_ENDPOINT_REQUIREMETS = FeatureFlags::FEATURE_FLAG_ENDPOINT_REQUIREMENTS
+    ENVIRONMENT_SCOPE_ENDPOINT_REQUIREMENTS = FeatureFlags::FEATURE_FLAG_ENDPOINT_REQUIREMENTS
       .merge(environment_scope: API::NO_SLASH_URL_PART_REGEX)
 
     before do
-      not_found! unless Feature.enabled?(:feature_flag_api, user_project)
       authorize_read_feature_flags!
     end
 
@@ -18,14 +17,14 @@ module API
     resource 'projects/:id', requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       resource :feature_flag_scopes do
         desc 'Get all effective feature flags under the environment' do
-          detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-          success EE::API::Entities::FeatureFlag::DetailedScope
+          detail 'This feature was introduced in GitLab 12.5'
+          success EE::API::Entities::FeatureFlag::DetailedLegacyScope
         end
         params do
           requires :environment, type: String, desc: 'The environment name'
         end
         get do
-          present scopes_for_environment, with: EE::API::Entities::FeatureFlag::DetailedScope
+          present scopes_for_environment, with: EE::API::Entities::FeatureFlag::DetailedLegacyScope
         end
       end
 
@@ -35,23 +34,23 @@ module API
       resource 'feature_flags/:name', requirements: FeatureFlags::FEATURE_FLAG_ENDPOINT_REQUIREMENTS do
         resource :scopes do
           desc 'Get all scopes of a feature flag' do
-            detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-            success EE::API::Entities::FeatureFlag::Scope
+            detail 'This feature was introduced in GitLab 12.5'
+            success EE::API::Entities::FeatureFlag::LegacyScope
           end
           params do
             use :pagination
           end
           get do
-            present paginate(feature_flag.scopes), with: EE::API::Entities::FeatureFlag::Scope
+            present paginate(feature_flag.scopes), with: EE::API::Entities::FeatureFlag::LegacyScope
           end
 
           desc 'Create a scope of a feature flag' do
-            detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-            success EE::API::Entities::FeatureFlag::Scope
+            detail 'This feature was introduced in GitLab 12.5'
+            success EE::API::Entities::FeatureFlag::LegacyScope
           end
           params do
             requires :environment_scope, type: String, desc: 'The environment scope of the scope'
-            requires :active, type: Boolean, desc: 'Active/inactive of the scope'
+            requires :active, type: Boolean, desc: 'Whether the scope is active'
             requires :strategies, type: JSON, desc: 'The strategies of the scope'
           end
           post do
@@ -62,7 +61,7 @@ module API
               .execute(feature_flag)
 
             if result[:status] == :success
-              present scope, with: EE::API::Entities::FeatureFlag::Scope
+              present scope, with: EE::API::Entities::FeatureFlag::LegacyScope
             else
               render_api_error!(result[:message], result[:http_status])
             end
@@ -71,21 +70,21 @@ module API
           params do
             requires :environment_scope, type: String, desc: 'URL-encoded environment scope'
           end
-          resource ':environment_scope', requirements: ENVIRONMENT_SCOPE_ENDPOINT_REQUIREMETS do
+          resource ':environment_scope', requirements: ENVIRONMENT_SCOPE_ENDPOINT_REQUIREMENTS do
             desc 'Get a scope of a feature flag' do
-              detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-              success EE::API::Entities::FeatureFlag::Scope
+              detail 'This feature was introduced in GitLab 12.5'
+              success EE::API::Entities::FeatureFlag::LegacyScope
             end
             get do
-              present scope, with: EE::API::Entities::FeatureFlag::Scope
+              present scope, with: EE::API::Entities::FeatureFlag::LegacyScope
             end
 
             desc 'Update a scope of a feature flag' do
-              detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-              success EE::API::Entities::FeatureFlag::Scope
+              detail 'This feature was introduced in GitLab 12.5'
+              success EE::API::Entities::FeatureFlag::LegacyScope
             end
             params do
-              optional :active, type: Boolean, desc: 'Active/inactive of the scope'
+              optional :active, type: Boolean, desc: 'Whether the scope is active'
               optional :strategies, type: JSON, desc: 'The strategies of the scope'
             end
             put do
@@ -101,15 +100,15 @@ module API
                 updated_scope = result[:feature_flag].scopes
                   .find { |scope| scope.environment_scope == params[:environment_scope] }
 
-                present updated_scope, with: EE::API::Entities::FeatureFlag::Scope
+                present updated_scope, with: EE::API::Entities::FeatureFlag::LegacyScope
               else
                 render_api_error!(result[:message], result[:http_status])
               end
             end
 
             desc 'Delete a scope from a feature flag' do
-              detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-              success EE::API::Entities::FeatureFlag::Scope
+              detail 'This feature was introduced in GitLab 12.5'
+              success EE::API::Entities::FeatureFlag::LegacyScope
             end
             delete do
               authorize_update_feature_flag!

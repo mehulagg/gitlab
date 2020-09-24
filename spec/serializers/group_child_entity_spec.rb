@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe GroupChildEntity do
+RSpec.describe GroupChildEntity do
   include ExternalAuthorizationServiceHelpers
   include Gitlab::Routing.url_helpers
 
   let(:user) { create(:user) }
   let(:request) { double('request') }
   let(:entity) { described_class.new(object, request: request) }
+
   subject(:json) { entity.as_json }
 
   before do

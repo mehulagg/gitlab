@@ -1,11 +1,11 @@
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
+import download from '~/lib/utils/downloader';
+import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import toast from '~/vue_shared/plugins/global_toast';
 import * as types from './mutation_types';
-import downloadPatchHelper from './utils/download_patch_helper';
-import { pollUntilComplete } from './utils';
 
 /**
  * A lot of this file has duplicate actions to
@@ -24,6 +24,9 @@ export const setBaseBlobPath = ({ commit }, blobPath) => commit(types.SET_BASE_B
 
 export const setSourceBranch = ({ commit }, branch) => commit(types.SET_SOURCE_BRANCH, branch);
 
+export const setCanReadVulnerabilityFeedback = ({ commit }, value) =>
+  commit(types.SET_CAN_READ_VULNERABILITY_FEEDBACK, value);
+
 export const setVulnerabilityFeedbackPath = ({ commit }, path) =>
   commit(types.SET_VULNERABILITY_FEEDBACK_PATH, path);
 
@@ -41,84 +44,44 @@ export const setCreateVulnerabilityFeedbackDismissalPath = ({ commit }, path) =>
 
 export const setPipelineId = ({ commit }, id) => commit(types.SET_PIPELINE_ID, id);
 
-export const setCanCreateIssuePermission = ({ commit }, permission) =>
-  commit(types.SET_CAN_CREATE_ISSUE_PERMISSION, permission);
+export const fetchDiffData = (state, endpoint, category) => {
+  const requests = [pollUntilComplete(endpoint)];
 
-export const setCanCreateFeedbackPermission = ({ commit }, permission) =>
-  commit(types.SET_CAN_CREATE_FEEDBACK_PERMISSION, permission);
+  if (state.canReadVulnerabilityFeedback) {
+    requests.push(axios.get(state.vulnerabilityFeedbackPath, { params: { category } }));
+  }
 
-/**
- * SAST CONTAINER
- */
-export const setSastContainerHeadPath = ({ commit }, path) =>
-  commit(types.SET_SAST_CONTAINER_HEAD_PATH, path);
-
-export const setSastContainerBasePath = ({ commit }, path) =>
-  commit(types.SET_SAST_CONTAINER_BASE_PATH, path);
-
-export const setSastContainerDiffEndpoint = ({ commit }, path) =>
-  commit(types.SET_SAST_CONTAINER_DIFF_ENDPOINT, path);
-
-export const requestSastContainerReports = ({ commit }) =>
-  commit(types.REQUEST_SAST_CONTAINER_REPORTS);
-
-export const receiveSastContainerReports = ({ commit }, response) =>
-  commit(types.RECEIVE_SAST_CONTAINER_REPORTS, response);
-
-export const receiveSastContainerError = ({ commit }, error) =>
-  commit(types.RECEIVE_SAST_CONTAINER_ERROR, error);
-
-export const receiveSastContainerDiffSuccess = ({ commit }, response) =>
-  commit(types.RECEIVE_SAST_CONTAINER_DIFF_SUCCESS, response);
-
-export const receiveSastContainerDiffError = ({ commit }) =>
-  commit(types.RECEIVE_SAST_CONTAINER_DIFF_ERROR);
-
-export const fetchSastContainerDiff = ({ state, dispatch }) => {
-  dispatch('requestSastContainerReports');
-
-  return Promise.all([
-    pollUntilComplete(state.sastContainer.paths.diffEndpoint),
-    axios.get(state.vulnerabilityFeedbackPath, {
-      params: {
-        category: 'container_scanning',
-      },
-    }),
-  ])
-    .then(values => {
-      dispatch('receiveSastContainerDiffSuccess', {
-        diff: values[0].data,
-        enrichData: values[1].data,
-      });
-    })
-    .catch(() => {
-      dispatch('receiveSastContainerDiffError');
-    });
+  return Promise.all(requests).then(([diffResponse, enrichResponse]) => ({
+    diff: diffResponse.data,
+    enrichData: enrichResponse?.data ?? [],
+  }));
 };
 
-export const fetchSastContainerReports = ({ state, dispatch }) => {
-  const { base, head } = state.sastContainer.paths;
+/**
+ * CONTAINER SCANNING
+ */
 
-  dispatch('requestSastContainerReports');
+export const setContainerScanningDiffEndpoint = ({ commit }, path) =>
+  commit(types.SET_CONTAINER_SCANNING_DIFF_ENDPOINT, path);
 
-  return Promise.all([
-    head ? axios.get(head) : Promise.resolve(),
-    base ? axios.get(base) : Promise.resolve(),
-    axios.get(state.vulnerabilityFeedbackPath, {
-      params: {
-        category: 'container_scanning',
-      },
-    }),
-  ])
-    .then(values => {
-      dispatch('receiveSastContainerReports', {
-        head: values[0] ? values[0].data : null,
-        base: values[1] ? values[1].data : null,
-        enrichData: values && values[2] ? values[2].data : [],
-      });
+export const requestContainerScanningDiff = ({ commit }) =>
+  commit(types.REQUEST_CONTAINER_SCANNING_DIFF);
+
+export const receiveContainerScanningDiffSuccess = ({ commit }, response) =>
+  commit(types.RECEIVE_CONTAINER_SCANNING_DIFF_SUCCESS, response);
+
+export const receiveContainerScanningDiffError = ({ commit }) =>
+  commit(types.RECEIVE_CONTAINER_SCANNING_DIFF_ERROR);
+
+export const fetchContainerScanningDiff = ({ state, dispatch }) => {
+  dispatch('requestContainerScanningDiff');
+
+  return fetchDiffData(state, state.containerScanning.paths.diffEndpoint, 'container_scanning')
+    .then(data => {
+      dispatch('receiveContainerScanningDiffSuccess', data);
     })
     .catch(() => {
-      dispatch('receiveSastContainerError');
+      dispatch('receiveContainerScanningDiffError');
     });
 };
 
@@ -128,44 +91,9 @@ export const updateContainerScanningIssue = ({ commit }, issue) =>
 /**
  * DAST
  */
-export const setDastHeadPath = ({ commit }, path) => commit(types.SET_DAST_HEAD_PATH, path);
-
-export const setDastBasePath = ({ commit }, path) => commit(types.SET_DAST_BASE_PATH, path);
-
 export const setDastDiffEndpoint = ({ commit }, path) => commit(types.SET_DAST_DIFF_ENDPOINT, path);
 
-export const requestDastReports = ({ commit }) => commit(types.REQUEST_DAST_REPORTS);
-
-export const receiveDastReports = ({ commit }, response) =>
-  commit(types.RECEIVE_DAST_REPORTS, response);
-
-export const receiveDastError = ({ commit }, error) => commit(types.RECEIVE_DAST_ERROR, error);
-
-export const fetchDastReports = ({ state, dispatch }) => {
-  const { base, head } = state.dast.paths;
-
-  dispatch('requestDastReports');
-
-  return Promise.all([
-    head ? axios.get(head) : Promise.resolve(),
-    base ? axios.get(base) : Promise.resolve(),
-    axios.get(state.vulnerabilityFeedbackPath, {
-      params: {
-        category: 'dast',
-      },
-    }),
-  ])
-    .then(values => {
-      dispatch('receiveDastReports', {
-        head: values && values[0] ? values[0].data : null,
-        base: values && values[1] ? values[1].data : null,
-        enrichData: values && values[2] ? values[2].data : [],
-      });
-    })
-    .catch(() => {
-      dispatch('receiveDastError');
-    });
-};
+export const requestDastDiff = ({ commit }) => commit(types.REQUEST_DAST_DIFF);
 
 export const updateDastIssue = ({ commit }, issue) => commit(types.UPDATE_DAST_ISSUE, issue);
 
@@ -175,21 +103,11 @@ export const receiveDastDiffSuccess = ({ commit }, response) =>
 export const receiveDastDiffError = ({ commit }) => commit(types.RECEIVE_DAST_DIFF_ERROR);
 
 export const fetchDastDiff = ({ state, dispatch }) => {
-  dispatch('requestDastReports');
+  dispatch('requestDastDiff');
 
-  return Promise.all([
-    pollUntilComplete(state.dast.paths.diffEndpoint),
-    axios.get(state.vulnerabilityFeedbackPath, {
-      params: {
-        category: 'dast',
-      },
-    }),
-  ])
-    .then(values => {
-      dispatch('receiveDastDiffSuccess', {
-        diff: values[0].data,
-        enrichData: values[1].data,
-      });
+  return fetchDiffData(state, state.dast.paths.diffEndpoint, 'dast')
+    .then(data => {
+      dispatch('receiveDastDiffSuccess', data);
     })
     .catch(() => {
       dispatch('receiveDastDiffError');
@@ -199,23 +117,12 @@ export const fetchDastDiff = ({ state, dispatch }) => {
 /**
  * DEPENDENCY SCANNING
  */
-export const setDependencyScanningHeadPath = ({ commit }, path) =>
-  commit(types.SET_DEPENDENCY_SCANNING_HEAD_PATH, path);
-
-export const setDependencyScanningBasePath = ({ commit }, path) =>
-  commit(types.SET_DEPENDENCY_SCANNING_BASE_PATH, path);
 
 export const setDependencyScanningDiffEndpoint = ({ commit }, path) =>
   commit(types.SET_DEPENDENCY_SCANNING_DIFF_ENDPOINT, path);
 
-export const requestDependencyScanningReports = ({ commit }) =>
-  commit(types.REQUEST_DEPENDENCY_SCANNING_REPORTS);
-
-export const receiveDependencyScanningReports = ({ commit }, response) =>
-  commit(types.RECEIVE_DEPENDENCY_SCANNING_REPORTS, response);
-
-export const receiveDependencyScanningError = ({ commit }, error) =>
-  commit(types.RECEIVE_DEPENDENCY_SCANNING_ERROR, error);
+export const requestDependencyScanningDiff = ({ commit }) =>
+  commit(types.REQUEST_DEPENDENCY_SCANNING_DIFF);
 
 export const receiveDependencyScanningDiffSuccess = ({ commit }, response) =>
   commit(types.RECEIVE_DEPENDENCY_SCANNING_DIFF_SUCCESS, response);
@@ -224,55 +131,89 @@ export const receiveDependencyScanningDiffError = ({ commit }) =>
   commit(types.RECEIVE_DEPENDENCY_SCANNING_DIFF_ERROR);
 
 export const fetchDependencyScanningDiff = ({ state, dispatch }) => {
-  dispatch('requestDependencyScanningReports');
+  dispatch('requestDependencyScanningDiff');
 
-  return Promise.all([
-    pollUntilComplete(state.dependencyScanning.paths.diffEndpoint),
-    axios.get(state.vulnerabilityFeedbackPath, {
-      params: {
-        category: 'dependency_scanning',
-      },
-    }),
-  ])
-    .then(values => {
-      dispatch('receiveDependencyScanningDiffSuccess', {
-        diff: values[0].data,
-        enrichData: values[1].data,
-      });
+  return fetchDiffData(state, state.dependencyScanning.paths.diffEndpoint, 'dependency_scanning')
+    .then(data => {
+      dispatch('receiveDependencyScanningDiffSuccess', data);
     })
     .catch(() => {
       dispatch('receiveDependencyScanningDiffError');
     });
 };
 
-export const fetchDependencyScanningReports = ({ state, dispatch }) => {
-  const { base, head } = state.dependencyScanning.paths;
+export const updateDependencyScanningIssue = ({ commit }, issue) =>
+  commit(types.UPDATE_DEPENDENCY_SCANNING_ISSUE, issue);
 
-  dispatch('requestDependencyScanningReports');
+/**
+ * COVERAGE FUZZING
+ */
+export const setCoverageFuzzingDiffEndpoint = ({ commit }, path) =>
+  commit(types.SET_COVERAGE_FUZZING_DIFF_ENDPOINT, path);
+
+export const requestCoverageFuzzingDiff = ({ commit }) =>
+  commit(types.REQUEST_COVERAGE_FUZZING_DIFF);
+
+export const receiveCoverageFuzzingDiffSuccess = ({ commit }, response) =>
+  commit(types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS, response);
+
+export const receiveCoverageFuzzingDiffError = ({ commit }) =>
+  commit(types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR);
+
+export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
+  dispatch('requestCoverageFuzzingDiff');
 
   return Promise.all([
-    head ? axios.get(head) : Promise.resolve(),
-    base ? axios.get(base) : Promise.resolve(),
+    pollUntilComplete(state.coverageFuzzing.paths.diffEndpoint),
     axios.get(state.vulnerabilityFeedbackPath, {
       params: {
-        category: 'dependency_scanning',
+        category: 'coverage_fuzzing',
       },
     }),
   ])
     .then(values => {
-      dispatch('receiveDependencyScanningReports', {
-        head: values[0] ? values[0].data : null,
-        base: values[1] ? values[1].data : null,
-        enrichData: values && values[2] ? values[2].data : [],
+      dispatch('receiveCoverageFuzzingDiffSuccess', {
+        diff: values[0].data,
+        enrichData: values[1].data,
       });
     })
     .catch(() => {
-      dispatch('receiveDependencyScanningError');
+      dispatch('receiveCoverageFuzzingDiffError');
     });
 };
 
-export const updateDependencyScanningIssue = ({ commit }, issue) =>
-  commit(types.UPDATE_DEPENDENCY_SCANNING_ISSUE, issue);
+export const updateCoverageFuzzingIssue = ({ commit }, issue) =>
+  commit(types.UPDATE_COVERAGE_FUZZING_ISSUE, issue);
+
+/**
+ * SECRET SCANNING
+ */
+
+export const setSecretScanningDiffEndpoint = ({ commit }, path) =>
+  commit(types.SET_SECRET_SCANNING_DIFF_ENDPOINT, path);
+
+export const requestSecretScanningDiff = ({ commit }) => commit(types.REQUEST_SECRET_SCANNING_DIFF);
+
+export const receiveSecretScanningDiffSuccess = ({ commit }, response) =>
+  commit(types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS, response);
+
+export const receiveSecretScanningDiffError = ({ commit }) =>
+  commit(types.RECEIVE_SECRET_SCANNING_DIFF_ERROR);
+
+export const fetchSecretScanningDiff = ({ state, dispatch }) => {
+  dispatch('requestSecretScanningDiff');
+
+  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_detection')
+    .then(data => {
+      dispatch('receiveSecretScanningDiffSuccess', data);
+    })
+    .catch(() => {
+      dispatch('receiveSecretScanningDiffError');
+    });
+};
+
+export const updateSecretScanningIssue = ({ commit }, issue) =>
+  commit(types.UPDATE_SECRET_SCANNING_ISSUE, issue);
 
 export const openModal = ({ dispatch }, payload) => {
   dispatch('setModalData', payload);
@@ -291,7 +232,7 @@ export const receiveDismissVulnerabilityError = ({ commit }, error) =>
 export const dismissVulnerability = ({ state, dispatch }, comment) => {
   dispatch('requestDismissVulnerability');
 
-  const toastMsg = sprintf(s__("Security Reports|Dismissed '%{vulnerabilityName}'"), {
+  const toastMsg = sprintf(s__("SecurityReports|Dismissed '%{vulnerabilityName}'"), {
     vulnerabilityName: state.modal.vulnerability.name,
   });
 
@@ -337,10 +278,10 @@ export const addDismissalComment = ({ state, dispatch }, { comment }) => {
     dismissalFeedback.comment_details && dismissalFeedback.comment_details.comment;
 
   const toastMsg = editingDismissalContent
-    ? sprintf(s__("Security Reports|Comment edited on '%{vulnerabilityName}'"), {
+    ? sprintf(s__("SecurityReports|Comment edited on '%{vulnerabilityName}'"), {
         vulnerabilityName: vulnerability.name,
       })
-    : sprintf(s__("Security Reports|Comment added to '%{vulnerabilityName}'"), {
+    : sprintf(s__("SecurityReports|Comment added to '%{vulnerabilityName}'"), {
         vulnerabilityName: vulnerability.name,
       });
 
@@ -358,7 +299,7 @@ export const addDismissalComment = ({ state, dispatch }, { comment }) => {
     .catch(() => {
       dispatch(
         'receiveAddDismissalCommentError',
-        s__('Security Reports|There was an error adding the comment.'),
+        s__('SecurityReports|There was an error adding the comment.'),
       );
     });
 };
@@ -369,7 +310,7 @@ export const deleteDismissalComment = ({ state, dispatch }) => {
   const { vulnerability } = state.modal;
   const { dismissalFeedback } = vulnerability;
   const url = `${state.createVulnerabilityFeedbackDismissalPath}/${dismissalFeedback.id}`;
-  const toastMsg = sprintf(s__("Security Reports|Comment deleted on '%{vulnerabilityName}'"), {
+  const toastMsg = sprintf(s__("SecurityReports|Comment deleted on '%{vulnerabilityName}'"), {
     vulnerabilityName: vulnerability.name,
   });
 
@@ -386,7 +327,7 @@ export const deleteDismissalComment = ({ state, dispatch }) => {
     .catch(() => {
       dispatch(
         'receiveDeleteDismissalCommentError',
-        s__('Security Reports|There was an error deleting the comment.'),
+        s__('SecurityReports|There was an error deleting the comment.'),
       );
     });
 };
@@ -511,16 +452,16 @@ export const createMergeRequest = ({ state, dispatch }) => {
 };
 
 export const downloadPatch = ({ state }) => {
-  /* 
+  /*
     This action doesn't actually mutate the Vuex state and is a dirty
-    workaround to modifying the dom. We do this because gl-split-button 
-    relies on a old version of vue-bootstrap and it doesn't allow us to 
-    set a href for a file download. 
+    workaround to modifying the dom. We do this because gl-split-button
+    relies on a old version of vue-bootstrap and it doesn't allow us to
+    set a href for a file download.
 
     https://gitlab.com/gitlab-org/gitlab-ui/issues/188#note_165808493
   */
   const { vulnerability } = state.modal;
-  downloadPatchHelper(vulnerability.remediations[0].diff);
+  download({ fileData: vulnerability.remediations[0].diff, fileName: 'remediation.patch' });
   $('#modal-mrwidget-security-issue').modal('hide');
 };
 
@@ -543,6 +484,3 @@ export const openDismissalCommentBox = ({ commit }) => {
 export const closeDismissalCommentBox = ({ commit }) => {
   commit(types.CLOSE_DISMISSAL_COMMENT_BOX);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

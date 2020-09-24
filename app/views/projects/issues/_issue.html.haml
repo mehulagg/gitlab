@@ -1,5 +1,5 @@
 -# DANGER: Any changes to this file need to be reflected in issuables_list/components/issuable.vue!
-%li{ id: dom_id(issue), class: issue_css_classes(issue), url: issue_path(issue), data: { labels: issue.label_ids, id: issue.id } }
+%li{ id: dom_id(issue), class: issue_css_classes(issue), url: issue_path(issue), data: { labels: issue.label_ids, id: issue.id, qa_selector: 'issue_container', qa_issue_title: issue.title } }
   .issue-box
     - if @can_bulk_update
       .issue-check.hidden
@@ -12,6 +12,7 @@
               %span.has-tooltip{ title: _('Confidential') }
                 = confidential_icon(issue)
             = link_to issue.title, issue_path(issue)
+          = render_if_exists 'projects/issues/subepic_flag', issue: issue
           - if issue.tasks?
             %span.task-status.d-none.d-sm-inline-block
               &nbsp;
@@ -24,11 +25,12 @@
             &middot;
             opened #{time_ago_with_tooltip(issue.created_at, placement: 'bottom')}
             by #{link_to_member(@project, issue.author, avatar: false)}
+            = render_if_exists 'shared/issuable/gitlab_team_member_badge', {author: issue.author}
           - if issue.milestone
             %span.issuable-milestone.d-none.d-sm-inline-block
               &nbsp;
               = link_to project_issues_path(issue.project, milestone_title: issue.milestone.title), data: { html: 'true', toggle: 'tooltip', title: milestone_tooltip_due_date(issue.milestone) } do
-                = icon('clock-o')
+                = sprite_icon('clock', css_class: 'gl-vertical-align-text-bottom')
                 = issue.milestone.title
           - if issue.due_date
             %span.issuable-due-date.d-none.d-sm-inline-block.has-tooltip{ class: "#{'cred' if issue.overdue?}", title: _('Due date') }
@@ -38,13 +40,14 @@
           - if issue.labels.any?
             &nbsp;
             - presented_labels_sorted_by_title(issue.labels, issue.project).each do |label|
-              = link_to_label(label, css_class: 'label-link')
+              = link_to_label(label, small: true)
 
           = render_if_exists "projects/issues/issue_weight", issue: issue
+          = render "projects/issues/issue_estimate", issue: issue
 
       .issuable-meta
         %ul.controls
-          - if issue.moved?
+          - if issue.closed? && issue.moved?
             %li.issuable-status
               = _('CLOSED (MOVED)')
           - elsif issue.closed?

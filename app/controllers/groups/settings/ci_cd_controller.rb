@@ -6,9 +6,20 @@ module Groups
       skip_cross_project_access_check :show
       before_action :authorize_admin_group!
       before_action :authorize_update_max_artifacts_size!, only: [:update]
+      before_action do
+        push_frontend_feature_flag(:new_variables_ui, @group, default_enabled: true)
+      end
+      before_action :define_variables, only: [:show]
+
+      NUMBER_OF_RUNNERS_PER_PAGE = 4
 
       def show
-        define_ci_variables
+        runners_finder = Ci::RunnersFinder.new(current_user: current_user, group: @group, params: params)
+        # We need all runners for count
+        @all_group_runners = runners_finder.execute.except(:limit, :offset)
+        @group_runners = runners_finder.execute.page(params[:page]).per(NUMBER_OF_RUNNERS_PER_PAGE)
+
+        @sort = runners_finder.sort_key
       end
 
       def update
@@ -39,6 +50,10 @@ module Groups
       end
 
       private
+
+      def define_variables
+        define_ci_variables
+      end
 
       def define_ci_variables
         @variable = Ci::GroupVariable.new(group: group)

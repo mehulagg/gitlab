@@ -2,7 +2,7 @@
 * None Syntax Colors
 */
 
-@import "../common";
+@import '../common';
 
 @mixin match-line {
   color: $black-transparent;
@@ -10,7 +10,7 @@
 }
 
 .code.none {
-    // Line numbers
+  // Line numbers
   .line-numbers,
   .diff-line-num {
     background-color: $gray-light;
@@ -30,7 +30,7 @@
   &,
   pre.code,
   .line_holder .line_content {
-    background-color: $white-light;
+    background-color: $white;
     color: $gl-text-color;
   }
 
@@ -44,11 +44,19 @@
   $none-expanded-bg: #e0e0e0;
 
   .line_holder {
-
     &.match .line_content,
     .new-nonewline.line_content,
     .old-nonewline.line_content {
       @include match-line;
+    }
+
+    .line-coverage {
+      @include line-coverage-border-color($green-500, $orange-500);
+
+      &.old,
+      &.new {
+        background-color: $white-normal;
+      }
     }
 
     .diff-line-num {
@@ -75,7 +83,7 @@
       }
 
       &.hll:not(.empty-cell) {
-        background-color: $white-light;
+        background-color: $white;
         border-color: $white-normal;
       }
     }
@@ -83,6 +91,7 @@
     &:not(.diff-expanded) + .diff-expanded,
     &.diff-expanded + .line_holder:not(.diff-expanded) {
       > .diff-line-num,
+      > .line-coverage,
       > .line_content {
         border-top: 1px solid $none-expanded-border;
       }
@@ -90,6 +99,7 @@
 
     &.diff-expanded {
       > .diff-line-num,
+      > .line-coverage,
       > .line_content {
         background: $none-expanded-bg;
         border-color: $none-expanded-bg;
@@ -138,30 +148,36 @@
     background-color: $white-normal;
   }
 
-    // Search result highlight
+  // Search result highlight
   span.highlight_word {
     background-color: $white-normal;
   }
 
-  .hll { background-color: $white-light; }
+  // Links to URLs, emails, or dependencies
+  .line a {
+    color: $gl-text-color;
+    text-decoration: underline;
+  }
+
+  .hll { background-color: $white; }
 
   .gd {
     color: $gl-text-color;
-    background-color: $white-light;
+    background-color: $white;
 
     .x {
       color: $gl-text-color;
-      background-color: $white-light;
+      background-color: $white;
     }
   }
 
   .gi {
     color: $gl-text-color;
-    background-color: $white-light;
+    background-color: $white;
 
     .x {
       color: $gl-text-color;
-      background-color: $white-light;
+      background-color: $white;
     }
   }
 

@@ -2,19 +2,8 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportImportStrategy do
-  let!(:project_template) { create(:project, :repository, :with_export) }
-  let(:project) { create(:project, :import_scheduled, import_type: 'gitlab_custom_project_template') }
-  let(:user) { build(:user) }
-  let(:repository_import_worker) { RepositoryImportWorker.new }
-
+RSpec.describe EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportImportStrategy do
   subject { described_class.new(export_into_project_id: project.id) }
-
-  before do
-    stub_licensed_features(custom_project_templates: true)
-    allow(RepositoryImportWorker).to receive(:new).and_return(repository_import_worker)
-    allow(repository_import_worker).to receive(:perform)
-  end
 
   describe 'validations' do
     it 'export_into_project_id must be present' do
@@ -24,6 +13,21 @@ describe EE::Gitlab::ImportExport::AfterExportStrategies::CustomTemplateExportIm
   end
 
   describe '#execute' do
+    before do
+      allow_next_instance_of(ProjectExportWorker) do |job|
+        allow(job).to receive(:jid).and_return(SecureRandom.hex(8))
+      end
+
+      stub_licensed_features(custom_project_templates: true)
+      allow(RepositoryImportWorker).to receive(:new).and_return(repository_import_worker)
+      allow(repository_import_worker).to receive(:perform)
+    end
+
+    let!(:project_template) { create(:project, :repository, :with_export) }
+    let(:project) { create(:project, :import_scheduled, import_type: 'gitlab_custom_project_template') }
+    let(:user) { build(:user) }
+    let(:repository_import_worker) { RepositoryImportWorker.new }
+
     it 'updates the project import_source with the path to import' do
       file = fixture_file_upload('spec/fixtures/project_export.tar.gz')
 

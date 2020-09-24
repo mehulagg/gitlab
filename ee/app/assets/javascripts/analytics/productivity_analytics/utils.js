@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import { flatten } from 'lodash';
 import dateFormat from 'dateformat';
 import { getDayDifference, getDateInPast } from '~/lib/utils/datetime_utility';
 import { median } from '~/lib/utils/number_utils';
@@ -33,6 +33,24 @@ export const getMilestonesEndpoint = (namespacePath, projectPathWithNamespace) =
 };
 
 /**
+ * Determines the default min date for the productivity analytics date picker
+ * by taking the minDate (provided by the BE) into account.
+ * @param {Date} minDate - The min start date provided by the backend.
+ * @param {Number} defaultDaysInPast - The number of days in the past (used for computing the start date).
+ * @returns {Date} - The computed default start date.
+ */
+export const getDefaultStartDate = (minDate, defaultDaysInPast) => {
+  const now = new Date(Date.now());
+  const dateInPast = getDateInPast(now, defaultDaysInPast);
+
+  if (!minDate) {
+    return dateInPast;
+  }
+
+  return minDate > dateInPast ? minDate : dateInPast;
+};
+
+/**
  * Computes the day difference 'days' between a given start and end date
  * and creates an array of length 'days'.
  * For each day in the array it initializes an empty array.
@@ -64,9 +82,9 @@ export const initDateArray = (startDate, endDate) => {
  *   [{ merged_at: '2019-09-03T21:29:49.351Z', metric: 24 }, ... ] // 2019-09-03
  * ]
  *
- * @param {*} data - The raw data received from the API.
- * @param {*} startDate - The start date selected by the user minus an additional offset in days (e.g., 30 days).
- * @param {*} endDate - The end date selected by the user.
+ * @param {Object} data - The raw data received from the API.
+ * @param {Date} startDate - The start date selected by the user minus an additional offset in days (e.g., 30 days).
+ * @param {Date} endDate - The end date selected by the user.
  * @returns {Array} The transformed data array (first item corresponds to start date, last item to end date)
  */
 export const transformScatterData = (data, startDate, endDate) => {
@@ -75,12 +93,8 @@ export const transformScatterData = (data, startDate, endDate) => {
 
   Object.keys(data).forEach(id => {
     const mergedAtDate = new Date(data[id].merged_at);
-    const d = new Date();
-    d.setDate(mergedAtDate.getDate());
-    d.setMonth(mergedAtDate.getMonth());
-    d.setFullYear(mergedAtDate.getFullYear());
+    const dayDiff = getDayDifference(mergedAtDate, endDate);
 
-    const dayDiff = getDayDifference(d, endDate);
     if (dayDiff > -1) {
       const idx = totalItems - (dayDiff + 1);
       result[idx].push(data[id]);
@@ -108,9 +122,9 @@ export const transformScatterData = (data, startDate, endDate) => {
  * i[1] = metric, displayed on y axis
  * i[2] = datetime, used in the tooltip
  *
- * @param {*} data - The already transformed scatterplot data (which is computed by transformScatterData)
- * @param {*} startDate - The start date selected by the user
- * @param {*} endDate - The end date selected by the user
+ * @param {Array} data - The already transformed scatterplot data (which is computed by transformScatterData)
+ * @param {Date} startDate - The start date selected by the user
+ * @param {Date} endDate - The end date selected by the user
  * @returns {Array} An array with each item being another arry of two items (date, computed median)
  */
 export const getScatterPlotData = (data, startDate, endDate) => {
@@ -120,7 +134,7 @@ export const getScatterPlotData = (data, startDate, endDate) => {
   const visibleData = data.slice(startIndex);
 
   // group by date
-  const result = _.flatten(visibleData).map(item => [
+  const result = flatten(visibleData).map(item => [
     dateFormat(item.merged_at, dateFormats.isoDate),
     item.metric,
     item.merged_at,
@@ -139,9 +153,9 @@ export const getScatterPlotData = (data, startDate, endDate) => {
  * Example: Rolling median for m days:
  * Calculate median for day i: median[i - m + 1 ... i]
  *
- * @param {*} data - The already transformed scatterplot data (which is computed by transformScatterData)
- * @param {*} startDate - The start date selected by the user
- * @param {*} endDate - The end date selected by the user
+ * @param {Array} data - The already transformed scatterplot data (which is computed by transformScatterData)
+ * @param {Date} startDate - The start date selected by the user
+ * @param {Date} endDate - The end date selected by the user
  * @param {Number} daysOffset The number of days that to look up data in the past (e.g. 30 days in the past for 30 day rolling median)
  * @returns {Array} An array with each item being another arry of two items (date, computed median)
  */
@@ -161,7 +175,7 @@ export const getMedianLineData = (data, startDate, endDate, daysOffset) => {
     startIndex = i - daysOffset - 1;
     if (transformedData[startIndex] && transformedData[i - 1]) {
       medianData = transformedData.slice(startIndex, i);
-      flattenedData = _.flatten(medianData);
+      flattenedData = flatten(medianData);
       if (flattenedData.length) {
         d = getDateInPast(endDate, len - i).toISOString();
         result.push([dateFormat(d, dateFormats.isoDate), median(flattenedData)]);

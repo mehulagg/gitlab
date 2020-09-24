@@ -2,14 +2,18 @@
 
 require 'spec_helper'
 
-describe Mutations::MergeRequests::SetMilestone do
+RSpec.describe Mutations::MergeRequests::SetMilestone do
   let(:merge_request) { create(:merge_request) }
   let(:user) { create(:user) }
-  subject(:mutation) { described_class.new(object: nil, context: { current_user: user }) }
+
+  subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
+
+  specify { expect(described_class).to require_graphql_authorizations(:update_merge_request) }
 
   describe '#resolve' do
     let(:milestone) { create(:milestone, project: merge_request.project) }
     let(:mutated_merge_request) { subject[:merge_request] }
+
     subject { mutation.resolve(project_path: merge_request.project.full_path, iid: merge_request.iid, milestone: milestone) }
 
     it 'raises an error if the resource is not accessible to the user' do

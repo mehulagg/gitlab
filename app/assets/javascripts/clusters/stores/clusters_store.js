@@ -5,13 +5,15 @@ import {
   JUPYTER,
   KNATIVE,
   CERT_MANAGER,
-  ELASTIC_STACK,
+  CROSSPLANE,
   RUNNER,
   APPLICATION_INSTALLED_STATUSES,
   APPLICATION_STATUS,
   INSTALL_EVENT,
   UPDATE_EVENT,
   UNINSTALL_EVENT,
+  ELASTIC_STACK,
+  FLUENTD,
 } from '../constants';
 import transitionApplicationState from '../services/application_state_machine';
 
@@ -21,11 +23,13 @@ const applicationInitialState = {
   status: null,
   statusReason: null,
   requestReason: null,
+  installable: true,
   installed: false,
   installFailed: false,
   uninstallable: false,
   uninstallFailed: false,
   uninstallSuccessful: false,
+  validationError: null,
 };
 
 export default class ClusterStore {
@@ -50,13 +54,24 @@ export default class ClusterStore {
         ingress: {
           ...applicationInitialState,
           title: s__('ClusterIntegration|Ingress'),
+          modsecurity_enabled: false,
+          modsecurity_mode: null,
           externalIp: null,
           externalHostname: null,
+          isEditingModSecurityEnabled: false,
+          isEditingModSecurityMode: false,
+          updateFailed: false,
+          updateAvailable: false,
         },
         cert_manager: {
           ...applicationInitialState,
           title: s__('ClusterIntegration|Cert-Manager'),
           email: null,
+        },
+        crossplane: {
+          ...applicationInitialState,
+          title: s__('ClusterIntegration|Crossplane'),
+          stack: null,
         },
         runner: {
           ...applicationInitialState,
@@ -80,7 +95,7 @@ export default class ClusterStore {
           ...applicationInitialState,
           title: s__('ClusterIntegration|Knative'),
           hostname: null,
-          isEditingHostName: false,
+          isEditingDomain: false,
           externalIp: null,
           externalHostname: null,
           updateSuccessful: false,
@@ -89,7 +104,21 @@ export default class ClusterStore {
         elastic_stack: {
           ...applicationInitialState,
           title: s__('ClusterIntegration|Elastic Stack'),
-          kibana_hostname: null,
+        },
+        fluentd: {
+          ...applicationInitialState,
+          title: s__('ClusterIntegration|Fluentd'),
+          host: null,
+          port: null,
+          protocol: null,
+          wafLogEnabled: null,
+          ciliumLogEnabled: null,
+          isEditingSettings: false,
+        },
+        cilium: {
+          ...applicationInitialState,
+          title: s__('ClusterIntegration|GitLab Container Network Policies'),
+          installable: false,
         },
       },
       environments: [],
@@ -101,18 +130,22 @@ export default class ClusterStore {
     helpPath,
     ingressHelpPath,
     ingressDnsHelpPath,
+    ingressModSecurityHelpPath,
     environmentsHelpPath,
     clustersHelpPath,
     deployBoardsHelpPath,
     cloudRunHelpPath,
+    ciliumHelpPath,
   ) {
     this.state.helpPath = helpPath;
     this.state.ingressHelpPath = ingressHelpPath;
     this.state.ingressDnsHelpPath = ingressDnsHelpPath;
+    this.state.ingressModSecurityHelpPath = ingressModSecurityHelpPath;
     this.state.environmentsHelpPath = environmentsHelpPath;
     this.state.clustersHelpPath = clustersHelpPath;
     this.state.deployBoardsHelpPath = deployBoardsHelpPath;
     this.state.cloudRunHelpPath = cloudRunHelpPath;
+    this.state.ciliumHelpPath = ciliumHelpPath;
   }
 
   setManagePrometheusPath(managePrometheusPath) {
@@ -200,9 +233,19 @@ export default class ClusterStore {
       if (appId === INGRESS) {
         this.state.applications.ingress.externalIp = serverAppEntry.external_ip;
         this.state.applications.ingress.externalHostname = serverAppEntry.external_hostname;
+        this.state.applications.ingress.updateAvailable = updateAvailable;
+        if (!this.state.applications.ingress.isEditingModSecurityEnabled) {
+          this.state.applications.ingress.modsecurity_enabled = serverAppEntry.modsecurity_enabled;
+        }
+        if (!this.state.applications.ingress.isEditingModSecurityMode) {
+          this.state.applications.ingress.modsecurity_mode = serverAppEntry.modsecurity_mode;
+        }
       } else if (appId === CERT_MANAGER) {
         this.state.applications.cert_manager.email =
           this.state.applications.cert_manager.email || serverAppEntry.email;
+      } else if (appId === CROSSPLANE) {
+        this.state.applications.crossplane.stack =
+          this.state.applications.crossplane.stack || serverAppEntry.stack;
       } else if (appId === JUPYTER) {
         this.state.applications.jupyter.hostname = this.updateHostnameIfUnset(
           this.state.applications.jupyter.hostname,
@@ -210,7 +253,12 @@ export default class ClusterStore {
           'jupyter',
         );
       } else if (appId === KNATIVE) {
-        if (!this.state.applications.knative.isEditingHostName) {
+        if (serverAppEntry.available_domains) {
+          this.state.applications.knative.availableDomains = serverAppEntry.available_domains;
+        }
+        if (!this.state.applications.knative.isEditingDomain) {
+          this.state.applications.knative.pagesDomain =
+            serverAppEntry.pages_domain || this.state.applications.knative.pagesDomain;
           this.state.applications.knative.hostname =
             serverAppEntry.hostname || this.state.applications.knative.hostname;
         }
@@ -222,11 +270,16 @@ export default class ClusterStore {
         this.state.applications.runner.version = version;
         this.state.applications.runner.updateAvailable = updateAvailable;
       } else if (appId === ELASTIC_STACK) {
-        this.state.applications.elastic_stack.kibana_hostname = this.updateHostnameIfUnset(
-          this.state.applications.elastic_stack.kibana_hostname,
-          serverAppEntry.kibana_hostname,
-          'kibana',
-        );
+        this.state.applications.elastic_stack.version = version;
+        this.state.applications.elastic_stack.updateAvailable = updateAvailable;
+      } else if (appId === FLUENTD) {
+        if (!this.state.applications.fluentd.isEditingSettings) {
+          this.state.applications.fluentd.port = serverAppEntry.port;
+          this.state.applications.fluentd.host = serverAppEntry.host;
+          this.state.applications.fluentd.protocol = serverAppEntry.protocol;
+          this.state.applications.fluentd.wafLogEnabled = serverAppEntry.waf_log_enabled;
+          this.state.applications.fluentd.ciliumLogEnabled = serverAppEntry.cilium_log_enabled;
+        }
       }
     });
   }
@@ -250,6 +303,7 @@ export default class ClusterStore {
       name: environment.name,
       project: environment.project,
       environmentPath: environment.environment_path,
+      logsPath: environment.logs_path,
       lastDeployment: environment.last_deployment,
       rolloutStatus: {
         status: environment.rollout_status ? environment.rollout_status.status : null,

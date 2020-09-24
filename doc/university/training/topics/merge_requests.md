@@ -7,7 +7,7 @@ comments: false
 - When you want feedback create a merge request
 - Target is the default branch (usually master)
 - Assign or mention the person you would like to review
-- Add 'WIP' to the title if it's a work in progress
+- Add `[Draft]` to the title if it's a work in progress
 - When accepting, always delete the branch
 - Anyone can comment, not just the assignee
 - Push corrections to the same branch
@@ -34,4 +34,4 @@ Review the Thoughtbot code-review guide for suggestions to follow when reviewing
 [https://github.com/thoughtbot/guides/tree/master/code-review](https://github.com/thoughtbot/guides/tree/master/code-review)
 
 See GitLab merge requests for examples:
-[https://gitlab.com/gitlab-org/gitlab-foss/merge_requests](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests)
+[https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests)

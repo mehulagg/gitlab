@@ -1,6 +1,12 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Project clusters API
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/23922) in GitLab 11.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23922) in GitLab 11.7.
 
 NOTE: **Note:**
 User will need at least maintainer access to use these endpoints.
@@ -9,7 +15,7 @@ User will need at least maintainer access to use these endpoints.
 
 Returns a list of project clusters.
 
-```
+```plaintext
 GET /projects/:id/clusters
 ```
 
@@ -21,8 +27,8 @@ Parameters:
 
 Example request:
 
-```bash
-curl --header 'Private-Token: <your_access_token>' https://gitlab.example.com/api/v4/projects/26/clusters
+```shell
+curl --header "Private-Token: <your_access_token>" "https://gitlab.example.com/api/v4/projects/26/clusters"
 ```
 
 Example response:
@@ -77,7 +83,7 @@ Example response:
 
 Gets a single project cluster.
 
-```bash
+```shell
 GET /projects/:id/clusters/:cluster_id
 ```
 
@@ -90,8 +96,8 @@ Parameters:
 
 Example request:
 
-```bash
-curl --header 'Private-Token: <your_access_token>' https://gitlab.example.com/api/v4/projects/26/clusters/18
+```shell
+curl --header "Private-Token: <your_access_token>" "https://gitlab.example.com/api/v4/projects/26/clusters/18"
 ```
 
 Example response:
@@ -168,7 +174,7 @@ Example response:
 
 Adds an existing Kubernetes cluster to the project.
 
-```bash
+```shell
 POST /projects/:id/clusters/user
 ```
 
@@ -177,21 +183,22 @@ Parameters:
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `id` | integer | yes | The ID of the project owned by the authenticated user |
-| `name` | String | yes | The name of the cluster |
-| `domain` | String | no | The [base domain](../user/project/clusters/index.md#base-domain) of the cluster |
-| `enabled` | Boolean | no | Determines if cluster is active or not, defaults to true |
-| `managed` | Boolean | no | Determines if GitLab will manage namespaces and service accounts for this cluster, defaults to true |
-| `platform_kubernetes_attributes[api_url]` | String | yes | The URL to access the Kubernetes API |
-| `platform_kubernetes_attributes[token]` | String | yes | The token to authenticate against Kubernetes |
-| `platform_kubernetes_attributes[ca_cert]` | String | no | TLS certificate (needed if API is using a self-signed TLS certificate |
-| `platform_kubernetes_attributes[namespace]` | String | no | The unique namespace related to the project |
-| `platform_kubernetes_attributes[authorization_type]` | String | no | The cluster authorization type: `rbac`, `abac` or `unknown_authorization`. Defaults to `rbac`. |
-| `environment_scope` | String | no | The associated environment to the cluster. Defaults to `*` **(PREMIUM)** |
+| `name` | string | yes | The name of the cluster |
+| `domain` | string | no | The [base domain](../user/project/clusters/index.md#base-domain) of the cluster |
+| `management_project_id` | integer | no | The ID of the [management project](../user/clusters/management_project.md) for the cluster |
+| `enabled` | boolean | no | Determines if cluster is active or not, defaults to true |
+| `managed` | boolean | no | Determines if GitLab will manage namespaces and service accounts for this cluster, defaults to true |
+| `platform_kubernetes_attributes[api_url]` | string | yes | The URL to access the Kubernetes API |
+| `platform_kubernetes_attributes[token]` | string | yes | The token to authenticate against Kubernetes |
+| `platform_kubernetes_attributes[ca_cert]` | string | no | TLS certificate. Required if API is using a self-signed TLS certificate. |
+| `platform_kubernetes_attributes[namespace]` | string | no | The unique namespace related to the project |
+| `platform_kubernetes_attributes[authorization_type]` | string | no | The cluster authorization type: `rbac`, `abac` or `unknown_authorization`. Defaults to `rbac`. |
+| `environment_scope` | string | no | The associated environment to the cluster. Defaults to `*` **(PREMIUM)** |
 
 Example request:
 
-```bash
-curl --header 'Private-Token: <your_access_token>' https://gitlab.example.com/api/v4/projects/26/clusters/user \
+```shell
+curl --header "Private-Token: <your_access_token>" "https://gitlab.example.com/api/v4/projects/26/clusters/user" \
 -H "Accept: application/json" \
 -H "Content-Type:application/json" \
 -X POST --data '{"name":"cluster-5", "platform_kubernetes_attributes":{"api_url":"https://35.111.51.20","token":"12345","namespace":"cluster-5-namespace","ca_cert":"-----BEGIN CERTIFICATE-----\r\nhFiK1L61owwDQYJKoZIhvcNAQELBQAw\r\nLzEtMCsGA1UEAxMkZDA1YzQ1YjctNzdiMS00NDY0LThjNmEtMTQ0ZDJkZjM4ZDBj\r\nMB4XDTE4MTIyNzIwMDM1MVoXDTIzMTIyNjIxMDM1MVowLzEtMCsGA1UEAxMkZDA1\r\nYzQ1YjctNzdiMS00NDY0LThjNmEtMTQ0ZDJkZjM.......-----END CERTIFICATE-----"}}'
@@ -261,7 +268,7 @@ Example response:
 
 Updates an existing project cluster.
 
-```bash
+```shell
 PUT /projects/:id/clusters/:cluster_id
 ```
 
@@ -271,14 +278,14 @@ Parameters:
 | --------- | ---- | -------- | ----------- |
 | `id` | integer | yes | The ID of the project owned by the authenticated user |
 | `cluster_id` | integer | yes | The ID of the cluster |
-| `name` | String | no | The name of the cluster |
-| `domain` | String | no | The [base domain](../user/project/clusters/index.md#base-domain) of the cluster |
+| `name` | string | no | The name of the cluster |
+| `domain` | string | no | The [base domain](../user/project/clusters/index.md#base-domain) of the cluster |
 | `management_project_id` | integer | no | The ID of the [management project](../user/clusters/management_project.md) for the cluster |
-| `platform_kubernetes_attributes[api_url]` | String | no | The URL to access the Kubernetes API |
-| `platform_kubernetes_attributes[token]` | String | no | The token to authenticate against Kubernetes |
-| `platform_kubernetes_attributes[ca_cert]` | String | no | TLS certificate (needed if API is using a self-signed TLS certificate |
-| `platform_kubernetes_attributes[namespace]` | String | no | The unique namespace related to the project |
-| `environment_scope` | String | no | The associated environment to the cluster **(PREMIUM)** |
+| `platform_kubernetes_attributes[api_url]` | string | no | The URL to access the Kubernetes API |
+| `platform_kubernetes_attributes[token]` | string | no | The token to authenticate against Kubernetes |
+| `platform_kubernetes_attributes[ca_cert]` | string | no | TLS certificate. Required if API is using a self-signed TLS certificate. |
+| `platform_kubernetes_attributes[namespace]` | string | no | The unique namespace related to the project |
+| `environment_scope` | string | no | The associated environment to the cluster **(PREMIUM)** |
 
 NOTE: **Note:**
 `name`, `api_url`, `ca_cert` and `token` can only be updated if the cluster was added
@@ -287,8 +294,8 @@ through the ["Add existing cluster to project"](#add-existing-cluster-to-project
 
 Example request:
 
-```bash
-curl --header 'Private-Token: <your_access_token>' https://gitlab.example.com/api/v4/projects/26/clusters/24 \
+```shell
+curl --header "Private-Token: <your_access_token>" "https://gitlab.example.com/api/v4/projects/26/clusters/24" \
 -H "Content-Type:application/json" \
 -X PUT --data '{"name":"new-cluster-name","domain":"new-domain.com","api_url":"https://new-api-url.com"}'
 ```
@@ -368,7 +375,7 @@ Example response:
 
 Deletes an existing project cluster.
 
-```
+```plaintext
 DELETE /projects/:id/clusters/:cluster_id
 ```
 
@@ -381,6 +388,6 @@ Parameters:
 
 Example request:
 
-```bash
-curl --request DELETE --header 'Private-Token: <your_access_token>' https://gitlab.example.com/api/v4/projects/26/clusters/23
+```shell
+curl --request DELETE --header "Private-Token: <your_access_token>" "https://gitlab.example.com/api/v4/projects/26/clusters/23"
 ```

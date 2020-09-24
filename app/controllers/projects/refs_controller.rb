@@ -40,47 +40,23 @@ class Projects::RefsController < Projects::ApplicationController
   end
 
   def logs_tree
-    summary = ::Gitlab::TreeSummary.new(
-      @commit,
-      @project,
-      path: @path,
-      offset: params[:offset],
-      limit: 25
-    )
-
-    @logs, commits = summary.summarize
-    @more_log_url = more_url(summary.next_offset) if summary.more?
+    tree_summary = ::Gitlab::TreeSummary.new(
+      @commit, @project, current_user,
+      path: @path, offset: params[:offset], limit: 25)
 
     respond_to do |format|
       format.html { render_404 }
       format.json do
-        response.headers["More-Logs-Url"] = @more_log_url if summary.more?
-        response.headers["More-Logs-Offset"] = summary.next_offset if summary.more?
-        render json: @logs
-      end
+        logs, next_offset = tree_summary.fetch_logs
 
-      # The commit titles must be rendered and redacted before being shown.
-      # Doing it here allows us to apply performance optimizations that avoid
-      # N+1 problems
-      format.js do
-        prerender_commit_full_titles!(commits)
+        response.headers["More-Logs-Offset"] = next_offset.to_s if next_offset
+
+        render json: logs
       end
     end
   end
 
   private
-
-  def more_url(offset)
-    logs_file_project_ref_path(@project, @ref, @path, offset: offset)
-  end
-
-  def prerender_commit_full_titles!(commits)
-    # Preload commit authors as they are used in rendering
-    commits.each(&:lazy_author)
-
-    renderer = Banzai::ObjectRenderer.new(user: current_user, default_project: @project)
-    renderer.render(commits, :full_title)
-  end
 
   def validate_ref_id
     return not_found! if params[:id].present? && params[:id] !~ Gitlab::PathRegex.git_reference_regex

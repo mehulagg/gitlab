@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class VisualReviewDiscussions < Grape::API
+  class VisualReviewDiscussions < Grape::API::Instance
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
     helpers ::RendersNotes
@@ -36,15 +36,16 @@ module API
           forbidden!('Anonymous visual review feedback is disabled')
         end
 
-        merge_request = find_merge_request_without_permissions_check(params[:id], params[:merge_request_iid])
+        merge_request = find_merge_request(params[:merge_request_iid])
 
-        note = create_visual_review_note(merge_request, {
-          note: params[:body],
-          type: 'DiscussionNote',
-          noteable_type: 'MergeRequest',
-          position: params[:position],
-          noteable_id: merge_request.id
-        })
+        note = ::Notes::CreateVisualReviewService.new(
+          merge_request,
+          current_user,
+          {
+            body: params[:body],
+            position: params[:position]
+          }
+        ).execute
 
         if note.valid?
           present note.discussion, with: Entities::Discussion

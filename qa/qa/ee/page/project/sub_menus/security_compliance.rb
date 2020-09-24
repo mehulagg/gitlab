@@ -6,8 +6,10 @@ module QA
       module Project
         module SubMenus
           module SecurityCompliance
-            def self.included(page)
-              page.class_eval do
+            extend QA::Page::PageConcern
+
+            def self.prepended(base)
+              base.class_eval do
                 view 'ee/app/views/layouts/nav/sidebar/_project_security_link.html.haml' do
                   element :security_dashboard_link
                   element :dependency_list_link

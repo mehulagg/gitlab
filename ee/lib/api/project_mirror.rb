@@ -3,17 +3,17 @@
 require_dependency 'declarative_policy'
 
 module API
-  class ProjectMirror < Grape::API
+  class ProjectMirror < Grape::API::Instance
     helpers do
       def github_webhook_signature
         @github_webhook_signature ||= headers['X-Hub-Signature']
       end
 
-      def authenticate_from_github_webhook!
-        return unless github_webhook_signature
-
-        unless valid_github_signature?
-          Guest.can?(:read_project, project) ? unauthorized! : not_found!
+      def render_invalid_github_signature!
+        if Guest.can?(:read_project, project)
+          unauthorized!
+        else
+          not_found!
         end
       end
 
@@ -28,10 +28,16 @@ module API
       end
 
       def authenticate_with_webhook_token!
-        if github_webhook_signature
-          not_found! unless project
+        return not_found! unless project
 
-          authenticate_from_github_webhook!
+        return if valid_github_signature?
+
+        render_invalid_github_signature!
+      end
+
+      def try_authenticate_with_webhook_token!
+        if github_webhook_signature
+          authenticate_with_webhook_token!
         else
           authenticate!
           authorize_admin_project
@@ -43,7 +49,7 @@ module API
       end
 
       def process_pull_request
-        external_pull_request = ProcessGithubPullRequestEventService.new(project, mirror_user).execute(params)
+        external_pull_request = ::Ci::ExternalPullRequests::ProcessGithubEventService.new(project, mirror_user).execute(params)
 
         if external_pull_request
           render_validation_error!(external_pull_request)
@@ -53,7 +59,7 @@ module API
       end
 
       def start_pull_mirroring
-        result = StartPullMirroringService.new(project, mirror_user).execute
+        result = StartPullMirroringService.new(project, mirror_user, pause_on_hard_failure: true).execute
 
         render_api_error!(result[:message], result[:http_status]) if result[:status] == :error
       end
@@ -79,7 +85,7 @@ module API
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Triggers a pull mirror operation'
       post ":id/mirror/pull" do
-        authenticate_with_webhook_token!
+        try_authenticate_with_webhook_token!
 
         break render_api_error!('The project is not mirrored', 400) unless project.mirror?
 

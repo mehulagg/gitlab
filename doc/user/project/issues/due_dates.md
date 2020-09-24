@@ -1,6 +1,12 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Due dates
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/3614) in GitLab 8.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3614) in GitLab 8.7.
 
 Please read through the [GitLab Issue Documentation](index.md) for an overview on GitLab Issues.
 
@@ -24,6 +30,11 @@ Changes are saved immediately.
 
 ![Edit a due date via the sidebar](img/due_dates_edit_sidebar.png)
 
+The last way to set a due date is by using [quick actions](../quick_actions.md), directly in an issue's description or comment:
+
+- `/due <date>`: set due date. Examples of valid `<date>` include `in 2 days`, `this Friday`, and `December 31st`.
+- `/remove_due_date`: remove due date.
+
 ## Making use of due dates
 
 Issues that have a due date can be easily seen in the issue tracker,
@@ -33,9 +44,9 @@ the icon and the date colored red. You can sort issues by those that are
 
 ![Issues with due dates in the issues index page](img/due_dates_issues_index_page.png)
 
-Due dates also appear in your [todos list](../../todos.md).
+Due dates also appear in your [to-do list](../../todos.md).
 
-![Issues with due dates in the todos](img/due_dates_todos.png)
+![Issues with due dates in the to-dos](img/due_dates_todos.png)
 
 The day before an open issue is due, an email will be sent to all participants
 of the issue. Like the due date, the "day before the due date" is determined by the

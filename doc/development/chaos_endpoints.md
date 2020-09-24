@@ -26,7 +26,7 @@ A secret token can be set through the `GITLAB_CHAOS_SECRET` environment variable
 For example, when using the [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit)
 this can be done with the following command:
 
-```bash
+```shell
 GITLAB_CHAOS_SECRET=secret gdk run
 ```
 
@@ -47,7 +47,7 @@ To simulate a memory leak in your application, use the `/-/chaos/leakmem` endpoi
 NOTE: **Note:**
 The memory is not retained after the request finishes. Once the request has completed, the Ruby garbage collector will attempt to recover the memory.
 
-```
+```plaintext
 GET /-/chaos/leakmem
 GET /-/chaos/leakmem?memory_mb=1024
 GET /-/chaos/leakmem?memory_mb=1024&duration_s=50
@@ -60,7 +60,7 @@ GET /-/chaos/leakmem?memory_mb=1024&duration_s=50&async=true
 | `duration_s` | integer | no       | Minimum duration_s, in seconds, that the memory should be retained. Defaults to 30s. |
 | `async`      | boolean | no       | Set to true to leak memory in a Sidekiq background worker process                    |
 
-```bash
+```shell
 curl http://localhost:3000/-/chaos/leakmem?memory_mb=1024&duration_s=10 --header 'X-Chaos-Secret: secret'
 curl http://localhost:3000/-/chaos/leakmem?memory_mb=1024&duration_s=10&token=secret
 ```
@@ -72,7 +72,7 @@ This endpoint attempts to fully utilise a single core, at 100%, for the given pe
 Depending on your rack server setup, your request may timeout after a predetermined period (normally 60 seconds).
 If you're using Unicorn, this is done by killing the worker process.
 
-```
+```plaintext
 GET /-/chaos/cpu_spin
 GET /-/chaos/cpu_spin?duration_s=50
 GET /-/chaos/cpu_spin?duration_s=50&async=true
@@ -83,7 +83,7 @@ GET /-/chaos/cpu_spin?duration_s=50&async=true
 | `duration_s` | integer | no       | Duration, in seconds, that the core will be utilized. Defaults to 30s |
 | `async`      | boolean | no       | Set to true to consume CPU in a Sidekiq background worker process     |
 
-```bash
+```shell
 curl http://localhost:3000/-/chaos/cpu_spin?duration_s=60 --header 'X-Chaos-Secret: secret'
 curl http://localhost:3000/-/chaos/cpu_spin?duration_s=60&token=secret
 ```
@@ -96,7 +96,7 @@ This endpoint can be used to model yielding execution to another threads when ru
 Depending on your rack server setup, your request may timeout after a predetermined period (normally 60 seconds).
 If you're using Unicorn, this is done by killing the worker process.
 
-```
+```plaintext
 GET /-/chaos/db_spin
 GET /-/chaos/db_spin?duration_s=50
 GET /-/chaos/db_spin?duration_s=50&async=true
@@ -108,7 +108,7 @@ GET /-/chaos/db_spin?duration_s=50&async=true
 | `duration_s` | integer | no       | Duration, in seconds, that the core will be utilized. Defaults to 30s       |
 | `async`      | boolean | no       | Set to true to perform the operation in a Sidekiq background worker process |
 
-```bash
+```shell
 curl http://localhost:3000/-/chaos/db_spin?interval_s=1&duration_s=60 --header 'X-Chaos-Secret: secret'
 curl http://localhost:3000/-/chaos/db_spin?interval_s=1&duration_s=60&token=secret
 ```
@@ -119,7 +119,7 @@ This endpoint is similar to the CPU Spin endpoint but simulates off-processor ac
 
 As with the CPU Spin endpoint, this may lead to your request timing out if duration_s exceeds the configured limit.
 
-```
+```plaintext
 GET /-/chaos/sleep
 GET /-/chaos/sleep?duration_s=50
 GET /-/chaos/sleep?duration_s=50&async=true
@@ -130,7 +130,7 @@ GET /-/chaos/sleep?duration_s=50&async=true
 | `duration_s` | integer | no       | Duration, in seconds, that the request will sleep for. Defaults to 30s |
 | `async`      | boolean | no       | Set to true to sleep in a Sidekiq background worker process            |
 
-```bash
+```shell
 curl http://localhost:3000/-/chaos/sleep?duration_s=60 --header 'X-Chaos-Secret: secret'
 curl http://localhost:3000/-/chaos/sleep?duration_s=60&token=secret
 ```
@@ -142,7 +142,7 @@ This endpoint will simulate the unexpected death of a worker process using a `ki
 NOTE: **Note:**
 Since this endpoint uses the `KILL` signal, the worker is not given a chance to cleanup or shutdown.
 
-```
+```plaintext
 GET /-/chaos/kill
 GET /-/chaos/kill?async=true
 ```
@@ -151,7 +151,7 @@ GET /-/chaos/kill?async=true
 | ------------ | ------- | -------- | ---------------------------------------------------------------------- |
 | `async`      | boolean | no       | Set to true to kill a Sidekiq background worker process                |
 
-```bash
+```shell
 curl http://localhost:3000/-/chaos/kill --header 'X-Chaos-Secret: secret'
 curl http://localhost:3000/-/chaos/kill?token=secret
 ```

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :ci_reports_license_scanning_report, class: ::Gitlab::Ci::Reports::LicenseScanning::Report, aliases: [:license_scan_report] do
+  factory :ci_reports_license_scanning_report, class: '::Gitlab::Ci::Reports::LicenseScanning::Report', aliases: [:license_scan_report] do
     trait :version_1 do
       version { '1.0' }
     end

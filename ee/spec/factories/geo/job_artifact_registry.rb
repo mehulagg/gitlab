@@ -1,9 +1,19 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :geo_job_artifact_registry, class: Geo::JobArtifactRegistry do
+  factory :geo_job_artifact_registry, class: 'Geo::JobArtifactRegistry' do
     sequence(:artifact_id)
     success { true }
+
+    trait :failed do
+      success { false }
+      retry_count { 1 }
+    end
+
+    trait :never_synced do
+      success { false }
+      retry_count { nil }
+    end
 
     trait :with_artifact do
       transient do

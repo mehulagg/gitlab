@@ -1,3 +1,10 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Automatic background verification **(PREMIUM ONLY)**
 
 NOTE: **Note:**
@@ -17,8 +24,8 @@ You can restore it from backup or remove it from the **primary** node to resolve
 If verification succeeds on the **primary** node but fails on the **secondary** node,
 this indicates that the object was corrupted during the replication process.
 Geo actively try to correct verification failures marking the repository to
-be resynced with a backoff period. If you want to reset the verification for
-these failures, so you should follow [these instructions][reset-verification].
+be resynced with a back-off period. If you want to reset the verification for
+these failures, so you should follow [these instructions](background_verification.md#reset-verification-for-projects-where-verification-has-failed).
 
 If verification is lagging significantly behind replication, consider giving
 the node more time before scheduling a planned failover.
@@ -27,7 +34,7 @@ the node more time before scheduling a planned failover.
 
 Run the following commands in a Rails console on the **primary** node:
 
-```sh
+```shell
 gitlab-rails console
 ```
 
@@ -54,14 +61,14 @@ Feature.enable('geo_repository_verification')
 Navigate to the **Admin Area > Geo** dashboard on the **primary** node and expand
 the **Verification information** tab for that node to view automatic checksumming
 status for repositories and wikis. Successes are shown in green, pending work
-in grey, and failures in red.
+in gray, and failures in red.
 
 ![Verification status](img/verification-status-primary.png)
 
 Navigate to the **Admin Area > Geo** dashboard on the **secondary** node and expand
 the **Verification information** tab for that node to view automatic verification
 status for repositories and wikis. As with checksumming, successes are shown in
-green, pending work in grey, and failures in red.
+green, pending work in gray, and failures in red.
 
 ![Verification status](img/verification-status-secondary.png)
 
@@ -76,7 +83,7 @@ in sync.
 
 ## Repository re-verification
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/8550) in GitLab Enterprise Edition 11.6. Available in [GitLab Premium](https://about.gitlab.com/pricing/).
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/8550) in GitLab Enterprise Edition 11.6. Available in [GitLab Premium](https://about.gitlab.com/pricing/).
 
 Due to bugs or transient infrastructure failures, it is possible for Git
 repositories to change unexpectedly without being marked for verification.
@@ -95,7 +102,7 @@ The automatic background re-verification is enabled by default, but you can
 disable if you need. Run the following commands in a Rails console on the
 **primary** node:
 
-```sh
+```shell
 gitlab-rails console
 ```
 
@@ -114,19 +121,19 @@ Feature.enable('geo_repository_reverification')
 ## Reset verification for projects where verification has failed
 
 Geo actively try to correct verification failures marking the repository to
-be resynced with a backoff period. If you want to reset them manually, this
-rake task marks projects where verification has failed or the checksum mismatch
-to be resynced without the backoff period:
+be resynced with a back-off period. If you want to reset them manually, this
+Rake task marks projects where verification has failed or the checksum mismatch
+to be resynced without the back-off period:
 
 For repositories:
 
-```sh
+```shell
 sudo gitlab-rake geo:verification:repository:reset
 ```
 
 For wikis:
 
-```sh
+```shell
 sudo gitlab-rake geo:verification:wiki:reset
 ```
 
@@ -134,7 +141,7 @@ sudo gitlab-rake geo:verification:wiki:reset
 
 If the **primary** and **secondary** nodes have a checksum verification mismatch, the cause may not be apparent. To find the cause of a checksum mismatch:
 
-1. Navigate to the **Admin Area > Projects** dashboard on the **primary** node, find the
+1. Navigate to the **Admin Area > Overview > Projects** dashboard on the **primary** node, find the
    project that you want to check the checksum differences and click on the
    **Edit** button:
    ![Projects dashboard](img/checksum-differences-admin-projects.png)
@@ -146,25 +153,25 @@ If the **primary** and **secondary** nodes have a checksum verification mismatch
    (the path is usually `/var/opt/gitlab/git-data/repositories`). Note that if `git_data_dirs`
    is customized, check the directory layout on your server to be sure.
 
-   ```sh
+   ```shell
    cd /var/opt/gitlab/git-data/repositories
    ```
 
 1. Run the following command on the **primary** node, redirecting the output to a file:
 
-   ```sh
+   ```shell
    git show-ref --head | grep -E "HEAD|(refs/(heads|tags|keep-around|merge-requests|environments|notes)/)" > primary-node-refs
    ```
 
 1. Run the following command on the **secondary** node, redirecting the output to a file:
 
-   ```sh
+   ```shell
    git show-ref --head | grep -E "HEAD|(refs/(heads|tags|keep-around|merge-requests|environments|notes)/)" > secondary-node-refs
    ```
 
 1. Copy the files from the previous steps on the same system, and do a diff between the contents:
 
-   ```sh
+   ```shell
    diff primary-node-refs secondary-node-refs
    ```
 
@@ -172,11 +179,13 @@ If the **primary** and **secondary** nodes have a checksum verification mismatch
 
 Automatic background verification doesn't cover attachments, LFS objects,
 job artifacts, and user uploads in file storage. You can keep track of the
-progress to include them in [ee-1430]. For now, you can verify their integrity
-manually by following [these instructions][foreground-verification] on both
+progress to include them in [Geo: Verify all replicated data](https://gitlab.com/groups/gitlab-org/-/epics/1430).
+
+For now, you can verify their integrity
+manually by following [these instructions](../../raketasks/check.md) on both
 nodes, and comparing the output between them.
 
-In GitLab EE 12.1, Geo calculates checksums for attachments, LFS objects and
+In GitLab EE 12.1, Geo calculates checksums for attachments, LFS objects, and
 archived traces on secondary nodes after the transfer, compares it with the
 stored checksums, and rejects transfers if mismatched. Please note that Geo
 currently does not support an automatic way to verify these data if they have
@@ -184,7 +193,3 @@ been synced before GitLab EE 12.1.
 
 Data in object storage is **not verified**, as the object store is responsible
 for ensuring the integrity of the data.
-
-[reset-verification]: background_verification.md#reset-verification-for-projects-where-verification-has-failed
-[foreground-verification]: ../../raketasks/check.md
-[ee-1430]: https://gitlab.com/groups/gitlab-org/-/epics/1430

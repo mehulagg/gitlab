@@ -2,13 +2,11 @@
 import { GlButton } from '@gitlab/ui';
 import Tracking from '~/tracking';
 import { s__ } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 export default {
   name: 'DismissalCommentModalFooter',
   components: {
     GlButton,
-    LoadingButton,
   },
   props: {
     isDismissingVulnerability: {
@@ -65,17 +63,18 @@ export default {
 
 <template>
   <div>
-    <gl-button class="js-cancel" @click="$emit('cancel')">
+    <gl-button variant="default" category="primary" class="js-cancel" @click="$emit('cancel')">
       {{ __('Cancel') }}
     </gl-button>
-
-    <loading-button
+    <gl-button
       :loading="isDismissingVulnerability"
       :disabled="isDismissingVulnerability"
-      :label="submitLabel"
-      class="js-loading-button"
-      container-class="btn btn-close"
+      data-qa-selector="add_and_dismiss_button"
+      data-testid="add_and_dismiss_button"
+      variant="warning"
       @click="handleSubmit"
-    />
+    >
+      {{ submitLabel }}
+    </gl-button>
   </div>
 </template>

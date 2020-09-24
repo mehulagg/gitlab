@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ImportSoftwareLicensesWorker
+class ImportSoftwareLicensesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   queue_namespace :cronjob
@@ -8,8 +8,10 @@ class ImportSoftwareLicensesWorker
 
   def perform
     catalogue.each do |spdx_license|
-      if unknown_licenses[spdx_license.name]
-        unknown_licenses_with(spdx_license.name)
+      next if spdx_license.deprecated
+
+      if licenses[spdx_license.name]
+        licenses_with(spdx_license.name)
           .update_all(spdx_identifier: spdx_license.id)
       else
         SoftwareLicense.safe_find_or_create_by!(
@@ -22,13 +24,13 @@ class ImportSoftwareLicensesWorker
 
   private
 
-  def unknown_licenses
-    @unknown_licenses ||=
-      unknown_licenses_with(catalogue.map(&:name)).grouped_by_name.count
+  def licenses
+    @licenses ||=
+      licenses_with(catalogue.map(&:name)).grouped_by_name.count
   end
 
-  def unknown_licenses_with(name)
-    SoftwareLicense.unknown.by_name(name)
+  def licenses_with(name)
+    SoftwareLicense.by_name(name)
   end
 
   def catalogue

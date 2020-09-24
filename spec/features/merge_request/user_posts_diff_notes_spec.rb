@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User posts diff notes', :js do
+RSpec.describe 'Merge request > User posts diff notes', :js do
   include MergeRequestDiffHelpers
 
   let(:merge_request) { create(:merge_request) }
@@ -14,14 +14,11 @@ describe 'Merge request > User posts diff notes', :js do
   let(:test_note_comment) { 'this is a test note!' }
 
   before do
-    stub_feature_flags(single_mr_diff_view: false)
     set_cookie('sidebar_collapsed', 'true')
 
     project.add_developer(user)
     sign_in(user)
   end
-
-  it_behaves_like 'rendering a single diff version'
 
   context 'when hovering over a parallel view diff file' do
     before do
@@ -49,7 +46,7 @@ describe 'Merge request > User posts diff notes', :js do
     end
 
     context 'with an old line on the left and a new line on the right' do
-      it 'allows commenting on the left side' do
+      it 'allows commenting on the left side', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/199050' do
         should_allow_commenting(find('[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_9_9"]').find(:xpath, '..'), 'left')
       end
 
@@ -59,7 +56,7 @@ describe 'Merge request > User posts diff notes', :js do
     end
 
     context 'with an unchanged line on the left and an unchanged line on the right' do
-      it 'allows commenting on the left side' do
+      it 'allows commenting on the left side', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/196826' do
         should_allow_commenting(find('[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_7_7"]', match: :first).find(:xpath, '..'), 'left')
       end
 
@@ -69,12 +66,7 @@ describe 'Merge request > User posts diff notes', :js do
     end
 
     context 'with a match line' do
-      it 'does not allow commenting on the left side' do
-        line_holder = find('.match', match: :first).find(:xpath, '..')
-        match_should_not_allow_commenting(line_holder)
-      end
-
-      it 'does not allow commenting on the right side' do
+      it 'does not allow commenting' do
         line_holder = find('.match', match: :first).find(:xpath, '..')
         match_should_not_allow_commenting(line_holder)
       end
@@ -201,7 +193,7 @@ describe 'Merge request > User posts diff notes', :js do
 
   context 'when the MR only supports legacy diff notes' do
     before do
-      merge_request.merge_request_diff.update(start_commit_sha: nil)
+      merge_request.merge_request_diff.update!(start_commit_sha: nil)
       visit diffs_project_merge_request_path(project, merge_request, view: 'inline')
     end
 
@@ -233,7 +225,7 @@ describe 'Merge request > User posts diff notes', :js do
   def should_allow_commenting(line_holder, diff_side = nil, asset_form_reset: true)
     write_comment_on_line(line_holder, diff_side)
 
-    click_button 'Comment'
+    click_button 'Add comment now'
 
     wait_for_requests
 
@@ -243,7 +235,9 @@ describe 'Merge request > User posts diff notes', :js do
   def should_allow_dismissing_a_comment(line_holder, diff_side = nil)
     write_comment_on_line(line_holder, diff_side)
 
-    find('.js-close-discussion-note-form').click
+    accept_confirm do
+      find('.js-close-discussion-note-form').click
+    end
 
     assert_comment_dismissal(line_holder)
   end

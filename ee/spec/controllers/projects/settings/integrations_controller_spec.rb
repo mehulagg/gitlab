@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Settings::IntegrationsController do
+RSpec.describe Projects::Settings::IntegrationsController do
   let(:project) { create(:project, :public) }
   let(:user) { create(:user) }
 
@@ -29,7 +29,7 @@ describe Projects::Settings::IntegrationsController do
 
   context 'Sets correct services list' do
     let(:active_services) { assigns(:services).map(&:type) }
-    let(:disabled_services) { %w(JenkinsService JenkinsDeprecatedService) }
+    let(:disabled_services) { %w(JenkinsService) }
 
     it 'enables SlackSlashCommandsService and disables GitlabSlackApplication' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
@@ -50,7 +50,7 @@ describe Projects::Settings::IntegrationsController do
 
     context 'without a license key' do
       before do
-        License.destroy_all # rubocop: disable DestroyAll
+        License.destroy_all # rubocop: disable Cop/DestroyAll
       end
 
       it_behaves_like 'endpoint with some disabled services'

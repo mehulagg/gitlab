@@ -5,12 +5,32 @@ class ApplicationSetting < ApplicationRecord
   include CacheMarkdownField
   include TokenAuthenticatable
   include ChronicDurationAttribute
+  include IgnorableColumns
 
-  add_authentication_token_field :runners_registration_token, encrypted: -> { Feature.enabled?(:application_settings_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
+  ignore_column :namespace_storage_size_limit, remove_with: '13.5', remove_after: '2020-09-22'
+  ignore_column :instance_statistics_visibility_private, remove_with: '13.6', remove_after: '2020-10-22'
+  ignore_column :snowplow_iglu_registry_url, remove_with: '13.6', remove_after: '2020-11-22'
+
+  GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
+    'Admin Area > Settings > Metrics and profiling > Metrics - Grafana'
+
+  add_authentication_token_field :runners_registration_token, encrypted: -> { Feature.enabled?(:application_settings_tokens_optional_encryption) ? :optional : :required }
   add_authentication_token_field :health_check_access_token
   add_authentication_token_field :static_objects_external_storage_auth_token
 
-  belongs_to :instance_administration_project, class_name: "Project"
+  belongs_to :self_monitoring_project, class_name: "Project", foreign_key: 'instance_administration_project_id'
+  belongs_to :push_rule
+  alias_attribute :self_monitoring_project_id, :instance_administration_project_id
+
+  belongs_to :instance_group, class_name: "Group", foreign_key: 'instance_administrators_group_id'
+  alias_attribute :instance_group_id, :instance_administrators_group_id
+  alias_attribute :instance_administrators_group, :instance_group
+
+  def self.repository_storages_weighted_attributes
+    @repository_storages_weighted_atributes ||= Gitlab.config.repositories.storages.keys.map { |k| "repository_storages_weighted_#{k}".to_sym }.freeze
+  end
+
+  store_accessor :repository_storages_weighted, *Gitlab.config.repositories.storages.keys, prefix: true
 
   # Include here so it can override methods from
   # `add_authentication_token_field`
@@ -32,8 +52,17 @@ class ApplicationSetting < ApplicationRecord
   cache_markdown_field :after_sign_up_text
 
   default_value_for :id, 1
+  default_value_for :repository_storages_weighted, {}
 
   chronic_duration_attr_writer :archive_builds_in_human_readable, :archive_builds_in_seconds
+
+  validates :grafana_url,
+            system_hook_url: {
+              blocked_message: "is blocked: %{exception_message}. " + GRAFANA_URL_ERROR_MESSAGE
+            },
+            if: :grafana_url_absolute?
+
+  validate :validate_grafana_url
 
   validates :uuid, presence: true
 
@@ -45,6 +74,12 @@ class ApplicationSetting < ApplicationRecord
   validates :session_expire_delay,
             presence: true,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :minimum_password_length,
+            presence: true,
+            numericality: { only_integer: true,
+                            greater_than_or_equal_to: DEFAULT_MINIMUM_PASSWORD_LENGTH,
+                            less_than_or_equal_to: Devise.password_length.max }
 
   validates :home_page_url,
             allow_blank: true,
@@ -93,20 +128,19 @@ class ApplicationSetting < ApplicationRecord
             presence: true,
             if: :plantuml_enabled
 
+  validates :sourcegraph_url,
+            presence: true,
+            if: :sourcegraph_enabled
+
+  validates :gitpod_url,
+            presence: true,
+            addressable_url: { enforce_sanitization: true },
+            if: :gitpod_enabled
+
   validates :snowplow_collector_hostname,
             presence: true,
             hostname: true,
             if: :snowplow_enabled
-
-  validates :snowplow_iglu_registry_url,
-            addressable_url: true,
-            allow_blank: true,
-            if: :snowplow_enabled
-
-  validates :pendo_url,
-            presence: true,
-            public_url: true,
-            if: :pendo_enabled
 
   validates :max_attachment_size,
             presence: true,
@@ -116,7 +150,19 @@ class ApplicationSetting < ApplicationRecord
             presence: true,
             numericality: { only_integer: true, greater_than: 0 }
 
+  validates :max_import_size,
+            presence: true,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :max_pages_size,
+            presence: true,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0,
+                            less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
+
   validates :default_artifacts_expire_in, presence: true, duration: true
+
+  validates :container_expiration_policies_enable_historic_entries,
+            inclusion: { in: [true, false], message: 'must be a boolean value' }
 
   validates :container_registry_token_expire_delay,
             presence: true,
@@ -124,6 +170,7 @@ class ApplicationSetting < ApplicationRecord
 
   validates :repository_storages, presence: true
   validate :check_repository_storages
+  validate :check_repository_storages_weighted
 
   validates :auto_devops_domain,
             allow_blank: true,
@@ -131,7 +178,7 @@ class ApplicationSetting < ApplicationRecord
             if: :auto_devops_enabled?
 
   validates :enabled_git_access_protocol,
-            inclusion: { in: %w(ssh http), allow_blank: true, allow_nil: true }
+            inclusion: { in: %w(ssh http), allow_blank: true }
 
   validates :domain_blacklist,
             presence: { message: 'Domain blacklist cannot be empty if Blacklist is enabled.' },
@@ -159,10 +206,16 @@ class ApplicationSetting < ApplicationRecord
 
   validates :gitaly_timeout_default,
             presence: true,
-            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+            if: :gitaly_timeout_default_changed?,
+            numericality: {
+              only_integer: true,
+              greater_than_or_equal_to: 0,
+              less_than_or_equal_to: Settings.gitlab.max_request_duration_seconds
+            }
 
   validates :gitaly_timeout_medium,
             presence: true,
+            if: :gitaly_timeout_medium_changed?,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :gitaly_timeout_medium,
             numericality: { less_than_or_equal_to: :gitaly_timeout_default },
@@ -173,6 +226,7 @@ class ApplicationSetting < ApplicationRecord
 
   validates :gitaly_timeout_fast,
             presence: true,
+            if: :gitaly_timeout_fast_changed?,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :gitaly_timeout_fast,
             numericality: { less_than_or_equal_to: :gitaly_timeout_default },
@@ -224,6 +278,16 @@ class ApplicationSetting < ApplicationRecord
   validates :push_event_activities_limit,
             numericality: { greater_than_or_equal_to: 0 }
 
+  validates :snippet_size_limit, numericality: { only_integer: true, greater_than: 0 }
+  validates :wiki_page_max_content_bytes, numericality: { only_integer: true, greater_than_or_equal_to: 1.kilobytes }
+
+  validates :email_restrictions, untrusted_regexp: true
+
+  validates :hashed_storage_enabled, inclusion: { in: [true], message: _("Hashed storage can't be disabled anymore for new projects") }
+
+  validates :container_registry_delete_tags_service_timeout,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
   SUPPORTED_KEY_TYPES.each do |type|
     validates :"#{type}_key_restriction", presence: true, key_restriction: { type: type }
   end
@@ -259,6 +323,13 @@ class ApplicationSetting < ApplicationRecord
   validates :external_authorization_service_timeout,
             numericality: { greater_than: 0, less_than_or_equal_to: 10 },
             if: :external_authorization_service_enabled
+
+  validates :spam_check_endpoint_url,
+            addressable_url: true, allow_blank: true
+
+  validates :spam_check_endpoint_url,
+            presence: true,
+            if: :spam_check_endpoint_enabled
 
   validates :external_auth_client_key,
             presence: true,
@@ -296,35 +367,43 @@ class ApplicationSetting < ApplicationRecord
                  pass: :external_auth_client_key_pass,
                  if: -> (setting) { setting.external_auth_client_cert.present? }
 
+  validates :default_ci_config_path,
+    format: { without: %r{(\.{2}|\A/)},
+              message: N_('cannot include leading slash or directory traversal.') },
+    length: { maximum: 255 },
+    allow_blank: true
+
+  validates :issues_create_limit,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :raw_blob_request_limit,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
   attr_encrypted :asset_proxy_secret_key,
                  mode: :per_attribute_iv,
                  key: Settings.attr_encrypted_db_key_base_truncated,
                  algorithm: 'aes-256-cbc',
                  insecure_mode: true
 
-  attr_encrypted :external_auth_client_key,
-                 mode: :per_attribute_iv,
-                 key: Settings.attr_encrypted_db_key_base_truncated,
-                 algorithm: 'aes-256-gcm',
-                 encode: true
+  private_class_method def self.encryption_options_base_truncated_aes_256_gcm
+    {
+      mode: :per_attribute_iv,
+      key: Settings.attr_encrypted_db_key_base_truncated,
+      algorithm: 'aes-256-gcm',
+      encode: true
+    }
+  end
 
-  attr_encrypted :external_auth_client_key_pass,
-                 mode: :per_attribute_iv,
-                 key: Settings.attr_encrypted_db_key_base_truncated,
-                 algorithm: 'aes-256-gcm',
-                 encode: true
-
-  attr_encrypted :lets_encrypt_private_key,
-                 mode: :per_attribute_iv,
-                 key: Settings.attr_encrypted_db_key_base_truncated,
-                 algorithm: 'aes-256-gcm',
-                 encode: true
-
-  attr_encrypted :eks_secret_access_key,
-                 mode: :per_attribute_iv,
-                 key: Settings.attr_encrypted_db_key_base_truncated,
-                 algorithm: 'aes-256-gcm',
-                 encode: true
+  attr_encrypted :external_auth_client_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :external_auth_client_key_pass, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :lets_encrypt_private_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :eks_secret_access_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :akismet_api_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :elasticsearch_aws_secret_access_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :recaptcha_private_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :recaptcha_site_key, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :slack_app_secret, encryption_options_base_truncated_aes_256_gcm
+  attr_encrypted :slack_app_verification_token, encryption_options_base_truncated_aes_256_gcm
 
   before_validation :ensure_uuid!
 
@@ -336,7 +415,26 @@ class ApplicationSetting < ApplicationRecord
   end
   after_commit :expire_performance_bar_allowed_user_ids_cache, if: -> { previous_changes.key?('performance_bar_allowed_group_id') }
 
+  def validate_grafana_url
+    unless parsed_grafana_url
+      self.errors.add(
+        :grafana_url,
+        "must be a valid relative or absolute URL. #{GRAFANA_URL_ERROR_MESSAGE}"
+      )
+    end
+  end
+
+  def grafana_url_absolute?
+    parsed_grafana_url&.absolute?
+  end
+
+  def sourcegraph_url_is_com?
+    !!(sourcegraph_url =~ /\Ahttps:\/\/(www\.)?sourcegraph\.com/)
+  end
+
   def self.create_from_defaults
+    check_schema!
+
     transaction(requires_new: true) do
       super
     end
@@ -345,16 +443,44 @@ class ApplicationSetting < ApplicationRecord
     current_without_cache
   end
 
+  # Due to the frequency with which settings are accessed, it is
+  # likely that during a backup restore a running GitLab process
+  # will insert a new `application_settings` row before the
+  # constraints have been added to the table. This would add an
+  # extra row with ID 1 and prevent the primary key constraint from
+  # being added, which made ActiveRecord throw a
+  # IrreversibleOrderError anytime the settings were accessed
+  # (https://gitlab.com/gitlab-org/gitlab/-/issues/36405).  To
+  # prevent this from happening, we do a sanity check that the
+  # primary key constraint is present before inserting a new entry.
+  def self.check_schema!
+    return if ActiveRecord::Base.connection.primary_key(self.table_name).present?
+
+    raise "The `#{self.table_name}` table is missing a primary key constraint in the database schema"
+  end
+
   # By default, the backend is Rails.cache, which uses
   # ActiveSupport::Cache::RedisStore. Since loading ApplicationSetting
   # can cause a significant amount of load on Redis, let's cache it in
   # memory.
   def self.cache_backend
-    Gitlab::ThreadMemoryCache.cache_backend
+    Gitlab::ProcessMemoryCache.cache_backend
   end
 
   def recaptcha_or_login_protection_enabled
     recaptcha_enabled || login_recaptcha_protection_enabled
+  end
+
+  repository_storages_weighted_attributes.each do |attribute|
+    define_method :"#{attribute}=" do |value|
+      super(value.to_i)
+    end
+  end
+
+  private
+
+  def parsed_grafana_url
+    @parsed_grafana_url ||= Gitlab::Utils.parse_url(grafana_url)
   end
 end
 

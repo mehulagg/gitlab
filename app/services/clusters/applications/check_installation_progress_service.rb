@@ -11,6 +11,8 @@ module Clusters
 
       def on_success
         app.make_installed!
+
+        Gitlab::Tracking.event('cluster:applications', "cluster_application_#{app.name}_installed")
       ensure
         remove_installation_pod
       end
@@ -31,7 +33,7 @@ module Clusters
       end
 
       def timed_out?
-        Time.now.utc - app.updated_at.utc > ClusterWaitForAppInstallationWorker::TIMEOUT
+        Time.current.utc - app.updated_at.utc > ClusterWaitForAppInstallationWorker::TIMEOUT
       end
 
       def remove_installation_pod

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Thread Comments Epic', :js do
+RSpec.describe 'Thread Comments Epic', :js do
   let(:user) { create(:user) }
   let(:epic) { create(:epic) }
 

@@ -1,5 +1,6 @@
-import CESidebarMediator from '~/sidebar/sidebar_mediator';
 import Store from 'ee/sidebar/stores/sidebar_store';
+import CESidebarMediator from '~/sidebar/sidebar_mediator';
+import updateStatusMutation from '~/sidebar/queries/updateStatus.mutation.graphql';
 
 export default class SidebarMediator extends CESidebarMediator {
   initSingleton(options) {
@@ -7,10 +8,11 @@ export default class SidebarMediator extends CESidebarMediator {
     this.store = new Store(options);
   }
 
-  processFetchedData(data) {
-    super.processFetchedData(data);
-    this.store.setWeightData(data);
-    this.store.setEpicData(data);
+  processFetchedData(restData, graphQlData) {
+    super.processFetchedData(restData);
+    this.store.setWeightData(restData);
+    this.store.setEpicData(restData);
+    this.store.setStatusData(graphQlData);
   }
 
   updateWeight(newWeight) {
@@ -25,5 +27,21 @@ export default class SidebarMediator extends CESidebarMediator {
         this.store.setLoadingState('weight', false);
         throw err;
       });
+  }
+
+  updateStatus(healthStatus) {
+    this.store.setFetchingState('status', true);
+    return this.service
+      .updateWithGraphQl(updateStatusMutation, { healthStatus })
+      .then(({ data }) => {
+        if (data?.updateIssue?.errors?.length > 0) {
+          throw data.updateIssue.errors[0];
+        }
+        this.store.setStatus(data?.updateIssue?.issue?.healthStatus);
+      })
+      .catch(error => {
+        throw error;
+      })
+      .finally(() => this.store.setFetchingState('status', false));
   }
 }

@@ -7,19 +7,20 @@ class Groups::EpicsController < Groups::ApplicationController
   include ToggleSubscriptionAction
   include RendersNotes
   include EpicsActions
+  include DescriptionDiffActions
 
   before_action :check_epics_available!
-  before_action :epic, except: [:index, :create, :bulk_update]
+  before_action :epic, except: [:index, :create, :new, :bulk_update]
   before_action :set_issuables_index, only: :index
   before_action :authorize_update_issuable!, only: :update
-  before_action :authorize_create_epic!, only: [:create]
+  before_action :authorize_create_epic!, only: [:create, :new]
   before_action :verify_group_bulk_edit_enabled!, only: [:bulk_update]
 
   before_action do
-    push_frontend_feature_flag(:roadmap_graphql, @group)
     push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
-    push_frontend_feature_flag(:epic_new_issue, @group)
   end
+
+  def new; end
 
   def index
     @epics = @issuables
@@ -80,6 +81,7 @@ class Groups::EpicsController < Groups::ApplicationController
       :due_date_fixed,
       :due_date_is_fixed,
       :state_event,
+      :confidential,
       label_ids: [],
       update_task: [:index, :checked, :line_number, :line_source]
     ]

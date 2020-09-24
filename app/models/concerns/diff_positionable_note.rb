@@ -5,7 +5,7 @@ module DiffPositionableNote
   included do
     delegate :on_text?, :on_image?, to: :position, allow_nil: true
     before_validation :set_original_position, on: :create
-    before_validation :update_position, on: :create, if: :on_text?
+    before_validation :update_position, on: :create, if: :on_text?, unless: :importing?
 
     serialize :original_position, Gitlab::Diff::Position # rubocop:disable Cop/ActiveRecordSerialize
     serialize :position, Gitlab::Diff::Position # rubocop:disable Cop/ActiveRecordSerialize
@@ -17,12 +17,14 @@ module DiffPositionableNote
   %i(original_position position change_position).each do |meth|
     define_method "#{meth}=" do |new_position|
       if new_position.is_a?(String)
-        new_position = JSON.parse(new_position) rescue nil
+        new_position = Gitlab::Json.parse(new_position) rescue nil
       end
 
       if new_position.is_a?(Hash)
         new_position = new_position.with_indifferent_access
         new_position = Gitlab::Diff::Position.new(new_position)
+      elsif !new_position.is_a?(Gitlab::Diff::Position)
+        new_position = nil
       end
 
       return if new_position == read_attribute(meth)

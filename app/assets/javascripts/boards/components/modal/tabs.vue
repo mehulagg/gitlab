@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
+/* eslint-disable @gitlab/vue-require-i18n-strings */
 import ModalStore from '../../stores/modal_store';
 import modalMixin from '../../mixins/modal_mixins';
 
@@ -19,7 +19,7 @@ export default {
 };
 </script>
 <template>
-  <div class="top-area prepend-top-10 append-bottom-10">
+  <div class="top-area gl-mt-3 gl-mb-3">
     <ul class="nav-links issues-state-filters">
       <li :class="{ active: activeTab == 'all' }">
         <a href="#" role="button" @click.prevent="changeTab('all')">

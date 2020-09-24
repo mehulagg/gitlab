@@ -49,23 +49,26 @@ Notice that in the above example, before clicking the `:operations_environments_
 
 When adding new elements to a page, it's important that we have a uniform element naming convention.
 
-We follow a simple formula roughly based on hungarian notation.
+We follow a simple formula roughly based on Hungarian notation.
 
 *Formula*: `element :<descriptor>_<type>`
 
 - `descriptor`: The natural-language description of what the element is. On the login page, this could be `username`, or `password`.
-- `type`: A physical control on the page that can be seen by a user.
+- `type`: A generic control on the page that can be seen by a user.
   - `_button`
-  - `_link`
-  - `_tab`
-  - `_dropdown`
-  - `_field`
   - `_checkbox`
+  - `_container`: an element that includes other elements, but doesn't present visible content itself. E.g., an element that has a third-party editor inside it, but which isn't the editor itself and so doesn't include the editor's content.
+  - `_content`: any element that contains text, images, or any other content displayed to the user.
+  - `_dropdown`
+  - `_field`: a text input element.
+  - `_link`
+  - `_modal`: a popup modal dialog, e.g., a confirmation prompt.
+  - `_placeholder`: a temporary element that appears while content is loading. For example, the elements that are displayed instead of discussions while the discussions are being fetched.
   - `_radio`
-  - `_content`
+  - `_tab`
+  - `_menu_item`
 
-*Note: This list is a work in progress. This list will eventually be the end-all enumeration of all available types.
-        I.e., any element that does not end with something in this list is bad form.*
+*Note: If none of the listed types are suitable, please open a merge request to add an appropriate type to the list.*
 
 ### Examples
 
@@ -106,7 +109,7 @@ we use the name of the page object in [snake_case](https://en.wikipedia.org/wiki
 (all lowercase, with words separated by an underscore). See good and bad examples below.
 
 While we prefer to follow the standard in most cases, it is also acceptable to
-use common abbreviations (e.g., mr) or other alternatives, as long as
+use common abbreviations (e.g., `mr`) or other alternatives, as long as
 the name is not ambiguous. This can include appending `_page` if it helps to
 avoid confusion or make the code more readable. For example, if a page object is
 named `New`, it could be confusing to name the block argument `new` because that
@@ -120,7 +123,7 @@ Capybara DSL, potentially leading to confusion and bugs.
 **Good**
 
 ```ruby
-Page::Project::Settings::Members.perform do |members|
+Page::Project::Members.perform do |members|
   members.do_something
 end
 ```
@@ -146,7 +149,7 @@ end
 **Bad**
 
 ```ruby
-Page::Project::Settings::Members.perform do |project_settings_members_page|
+Page::Project::Members.perform do |project_settings_members_page|
   project_settings_members_page.do_something
 end
 ```

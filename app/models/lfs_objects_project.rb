@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class LfsObjectsProject < ApplicationRecord
+  include ::EachBatch
+
   belongs_to :project
   belongs_to :lfs_object
 
@@ -13,8 +15,11 @@ class LfsObjectsProject < ApplicationRecord
   enum repository_type: {
     project: 0,
     wiki: 1,
-    design: 2 ## EE-specific
+    design: 2
   }
+
+  scope :project_id_in, ->(ids) { where(project_id: ids) }
+  scope :lfs_object_in, -> (lfs_objects) { where(lfs_object: lfs_objects) }
 
   private
 

@@ -3,7 +3,6 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
 import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 import ReportSection from '~/reports/components/report_section.vue';
-import SummaryRow from '~/reports/components/summary_row.vue';
 import ReportItem from '~/reports/components/report_item.vue';
 import { n__, s__, sprintf } from '~/locale';
 import createStore from './store';
@@ -13,7 +12,6 @@ export default {
   store: createStore(),
   components: {
     ReportSection,
-    SummaryRow,
     ReportItem,
     SmartVirtualList,
   },
@@ -96,7 +94,7 @@ export default {
           status="none"
           :status-icon-size="24"
           :component="$options.componentNames.MetricsReportsIssueBody"
-          class="prepend-left-4 prepend-top-4 append-bottom-8"
+          class="gl-ml-2 gl-mt-2 gl-mb-3"
         />
       </smart-virtual-list>
     </div>

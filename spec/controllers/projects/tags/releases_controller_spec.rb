@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Tags::ReleasesController do
+RSpec.describe Projects::Tags::ReleasesController do
   let!(:project) { create(:project, :repository) }
   let!(:user)    { create(:user) }
   let!(:release) { create(:release, project: project) }
@@ -16,14 +16,14 @@ describe Projects::Tags::ReleasesController do
   describe 'GET #edit' do
     it 'initializes a new release' do
       tag_id = release.tag
-      project.releases.destroy_all # rubocop: disable DestroyAll
+      project.releases.destroy_all # rubocop: disable Cop/DestroyAll
 
       response = get :edit, params: { namespace_id: project.namespace, project_id: project, tag_id: tag_id }
 
       release = assigns(:release)
       expect(release).not_to be_nil
       expect(release).not_to be_persisted
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     it 'retrieves an existing release' do
@@ -32,7 +32,7 @@ describe Projects::Tags::ReleasesController do
       release = assigns(:release)
       expect(release).not_to be_nil
       expect(release).to be_persisted
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 
@@ -42,7 +42,7 @@ describe Projects::Tags::ReleasesController do
 
       release = project.releases.find_by(tag: tag)
       expect(release.description).to eq("description updated")
-      expect(response).to have_http_status(:found)
+      expect(response).to have_gitlab_http_status(:found)
     end
 
     it 'creates a release if one does not exist' do
@@ -52,7 +52,7 @@ describe Projects::Tags::ReleasesController do
         update_release(tag_without_release.name, "a new release")
       end.to change { project.releases.count }.by(1)
 
-      expect(response).to have_http_status(:found)
+      expect(response).to have_gitlab_http_status(:found)
     end
 
     it 'sets the release name, sha, and author for a new release' do
@@ -64,17 +64,17 @@ describe Projects::Tags::ReleasesController do
       expect(release.name).to eq(tag_without_release.name)
       expect(release.sha).to eq(tag_without_release.target_commit.sha)
       expect(release.author.id).to eq(user.id)
-      expect(response).to have_http_status(:found)
+      expect(response).to have_gitlab_http_status(:found)
     end
 
-    it 'deletes release when description is empty' do
-      initial_releases_count = project.releases.count
+    it 'does not delete release when description is empty' do
+      expect do
+        update_release(tag, "")
+      end.not_to change { project.releases.count }
 
-      response = update_release(release.tag, "")
+      expect(release.reload.description).to eq("")
 
-      expect(initial_releases_count).to eq(1)
-      expect(project.releases.count).to eq(0)
-      expect(response).to have_http_status(:found)
+      expect(response).to have_gitlab_http_status(:found)
     end
 
     it 'does nothing when description is empty and the tag does not have a release' do
@@ -84,7 +84,7 @@ describe Projects::Tags::ReleasesController do
         update_release(tag_without_release.name, "")
       end.not_to change { project.releases.count }
 
-      expect(response).to have_http_status(:found)
+      expect(response).to have_gitlab_http_status(:found)
     end
   end
 

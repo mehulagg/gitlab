@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DependencyProxy::PullManifestService do
+RSpec.describe DependencyProxy::PullManifestService do
   include EE::DependencyProxyHelpers
 
   let(:image) { 'alpine' }

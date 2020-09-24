@@ -5,6 +5,8 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
+      has_and_belongs_to_many :approval_project_rules
+
       protected_ref_access_levels :unprotect
     end
 

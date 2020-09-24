@@ -24,7 +24,7 @@ get the commit comment added to it.
 You can also close a task with a message containing: `fix #123456`.
 
 You can create a Personal Access Token here:
-http://app.asana.com/-/account_api'
+https://app.asana.com/0/developer-console'
   end
 
   def self.to_param
@@ -81,12 +81,12 @@ http://app.asana.com/-/account_api'
   def check_commit(message, push_msg)
     # matches either:
     # - #1234
-    # - https://app.asana.com/0/0/1234
+    # - https://app.asana.com/0/{project_gid}/{task_gid}
     # optionally preceded with:
     # - fix/ed/es/ing
     # - close/s/d
     # - closing
-    issue_finder = %r{(fix\w*|clos[ei]\w*+)?\W*(?:https://app\.asana\.com/\d+/\d+/(\d+)|#(\d+))}i
+    issue_finder = %r{(fix\w*|clos[ei]\w*+)?\W*(?:https://app\.asana\.com/\d+/\w+/(\w+)|#(\w+))}i
 
     message.scan(issue_finder).each do |tuple|
       # tuple will be
@@ -94,7 +94,7 @@ http://app.asana.com/-/account_api'
       taskid = tuple[2] || tuple[1]
 
       begin
-        task = Asana::Task.find_by_id(client, taskid)
+        task = Asana::Resources::Task.find_by_id(client, taskid)
         task.add_comment(text: "#{push_msg} #{message}")
 
         if tuple[0]

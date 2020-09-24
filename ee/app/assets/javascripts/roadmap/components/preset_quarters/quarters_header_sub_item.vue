@@ -1,15 +1,12 @@
 <script>
 import { monthInWords } from '~/lib/utils/datetime_utility';
 
+import CommonMixin from '../../mixins/common_mixin';
+
 import { PRESET_TYPES } from '../../constants';
 
-import timelineTodayIndicator from '../timeline_today_indicator.vue';
-
 export default {
-  presetType: PRESET_TYPES.QUARTERS,
-  components: {
-    timelineTodayIndicator,
-  },
+  mixins: [CommonMixin],
   props: {
     currentDate: {
       type: Date,
@@ -19,6 +16,12 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      presetType: PRESET_TYPES.QUARTERS,
+      indicatorStyle: {},
+    };
   },
   computed: {
     quarterBeginDate() {
@@ -30,9 +33,11 @@ export default {
     headerSubItems() {
       return this.timeframeItem.range;
     },
-    hasToday() {
-      return this.currentDate >= this.quarterBeginDate && this.currentDate <= this.quarterEndDate;
-    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.indicatorStyle = this.getIndicatorStyles();
+    });
   },
   methods: {
     getSubItemValueClass(subItem) {
@@ -62,14 +67,12 @@ export default {
       :key="index"
       :class="getSubItemValueClass(subItem)"
       class="sublabel-value"
+      >{{ getSubItemValue(subItem) }}</span
     >
-      {{ getSubItemValue(subItem) }}
-    </span>
-    <timeline-today-indicator
+    <span
       v-if="hasToday"
-      :preset-type="$options.presetType"
-      :current-date="currentDate"
-      :timeframe-item="timeframeItem"
-    />
+      :style="indicatorStyle"
+      class="current-day-indicator-header preset-quarters position-absolute"
+    ></span>
   </div>
 </template>

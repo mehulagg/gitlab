@@ -9,6 +9,10 @@ module BoardsActions
 
     before_action :boards, only: :index
     before_action :board, only: :show
+    before_action :push_licensed_features, only: [:index, :show]
+    before_action do
+      push_frontend_feature_flag(:not_issuable_queries, parent, default_enabled: true)
+    end
   end
 
   def index
@@ -23,6 +27,10 @@ module BoardsActions
   end
 
   private
+
+  # Noop on FOSS
+  def push_licensed_features
+  end
 
   def boards
     strong_memoize(:boards) do

@@ -5,6 +5,7 @@
 # A note of this type is never resolvable.
 class Note < ApplicationRecord
   extend ActiveModel::Naming
+  include Gitlab::Utils::StrongMemoize
   include Participable
   include Mentionable
   include Awardable
@@ -19,23 +20,13 @@ class Note < ApplicationRecord
   include ThrottledTouch
   include FromUnion
 
-  module SpecialRole
-    FIRST_TIME_CONTRIBUTOR = :first_time_contributor
-
-    class << self
-      def values
-        constants.map {|const| self.const_get(const, false)}
-      end
-
-      def value?(val)
-        values.include?(val)
-      end
-    end
-  end
-
   cache_markdown_field :note, pipeline: :note, issuable_state_filter_enabled: true
 
   redact_field :note
+
+  TYPES_RESTRICTED_BY_ABILITY = {
+    branch: :download_code
+  }.freeze
 
   # Aliases to make application_helper#edited_time_ago_with_tooltip helper work properly with notes.
   # See https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/10392/diffs#note_28719102
@@ -55,9 +46,6 @@ class Note < ApplicationRecord
   # Attribute used to store the attributes that have been changed by quick actions.
   attr_accessor :commands_changes
 
-  # A special role that may be displayed on issuable's discussions
-  attr_accessor :special_role
-
   default_value_for :system, false
 
   attr_mentionable :note, pipeline: :note
@@ -68,6 +56,7 @@ class Note < ApplicationRecord
   belongs_to :author, class_name: "User"
   belongs_to :updated_by, class_name: "User"
   belongs_to :last_edited_by, class_name: 'User'
+  belongs_to :review, inverse_of: :notes
 
   has_many :todos
 
@@ -79,6 +68,7 @@ class Note < ApplicationRecord
   has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :system_note_metadata
   has_one :note_diff_file, inverse_of: :diff_note, foreign_key: :diff_note_id
+  has_many :diff_note_positions
 
   delegate :gfm_reference, :local_reference, to: :noteable
   delegate :name, to: :project, prefix: true
@@ -116,11 +106,13 @@ class Note < ApplicationRecord
   scope :common, -> { where(noteable_type: ["", nil]) }
   scope :fresh, -> { order(created_at: :asc, id: :asc) }
   scope :updated_after, ->(time) { where('updated_at > ?', time) }
+  scope :with_updated_at, ->(time) { where(updated_at: time) }
+  scope :by_updated_at, -> { reorder(:updated_at, :id) }
   scope :inc_author_project, -> { includes(:project, :author) }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> do
     includes(:project, { author: :status }, :updated_by, :resolved_by, :award_emoji,
-             :system_note_metadata, :note_diff_file, :suggestions)
+             { system_note_metadata: :description_version }, :note_diff_file, :diff_note_positions, :suggestions)
   end
 
   scope :with_notes_filter, -> (notes_filter) do
@@ -148,13 +140,14 @@ class Note < ApplicationRecord
   scope :for_note_or_capitalized_note, ->(text) { where(note: [text, text.capitalize]) }
   scope :like_note_or_capitalized_note, ->(text) { where('(note LIKE ? OR note LIKE ?)', text, text.capitalize) }
 
-  after_initialize :ensure_discussion_id
   before_validation :nullify_blank_type, :nullify_blank_line_code
-  before_validation :set_discussion_id, on: :create
-  after_save :keep_around_commit, if: :for_project_noteable?
-  after_save :expire_etag_cache
-  after_save :touch_noteable
+  after_save :keep_around_commit, if: :for_project_noteable?, unless: :importing?
+  after_save :expire_etag_cache, unless: :importing?
+  after_save :touch_noteable, unless: :importing?
   after_destroy :expire_etag_cache
+  after_save :store_mentions!, if: :any_mentionable_attributes_changed?
+  after_commit :notify_after_create, on: :create
+  after_commit :notify_after_destroy, on: :destroy
 
   class << self
     def model_name
@@ -210,17 +203,13 @@ class Note < ApplicationRecord
         .where(noteable_type: type, noteable_id: ids)
     end
 
-    def has_special_role?(role, note)
-      note.special_role == role
-    end
-
     def search(query)
       fuzzy_search(query, [:note])
     end
   end
 
   # rubocop: disable CodeReuse/ServiceClass
-  def cross_reference?
+  def system_note_with_references?
     return unless system?
 
     if force_cross_reference_regex_check?
@@ -267,12 +256,20 @@ class Note < ApplicationRecord
     noteable_type == "Snippet"
   end
 
+  def for_alert_mangement_alert?
+    noteable_type == 'AlertManagement::Alert'
+  end
+
   def for_personal_snippet?
     noteable.is_a?(PersonalSnippet)
   end
 
   def for_project_noteable?
     !for_personal_snippet?
+  end
+
+  def for_design?
+    noteable_type == DesignManagement::Design.name
   end
 
   def for_issuable?
@@ -285,6 +282,19 @@ class Note < ApplicationRecord
 
   def commit
     @commit ||= project.commit(commit_id) if commit_id.present?
+  end
+
+  # Notes on merge requests and commits can be traced back to one or several
+  # MRs. This method returns a relation if the note is for one of these types,
+  # or nil if it is a note on some other object.
+  def merge_requests
+    if for_commit?
+      project.merge_requests.by_commit_sha(commit_id)
+    elsif for_merge_request?
+      MergeRequest.id_in(noteable_id)
+    else
+      nil
+    end
   end
 
   # override to return commits, which are not active record
@@ -304,24 +314,31 @@ class Note < ApplicationRecord
     super(noteable_type.to_s.classify.constantize.base_class.to_s)
   end
 
-  def special_role=(role)
-    raise "Role is undefined, #{role} not found in #{SpecialRole.values}" unless SpecialRole.value?(role)
+  def noteable_assignee_or_author?(user)
+    return false unless user
+    return noteable.assignee_or_author?(user) if [MergeRequest, Issue].include?(noteable.class)
 
-    @special_role = role
+    noteable.author_id == user.id
   end
 
-  def has_special_role?(role)
-    self.class.has_special_role?(role, self)
+  def contributor?
+    project&.team&.contributor?(self.author_id)
   end
 
-  def specialize_for_first_contribution!(noteable)
-    return unless noteable.author_id == self.author_id
+  def noteable_author?(noteable)
+    return false unless ::Feature.enabled?(:show_author_on_note, project)
 
-    self.special_role = Note::SpecialRole::FIRST_TIME_CONTRIBUTOR
+    noteable.author == self.author
   end
 
-  def confidential?
-    noteable.try(:confidential?)
+  def project_name
+    project&.name
+  end
+
+  def confidential?(include_noteable: false)
+    return true if confidential
+
+    include_noteable && noteable.try(:confidential?)
   end
 
   def editable?
@@ -336,12 +353,10 @@ class Note < ApplicationRecord
     super
   end
 
-  def cross_reference_not_visible_for?(user)
-    cross_reference? && !all_referenced_mentionables_allowed?(user)
-  end
-
-  def visible_for?(user)
-    !cross_reference_not_visible_for?(user)
+  # This method is to be used for checking read permissions on a note instead of `system_note_with_references_visible_for?`
+  def readable_by?(user)
+    # note_policy accounts for #system_note_with_references_visible_for?(user) check when granting read access
+    Ability.allowed?(user, :read_note, self)
   end
 
   def award_emoji?
@@ -365,7 +380,13 @@ class Note < ApplicationRecord
   end
 
   def noteable_ability_name
-    for_snippet? ? noteable.class.name.underscore : noteable_type.demodulize.underscore
+    if for_snippet?
+      'snippet'
+    elsif for_alert_mangement_alert?
+      'alert_management_alert'
+    else
+      noteable_type.demodulize.underscore
+    end
   end
 
   def can_be_discussion_note?
@@ -373,7 +394,7 @@ class Note < ApplicationRecord
   end
 
   def can_create_todo?
-    # Skip system notes, and notes on project snippet
+    # Skip system notes, and notes on snippets
     !system? && !for_snippet?
   end
 
@@ -390,7 +411,7 @@ class Note < ApplicationRecord
 
   # See `Discussion.override_discussion_id` for details.
   def discussion_id(noteable = nil)
-    discussion_class(noteable).override_discussion_id(self) || super()
+    discussion_class(noteable).override_discussion_id(self) || super() || ensure_discussion_id
   end
 
   # Returns a discussion containing just this note.
@@ -405,8 +426,14 @@ class Note < ApplicationRecord
   # Consider using `#to_discussion` if we do not need to render the discussion
   # and all its notes and if we don't care about the discussion's resolvability status.
   def discussion
-    full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
-    full_discussion || to_discussion
+    strong_memoize(:discussion) do
+      full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
+      full_discussion || to_discussion
+    end
+  end
+
+  def start_of_discussion?
+    discussion.first_note == self
   end
 
   def part_of_discussion?
@@ -479,8 +506,16 @@ class Note < ApplicationRecord
     noteable_object
   end
 
+  def notify_after_create
+    noteable&.after_note_created(self)
+  end
+
+  def notify_after_destroy
+    noteable&.after_note_destroyed(self)
+  end
+
   def banzai_render_context(field)
-    super.merge(noteable: noteable, system_note: system?)
+    super.merge(noteable: noteable, system_note: system?, label_url_method: noteable_label_url_method)
   end
 
   def retrieve_upload(_identifier, paths)
@@ -491,7 +526,44 @@ class Note < ApplicationRecord
     project
   end
 
+  def user_mentions
+    return Note.none unless noteable.present?
+
+    noteable.user_mentions.where(note: self)
+  end
+
+  def system_note_with_references_visible_for?(user)
+    return true unless system?
+
+    (!system_note_with_references? || all_referenced_mentionables_allowed?(user)) && system_note_viewable_by?(user)
+  end
+
+  def parent_user
+    noteable.author if for_personal_snippet?
+  end
+
+  def skip_notification?
+    review.present?
+  end
+
   private
+
+  # Using this method followed by a call to `save` may result in ActiveRecord::RecordNotUnique exception
+  # in a multithreaded environment. Make sure to use it within a `safe_ensure_unique` block.
+  def model_user_mention
+    return if user_mentions.is_a?(ActiveRecord::NullRelation)
+
+    user_mentions.first_or_initialize
+  end
+
+  def system_note_viewable_by?(user)
+    return true unless system_note_metadata
+
+    restriction = TYPES_RESTRICTED_BY_ABILITY[system_note_metadata.action.to_sym]
+    return Ability.allowed?(user, restriction, project) if restriction
+
+    true
+  end
 
   def keep_around_commit
     project.repository.keep_around(self.commit_id)
@@ -506,17 +578,13 @@ class Note < ApplicationRecord
   end
 
   def ensure_discussion_id
-    return unless self.persisted?
-    # Needed in case the SELECT statement doesn't ask for `discussion_id`
-    return unless self.has_attribute?(:discussion_id)
-    return if self.discussion_id
+    return if self.attribute_present?(:discussion_id)
 
-    set_discussion_id
-    update_column(:discussion_id, self.discussion_id)
+    self.discussion_id = derive_discussion_id
   end
 
-  def set_discussion_id
-    self.discussion_id ||= discussion_class.discussion_id(self)
+  def derive_discussion_id
+    discussion_class.discussion_id(self)
   end
 
   def all_referenced_mentionables_allowed?(user)
@@ -524,7 +592,8 @@ class Note < ApplicationRecord
       # if they are not equal, then there are private/confidential references as well
       user_visible_reference_count > 0 && user_visible_reference_count == total_reference_count
     else
-      referenced_mentionables(user).any?
+      refs = all_references(user)
+      refs.all.any? && refs.stateful_not_visible_counter == 0
     end
   end
 
@@ -538,6 +607,10 @@ class Note < ApplicationRecord
     return unless noteable
 
     errors.add(:base, _('Maximum number of comments exceeded')) if noteable.notes.count >= Noteable::MAX_NOTES_LIMIT
+  end
+
+  def noteable_label_url_method
+    for_merge_request? ? :project_merge_requests_url : :project_issues_url
   end
 end
 

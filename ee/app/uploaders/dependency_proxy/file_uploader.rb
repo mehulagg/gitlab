@@ -18,11 +18,6 @@ class DependencyProxy::FileUploader < GitlabUploader
   private
 
   def dynamic_segment
-    File.join(disk_hash[0..1], disk_hash[2..3], disk_hash,
-              'dependency_proxy', model.group_id.to_s, 'files', model.id.to_s)
-  end
-
-  def disk_hash
-    @disk_hash ||= Digest::SHA2.hexdigest(model.group_id.to_s)
+    Gitlab::HashedPath.new('dependency_proxy', model.group_id, 'files', model.id, root_hash: model.group_id)
   end
 end

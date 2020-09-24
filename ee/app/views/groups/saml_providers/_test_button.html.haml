@@ -1,1 +1,1 @@
-= saml_link_for_provider _('Test SAML SSO'), saml_provider, redirect: request.url, html_class: "btn qa-saml-settings-test-button #{ 'd-none' unless saml_provider.persisted? }"
+= saml_link_for_provider _('Verify SAML Configuration'), saml_provider, redirect: ::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE, html_class: "btn qa-saml-settings-test-button #{ 'd-none' unless saml_provider.persisted? }"

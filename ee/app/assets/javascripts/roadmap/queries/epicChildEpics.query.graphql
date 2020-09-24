@@ -1,3 +1,5 @@
+#import "./epic.fragment.graphql"
+
 query epicChildEpics(
   $fullPath: ID!
   $iid: ID!
@@ -5,6 +7,9 @@ query epicChildEpics(
   $sort: EpicSort
   $startDate: Time
   $dueDate: Time
+  $labelName: [String!] = []
+  $authorUsername: String = ""
+  $search: String = ""
 ) {
   group(fullPath: $fullPath) {
     id
@@ -12,19 +17,19 @@ query epicChildEpics(
     epic(iid: $iid) {
       id
       title
-      children(state: $state, sort: $sort, startDate: $startDate, endDate: $dueDate) {
+      hasChildren
+      children(
+        state: $state
+        sort: $sort
+        startDate: $startDate
+        endDate: $dueDate
+        labelName: $labelName
+        authorUsername: $authorUsername
+        search: $search
+      ) {
         edges {
           node {
-            id
-            title
-            state
-            webUrl
-            startDate
-            dueDate
-            group {
-              name
-              fullName
-            }
+            ...BaseEpic
           }
         }
       }

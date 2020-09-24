@@ -1,9 +1,16 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Geo security review (Q&A) **(PREMIUM ONLY)**
 
 The following security review of the Geo feature set focuses on security aspects of
 the feature as they apply to customers running their own GitLab instances. The review
-questions are based in part on the [OWASP Application Security Verification Standard Project](https://www.owasp.org/index.php/Category:OWASP_Application_Security_Verification_Standard_Project)
-from [owasp.org](https://www.owasp.org/index.php/Main_Page).
+questions are based in part on the [OWASP Application Security Verification Standard Project](https://owasp.org/www-project-application-security-verification-standard/)
+from [owasp.org](https://owasp.org/).
 
 ## Business Model
 
@@ -22,7 +29,7 @@ from [owasp.org](https://www.owasp.org/index.php/Main_Page).
   etc) and repository + wiki data. In a typical configuration, this will
   happen across the public Internet, and be TLS-encrypted.
 - PostgreSQL replication is TLS-encrypted.
-- See also: [only TLSv1.2 should be supported](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/2948)
+- See also: [only TLSv1.2 should be supported](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/2948)
 
 ### How can the data be classified into categories according to its sensitivity?
 
@@ -30,7 +37,7 @@ from [owasp.org](https://www.owasp.org/index.php/Main_Page).
   private projects. Geo replicates them all indiscriminately. “Selective sync”
   exists for files and repositories (but not database content), which would permit
   only less-sensitive projects to be replicated to a **secondary** node if desired.
-- See also: [GitLab data classification policy](https://about.gitlab.com/handbook/engineering/security/data-classification-policy.html).
+- See also: [GitLab data classification policy](https://about.gitlab.com/handbook/engineering/security/data-classification-standard.html).
 
 ### What data backup and retention requirements have been defined for the application?
 
@@ -72,8 +79,8 @@ from [owasp.org](https://www.owasp.org/index.php/Main_Page).
 
 - Nothing Geo-specific. Any user where `admin: true` is set in the database is
   considered an admin with super-user privileges.
-- See also: [more granular access control](https://gitlab.com/gitlab-org/gitlab-foss/issues/32730)
-  (not geo-specific)
+- See also: [more granular access control](https://gitlab.com/gitlab-org/gitlab/-/issues/18242)
+  (not Geo-specific).
 - Much of Geo’s integration (database replication, for instance) must be
   configured with the application, typically by system administrators.
 
@@ -116,7 +123,7 @@ from [owasp.org](https://www.owasp.org/index.php/Main_Page).
 
 - Geo imposes no additional restrictions on operating system (see the
   [GitLab installation](https://about.gitlab.com/install/) page for more
-  details), however we recommend using the operating systems listed in the [Geo documentation](index.md#requirements-for-running-geo).
+  details), however we recommend using the operating systems listed in the [Geo documentation](../index.md#requirements-for-running-geo).
 
 ### What details regarding required OS components and lock‐down needs have been defined?
 
@@ -177,7 +184,7 @@ from [owasp.org](https://www.owasp.org/index.php/Main_Page).
 
 ### What databases and application servers support the application?
 
-- PostgreSQL >= 9.6, Redis, Sidekiq, Unicorn.
+- PostgreSQL >= 11, Redis, Sidekiq, Puma.
 
 ### How will database connection strings, encryption keys, and other sensitive components be stored, accessed, and protected from unauthorized detection?
 

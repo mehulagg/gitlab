@@ -1,0 +1,9 @@
+mutation createRequirement($createRequirementInput: CreateRequirementInput!) {
+  createRequirement(input: $createRequirementInput) {
+    clientMutationId
+    errors
+    requirement {
+      iid
+    }
+  }
+}

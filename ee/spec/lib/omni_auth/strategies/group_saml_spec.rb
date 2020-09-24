@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe OmniAuth::Strategies::GroupSaml, type: :strategy do
+RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
+  include Gitlab::Routing
+
   let(:strategy) { [OmniAuth::Strategies::GroupSaml, {}] }
   let!(:group) { create(:group, name: 'my-group') }
   let(:idp_sso_url) { 'https://saml.example.com/adfs/ls' }
@@ -16,6 +18,14 @@ describe OmniAuth::Strategies::GroupSaml, type: :strategy do
 
   before do
     stub_licensed_features(group_saml: true)
+    fake_actiondispatch_request_session
+  end
+
+  def fake_actiondispatch_request_session
+    session = {}
+    session_id = 123
+    allow(session).to receive(:id).and_return(session_id)
+    env('rack.session', session)
   end
 
   describe 'callback_path option' do
@@ -66,6 +76,22 @@ describe OmniAuth::Strategies::GroupSaml, type: :strategy do
         expect do
           post "/groups/my-group/-/saml/callback", SAMLResponse: saml_response
         end.to raise_error(ActionController::RoutingError)
+      end
+
+      context 'user is testing SAML response' do
+        let(:relay_state) { ::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE }
+
+        it 'stores the saml response for retrieval after redirect' do
+          expect_any_instance_of(::Gitlab::Auth::GroupSaml::ResponseStore).to receive(:set_raw).with(saml_response)
+
+          post "/groups/my-group/-/saml/callback", SAMLResponse: saml_response, RelayState: relay_state
+        end
+
+        it 'redirects back to the settings page' do
+          post "/groups/my-group/-/saml/callback", SAMLResponse: saml_response, RelayState: relay_state
+
+          expect(last_response.location).to eq(group_saml_providers_path(group, anchor: 'response'))
+        end
       end
     end
 

@@ -1,5 +1,5 @@
-import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { setDeployBoard } from 'ee_else_ce/environments/stores/helpers';
+import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 
 /**
  * Environments Store.
@@ -14,6 +14,7 @@ export default class EnvironmentsStore {
     this.state.stoppedCounter = 0;
     this.state.availableCounter = 0;
     this.state.paginationInformation = {};
+    this.state.reviewAppDetails = {};
 
     return this;
   }
@@ -57,13 +58,14 @@ export default class EnvironmentsStore {
       let filtered = {};
 
       if (env.size > 1) {
-        filtered = Object.assign({}, env, {
+        filtered = {
+          ...env,
           isFolder: true,
           isLoadingFolderContent: oldEnvironmentState.isLoading || false,
           folderName: env.name,
           isOpen: oldEnvironmentState.isOpen || false,
           children: oldEnvironmentState.children || [],
-        });
+        };
       }
 
       if (env.latest) {
@@ -104,6 +106,11 @@ export default class EnvironmentsStore {
     return paginationInformation;
   }
 
+  setReviewAppDetails(details = {}) {
+    this.state.reviewAppDetails = details;
+    return details;
+  }
+
   /**
    * Stores the number of available environments.
    *
@@ -124,6 +131,17 @@ export default class EnvironmentsStore {
   storeStoppedCount(count = 0) {
     this.state.stoppedCounter = count;
     return count;
+  }
+
+  /**
+   * Toggles deploy board visibility for the provided environment ID.
+   * Currently only works on EE.
+   *
+   * @param  {Object} environment
+   * @return {Array}
+   */
+  toggleDeployBoard() {
+    return this.state.environments;
   }
 
   /**
@@ -149,7 +167,7 @@ export default class EnvironmentsStore {
       let updated = env;
 
       if (env.latest) {
-        updated = Object.assign({}, env, env.latest);
+        updated = { ...env, ...env.latest };
         delete updated.latest;
       } else {
         updated = env;
@@ -175,7 +193,7 @@ export default class EnvironmentsStore {
     const { environments } = this.state;
 
     const updatedEnvironments = environments.map(env => {
-      const updateEnv = Object.assign({}, env);
+      const updateEnv = { ...env };
       if (env.id === environment.id) {
         updateEnv[prop] = newValue;
       }

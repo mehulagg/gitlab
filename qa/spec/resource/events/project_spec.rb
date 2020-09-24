@@ -8,6 +8,7 @@ describe QA::Resource::Events::Project do
       end
     end
   end
+
   let(:all_events) do
     [
       {
@@ -33,6 +34,7 @@ describe QA::Resource::Events::Project do
 
   before do
     allow(subject).to receive(:max_wait).and_return(0.01)
+    allow(subject).to receive(:raise_on_failure).and_return(false)
     allow(subject).to receive(:parse_body).and_return(all_events)
   end
 

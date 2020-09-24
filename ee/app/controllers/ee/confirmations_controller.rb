@@ -2,7 +2,7 @@
 
 module EE
   module ConfirmationsController
-    include EE::Audit::Changes # rubocop: disable Cop/InjectEnterpriseEditionModule
+    include ::Audit::Changes
     extend ::Gitlab::Utils::Override
 
     protected

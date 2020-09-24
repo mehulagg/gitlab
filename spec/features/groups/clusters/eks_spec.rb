@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group AWS EKS Cluster', :js do
+RSpec.describe 'Group AWS EKS Cluster', :js do
   let(:group) { create(:group) }
   let(:user) { create(:user) }
 
@@ -28,7 +28,7 @@ describe 'Group AWS EKS Cluster', :js do
       end
 
       it 'user sees a form to create an EKS cluster' do
-        expect(page).to have_content('Create new Cluster on EKS')
+        expect(page).to have_content('Create new cluster on EKS')
       end
     end
   end

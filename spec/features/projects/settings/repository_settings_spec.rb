@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Settings > Repository settings' do
+RSpec.describe 'Projects > Settings > Repository settings' do
   let(:project) { create(:project_empty_repo) }
   let(:user) { create(:user) }
   let(:role) { :developer }
@@ -25,9 +25,23 @@ describe 'Projects > Settings > Repository settings' do
   context 'for maintainer' do
     let(:role) { :maintainer }
 
+    context 'Deploy tokens' do
+      let!(:deploy_token) { create(:deploy_token, projects: [project]) }
+
+      before do
+        stub_container_registry_config(enabled: true)
+        stub_feature_flags(ajax_new_deploy_token: project)
+        visit project_settings_repository_path(project)
+      end
+
+      it_behaves_like 'a deploy token in settings' do
+        let(:entity_type) { 'project' }
+      end
+    end
+
     context 'Deploy Keys', :js do
-      let(:private_deploy_key) { create(:deploy_key, title: 'private_deploy_key', public: false) }
-      let(:public_deploy_key) { create(:another_deploy_key, title: 'public_deploy_key', public: true) }
+      let_it_be(:private_deploy_key) { create(:deploy_key, title: 'private_deploy_key', public: false) }
+      let_it_be(:public_deploy_key) { create(:another_deploy_key, title: 'public_deploy_key', public: true) }
       let(:new_ssh_key) { attributes_for(:key)[:key] }
 
       it 'get list of keys' do
@@ -56,7 +70,7 @@ describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << private_deploy_key
         visit project_settings_repository_path(project)
 
-        find('.deploy-key', text: private_deploy_key.title).find('.ic-pencil').click
+        find('.deploy-key', text: private_deploy_key.title).find('[data-testid="pencil-icon"]').click
 
         fill_in 'deploy_key_title', with: 'updated_deploy_key'
         check 'deploy_key_deploy_keys_projects_attributes_0_can_push'
@@ -70,7 +84,7 @@ describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << public_deploy_key
         visit project_settings_repository_path(project)
 
-        find('.deploy-key', text: public_deploy_key.title).find('.ic-pencil').click
+        find('.deploy-key', text: public_deploy_key.title).find('[data-testid="pencil-icon"]').click
 
         check 'deploy_key_deploy_keys_projects_attributes_0_can_push'
         click_button 'Save changes'
@@ -88,7 +102,7 @@ describe 'Projects > Settings > Repository settings' do
 
         find('.js-deployKeys-tab-available_project_keys').click
 
-        find('.deploy-key', text: private_deploy_key.title).find('.ic-pencil').click
+        find('.deploy-key', text: private_deploy_key.title).find('[data-testid="pencil-icon"]').click
 
         fill_in 'deploy_key_title', with: 'updated_deploy_key'
         click_button 'Save changes'
@@ -102,51 +116,14 @@ describe 'Projects > Settings > Repository settings' do
         project.deploy_keys << private_deploy_key
         visit project_settings_repository_path(project)
 
-        accept_confirm { find('.deploy-key', text: private_deploy_key.title).find('.ic-remove').click }
+        accept_confirm { find('.deploy-key', text: private_deploy_key.title).find('[data-testid="remove-icon"]').click }
 
         expect(page).not_to have_content(private_deploy_key.title)
       end
     end
 
-    context 'Deploy tokens' do
-      let!(:deploy_token) { create(:deploy_token, projects: [project]) }
-
-      before do
-        stub_container_registry_config(enabled: true)
-        visit project_settings_repository_path(project)
-      end
-
-      it 'view deploy tokens' do
-        within('.deploy-tokens') do
-          expect(page).to have_content(deploy_token.name)
-          expect(page).to have_content('read_repository')
-          expect(page).to have_content('read_registry')
-        end
-      end
-
-      it 'add a new deploy token' do
-        fill_in 'deploy_token_name', with: 'new_deploy_key'
-        fill_in 'deploy_token_expires_at', with: (Date.today + 1.month).to_s
-        fill_in 'deploy_token_username', with: 'deployer'
-        check 'deploy_token_read_repository'
-        check 'deploy_token_read_registry'
-        click_button 'Create deploy token'
-
-        expect(page).to have_content('Your new project deploy token has been created')
-
-        within('.created-deploy-token-container') do
-          expect(page).to have_selector("input[name='deploy-token-user'][value='deployer']")
-          expect(page).to have_selector("input[name='deploy-token'][readonly='readonly']")
-        end
-      end
-    end
-
     context 'remote mirror settings' do
-      let(:user2) { create(:user) }
-
       before do
-        project.add_maintainer(user2)
-
         visit project_settings_repository_path(project)
       end
 
@@ -192,6 +169,21 @@ describe 'Projects > Settings > Repository settings' do
         expect(project.remote_mirrors.first.only_protected_branches).to eq(true)
       end
 
+      it 'creates a push mirror that keeps divergent refs', :js do
+        select_direction
+
+        fill_in 'url', with: 'ssh://user@localhost/project.git'
+        fill_in 'Password', with: 'password'
+        check 'Keep divergent refs'
+
+        Sidekiq::Testing.fake! do
+          click_button 'Mirror repository'
+        end
+
+        expect(page).to have_content('Mirroring settings were successfully updated')
+        expect(project.reload.remote_mirrors.first.keep_divergent_refs).to eq(true)
+      end
+
       it 'generates an SSH public key on submission', :js do
         fill_in 'url', with: 'ssh://user@localhost/project.git'
         select 'SSH public key', from: 'Authentication method'
@@ -204,6 +196,18 @@ describe 'Projects > Settings > Repository settings' do
 
         expect(page).to have_content('Mirroring settings were successfully updated')
         expect(page).to have_selector('[title="Copy SSH public key"]')
+      end
+
+      context 'when project mirroring is disabled' do
+        before do
+          stub_application_setting(mirror_available: false)
+          visit project_settings_repository_path(project)
+        end
+
+        it 'hides remote mirror settings' do
+          expect(page.find('.project-mirror-settings')).not_to have_selector('form')
+          expect(page).to have_content('Mirror settings are only available to GitLab administrators.')
+        end
       end
 
       def select_direction(direction = 'push')
@@ -268,6 +272,33 @@ describe 'Projects > Settings > Repository settings' do
       expect(mirror).to have_selector('.rspec-delete-mirror')
       expect(mirror).to have_selector('.rspec-disabled-mirror-badge')
       expect(mirror).not_to have_selector('.rspec-update-now-button')
+    end
+  end
+
+  context 'for admin' do
+    shared_examples_for 'shows mirror settings' do
+      it 'shows mirror settings' do
+        expect(page.find('.project-mirror-settings')).to have_selector('form')
+        expect(page).not_to have_content('Changing mirroring setting is disabled for non-admin users.')
+      end
+    end
+
+    before do
+      stub_application_setting(mirror_available: mirror_available)
+      user.update!(admin: true)
+      visit project_settings_repository_path(project)
+    end
+
+    context 'when project mirroring is enabled' do
+      let(:mirror_available) { true }
+
+      include_examples 'shows mirror settings'
+    end
+
+    context 'when project mirroring is disabled' do
+      let(:mirror_available) { false }
+
+      include_examples 'shows mirror settings'
     end
   end
 end

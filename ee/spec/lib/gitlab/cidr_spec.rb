@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CIDR do
+RSpec.describe Gitlab::CIDR do
   using RSpec::Parameterized::TableSyntax
 
   context 'validation' do
@@ -31,7 +31,7 @@ describe Gitlab::CIDR do
     end
 
     with_them do
-      it do
+      specify do
         expect(described_class.new(values).match?(ip)).to eq(match)
       end
     end

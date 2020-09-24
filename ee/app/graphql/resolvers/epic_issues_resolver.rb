@@ -7,7 +7,7 @@ module Resolvers
     alias_method :epic, :object
 
     def resolve(**args)
-      epic.issues_readable_by(context[:current_user])
+      epic.issues_readable_by(context[:current_user], preload: { project: [:namespace, :project_feature] })
     end
   end
 end

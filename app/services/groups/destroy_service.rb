@@ -6,7 +6,7 @@ module Groups
 
     def async_execute
       job_id = GroupDestroyWorker.perform_async(group.id, current_user.id)
-      Rails.logger.info("User #{current_user.id} scheduled a deletion of group ID #{group.id} with job ID #{job_id}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.info("User #{current_user.id} scheduled a deletion of group ID #{group.id} with job ID #{job_id}")
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -29,7 +29,15 @@ module Groups
 
       group.chat_team&.remove_mattermost_team(current_user)
 
+      user_ids_for_project_authorizations_refresh = group.user_ids_for_project_authorizations
+
       group.destroy
+
+      UserProjectAccessChangedService
+        .new(user_ids_for_project_authorizations_refresh)
+        .execute(blocking: true)
+
+      group
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end

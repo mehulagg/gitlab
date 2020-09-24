@@ -43,14 +43,14 @@ module Gitlab
       end
 
       def uncached_application_settings
-        return fake_application_settings unless connect_to_db?
+        return fake_application_settings if Gitlab::Runtime.rake? && !connect_to_db?
 
         current_settings = ::ApplicationSetting.current
         # If there are pending migrations, it's possible there are columns that
         # need to be added to the application settings. To prevent Rake tasks
         # and other callers from failing, use any loaded settings and return
         # defaults for missing columns.
-        if ActiveRecord::Base.connection.migration_context.needs_migration?
+        if Gitlab::Runtime.rake? && ActiveRecord::Base.connection.migration_context.needs_migration?
           db_attributes = current_settings&.attributes || {}
           fake_application_settings(db_attributes)
         elsif current_settings.present?

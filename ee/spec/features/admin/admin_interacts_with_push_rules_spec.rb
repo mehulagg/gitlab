@@ -2,10 +2,13 @@
 
 require "spec_helper"
 
-describe "Admin interacts with push rules" do
-  set(:user) { create(:admin) }
+RSpec.describe "Admin interacts with push rules" do
+  include StubENV
+
+  let_it_be(:user) { create(:admin) }
 
   before do
+    stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     sign_in(user)
   end
 

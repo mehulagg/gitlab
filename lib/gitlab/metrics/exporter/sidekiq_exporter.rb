@@ -12,7 +12,11 @@ module Gitlab
         end
 
         def log_filename
-          File.join(Rails.root, 'log', 'sidekiq_exporter.log')
+          if settings['log_enabled']
+            File.join(Rails.root, 'log', 'sidekiq_exporter.log')
+          else
+            File::NULL
+          end
         end
 
         private
@@ -32,7 +36,7 @@ module Gitlab
           Sidekiq.logger.error(
             class: self.class.to_s,
             message: 'Cannot start sidekiq_exporter',
-            exception: e.message
+            'exception.message' => e.message
           )
 
           false

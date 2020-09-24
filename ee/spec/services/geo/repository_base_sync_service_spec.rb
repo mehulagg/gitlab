@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryBaseSyncService do
+RSpec.describe Geo::RepositoryBaseSyncService do
   let(:project) { build('project') }
 
   subject { described_class.new(project) }

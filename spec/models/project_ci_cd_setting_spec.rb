@@ -2,26 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectCiCdSetting do
-  describe '.available?' do
-    before do
-      described_class.reset_column_information
-    end
-
-    it 'returns true' do
-      expect(described_class).to be_available
-    end
-
-    it 'memoizes the schema version' do
-      expect(ActiveRecord::Migrator)
-        .to receive(:current_version)
-        .and_call_original
-        .once
-
-      2.times { described_class.available? }
-    end
-  end
-
+RSpec.describe ProjectCiCdSetting do
   describe 'validations' do
     it 'validates default_git_depth is between 0 and 1000 or nil' do
       expect(subject).to validate_numericality_of(:default_git_depth)
@@ -29,6 +10,12 @@ describe ProjectCiCdSetting do
         .is_greater_than_or_equal_to(0)
         .is_less_than_or_equal_to(1000)
         .allow_nil
+    end
+  end
+
+  describe '#forward_deployment_enabled' do
+    it 'is true by default' do
+      expect(described_class.new.forward_deployment_enabled).to be_truthy
     end
   end
 
@@ -47,18 +34,6 @@ describe ProjectCiCdSetting do
       project.save!
 
       expect(project.reload.ci_cd_settings.default_git_depth).to eq(0)
-    end
-
-    context 'when feature flag :ci_set_project_default_git_depth is disabled' do
-      let(:project) { create(:project) }
-
-      before do
-        stub_feature_flags(ci_set_project_default_git_depth: { enabled: false } )
-      end
-
-      it 'does not set default value for new records' do
-        expect(project.ci_cd_settings.default_git_depth).to eq(nil)
-      end
     end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Read-only board configuration' do
       let(:qa_user) do
         Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
@@ -12,8 +12,7 @@ module QA
       end
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         label_board_list.project.add_member(qa_user, Resource::Members::AccessLevel::GUEST)
 
@@ -25,8 +24,8 @@ module QA
         Page::Project::Menu.perform(&:go_to_boards)
       end
 
-      it 'shows board configuration to user without edit permission' do
-        EE::Page::Component::IssueBoard::Show.perform do |show|
+      it 'shows board configuration to user without edit permission', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/636' do
+        Page::Component::IssueBoard::Show.perform do |show|
           show.click_boards_config_button
 
           expect(show.board_scope_modal).to be_visible

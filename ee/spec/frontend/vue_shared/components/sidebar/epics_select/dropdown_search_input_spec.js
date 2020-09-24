@@ -1,15 +1,10 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 
-import { GlButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-
+import { GlButton, GlIcon } from '@gitlab/ui';
 import DropdownSearchInput from 'ee/vue_shared/components/sidebar/epics_select/dropdown_search_input.vue';
 
-const createComponent = () => {
-  const localVue = createLocalVue();
-
-  return shallowMount(DropdownSearchInput, {
-    localVue,
+const createComponent = () =>
+  shallowMount(DropdownSearchInput, {
     directives: {
       /**
        * We don't want any observers
@@ -19,7 +14,6 @@ const createComponent = () => {
       autofocusonshow: {},
     },
   });
-};
 
 describe('EpicsSelect', () => {
   describe('DropdownSearchInput', () => {
@@ -73,7 +67,9 @@ describe('EpicsSelect', () => {
           query: 'foo',
         });
 
-        expect(wrapper.classes()).toContain('has-value');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.classes()).toContain('has-value');
+        });
       });
 
       it('should render input element', () => {
@@ -90,10 +86,13 @@ describe('EpicsSelect', () => {
         wrapper.setData({
           query: 'foo',
         });
-        const iconEl = wrapper.find(Icon);
 
-        expect(iconEl.exists()).toBe(true);
-        expect(iconEl.attributes('name')).toBe('search');
+        return wrapper.vm.$nextTick().then(() => {
+          const iconEl = wrapper.find(GlIcon);
+
+          expect(iconEl.exists()).toBe(true);
+          expect(iconEl.attributes('name')).toBe('search');
+        });
       });
 
       it('should render input clear button', () => {
@@ -101,12 +100,7 @@ describe('EpicsSelect', () => {
 
         expect(clearButtonEl.exists()).toBe(true);
         expect(clearButtonEl.classes()).toEqual(
-          expect.arrayContaining([
-            'fa',
-            'fa-times',
-            'dropdown-input-clear',
-            'js-dropdown-input-clear',
-          ]),
+          expect.arrayContaining(['dropdown-input-clear', 'js-dropdown-input-clear']),
         );
       });
     });

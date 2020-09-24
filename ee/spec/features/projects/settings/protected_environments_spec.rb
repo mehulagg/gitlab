@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Protected Environments' do
+RSpec.describe 'Protected Environments' do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:environments) { %w(production development staging test) }
@@ -28,7 +28,7 @@ describe 'Protected Environments' do
     end
 
     it 'does not have access to Protected Environments settings' do
-      expect(page).to have_gitlab_http_status(404)
+      expect(page).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -40,7 +40,7 @@ describe 'Protected Environments' do
     end
 
     it 'has access to Protected Environments settings' do
-      expect(page).to have_gitlab_http_status(200)
+      expect(page).to have_gitlab_http_status(:ok)
     end
 
     it 'allows seeing a list of protected environments' do
@@ -65,7 +65,7 @@ describe 'Protected Environments' do
       end
     end
 
-    it 'allows updating access to a protected environment', :js, :quarantine do
+    it 'allows updating access to a protected environment', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/11086' do
       within('.protected-branches-list tr', text: 'production') do
         set_allowed_to_deploy('Developers + Maintainers')
       end
@@ -103,7 +103,7 @@ describe 'Protected Environments' do
         it 'shows setting page correctly' do
           visit project_settings_ci_cd_path(project)
 
-          expect(page).to have_gitlab_http_status(200)
+          expect(page).to have_gitlab_http_status(:ok)
         end
       end
     end

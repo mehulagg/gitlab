@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GoogleCodeImport::ProjectCreator do
+RSpec.describe Gitlab::GoogleCodeImport::ProjectCreator do
   let(:user) { create(:user) }
   let(:repo) do
     Gitlab::GoogleCodeImport::Repository.new(
@@ -9,6 +11,7 @@ describe Gitlab::GoogleCodeImport::ProjectCreator do
       "repositoryUrls" => ["https://vim.googlecode.com/git/"]
     )
   end
+
   let(:namespace) { create(:group) }
 
   before do

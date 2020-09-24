@@ -29,24 +29,16 @@ module Deployments
           environment.external_url = url
         end
 
+        renew_auto_stop_in
         environment.fire_state_event(action)
 
         if environment.save && !environment.stopped?
           deployment.update_merge_request_metrics!
-          link_merge_requests(deployment)
         end
       end
     end
 
     private
-
-    def link_merge_requests(deployment)
-      unless Feature.enabled?(:deployment_merge_requests, deployment.project)
-        return
-      end
-
-      LinkMergeRequestsService.new(deployment).execute
-    end
 
     def environment_options
       options&.dig(:environment) || {}
@@ -62,6 +54,12 @@ module Deployments
 
     def action
       environment_options[:action] || 'start'
+    end
+
+    def renew_auto_stop_in
+      return unless deployable
+
+      environment.auto_stop_in = deployable.environment_auto_stop_in
     end
   end
 end

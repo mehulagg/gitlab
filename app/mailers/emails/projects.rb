@@ -51,9 +51,20 @@ module Emails
       add_project_headers
       headers['X-GitLab-Author'] = @message.author_username
 
-      mail(from:      sender(@message.author_id, @message.send_from_committer_email?),
+      mail(from:      sender(@message.author_id, send_from_user_email: @message.send_from_committer_email?),
            reply_to:  @message.reply_to,
            subject:   @message.subject)
+    end
+
+    def prometheus_alert_fired_email(project_id, user_id, alert_attributes)
+      @project = ::Project.find(project_id)
+      user = ::User.find(user_id)
+
+      @alert = AlertManagement::Alert.new(alert_attributes.with_indifferent_access).present
+      return unless @alert.parsed_payload.has_required_attributes?
+
+      subject_text = "Alert: #{@alert.email_title}"
+      mail(to: user.notification_email_for(@project.group), subject: subject(subject_text))
     end
   end
 end

@@ -7,10 +7,12 @@ module QA
         class Show < Page::Base
           include Page::Component::Issuable::Common
           include Page::Component::Note
+          include Page::Component::DesignManagement
+          include Page::Component::Issuable::Sidebar
 
           view 'app/assets/javascripts/notes/components/comment_form.vue' do
             element :comment_button
-            element :comment_input
+            element :comment_field
           end
 
           view 'app/assets/javascripts/notes/components/discussion_filter.vue' do
@@ -22,37 +24,13 @@ module QA
             element :noteable_note_item
           end
 
-          view 'app/assets/javascripts/sidebar/components/assignees/assignee_avatar.vue' do
-            element :avatar_image
-          end
-
-          view 'app/assets/javascripts/sidebar/components/assignees/assignee_title.vue' do
-            element :assignee_edit_link
-            element :assignee_title
-          end
-
-          view 'app/assets/javascripts/sidebar/components/assignees/uncollapsed_assignee_list.vue' do
-            element :more_assignees_link
-          end
-
           view 'app/assets/javascripts/vue_shared/components/issue/related_issuable_item.vue' do
             element :remove_related_issue_button
           end
 
-          view 'app/helpers/dropdowns_helper.rb' do
-            element :dropdown_input_field
-          end
-
           view 'app/views/shared/issuable/_close_reopen_button.html.haml' do
+            element :close_issue_button
             element :reopen_issue_button
-          end
-
-          view 'app/views/shared/issuable/_sidebar.html.haml' do
-            element :assignee_block
-            element :labels_block
-            element :edit_link_labels
-            element :dropdown_menu_labels
-            element :milestone_link
           end
 
           view 'app/views/shared/notes/_form.html.haml' do
@@ -60,35 +38,53 @@ module QA
             element :new_note_form, 'attr: :note' # rubocop:disable QA/ElementWithPattern
           end
 
-          def assign(user)
-            click_element(:assignee_edit_link)
-            select_user(user.username)
-            click_body
+          view 'app/assets/javascripts/related_issues/components/add_issuable_form.vue' do
+            element :add_issue_button
           end
 
-          def assignee_title
-            find_element(:assignee_title)
+          view 'app/assets/javascripts/related_issues/components/related_issuable_input.vue' do
+            element :add_issue_field
           end
 
-          def avatar_image_count
-            wait_assignees_block_finish_loading do
-              all_elements(:avatar_image).count
-            end
+          view 'app/assets/javascripts/related_issues/components/related_issues_block.vue' do
+            element :related_issues_plus_button
           end
 
-          def click_milestone_link
-            click_element(:milestone_link)
+          view 'app/assets/javascripts/related_issues/components/related_issues_list.vue' do
+            element :related_issuable_item
+            element :related_issues_loading_icon
+          end
+
+          def relate_issue(issue)
+            click_element(:related_issues_plus_button)
+            fill_element(:add_issue_field, issue.web_url)
+            send_keys_to_element(:add_issue_field, :enter)
+          end
+
+          def related_issuable_item
+            find_element(:related_issuable_item)
+          end
+
+          def wait_for_related_issues_to_load
+            has_no_element?(:related_issues_loading_icon, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           end
 
           def click_remove_related_issue_button
-            click_element(:remove_related_issue_button)
+            retry_until(sleep_interval: 5) do
+              click_element(:remove_related_issue_button)
+              has_no_element?(:remove_related_issue_button, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
+            end
+          end
+
+          def click_close_issue_button
+            click_element :close_issue_button
           end
 
           # Adds a comment to an issue
           # attachment option should be an absolute path
           def comment(text, attachment: nil, filter: :all_activities)
             method("select_#{filter}_filter").call
-            fill_element :comment_input, text
+            fill_element :comment_field, "#{text}\n"
 
             unless attachment.nil?
               QA::Page::Component::Dropzone.new(self, '.new-note')
@@ -99,13 +95,7 @@ module QA
           end
 
           def has_comment?(comment_text)
-            wait(reload: false) do
-              has_element?(:noteable_note_item, text: comment_text)
-            end
-          end
-
-          def more_assignees_link
-            find_element(:more_assignees_link)
+            has_element?(:noteable_note_item, text: comment_text, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           end
 
           def noteable_note_item
@@ -124,64 +114,19 @@ module QA
             select_filter_with_text('Show history only')
           end
 
-          def select_labels_and_refresh(labels)
-            Support::Retrier.retry_until do
-              click_element(:edit_link_labels)
-              has_element?(:dropdown_menu_labels, text: labels.first)
-            end
-
-            labels.each do |label|
-              within_element(:dropdown_menu_labels, text: label) do
-                send_keys_to_element(:dropdown_input_field, [label, :enter])
-              end
-            end
-
-            click_body
-
-            labels.each do |label|
-              has_element?(:labels_block, text: label)
-            end
-
-            refresh
-          end
-
-          def text_of_labels_block
-            find_element(:labels_block)
-          end
-
-          def toggle_more_assignees_link
-            click_element(:more_assignees_link)
+          def has_metrics_unfurled?
+            has_element?(:prometheus_graph_widgets, wait: 30)
           end
 
           private
 
           def select_filter_with_text(text)
             retry_on_exception do
-              click_body
+              click_element(:title)
               click_element :discussion_filter
               find_element(:filter_options, text: text).click
-            end
-          end
 
-          def select_user(username)
-            find("#{element_selector_css(:assignee_block)} input").set(username)
-
-            dropdown_menu_user_link_selector = '.dropdown-menu-user-link'
-            at_username = "@#{username}"
-            ten_seconds = 10
-
-            wait(reload: false, max: ten_seconds, interval: 1) do
-              has_css?(dropdown_menu_user_link_selector, wait: ten_seconds, text: at_username)
-            end
-            find(dropdown_menu_user_link_selector, text: at_username).click
-          end
-
-          def wait_assignees_block_finish_loading
-            within_element(:assignee_block) do
-              wait(reload: false, max: 10, interval: 1) do
-                finished_loading_block?
-                yield
-              end
+              wait_for_loading
             end
           end
         end

@@ -5,9 +5,10 @@ module QA
     module Project
       module Settings
         class Main < Page::Base
-          include Common
+          include QA::Page::Settings::Common
           include Component::Select2
           include SubMenus::Project
+          include Component::Breadcrumbs
 
           view 'app/views/projects/edit.html.haml' do
             element :advanced_settings
@@ -37,19 +38,19 @@ module QA
           end
 
           def expand_advanced_settings(&block)
-            expand_section(:advanced_settings) do
+            expand_content(:advanced_settings) do
               Advanced.perform(&block)
             end
           end
 
           def expand_merge_requests_settings(&block)
-            expand_section(:merge_request_settings) do
+            expand_content(:merge_request_settings) do
               MergeRequest.perform(&block)
             end
           end
 
           def expand_visibility_project_features_permissions(&block)
-            expand_section(:visibility_features_permissions_content) do
+            expand_content(:visibility_features_permissions_content) do
               VisibilityFeaturesPermissions.perform(&block)
             end
           end
@@ -58,3 +59,5 @@ module QA
     end
   end
 end
+
+QA::Page::Project::Settings::Main.prepend_if_ee("QA::EE::Page::Project::Settings::Main")

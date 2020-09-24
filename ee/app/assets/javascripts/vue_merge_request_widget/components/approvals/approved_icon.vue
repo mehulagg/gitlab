@@ -1,9 +1,9 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     isApproved: {
@@ -15,6 +15,6 @@ export default {
 </script>
 
 <template>
-  <icon v-if="isApproved" name="mobile-issue-close" class="text-success" :size="16" />
+  <gl-icon v-if="isApproved" name="mobile-issue-close" class="text-success" :size="16" />
   <div v-else class="square s16"></div>
 </template>

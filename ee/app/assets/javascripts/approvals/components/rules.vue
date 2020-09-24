@@ -5,6 +5,7 @@ const HEADERS = {
   name: s__('ApprovalRule|Name'),
   members: s__('ApprovalRule|Approvers'),
   approvalsRequired: s__('ApprovalRule|No. approvals required'),
+  branches: s__('Target branch'),
 };
 
 export default {
@@ -24,9 +25,7 @@ export default {
       <slot name="thead" v-bind="$options.HEADERS"></slot>
     </thead>
     <tbody>
-      <tr v-for="rule in rules" :key="rule.id">
-        <slot :rule="rule" name="tr"></slot>
-      </tr>
+      <slot name="tbody" :rules="rules"></slot>
     </tbody>
   </table>
 </template>

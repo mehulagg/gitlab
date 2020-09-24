@@ -1,6 +1,7 @@
 <script>
-import { glEmojiTag } from '~/emoji';
+/* eslint-disable vue/no-v-html */
 import { GlPopover } from '@gitlab/ui';
+import { glEmojiTag } from '~/emoji';
 
 export default {
   components: {

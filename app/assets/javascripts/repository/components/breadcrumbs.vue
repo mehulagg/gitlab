@@ -1,11 +1,17 @@
 <script>
-import { GlDropdown, GlDropdownDivider, GlDropdownHeader, GlDropdownItem } from '@gitlab/ui';
+import {
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownDivider,
+  GlDeprecatedDropdownHeader,
+  GlDeprecatedDropdownItem,
+  GlIcon,
+} from '@gitlab/ui';
+import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '../../locale';
-import Icon from '../../vue_shared/components/icon.vue';
 import getRefMixin from '../mixins/get_ref';
-import getProjectShortPath from '../queries/getProjectShortPath.query.graphql';
-import getProjectPath from '../queries/getProjectPath.query.graphql';
-import getPermissions from '../queries/getPermissions.query.graphql';
+import projectShortPathQuery from '../queries/project_short_path.query.graphql';
+import projectPathQuery from '../queries/project_path.query.graphql';
+import permissionsQuery from '../queries/permissions.query.graphql';
 
 const ROW_TYPES = {
   header: 'header',
@@ -14,27 +20,30 @@ const ROW_TYPES = {
 
 export default {
   components: {
-    GlDropdown,
-    GlDropdownDivider,
-    GlDropdownHeader,
-    GlDropdownItem,
-    Icon,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownDivider,
+    GlDeprecatedDropdownHeader,
+    GlDeprecatedDropdownItem,
+    GlIcon,
   },
   apollo: {
     projectShortPath: {
-      query: getProjectShortPath,
+      query: projectShortPathQuery,
     },
     projectPath: {
-      query: getProjectPath,
+      query: projectPathQuery,
     },
     userPermissions: {
-      query: getPermissions,
+      query: permissionsQuery,
       variables() {
         return {
           projectPath: this.projectPath,
         };
       },
-      update: data => data.project.userPermissions,
+      update: data => data.project?.userPermissions,
+      error(error) {
+        throw error;
+      },
     },
   },
   mixins: [getRefMixin],
@@ -42,7 +51,7 @@ export default {
     currentPath: {
       type: String,
       required: false,
-      default: '/',
+      default: '',
     },
     canCollaborate: {
       type: Boolean,
@@ -99,15 +108,21 @@ export default {
         .filter(p => p !== '')
         .reduce(
           (acc, name, i) => {
-            const path = `${i > 0 ? acc[i].path : ''}/${name}`;
+            const path = joinPaths(i > 0 ? acc[i].path : '', escapeFileUrl(name));
 
             return acc.concat({
               name,
               path,
-              to: `/tree/${this.ref}${path}`,
+              to: `/-/tree/${joinPaths(this.escapedRef, path)}`,
             });
           },
-          [{ name: this.projectShortPath, path: '/', to: `/tree/${this.ref}/` }],
+          [
+            {
+              name: this.projectShortPath,
+              path: '/',
+              to: `/-/tree/${this.escapedRef}/`,
+            },
+          ],
         );
     },
     canCreateMrFromFork() {
@@ -124,7 +139,9 @@ export default {
           },
           {
             attrs: {
-              href: this.newBlobPath,
+              href: `${this.newBlobPath}/${
+                this.currentPath ? encodeURIComponent(this.currentPath) : ''
+              }`,
               class: 'qa-new-file-option',
             },
             text: __('New file'),
@@ -172,7 +189,7 @@ export default {
         );
       }
 
-      if (this.userPermissions.pushCode) {
+      if (this.userPermissions?.pushCode) {
         items.push(
           {
             type: ROW_TYPES.divider,
@@ -209,11 +226,11 @@ export default {
     getComponent(type) {
       switch (type) {
         case ROW_TYPES.divider:
-          return 'gl-dropdown-divider';
+          return 'gl-deprecated-dropdown-divider';
         case ROW_TYPES.header:
-          return 'gl-dropdown-header';
+          return 'gl-deprecated-dropdown-header';
         default:
-          return 'gl-dropdown-item';
+          return 'gl-deprecated-dropdown-item';
       }
     },
   },
@@ -229,18 +246,18 @@ export default {
         </router-link>
       </li>
       <li v-if="renderAddToTreeDropdown" class="breadcrumb-item">
-        <gl-dropdown toggle-class="add-to-tree qa-add-to-tree ml-1">
-          <template slot="button-content">
+        <gl-deprecated-dropdown toggle-class="add-to-tree qa-add-to-tree ml-1">
+          <template #button-content>
             <span class="sr-only">{{ __('Add to tree') }}</span>
-            <icon name="plus" :size="16" class="float-left" />
-            <icon name="arrow-down" :size="16" class="float-left" />
+            <gl-icon name="plus" :size="16" class="float-left" />
+            <gl-icon name="chevron-down" :size="16" class="float-left" />
           </template>
           <template v-for="(item, i) in dropdownItems">
             <component :is="getComponent(item.type)" :key="i" v-bind="item.attrs">
               {{ item.text }}
             </component>
           </template>
-        </gl-dropdown>
+        </gl-deprecated-dropdown>
       </li>
     </ol>
   </nav>

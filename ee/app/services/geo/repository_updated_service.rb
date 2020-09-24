@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# This service is deprecated. Don't add new resources to here.
+# Use the new Self-Service Framework instead.
 module Geo
   class RepositoryUpdatedService
     include ::Gitlab::Geo::ProjectLogHelpers
@@ -7,19 +9,16 @@ module Geo
     RepositoryUpdateError = Class.new(StandardError)
 
     def initialize(repository, params = {})
-      @project = repository.project
-      @params  = params
-      @refs    = params.fetch(:refs, [])
-      @changes = params.fetch(:changes, [])
-      @source  = Geo::RepositoryUpdatedEvent.source_for(repository)
+      @project    = repository.project
+      @repository = repository
+      @params     = params
+      @refs       = params.fetch(:refs, [])
+      @changes    = params.fetch(:changes, [])
+      @source     = Geo::RepositoryUpdatedEvent.source_for(repository)
     end
 
     def execute
       return false unless Gitlab::Geo.primary?
-
-      if source == Geo::RepositoryUpdatedEvent::DESIGN && Feature.disabled?(:enable_geo_design_sync)
-        return false
-      end
 
       reset_repository_checksum!
       create_repository_updated_event!
@@ -29,20 +28,25 @@ module Geo
 
     private
 
-    attr_reader :project, :refs, :changes, :source
+    attr_reader :project, :repository, :refs, :changes, :source
 
     delegate :repository_state, to: :project
 
     def create_repository_updated_event!
+      return unless repository.exists?
+
       Geo::RepositoryUpdatedEventStore.new(
         project, refs: refs, changes: changes, source: source
       ).create!
     end
 
+    def design?
+      source == Geo::RepositoryUpdatedEvent::DESIGN
+    end
+
     def reset_repository_checksum!
       # We don't yet support verification for Design repositories
-      return if source == Geo::RepositoryUpdatedEvent::DESIGN
-
+      return if design?
       return if repository_state.nil?
 
       repository_state.update!(

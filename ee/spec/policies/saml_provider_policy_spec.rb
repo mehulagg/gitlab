@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe SamlProviderPolicy do
+RSpec.describe SamlProviderPolicy do
   let(:group_visibility) { :public }
   let(:group) { create(:group, group_visibility) }
   let(:saml_provider) { create(:saml_provider, group: group) }

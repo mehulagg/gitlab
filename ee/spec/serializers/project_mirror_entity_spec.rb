@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectMirrorEntity do
+RSpec.describe ProjectMirrorEntity do
   subject(:entity) { described_class.new(project).as_json.deep_symbolize_keys }
 
   describe 'pull mirror' do
@@ -18,7 +18,7 @@ describe ProjectMirrorEntity do
         is_expected.to eq(
           id: project.id,
           mirror: true,
-          import_url: project.import_url,
+          import_url: project.safe_import_url,
           username_only_import_url: project.username_only_import_url,
           mirror_user_id: project.mirror_user_id,
           mirror_trigger_builds: project.mirror_trigger_builds,
@@ -35,6 +35,10 @@ describe ProjectMirrorEntity do
           },
           remote_mirrors_attributes: []
         )
+      end
+
+      it 'excludes password information' do
+        expect(subject[:import_url]).not_to include('password')
       end
     end
 

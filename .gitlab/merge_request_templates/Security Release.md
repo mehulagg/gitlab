@@ -1,35 +1,44 @@
 <!--
 # README first!
-This MR should be created on `dev.gitlab.org`.
+This MR should be created on `gitlab.com/gitlab-org/security/gitlab`.
 
 See [the general developer security release guidelines](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/developer.md).
 
-This merge request _must not_ close the corresponding security issue _unless_ it
-targets master.
-
-When submitting a merge request for CE, a corresponding EE merge request is
-always required. This makes it easier to merge security merge requests, as
-manually merging CE into EE is no longer required.
-
 -->
+
 ## Related issues
 
-<!-- Mention the issue(s) this MR is related to -->
+<!-- Mention the GitLab Security issue this MR is related to -->
 
 ## Developer checklist
 
-- [ ] Link to the developer security workflow issue on `dev.gitlab.org`
-- [ ] MR targets `master`, or `X-Y-stable` for backports
-- [ ] Milestone is set for the version this MR applies to
-- [ ] Title of this MR is the same as for all backports
-- [ ] A [CHANGELOG entry](https://docs.gitlab.com/ee/development/changelog.html) is added without a `merge_request` value, with `type` set to `security`
-- [ ] Add a link to this MR in the `links` section of related issue
-- [ ] Set up an EE MR (always required for CE merge requests): EE_MR_LINK_HERE
-- [ ] Assign to a reviewer (that is not a release manager)
+- [ ] **On "Related issues" section, write down the [GitLab Security] issue it belongs to (i.e. `Related to <issue_id>`).**
+- [ ] Merge request targets `master`, or a versioned stable branch (`X-Y-stable-ee`).
+- [ ] Milestone is set for the version this merge request applies to. A closed milestone can be assigned via [quick actions].
+- [ ] Title of this merge request is the same as for all backports.
+- [ ] A [CHANGELOG entry] is added without a `merge_request` value, with `type` set to `security`
+- [ ] For the MR targeting `master`:
+  - [ ] Assign to a reviewer and maintainer, per our [Code Review process].
+  - [ ] Ensure it's approved according to our [Approval Guidelines].
+  - [ ] Ensure it's approved by an AppSec engineer.
+    - If you're unsure who should approve, find the AppSec engineer associated to the issue in the [Canonical repository], or ask #sec-appsec on Slack.
+    - Trigger the [`package-and-qa` build]. The docker image generated will be used by the AppSec engineer to validate the security vulnerability has been remediated.
+- [ ] For a backport MR targeting a versioned stable branch (`X-Y-stable-ee`)
+  - [ ] Ensure it's approved by a maintainer.
 
-## Reviewer checklist
+**Note:** Reviewer/maintainer should not be a Release Manager
+
+## Maintainer checklist
 
 - [ ] Correct milestone is applied and the title is matching across all backports
-- [ ] Assigned to `@gitlab-release-tools-bot` with passing CI pipelines
+- [ ] Assigned to `@gitlab-release-tools-bot` with passing CI pipelines and **when all backports including the MR targeting master are ready.**
 
 /label ~security
+
+[GitLab Security]: https://gitlab.com/gitlab-org/security/gitlab
+[quick actions]: https://docs.gitlab.com/ee/user/project/quick_actions.html#quick-actions-for-issues-merge-requests-and-epics
+[CHANGELOG entry]: https://docs.gitlab.com/ee/development/changelog.html
+[Code Review process]: https://docs.gitlab.com/ee/development/code_review.html
+[Approval Guidelines]: https://docs.gitlab.com/ee/development/code_review.html#approval-guidelines
+[Canonical repository]: https://gitlab.com/gitlab-org/gitlab
+[`package-and-qa` build]: https://docs.gitlab.com/ee/development/testing_guide/end_to_end/#using-the-package-and-qa-job

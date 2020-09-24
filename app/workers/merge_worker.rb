@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-class MergeWorker
+class MergeWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :source_code_management
-  latency_sensitive_worker!
+  urgency :high
+  weight 5
+  loggable_arguments 2
 
   def perform(merge_request_id, current_user_id, params)
     params = params.with_indifferent_access

@@ -1,6 +1,7 @@
 import {
   getLabelsEndpoint,
   getMilestonesEndpoint,
+  getDefaultStartDate,
   initDateArray,
   transformScatterData,
   getScatterPlotData,
@@ -35,6 +36,32 @@ describe('Productivity Analytics utils', () => {
     });
   });
 
+  describe('getDefaultStartDate', () => {
+    const realDateNow = Date.now;
+    const defaultDaysInPast = 10;
+
+    beforeAll(() => {
+      const today = jest.fn(() => new Date('2019-10-01'));
+      global.Date.now = today;
+    });
+
+    afterAll(() => {
+      global.Date.now = realDateNow;
+    });
+
+    it('returns the minDate when the computed date (today minus defaultDaysInPast) is before the minDate', () => {
+      const minDate = new Date('2019-09-30');
+
+      expect(getDefaultStartDate(minDate, defaultDaysInPast)).toEqual(minDate);
+    });
+
+    it('returns the computed date (today minus defaultDaysInPast) when this is after the minDate', () => {
+      const minDate = new Date('2019-09-01');
+
+      expect(getDefaultStartDate(minDate, defaultDaysInPast)).toEqual(new Date('2019-09-21'));
+    });
+  });
+
   describe('initDateArray', () => {
     it('creates a two-dimensional array with 3 empty arrays for startDate=2019-09-01 and endDate=2019-09-03', () => {
       const startDate = new Date('2019-09-01');
@@ -46,22 +73,23 @@ describe('Productivity Analytics utils', () => {
 
   describe('transformScatterData', () => {
     it('transforms the raw scatter data into a two-dimensional array and groups by date', () => {
-      const startDate = new Date('2019-08-01');
-      const endDate = new Date('2019-08-03');
+      const startDate = new Date('2019-10-29');
+      const endDate = new Date('2019-11-01');
       const data = {
-        1: { merged_at: '2019-08-01T11:10:00.000Z', metric: 10 },
-        2: { merged_at: '2019-08-01T12:11:00.000Z', metric: 20 },
-        3: { merged_at: '2019-08-02T13:13:00.000Z', metric: 30 },
-        4: { merged_at: '2019-08-03T14:14:00.000Z', metric: 40 },
+        1: { merged_at: '2019-10-29T11:10:00.000Z', metric: 10 },
+        2: { merged_at: '2019-10-29T12:11:00.000Z', metric: 20 },
+        3: { merged_at: '2019-10-30T13:13:00.000Z', metric: 30 },
+        4: { merged_at: '2019-10-31T01:23:15.231Z', metric: 40 },
       };
       const result = transformScatterData(data, startDate, endDate);
       const expected = [
         [
-          { merged_at: '2019-08-01T11:10:00.000Z', metric: 10 },
-          { merged_at: '2019-08-01T12:11:00.000Z', metric: 20 },
+          { merged_at: '2019-10-29T11:10:00.000Z', metric: 10 },
+          { merged_at: '2019-10-29T12:11:00.000Z', metric: 20 },
         ],
-        [{ merged_at: '2019-08-02T13:13:00.000Z', metric: 30 }],
-        [{ merged_at: '2019-08-03T14:14:00.000Z', metric: 40 }],
+        [{ merged_at: '2019-10-30T13:13:00.000Z', metric: 30 }],
+        [{ merged_at: '2019-10-31T01:23:15.231Z', metric: 40 }],
+        [],
       ];
       expect(result).toEqual(expected);
     });

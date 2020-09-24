@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Auth::LDAP::AccessLevels do
+RSpec.describe EE::Gitlab::Auth::Ldap::AccessLevels do
   describe '#set' do
     let(:access_levels) { described_class.new }
     let(:dns) do
@@ -11,6 +11,7 @@ describe EE::Gitlab::Auth::LDAP::AccessLevels do
       uid=janedoe,ou=users,dc=example,dc=com
     )
     end
+
     subject { access_levels }
 
     context 'when access_levels is empty' do
@@ -34,12 +35,14 @@ describe EE::Gitlab::Auth::LDAP::AccessLevels do
           uid=jamesdoe,ou=users,dc=example,dc=com
         }
       end
+
       let(:master_dns) do
         %w{
           uid=johndoe,ou=users,dc=example,dc=com
           uid=janedoe,ou=users,dc=example,dc=com
         }
       end
+
       before do
         access_levels.set(master_dns, to: Gitlab::Access::MAINTAINER)
         access_levels.set(developer_dns, to: Gitlab::Access::DEVELOPER)

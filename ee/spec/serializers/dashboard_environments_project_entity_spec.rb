@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DashboardEnvironmentsProjectEntity do
+RSpec.describe DashboardEnvironmentsProjectEntity do
   describe '.as_json' do
     it 'includes project attributes' do
       current_user = create(:user)

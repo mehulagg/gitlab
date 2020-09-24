@@ -1,7 +1,7 @@
 <script>
+import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import Flash from '~/flash';
-import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import SmartInterval from '~/smart_interval';
 
 import eventHub from '../event_hub';
@@ -9,11 +9,10 @@ import eventHub from '../event_hub';
 import { NODE_ACTIONS } from '../constants';
 
 import GeoNodeItem from './geo_node_item.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    DeprecatedModal,
+    GlModal,
     GeoNodeItem,
     GlLoadingIcon,
   },
@@ -43,12 +42,13 @@ export default {
     return {
       isLoading: true,
       hasError: false,
-      showModal: false,
       targetNode: null,
       targetNodeActionType: '',
+      modalTitle: '',
       modalKind: 'warning',
       modalMessage: '',
       modalActionLabel: '',
+      modalId: 'node-action',
     };
   },
   computed: {
@@ -131,7 +131,7 @@ export default {
         .repairNode(targetNode)
         .then(() => {
           this.setNodeActionStatus(targetNode, false);
-          Flash(s__('GeoNodes|Node Authentication was successfully repaired.'), 'notice');
+          this.$toast.show(s__('GeoNodes|Node Authentication was successfully repaired.'));
         })
         .catch(() => {
           this.setNodeActionStatus(targetNode, false);
@@ -160,7 +160,7 @@ export default {
         .removeNode(targetNode)
         .then(() => {
           this.store.removeNode(targetNode);
-          Flash(s__('GeoNodes|Node was successfully removed.'), 'notice');
+          this.$toast.show(s__('GeoNodes|Node was successfully removed.'));
         })
         .catch(() => {
           this.setNodeActionStatus(targetNode, false);
@@ -168,7 +168,7 @@ export default {
         });
     },
     handleNodeAction() {
-      this.showModal = false;
+      this.hideNodeActionModal();
 
       if (this.targetNodeActionType === NODE_ACTIONS.TOGGLE) {
         this.toggleNode(this.targetNode);
@@ -182,21 +182,26 @@ export default {
       modalKind = 'warning',
       modalMessage,
       modalActionLabel,
+      modalTitle,
     }) {
       this.targetNode = node;
       this.targetNodeActionType = actionType;
       this.modalKind = modalKind;
       this.modalMessage = modalMessage;
       this.modalActionLabel = modalActionLabel;
+      this.modalTitle = modalTitle;
 
       if (actionType === NODE_ACTIONS.TOGGLE && !node.enabled) {
         this.toggleNode(this.targetNode);
       } else {
-        this.showModal = true;
+        this.$root.$emit('bv::show::modal', this.modalId);
       }
     },
     hideNodeActionModal() {
-      this.showModal = false;
+      this.$root.$emit('bv::hide::modal', this.modalId);
+    },
+    nodeRemovalAllowed(node) {
+      return !node.primary || this.nodes.length <= 1;
     },
   },
 };
@@ -207,7 +212,7 @@ export default {
     <gl-loading-icon
       v-if="isLoading"
       :label="s__('GeoNodes|Loading nodes')"
-      :size="2"
+      size="md"
       class="loading-animation prepend-top-20 append-bottom-20"
     />
     <geo-node-item
@@ -217,16 +222,20 @@ export default {
       :primary-node="node.primary"
       :node-actions-allowed="nodeActionsAllowed"
       :node-edit-allowed="nodeEditAllowed"
+      :node-removal-allowed="nodeRemovalAllowed(node)"
       :geo-troubleshooting-help-path="geoTroubleshootingHelpPath"
     />
-    <deprecated-modal
-      v-show="showModal"
-      :title="__('Are you sure?')"
-      :kind="modalKind"
-      :text="modalMessage"
-      :primary-button-label="modalActionLabel"
+    <gl-modal
+      :modal-id="modalId"
+      :title="modalTitle"
+      :ok-variant="modalKind"
+      :ok-title="modalActionLabel"
       @cancel="hideNodeActionModal"
-      @submit="handleNodeAction"
-    />
+      @ok="handleNodeAction"
+    >
+      <template>
+        {{ modalMessage }}
+      </template>
+    </gl-modal>
   </div>
 </template>

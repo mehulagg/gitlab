@@ -6,8 +6,10 @@ class UpdateHeadPipelineForMergeRequestWorker
 
   queue_namespace :pipeline_processing
   feature_category :continuous_integration
-  latency_sensitive_worker!
+  urgency :high
   worker_resource_boundary :cpu
+
+  idempotent!
 
   def perform(merge_request_id)
     MergeRequest.find_by_id(merge_request_id).try do |merge_request|

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectApprovalSettings < ::Grape::API
+  class ProjectApprovalSettings < ::Grape::API::Instance
     before { authenticate! }
 
     helpers ::API::Helpers::ProjectApprovalRulesHelpers
@@ -15,34 +15,42 @@ module API
           detail 'Private API subject to change'
           success EE::API::Entities::ProjectApprovalSettings
         end
+        params do
+          optional :target_branch, type: String, desc: 'Branch that scoped approval rules apply to'
+        end
         get do
           authorize_create_merge_request_in_project
 
-          present user_project, with: EE::API::Entities::ProjectApprovalSettings, current_user: current_user
+          present(
+            user_project,
+            with: EE::API::Entities::ProjectApprovalSettings,
+            current_user: current_user,
+            target_branch: declared_params[:target_branch]
+          )
         end
 
         segment 'rules' do
           desc 'Create new approval rule' do
             detail 'Private API subject to change'
-            success EE::API::Entities::ApprovalSettingRule
+            success EE::API::Entities::ProjectApprovalSettingRule
           end
           params do
             use :create_project_approval_rule
           end
           post do
-            create_project_approval_rule(present_with: EE::API::Entities::ApprovalSettingRule)
+            create_project_approval_rule(present_with: EE::API::Entities::ProjectApprovalSettingRule)
           end
 
           segment ':approval_rule_id' do
             desc 'Update approval rule' do
               detail 'Private API subject to change'
-              success EE::API::Entities::ApprovalSettingRule
+              success EE::API::Entities::ProjectApprovalSettingRule
             end
             params do
               use :update_project_approval_rule
             end
             put do
-              update_project_approval_rule(present_with: EE::API::Entities::ApprovalSettingRule)
+              update_project_approval_rule(present_with: EE::API::Entities::ProjectApprovalSettingRule)
             end
 
             desc 'Delete an approval rule' do

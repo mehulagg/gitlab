@@ -26,6 +26,17 @@ module ApplicationSettingsHelper
     end
   end
 
+  def storage_weights
+    ApplicationSetting.repository_storages_weighted_attributes.map do |attribute|
+      storage = attribute.to_s.delete_prefix('repository_storages_weighted_')
+      {
+        name: attribute,
+        label: storage,
+        value: @application_setting.repository_storages_weighted[storage] || 0
+      }
+    end
+  end
+
   def all_protocols_enabled?
     Gitlab::CurrentSettings.enabled_git_access_protocol.blank?
   end
@@ -111,12 +122,15 @@ module ApplicationSettingsHelper
     ]
   end
 
-  def repository_storages_options_for_select(selected)
+  def repository_storages_options_json
     options = Gitlab.config.repositories.storages.map do |name, storage|
-      ["#{name} - #{storage['gitaly_address']}", name]
+      {
+        label: "#{name} - #{storage['gitaly_address']}",
+        value: name
+      }
     end
 
-    options_for_select(options, selected)
+    options.to_json
   end
 
   def external_authorization_description
@@ -173,9 +187,12 @@ module ApplicationSettingsHelper
       :authorized_keys_enabled,
       :auto_devops_enabled,
       :auto_devops_domain,
+      :container_expiration_policies_enable_historic_entries,
       :container_registry_token_expire_delay,
       :default_artifacts_expire_in,
+      :default_branch_name,
       :default_branch_protection,
+      :default_ci_config_path,
       :default_group_visibility,
       :default_project_creation,
       :default_project_visibility,
@@ -201,9 +218,12 @@ module ApplicationSettingsHelper
       :enabled_git_access_protocol,
       :enforce_terms,
       :first_day_of_week,
+      :force_pages_access_control,
       :gitaly_timeout_default,
       :gitaly_timeout_medium,
       :gitaly_timeout_fast,
+      :gitpod_enabled,
+      :gitpod_url,
       :grafana_enabled,
       :grafana_url,
       :gravatar_enabled,
@@ -222,16 +242,12 @@ module ApplicationSettingsHelper
       :import_sources,
       :max_artifacts_size,
       :max_attachment_size,
+      :max_import_size,
       :max_pages_size,
-      :metrics_enabled,
-      :metrics_host,
       :metrics_method_call_threshold,
-      :metrics_packet_size,
-      :metrics_pool_size,
-      :metrics_port,
-      :metrics_sample_interval,
-      :metrics_timeout,
+      :minimum_password_length,
       :mirror_available,
+      :notify_on_unknown_sign_in,
       :pages_domain_verification_enabled,
       :password_authentication_enabled_for_web,
       :password_authentication_enabled_for_git,
@@ -248,7 +264,7 @@ module ApplicationSettingsHelper
       :login_recaptcha_protection_enabled,
       :receive_max_input_size,
       :repository_checks_enabled,
-      :repository_storages,
+      :repository_storages_weighted,
       :require_two_factor_authentication,
       :restricted_visibility_levels,
       :rsa_key_restriction,
@@ -258,6 +274,11 @@ module ApplicationSettingsHelper
       :shared_runners_text,
       :sign_in_text,
       :signup_enabled,
+      :sourcegraph_enabled,
+      :sourcegraph_url,
+      :sourcegraph_public_only,
+      :spam_check_endpoint_enabled,
+      :spam_check_endpoint_url,
       :terminal_max_session_time,
       :terms,
       :throttle_authenticated_api_enabled,
@@ -279,7 +300,6 @@ module ApplicationSettingsHelper
       :unique_ips_limit_per_user,
       :unique_ips_limit_time_window,
       :usage_ping_enabled,
-      :instance_statistics_visibility_private,
       :user_default_external,
       :user_show_add_ssh_key_message,
       :user_default_internal_regex,
@@ -294,12 +314,22 @@ module ApplicationSettingsHelper
       :snowplow_cookie_domain,
       :snowplow_enabled,
       :snowplow_app_id,
-      :snowplow_iglu_registry_url,
       :push_event_hooks_limit,
       :push_event_activities_limit,
       :custom_http_clone_url_root,
-      :pendo_enabled,
-      :pendo_url
+      :snippet_size_limit,
+      :email_restrictions_enabled,
+      :email_restrictions,
+      :issues_create_limit,
+      :raw_blob_request_limit,
+      :project_import_limit,
+      :project_export_limit,
+      :project_download_export_limit,
+      :group_import_limit,
+      :group_export_limit,
+      :group_download_export_limit,
+      :wiki_page_max_content_bytes,
+      :container_registry_delete_tags_service_timeout
     ]
   end
 
@@ -330,9 +360,31 @@ module ApplicationSettingsHelper
   def omnibus_protected_paths_throttle?
     Rack::Attack.throttles.key?('protected paths')
   end
+
+  def self_monitoring_project_data
+    {
+      'create_self_monitoring_project_path' =>
+        create_self_monitoring_project_admin_application_settings_path,
+
+      'status_create_self_monitoring_project_path' =>
+        status_create_self_monitoring_project_admin_application_settings_path,
+
+      'delete_self_monitoring_project_path' =>
+        delete_self_monitoring_project_admin_application_settings_path,
+
+      'status_delete_self_monitoring_project_path' =>
+        status_delete_self_monitoring_project_admin_application_settings_path,
+
+      'self_monitoring_project_exists' =>
+        Gitlab::CurrentSettings.self_monitoring_project.present?.to_s,
+
+      'self_monitoring_project_full_path' =>
+        Gitlab::CurrentSettings.self_monitoring_project&.full_path
+    }
+  end
 end
 
-ApplicationSettingsHelper.prepend_if_ee('EE::ApplicationSettingsHelper') # rubocop: disable Cop/InjectEnterpriseEditionModule
+ApplicationSettingsHelper.prepend_if_ee('EE::ApplicationSettingsHelper')
 
 # The methods in `EE::ApplicationSettingsHelper` should be available as both
 # instance and class methods.

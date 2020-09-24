@@ -2,13 +2,15 @@
 
 require 'spec_helper'
 
-describe Gitlab::QuickActions::SubstitutionDefinition do
+RSpec.describe Gitlab::QuickActions::SubstitutionDefinition do
   let(:content) do
     <<EOF
 Hello! Let's do this!
 /sub_name I like this stuff
+/sub_name second substitution
 EOF
   end
+
   subject do
     described_class.new(:sub_name, action_block: proc { |text| "#{text} foo" })
   end
@@ -18,27 +20,30 @@ EOF
       expect(subject.perform_substitution(self, nil)).to be_nil
     end
 
-    it 'performs the substitution by default' do
-      expect(subject.perform_substitution(self, content)).to eq <<EOF
+    context 'when content contains command name' do
+      it 'performs the substitution by default' do
+        expect(subject.perform_substitution(self, content)).to eq <<EOF
 Hello! Let's do this!
 I like this stuff foo
+/sub_name second substitution
 EOF
-    end
-  end
-
-  describe '#match' do
-    it 'checks the content for the command' do
-      expect(subject.match(content)).to be_truthy
+      end
     end
 
-    it 'returns the match data' do
-      data = subject.match(content)
-      expect(data).to be_a(MatchData)
-      expect(data[1]).to eq('I like this stuff')
-    end
+    context 'when content contains command name in word' do
+      let(:content) do
+        <<EOF
+Hello! Let's do this!
+`/sub_names` I like this stuff
+EOF
+      end
 
-    it 'is nil if content does not have the command' do
-      expect(subject.match('blah')).to be_falsey
+      it 'does not perform the substitution' do
+        expect(subject.perform_substitution(self, content)).to eq <<EOF
+Hello! Let's do this!
+`/sub_names` I like this stuff
+EOF
+      end
     end
   end
 end

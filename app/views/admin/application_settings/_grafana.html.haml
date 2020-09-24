@@ -1,10 +1,10 @@
-= form_for @application_setting, url: admin_application_settings_path(anchor: 'js-grafana-settings'), html: { class: 'fieldset-form' } do |f|
+= form_for @application_setting, url: metrics_and_profiling_admin_application_settings_path(anchor: 'js-grafana-settings'), html: { class: 'fieldset-form' } do |f|
   = form_errors(@application_setting)
 
   %fieldset
     %p
       = _("Add a Grafana button in the admin sidebar, monitoring section, to access a variety of statistics on the health and performance of GitLab.")
-      = link_to icon('question-circle'), help_page_path('administration/monitoring/performance/grafana_configuration.md')
+      = link_to sprite_icon('question-o'), help_page_path('administration/monitoring/performance/grafana_configuration.md')
     .form-group
       .form-check
         = f.check_box :grafana_enabled, class: 'form-check-input'

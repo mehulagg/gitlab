@@ -17,7 +17,7 @@ module QA
             element :allowed_to_merge_dropdown
           end
 
-          view 'app/views/projects/protected_branches/_update_protected_branch.html.haml' do
+          view 'app/views/shared/projects/protected_branches/_update_protected_branch.html.haml' do
             element :allowed_to_merge
           end
 
@@ -46,7 +46,8 @@ module QA
           end
 
           def protect_branch
-            click_element :protect_button
+            click_element(:protect_button, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
+            wait_for_requests
           end
 
           private
@@ -58,10 +59,9 @@ module QA
 
             within_element(:"allowed_to_#{action}_dropdown") do
               click_on allowed[:roles]
+              allowed[:users].each { |user| click_on user.username } if allowed.key?(:users)
+              allowed[:groups].each { |group| click_on group.name } if allowed.key?(:groups)
             end
-
-            # Click the select element again to close the dropdown
-            click_element :protected_branch_select
           end
         end
       end

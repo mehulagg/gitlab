@@ -3,17 +3,17 @@ namespace :geo do
     namespace :housekeeping do
       using ProgressBar::Refinements::Enumerator
 
-      desc "GitLab | Git | Housekeeping | Garbage Collection"
+      desc "GitLab | Geo | Git | Housekeeping | Garbage Collection"
       task gc: :gitlab_environment do
         flag_for_housekeeping(Gitlab::CurrentSettings.housekeeping_gc_period)
       end
 
-      desc "GitLab | Git | Housekeeping | Full Repack"
+      desc "GitLab | Geo | Git | Housekeeping | Full Repack"
       task full_repack: :gitlab_environment do
         flag_for_housekeeping(Gitlab::CurrentSettings.housekeeping_full_repack_period)
       end
 
-      desc "GitLab | Git | Housekeeping | Incremental Repack"
+      desc "GitLab | Geo | Git | Housekeeping | Incremental Repack"
       task incremental_repack: :gitlab_environment do
         flag_for_housekeeping(Gitlab::CurrentSettings.housekeeping_incremental_repack_period)
       end

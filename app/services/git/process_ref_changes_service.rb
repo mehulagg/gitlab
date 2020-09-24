@@ -35,13 +35,14 @@ module Git
     end
 
     def execute_project_hooks?(changes)
-      (changes.size <= Gitlab::CurrentSettings.push_event_hooks_limit) || Feature.enabled?(:git_push_execute_all_project_hooks, project)
+      changes.size <= Gitlab::CurrentSettings.push_event_hooks_limit
     end
 
     def process_changes(ref_type, action, changes, execute_project_hooks:)
       push_service_class = push_service_class_for(ref_type)
 
       create_bulk_push_event = changes.size > Gitlab::CurrentSettings.push_event_activities_limit
+      merge_request_branches = merge_request_branches_for(ref_type, changes)
 
       changes.each do |change|
         push_service_class.new(
@@ -49,6 +50,7 @@ module Git
           current_user,
           change: change,
           push_options: params[:push_options],
+          merge_request_branches: merge_request_branches,
           create_pipelines: change[:index] < PIPELINE_PROCESS_LIMIT || Feature.enabled?(:git_push_create_all_pipelines, project),
           execute_project_hooks: execute_project_hooks,
           create_push_event: !create_bulk_push_event
@@ -70,6 +72,12 @@ module Git
       return Git::TagPushService if ref_type == :tag
 
       Git::BranchPushService
+    end
+
+    def merge_request_branches_for(ref_type, changes)
+      return [] if ref_type == :tag
+
+      MergeRequests::PushedBranchesService.new(project, current_user, changes: changes).execute
     end
   end
 end

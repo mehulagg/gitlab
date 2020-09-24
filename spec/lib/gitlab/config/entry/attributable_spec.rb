@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Config::Entry::Attributable do
+RSpec.describe Gitlab::Config::Entry::Attributable do
   let(:node) do
     Class.new do
       include Gitlab::Config::Entry::Attributable
@@ -59,7 +59,7 @@ describe Gitlab::Config::Entry::Attributable do
         end
       end
 
-      expectation.to raise_error(ArgumentError, 'Method already defined!')
+      expectation.to raise_error(ArgumentError, /Method 'length' already defined in/)
     end
   end
 end

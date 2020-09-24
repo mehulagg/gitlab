@@ -13,6 +13,14 @@ module Projects
 
       ensure_wiki_exists if enabling_wiki?
 
+      if changing_repository_storage?
+        storage_move = project.repository_storage_moves.build(
+          source_storage_name: project.repository_storage,
+          destination_storage_name: params.delete(:repository_storage)
+        )
+        storage_move.schedule
+      end
+
       yield if block_given?
 
       validate_classification_label(project, :external_authorization_classification_label)
@@ -65,7 +73,7 @@ module Projects
       )
       project_changed_feature_keys = project.project_feature.previous_changes.keys
 
-      if project.previous_changes.include?(:visibility_level) && project.private?
+      if project.visibility_level_previous_changes && project.private?
         # don't enqueue immediately to prevent todos removal in case of a mistake
         TodosDestroyer::ConfidentialIssueWorker.perform_in(Todo::WAIT_FOR_DELETE, nil, project.id)
         TodosDestroyer::ProjectPrivateWorker.perform_in(Todo::WAIT_FOR_DELETE, project.id)
@@ -77,6 +85,11 @@ module Projects
         after_rename_service(project).execute
       else
         system_hook_service.execute_hooks_for(project, :update)
+      end
+
+      if project.visibility_level_decreased? && project.unlink_forks_upon_visibility_decrease_enabled?
+        # It's a system-bounded operation, so no extra authorization check is required.
+        Projects::UnlinkForkService.new(project, current_user).execute
       end
 
       update_pages_config if changing_pages_related_config?
@@ -123,17 +136,27 @@ module Projects
 
     def ensure_wiki_exists
       ProjectWiki.new(project, project.owner).wiki
-    rescue ProjectWiki::CouldNotCreateWikiError
+    rescue Wiki::CouldNotCreateWikiError
       log_error("Could not create wiki for #{project.full_name}")
       Gitlab::Metrics.counter(:wiki_can_not_be_created_total, 'Counts the times we failed to create a wiki').increment
     end
 
     def update_pages_config
-      Projects::UpdatePagesConfigurationService.new(project).execute
+      return unless project.pages_deployed?
+
+      PagesUpdateConfigurationWorker.perform_async(project.id)
     end
 
     def changing_pages_https_only?
       project.previous_changes.include?(:pages_https_only)
+    end
+
+    def changing_repository_storage?
+      new_repository_storage = params[:repository_storage]
+
+      new_repository_storage && project.repository.exists? &&
+        project.repository_storage != new_repository_storage &&
+        can?(current_user, :change_repository_storage, project)
     end
   end
 end

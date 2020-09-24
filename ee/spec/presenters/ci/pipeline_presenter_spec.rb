@@ -2,15 +2,13 @@
 
 require 'spec_helper'
 
-describe Ci::PipelinePresenter do
-  set(:project) { create(:project) }
-  set(:pipeline) { create(:ci_pipeline, project: project) }
+RSpec.describe Ci::PipelinePresenter do
+  let_it_be(:project, reload: true) { create(:project) }
+  let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, project: project) }
 
-  subject(:presenter) do
-    described_class.new(pipeline)
-  end
+  let(:presenter) { described_class.new(pipeline) }
 
-  context '#failure_reason' do
+  describe '#failure_reason' do
     context 'when pipeline has failure reason' do
       it 'represents a failure reason sentence' do
         pipeline.failure_reason = :activity_limit_exceeded
@@ -23,6 +21,170 @@ describe Ci::PipelinePresenter do
     context 'when pipeline does not have failure reason' do
       it 'returns nil' do
         expect(presenter.failure_reason).to be_nil
+      end
+    end
+  end
+
+  describe '#expose_security_dashboard?' do
+    subject { presenter.expose_security_dashboard? }
+
+    let(:current_user) { create(:user) }
+
+    before do
+      allow(presenter).to receive(:current_user) { current_user }
+    end
+
+    context 'with developer' do
+      before do
+        project.add_developer(current_user)
+      end
+
+      context 'when features are available' do
+        before do
+          stub_licensed_features(dependency_scanning: true, license_scanning: true, security_dashboard: true)
+        end
+
+        context 'when there is an artifact of a right type' do
+          let!(:build) { create(:ee_ci_build, :dependency_scanning, pipeline: pipeline) }
+
+          it { is_expected.to be_truthy }
+        end
+
+        context 'when there is an artifact of a wrong type' do
+          let!(:build) { create(:ee_ci_build, :license_scanning, pipeline: pipeline) }
+
+          it { is_expected.to be_falsey }
+        end
+
+        context 'when there is no found artifact' do
+          let!(:build) { create(:ee_ci_build, pipeline: pipeline) }
+
+          it { is_expected.to be_falsey }
+        end
+      end
+
+      context 'when features are disabled' do
+        context 'when there is an artifact of a right type' do
+          let!(:build) { create(:ee_ci_build, :dependency_scanning, pipeline: pipeline) }
+
+          it { is_expected.to be_falsey }
+        end
+      end
+    end
+
+    context 'with reporter' do
+      let!(:build) { create(:ee_ci_build, :dependency_scanning, pipeline: pipeline) }
+
+      before do
+        project.add_reporter(current_user)
+        stub_licensed_features(dependency_scanning: true, license_scanning: true, security_dashboard: true)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#downloadable_path_for_report_type' do
+    let(:current_user) { create(:user) }
+
+    before do
+      allow(presenter).to receive(:current_user) { current_user }
+    end
+
+    shared_examples '#downloadable_path_for_report_type' do |file_type, license|
+      context 'when feature is available' do
+        before do
+          stub_licensed_features("#{license}": true)
+          project.add_reporter(current_user)
+        end
+
+        it 'returns the downloadable path' do
+          expect(presenter.downloadable_path_for_report_type(file_type)).to include(
+            "#{project.full_path}/-/jobs/#{pipeline.builds.last.id}/artifacts/download?file_type=#{pipeline.builds.last.job_artifacts.last.file_type}")
+        end
+      end
+
+      context 'when feature is not available' do
+        before do
+          stub_licensed_features("#{license}": false)
+          project.add_reporter(current_user)
+        end
+
+        it 'doesn\'t return the downloadable path' do
+          expect(presenter.downloadable_path_for_report_type(file_type)).to eq(nil)
+        end
+      end
+
+      context 'when user is not authorized' do
+        before do
+          stub_licensed_features("#{license}": true)
+          project.add_guest(current_user)
+        end
+
+        it 'doesn\'t return the downloadable path' do
+          expect(presenter.downloadable_path_for_report_type(file_type)).to eq(nil)
+        end
+      end
+    end
+
+    context 'with browser_performance artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
+
+      include_examples '#downloadable_path_for_report_type', :browser_performance, :merge_request_performance_metrics
+    end
+
+    context 'with load_performance artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_load_performance_report, project: project) }
+
+      include_examples '#downloadable_path_for_report_type', :load_performance, :merge_request_performance_metrics
+    end
+
+    context 'with license_scanning artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
+
+      include_examples '#downloadable_path_for_report_type', :license_scanning, :license_scanning
+    end
+  end
+
+  describe '#degradation_threshold' do
+    let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
+    let(:current_user) { create(:user) }
+
+    before do
+      allow(presenter).to receive(:current_user) { current_user }
+      allow_any_instance_of(Ci::Build).to receive(:degradation_threshold).and_return(1)
+    end
+
+    context 'when feature is available' do
+      before do
+        project.add_reporter(current_user)
+        stub_licensed_features(merge_request_performance_metrics: true)
+      end
+
+      it 'returns the degradation threshold' do
+        expect(presenter.degradation_threshold(:browser_performance)).to eq(1)
+      end
+    end
+
+    context 'when feature is not available' do
+      before do
+        project.add_reporter(current_user)
+        stub_licensed_features(merge_request_performance_metrics: false)
+      end
+
+      it 'doesn\'t return the degradation threshold' do
+        expect(presenter.degradation_threshold(:browser_performance)).to eq(nil)
+      end
+    end
+
+    context 'when user is not authorized' do
+      before do
+        project.add_guest(current_user)
+        stub_licensed_features(merge_request_performance_metrics: true)
+      end
+
+      it 'doesn\'t return the degradation threshold' do
+        expect(presenter.degradation_threshold(:browser_performance)).to eq(nil)
       end
     end
   end

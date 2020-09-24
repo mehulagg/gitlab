@@ -2,31 +2,43 @@
 
 module Projects
   class UnlinkForkService < BaseService
-    # rubocop: disable CodeReuse/ActiveRecord
+    # Close existing MRs coming from the project and remove it from the fork network
     def execute
-      return unless @project.forked?
+      fork_network = @project.fork_network
+      forked_from = @project.forked_from_project
 
-      if fork_source = @project.fork_source
-        fork_source.lfs_objects.find_each do |lfs_object|
-          lfs_object.projects << @project unless lfs_object.projects.include?(@project)
-        end
+      return unless fork_network
 
-        refresh_forks_count(fork_source)
-      end
-
-      merge_requests = @project.fork_network
+      merge_requests = fork_network
                          .merge_requests
                          .opened
-                         .where.not(target_project: @project)
-                         .from_project(@project)
+                         .from_and_to_forks(@project)
 
-      merge_requests.each do |mr|
+      merge_requests.find_each do |mr|
         ::MergeRequests::CloseService.new(@project, @current_user).execute(mr)
       end
 
-      @project.fork_network_member.destroy
+      Project.transaction do
+        # Get out of the fork network as a member and
+        # remove references from all its direct forks.
+        @project.fork_network_member.destroy
+        @project.forked_to_members.update_all(forked_from_project_id: nil)
+
+        # The project is not necessarily a fork, so update the fork network originating
+        # from this project
+        if fork_network = @project.root_of_fork_network
+          fork_network.update(root_project: nil, deleted_root_project_name: @project.full_name)
+        end
+      end
+
+      # When the project getting out of the network is a node with parent
+      # and children, both the parent and the node needs a cache refresh.
+      [forked_from, @project].compact.each do |project|
+        refresh_forks_count(project)
+      end
     end
-    # rubocop: enable CodeReuse/ActiveRecord
+
+    private
 
     def refresh_forks_count(project)
       Projects::ForksCountService.new(project).refresh_cache

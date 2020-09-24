@@ -2,14 +2,15 @@
 
 require 'spec_helper'
 
-describe SystemNoteService do
+RSpec.describe SystemNoteService do
   include Gitlab::Routing
   include RepoHelpers
   include AssetsHelpers
+  include DesignManagementTestHelpers
 
-  set(:group)    { create(:group) }
-  set(:project)  { create(:project, :repository, group: group) }
-  set(:author)   { create(:user) }
+  let_it_be(:group)    { create(:group) }
+  let_it_be(:project)  { create(:project, :repository, group: group) }
+  let_it_be(:author)   { create(:user) }
   let(:noteable) { create(:issue, project: project) }
   let(:issue)    { noteable }
 
@@ -63,41 +64,71 @@ describe SystemNoteService do
     end
   end
 
-  describe '.change_milestone' do
-    let(:milestone) { double }
+  describe '.change_issuable_reviewers' do
+    let(:reviewers) { [double, double] }
 
     it 'calls IssuableService' do
       expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
-        expect(service).to receive(:change_milestone).with(milestone)
+        expect(service).to receive(:change_issuable_reviewers).with(reviewers)
       end
 
-      described_class.change_milestone(noteable, project, author, milestone)
+      described_class.change_issuable_reviewers(noteable, project, author, reviewers)
+    end
+  end
+
+  describe '.close_after_error_tracking_resolve' do
+    it 'calls IssuableService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:close_after_error_tracking_resolve)
+      end
+
+      described_class.close_after_error_tracking_resolve(noteable, project, author)
+    end
+  end
+
+  describe '.relate_issue' do
+    let(:noteable_ref) { double }
+    let(:noteable) { double }
+
+    before do
+      allow(noteable).to receive(:project).and_return(double)
+    end
+
+    it 'calls IssuableService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:relate_issue).with(noteable_ref)
+      end
+
+      described_class.relate_issue(noteable, noteable_ref, double)
+    end
+  end
+
+  describe '.unrelate_issue' do
+    let(:noteable_ref) { double }
+    let(:noteable) { double }
+
+    before do
+      allow(noteable).to receive(:project).and_return(double)
+    end
+
+    it 'calls IssuableService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:unrelate_issue).with(noteable_ref)
+      end
+
+      described_class.unrelate_issue(noteable, noteable_ref, double)
     end
   end
 
   describe '.change_due_date' do
-    subject { described_class.change_due_date(noteable, project, author, due_date) }
+    let(:due_date) { double }
 
-    let(:due_date) { Date.today }
-
-    it_behaves_like 'a note with overridable created_at'
-
-    it_behaves_like 'a system note' do
-      let(:action) { 'due_date' }
-    end
-
-    context 'when due date added' do
-      it 'sets the note text' do
-        expect(subject.note).to eq "changed due date to #{Date.today.to_s(:long)}"
+    it 'calls TimeTrackingService' do
+      expect_next_instance_of(::SystemNotes::TimeTrackingService) do |service|
+        expect(service).to receive(:change_due_date).with(due_date)
       end
-    end
 
-    context 'when due date removed' do
-      let(:due_date) { nil }
-
-      it 'sets the note text' do
-        expect(subject.note).to eq 'removed due date'
-      end
+      described_class.change_due_date(noteable, project, author, due_date)
     end
   end
 
@@ -316,6 +347,7 @@ describe SystemNoteService do
     let(:success_message) { "SUCCESS: Successfully posted to http://jira.example.net." }
 
     before do
+      stub_jira_service_test
       stub_jira_urls(jira_issue.id)
       jira_service_settings
     end
@@ -326,9 +358,9 @@ describe SystemNoteService do
       links = []
       if link_exists
         url = if type == 'commit'
-                "#{Settings.gitlab.base_url}/#{project.namespace.path}/#{project.path}/commit/#{commit.id}"
+                "#{Settings.gitlab.base_url}/#{project.namespace.path}/#{project.path}/-/commit/#{commit.id}"
               else
-                "#{Settings.gitlab.base_url}/#{project.namespace.path}/#{project.path}/merge_requests/#{merge_request.iid}"
+                "#{Settings.gitlab.base_url}/#{project.namespace.path}/#{project.path}/-/merge_requests/#{merge_request.iid}"
               end
 
         link = double(object: { 'url' => url })
@@ -348,7 +380,7 @@ describe SystemNoteService do
         it "blocks cross reference when #{type.underscore}_events is false" do
           jira_tracker.update("#{type}_events" => false)
 
-          expect(cross_reference(type)).to eq("Events for #{type.pluralize.humanize.downcase} are disabled.")
+          expect(cross_reference(type)).to eq(s_('JiraService|Events for %{noteable_model_name} are disabled.') % { noteable_model_name: type.pluralize.humanize.downcase })
         end
 
         it "creates cross reference when #{type.underscore}_events is true" do
@@ -466,8 +498,11 @@ describe SystemNoteService do
     describe "existing reference" do
       before do
         allow(JIRA::Resource::Remotelink).to receive(:all).and_return([])
-        message = "[#{author.name}|http://localhost/#{author.username}] mentioned this issue in [a commit of #{project.full_path}|http://localhost/#{project.full_path}/commit/#{commit.id}]:\n'#{commit.title.chomp}'"
-        allow_any_instance_of(JIRA::Resource::Issue).to receive(:comments).and_return([OpenStruct.new(body: message)])
+        message = double('message')
+        allow(message).to receive(:include?) { true }
+        allow_next_instance_of(JIRA::Resource::Issue) do |instance|
+          allow(instance).to receive(:comments).and_return([OpenStruct.new(body: message)])
+        end
       end
 
       it "does not return success message" do
@@ -486,36 +521,12 @@ describe SystemNoteService do
   end
 
   describe '.change_time_estimate' do
-    subject { described_class.change_time_estimate(noteable, project, author) }
-
-    it_behaves_like 'a system note' do
-      let(:action) { 'time_tracking' }
-    end
-
-    context 'with a time estimate' do
-      it 'sets the note text' do
-        noteable.update_attribute(:time_estimate, 277200)
-
-        expect(subject.note).to eq "changed time estimate to 1w 4d 5h"
+    it 'calls TimeTrackingService' do
+      expect_next_instance_of(::SystemNotes::TimeTrackingService) do |service|
+        expect(service).to receive(:change_time_estimate)
       end
 
-      context 'when time_tracking_limit_to_hours setting is true' do
-        before do
-          stub_application_setting(time_tracking_limit_to_hours: true)
-        end
-
-        it 'sets the note text' do
-          noteable.update_attribute(:time_estimate, 277200)
-
-          expect(subject.note).to eq "changed time estimate to 77h"
-        end
-      end
-    end
-
-    context 'without a time estimate' do
-      it 'sets the note text' do
-        expect(subject.note).to eq "removed time estimate"
-      end
+      described_class.change_time_estimate(noteable, project, author)
     end
   end
 
@@ -546,61 +557,12 @@ describe SystemNoteService do
   end
 
   describe '.change_time_spent' do
-    # We need a custom noteable in order to the shared examples to be green.
-    let(:noteable) do
-      mr = create(:merge_request, source_project: project)
-      mr.spend_time(duration: 360000, user_id: author.id)
-      mr.save!
-      mr
-    end
+    it 'calls TimeTrackingService' do
+      expect_next_instance_of(::SystemNotes::TimeTrackingService) do |service|
+        expect(service).to receive(:change_time_spent)
+      end
 
-    subject do
       described_class.change_time_spent(noteable, project, author)
-    end
-
-    it_behaves_like 'a system note' do
-      let(:action) { 'time_tracking' }
-    end
-
-    context 'when time was added' do
-      it 'sets the note text' do
-        spend_time!(277200)
-
-        expect(subject.note).to eq "added 1w 4d 5h of time spent"
-      end
-    end
-
-    context 'when time was subtracted' do
-      it 'sets the note text' do
-        spend_time!(-277200)
-
-        expect(subject.note).to eq "subtracted 1w 4d 5h of time spent"
-      end
-    end
-
-    context 'when time was removed' do
-      it 'sets the note text' do
-        spend_time!(:reset)
-
-        expect(subject.note).to eq "removed time spent"
-      end
-    end
-
-    context 'when time_tracking_limit_to_hours setting is true' do
-      before do
-        stub_application_setting(time_tracking_limit_to_hours: true)
-      end
-
-      it 'sets the note text' do
-        spend_time!(277200)
-
-        expect(subject.note).to eq "added 77h of time spent"
-      end
-    end
-
-    def spend_time!(seconds)
-      noteable.spend_time(duration: seconds, user_id: author.id)
-      noteable.save!
     end
   end
 
@@ -698,6 +660,109 @@ describe SystemNoteService do
       end
 
       described_class.discussion_lock(issuable, double)
+    end
+  end
+
+  describe '.auto_resolve_prometheus_alert' do
+    it 'calls IssuableService' do
+      expect_next_instance_of(::SystemNotes::IssuablesService) do |service|
+        expect(service).to receive(:auto_resolve_prometheus_alert)
+      end
+
+      described_class.auto_resolve_prometheus_alert(noteable, project, author)
+    end
+  end
+
+  describe '.design_version_added' do
+    let(:version) { create(:design_version) }
+
+    it 'calls DesignManagementService' do
+      expect_next_instance_of(SystemNotes::DesignManagementService) do |service|
+        expect(service).to receive(:design_version_added).with(version)
+      end
+
+      described_class.design_version_added(version)
+    end
+  end
+
+  describe '.design_discussion_added' do
+    let(:discussion_note) { create(:diff_note_on_design) }
+
+    it 'calls DesignManagementService' do
+      expect_next_instance_of(SystemNotes::DesignManagementService) do |service|
+        expect(service).to receive(:design_discussion_added).with(discussion_note)
+      end
+
+      described_class.design_discussion_added(discussion_note)
+    end
+  end
+
+  describe '.approve_mr' do
+    it 'calls MergeRequestsService' do
+      expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
+        expect(service).to receive(:approve_mr)
+      end
+
+      described_class.approve_mr(noteable, author)
+    end
+  end
+
+  describe '.unapprove_mr' do
+    it 'calls MergeRequestsService' do
+      expect_next_instance_of(::SystemNotes::MergeRequestsService) do |service|
+        expect(service).to receive(:unapprove_mr)
+      end
+
+      described_class.unapprove_mr(noteable, author)
+    end
+  end
+
+  describe '.change_alert_status' do
+    let(:alert) { build(:alert_management_alert) }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:change_alert_status).with(alert)
+      end
+
+      described_class.change_alert_status(alert, author)
+    end
+  end
+
+  describe '.new_alert_issue' do
+    let(:alert) { build(:alert_management_alert, :with_issue) }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:new_alert_issue).with(alert.issue)
+      end
+
+      described_class.new_alert_issue(alert, alert.issue, author)
+    end
+  end
+
+  describe '.create_new_alert' do
+    let(:alert) { build(:alert_management_alert) }
+    let(:monitoring_tool) { 'Prometheus' }
+
+    it 'calls AlertManagementService' do
+      expect_next_instance_of(SystemNotes::AlertManagementService) do |service|
+        expect(service).to receive(:create_new_alert).with(monitoring_tool)
+      end
+
+      described_class.create_new_alert(alert, monitoring_tool)
+    end
+  end
+
+  describe '.change_incident_severity' do
+    let(:incident) { build(:incident) }
+
+    it 'calls IncidentService' do
+      expect_next_instance_of(SystemNotes::IncidentService) do |service|
+        expect(service).to receive(:change_incident_severity)
+      end
+
+      described_class.change_incident_severity(incident, author)
     end
   end
 end

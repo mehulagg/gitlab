@@ -1,17 +1,21 @@
-/* eslint-disable func-names, no-var, consistent-return, one-var, no-cond-assign, no-return-assign */
+/* eslint-disable func-names, consistent-return, no-return-assign */
 
 import $ from 'jquery';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
+import { sanitize } from '~/lib/dompurify';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
-import sanitize from 'sanitize-html';
 
 // highlight text(awefwbwgtc -> <b>a</b>wefw<b>b</b>wgt<b>c</b> )
 const highlighter = function(element, text, matches) {
-  var j, lastIndex, len, matchIndex, matchedChars, unmatched;
-  lastIndex = 0;
-  matchedChars = [];
+  let j = 0;
+  let len = 0;
+  let lastIndex = 0;
+  let matchedChars = [];
+  let matchIndex = matches[j];
+  let unmatched = text.substring(lastIndex, matchIndex);
   for (j = 0, len = matches.length; j < len; j += 1) {
     matchIndex = matches[j];
     unmatched = text.substring(lastIndex, matchIndex);
@@ -51,32 +55,26 @@ export default class ProjectFindFile {
 
   initEvent() {
     this.inputElement.off('keyup');
-    this.inputElement.on(
-      'keyup',
-      (function(_this) {
-        return function(event) {
-          var oldValue, ref, target, value;
-          target = $(event.target);
-          value = target.val();
-          oldValue = (ref = target.data('oldValue')) != null ? ref : '';
-          if (value !== oldValue) {
-            target.data('oldValue', value);
-            _this.findFile();
-            return _this.element
-              .find('tr.tree-item')
-              .eq(0)
-              .addClass('selected')
-              .focus();
-          }
-        };
-      })(this),
-    );
+    this.inputElement.on('keyup', event => {
+      const target = $(event.target);
+      const value = target.val();
+      const ref = target.data('oldValue');
+      const oldValue = ref != null ? ref : '';
+      if (value !== oldValue) {
+        target.data('oldValue', value);
+        this.findFile();
+        return this.element
+          .find('tr.tree-item')
+          .eq(0)
+          .addClass('selected')
+          .focus();
+      }
+    });
   }
 
   findFile() {
-    var result, searchText;
-    searchText = sanitize(this.inputElement.val());
-    result =
+    const searchText = sanitize(this.inputElement.val());
+    const result =
       searchText.length > 0 ? fuzzaldrinPlus.filter(this.filePaths, searchText) : this.filePaths;
     return this.renderList(result, searchText);
     // find file
@@ -101,20 +99,21 @@ export default class ProjectFindFile {
 
   // render result
   renderList(filePaths, searchText) {
-    var blobItemUrl, filePath, html, i, len, matches, results;
+    let i = 0;
+    let len = 0;
+    let matches = [];
+    const results = [];
     this.element.find('.tree-table > tbody').empty();
-    results = [];
-
     for (i = 0, len = filePaths.length; i < len; i += 1) {
-      filePath = filePaths[i];
+      const filePath = filePaths[i];
       if (i === 20) {
         break;
       }
       if (searchText) {
         matches = fuzzaldrinPlus.match(filePath, searchText);
       }
-      blobItemUrl = `${this.options.blobUrlTemplate}/${encodeURIComponent(filePath)}`;
-      html = ProjectFindFile.makeHtml(filePath, matches, blobItemUrl);
+      const blobItemUrl = joinPaths(this.options.blobUrlTemplate, escapeFileUrl(filePath));
+      const html = ProjectFindFile.makeHtml(filePath, matches, blobItemUrl);
       results.push(this.element.find('.tree-table > tbody').append(html));
     }
 
@@ -125,8 +124,7 @@ export default class ProjectFindFile {
 
   // make tbody row html
   static makeHtml(filePath, matches, blobItemUrl) {
-    var $tr;
-    $tr = $(
+    const $tr = $(
       "<tr class='tree-item'><td class='tree-item-file-name link-container'><a><i class='fa fa-file-text-o fa-fw'></i><span class='str-truncated'></span></a></td></tr>",
     );
     if (matches) {
@@ -141,9 +139,9 @@ export default class ProjectFindFile {
   }
 
   selectRow(type) {
-    var next, rows, selectedRow;
-    rows = this.element.find('.files-slider tr.tree-item');
-    selectedRow = this.element.find('.files-slider tr.tree-item.selected');
+    const rows = this.element.find('.files-slider tr.tree-item');
+    let selectedRow = this.element.find('.files-slider tr.tree-item.selected');
+    let next = selectedRow.prev();
     if (rows && rows.length > 0) {
       if (selectedRow && selectedRow.length > 0) {
         if (type === 'UP') {
@@ -175,7 +173,7 @@ export default class ProjectFindFile {
   }
 
   goToBlob() {
-    var $link = this.element.find('.tree-item.selected .tree-item-file-name a');
+    const $link = this.element.find('.tree-item.selected .tree-item-file-name a');
 
     if ($link.length) {
       $link.get(0).click();

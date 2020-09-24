@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Atlassian HipChat
 
 GitLab provides a way to send HipChat notifications upon a number of events,
@@ -25,7 +31,7 @@ allow GitLab to send messages only to *one* room.
 1. In the "Send messages to this room by posting this URL" column, you should
    see a URL in the format:
 
-```
+```plaintext
 https://api.hipchat.com/v2/room/<room>/notification?auth_token=<token>
 ```
 
@@ -35,9 +41,9 @@ service in GitLab.
 ### Complete these steps in GitLab
 
 1. Navigate to the project you want to configure for notifications.
-1. Navigate to the [Integrations page](project_services.md#accessing-the-project-services)
+1. Navigate to the [Integrations page](overview.md#accessing-integrations)
 1. Click "HipChat".
-1. Select the "Active" checkbox.
+1. Ensure that the **Active** toggle is enabled.
 1. Insert the `token` field from the URL into the `Token` field on the Web page.
 1. Insert the `room` field from the URL into the `Room` field on the Web page.
 1. Save or optionally click "Test Settings".

@@ -3,7 +3,7 @@ import { __ } from '~/locale';
 export default [
   {
     id: null,
-    title: __('Any Milestone'),
+    title: __('Any milestone'),
   },
   {
     id: -2,

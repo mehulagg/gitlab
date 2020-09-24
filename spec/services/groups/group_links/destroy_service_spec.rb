@@ -2,20 +2,26 @@
 
 require 'spec_helper'
 
-describe Groups::GroupLinks::DestroyService, '#execute' do
+RSpec.describe Groups::GroupLinks::DestroyService, '#execute' do
   let(:user) { create(:user) }
 
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:shared_group) { create(:group, :private) }
   let_it_be(:project) { create(:project, group: shared_group) }
+  let_it_be(:owner) { create(:user) }
 
-  subject { described_class.new(nil, nil) }
+  before do
+    group.add_developer(owner)
+    shared_group.add_owner(owner)
+  end
+
+  subject { described_class.new(shared_group, owner) }
 
   context 'single link' do
     let!(:link) { create(:group_group_link, shared_group: shared_group, shared_with_group: group) }
 
     it 'destroys link' do
-      expect { subject.execute(link) }.to change { GroupGroupLink.count }.from(1).to(0)
+      expect { subject.execute(link) }.to change { shared_group.shared_with_group_links.count }.from(1).to(0)
     end
 
     it 'revokes project authorization' do
@@ -40,24 +46,11 @@ describe Groups::GroupLinks::DestroyService, '#execute' do
     end
 
     it 'updates project authorization once per group' do
-      expect(GroupGroupLink).to receive(:delete)
+      expect(GroupGroupLink).to receive(:delete).and_call_original
       expect(group).to receive(:refresh_members_authorized_projects).once
       expect(another_group).to receive(:refresh_members_authorized_projects).once
 
       subject.execute(links)
-    end
-
-    it 'rolls back changes when error happens' do
-      group.add_developer(user)
-
-      expect(group).to receive(:refresh_members_authorized_projects).once.and_call_original
-      expect(another_group).to(
-        receive(:refresh_members_authorized_projects).and_raise('boom'))
-
-      expect { subject.execute(links) }.to raise_error('boom')
-
-      expect(GroupGroupLink.count).to eq(links.length)
-      expect(Ability.allowed?(user, :read_project, project)).to be_truthy
     end
   end
 end

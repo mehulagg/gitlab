@@ -1,10 +1,8 @@
 import { mount } from '@vue/test-utils';
-import $ from 'jquery';
-import 'bootstrap';
-import '~/gl_dropdown';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
-import Api from '~/api';
 import { TEST_HOST } from 'helpers/test_constants';
+import Api from '~/api';
 
 jest.mock('~/api', () => ({
   groups: jest.fn(),
@@ -28,132 +26,120 @@ const groups = [
 describe('GroupsDropdownFilter component', () => {
   let wrapper;
 
+  const createComponent = (props = {}) => {
+    wrapper = mount(GroupsDropdownFilter, {
+      propsData: {
+        ...props,
+      },
+    });
+  };
+
   afterEach(() => {
     wrapper.destroy();
   });
 
   beforeEach(() => {
-    jest.spyOn($.fn, 'glDropdown');
-    Api.groups.mockImplementation((term, options, callback) => {
-      callback(groups);
-    });
-    wrapper = mount(GroupsDropdownFilter);
+    Api.groups.mockImplementation(() => Promise.resolve(groups));
   });
 
-  const findDropdown = () => wrapper.find('.dropdown');
-  const openDropdown = () => {
-    $(findDropdown().element)
-      .parent()
-      .trigger('shown.bs.dropdown');
-  };
-  const findDropdownItems = () => findDropdown().findAll('a');
-  const findDropdownButton = () => findDropdown().find('button');
+  const findDropdown = () => wrapper.find(GlDropdown);
 
-  it('should call glDropdown', () => {
-    expect($.fn.glDropdown).toHaveBeenCalled();
+  const findDropdownItems = () =>
+    findDropdown()
+      .findAll(GlDropdownItem)
+      .filter(w => w.text() !== 'No matching results');
+
+  const findDropdownAtIndex = index => findDropdownItems().at(index);
+  const findDropdownButton = () => findDropdown().find('.dropdown-toggle');
+  const findDropdownButtonAvatar = () => findDropdown().find('.gl-avatar');
+
+  const shouldContainAvatar = ({ dropdown, hasImage = true, hasIdenticon = true }) => {
+    expect(dropdown.find('img.gl-avatar').exists()).toBe(hasImage);
+    expect(dropdown.find('div.gl-avatar-identicon').exists()).toBe(hasIdenticon);
+  };
+
+  const selectDropdownAtIndex = index =>
+    findDropdownAtIndex(index)
+      .find('button')
+      .trigger('click');
+
+  describe('when passed a defaultGroup as prop', () => {
+    beforeEach(() => {
+      createComponent({
+        defaultGroup: groups[0],
+      });
+    });
+
+    it("displays the defaultGroup's name", () => {
+      expect(findDropdownButton().text()).toContain(groups[0].name);
+    });
+
+    it("renders the defaultGroup's avatar", () => {
+      expect(findDropdownButtonAvatar().exists()).toBe(true);
+    });
   });
 
   describe('it renders the items correctly', () => {
     beforeEach(() => {
-      openDropdown();
-
-      return wrapper.vm.$nextTick();
+      createComponent();
     });
 
     it('should contain 2 items', () => {
-      expect(findDropdownItems().length).toEqual(2);
+      expect(findDropdownItems()).toHaveLength(2);
     });
 
     it('renders an avatar when the group has an avatar_url', () => {
-      expect(
-        findDropdownItems()
-          .at(0)
-          .contains('img.avatar'),
-      ).toBe(true);
-      expect(
-        findDropdownItems()
-          .at(0)
-          .contains('div.identicon'),
-      ).toBe(false);
+      shouldContainAvatar({ dropdown: findDropdownAtIndex(0), hasIdenticon: false });
     });
 
     it("renders an identicon when the group doesn't have an avatar_url", () => {
-      expect(
-        findDropdownItems()
-          .at(1)
-          .contains('img.avatar'),
-      ).toBe(false);
-      expect(
-        findDropdownItems()
-          .at(1)
-          .contains('div.identicon'),
-      ).toBe(true);
+      shouldContainAvatar({ dropdown: findDropdownAtIndex(1), hasImage: false });
     });
 
     it('renders the full group name and highlights the last part', () => {
-      expect(
-        findDropdownItems()
-          .at(1)
-          .find('.js-group-path')
-          .html(),
-      ).toContain('group / <strong>subgroup</strong>');
+      expect(findDropdownAtIndex(1).text()).toContain('group / subgroup');
     });
   });
 
   describe('on group click', () => {
     beforeEach(() => {
-      openDropdown();
-
-      return wrapper.vm.$nextTick();
+      createComponent();
     });
 
     it('should emit the "selected" event with the selected group', () => {
-      findDropdownItems()
-        .at(0)
-        .trigger('click');
+      selectDropdownAtIndex(0);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [groups[0]],
-        },
-      ]);
+      expect(wrapper.emitted().selected).toEqual([[groups[0]]]);
     });
 
     it('should change selection when new group is clicked', () => {
-      findDropdownItems()
-        .at(1)
-        .trigger('click');
+      selectDropdownAtIndex(1);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [groups[1]],
-        },
-      ]);
+      expect(wrapper.emitted().selected).toEqual([[groups[1]]]);
     });
 
-    it('renders an avatar in the dropdown button when the group has an avatar_url', done => {
-      findDropdownItems()
-        .at(0)
-        .trigger('click');
+    it('renders an avatar in the dropdown button when the group has an avatar_url', () => {
+      selectDropdownAtIndex(0);
 
-      wrapper.vm.$nextTick(() => {
-        expect(findDropdownButton().contains('img.gl-avatar')).toBe(true);
-        expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(false);
-        done();
+      return wrapper.vm.$nextTick().then(() => {
+        shouldContainAvatar({ dropdown: findDropdownButton(), hasIdenticon: false });
       });
     });
 
-    it("renders an identicon in the dropdown button when the group doesn't have an avatar_url", done => {
-      findDropdownItems()
-        .at(1)
-        .trigger('click');
+    it("renders an identicon in the dropdown button when the group doesn't have an avatar_url", () => {
+      selectDropdownAtIndex(1);
 
-      wrapper.vm.$nextTick(() => {
-        expect(findDropdownButton().contains('img.gl-avatar')).toBe(false);
-        expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(true);
-        done();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(
+          findDropdownButton()
+            .find('img.gl-avatar')
+            .exists(),
+        ).toBe(false);
+        expect(
+          findDropdownButton()
+            .find('.gl-avatar-identicon')
+            .exists(),
+        ).toBe(true);
       });
     });
   });

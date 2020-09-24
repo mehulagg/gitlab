@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import createStore from 'ee/dependencies/store';
@@ -12,16 +12,12 @@ describe('DependenciesActions component', () => {
   const { namespace } = DEPENDENCY_LIST_TYPES.all;
 
   const factory = ({ propsData, ...options } = {}) => {
-    const localVue = createLocalVue();
-
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation();
 
-    wrapper = shallowMount(localVue.extend(DependenciesActions), {
+    wrapper = shallowMount(DependenciesActions, {
       ...options,
-      localVue,
       store,
-      sync: false,
       propsData: { ...propsData },
     });
   };
@@ -30,7 +26,7 @@ describe('DependenciesActions component', () => {
     factory({
       propsData: { namespace },
     });
-    store.state[namespace].endpoint = `${TEST_HOST}/dependencies`;
+    store.state[namespace].endpoint = `${TEST_HOST}/dependencies.json`;
     return wrapper.vm.$nextTick();
   });
 

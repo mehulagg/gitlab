@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe API::FeatureFlagScopes do
+RSpec.describe API::FeatureFlagScopes do
   include FeatureFlagHelpers
 
   let(:project) { create(:project, :repository) }
@@ -10,8 +10,6 @@ describe API::FeatureFlagScopes do
   let(:user) { developer }
 
   before do
-    stub_licensed_features(feature_flags: true)
-
     project.add_developer(developer)
     project.add_reporter(reporter)
   end
@@ -24,30 +22,6 @@ describe API::FeatureFlagScopes do
         subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-
-    context 'when license is not sufficient' do
-      before do
-        stub_licensed_features(feature_flags: false)
-      end
-
-      it 'forbids the request' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-
-    context 'when feature_flag_api feature flag is disabled' do
-      before do
-        stub_feature_flags(feature_flag_api: false)
-      end
-
-      it 'forbids the request' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -66,13 +40,13 @@ describe API::FeatureFlagScopes do
           params: params
     end
 
-    let(:feature_flag_1) { create_flag(project, 'flag_1', false) }
-    let(:feature_flag_2) { create_flag(project, 'flag_2', false) }
+    let(:feature_flag_1) { create_flag(project, 'flag_1', true) }
+    let(:feature_flag_2) { create_flag(project, 'flag_2', true) }
 
     before do
-      create_scope(feature_flag_1, 'staging', true)
-      create_scope(feature_flag_1, 'production', false)
-      create_scope(feature_flag_2, 'review/*', true)
+      create_scope(feature_flag_1, 'staging', false)
+      create_scope(feature_flag_1, 'production', true)
+      create_scope(feature_flag_2, 'review/*', false)
     end
 
     context 'when environment is production' do
@@ -85,8 +59,8 @@ describe API::FeatureFlagScopes do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to match_response_schema('public_api/v4/feature_flag_detailed_scopes', dir: 'ee')
-        expect(json_response.second).to include({ 'name' => 'flag_1', 'active' => false })
-        expect(json_response.first).to include({ 'name' => 'flag_2', 'active' => false })
+        expect(json_response.second).to include({ 'name' => 'flag_1', 'active' => true })
+        expect(json_response.first).to include({ 'name' => 'flag_2', 'active' => true })
       end
     end
 
@@ -97,8 +71,8 @@ describe API::FeatureFlagScopes do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response.second).to include({ 'name' => 'flag_1', 'active' => true })
-        expect(json_response.first).to include({ 'name' => 'flag_2', 'active' => false })
+        expect(json_response.second).to include({ 'name' => 'flag_1', 'active' => false })
+        expect(json_response.first).to include({ 'name' => 'flag_2', 'active' => true })
       end
     end
 
@@ -109,8 +83,8 @@ describe API::FeatureFlagScopes do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response.second).to include({ 'name' => 'flag_1', 'active' => false })
-        expect(json_response.first).to include({ 'name' => 'flag_2', 'active' => true })
+        expect(json_response.second).to include({ 'name' => 'flag_1', 'active' => true })
+        expect(json_response.first).to include({ 'name' => 'flag_2', 'active' => false })
       end
     end
   end
@@ -170,7 +144,7 @@ describe API::FeatureFlagScopes do
         expect(response).to match_response_schema('public_api/v4/feature_flag_scope', dir: 'ee')
         expect(json_response['environment_scope']).to eq(params[:environment_scope])
         expect(json_response['active']).to eq(params[:active])
-        expect(json_response['strategies']).to eq(JSON.parse(params[:strategies]))
+        expect(json_response['strategies']).to eq(Gitlab::Json.parse(params[:strategies]))
       end
 
       context 'when the scope already exists' do
@@ -270,7 +244,7 @@ describe API::FeatureFlagScopes do
         expect(response).to match_response_schema('public_api/v4/feature_flag_scope', dir: 'ee')
         expect(json_response['id']).to eq(scope.id)
         expect(json_response['active']).to eq(params[:active])
-        expect(json_response['strategies']).to eq(JSON.parse(params[:strategies]))
+        expect(json_response['strategies']).to eq(Gitlab::Json.parse(params[:strategies]))
       end
 
       context 'when there are no corresponding feature flag scopes' do

@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'slack-notifier'
 
 module ChatMessage
   class PipelineMessage < BaseMessage
@@ -35,7 +34,9 @@ module ChatMessage
       @duration = pipeline_attributes[:duration].to_i
       @finished_at = pipeline_attributes[:finished_at] ? Time.parse(pipeline_attributes[:finished_at]).to_i : nil
       @pipeline_id = pipeline_attributes[:id]
-      @failed_jobs = Array(data[:builds]).select { |b| b[:status] == 'failed' }.reverse # Show failed jobs from oldest to newest
+
+      # Get list of jobs that have actually failed (after exhausting all retries)
+      @failed_jobs = actually_failed_jobs(Array(data[:builds]))
       @failed_stages = @failed_jobs.map { |j| j[:stage] }.uniq
 
       @project = Project.find(data[:project][:id])
@@ -50,8 +51,6 @@ module ChatMessage
 
     def attachments
       return message if markdown
-
-      return [{ text: format(message), color: attachment_color }] unless fancy_notifications?
 
       [{
         fallback: format(message),
@@ -91,14 +90,21 @@ module ChatMessage
 
     private
 
-    def fancy_notifications?
-      Feature.enabled?(:fancy_pipeline_slack_notifications, default_enabled: true)
+    def actually_failed_jobs(builds)
+      succeeded_job_names = builds.map { |b| b[:name] if b[:status] == 'success' }.compact.uniq
+
+      failed_jobs = builds.select do |build|
+        # Select jobs which doesn't have a successful retry
+        build[:status] == 'failed' && !succeeded_job_names.include?(build[:name])
+      end
+
+      failed_jobs.uniq { |job| job[:name] }.reverse
     end
 
     def failed_stages_field
       {
         title: s_("ChatMessage|Failed stage").pluralize(failed_stages.length),
-        value: Slack::Notifier::LinkFormatter.format(failed_stages_links),
+        value: Slack::Messenger::Util::LinkFormatter.format(failed_stages_links),
         short: true
       }
     end
@@ -106,7 +112,7 @@ module ChatMessage
     def failed_jobs_field
       {
         title: s_("ChatMessage|Failed job").pluralize(failed_jobs.length),
-        value: Slack::Notifier::LinkFormatter.format(failed_jobs_links),
+        value: Slack::Messenger::Util::LinkFormatter.format(failed_jobs_links),
         short: true
       }
     end
@@ -123,12 +129,12 @@ module ChatMessage
       fields = [
         {
           title: ref_type == "tag" ? s_("ChatMessage|Tag") : s_("ChatMessage|Branch"),
-          value: Slack::Notifier::LinkFormatter.format(ref_link),
+          value: Slack::Messenger::Util::LinkFormatter.format(ref_link),
           short: true
         },
         {
           title: s_("ChatMessage|Commit"),
-          value: Slack::Notifier::LinkFormatter.format(commit_link),
+          value: Slack::Messenger::Util::LinkFormatter.format(commit_link),
           short: true
         }
       ]
@@ -154,42 +160,22 @@ module ChatMessage
     end
 
     def humanized_status
-      if fancy_notifications?
-        case status
-        when 'success'
-          detailed_status == "passed with warnings" ? s_("ChatMessage|has passed with warnings") : s_("ChatMessage|has passed")
-        when 'failed'
-          s_("ChatMessage|has failed")
-        else
-          status
-        end
+      case status
+      when 'success'
+        detailed_status == "passed with warnings" ? s_("ChatMessage|has passed with warnings") : s_("ChatMessage|has passed")
+      when 'failed'
+        s_("ChatMessage|has failed")
       else
-        case status
-        when 'success'
-          s_("ChatMessage|passed")
-        when 'failed'
-          s_("ChatMessage|failed")
-        else
-          status
-        end
+        status
       end
     end
 
     def attachment_color
-      if fancy_notifications?
-        case status
-        when 'success'
-          detailed_status == 'passed with warnings' ? 'warning' : 'good'
-        else
-          'danger'
-        end
+      case status
+      when 'success'
+        detailed_status == 'passed with warnings' ? 'warning' : 'good'
       else
-        case status
-        when 'success'
-          'good'
-        else
-          'danger'
-        end
+        'danger'
       end
     end
 
@@ -197,7 +183,7 @@ module ChatMessage
       if ref_type == 'tag'
         "#{project_url}/-/tags/#{ref}"
       else
-        "#{project_url}/commits/#{ref}"
+        "#{project_url}/-/commits/#{ref}"
       end
     end
 
@@ -214,14 +200,14 @@ module ChatMessage
     end
 
     def pipeline_failed_jobs_url
-      "#{project_url}/pipelines/#{pipeline_id}/failures"
+      "#{project_url}/-/pipelines/#{pipeline_id}/failures"
     end
 
     def pipeline_url
-      if fancy_notifications? && failed_jobs.any?
+      if failed_jobs.any?
         pipeline_failed_jobs_url
       else
-        "#{project_url}/pipelines/#{pipeline_id}"
+        "#{project_url}/-/pipelines/#{pipeline_id}"
       end
     end
 

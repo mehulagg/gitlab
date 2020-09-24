@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Geo::ContainerRepositorySyncService, :geo do
+RSpec.describe Geo::ContainerRepositorySyncService, :geo do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
-  set(:secondary) { create(:geo_node) }
+  let_it_be(:secondary) { create(:geo_node) }
 
   let(:registry) { create(:container_repository_registry, :sync_started) }
   let(:container_repository) { registry.container_repository }

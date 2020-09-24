@@ -5,11 +5,13 @@ class Groups::SsoController < Groups::ApplicationController
   skip_before_action :group
 
   before_action :authenticate_user!, only: [:unlink]
-  before_action :require_configured_provider!
+  before_action :require_group_saml_instance!
+  before_action :require_licensed_group!, except: [:unlink]
+  before_action :require_saml_provider!
   before_action :require_enabled_provider!, except: [:unlink]
   before_action :check_user_can_sign_in_with_provider, only: [:saml]
   before_action :redirect_if_group_moved
-  before_action :check_oauth_data, only: [:sign_up_form, :sign_up]
+  before_action :check_oauth_data, only: [:sign_up_form, :sign_up, :authorize_managed_account]
 
   layout 'devise'
 
@@ -43,6 +45,20 @@ class Groups::SsoController < Groups::ApplicationController
       sign_out
       flash[:notice] = _('Sign up was successful! Please confirm your email to sign in.')
       redirect_to_sign_in
+    else
+      render_sign_up_form
+    end
+  end
+
+  def authorize_managed_account
+    transfer_membership_service = GroupSaml::GroupManagedAccounts::TransferMembershipService.new(current_user, unauthenticated_group, session)
+
+    if transfer_membership_service.execute
+      session['oauth_data'] = nil
+      flash[:notice] = nil
+      store_active_saml_session
+
+      redirect_to group_url(unauthenticated_group)
     else
       render_sign_up_form
     end
@@ -94,20 +110,24 @@ class Groups::SsoController < Groups::ApplicationController
     @unauthenticated_group ||= Group.find_by_full_path(params[:group_id], follow_redirects: true)
   end
 
-  def require_configured_provider!
-    unless unauthenticated_group&.feature_available?(:group_saml) && Gitlab::Auth::GroupSaml::Config.enabled?
-      return route_not_found
-    end
+  def store_active_saml_session
+    Gitlab::Auth::GroupSaml::SsoEnforcer.new(unauthenticated_group.saml_provider).update_session
+  end
 
-    return if unauthenticated_group.saml_provider
+  def require_group_saml_instance!
+    route_not_found unless Gitlab::Auth::GroupSaml::Config.enabled?
+  end
 
-    redirect_settings_or_not_found
+  def require_licensed_group!
+    route_not_found unless unauthenticated_group&.feature_available?(:group_saml)
+  end
+
+  def require_saml_provider!
+    redirect_settings_or_not_found unless unauthenticated_group.saml_provider
   end
 
   def require_enabled_provider!
-    return if unauthenticated_group.saml_provider&.enabled?
-
-    redirect_settings_or_not_found
+    redirect_settings_or_not_found unless unauthenticated_group.saml_provider&.enabled?
   end
 
   def redirect_settings_or_not_found

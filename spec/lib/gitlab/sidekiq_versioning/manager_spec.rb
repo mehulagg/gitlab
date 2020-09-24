@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SidekiqVersioning::Manager do
+RSpec.describe Gitlab::SidekiqVersioning::Manager do
   before do
     Sidekiq::Manager.prepend described_class
   end
@@ -16,7 +16,8 @@ describe Gitlab::SidekiqVersioning::Manager do
       expect(queues).to include('post_receive')
       expect(queues).to include('repository_fork')
       expect(queues).to include('cronjob')
-      expect(queues).to include('cronjob:stuck_import_jobs')
+      expect(queues).to include('cronjob:import_stuck_project_import_jobs')
+      expect(queues).to include('cronjob:jira_import_stuck_jira_import_jobs')
       expect(queues).to include('cronjob:stuck_merge_jobs')
       expect(queues).to include('unknown')
     end

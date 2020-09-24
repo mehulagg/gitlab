@@ -1,8 +1,8 @@
-- page_title 'Edit Slack integration'
+- page_title _('Edit Slack integration')
 
-.row.prepend-top-default.append-bottom-default
+.row.gl-mt-3.gl-mb-3
   .col-lg-3
-    %h4.prepend-top-0
+    %h4.gl-mt-0
       Edit project alias
 
     %p You can use this alias in your Slack commands
@@ -16,8 +16,8 @@
 
       .footer-block.row-content-block
         %button.btn.btn-success{ type: 'submit' }
-          = icon('spinner spin', class: 'hidden js-btn-spinner')
-          %span.js-btn-label
+          .spinner.spinner-light
+          %span
             Save changes
         &nbsp;
         = link_to 'Cancel', edit_project_service_path(@project, @service), class: 'btn btn-cancel'

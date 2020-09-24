@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::ImportsController do
+RSpec.describe Projects::ImportsController do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
 
@@ -14,7 +14,9 @@ describe Projects::ImportsController do
   context 'POST #create' do
     context 'mirror user is not the current user' do
       it 'only assigns the current user' do
-        allow_any_instance_of(EE::Project).to receive(:add_import_job)
+        allow_next_instance_of(EE::Project) do |instance|
+          allow(instance).to receive(:add_import_job)
+        end
 
         new_user = create(:user)
         project.add_maintainer(new_user)

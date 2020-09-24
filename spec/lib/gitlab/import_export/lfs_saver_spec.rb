@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::LfsSaver do
+RSpec.describe Gitlab::ImportExport::LfsSaver do
   let(:shared) { project.import_export_shared }
   let(:export_path) { "#{Dir.tmpdir}/project_tree_saver_spec" }
   let(:project) { create(:project) }
@@ -8,7 +10,9 @@ describe Gitlab::ImportExport::LfsSaver do
   subject(:saver) { described_class.new(project: project, shared: shared) }
 
   before do
-    allow_any_instance_of(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
+    allow_next_instance_of(Gitlab::ImportExport) do |instance|
+      allow(instance).to receive(:storage_path).and_return(export_path)
+    end
     FileUtils.mkdir_p(shared.export_path)
   end
 
@@ -22,7 +26,7 @@ describe Gitlab::ImportExport::LfsSaver do
       let(:lfs_json_file) { File.join(shared.export_path, Gitlab::ImportExport.lfs_objects_filename) }
 
       def lfs_json
-        JSON.parse(IO.read(lfs_json_file))
+        Gitlab::Json.parse(IO.read(lfs_json_file))
       end
 
       before do
@@ -69,14 +73,6 @@ describe Gitlab::ImportExport::LfsSaver do
               ]
             }
           )
-        end
-
-        it 'does not save a json file if feature is disabled' do
-          stub_feature_flags(export_lfs_objects_projects: false)
-
-          saver.save
-
-          expect(File.exist?(lfs_json_file)).to eq(false)
         end
       end
     end

@@ -5,7 +5,7 @@ require 'net/ldap/dn'
 module EE
   module Gitlab
     module Auth
-      module LDAP
+      module Ldap
         module Sync
           class Proxy
             attr_reader :provider, :adapter
@@ -13,7 +13,7 @@ module EE
             # Open a connection and run all queries through it.
             # It's more efficient than the default of opening/closing per LDAP query.
             def self.open(provider, &block)
-              ::Gitlab::Auth::LDAP::Adapter.open(provider) do |adapter|
+              ::Gitlab::Auth::Ldap::Adapter.open(provider) do |adapter|
                 block.call(self.new(provider, adapter))
               end
             end
@@ -43,9 +43,9 @@ module EE
             private
 
             def ldap_group_member_dns(ldap_group_cn)
-              ldap_group = LDAP::Group.find_by_cn(ldap_group_cn, adapter)
+              ldap_group = Ldap::Group.find_by_cn(ldap_group_cn, adapter)
               unless ldap_group.present?
-                logger.warn { "Cannot find LDAP group with CN '#{ldap_group_cn}'. Skipping" }
+                logger.warn "Cannot find LDAP group with CN '#{ldap_group_cn}'. Skipping"
                 return []
               end
 
@@ -64,7 +64,7 @@ module EE
 
               ensure_full_dns!(member_dns)
 
-              logger.debug { "Members in '#{ldap_group.name}' LDAP group: #{member_dns}" }
+              logger.debug "Members in '#{ldap_group.name}' LDAP group: #{member_dns}"
 
               # Various lookups in this method could return `nil` values.
               # Compact the array to remove those entries
@@ -77,10 +77,10 @@ module EE
             def ensure_full_dns!(dns)
               dns.map! do |dn|
                 begin
-                  dn_obj = ::Gitlab::Auth::LDAP::DN.new(dn)
+                  dn_obj = ::Gitlab::Auth::Ldap::DN.new(dn)
                   parsed_dn = dn_obj.to_a
-                rescue ::Gitlab::Auth::LDAP::DN::FormatError => e
-                  logger.error { "Found malformed DN: '#{dn}'. Skipping. Error: \"#{e.message}\"" }
+                rescue ::Gitlab::Auth::Ldap::DN::FormatError => e
+                  logger.error "Found malformed DN: '#{dn}'. Skipping. Error: \"#{e.message}\""
                   next
                 end
 
@@ -90,12 +90,12 @@ module EE
                   if parsed_dn.count > 2
                     dn_obj.to_normalized_s
                   elsif parsed_dn.count == 0
-                    logger.warn { "Found null DN. Skipping." }
+                    logger.warn "Found null DN. Skipping."
                     nil
                   elsif parsed_dn[0] == 'uid'
                     dn_for_uid(parsed_dn[1])
                   else
-                    logger.warn { "Found potentially malformed/incomplete DN: '#{dn}'" }
+                    logger.warn "Found potentially malformed/incomplete DN: '#{dn}'"
                     dn
                   end
 
@@ -124,7 +124,7 @@ module EE
                 # Use the DN on record in GitLab when it's available
                 identity.extern_uid
               else
-                ldap_user = ::Gitlab::Auth::LDAP::Person.find_by_uid(uid, adapter)
+                ldap_user = ::Gitlab::Auth::Ldap::Person.find_by_uid(uid, adapter)
 
                 # Can't find a matching user
                 return unless ldap_user.present?
@@ -150,19 +150,19 @@ module EE
             # rubocop: enable CodeReuse/ActiveRecord
 
             def dn_filter_search(filter)
-              logger.debug { "Running filter \"#{filter}\" against #{provider}" }
+              logger.debug "Running filter \"#{filter}\" against #{provider}"
 
               dns = adapter.filter_search(filter).map(&:dn)
 
               ensure_full_dns!(dns)
 
-              logger.debug { "Found #{dns.count} matching users for filter #{filter}" }
+              logger.debug "Found #{dns.count} matching users for filter #{filter}"
 
               dns
             end
 
             def logger
-              Rails.logger # rubocop:disable Gitlab/RailsLogger
+              ::Gitlab::AppLogger
             end
           end
         end

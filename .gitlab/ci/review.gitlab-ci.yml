@@ -1,187 +1,132 @@
-.review-docker:
+review-cleanup:
   extends:
-    - .default-tags
     - .default-retry
-    - .default-only
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-qa-alpine
-  services:
-    - docker:19.03.0-dind
-  tags:
-    - gitlab-org
-    - docker
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_HOST: tcp://docker:2375
-    GITLAB_EDITION: "ce"
-
-build-qa-image:
-  extends:
-    - .review-docker
-    - .only:variables-canonical-dot-com
-    - .except:refs-deploy
-    - .only:changes-code-qa
+    - .review:rules:review-cleanup
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-helm3-kubectl1.14
   stage: prepare
-  script:
-    - '[[ ! -d "ee/" ]] || export GITLAB_EDITION="ee"'
-    - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab/gitlab-${GITLAB_EDITION}-qa:${CI_COMMIT_REF_SLUG}"
-    - time docker build --cache-from gitlab/gitlab-${GITLAB_EDITION}-qa:nightly --tag ${QA_IMAGE} --file ./qa/Dockerfile ./
-    - echo "${CI_JOB_TOKEN}" | docker login --username gitlab-ci-token --password-stdin ${CI_REGISTRY}
-    - time docker push ${QA_IMAGE}
-
-.base-review-cleanup:
-  extends:
-    - .default-tags
-    - .default-retry
-    - .default-only
-  stage: prepare
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-charts-build-base
-  allow_failure: true
   environment:
     name: review/auto-cleanup
     action: stop
   before_script:
     - source scripts/utils.sh
+    - source scripts/review_apps/gcp_cleanup.sh
     - install_gitlab_gem
+    - setup_gcp_dependencies
   script:
     - ruby -rrubygems scripts/review_apps/automated_cleanup.rb
+    - gcp_cleanup
 
-schedule:review-cleanup:
+review-build-cng:
   extends:
-    - .base-review-cleanup
-    - .only-review-schedules
-
-manual:review-cleanup:
-  extends:
-    - .base-review-cleanup
-    - .only:changes-code-qa
-  when: manual
-
-.review-build-cng-base:
-  extends:
-    - .default-tags
     - .default-retry
-    - .default-only
+    - .review:rules:review-build-cng
   image: ruby:2.6-alpine
   stage: review-prepare
   before_script:
     - source scripts/utils.sh
     - install_api_client_dependencies_with_apk
     - install_gitlab_gem
-  dependencies: []
+  needs:
+    - job: compile-production-assets
+      artifacts: false
   script:
     - BUILD_TRIGGER_TOKEN=$REVIEW_APPS_BUILD_TRIGGER_TOKEN ./scripts/trigger-build cng
-
-review-build-cng:
-  extends:
-    - .review-build-cng-base
-    - .only-review
-    - .only:changes-code-qa
-  needs: ["gitlab:assets:compile pull-cache"]
-
-schedule:review-build-cng:
-  extends:
-    - .review-build-cng-base
-    - .only-review-schedules
-  needs: ["gitlab:assets:compile pull-cache"]
+    # When the job is manual, review-deploy is also manual and we don't want people
+    # to have to manually start the jobs in sequence, so we do it for them.
+    - '[ -z $CI_JOB_MANUAL ] || play_job "review-deploy"'
 
 .review-workflow-base:
   extends:
-    - .default-tags
     - .default-retry
-    - .default-only
-  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-charts-build-base
-  dependencies: []
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-helm3-kubectl1.14
   variables:
     HOST_SUFFIX: "${CI_ENVIRONMENT_SLUG}"
+    REVIEW_APPS_DOMAIN: "temp.gitlab-review.app"  # FIXME: using temporary domain
     DOMAIN: "-${CI_ENVIRONMENT_SLUG}.${REVIEW_APPS_DOMAIN}"
-    # v2.4.4 + two improvements:
-    # - Allow to pass an EE license when installing the chart: https://gitlab.com/gitlab-org/charts/gitlab/merge_requests/1008
-    # - Allow to customize the livenessProbe for `gitlab-shell`: https://gitlab.com/gitlab-org/charts/gitlab/merge_requests/1021
-    GITLAB_HELM_CHART_REF: "6c655ed77e60f1f7f533afb97bef8c9cb7dc61eb"
-    GITLAB_EDITION: "ce"
+    GITLAB_HELM_CHART_REF: "v4.3.0"
   environment:
-    name: review/${CI_COMMIT_REF_NAME}
+    name: review/${CI_COMMIT_REF_SLUG}${FREQUENCY}
     url: https://gitlab-${CI_ENVIRONMENT_SLUG}.${REVIEW_APPS_DOMAIN}
     on_stop: review-stop
+    auto_stop_in: 48 hours
 
-.review-deploy-base:
-  extends: .review-workflow-base
+review-deploy:
+  extends:
+    - .review-workflow-base
+    - .review:rules:review-deploy
   stage: review
-  allow_failure: true
+  dependencies: []
+  resource_group: "review/${CI_COMMIT_REF_NAME}"
   before_script:
-    - '[[ ! -d "ee/" ]] || export GITLAB_EDITION="ee"'
     - export GITLAB_SHELL_VERSION=$(<GITLAB_SHELL_VERSION)
     - export GITALY_VERSION=$(<GITALY_SERVER_VERSION)
     - export GITLAB_WORKHORSE_VERSION=$(<GITLAB_WORKHORSE_VERSION)
-    - echo "${CI_ENVIRONMENT_URL}" > review_app_url.txt
-    - source scripts/utils.sh
+    - echo "${CI_ENVIRONMENT_URL}" > environment_url.txt
+    - source ./scripts/utils.sh
     - install_api_client_dependencies_with_apk
     - source scripts/review_apps/review-apps.sh
   script:
     - check_kube_domain
     - ensure_namespace
-    - install_tiller
     - install_external_dns
     - download_chart
     - date
     - deploy || (display_deployment_debug && exit 1)
+    - disable_sign_ups
+    # When the job is manual, review-qa-smoke is also manual and we don't want people
+    # to have to manually start the jobs in sequence, so we do it for them.
+    - '[ -z $CI_JOB_MANUAL ] || play_job "review-qa-smoke"'
+    - '[ -z $CI_JOB_MANUAL ] || play_job "review-performance"'
+  after_script:
+    # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
+    # Set DAST_RUN to true when jobs are manually scheduled.
+    - if [ "$DAST_RUN" == "true" ]; then source scripts/review_apps/seed-dast-test-data.sh; TRACE=1 trigger_proj_user_creation; fi
+
   artifacts:
-    paths: [review_app_url.txt]
+    paths: [environment_url.txt]
     expire_in: 2 days
     when: always
 
-review-deploy:
-  extends:
-    - .review-deploy-base
-    - .only-review
-    - .only:changes-code-qa
-  needs: ["review-build-cng"]
-
-schedule:review-deploy:
-  extends:
-    - .review-deploy-base
-    - .only-review-schedules
-  needs: ["schedule:review-build-cng"]
-
-.base-review-stop:
-  extends:
-    - .review-workflow-base
-    - .only-review
-    - .only:changes-code-qa
+.review-stop-base:
+  extends: .review-workflow-base
   environment:
     action: stop
+  dependencies: []
   variables:
-    GIT_STRATEGY: none
+    # We're cloning the repo instead of downloading the script for now
+    # because some repos are private and CI_JOB_TOKEN cannot access files.
+    # See https://gitlab.com/gitlab-org/gitlab/issues/191273
+    GIT_DEPTH: 1
   before_script:
-    # We don't clone the repo by using GIT_STRATEGY: none and only download the
-    # single script we need here so it's much faster than cloning.
     - apk add --update openssl
-    - wget $CI_PROJECT_URL/raw/$CI_COMMIT_SHA/scripts/review_apps/review-apps.sh
-    - wget $CI_PROJECT_URL/raw/$CI_COMMIT_SHA/scripts/utils.sh
-    - source utils.sh
-    - source review-apps.sh
+    - source ./scripts/utils.sh
+    - source ./scripts/review_apps/review-apps.sh
 
 review-stop-failed-deployment:
-  extends: .base-review-stop
+  extends:
+    - .review-stop-base
+    - .review:rules:review-stop-failed-deployment
   stage: prepare
   script:
     - delete_failed_release
 
 review-stop:
-  extends: .base-review-stop
-  stage: review
-  when: manual
-  allow_failure: true
+  extends:
+    - .review-stop-base
+    - .review:rules:review-stop
+  stage: post-qa
   script:
     - delete_release
 
 .review-qa-base:
   extends:
-    - .review-docker
-    - .only-review
-    - .only:changes-code-qa
+    - .default-retry
+    - .use-docker-in-docker
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-qa-alpine-ruby-2.6
   stage: qa
-  allow_failure: true
+  # This is needed so that manual jobs with needs don't block the pipeline.
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/199979.
+  dependencies: ["review-deploy"]
   variables:
     QA_ARTIFACTS_DIR: "${CI_PROJECT_DIR}/qa"
     QA_CAN_TEST_GIT_PROTOCOL_V2: "false"
@@ -192,72 +137,57 @@ review-stop:
     GITLAB_ADMIN_PASSWORD: "${REVIEW_APPS_ROOT_PASSWORD}"
     GITHUB_ACCESS_TOKEN: "${REVIEW_APPS_QA_GITHUB_ACCESS_TOKEN}"
     EE_LICENSE: "${REVIEW_APPS_EE_LICENSE}"
-  needs: ["review-deploy"]
-  dependencies: ["review-deploy"]
-  artifacts:
-    paths:
-      - ./qa/gitlab-qa-run-*
-    expire_in: 7 days
-    when: always
+    SIGNUP_DISABLED: "true"
   before_script:
-    - '[[ ! -d "ee/" ]] || export GITLAB_EDITION="ee"'
-    - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab/gitlab-${GITLAB_EDITION}-qa:${CI_COMMIT_REF_SLUG}"
-    - export CI_ENVIRONMENT_URL="$(cat review_app_url.txt)"
+    - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
+    - export CI_ENVIRONMENT_URL="$(cat environment_url.txt)"
     - echo "${CI_ENVIRONMENT_URL}"
     - echo "${QA_IMAGE}"
     - source scripts/utils.sh
     - install_api_client_dependencies_with_apk
     - gem install gitlab-qa --no-document ${GITLAB_QA_VERSION:+ --version ${GITLAB_QA_VERSION}}
+  artifacts:
+    paths:
+      - ./qa/gitlab-qa-run-*
+    expire_in: 7 days
+    when: always
 
 review-qa-smoke:
-  extends: .review-qa-base
+  extends:
+    - .review-qa-base
+    - .review:rules:review-qa-smoke
   script:
     - gitlab-qa Test::Instance::Smoke "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}"
 
 review-qa-all:
-  extends: .review-qa-base
-  when: manual
+  extends:
+    - .review-qa-base
+    - .review:rules:mr-only-manual
   parallel: 5
   script:
     - export KNAPSACK_REPORT_PATH=knapsack/master_report.json
     - export KNAPSACK_TEST_FILE_PATTERN=qa/specs/features/**/*_spec.rb
     - gitlab-qa Test::Instance::Any "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}" -- --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml --format html --out tmp/rspec.htm --color --format documentation
 
-.review-performance-base:
-  extends: .review-docker
-  stage: qa
-  allow_failure: true
-  before_script:
-    - export CI_ENVIRONMENT_URL="$(cat review_app_url.txt)"
-    - echo "${CI_ENVIRONMENT_URL}"
-    - mkdir -p gitlab-exporter
-    - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/master/index.js
-    - mkdir -p sitespeed-results
-  script:
-    - docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:6.3.1 --plugins.add ./gitlab-exporter --outputFolder sitespeed-results "${CI_ENVIRONMENT_URL}"
-  after_script:
-    - mv sitespeed-results/data/performance.json performance.json
-  artifacts:
-    paths:
-      - sitespeed-results/
-    reports:
-      performance: performance.json
-
 review-performance:
   extends:
-    - .review-performance-base
-    - .only-review
-    - .only:changes-code-qa
-  needs: ["review-deploy"]
+    - .default-retry
+    - .review:rules:review-performance
+  image:
+    name: sitespeedio/sitespeed.io
+    entrypoint: [""]
+  stage: qa
+  # This is needed so that manual jobs with needs don't block the pipeline.
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/199979.
   dependencies: ["review-deploy"]
   before_script:
-    - export CI_ENVIRONMENT_URL="$(cat review_app_url.txt)"
+    - export CI_ENVIRONMENT_URL="$(cat environment_url.txt)"
     - echo "${CI_ENVIRONMENT_URL}"
     - mkdir -p gitlab-exporter
     - wget -O ./gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/master/index.js
     - mkdir -p sitespeed-results
   script:
-    - docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:6.3.1 --plugins.add ./gitlab-exporter --outputFolder sitespeed-results "${CI_ENVIRONMENT_URL}"
+    - /start.sh --plugins.add ./gitlab-exporter --outputFolder sitespeed-results "${CI_ENVIRONMENT_URL}"
   after_script:
     - mv sitespeed-results/data/performance.json performance.json
   artifacts:
@@ -265,35 +195,17 @@ review-performance:
       - sitespeed-results/
     reports:
       performance: performance.json
-
-schedule:review-performance:
-  extends:
-    - .review-performance-base
-    - .only-review-schedules
-  needs: ["schedule:review-deploy"]
-  dependencies: ["schedule:review-deploy"]
+    expire_in: 31d
 
 parallel-spec-reports:
   extends:
-    - .default-tags
-    - .default-only
-    - .only-review
-    - .only:changes-code-qa
+    - .review:rules:mr-only-manual
   image: ruby:2.6-alpine
-  stage: post-test
+  stage: post-qa
   dependencies: ["review-qa-all"]
   variables:
     NEW_PARALLEL_SPECS_REPORT: qa/report-new.html
     BASE_ARTIFACT_URL: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/file/qa/"
-  allow_failure: true
-  when: manual
-  artifacts:
-    when: always
-    paths:
-      - qa/report-new.html
-      - qa/gitlab-qa-run-*
-    reports:
-      junit: qa/gitlab-qa-run-*/**/rspec-*.xml
   script:
     - apk add --update build-base libxml2-dev libxslt-dev && rm -rf /var/cache/apk/*
     - gem install nokogiri --no-document
@@ -302,22 +214,24 @@ parallel-spec-reports:
     - cd -
     - '[[ -f $NEW_PARALLEL_SPECS_REPORT ]] || echo "{}" > ${NEW_PARALLEL_SPECS_REPORT}'
     - scripts/merge-html-reports ${NEW_PARALLEL_SPECS_REPORT} ${BASE_ARTIFACT_URL}${ARTIFACT_DIRS} qa/gitlab-qa-run-*/**/rspec.htm
+  artifacts:
+    when: always
+    paths:
+      - qa/report-new.html
+      - qa/gitlab-qa-run-*
+    reports:
+      junit: qa/gitlab-qa-run-*/**/rspec-*.xml
+    expire_in: 31d
 
 danger-review:
   extends:
-    - .default-tags
     - .default-retry
-    - .default-cache
-    - .default-only
-    - .except:refs-master-tags-stable-deploy
+    - .yarn-cache
+    - .review:rules:danger
   image: registry.gitlab.com/gitlab-org/gitlab-build-images:danger
   stage: test
-  dependencies: []
-  only:
-    variables:
-      - $DANGER_GITLAB_API_TOKEN
+  needs: []
   script:
-    - git version
-    - node --version
-    - yarn install --frozen-lockfile --cache-folder .yarn-cache --prefer-offline
-    - danger --fail-on-errors=true
+    - source scripts/utils.sh
+    - retry yarn install --frozen-lockfile
+    - danger --fail-on-errors=true --verbose

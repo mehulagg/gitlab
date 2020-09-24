@@ -53,7 +53,7 @@ module EE
     def smartcard_enabled_for_ldap?(provider_name, required: false)
       return false unless smartcard_enabled?
 
-      server = ::Gitlab::Auth::LDAP::Config.servers.find do |server|
+      server = ::Gitlab::Auth::Ldap::Config.servers.find do |server|
         server['provider_name'] == provider_name
       end
 

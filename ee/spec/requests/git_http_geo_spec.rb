@@ -2,16 +2,20 @@
 
 require 'spec_helper'
 
-describe "Git HTTP requests (Geo)", :geo do
+RSpec.describe "Git HTTP requests (Geo)", :geo do
   include TermsHelper
   include ::EE::GeoHelpers
   include GitHttpHelpers
   include WorkhorseHelpers
   using RSpec::Parameterized::TableSyntax
 
-  set(:project) { create(:project, :repository, :private) }
-  set(:primary) { create(:geo_node, :primary) }
-  set(:secondary) { create(:geo_node) }
+  let_it_be(:project_with_repo) { create(:project, :repository, :private) }
+  let_it_be(:project_no_repo) { create(:project, :private) }
+
+  let_it_be(:primary_url) { 'http://primary.example.com' }
+  let_it_be(:secondary_url) { 'http://secondary.example.com' }
+  let_it_be(:primary) { create(:geo_node, :primary, url: primary_url) }
+  let_it_be(:secondary) { create(:geo_node, url: secondary_url) }
 
   # Ensure the token always comes from the real time of the request
   let(:auth_token) { Gitlab::Geo::BaseRequest.new(scope: project.full_path).authorization }
@@ -26,8 +30,12 @@ describe "Git HTTP requests (Geo)", :geo do
   let(:auth_token_with_invalid_scope) { Gitlab::Geo::BaseRequest.new(scope: "invalid").authorization }
 
   before do
-    project.add_maintainer(user)
-    project.add_guest(user_without_push_access)
+    project_with_repo.add_maintainer(user)
+    project_with_repo.add_guest(user_without_push_access)
+    create(:geo_project_registry, :synced, project: project_with_repo)
+
+    project_no_repo.add_maintainer(user)
+    project_no_repo.add_guest(user_without_push_access)
 
     stub_licensed_features(geo: true)
     stub_current_geo_node(current_node)
@@ -36,7 +44,56 @@ describe "Git HTTP requests (Geo)", :geo do
     auth_token
   end
 
-  shared_examples_for 'Geo request' do
+  shared_examples_for 'a Geo 200 git request' do
+    subject do
+      make_request
+      response
+    end
+
+    context 'valid Geo JWT token' do
+      it 'returns an OK response with JSON data' do
+        is_expected.to have_gitlab_http_status(:ok)
+
+        expect(response.content_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+        expect(json_response).to include('ShowAllRefs' => true)
+      end
+    end
+  end
+
+  shared_examples_for 'a Geo 200 git-lfs request' do
+    subject do
+      make_request
+      response
+    end
+
+    context 'valid Geo JWT token' do
+      it 'returns an OK response with binary data' do
+        is_expected.to have_gitlab_http_status(:ok)
+
+        expect(response.content_type).to eq('application/octet-stream')
+      end
+    end
+  end
+
+  shared_examples_for 'a Geo 302 redirect to Primary' do
+    # redirect_url needs to be defined when using this shared example
+
+    subject do
+      make_request
+      response
+    end
+
+    context 'valid Geo JWT token' do
+      it 'returns a redirect response' do
+        is_expected.to have_gitlab_http_status(:redirect)
+
+        expect(response.content_type).to eq('text/html')
+        expect(response.headers['Location']).to eq(redirect_url)
+      end
+    end
+  end
+
+  shared_examples_for 'a Geo git request' do
     subject do
       make_request
       response
@@ -56,17 +113,9 @@ describe "Git HTTP requests (Geo)", :geo do
       it { is_expected.to have_gitlab_http_status(:unauthorized) }
     end
 
-    context 'valid Geo JWT token' do
-      it 'returns an OK response' do
-        is_expected.to have_gitlab_http_status(:ok)
-
-        expect(response.content_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
-        expect(json_response).to include('ShowAllRefs' => true)
-      end
-    end
-
     context 'no Geo JWT token' do
       let(:env) { workhorse_internal_api_request_header }
+
       it { is_expected.to have_gitlab_http_status(:unauthorized) }
     end
 
@@ -82,42 +131,106 @@ describe "Git HTTP requests (Geo)", :geo do
   context 'when current node is a secondary' do
     let(:current_node) { secondary }
 
-    set(:project) { create(:project, :repository, :private) }
-
     describe 'GET info_refs' do
       context 'git pull' do
         def make_request
           get "/#{project.full_path}.git/info/refs", params: { service: 'git-upload-pack' }, headers: env
         end
 
-        it_behaves_like 'Geo request'
+        context 'when the repository exists' do
+          context 'but has not successfully synced' do
+            let_it_be(:project_with_repo_but_not_synced) { create(:project, :repository, :private) }
+            let_it_be(:project) { project_with_repo_but_not_synced }
+            let(:redirect_url) { "#{primary_url}/#{project_with_repo_but_not_synced.full_path}.git/info/refs?service=git-upload-pack" }
 
-        context 'when terms are enforced' do
-          before do
-            enforce_terms
+            before do
+              create(:geo_project_registry, :synced, project: project_with_repo_but_not_synced, last_repository_successful_sync_at: nil)
+            end
+
+            it_behaves_like 'a Geo 302 redirect to Primary'
+
+            context 'when terms are enforced' do
+              before do
+                enforce_terms
+              end
+
+              it_behaves_like 'a Geo 302 redirect to Primary'
+            end
           end
 
-          it_behaves_like 'Geo request'
+          context 'and has successfully synced' do
+            let_it_be(:project) { project_with_repo }
+
+            it_behaves_like 'a Geo git request'
+            it_behaves_like 'a Geo 200 git request'
+
+            context 'when terms are enforced' do
+              before do
+                enforce_terms
+              end
+
+              it_behaves_like 'a Geo git request'
+              it_behaves_like 'a Geo 200 git request'
+            end
+          end
+        end
+
+        context 'when the repository does not exist' do
+          let_it_be(:project) { project_no_repo }
+          let(:redirect_url) { "#{primary_url}/#{project.full_path}.git/info/refs?service=git-upload-pack" }
+
+          it_behaves_like 'a Geo 302 redirect to Primary'
+
+          context 'when terms are enforced' do
+            before do
+              enforce_terms
+            end
+
+            it_behaves_like 'a Geo 302 redirect to Primary'
+          end
+        end
+
+        context 'when the project does not exist' do
+          # Override #make_request so we can use a non-existent project path
+          def make_request
+            get "/#{non_existent_project_path}.git/info/refs", params: { service: 'git-upload-pack' }, headers: env
+          end
+
+          let(:project) { nil }
+          let(:auth_token) { nil }
+          let(:non_existent_project_path) { 'non-existent-namespace/non-existent-project' }
+          let(:endpoint_path) { "/#{non_existent_project_path}.git/info/refs?service=git-upload-pack" }
+          let(:redirect_url) { redirected_primary_url }
+
+          # To avoid enumeration of private projects not in selective sync,
+          # this response must be the same as a private project without a repo.
+          it_behaves_like 'a Geo 302 redirect to Primary'
+
+          context 'when terms are enforced' do
+            before do
+              enforce_terms
+            end
+
+            it_behaves_like 'a Geo 302 redirect to Primary'
+          end
         end
       end
 
       context 'git push' do
         def make_request
-          get url, params: { service: 'git-receive-pack' }, headers: env
+          get endpoint_path, params: { service: 'git-receive-pack' }, headers: env
         end
 
-        let(:url) { "/#{project.full_path}.git/info/refs" }
+        let_it_be(:project) { project_with_repo }
+        let(:endpoint_path) { "/#{project.full_path}.git/info/refs" }
+        let(:redirect_url) { "#{redirected_primary_url}?service=git-receive-pack" }
 
         subject do
           make_request
           response
         end
 
-        it 'redirects to the primary' do
-          is_expected.to have_gitlab_http_status(:redirect)
-          redirect_location = "#{redirected_primary_url}?service=git-receive-pack"
-          expect(subject.header['Location']).to eq(redirect_location)
-        end
+        it_behaves_like 'a Geo 302 redirect to Primary'
       end
     end
 
@@ -126,26 +239,48 @@ describe "Git HTTP requests (Geo)", :geo do
         post "/#{project.full_path}.git/git-upload-pack", params: {}, headers: env
       end
 
-      it_behaves_like 'Geo request'
+      context 'when the repository exists' do
+        let_it_be(:project) { project_with_repo }
 
-      context 'when terms are enforced' do
-        before do
-          enforce_terms
+        it_behaves_like 'a Geo git request'
+        it_behaves_like 'a Geo 200 git request'
+
+        context 'when terms are enforced' do
+          before do
+            enforce_terms
+          end
+
+          it_behaves_like 'a Geo git request'
+          it_behaves_like 'a Geo 200 git request'
         end
+      end
 
-        it_behaves_like 'Geo request'
+      context 'when the repository does not exist' do
+        let_it_be(:project) { project_no_repo }
+        let(:redirect_url) { "#{primary_url}/#{project.full_path}.git/git-upload-pack" }
+
+        it_behaves_like 'a Geo 302 redirect to Primary'
+
+        context 'when terms are enforced' do
+          before do
+            enforce_terms
+          end
+
+          it_behaves_like 'a Geo 302 redirect to Primary'
+        end
       end
     end
 
     context 'git-lfs' do
-      context 'API' do
-        describe 'POST batch' do
+      context 'Batch API' do
+        describe 'POST /namespace/repo.git/info/lfs/objects/batch' do
           def make_request
-            post url, params: args, headers: env
+            post endpoint_path, params: args, headers: env
           end
 
           let(:args) { {} }
-          let(:url) { "/#{project.full_path}.git/info/lfs/objects/batch" }
+          let_it_be(:project) { project_with_repo }
+          let(:endpoint_path) { "/#{project.full_path}.git/info/lfs/objects/batch" }
 
           subject do
             make_request
@@ -160,20 +295,17 @@ describe "Git HTTP requests (Geo)", :geo do
 
           context 'operation upload' do
             let(:args) { { 'operation' => 'upload' }.to_json }
+            let(:redirect_url) { redirected_primary_url }
 
-            context 'with the correct git-lfs version' do
+            context 'with a valid git-lfs version' do
               before do
                 env['User-Agent'] = 'git-lfs/2.4.2 (GitHub; darwin amd64; go 1.10.2)'
               end
 
-              it 'redirects to the primary' do
-                is_expected.to have_gitlab_http_status(:redirect)
-                redirect_location = "#{redirected_primary_url}"
-                expect(subject.header['Location']).to eq(redirect_location)
-              end
+              it_behaves_like 'a Geo 302 redirect to Primary'
             end
 
-            context 'with an incorrect git-lfs version' do
+            context 'with an invalid git-lfs version' do
               where(:description, :version) do
                 'outdated' | 'git-lfs/2.4.1'
                 'unknown'  | 'git-lfs'
@@ -208,10 +340,22 @@ describe "Git HTTP requests (Geo)", :geo do
             before do
               project.add_maintainer(user)
               env['Authorization'] = authorization
+              env['User-Agent'] = "2.4.2 (GitHub; darwin amd64; go 1.10.2)"
             end
 
-            it 'is handled by the secondary' do
-              is_expected.to have_gitlab_http_status(:ok)
+            context 'when the repository exists' do
+              let_it_be(:project) { project_with_repo }
+
+              it 'is handled by the secondary' do
+                is_expected.to have_gitlab_http_status(:ok)
+              end
+            end
+
+            context 'when the repository does not exist' do
+              let_it_be(:project) { project_no_repo }
+              let(:redirect_url) { redirected_primary_url }
+
+              it_behaves_like 'a Geo 302 redirect to Primary'
             end
 
             where(:description, :version) do
@@ -234,6 +378,47 @@ describe "Git HTTP requests (Geo)", :geo do
         end
       end
 
+      context 'Transfer API' do
+        describe 'GET /namespace/repo.git/gitlab-lfs/objects/<oid>' do
+          def make_request
+            get endpoint_path, headers: env
+          end
+
+          let(:user) { create(:user) }
+          let(:lfs_object) { create(:lfs_object, :with_file) }
+          let(:endpoint_path) { "/#{project.full_path}.git/gitlab-lfs/objects/#{lfs_object.oid}" }
+          let(:authorization) { ActionController::HttpAuthentication::Basic.encode_credentials(user.username, user.password) }
+
+          subject do
+            make_request
+            response
+          end
+
+          before do
+            allow(Gitlab.config.lfs).to receive(:enabled).and_return(true)
+            project.update_attribute(:lfs_enabled, true)
+            project.lfs_objects << lfs_object
+
+            project.add_maintainer(user)
+            env['Authorization'] = authorization
+            env['User-Agent'] = "2.4.2 (GitHub; darwin amd64; go 1.10.2)"
+          end
+
+          context 'when the repository exists' do
+            let_it_be(:project) { project_with_repo }
+
+            it_behaves_like 'a Geo 200 git-lfs request'
+          end
+
+          context 'when the repository does not exist' do
+            let_it_be(:project) { project_no_repo }
+            let(:redirect_url) { redirected_primary_url }
+
+            it_behaves_like 'a Geo 302 redirect to Primary'
+          end
+        end
+      end
+
       context 'Locks API' do
         where(:description, :path, :args) do
           'create' | 'info/lfs/locks'          | {}
@@ -244,28 +429,26 @@ describe "Git HTTP requests (Geo)", :geo do
         with_them do
           describe "POST #{description}" do
             def make_request
-              post url, params: args, headers: env
+              post endpoint_path, params: args, headers: env
             end
 
-            let(:url) { "/#{project.full_path}.git/#{path}" }
+            let_it_be(:project) { project_with_repo }
+            let(:endpoint_path) { "/#{project.full_path}.git/#{path}" }
+            let(:redirect_url) { redirected_primary_url }
 
             subject do
               make_request
               response
             end
 
-            it 'redirects to the primary' do
-              is_expected.to have_gitlab_http_status(:redirect)
-              redirect_location = "#{redirected_primary_url}"
-              expect(subject.header['Location']).to eq(redirect_location)
-            end
+            it_behaves_like 'a Geo 302 redirect to Primary'
           end
         end
       end
     end
 
     def redirected_primary_url
-      "#{primary.url.chomp('/')}#{::Gitlab::Geo::GitPushHttp::PATH_PREFIX}/#{secondary.id}#{url}"
+      "#{primary.url.chomp('/')}#{::Gitlab::Geo::GitPushHttp::PATH_PREFIX}/#{secondary.id}#{endpoint_path}"
     end
   end
 
@@ -280,12 +463,13 @@ describe "Git HTTP requests (Geo)", :geo do
 
       context 'when HTTP redirected from a secondary node' do
         def make_request
-          post url, headers: auth_env(user.username, user.password, nil)
+          post endpoint_path, headers: auth_env(user.username, user.password, nil)
         end
 
         let(:identifier) { "user-#{user.id}" }
+        let_it_be(:project) { project_with_repo }
         let(:gl_repository) { "project-#{project.id}" }
-        let(:url) { "#{::Gitlab::Geo::GitPushHttp::PATH_PREFIX}/#{secondary.id}/#{project.full_path}.git/git-receive-pack" }
+        let(:endpoint_path) { "#{::Gitlab::Geo::GitPushHttp::PATH_PREFIX}/#{secondary.id}/#{project.full_path}.git/git-receive-pack" }
 
         # The bigger picture request flow relevant to this feature is:
         #
@@ -313,10 +497,11 @@ describe "Git HTTP requests (Geo)", :geo do
 
       context 'when proxying an SSH request from a secondary node' do
         def make_request
-          post url, params: {}, headers: env
+          post endpoint_path, params: {}, headers: env
         end
 
-        let(:url) { "/#{project.full_path}.git/git-receive-pack" }
+        let_it_be(:project) { project_with_repo }
+        let(:endpoint_path) { "/#{project.full_path}.git/git-receive-pack" }
 
         before do
           env['Geo-GL-Id'] = geo_gl_id
@@ -341,13 +526,13 @@ describe "Git HTTP requests (Geo)", :geo do
         context 'when gl_id is provided via HTTP headers' do
           context 'but is invalid' do
             where(:geo_gl_id) do
-              [
-                'key-999',
-                'key-1',
-                'key-999',
-                'junk',
-                'junk-1',
-                'kkey-1'
+              %w[
+                key-999
+                key-1
+                key-999
+                junk
+                junk-1
+                kkey-1
               ]
             end
 
@@ -384,7 +569,7 @@ describe "Git HTTP requests (Geo)", :geo do
               it 'returns a 200' do
                 is_expected.to have_gitlab_http_status(:ok)
                 expect(json_response['GL_ID']).to match("user-#{user.id}")
-                expect(json_response['GL_REPOSITORY']).to match(Gitlab::GlRepository::PROJECT.identifier_for_subject(project))
+                expect(json_response['GL_REPOSITORY']).to match(Gitlab::GlRepository::PROJECT.identifier_for_container(project))
               end
             end
           end
@@ -400,10 +585,11 @@ describe "Git HTTP requests (Geo)", :geo do
 
       def make_request
         full_path = project.full_path
-        project.destroy
 
         get "/#{full_path}.git/info/refs", params: { service: 'git-upload-pack' }, headers: env
       end
+
+      let_it_be(:project) { project_no_repo }
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
     end
@@ -417,6 +603,8 @@ describe "Git HTTP requests (Geo)", :geo do
       def make_request
         get "/#{repository_path}.git/info/refs", params: { service: 'git-upload-pack' }, headers: env
       end
+
+      let_it_be(:project) { project_with_repo }
 
       shared_examples_for 'unauthorized because of invalid scope' do
         it { is_expected.to have_gitlab_http_status(:unauthorized) }
@@ -465,6 +653,7 @@ describe "Git HTTP requests (Geo)", :geo do
         get "/#{repository_path}.git/info/refs", params: { service: 'git-upload-pack' }, headers: env
       end
 
+      let_it_be(:project) { project_with_repo }
       let(:repository_path) { project.full_path }
 
       it 'returns unauthorized error' do

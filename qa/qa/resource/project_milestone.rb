@@ -3,33 +3,21 @@
 module QA
   module Resource
     class ProjectMilestone < Base
-      attr_reader :title
-      attr_accessor :description
+      attr_writer :start_date, :due_date
+
+      attribute :id
+      attribute :title
+      attribute :description
 
       attribute :project do
-        Project.fabricate!
+        Project.fabricate_via_api! do |resource|
+          resource.name = 'project-with-milestone'
+        end
       end
 
-      def title=(title)
-        @title = "#{title}-#{SecureRandom.hex(4)}"
-        @description = 'A milestone'
-      end
-
-      def fabricate!
-        project.visit!
-
-        Page::Project::Menu.perform do |page| # rubocop:disable QA/AmbiguousPageObjectName
-          page.click_issues
-          page.click_milestones
-        end
-
-        Page::Project::Milestone::Index.perform(&:click_new_milestone)
-
-        Page::Project::Milestone::New.perform do |milestone_new|
-          milestone_new.set_title(@title)
-          milestone_new.set_description(@description)
-          milestone_new.click_milestone_create_button
-        end
+      def initialize
+        @title = "project-milestone-#{SecureRandom.hex(4)}"
+        @description = "My awesome project milestone."
       end
 
       def api_get_path
@@ -42,9 +30,27 @@ module QA
 
       def api_post_body
         {
-          description: @description,
-          title: @title
-        }
+          title: title,
+          description: description
+        }.tap do |hash|
+          hash[:start_date] = @start_date if @start_date
+          hash[:due_date] = @due_date if @due_date
+        end
+      end
+
+      def fabricate!
+        project.visit!
+
+        Page::Project::Menu.perform(&:go_to_milestones)
+        Page::Project::Milestone::Index.perform(&:click_new_milestone_link)
+
+        Page::Project::Milestone::New.perform do |new_milestone|
+          new_milestone.set_title(@title)
+          new_milestone.set_description(@description)
+          new_milestone.set_start_date(@start_date) if @start_date
+          new_milestone.set_due_date(@due_date) if @due_date
+          new_milestone.click_create_milestone_button
+        end
       end
     end
   end

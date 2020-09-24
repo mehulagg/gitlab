@@ -2,16 +2,16 @@
 
 require 'spec_helper'
 
-describe BlobViewer::GitlabCiYml do
+RSpec.describe BlobViewer::GitlabCiYml do
   include FakeBlobHelpers
   include RepoHelpers
 
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
-
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:data) { File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci.yml')) }
   let(:blob) { fake_blob(path: '.gitlab-ci.yml', data: data) }
   let(:sha) { sample_commit.id }
+
   subject { described_class.new(blob) }
 
   describe '#validation_message' do

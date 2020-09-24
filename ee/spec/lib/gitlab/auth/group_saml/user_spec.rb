@@ -3,7 +3,7 @@ require 'spec_helper'
 
 require 'spec_helper'
 
-describe Gitlab::Auth::GroupSaml::User do
+RSpec.describe Gitlab::Auth::GroupSaml::User do
   let(:uid) { 1234 }
   let(:auth_hash) { OmniAuth::AuthHash.new(uid: uid) }
   let(:saml_provider) { create(:saml_provider) }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::BlameController do
+RSpec.describe Projects::BlameController do
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
 
@@ -36,7 +36,7 @@ describe Projects::BlameController do
 
       it 'redirects' do
         expect(subject)
-            .to redirect_to("/#{project.full_path}/tree/master")
+            .to redirect_to("/#{project.full_path}/-/tree/master")
       end
     end
 

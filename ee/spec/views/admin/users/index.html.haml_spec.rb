@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'admin/users/index' do
+RSpec.describe 'admin/users/index' do
   let(:should_check_namespace_plan) { false }
 
   before do

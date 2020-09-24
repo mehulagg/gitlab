@@ -1,6 +1,11 @@
 <script>
+import { GlButton } from '@gitlab/ui';
+
 export default {
   name: 'ResolveDiscussionButton',
+  components: {
+    GlButton,
+  },
   props: {
     isResolving: {
       type: Boolean,
@@ -16,13 +21,7 @@ export default {
 </script>
 
 <template>
-  <button ref="button" type="button" class="btn btn-default ml-sm-2" @click="$emit('onClick')">
-    <i
-      v-if="isResolving"
-      ref="isResolvingIcon"
-      aria-hidden="true"
-      class="fa fa-spinner fa-spin"
-    ></i>
+  <gl-button :loading="isResolving" class="ml-sm-2" @click="$emit('onClick')">
     {{ buttonTitle }}
-  </button>
+  </gl-button>
 </template>

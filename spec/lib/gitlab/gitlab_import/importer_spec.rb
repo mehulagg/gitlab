@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GitlabImport::Importer do
+RSpec.describe Gitlab::GitlabImport::Importer do
   include ImportSpecHelper
 
   describe '#execute' do

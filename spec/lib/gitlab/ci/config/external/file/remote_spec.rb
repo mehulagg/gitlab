@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::External::File::Remote do
+RSpec.describe Gitlab::Ci::Config::External::File::Remote do
   include StubRequests
 
   let(:context_params) { { sha: '12345' } }
@@ -21,8 +21,9 @@ describe Gitlab::Ci::Config::External::File::Remote do
   end
 
   before do
-    allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-      .to receive(:check_execution_time!)
+    allow_next_instance_of(Gitlab::Ci::Config::External::Context) do |instance|
+      allow(instance).to receive(:check_execution_time!)
+    end
   end
 
   describe '#matching?' do

@@ -1,5 +1,0 @@
----
-title: Expose SHA of squashed commit via API when fast-forward merge is enabled
-merge_request: !17052
-author: minghuan lei
-type: added

@@ -2,12 +2,17 @@
 
 require 'spec_helper'
 
-describe LicensesListEntity do
-  let(:report) { build(:ci_reports_license_scanning_report, :mit) }
+RSpec.describe LicensesListEntity do
+  let!(:pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
+  let(:license_compliance) { project.license_compliance }
+
+  before do
+    stub_licensed_features(license_scanning: true)
+  end
 
   it_behaves_like 'report list' do
     let(:name) { :licenses }
-    let(:collection) { report.licenses }
+    let(:collection) { license_compliance.policies }
     let(:no_items_status) { :no_licenses }
   end
 end

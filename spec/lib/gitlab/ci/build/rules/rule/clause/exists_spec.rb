@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists do
+RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists do
   describe '#satisfied_by?' do
     let(:pipeline) { build(:ci_pipeline, project: project, sha: project.repository.head_commit.sha) }
 
@@ -18,7 +18,7 @@ describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists do
 
       before do
         stub_const('Gitlab::Ci::Build::Rules::Rule::Clause::Exists::MAX_PATTERN_COMPARISONS', 2)
-        expect(File).to receive(:fnmatch?).exactly(2).times.and_call_original
+        expect(File).to receive(:fnmatch?).twice.and_call_original
       end
 
       it { is_expected.to be_truthy }

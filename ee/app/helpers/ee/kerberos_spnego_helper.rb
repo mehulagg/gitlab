@@ -82,7 +82,7 @@ module EE
       # Return user principal name if authentication succeeded
       gss.display_name
     rescue GSSAPI::GssApiError => ex
-      Rails.logger.error "#{self.class.name}: failed to process Negotiate/Kerberos authentication: #{ex.message}" # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error "#{self.class.name}: failed to process Negotiate/Kerberos authentication: #{ex.message}"
       false
     end
 

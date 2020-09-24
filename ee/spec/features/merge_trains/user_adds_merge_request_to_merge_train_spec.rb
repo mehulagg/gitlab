@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User adds a merge request to a merge train', :js do
+RSpec.describe 'User adds a merge request to a merge train', :js do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -17,6 +17,7 @@ describe 'User adds a merge request to a merge train', :js do
   end
 
   before do
+    stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
     project.add_maintainer(user)
     project.update!(merge_pipelines_enabled: true)

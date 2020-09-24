@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GroupPlansPreloader do
+RSpec.describe Gitlab::GroupPlansPreloader do
   describe '#preload' do
     let!(:plan1) { create(:free_plan, name: 'plan-1') }
     let!(:plan2) { create(:free_plan, name: 'plan-2') }
@@ -14,9 +14,12 @@ describe Gitlab::GroupPlansPreloader do
     end
 
     before do
-      group1 = create(:group, name: 'group-1', plan_id: plan1.id)
+      group1 = create(:group, name: 'group-1')
+      create(:gitlab_subscription, namespace: group1, hosted_plan_id: plan1.id)
 
-      create(:group, name: 'group-2', plan_id: plan2.id)
+      group2 = create(:group, name: 'group-2')
+      create(:gitlab_subscription, namespace: group2, hosted_plan_id: plan2.id)
+
       create(:group, name: 'group-3', parent: group1)
     end
 

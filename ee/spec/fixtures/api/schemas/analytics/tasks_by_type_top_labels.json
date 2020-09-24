@@ -1,0 +1,26 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object" ,
+    "required": ["id", "title", "color", "text_color"],
+    "properties": {
+      "label": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "text_color": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

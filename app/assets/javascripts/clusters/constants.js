@@ -25,6 +25,7 @@ export const APPLICATION_STATUS = {
   UNINSTALL_ERRORED: 'uninstall_errored',
   ERROR: 'errored',
   PRE_INSTALLED: 'pre_installed',
+  UNINSTALLED: 'uninstalled',
 };
 
 /*
@@ -50,8 +51,10 @@ export const JUPYTER = 'jupyter';
 export const KNATIVE = 'knative';
 export const RUNNER = 'runner';
 export const CERT_MANAGER = 'cert_manager';
+export const CROSSPLANE = 'crossplane';
 export const PROMETHEUS = 'prometheus';
 export const ELASTIC_STACK = 'elastic_stack';
+export const FLUENTD = 'fluentd';
 
 export const APPLICATIONS = [
   HELM,
@@ -62,6 +65,10 @@ export const APPLICATIONS = [
   CERT_MANAGER,
   PROMETHEUS,
   ELASTIC_STACK,
+  FLUENTD,
 ];
 
 export const INGRESS_DOMAIN_SUFFIX = '.nip.io';
+
+export const LOGGING_MODE = 'logging';
+export const BLOCKING_MODE = 'blocking';

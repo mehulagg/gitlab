@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EnvironmentStatus do
+RSpec.describe EnvironmentStatus do
   include ProjectForksHelper
 
   let(:deployment)    { create(:deployment, :succeed, :review_app) }
@@ -51,8 +51,10 @@ describe EnvironmentStatus do
   # - source: /files\/(.+)/
   #   public: '\1'
   describe '#changes' do
+    subject { environment_status.changes }
+
     it 'contains only added and modified public pages' do
-      expect(environment_status.changes).to contain_exactly(
+      expect(subject).to contain_exactly(
         {
           path: 'ruby-style-guide.html',
           external_url: "#{environment.external_url}/ruby-style-guide.html"
@@ -62,6 +64,18 @@ describe EnvironmentStatus do
         }
       )
     end
+  end
+
+  describe '#changed_paths' do
+    subject { environment_status.changed_urls }
+
+    it { is_expected.to contain_exactly("#{environment.external_url}/ruby-style-guide.html", "#{environment.external_url}/html/page.html") }
+  end
+
+  describe '#changed_urls' do
+    subject { environment_status.changed_paths }
+
+    it { is_expected.to contain_exactly('ruby-style-guide.html', 'html/page.html') }
   end
 
   describe '.for_merge_request' do
@@ -76,19 +90,81 @@ describe EnvironmentStatus do
     end
   end
 
-  describe '.after_merge_request' do
-    let(:admin)    { create(:admin) }
-    let(:pipeline) { create(:ci_pipeline, sha: sha) }
+  describe '.for_deployed_merge_request' do
+    context 'when a merge request has no explicitly linked deployments' do
+      it 'returns the statuses based on the CI pipelines' do
+        mr = create(:merge_request, :merged)
 
-    before do
-      merge_request.mark_as_merged!
+        expect(described_class)
+          .to receive(:after_merge_request)
+          .with(mr, mr.author)
+          .and_return([])
+
+        statuses = described_class.for_deployed_merge_request(mr, mr.author)
+
+        expect(statuses).to eq([])
+      end
     end
 
-    it 'is based on merge_request.merge_commit_sha' do
-      expect(merge_request).to receive(:merge_commit_sha)
-      expect(merge_request).not_to receive(:diff_head_sha)
+    context 'when a merge request has explicitly linked deployments' do
+      let(:merge_request) { create(:merge_request, :merged) }
 
-      described_class.after_merge_request(merge_request, admin)
+      let(:environment) do
+        create(:environment, project: merge_request.target_project)
+      end
+
+      it 'returns the statuses based on the linked deployments' do
+        deploy = create(
+          :deployment,
+          :success,
+          project: merge_request.target_project,
+          environment: environment,
+          deployable: nil
+        )
+
+        deploy.link_merge_requests(merge_request.target_project.merge_requests)
+
+        statuses = described_class
+          .for_deployed_merge_request(merge_request, merge_request.author)
+
+        expect(statuses.length).to eq(1)
+        expect(statuses[0].environment).to eq(environment)
+        expect(statuses[0].merge_request).to eq(merge_request)
+      end
+
+      it 'excludes environments the user can not see' do
+        deploy = create(
+          :deployment,
+          :success,
+          project: merge_request.target_project,
+          environment: environment,
+          deployable: nil
+        )
+
+        deploy.link_merge_requests(merge_request.target_project.merge_requests)
+
+        statuses = described_class
+          .for_deployed_merge_request(merge_request, create(:user))
+
+        expect(statuses).to be_empty
+      end
+
+      it 'excludes deployments that have the status "created"' do
+        deploy = create(
+          :deployment,
+          :created,
+          project: merge_request.target_project,
+          environment: environment,
+          deployable: nil
+        )
+
+        deploy.link_merge_requests(merge_request.target_project.merge_requests)
+
+        statuses = described_class
+          .for_deployed_merge_request(merge_request, merge_request.author)
+
+        expect(statuses).to be_empty
+      end
     end
   end
 
@@ -99,7 +175,7 @@ describe EnvironmentStatus do
     let(:environment) { build.deployment.environment }
     let(:user) { project.owner }
 
-    context 'when environment is created on a forked project' do
+    context 'when environment is created on a forked project', :sidekiq_inline do
       let(:project) { create(:project, :repository) }
       let(:forked) { fork_project(project, user, repository: true) }
       let(:sha) { forked.commit.sha }
@@ -113,7 +189,7 @@ describe EnvironmentStatus do
                head_pipeline: pipeline)
       end
 
-      it 'returns environment status', :sidekiq_might_not_need_inline do
+      it 'returns environment status' do
         expect(subject.count).to eq(1)
         expect(subject[0].environment).to eq(environment)
         expect(subject[0].merge_request).to eq(merge_request)

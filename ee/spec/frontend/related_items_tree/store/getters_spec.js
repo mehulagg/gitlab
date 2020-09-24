@@ -1,11 +1,8 @@
 import * as getters from 'ee/related_items_tree/store/getters';
-
 import createDefaultState from 'ee/related_items_tree/store/state';
+import { issuableTypesMap } from '~/related_issues/constants';
 
-import { issuableTypesMap } from 'ee/related_issues/constants';
-import { ChildType } from 'ee/related_items_tree/constants';
-
-import { mockEpic1, mockEpic2 } from '../../../javascripts/related_items_tree/mock_data';
+import { mockEpic1, mockEpic2 } from '../mock_data';
 
 window.gl = window.gl || {};
 
@@ -60,36 +57,6 @@ describe('RelatedItemsTree', () => {
         });
       });
 
-      describe('headerItems', () => {
-        it('returns an item within array containing Epic iconName, count, qaClass & type props', () => {
-          state.epicsCount = 2;
-          const epicHeaderItem = getters.headerItems(state)[0];
-
-          expect(epicHeaderItem).toEqual(
-            expect.objectContaining({
-              iconName: 'epic',
-              count: 2,
-              qaClass: 'qa-add-epics-button',
-              type: ChildType.Epic,
-            }),
-          );
-        });
-
-        it('returns an item within array containing Issue iconName, count, qaClass & type props', () => {
-          state.issuesCount = 2;
-          const epicHeaderItem = getters.headerItems(state)[1];
-
-          expect(epicHeaderItem).toEqual(
-            expect.objectContaining({
-              iconName: 'issues',
-              count: 2,
-              qaClass: 'qa-add-issues-button',
-              type: ChildType.Issue,
-            }),
-          );
-        });
-      });
-
       describe('itemAutoCompleteSources', () => {
         it('returns autoCompleteSources value when `issuableType` is set to `Epic` and `autoCompleteEpics` is true', () => {
           const mockGetter = {
@@ -122,6 +89,28 @@ describe('RelatedItemsTree', () => {
           expect(getters.itemAutoCompleteSources(state, mockGetter)).toEqual(
             expect.objectContaining({}),
           );
+        });
+
+        it('returns autoCompleteSources with a formatted issue_type query URL for issues when parent is epic', () => {
+          const mockGetter = {
+            autoCompleteSources: {
+              issues: 'foo',
+            },
+          };
+          state.issuesEndpoint = '/epics';
+          state.issuableType = issuableTypesMap.Issue;
+          state.autoCompleteIssues = true;
+
+          expect(getters.itemAutoCompleteSources(state, mockGetter)).toEqual({
+            issues: 'foo?issue_types=issue',
+          });
+
+          state.issuesEndpoint = '/';
+          state.autoCompleteEpics = false;
+
+          expect(getters.itemAutoCompleteSources(state, mockGetter)).toEqual({
+            issues: 'foo',
+          });
         });
       });
 

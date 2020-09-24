@@ -1,0 +1,54 @@
+- page_title _('Your first project')
+- visibility_level = selected_visibility_level(@project, params.dig(:project, :visibility_level))
+
+.row.flex-grow-1.bg-gray-light
+  .d-flex.flex-column.align-items-center.w-100.p-3
+    .new-project.d-flex.flex-column.align-items-center.pt-5
+      #progress-bar
+      %h2.center= _('Create/import your first project')
+      %p
+        .center= html_escape(_('This project will live in your group %{strong_open}%{namespace}%{strong_close}. A project is where you house your files (repository), plan your work (issues), publish your documentation (wiki), and so much more.')) % { namespace: html_escape(@project.namespace.name), strong_open: '<strong>'.html_safe, strong_close: '</strong>'.html_safe }
+
+      .js-toggle-container.w-100
+        %ul.nav.nav-tabs.nav-links.gitlab-tabs{ role: 'tablist' }
+          %li.nav-item{ role: 'presentation' }
+            %a#blank-project-tab.nav-link.active{ href: '#blank-project-pane', data: { toggle: 'tab', track_label: 'blank_project', track_event: 'click_tab', track_value: '' }, role: 'tab' }
+              %span= s_('ProjectsNew|Create')
+          %li.nav-item{ role: 'presentation' }
+            %a#import-project-tab.nav-link{ href: '#import-project-pane', data: { toggle: 'tab', track_label: 'import_project', track_event: 'click_tab', track_value: '' }, role: 'tab' }
+              %span= s_('ProjectsNew|Import')
+
+        .tab-content.gitlab-tab-content.bg-white
+          #blank-project-pane.tab-pane.js-toggle-container.active{ role: 'tabpanel' }
+            = form_for @project, url: users_sign_up_projects_path, html: { class: 'new_project' } do |f|
+              = form_errors(@project)
+              = f.hidden_field :namespace_id, value: @project.namespace_id
+              #blank-project-name.row
+                .form-group.project-name.col-sm-12
+                  = f.label :name, class: 'label-bold' do
+                    %span= _('Project name')
+                  = f.text_field :name, class: 'form-control', autofocus: true, data: { track_label: 'blank_project', track_event: 'activate_form_input', track_property: 'project_name', track_value: '' }
+                  .form-text.text-muted= _('You can always edit this later')
+                .form-group.col-sm-12
+                  = f.label :path, class: 'label-bold' do
+                    %span= _('Project URL')
+                  .input-group.flex-nowrap
+                    .input-group-prepend.flex-shrink-0.has-tooltip{ title: "#{group_url(@project.namespace)}/" }
+                      .input-group-text
+                        #{group_url(@project.namespace)}/
+                    = f.text_field :path, class: 'form-control', required: true
+
+              = f.label :visibility_level, class: 'label-bold' do
+                = s_('ProjectsNew|Visibility Level')
+                = link_to sprite_icon('question-o'), help_page_path('public_access/public_access'), aria: { label: 'Documentation for Visibility Level' }, target: '_blank', rel: 'noopener noreferrer'
+              = render 'shared/visibility_level', f: f, visibility_level: visibility_level.to_i, can_change_visibility_level: true, form_model: @project, with_label: false
+
+              = f.submit _('Create project'), class: 'btn btn-success project-submit w-100', data: { track_label: 'blank_project', track_event: 'click_button', track_property: 'create_project', track_value: '' }
+
+          #import-project-pane.tab-pane.import-project-pane.js-toggle-container{ role: 'tabpanel' }
+            - if import_sources_enabled?
+              = render 'projects/import_project_pane'
+            - else
+              .nothing-here-block
+                %h4= s_('ProjectsNew|No import options available')
+                %p= s_('ProjectsNew|Contact an administrator to enable options for importing your project.')

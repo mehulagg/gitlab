@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Verify::Uploads do
+RSpec.describe Gitlab::Verify::Uploads do
   before do
     stub_uploads_object_storage(AvatarUploader)
   end

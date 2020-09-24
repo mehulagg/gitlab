@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ExpireBuildInstanceArtifactsWorker do
+RSpec.describe ExpireBuildInstanceArtifactsWorker do
   include RepoHelpers
 
   let(:worker) { described_class.new }
@@ -31,8 +31,8 @@ describe ExpireBuildInstanceArtifactsWorker do
     end
 
     context 'with not yet expired artifacts' do
-      set(:build) do
-        create(:ci_build, :artifacts, artifacts_expire_at: Time.now + 7.days)
+      let_it_be(:build) do
+        create(:ci_build, :artifacts, artifacts_expire_at: Time.current + 7.days)
       end
 
       it 'does not expire' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Oauth::GeoAuthController, :geo do
+RSpec.describe Oauth::GeoAuthController, :geo do
   include EE::GeoHelpers
 
   # The Geo OAuth workflow depends on the OAuth application and the URL
@@ -155,7 +155,7 @@ describe Oauth::GeoAuthController, :geo do
 
       before do
         allow_any_instance_of(Gitlab::Geo::Oauth::Session).to receive(:get_token).and_return('token')
-        allow_any_instance_of(Gitlab::Geo::Oauth::Session).to receive(:authenticate).and_return(id: 999999)
+        allow_any_instance_of(Gitlab::Geo::Oauth::Session).to receive(:authenticate).and_return(id: non_existing_record_id)
       end
 
       it 'handles non-existent local user error' do

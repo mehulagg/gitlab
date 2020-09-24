@@ -17,7 +17,7 @@ module Ci
     private
 
     def key(base_pipeline, head_pipeline)
-      super(base_pipeline, head_pipeline) + project.software_license_policies.workaround_cache_key
+      super(base_pipeline, head_pipeline) + [project.software_license_policies.cache_key]
     end
   end
 end

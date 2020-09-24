@@ -1,9 +1,14 @@
-/* eslint-disable class-methods-use-this */
-import _ from 'underscore';
+/* eslint-disable class-methods-use-this, no-param-reassign */
+/*
+  no-param-reassign is disabled because one method of BoardsStoreEE
+  modify the passed parameter in conformity with non-ee BoardsStore.
+*/
+
+import { sortBy } from 'lodash';
 import Cookies from 'js-cookie';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
 
@@ -39,7 +44,6 @@ class BoardsStoreEE {
             boardWeight,
             weightFeatureAvailable,
             scopedLabels,
-            scopedLabelsDocumentationLink,
           },
         } = this.$boardApp;
         this.store.boardConfig = {
@@ -53,7 +57,6 @@ class BoardsStoreEE {
         this.store.weightFeatureAvailable = parseBoolean(weightFeatureAvailable);
         this.store.scopedLabels = {
           enabled: parseBoolean(scopedLabels),
-          helpLink: scopedLabelsDocumentationLink,
         };
         this.initBoardFilters();
       }
@@ -69,6 +72,8 @@ class BoardsStoreEE {
         window.history.pushState(null, null, `?${this.store.filter.path}`);
       }
     };
+
+    this.store.updateIssueEpic = this.updateIssueEpic;
 
     sidebarEventHub.$on('updateWeight', this.updateWeight.bind(this));
 
@@ -96,7 +101,7 @@ class BoardsStoreEE {
 
     let { milestoneTitle } = this.store.boardConfig;
     if (this.store.boardConfig.milestoneId === 0) {
-      /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
+      /* eslint-disable-next-line @gitlab/require-i18n-strings */
       milestoneTitle = 'No+Milestone';
     } else {
       milestoneTitle = encodeURIComponent(milestoneTitle);
@@ -109,11 +114,16 @@ class BoardsStoreEE {
     let { weight } = this.store.boardConfig;
     if (weight !== -1) {
       if (weight === 0) {
-        /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
-        weight = 'No+Weight';
+        weight = '0';
       }
+      if (weight === -2) {
+        /* eslint-disable-next-line @gitlab/require-i18n-strings */
+        weight = 'None';
+      }
+
       updateFilterPath('weight', weight);
     }
+
     updateFilterPath('assignee_username', this.store.boardConfig.assigneeUsername);
     if (this.store.boardConfig.assigneeUsername) {
       this.store.cantEdit.push('assignee');
@@ -156,7 +166,7 @@ class BoardsStoreEE {
       position: 0,
     });
 
-    this.store.state.lists = _.sortBy(this.store.state.lists, 'position');
+    this.store.state.lists = sortBy(this.store.state.lists, 'position');
   }
 
   removePromotion() {
@@ -170,6 +180,14 @@ class BoardsStoreEE {
 
   promotionIsHidden() {
     return parseBoolean(Cookies.get('promotion_issue_board_hidden'));
+  }
+
+  setMaxIssueCountOnList(id, maxIssueCount) {
+    this.store.findList('id', id).maxIssueCount = maxIssueCount;
+  }
+
+  updateIssueEpic(issue, newEpic) {
+    issue.epic = newEpic;
   }
 
   updateWeight(newWeight, id) {

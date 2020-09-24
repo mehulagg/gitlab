@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class GroupMilestones < Grape::API
+  class GroupMilestones < Grape::API::Instance
     include MilestoneResponses
     include PaginationParams
 
-    before do
-      authenticate!
-    end
+    before { authenticate! }
 
     params do
       requires :id, type: String, desc: 'The ID of a group'
@@ -67,7 +65,7 @@ module API
         milestone = user_group.milestones.find(params[:milestone_id])
         Milestones::DestroyService.new(user_group, current_user).execute(milestone)
 
-        status(204)
+        no_content!
       end
 
       desc 'Get all issues for a single group milestone' do

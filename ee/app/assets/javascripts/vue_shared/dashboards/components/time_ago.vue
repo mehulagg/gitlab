@@ -1,12 +1,11 @@
 <script>
-import { GlTooltip } from '@gitlab/ui';
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
     GlTooltip,
-    Icon,
+    GlIcon,
   },
 
   mixins: [timeagoMixin],
@@ -26,14 +25,14 @@ export default {
       return this.tooltipTitle(this.time);
     },
     formattedTime() {
-      return this.timeFormated(this.time);
+      return this.timeFormatted(this.time);
     },
   },
 };
 </script>
 <template>
   <div class="text-secondary">
-    <icon
+    <gl-icon
       name="clock"
       class="dashboard-card-icon align-text-bottom js-dashboard-project-clock-icon"
     />

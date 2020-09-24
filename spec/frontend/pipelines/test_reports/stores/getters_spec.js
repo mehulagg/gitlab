@@ -1,17 +1,20 @@
+import { getJSONFixture } from 'helpers/fixtures';
 import * as getters from '~/pipelines/stores/test_reports/getters';
-import { testReports, testSuitesFormatted, testCasesFormatted } from '../mock_data';
+import { iconForTestStatus, formattedTime } from '~/pipelines/stores/test_reports/utils';
 
 describe('Getters TestReports Store', () => {
   let state;
 
+  const testReports = getJSONFixture('pipelines/test_report.json');
+
   const defaultState = {
     testReports,
-    selectedSuite: testReports.test_suites[0],
+    selectedSuiteIndex: 0,
   };
 
   const emptyState = {
     testReports: {},
-    selectedSuite: {},
+    selectedSuite: null,
   };
 
   beforeEach(() => {
@@ -28,7 +31,13 @@ describe('Getters TestReports Store', () => {
     it('should return the test suites', () => {
       setupState();
 
-      expect(getters.getTestSuites(state)).toEqual(testSuitesFormatted);
+      const suites = getters.getTestSuites(state);
+      const expected = testReports.test_suites.map(x => ({
+        ...x,
+        formattedTime: formattedTime(x.total_time),
+      }));
+
+      expect(suites).toEqual(expected);
     });
 
     it('should return an empty array when testReports is empty', () => {
@@ -38,11 +47,29 @@ describe('Getters TestReports Store', () => {
     });
   });
 
+  describe('getSelectedSuite', () => {
+    it('should return the selected suite', () => {
+      setupState();
+
+      const selectedSuite = getters.getSelectedSuite(state);
+      const expected = testReports.test_suites[state.selectedSuiteIndex];
+
+      expect(selectedSuite).toEqual(expected);
+    });
+  });
+
   describe('getSuiteTests', () => {
     it('should return the test cases inside the suite', () => {
       setupState();
 
-      expect(getters.getSuiteTests(state)).toEqual(testCasesFormatted);
+      const cases = getters.getSuiteTests(state);
+      const expected = testReports.test_suites[0].test_cases.map(x => ({
+        ...x,
+        formattedTime: formattedTime(x.execution_time),
+        icon: iconForTestStatus(x.status),
+      }));
+
+      expect(cases).toEqual(expected);
     });
 
     it('should return an empty array when testReports is empty', () => {

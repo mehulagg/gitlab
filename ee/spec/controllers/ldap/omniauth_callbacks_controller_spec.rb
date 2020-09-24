@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ldap::OmniauthCallbacksController do
+RSpec.describe Ldap::OmniauthCallbacksController do
   include_context 'Ldap::OmniauthCallbacksController'
 
   it "displays LDAP sync flash on first sign in" do
@@ -22,10 +22,12 @@ describe Ldap::OmniauthCallbacksController do
   context 'access denied' do
     let(:valid_login?) { false }
 
-    it 'logs a failure event' do
+    # This test used to pass on retry only, masking an actual bug. We want to
+    # make sure it passes on the first try.
+    it 'logs a failure event', retry: 0 do
       stub_licensed_features(extended_audit_events: true)
 
-      expect { post provider }.to change(SecurityEvent, :count).by(1)
+      expect { post provider }.to change(AuditEvent, :count).by(1)
     end
   end
 end

@@ -7,12 +7,12 @@ module QA
         module Geo
           module Nodes
             class New < QA::Page::Base
-              view 'ee/app/views/admin/geo/nodes/_form.html.haml' do
+              view 'ee/app/assets/javascripts/geo_node_form/components/geo_node_form_core.vue' do
                 element :node_name_field
                 element :node_url_field
               end
 
-              view 'ee/app/views/admin/geo/nodes/new.html.haml' do
+              view 'ee/app/assets/javascripts/geo_node_form/components/geo_node_form.vue' do
                 element :add_node_button
               end
 

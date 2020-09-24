@@ -4,24 +4,27 @@ module Gitlab
   module Middleware
     class ReadOnly
       class Controller
-        prepend_if_ee('EE::Gitlab::Middleware::ReadOnly::Controller') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
         DISALLOWED_METHODS = %w(POST PATCH PUT DELETE).freeze
         APPLICATION_JSON = 'application/json'
         APPLICATION_JSON_TYPES = %W{#{APPLICATION_JSON} application/vnd.git-lfs+json}.freeze
         ERROR_MESSAGE = 'You cannot perform write operations on a read-only instance'
 
         WHITELISTED_GIT_ROUTES = {
-          'projects/git_http' => %w{git_upload_pack git_receive_pack}
+          'repositories/git_http' => %w{git_upload_pack git_receive_pack}
         }.freeze
 
         WHITELISTED_GIT_LFS_ROUTES = {
-          'projects/lfs_api' => %w{batch},
-          'projects/lfs_locks_api' => %w{verify create unlock}
+          'repositories/lfs_api' => %w{batch},
+          'repositories/lfs_locks_api' => %w{verify create unlock}
         }.freeze
 
         WHITELISTED_GIT_REVISION_ROUTES = {
           'projects/compare' => %w{create}
+        }.freeze
+
+        WHITELISTED_SESSION_ROUTES = {
+          'sessions' => %w{destroy},
+          'admin/sessions' => %w{create destroy}
         }.freeze
 
         GRAPHQL_URL = '/api/graphql'
@@ -33,7 +36,7 @@ module Gitlab
 
         def call
           if disallowed_request? && Gitlab::Database.read_only?
-            Rails.logger.debug('GitLab ReadOnly: preventing possible non read-only operation') # rubocop:disable Gitlab/RailsLogger
+            Gitlab::AppLogger.debug('GitLab ReadOnly: preventing possible non read-only operation')
 
             if json_request?
               return [403, { 'Content-Type' => APPLICATION_JSON }, [{ 'message' => ERROR_MESSAGE }.to_json]]
@@ -85,12 +88,14 @@ module Gitlab
 
         # Overridden in EE module
         def whitelisted_routes
-          grack_route? || internal_route? || lfs_route? || compare_git_revisions_route? || sidekiq_route? || graphql_query?
+          workhorse_passthrough_route? || internal_route? || lfs_route? || compare_git_revisions_route? || sidekiq_route? || session_route? || graphql_query?
         end
 
-        def grack_route?
+        # URL for requests passed through gitlab-workhorse to rails-web
+        # https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/12
+        def workhorse_passthrough_route?
           # Calling route_hash may be expensive. Only do it if we think there's a possible match
-          return false unless
+          return false unless request.post? &&
             request.path.end_with?('.git/git-upload-pack', '.git/git-receive-pack')
 
           WHITELISTED_GIT_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
@@ -118,14 +123,24 @@ module Gitlab
           WHITELISTED_GIT_LFS_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
         end
 
+        def session_route?
+          # Calling route_hash may be expensive. Only do it if we think there's a possible match
+          return false unless request.post? && request.path.end_with?('/users/sign_out',
+            '/admin/session', '/admin/session/destroy')
+
+          WHITELISTED_SESSION_ROUTES[route_hash[:controller]]&.include?(route_hash[:action])
+        end
+
         def sidekiq_route?
           request.path.start_with?("#{relative_url}/admin/sidekiq")
         end
 
         def graphql_query?
-          request.post? && request.path.start_with?(GRAPHQL_URL)
+          request.post? && request.path.start_with?(File.join(relative_url, GRAPHQL_URL))
         end
       end
     end
   end
 end
+
+Gitlab::Middleware::ReadOnly::Controller.prepend_if_ee('EE::Gitlab::Middleware::ReadOnly::Controller')

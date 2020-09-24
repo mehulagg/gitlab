@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe API::Internal::Base do
+RSpec.describe API::Internal::Base do
   include EE::GeoHelpers
+  include APIInternalBaseHelpers
 
-  set(:primary_node) { create(:geo_node, :primary) }
-  set(:secondary_node) { create(:geo_node) }
+  let_it_be(:primary_url) { 'http://primary.example.com' }
+  let_it_be(:secondary_url) { 'http://secondary.example.com' }
+  let_it_be(:primary_node, reload: true) { create(:geo_node, :primary, url: primary_url) }
+  let_it_be(:secondary_node, reload: true) { create(:geo_node, url: secondary_url) }
+  let_it_be(:user) { create(:user) }
 
   describe 'POST /internal/post_receive', :geo do
-    set(:user) { create(:user) }
     let(:key) { create(:key, user: user) }
-    set(:project) { create(:project, :repository, :wiki_repo) }
+    let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
     let(:secret_token) { Gitlab::Shell.secret_token }
     let(:gl_repository) { "project-#{project.id}" }
     let(:reference_counter) { double('ReferenceCounter') }
@@ -38,7 +41,9 @@ describe API::Internal::Base do
     before do
       project.add_developer(user)
       allow(described_class).to receive(:identify).and_return(user)
-      allow_any_instance_of(Gitlab::Identifier).to receive(:identify).and_return(user)
+      allow_next_instance_of(Gitlab::Identifier) do |instance|
+        allow(instance).to receive(:identify).and_return(user)
+      end
       stub_current_geo_node(primary_node)
     end
 
@@ -48,91 +53,28 @@ describe API::Internal::Base do
         expect(git_push_http).to receive(:fetch_referrer_node).and_return(secondary_node)
       end
 
-      context 'when the secondary has a GeoNodeStatus' do
-        context 'when the GeoNodeStatus db_replication_lag_seconds is greater than 0' do
-          let!(:status) { create(:geo_node_status, geo_node: secondary_node, db_replication_lag_seconds: 17) }
+      it 'includes a message advising a redirection occurred' do
+        redirect_message = <<~STR
+        This request to a Geo secondary node will be forwarded to the
+        Geo primary node:
 
-          it 'includes current Geo secondary lag in the output' do
-            post api('/internal/post_receive'), params: valid_params
+          http://primary.example.com/#{project.full_path}.git
+        STR
 
-            expect(response).to have_gitlab_http_status(200)
-            expect(json_response['messages']).to include({
-              'type' => 'basic',
-              'message' => "Current replication lag: 17 seconds"
-            })
-          end
-        end
-
-        context 'when the GeoNodeStatus db_replication_lag_seconds is 0' do
-          let!(:status) { create(:geo_node_status, geo_node: secondary_node, db_replication_lag_seconds: 0) }
-
-          it 'does not include current Geo secondary lag in the output' do
-            post api('/internal/post_receive'), params: valid_params
-
-            expect(response).to have_gitlab_http_status(200)
-            expect(json_response['messages']).not_to include({ 'message' => a_string_matching('replication lag'), 'type' => anything })
-          end
-        end
-
-        context 'when the GeoNodeStatus db_replication_lag_seconds is nil' do
-          let!(:status) { create(:geo_node_status, geo_node: secondary_node, db_replication_lag_seconds: nil) }
-
-          it 'does not include current Geo secondary lag in the output' do
-            post api('/internal/post_receive'), params: valid_params
-
-            expect(response).to have_gitlab_http_status(200)
-            expect(json_response['messages']).not_to include({ 'message' => a_string_matching('replication lag'), 'type' => anything })
-          end
-        end
-      end
-
-      context 'when the secondary does not have a GeoNodeStatus' do
-        it 'does not include current Geo secondary lag in the output' do
-          post api('/internal/post_receive'), params: valid_params
-
-          expect(response).to have_gitlab_http_status(200)
-          expect(json_response['messages']).not_to include({ 'message' => a_string_matching('replication lag'), 'type' => anything })
-        end
-      end
-    end
-
-    context 'when the push was not redirected from a Geo secondary to the primary' do
-      before do
-        expect(Gitlab::Geo::GitPushHttp).to receive(:new).with(identifier, gl_repository).and_return(git_push_http)
-        expect(git_push_http).to receive(:fetch_referrer_node).and_return(nil)
-      end
-
-      it 'does not include current Geo secondary lag in the output' do
         post api('/internal/post_receive'), params: valid_params
 
-        expect(response).to have_gitlab_http_status(200)
-        expect(json_response['messages']).not_to include({ 'message' => a_string_matching('replication lag'), 'type' => anything })
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['messages']).to include({
+          'type' => 'basic',
+          'message' => redirect_message
+        })
       end
     end
   end
 
   describe "POST /internal/allowed" do
-    set(:user) { create(:user) }
-    set(:key) { create(:key, user: user) }
+    let_it_be(:key) { create(:key, user: user) }
     let(:secret_token) { Gitlab::Shell.secret_token }
-
-    context "for design repositories" do
-      set(:project) { create(:project) }
-      let(:gl_repository) { EE::Gitlab::GlRepository::DESIGN.identifier_for_subject(project) }
-
-      it "does not allow access" do
-        post(api("/internal/allowed"),
-             params: {
-               key_id: key.id,
-               project: project.full_path,
-               gl_repository: gl_repository,
-               secret_token: secret_token,
-               protocol: 'ssh'
-             })
-
-        expect(response).to have_gitlab_http_status(401)
-      end
-    end
 
     context "project alias" do
       let(:project) { create(:project, :public, :repository) }
@@ -158,7 +100,7 @@ describe API::Internal::Base do
           end
 
           it "does not allow access because project can't be found" do
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end
@@ -174,7 +116,7 @@ describe API::Internal::Base do
           end
 
           it "allows access" do
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
 
@@ -184,14 +126,14 @@ describe API::Internal::Base do
           end
 
           it "does not allow access because project can't be found" do
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end
     end
 
     context 'smartcard session required' do
-      set(:project) { create(:project, :repository, :wiki_repo) }
+      let_it_be(:project) { create(:project, :repository, :wiki_repo) }
 
       subject do
         post(
@@ -227,7 +169,7 @@ describe API::Internal::Base do
         it "allows access" do
           subject
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
@@ -235,7 +177,7 @@ describe API::Internal::Base do
         it "does not allow access" do
           subject
 
-          expect(response).to have_gitlab_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
           expect(json_response['message']).to eql('Project requires smartcard login. Please login to GitLab using a smartcard.')
         end
       end
@@ -248,7 +190,7 @@ describe API::Internal::Base do
         it "allows access" do
           subject
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end
@@ -266,6 +208,7 @@ describe API::Internal::Base do
           protocol: 'ssh'
         }
       end
+
       let(:allowed_ip) { '150.168.0.1' }
 
       before do
@@ -300,10 +243,41 @@ describe API::Internal::Base do
         end
       end
     end
+
+    context 'maintenance mode enabled' do
+      let_it_be(:project) { create(:project, :repository) }
+
+      before do
+        stub_application_setting(maintenance_mode: true)
+
+        project.add_developer(user)
+      end
+
+      context 'when action is git push' do
+        it 'returns forbidden' do
+          push(key, project)
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
+          expect(json_response["status"]).to be_falsey
+          expect(json_response["message"]).to eq(
+            'Git push is not allowed because this GitLab instance is currently in (read-only) maintenance mode.'
+          )
+          expect(user.reload.last_activity_on).to be_nil
+        end
+      end
+
+      context 'when action is not git push' do
+        it 'returns success' do
+          pull(key, project)
+
+          expect(response).to have_gitlab_http_status(:success)
+          expect(json_response["status"]).to be_truthy
+        end
+      end
+    end
   end
 
   describe "POST /internal/lfs_authenticate", :geo do
-    let(:user) { create(:user) }
     let(:project) { create(:project, :repository) }
     let(:secret_token) { Gitlab::Shell.secret_token }
 
@@ -318,7 +292,7 @@ describe API::Internal::Base do
 
         lfs_auth_user(user.id, project)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['repository_http_path']).to eq(geo_primary_http_url_to_repo(project))
       end
     end
@@ -332,6 +306,58 @@ describe API::Internal::Base do
           project: project.full_path
         }
       )
+    end
+  end
+
+  describe 'POST /internal/personal_access_token' do
+    let_it_be(:key) { create(:key, user: user) }
+
+    let(:instance_level_max_personal_access_token_lifetime) { nil }
+    let(:secret_token) { Gitlab::Shell.secret_token }
+
+    before do
+      stub_licensed_features(personal_access_token_expiration_policy: !!instance_level_max_personal_access_token_lifetime)
+      stub_application_setting(max_personal_access_token_lifetime: instance_level_max_personal_access_token_lifetime)
+    end
+
+    context 'with a max token lifetime on the instance' do
+      let(:instance_level_max_personal_access_token_lifetime) { 10 }
+
+      it 'returns an error message when the expiry date exceeds the max token lifetime' do
+        post api('/internal/personal_access_token'),
+             params: {
+               secret_token: secret_token,
+               key_id:  key.id,
+               name: 'newtoken',
+               scopes: %w(read_api read_repository),
+               expires_at: (instance_level_max_personal_access_token_lifetime + 1).days.from_now.to_date.to_s
+             }
+
+        aggregate_failures do
+          expect(json_response['success']).to eq(false)
+          expect(json_response['message']).to eq("Failed to create token: Expires at is invalid")
+        end
+      end
+
+      it 'returns a valid token when the expiry date does not exceed the max token lifetime' do
+        expires_at = instance_level_max_personal_access_token_lifetime.days.from_now.to_date.to_s
+
+        post api('/internal/personal_access_token'),
+             params: {
+               secret_token: secret_token,
+               key_id:  key.id,
+               name: 'newtoken',
+               scopes: %w(read_api read_repository),
+               expires_at: expires_at
+             }
+
+        aggregate_failures do
+          expect(json_response['success']).to eq(true)
+          expect(json_response['token']).to match(/\A\S{20}\z/)
+          expect(json_response['scopes']).to match_array(%w(read_api read_repository))
+          expect(json_response['expires_at']).to eq(expires_at)
+        end
+      end
     end
   end
 end

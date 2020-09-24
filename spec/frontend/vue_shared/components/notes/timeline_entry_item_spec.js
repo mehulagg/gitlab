@@ -1,14 +1,11 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 
 describe(`TimelineEntryItem`, () => {
   let wrapper;
 
   const factory = (options = {}) => {
-    const localVue = createLocalVue();
-
     wrapper = shallowMount(TimelineEntryItem, {
-      localVue,
       ...options,
     });
   };
@@ -20,9 +17,9 @@ describe(`TimelineEntryItem`, () => {
   it('renders correctly', () => {
     factory();
 
-    expect(wrapper.is('.timeline-entry')).toBe(true);
+    expect(wrapper.classes()).toContain('timeline-entry');
 
-    expect(wrapper.contains('.timeline-entry-inner')).toBe(true);
+    expect(wrapper.find('.timeline-entry-inner').exists()).toBe(true);
   });
 
   it('accepts default slot', () => {

@@ -13,6 +13,17 @@ function hideEndFade($scrollingTabs) {
 
 function initDeferred() {
   $(document).trigger('init.scrolling-tabs');
+
+  const whatsNewTriggerEl = document.querySelector('.js-whats-new-trigger');
+  if (whatsNewTriggerEl) {
+    whatsNewTriggerEl.addEventListener('click', () => {
+      import(/* webpackChunkName: 'whatsNewApp' */ '~/whats_new')
+        .then(({ default: initWhatsNew }) => {
+          initWhatsNew();
+        })
+        .catch(() => {});
+    });
+  }
 }
 
 export default function initLayoutNav() {

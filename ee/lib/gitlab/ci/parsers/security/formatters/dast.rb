@@ -6,11 +6,53 @@ module Gitlab
       module Security
         module Formatters
           class Dast
-            def initialize(vulnerability)
-              @vulnerability = vulnerability
+            FORMAT_VERSION = '2.0'.freeze
+
+            def initialize(report)
+              @report = report
             end
 
-            def format(instance, hostname)
+            def self.satisfies?(report)
+              report.key?('site') && !report.key?('vulnerabilities')
+            end
+
+            def format
+              {
+                'vulnerabilities' => extract_vulnerabilities_from(Array.wrap(@report['site'])),
+                'version' => FORMAT_VERSION
+              }
+            end
+
+            private
+
+            # Log messages to be added here to track usage of legacy reports,
+            # parsing failures and any other scenarios: https://gitlab.com/gitlab-org/gitlab/issues/34668
+            def extract_vulnerabilities_from(sites = [])
+              return [] if sites.empty?
+
+              vulnerabilities = []
+
+              sites.each do |site|
+                site_report = Hash(site)
+
+                next if site_report.blank?
+
+                # If host is blank for legacy reports
+                host = site_report['@name']
+
+                site_report['alerts'].each do |vulnerability|
+                  vulnerabilities += flatten_vulnerabilities(vulnerability, host)
+                end
+              end
+
+              vulnerabilities
+            end
+
+            def flatten_vulnerabilities(vulnerability, host)
+              vulnerability['instances'].map { |instance| format_vulnerability(vulnerability, instance, host) }
+            end
+
+            def format_vulnerability(vulnerability, instance, hostname)
               {
                 'category' => 'dast',
                 'message' => vulnerability['name'],
@@ -19,7 +61,7 @@ module Gitlab
                 'severity' => severity(vulnerability['riskcode']),
                 'solution' => sanitize(vulnerability['solution']),
                 'confidence' => confidence(vulnerability['confidence']),
-                'scanner' => { 'id' => 'zaproxy', 'name' => 'ZAProxy' },
+                'scanner' => { 'id' => 'zaproxy', 'name' => 'ZAProxy', 'vendor' => { 'name' => 'GitLab' } },
                 'identifiers' => [
                   {
                     'type' => 'ZAProxy_PluginId',
@@ -49,10 +91,6 @@ module Gitlab
                 }
               }
             end
-
-            private
-
-            attr_reader :vulnerability
 
             SEVERITY_MAPPING = %w{info low medium high}.freeze
             CONFIDENCE_MAPPING = %w{ignore low medium high confirmed}.freeze

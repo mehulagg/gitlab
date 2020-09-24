@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # Also see spec/graphql/features/authorization_spec.rb for
 # integration tests of AuthorizeFieldService
-describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
+RSpec.describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
   def type(type_authorizations = [])
     Class.new(Types::BaseObject) do
       graphql_name 'TestType'
@@ -25,6 +25,7 @@ describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
   end
 
   let(:current_user) { double(:current_user) }
+
   subject(:service) { described_class.new(field) }
 
   describe '#authorized_resolve' do
@@ -34,6 +35,7 @@ describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
     let(:schema) { GraphQL::Schema.define(query: query_type, mutation: nil)}
     let(:query_context) { OpenStruct.new(schema: schema) }
     let(:context) { GraphQL::Query::Context.new(query: OpenStruct.new(schema: schema, context: query_context), values: { current_user: current_user }, object: nil) }
+
     subject(:resolved) { service.authorized_resolve.call(presented_type, {}, context) }
 
     context 'scalar types' do
@@ -79,6 +81,16 @@ describe Gitlab::Graphql::Authorize::AuthorizeFieldService do
         let(:expected_permissions) { [:read_field] }
 
         it_behaves_like 'checking permissions on the presented object'
+      end
+    end
+
+    context 'when the field is a connection' do
+      context 'when it resolves to nil' do
+        let(:field) { type_with_field(Types::QueryType.connection_type, :read_field, nil).fields['testField'].to_graphql }
+
+        it 'does not fail when authorizing' do
+          expect(resolved).to be_nil
+        end
       end
     end
 

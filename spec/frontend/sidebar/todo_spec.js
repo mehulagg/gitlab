@@ -1,8 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 
 import SidebarTodos from '~/sidebar/components/todo_toggle/todo.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const defaultProps = {
   issuableId: 1,
@@ -14,7 +13,6 @@ describe('SidebarTodo', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(SidebarTodos, {
-      sync: false,
       propsData: {
         ...defaultProps,
         ...props,
@@ -37,7 +35,7 @@ describe('SidebarTodo', () => {
 
   it.each`
     isTodo   | iconClass        | label             | icon
-    ${false} | ${''}            | ${'Add a To Do'}  | ${'todo-add'}
+    ${false} | ${''}            | ${'Add a To-Do'}  | ${'todo-add'}
     ${true}  | ${'todo-undone'} | ${'Mark as done'} | ${'todo-done'}
   `(
     'renders proper button when `isTodo` prop is `$isTodo`',
@@ -46,11 +44,11 @@ describe('SidebarTodo', () => {
 
       expect(
         wrapper
-          .find(Icon)
+          .find(GlIcon)
           .classes()
           .join(' '),
       ).toStrictEqual(iconClass);
-      expect(wrapper.find(Icon).props('name')).toStrictEqual(icon);
+      expect(wrapper.find(GlIcon).props('name')).toStrictEqual(icon);
       expect(wrapper.find('button').text()).toBe(label);
     },
   );
@@ -60,7 +58,9 @@ describe('SidebarTodo', () => {
       createComponent();
       wrapper.find('button').trigger('click');
 
-      expect(wrapper.emitted().toggleTodo).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().toggleTodo).toBeTruthy();
+      });
     });
 
     it('renders component container element with proper data attributes', () => {
@@ -81,13 +81,19 @@ describe('SidebarTodo', () => {
     it('renders button icon when `collapsed` prop is `true`', () => {
       createComponent({ collapsed: true });
 
-      expect(wrapper.find(Icon).props('name')).toBe('todo-done');
+      expect(wrapper.find(GlIcon).props('name')).toBe('todo-done');
     });
 
     it('renders loading icon when `isActionActive` prop is true', () => {
       createComponent({ isActionActive: true });
 
       expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    });
+
+    it('hides button icon when `isActionActive` prop is true', () => {
+      createComponent({ collapsed: true, isActionActive: true });
+
+      expect(wrapper.find(GlIcon).isVisible()).toBe(false);
     });
   });
 });

@@ -1,11 +1,11 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import { last } from 'lodash';
 import { scaleLinear, scaleThreshold } from 'd3-scale';
 import { select } from 'd3-selection';
 import dateFormat from 'dateformat';
 import { getDayName, getDayDifference } from '~/lib/utils/datetime_utility';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { n__, s__, __ } from '~/locale';
 
 const d3 = { select, scaleLinear, scaleThreshold };
@@ -18,7 +18,7 @@ const firstDayOfWeekChoices = Object.freeze({
 
 const LOADING_HTML = `
   <div class="text-center">
-    <i class="fa fa-spinner fa-spin user-calendar-activities-loading"></i>
+    <div class="spinner spinner-md"></div>
   </div>
 `;
 
@@ -164,11 +164,11 @@ export default class ActivityCalendar {
       .enter()
       .append('g')
       .attr('transform', (group, i) => {
-        _.each(group, (stamp, a) => {
+        group.forEach((stamp, a) => {
           if (a === 0 && stamp.day === this.firstDayOfWeek) {
             const month = stamp.date.getMonth();
             const x = this.daySizeWithSpace * i + 1 + this.daySizeWithSpace;
-            const lastMonth = _.last(this.months);
+            const lastMonth = last(this.months);
             if (
               lastMonth == null ||
               (month !== lastMonth.month && x - this.daySizeWithSpace !== lastMonth.x)

@@ -13,7 +13,7 @@ module EE
           end
 
           def check_cross_project_pipelines_feature!
-            if job_token_authentication? && !@project.feature_available?(:cross_project_pipelines)
+            if job_token_authentication? && !user_project.feature_available?(:cross_project_pipelines)
               not_found!('Project')
             end
           end

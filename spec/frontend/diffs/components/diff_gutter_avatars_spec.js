@@ -1,9 +1,8 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import DiffGutterAvatars from '~/diffs/components/diff_gutter_avatars.vue';
 import discussionsMockData from '../mock_data/diff_discussions';
 
-const localVue = createLocalVue();
-const getDiscussionsMockData = () => [Object.assign({}, discussionsMockData)];
+const getDiscussionsMockData = () => [{ ...discussionsMockData }];
 
 describe('DiffGutterAvatars', () => {
   let wrapper;
@@ -14,8 +13,6 @@ describe('DiffGutterAvatars', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(DiffGutterAvatars, {
-      localVue,
-      sync: false,
       propsData: {
         ...props,
       },
@@ -41,7 +38,9 @@ describe('DiffGutterAvatars', () => {
     it('should emit toggleDiscussions event on button click', () => {
       findCollapseButton().trigger('click');
 
-      expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
+      });
     });
   });
 
@@ -71,13 +70,17 @@ describe('DiffGutterAvatars', () => {
         .at(0)
         .trigger('click');
 
-      expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
+      });
     });
 
     it('should emit toggleDiscussions event on more count text click', () => {
       findMoreCount().trigger('click');
 
-      expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().toggleLineDiscussions).toBeTruthy();
+      });
     });
   });
 
@@ -107,7 +110,7 @@ describe('DiffGutterAvatars', () => {
     it('returns truncated version of comment if it is longer than max length', () => {
       const note = wrapper.vm.discussions[0].notes[1];
 
-      expect(wrapper.vm.getTooltipText(note)).toEqual('Fatih Acet: comment 2 is r...');
+      expect(wrapper.vm.getTooltipText(note)).toEqual('Fatih Acet: comment 2 is rea…');
     });
   });
 });

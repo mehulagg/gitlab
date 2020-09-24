@@ -12,8 +12,11 @@ module QA
     end
 
     module Page
+      autoload :OperationsDashboard, 'qa/ee/page/operations_dashboard'
+
       module Component
-        autoload :DesignManagement, 'qa/ee/page/component/design_management'
+        autoload :LicenseManagement, 'qa/ee/page/component/license_management'
+        autoload :SecureReport, 'qa/ee/page/component/secure_report'
 
         module IssueBoard
           autoload :Show, 'qa/ee/page/component/issue_board/show'
@@ -31,7 +34,15 @@ module QA
       module Group
         autoload :Menu, 'qa/ee/page/group/menu'
         autoload :SamlSSOSignIn, 'qa/ee/page/group/saml_sso_sign_in'
+        autoload :SamlSSOSignUp, 'qa/ee/page/group/saml_sso_sign_up'
         autoload :Members, 'qa/ee/page/group/members'
+        autoload :ContributionAnalytics, 'qa/ee/page/group/contribution_analytics'
+
+        module Iteration
+          autoload :Index, 'qa/ee/page/group/iteration/index'
+          autoload :New, 'qa/ee/page/group/iteration/new'
+          autoload :Show, 'qa/ee/page/group/iteration/show'
+        end
 
         module Settings
           autoload :SamlSSO, 'qa/ee/page/group/settings/saml_sso'
@@ -46,6 +57,8 @@ module QA
 
       module Main
         autoload :Banner, 'qa/ee/page/main/banner'
+        autoload :Menu, 'qa/ee/page/main/menu'
+        autoload :SignUp, 'qa/ee/page/main/sign_up'
       end
 
       module Admin
@@ -65,7 +78,7 @@ module QA
 
         module Settings
           autoload :Templates, 'qa/ee/page/admin/settings/templates'
-          autoload :Integration, 'qa/ee/page/admin/settings/integration'
+          autoload :Elasticsearch, 'qa/ee/page/admin/settings/elasticsearch'
           autoload :Preferences, 'qa/ee/page/admin/settings/preferences'
 
           module Component
@@ -73,6 +86,16 @@ module QA
             autoload :Elasticsearch, 'qa/ee/page/admin/settings/component/elasticsearch'
           end
         end
+
+        module Overview
+          module Groups
+            autoload :Edit, 'qa/ee/page/admin/overview/groups/edit'
+          end
+        end
+      end
+
+      module Milestone
+        autoload :Show, 'qa/ee/page/milestone/show'
       end
 
       module Profile
@@ -84,12 +107,16 @@ module QA
         autoload :Show, 'qa/ee/page/project/show'
         autoload :Menu, 'qa/ee/page/project/menu'
 
+        module Artifact
+          autoload :Show, 'qa/ee/page/project/artifact/show'
+        end
+
         module SubMenus
-          autoload :Packages, 'qa/ee/page/project/sub_menus/packages'
           autoload :SecurityCompliance, 'qa/ee/page/project/sub_menus/security_compliance'
           autoload :Repository, 'qa/ee/page/project/sub_menus/repository'
           autoload :Settings, 'qa/ee/page/project/sub_menus/settings'
           autoload :Project, 'qa/ee/page/project/sub_menus/project'
+          autoload :LicenseCompliance, 'qa/ee/page/project/sub_menus/license_compliance'
         end
 
         module Issue
@@ -101,19 +128,17 @@ module QA
           autoload :Show, 'qa/ee/page/project/wiki/show'
         end
 
-        module Milestone
-          autoload :Show, 'qa/ee/page/project/milestone/show'
-        end
-
         module Settings
           autoload :ProtectedBranches, 'qa/ee/page/project/settings/protected_branches'
+          autoload :Main, 'qa/ee/page/project/settings/main'
           autoload :MirroringRepositories, 'qa/ee/page/project/settings/mirroring_repositories'
+          autoload :ProtectedTags, 'qa/ee/page/project/settings/protected_tags'
           autoload :MergeRequest, 'qa/ee/page/project/settings/merge_request'
+          autoload :MergeRequestApprovals, 'qa/ee/page/project/settings/merge_request_approvals'
           autoload :Integrations, 'qa/ee/page/project/settings/integrations'
           autoload :Repository, 'qa/ee/page/project/settings/repository'
           autoload :PushRules, 'qa/ee/page/project/settings/push_rules'
-          autoload :CICD, 'qa/ee/page/project/settings/ci_cd.rb'
-          autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance.rb'
+          autoload :LicenseCompliance, 'qa/ee/page/project/settings/license_compliance'
 
           module Services
             autoload :Jenkins, 'qa/ee/page/project/settings/services/jenkins'
@@ -121,14 +146,9 @@ module QA
         end
 
         module Operations
-          module Kubernetes
-            autoload :Show, 'qa/ee/page/project/operations/kubernetes/show'
+          module Metrics
+            autoload :Show, 'qa/ee/page/project/operations/metrics/show'
           end
-        end
-
-        module Packages
-          autoload :Index, 'qa/ee/page/project/packages/index'
-          autoload :Show, 'qa/ee/page/project/packages/show'
         end
 
         module Pipeline
@@ -138,10 +158,17 @@ module QA
         module Secure
           autoload :Show, 'qa/ee/page/project/secure/show'
           autoload :DependencyList, 'qa/ee/page/project/secure/dependency_list'
+          autoload :SecurityDashboard, 'qa/ee/page/project/secure/security_dashboard'
+          autoload :VulnerabilityDetails, 'qa/ee/page/project/secure/vulnerability_details'
+          autoload :LicenseCompliance, 'qa/ee/page/project/secure/license_compliance'
         end
 
         module PathLocks
           autoload :Index, 'qa/ee/page/project/path_locks/index'
+        end
+
+        module Packages
+          autoload :Index, 'qa/ee/page/project/packages/index'
         end
       end
 
@@ -157,7 +184,6 @@ module QA
         module Epic
           autoload :Index, 'qa/ee/page/group/epic/index'
           autoload :Show, 'qa/ee/page/group/epic/show'
-          autoload :Edit, 'qa/ee/page/group/epic/edit'
         end
 
         module Secure
@@ -173,8 +199,9 @@ module QA
     module Resource
       autoload :License, 'qa/ee/resource/license'
       autoload :Epic, 'qa/ee/resource/epic'
-      autoload :ProjectMilestone, 'qa/ee/resource/project_milestone'
-      autoload :GroupLabel, 'qa/ee/resource/group_label.rb'
+      autoload :GroupLabel, 'qa/ee/resource/group_label'
+      autoload :GroupIteration, 'qa/ee/resource/group_iteration'
+      autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
 
       module Board
         autoload :BaseBoard, 'qa/ee/resource/board/base_board'
@@ -188,6 +215,7 @@ module QA
 
           module Project
             autoload :BaseBoardList, 'qa/ee/resource/board/board_list/project/base_board_list'
+            autoload :AssigneeBoardList, 'qa/ee/resource/board/board_list/project/assignee_board_list'
             autoload :LabelBoardList, 'qa/ee/resource/board/board_list/project/label_board_list'
             autoload :MilestoneBoardList, 'qa/ee/resource/board/board_list/project/milestone_board_list'
           end

@@ -1,5 +1,7 @@
 import { KUBERNETES_VERSIONS } from '../constants';
 
+const kubernetesVersion = KUBERNETES_VERSIONS.find(version => version.default).value;
+
 export default () => ({
   createRolePath: null,
 
@@ -10,15 +12,22 @@ export default () => ({
   accountId: '',
   externalId: '',
 
+  roleArn: '',
+
   clusterName: '',
   environmentScope: '*',
-  kubernetesVersion: [KUBERNETES_VERSIONS].value,
+  kubernetesVersion,
   selectedRegion: '',
   selectedRole: '',
   selectedKeyPair: '',
   selectedVpc: '',
-  selectedSubnet: '',
+  selectedSubnet: [],
   selectedSecurityGroup: '',
+  selectedInstanceType: 'm5.large',
+  nodeCount: '3',
+
+  isCreatingCluster: false,
+  createClusterError: false,
 
   gitlabManagedCluster: true,
 });

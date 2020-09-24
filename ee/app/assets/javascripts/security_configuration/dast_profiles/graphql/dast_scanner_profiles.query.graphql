@@ -1,0 +1,32 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query DastScannerProfiles(
+  $fullPath: ID!
+  $after: String
+  $before: String
+  $first: Int
+  $last: Int
+) {
+  project(fullPath: $fullPath) {
+    scannerProfiles: dastScannerProfiles(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        cursor
+        node {
+          id: globalId
+          profileName
+          spiderTimeout
+          targetTimeout
+          editPath
+        }
+      }
+    }
+  }
+}

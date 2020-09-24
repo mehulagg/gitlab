@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PathLocksController do
+RSpec.describe Projects::PathLocksController do
   let(:project) { create(:project, :repository, :public) }
   let(:user)    { project.owner }
   let(:file_path) { 'files/lfs/lfs_object.iso' }
@@ -17,7 +17,7 @@ describe Projects::PathLocksController do
     it 'displays the lock paths' do
       get :index, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     context 'when the user does not have access' do
@@ -27,7 +27,7 @@ describe Projects::PathLocksController do
       it 'does not allow access' do
         get :index, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -43,7 +43,7 @@ describe Projects::PathLocksController do
           toggle_lock(file_path)
 
           expect(PathLock.count).to eq(1)
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it "locks the file in LFS" do
@@ -61,13 +61,13 @@ describe Projects::PathLocksController do
         it 'locks the directory' do
           expect { toggle_lock('bar/') }.to change { PathLock.count }.to(1)
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'does not locks the directory through LFS' do
           expect { toggle_lock('bar/') }.not_to change { LfsFileLock.count }
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
@@ -80,7 +80,7 @@ describe Projects::PathLocksController do
           it 'unlocks the file' do
             expect { toggle_lock(file_path) }.to change { PathLock.count }.to(0)
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           it "unlocks the file in LFS" do
@@ -97,7 +97,7 @@ describe Projects::PathLocksController do
         it 'unlocks the directory' do
           expect { toggle_lock('bar') }.to change { PathLock.count }.to(0)
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'does not call the LFS unlock service' do
@@ -112,7 +112,7 @@ describe Projects::PathLocksController do
       it 'locks the file' do
         expect { toggle_lock(file_path) }.to change { PathLock.count }.to(1)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it "doesn't lock the file in LFS" do
@@ -124,7 +124,7 @@ describe Projects::PathLocksController do
 
         expect { toggle_lock(file_path) }.to change { PathLock.count }.to(0)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -135,7 +135,7 @@ describe Projects::PathLocksController do
       it 'does not allow access' do
         toggle_lock(file_path)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

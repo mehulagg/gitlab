@@ -1,14 +1,13 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: index, howto
 ---
 
 # GitLab CI/CD for external repositories **(PREMIUM)**
 
->[Introduced][ee-4642] in [GitLab Premium][eep] 10.6.
-
-NOTE: **Note:**
-This feature [is available for free](https://about.gitlab.com/blog/2019/09/09/ci-cd-github-extended-again/) to
-GitLab.com users until March 22nd, 2020.
+>[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4642) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.6.
 
 GitLab CI/CD can be used with:
 
@@ -19,10 +18,10 @@ GitLab CI/CD can be used with:
 Instead of moving your entire project to GitLab, you can connect your
 external repository to get the benefits of GitLab CI/CD.
 
-Connecting an external repository will set up [repository mirroring][mirroring]
+Connecting an external repository will set up [repository mirroring](../../user/project/repository/repository_mirroring.md)
 and create a lightweight project with issues, merge requests, wiki, and
 snippets disabled. These features
-[can be re-enabled later][settings].
+[can be re-enabled later](../../user/project/settings/index.md#sharing-and-permissions).
 
 To connect to an external repository:
 
@@ -35,7 +34,7 @@ To connect to an external repository:
 
 ## Pipelines for external pull requests
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/65139) in GitLab Premium 12.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/65139) in GitLab Premium 12.3.
 
 When using GitLab CI/CD with an [external repository on GitHub](github_integration.md),
 it's possible to run a pipeline in the context of a Pull Request.
@@ -91,15 +90,10 @@ The variable names are prefixed with `CI_EXTERNAL_PULL_REQUEST_`.
 
 ### Limitations
 
-This feature currently does not support Pull Requests from fork repositories. Any Pull Requests from fork repositories will be ignored.  [Read more](https://gitlab.com/gitlab-org/gitlab/issues/5667).
+This feature currently does not support Pull Requests from fork repositories. Any Pull Requests from fork repositories will be ignored.  [Read more](https://gitlab.com/gitlab-org/gitlab/-/issues/5667).
 
 Given that GitLab will create 2 pipelines, if changes are pushed to a remote branch that
 references an open Pull Request, both will contribute to the status of the Pull Request
 via GitHub integration. If you want to exclusively run pipelines on external pull
 requests and not on branches you can add `except: [branches]` to the job specs.
-[Read more](https://gitlab.com/gitlab-org/gitlab/issues/24089#workaround).
-
-[ee-4642]: https://gitlab.com/gitlab-org/gitlab/merge_requests/4642
-[eep]: https://about.gitlab.com/pricing/
-[mirroring]: ../../user/project/repository/repository_mirroring.md
-[settings]: ../../user/project/settings/index.md#sharing-and-permissions
+[Read more](https://gitlab.com/gitlab-org/gitlab/-/issues/24089#workaround).

@@ -2,22 +2,25 @@
 
 require 'spec_helper'
 
-describe Tree do
+RSpec.describe Tree do
   let(:repository) { create(:project, :repository).repository }
   let(:sha) { repository.root_ref }
 
   subject { described_class.new(repository, '54fcc214') }
 
   describe '#readme' do
-    class FakeBlob
-      attr_reader :name
+    before do
+      stub_const('FakeBlob', Class.new)
+      FakeBlob.class_eval do
+        attr_reader :name
 
-      def initialize(name)
-        @name = name
-      end
+        def initialize(name)
+          @name = name
+        end
 
-      def readme?
-        name =~ /^readme/i
+        def readme?
+          name =~ /^readme/i
+        end
       end
     end
 

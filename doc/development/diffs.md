@@ -8,12 +8,7 @@ Currently we rely on different sources to present diffs, these include:
 
 ## Deep Dive
 
-In Jaunary 2019, Oswaldo Ferreira hosted a [Deep Dive] on GitLab's Diffs and Commenting on Diffs functionality to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube], and the slides on [Google Slides] and in [PDF]. Everything covered in this deep dive was accurate as of GitLab 11.7, and while specific details may have changed since then, it should still serve as a good introduction.
-
-[Deep Dive]: https://gitlab.com/gitlab-org/create-stage/issues/1
-[recording on YouTube]: https://www.youtube.com/watch?v=K6G3gMcFyek
-[Google Slides]: https://docs.google.com/presentation/d/1bGutFH2AT3bxOPZuLMGl1ANWHqFnrxwQwjiwAZkF-TU/edit
-[PDF]: https://gitlab.com/gitlab-org/create-stage/uploads/b5ad2f336e0afcfe0f99db0af0ccc71a/Create_Deep_Dive__Diffs_and_commenting_on_diffs.pdf
+In January 2019, Oswaldo Ferreira hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's Diffs and Commenting on Diffs functionality to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=K6G3gMcFyek), and the slides on [Google Slides](https://docs.google.com/presentation/d/1bGutFH2AT3bxOPZuLMGl1ANWHqFnrxwQwjiwAZkF-TU/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/b5ad2f336e0afcfe0f99db0af0ccc71a/). Everything covered in this deep dive was accurate as of GitLab 11.7, and while specific details may have changed since then, it should still serve as a good introduction.
 
 ## Architecture overview
 
@@ -26,7 +21,7 @@ The diffs fetching process _limits_ single file diff sizes and the overall size 
 then persisted on `merge_request_diff_files` table.
 
 Even though diffs larger than 10% of the value of `ApplicationSettings#diff_max_patch_bytes` are collapsed,
-we still keep them on Postgres. However, diff files larger than defined _safety limits_
+we still keep them on PostgreSQL. However, diff files larger than defined _safety limits_
 (see the [Diff limits section](#diff-limits)) are _not_ persisted in the database.
 
 In order to present diffs information on the Merge Request diffs page, we:
@@ -98,7 +93,8 @@ Gitlab::Git::DiffCollection.collection_limits[:max_bytes] = Gitlab::Git::DiffCol
 
 No more files will be rendered at all if 5 megabytes have already been rendered.
 
-*Note:* All collection limit parameters are currently sent and applied on Gitaly. That is, once the limit is surpassed,
+NOTE: **Note:**
+All collection limit parameters are currently sent and applied on Gitaly. That is, once the limit is surpassed,
 Gitaly will only return the safe amount of data to be persisted on `merge_request_diff_files`.
 
 ### Individual diff file limits
@@ -112,7 +108,8 @@ That is, it's equivalent to 10kb if the maximum allowed value is 100kb.
 The diff will still be persisted and expandable if the patch size doesn't
 surpass `ApplicationSettings#diff_max_patch_bytes`.
 
-*Note:* Although this nomenclature (Collapsing) is also used on Gitaly, this limit is only used on GitLab (hardcoded - not sent to Gitaly).
+NOTE: **Note:**
+Although this nomenclature (Collapsing) is also used on Gitaly, this limit is only used on GitLab (hardcoded - not sent to Gitaly).
 Gitaly will only return `Diff.Collapsed` (RPC) when surpassing collection limits.
 
 #### Not expandable patches (too large)
@@ -126,7 +123,8 @@ Commit::DIFF_SAFE_LINES = Gitlab::Git::DiffCollection::DEFAULT_LIMITS[:max_lines
 
 File diff will be suppressed (technically different from collapsed, but behaves the same, and is expandable) if it has more than 5000 lines.
 
-*Note:* This limit is currently hardcoded and only applied on GitLab.
+NOTE: **Note:**
+This limit is currently hardcoded and only applied on GitLab.
 
 ## Viewers
 

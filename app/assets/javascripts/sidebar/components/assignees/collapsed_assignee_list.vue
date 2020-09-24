@@ -1,6 +1,6 @@
 <script>
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import { GlTooltipDirective } from '@gitlab/ui';
 import CollapsedAssignee from './collapsed_assignee.vue';
 
 const DEFAULT_MAX_COUNTER = 99;
@@ -12,6 +12,7 @@ export default {
   },
   components: {
     CollapsedAssignee,
+    GlIcon,
   },
   props: {
     users: {
@@ -102,7 +103,7 @@ export default {
     :title="tooltipTitle"
     class="sidebar-collapsed-icon sidebar-collapsed-user"
   >
-    <i v-if="hasNoUsers" :aria-label="__('None')" class="fa fa-user"> </i>
+    <gl-icon v-if="hasNoUsers" name="user" :aria-label="__('None')" />
     <collapsed-assignee
       v-for="user in collapsedUsers"
       :key="user.id"

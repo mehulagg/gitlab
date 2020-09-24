@@ -3,7 +3,12 @@
 module Clusters
   module Applications
     class Ingress < ApplicationRecord
-      VERSION = '1.22.1'
+      VERSION = '1.40.2'
+      INGRESS_CONTAINER_NAME = 'nginx-ingress-controller'
+      MODSECURITY_LOG_CONTAINER_NAME = 'modsecurity-log'
+      MODSECURITY_MODE_LOGGING = "DetectionOnly"
+      MODSECURITY_MODE_BLOCKING = "On"
+      MODSECURITY_OWASP_RULES_FILE = "/etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf"
 
       self.table_name = 'clusters_applications_ingress'
 
@@ -12,13 +17,22 @@ module Clusters
       include ::Clusters::Concerns::ApplicationVersion
       include ::Clusters::Concerns::ApplicationData
       include AfterCommitQueue
+      include UsageStatistics
 
       default_value_for :ingress_type, :nginx
+      default_value_for :modsecurity_enabled, true
       default_value_for :version, VERSION
+      default_value_for :modsecurity_mode, :logging
 
       enum ingress_type: {
         nginx: 1
       }
+
+      enum modsecurity_mode: { logging: 0, blocking: 1 }
+
+      scope :modsecurity_not_installed, -> { where(modsecurity_enabled: nil) }
+      scope :modsecurity_enabled, -> { where(modsecurity_enabled: true) }
+      scope :modsecurity_disabled, -> { where(modsecurity_enabled: false) }
 
       FETCH_IP_ADDRESS_DELAY = 30.seconds
 
@@ -40,7 +54,7 @@ module Clusters
       end
 
       def allowed_to_uninstall?
-        external_ip_or_hostname? && application_jupyter_nil_or_installable? && application_elastic_stack_nil_or_installable?
+        external_ip_or_hostname? && !application_jupyter_installed?
       end
 
       def install_command
@@ -66,33 +80,64 @@ module Clusters
       end
 
       def ingress_service
-        cluster.kubeclient.get_service('ingress-nginx-ingress-controller', Gitlab::Kubernetes::Helm::NAMESPACE)
+        cluster.kubeclient.get_service("ingress-#{INGRESS_CONTAINER_NAME}", Gitlab::Kubernetes::Helm::NAMESPACE)
       end
 
       private
 
       def specification
-        return {} unless Feature.enabled?(:ingress_modsecurity)
+        return {} unless modsecurity_enabled
 
         {
           "controller" => {
             "config" => {
               "enable-modsecurity" => "true",
-              "enable-owasp-modsecurity-crs" => "true",
+              "enable-owasp-modsecurity-crs" => "false",
+              "modsecurity-snippet" => modsecurity_snippet_content,
               "modsecurity.conf" => modsecurity_config_content
             },
+            "extraContainers" => [
+              {
+                "name" => MODSECURITY_LOG_CONTAINER_NAME,
+                "image" => "busybox",
+                "args" => [
+                  "/bin/sh",
+                  "-c",
+                  "tail -F /var/log/modsec/audit.log"
+                ],
+                "volumeMounts" => [
+                  {
+                    "name" => "modsecurity-log-volume",
+                    "mountPath" => "/var/log/modsec",
+                    "readOnly" => true
+                  }
+                ],
+                "livenessProbe" => {
+                  "exec" => {
+                    "command" => [
+                      "ls",
+                      "/var/log/modsec/audit.log"
+                    ]
+                  }
+                }
+              }
+            ],
             "extraVolumeMounts" => [
               {
                 "name" => "modsecurity-template-volume",
                 "mountPath" => "/etc/nginx/modsecurity/modsecurity.conf",
                 "subPath" => "modsecurity.conf"
+              },
+              {
+                "name" => "modsecurity-log-volume",
+                "mountPath" => "/var/log/modsec"
               }
             ],
             "extraVolumes" => [
               {
                 "name" => "modsecurity-template-volume",
                 "configMap" => {
-                  "name" => "ingress-nginx-ingress-controller",
+                  "name" => "ingress-#{INGRESS_CONTAINER_NAME}",
                   "items" => [
                     {
                       "key" => "modsecurity.conf",
@@ -100,6 +145,10 @@ module Clusters
                     }
                   ]
                 }
+              },
+              {
+                "name" => "modsecurity-log-volume",
+                "emptyDir" => {}
               }
             ]
           }
@@ -118,12 +167,13 @@ module Clusters
         YAML.load_file(chart_values_file).deep_merge!(specification)
       end
 
-      def application_jupyter_nil_or_installable?
-        cluster.application_jupyter.nil? || cluster.application_jupyter&.installable?
+      def application_jupyter_installed?
+        cluster.application_jupyter&.installed?
       end
 
-      def application_elastic_stack_nil_or_installable?
-        cluster.application_elastic_stack.nil? || cluster.application_elastic_stack&.installable?
+      def modsecurity_snippet_content
+        sec_rule_engine = logging? ? MODSECURITY_MODE_LOGGING : MODSECURITY_MODE_BLOCKING
+        "SecRuleEngine #{sec_rule_engine}\nInclude #{MODSECURITY_OWASP_RULES_FILE}"
       end
     end
   end

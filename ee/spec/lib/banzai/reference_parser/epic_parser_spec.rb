@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::ReferenceParser::EpicParser do
+RSpec.describe Banzai::ReferenceParser::EpicParser do
   include ReferenceParserHelpers
 
   def link(epic_id)
@@ -67,7 +67,7 @@ describe Banzai::ReferenceParser::EpicParser do
 
     context 'when epic with given ID does not exist' do
       it 'returns an empty Array' do
-        expect(subject.referenced_by([link(9999)])).to be_empty
+        expect(subject.referenced_by([link(non_existing_record_id)])).to be_empty
       end
     end
   end

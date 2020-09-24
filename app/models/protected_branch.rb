@@ -2,6 +2,7 @@
 
 class ProtectedBranch < ApplicationRecord
   include ProtectedRef
+  include Gitlab::SQL::Pattern
 
   scope :requiring_code_owner_approval,
         -> { where(code_owner_approval_required: true) }
@@ -10,7 +11,8 @@ class ProtectedBranch < ApplicationRecord
 
   def self.protected_ref_accessible_to?(ref, user, project:, action:, protected_refs: nil)
     # Maintainers, owners and admins are allowed to create the default branch
-    if default_branch_protected? && project.empty_repo?
+
+    if project.empty_repo? && project.default_branch_protected?
       return true if user.admin? || project.team.max_member_access(user.id) > Gitlab::Access::DEVELOPER
     end
 
@@ -19,7 +21,7 @@ class ProtectedBranch < ApplicationRecord
 
   # Check if branch name is marked as protected in the system
   def self.protected?(project, ref_name)
-    return true if project.empty_repo? && default_branch_protected?
+    return true if project.empty_repo? && project.default_branch_protected?
 
     self.matching(ref_name, protected_refs: protected_refs(project)).present?
   end
@@ -32,18 +34,19 @@ class ProtectedBranch < ApplicationRecord
     end
   end
 
-  def self.default_branch_protected?
-    Gitlab::CurrentSettings.default_branch_protection == Gitlab::Access::PROTECTION_FULL ||
-      Gitlab::CurrentSettings.default_branch_protection == Gitlab::Access::PROTECTION_DEV_CAN_MERGE
-  end
-
   def self.protected_refs(project)
     project.protected_branches
   end
 
+  # overridden in EE
   def self.branch_requires_code_owner_approval?(project, branch_name)
-    # NOOP
-    #
+    false
+  end
+
+  def self.by_name(query)
+    return none if query.blank?
+
+    where(fuzzy_arel_match(:name, query.downcase))
   end
 end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Backup::Manager do
+RSpec.describe Backup::Manager do
   include StubENV
 
   let(:progress) { StringIO.new }
@@ -214,6 +214,30 @@ describe Backup::Manager do
     end
   end
 
+  describe 'verify_backup_version' do
+    context 'on version mismatch' do
+      let(:gitlab_version) { Gitlab::VERSION }
+
+      it 'stops the process' do
+        allow(YAML).to receive(:load_file)
+          .and_return({ gitlab_version: "not #{gitlab_version}" })
+
+        expect { subject.verify_backup_version }.to raise_error SystemExit
+      end
+    end
+
+    context 'on version match' do
+      let(:gitlab_version) { Gitlab::VERSION }
+
+      it 'does nothing' do
+        allow(YAML).to receive(:load_file)
+          .and_return({ gitlab_version: "#{gitlab_version}" })
+
+        expect { subject.verify_backup_version }.not_to raise_error
+      end
+    end
+  end
+
   describe '#unpack' do
     context 'when there are no backup files in the directory' do
       before do
@@ -292,6 +316,26 @@ describe Backup::Manager do
         expect(progress).to have_received(:puts).with(a_string_matching('done'))
       end
     end
+
+    context 'when there is a non-tarred backup in the directory' do
+      before do
+        allow(Dir).to receive(:glob).and_return(
+          [
+            'backup_information.yml'
+          ]
+        )
+        allow(File).to receive(:exist?).and_return(true)
+      end
+
+      it 'selects the non-tarred backup to restore from' do
+        expect(Kernel).not_to receive(:system)
+
+        subject.unpack
+
+        expect(progress).to have_received(:puts)
+          .with(a_string_matching('Non tarred backup found '))
+      end
+    end
   end
 
   describe '#upload' do
@@ -326,24 +370,73 @@ describe Backup::Manager do
     context 'target path' do
       it 'uses the tar filename by default' do
         expect_any_instance_of(Fog::Collection).to receive(:create)
-          .with(hash_including(key: backup_filename))
+          .with(hash_including(key: backup_filename, public: false))
           .and_return(true)
 
-        Dir.chdir(Gitlab.config.backup.path) do
-          subject.upload
-        end
+        subject.upload
       end
 
       it 'adds the DIRECTORY environment variable if present' do
         stub_env('DIRECTORY', 'daily')
 
         expect_any_instance_of(Fog::Collection).to receive(:create)
-          .with(hash_including(key: "daily/#{backup_filename}"))
+          .with(hash_including(key: "daily/#{backup_filename}", public: false))
           .and_return(true)
 
-        Dir.chdir(Gitlab.config.backup.path) do
-          subject.upload
-        end
+        subject.upload
+      end
+    end
+
+    context 'with Google provider' do
+      before do
+        stub_backup_setting(
+          upload: {
+            connection: {
+              provider: 'Google',
+              google_storage_access_key_id: 'test-access-id',
+              google_storage_secret_access_key: 'secret'
+            },
+            remote_directory: 'directory',
+            multipart_chunk_size: Gitlab.config.backup.upload.multipart_chunk_size,
+            encryption: nil,
+            encryption_key: nil,
+            storage_class: nil
+          }
+        )
+
+        connection = ::Fog::Storage.new(Gitlab.config.backup.upload.connection.symbolize_keys)
+        connection.directories.create(key: Gitlab.config.backup.upload.remote_directory)
+      end
+
+      it 'does not attempt to set ACL' do
+        expect_any_instance_of(Fog::Collection).to receive(:create)
+          .with(hash_excluding(public: false))
+          .and_return(true)
+
+        subject.upload
+      end
+    end
+
+    context 'with AzureRM provider' do
+      before do
+        stub_backup_setting(
+          upload: {
+            connection: {
+              provider: 'AzureRM',
+              azure_storage_account_name: 'test-access-id',
+              azure_storage_access_key: 'secret'
+            },
+            remote_directory: 'directory',
+            multipart_chunk_size: nil,
+            encryption: nil,
+            encryption_key: nil,
+            storage_class: nil
+          }
+        )
+      end
+
+      it 'loads the provider' do
+        expect { subject.upload }.not_to raise_error
       end
     end
   end

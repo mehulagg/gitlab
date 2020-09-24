@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::Deployment do
+RSpec.describe Gitlab::Kubernetes::Deployment do
   include KubernetesHelpers
 
   let(:pods) { {} }
@@ -56,10 +56,10 @@ describe Gitlab::Kubernetes::Deployment do
 
       it 'returns all pods with generated names and pending' do
         expected = [
-          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'unknown (generated-name-with-suffix) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'unknown (generated-name-with-suffix) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'unknown (generated-name-with-suffix) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'unknown (generated-name-with-suffix) Pending', track: 'stable', stable: true }
+          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'generated-name-with-suffix (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'generated-name-with-suffix (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'generated-name-with-suffix (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'generated-name-with-suffix', tooltip: 'generated-name-with-suffix (Pending)', track: 'stable', stable: true }
         ]
 
         expect(deployment.instances).to eq(expected)
@@ -75,9 +75,9 @@ describe Gitlab::Kubernetes::Deployment do
 
       it 'returns not spawned pods as pending and unknown and running' do
         expected = [
-          { status: 'running', pod_name: 'generated-name-with-suffix', tooltip: 'unknown (generated-name-with-suffix) Running', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'Not provided', tooltip: 'unknown (Not provided) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'Not provided', tooltip: 'unknown (Not provided) Pending', track: 'stable', stable: true }
+          { status: 'running', pod_name: 'generated-name-with-suffix', tooltip: 'generated-name-with-suffix (Running)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'Not provided', tooltip: 'Not provided (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'Not provided', tooltip: 'Not provided (Pending)', track: 'stable', stable: true }
         ]
 
         expect(deployment.instances).to eq(expected)
@@ -98,10 +98,10 @@ describe Gitlab::Kubernetes::Deployment do
 
       it 'returns all instances as named and waiting' do
         expected = [
-          { status: 'pending', pod_name: 'kube-pod', tooltip: 'foo (kube-pod) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'kube-pod1', tooltip: 'foo (kube-pod1) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'kube-pod2', tooltip: 'foo (kube-pod2) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'kube-pod3', tooltip: 'foo (kube-pod3) Pending', track: 'stable', stable: true }
+          { status: 'pending', pod_name: 'kube-pod', tooltip: 'kube-pod (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'kube-pod1', tooltip: 'kube-pod1 (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'kube-pod2', tooltip: 'kube-pod2 (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'kube-pod3', tooltip: 'kube-pod3 (Pending)', track: 'stable', stable: true }
         ]
 
         expect(deployment.instances).to eq(expected)
@@ -122,10 +122,10 @@ describe Gitlab::Kubernetes::Deployment do
 
       it 'returns all instances' do
         expected = [
-          { status: 'succeeded', pod_name: 'kube-pod', tooltip: 'foo (kube-pod) Succeeded', track: 'stable', stable: true },
-          { status: 'running', pod_name: 'kube-pod1', tooltip: 'foo (kube-pod1) Running', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'kube-pod2', tooltip: 'foo (kube-pod2) Pending', track: 'stable', stable: true },
-          { status: 'pending', pod_name: 'kube-pod3', tooltip: 'foo (kube-pod3) Pending', track: 'stable', stable: true }
+          { status: 'succeeded', pod_name: 'kube-pod', tooltip: 'kube-pod (Succeeded)', track: 'stable', stable: true },
+          { status: 'running', pod_name: 'kube-pod1', tooltip: 'kube-pod1 (Running)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'kube-pod2', tooltip: 'kube-pod2 (Pending)', track: 'stable', stable: true },
+          { status: 'pending', pod_name: 'kube-pod3', tooltip: 'kube-pod3 (Pending)', track: 'stable', stable: true }
         ]
 
         expect(deployment.instances).to eq(expected)
@@ -142,7 +142,7 @@ describe Gitlab::Kubernetes::Deployment do
 
         it 'returns all instances' do
           expected = [
-            { status: 'pending', pod_name: 'kube-pod', tooltip: 'foo (kube-pod) Pending', track: 'stable', stable: true }
+            { status: 'pending', pod_name: 'kube-pod', tooltip: 'kube-pod (Pending)', track: 'stable', stable: true }
           ]
 
           expect(deployment.instances).to eq(expected)
@@ -155,7 +155,7 @@ describe Gitlab::Kubernetes::Deployment do
 
         it 'returns all instances' do
           expected = [
-            { status: 'pending', pod_name: 'kube-pod', tooltip: 'foo (kube-pod) Pending', track: 'canary', stable: false }
+            { status: 'pending', pod_name: 'kube-pod', tooltip: 'kube-pod (Pending)', track: 'canary', stable: false }
           ]
 
           expect(deployment.instances).to eq(expected)

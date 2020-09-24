@@ -10,4 +10,10 @@ module FeatureFlagsHelper
   def unleash_api_instance_id(project)
     project.feature_flags_client_token
   end
+
+  def feature_flag_issues_links_endpoint(project, feature_flag, user)
+    return '' unless can?(user, :admin_feature_flags_issue_links, project)
+
+    project_feature_flag_issues_path(project, feature_flag)
+  end
 end

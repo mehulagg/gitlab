@@ -2,14 +2,16 @@
 
 require 'spec_helper'
 
-describe Gitlab::Cache::Ci::ProjectPipelineStatus, :clean_gitlab_redis_cache do
-  let!(:project) { create(:project, :repository) }
+RSpec.describe Gitlab::Cache::Ci::ProjectPipelineStatus, :clean_gitlab_redis_cache do
+  let_it_be(:project) { create(:project, :repository) }
   let(:pipeline_status) { described_class.new(project) }
   let(:cache_key) { pipeline_status.cache_key }
 
   describe '.load_for_project' do
     it "loads the status" do
-      expect_any_instance_of(described_class).to receive(:load_status)
+      expect_next_instance_of(described_class) do |instance|
+        expect(instance).to receive(:load_status)
+      end
 
       described_class.load_for_project(project)
     end
@@ -75,6 +77,62 @@ describe Gitlab::Cache::Ci::ProjectPipelineStatus, :clean_gitlab_redis_cache do
   end
 
   describe '#load_status' do
+    describe 'gitaly call counts', :request_store do
+      context 'not cached' do
+        before do
+          expect(pipeline_status).not_to be_has_cache
+        end
+
+        context 'ci_pipeline_status_omit_commit_sha_in_cache_key is enabled' do
+          before do
+            stub_feature_flags(ci_pipeline_status_omit_commit_sha_in_cache_key: project)
+          end
+
+          it 'makes a Gitaly call' do
+            expect { pipeline_status.load_status }.to change { Gitlab::GitalyClient.get_request_count }.by(1)
+          end
+        end
+
+        context 'ci_pipeline_status_omit_commit_sha_in_cache_key is disabled' do
+          before do
+            stub_feature_flags(ci_pipeline_status_omit_commit_sha_in_cache_key: false)
+          end
+
+          it 'makes a Gitaly calls' do
+            expect { pipeline_status.load_status }.to change { Gitlab::GitalyClient.get_request_count }.by(1)
+          end
+        end
+      end
+
+      context 'cached' do
+        before do
+          described_class.load_in_batch_for_projects([project])
+
+          expect(pipeline_status).to be_has_cache
+        end
+
+        context 'ci_pipeline_status_omit_commit_sha_in_cache_key is enabled' do
+          before do
+            stub_feature_flags(ci_pipeline_status_omit_commit_sha_in_cache_key: project)
+          end
+
+          it 'makes no Gitaly calls' do
+            expect { pipeline_status.load_status }.to change { Gitlab::GitalyClient.get_request_count }.by(0)
+          end
+        end
+
+        context 'ci_pipeline_status_omit_commit_sha_in_cache_key is disabled' do
+          before do
+            stub_feature_flags(ci_pipeline_status_omit_commit_sha_in_cache_key: false)
+          end
+
+          it 'makes a Gitaly calls' do
+            expect { pipeline_status.load_status }.to change { Gitlab::GitalyClient.get_request_count }.by(1)
+          end
+        end
+      end
+    end
+
     it 'loads the status from the cache when there is one' do
       expect(pipeline_status).to receive(:has_cache?).and_return(true)
       expect(pipeline_status).to receive(:load_from_cache)
@@ -111,6 +169,24 @@ describe Gitlab::Cache::Ci::ProjectPipelineStatus, :clean_gitlab_redis_cache do
 
       pipeline_status.load_status
       pipeline_status.load_status
+    end
+
+    it 'handles Gitaly unavailable exceptions gracefully' do
+      allow(pipeline_status).to receive(:commit).and_raise(GRPC::Unavailable)
+
+      expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+        an_instance_of(GRPC::Unavailable), project_id: project.id
+      )
+      expect { pipeline_status.load_status }.not_to raise_error
+    end
+
+    it 'handles Gitaly timeout exceptions gracefully' do
+      allow(pipeline_status).to receive(:commit).and_raise(GRPC::DeadlineExceeded)
+
+      expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+        an_instance_of(GRPC::DeadlineExceeded), project_id: project.id
+      )
+      expect { pipeline_status.load_status }.not_to raise_error
     end
   end
 

@@ -11,13 +11,23 @@ module BoardsHelper
       lists_endpoint: board_lists_path(board),
       board_id: board.id,
       disabled: (!can?(current_user, :create_non_backlog_issues, board)).to_s,
-      issue_link_base: build_issue_link_base,
       root_path: root_path,
+      full_path: full_path,
       bulk_update_path: @bulk_issues_path,
-      default_avatar: image_path(default_avatar),
+      can_update: (!!can?(current_user, :admin_issue, board)).to_s,
       time_tracking_limit_to_hours: Gitlab::CurrentSettings.time_tracking_limit_to_hours.to_s,
-      recent_boards_endpoint: recent_boards_path
+      recent_boards_endpoint: recent_boards_path,
+      parent: current_board_parent.model_name.param_key,
+      group_id: @group&.id
     }
+  end
+
+  def full_path
+    if board.group_board?
+      @group.full_path
+    else
+      @project.full_path
+    end
   end
 
   def build_issue_link_base

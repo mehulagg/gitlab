@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::LabelFinder, :clean_gitlab_redis_cache do
-  let(:project) { create(:project) }
-  let(:finder) { described_class.new(project) }
-  let!(:bug) { create(:label, project: project, name: 'Bug') }
-  let!(:feature) { create(:label, project: project, name: 'Feature') }
+RSpec.describe Gitlab::GithubImport::LabelFinder, :clean_gitlab_redis_cache do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:finder) { described_class.new(project) }
+  let_it_be(:bug) { create(:label, project: project, name: 'Bug') }
+  let_it_be(:feature) { create(:label, project: project, name: 'Feature') }
 
   describe '#id_for' do
     context 'with a cache in place' do
@@ -19,7 +21,7 @@ describe Gitlab::GithubImport::LabelFinder, :clean_gitlab_redis_cache do
       it 'returns nil for an empty cache key' do
         key = finder.cache_key_for(bug.name)
 
-        Gitlab::GithubImport::Caching.write(key, '')
+        Gitlab::Cache::Import::Caching.write(key, '')
 
         expect(finder.id_for(bug.name)).to be_nil
       end
@@ -38,7 +40,7 @@ describe Gitlab::GithubImport::LabelFinder, :clean_gitlab_redis_cache do
 
   describe '#build_cache' do
     it 'builds the cache of all project labels' do
-      expect(Gitlab::GithubImport::Caching)
+      expect(Gitlab::Cache::Import::Caching)
         .to receive(:write_multiple)
         .with(
           {

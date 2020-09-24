@@ -7,23 +7,54 @@ may be filling up. Users will notice when this happens because new branches
 may not show up and merge requests may not be updated. The following are some
 troubleshooting steps that will help you diagnose the bottleneck.
 
-> **Note:** GitLab administrators/users should consider working through these
-> debug steps with GitLab Support so the backtraces can be analyzed by our team.
-> It may reveal a bug or necessary improvement in GitLab.
->
-> **Note:** In any of the backtraces, be wary of suspecting cases where every
-> thread appears to be waiting in the database, Redis, or waiting to acquire
-> a mutex. This **may** mean there's contention in the database, for example,
-> but look for one thread that is different than the rest. This other thread
-> may be using all available CPU, or have a Ruby Global Interpreter Lock,
-> preventing other threads from continuing.
+NOTE **Note:**
+GitLab administrators/users should consider working through these
+debug steps with GitLab Support so the backtraces can be analyzed by our team.
+It may reveal a bug or necessary improvement in GitLab.
+
+NOTE: **Note:**
+In any of the backtraces, be wary of suspecting cases where every
+thread appears to be waiting in the database, Redis, or waiting to acquire
+a mutex. This **may** mean there's contention in the database, for example,
+but look for one thread that is different than the rest. This other thread
+may be using all available CPU, or have a Ruby Global Interpreter Lock,
+preventing other threads from continuing.
+
+## Log arguments to Sidekiq jobs
+
+If you want to see what arguments are being passed to Sidekiq jobs you can set
+the `SIDEKIQ_LOG_ARGUMENTS` [environment variable](https://docs.gitlab.com/omnibus/settings/environment-variables.html) to `1` (true).
+
+Example:
+
+```ruby
+gitlab_rails['env'] = {"SIDEKIQ_LOG_ARGUMENTS" => "1"}
+```
+
+This does not log all job arguments. To avoid logging sensitive
+information (for instance, password reset tokens), it logs numeric
+arguments for all workers, with overrides for some specific workers
+where their arguments are not sensitive.
+
+Example log output:
+
+```json
+{"severity":"INFO","time":"2020-06-08T14:37:37.892Z","class":"AdminEmailsWorker","args":["[FILTERED]","[FILTERED]","[FILTERED]"],"retry":3,"queue":"admin_emails","backtrace":true,"jid":"9e35e2674ac7b12d123e13cc","created_at":"2020-06-08T14:37:37.373Z","meta.user":"root","meta.caller_id":"Admin::EmailsController#create","correlation_id":"37D3lArJmT1","uber-trace-id":"2d942cc98cc1b561:6dc94409cfdd4d77:9fbe19bdee865293:1","enqueued_at":"2020-06-08T14:37:37.410Z","pid":65011,"message":"AdminEmailsWorker JID-9e35e2674ac7b12d123e13cc: done: 0.48085 sec","job_status":"done","scheduling_latency_s":0.001012,"redis_calls":9,"redis_duration_s":0.004608,"redis_read_bytes":696,"redis_write_bytes":6141,"duration_s":0.48085,"cpu_s":0.308849,"completed_at":"2020-06-08T14:37:37.892Z","db_duration_s":0.010742}
+{"severity":"INFO","time":"2020-06-08T14:37:37.894Z","class":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper","wrapped":"ActionMailer::MailDeliveryJob","queue":"mailers","args":["[FILTERED]"],"retry":3,"backtrace":true,"jid":"e47a4f6793d475378432e3c8","created_at":"2020-06-08T14:37:37.884Z","meta.user":"root","meta.caller_id":"AdminEmailsWorker","correlation_id":"37D3lArJmT1","uber-trace-id":"2d942cc98cc1b561:29344de0f966446d:5c3b0e0e1bef987b:1","enqueued_at":"2020-06-08T14:37:37.885Z","pid":65011,"message":"ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper JID-e47a4f6793d475378432e3c8: start","job_status":"start","scheduling_latency_s":0.009473}
+{"severity":"INFO","time":"2020-06-08T14:39:50.648Z","class":"NewIssueWorker","args":["455","1"],"retry":3,"queue":"new_issue","backtrace":true,"jid":"a24af71f96fd129ec47f5d1e","created_at":"2020-06-08T14:39:50.643Z","meta.user":"root","meta.project":"h5bp/html5-boilerplate","meta.root_namespace":"h5bp","meta.caller_id":"Projects::IssuesController#create","correlation_id":"f9UCZHqhuP7","uber-trace-id":"28f65730f99f55a3:a5d2b62dec38dffc:48ddd092707fa1b7:1","enqueued_at":"2020-06-08T14:39:50.646Z","pid":65011,"message":"NewIssueWorker JID-a24af71f96fd129ec47f5d1e: start","job_status":"start","scheduling_latency_s":0.001144}
+```
+
+When using [Sidekiq JSON logging](../logs.md#sidekiqlog),
+arguments logs are limited to a maximum size of 10 kilobytes of text;
+any arguments after this limit will be discarded and replaced with a
+single argument containing the string `"..."`.
 
 ## Thread dump
 
 Send the Sidekiq process ID the `TTIN` signal and it will output thread
 backtraces in the log file.
 
-```
+```shell
 kill -TTIN <sidekiq_pid>
 ```
 
@@ -31,7 +62,7 @@ Check in `/var/log/gitlab/sidekiq/current` or `$GITLAB_HOME/log/sidekiq.log` for
 the backtrace output. The backtraces will be lengthy and generally start with
 several `WARN` level messages. Here's an example of a single thread's backtrace:
 
-```
+```plaintext
 2016-04-13T06:21:20.022Z 31517 TID-orn4urby0 WARN: ActiveRecord::RecordNotFound: Couldn't find Note with 'id'=3375386
 2016-04-13T06:21:20.022Z 31517 TID-orn4urby0 WARN: /opt/gitlab/embedded/service/gem/ruby/2.1.0/gems/activerecord-4.2.5.2/lib/active_record/core.rb:155:in `find'
 /opt/gitlab/embedded/service/gitlab-rails/app/workers/new_note_worker.rb:7:in `perform'
@@ -55,7 +86,7 @@ respond to the `TTIN` signal, this is a good next step.
 
 If `perf` is not installed on your system, install it with `apt-get` or `yum`:
 
-```
+```shell
 # Debian
 sudo apt-get install linux-tools
 
@@ -66,16 +97,16 @@ sudo apt-get install linux-tools-common linux-tools-generic linux-tools-`uname -
 sudo yum install perf
 ```
 
-Run perf against the Sidekiq PID:
+Run `perf` against the Sidekiq PID:
 
-```
+```shell
 sudo perf record -p <sidekiq_pid>
 ```
 
-Let this run for 30-60 seconds and then press Ctrl-C. Then view the perf report:
+Let this run for 30-60 seconds and then press Ctrl-C. Then view the `perf` report:
 
-```
-sudo perf report
+```shell
+$ sudo perf report
 
 # Sample output
 Samples: 348K of event 'cycles', Event count (approx.): 280908431073
@@ -85,13 +116,13 @@ Samples: 348K of event 'cycles', Event count (approx.): 280908431073
   0.10%            ruby  libc-2.12.so        [.] _int_free
 ```
 
-Above you see sample output from a perf report. It shows that 97% of the CPU is
+Above you see sample output from a `perf` report. It shows that 97% of the CPU is
 being spent inside Nokogiri and `xmlXPathNodeSetMergeAndClear`. For something
 this obvious you should then go investigate what job in GitLab would use
 Nokogiri and XPath. Combine with `TTIN` or `gdb` output to show the
 corresponding Ruby code where this is happening.
 
-## The GNU Project Debugger (gdb)
+## The GNU Project Debugger (`gdb`)
 
 `gdb` can be another effective tool for debugging Sidekiq. It gives you a little
 more interactive way to look at each thread and see what's causing problems.
@@ -102,13 +133,13 @@ of the process (Sidekiq will not process jobs while `gdb` is attached).
 
 Start by attaching to the Sidekiq PID:
 
-```
+```shell
 gdb -p <sidekiq_pid>
 ```
 
 Then gather information on all the threads:
 
-```
+```plaintext
 info threads
 
 # Example output
@@ -129,7 +160,7 @@ from /opt/gitlab/embedded/service/gem/ruby/2.1.0/gems/nokogiri-1.6.7.2/lib/nokog
 If you see a suspicious thread, like the Nokogiri one above, you may want
 to get more information:
 
-```
+```plaintext
 thread 21
 bt
 
@@ -147,7 +178,7 @@ bt
 
 To output a backtrace from all threads at once:
 
-```
+```plaintext
 set pagination off
 thread apply all bt
 ```
@@ -155,10 +186,17 @@ thread apply all bt
 Once you're done debugging with `gdb`, be sure to detach from the process and
 exit:
 
-```
+```plaintext
 detach
 exit
 ```
+
+## Sidekiq kill signals
+
+TTIN was described above as the signal to print backtraces for logging, however
+Sidekiq responds to other signals as well. For example, TSTP and TERM can be used
+to gracefully shut Sidekiq down, see
+[the Sidekiq Signals docs](https://github.com/mperham/sidekiq/wiki/Signals#ttin).
 
 ## Check for blocking queries
 
@@ -174,12 +212,12 @@ the query details.
 ## Managing Sidekiq queues
 
 It is possible to use [Sidekiq API](https://github.com/mperham/sidekiq/wiki/API)
-to perform a number of troubleshoting on Sidekiq.
+to perform a number of troubleshooting steps on Sidekiq.
 
 These are the administrative commands and it should only be used if currently
 admin interface is not suitable due to scale of installation.
 
-All this commands should be run using `gitlab-rails console`.
+All these commands should be run using `gitlab-rails console`.
 
 ### View the queue size
 
@@ -240,9 +278,36 @@ end
 
 ### Remove Sidekiq jobs for given parameters (destructive)
 
+The general method to kill jobs conditionally is the following:
+
 ```ruby
-# for jobs like this:
-# RepositoryImportWorker.new.perform_async(100)
+queue = Sidekiq::Queue.new('<queue name>')
+queue.each { |job| job.delete if <condition>}
+```
+
+NOTE: **Note:**
+This will remove jobs that are queued but not started, running jobs will not be killed. Have a look at the section below for cancelling running jobs.
+
+In the method above, `<queue-name>` is the name of the queue that contains the job(s) you want to delete and `<condition>` will decide which jobs get deleted.
+
+Commonly, `<condition>` references the job arguments, which depend on the type of job in question. To find the arguments for a specific queue, you can have a look at the `perform` function of the related worker file, commonly found at `/app/workers/<queue-name>_worker.rb`.
+
+For example, `repository_import` has `project_id` as the job argument, while `update_merge_requests` has `project_id, user_id, oldrev, newrev, ref`.
+
+NOTE: **Note:**
+Arguments need to be referenced by their sequence ID using `job.args[<id>]` because `job.args` is a list of all arguments provided to the Sidekiq job.
+
+Here are some examples:
+
+```ruby
+queue = Sidekiq::Queue.new('update_merge_requests')
+# In this example, we want to remove any update_merge_requests jobs
+# for the Project with ID 125 and ref `ref/heads/my_branch`
+queue.each { |job| job.delete if job.args[0] == 125 and job.args[4] == 'ref/heads/my_branch' }
+```
+
+```ruby
+# Cancelling jobs like: `RepositoryImportWorker.new.perform_async(100)`
 id_list = [100]
 
 queue = Sidekiq::Queue.new('repository_import')
@@ -287,4 +352,4 @@ has number of drawbacks, as mentioned in [Why Ruby’s Timeout is dangerous (and
 > - while creating an object to save to the database afterwards
 > - in any of your code, regardless of whether it could have possibly raised an exception before
 >
-> Nobody writes code to defend against an exception being raised on literally any line. That’s not even possible. So Thread.raise is  basically like a sneak attack on your code that could result in almost anything. It would probably be okay if it were pure-functional code that did not modify any state. But this is Ruby, so that’s unlikely :)
+> Nobody writes code to defend against an exception being raised on literally any line. That’s not even possible. So Thread.raise is basically like a sneak attack on your code that could result in almost anything. It would probably be okay if it were pure-functional code that did not modify any state. But this is Ruby, so that’s unlikely :)

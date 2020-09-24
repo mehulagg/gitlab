@@ -37,15 +37,26 @@ module Gitlab
 
         def process_message(**kwargs)
           message = ReplyParser.new(mail, **kwargs).execute.strip
-          add_attachments(message)
+          message_with_attachments = add_attachments(message)
+
+          # Support bot is specifically forbidden
+          # from using slash commands.
+          strip_quick_actions(message_with_attachments)
         end
 
         def add_attachments(reply)
-          attachments = Email::AttachmentUploader.new(mail).execute(project)
+          attachments = Email::AttachmentUploader.new(mail).execute(upload_params)
 
           reply + attachments.map do |link|
             "\n\n#{link[:markdown]}"
           end.join
+        end
+
+        def upload_params
+          {
+            upload_parent: project,
+            uploader_class: FileUploader
+          }
         end
 
         def validate_permission!(permission)
@@ -75,7 +86,18 @@ module Gitlab
         def valid_project_slug?(found_project)
           project_slug == found_project.full_path_slug
         end
+
+        def strip_quick_actions(content)
+          return content unless author.support_bot?
+
+          command_definitions = ::QuickActions::InterpretService.command_definitions
+          extractor = ::Gitlab::QuickActions::Extractor.new(command_definitions)
+
+          extractor.redact_commands(content)
+        end
       end
     end
   end
 end
+
+Gitlab::Email::Handler::ReplyProcessing.prepend_if_ee('::EE::Gitlab::Email::Handler::ReplyProcessing')

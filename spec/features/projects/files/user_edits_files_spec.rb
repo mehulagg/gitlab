@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Files > User edits files', :js do
+RSpec.describe 'Projects > Files > User edits files', :js do
   include ProjectForksHelper
   let(:project) { create(:project, :repository, name: 'Shop') }
   let(:project2) { create(:project, :repository, name: 'Another Project', path: 'another-project') }
@@ -11,9 +11,6 @@ describe 'Projects > Files > User edits files', :js do
   let(:user) { create(:user) }
 
   before do
-    stub_feature_flags(web_ide_default: false)
-    stub_feature_flags(vue_file_list: false)
-
     sign_in(user)
   end
 
@@ -47,9 +44,9 @@ describe 'Projects > Files > User edits files', :js do
       find('.file-editor', match: :first)
 
       find('#editor')
-      execute_script("ace.edit('editor').setValue('*.rbca')")
+      execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
 
-      expect(evaluate_script('ace.edit("editor").getValue()')).to eq('*.rbca')
+      expect(evaluate_script('monaco.editor.getModels()[0].getValue()')).to eq('*.rbca')
     end
 
     it 'does not show the edit link if a file is binary' do
@@ -68,7 +65,7 @@ describe 'Projects > Files > User edits files', :js do
       find('.file-editor', match: :first)
 
       find('#editor')
-      execute_script("ace.edit('editor').setValue('*.rbca')")
+      execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
       fill_in(:commit_message, with: 'New commit message', visible: true)
       click_button('Commit changes')
 
@@ -86,7 +83,7 @@ describe 'Projects > Files > User edits files', :js do
       find('.file-editor', match: :first)
 
       find('#editor')
-      execute_script("ace.edit('editor').setValue('*.rbca')")
+      execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
       fill_in(:commit_message, with: 'New commit message', visible: true)
       fill_in(:branch_name, with: 'new_branch_name', visible: true)
       click_button('Commit changes')
@@ -104,7 +101,7 @@ describe 'Projects > Files > User edits files', :js do
       find('.file-editor', match: :first)
 
       find('#editor')
-      execute_script("ace.edit('editor').setValue('*.rbca')")
+      execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
       click_link('Preview changes')
 
       expect(page).to have_css('.line_holder.new')
@@ -149,9 +146,9 @@ describe 'Projects > Files > User edits files', :js do
       find('.file-editor', match: :first)
 
       find('#editor')
-      execute_script("ace.edit('editor').setValue('*.rbca')")
+      execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
 
-      expect(evaluate_script('ace.edit("editor").getValue()')).to eq('*.rbca')
+      expect(evaluate_script('monaco.editor.getModels()[0].getValue()')).to eq('*.rbca')
     end
 
     it 'opens the Web IDE in a forked project', :sidekiq_might_not_need_inline do
@@ -179,7 +176,7 @@ describe 'Projects > Files > User edits files', :js do
       find('.file-editor', match: :first)
 
       find('#editor')
-      execute_script("ace.edit('editor').setValue('*.rbca')")
+      execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
       fill_in(:commit_message, with: 'New commit message', visible: true)
       click_button('Commit changes')
 
@@ -194,6 +191,7 @@ describe 'Projects > Files > User edits files', :js do
 
     context 'when the user already had a fork of the project', :js do
       let!(:forked_project) { fork_project(project2, user, namespace: user.namespace, repository: true) }
+
       before do
         visit(project2_tree_path_root_ref)
         wait_for_requests
@@ -207,7 +205,7 @@ describe 'Projects > Files > User edits files', :js do
         expect(page).not_to have_button('Cancel')
 
         find('#editor')
-        execute_script("ace.edit('editor').setValue('*.rbca')")
+        execute_script("monaco.editor.getModels()[0].setValue('*.rbca')")
         fill_in(:commit_message, with: 'Another commit', visible: true)
         click_button('Commit changes')
 

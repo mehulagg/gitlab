@@ -2,19 +2,19 @@
 
 require 'spec_helper'
 
-describe API::Issues do
-  set(:user) { create(:user) }
-  set(:project) { create(:project, :public, :repository, creator_id: user.id, namespace: user.namespace) }
-  set(:private_mrs_project) do
+RSpec.describe API::Issues do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project, :public, :repository, creator_id: user.id, namespace: user.namespace) }
+  let_it_be(:private_mrs_project) do
     create(:project, :public, :repository, creator_id: user.id, namespace: user.namespace, merge_requests_access_level: ProjectFeature::PRIVATE)
   end
 
-  let(:user2)       { create(:user) }
-  let(:non_member)  { create(:user) }
-  set(:guest)       { create(:user) }
-  set(:author)      { create(:author) }
-  set(:assignee)    { create(:assignee) }
-  let(:admin)       { create(:user, :admin) }
+  let(:user2)             { create(:user) }
+  let(:non_member)        { create(:user) }
+  let_it_be(:guest)       { create(:user) }
+  let_it_be(:author)      { create(:author) }
+  let_it_be(:assignee)    { create(:assignee) }
+  let(:admin)             { create(:user, :admin) }
   let(:issue_title)       { 'foo' }
   let(:issue_description) { 'closed' }
   let!(:closed_issue) do
@@ -28,6 +28,7 @@ describe API::Issues do
            updated_at: 3.hours.ago,
            closed_at: 1.hour.ago
   end
+
   let!(:confidential_issue) do
     create :issue,
            :confidential,
@@ -37,6 +38,7 @@ describe API::Issues do
            created_at: generate(:past_time),
            updated_at: 2.hours.ago
   end
+
   let!(:issue) do
     create :issue,
            author: user,
@@ -48,12 +50,13 @@ describe API::Issues do
            title: issue_title,
            description: issue_description
   end
-  set(:label) do
+
+  let_it_be(:label) do
     create(:label, title: 'label', color: '#FFAABB', project: project)
   end
   let!(:label_link) { create(:label_link, label: label, target: issue) }
   let(:milestone) { create(:milestone, title: '1.0.0', project: project) }
-  set(:empty_milestone) do
+  let_it_be(:empty_milestone) do
     create(:milestone, title: '2.0.0', project: project)
   end
   let!(:note) { create(:note_on_issue, author: user, project: project, noteable: issue) }
@@ -61,7 +64,7 @@ describe API::Issues do
   let(:no_milestone_title) { 'None' }
   let(:any_milestone_title) { 'Any' }
 
-  before(:all) do
+  before_all do
     project.add_reporter(user)
     project.add_guest(guest)
     private_mrs_project.add_reporter(user)
@@ -76,11 +79,51 @@ describe API::Issues do
     it 'returns issues statistics' do
       get api("/issues_statistics", user), params: params
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['statistics']).not_to be_nil
       expect(json_response['statistics']['counts']['all']).to eq counts[:all]
       expect(json_response['statistics']['counts']['closed']).to eq counts[:closed]
       expect(json_response['statistics']['counts']['opened']).to eq counts[:opened]
+    end
+  end
+
+  describe 'GET /issues/:id' do
+    context 'when unauthorized' do
+      it 'returns unauthorized' do
+        get api("/issues/#{issue.id}" )
+
+        expect(response).to have_gitlab_http_status(:unauthorized)
+      end
+    end
+
+    context 'when authorized' do
+      context 'as a normal user' do
+        it 'returns forbidden' do
+          get api("/issues/#{issue.id}", user )
+
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+
+      context 'as an admin' do
+        context 'when issue exists' do
+          it 'returns the issue' do
+            get api("/issues/#{issue.id}", admin)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response.dig('author', 'id')).to eq(issue.author.id)
+            expect(json_response['description']).to eq(issue.description)
+          end
+        end
+
+        context 'when issue does not exist' do
+          it 'returns 404' do
+            get api("/issues/0", admin)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
     end
   end
 
@@ -89,59 +132,64 @@ describe API::Issues do
       it 'returns an array of all issues' do
         get api('/issues'), params: { scope: 'all' }
 
-        expect(response).to have_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_an Array
       end
 
       it 'returns authentication error without any scope' do
         get api('/issues')
 
-        expect(response).to have_http_status(401)
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
 
       it 'returns authentication error when scope is assigned-to-me' do
         get api('/issues'), params: { scope: 'assigned-to-me' }
 
-        expect(response).to have_http_status(401)
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
 
       it 'returns authentication error when scope is created-by-me' do
         get api('/issues'), params: { scope: 'created-by-me' }
 
-        expect(response).to have_http_status(401)
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
 
       it 'returns an array of issues matching state in milestone' do
         get api('/issues'), params: { milestone: 'foo', scope: 'all' }
 
-        expect(response).to have_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect_paginated_array_response([])
       end
 
       it 'returns an array of issues matching state in milestone' do
         get api('/issues'), params: { milestone: milestone.title, scope: 'all' }
 
-        expect(response).to have_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect_paginated_array_response([issue.id, closed_issue.id])
+      end
+
+      it 'responds with a 401 instead of the specified issue' do
+        get api("/issues/#{issue.id}")
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
 
       context 'issues_statistics' do
         it 'returns authentication error without any scope' do
           get api('/issues_statistics')
 
-          expect(response).to have_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         it 'returns authentication error when scope is assigned_to_me' do
           get api('/issues_statistics'), params: { scope: 'assigned_to_me' }
 
-          expect(response).to have_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         it 'returns authentication error when scope is created_by_me' do
           get api('/issues_statistics'), params: { scope: 'created_by_me' }
 
-          expect(response).to have_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         context 'no state is treated as all state' do
@@ -384,6 +432,60 @@ describe API::Issues do
         end
       end
 
+      context 'filtering by due date' do
+        # This date chosen because it is the beginning of a week + near the beginning of a month
+        let_it_be(:frozen_time) { DateTime.parse('2020-08-03 12:00') }
+
+        let_it_be(:issue2) { create(:issue, project: project, author: user, due_date: frozen_time + 3.days) }
+        let_it_be(:issue3) { create(:issue, project: project, author: user, due_date: frozen_time + 10.days) }
+        let_it_be(:issue4) { create(:issue, project: project, author: user, due_date: frozen_time + 34.days) }
+        let_it_be(:issue5) { create(:issue, project: project, author: user, due_date: frozen_time - 8.days) }
+
+        before do
+          travel_to(frozen_time)
+        end
+
+        after do
+          travel_back
+        end
+
+        it 'returns them all when argument is empty' do
+          get api('/issues?due_date=', user)
+
+          expect_paginated_array_response(issue5.id, issue4.id, issue3.id, issue2.id, issue.id, closed_issue.id)
+        end
+
+        it 'returns issues without due date' do
+          get api('/issues?due_date=0', user)
+
+          expect_paginated_array_response(issue.id, closed_issue.id)
+        end
+
+        it 'returns issues due for this week' do
+          get api('/issues?due_date=week', user)
+
+          expect_paginated_array_response(issue2.id)
+        end
+
+        it 'returns issues due for this month' do
+          get api('/issues?due_date=month', user)
+
+          expect_paginated_array_response(issue3.id, issue2.id)
+        end
+
+        it 'returns issues that are due previous two weeks and next month' do
+          get api('/issues?due_date=next_month_and_previous_two_weeks', user)
+
+          expect_paginated_array_response(issue5.id, issue4.id, issue3.id, issue2.id)
+        end
+
+        it 'returns issues that are overdue' do
+          get api('/issues?due_date=overdue', user)
+
+          expect_paginated_array_response(issue5.id)
+        end
+      end
+
       context 'filter by labels or label_name param' do
         context 'N+1' do
           let(:label_b) { create(:label, title: 'foo', project: project) }
@@ -476,25 +578,25 @@ describe API::Issues do
         end
 
         it 'returns an array of issues with any label' do
-          get api('/issues', user), params: { labels: IssuesFinder::FILTER_ANY }
+          get api('/issues', user), params: { labels: IssuableFinder::Params::FILTER_ANY }
 
           expect_paginated_array_response(issue.id)
         end
 
         it 'returns an array of issues with any label with labels param as array' do
-          get api('/issues', user), params: { labels: [IssuesFinder::FILTER_ANY] }
+          get api('/issues', user), params: { labels: [IssuableFinder::Params::FILTER_ANY] }
 
           expect_paginated_array_response(issue.id)
         end
 
         it 'returns an array of issues with no label' do
-          get api('/issues', user), params: { labels: IssuesFinder::FILTER_NONE }
+          get api('/issues', user), params: { labels: IssuableFinder::Params::FILTER_NONE }
 
           expect_paginated_array_response(closed_issue.id)
         end
 
         it 'returns an array of issues with no label with labels param as array' do
-          get api('/issues', user), params: { labels: [IssuesFinder::FILTER_NONE] }
+          get api('/issues', user), params: { labels: [IssuableFinder::Params::FILTER_NONE] }
 
           expect_paginated_array_response(closed_issue.id)
         end
@@ -642,14 +744,14 @@ describe API::Issues do
         it 'accepts only predefined order by params' do
           API::Helpers::IssuesHelpers.sort_options.each do |sort_opt|
             get api('/issues', user), params: { order_by: sort_opt, sort: 'asc' }
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
 
         it 'fails to sort with non predefined options' do
           %w(milestone title abracadabra).each do |sort_opt|
             get api('/issues', user), params: { order_by: sort_opt, sort: 'asc' }
-            expect(response).to have_gitlab_http_status(400)
+            expect(response).to have_gitlab_http_status(:bad_request)
           end
         end
       end
@@ -657,14 +759,14 @@ describe API::Issues do
       it 'matches V4 response schema' do
         get api('/issues', user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to match_response_schema('public_api/v4/issues')
       end
 
       it 'returns a related merge request count of 0 if there are no related merge requests' do
         get api('/issues', user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to match_response_schema('public_api/v4/issues')
         expect(json_response.first).to include('merge_requests_count' => 0)
       end
@@ -674,7 +776,7 @@ describe API::Issues do
 
         get api('/issues', user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to match_response_schema('public_api/v4/issues')
         expect(json_response.first).to include('merge_requests_count' => 1)
       end
@@ -767,15 +869,33 @@ describe API::Issues do
         it 'returns error when multiple assignees are passed' do
           get api("/issues", user), params: { assignee_username: [assignee.username, another_assignee.username], scope: 'all' }
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response["error"]).to include("allows one value, but found 2")
         end
 
         it 'returns error when assignee_username and assignee_id are passed together' do
           get api("/issues", user), params: { assignee_username: [assignee.username], assignee_id: another_assignee.id, scope: 'all' }
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response["error"]).to include("mutually exclusive")
+        end
+      end
+
+      context 'filtering by non_archived' do
+        let_it_be(:archived_project) { create(:project, :archived, creator_id: user.id, namespace: user.namespace) }
+        let_it_be(:archived_issue) { create(:issue, author: user, project: archived_project) }
+        let_it_be(:active_issue) { create(:issue, author: user, project: project) }
+
+        it 'returns issues from non archived projects by default' do
+          get api('/issues', user)
+
+          expect_paginated_array_response(active_issue.id, issue.id, closed_issue.id)
+        end
+
+        it 'returns issues from archived project with non_archived set as false' do
+          get api("/issues", user), params: { non_archived: false }
+
+          expect_paginated_array_response(active_issue.id, archived_issue.id, issue.id, closed_issue.id)
         end
       end
     end
@@ -789,6 +909,7 @@ describe API::Issues do
                target_project: private_mrs_project,
                description: "closes #{issue.to_reference(private_mrs_project)}")
       end
+
       let!(:merge_request2) do
         create(:merge_request,
                :simple,
@@ -805,15 +926,32 @@ describe API::Issues do
     end
   end
 
+  describe 'GET /projects/:id/issues/:issue_iid' do
+    it 'exposes full reference path' do
+      get api("/projects/#{project.id}/issues/#{issue.iid}", user)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(json_response['references']['short']).to eq("##{issue.iid}")
+      expect(json_response['references']['relative']).to eq("##{issue.iid}")
+      expect(json_response['references']['full']).to eq("#{project.parent.path}/#{project.path}##{issue.iid}")
+    end
+  end
+
+  describe 'PUT /projects/:id/issues/:issue_id' do
+    it_behaves_like 'issuable update endpoint' do
+      let(:entity) { issue }
+    end
+  end
+
   describe 'DELETE /projects/:id/issues/:issue_iid' do
     it 'rejects a non member from deleting an issue' do
       delete api("/projects/#{project.id}/issues/#{issue.iid}", non_member)
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
 
     it 'rejects a developer from deleting an issue' do
       delete api("/projects/#{project.id}/issues/#{issue.iid}", author)
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
 
     context 'when the user is project owner' do
@@ -823,7 +961,7 @@ describe API::Issues do
       it 'deletes the issue if an admin requests it' do
         delete api("/projects/#{project.id}/issues/#{issue.iid}", owner)
 
-        expect(response).to have_gitlab_http_status(204)
+        expect(response).to have_gitlab_http_status(:no_content)
       end
 
       it_behaves_like '412 response' do
@@ -832,17 +970,17 @@ describe API::Issues do
     end
 
     context 'when issue does not exist' do
-      it 'returns 404 when trying to move an issue' do
+      it 'returns 404 when trying to delete an issue' do
         delete api("/projects/#{project.id}/issues/123", user)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
     it 'returns 404 when using the issue ID instead of IID' do
       delete api("/projects/#{project.id}/issues/#{issue.id}", user)
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -850,5 +988,54 @@ describe API::Issues do
     let(:issuable) { issue }
 
     include_examples 'time tracking endpoints', 'issue'
+  end
+
+  describe 'PUT /projects/:id/issues/:issue_iid/reorder' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:issue1) { create(:issue, project: project, relative_position: 10) }
+    let_it_be(:issue2) { create(:issue, project: project, relative_position: 20) }
+    let_it_be(:issue3) { create(:issue, project: project, relative_position: 30) }
+
+    context 'when user has access' do
+      before do
+        project.add_developer(user)
+      end
+
+      context 'with valid params' do
+        it 'reorders issues and returns a successful 200 response' do
+          put api("/projects/#{project.id}/issues/#{issue1.iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: issue3.id }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(issue1.reload.relative_position)
+                .to be_between(issue2.reload.relative_position, issue3.reload.relative_position)
+        end
+      end
+
+      context 'with invalid params' do
+        it 'returns a unprocessable entity 422 response for invalid move ids' do
+          put api("/projects/#{project.id}/issues/#{issue1.iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: non_existing_record_id }
+
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        end
+
+        it 'returns a not found 404 response for invalid issue id' do
+          put api("/projects/#{project.id}/issues/#{non_existing_record_iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: issue3.id }
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    context 'with unauthorized user' do
+      before do
+        project.add_guest(user)
+      end
+
+      it 'responds with 403 forbidden' do
+        put api("/projects/#{project.id}/issues/#{issue1.iid}/reorder", user), params: { move_after_id: issue2.id, move_before_id: issue3.id }
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
   end
 end

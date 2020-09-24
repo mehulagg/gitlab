@@ -13,7 +13,7 @@ resources available online.
 
 Get all license templates.
 
-```
+```plaintext
 GET /templates/licenses
 ```
 
@@ -21,7 +21,7 @@ GET /templates/licenses
 | --------- | ------- | -------- | --------------------- |
 | `popular` | boolean | no       | If passed, returns only popular licenses |
 
-```bash
+```shell
 curl https://gitlab.example.com/api/v4/templates/licenses?popular=1
 ```
 
@@ -110,7 +110,7 @@ Example response:
 Get a single license template. You can pass parameters to replace the license
 placeholder.
 
-```
+```plaintext
 GET /templates/licenses/:key
 ```
 
@@ -120,11 +120,11 @@ GET /templates/licenses/:key
 | `project`  | string | no       | The copyrighted project name |
 | `fullname` | string | no       | The full-name of the copyright holder |
 
->**Note:**
+NOTE: **Note:**
 If you omit the `fullname` parameter but authenticate your request, the name of
 the authenticated user will be used to replace the copyright holder placeholder.
 
-```bash
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/templates/licenses/mit?project=My+Cool+Project
 ```
 

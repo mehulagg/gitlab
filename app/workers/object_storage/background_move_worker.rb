@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 module ObjectStorage
-  class BackgroundMoveWorker
+  class BackgroundMoveWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include ObjectStorageQueue
 
     sidekiq_options retry: 5
     feature_category_not_owned!
+    loggable_arguments 0, 1, 2, 3
 
     def perform(uploader_class_name, subject_class_name, file_field, subject_id)
       uploader_class = uploader_class_name.constantize

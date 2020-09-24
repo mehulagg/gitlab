@@ -1,13 +1,12 @@
 <script>
-import { GlButton } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
-import DependencyListAlert from './dependency_list_alert.vue';
+/* eslint-disable vue/no-v-html */
+import { GlAlert } from '@gitlab/ui';
+import { __, sprintf, s__ } from '~/locale';
 
 export default {
   name: 'DependencyListJobFailedAlert',
   components: {
-    DependencyListAlert,
-    GlButton,
+    GlAlert,
   },
   props: {
     jobPath: {
@@ -16,29 +15,34 @@ export default {
       default: '',
     },
   },
-  data() {
-    return {
-      message: sprintf(
-        s__(
-          'Dependencies|The %{codeStartTag}dependency_scanning%{codeEndTag} job has failed and cannot generate the list. Please ensure the job is running properly and run the pipeline again.',
-        ),
-        { codeStartTag: '<code>', codeEndTag: '</code>' },
-        false,
-      ),
-    };
+  computed: {
+    buttonProps() {
+      return this.jobPath
+        ? {
+            secondaryButtonText: __('View job'),
+            secondaryButtonLink: this.jobPath,
+          }
+        : {};
+    },
   },
+  message: sprintf(
+    s__(
+      'Dependencies|The %{codeStartTag}dependency_scanning%{codeEndTag} job has failed and cannot generate the list. Please ensure the job is running properly and run the pipeline again.',
+    ),
+    { codeStartTag: '<code>', codeEndTag: '</code>' },
+    false,
+  ),
 };
 </script>
 
 <template>
-  <dependency-list-alert
-    type="danger"
-    :header-text="s__('Dependencies|Job failed to generate the dependency list')"
+  <gl-alert
+    variant="danger"
+    :title="s__('Dependencies|Job failed to generate the dependency list')"
+    v-bind="buttonProps"
+    @dismiss="$emit('close')"
     v-on="$listeners"
   >
-    <p v-html="message"></p>
-    <gl-button v-if="jobPath" :href="jobPath" class="btn-inverted btn-danger mb-2">
-      {{ __('View job') }}
-    </gl-button>
-  </dependency-list-alert>
+    <span v-html="$options.message"></span>
+  </gl-alert>
 </template>

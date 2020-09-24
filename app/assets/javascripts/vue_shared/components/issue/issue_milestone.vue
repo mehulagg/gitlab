@@ -1,13 +1,12 @@
 <script>
-import { GlTooltip } from '@gitlab/ui';
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { timeFor, parsePikadayDate, dateInWords } from '~/lib/utils/datetime_utility';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlTooltip,
   },
   mixins: [timeagoMixin],
@@ -54,7 +53,7 @@ export default {
           return timeFor(
             this.milestoneDue,
             sprintf(__('Expired %{expiredOn}'), {
-              expiredOn: this.timeFormated(this.milestoneDue),
+              expiredOn: this.timeFormatted(this.milestoneDue),
             }),
           );
         }
@@ -62,7 +61,7 @@ export default {
         return sprintf(
           this.isMilestoneStarted ? __('Started %{startsIn}') : __('Starts %{startsIn}'),
           {
-            startsIn: this.timeFormated(this.milestoneStart),
+            startsIn: this.timeFormatted(this.milestoneStart),
           },
         );
       }
@@ -73,7 +72,7 @@ export default {
 </script>
 <template>
   <div ref="milestoneDetails" class="issue-milestone-details">
-    <icon :size="16" class="inline icon" name="clock" />
+    <gl-icon :size="16" class="gl-mr-2" name="clock" />
     <span class="milestone-title d-inline-block">{{ milestone.title }}</span>
     <gl-tooltip :target="() => $refs.milestoneDetails" placement="bottom" class="js-item-milestone">
       <span class="bold">{{ __('Milestone') }}</span> <br />

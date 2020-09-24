@@ -2,7 +2,17 @@
 
 require 'spec_helper'
 
-describe MergeRequestDiffFile do
+RSpec.describe MergeRequestDiffFile do
+  it_behaves_like 'a BulkInsertSafe model', MergeRequestDiffFile do
+    let(:valid_items_for_bulk_insertion) do
+      build_list(:merge_request_diff_file, 10) do |mr_diff_file|
+        mr_diff_file.merge_request_diff = create(:merge_request_diff)
+      end
+    end
+
+    let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
+  end
+
   describe '#diff' do
     context 'when diff is not stored' do
       let(:unpacked) { 'unpacked' }
@@ -19,6 +29,14 @@ describe MergeRequestDiffFile do
 
         it 'unpacks from base 64' do
           expect(subject.diff).to eq(unpacked)
+        end
+
+        context 'invalid base64' do
+          let(:packed) { '---/dev/null' }
+
+          it 'returns the raw diff' do
+            expect(subject.diff).to eq(packed)
+          end
         end
       end
 

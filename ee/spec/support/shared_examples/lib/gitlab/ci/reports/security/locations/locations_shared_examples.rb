@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'vulnerability location' do
+RSpec.shared_examples 'vulnerability location' do
   describe '#initialize' do
     subject { described_class.new(**params) }
 

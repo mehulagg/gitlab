@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SlashCommands::Presenters::IssueShow do
+RSpec.describe Gitlab::SlashCommands::Presenters::IssueShow do
   let(:project) { create(:project) }
   let(:attachment) { subject[:attachments].first }
 

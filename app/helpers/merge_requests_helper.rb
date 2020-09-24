@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module MergeRequestsHelper
+  include Gitlab::Utils::StrongMemoize
+
   def new_mr_path_from_push_event(event)
     target_project = event.project.default_merge_request_target
     project_new_merge_request_path(
@@ -25,6 +27,16 @@ module MergeRequestsHelper
     classes << "closed" if mr.closed?
     classes << "merged" if mr.merged?
     classes.join(' ')
+  end
+
+  def state_name_with_icon(merge_request)
+    if merge_request.merged?
+      [_("Merged"), "git-merge"]
+    elsif merge_request.closed?
+      [_("Closed"), "close"]
+    else
+      [_("Open"), "issue-open-m"]
+    end
   end
 
   def ci_build_details_path(merge_request)
@@ -76,7 +88,7 @@ module MergeRequestsHelper
 
   def target_projects(project)
     MergeRequestTargetProjectFinder.new(current_user: current_user, source_project: project)
-      .execute
+      .execute(include_routes: true)
   end
 
   def merge_request_button_visibility(merge_request, closed)
@@ -97,16 +109,12 @@ module MergeRequestsHelper
     @merge_request_diffs.size - @merge_request_diffs.index(merge_request_diff)
   end
 
-  def different_base?(version1, version2)
-    version1 && version2 && version1.base_commit_sha != version2.base_commit_sha
-  end
-
   def merge_params(merge_request)
     {
       auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
       should_remove_source_branch: true,
       sha: merge_request.diff_head_sha,
-      squash: merge_request.squash
+      squash: merge_request.squash_on_merge?
     }
   end
 

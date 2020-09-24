@@ -6,6 +6,7 @@ module EE
       module Pipeline
         module Quota
           class Activity < Ci::Limit
+            include ::Gitlab::Utils::StrongMemoize
             include ActionView::Helpers::TextHelper
 
             def initialize(namespace, project)
@@ -14,7 +15,7 @@ module EE
             end
 
             def enabled?
-              @namespace.max_active_pipelines > 0
+              ci_active_pipelines_limit > 0
             end
 
             def exceeded?
@@ -33,15 +34,17 @@ module EE
             private
 
             def excessive_pipelines_count
-              @excessive ||= alive_pipelines_count - max_active_pipelines_count
+              @excessive ||= alive_pipelines_count - ci_active_pipelines_limit
             end
 
             def alive_pipelines_count
               @project.ci_pipelines.alive.count
             end
 
-            def max_active_pipelines_count
-              @namespace.max_active_pipelines
+            def ci_active_pipelines_limit
+              strong_memoize(:ci_active_pipelines_limit) do
+                @namespace.actual_limits.ci_active_pipelines
+              end
             end
           end
         end

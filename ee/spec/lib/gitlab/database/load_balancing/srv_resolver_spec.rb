@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::SrvResolver do
+RSpec.describe Gitlab::Database::LoadBalancing::SrvResolver do
   let(:resolver) { Net::DNS::Resolver.new(nameservers: '127.0.0.1', port: 8600, use_tcp: true) }
   let(:additional) { dns_response_packet_from_fixture('srv_with_a_rr_in_additional_section').additional }
 
@@ -53,7 +53,7 @@ describe Gitlab::Database::LoadBalancing::SrvResolver do
 
   def dns_response_packet_from_fixture(fixture_name)
     fixture         = File.read(Rails.root + "ee/spec/fixtures/dns/#{fixture_name}.json")
-    encoded_payload = JSON.parse(fixture)['payload']
+    encoded_payload = Gitlab::Json.parse(fixture)['payload']
     payload         = Base64.decode64(encoded_payload)
 
     Net::DNS::Packet.parse(payload)

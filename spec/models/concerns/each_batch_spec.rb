@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EachBatch do
+RSpec.describe EachBatch do
   describe '.each_batch' do
     let(:model) do
       Class.new(ActiveRecord::Base) do
@@ -13,7 +13,7 @@ describe EachBatch do
     end
 
     before do
-      5.times { create(:user, updated_at: 1.day.ago) }
+      create_list(:user, 5, updated_at: 1.day.ago)
     end
 
     shared_examples 'each_batch handling' do |kwargs|
@@ -44,7 +44,7 @@ describe EachBatch do
       end
 
       it 'allows updating of the yielded relations' do
-        time = Time.now
+        time = Time.current
 
         model.each_batch do |relation|
           relation.update_all(updated_at: time)

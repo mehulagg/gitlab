@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'test coverage badge' do
+RSpec.describe 'test coverage badge' do
   let!(:user) { create(:user) }
   let!(:project) { create(:project, :private) }
 
@@ -54,7 +54,7 @@ describe 'test coverage badge' do
     it 'user requests test coverage badge image' do
       show_test_coverage_badge
 
-      expect(page).to have_gitlab_http_status(404)
+      expect(page).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -63,7 +63,7 @@ describe 'test coverage badge' do
 
     create(:ci_pipeline, opts).tap do |pipeline|
       yield pipeline
-      pipeline.update_status
+      ::Ci::ProcessPipelineService.new(pipeline).execute
     end
   end
 

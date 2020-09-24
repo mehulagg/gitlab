@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ExpireBuildInstanceArtifactsWorker
+class ExpireBuildInstanceArtifactsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :continuous_integration
@@ -14,7 +14,7 @@ class ExpireBuildInstanceArtifactsWorker
 
     return unless build&.project && !build.project.pending_delete
 
-    Rails.logger.info "Removing artifacts for build #{build.id}..." # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.info("Removing artifacts for build #{build.id}...")
     build.erase_erasable_artifacts!
   end
   # rubocop: enable CodeReuse/ActiveRecord

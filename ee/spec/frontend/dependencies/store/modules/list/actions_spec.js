@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import { sortBy } from 'lodash';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
@@ -11,11 +11,11 @@ import {
   SORT_ORDER,
   FETCH_ERROR_MESSAGE,
 } from 'ee/dependencies/store/modules/list/constants';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
-import mockDependenciesResponse from './data/mock_dependencies';
+import mockDependenciesResponse from './data/mock_dependencies.json';
 
-jest.mock('~/flash', () => jest.fn());
+jest.mock('~/flash');
 
 describe('Dependencies actions', () => {
   const pageInfo = {
@@ -132,8 +132,9 @@ describe('Dependencies actions', () => {
   describe('fetchDependencies', () => {
     const dependenciesPackagerDescending = {
       ...mockDependenciesResponse,
-      dependencies: _.sortBy(mockDependenciesResponse.dependencies, 'packager').reverse(),
+      dependencies: sortBy(mockDependenciesResponse.dependencies, 'packager').reverse(),
     };
+
     let state;
     let mock;
 

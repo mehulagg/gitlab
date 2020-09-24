@@ -2,15 +2,16 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Chain::Build do
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user, developer_projects: [project]) }
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Build do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
   let(:pipeline) { Ci::Pipeline.new }
 
   let(:variables_attributes) do
     [{ key: 'first', secret_value: 'world' },
      { key: 'second', secret_value: 'second_world' }]
   end
+
   let(:command) do
     Gitlab::Ci::Pipeline::Chain::Command.new(
       source: :push,
@@ -29,7 +30,7 @@ describe Gitlab::Ci::Pipeline::Chain::Build do
   let(:step) { described_class.new(pipeline, command) }
 
   before do
-    stub_repository_ci_yaml_file(sha: anything)
+    stub_ci_pipeline_yaml_file(gitlab_ci_yaml)
   end
 
   it 'never breaks the chain' do
@@ -49,12 +50,6 @@ describe Gitlab::Ci::Pipeline::Chain::Build do
     expect(pipeline.project).to eq project
     expect(pipeline.variables.map { |var| var.slice(:key, :secret_value) })
       .to eq variables_attributes.map(&:with_indifferent_access)
-  end
-
-  it 'sets a valid config source' do
-    step.perform!
-
-    expect(pipeline.repository_source?).to be true
   end
 
   it 'returns a valid pipeline' do

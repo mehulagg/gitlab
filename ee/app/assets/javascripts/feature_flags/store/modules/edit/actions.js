@@ -1,9 +1,10 @@
 import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
-import { mapFromScopesViewModel } from '../helpers';
+import { NEW_VERSION_FLAG } from '../../../constants';
+import { mapFromScopesViewModel, mapStrategiesToRails } from '../helpers';
 
 /**
  * Commits mutation to set the main endpoint
@@ -32,7 +33,12 @@ export const updateFeatureFlag = ({ state, dispatch }, params) => {
   dispatch('requestUpdateFeatureFlag');
 
   axios
-    .put(state.endpoint, mapFromScopesViewModel(params))
+    .put(
+      state.endpoint,
+      params.version === NEW_VERSION_FLAG
+        ? mapStrategiesToRails(params)
+        : mapFromScopesViewModel(params),
+    )
     .then(() => {
       dispatch('receiveUpdateFeatureFlagSuccess');
       visitUrl(state.path);
@@ -66,5 +72,4 @@ export const receiveFeatureFlagError = ({ commit }) => {
   createFlash(__('Something went wrong on our end. Please try again!'));
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const toggleActive = ({ commit }, active) => commit(types.TOGGLE_ACTIVE, active);

@@ -2,15 +2,35 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::DefaultEmbedService, :use_clean_rails_memory_store_caching do
+RSpec.describe Metrics::Dashboard::DefaultEmbedService, :use_clean_rails_memory_store_caching do
   include MetricsDashboardHelpers
 
-  set(:project) { build(:project) }
-  set(:user) { create(:user) }
-  set(:environment) { create(:environment, project: project) }
+  let_it_be(:project) { build(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:environment) { create(:environment, project: project) }
 
   before do
     project.add_maintainer(user)
+  end
+
+  describe '.valid_params?' do
+    let(:params) { { embedded: true } }
+
+    subject { described_class.valid_params?(params) }
+
+    it { is_expected.to be_truthy }
+
+    context 'missing embedded' do
+      let(:params) { {} }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'not embedded' do
+      let(:params) { { embedded: 'false' } }
+
+      it { is_expected.to be_falsey }
+    end
   end
 
   describe '#get_dashboard' do

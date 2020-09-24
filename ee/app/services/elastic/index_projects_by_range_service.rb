@@ -18,7 +18,7 @@ module Elastic
       end
 
       args.each_slice(BULK_PERFORM_SIZE) do |args|
-        ElasticFullIndexWorker.bulk_perform_async(args)
+        ElasticFullIndexWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
       end
     end
   end

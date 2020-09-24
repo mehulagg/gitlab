@@ -7,6 +7,7 @@ module Gitlab
       include Presentable
       include BlobLanguageFromGitAttributes
       include Gitlab::Utils::StrongMemoize
+      include BlobActiveModel
 
       attr_reader :project, :content_match, :blob_path
 
@@ -154,7 +155,7 @@ module Gitlab
       end
 
       def repository
-        @repository ||= project.repository
+        @repository ||= project&.repository
       end
     end
   end

@@ -1,6 +1,13 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference
+---
+
 # Merge request diffs storage **(CORE ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/52568) in GitLab 11.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/52568) in GitLab 11.8.
 
 Merge request diffs are size-limited copies of diffs associated with merge
 requests. When viewing a merge request, diffs are sourced from these copies
@@ -25,7 +32,7 @@ To enable external storage of merge request diffs, follow the instructions below
    gitlab_rails['external_diffs_enabled'] = true
    ```
 
-1. _The external diffs will be stored in in
+1. _The external diffs will be stored in
    `/var/opt/gitlab/gitlab-rails/shared/external-diffs`._ To change the path,
    for example, to `/mnt/storage/external-diffs`, edit `/etc/gitlab/gitlab.rb`
    and add the following line:
@@ -68,7 +75,14 @@ Instead of storing the external diffs on disk, we recommended the use of an obje
 store like AWS S3 instead. This configuration relies on valid AWS credentials to
 be configured already.
 
+[Read more about using object storage with GitLab](object_storage.md).
+
 ## Object Storage Settings
+
+NOTE: **Note:**
+In GitLab 13.2 and later, we recommend using the
+[consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration).
+This section describes the earlier configuration format.
 
 For source installations, these settings are nested under `external_diffs:` and
 then `object_store:`. On Omnibus installations, they are prefixed by
@@ -85,20 +99,7 @@ then `object_store:`. On Omnibus installations, they are prefixed by
 
 ### S3 compatible connection settings
 
-The connection settings match those provided by [Fog](https://github.com/fog), and are as follows:
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `provider` | Always `AWS` for compatible hosts | AWS |
-| `aws_access_key_id` | AWS credentials, or compatible | |
-| `aws_secret_access_key` | AWS credentials, or compatible | |
-| `aws_signature_version` | AWS signature version to use. 2 or 4 are valid options. Digital Ocean Spaces and other providers may need 2. | 4 |
-| `enable_signature_v4_streaming` | Set to true to enable HTTP chunked transfers with [AWS v4 signatures](https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html). Oracle Cloud S3 needs this to be false | true |
-| `region` | AWS region | us-east-1 |
-| `host` | S3 compatible host for when not using AWS, e.g. `localhost` or `storage.example.com` | s3.amazonaws.com |
-| `endpoint` | Can be used when configuring an S3 compatible service such as [MinIO](https://min.io), by entering a URL such as `http://127.0.0.1:9000` | (optional) |
-| `path_style` | Set to true to use `host/bucket_name/object` style paths instead of `bucket_name.host/object`. Leave as false for AWS S3 | false |
-| `use_iam_profile` | Set to true to use IAM profile instead of access keys | false
+See [the available connection settings for different providers](object_storage.md#connection-settings).
 
 **In Omnibus installations:**
 
@@ -193,3 +194,51 @@ conditions become true:
 These rules strike a balance between space and performance by only storing
 frequently-accessed diffs in the database. Diffs that are less likely to be
 accessed are moved to external storage instead.
+
+## Correcting incorrectly-migrated diffs
+
+Versions of GitLab earlier than `v13.0.0` would incorrectly record the location
+of some merge request diffs when [external diffs in object storage](#object-storage-settings)
+were enabled. This mainly affected imported merge requests, and was resolved
+with [this merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31005).
+
+If you are using object storage, have never used on-disk storage for external
+diffs, the "changes" tab for some merge requests fails to load with a 500 error,
+and the exception for that error is of this form:
+
+```plain
+Errno::ENOENT (No such file or directory @ rb_sysopen - /var/opt/gitlab/gitlab-rails/shared/external-diffs/merge_request_diffs/mr-6167082/diff-8199789)
+```
+
+Then you are affected by this issue. Since it's not possible to safely determine
+all these conditions automatically, we've provided a Rake task in GitLab v13.2.0
+that you can run manually to correct the data:
+
+**In Omnibus installations:**
+
+```shell
+sudo gitlab-rake gitlab:external_diffs:force_object_storage
+```
+
+**In installations from source:**
+
+```shell
+sudo -u git -H bundle exec rake gitlab:external_diffs:force_object_storage RAILS_ENV=production
+```
+
+Environment variables can be provided to modify the behavior of the task. The
+available variables are:
+
+| Name | Default value | Purpose |
+| ---- | ------------- | ------- |
+| `ANSI`         | `true`  | Use ANSI escape codes to make output more understandable |
+| `BATCH_SIZE`   | `1000`  | Iterate through the table in batches of this size |
+| `START_ID`     | `nil`   | If set, begin scanning at this ID |
+| `END_ID`       | `nil`   | If set, stop scanning at this ID |
+| `UPDATE_DELAY` | `1`     | Number of seconds to sleep between updates |
+
+The `START_ID` and `END_ID` variables may be used to run the update in parallel,
+by assigning different processes to different parts of the table. The `BATCH`
+and `UPDATE_DELAY` parameters allow the speed of the migration to be traded off
+against concurrent access to the table. The `ANSI` parameter should be set to
+false if your terminal does not support ANSI escape codes.

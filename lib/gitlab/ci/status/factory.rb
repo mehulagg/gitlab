@@ -7,7 +7,7 @@ module Gitlab
         def initialize(subject, user)
           @subject = subject
           @user = user
-          @status = subject.status || HasStatus::DEFAULT_STATUS
+          @status = subject.status || ::Ci::HasStatus::DEFAULT_STATUS
         end
 
         def fabricate!
@@ -20,7 +20,7 @@ module Gitlab
 
         def core_status
           Gitlab::Ci::Status
-            .const_get(@status.capitalize, false)
+            .const_get(@status.to_s.camelize, false)
             .new(@subject, @user)
             .extend(self.class.common_helpers)
         end

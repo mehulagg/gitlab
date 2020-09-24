@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::GroupContainerRepositories do
+RSpec.describe API::GroupContainerRepositories do
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:project) { create(:project, :private, group: group) }
   let_it_be(:reporter) { create(:user) }
@@ -47,7 +47,7 @@ describe API::GroupContainerRepositories do
     it_behaves_like 'a gitlab tracking event', described_class.name, 'list_repositories'
 
     context 'with invalid group id' do
-      let(:url) { '/groups/123412341234/registry/repositories' }
+      let(:url) { "/groups/#{non_existing_record_id}/registry/repositories" }
 
       it 'returns not found' do
         subject

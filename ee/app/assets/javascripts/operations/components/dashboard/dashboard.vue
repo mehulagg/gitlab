@@ -1,12 +1,12 @@
 <script>
-import _ from 'underscore';
 import { mapState, mapActions } from 'vuex';
 import {
-  GlLoadingIcon,
+  GlDashboardSkeleton,
+  GlButton,
+  GlEmptyState,
+  GlLink,
   GlModal,
   GlModalDirective,
-  GlButton,
-  GlDashboardSkeleton,
 } from '@gitlab/ui';
 import VueDraggable from 'vuedraggable';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
@@ -15,10 +15,11 @@ import DashboardProject from './project.vue';
 export default {
   components: {
     DashboardProject,
-    GlModal,
     GlDashboardSkeleton,
-    GlLoadingIcon,
     GlButton,
+    GlEmptyState,
+    GlLink,
+    GlModal,
     ProjectSelector,
     VueDraggable,
   },
@@ -51,6 +52,7 @@ export default {
       'projectSearchResults',
       'searchCount',
       'messages',
+      'pageInfo',
     ]),
     projects: {
       get() {
@@ -64,7 +66,7 @@ export default {
       return this.searchCount > 0;
     },
     okDisabled() {
-      return _.isEmpty(this.selectedProjects);
+      return Object.keys(this.selectedProjects).length === 0;
     },
   },
   created() {
@@ -76,6 +78,7 @@ export default {
   },
   methods: {
     ...mapActions([
+      'fetchNextPage',
       'fetchSearchResults',
       'addProjectsToDashboard',
       'fetchProjects',
@@ -115,6 +118,7 @@ export default {
       :ok-title="s__('OperationsDashboard|Add projects')"
       :ok-disabled="okDisabled"
       ok-variant="success"
+      data-qa-selector="add_projects_modal"
       @cancel="onCancel"
       @ok="onOk"
     >
@@ -126,8 +130,10 @@ export default {
         :show-loading-indicator="isSearchingProjects"
         :show-minimum-search-query-message="messages.minimumQuery"
         :show-search-error-message="messages.searchError"
+        :total-results="pageInfo.totalResults"
         @searched="searched"
         @projectClicked="projectClicked"
+        @bottomReached="fetchNextPage"
       />
     </gl-modal>
 
@@ -138,50 +144,55 @@ export default {
       <gl-button
         v-if="projects.length"
         v-gl-modal="$options.modalId"
-        class="js-add-projects-button btn btn-success"
+        variant="success"
+        category="primary"
+        data-testid="add-projects-button"
+        data-qa-selector="add_projects_button"
       >
         {{ s__('OperationsDashboard|Add projects') }}
       </gl-button>
     </div>
-    <div class="prepend-top-default">
+    <div class="gl-mt-3">
       <vue-draggable
         v-if="projects.length"
         v-model="projects"
         group="dashboard-projects"
-        class="row prepend-top-default dashboard-cards"
+        class="row gl-mt-3 dashboard-cards"
       >
         <div v-for="project in projects" :key="project.id" class="col-12 col-md-6 col-xl-4 px-2">
           <dashboard-project :project="project" />
         </div>
       </vue-draggable>
-      <div v-else-if="!isLoadingProjects" class="row prepend-top-20 text-center">
-        <div class="col-12 d-flex justify-content-center svg-content">
-          <img :src="emptyDashboardSvgPath" class="js-empty-state-svg col-12 prepend-top-20" />
-        </div>
-        <h4 class="js-title col-12 prepend-top-20">
-          {{ s__('OperationsDashboard|Add a project to the dashboard') }}
-        </h4>
-        <div class="col-12 d-flex justify-content-center">
-          <span class="js-sub-title mw-460 text-tertiary text-left">
-            {{
-              s__(`OperationsDashboard|The operations dashboard provides a summary of each project's
-              operational health, including pipeline and alert statuses.`)
-            }}
-            <a :href="emptyDashboardHelpPath" class="js-documentation-link">
-              {{ s__('OperationsDashboard|More information') }}
-            </a>
-          </span>
-        </div>
-        <div class="col-12">
+
+      <gl-dashboard-skeleton v-else-if="isLoadingProjects" />
+
+      <gl-empty-state
+        v-else
+        :title="s__(`OperationsDashboard|Add a project to the dashboard`)"
+        :svg-path="emptyDashboardSvgPath"
+      >
+        <template #description>
+          {{
+            s__(
+              `OperationsDashboard|The operations dashboard provides a summary of each project's operational health, including pipeline and alert statuses.`,
+            )
+          }}
+          <gl-link :href="emptyDashboardHelpPath" data-testid="documentation-link">{{
+            s__('OperationsDashboard|More information')
+          }}</gl-link
+          >.
+        </template>
+        <template #actions>
           <gl-button
             v-gl-modal="$options.modalId"
-            class="js-add-projects-button btn btn-success prepend-top-default append-bottom-default"
+            variant="success"
+            data-testid="add-projects-button"
+            data-qa-selector="add_projects_button"
           >
             {{ s__('OperationsDashboard|Add projects') }}
           </gl-button>
-        </div>
-      </div>
-      <gl-dashboard-skeleton v-else />
+        </template>
+      </gl-empty-state>
     </div>
   </div>
 </template>

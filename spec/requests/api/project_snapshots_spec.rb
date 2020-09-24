@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectSnapshots do
+RSpec.describe API::ProjectSnapshots do
   include WorkhorseHelpers
 
   let(:project) { create(:project) }
@@ -34,26 +34,26 @@ describe API::ProjectSnapshots do
     it 'returns authentication error as project owner' do
       get api("/projects/#{project.id}/snapshot", project.owner)
 
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
 
     it 'returns authentication error as unauthenticated user' do
       get api("/projects/#{project.id}/snapshot", nil)
 
-      expect(response).to have_gitlab_http_status(401)
+      expect(response).to have_gitlab_http_status(:unauthorized)
     end
 
     it 'requests project repository raw archive as administrator' do
       get api("/projects/#{project.id}/snapshot", admin), params: { wiki: '0' }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect_snapshot_response_for(project.repository)
     end
 
     it 'requests wiki repository raw archive as administrator' do
       get api("/projects/#{project.id}/snapshot", admin), params: { wiki: '1' }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect_snapshot_response_for(project.wiki.repository)
     end
   end

@@ -1,10 +1,15 @@
 - @can_bulk_update = can?(current_user, :admin_issue, @project)
 
-- page_title "Issues"
+- page_title _("Issues")
 - new_issue_email = @project.new_issuable_address(current_user, 'issue')
 
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, safe_params.merge(rss_url_options).to_h, title: "#{@project.name} issues")
+
+.js-projects-issues-root{ data: { can_edit: can?(current_user, :admin_project, @project).to_s,
+  is_jira_configured: @project.jira_service.present?.to_s,
+  issues_path: project_issues_path(@project),
+  project_path: @project.full_path } }
 
 - if project_issues(@project).exists?
   .top-area

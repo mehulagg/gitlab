@@ -33,11 +33,7 @@ module MergeTrains
         raise ProcessError, 'merge request is not on a merge train'
       end
 
-      if merge_request.squash?
-        raise ProcessError, 'merge train does not support squash merge'
-      end
-
-      unless merge_request.mergeable_state?(skip_ci_check: true)
+      unless merge_request.mergeable_state?(skip_ci_check: true, skip_discussions_check: true)
         raise ProcessError, 'merge request is not mergeable'
       end
 
@@ -52,9 +48,6 @@ module MergeTrains
       end
     end
 
-    # Since `stale_pipeline?` is expensive process which requires multiple Gitaly calls,
-    # each refresh service relays `require_recreate` flag whether the next
-    # merge request obviously requires to re-create pipeline for merge train.
     def should_create_pipeline?
       pipeline_absent? || require_recreate? || stale_pipeline?
     end
@@ -70,35 +63,22 @@ module MergeTrains
     end
 
     def should_merge?
-      first_in_train? && pipeline_for_merge_train&.success?
+      pipeline_for_merge_train&.success? && first_in_train?
     end
 
     def merge!
+      merge_train.start_merge!
+
       MergeRequests::MergeService.new(project, merge_user, merge_request.merge_params)
-                                 .execute(merge_request)
+                                 .execute(merge_request, skip_discussions_check: true)
 
-      raise ProcessError, 'failed to merge' unless merge_request.merged?
+      raise ProcessError, "failed to merge. #{merge_request.merge_error}" unless merge_request.merged?
 
-      merge_train.destroy
+      merge_train.finish_merge!
     end
 
-    # NOTE: This method works for both no-ff-merge and ff-merge, however,
-    #       it doesn't work for squash and merge option.
     def stale_pipeline?
-      return true unless pipeline_for_merge_train.source_sha == merge_request.diff_head_sha
-      return false if pipeline_for_merge_train.target_sha == previous_ref_sha
-
-      ##
-      # Now `pipeline.target_sha` and `previous_ref_sha` are different. This case
-      # happens in the following cases:
-      # 1. Previous sha has a completely different history from the pipeline.target_sha.
-      #    e.g. Previous merge request was dropped from the merge train.
-      # 2. Previous sha has exactly the same history with the pipeline.target_sha.
-      #    e.g. Previous merge request was merged into target branch with no-ff option.
-      #
-      # We distinguish these two cases by comparing parent commits.
-      commits = merge_request.project.commits_by(oids: [pipeline_for_merge_train.target_sha, previous_ref_sha])
-      commits[0].parent_ids != commits[1].parent_ids
+      merge_train.stale?
     end
 
     def pipeline_absent?
@@ -122,7 +102,7 @@ module MergeTrains
     end
 
     def update_pipeline_for_merge_train(pipeline)
-      merge_train.update!(pipeline: pipeline)
+      merge_train.refresh_pipeline!(pipeline.id)
     end
 
     def merge_user

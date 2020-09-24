@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSetting do
+RSpec.describe ApplicationSetting do
   using RSpec::Parameterized::TableSyntax
 
   subject(:setting) { described_class.create_from_defaults }
@@ -36,15 +36,54 @@ describe ApplicationSetting do
     it { is_expected.not_to allow_value(-1).for(:elasticsearch_shards) }
 
     it { is_expected.to allow_value(10).for(:elasticsearch_replicas) }
+    it { is_expected.to allow_value(0).for(:elasticsearch_replicas) }
     it { is_expected.not_to allow_value(nil).for(:elasticsearch_replicas) }
-    it { is_expected.not_to allow_value(0).for(:elasticsearch_replicas) }
     it { is_expected.not_to allow_value(1.1).for(:elasticsearch_replicas) }
     it { is_expected.not_to allow_value(-1).for(:elasticsearch_replicas) }
+
+    it { is_expected.to allow_value(10).for(:elasticsearch_indexed_file_size_limit_kb) }
+    it { is_expected.not_to allow_value(0).for(:elasticsearch_indexed_file_size_limit_kb) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_indexed_file_size_limit_kb) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_indexed_file_size_limit_kb) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_indexed_file_size_limit_kb) }
+
+    it { is_expected.to allow_value(10).for(:elasticsearch_indexed_field_length_limit) }
+    it { is_expected.to allow_value(0).for(:elasticsearch_indexed_field_length_limit) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_indexed_field_length_limit) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_indexed_field_length_limit) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_indexed_field_length_limit) }
+
+    it { is_expected.to allow_value(25).for(:elasticsearch_max_bulk_size_mb) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_max_bulk_size_mb) }
+    it { is_expected.not_to allow_value(0).for(:elasticsearch_max_bulk_size_mb) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_max_bulk_size_mb) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_max_bulk_size_mb) }
+
+    it { is_expected.to allow_value(2).for(:elasticsearch_max_bulk_concurrency) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_max_bulk_concurrency) }
+    it { is_expected.not_to allow_value(0).for(:elasticsearch_max_bulk_concurrency) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_max_bulk_concurrency) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_max_bulk_concurrency) }
+
+    it { is_expected.to allow_value(30).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.to allow_value(0).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_client_request_timeout) }
 
     it { is_expected.to allow_value(nil).for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("").for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("  ").for(:required_instance_ci_template) }
     it { is_expected.to allow_value("template_name").for(:required_instance_ci_template) }
+
+    it { is_expected.to allow_value(1).for(:max_personal_access_token_lifetime) }
+    it { is_expected.to allow_value(nil).for(:max_personal_access_token_lifetime) }
+    it { is_expected.to allow_value(10).for(:max_personal_access_token_lifetime) }
+    it { is_expected.to allow_value(365).for(:max_personal_access_token_lifetime) }
+    it { is_expected.not_to allow_value("value").for(:max_personal_access_token_lifetime) }
+    it { is_expected.not_to allow_value(2.5).for(:max_personal_access_token_lifetime) }
+    it { is_expected.not_to allow_value(-5).for(:max_personal_access_token_lifetime) }
+    it { is_expected.not_to allow_value(366).for(:max_personal_access_token_lifetime) }
 
     describe 'when additional email text is enabled' do
       before do
@@ -68,10 +107,55 @@ describe ApplicationSetting do
       end
 
       with_them do
-        it do
+        specify do
           setting.update_column(:geo_node_allowed_ips, allowed_ips)
 
           expect(setting.reload.valid?).to eq(is_valid)
+        end
+      end
+    end
+
+    context 'when validating elasticsearch_url' do
+      where(:elasticsearch_url, :is_valid) do
+        "http://es.localdomain" | true
+        "https://es.localdomain" | true
+        "http://es.localdomain, https://es.localdomain " | true
+        "http://10.0.0.1" | true
+        "https://10.0.0.1" | true
+        "http://10.0.0.1, https://10.0.0.1" | true
+        "http://localhost" | true
+        "http://127.0.0.1" | true
+
+        "es.localdomain" | false
+        "10.0.0.1" | false
+        "http://es.localdomain, es.localdomain" | false
+        "http://es.localdomain, 10.0.0.1" | false
+        "this_isnt_a_url" | false
+      end
+
+      with_them do
+        specify do
+          setting.elasticsearch_url = elasticsearch_url
+
+          expect(setting.valid?).to eq(is_valid)
+        end
+      end
+    end
+
+    context 'when validating compliance_frameworks' do
+      where(:compliance_frameworks, :is_valid) do
+        [1, 2, 3, 4, 5] | true
+        nil             | true
+        1               | true
+        [2, 3, 4, 6]    | false
+        6               | false
+      end
+
+      with_them do
+        specify do
+          setting.compliance_frameworks = compliance_frameworks
+
+          expect(setting.valid?).to eq(is_valid)
         end
       end
     end
@@ -88,6 +172,7 @@ describe ApplicationSetting do
       # and we want to make sure we're still testing
       # should_check_namespace_plan? method through the test-suite (see
       # https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/18461#note_69322821).
+      allow(Rails).to receive_message_chain(:env, :development?).and_return(false)
       allow(Rails).to receive_message_chain(:env, :test?).and_return(false)
     end
 
@@ -160,6 +245,20 @@ describe ApplicationSetting do
     end
   end
 
+  describe '#elasticsearch_pause_indexing' do
+    before do
+      setting.elasticsearch_pause_indexing = true
+    end
+
+    it 'resumes indexing' do
+      expect(ElasticIndexingControlWorker).to receive(:perform_async)
+
+      setting.save!
+      setting.elasticsearch_pause_indexing = false
+      setting.save!
+    end
+  end
+
   describe '#elasticsearch_url' do
     it 'presents a single URL as a one-element array' do
       setting.elasticsearch_url = 'http://example.com'
@@ -193,7 +292,10 @@ describe ApplicationSetting do
         elasticsearch_aws: false,
         elasticsearch_aws_region:     'test-region',
         elasticsearch_aws_access_key: 'test-access-key',
-        elasticsearch_aws_secret_access_key: 'test-secret-access-key'
+        elasticsearch_aws_secret_access_key: 'test-secret-access-key',
+        elasticsearch_max_bulk_size_mb: 67,
+        elasticsearch_max_bulk_concurrency: 8,
+        elasticsearch_client_request_timeout: 30
       )
 
       expect(setting.elasticsearch_config).to eq(
@@ -201,8 +303,17 @@ describe ApplicationSetting do
         aws: false,
         aws_region:     'test-region',
         aws_access_key: 'test-access-key',
-        aws_secret_access_key: 'test-secret-access-key'
+        aws_secret_access_key: 'test-secret-access-key',
+        max_bulk_size_bytes: 67.megabytes,
+        max_bulk_concurrency: 8,
+        client_request_timeout: 30
       )
+
+      setting.update!(
+        elasticsearch_client_request_timeout: 0
+      )
+
+      expect(setting.elasticsearch_config).not_to include(:client_request_timeout)
     end
 
     context 'limiting namespaces and projects' do
@@ -231,6 +342,35 @@ describe ApplicationSetting do
           expect(setting.elasticsearch_limited_namespaces(true)).to match_array(
             [namespaces.last, child_namespace])
         end
+
+        describe '#elasticsearch_indexes_project?' do
+          context 'when project is in a subgroup' do
+            let(:root_group) { create(:group) }
+            let(:subgroup) { create(:group, parent: root_group) }
+            let(:project) { create(:project, group: subgroup) }
+
+            before do
+              create(:elasticsearch_indexed_namespace, namespace: root_group)
+            end
+
+            it 'allows project to be indexed' do
+              expect(setting.elasticsearch_indexes_project?(project)).to be(true)
+            end
+          end
+
+          context 'when project is in a namespace' do
+            let(:namespace) { create(:namespace) }
+            let(:project) { create(:project, namespace: namespace) }
+
+            before do
+              create(:elasticsearch_indexed_namespace, namespace: namespace)
+            end
+
+            it 'allows project to be indexed' do
+              expect(setting.elasticsearch_indexes_project?(project)).to be(true)
+            end
+          end
+        end
       end
 
       context 'projects' do
@@ -249,23 +389,38 @@ describe ApplicationSetting do
           expect(setting.elasticsearch_limited_projects).to match_array(
             [projects.last, project_indexed_through_namespace])
         end
+
+        it 'uses the ElasticsearchEnabledCache cache' do
+          expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:fetch).and_return(true)
+
+          expect(setting.elasticsearch_indexes_project?(projects.first)).to be(true)
+        end
       end
     end
   end
 
+  describe '#invalidate_elasticsearch_indexes_cache' do
+    it 'deletes the ElasticsearchEnabledCache for projects and namespaces' do
+      expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:delete).with(:project)
+      expect(::Gitlab::Elastic::ElasticsearchEnabledCache).to receive(:delete).with(:namespace)
+
+      setting.invalidate_elasticsearch_indexes_cache!
+    end
+  end
+
   describe '#search_using_elasticsearch?' do
-    # Constructs a truth table with 16 entries to run the specs against
-    where(indexing: [true, false], searching: [true, false], limiting: [true, false])
+    # Constructs a truth table to run the specs against
+    where(indexing: [true, false], searching: [true, false], limiting: [true, false], advanced_global_search_for_limited_indexing: [true, false])
 
     with_them do
-      set(:included_project_container) { create(:elasticsearch_indexed_project) }
-      set(:included_namespace_container) { create(:elasticsearch_indexed_namespace) }
+      let_it_be(:included_project_container) { create(:elasticsearch_indexed_project) }
+      let_it_be(:included_namespace_container) { create(:elasticsearch_indexed_namespace) }
 
-      set(:included_project) { included_project_container.project }
-      set(:included_namespace) { included_namespace_container.namespace }
+      let_it_be(:included_project) { included_project_container.project }
+      let_it_be(:included_namespace) { included_namespace_container.namespace }
 
-      set(:excluded_project) { create(:project) }
-      set(:excluded_namespace) { create(:namespace) }
+      let_it_be(:excluded_project) { create(:project) }
+      let_it_be(:excluded_namespace) { create(:namespace) }
 
       let(:only_when_enabled_globally) { indexing && searching && !limiting }
 
@@ -277,12 +432,14 @@ describe ApplicationSetting do
           elasticsearch_search: searching,
           elasticsearch_limit_indexing: limiting
         )
+
+        stub_feature_flags(advanced_global_search_for_limited_indexing: advanced_global_search_for_limited_indexing)
       end
 
       context 'global scope' do
         let(:scope) { nil }
 
-        it { is_expected.to eq(only_when_enabled_globally) }
+        it { is_expected.to eq(indexing && searching && (!limiting || advanced_global_search_for_limited_indexing)) }
       end
 
       context 'namespace (in scope)' do
@@ -393,27 +550,162 @@ describe ApplicationSetting do
     context 'for instances without a valid license' do
       before do
         allow(License).to receive(:current).and_return(nil)
+        expect(Rails.cache).to receive(:fetch).and_return(
+          ::ApplicationSetting::INSTANCE_REVIEW_MIN_USERS + users_over_minimum
+        )
       end
 
-      context 'when there are more users than minimum count' do
-        before do
-          expect(Rails.cache).to receive(:fetch).and_return(101)
-        end
+      where(users_over_minimum: [-1, 0, 1])
 
-        it 'is permitted' do
-          expect(subject).to be_truthy
-        end
+      with_them do
+        it { is_expected.to be(users_over_minimum >= 0) }
+      end
+    end
+  end
+
+  describe '#max_personal_access_token_lifetime_from_now' do
+    subject { setting.max_personal_access_token_lifetime_from_now }
+
+    let(:days_from_now) { nil }
+
+    before do
+      stub_application_setting(max_personal_access_token_lifetime: days_from_now)
+    end
+
+    context 'when max_personal_access_token_lifetime is defined' do
+      let(:days_from_now) { 30 }
+
+      it 'is a date time' do
+        expect(subject).to be_a Time
       end
 
-      context 'when there are less users than minimum count' do
-        before do
-          create(:user)
+      it 'is in the future' do
+        expect(subject).to be > Time.zone.now
+      end
+
+      it 'is in days_from_now' do
+        expect(subject.to_date - Date.today).to eq days_from_now
+      end
+    end
+
+    context 'when max_personal_access_token_lifetime is nil' do
+      it 'is nil' do
+        expect(subject).to be_nil
+      end
+    end
+  end
+
+  describe 'updates to max_personal_access_token_lifetime' do
+    context 'without personal_access_token_expiration_policy licensed' do
+      before do
+        stub_licensed_features(personal_access_token_expiration_policy: false)
+      end
+
+      it "doesn't call the update lifetime service" do
+        expect(::PersonalAccessTokens::Instance::UpdateLifetimeService).not_to receive(:new)
+
+        setting.save
+      end
+    end
+
+    context 'with personal_access_token_expiration_policy licensed' do
+      before do
+        setting.max_personal_access_token_lifetime = 30
+        stub_licensed_features(personal_access_token_expiration_policy: true)
+      end
+
+      it 'executes the update lifetime service' do
+        expect_next_instance_of(::PersonalAccessTokens::Instance::UpdateLifetimeService) do |service|
+          expect(service).to receive(:execute)
         end
 
-        it 'is not permitted' do
-          expect(subject).to be_falsey
-        end
+        setting.save
       end
+    end
+  end
+
+  describe '#seat_link_available?' do
+    subject { setting.seat_link_available? }
+
+    before do
+      allow(License).to receive(:feature_available?).and_call_original
+      allow(License).to receive(:feature_available?).with(:seat_link).and_return(seat_link)
+    end
+
+    context 'when the seat_link feature is available' do
+      let(:seat_link) { true }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when the seat_link feature is not available' do
+      let(:seat_link) { false }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#seat_link_can_be_configured?' do
+    subject { setting.seat_link_can_be_configured? }
+
+    before do
+      allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(seat_link_enabled)
+    end
+
+    context 'when the seat_link_enabled configuration is enabled' do
+      let(:seat_link_enabled) { true }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when the seat_link_enabled configuration is disabled' do
+      let(:seat_link_enabled) { false }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#seat_link_enabled?' do
+    subject { setting.seat_link_enabled? }
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:seat_link_available, :seat_link_can_be_configured, :seat_link_enabled, :result) do
+      true  | true  | true  | true
+      false | true  | true  | false
+      true  | false | true  | false
+      true  | true  | false | false
+      false | false | false | false
+    end
+
+    with_them do
+      before do
+        allow(setting).to receive(:seat_link_available?).and_return(seat_link_available)
+        allow(setting).to receive(:seat_link_can_be_configured?).and_return(seat_link_can_be_configured)
+        setting.seat_link_enabled = seat_link_enabled
+      end
+
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#compliance_frameworks' do
+    it 'sorts the list' do
+      setting.compliance_frameworks = [5, 4, 1, 3, 2]
+
+      expect(setting.compliance_frameworks).to eq([1, 2, 3, 4, 5])
+    end
+
+    it 'removes duplicates' do
+      setting.compliance_frameworks = [1, 2, 2, 3, 3, 3]
+
+      expect(setting.compliance_frameworks).to eq([1, 2, 3])
+    end
+
+    it 'sets empty values' do
+      setting.compliance_frameworks = [""]
+
+      expect(setting.compliance_frameworks).to eq([])
     end
   end
 end

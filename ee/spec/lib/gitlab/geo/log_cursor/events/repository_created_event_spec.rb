@@ -2,7 +2,10 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gitlab_redis_shared_state do
+  include ::EE::GeoHelpers
+
+  let_it_be(:secondary) { create(:geo_node) }
   let(:logger) { Gitlab::Geo::LogCursor::Logger.new(described_class, Logger::INFO) }
   let(:project) { create(:project) }
   let(:repository_created_event) { create(:geo_repository_created_event, project: project) }
@@ -13,6 +16,10 @@ describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gitlab_r
 
   around do |example|
     Sidekiq::Testing.fake! { example.run }
+  end
+
+  before do
+    stub_current_geo_node(secondary)
   end
 
   RSpec.shared_examples 'RepositoryCreatedEvent' do
@@ -35,6 +42,18 @@ describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gitlab_r
       registry = Geo::ProjectRegistry.last
       expect(registry).to have_attributes(project_id: project.id, resync_repository: true, resync_wiki: false)
     end
+
+    context 'when outside selective sync' do
+      before do
+        selective_sync_secondary = create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: ['non-existent'])
+
+        stub_current_geo_node(selective_sync_secondary)
+      end
+
+      it 'does not create a new project registry' do
+        expect { subject.process }.not_to change(Geo::ProjectRegistry, :count)
+      end
+    end
   end
 
   describe '#process' do
@@ -52,6 +71,8 @@ describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gitlab_r
 
         subject.process
       end
+
+      it_behaves_like 'logs event source info'
     end
 
     context 'when the associated shard is not healthy' do

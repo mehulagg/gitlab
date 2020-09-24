@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User edit profile' do
+RSpec.describe 'User edit profile' do
   let(:user) { create(:user) }
 
   before do
@@ -15,13 +15,19 @@ describe 'User edit profile' do
     wait_for_requests if respond_to?(:wait_for_requests)
   end
 
+  def visit_user
+    visit user_path(user)
+    wait_for_requests
+  end
+
   it 'changes user profile' do
     fill_in 'user_skype', with: 'testskype'
     fill_in 'user_linkedin', with: 'testlinkedin'
     fill_in 'user_twitter', with: 'testtwitter'
     fill_in 'user_website_url', with: 'testurl'
     fill_in 'user_location', with: 'Ukraine'
-    fill_in 'user_bio', with: 'I <3 GitLab'
+    fill_in 'user_bio', with: 'I <3 GitLab :tada:'
+    fill_in 'user_job_title', with: 'Frontend Engineer'
     fill_in 'user_organization', with: 'GitLab'
     submit_settings
 
@@ -30,7 +36,9 @@ describe 'User edit profile' do
       linkedin: 'testlinkedin',
       twitter: 'testtwitter',
       website_url: 'testurl',
-      bio: 'I <3 GitLab',
+      bio: 'I <3 GitLab :tada:',
+      bio_html: '<p data-sourcepos="1:1-1:18" dir="auto">I &lt;3 GitLab <gl-emoji title="party popper" data-name="tada" data-unicode-version="6.0">🎉</gl-emoji></p>',
+      job_title: 'Frontend Engineer',
       organization: 'GitLab'
     )
 
@@ -66,34 +74,6 @@ describe 'User edit profile' do
     end
   end
 
-  describe 'when I change my role' do
-    context 'experiment enabled' do
-      before do
-        stub_experiment_for_user(signup_flow: true)
-        visit(profile_path)
-      end
-
-      it 'changes my role' do
-        expect(page).to have_content 'Role'
-        select 'Data Analyst', from: 'user_role'
-        submit_settings
-        user.reload
-        expect(user.role).to eq 'data_analyst'
-      end
-    end
-
-    context 'experiment disabled' do
-      before do
-        stub_experiment_for_user(signup_flow: false)
-        visit(profile_path)
-      end
-
-      it 'does not show the role picker' do
-        expect(page).not_to have_content 'Role'
-      end
-    end
-  end
-
   context 'user avatar' do
     before do
       attach_file(:user_avatar, Rails.root.join('spec', 'fixtures', 'banana_sample.gif'))
@@ -120,11 +100,6 @@ describe 'User edit profile' do
   end
 
   context 'user status', :js do
-    def visit_user
-      visit user_path(user)
-      wait_for_requests
-    end
-
     def select_emoji(emoji_name, is_modal = false)
       emoji_menu_class = is_modal ? '.js-modal-status-emoji-menu' : '.js-status-emoji-menu'
       toggle_button = find('.js-toggle-emoji-menu')
@@ -271,6 +246,15 @@ describe 'User edit profile' do
         end
       end
 
+      it 'opens the emoji modal again after closing it' do
+        open_user_status_modal
+        select_emoji('biohazard', true)
+
+        find('.js-toggle-emoji-menu').click
+
+        expect(page).to have_selector('.emoji-menu')
+      end
+
       it 'does not update the awards panel emoji' do
         project.add_maintainer(user)
         visit(project_issue_path(project, issue))
@@ -404,6 +388,42 @@ describe 'User edit profile' do
       it 'timezone defaults to servers default' do
         timezone_name = Time.zone.tzinfo.name
         expect(page.find('.user-time-preferences #user_timezone', visible: false).value).to eq(timezone_name)
+      end
+    end
+  end
+
+  context 'work information', :js do
+    context 'when job title and organziation are entered' do
+      it "shows job title and organzation on user's profile" do
+        fill_in 'user_job_title', with: 'Frontend Engineer'
+        fill_in 'user_organization', with: 'GitLab - work info test'
+        submit_settings
+
+        visit_user
+
+        expect(page).to have_content('Frontend Engineer at GitLab - work info test')
+      end
+    end
+
+    context 'when only job title is entered' do
+      it "shows only job title on user's profile" do
+        fill_in 'user_job_title', with: 'Frontend Engineer - work info test'
+        submit_settings
+
+        visit_user
+
+        expect(page).to have_content('Frontend Engineer - work info test')
+      end
+    end
+
+    context 'when only organization is entered' do
+      it "shows only organization on user's profile" do
+        fill_in 'user_organization', with: 'GitLab - work info test'
+        submit_settings
+
+        visit_user
+
+        expect(page).to have_content('GitLab - work info test')
       end
     end
   end

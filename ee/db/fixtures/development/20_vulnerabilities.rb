@@ -1,10 +1,12 @@
-require './spec/support/sidekiq'
+require './spec/support/sidekiq_middleware'
 
 class Gitlab::Seeder::Vulnerabilities
   attr_reader :project
 
   def initialize(project)
     @project = project
+    FactoryBot.definition_file_paths << Rails.root.join('ee', 'spec', 'factories')
+    FactoryBot.reload # rubocop:disable Cop/ActiveRecordAssociationReload
   end
 
   def seed!
@@ -12,8 +14,9 @@ class Gitlab::Seeder::Vulnerabilities
 
     10.times do |rank|
       primary_identifier = create_identifier(rank)
-      occurrence = create_occurrence(rank, primary_identifier)
-      # Create occurrence_pipeline join model
+      vulnerability = create_vulnerability
+      occurrence = create_occurrence(vulnerability, rank, primary_identifier)
+      # Create finding_pipeline join model
       occurrence.pipelines << pipeline
       # Create occurrence_identifier join models
       occurrence.identifiers << primary_identifier
@@ -24,7 +27,7 @@ class Gitlab::Seeder::Vulnerabilities
         when 0
           create_feedback(occurrence, 'dismissal')
         when 1
-          create_feedback(occurrence, 'issue')
+          create_feedback(occurrence, 'issue', vulnerability: vulnerability)
         else
           # no feedback
         end
@@ -34,60 +37,106 @@ class Gitlab::Seeder::Vulnerabilities
 
   private
 
-  def create_occurrence(rank, primary_identifier)
-    project.vulnerability_findings.create!(
-      uuid: random_uuid,
-      name: 'Cipher with no integrity',
-      report_type: :sast,
+  def create_vulnerability
+    state_symbol = ::Vulnerability.states.keys.sample.to_sym
+    vulnerability = build_vulnerability(state_symbol)
+
+    case state_symbol
+    when :resolved
+      vulnerability.resolved_by = author
+    when :dismissed
+      vulnerability.dismissed_by = author
+    end
+
+    vulnerability.tap(&:save!)
+  end
+
+  def build_vulnerability(state_symbol)
+    FactoryBot.build(
+      :vulnerability,
+      state_symbol,
+      project: project,
+      author: author,
+      title: 'Cypher with no integrity',
       severity: random_severity_level,
       confidence: random_confidence_level,
+      report_type: random_report_type
+    )
+  end
+
+  def create_occurrence(vulnerability, rank, primary_identifier)
+    scanner = FactoryBot.create(:vulnerabilities_scanner, project: vulnerability.project)
+    FactoryBot.create(
+      :vulnerabilities_occurrence,
+      project: project,
+      vulnerability: vulnerability,
+      scanner: scanner,
+      severity: random_severity_level,
+      confidence: random_confidence_level,
+      primary_identifier: primary_identifier,
       project_fingerprint: random_fingerprint,
       location_fingerprint: random_fingerprint,
-      primary_identifier: primary_identifier,
-      raw_metadata: metadata(rank).to_json,
-      metadata_version: 'sast:1.0',
-      scanner: scanner)
+      raw_metadata: metadata(rank).to_json
+    )
   end
 
   def create_identifier(rank)
-    project.vulnerability_identifiers.create!(
+    FactoryBot.create(
+      :vulnerabilities_identifier,
       external_type: "SECURITY_ID",
       external_id: "SECURITY_#{rank}",
       fingerprint: random_fingerprint,
       name: "SECURITY_IDENTIFIER #{rank}",
-      url: "https://security.example.com/#{rank}"
+      url: "https://security.example.com/#{rank}",
+      project: project
     )
   end
 
-  def create_feedback(occurrence, type)
-    issue = create_issue("Dismiss #{occurrence.name}") if type == 'issue'
-    project.vulnerability_feedback.create!(
+  def create_feedback(occurrence, type, vulnerability: nil)
+    if type == 'issue'
+      issue = create_issue("Dismiss #{occurrence.name}")
+      create_vulnerability_issue_link(vulnerability, issue)
+    end
+
+    FactoryBot.create(
+      :vulnerability_feedback,
       feedback_type: type,
-      category: 'sast',
+      project: project,
       author: author,
       issue: issue,
       pipeline: pipeline,
-      project_fingerprint: occurrence.project_fingerprint,
-      vulnerability_data: { category: 'sast' })
-  end
-
-  def scanner
-    @scanner ||= project.vulnerability_scanners.create!(
-      project: project,
-      external_id: 'security-scanner',
-      name: 'Security Scanner')
+      project_fingerprint: occurrence.project_fingerprint
+    )
   end
 
   def create_issue(title)
-    project.issues.create!(author: author, title: title)
+    FactoryBot.create(
+      :issue,
+      project: project,
+      author: author,
+      title: title
+    )
+  end
+
+  def create_vulnerability_issue_link(vulnerability, issue)
+    FactoryBot.create(
+      :vulnerabilities_issue_link,
+      :created,
+      vulnerability: vulnerability,
+      issue: issue
+    )
   end
 
   def random_confidence_level
-    ::Vulnerabilities::Occurrence::CONFIDENCE_LEVELS.keys.sample
+    ::Vulnerabilities::Finding::CONFIDENCE_LEVELS.keys.sample
   end
 
   def random_severity_level
-    ::Vulnerabilities::Occurrence::SEVERITY_LEVELS.keys.sample
+    ::Vulnerabilities::Finding::SEVERITY_LEVELS.keys.sample
+  end
+
+  def random_report_type
+    ::Vulnerabilities::Finding::REPORT_TYPES.keys.sample
   end
 
   def metadata(line)
@@ -110,10 +159,6 @@ class Gitlab::Seeder::Vulnerabilities
     }
   end
 
-  def random_uuid
-    SecureRandom.hex(18)
-  end
-
   def random_fingerprint
     SecureRandom.hex(20)
   end
@@ -128,7 +173,7 @@ class Gitlab::Seeder::Vulnerabilities
 end
 
 Gitlab::Seeder.quiet do
-  Project.joins(:ci_pipelines).distinct.all.sample(5).each do |project|
+  Project.joins(:ci_pipelines).not_mass_generated.distinct.all.sample(5).each do |project|
     seeder = Gitlab::Seeder::Vulnerabilities.new(project)
     seeder.seed!
   end

@@ -1,22 +1,19 @@
 import { shallowMount } from '@vue/test-utils';
-import $ from 'jquery';
-import 'bootstrap';
-import '~/gl_dropdown';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import StageDropdownFilter from 'ee/analytics/cycle_analytics/components/stage_dropdown_filter.vue';
-
-jest.mock('~/api', () => ({
-  groupProjects: jest.fn(),
-}));
 
 const stages = [
   {
-    name: 'issue',
+    id: 1,
+    title: 'Issue',
   },
   {
-    name: 'plan',
+    id: 2,
+    title: 'Plan',
   },
   {
-    name: 'code',
+    id: 3,
+    title: 'Code',
   },
 ];
 
@@ -25,7 +22,6 @@ describe('StageDropdownFilter component', () => {
 
   const createComponent = () => {
     wrapper = shallowMount(StageDropdownFilter, {
-      sync: false,
       propsData: {
         stages,
       },
@@ -34,64 +30,42 @@ describe('StageDropdownFilter component', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   beforeEach(() => {
-    createComponent({ multiSelect: false });
+    createComponent();
   });
 
-  const findDropdown = () => wrapper.find('.dropdown');
-  const openDropdown = () => {
-    $(findDropdown().element)
-      .parent()
-      .trigger('shown.bs.dropdown');
-  };
-  const findDropdownItems = () => findDropdown().findAll('a');
+  const findDropdown = () => wrapper.find(GlDropdown);
+  const selectDropdownItemAtIndex = index =>
+    findDropdown()
+      .findAll(GlDropdownItem)
+      .at(index)
+      .vm.$emit('click');
 
   describe('on stage click', () => {
-    beforeEach(() => {
-      openDropdown();
+    describe('clicking a selected stage', () => {
+      it('should remove from selection', () => {
+        selectDropdownItemAtIndex(0);
 
-      return wrapper.vm.$nextTick();
+        expect(wrapper.emitted().selected).toEqual([[[stages[1], stages[2]]]]);
+      });
     });
 
-    it('should add to selection when new stage is clicked', () => {
-      findDropdownItems()
-        .at(0)
-        .trigger('click');
+    describe('clicking a deselected stage', () => {
+      beforeEach(() => {
+        selectDropdownItemAtIndex(0);
+      });
 
-      findDropdownItems()
-        .at(1)
-        .trigger('click');
+      it('should add to selection', () => {
+        selectDropdownItemAtIndex(0);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [[stages[0]]],
-        },
-        {
-          name: 'selected',
-          args: [[stages[0], stages[1]]],
-        },
-      ]);
-    });
-
-    it('should remove from selection when clicked again', () => {
-      const item = findDropdownItems().at(0);
-
-      item.trigger('click');
-      item.trigger('click');
-
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [[stages[0]]],
-        },
-        {
-          name: 'selected',
-          args: [[]],
-        },
-      ]);
+        expect(wrapper.emitted().selected).toEqual([
+          [[stages[1], stages[2]]],
+          [[stages[1], stages[2], stages[0]]],
+        ]);
+      });
     });
   });
 });

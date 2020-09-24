@@ -1,6 +1,6 @@
 - if smartcard_enabled?
   .login-box.tab-pane{ id: 'smartcard', role: 'tabpanel', class: active_when(form_based_auth_provider_has_active_class?(:smartcard)) }
     .login-body
-      = form_tag(smartcard_auth_url(port: smartcard_config_port), html: { 'aria-live' => 'assertive'}) do
+      = form_tag(auth_smartcard_url, html: { 'aria-live' => 'assertive'}) do
         .submit-container
           = submit_tag _('Login with smartcard'), class: 'btn btn-success'

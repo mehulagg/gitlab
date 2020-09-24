@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ReferenceExtractor do
+RSpec.describe Gitlab::ReferenceExtractor do
   let(:group)   { create(:group) }
   let(:project) { create(:project, group: group) }
 
@@ -19,7 +19,7 @@ describe Gitlab::ReferenceExtractor do
     @e1 = create(:epic, group: group)
     @e2 = create(:epic, group: create(:group, :private))
 
-    text = "#{@e0.to_reference(group, full: true)}, &999, #{@e1.to_reference(group, full: true)}, #{@e2.to_reference(group, full: true)}"
+    text = "#{@e0.to_reference(group, full: true)}, &#{non_existing_record_iid}, #{@e1.to_reference(group, full: true)}, #{@e2.to_reference(group, full: true)}"
 
     subject.analyze(text, { group: group })
 

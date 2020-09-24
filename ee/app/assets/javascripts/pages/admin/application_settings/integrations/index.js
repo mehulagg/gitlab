@@ -1,7 +1,7 @@
 import 'select2/select2';
 import $ from 'jquery';
 import { s__ } from '~/locale';
-import Api from '~/api';
+import PersistentUserCallout from '~/persistent_user_callout';
 
 const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) => {
   $limitByNamespaces.find('.select2').select2('data', null);
@@ -10,14 +10,14 @@ const onLimitCheckboxChange = (checked, $limitByNamespaces, $limitByProjects) =>
   $limitByProjects.toggleClass('hidden', !checked);
 };
 
-const getDropdownConfig = (placeholder, apiPath, textProp) => ({
+const getDropdownConfig = (placeholder, url) => ({
   placeholder,
   multiple: true,
   initSelection($el, callback) {
     callback($el.data('selected'));
   },
   ajax: {
-    url: Api.buildUrl(apiPath),
+    url,
     dataType: 'JSON',
     quietMillis: 250,
     data(search) {
@@ -28,8 +28,8 @@ const getDropdownConfig = (placeholder, apiPath, textProp) => ({
     results(data) {
       return {
         results: data.map(entity => ({
-          id: entity.id,
-          text: entity[textProp],
+          id: entity.source_id,
+          text: entity.path,
         })),
       };
     },
@@ -37,6 +37,10 @@ const getDropdownConfig = (placeholder, apiPath, textProp) => ({
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  const callout = document.querySelector('.js-admin-integrations-moved');
+  PersistentUserCallout.factory(callout);
+
+  // ElasticSearch
   const $container = $('#js-elasticsearch-settings');
 
   $container
@@ -54,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .select2(
       getDropdownConfig(
         s__('Elastic|None. Select namespaces to index.'),
-        Api.namespacesPath,
-        'full_path',
+        '/-/autocomplete/namespace_routes.json',
       ),
     );
 
@@ -64,8 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .select2(
       getDropdownConfig(
         s__('Elastic|None. Select projects to index.'),
-        Api.projectsPath,
-        'name_with_namespace',
+        '/-/autocomplete/project_routes.json',
       ),
     );
 });

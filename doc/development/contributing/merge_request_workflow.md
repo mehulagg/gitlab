@@ -15,13 +15,12 @@ to be marked as `Accepting Merge Requests`. Please include screenshots or
 wireframes of the proposed feature if it will also change the UI.
 
 Merge requests should be submitted to the appropriate project at GitLab.com, for example
-[GitLab CE](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests),
-[GitLab EE](https://gitlab.com/gitlab-org/gitlab/merge_requests),
-[GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/merge_requests),
-[GitLab Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests), etc.
+[GitLab](https://gitlab.com/gitlab-org/gitlab/-/merge_requests),
+[GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests),
+[Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests), etc.
 
 If you are new to GitLab development (or web development in general), see the
-[I want to contribute!](index.md#i-want-to-contribute) section to get started with
+[how to contribute](index.md#how-to-contribute) section to get started with
 some potentially easy issues.
 
 To start developing GitLab, download the [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit)
@@ -49,13 +48,8 @@ request is as follows:
    but do not change the commit history if you're working on shared branches though.
 1. Push the commit(s) to your working branch in your fork.
 1. Submit a merge request (MR) to the `master` branch in the main GitLab project.
-   1. Your merge request needs at least 1 approval, but feel free to require more.
-      For instance if you're touching both backend and frontend code, it's a good idea
-      to require 2 approvals: 1 from a backend maintainer and 1 from a frontend
-      maintainer.
-   1. If you're submitting changes to documentation, you'll need approval from a technical
-      writer, based on the appropriate [product category](https://about.gitlab.com/handbook/product/categories/).
-      Only assign the MR to them when it's ready for docs review.
+   1. Your merge request needs at least 1 approval, but depending on your changes
+      you might need additional approvals. Refer to the [Approval guidelines](../code_review.md#approval-guidelines).
    1. You don't have to select any specific approvers, but you can if you really want
       specific people to approve your merge request.
 1. The MR title should describe the change you want to make.
@@ -67,17 +61,12 @@ request is as follows:
    1. Mention the issue(s) your merge request solves, using the `Solves #XXX` or
       `Closes #XXX` syntax to [auto-close](../../user/project/issues/managing_issues.md#closing-issues-automatically)
       the issue(s) once the merge request is merged.
-1. If you're allowed to (Core team members, for example), set a relevant milestone
-   and [labels](issue_workflow.md).
-1. If the MR changes the UI, you'll need approval from a Product Designer (UX), based on the appropriate [product category](https://about.gitlab.com/handbook/product/categories/). UI changes should use available components from the GitLab Design System, [Pajamas](https://design.gitlab.com/). The MR must include *Before* and *After* screenshots.
+1. If you're allowed to, set a relevant milestone and [labels](issue_workflow.md).
+1. UI changes should use available components from the GitLab Design System,
+   [Pajamas](https://design.gitlab.com/). The MR must include *Before* and
+   *After* screenshots.
 1. If the MR changes CSS classes, please include the list of affected pages, which
    can be found by running `grep css-class ./app -R`.
-1. Be prepared to answer questions and incorporate feedback into your MR with new
-   commits. Once you have fully addressed a suggestion from a reviewer, click the
-   "Resolve thread" button beneath it to mark it resolved.
-   1. The merge request author resolves only the threads they have fully addressed.
-      If there's an open reply or thread, a suggestion, a question, or anything else,
-      the thread should be left to be resolved by the reviewer.
 1. If your MR touches code that executes shell commands, reads or opens files, or
    handles paths to files on disk, make sure it adheres to the
    [shell command guidelines](../shell_commands.md)
@@ -98,6 +87,10 @@ request is as follows:
    `doc/update/upgrading_from_source.md` in the same merge request. If these
    instructions are specific to a version, add them to the "Version specific
    upgrading instructions" section.
+1. Read and adhere to
+   [The responsibility of the merge request author](../code_review.md#the-responsibility-of-the-merge-request-author).
+1. Read and follow
+   [Having your merge request reviewed](../code_review.md#having-your-merge-request-reviewed).
 
 If you would like quick feedback on your merge request feel free to mention someone
 from the [core team](https://about.gitlab.com/community/core-team/) or one of the
@@ -126,8 +119,7 @@ document from the Kubernetes team also has some great points regarding this.
 When writing commit messages, please follow the guidelines below:
 
 - The commit subject must contain at least 3 words.
-- The commit subject should ideally contain up to 50 characters,
-  and must not be longer than 72 characters.
+- The commit subject must not be longer than 72 characters.
 - The commit subject must start with a capital letter.
 - The commit subject must not end with a period.
 - The commit subject and body must be separated by a blank line.
@@ -145,7 +137,7 @@ For more information see [How to Write a Git Commit Message](https://chris.beams
 
 Example commit message template that can be used on your machine that embodies the above (guide for [how to apply template](https://codeinthehole.com/tips/a-useful-template-for-commit-messages/)):
 
-```text
+```plaintext
 # (If applied, this commit will...) <subject> (Max 50 char)
 # |<----  Using a Maximum Of 50 Characters  ---->|
 
@@ -184,7 +176,7 @@ the contribution acceptance criteria below:
    exposing a bug in existing code). Every new class should have corresponding
    unit tests, even if the class is exercised at a higher level, such as a feature test.
    - If a failing CI build seems to be unrelated to your contribution, you can try
-     restarting the failing CI job, rebasing from master to bring in updates that
+     restarting the failing CI job, rebasing from `master` to bring in updates that
      may resolve the failure, or if it has not been fixed yet, ask a developer to
      help you fix the test.
 1. The MR initially contains a few logically organized commits.
@@ -223,10 +215,12 @@ requirements.
 1. Regressions and bugs are covered with tests that reduce the risk of the issue happening
    again.
 1. [Performance guidelines](../merge_request_performance_guidelines.md) have been followed.
+1. [Secure coding guidelines](https://gitlab.com/gitlab-com/gl-security/security-guidelines) have been followed.
 1. [Documented](../documentation/index.md) in the `/doc` directory.
 1. [Changelog entry added](../changelog.md), if necessary.
 1. Reviewed by relevant (UX/FE/BE/tech writing) reviewers and all concerns are addressed.
 1. Merged by a project maintainer.
+1. Create an issue in the [infrastructure issue tracker](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues) to inform the Infrastructure department when your contribution is changing default settings or introduces a new setting, if relevant.
 1. Confirmed to be working in the [Canary stage](https://about.gitlab.com/handbook/engineering/#canary-testing) or on GitLab.com once the contribution is deployed.
 1. Added to the [release post](https://about.gitlab.com/handbook/marketing/blog/release-posts/),
    if relevant.
@@ -248,3 +242,17 @@ request:
 1. The [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit).
 1. The [CI environment preparation](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/prepare_build.sh).
 1. The [Omnibus package creator](https://gitlab.com/gitlab-org/omnibus-gitlab).
+1. The [Cloud Native GitLab Dockerfiles](https://gitlab.com/gitlab-org/build/CNG)
+
+## Incremental improvements
+
+We allow engineering time to fix small problems (with or without an
+issue) that are incremental improvements, such as:
+
+1. Unprioritized bug fixes (e.g. [Banner alerting of project move is
+showing up everywhere](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18985))
+1. Documentation improvements
+1. Rubocop or Code Quality improvements
+
+Tag a merge request with ~"Stuff that should Just Work" to track work in
+this area.

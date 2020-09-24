@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupExportWorker do
+RSpec.describe GroupExportWorker do
   let!(:user) { create(:user) }
   let!(:group) { create(:group) }
 
@@ -21,8 +21,8 @@ describe GroupExportWorker do
       it 'raises an exception when params are invalid' do
         expect_any_instance_of(::Groups::ImportExport::ExportService).not_to receive(:execute)
 
-        expect { subject.perform(1234, group.id, {}) }.to raise_exception(ActiveRecord::RecordNotFound)
-        expect { subject.perform(user.id, 1234, {}) }.to raise_exception(ActiveRecord::RecordNotFound)
+        expect { subject.perform(non_existing_record_id, group.id, {}) }.to raise_exception(ActiveRecord::RecordNotFound)
+        expect { subject.perform(user.id, non_existing_record_id, {}) }.to raise_exception(ActiveRecord::RecordNotFound)
       end
     end
   end

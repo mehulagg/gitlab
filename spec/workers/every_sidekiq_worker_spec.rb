@@ -2,9 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Every Sidekiq worker' do
+RSpec.describe 'Every Sidekiq worker' do
+  let(:workers_without_defaults) do
+    Gitlab::SidekiqConfig.workers - Gitlab::SidekiqConfig::DEFAULT_WORKERS
+  end
+
   it 'does not use the default queue' do
-    expect(Gitlab::SidekiqConfig.workers.map(&:queue)).not_to include('default')
+    expect(workers_without_defaults.map(&:queue)).not_to include('default')
   end
 
   it 'uses the cronjob queue when the worker runs as a cronjob' do
@@ -15,7 +19,7 @@ describe 'Every Sidekiq worker' do
     file_worker_queues = Gitlab::SidekiqConfig.worker_queues.to_set
 
     worker_queues = Gitlab::SidekiqConfig.workers.map(&:queue).to_set
-    worker_queues << ActionMailer::DeliveryJob.new.queue_name
+    worker_queues << ActionMailer::MailDeliveryJob.new.queue_name
     worker_queues << 'default'
 
     missing_from_file = worker_queues - file_worker_queues
@@ -36,6 +40,12 @@ describe 'Every Sidekiq worker' do
     end
   end
 
+  it 'has a value for loggable_arguments' do
+    workers_without_defaults.each do |worker|
+      expect(worker.klass.loggable_arguments).to be_an(Array)
+    end
+  end
+
   describe "feature category declarations" do
     let(:feature_categories) do
       YAML.load_file(Rails.root.join('config', 'feature_categories.yml')).map(&:to_sym).to_set
@@ -43,18 +53,18 @@ describe 'Every Sidekiq worker' do
 
     # All Sidekiq worker classes should declare a valid `feature_category`
     # or explicitly be excluded with the `feature_category_not_owned!` annotation.
-    # Please see doc/development/sidekiq_style_guide.md#Feature-Categorization for more details.
+    # Please see doc/development/sidekiq_style_guide.md#feature-categorization for more details.
     it 'has a feature_category or feature_category_not_owned! attribute', :aggregate_failures do
-      Gitlab::SidekiqConfig.workers.each do |worker|
+      workers_without_defaults.each do |worker|
         expect(worker.get_feature_category).to be_a(Symbol), "expected #{worker.inspect} to declare a feature_category or feature_category_not_owned!"
       end
     end
 
     # All Sidekiq worker classes should declare a valid `feature_category`.
     # The category should match a value in `config/feature_categories.yml`.
-    # Please see doc/development/sidekiq_style_guide.md#Feature-Categorization for more details.
+    # Please see doc/development/sidekiq_style_guide.md#feature-categorization for more details.
     it 'has a feature_category that maps to a value in feature_categories.yml', :aggregate_failures do
-      workers_with_feature_categories = Gitlab::SidekiqConfig.workers
+      workers_with_feature_categories = workers_without_defaults
                   .select(&:get_feature_category)
                   .reject(&:feature_category_not_owned?)
 
@@ -67,30 +77,30 @@ describe 'Every Sidekiq worker' do
     # concurrency, so that each job can consume a large amounts of memory. For this reason, on
     # GitLab.com, when a large number of memory-bound jobs arrive at once, we let them queue up
     # rather than scaling the hardware to meet the SLO. For this reason, memory-bound,
-    # latency-sensitive jobs are explicitly discouraged and disabled.
-    it 'is (exclusively) memory-bound or latency-sentitive, not both', :aggregate_failures do
-      latency_sensitive_workers = Gitlab::SidekiqConfig.workers
-                  .select(&:latency_sensitive_worker?)
+    # high urgency jobs are explicitly discouraged and disabled.
+    it 'is (exclusively) memory-bound or high urgency, not both', :aggregate_failures do
+      high_urgency_workers = workers_without_defaults
+                               .select { |worker| worker.get_urgency == :high }
 
-      latency_sensitive_workers.each do |worker|
-        expect(worker.get_worker_resource_boundary).not_to eq(:memory), "#{worker.inspect} cannot be both memory-bound and latency sensitive"
+      high_urgency_workers.each do |worker|
+        expect(worker.get_worker_resource_boundary).not_to eq(:memory), "#{worker.inspect} cannot be both memory-bound and high urgency"
       end
     end
 
-    # In high traffic installations, such as GitLab.com, `latency_sensitive` workers run in a
-    # dedicated fleet. In order to ensure short queue times, `latency_sensitive` jobs have strict
+    # In high traffic installations, such as GitLab.com, `urgency :high` workers run in a
+    # dedicated fleet. In order to ensure short queue times, `urgency :high` jobs have strict
     # SLOs in order to ensure throughput. However, when a worker depends on an external service,
     # such as a user's k8s cluster or a third-party internet service, we cannot guarantee latency,
     # and therefore throughput. An outage to an 3rd party service could therefore impact throughput
-    # on other latency_sensitive jobs, leading to degradation through the GitLab application.
-    # Please see doc/development/sidekiq_style_guide.md#Jobs-with-External-Dependencies for more
+    # on other high urgency jobs, leading to degradation through the GitLab application.
+    # Please see doc/development/sidekiq_style_guide.md#jobs-with-external-dependencies for more
     # details.
-    it 'has (exclusively) external dependencies or is latency-sentitive, not both', :aggregate_failures do
-      latency_sensitive_workers = Gitlab::SidekiqConfig.workers
-                  .select(&:latency_sensitive_worker?)
+    it 'has (exclusively) external dependencies or is high urgency, not both', :aggregate_failures do
+      high_urgency_workers = workers_without_defaults
+                               .select { |worker| worker.get_urgency == :high }
 
-      latency_sensitive_workers.each do |worker|
-        expect(worker.worker_has_external_dependencies?).to be_falsey, "#{worker.inspect} cannot have both external dependencies and be latency sensitive"
+      high_urgency_workers.each do |worker|
+        expect(worker.worker_has_external_dependencies?).to be_falsey, "#{worker.inspect} cannot have both external dependencies and be high urgency"
       end
     end
   end

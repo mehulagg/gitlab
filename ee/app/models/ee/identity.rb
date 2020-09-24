@@ -71,7 +71,7 @@ module EE
     def validate_managing_group
       return unless saml_provider&.enforced_group_managed_accounts?
 
-      errors.add(:base, 'Group requires separate account') if saml_provider.group != user.managing_group
+      errors.add(:base, _('Group requires separate account')) if saml_provider.group != user.managing_group
     end
   end
 end

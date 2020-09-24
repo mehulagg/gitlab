@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RegistrationsController do
+RSpec.describe RegistrationsController do
   include TermsHelper
 
   before do
@@ -18,19 +18,9 @@ describe RegistrationsController do
         stub_experiment_for_user(signup_flow: true)
       end
 
-      it 'tracks the event with the right parameters' do
-        expect(Gitlab::Tracking).to receive(:event).with(
-          'Growth::Acquisition::Experiment::SignUpFlow',
-          'start',
-          label: anything,
-          property: 'experimental_group'
-        )
-        subject
-      end
-
       it 'renders new template and sets the resource variable' do
         expect(subject).to render_template(:new)
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(assigns(:resource)).to be_a(User)
       end
     end
@@ -41,15 +31,50 @@ describe RegistrationsController do
         stub_experiment_for_user(signup_flow: false)
       end
 
-      it 'does not track the event' do
-        expect(Gitlab::Tracking).not_to receive(:event)
-        subject
-      end
-
       it 'renders new template and sets the resource variable' do
         subject
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(new_user_session_path(anchor: 'register-pane'))
+      end
+    end
+
+    context 'with sign up flow and terms_opt_in experiment being enabled' do
+      before do
+        stub_experiment(signup_flow: true, terms_opt_in: true)
+      end
+
+      context 'when user is not part of the experiment' do
+        before do
+          stub_experiment_for_user(signup_flow: true, terms_opt_in: false)
+        end
+
+        it 'tracks event with right parameters' do
+          expect(Gitlab::Tracking).to receive(:event).with(
+            'Growth::Acquisition::Experiment::TermsOptIn',
+            'start',
+            label: anything,
+            property: 'control_group'
+          )
+
+          subject
+        end
+      end
+
+      context 'when user is part of the experiment' do
+        before do
+          stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
+        end
+
+        it 'tracks event with right parameters' do
+          expect(Gitlab::Tracking).to receive(:event).with(
+            'Growth::Acquisition::Experiment::TermsOptIn',
+            'start',
+            label: anything,
+            property: 'experimental_group'
+          )
+
+          subject
+        end
       end
     end
   end
@@ -103,7 +128,7 @@ describe RegistrationsController do
             post(:create, params: user_params)
 
             expect(ActionMailer::Base.deliveries.last.to.first).to eq(user_params[:user][:email])
-            expect(response).to redirect_to(dashboard_projects_path)
+            expect(response).to redirect_to(users_sign_up_welcome_path)
           end
         end
       end
@@ -136,23 +161,13 @@ describe RegistrationsController do
         post(:create, params: user_params)
 
         expect(response).to render_template(:new)
-        expect(flash[:alert]).to include 'There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'
+        expect(flash[:alert]).to eq(_('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'))
       end
 
-      it 'redirects to the dashboard when the recaptcha is solved' do
+      it 'redirects to the welcome page when the reCAPTCHA is solved' do
         post(:create, params: user_params)
 
-        expect(flash[:notice]).to include 'Welcome! You have signed up successfully.'
-      end
-
-      it 'does not require reCAPTCHA if disabled by feature flag' do
-        stub_feature_flags(registrations_recaptcha: false)
-
-        post(:create, params: user_params)
-
-        expect(controller).not_to receive(:verify_recaptcha)
-        expect(flash[:alert]).to be_nil
-        expect(flash[:notice]).to include 'Welcome! You have signed up successfully.'
+        expect(response).to redirect_to(users_sign_up_welcome_path)
       end
     end
 
@@ -200,7 +215,7 @@ describe RegistrationsController do
               .and_call_original
             expect(Gitlab::AuthLogger).to receive(:error).with(auth_log_attributes).once
             expect { post(:create, params: user_params, session: session_params) }.not_to change(User, :count)
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
             expect(response.body).to be_empty
           end
         end
@@ -220,7 +235,7 @@ describe RegistrationsController do
               expect(Gitlab::AuthLogger).to receive(:error).with(auth_log_attributes).once
               expect { post(:create, params: user_params, session: session_params) }.not_to change(User, :count)
               expect(response).to redirect_to(new_user_session_path)
-              expect(flash[:alert]).to include 'That was a bit too quick! Please resubmit.'
+              expect(flash[:alert]).to eq(I18n.t('invisible_captcha.timestamp_error_message'))
             end
           end
         end
@@ -236,7 +251,7 @@ describe RegistrationsController do
               expect(Gitlab::AuthLogger).to receive(:error).with(auth_log_attributes).once
               expect { post(:create, params: user_params, session: session_params) }.not_to change(User, :count)
               expect(response).to redirect_to(new_user_session_path)
-              expect(flash[:alert]).to include 'That was a bit too quick! Please resubmit.'
+              expect(flash[:alert]).to eq(I18n.t('invisible_captcha.timestamp_error_message'))
             end
           end
         end
@@ -251,7 +266,7 @@ describe RegistrationsController do
       it 'redirects back with a notice when the checkbox was not checked' do
         post :create, params: user_params
 
-        expect(flash[:alert]).to match /you must accept our terms/i
+        expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
       end
 
       it 'creates the user with agreement when terms are accepted' do
@@ -260,42 +275,90 @@ describe RegistrationsController do
         expect(subject.current_user).to be_present
         expect(subject.current_user.terms_accepted?).to be(true)
       end
+
+      context 'when experiment terms_opt_in is enabled' do
+        before do
+          stub_experiment(terms_opt_in: true)
+        end
+
+        context 'when user is part of the experiment' do
+          before do
+            stub_experiment_for_user(terms_opt_in: true)
+          end
+
+          it 'creates the user with accepted terms' do
+            post :create, params: user_params
+
+            expect(subject.current_user).to be_present
+            expect(subject.current_user.terms_accepted?).to be(true)
+          end
+        end
+
+        context 'when user is not part of the experiment' do
+          before do
+            stub_experiment_for_user(terms_opt_in: false)
+          end
+
+          it 'creates the user without accepted terms' do
+            post :create, params: user_params
+
+            expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
+          end
+        end
+      end
     end
 
     describe 'tracking data' do
-      context 'with the experimental signup flow enabled and the user is part of the control group' do
+      context 'with sign up flow and terms_opt_in experiment being enabled' do
+        subject { post :create, params: user_params }
+
         before do
-          stub_experiment(signup_flow: true)
-          stub_experiment_for_user(signup_flow: false)
+          stub_experiment(signup_flow: true, terms_opt_in: true)
         end
 
-        it 'tracks the event with the right parameters' do
-          expect(Gitlab::Tracking).to receive(:event).with(
-            'Growth::Acquisition::Experiment::SignUpFlow',
-            'end',
-            label: anything,
-            property: 'control_group'
-          )
-          post :create, params: user_params
-        end
-      end
+        it 'records user for the terms_opt_in experiment' do
+          expect(controller).to receive(:record_experiment_user).with(:terms_opt_in)
 
-      context 'with the experimental signup flow enabled and the user is part of the experimental group' do
-        before do
-          stub_experiment(signup_flow: true)
-          stub_experiment_for_user(signup_flow: true)
+          subject
         end
 
-        it 'does not track the event' do
-          expect(Gitlab::Tracking).not_to receive(:event)
-          post :create, params: user_params
+        context 'when user is not part of the experiment' do
+          before do
+            stub_experiment_for_user(signup_flow: true, terms_opt_in: false)
+          end
+
+          it 'tracks event with right parameters' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Growth::Acquisition::Experiment::TermsOptIn',
+              'end',
+              label: anything,
+              property: 'control_group'
+            )
+
+            subject
+          end
+        end
+
+        context 'when user is part of the experiment' do
+          before do
+            stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
+          end
+
+          it 'tracks event with right parameters' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Growth::Acquisition::Experiment::TermsOptIn',
+              'end',
+              label: anything,
+              property: 'experimental_group'
+            )
+
+            subject
+          end
         end
       end
     end
 
     it "logs a 'User Created' message" do
-      stub_feature_flags(registrations_recaptcha: false)
-
       expect(Gitlab::AppLogger).to receive(:info).with(/\AUser Created: username=new_username email=new@user.com.+\z/).and_call_original
 
       post(:create, params: user_params)
@@ -305,6 +368,23 @@ describe RegistrationsController do
       post(:create, params: { new_user: base_user_params })
 
       expect(subject.current_user).not_to be_nil
+    end
+
+    context 'with the experimental signup flow enabled and the user is part of the experimental group' do
+      before do
+        stub_experiment(signup_flow: true)
+        stub_experiment_for_user(signup_flow: true)
+      end
+
+      let(:base_user_params) { { first_name: 'First', last_name: 'Last', username: 'new_username', email: 'new@user.com', password: 'Any_password' } }
+
+      it 'sets name from first and last name' do
+        post :create, params: { new_user: base_user_params }
+
+        expect(User.last.first_name).to eq(base_user_params[:first_name])
+        expect(User.last.last_name).to eq(base_user_params[:last_name])
+        expect(User.last.name).to eq("#{base_user_params[:first_name]} #{base_user_params[:last_name]}")
+      end
     end
   end
 
@@ -317,21 +397,21 @@ describe RegistrationsController do
 
     def expect_failure(message)
       expect(flash[:alert]).to eq(message)
-      expect(response.status).to eq(303)
+      expect(response).to have_gitlab_http_status(:see_other)
       expect(response).to redirect_to profile_account_path
     end
 
     def expect_password_failure
-      expect_failure('Invalid password')
+      expect_failure(s_('Profiles|Invalid password'))
     end
 
     def expect_username_failure
-      expect_failure('Invalid username')
+      expect_failure(s_('Profiles|Invalid username'))
     end
 
     def expect_success
-      expect(flash[:notice]).to eq 'Account scheduled for removal.'
-      expect(response.status).to eq(303)
+      expect(flash[:notice]).to eq s_('Profiles|Account scheduled for removal.')
+      expect(response).to have_gitlab_http_status(:see_other)
       expect(response).to redirect_to new_user_session_path
     end
 
@@ -381,21 +461,38 @@ describe RegistrationsController do
     end
   end
 
+  describe '#welcome' do
+    subject { get :welcome }
+
+    it 'renders the devise_experimental_separate_sign_up_flow layout' do
+      sign_in(create(:user))
+
+      expected_layout = Gitlab.ee? ? :checkout : :devise_experimental_separate_sign_up_flow
+
+      expect(subject).to render_template(expected_layout)
+    end
+
+    context '2FA is required from group' do
+      before do
+        user = create(:user, require_two_factor_authentication_from_group: true)
+        sign_in(user)
+      end
+
+      it 'does not perform a redirect' do
+        expect(subject).not_to redirect_to(profile_two_factor_auth_path)
+      end
+    end
+  end
+
   describe '#update_registration' do
+    subject(:update_registration) do
+      patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
+    end
+
     before do
-      stub_experiment(signup_flow: true)
-      stub_experiment_for_user(signup_flow: true)
       sign_in(create(:user))
     end
 
-    it 'tracks the event with the right parameters' do
-      expect(Gitlab::Tracking).to receive(:event).with(
-        'Growth::Acquisition::Experiment::SignUpFlow',
-        'end',
-        label: anything,
-        property: 'experimental_group'
-      )
-      patch :update_registration, params: { user: { name: 'New name', role: 'software_developer', setup_for_company: 'false' } }
-    end
+    it { is_expected.to redirect_to(dashboard_projects_path)}
   end
 end

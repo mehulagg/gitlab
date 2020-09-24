@@ -2,14 +2,16 @@
 
 require 'spec_helper'
 
-describe Ci::CreatePipelineService, '#execute' do
-  set(:namespace) { create(:namespace) }
-  set(:gold_plan) { create(:gold_plan) }
-  set(:project) { create(:project, :repository, namespace: namespace) }
-  set(:user) { create(:user) }
+RSpec.describe Ci::CreatePipelineService, '#execute' do
+  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:gold_plan) { create(:gold_plan) }
+  let_it_be(:plan_limits) { create(:plan_limits, plan: gold_plan) }
+  let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
+  let_it_be(:user) { create(:user) }
+  let(:ref_name) { 'master' }
 
   let(:service) do
-    params = { ref: 'master',
+    params = { ref: ref_name,
                before: '00000000',
                after: project.commit.id,
                commits: [{ message: 'some commit' }] }
@@ -36,7 +38,7 @@ describe Ci::CreatePipelineService, '#execute' do
 
     context 'when pipeline activity limit is exceeded' do
       before do
-        gold_plan.update_column(:active_pipelines_limit, 2)
+        plan_limits.update_column(:ci_active_pipelines, 2)
 
         create(:ci_pipeline, project: project, status: 'pending')
         create(:ci_pipeline, project: project, status: 'running')
@@ -55,7 +57,7 @@ describe Ci::CreatePipelineService, '#execute' do
 
     context 'when pipeline size limit is exceeded' do
       before do
-        gold_plan.update_column(:pipeline_size_limit, 2)
+        plan_limits.update_column(:ci_pipeline_size, 2)
       end
 
       it 'drops pipeline without creating jobs' do
@@ -63,7 +65,6 @@ describe Ci::CreatePipelineService, '#execute' do
 
         expect(pipeline).to be_persisted
         expect(pipeline).to be_failed
-        expect(pipeline.seeds_size).to be > 2
         expect(pipeline.statuses).to be_empty
         expect(pipeline.size_limit_exceeded?).to be true
       end
@@ -72,8 +73,6 @@ describe Ci::CreatePipelineService, '#execute' do
 
   describe 'cross-project pipeline triggers' do
     before do
-      stub_feature_flags(cross_project_pipeline_triggers: true)
-
       stub_ci_pipeline_yaml_file <<~YAML
         test:
           script: rspec
@@ -100,6 +99,77 @@ describe Ci::CreatePipelineService, '#execute' do
       expect(bridge.options).to eq('trigger' => { 'project' => 'my/project' })
       expect(bridge.yaml_variables)
         .to include(key: 'CROSS', value: 'downstream', public: true)
+    end
+
+    context 'when configured with rules' do
+      before do
+        stub_ci_pipeline_yaml_file(config)
+      end
+
+      let(:downstream_project) { create(:project, :repository) }
+
+      let(:config) do
+        <<-EOY
+          hello:
+            script: echo world
+
+          bridge-job:
+            rules:
+              - if: $CI_COMMIT_REF_NAME == "master"
+            trigger:
+              project: #{downstream_project.full_path}
+              branch: master
+        EOY
+      end
+
+      context 'that include the bridge job' do
+        it 'persists the bridge job' do
+          pipeline = create_pipeline!
+
+          expect(pipeline.processables.pluck(:name)).to contain_exactly('hello', 'bridge-job')
+        end
+      end
+
+      context 'that exclude the bridge job' do
+        let(:ref_name) { 'refs/heads/wip' }
+
+        it 'does not include the bridge job' do
+          pipeline = create_pipeline!
+
+          expect(pipeline.processables.pluck(:name)).to eq(%w[hello])
+        end
+      end
+    end
+  end
+
+  describe 'job with secrets' do
+    before do
+      stub_ci_pipeline_yaml_file <<~YAML
+        deploy:
+          script:
+            - echo
+          secrets:
+            DATABASE_PASSWORD:
+              vault: production/db/password
+      YAML
+    end
+
+    it 'persists secrets as job metadata' do
+      pipeline = create_pipeline!
+
+      expect(pipeline).to be_persisted
+
+      build = Ci::Build.find(pipeline.builds.first.id)
+
+      expect(build.metadata.secrets).to eq({
+        'DATABASE_PASSWORD' => {
+          'vault' => {
+            'engine' => { 'name' => 'kv-v2', 'path' => 'kv-v2' },
+            'path' => 'production/db',
+            'field' => 'password'
+          }
+        }
+      })
     end
   end
 

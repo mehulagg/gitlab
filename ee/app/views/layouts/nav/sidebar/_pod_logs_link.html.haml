@@ -1,6 +1,0 @@
-- return unless project_nav_tab?(:environments)
-
-= nav_link(controller: :environments, action: [:logs, :logs_redirect]) do
-  = link_to logs_project_environments_path(@project), title: _('Pod logs') do
-    %span
-      = _('Pod logs')

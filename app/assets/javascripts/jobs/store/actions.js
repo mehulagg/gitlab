@@ -3,7 +3,7 @@ import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
 import { setFaviconOverlay, resetFavicon } from '~/lib/utils/common_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import {
   canScroll,
@@ -13,6 +13,16 @@ import {
   scrollDown,
   scrollUp,
 } from '~/lib/utils/scroll_utils';
+
+export const init = ({ dispatch }, { endpoint, logState, pagePath }) => {
+  dispatch('setJobEndpoint', endpoint);
+  dispatch('setTraceOptions', {
+    logState,
+    pagePath,
+  });
+
+  return Promise.all([dispatch('fetchJob'), dispatch('fetchTrace')]);
+};
 
 export const setJobEndpoint = ({ commit }, endpoint) => commit(types.SET_JOB_ENDPOINT, endpoint);
 export const setTraceOptions = ({ commit }, options) => commit(types.SET_TRACE_OPTIONS, options);
@@ -147,7 +157,6 @@ export const toggleScrollisInBottom = ({ commit }, toggle) => {
 
 export const requestTrace = ({ commit }) => commit(types.REQUEST_TRACE);
 
-let traceTimeout;
 export const fetchTrace = ({ dispatch, state }) =>
   axios
     .get(`${state.traceEndpoint}/trace.json`, {
@@ -157,28 +166,36 @@ export const fetchTrace = ({ dispatch, state }) =>
       dispatch('toggleScrollisInBottom', isScrolledToBottom());
       dispatch('receiveTraceSuccess', data);
 
-      if (!data.complete) {
-        traceTimeout = setTimeout(() => {
-          dispatch('fetchTrace');
-        }, 4000);
-      } else {
+      if (data.complete) {
         dispatch('stopPollingTrace');
+      } else if (!state.traceTimeout) {
+        dispatch('startPollingTrace');
       }
     })
     .catch(() => dispatch('receiveTraceError'));
 
-export const stopPollingTrace = ({ commit }) => {
-  commit(types.STOP_POLLING_TRACE);
-  clearTimeout(traceTimeout);
+export const startPollingTrace = ({ dispatch, commit }) => {
+  const traceTimeout = setTimeout(() => {
+    commit(types.SET_TRACE_TIMEOUT, 0);
+    dispatch('fetchTrace');
+  }, 4000);
+
+  commit(types.SET_TRACE_TIMEOUT, traceTimeout);
 };
+
+export const stopPollingTrace = ({ state, commit }) => {
+  clearTimeout(state.traceTimeout);
+  commit(types.SET_TRACE_TIMEOUT, 0);
+  commit(types.STOP_POLLING_TRACE);
+};
+
 export const receiveTraceSuccess = ({ commit }, log) => commit(types.RECEIVE_TRACE_SUCCESS, log);
-export const receiveTraceError = ({ commit }) => {
-  commit(types.RECEIVE_TRACE_ERROR);
-  clearTimeout(traceTimeout);
+export const receiveTraceError = ({ dispatch }) => {
+  dispatch('stopPollingTrace');
   flash(__('An error occurred while fetching the job log.'));
 };
 /**
- * When the user clicks a collpasible line in the job
+ * When the user clicks a collapsible line in the job
  * log, we commit a mutation to update the state
  *
  * @param {Object} section
@@ -203,7 +220,7 @@ export const fetchJobsForStage = ({ dispatch }, stage = {}) => {
       },
     })
     .then(({ data }) => {
-      const retriedJobs = data.retried.map(job => Object.assign({}, job, { retried: true }));
+      const retriedJobs = data.retried.map(job => ({ ...job, retried: true }));
       const jobs = data.latest_statuses.concat(retriedJobs);
 
       dispatch('receiveJobsForStageSuccess', jobs);
@@ -219,7 +236,7 @@ export const receiveJobsForStageError = ({ commit }) => {
 
 export const triggerManualJob = ({ state }, variables) => {
   const parsedVariables = variables.map(variable => {
-    const copyVar = Object.assign({}, variable);
+    const copyVar = { ...variable };
     delete copyVar.id;
     return copyVar;
   });
@@ -230,6 +247,3 @@ export const triggerManualJob = ({ state }, variables) => {
     })
     .catch(() => flash(__('An error occurred while triggering the job.')));
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

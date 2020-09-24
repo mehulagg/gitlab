@@ -2,16 +2,12 @@
 
 require 'spec_helper'
 
-describe Project do
+RSpec.describe Project do
   include ProjectForksHelper
   include ::EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax
 
   let(:project) { create(:project) }
-
-  it_behaves_like Vulnerable do
-    let(:vulnerable) { project }
-  end
 
   describe 'associations' do
     it { is_expected.to delegate_method(:shared_runners_minutes).to(:statistics) }
@@ -21,26 +17,98 @@ describe Project do
     it { is_expected.to delegate_method(:actual_shared_runners_minutes_limit).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_limit_enabled?).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_used?).to(:shared_runners_limit_namespace) }
+    it { is_expected.to delegate_method(:shared_runners_remaining_minutes_below_threshold?).to(:shared_runners_limit_namespace) }
+
+    it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
 
     it { is_expected.to belong_to(:deleting_user) }
 
     it { is_expected.to have_one(:import_state).class_name('ProjectImportState') }
     it { is_expected.to have_one(:repository_state).class_name('ProjectRepositoryState').inverse_of(:project) }
-    it { is_expected.to have_one(:alerting_setting).class_name('Alerting::ProjectAlertingSetting') }
+    it { is_expected.to have_one(:status_page_setting).class_name('StatusPage::ProjectSetting') }
+    it { is_expected.to have_one(:compliance_framework_setting).class_name('ComplianceManagement::ComplianceFramework::ProjectSettings') }
+    it { is_expected.to have_one(:security_setting).class_name('ProjectSecuritySetting') }
+    it { is_expected.to have_one(:vulnerability_statistic).class_name('Vulnerabilities::Statistic') }
 
-    it { is_expected.to have_many(:reviews).inverse_of(:project) }
     it { is_expected.to have_many(:path_locks) }
     it { is_expected.to have_many(:vulnerability_feedback) }
+    it { is_expected.to have_many(:vulnerability_exports) }
+    it { is_expected.to have_many(:vulnerability_scanners) }
+    it { is_expected.to have_many(:dast_site_profiles) }
+    it { is_expected.to have_many(:dast_site_tokens) }
+    it { is_expected.to have_many(:dast_sites) }
     it { is_expected.to have_many(:audit_events).dependent(false) }
     it { is_expected.to have_many(:protected_environments) }
     it { is_expected.to have_many(:approvers).dependent(:destroy) }
     it { is_expected.to have_many(:approver_users).through(:approvers) }
     it { is_expected.to have_many(:approver_groups).dependent(:destroy) }
-    it { is_expected.to have_many(:packages).class_name('Packages::Package') }
-    it { is_expected.to have_many(:package_files).class_name('Packages::PackageFile') }
+    it { is_expected.to have_many(:upstream_project_subscriptions) }
+    it { is_expected.to have_many(:upstream_projects) }
+    it { is_expected.to have_many(:downstream_project_subscriptions) }
+    it { is_expected.to have_many(:downstream_projects) }
+    it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
 
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
+    it { is_expected.to have_many(:approval_rules) }
+
+    describe 'approval_rules association' do
+      let_it_be(:rule, reload: true) { create(:approval_project_rule) }
+      let(:project) { rule.project }
+      let(:branch) { 'stable' }
+
+      describe '#applicable_to_branch' do
+        subject { project.approval_rules.applicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to eq([rule]) }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+
+      describe '#inapplicable_to_branch' do
+        subject { project.approval_rules.inapplicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+    end
   end
 
   context 'scopes' do
@@ -74,46 +142,6 @@ describe Project do
 
         expect(described_class.with_active_services).to include(active_service.project)
         expect(described_class.with_active_services).not_to include(inactive_service.project)
-      end
-    end
-
-    describe '.with_active_jira_services' do
-      it 'returns the correct project' do
-        active_jira_service = create(:jira_service)
-        active_service = create(:service, active: true)
-
-        expect(described_class.with_active_jira_services).to include(active_jira_service.project)
-        expect(described_class.with_active_jira_services).not_to include(active_service.project)
-      end
-    end
-
-    describe '.service_desk_enabled' do
-      it 'returns the correct project' do
-        project_with_service_desk_enabled = create(:project)
-        project_with_service_desk_disabled = create(:project, :service_desk_disabled)
-
-        expect(described_class.service_desk_enabled).to include(project_with_service_desk_enabled)
-        expect(described_class.service_desk_enabled).not_to include(project_with_service_desk_disabled)
-      end
-    end
-
-    describe '.with_jira_dvcs_cloud' do
-      it 'returns the correct project' do
-        jira_dvcs_cloud_project = create(:project, :jira_dvcs_cloud)
-        jira_dvcs_server_project = create(:project, :jira_dvcs_server)
-
-        expect(described_class.with_jira_dvcs_cloud).to include(jira_dvcs_cloud_project)
-        expect(described_class.with_jira_dvcs_cloud).not_to include(jira_dvcs_server_project)
-      end
-    end
-
-    describe '.with_jira_dvcs_server' do
-      it 'returns the correct project' do
-        jira_dvcs_server_project = create(:project, :jira_dvcs_server)
-        jira_dvcs_cloud_project = create(:project, :jira_dvcs_cloud)
-
-        expect(described_class.with_jira_dvcs_server).to include(jira_dvcs_server_project)
-        expect(described_class.with_jira_dvcs_server).not_to include(jira_dvcs_cloud_project)
       end
     end
 
@@ -166,6 +194,81 @@ describe Project do
         expect(described_class.with_active_prometheus_service).not_to include(project_without_active_prometheus_service)
       end
     end
+
+    describe '.with_shared_runners_limit_enabled' do
+      let(:public_cost_factor) { 1.0 }
+
+      before do
+        create(:ci_runner, :instance, public_projects_minutes_cost_factor: public_cost_factor)
+      end
+
+      it 'does not return projects without shared runners' do
+        project_with_shared_runners = create(:project, shared_runners_enabled: true)
+        project_without_shared_runners = create(:project, shared_runners_enabled: false)
+
+        expect(described_class.with_shared_runners_limit_enabled).to include(project_with_shared_runners)
+        expect(described_class.with_shared_runners_limit_enabled).not_to include(project_without_shared_runners)
+      end
+
+      it 'return projects with shared runners with positive public cost factor with any visibility levels' do
+        public_project_with_shared_runners = create(:project, :public, shared_runners_enabled: true)
+        internal_project_with_shared_runners = create(:project, :internal, shared_runners_enabled: true)
+        private_project_with_shared_runners = create(:project, :private, shared_runners_enabled: true)
+
+        expect(described_class.with_shared_runners_limit_enabled).to include(public_project_with_shared_runners)
+        expect(described_class.with_shared_runners_limit_enabled).to include(internal_project_with_shared_runners)
+        expect(described_class.with_shared_runners_limit_enabled).to include(private_project_with_shared_runners)
+      end
+
+      context 'and shared runners public cost factors set to 0' do
+        let(:public_cost_factor) { 0.0 }
+
+        it 'return projects with any visibility levels except public' do
+          public_project_with_shared_runners = create(:project, :public, shared_runners_enabled: true)
+          internal_project_with_shared_runners = create(:project, :internal, shared_runners_enabled: true)
+          private_project_with_shared_runners = create(:project, :private, shared_runners_enabled: true)
+
+          expect(described_class.with_shared_runners_limit_enabled).not_to include(public_project_with_shared_runners)
+          expect(described_class.with_shared_runners_limit_enabled).to include(internal_project_with_shared_runners)
+          expect(described_class.with_shared_runners_limit_enabled).to include(private_project_with_shared_runners)
+        end
+      end
+    end
+
+    describe '.has_vulnerabilities' do
+      let_it_be(:project_1) { create(:project) }
+      let_it_be(:project_2) { create(:project) }
+
+      before do
+        create(:vulnerability, project: project_1)
+      end
+
+      subject { described_class.has_vulnerabilities }
+
+      it { is_expected.to contain_exactly(project_1) }
+    end
+
+    describe '.has_vulnerability_statistics' do
+      let_it_be(:project_1) { create(:project) }
+      let_it_be(:project_2) { create(:project) }
+
+      before do
+        create(:vulnerability_statistic, project: project_1)
+      end
+
+      subject { described_class.has_vulnerability_statistics }
+
+      it { is_expected.to contain_exactly(project_1) }
+    end
+
+    describe '.not_aimed_for_deletion' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:delayed_deletion_project) { create(:project, marked_for_deletion_at: Date.current) }
+
+      it do
+        expect(described_class.not_aimed_for_deletion).to contain_exactly(project)
+      end
+    end
   end
 
   describe 'validations' do
@@ -190,6 +293,11 @@ describe Project do
 
       context 'with same variable keys and different environment scope' do
         it { expect(project).to be_valid }
+      end
+
+      it "ensures max_pages_size is an integer greater than 0 (or equal to 0 to indicate unlimited/maximum)" do
+        is_expected.to validate_numericality_of(:max_pages_size).only_integer.is_greater_than_or_equal_to(0)
+                         .is_less_than(::Gitlab::Pages::MAX_SIZE / 1.megabyte)
       end
     end
 
@@ -222,14 +330,14 @@ describe Project do
   describe 'setting up a mirror' do
     context 'when new project' do
       it 'creates import_state and sets next_execution_timestamp to now' do
-        project = build(:project, :mirror)
+        project = build(:project, :mirror, creator: create(:user))
 
         Timecop.freeze do
           expect do
-            project.save
+            project.save!
           end.to change { ProjectImportState.count }.by(1)
 
-          expect(project.import_state.next_execution_timestamp).to be_like_time(Time.now)
+          expect(project.import_state.next_execution_timestamp).to be_like_time(Time.current)
         end
       end
     end
@@ -244,7 +352,7 @@ describe Project do
               project.update(mirror: true, mirror_user_id: project.creator.id, import_url: generate(:url))
             end.to change { ProjectImportState.count }.by(1)
 
-            expect(project.import_state.next_execution_timestamp).to be_like_time(Time.now)
+            expect(project.import_state.next_execution_timestamp).to be_like_time(Time.current)
           end
         end
       end
@@ -258,7 +366,7 @@ describe Project do
               project.update(mirror: true, mirror_user_id: project.creator.id)
             end.not_to change { ProjectImportState.count }
 
-            expect(project.import_state.next_execution_timestamp).to be_like_time(Time.now)
+            expect(project.import_state.next_execution_timestamp).to be_like_time(Time.current)
           end
         end
       end
@@ -266,7 +374,7 @@ describe Project do
   end
 
   describe '.mirrors_to_sync' do
-    let(:timestamp) { Time.now }
+    let(:timestamp) { Time.current }
 
     context 'when mirror is scheduled' do
       it 'returns empty' do
@@ -363,71 +471,45 @@ describe Project do
   end
 
   describe '#deployment_variables' do
-    context 'when project has a deployment platforms' do
-      context 'when multiple clusters (EEP) is enabled' do
-        before do
-          stub_licensed_features(multiple_clusters: true)
-        end
+    let(:project) { create(:project) }
 
-        let(:project) { create(:project) }
+    let!(:default_cluster) do
+      create(:cluster,
+              :not_managed,
+              platform_type: :kubernetes,
+              projects: [project],
+              environment_scope: '*',
+              platform_kubernetes: default_cluster_kubernetes)
+    end
 
-        let!(:default_cluster) do
-          create(:cluster,
-                 :not_managed,
-                 platform_type: :kubernetes,
-                 projects: [project],
-                 environment_scope: '*',
-                 platform_kubernetes: default_cluster_kubernetes)
-        end
+    let!(:review_env_cluster) do
+      create(:cluster,
+              :not_managed,
+              platform_type: :kubernetes,
+              projects: [project],
+              environment_scope: 'review/*',
+              platform_kubernetes: review_env_cluster_kubernetes)
+    end
 
-        let!(:review_env_cluster) do
-          create(:cluster,
-                 :not_managed,
-                 platform_type: :kubernetes,
-                 projects: [project],
-                 environment_scope: 'review/*',
-                 platform_kubernetes: review_env_cluster_kubernetes)
-        end
+    let(:default_cluster_kubernetes) { create(:cluster_platform_kubernetes, token: 'default-AAA') }
+    let(:review_env_cluster_kubernetes) { create(:cluster_platform_kubernetes, token: 'review-AAA') }
 
-        let(:default_cluster_kubernetes) { create(:cluster_platform_kubernetes, token: 'default-AAA') }
-        let(:review_env_cluster_kubernetes) { create(:cluster_platform_kubernetes, token: 'review-AAA') }
+    context 'when environment name is review/name' do
+      let!(:environment) { create(:environment, project: project, name: 'review/name') }
 
-        context 'when environment name is review/name' do
-          let!(:environment) { create(:environment, project: project, name: 'review/name') }
-
-          it 'returns variables from this service' do
-            expect(project.deployment_variables(environment: 'review/name'))
-              .to include(key: 'KUBE_TOKEN', value: 'review-AAA', public: false, masked: true)
-          end
-        end
-
-        context 'when environment name is other' do
-          let!(:environment) { create(:environment, project: project, name: 'staging/name') }
-
-          it 'returns variables from this service' do
-            expect(project.deployment_variables(environment: 'staging/name'))
-              .to include(key: 'KUBE_TOKEN', value: 'default-AAA', public: false, masked: true)
-          end
-        end
+      it 'returns variables from this service' do
+        expect(project.deployment_variables(environment: 'review/name'))
+          .to include(key: 'KUBE_TOKEN', value: 'review-AAA', public: false, masked: true)
       end
     end
-  end
 
-  describe '#environments_for_scope' do
-    set(:project) { create(:project) }
+    context 'when environment name is other' do
+      let!(:environment) { create(:environment, project: project, name: 'staging/name') }
 
-    before do
-      create_list(:environment, 2, project: project)
-    end
-
-    it 'retrieves all project environments when using the * wildcard' do
-      expect(project.environments_for_scope("*")).to eq(project.environments)
-    end
-
-    it 'retrieves a specific project environment when using the name of that environment' do
-      environment = project.environments.first
-
-      expect(project.environments_for_scope(environment.name)).to eq([environment])
+      it 'returns variables from this service' do
+        expect(project.deployment_variables(environment: 'staging/name'))
+          .to include(key: 'KUBE_TOKEN', value: 'default-AAA', public: false, masked: true)
+      end
     end
   end
 
@@ -459,6 +541,119 @@ describe Project do
     end
   end
 
+  context 'merge requests related settings' do
+    shared_examples 'setting modified by application setting' do
+      where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
+        true  | true  | true  | true
+        false | true  | true  | false
+        true  | false | true  | true
+        false | false | true  | false
+        true  | true  | false | true
+        false | true  | false | true
+        true  | false | false | false
+        false | false | false | false
+      end
+
+      with_them do
+        let(:project) { create(:project) }
+
+        before do
+          stub_licensed_features(admin_merge_request_approvers_rules: true)
+
+          allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
+          stub_application_setting(application_setting => app_setting)
+          project.update(setting => project_setting)
+        end
+
+        it 'shows proper setting' do
+          expect(project.send(setting)).to eq(final_setting)
+          expect(project.send("#{setting}?")).to eq(final_setting)
+        end
+      end
+    end
+
+    describe '#disable_overriding_approvers_per_merge_request' do
+      it_behaves_like 'setting modified by application setting' do
+        let(:feature) { :admin_merge_request_approvers_rules }
+        let(:setting) { :disable_overriding_approvers_per_merge_request }
+        let(:application_setting) { :disable_overriding_approvers_per_merge_request }
+      end
+    end
+
+    describe '#merge_requests_disable_committers_approval' do
+      it_behaves_like 'setting modified by application setting' do
+        let(:feature) { :admin_merge_request_approvers_rules }
+        let(:setting) { :merge_requests_disable_committers_approval }
+        let(:application_setting) { :prevent_merge_requests_committers_approval }
+      end
+    end
+
+    describe '#merge_requests_author_approval' do
+      let(:project) { create(:project) }
+      let(:feature) { :admin_merge_request_approvers_rules }
+      let(:setting) { :merge_requests_author_approval }
+      let(:application_setting) { :prevent_merge_requests_author_approval }
+
+      where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
+        true  | true  | true  | false
+        false | true  | true  | true
+        true  | false | true  | false
+        false | false | true  | true
+        true  | true  | false | true
+        false | true  | false | true
+        true  | false | false | false
+        false | false | false | false
+      end
+
+      with_them do
+        let(:project) { create(:project) }
+
+        before do
+          stub_licensed_features(admin_merge_request_approvers_rules: true)
+
+          allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
+          stub_application_setting(application_setting => app_setting)
+          project.update(setting => project_setting)
+        end
+
+        it 'shows proper setting' do
+          expect(project.send(setting)).to eq(final_setting)
+          expect(project.send("#{setting}?")).to eq(final_setting)
+        end
+      end
+    end
+  end
+
+  describe '#has_regulated_settings?' do
+    let(:framework) { ComplianceManagement::ComplianceFramework::FRAMEWORKS.first }
+    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, framework: framework.first.to_s) }
+    let(:project) { build(:project, compliance_framework_setting: compliance_framework_setting) }
+
+    subject { project.has_regulated_settings? }
+
+    context 'framework is regulated' do
+      before do
+        stub_application_setting(compliance_frameworks: [framework.last])
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'framework is not regulated' do
+      before do
+        stub_application_setting(compliance_frameworks: [])
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'project does not have compliance framework' do
+      let(:project) { build(:project) }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
   describe '#has_active_hooks?' do
     context "with group hooks" do
       let(:group) { create(:group) }
@@ -483,22 +678,62 @@ describe Project do
     end
   end
 
+  describe '#has_group_hooks?' do
+    subject { project.has_group_hooks? }
+
+    let(:project) { create(:project) }
+
+    it { is_expected.to eq(nil) }
+
+    context 'project is in a group' do
+      let(:group) { create(:group) }
+      let(:project) { create(:project, namespace: group) }
+
+      shared_examples 'returns nil when the feature is not available' do
+        specify do
+          stub_licensed_features(group_webhooks: false)
+
+          expect(subject).to eq(nil)
+        end
+      end
+
+      it_behaves_like 'returns nil when the feature is not available'
+
+      it { is_expected.to eq(false) }
+
+      context 'the group has hooks' do
+        let!(:group_hook) { create(:group_hook, group: group, push_events: true) }
+
+        it { is_expected.to eq(true) }
+
+        it_behaves_like 'returns nil when the feature is not available'
+
+        context 'but the hook is not in scope' do
+          subject { project.has_group_hooks?(:issue_hooks) }
+
+          it_behaves_like 'returns nil when the feature is not available'
+
+          it { is_expected.to eq(false) }
+        end
+      end
+
+      context 'the group inherits a hook' do
+        let(:parent_group) { create(:group) }
+        let!(:group_hook) { create(:group_hook, group: parent_group) }
+        let(:group) { create(:group, parent: parent_group) }
+
+        it_behaves_like 'returns nil when the feature is not available'
+
+        it { is_expected.to eq(true) }
+      end
+    end
+  end
+
   describe "#execute_hooks" do
     context "group hooks" do
       let(:group) { create(:group) }
       let(:project) { create(:project, namespace: group) }
       let(:group_hook) { create(:group_hook, group: group, push_events: true) }
-
-      it 'executes the hook when the feature is enabled' do
-        stub_licensed_features(group_webhooks: true)
-
-        fake_service = double
-        expect(WebHookService).to receive(:new)
-                                    .with(group_hook, { some: 'info' }, 'push_hooks') { fake_service }
-        expect(fake_service).to receive(:async_execute)
-
-        project.execute_hooks(some: 'info')
-      end
 
       it 'does not execute the hook when the feature is disabled' do
         stub_licensed_features(group_webhooks: false)
@@ -508,23 +743,34 @@ describe Project do
 
         project.execute_hooks(some: 'info')
       end
-    end
-  end
 
-  describe '#execute_hooks' do
-    it "triggers project and group hooks" do
-      group = create :group, name: 'gitlab'
-      project = create(:project, name: 'gitlabhq', namespace: group)
-      project_hook = create(:project_hook, push_events: true, project: project)
-      group_hook = create(:group_hook, push_events: true, group: group)
+      context 'when group_webhooks frature is enabled' do
+        before do
+          stub_licensed_features(group_webhooks: true)
+        end
+        let(:fake_service) { double }
 
-      stub_request(:post, project_hook.url)
-      stub_request(:post, group_hook.url)
+        shared_examples 'triggering group webhook' do
+          it 'executes the hook' do
+            expect(fake_service).to receive(:async_execute).once
 
-      expect_any_instance_of(GroupHook).to receive(:async_execute).and_return(true)
-      expect_any_instance_of(ProjectHook).to receive(:async_execute).and_return(true)
+            expect(WebHookService).to receive(:new)
+                                        .with(group_hook, { some: 'info' }, 'push_hooks') { fake_service }
 
-      project.execute_hooks({}, :push_hooks)
+            project.execute_hooks(some: 'info')
+          end
+        end
+
+        it_behaves_like 'triggering group webhook'
+
+        context 'in sub group' do
+          let(:sub_group) { create :group, parent: group }
+          let(:sub_sub_group) { create :group, parent: sub_group }
+          let(:project) { create(:project, namespace: sub_sub_group) }
+
+          it_behaves_like 'triggering group webhook'
+        end
+      end
     end
   end
 
@@ -541,8 +787,8 @@ describe Project do
     end
   end
 
-  describe '#beta_feature_available?' do
-    it_behaves_like 'an entity with beta feature support' do
+  describe '#alpha/beta_feature_available?' do
+    it_behaves_like 'an entity with alpha/beta feature support' do
       let(:entity) { create(:project) }
     end
   end
@@ -564,9 +810,9 @@ describe Project do
       end
 
       License::EEU_FEATURES.each do |feature_sym|
-        let(:feature) { feature_sym }
-
         context feature_sym.to_s do
+          let(:feature) { feature_sym }
+
           unless License::GLOBAL_FEATURES.include?(feature_sym)
             context "checking #{feature_sym} availability both on Global and Namespace license" do
               let(:check_namespace_plan) { true }
@@ -653,7 +899,7 @@ describe Project do
       expect(project).to receive(:load_licensed_feature_available)
                              .once.and_call_original
 
-      2.times { project.feature_available?(:service_desk) }
+      2.times { project.feature_available?(:push_rules) }
     end
 
     context 'when feature symbol is not included on Namespace features code' do
@@ -677,7 +923,7 @@ describe Project do
     with_them do
       let(:project) { build(:project, :mirror, import_url: import_url, import_data_attributes: { auth_method: auth_method } ) }
 
-      it do
+      specify do
         expect(project.repository).to receive(:fetch_upstream).with(expected, forced: false)
 
         project.fetch_mirror
@@ -775,8 +1021,8 @@ describe Project do
   end
 
   describe '#shared_runners_limit_namespace' do
-    set(:root_ancestor) { create(:group) }
-    set(:group) { create(:group, parent: root_ancestor) }
+    let_it_be(:root_ancestor) { create(:group) }
+    let_it_be(:group) { create(:group, parent: root_ancestor) }
     let(:project) { create(:project, namespace: group) }
 
     subject { project.shared_runners_limit_namespace }
@@ -806,7 +1052,7 @@ describe Project do
           project.visibility_level = Project::PUBLIC
         end
 
-        it { is_expected.to be_falsey }
+        it { is_expected.to be_truthy }
       end
 
       context 'for internal project' do
@@ -832,100 +1078,6 @@ describe Project do
       end
 
       it { is_expected.to be_falsey }
-    end
-  end
-
-  describe '#size_limit_enabled?' do
-    let(:project) { create(:project) }
-
-    context 'when repository_size_limit is not configured' do
-      it 'is disabled' do
-        expect(project.size_limit_enabled?).to be_falsey
-      end
-    end
-
-    context 'when repository_size_limit is configured' do
-      before do
-        project.update(repository_size_limit: 1024)
-      end
-
-      context 'with an EES license' do
-        let!(:license) { create(:license, plan: License::STARTER_PLAN) }
-
-        it 'is enabled' do
-          expect(project.size_limit_enabled?).to be_truthy
-        end
-      end
-
-      context 'with an EEP license' do
-        let!(:license) { create(:license, plan: License::PREMIUM_PLAN) }
-
-        it 'is enabled' do
-          expect(project.size_limit_enabled?).to be_truthy
-        end
-      end
-
-      context 'without a License' do
-        before do
-          License.destroy_all # rubocop: disable DestroyAll
-        end
-
-        it 'is disabled' do
-          expect(project.size_limit_enabled?).to be_falsey
-        end
-      end
-    end
-  end
-
-  describe '#service_desk_enabled?' do
-    let!(:license) { create(:license, plan: License::PREMIUM_PLAN) }
-    let(:namespace) { create(:namespace) }
-
-    subject(:project) { build(:project, :private, namespace: namespace, service_desk_enabled: true) }
-
-    before do
-      allow(::Gitlab).to receive(:com?).and_return(true)
-      allow(::Gitlab::IncomingEmail).to receive(:enabled?).and_return(true)
-      allow(::Gitlab::IncomingEmail).to receive(:supports_wildcard?).and_return(true)
-    end
-
-    it 'is enabled' do
-      expect(project.service_desk_enabled?).to be_truthy
-      expect(project.service_desk_enabled).to be_truthy
-    end
-
-    context 'namespace plans active' do
-      before do
-        stub_application_setting(check_namespace_plan: true)
-      end
-
-      it 'is disabled' do
-        expect(project.service_desk_enabled?).to be_falsy
-        expect(project.service_desk_enabled).to be_falsy
-      end
-
-      context 'Service Desk available in namespace plan' do
-        let!(:gitlab_subscription) { create(:gitlab_subscription, :silver, namespace: namespace) }
-
-        it 'is enabled' do
-          expect(project.service_desk_enabled?).to be_truthy
-          expect(project.service_desk_enabled).to be_truthy
-        end
-      end
-    end
-  end
-
-  describe '#service_desk_address' do
-    let(:project) { create(:project, service_desk_enabled: true) }
-
-    before do
-      allow(::EE::Gitlab::ServiceDesk).to receive(:enabled?).and_return(true)
-      allow(Gitlab.config.incoming_email).to receive(:enabled).and_return(true)
-      allow(Gitlab.config.incoming_email).to receive(:address).and_return("test+%{key}@mail.com")
-    end
-
-    it 'uses project full path as service desk address key' do
-      expect(project.service_desk_address).to eq("test+#{project.full_path_slug}-#{project.project_id}-issue-@mail.com")
     end
   end
 
@@ -992,16 +1144,20 @@ describe Project do
     end
   end
 
-  describe '#visible_regular_approval_rules' do
+  describe '#visible_user_defined_rules' do
     let(:project) { create(:project) }
     let!(:approval_rules) { create_list(:approval_project_rule, 2, project: project) }
+    let!(:any_approver_rule) { create(:approval_project_rule, rule_type: :any_approver, project: project) }
+    let(:branch) { nil }
+
+    subject { project.visible_user_defined_rules(branch: branch) }
 
     before do
       stub_licensed_features(multiple_approval_rules: true)
     end
 
     it 'returns all approval rules' do
-      expect(project.visible_regular_approval_rules).to contain_exactly(*approval_rules)
+      expect(subject).to eq([any_approver_rule, *approval_rules])
     end
 
     context 'when multiple approval rules is not available' do
@@ -1010,35 +1166,85 @@ describe Project do
       end
 
       it 'returns the first approval rule' do
-        expect(project.visible_regular_approval_rules).to contain_exactly(approval_rules.first)
+        expect(subject).to eq([any_approver_rule])
+      end
+    end
+
+    context 'when branch is provided' do
+      let(:branch) { 'master' }
+
+      it 'caches the rules' do
+        expect(project).to receive(:user_defined_rules).and_call_original
+        subject
+
+        expect(project).not_to receive(:user_defined_rules)
+        subject
+      end
+    end
+  end
+
+  describe '#visible_user_defined_inapplicable_rules' do
+    let_it_be(:project) { create(:project) }
+    let!(:rule) { create(:approval_project_rule, project: project) }
+    let!(:another_rule) { create(:approval_project_rule, project: project) }
+
+    context 'when multiple approval rules is available' do
+      before do
+        stub_licensed_features(multiple_approval_rules: true)
+      end
+
+      let(:protected_branch) { create(:protected_branch, project: project, name: 'stable-*') }
+      let(:another_protected_branch) { create(:protected_branch, project: project, name: 'test-*') }
+
+      context 'when rules are scoped' do
+        before do
+          rule.update!(protected_branches: [protected_branch])
+          another_rule.update!(protected_branches: [another_protected_branch])
+        end
+
+        it 'returns rules that are not applicable to target_branch' do
+          expect(project.visible_user_defined_inapplicable_rules('stable-1'))
+            .to match_array([another_rule])
+        end
+      end
+
+      context 'when rules are not scoped' do
+        it 'returns empty array' do
+          expect(project.visible_user_defined_inapplicable_rules('stable-1')).to be_empty
+        end
+      end
+    end
+
+    context 'when multiple approval rules is not available' do
+      before do
+        stub_licensed_features(multiple_approval_rules: false)
+      end
+
+      it 'returns empty array' do
+        expect(project.visible_user_defined_inapplicable_rules('stable-1')).to be_empty
       end
     end
   end
 
   describe '#min_fallback_approvals' do
-    let(:project) { create(:project, approvals_before_merge: 1) }
+    let(:project) { create(:project) }
 
-    it 'returns approvals before merge if there are no rules' do
-      expect(project.min_fallback_approvals).to eq(1)
+    before do
+      create(:approval_project_rule, project: project, rule_type: :any_approver, approvals_required: 2)
+      create(:approval_project_rule, project: project, approvals_required: 2)
+      create(:approval_project_rule, project: project, approvals_required: 3)
+
+      stub_licensed_features(multiple_approval_rules: true)
     end
 
-    context 'when approval rules are present' do
-      before do
-        create(:approval_project_rule, project: project, approvals_required: 2)
-        create(:approval_project_rule, project: project, approvals_required: 3)
+    it 'returns the maximum requirement' do
+      expect(project.min_fallback_approvals).to eq(3)
+    end
 
-        stub_licensed_features(multiple_approval_rules: true)
-      end
+    it 'returns the first rule requirement if there is a rule' do
+      stub_licensed_features(multiple_approval_rules: false)
 
-      it 'returns the maximum requirement' do
-        expect(project.min_fallback_approvals).to eq(3)
-      end
-
-      it 'returns the first rule requirement if there is a rule' do
-        stub_licensed_features(multiple_approval_rules: false)
-
-        expect(project.min_fallback_approvals).to eq(2)
-      end
+      expect(project.min_fallback_approvals).to eq(2)
     end
   end
 
@@ -1109,51 +1315,14 @@ describe Project do
     end
   end
 
-  describe '#alerts_service_activated?' do
-    let!(:project) { create(:project) }
-
-    subject { project.alerts_service_activated? }
-
-    context 'when incident management feature available' do
-      before do
-        stub_licensed_features(incident_management: true)
-      end
-
-      context 'when project has an activated alerts service' do
-        before do
-          create(:alerts_service, project: project)
-        end
-
-        it { is_expected.to be_truthy }
-      end
-
-      context 'when project has an inactive alerts service' do
-        before do
-          create(:alerts_service, :inactive, project: project)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-    end
-
-    context 'when incident feature is not available' do
-      before do
-        stub_licensed_features(incident_management: false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
-  end
-
   describe '#disabled_services' do
     let(:project) { build(:project) }
 
     subject { project.disabled_services }
 
     where(:license_feature, :disabled_services) do
-      :jenkins_integration                | %w(jenkins jenkins_deprecated)
+      :jenkins_integration                | %w(jenkins)
       :github_project_service_integration | %w(github)
-      :incident_management                | %w(alerts)
     end
 
     with_them do
@@ -1274,10 +1443,11 @@ describe Project do
     before do
       allow(License).to receive(:current).and_return(global_license)
       allow(global_license).to receive(:features).and_return([
-        :epics, # Gold only
-        :service_desk, # Silver and up
+        :subepics, # Gold only
+        :epics, # Silver and up
+        :push_rules, # Silver and up
         :audit_events, # Bronze and up
-        :geo, # Global feature, should not be checked at namespace level
+        :geo # Global feature, should not be checked at namespace level
       ])
     end
 
@@ -1292,7 +1462,7 @@ describe Project do
         let(:plan_license) { :bronze }
 
         it 'filters for bronze features' do
-          is_expected.to contain_exactly(:audit_events, :geo)
+          is_expected.to contain_exactly(:audit_events, :geo, :push_rules)
         end
       end
 
@@ -1300,7 +1470,7 @@ describe Project do
         let(:plan_license) { :silver }
 
         it 'filters for silver features' do
-          is_expected.to contain_exactly(:service_desk, :audit_events, :geo)
+          is_expected.to contain_exactly(:push_rules, :audit_events, :geo, :epics)
         end
       end
 
@@ -1308,7 +1478,7 @@ describe Project do
         let(:plan_license) { :gold }
 
         it 'filters for gold features' do
-          is_expected.to contain_exactly(:epics, :service_desk, :audit_events, :geo)
+          is_expected.to contain_exactly(:epics, :push_rules, :audit_events, :geo, :subepics)
         end
       end
 
@@ -1325,7 +1495,7 @@ describe Project do
           let(:project) { create(:project, :public, group: group) }
 
           it 'includes all features in global license' do
-            is_expected.to contain_exactly(:epics, :service_desk, :audit_events, :geo)
+            is_expected.to contain_exactly(:epics, :push_rules, :audit_events, :geo, :subepics)
           end
         end
       end
@@ -1333,7 +1503,7 @@ describe Project do
 
     context 'when namespace should not be checked' do
       it 'includes all features in global license' do
-        is_expected.to contain_exactly(:epics, :service_desk, :audit_events, :geo)
+        is_expected.to contain_exactly(:epics, :push_rules, :audit_events, :geo, :subepics)
       end
     end
 
@@ -1377,41 +1547,81 @@ describe Project do
   end
 
   describe '#latest_pipeline_with_security_reports' do
-    let(:project) { create(:project) }
-    let!(:pipeline_1) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_2) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_3) { create(:ci_pipeline_without_jobs, project: project) }
+    let(:only_successful) { false }
 
-    subject { project.latest_pipeline_with_security_reports }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:pipeline_1) { create(:ci_pipeline, :success, project: project) }
+    let_it_be(:pipeline_2) { create(:ci_pipeline, project: project) }
+    let_it_be(:pipeline_3) { create(:ci_pipeline, :success, project: project) }
 
-    context 'when legacy reports are used' do
-      before do
-        create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
-        create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
+    subject { project.latest_pipeline_with_security_reports(only_successful: only_successful) }
+
+    context 'when all pipelines are used' do
+      context 'when legacy reports are used' do
+        before do
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
+        end
+
+        it 'returns the latest pipeline with security reports' do
+          is_expected.to eq(pipeline_2)
+        end
       end
 
-      it "returns the latest pipeline with security reports" do
-        is_expected.to eq(pipeline_2)
+      context 'when new reports are used' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :sast, pipeline: pipeline_2)
+        end
+
+        it 'returns the latest pipeline with security reports' do
+          is_expected.to eq(pipeline_2)
+        end
+
+        context 'when legacy used' do
+          before do
+            create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
+          end
+
+          it 'prefers the new reports' do
+            is_expected.to eq(pipeline_2)
+          end
+        end
       end
     end
 
-    context 'when new reports are used' do
-      before do
-        create(:ee_ci_build, :sast, pipeline: pipeline_1)
-        create(:ee_ci_build, :sast, pipeline: pipeline_2)
-      end
+    context 'when only successful pipelines are used' do
+      let(:only_successful) { true }
 
-      it "returns the latest pipeline with security reports" do
-        is_expected.to eq(pipeline_2)
-      end
-
-      context 'when legacy used' do
+      context 'when legacy reports are used' do
         before do
-          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
         end
 
-        it "prefers the new reports" do
-          is_expected.to eq(pipeline_2)
+        it "returns the latest succesful pipeline with security reports" do
+          is_expected.to eq(pipeline_1)
+        end
+      end
+
+      context 'when new reports are used' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :sast, pipeline: pipeline_2)
+        end
+
+        it 'returns the latest successful pipeline with security reports' do
+          is_expected.to eq(pipeline_1)
+        end
+
+        context 'when legacy used' do
+          before do
+            create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
+          end
+
+          it 'prefers the new reports' do
+            is_expected.to eq(pipeline_1)
+          end
         end
       end
     end
@@ -1443,7 +1653,7 @@ describe Project do
   end
 
   describe '#protected_environment_by_name' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
 
     subject { project.protected_environment_by_name('production') }
 
@@ -1460,19 +1670,27 @@ describe Project do
 
     context 'when Protected Environments feature is available on the project' do
       let(:feature_available) { true }
-      let(:environment) { create(:environment, name: 'production') }
-      let(:protected_environment) { create(:protected_environment, name: environment.name, project: project) }
-
-      context 'when the project environment exists' do
-        before do
-          protected_environment
-        end
-
-        it { is_expected.to eq(protected_environment) }
-      end
 
       context 'when the project environment does not exists' do
         it { is_expected.to be_nil }
+      end
+
+      context 'when the project environment exists' do
+        let_it_be(:environment) { create(:environment, name: 'production') }
+        let_it_be(:protected_environment) { create(:protected_environment, name: environment.name, project: project) }
+
+        it { is_expected.to eq(protected_environment) }
+
+        it 'caches environment name', :request_store do
+          control_count = ActiveRecord::QueryRecorder.new { project.protected_environment_by_name(protected_environment.name) }
+
+          expect do
+            2.times { project.protected_environment_by_name(protected_environment.name) }
+          end.not_to exceed_query_limit(control_count)
+
+          expect(project.protected_environment_by_name('non-existent-env')).to be_nil
+          expect(project.protected_environment_by_name(protected_environment.name)).to eq(protected_environment)
+        end
       end
     end
   end
@@ -1524,47 +1742,88 @@ describe Project do
   end
 
   describe '#after_import' do
-    let(:project) { create(:project) }
-    let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
-    let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
-    let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+    let_it_be(:project) { create(:project) }
 
-    before do
-      create(:import_state, project: project)
+    context 'Geo repository update events' do
+      let_it_be(:import_state) { create(:import_state, :started, project: project) }
+      let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+      let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+      let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
 
-      allow(::Geo::RepositoryUpdatedService)
-        .to receive(:new)
-        .with(project.repository)
-        .and_return(repository_updated_service)
+      before do
+        allow(::Geo::RepositoryUpdatedService)
+          .to receive(:new)
+          .with(project.repository)
+          .and_return(repository_updated_service)
 
-      allow(::Geo::RepositoryUpdatedService)
-        .to receive(:new)
-        .with(project.wiki.repository)
-        .and_return(wiki_updated_service)
+        allow(::Geo::RepositoryUpdatedService)
+          .to receive(:new)
+          .with(project.wiki.repository)
+          .and_return(wiki_updated_service)
 
-      allow(::Geo::RepositoryUpdatedService)
-        .to receive(:new)
-        .with(project.design_repository)
-        .and_return(design_updated_service)
+        allow(::Geo::RepositoryUpdatedService)
+          .to receive(:new)
+          .with(project.design_repository)
+          .and_return(design_updated_service)
+      end
+
+      it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node', :aggregate_failures do
+        stub_primary_node
+
+        expect(repository_updated_service).to receive(:execute).once
+        expect(wiki_updated_service).to receive(:execute).once
+        expect(design_updated_service).to receive(:execute).once
+
+        project.after_import
+      end
+
+      it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node', :aggregate_failures do
+        expect(repository_updated_service).not_to receive(:execute)
+        expect(wiki_updated_service).not_to receive(:execute)
+        expect(design_updated_service).not_to receive(:execute)
+
+        project.after_import
+      end
     end
 
-    it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
-      allow(Gitlab::Geo).to receive(:primary?).and_return(true)
+    context 'elasticsearch indexing' do
+      let_it_be(:import_state) { create(:import_state, project: project) }
 
-      expect(repository_updated_service).to receive(:execute).once
-      expect(wiki_updated_service).to receive(:execute).once
-      expect(design_updated_service).to receive(:execute).once
+      context 'elasticsearch indexing disabled for this project' do
+        before do
+          expect(project).to receive(:use_elasticsearch?).and_return(false)
+        end
 
-      project.after_import
-    end
+        it 'does not index the wiki repository' do
+          expect(ElasticCommitIndexerWorker).not_to receive(:perform_async)
 
-    it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node' do
-      allow(Gitlab::Geo).to receive(:primary?).and_return(false)
+          project.after_import
+        end
+      end
 
-      expect(repository_updated_service).not_to receive(:execute)
-      expect(wiki_updated_service).not_to receive(:execute)
+      context 'elasticsearch indexing enabled for this project' do
+        before do
+          expect(project).to receive(:use_elasticsearch?).and_return(true)
+        end
 
-      project.after_import
+        it 'schedules a full index of the wiki repository' do
+          expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+
+          project.after_import
+        end
+
+        context 'when project is forked' do
+          before do
+            expect(project).to receive(:forked?).and_return(true)
+          end
+
+          it 'does not index the wiki repository' do
+            expect(ElasticCommitIndexerWorker).not_to receive(:perform_async)
+
+            project.after_import
+          end
+        end
+      end
     end
   end
 
@@ -1643,11 +1902,37 @@ describe Project do
   describe '#add_import_job' do
     let(:project) { create(:project) }
 
-    context 'when import_type is gitlab_custom_project_template_import' do
-      it 'does not create import job' do
-        project.import_type = 'gitlab_custom_project_template_import'
+    before do
+      stub_licensed_features(custom_project_templates: true)
+    end
 
+    context 'when import_type is gitlab_custom_project_template' do
+      it 'does not create import job' do
+        project.import_type = 'gitlab_custom_project_template'
+
+        expect(project.gitlab_custom_project_template_import?).to be true
         expect(project.add_import_job).to be_nil
+      end
+    end
+
+    context 'when mirror true on a jira imported project' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:project) { create(:project, :repository, import_type: 'jira', mirror: true, import_url: 'http://some_url.com', mirror_user_id: user.id) }
+      let_it_be(:jira_import) { create(:jira_import_state, project: project) }
+
+      context 'when jira import is in progress' do
+        before do
+          jira_import.start
+        end
+
+        it 'does trigger mirror update' do
+          expect(RepositoryUpdateMirrorWorker).to receive(:perform_async)
+          expect(Gitlab::JiraImport::Stage::StartImportWorker).not_to receive(:perform_async)
+          expect(project.mirror).to be true
+          expect(project.jira_import?).to be true
+
+          project.add_import_job
+        end
       end
     end
   end
@@ -1670,12 +1955,6 @@ describe Project do
         expect(project.gitlab_custom_project_template_import?).to be false
       end
     end
-  end
-
-  describe '#packages_enabled' do
-    subject { create(:project).packages_enabled }
-
-    it { is_expected.to be true }
   end
 
   describe '#update_root_ref' do
@@ -1767,6 +2046,7 @@ describe Project do
 
   describe '#object_pool_missing?' do
     let(:pool) { create(:pool_repository, :ready) }
+
     subject { create(:project, :repository, pool_repository: pool) }
 
     it 'returns true when object pool is missing' do
@@ -1900,33 +2180,6 @@ describe Project do
     end
   end
 
-  describe '#design_management_enabled?' do
-    let(:project) { build(:project) }
-
-    where(:feature_enabled, :license_enabled, :lfs_enabled, :hashed_storage_enabled, :hash_storage_required, :expectation) do
-      false | false | false | false | false | false
-      true  | false | false | false | false | false
-      true  | true  | false | false | false | false
-      true  | true  | true  | false | false | true
-      true  | true  | true  | false | true  | false
-      true  | true  | true  | true  | false | true
-      true  | true  | true  | true  | true  | true
-    end
-
-    with_them do
-      before do
-        stub_licensed_features(design_management: license_enabled)
-        stub_feature_flags(design_management_flag: feature_enabled, design_management_require_hashed_storage: hash_storage_required)
-        expect(project).to receive(:lfs_enabled?).and_return(lfs_enabled)
-        allow(project).to receive(:hashed_storage?).with(:repository).and_return(hashed_storage_enabled)
-      end
-
-      it do
-        expect(project.design_management_enabled?).to be(expectation)
-      end
-    end
-  end
-
   describe "#kerberos_url_to_repo" do
     let(:project) { create(:project, path: "somewhere") }
 
@@ -1935,77 +2188,71 @@ describe Project do
     end
   end
 
-  describe 'repository size restrictions' do
+  describe '#repository_size_checker' do
     let(:project) { build(:project) }
+    let(:checker) { project.repository_size_checker }
 
-    before do
-      allow_any_instance_of(ApplicationSetting).to receive(:repository_size_limit).and_return(50)
-    end
+    describe '#current_size' do
+      let(:project) { create(:project) }
 
-    describe '#changes_will_exceed_size_limit?' do
-      before do
-        allow(project).to receive(:repository_and_lfs_size).and_return(49)
-      end
-      it 'returns true when changes go over' do
-        expect(project.changes_will_exceed_size_limit?(5)).to be_truthy
+      it 'returns the total repository and lfs size' do
+        allow(project.statistics).to receive(:total_repository_size).and_return(80)
+
+        expect(checker.current_size).to eq(80)
       end
     end
 
-    describe '#actual_size_limit' do
-      it 'returns the limit set in the application settings' do
-        expect(project.actual_size_limit).to eq(50)
+    describe '#limit' do
+      it 'returns the value set in the namespace when available' do
+        allow(project.namespace).to receive(:actual_size_limit).and_return(100)
+
+        expect(checker.limit).to eq(100)
       end
 
-      it 'returns the value set in the group' do
-        group = create(:group, repository_size_limit: 100)
-        project.update_attribute(:namespace_id, group.id)
+      it 'returns the value set locally when available' do
+        project.repository_size_limit = 200
 
-        expect(project.actual_size_limit).to eq(100)
-      end
-
-      it 'returns the value set locally' do
-        project.update_attribute(:repository_size_limit, 75)
-
-        expect(project.actual_size_limit).to eq(75)
+        expect(checker.limit).to eq(200)
       end
     end
 
-    describe '#size_limit_enabled?' do
-      it 'returns false when disabled' do
-        project.update_attribute(:repository_size_limit, 0)
+    describe '#enabled?' do
+      it 'returns true when not equal to zero' do
+        project.repository_size_limit = 1
 
-        expect(project.size_limit_enabled?).to be_falsey
+        expect(checker.enabled?).to be_truthy
       end
 
-      it 'returns true when a limit is set' do
-        project.update_attribute(:repository_size_limit, 75)
+      it 'returns false when equals to zero' do
+        project.repository_size_limit = 0
 
-        expect(project.size_limit_enabled?).to be_truthy
-      end
-    end
-
-    describe '#above_size_limit?' do
-      let(:project) do
-        create(:project,
-               statistics: build(:project_statistics))
+        expect(checker.enabled?).to be_falsey
       end
 
-      it 'returns true when above the limit' do
-        allow(project).to receive(:repository_and_lfs_size).and_return(100)
+      context 'when repository_size_limit is configured' do
+        before do
+          project.repository_size_limit = 1
+        end
 
-        expect(project.above_size_limit?).to be_truthy
-      end
+        context 'when license feature enabled' do
+          before do
+            stub_licensed_features(repository_size_limit: true)
+          end
 
-      it 'returns false when not over the limit' do
-        expect(project.above_size_limit?).to be_falsey
-      end
-    end
+          it 'is enabled' do
+            expect(checker.enabled?).to be_truthy
+          end
+        end
 
-    describe '#size_to_remove' do
-      it 'returns the correct value' do
-        allow(project).to receive(:repository_and_lfs_size).and_return(100)
+        context 'when license feature disabled' do
+          before do
+            stub_licensed_features(repository_size_limit: false)
+          end
 
-        expect(project.size_to_remove).to eq(50)
+          it 'is disabled' do
+            expect(checker.enabled?).to be_falsey
+          end
+        end
       end
     end
   end
@@ -2096,62 +2343,6 @@ describe Project do
     end
   end
 
-  describe '#change_repository_storage' do
-    let(:project) { create(:project, :repository) }
-    let(:read_only_project) { create(:project, :repository, repository_read_only: true) }
-
-    before do
-      FileUtils.mkdir('tmp/tests/extra_storage')
-      stub_storage_settings('extra' => { 'path' => 'tmp/tests/extra_storage' })
-    end
-
-    after do
-      FileUtils.rm_rf('tmp/tests/extra_storage')
-    end
-
-    it 'schedule the transfer of the repository to the new storage and locks the project' do
-      expect(ProjectUpdateRepositoryStorageWorker).to receive(:perform_async).with(project.id, 'extra')
-
-      project.change_repository_storage('extra')
-      project.save
-
-      expect(project).to be_repository_read_only
-    end
-
-    it "doesn't schedule the transfer if the repository is already read-only" do
-      expect(ProjectUpdateRepositoryStorageWorker).not_to receive(:perform_async)
-
-      read_only_project.change_repository_storage('extra')
-      read_only_project.save
-    end
-
-    it "doesn't lock or schedule the transfer if the storage hasn't changed" do
-      expect(ProjectUpdateRepositoryStorageWorker).not_to receive(:perform_async)
-
-      project.change_repository_storage(project.repository_storage)
-      project.save
-
-      expect(project).not_to be_repository_read_only
-    end
-
-    it 'throws an error if an invalid repository storage is provided' do
-      expect { project.change_repository_storage('unknown') }.to raise_error(ArgumentError)
-    end
-  end
-
-  describe '#repository_and_lfs_size' do
-    let(:project) { create(:project, :repository) }
-    let(:size) { 50 }
-
-    before do
-      allow(project.statistics).to receive(:total_repository_size).and_return(size)
-    end
-
-    it 'returns the total repository and lfs size' do
-      expect(project.repository_and_lfs_size).to eq(size)
-    end
-  end
-
   describe '#approver_group_ids=' do
     let(:project) { create(:project) }
 
@@ -2217,135 +2408,188 @@ describe Project do
       .and_return(host: host)
   end
 
-  describe '#package_already_taken?' do
-    let(:namespace) { create(:namespace) }
-    let(:project) { create(:project, :public, namespace: namespace) }
-    let!(:package) { create(:npm_package, project: project, name: "@#{namespace.path}/foo") }
-
-    context 'no package exists with the same name' do
-      it 'returns false' do
-        result = project.package_already_taken?("@#{namespace.path}/bar")
-        expect(result).to be false
+  describe '#ancestor_marked_for_deletion' do
+    context 'delayed deletion feature is not available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      it 'returns false if it is the project that the package belongs to' do
-        result = project.package_already_taken?("@#{namespace.path}/foo")
-        expect(result).to be false
+      context 'the parent namespace has been marked for deletion' do
+        let(:parent_group) do
+          create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago)
+        end
+
+        let(:project) { create(:project, namespace: parent_group) }
+
+        it 'returns nil' do
+          expect(project.ancestor_marked_for_deletion).to be_nil
+        end
       end
     end
 
-    context 'a package already exists with the same name' do
-      let(:alt_project) { create(:project, :public, namespace: namespace) }
+    context 'delayed deletion feature is available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+      end
 
-      it 'returns true' do
-        result = alt_project.package_already_taken?("@#{namespace.path}/foo")
-        expect(result).to be true
+      context 'the parent namespace has been marked for deletion' do
+        let(:parent_group) do
+          create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago)
+        end
+
+        let(:project) { create(:project, namespace: parent_group) }
+
+        it 'returns the parent namespace' do
+          expect(project.ancestor_marked_for_deletion).to eq(parent_group)
+        end
+      end
+
+      context "project or its parent group has not been marked for deletion" do
+        let(:parent_group) { create(:group) }
+        let(:project) { create(:project, namespace: parent_group) }
+
+        it 'returns nil' do
+          expect(project.ancestor_marked_for_deletion).to be_nil
+        end
+      end
+
+      context 'ordering' do
+        let(:group_a) { create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago) }
+        let(:subgroup_a) { create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago, parent: group_a) }
+        let(:project) { create(:project, namespace: subgroup_a) }
+
+        it 'returns the first group that is marked for deletion, up its ancestry chain' do
+          expect(project.ancestor_marked_for_deletion).to eq(subgroup_a)
+        end
       end
     end
   end
 
   describe '#adjourned_deletion?' do
-    context 'when marking for deletion feature is available' do
-      let(:project) { create(:project) }
+    using RSpec::Parameterized::TableSyntax
 
-      before do
-        stub_licensed_features(marking_project_for_deletion: true)
-      end
+    subject { project.adjourned_deletion? }
 
-      context 'when number of days is set to more than 0' do
-        it 'returns true' do
-          stub_application_setting(deletion_adjourned_period: 1)
-          expect(project.adjourned_deletion?).to eq(true)
-        end
-      end
-
-      context 'when number of days is set to 0' do
-        it 'returns false' do
-          stub_application_setting(deletion_adjourned_period: 0)
-          expect(project.adjourned_deletion?).to eq(false)
-        end
-      end
+    where(:licensed?, :feature_enabled_on_group?, :adjourned_period, :result) do
+      true    | true  | 0 | false
+      true    | true  | 1 | true
+      true    | false | 0 | false
+      true    | false | 1 | false
+      false   | true  | 0 | false
+      false   | true  | 1 | false
+      false   | false | 0 | false
+      false   | false | 1 | false
     end
 
-    context 'when marking for deletion feature is not available' do
-      let(:project) { create(:project) }
+    with_them do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:project) { create(:project, group: group) }
 
       before do
-        stub_licensed_features(marking_project_for_deletion: false)
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
+        stub_application_setting(deletion_adjourned_period: adjourned_period)
+        allow(group).to receive(:delayed_project_removal?).and_return(feature_enabled_on_group?)
       end
 
-      context 'when number of days is set to more than 0' do
-        it 'returns false' do
-          stub_application_setting(deletion_adjourned_period: 1)
+      it { is_expected.to be result }
+    end
 
-          expect(project.adjourned_deletion?).to eq(false)
-        end
+    context 'when project belongs to user namespace' do
+      let_it_be(:user) { create(:user) }
+      let_it_be(:user_project) { create(:project, namespace: user.namespace) }
+
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+        stub_application_setting(deletion_adjourned_period: 7)
       end
 
-      context 'when number of days is set to 0' do
-        it 'returns false' do
-          stub_application_setting(deletion_adjourned_period: 0)
-
-          expect(project.adjourned_deletion?).to eq(false)
-        end
+      it 'deletes immediately' do
+        expect(user_project.adjourned_deletion?).to be nil
       end
     end
   end
 
-  describe '#has_packages?' do
-    let(:project) { create(:project, :public) }
+  describe 'caculate template repositories' do
+    let(:group1) { create(:group) }
+    let(:group2) { create(:group) }
+    let(:group2_sub1) { create(:group, parent: group2) }
+    let(:group2_sub2) { create(:group, parent: group2) }
 
-    subject { project.has_packages?(package_type) }
+    before do
+      stub_ee_application_setting(custom_project_templates_group_id: group2.id)
+      group2.update(custom_project_templates_group_id: group2_sub2.id)
+      create(:project, group: group1)
 
-    shared_examples 'returning true examples' do
-      let!(:package) { create("#{package_type}_package", project: project) }
-
-      it { is_expected.to be true }
+      create_list(:project, 2, group: group2)
+      create_list(:project, 3, group: group2_sub1)
+      create_list(:project, 4, group: group2_sub2)
     end
 
-    shared_examples 'returning false examples' do
-      it { is_expected.to be false }
+    it 'counts instance level templates' do
+      expect(described_class.with_repos_templates.count).to eq(2)
     end
 
-    context 'with packages disabled' do
+    it 'counts group level templates' do
+      expect(described_class.with_groups_level_repos_templates.count).to eq(4)
+    end
+  end
+
+  describe '#license_compliance' do
+    it { expect(subject.license_compliance).to be_instance_of(::SCA::LicenseCompliance) }
+  end
+
+  describe '#template_source?' do
+    let_it_be(:group) { create(:group, :private) }
+    let_it_be(:subgroup) { create(:group, :private, parent: group) }
+    let_it_be(:project_template) { create(:project, group: subgroup) }
+
+    context 'when project is not template source' do
+      it 'returns false' do
+        expect(project.template_source?).to be_falsey
+      end
+    end
+
+    context 'instance-level custom project templates' do
       before do
-        stub_licensed_features(packages: false)
+        stub_ee_application_setting(custom_project_templates_group_id: subgroup.id)
       end
 
-      it_behaves_like 'returning false examples' do
-        let!(:package) { create(:maven_package, project: project) }
-        let(:package_type) { :maven }
+      it 'returns true' do
+        expect(project_template.template_source?).to be_truthy
       end
     end
 
-    context 'with packages enabled' do
+    context 'group-level custom project templates' do
       before do
-        stub_licensed_features(packages: true)
+        group.update(custom_project_templates_group_id: subgroup.id)
       end
 
-      context 'with maven packages' do
-        it_behaves_like 'returning true examples' do
-          let(:package_type) { :maven }
-        end
+      it 'returns true' do
+        expect(project_template.template_source?).to be_truthy
       end
+    end
+  end
 
-      context 'with npm packages' do
-        it_behaves_like 'returning true examples' do
-          let(:package_type) { :npm }
-        end
-      end
+  describe '#remove_import_data' do
+    let(:import_data) { ProjectImportData.new(data: { 'test' => 'some data' }) }
 
-      context 'with conan packages' do
-        it_behaves_like 'returning true examples' do
-          let(:package_type) { :conan }
-        end
-      end
+    context 'when mirror' do
+      let(:user) { create(:user) }
+      let!(:project) { create(:project, mirror: true, import_url: 'http://some_url.com', mirror_user_id: user.id, import_data: import_data) }
 
-      context 'with no package type' do
-        it_behaves_like 'returning false examples' do
-          let(:package_type) { nil }
-        end
+      it 'does not remove import data' do
+        expect(project.mirror?).to be true
+        expect(project.jira_import?).to be false
+        expect { project.remove_import_data }.not_to change { ProjectImportData.count }
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 end

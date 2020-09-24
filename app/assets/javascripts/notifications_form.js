@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { __ } from './locale';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 
 export default class NotificationsForm {
   constructor() {
@@ -26,12 +26,12 @@ export default class NotificationsForm {
       .addClass('is-loading')
       .find('.custom-notification-event-loading')
       .removeClass('fa-check')
-      .addClass('fa-spin fa-spinner')
+      .addClass('spinner align-middle')
       .removeClass('is-done');
   }
 
   saveEvent($checkbox, $parent) {
-    const form = $parent.parents('form:first');
+    const form = $parent.parents('form').first();
 
     this.showCheckboxLoadingSpinner($parent);
 
@@ -41,12 +41,12 @@ export default class NotificationsForm {
         if (data.saved) {
           $parent
             .find('.custom-notification-event-loading')
-            .toggleClass('fa-spin fa-spinner fa-check is-done');
+            .toggleClass('spinner fa-check is-done align-middle');
           setTimeout(() => {
             $parent
               .removeClass('is-loading')
               .find('.custom-notification-event-loading')
-              .toggleClass('fa-spin fa-spinner fa-check is-done');
+              .toggleClass('spinner fa-check is-done align-middle');
           }, 2000);
         }
       })

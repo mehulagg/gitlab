@@ -2,108 +2,93 @@
 
 require 'spec_helper'
 
-describe AlertsService do
-  set(:project) { create(:project) }
-  let(:service_params) { { project: project, active: active } }
-  let(:active) { true }
-  let(:service) { described_class.new(service_params) }
+RSpec.describe AlertsService do
+  let(:service) { build_stubbed(:alerts_service) }
 
-  shared_context 'when active' do
-    let(:active) { true }
-  end
+  describe 'Opsgenie MVC' do
+    describe '#opsgenie_mvc_target_url' do
+      context 'when enabled' do
+        before do
+          service.opsgenie_mvc_enabled = true
+        end
 
-  shared_context 'when inactive' do
-    let(:active) { false }
-  end
+        it 'validates presence' do
+          expect(service).to validate_presence_of(:opsgenie_mvc_target_url)
+        end
 
-  shared_context 'when persisted' do
-    before do
-      service.save!
-      service.reload
+        describe 'enforces public urls' do
+          where(:url, :valid) do
+            [
+              ['https://appname.app.opsgenie.com/alert/list', true],
+              ['https://example.com', true],
+              ['http://example.com', true],
+              ['http://0.0.0.0', false],
+              ['http://127.0.0.1', false],
+              ['ftp://example.com', false],
+              ['invalid url', false]
+            ]
+          end
+
+          with_them do
+            before do
+              service.opsgenie_mvc_target_url = url
+            end
+
+            if params[:valid]
+              it { expect(service).to be_valid }
+            else
+              it { expect(service).to be_invalid }
+            end
+          end
+        end
+      end
+
+      context 'when disabled' do
+        before do
+          service.opsgenie_mvc_enabled = false
+        end
+
+        it 'does not validate presence' do
+          expect(service).not_to validate_presence_of(:opsgenie_mvc_target_url)
+        end
+
+        it 'allows any value' do
+          service.opsgenie_mvc_target_url = 'any value'
+          expect(service).to be_valid
+        end
+      end
     end
-  end
 
-  describe '#url' do
-    include Gitlab::Routing
+    describe '#opsgenie_mvc_available?' do
+      subject { service.opsgenie_mvc_available? }
 
-    subject { service.url }
-
-    it { is_expected.to eq(project_alerts_notify_url(project, format: :json)) }
-  end
-
-  describe '#json_fields' do
-    subject { service.json_fields }
-
-    it { is_expected.to eq(%w(active token)) }
-  end
-
-  describe '#as_json' do
-    subject { service.as_json(only: service.json_fields) }
-
-    it { is_expected.to eq('active' => true, 'token' => nil) }
-  end
-
-  describe '#token' do
-    shared_context 'reset token' do
       before do
-        service.token = ''
-        service.valid?
-      end
-    end
-
-    shared_context 'assign token' do |token|
-      before do
-        service.token = token
-        service.valid?
-      end
-    end
-
-    shared_examples 'valid token' do
-      it { is_expected.to match(/\A\h{32}\z/) }
-    end
-
-    shared_examples 'no token' do
-      it { is_expected.to be_blank }
-    end
-
-    subject { service.token }
-
-    context 'when active' do
-      include_context 'when active'
-
-      context 'when resetting' do
-        let!(:previous_token) { service.token }
-
-        include_context 'reset token'
-
-        it_behaves_like 'valid token'
-
-        it { is_expected.not_to eq(previous_token) }
+        stub_licensed_features(opsgenie_integration: true)
       end
 
-      context 'when assigning' do
-        include_context 'assign token', 'random token'
-
-        it_behaves_like 'valid token'
+      context 'when license is available' do
+        it { is_expected.to eq(true) }
       end
-    end
 
-    context 'when inactive' do
-      include_context 'when inactive'
+      context 'when license is not available' do
+        before do
+          stub_licensed_features(opsgenie_integration: false)
+        end
 
-      context 'when resetting' do
-        let!(:previous_token) { service.token }
-
-        include_context 'reset token'
-
-        it_behaves_like 'no token'
+        it { is_expected.to eq(false) }
       end
-    end
 
-    context 'when persisted' do
-      include_context 'when persisted'
+      context 'when template service' do
+        let(:service) { build_stubbed(:alerts_service, :template) }
 
-      it_behaves_like 'valid token'
+        it { is_expected.to eq(false) }
+      end
+
+      context 'when instance service' do
+        let(:service) { build_stubbed(:alerts_service, :instance) }
+
+        it { is_expected.to eq(false) }
+      end
     end
   end
 end

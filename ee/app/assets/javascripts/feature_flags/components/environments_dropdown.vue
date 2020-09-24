@@ -1,17 +1,16 @@
 <script>
-import _ from 'underscore';
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import { debounce } from 'lodash';
+import { GlDeprecatedButton, GlSearchBoxByType } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 /**
  * Creates a searchable input for environments.
  *
  * When given a value, it will render it as selected value
- * Otherwise it will render a placeholder for the search
- * input.
+ * Otherwise it will render a placeholder for the search input.
+ * It will fetch the available environments on focus.
  *
  * When the user types, it will trigger an event to allow
  * for API queries outside of the component.
@@ -29,9 +28,8 @@ import createFlash from '~/flash';
 export default {
   name: 'EnvironmentsSearchableInput',
   components: {
-    GlButton,
-    GlLoadingIcon,
-    Icon,
+    GlDeprecatedButton,
+    GlSearchBoxByType,
   },
   props: {
     endpoint: {
@@ -56,11 +54,12 @@ export default {
     disabled: {
       type: Boolean,
       default: false,
+      required: false,
     },
   },
   data() {
     return {
-      filter: this.value || '',
+      environmentSearch: this.value,
       results: [],
       showSuggestions: false,
       isLoading: false,
@@ -72,49 +71,28 @@ export default {
      * @returns {String}
      */
     composedCreateButtonLabel() {
-      return `${this.createButtonLabel} ${this.filter}`;
+      return `${this.createButtonLabel} ${this.environmentSearch}`;
     },
-    /**
-     * Create button is available when
-     * - loading is false, filter is set and no results are available
-     * @returns Boolean
-     */
     shouldRenderCreateButton() {
-      return !_.isEmpty(this.filter) && !this.isLoading && !this.results.length;
-    },
-  },
-  watch: {
-    value(newVal) {
-      this.filter = newVal;
+      return !this.isLoading && !this.results.length;
     },
   },
   methods: {
-    /**
-     * On each input event, it updates the filter value and fetches the
-     * list of environments based on the value typed.
-     *
-     * Since we need to update the input value both with the value provided by the parent
-     * and the value typed by the user, we can't use v-model.
-     */
-    fetchEnvironments(evt) {
-      this.filter = evt.target.value;
-
+    fetchEnvironments: debounce(function debouncedFetchEnvironments() {
       this.isLoading = true;
       this.openSuggestions();
-
-      return axios
-        .get(this.endpoint, { params: { query: this.filter } })
+      axios
+        .get(this.endpoint, { params: { query: this.environmentSearch } })
         .then(({ data }) => {
-          this.results = data;
+          this.results = data || [];
           this.isLoading = false;
         })
         .catch(() => {
           this.isLoading = false;
           this.closeSuggestions();
-
           createFlash(__('Something went wrong on our end. Please try again.'));
         });
-    },
+    }, 250),
     /**
      * Opens the list of suggestions
      */
@@ -126,7 +104,7 @@ export default {
      */
     closeSuggestions() {
       this.showSuggestions = false;
-      this.results = [];
+      this.environmentSearch = '';
     },
     /**
      * On click, it will:
@@ -135,7 +113,6 @@ export default {
      *  3. emit an event
      */
     clearInput() {
-      this.filter = '';
       this.closeSuggestions();
       this.$emit('clearInput');
     },
@@ -150,19 +127,16 @@ export default {
      */
     selectEnvironment(selected) {
       this.$emit('selectEnvironment', selected);
-
-      this.filter = '';
+      this.results = [];
       this.closeSuggestions();
     },
 
     /**
      * When the user clicks the create button
      * it emits an event with the filter value
-     * Clears the input and closes the list of suggestions.
      */
     createClicked() {
-      this.$emit('createClicked', this.filter);
-      this.filter = '';
+      this.$emit('createClicked', this.environmentSearch);
       this.closeSuggestions();
     },
   },
@@ -171,48 +145,37 @@ export default {
 <template>
   <div>
     <div class="dropdown position-relative">
-      <icon name="search" class="seach-icon-input" />
-
-      <input
-        type="text"
-        class="js-env-input form-control pl-4"
+      <gl-search-box-by-type
+        v-model.trim="environmentSearch"
+        class="js-env-search"
         :aria-label="placeholder"
-        :value="filter"
         :placeholder="placeholder"
         :disabled="disabled"
-        @input="fetchEnvironments"
+        :is-loading="isLoading"
+        @focus="fetchEnvironments"
+        @keyup="fetchEnvironments"
       />
-
-      <gl-button
-        v-if="!disabled"
-        class="js-clear-search-input btn-transparent clear-search-input position-right-0"
-        @click="clearInput"
-      >
-        <icon name="clear" :aria-label="__('Clear input')" />
-      </gl-button>
-
       <div
         v-if="showSuggestions"
         class="dropdown-menu d-block dropdown-menu-selectable dropdown-menu-full-width"
       >
         <div class="dropdown-content">
-          <gl-loading-icon v-if="isLoading" />
-
-          <ul v-else-if="results.length">
+          <ul v-if="results.length">
             <li v-for="(result, i) in results" :key="i">
-              <gl-button class="btn-transparent" @click="selectEnvironment(result)">{{
+              <gl-deprecated-button class="btn-transparent" @click="selectEnvironment(result)">{{
                 result
-              }}</gl-button>
+              }}</gl-deprecated-button>
             </li>
           </ul>
-          <div v-else-if="!results.length" class="text-secondary p-2">
+          <div v-else-if="!results.length" class="text-secondary gl-p-3">
             {{ __('No matching results') }}
           </div>
-
           <div v-if="shouldRenderCreateButton" class="dropdown-footer">
-            <gl-button class="js-create-button btn-blank dropdown-item" @click="createClicked">{{
-              composedCreateButtonLabel
-            }}</gl-button>
+            <gl-deprecated-button
+              class="js-create-button btn-blank dropdown-item"
+              @click="createClicked"
+              >{{ composedCreateButtonLabel }}</gl-deprecated-button
+            >
           </div>
         </div>
       </div>

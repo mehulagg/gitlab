@@ -9,6 +9,7 @@ class SamlProvider < ApplicationRecord
   validates :group, presence: true, top_level_group: true
   validates :sso_url, presence: true, addressable_url: { schemes: %w(https), ascii_only: true }
   validates :certificate_fingerprint, presence: true, certificate_fingerprint: true
+  validates :default_membership_role, presence: true, inclusion: { in: Gitlab::Access.values }
 
   after_initialize :set_defaults, if: :new_record?
 
@@ -30,11 +31,22 @@ class SamlProvider < ApplicationRecord
   end
 
   def enforced_sso?
-    enabled? && super && ::Feature.enabled?(:enforced_sso, group)
+    enabled? && super && group.feature_available?(:group_saml)
   end
 
   def enforced_group_managed_accounts?
     super && enforced_sso? && Feature.enabled?(:group_managed_accounts, group)
+  end
+
+  def prohibited_outer_forks?
+    enforced_group_managed_accounts? && super
+  end
+
+  def last_linked_owner?(user)
+    return false unless group.owned_by?(user)
+    return false unless identities.for_user(user).exists?
+
+    identities.for_user(group.owners).count == 1
   end
 
   class DefaultOptions

@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe DeploymentEntity do
+RSpec.describe DeploymentEntity do
   let(:user) { developer }
   let(:developer) { create(:user) }
   let(:reporter) { create(:user) }
-  let(:project) { create(:project) }
+  let(:project) { create(:project, :repository) }
   let(:request) { double('request') }
   let(:deployment) { create(:deployment, deployable: build, project: project) }
   let(:build) { create(:ci_build, :manual, pipeline: pipeline) }
@@ -103,6 +103,36 @@ describe DeploymentEntity do
 
       it 'does not serialize scheduled actions details' do
         expect(subject.with_indifferent_access).not_to include(:scheduled_actions)
+      end
+    end
+  end
+
+  describe 'playable_build' do
+    let_it_be(:project) { create(:project, :repository) }
+
+    context 'when the deployment has a playable deployable' do
+      context 'when this build is ready to be played' do
+        let(:build) { create(:ci_build, :playable, :scheduled, pipeline: pipeline) }
+
+        it 'exposes only the play_path' do
+          expect(subject[:playable_build].keys).to contain_exactly(:play_path)
+        end
+      end
+
+      context 'when this build has failed' do
+        let(:build) { create(:ci_build, :playable, :failed, pipeline: pipeline) }
+
+        it 'exposes the play_path and the retry_path' do
+          expect(subject[:playable_build].keys).to contain_exactly(:play_path, :retry_path)
+        end
+      end
+    end
+
+    context 'when the deployment does not have a playable deployable' do
+      let(:build) { create(:ci_build) }
+
+      it 'is not exposed' do
+        expect(subject[:playable_build]).to be_nil
       end
     end
   end

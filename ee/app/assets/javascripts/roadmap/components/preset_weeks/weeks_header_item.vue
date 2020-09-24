@@ -20,10 +20,6 @@ export default {
       type: Array,
       required: true,
     },
-    itemWidth: {
-      type: Number,
-      required: true,
-    },
   },
   data() {
     const currentDate = new Date();
@@ -34,11 +30,6 @@ export default {
     };
   },
   computed: {
-    itemStyles() {
-      return {
-        width: `${this.itemWidth}px`,
-      };
-    },
     lastDayOfCurrentWeek() {
       const lastDayOfCurrentWeek = new Date(this.timeframeItem.getTime());
       lastDayOfCurrentWeek.setDate(lastDayOfCurrentWeek.getDate() + 7);
@@ -77,7 +68,7 @@ export default {
 </script>
 
 <template>
-  <span :style="itemStyles" class="timeline-header-item">
+  <span class="timeline-header-item">
     <div :class="timelineHeaderClass" class="item-label">{{ timelineHeaderLabel }}</div>
     <weeks-header-sub-item :timeframe-item="timeframeItem" :current-date="currentDate" />
   </span>

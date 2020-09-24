@@ -18,25 +18,24 @@ module QA
 
       before do
         # Add two new users to a project as members
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         @user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
         @user2 = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2)
 
-        @project = Resource::Project.fabricate! do |project|
+        @project = Resource::Project.fabricate_via_api! do |project|
           project.name = "codeowners"
         end
         @project.visit!
 
-        Page::Project::Menu.perform(&:go_to_members_settings)
-        Page::Project::Settings::Members.perform do |members_page|
+        Page::Project::Menu.perform(&:click_members)
+        Page::Project::Members.perform do |members_page|
           members_page.add_member(@user.username)
           members_page.add_member(@user2.username)
         end
       end
 
-      it 'displays owners specified in CODEOWNERS file' do
+      it 'displays owners specified in CODEOWNERS file', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/519' do
         codeowners_file_content =
           <<-CONTENT
             * @#{@user2.username}

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Git::BranchHooksService do
+RSpec.describe Git::BranchHooksService do
   include RepoHelpers
   include ProjectForksHelper
 
@@ -69,6 +69,7 @@ describe Git::BranchHooksService do
               Gitlab.config.gitlab.url,
               project.namespace.to_param,
               project.to_param,
+              '-',
               'commit',
               commit.id
             ].join('/')
@@ -90,7 +91,7 @@ describe Git::BranchHooksService do
   end
 
   describe 'Push Event' do
-    let(:event) { Event.find_by_action(Event::PUSHED) }
+    let(:event) { Event.pushed_action.first }
 
     before do
       service.execute
@@ -100,7 +101,7 @@ describe Git::BranchHooksService do
       it 'generates a push event with one commit' do
         expect(event).to be_an_instance_of(PushEvent)
         expect(event.project).to eq(project)
-        expect(event.action).to eq(Event::PUSHED)
+        expect(event).to be_pushed_action
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to eq(oldrev)
         expect(event.push_event_payload.commit_to).to eq(newrev)
@@ -116,7 +117,7 @@ describe Git::BranchHooksService do
       it 'generates a push event with more than one commit' do
         expect(event).to be_an_instance_of(PushEvent)
         expect(event.project).to eq(project)
-        expect(event.action).to eq(Event::PUSHED)
+        expect(event).to be_pushed_action
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to be_nil
         expect(event.push_event_payload.commit_to).to eq(newrev)
@@ -132,7 +133,7 @@ describe Git::BranchHooksService do
       it 'generates a push event with no commits' do
         expect(event).to be_an_instance_of(PushEvent)
         expect(event.project).to eq(project)
-        expect(event.action).to eq(Event::PUSHED)
+        expect(event).to be_pushed_action
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to eq(oldrev)
         expect(event.push_event_payload.commit_to).to be_nil
@@ -213,23 +214,23 @@ describe Git::BranchHooksService do
     end
   end
 
-  describe 'GPG signatures' do
+  describe 'signatures' do
     context 'when the commit has a signature' do
       context 'when the signature is already cached' do
         before do
           create(:gpg_signature, commit_sha: commit.id)
         end
 
-        it 'does not queue a CreateGpgSignatureWorker' do
-          expect(CreateGpgSignatureWorker).not_to receive(:perform_async)
+        it 'does not queue a CreateCommitSignatureWorker' do
+          expect(CreateCommitSignatureWorker).not_to receive(:perform_async)
 
           service.execute
         end
       end
 
       context 'when the signature is not yet cached' do
-        it 'queues a CreateGpgSignatureWorker' do
-          expect(CreateGpgSignatureWorker).to receive(:perform_async).with([commit.id], project.id)
+        it 'queues a CreateCommitSignatureWorker' do
+          expect(CreateCommitSignatureWorker).to receive(:perform_async).with([commit.id], project.id)
 
           service.execute
         end
@@ -239,7 +240,7 @@ describe Git::BranchHooksService do
             .to receive(:shas_with_signatures)
             .and_return([sample_commit.id, another_sample_commit.id])
 
-          expect(CreateGpgSignatureWorker)
+          expect(CreateCommitSignatureWorker)
             .to receive(:perform_async)
             .with([sample_commit.id, another_sample_commit.id], project.id)
 
@@ -256,8 +257,8 @@ describe Git::BranchHooksService do
           .and_return([])
       end
 
-      it 'does not queue a CreateGpgSignatureWorker' do
-        expect(CreateGpgSignatureWorker)
+      it 'does not queue a CreateCommitSignatureWorker' do
+        expect(CreateCommitSignatureWorker)
           .not_to receive(:perform_async)
           .with(sample_commit.id, project.id)
 
@@ -347,7 +348,7 @@ describe Git::BranchHooksService do
 
     context 'when the project is forked', :sidekiq_might_not_need_inline do
       let(:upstream_project) { project }
-      let(:forked_project) { fork_project(upstream_project, user, repository: true) }
+      let(:forked_project) { fork_project(upstream_project, user, repository: true, using_service: true) }
 
       let!(:forked_service) do
         described_class.new(forked_project, user, change: { oldrev: oldrev, newrev: newrev, ref: ref })

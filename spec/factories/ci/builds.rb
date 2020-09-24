@@ -3,7 +3,7 @@
 include ActionDispatch::TestProcess
 
 FactoryBot.define do
-  factory :ci_build, class: Ci::Build do
+  factory :ci_build, class: 'Ci::Build' do
     name { 'test' }
     stage { 'test' }
     stage_idx { 0 }
@@ -11,11 +11,12 @@ FactoryBot.define do
     tag { false }
     add_attribute(:protected) { false }
     created_at { 'Di 29. Okt 09:50:00 CET 2013' }
+    scheduling_type { 'stage' }
     pending
 
     options do
       {
-        image: 'ruby:2.1',
+        image: 'ruby:2.7',
         services: ['postgres'],
         script: ['ls -a']
       }
@@ -28,6 +29,7 @@ FactoryBot.define do
     end
 
     pipeline factory: :ci_pipeline
+    project { pipeline.project }
 
     trait :degenerated do
       options { nil }
@@ -75,6 +77,10 @@ FactoryBot.define do
 
     trait :created do
       status { 'created' }
+    end
+
+    trait :waiting_for_resource do
+      status { 'waiting_for_resource' }
     end
 
     trait :preparing do
@@ -207,8 +213,12 @@ FactoryBot.define do
       trigger_request factory: :ci_trigger_request
     end
 
-    after(:build) do |build, evaluator|
-      build.project ||= build.pipeline.project
+    trait :resource_group do
+      waiting_for_resource_at { 5.minutes.ago }
+
+      after(:build) do |build, evaluator|
+        build.resource_group = create(:ci_resource_group, project: build.project)
+      end
     end
 
     trait :with_deployment do
@@ -217,8 +227,9 @@ FactoryBot.define do
         # Build deployment/environment relations if environment name is set
         # to the job. If `build.deployment` has already been set, it doesn't
         # build a new instance.
+        environment = Gitlab::Ci::Pipeline::Seed::Environment.new(build).to_resource
         build.deployment =
-          Gitlab::Ci::Pipeline::Seed::Deployment.new(build).to_resource
+          Gitlab::Ci::Pipeline::Seed::Deployment.new(build, environment).to_resource
       end
     end
 
@@ -291,9 +302,51 @@ FactoryBot.define do
       end
     end
 
+    trait :report_results do
+      after(:build) do |build|
+        build.report_results << build(:ci_build_report_result)
+      end
+    end
+
+    trait :codequality_report do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :codequality, job: build)
+      end
+    end
+
     trait :test_reports do
       after(:build) do |build|
         build.job_artifacts << create(:ci_job_artifact, :junit, job: build)
+      end
+    end
+
+    trait :test_reports_with_attachment do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :junit_with_attachment, job: build)
+      end
+    end
+
+    trait :broken_test_reports do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :junit_with_corrupted_data, job: build)
+      end
+    end
+
+    trait :accessibility_reports do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :accessibility, job: build)
+      end
+    end
+
+    trait :coverage_reports do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :cobertura, job: build)
+      end
+    end
+
+    trait :terraform_reports do
+      after(:build) do |build|
+        build.job_artifacts << create(:ci_job_artifact, :terraform, job: build)
       end
     end
 
@@ -316,7 +369,7 @@ FactoryBot.define do
     trait :extended_options do
       options do
         {
-          image: { name: 'ruby:2.1', entrypoint: '/bin/sh' },
+          image: { name: 'ruby:2.7', entrypoint: '/bin/sh' },
           services: ['postgres', { name: 'docker:stable-dind', entrypoint: '/bin/sh', command: 'sleep 30', alias: 'docker' }],
           script: %w(echo),
           after_script: %w(ls date),
@@ -337,10 +390,27 @@ FactoryBot.define do
       end
     end
 
+    trait :release_options do
+      options do
+        {
+          only: 'tags',
+          script: ['make changelog | tee release_changelog.txt'],
+          release: {
+            name: 'Release $CI_COMMIT_SHA',
+            description: 'Created using the release-cli $EXTRA_DESCRIPTION',
+            tag_name: 'release-$CI_COMMIT_SHA',
+            ref: '$CI_COMMIT_SHA'
+          }
+        }
+      end
+    end
+
     trait :no_options do
       options { {} }
     end
 
+    # TODO: move Security traits to ee_ci_build
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/210486
     trait :dast do
       options do
         {
@@ -357,6 +427,14 @@ FactoryBot.define do
       end
     end
 
+    trait :secret_detection do
+      options do
+        {
+            artifacts: { reports: { secret_detection: 'gl-secret-detection-report.json' } }
+        }
+      end
+    end
+
     trait :dependency_scanning do
       options do
         {
@@ -369,6 +447,22 @@ FactoryBot.define do
       options do
         {
             artifacts: { reports: { container_scanning: 'gl-container-scanning-report.json' } }
+        }
+      end
+    end
+
+    trait :license_management do
+      options do
+        {
+            artifacts: { reports: { license_management: 'gl-license-management-report.json' } }
+        }
+      end
+    end
+
+    trait :license_scanning do
+      options do
+        {
+          artifacts: { reports: { license_management: 'gl-license-scanning-report.json' } }
         }
       end
     end

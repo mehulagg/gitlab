@@ -1,6 +1,12 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Discord Notifications service
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/22684) in GitLab 11.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22684) in GitLab 11.6.
 
 The Discord Notifications service sends event notifications from GitLab to the channel for which the webhook was created.
 
@@ -19,9 +25,9 @@ To send GitLab event notifications to a Discord channel, create a webhook in Dis
 
 With the webhook URL created in the Discord channel, you can set up the Discord Notifications service in GitLab.
 
-1. Navigate to the [Integrations page](project_services.md#accessing-the-project-services) in your project's settings. That is, **Project > Settings > Integrations**.
-1. Select the **Discord Notifications** project service to configure it.
-1. Check the **Active** checkbox to turn on the service.
+1. Navigate to the [Integrations page](overview.md#accessing-integrations) in your project's settings. That is, **Project > Settings > Integrations**.
+1. Select the **Discord Notifications** integration to configure it.
+1. Ensure that the **Active** toggle is enabled.
 1. Check the checkboxes corresponding to the GitLab events for which you want to send notifications to Discord.
 1. Paste the webhook URL that you copied from the create Discord webhook step.
 1. Configure the remaining options and click the **Save changes** button.

@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe UpdateBuildMinutesService do
-  context '#perform' do
+RSpec.describe UpdateBuildMinutesService do
+  describe '#perform' do
     let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
-    let(:project) { create(:project, namespace: namespace) }
+    let(:project) { create(:project, :public, namespace: namespace) }
     let(:pipeline) { create(:ci_pipeline, project: project) }
     let(:build) do
       create(:ci_build, :success,
@@ -16,16 +16,17 @@ describe UpdateBuildMinutesService do
     subject { described_class.new(project, nil).execute(build) }
 
     context 'with shared runner' do
-      let(:runner) { create(:ci_runner, :instance) }
+      let(:cost_factor) { 2.0 }
+      let(:runner) { create(:ci_runner, :instance, public_projects_minutes_cost_factor: cost_factor) }
 
-      it "creates a statistics and sets duration" do
+      it "creates a statistics and sets duration with applied cost factor" do
         subject
 
         expect(project.statistics.reload.shared_runners_seconds)
-          .to eq(build.duration.to_i)
+          .to eq(build.duration.to_i * 2)
 
         expect(namespace.namespace_statistics.reload.shared_runners_seconds)
-          .to eq(build.duration.to_i)
+          .to eq(build.duration.to_i * 2)
       end
 
       context 'when statistics are created' do
@@ -34,14 +35,14 @@ describe UpdateBuildMinutesService do
           namespace.create_namespace_statistics(shared_runners_seconds: 100)
         end
 
-        it "updates statistics and adds duration" do
+        it "updates statistics and adds duration with applied cost factor" do
           subject
 
           expect(project.statistics.reload.shared_runners_seconds)
-            .to eq(100 + build.duration.to_i)
+            .to eq(100 + build.duration.to_i * 2)
 
           expect(namespace.namespace_statistics.reload.shared_runners_seconds)
-            .to eq(100 + build.duration.to_i)
+            .to eq(100 + build.duration.to_i * 2)
         end
       end
 
@@ -53,7 +54,21 @@ describe UpdateBuildMinutesService do
           subject
 
           expect(root_ancestor.namespace_statistics.reload.shared_runners_seconds)
-            .to eq(build.duration.to_i)
+            .to eq(build.duration.to_i * 2)
+        end
+      end
+
+      context 'when cost factor has non-zero fractional part' do
+        let(:cost_factor) { 1.234 }
+
+        it 'truncates the result product value' do
+          subject
+
+          expect(project.statistics.reload.shared_runners_seconds)
+            .to eq((build.duration.to_i * 1.234).to_i)
+
+          expect(namespace.namespace_statistics.reload.shared_runners_seconds)
+            .to eq((build.duration.to_i * 1.234).to_i)
         end
       end
     end

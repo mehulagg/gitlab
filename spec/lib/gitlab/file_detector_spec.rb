@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::FileDetector do
+RSpec.describe Gitlab::FileDetector do
   describe '.types_in_paths' do
     it 'returns the file types for the given paths' do
       expect(described_class.types_in_paths(%w(README.md CHANGELOG VERSION VERSION)))
@@ -16,21 +16,28 @@ describe Gitlab::FileDetector do
   end
 
   describe '.type_of' do
-    it 'returns the type of a README file' do
-      filenames = Gitlab::MarkupHelper::PLAIN_FILENAMES + Gitlab::MarkupHelper::PLAIN_FILENAMES.map(&:upcase)
-      extensions = Gitlab::MarkupHelper::EXTENSIONS + Gitlab::MarkupHelper::EXTENSIONS.map(&:upcase)
+    it 'returns the type of a README without extension' do
+      expect(described_class.type_of('README')).to eq(:readme)
+      expect(described_class.type_of('INDEX')).to eq(:readme)
+    end
 
-      filenames.each do |filename|
-        expect(described_class.type_of(filename)).to eq(:readme)
+    it 'returns the type of a README file with a recognized extension' do
+      extensions = ['txt', *Gitlab::MarkupHelper::EXTENSIONS]
 
-        extensions.each do |extname|
-          expect(described_class.type_of("#{filename}.#{extname}")).to eq(:readme)
+      extensions.each do |ext|
+        %w(index readme).each do |file|
+          expect(described_class.type_of("#{file}.#{ext}")).to eq(:readme)
         end
       end
     end
 
-    it 'returns nil for a README.rb file' do
+    it 'returns nil for a README with unrecognized extension' do
       expect(described_class.type_of('README.rb')).to be_nil
+    end
+
+    it 'is case insensitive' do
+      expect(described_class.type_of('ReadMe')).to eq(:readme)
+      expect(described_class.type_of('index.TXT')).to eq(:readme)
     end
 
     it 'returns nil for a README file in a directory' do
@@ -81,6 +88,33 @@ describe Gitlab::FileDetector do
 
     it 'returns nil for an unknown file' do
       expect(described_class.type_of('foo.txt')).to be_nil
+    end
+
+    it 'returns the type of an OpenAPI spec if file name is correct' do
+      openapi_types = [
+        'openapi.yml', 'openapi.yaml', 'openapi.json',
+        'swagger.yml', 'swagger.yaml', 'swagger.json',
+        'gitlab_swagger.yml', 'openapi_gitlab.yml',
+        'OpenAPI.YML', 'openapi.Yaml', 'openapi.JSON',
+        'openapi.gitlab.yml', 'gitlab.openapi.yml',
+        'attention/openapi.yml', 'attention/swagger.yml',
+        'attention/gitlab_swagger.yml', 'attention/openapi_gitlab.yml',
+        'openapi/openapi.yml', 'openapi/swagger.yml',
+        'openapi/my_openapi.yml', 'openapi/swagger_one.yml'
+      ]
+
+      openapi_types.each do |type_name|
+        expect(described_class.type_of(type_name)).to eq(:openapi)
+      end
+
+      openapi_bad_types = [
+        'openapiyml',
+        'openapi/attention.yaml', 'swagger/attention.yaml'
+      ]
+
+      openapi_bad_types.each do |type_name|
+        expect(described_class.type_of(type_name)).to be_nil
+      end
     end
   end
 end

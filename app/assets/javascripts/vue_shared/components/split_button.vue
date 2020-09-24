@@ -1,16 +1,19 @@
 <script>
-import _ from 'underscore';
-
-import { GlDropdown, GlDropdownDivider, GlDropdownItem } from '@gitlab/ui';
+import { isString } from 'lodash';
+import {
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownDivider,
+  GlDeprecatedDropdownItem,
+} from '@gitlab/ui';
 
 const isValidItem = item =>
-  _.isString(item.eventName) && _.isString(item.title) && _.isString(item.description);
+  isString(item.eventName) && isString(item.title) && isString(item.description);
 
 export default {
   components: {
-    GlDropdown,
-    GlDropdownDivider,
-    GlDropdownItem,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownDivider,
+    GlDeprecatedDropdownItem,
   },
 
   props: {
@@ -25,6 +28,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    variant: {
+      type: String,
+      required: false,
+      default: 'secondary',
     },
   },
 
@@ -44,33 +52,38 @@ export default {
     triggerEvent() {
       this.$emit(this.selectedItem.eventName);
     },
+    changeSelectedItem(item) {
+      this.selectedItem = item;
+      this.$emit('change', item);
+    },
   },
 };
 </script>
 
 <template>
-  <gl-dropdown
+  <gl-deprecated-dropdown
     :menu-class="`dropdown-menu-selectable ${menuClass}`"
     split
     :text="dropdownToggleText"
+    :variant="variant"
     v-bind="$attrs"
     @click="triggerEvent"
   >
     <template v-for="(item, itemIndex) in actionItems">
-      <gl-dropdown-item
+      <gl-deprecated-dropdown-item
         :key="item.eventName"
         :active="selectedItem === item"
         active-class="is-active"
-        @click="selectedItem = item"
+        @click="changeSelectedItem(item)"
       >
         <strong>{{ item.title }}</strong>
         <div>{{ item.description }}</div>
-      </gl-dropdown-item>
+      </gl-deprecated-dropdown-item>
 
-      <gl-dropdown-divider
+      <gl-deprecated-dropdown-divider
         v-if="itemIndex < actionItems.length - 1"
         :key="`${item.eventName}-divider`"
       />
     </template>
-  </gl-dropdown>
+  </gl-deprecated-dropdown>
 </template>

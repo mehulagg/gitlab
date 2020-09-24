@@ -2,29 +2,49 @@
 
 require 'spec_helper'
 
-describe 'Trial Select Namespace', :js do
+RSpec.describe 'Trial Select Namespace', :js do
   include Select2Helper
 
   let(:new_group_name) { 'GitLab' }
   let(:user) { create(:user) }
 
   before do
-    stub_feature_flags(improved_trial_signup: true)
     allow(Gitlab).to receive(:com?).and_return(true).at_least(:once)
     sign_in(user)
   end
 
   context 'when user' do
+    let(:url_params) { {} }
+
+    before do
+      visit select_trials_path(url_params)
+      wait_for_all_requests
+
+      choose :trial_entity_company if url_params[:glm_source] != 'about.gitlab.com'
+    end
+
+    context 'when source is not about.gitlab.com' do
+      it 'shows company/individual question' do
+        expect(page).to have_content('Is this GitLab trial for your company?')
+      end
+    end
+
+    context 'when source is about.gitlab.com' do
+      let(:url_params) { { glm_source: 'about.gitlab.com' } }
+
+      it 'hides company/individual duplicate question' do
+        expect(page).not_to have_content('Is this GitLab trial for your company?')
+      end
+    end
+
     context 'selects create a new group' do
       before do
-        visit select_trials_path
-        wait_for_all_requests
-
         select2 '0', from: '#namespace_id'
       end
 
       it 'shows the new group name input' do
         expect(page).to have_field('New Group Name')
+        expect(page).to have_content('Is this GitLab trial for your company?')
       end
 
       context 'enters a valid new group name' do
@@ -65,16 +85,21 @@ describe 'Trial Select Namespace', :js do
       context 'enters an existing group name' do
         let!(:namespace) { create(:namespace, owner_id: user.id, path: 'gitlab') }
 
-        it 'shows validation error' do
+        before do
+          expect_any_instance_of(GitlabSubscriptions::ApplyTrialService).to receive(:execute) do
+            { success: true }
+          end
+        end
+
+        it 'proceeds to the next step with a unique url' do
           fill_in 'New Group Name', with: namespace.path
 
           click_button 'Start your free trial'
 
           wait_for_requests
 
-          expect(page).to have_selector('.flash-text')
-          expect(find('.flash-alert')).to have_text('Group URL has already been taken')
-          expect(current_path).to eq(apply_trials_path)
+          expect(page).not_to have_css('flash-container')
+          expect(current_path).to eq('/gitlab1')
         end
       end
 
@@ -92,15 +117,13 @@ describe 'Trial Select Namespace', :js do
 
     context 'selects an existing group' do
       before do
-        visit select_trials_path
-        wait_for_all_requests
-
         select2 user.namespace.id, from: '#namespace_id'
       end
 
       context 'without trial plan' do
         it 'does not show the new group name input' do
           expect(page).not_to have_field('New Group Name')
+          expect(page).to have_content('Is this GitLab trial for your company?')
         end
 
         it 'applies trial and redirects to dashboard' do
@@ -128,11 +151,14 @@ describe 'Trial Select Namespace', :js do
 
           expect(find('.flash-text')).to have_text(error_message)
           expect(current_path).to eq(apply_trials_path)
+          expect(find('#namespace_id', visible: false).value).to eq(user.namespace.id.to_s)
 
           # new group name should be functional
           select2 '0', from: '#namespace_id'
 
           expect(page).to have_field('New Group Name')
+          expect(find('#trial_entity_individual').checked?).to be(false)
+          expect(find('#trial_entity_company').checked?).to be(true)
         end
       end
     end

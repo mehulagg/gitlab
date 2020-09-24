@@ -139,7 +139,35 @@ module SystemNotes
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'merge'))
     end
+
+    def picked_into_branch(branch_name, pick_commit)
+      link = url_helpers.project_tree_path(project, branch_name)
+
+      body = "picked the changes into the branch [`#{branch_name}`](#{link}) with commit #{pick_commit}"
+
+      summary = NoteSummary.new(noteable, project, author, body, action: 'cherry_pick')
+      summary.note[:commit_id] = pick_commit
+
+      create_note(summary)
+    end
+
+    # Called when the merge request is approved by user
+    #
+    # Example Note text:
+    #
+    #   "approved this merge request"
+    #
+    # Returns the created Note object
+    def approve_mr
+      body = "approved this merge request"
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'approved'))
+    end
+
+    def unapprove_mr
+      body = "unapproved this merge request"
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'unapproved'))
+    end
   end
 end
-
-SystemNotes::MergeRequestsService.prepend_if_ee('::EE::SystemNotes::MergeRequestsService')

@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr_table.vue';
 import MergeRequestTableRow from 'ee/analytics/productivity_analytics/components/mr_table_row.vue';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
@@ -20,11 +20,7 @@ describe('MergeRequestTable component', () => {
   };
 
   const factory = (props = defaultProps) => {
-    const localVue = createLocalVue();
-
-    wrapper = shallowMount(localVue.extend(MergeRequestTable), {
-      localVue,
-      sync: false,
+    wrapper = shallowMount(MergeRequestTable, {
       propsData: { ...props },
     });
   };
@@ -59,11 +55,11 @@ describe('MergeRequestTable component', () => {
     });
 
     it('renders a dropdown item for each item in columnOptions', () => {
-      expect(findDropdownItems().length).toBe(Object.keys(defaultProps.columnOptions).length);
+      expect(findDropdownItems()).toHaveLength(Object.keys(defaultProps.columnOptions).length);
     });
 
     it('renders a row for every MR', () => {
-      expect(findMergeRequestTableRows().length).toBe(2);
+      expect(findMergeRequestTableRows()).toHaveLength(2);
     });
   });
 
@@ -79,7 +75,9 @@ describe('MergeRequestTable component', () => {
     it('it emits the metric key when item is selected from the dropdown', () => {
       findFirstDropdownItem().vm.$emit('click');
 
-      expect(wrapper.emitted().columnMetricChange[0]).toEqual(['time_to_first_comment']);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().columnMetricChange[0]).toEqual(['time_to_first_comment']);
+      });
     });
   });
 });

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cache do
   let(:project) { create(:project, import_source: 'foo/bar') }
   let(:client) { double(:client) }
   let(:importer) { described_class.new(project, client) }
@@ -48,8 +50,9 @@ describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cac
 
   describe '#build_labels_cache' do
     it 'builds the labels cache' do
-      expect_any_instance_of(Gitlab::GithubImport::LabelFinder)
-        .to receive(:build_cache)
+      expect_next_instance_of(Gitlab::GithubImport::LabelFinder) do |instance|
+        expect(instance).to receive(:build_cache)
+      end
 
       importer.build_labels_cache
     end
@@ -82,13 +85,13 @@ describe Gitlab::GithubImport::Importer::LabelsImporter, :clean_gitlab_redis_cac
       end
 
       it 'includes the created timestamp' do
-        Timecop.freeze do
+        freeze_time do
           expect(label_hash[:created_at]).to eq(Time.zone.now)
         end
       end
 
       it 'includes the updated timestamp' do
-        Timecop.freeze do
+        freeze_time do
           expect(label_hash[:updated_at]).to eq(Time.zone.now)
         end
       end

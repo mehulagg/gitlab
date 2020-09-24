@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::FileImporter do
+RSpec.describe Gitlab::ImportExport::FileImporter do
   include ExportFileHelper
 
   let(:shared) { Gitlab::ImportExport::Shared.new(nil) }
@@ -16,9 +18,15 @@ describe Gitlab::ImportExport::FileImporter do
     stub_const('Gitlab::ImportExport::FileImporter::MAX_RETRIES', 0)
     stub_uploads_object_storage(FileUploader)
 
-    allow_any_instance_of(Gitlab::ImportExport).to receive(:storage_path).and_return(storage_path)
-    allow_any_instance_of(Gitlab::ImportExport::CommandLineUtil).to receive(:untar_zxf).and_return(true)
-    allow_any_instance_of(Gitlab::ImportExport::Shared).to receive(:relative_archive_path).and_return('test')
+    allow_next_instance_of(Gitlab::ImportExport) do |instance|
+      allow(instance).to receive(:storage_path).and_return(storage_path)
+    end
+    allow_next_instance_of(Gitlab::ImportExport::CommandLineUtil) do |instance|
+      allow(instance).to receive(:untar_zxf).and_return(true)
+    end
+    allow_next_instance_of(Gitlab::ImportExport::Shared) do |instance|
+      allow(instance).to receive(:relative_archive_path).and_return('test')
+    end
     allow(SecureRandom).to receive(:hex).and_return('abcd')
     setup_files
   end
@@ -29,7 +37,7 @@ describe Gitlab::ImportExport::FileImporter do
 
   context 'normal run' do
     before do
-      described_class.import(project: build(:project), archive_file: '', shared: shared)
+      described_class.import(importable: build(:project), archive_file: '', shared: shared)
     end
 
     it 'removes symlinks in root folder' do
@@ -67,8 +75,10 @@ describe Gitlab::ImportExport::FileImporter do
 
   context 'error' do
     before do
-      allow_any_instance_of(described_class).to receive(:wait_for_archived_file).and_raise(StandardError)
-      described_class.import(project: build(:project), archive_file: '', shared: shared)
+      allow_next_instance_of(described_class) do |instance|
+        allow(instance).to receive(:wait_for_archived_file).and_raise(StandardError)
+      end
+      described_class.import(importable: build(:project), archive_file: '', shared: shared)
     end
 
     it 'removes symlinks in root folder' do
@@ -85,6 +95,45 @@ describe Gitlab::ImportExport::FileImporter do
 
     it 'does not remove a valid file' do
       expect(File.exist?(valid_file)).to be true
+    end
+  end
+
+  context 'when file exceeds acceptable decompressed size' do
+    let(:project) { create(:project) }
+    let(:shared) { Gitlab::ImportExport::Shared.new(project) }
+    let(:filepath) { File.join(Dir.tmpdir, 'file_importer_spec.gz') }
+
+    subject { described_class.new(importable: project, archive_file: filepath, shared: shared) }
+
+    before do
+      Zlib::GzipWriter.open(filepath) do |gz|
+        gz.write('Hello World!')
+      end
+    end
+
+    context 'when validate_import_decompressed_archive_size feature flag is enabled' do
+      before do
+        stub_feature_flags(validate_import_decompressed_archive_size: true)
+
+        allow(Gitlab::ImportExport::DecompressedArchiveSizeValidator).to receive(:max_bytes).and_return(1)
+      end
+
+      it 'returns false' do
+        expect(subject.import).to eq(false)
+        expect(shared.errors.join).to eq('Decompressed archive size validation failed.')
+      end
+    end
+
+    context 'when validate_import_decompressed_archive_size feature flag is disabled' do
+      before do
+        stub_feature_flags(validate_import_decompressed_archive_size: false)
+      end
+
+      it 'skips validation' do
+        expect(subject).to receive(:validate_decompressed_archive_size).never
+
+        subject.import
+      end
     end
   end
 

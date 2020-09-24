@@ -11,6 +11,7 @@
 #   options:
 #     only_owned: boolean
 #     only_shared: boolean
+#     limit: integer
 #   params:
 #     sort: string
 #     visibility_level: int
@@ -18,8 +19,13 @@
 #     personal: boolean
 #     search: string
 #     non_archived: boolean
+#     with_issues_enabled: boolean
+#     with_merge_requests_enabled: boolean
+#     min_access_level: int
 #
 class GroupProjectsFinder < ProjectsFinder
+  DEFAULT_PROJECTS_LIMIT = 100
+
   attr_reader :group, :options
 
   def initialize(group:, params: {}, options: {}, current_user: nil, project_ids_relation: nil)
@@ -32,38 +38,57 @@ class GroupProjectsFinder < ProjectsFinder
     @options = options
   end
 
+  def execute
+    collection = super
+    limit(collection)
+  end
+
   private
 
+  def filter_projects(collection)
+    projects = super
+    projects = by_feature_availability(projects)
+    projects
+  end
+
+  def limit(collection)
+    limit = options[:limit]
+
+    limit.present? ? collection.with_limit(limit) : collection
+  end
+
   def init_collection
-    projects = if current_user
-                 collection_with_user
-               else
-                 collection_without_user
-               end
+    projects =
+      if only_shared?
+        [shared_projects]
+      elsif only_owned?
+        [owned_projects]
+      else
+        [owned_projects, shared_projects]
+      end
+
+    projects.map! do |project_relation|
+      filter_by_visibility(project_relation)
+    end
 
     union(projects)
   end
 
-  def collection_with_user
-    if only_shared?
-      [shared_projects.public_or_visible_to_user(current_user)]
-    elsif only_owned?
-      [owned_projects.public_or_visible_to_user(current_user)]
-    else
-      [
-        owned_projects.public_or_visible_to_user(current_user),
-        shared_projects.public_or_visible_to_user(current_user)
-      ]
-    end
+  def by_feature_availability(projects)
+    projects = projects.with_issues_available_for_user(current_user) if params[:with_issues_enabled].present?
+    projects = projects.with_merge_requests_available_for_user(current_user) if params[:with_merge_requests_enabled].present?
+    projects
   end
 
-  def collection_without_user
-    if only_shared?
-      [shared_projects.public_only]
-    elsif only_owned?
-      [owned_projects.public_only]
+  def filter_by_visibility(relation)
+    if current_user
+      if min_access_level?
+        relation.visible_to_user_and_access_level(current_user, params[:min_access_level])
+      else
+        relation.public_or_visible_to_user(current_user)
+      end
     else
-      [shared_projects.public_only, owned_projects.public_only]
+      relation.public_only
     end
   end
 

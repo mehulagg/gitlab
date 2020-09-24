@@ -1,6 +1,6 @@
 /* https://gist.github.com/qguv/7936275 */
 
-@import "../common";
+@import '../common';
 
 /*
 * Solarized dark colors
@@ -21,6 +21,8 @@ $solarized-dark-highlight: #094554;
 $solarized-dark-hll-bg: #174652;
 $solarized-dark-over-bg: #9f9ab5;
 $solarized-dark-expanded-bg: #010d10;
+$solarized-dark-coverage: #859900;
+$solarized-dark-no-coverage: #cb4b16;
 $solarized-dark-c: #586e75;
 $solarized-dark-err: #93a1a1;
 $solarized-dark-g: #93a1a1;
@@ -128,12 +130,18 @@ $solarized-dark-il: #2aa198;
     }
 
     td.diff-line-num.hll:not(.empty-cell),
+    td.line-coverage.hll:not(.empty-cell),
     td.line_content.hll:not(.empty-cell) {
       background-color: $solarized-dark-hll-bg;
       border-color: darken($solarized-dark-hll-bg, 15%);
     }
 
+    .line-coverage {
+      @include line-coverage-border-color($solarized-dark-coverage, $solarized-dark-no-coverage);
+    }
+
     .diff-line-num.new,
+    .line-coverage.new,
     .line_content.new {
       @include diff-background($solarized-dark-new-bg, $solarized-dark-new-idiff, $solarized-dark-border);
 
@@ -144,6 +152,7 @@ $solarized-dark-il: #2aa198;
     }
 
     .diff-line-num.old,
+    .line-coverage.old,
     .line_content.old {
       @include diff-background($solarized-dark-old-bg, $solarized-dark-old-idiff, $solarized-dark-border);
 
@@ -172,6 +181,7 @@ $solarized-dark-il: #2aa198;
     &:not(.diff-expanded) + .diff-expanded,
     &.diff-expanded + .line_holder:not(.diff-expanded) {
       > .diff-line-num,
+      > .line-coverage,
       > .line_content {
         border-top: 1px solid $black;
       }
@@ -179,6 +189,7 @@ $solarized-dark-il: #2aa198;
 
     &.diff-expanded {
       > .diff-line-num,
+      > .line-coverage,
       > .line_content {
         background: $solarized-dark-expanded-bg;
         border-color: $solarized-dark-expanded-bg;
@@ -194,6 +205,11 @@ $solarized-dark-il: #2aa198;
   // Search result highlight
   span.highlight_word {
     background-color: $solarized-dark-highlight !important;
+  }
+
+  // Links to URLs, emails, or dependencies
+  .line a {
+    color: $solarized-dark-kd;
   }
 
   /* Solarized Dark
@@ -228,13 +244,19 @@ $solarized-dark-il: #2aa198;
   .c1 { color: $solarized-dark-c1; } /* Comment.Single */
   .cs { color: $solarized-dark-cs; } /* Comment.Special */
   .gd { color: $solarized-dark-gd; } /* Generic.Deleted */
-  .ge { color: $solarized-dark-ge; font-style: italic; } /* Generic.Emph */
+  .ge { /* Generic.Emph */
+    color: $solarized-dark-ge;
+    font-style: italic;
+  }
   .gr { color: $solarized-dark-gr; } /* Generic.Error */
   .gh { color: $solarized-dark-gh; } /* Generic.Heading */
   .gi { color: $solarized-dark-gi; } /* Generic.Inserted */
   .go { color: $solarized-dark-go; } /* Generic.Output */
   .gp { color: $solarized-dark-gp; } /* Generic.Prompt */
-  .gs { color: $solarized-dark-gs; font-weight: $gl-font-weight-bold; } /* Generic.Strong */
+  .gs { /* Generic.Strong */
+    color: $solarized-dark-gs;
+    font-weight: $gl-font-weight-bold;
+  }
   .gu { color: $solarized-dark-gu; } /* Generic.Subheading */
   .gt { color: $solarized-dark-gt; } /* Generic.Traceback */
   .kc { color: $solarized-dark-kc; } /* Keyword.Constant */

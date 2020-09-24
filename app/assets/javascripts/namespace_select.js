@@ -1,18 +1,16 @@
-/* eslint-disable no-else-return */
-
 import $ from 'jquery';
-import '~/gl_dropdown';
 import Api from './api';
 import { mergeUrlParams } from './lib/utils/url_utility';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { __ } from './locale';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class NamespaceSelect {
   constructor(opts) {
     const isFilter = parseBoolean(opts.dropdown.dataset.isFilter);
     const fieldName = opts.dropdown.dataset.fieldName || 'namespace_id';
 
-    $(opts.dropdown).glDropdown({
+    initDeprecatedJQueryDropdown($(opts.dropdown), {
       filterable: true,
       selectable: true,
       filterRemote: true,
@@ -23,9 +21,8 @@ export default class NamespaceSelect {
       toggleLabel(selected) {
         if (selected.id == null) {
           return selected.text;
-        } else {
-          return `${selected.kind}: ${selected.full_path}`;
         }
+        return `${selected.kind}: ${selected.full_path}`;
       },
       data(term, dataCallback) {
         return Api.namespaces(term, namespaces => {
@@ -43,9 +40,8 @@ export default class NamespaceSelect {
       text(namespace) {
         if (namespace.id == null) {
           return namespace.text;
-        } else {
-          return `${namespace.kind}: ${namespace.full_path}`;
         }
+        return `${namespace.kind}: ${namespace.full_path}`;
       },
       renderRow: this.renderRow,
       clicked(options) {

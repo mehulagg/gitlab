@@ -1,4 +1,4 @@
-import createFlash from '../flash';
+import { deprecatedCreateFlash as createFlash } from '../flash';
 import AjaxFilter from '../droplab/plugins/ajax_filter';
 import FilteredSearchDropdown from './filtered_search_dropdown';
 import DropdownUtils from './dropdown_utils';
@@ -45,7 +45,7 @@ export default class DropdownAjaxFilter extends FilteredSearchDropdown {
 
   getSearchInput() {
     const query = DropdownUtils.getSearchInput(this.input);
-    const { lastToken } = FilteredSearchTokenizer.processTokens(query, this.tokenKeys.get());
+    const { lastToken } = FilteredSearchTokenizer.processTokens(query, this.tokenKeys.getKeys());
 
     let value = lastToken || '';
 

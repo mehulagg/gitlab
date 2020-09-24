@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectClusters do
+RSpec.describe API::ProjectClusters do
   include KubernetesHelpers
 
   let(:current_user) { create(:user) }
@@ -25,7 +25,6 @@ describe API::ProjectClusters do
       )
 
       stub_kubeclient_put_secret(api_url, "#{namespace}-token", namespace: namespace)
-      stub_kubeclient_get_role_binding(api_url, "gitlab-#{namespace}", namespace: namespace)
       stub_kubeclient_put_role_binding(api_url, "gitlab-#{namespace}", namespace: namespace)
     end
   end
@@ -79,10 +78,8 @@ describe API::ProjectClusters do
       end
     end
 
-    context 'when license has multiple clusters feature' do
+    context 'when another cluster exists' do
       before do
-        stub_licensed_features(multiple_clusters: true)
-
         create(:cluster, :provided_by_gcp, :project,
                projects: [project])
 
@@ -90,7 +87,7 @@ describe API::ProjectClusters do
       end
 
       it 'responds with 201' do
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
       end
 
       it 'allows multiple clusters to be associated to project' do

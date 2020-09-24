@@ -26,7 +26,7 @@ If you do not provide any arguments, it will globally query and instantiate all 
 <ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 droplab.init();
 ```
@@ -47,7 +47,7 @@ You can add static list items.
 <ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 droplab.init();
 ```
@@ -65,7 +65,7 @@ a non-global instance of DropLab using the `DropLab.prototype.init` method.
 <ul>
 ```
 
-```js
+```javascript
 const trigger = document.getElementById('trigger');
 const list = document.getElementById('list');
 
@@ -83,7 +83,7 @@ You can also add hooks to an existing DropLab instance using `DropLab.prototype.
 <ul id="list" data-dropdown><!-- ... --><ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 
 droplab.init();
@@ -114,7 +114,7 @@ for all `data-dynamic` dropdown lists tracked by that DropLab instance.
 </ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 
 droplab.init().addData([{
@@ -137,7 +137,7 @@ the data as the second argument and the `id` of the trigger element as the first
 </ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 
 droplab.init().addData('trigger', [{
@@ -167,7 +167,7 @@ dropdown lists, one of which is dynamic.
 </div>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 
 droplab.init().addData('trigger', [{
@@ -185,11 +185,11 @@ DropLab adds some CSS classes to help lower the barrier to integration.
 
 For example:
 
-- The `droplab-item-selected` css class is added to items that have been selected
+- The `droplab-item-selected` CSS class is added to items that have been selected
   either by a mouse click or by enter key selection.
-- The `droplab-item-active` css class is added to items that have been selected
+- The `droplab-item-active` CSS class is added to items that have been selected
   using arrow key navigation.
-- You can add the `droplab-item-ignore` css class to any item that you do not want to be selectable. For example,
+- You can add the `droplab-item-ignore` CSS class to any item that you do not want to be selectable. For example,
   an `<li class="divider"></li>` list divider element that should not be interactive.
 
 ## Internal events
@@ -224,7 +224,7 @@ Some plugins require configuration values, the config object can be passed as th
 <ul id="list" data-dropdown><!-- ... --><ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 
 const trigger = document.getElementById('trigger');
@@ -249,7 +249,7 @@ droplab.init(trigger, list, [droplabAjax], {
 When plugins are initialised for a droplab trigger+dropdown, DropLab will
 call the plugins `init` function, so this must be implemented in the plugin.
 
-```js
+```javascript
 class MyPlugin {
   static init() {
     this.someProp = 'someProp';

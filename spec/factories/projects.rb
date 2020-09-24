@@ -3,8 +3,6 @@
 require_relative '../support/helpers/test_env'
 
 FactoryBot.define do
-  PAGES_ACCESS_LEVEL_SCHEMA_VERSION ||= 20180423204600
-
   # Project without repository
   #
   # Project does not have bare repository.
@@ -25,6 +23,7 @@ FactoryBot.define do
       builds_access_level { ProjectFeature::ENABLED }
       snippets_access_level { ProjectFeature::ENABLED }
       issues_access_level { ProjectFeature::ENABLED }
+      forking_access_level { ProjectFeature::ENABLED }
       merge_requests_access_level { ProjectFeature::ENABLED }
       repository_access_level { ProjectFeature::ENABLED }
       pages_access_level do
@@ -36,9 +35,12 @@ FactoryBot.define do
       group_runners_enabled { nil }
       import_status { nil }
       import_jid { nil }
+      import_correlation_id { nil }
+      import_last_error { nil }
+      forward_deployment_enabled { nil }
     end
 
-    after(:create) do |project, evaluator|
+    before(:create) do |project, evaluator|
       # Builds and MRs can't have higher visibility level than repository access level.
       builds_access_level = [evaluator.builds_access_level, evaluator.repository_access_level].min
       merge_requests_access_level = [evaluator.merge_requests_access_level, evaluator.repository_access_level].min
@@ -48,16 +50,16 @@ FactoryBot.define do
         builds_access_level: builds_access_level,
         snippets_access_level: evaluator.snippets_access_level,
         issues_access_level: evaluator.issues_access_level,
+        forking_access_level: evaluator.forking_access_level,
         merge_requests_access_level: merge_requests_access_level,
-        repository_access_level: evaluator.repository_access_level
+        repository_access_level: evaluator.repository_access_level,
+        pages_access_level: evaluator.pages_access_level
       }
 
-      if ActiveRecord::Migrator.current_version >= PAGES_ACCESS_LEVEL_SCHEMA_VERSION
-        hash.store("pages_access_level", evaluator.pages_access_level)
-      end
+      project.build_project_feature(hash)
+    end
 
-      project.project_feature.update(hash)
-
+    after(:create) do |project, evaluator|
       # Normally the class Projects::CreateService is used for creating
       # projects, and this class takes care of making sure the owner and current
       # user have access to the project. Our specs don't use said service class,
@@ -75,7 +77,9 @@ FactoryBot.define do
         import_state = project.import_state || project.build_import_state
         import_state.status = evaluator.import_status
         import_state.jid = evaluator.import_jid
-        import_state.save
+        import_state.correlation_id_value = evaluator.import_correlation_id
+        import_state.last_error = evaluator.import_last_error
+        import_state.save!
       end
     end
 
@@ -107,8 +111,24 @@ FactoryBot.define do
       import_status { :failed }
     end
 
+    trait :jira_dvcs_cloud do
+      before(:create) do |project|
+        create(:project_feature_usage, :dvcs_cloud, project: project)
+      end
+    end
+
+    trait :jira_dvcs_server do
+      before(:create) do |project|
+        create(:project_feature_usage, :dvcs_server, project: project)
+      end
+    end
+
     trait :archived do
       archived { true }
+    end
+
+    trait :last_repository_check_failed do
+      last_repository_check_failed { true }
     end
 
     storage_version { Project::LATEST_STORAGE_VERSION }
@@ -170,6 +190,7 @@ FactoryBot.define do
 
       transient do
         create_templates { nil }
+        create_branch { nil }
       end
 
       after :create do |project, evaluator|
@@ -195,12 +216,28 @@ FactoryBot.define do
             message: 'test 2',
             branch_name: 'master')
         end
+
+        if evaluator.create_branch
+          project.repository.create_file(
+            project.creator,
+            'README.md',
+            "README on branch #{evaluator.create_branch}",
+            message: 'Add README.md',
+            branch_name: evaluator.create_branch)
+
+        end
       end
     end
 
     trait :empty_repo do
       after(:create) do |project|
         raise "Failed to create repository!" unless project.create_repository
+      end
+    end
+
+    trait :design_repo do
+      after(:create) do |project|
+        raise 'Failed to create design repository!' unless project.design_repository.create_if_not_exists
       end
     end
 
@@ -258,6 +295,9 @@ FactoryBot.define do
     trait(:issues_disabled)         { issues_access_level { ProjectFeature::DISABLED } }
     trait(:issues_enabled)          { issues_access_level { ProjectFeature::ENABLED } }
     trait(:issues_private)          { issues_access_level { ProjectFeature::PRIVATE } }
+    trait(:forking_disabled)         { forking_access_level { ProjectFeature::DISABLED } }
+    trait(:forking_enabled)          { forking_access_level { ProjectFeature::ENABLED } }
+    trait(:forking_private)          { forking_access_level { ProjectFeature::PRIVATE } }
     trait(:merge_requests_enabled)  { merge_requests_access_level { ProjectFeature::ENABLED } }
     trait(:merge_requests_disabled) { merge_requests_access_level { ProjectFeature::DISABLED } }
     trait(:merge_requests_private)  { merge_requests_access_level { ProjectFeature::PRIVATE } }
@@ -277,6 +317,20 @@ FactoryBot.define do
     trait :auto_devops_disabled do
       association :auto_devops, factory: [:project_auto_devops, :disabled]
     end
+
+    trait :without_container_expiration_policy do
+      after :create do |project|
+        project.container_expiration_policy.destroy!
+      end
+    end
+  end
+
+  trait :service_desk_disabled do
+    service_desk_enabled { nil }
+  end
+
+  trait(:service_desk_enabled) do
+    service_desk_enabled { true }
   end
 
   # Project with empty repository
@@ -336,5 +390,22 @@ FactoryBot.define do
         }
       )
     end
+  end
+
+  factory :ewm_project, parent: :project do
+    has_external_issue_tracker { true }
+
+    ewm_service
+  end
+
+  factory :project_with_design, parent: :project do
+    after(:create) do |project|
+      issue = create(:issue, project: project)
+      create(:design, project: project, issue: issue)
+    end
+  end
+
+  trait :in_subgroup do
+    namespace factory: [:group, :nested]
   end
 end

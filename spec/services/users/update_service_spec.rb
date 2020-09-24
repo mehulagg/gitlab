@@ -2,17 +2,10 @@
 
 require 'spec_helper'
 
-describe Users::UpdateService do
+RSpec.describe Users::UpdateService do
   let(:user) { create(:user) }
 
   describe '#execute' do
-    it 'updates the name' do
-      result = update_user(user, name: 'New Name')
-
-      expect(result).to eq(status: :success)
-      expect(user.name).to eq('New Name')
-    end
-
     it 'updates time preferences' do
       result = update_user(user, timezone: 'Europe/Warsaw', time_display_relative: true, time_format_in_24h: false)
 
@@ -60,6 +53,39 @@ describe Users::UpdateService do
 
       expect(result[:status]).to eq(:error)
       expect(result[:message]).to eq("Emoji is not included in the list")
+    end
+
+    it 'updates user detail with provided attributes' do
+      result = update_user(user, job_title: 'Backend Engineer')
+
+      expect(result).to eq(status: :success)
+      expect(user.job_title).to eq('Backend Engineer')
+    end
+
+    context 'updating canonical email' do
+      context 'if email was changed' do
+        subject do
+          update_user(user, email: 'user+extrastuff@example.com')
+        end
+
+        it 'calls canonicalize_email' do
+          expect_next_instance_of(Users::UpdateCanonicalEmailService) do |service|
+            expect(service).to receive(:execute)
+          end
+
+          subject
+        end
+      end
+
+      context 'if email was NOT changed' do
+        subject do
+          update_user(user, job_title: 'supreme leader of the universe')
+        end
+
+        it 'skips update canonicalize email service call' do
+          expect { subject }.not_to change { user.user_canonical_email }
+        end
+      end
     end
 
     def update_user(user, opts)

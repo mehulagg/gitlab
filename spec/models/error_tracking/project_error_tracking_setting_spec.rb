@@ -2,35 +2,50 @@
 
 require 'spec_helper'
 
-describe ErrorTracking::ProjectErrorTrackingSetting do
+RSpec.describe ErrorTracking::ProjectErrorTrackingSetting do
   include ReactiveCachingHelpers
+  include Gitlab::Routing
 
-  set(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
 
-  subject { create(:project_error_tracking_setting, project: project) }
+  subject(:setting) { build(:project_error_tracking_setting, project: project) }
 
   describe 'Associations' do
     it { is_expected.to belong_to(:project) }
   end
 
   describe 'Validations' do
-    context 'when api_url is over 255 chars' do
-      before do
-        subject.api_url = 'https://' + 'a' * 250
-      end
+    it { is_expected.to validate_length_of(:api_url).is_at_most(255) }
+    it { is_expected.to allow_value("http://gitlab.com/api/0/projects/project1/something").for(:api_url) }
+    it { is_expected.not_to allow_values("http://gitlab.com/api/0/projects/project1/something€").for(:api_url) }
 
-      it 'fails validation' do
-        expect(subject).not_to be_valid
-        expect(subject.errors.messages[:api_url]).to include('is too long (maximum is 255 characters)')
-      end
+    it 'disallows non-booleans in enabled column' do
+      is_expected.not_to allow_value(
+        nil
+      ).for(:enabled)
     end
 
-    context 'With unsafe url' do
-      it 'fails validation' do
-        subject.api_url = "https://replaceme.com/'><script>alert(document.cookie)</script>"
+    it 'allows booleans in enabled column' do
+      is_expected.to allow_value(
+        true,
+        false
+      ).for(:enabled)
+    end
 
-        expect(subject).not_to be_valid
-      end
+    it 'rejects invalid api_urls' do
+      is_expected.not_to allow_values(
+        "https://replaceme.com/'><script>alert(document.cookie)</script>", # unsafe
+        "http://gitlab.com/project1/something", # missing api/0/projects
+        "http://gitlab.com/api/0/projects/org/proj/something", # extra segments
+        "http://gitlab.com/api/0/projects/org" # too few segments
+      ).for(:api_url).with_message('is invalid')
+    end
+
+    it 'fails validation without org and project slugs' do
+      subject.api_url = 'http://gitlab.com/api/0/projects/'
+
+      expect(subject).not_to be_valid
+      expect(subject.errors.messages[:project]).to include('is a required field')
     end
 
     context 'presence validations' do
@@ -60,51 +75,21 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
         it { expect(subject.valid?).to eq(valid?) }
       end
     end
+  end
 
-    context 'URL path' do
-      it 'fails validation without api/0/projects' do
-        subject.api_url = 'http://gitlab.com/project1/something'
+  describe '.extract_sentry_external_url' do
+    subject { described_class.extract_sentry_external_url(sentry_url) }
 
-        expect(subject).not_to be_valid
-        expect(subject.errors.messages[:api_url]).to include('is invalid')
-      end
+    describe 'when passing a URL' do
+      let(:sentry_url) { 'https://sentrytest.gitlab.com/api/0/projects/sentry-org/sentry-project' }
 
-      it 'fails validation without org and project slugs' do
-        subject.api_url = 'http://gitlab.com/api/0/projects/'
-
-        expect(subject).not_to be_valid
-        expect(subject.errors.messages[:project]).to include('is a required field')
-      end
-
-      it 'fails validation when api_url has extra parts' do
-        subject.api_url = 'http://gitlab.com/api/0/projects/org/proj/something'
-
-        expect(subject).not_to be_valid
-        expect(subject.errors.messages[:api_url]).to include("is invalid")
-      end
-
-      it 'fails validation when api_url has less parts' do
-        subject.api_url = 'http://gitlab.com/api/0/projects/org'
-
-        expect(subject).not_to be_valid
-        expect(subject.errors.messages[:api_url]).to include("is invalid")
-      end
-
-      it 'passes validation with correct path' do
-        subject.api_url = 'http://gitlab.com/api/0/projects/project1/something'
-
-        expect(subject).to be_valid
-      end
+      it { is_expected.to eq('https://sentrytest.gitlab.com/sentry-org/sentry-project') }
     end
 
-    context 'non ascii chars in api_url' do
-      before do
-        subject.api_url = 'http://gitlab.com/api/0/projects/project1/something€'
-      end
+    describe 'when passing nil' do
+      let(:sentry_url) { nil }
 
-      it 'fails validation' do
-        expect(subject).not_to be_valid
-      end
+      it { is_expected.to be_nil }
     end
   end
 
@@ -153,9 +138,9 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
 
       it 'returns cached issues' do
         expect(sentry_client).to receive(:list_issues).with(opts)
-          .and_return(issues)
+          .and_return(issues: issues, pagination: {})
 
-        expect(result).to eq(issues: issues)
+        expect(result).to eq(issues: issues, pagination: {})
       end
     end
 
@@ -183,8 +168,6 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
           error: 'error message',
           error_type: ErrorTracking::ProjectErrorTrackingSetting::SENTRY_API_ERROR_TYPE_NON_20X_RESPONSE
         )
-        expect(subject).to have_received(:sentry_client)
-        expect(sentry_client).to have_received(:list_issues)
       end
     end
 
@@ -204,8 +187,6 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
           error: 'Sentry API response is missing keys. key not found: "id"',
           error_type: ErrorTracking::ProjectErrorTrackingSetting::SENTRY_API_ERROR_TYPE_MISSING_KEYS
         )
-        expect(subject).to have_received(:sentry_client)
-        expect(sentry_client).to have_received(:list_issues)
       end
     end
 
@@ -226,8 +207,21 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
           error: error_msg,
           error_type: ErrorTracking::ProjectErrorTrackingSetting::SENTRY_API_ERROR_INVALID_SIZE
         )
-        expect(subject).to have_received(:sentry_client)
-        expect(sentry_client).to have_received(:list_issues)
+      end
+    end
+
+    context 'when sentry client raises StandardError' do
+      let(:sentry_client) { spy(:sentry_client) }
+
+      before do
+        synchronous_reactive_cache(subject)
+
+        allow(subject).to receive(:sentry_client).and_return(sentry_client)
+        allow(sentry_client).to receive(:list_issues).with(opts).and_raise(StandardError)
+      end
+
+      it 'returns error' do
+        expect(result).to eq(error: 'Unexpected Error')
       end
     end
   end
@@ -238,11 +232,95 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
 
     it 'calls sentry client' do
       expect(subject).to receive(:sentry_client).and_return(sentry_client)
-      expect(sentry_client).to receive(:list_projects).and_return(projects)
+      expect(sentry_client).to receive(:projects).and_return(projects)
 
       result = subject.list_sentry_projects
 
       expect(result).to eq(projects: projects)
+    end
+  end
+
+  describe '#issue_details' do
+    let(:issue) { build(:detailed_error_tracking_error) }
+    let(:sentry_client) { double('sentry_client', issue_details: issue) }
+    let(:commit_id) { issue.first_release_version }
+
+    let(:result) do
+      subject.issue_details
+    end
+
+    context 'when cached' do
+      before do
+        stub_reactive_cache(subject, issue, {})
+        synchronous_reactive_cache(subject)
+
+        expect(subject).to receive(:sentry_client).and_return(sentry_client)
+      end
+
+      it { expect(result).to eq(issue: issue) }
+      it { expect(result[:issue].first_release_version).to eq(commit_id) }
+      it { expect(result[:issue].gitlab_commit).to eq(nil) }
+      it { expect(result[:issue].gitlab_commit_path).to eq(nil) }
+
+      context 'when release version is nil' do
+        before do
+          issue.first_release_version = nil
+        end
+
+        it { expect(result[:issue].gitlab_commit).to eq(nil) }
+        it { expect(result[:issue].gitlab_commit_path).to eq(nil) }
+      end
+
+      context 'when repo commit matches first relase version' do
+        let(:commit) { double('commit', id: commit_id) }
+        let(:repository) { double('repository', commit: commit) }
+
+        before do
+          expect(project).to receive(:repository).and_return(repository)
+        end
+
+        it { expect(result[:issue].gitlab_commit).to eq(commit_id) }
+        it { expect(result[:issue].gitlab_commit_path).to eq("/#{project.namespace.path}/#{project.path}/-/commit/#{commit_id}") }
+      end
+    end
+
+    context 'when not cached' do
+      it { expect(subject).not_to receive(:sentry_client) }
+      it { expect(result).to be_nil }
+    end
+  end
+
+  describe '#update_issue' do
+    let(:opts) do
+      { status: 'resolved' }
+    end
+
+    let(:result) do
+      subject.update_issue(**opts)
+    end
+
+    let(:sentry_client) { spy(:sentry_client) }
+
+    context 'successful call to sentry' do
+      before do
+        allow(subject).to receive(:sentry_client).and_return(sentry_client)
+        allow(sentry_client).to receive(:update_issue).with(opts).and_return(true)
+      end
+
+      it 'returns the successful response' do
+        expect(result).to eq(updated: true)
+      end
+    end
+
+    context 'sentry raises an error' do
+      before do
+        allow(subject).to receive(:sentry_client).and_return(sentry_client)
+        allow(sentry_client).to receive(:update_issue).with(opts).and_raise(StandardError)
+      end
+
+      it 'returns the successful response' do
+        expect(result).to eq(error: 'Unexpected Error')
+      end
     end
   end
 
@@ -373,6 +451,25 @@ describe ErrorTracking::ProjectErrorTrackingSetting do
       it 'returns nil' do
         expect(subject.api_url).to eq(nil)
       end
+    end
+  end
+
+  describe '#expire_issues_cache', :use_clean_rails_redis_caching do
+    let(:issues) { [:some, :issues] }
+    let(:opt) { 'list_issues' }
+    let(:params) { { issue_status: 'unresolved', limit: 20, sort: 'last_seen' } }
+
+    before do
+      start_reactive_cache_lifetime(subject, opt, params.stringify_keys)
+      stub_reactive_cache(subject, issues, opt, params.stringify_keys)
+    end
+
+    it 'clears the cache' do
+      expect(subject.list_sentry_issues(params)).to eq(issues)
+
+      subject.expire_issues_cache
+
+      expect(subject.list_sentry_issues(params)).to eq(nil)
     end
   end
 end

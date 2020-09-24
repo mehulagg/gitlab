@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GroupLinksController do
+RSpec.describe Projects::GroupLinksController do
   let(:group) { create(:group, :private) }
   let(:group2) { create(:group, :private) }
   let(:project) { create(:project, :private, group: group2) }
@@ -33,11 +33,11 @@ describe Projects::GroupLinksController do
       include_context 'link project to group'
 
       it 'responds with status 404' do
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
-    context 'when user has access to group he want to link project to' do
+    context 'when user has access to group they want to link project to' do
       before do
         group.add_developer(user)
       end
@@ -55,11 +55,11 @@ describe Projects::GroupLinksController do
       end
     end
 
-    context 'when user doers not have access to group he want to link to' do
+    context 'when user doers not have access to group they want to link to' do
       include_context 'link project to group'
 
       it 'renders 404' do
-        expect(response.status).to eq 404
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'does not share project with that group' do
@@ -73,7 +73,7 @@ describe Projects::GroupLinksController do
       include_context 'link project to group'
 
       it 'renders 404' do
-        expect(response.status).to eq 404
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'does not share project with that group' do

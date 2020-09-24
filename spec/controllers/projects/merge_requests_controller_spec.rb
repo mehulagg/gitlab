@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MergeRequestsController do
+RSpec.describe Projects::MergeRequestsController do
   include ProjectForksHelper
   include Gitlab::Routing
 
@@ -44,6 +44,31 @@ describe Projects::MergeRequestsController do
       get :show, params: params.merge(extra_params)
     end
 
+    context 'with view param' do
+      before do
+        go(view: 'parallel')
+      end
+
+      it 'saves the preferred diff view in a cookie' do
+        expect(response.cookies['diff_view']).to eq('parallel')
+      end
+    end
+
+    context 'when merge request is unchecked' do
+      before do
+        merge_request.mark_as_unchecked!
+      end
+
+      it 'checks mergeability asynchronously' do
+        expect_next_instance_of(MergeRequests::MergeabilityCheckService) do |service|
+          expect(service).not_to receive(:execute)
+          expect(service).to receive(:async_execute)
+        end
+
+        go
+      end
+    end
+
     describe 'as html' do
       context 'when diff files were cleaned' do
         render_views
@@ -62,12 +87,50 @@ describe Projects::MergeRequestsController do
         end
       end
 
+      context 'with `default_merge_ref_for_diffs` feature flag enabled' do
+        before do
+          stub_feature_flags(default_merge_ref_for_diffs: true)
+          go
+        end
+
+        it 'adds the diff_head parameter' do
+          expect(assigns["endpoint_metadata_url"]).to eq(
+            diffs_metadata_project_json_merge_request_path(
+              project,
+              merge_request,
+              'json',
+              diff_head: true))
+        end
+      end
+
+      context 'when diff is missing' do
+        render_views
+
+        it 'renders merge request page' do
+          merge_request.merge_request_diff.destroy
+
+          go(format: :html)
+
+          expect(response).to be_successful
+        end
+      end
+
       it "renders merge request page" do
         expect(::Gitlab::GitalyClient).to receive(:allow_ref_name_caching).and_call_original
 
         go(format: :html)
 
         expect(response).to be_successful
+      end
+
+      it 'logs the view with Gitlab::Search::RecentMergeRequests' do
+        recent_merge_requests_double = instance_double(::Gitlab::Search::RecentMergeRequests, log_view: nil)
+        expect(::Gitlab::Search::RecentMergeRequests).to receive(:new).with(user: user).and_return(recent_merge_requests_double)
+
+        go(format: :html)
+
+        expect(response).to be_successful
+        expect(recent_merge_requests_double).to have_received(:log_view).with(merge_request)
       end
 
       context "that is invalid" do
@@ -98,7 +161,7 @@ describe Projects::MergeRequestsController do
               }
 
           expect(response).to redirect_to(project_merge_request_path(new_project, merge_request))
-          expect(response).to have_gitlab_http_status(302)
+          expect(response).to have_gitlab_http_status(:found)
         end
 
         it 'redirects from an old merge request commits correctly' do
@@ -110,7 +173,7 @@ describe Projects::MergeRequestsController do
               }
 
           expect(response).to redirect_to(commits_project_merge_request_path(new_project, merge_request))
-          expect(response).to have_gitlab_http_status(302)
+          expect(response).to have_gitlab_http_status(:found)
         end
       end
     end
@@ -214,7 +277,7 @@ describe Projects::MergeRequestsController do
         get_merge_requests(last_page)
 
         expect(assigns(:merge_requests).current_page).to eq(last_page)
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'does not redirect to external sites when provided a host field' do
@@ -291,7 +354,7 @@ describe Projects::MergeRequestsController do
       it 'responds with 404' do
         update_merge_request(title: 'New title')
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -307,7 +370,7 @@ describe Projects::MergeRequestsController do
       it 'closes MR without errors' do
         update_merge_request(state_event: 'close')
 
-        expect(response).to redirect_to([merge_request.target_project.namespace.becomes(Namespace), merge_request.target_project, merge_request])
+        expect(response).to redirect_to([merge_request.target_project, merge_request])
         expect(merge_request.reload.closed?).to be_truthy
       end
 
@@ -316,7 +379,7 @@ describe Projects::MergeRequestsController do
 
         update_merge_request(title: 'New title')
 
-        expect(response).to redirect_to([merge_request.target_project.namespace.becomes(Namespace), merge_request.target_project, merge_request])
+        expect(response).to redirect_to([merge_request.target_project, merge_request])
         expect(merge_request.reload.title).to eq 'New title'
       end
 
@@ -366,7 +429,7 @@ describe Projects::MergeRequestsController do
       end
 
       it 'returns 404' do
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -405,7 +468,7 @@ describe Projects::MergeRequestsController do
       end
 
       it 'starts the merge immediately with permitted params' do
-        expect(MergeWorker).to receive(:perform_async).with(merge_request.id, anything, { 'squash' => false })
+        expect(MergeWorker).to receive(:perform_async).with(merge_request.id, anything, { 'sha' => merge_request.diff_head_sha })
 
         merge_with_sha
       end
@@ -415,7 +478,7 @@ describe Projects::MergeRequestsController do
           merge_request.update(squash: false)
           merge_with_sha(squash: '1')
 
-          expect(merge_request.reload.squash).to be_truthy
+          expect(merge_request.reload.squash_on_merge?).to be_truthy
         end
       end
 
@@ -424,7 +487,7 @@ describe Projects::MergeRequestsController do
           merge_request.update(squash: true)
           merge_with_sha(squash: '0')
 
-          expect(merge_request.reload.squash).to be_falsey
+          expect(merge_request.reload.squash_on_merge?).to be_falsey
         end
       end
 
@@ -432,9 +495,14 @@ describe Projects::MergeRequestsController do
         let(:message) { 'My custom squash commit message' }
 
         it 'passes the same message to SquashService', :sidekiq_might_not_need_inline do
-          params = { squash: '1', squash_commit_message: message }
+          params = { squash: '1',
+                     squash_commit_message: message,
+                     sha: merge_request.diff_head_sha }
+          expected_squash_params = { squash_commit_message: message,
+                                     sha: merge_request.diff_head_sha,
+                                     merge_request: merge_request }
 
-          expect_next_instance_of(MergeRequests::SquashService, project, user, params.merge(merge_request: merge_request)) do |squash_service|
+          expect_next_instance_of(MergeRequests::SquashService, project, user, expected_squash_params) do |squash_service|
             expect(squash_service).to receive(:execute).and_return({
               status: :success,
               squash_sha: SecureRandom.hex(20)
@@ -595,7 +663,7 @@ describe Projects::MergeRequestsController do
     it "denies access to users unless they're admin or project owner" do
       delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     context "when the user is owner" do
@@ -610,25 +678,25 @@ describe Projects::MergeRequestsController do
       it "deletes the merge request" do
         delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid, destroy_confirm: true }
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(controller).to set_flash[:notice].to(/The merge request was successfully deleted\./)
       end
 
       it "prevents deletion if destroy_confirm is not set" do
-        expect(Gitlab::Sentry).to receive(:track_acceptable_exception).and_call_original
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).and_call_original
 
         delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid }
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(controller).to set_flash[:notice].to('Destroy confirmation not provided for merge request')
       end
 
       it "prevents deletion in JSON format if destroy_confirm is not set" do
-        expect(Gitlab::Sentry).to receive(:track_acceptable_exception).and_call_original
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).and_call_original
 
         delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid, format: 'json' }
 
-        expect(response).to have_gitlab_http_status(422)
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response).to eq({ 'errors' => 'Destroy confirmation not provided for merge request' })
       end
 
@@ -771,6 +839,21 @@ describe Projects::MergeRequestsController do
     end
   end
 
+  describe 'GET context commits' do
+    it 'returns the commits for context commits' do
+      get :context_commits,
+        params: {
+          namespace_id: project.namespace.to_param,
+          project_id: project,
+          id: merge_request.iid
+        },
+        format: 'json'
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response).to be_an Array
+    end
+  end
+
   describe 'GET exposed_artifacts' do
     let(:merge_request) do
       create(:merge_request,
@@ -822,7 +905,7 @@ describe Projects::MergeRequestsController do
         it 'responds with a 404' do
           subject
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.body).to be_blank
         end
       end
@@ -835,7 +918,7 @@ describe Projects::MergeRequestsController do
         it 'responds with a 404' do
           subject
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.body).to be_blank
         end
       end
@@ -878,7 +961,7 @@ describe Projects::MergeRequestsController do
         it 'returns exposed artifacts' do
           subject
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['status']).to eq('parsed')
           expect(json_response['data']).to eq([{
             'job_name' => 'test',
@@ -886,34 +969,6 @@ describe Projects::MergeRequestsController do
             'url' => file_project_job_artifacts_path(project, job, 'ci_artifacts.txt'),
             'text' => 'Exposed artifact'
           }])
-        end
-      end
-
-      context 'when feature flag :ci_expose_arbitrary_artifacts_in_mr is disabled' do
-        let(:job_options) do
-          {
-            artifacts: {
-              paths: ['ci_artifacts.txt'],
-              expose_as: 'Exposed artifact'
-            }
-          }
-        end
-        let(:report) { double }
-
-        before do
-          stub_feature_flags(ci_expose_arbitrary_artifacts_in_mr: false)
-        end
-
-        it 'does not send polling interval' do
-          expect(Gitlab::PollingInterval).not_to receive(:set_header)
-
-          subject
-        end
-
-        it 'returns 204 HTTP status' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:no_content)
         end
       end
     end
@@ -931,8 +986,286 @@ describe Projects::MergeRequestsController do
       it 'returns no content' do
         subject
 
-        expect(response).to have_gitlab_http_status(204)
+        expect(response).to have_gitlab_http_status(:no_content)
         expect(response.body).to be_empty
+      end
+    end
+  end
+
+  describe 'GET coverage_reports' do
+    let(:merge_request) do
+      create(:merge_request,
+        :with_merge_request_pipeline,
+        target_project: project,
+        source_project: project)
+    end
+
+    let(:pipeline) do
+      create(:ci_pipeline,
+        :success,
+        project: merge_request.source_project,
+        ref: merge_request.source_branch,
+        sha: merge_request.diff_head_sha)
+    end
+
+    before do
+      allow_any_instance_of(MergeRequest)
+        .to receive(:find_coverage_reports)
+        .and_return(report)
+
+      allow_any_instance_of(MergeRequest)
+        .to receive(:actual_head_pipeline)
+        .and_return(pipeline)
+    end
+
+    subject do
+      get :coverage_reports, params: {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      },
+      format: :json
+    end
+
+    describe 'permissions on a public project with private CI/CD' do
+      let(:project) { create :project, :repository, :public, :builds_private }
+      let(:report) { { status: :parsed, data: [] } }
+
+      context 'while signed out' do
+        before do
+          sign_out(user)
+        end
+
+        it 'responds with a 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+
+      context 'while signed in as an unrelated user' do
+        before do
+          sign_in(create(:user))
+        end
+
+        it 'responds with a 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+    end
+
+    context 'when pipeline has jobs with coverage reports' do
+      before do
+        allow_any_instance_of(MergeRequest)
+          .to receive(:has_coverage_reports?)
+          .and_return(true)
+      end
+
+      context 'when processing coverage reports is in progress' do
+        let(:report) { { status: :parsing } }
+
+        it 'sends polling interval' do
+          expect(Gitlab::PollingInterval).to receive(:set_header)
+
+          subject
+        end
+
+        it 'returns 204 HTTP status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'when processing coverage reports is completed' do
+        let(:report) { { status: :parsed, data: pipeline.coverage_reports } }
+
+        it 'returns coverage reports' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to eq({ 'files' => {} })
+        end
+      end
+
+      context 'when user created corrupted coverage reports' do
+        let(:report) { { status: :error, status_reason: 'Failed to parse coverage reports' } }
+
+        it 'does not send polling interval' do
+          expect(Gitlab::PollingInterval).not_to receive(:set_header)
+
+          subject
+        end
+
+        it 'returns 400 HTTP status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response).to eq({ 'status_reason' => 'Failed to parse coverage reports' })
+        end
+      end
+    end
+
+    context 'when pipeline does not have jobs with coverage reports' do
+      let(:report) { double }
+
+      it 'returns no content' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:no_content)
+        expect(response.body).to be_empty
+      end
+    end
+  end
+
+  describe 'GET terraform_reports' do
+    let(:merge_request) do
+      create(:merge_request,
+        :with_merge_request_pipeline,
+        target_project: project,
+        source_project: project)
+    end
+
+    let(:pipeline) do
+      create(:ci_pipeline,
+        :success,
+        :with_terraform_reports,
+        project: merge_request.source_project,
+        ref: merge_request.source_branch,
+        sha: merge_request.diff_head_sha)
+    end
+
+    before do
+      allow_any_instance_of(MergeRequest)
+        .to receive(:find_terraform_reports)
+        .and_return(report)
+
+      allow_any_instance_of(MergeRequest)
+        .to receive(:actual_head_pipeline)
+        .and_return(pipeline)
+    end
+
+    subject do
+      get :terraform_reports, params: {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      },
+      format: :json
+    end
+
+    describe 'permissions on a public project with private CI/CD' do
+      let(:project) { create :project, :repository, :public, :builds_private }
+      let(:report) { { status: :parsed, data: [] } }
+
+      context 'while signed out' do
+        before do
+          sign_out(user)
+        end
+
+        it 'responds with a 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+
+      context 'while signed in as an unrelated user' do
+        before do
+          sign_in(create(:user))
+        end
+
+        it 'responds with a 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+    end
+
+    context 'when pipeline has jobs with terraform reports' do
+      before do
+        allow_next_instance_of(MergeRequest) do |merge_request|
+          allow(merge_request).to receive(:has_terraform_reports?).and_return(true)
+        end
+      end
+
+      context 'when processing terraform reports is in progress' do
+        let(:report) { { status: :parsing } }
+
+        it 'sends polling interval' do
+          expect(Gitlab::PollingInterval).to receive(:set_header)
+
+          subject
+        end
+
+        it 'returns 204 HTTP status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'when processing terraform reports is completed' do
+        let(:report) { { status: :parsed, data: pipeline.terraform_reports.plans } }
+
+        it 'returns terraform reports' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+
+          pipeline.builds.each do |build|
+            expect(json_response).to match(
+              a_hash_including(
+                build.id.to_s => hash_including(
+                  'create' => 0,
+                  'delete' => 0,
+                  'update' => 1,
+                  'job_name' => build.options.dig(:artifacts, :name).to_s
+                )
+              )
+            )
+          end
+        end
+      end
+
+      context 'when user created corrupted terraform reports' do
+        let(:report) { { status: :error, status_reason: 'Failed to parse terraform reports' } }
+
+        it 'does not send polling interval' do
+          expect(Gitlab::PollingInterval).not_to receive(:set_header)
+
+          subject
+        end
+
+        it 'returns 400 HTTP status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response).to eq({ 'status_reason' => 'Failed to parse terraform reports' })
+        end
+      end
+    end
+
+    context 'when pipeline does not have jobs with terraform reports' do
+      before do
+        allow_next_instance_of(MergeRequest) do |merge_request|
+          allow(merge_request).to receive(:has_terraform_reports?).and_return(false)
+        end
+      end
+
+      let(:report) { { status: :error } }
+
+      it 'returns error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
       end
     end
   end
@@ -978,7 +1311,7 @@ describe Projects::MergeRequestsController do
         it 'responds with a 404' do
           subject
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.body).to be_blank
         end
       end
@@ -991,7 +1324,7 @@ describe Projects::MergeRequestsController do
         it 'responds with a 404' do
           subject
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.body).to be_blank
         end
       end
@@ -1048,6 +1381,127 @@ describe Projects::MergeRequestsController do
     end
   end
 
+  describe 'GET accessibility_reports' do
+    let(:merge_request) do
+      create(:merge_request,
+        :with_diffs,
+        :with_merge_request_pipeline,
+        target_project: project,
+        source_project: project
+      )
+    end
+
+    let(:pipeline) do
+      create(:ci_pipeline,
+        :success,
+        project: merge_request.source_project,
+        ref: merge_request.source_branch,
+        sha: merge_request.diff_head_sha)
+    end
+
+    before do
+      allow_any_instance_of(MergeRequest)
+        .to receive(:compare_accessibility_reports)
+        .and_return(accessibility_comparison)
+
+      allow_any_instance_of(MergeRequest)
+        .to receive(:actual_head_pipeline)
+        .and_return(pipeline)
+    end
+
+    subject do
+      get :accessibility_reports, params: {
+        namespace_id: project.namespace.to_param,
+        project_id: project,
+        id: merge_request.iid
+      },
+      format: :json
+    end
+
+    context 'permissions on a public project with private CI/CD' do
+      let(:project) { create(:project, :repository, :public, :builds_private) }
+      let(:accessibility_comparison) { { status: :parsed, data: { summary: 1 } } }
+
+      context 'while signed out' do
+        before do
+          sign_out(user)
+        end
+
+        it 'responds with a 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+
+      context 'while signed in as an unrelated user' do
+        before do
+          sign_in(create(:user))
+        end
+
+        it 'responds with a 404' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response.body).to be_blank
+        end
+      end
+    end
+
+    context 'when pipeline has jobs with accessibility reports' do
+      before do
+        allow_any_instance_of(MergeRequest)
+          .to receive(:has_accessibility_reports?)
+          .and_return(true)
+      end
+
+      context 'when processing accessibility reports is in progress' do
+        let(:accessibility_comparison) { { status: :parsing } }
+
+        it 'sends polling interval' do
+          expect(Gitlab::PollingInterval).to receive(:set_header)
+
+          subject
+        end
+
+        it 'returns 204 HTTP status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:no_content)
+        end
+      end
+
+      context 'when processing accessibility reports is completed' do
+        let(:accessibility_comparison) { { status: :parsed, data: { summary: 1 } } }
+
+        it 'returns accessibility reports' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to eq({ 'summary' => 1 })
+        end
+      end
+
+      context 'when user created corrupted accessibility reports' do
+        let(:accessibility_comparison) { { status: :error, status_reason: 'This merge request does not have accessibility reports' } }
+
+        it 'does not send polling interval' do
+          expect(Gitlab::PollingInterval).not_to receive(:set_header)
+
+          subject
+        end
+
+        it 'returns 400 HTTP status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response).to eq({ 'status_reason' => 'This merge request does not have accessibility reports' })
+        end
+      end
+    end
+  end
+
   describe 'POST remove_wip' do
     before do
       merge_request.title = merge_request.wip_title
@@ -1068,7 +1522,7 @@ describe Projects::MergeRequestsController do
     end
 
     it 'renders MergeRequest as JSON' do
-      expect(json_response.keys).to include('id', 'iid', 'description')
+      expect(json_response.keys).to include('id', 'iid', 'title', 'has_ci', 'merge_status', 'can_be_merged', 'current_user')
     end
   end
 
@@ -1102,7 +1556,7 @@ describe Projects::MergeRequestsController do
     it 'renders MergeRequest as JSON' do
       subject
 
-      expect(json_response.keys).to include('id', 'iid', 'description')
+      expect(json_response.keys).to include('id', 'iid', 'title', 'has_ci', 'merge_status', 'can_be_merged', 'current_user')
     end
   end
 
@@ -1221,9 +1675,9 @@ describe Projects::MergeRequestsController do
         environment2 = create(:environment, project: forked)
         create(:deployment, :succeed, environment: environment2, sha: sha, ref: 'master', deployable: build)
 
-        # TODO address the last 5 queries
-        # See https://gitlab.com/gitlab-org/gitlab-foss/issues/63952 (5 queries)
-        leeway = 5
+        # TODO address the last 3 queries
+        # See https://gitlab.com/gitlab-org/gitlab-foss/issues/63952 (3 queries)
+        leeway = 3
         expect { get_ci_environments_status }.not_to exceed_all_query_limit(control_count + leeway)
       end
     end
@@ -1273,6 +1727,15 @@ describe Projects::MergeRequestsController do
             .to change { Gitlab::GitalyClient.get_request_count }.by_at_most(1)
         end
       end
+    end
+
+    it 'uses the explicitly linked deployments' do
+      expect(EnvironmentStatus)
+        .to receive(:for_deployed_merge_request)
+        .with(merge_request, user)
+        .and_call_original
+
+      get_ci_environments_status(environment_target: 'merge_commit')
     end
 
     def get_ci_environments_status(extra_params = {})
@@ -1362,7 +1825,7 @@ describe Projects::MergeRequestsController do
     end
 
     def expect_rebase_worker_for(user)
-      expect(RebaseWorker).to receive(:perform_async).with(merge_request.id, user.id)
+      expect(RebaseWorker).to receive(:perform_async).with(merge_request.id, user.id, false)
     end
 
     context 'successfully' do
@@ -1371,7 +1834,7 @@ describe Projects::MergeRequestsController do
 
         post_rebase
 
-        expect(response.status).to eq(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -1386,7 +1849,7 @@ describe Projects::MergeRequestsController do
 
         post_rebase
 
-        expect(response.status).to eq(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -1397,8 +1860,8 @@ describe Projects::MergeRequestsController do
 
         post_rebase
 
-        expect(response.status).to eq(409)
-        expect(json_response['merge_error']).to eq(MergeRequest::REBASE_LOCK_MESSAGE)
+        expect(response).to have_gitlab_http_status(:conflict)
+        expect(json_response['merge_error']).to eq('Failed to enqueue the rebase operation, possibly due to a long-lived transaction. Try again later.')
       end
     end
 
@@ -1419,7 +1882,7 @@ describe Projects::MergeRequestsController do
 
           post_rebase
 
-          expect(response.status).to eq(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -1435,7 +1898,7 @@ describe Projects::MergeRequestsController do
 
           post_rebase
 
-          expect(response.status).to eq(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end
@@ -1453,7 +1916,7 @@ describe Projects::MergeRequestsController do
       it 'returns 200' do
         get :discussions, params: { namespace_id: project.namespace, project_id: project, id: merge_request.iid }
 
-        expect(response.status).to eq(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       context 'highlight preloading' do

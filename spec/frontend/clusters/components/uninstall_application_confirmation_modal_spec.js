@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import UninstallApplicationConfirmationModal from '~/clusters/components/uninstall_application_confirmation_modal.vue';
 import { GlModal } from '@gitlab/ui';
+import UninstallApplicationConfirmationModal from '~/clusters/components/uninstall_application_confirmation_modal.vue';
 import { INGRESS } from '~/clusters/constants';
 
 describe('UninstallApplicationConfirmationModal', () => {
@@ -35,9 +35,10 @@ describe('UninstallApplicationConfirmationModal', () => {
       wrapper.find(GlModal).vm.$emit('ok');
     });
 
-    it('emits confirm event', () => {
-      expect(wrapper.emitted('confirm')).toBeTruthy();
-    });
+    it('emits confirm event', () =>
+      wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('confirm')).toBeTruthy();
+      }));
 
     it('calls track uninstall button click mixin', () => {
       expect(wrapper.vm.trackUninstallButtonClick).toHaveBeenCalledWith(INGRESS);

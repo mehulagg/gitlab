@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Projects::TransferService do
+RSpec.describe Projects::TransferService do
   include EE::GeoHelpers
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:project) { create(:project, :repository, namespace: user.namespace) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
 
   subject { described_class.new(project, user) }
 
@@ -16,8 +16,8 @@ describe Projects::TransferService do
   end
 
   context 'when running on a primary node' do
-    set(:primary) { create(:geo_node, :primary) }
-    set(:secondary) { create(:geo_node) }
+    let_it_be(:primary) { create(:geo_node, :primary) }
+    let_it_be(:secondary) { create(:geo_node) }
 
     it 'logs an event to the Geo event log' do
       stub_current_geo_node(primary)
@@ -30,9 +30,11 @@ describe Projects::TransferService do
     include_examples 'audit event logging' do
       let(:operation) { subject.execute(group) }
       let(:fail_condition!) do
-        expect_any_instance_of(Project)
-          .to receive(:has_container_registry_tags?).and_return(true)
+        expect_next_instance_of(Project) do |instance|
+          expect(instance).to receive(:has_container_registry_tags?).and_return(true)
+        end
       end
+
       let(:attributes) do
         {
            author_id: user.id,
@@ -48,37 +50,6 @@ describe Projects::TransferService do
              target_details: project.full_path
            }
          }
-      end
-    end
-  end
-
-  context 'with npm packages' do
-    let!(:package) { create(:npm_package, project: project) }
-
-    before do
-      stub_licensed_features(packages: true)
-    end
-
-    context 'with a root namespace change' do
-      it 'does not allow the transfer' do
-        expect(subject.execute(group)).to be false
-        expect(project.errors[:new_namespace]).to include("Root namespace can't be updated if project has NPM packages")
-      end
-    end
-
-    context 'without a root namespace change' do
-      let(:root) { create(:group) }
-      let(:group) { create(:group, parent: root) }
-      let(:other_group) { create(:group, parent: root) }
-      let(:project) { create(:project, :repository, namespace: group) }
-
-      before do
-        other_group.add_owner(user)
-      end
-
-      it 'does allow the transfer' do
-        expect(subject.execute(other_group)).to be true
-        expect(project.errors[:new_namespace]).to be_empty
       end
     end
   end

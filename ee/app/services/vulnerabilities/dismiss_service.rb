@@ -1,19 +1,18 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class DismissService
+  class DismissService < BaseService
     include Gitlab::Allowable
 
     FindingsDismissResult = Struct.new(:ok?, :finding, :message)
 
-    def initialize(user, vulnerability)
-      @user = user
-      @vulnerability = vulnerability
-      @project = vulnerability.project
+    def initialize(current_user, vulnerability, comment = nil)
+      super(current_user, vulnerability)
+      @comment = comment
     end
 
     def execute
-      raise Gitlab::Access::AccessDeniedError unless can?(@user, :dismiss_vulnerability, @project)
+      raise Gitlab::Access::AccessDeniedError unless authorized?
 
       @vulnerability.transaction do
         result = dismiss_findings
@@ -23,7 +22,7 @@ module Vulnerabilities
           raise ActiveRecord::Rollback
         end
 
-        @vulnerability.update(state: :closed, closed_by: @user, closed_at: Time.zone.now)
+        update_with_note(@vulnerability, state: Vulnerability.states[:dismissed], dismissed_by: @user, dismissed_at: Time.current)
       end
 
       @vulnerability
@@ -39,7 +38,8 @@ module Vulnerabilities
       {
         category: finding.report_type,
         feedback_type: 'dismissal',
-        project_fingerprint: finding.project_fingerprint
+        project_fingerprint: finding.project_fingerprint,
+        comment: @comment
       }
     end
 

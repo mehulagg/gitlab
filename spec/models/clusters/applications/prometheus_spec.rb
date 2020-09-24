@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Prometheus do
+RSpec.describe Clusters::Applications::Prometheus do
   include KubernetesHelpers
+  include StubRequests
 
   include_examples 'cluster application core specs', :clusters_applications_prometheus
   include_examples 'cluster application status specs', :clusters_applications_prometheus
@@ -12,35 +13,42 @@ describe Clusters::Applications::Prometheus do
   include_examples 'cluster application initial status specs'
 
   describe 'after_destroy' do
-    let(:project) { create(:project) }
-    let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
-    let!(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
-    let!(:prometheus_service) { project.create_prometheus_service(active: true) }
+    context 'cluster type is project' do
+      let(:cluster) { create(:cluster, :with_installed_helm) }
+      let(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
 
-    it 'deactivates prometheus_service after destroy' do
-      expect do
+      it 'deactivates prometheus_service after destroy' do
+        expect(Clusters::Applications::DeactivateServiceWorker)
+          .to receive(:perform_async).with(cluster.id, 'prometheus')
+
         application.destroy!
-
-        prometheus_service.reload
-      end.to change(prometheus_service, :active).from(true).to(false)
+      end
     end
   end
 
   describe 'transition to installed' do
     let(:project) { create(:project) }
-    let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
-    let(:prometheus_service) { double('prometheus_service') }
+    let(:cluster) { create(:cluster, :with_installed_helm) }
+    let(:application) { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
 
-    subject { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
+    it 'schedules post installation job' do
+      expect(Clusters::Applications::ActivateServiceWorker)
+        .to receive(:perform_async).with(cluster.id, 'prometheus')
 
-    before do
-      allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return prometheus_service
+      application.make_installed
     end
+  end
 
-    it 'ensures Prometheus service is activated' do
-      expect(prometheus_service).to receive(:update!).with(active: true)
+  describe 'transition to updating' do
+    let(:project) { create(:project) }
+    let(:cluster) { create(:cluster, projects: [project]) }
 
-      subject.make_installed
+    subject { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
+
+    it 'sets last_update_started_at to now' do
+      freeze_time do
+        expect { subject.make_updating }.to change { subject.reload.last_update_started_at }.to be_within(1.second).of(Time.current)
+      end
     end
   end
 
@@ -53,6 +61,16 @@ describe Clusters::Applications::Prometheus do
   end
 
   describe '#prometheus_client' do
+    shared_examples 'exception caught for prometheus client' do
+      before do
+        allow(kube_client).to receive(:proxy_url).and_raise(exception)
+      end
+
+      it 'returns nil' do
+        expect(subject.prometheus_client).to be_nil
+      end
+    end
+
     context 'cluster is nil' do
       it 'returns nil' do
         expect(subject.cluster).to be_nil
@@ -62,6 +80,7 @@ describe Clusters::Applications::Prometheus do
 
     context "cluster doesn't have kubeclient" do
       let(:cluster) { create(:cluster) }
+
       subject { create(:clusters_applications_prometheus, cluster: cluster) }
 
       it 'returns nil' do
@@ -90,20 +109,35 @@ describe Clusters::Applications::Prometheus do
         expect(subject.prometheus_client).to be_instance_of(Gitlab::PrometheusClient)
       end
 
-      it 'copies proxy_url, options and headers from kube client to prometheus_client' do
+      it 'merges proxy_url, options and headers from kube client with prometheus_client options' do
         expect(Gitlab::PrometheusClient)
           .to(receive(:new))
-          .with(a_valid_url, kube_client.rest_client.options.merge(headers: kube_client.headers))
+          .with(a_valid_url, kube_client.rest_client.options.merge({
+            headers: kube_client.headers,
+            timeout: PrometheusAdapter::DEFAULT_PROMETHEUS_REQUEST_TIMEOUT_SEC
+          }))
         subject.prometheus_client
       end
 
       context 'when cluster is not reachable' do
-        before do
-          allow(kube_client).to receive(:proxy_url).and_raise(Kubeclient::HttpError.new(401, 'Unauthorized', nil))
+        it_behaves_like 'exception caught for prometheus client' do
+          let(:exception) { Kubeclient::HttpError.new(401, 'Unauthorized', nil) }
+        end
+      end
+
+      context 'when there is a socket error while contacting cluster' do
+        it_behaves_like 'exception caught for prometheus client' do
+          let(:exception) { Errno::ECONNREFUSED }
         end
 
-        it 'returns nil' do
-          expect(subject.prometheus_client).to be_nil
+        it_behaves_like 'exception caught for prometheus client' do
+          let(:exception) { Errno::ECONNRESET }
+        end
+      end
+
+      context 'when the network is unreachable' do
+        it_behaves_like 'exception caught for prometheus client' do
+          let(:exception) { Errno::ENETUNREACH }
         end
       end
     end
@@ -119,7 +153,7 @@ describe Clusters::Applications::Prometheus do
     it 'is initialized with 3 arguments' do
       expect(subject.name).to eq('prometheus')
       expect(subject.chart).to eq('stable/prometheus')
-      expect(subject.version).to eq('6.7.3')
+      expect(subject.version).to eq('10.4.1')
       expect(subject).to be_rbac
       expect(subject.files).to eq(prometheus.files)
     end
@@ -136,7 +170,7 @@ describe Clusters::Applications::Prometheus do
       let(:prometheus) { create(:clusters_applications_prometheus, :errored, version: '2.0.0') }
 
       it 'is initialized with the locked version' do
-        expect(subject.version).to eq('6.7.3')
+        expect(subject.version).to eq('10.4.1')
       end
     end
 
@@ -196,21 +230,19 @@ describe Clusters::Applications::Prometheus do
     end
   end
 
-  describe '#upgrade_command' do
+  describe '#patch_command' do
+    subject(:patch_command) { prometheus.patch_command(values) }
+
     let(:prometheus) { build(:clusters_applications_prometheus) }
     let(:values) { prometheus.values }
 
-    it 'returns an instance of Gitlab::Kubernetes::Helm::InstallCommand' do
-      expect(prometheus.upgrade_command(values)).to be_an_instance_of(::Gitlab::Kubernetes::Helm::InstallCommand)
-    end
+    it { is_expected.to be_an_instance_of(::Gitlab::Kubernetes::Helm::PatchCommand) }
 
     it 'is initialized with 3 arguments' do
-      command = prometheus.upgrade_command(values)
-
-      expect(command.name).to eq('prometheus')
-      expect(command.chart).to eq('stable/prometheus')
-      expect(command.version).to eq('6.7.3')
-      expect(command.files).to eq(prometheus.files)
+      expect(patch_command.name).to eq('prometheus')
+      expect(patch_command.chart).to eq('stable/prometheus')
+      expect(patch_command.version).to eq('10.4.1')
+      expect(patch_command.files).to eq(prometheus.files)
     end
   end
 
@@ -258,7 +290,8 @@ describe Clusters::Applications::Prometheus do
     subject { application.files_with_replaced_values({ hello: :world }) }
 
     it 'does not modify #files' do
-      expect(subject[:'values.yaml']).not_to eq(files)
+      expect(subject[:'values.yaml']).not_to eq(files[:'values.yaml'])
+
       expect(files[:'values.yaml']).to eq(application.values)
     end
 
@@ -266,26 +299,124 @@ describe Clusters::Applications::Prometheus do
       expect(subject[:'values.yaml']).to eq({ hello: :world })
     end
 
-    it 'includes cert files' do
-      expect(subject[:'ca.pem']).to be_present
-      expect(subject[:'ca.pem']).to eq(application.cluster.application_helm.ca_cert)
+    it 'uses values from #files, except for values.yaml' do
+      allow(application).to receive(:files).and_return({
+        'values.yaml': 'some value specific to files',
+        'file_a.txt': 'file_a',
+        'file_b.txt': 'file_b'
+      })
 
-      expect(subject[:'cert.pem']).to be_present
-      expect(subject[:'key.pem']).to be_present
-
-      cert = OpenSSL::X509::Certificate.new(subject[:'cert.pem'])
-      expect(cert.not_after).to be < 60.minutes.from_now
+      expect(subject.except(:'values.yaml')).to eq({
+        'file_a.txt': 'file_a',
+        'file_b.txt': 'file_b'
+      })
     end
+  end
 
-    context 'when the helm application does not have a ca_cert' do
-      before do
-        application.cluster.application_helm.ca_cert = nil
+  describe '#configured?' do
+    let(:prometheus) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
+
+    subject { prometheus.configured? }
+
+    context 'when a kubenetes client is present' do
+      let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
+
+      it { is_expected.to be_truthy }
+
+      context 'when it is not availalble' do
+        let(:prometheus) { create(:clusters_applications_prometheus, cluster: cluster) }
+
+        it { is_expected.to be_falsey }
       end
 
-      it 'does not include cert files' do
-        expect(subject[:'ca.pem']).not_to be_present
-        expect(subject[:'cert.pem']).not_to be_present
-        expect(subject[:'key.pem']).not_to be_present
+      context 'when the kubernetes URL is blocked' do
+        before do
+          blocked_ip = '127.0.0.1' # localhost addresses are blocked by default
+
+          stub_all_dns(cluster.platform.api_url, ip_address: blocked_ip)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when a kubenetes client is not present' do
+      let(:cluster) { create(:cluster) }
+
+      it { is_expected.to be_falsy }
+    end
+  end
+
+  describe '#updated_since?' do
+    let(:cluster) { create(:cluster) }
+    let(:prometheus_app) { build(:clusters_applications_prometheus, cluster: cluster) }
+    let(:timestamp) { Time.current - 5.minutes }
+
+    around do |example|
+      freeze_time { example.run }
+    end
+
+    before do
+      prometheus_app.last_update_started_at = Time.current
+    end
+
+    context 'when app does not have status failed' do
+      it 'returns true when last update started after the timestamp' do
+        expect(prometheus_app.updated_since?(timestamp)).to be true
+      end
+
+      it 'returns false when last update started before the timestamp' do
+        expect(prometheus_app.updated_since?(Time.current + 5.minutes)).to be false
+      end
+    end
+
+    context 'when app has status failed' do
+      it 'returns false when last update started after the timestamp' do
+        prometheus_app.status = 6
+
+        expect(prometheus_app.updated_since?(timestamp)).to be false
+      end
+    end
+  end
+
+  describe 'alert manager token' do
+    subject { create(:clusters_applications_prometheus) }
+
+    context 'when not set' do
+      it 'is empty by default' do
+        expect(subject.alert_manager_token).to be_nil
+        expect(subject.encrypted_alert_manager_token).to be_nil
+        expect(subject.encrypted_alert_manager_token_iv).to be_nil
+      end
+
+      describe '#generate_alert_manager_token!' do
+        it 'generates a token' do
+          subject.generate_alert_manager_token!
+
+          expect(subject.alert_manager_token).to match(/\A\h{32}\z/)
+        end
+      end
+    end
+
+    context 'when set' do
+      let(:token) { SecureRandom.hex }
+
+      before do
+        subject.update!(alert_manager_token: token)
+      end
+
+      it 'reads the token' do
+        expect(subject.alert_manager_token).to eq(token)
+        expect(subject.encrypted_alert_manager_token).not_to be_nil
+        expect(subject.encrypted_alert_manager_token_iv).not_to be_nil
+      end
+
+      describe '#generate_alert_manager_token!' do
+        it 'does not re-generate the token' do
+          subject.generate_alert_manager_token!
+
+          expect(subject.alert_manager_token).to eq(token)
+        end
       end
     end
   end

@@ -29,6 +29,8 @@ module DiffHelper
     if action_name == 'diff_for_path'
       options[:expanded] = true
       options[:paths] = params.values_at(:old_path, :new_path)
+    elsif action_name == 'show'
+      options[:include_context_commits] = true unless @project.context_commits_enabled?
     end
 
     options
@@ -98,18 +100,41 @@ module DiffHelper
   end
 
   def submodule_link(blob, ref, repository = @repository)
-    project_url, tree_url = submodule_links(blob, ref, repository)
-    commit_id = if tree_url.nil?
-                  Commit.truncate_sha(blob.id)
-                else
-                  link_to Commit.truncate_sha(blob.id), tree_url
-                end
+    urls = submodule_links(blob, ref, repository)
+
+    folder_name = truncate(blob.name, length: 40)
+    folder_name = link_to(folder_name, urls.web) if urls&.web
+
+    commit_id = Commit.truncate_sha(blob.id)
+    commit_id = link_to(commit_id, urls.tree) if urls&.tree
 
     [
-      content_tag(:span, link_to(truncate(blob.name, length: 40), project_url)),
+      content_tag(:span, folder_name),
       '@',
       content_tag(:span, commit_id, class: 'commit-sha')
     ].join(' ').html_safe
+  end
+
+  def submodule_diff_compare_link(diff_file)
+    compare_url = submodule_links(diff_file.blob, diff_file.content_sha, diff_file.repository, diff_file)&.compare
+
+    link = ""
+
+    if compare_url
+
+      link_text = [
+          _('Compare'),
+          ' ',
+          content_tag(:span, Commit.truncate_sha(diff_file.old_blob.id), class: 'commit-sha'),
+          '...',
+          content_tag(:span, Commit.truncate_sha(diff_file.blob.id), class: 'commit-sha')
+        ].join('').html_safe
+
+      tooltip = _('Compare submodule commit revisions')
+      link = content_tag(:span, link_to(link_text, compare_url, class: 'btn has-tooltip', title: tooltip), class: 'submodule-compare')
+    end
+
+    link
   end
 
   def diff_file_blob_raw_url(diff_file, only_path: false)
@@ -133,8 +158,7 @@ module DiffHelper
 
   def diff_file_html_data(project, diff_file_path, diff_commit_id)
     {
-      blob_diff_path: project_blob_diff_path(project,
-                                                       tree_join(diff_commit_id, diff_file_path)),
+      blob_diff_path: project_blob_diff_path(project, tree_join(diff_commit_id, diff_file_path)),
       view: diff_view
     }
   end
@@ -159,6 +183,22 @@ module DiffHelper
     elsif diff_file.new_file?
       "cgreen"
     end
+  end
+
+  def render_overflow_warning?(diffs_collection)
+    diff_files = diffs_collection.raw_diff_files
+
+    if diff_files.any?(&:too_large?)
+      Gitlab::Metrics.add_event(:diffs_overflow_single_file_limits)
+    end
+
+    diff_files.overflow?.tap do |overflown|
+      Gitlab::Metrics.add_event(:diffs_overflow_collection_limits) if overflown
+    end
+  end
+
+  def apply_diff_view_cookie!
+    set_secure_cookie(:diff_view, params.delete(:view), type: CookiesHelper::COOKIE_TYPE_PERMANENT) if params[:view].present?
   end
 
   private
@@ -201,12 +241,6 @@ module DiffHelper
   def toggle_whitespace_link(url, options)
     options[:class] = [*options[:class], 'btn btn-default'].join(' ')
     link_to "#{hide_whitespace? ? 'Show' : 'Hide'} whitespace changes", url, class: options[:class]
-  end
-
-  def render_overflow_warning?(diffs_collection)
-    diffs = @merge_request_diff.presence || diffs_collection.diff_files
-
-    diffs.overflow?
   end
 
   def diff_file_path_text(diff_file, max: 60)

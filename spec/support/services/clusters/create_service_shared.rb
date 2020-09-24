@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-shared_context 'valid cluster create params' do
+RSpec.shared_context 'valid cluster create params' do
+  let(:clusterable) { Clusters::Instance.new }
   let(:params) do
     {
       name: 'test-cluster',
@@ -11,12 +12,14 @@ shared_context 'valid cluster create params' do
         num_nodes: 1,
         machine_type: 'machine_type-a',
         legacy_abac: 'true'
-      }
+      },
+      clusterable: clusterable
     }
   end
 end
 
-shared_context 'invalid cluster create params' do
+RSpec.shared_context 'invalid cluster create params' do
+  let(:clusterable) { Clusters::Instance.new }
   let(:params) do
     {
       name: 'test-cluster',
@@ -26,12 +29,14 @@ shared_context 'invalid cluster create params' do
         zone: 'us-central1-a',
         num_nodes: 1,
         machine_type: 'machine_type-a'
-      }
+      },
+      clusterable: clusterable
+
     }
   end
 end
 
-shared_examples 'create cluster service success' do
+RSpec.shared_examples 'create cluster service success' do
   it 'creates a cluster object and performs a worker' do
     expect(ClusterProvisionWorker).to receive(:perform_async)
 
@@ -53,7 +58,7 @@ shared_examples 'create cluster service success' do
   end
 end
 
-shared_examples 'create cluster service error' do
+RSpec.shared_examples 'create cluster service error' do
   it 'returns an error' do
     expect(ClusterProvisionWorker).not_to receive(:perform_async)
     expect { subject }.to change { Clusters::Cluster.count }.by(0)

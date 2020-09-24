@@ -1,14 +1,13 @@
 /* eslint-disable import/no-commonjs, no-new */
 
 import $ from 'jquery';
-import _ from 'underscore';
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
-import * as urlUtility from '~/lib/utils/url_utility';
 import '~/behaviors/markdown/render_gfm';
 import { createSpyObj } from 'helpers/jest_helpers';
 import { setTestTimeoutOnce } from 'helpers/timeout';
 import { TEST_HOST } from 'helpers/test_constants';
+import * as urlUtility from '~/lib/utils/url_utility';
+import axios from '~/lib/utils/axios_utils';
 
 // These must be imported synchronously because they pull dependencies
 // from the DOM.
@@ -29,9 +28,11 @@ window.gl = window.gl || {};
 gl.utils = gl.utils || {};
 gl.utils.disableButtonIfEmptyField = () => {};
 
-describe('Old Notes (~/notes.js)', () => {
+// the following test is unreliable and failing in master 2-3 times a day
+// see https://gitlab.com/gitlab-org/gitlab/issues/206906#note_290602581
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('Old Notes (~/notes.js)', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     loadFixtures(fixture);
 
     // Re-declare this here so that test_setup.js#beforeEach() doesn't
@@ -192,7 +193,7 @@ describe('Old Notes (~/notes.js)', () => {
       $('.js-comment-button').click();
 
       const $targetNote = $notesContainer.find(`#note_${noteEntity.id}`);
-      const updatedNote = Object.assign({}, noteEntity);
+      const updatedNote = { ...noteEntity };
       updatedNote.note = 'bar';
       notes.updateNote(updatedNote, $targetNote);
 
@@ -209,13 +210,6 @@ describe('Old Notes (~/notes.js)', () => {
       $note = $(`<div id="${hash}"></div>`);
       jest.spyOn($note, 'filter');
       jest.spyOn($note, 'toggleClass');
-    });
-
-    afterEach(() => {
-      expect(typeof urlUtility.getLocationHash.mock).toBe('object');
-      urlUtility.getLocationHash.mockRestore();
-      expect(urlUtility.getLocationHash.mock).toBeUndefined();
-      expect(urlUtility.getLocationHash()).toBeNull();
     });
 
     // urlUtility is a dependency of the notes module. Its getLocatinHash() method should be called internally.
@@ -628,51 +622,9 @@ describe('Old Notes (~/notes.js)', () => {
         done();
       });
     });
-
-    // This is a bad test carried over from the Karma -> Jest migration.
-    // The corresponding test in the Karma suite tests for
-    // elements and methods that don't actually exist, and gives a false
-    // positive pass.
-    /*
-    it('should show flash error message when comment failed to be updated', done => {
-      mockNotesPost();
-      jest.spyOn(notes, 'addFlash').mockName('addFlash');
-
-      $('.js-comment-button').click();
-
-      deferredPromise()
-        .then(() => {
-          const $noteEl = $notesContainer.find(`#note_${note.id}`);
-          $noteEl.find('.js-note-edit').click();
-          $noteEl.find('textarea.js-note-text').val(updatedComment);
-
-          mockNotesPostError();
-
-          $noteEl.find('.js-comment-save-button').click();
-          notes.updateComment({preventDefault: () => {}});
-        })
-        .then(() => deferredPromise())
-        .then(() => {
-          const $updatedNoteEl = $notesContainer.find(`#note_${note.id}`);
-
-          expect($updatedNoteEl.hasClass('.being-posted')).toEqual(false); // Remove being-posted visuals
-          expect(
-            $updatedNoteEl
-              .find('.note-text')
-              .text()
-              .trim(),
-          ).toEqual(sampleComment); // See if comment reverted back to original
-
-          expect(notes.addFlash).toHaveBeenCalled();
-          expect(notes.flashContainer.style.display).not.toBe('none');
-          done();
-        })
-        .catch(done.fail);
-    }, 5000);
-    */
   });
 
-  describe('postComment with Slash commands', () => {
+  describe('postComment with quick actions', () => {
     const sampleComment = '/assign @root\n/award :100:';
     const note = {
       commands_changes: {
@@ -688,6 +640,7 @@ describe('Old Notes (~/notes.js)', () => {
     let $notesContainer;
 
     beforeEach(() => {
+      loadFixtures('commit/show.html');
       mockAxios.onPost(NOTES_POST_PATH).reply(200, note);
 
       new Notes('', []);
@@ -707,14 +660,49 @@ describe('Old Notes (~/notes.js)', () => {
       $form.find('textarea.js-note-text').val(sampleComment);
     });
 
-    it('should remove slash command placeholder when comment with slash commands is done posting', done => {
+    it('should remove quick action placeholder when comment with quick actions is done posting', done => {
       jest.spyOn(gl.awardsHandler, 'addAwardToEmojiBar');
       $('.js-comment-button').click();
 
-      expect($notesContainer.find('.system-note.being-posted').length).toEqual(1); // Placeholder shown
+      expect($notesContainer.find('.note.being-posted').length).toEqual(1); // Placeholder shown
 
       setImmediate(() => {
-        expect($notesContainer.find('.system-note.being-posted').length).toEqual(0); // Placeholder removed
+        expect($notesContainer.find('.note.being-posted').length).toEqual(0); // Placeholder removed
+        done();
+      });
+    });
+  });
+
+  describe('postComment with slash when quick actions are not supported', () => {
+    const sampleComment = '/assign @root';
+    let $form;
+    let $notesContainer;
+
+    beforeEach(() => {
+      const note = {
+        id: 1234,
+        html: `<li class="note note-row-1234 timeline-entry" id="note_1234">
+                <div class="note-text">${sampleComment}</div>
+                </li>`,
+        note: sampleComment,
+        valid: true,
+      };
+      mockAxios.onPost(NOTES_POST_PATH).reply(200, note);
+
+      new Notes('', []);
+      $form = $('form.js-main-target-form');
+      $notesContainer = $('ul.main-notes-list');
+      $form.find('textarea.js-note-text').val(sampleComment);
+    });
+
+    it('should show message placeholder including lines starting with slash', done => {
+      $('.js-comment-button').click();
+
+      expect($notesContainer.find('.note.being-posted').length).toEqual(1); // Placeholder shown
+      expect($notesContainer.find('.note-body p').text()).toEqual(sampleComment); // No quick action processing
+
+      setImmediate(() => {
+        expect($notesContainer.find('.note.being-posted').length).toEqual(0); // Placeholder removed
         done();
       });
     });
@@ -792,14 +780,11 @@ describe('Old Notes (~/notes.js)', () => {
     });
 
     it('should return form metadata with sanitized formContent from form reference', () => {
-      jest.spyOn(_, 'escape');
-
       sampleComment = '<script>alert("Boom!");</script>';
       $form.find('textarea.js-note-text').val(sampleComment);
 
       const { formContent } = notes.getFormData($form);
 
-      expect(_.escape).toHaveBeenCalledWith(sampleComment);
       expect(formContent).toEqual('&lt;script&gt;alert(&quot;Boom!&quot;);&lt;/script&gt;');
     });
   });
@@ -990,7 +975,6 @@ describe('Old Notes (~/notes.js)', () => {
 
     beforeEach(() => {
       notes = new Notes('', []);
-      jest.spyOn(_, 'escape');
     });
 
     it('should return constructed placeholder element for system note based on form contents', () => {

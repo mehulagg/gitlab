@@ -1,15 +1,14 @@
 <script>
-import _ from 'underscore';
-import { GlTooltipDirective, GlLink, GlBadge } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import Commit from '~/vue_shared/components/commit.vue';
+import { escape, isEmpty } from 'lodash';
+import { GlTooltipDirective, GlLink, GlDeprecatedBadge as GlBadge, GlIcon } from '@gitlab/ui';
 import Alerts from 'ee/vue_shared/dashboards/components/alerts.vue';
 import TimeAgo from 'ee/vue_shared/dashboards/components/time_ago.vue';
 import { STATUS_FAILED } from 'ee/vue_shared/dashboards/constants';
 import ProjectPipeline from 'ee/vue_shared/dashboards/components/project_pipeline.vue';
+import { s__, __, sprintf } from '~/locale';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import Commit from '~/vue_shared/components/commit.vue';
 import EnvironmentHeader from './environment_header.vue';
 
 export default {
@@ -22,7 +21,7 @@ export default {
     Alerts,
     ProjectPipeline,
     TimeAgo,
-    Icon,
+    GlIcon,
   },
   directives: {
     'gl-tooltip': GlTooltipDirective,
@@ -61,21 +60,21 @@ export default {
       };
     },
     user() {
-      return this.lastDeployment && !_.isEmpty(this.lastDeployment.user)
+      return this.lastDeployment && !isEmpty(this.lastDeployment.user)
         ? this.lastDeployment.user
         : null;
     },
     lastPipeline() {
-      return !_.isEmpty(this.environment.last_pipeline) ? this.environment.last_pipeline : null;
+      return !isEmpty(this.environment.last_pipeline) ? this.environment.last_pipeline : null;
     },
     lastDeployment() {
-      return !_.isEmpty(this.environment.last_deployment) ? this.environment.last_deployment : null;
+      return !isEmpty(this.environment.last_deployment) ? this.environment.last_deployment : null;
     },
     deployable() {
       return this.lastDeployment ? this.lastDeployment.deployable : null;
     },
     commit() {
-      return !_.isEmpty(this.lastDeployment.commit) ? this.lastDeployment.commit : {};
+      return !isEmpty(this.lastDeployment.commit) ? this.lastDeployment.commit : {};
     },
     jobTooltip() {
       return this.deployable
@@ -83,7 +82,7 @@ export default {
         : s__('EnvironmentDashboard|Created through the Deployment API');
     },
     commitRef() {
-      return this.lastDeployment && !_.isEmpty(this.lastDeployment.commit)
+      return this.lastDeployment && !isEmpty(this.lastDeployment.commit)
         ? {
             ...this.lastDeployment.commit,
             ...this.lastDeployment.ref,
@@ -95,7 +94,7 @@ export default {
       return (
         this.commit.author || {
           avatar_url: this.commit.author_gravatar_url,
-          path: `mailto:${_.escape(this.commit.author_email)}`,
+          path: `mailto:${escape(this.commit.author_email)}`,
           username: this.commit.author_name,
         }
       );
@@ -127,7 +126,7 @@ export default {
 
     <div :class="cardClasses" class="dashboard-card-body card-body">
       <div v-if="lastDeployment" class="row">
-        <div class="col-1 align-self-center">
+        <div class="col-1 align-self-center px-3">
           <user-avatar-link
             v-if="user"
             :link-href="user.path"
@@ -139,7 +138,7 @@ export default {
 
         <div class="col-10 col-sm-7 pr-0 pl-5 align-self-center align-middle ci-table">
           <div class="branch-commit">
-            <icon name="work" />
+            <gl-icon name="work" />
             <gl-link
               v-if="deployable"
               v-gl-tooltip="jobTooltip"
@@ -162,7 +161,7 @@ export default {
         </div>
 
         <div
-          class="col-sm-4 mt-0 pl-5 pl-sm-0 offset-1 offset-sm-0 text-sm-right align-self-center col-12 d-sm-block"
+          class="col-sm-3 mt-0 pl-6 pr-0 pl-sm-0 offset-1 offset-sm-0 text-sm-right align-self-center col-12 d-sm-block"
         >
           <time-ago
             v-if="shouldShowTimeAgo"

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::DependencyProxiesController do
+RSpec.describe Groups::DependencyProxiesController do
   let(:group) { create(:group) }
   let(:user)  { create(:user) }
 
@@ -20,7 +20,7 @@ describe Groups::DependencyProxiesController do
       it 'returns 200 and renders the view' do
         get :show, params: { group_id: group.to_param }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template('groups/dependency_proxies/show')
       end
     end
@@ -28,7 +28,7 @@ describe Groups::DependencyProxiesController do
     it 'returns 404 when feature is disabled' do
       get :show, params: { group_id: group.to_param }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -41,14 +41,14 @@ describe Groups::DependencyProxiesController do
       it 'redirects back to show page' do
         put :update, params: update_params
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
 
     it 'returns 404 when feature is disabled' do
       put :update, params: update_params
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     def update_params

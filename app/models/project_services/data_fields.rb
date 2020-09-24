@@ -44,13 +44,14 @@ module DataFields
   included do
     has_one :issue_tracker_data, autosave: true
     has_one :jira_tracker_data, autosave: true
+    has_one :open_project_tracker_data, autosave: true
 
     def data_fields
       raise NotImplementedError
     end
 
     def data_fields_present?
-      data_fields.persisted?
+      data_fields.present?
     rescue NotImplementedError
       false
     end

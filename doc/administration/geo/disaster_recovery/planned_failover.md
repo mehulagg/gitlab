@@ -1,3 +1,10 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Disaster recovery for planned failover **(PREMIUM ONLY)**
 
 The primary use-case of Disaster Recovery is to ensure business continuity in
@@ -12,7 +19,7 @@ length of this window is determined by your replication capacity - once the
 data loss.
 
 This document assumes you already have a fully configured, working Geo setup.
-Please read it and the [Disaster Recovery][disaster-recovery] failover
+Please read it and the [Disaster Recovery](index.md) failover
 documentation in full before proceeding. Planned failover is a major operation,
 and if performed incorrectly, there is a high risk of data loss. Consider
 rehearsing the procedure until you are comfortable with the necessary steps and
@@ -20,7 +27,7 @@ have a high degree of confidence in being able to perform them accurately.
 
 ## Not all data is automatically replicated
 
-If you are using any GitLab features that Geo [doesn't support][limitations],
+If you are using any GitLab features that Geo [doesn't support](../index.md#limitations),
 you must make separate provisions to ensure that the **secondary** node has an
 up-to-date copy of any data associated with that feature. This may extend the
 required scheduled maintenance period significantly.
@@ -32,24 +39,29 @@ final transfer inside the maintenance window) will then transfer only the
 *changes* between the **primary** node and the **secondary** nodes.
 
 Repository-centric strategies for using `rsync` effectively can be found in the
-[moving repositories][moving-repositories] documentation; these strategies can
+[moving repositories](../../operations/moving_repositories.md) documentation; these strategies can
 be adapted for use with any other file-based data, such as GitLab Pages (to
 be found in `/var/opt/gitlab/gitlab-rails/shared/pages` if using Omnibus).
 
-## Pre-flight checks
+## Preflight checks
 
-Follow these steps before scheduling a planned failover to ensure the process
-will go smoothly.
+Run this command to list out all preflight checks and automatically check if replication and verification are complete before scheduling a planned failover to ensure the process will go smoothly:
+
+```shell
+gitlab-ctl promotion-preflight-checks
+```
+
+Each step is described in more detail below.
 
 ### Object storage
 
 If you have a large GitLab installation or cannot tolerate downtime, consider
-[migrating to Object Storage][os-conf] **before** scheduling a planned failover.
+[migrating to Object Storage](../replication/object_storage.md) **before** scheduling a planned failover.
 Doing so reduces both the length of the maintenance window, and the risk of data
 loss as a result of a poorly executed planned failover.
 
 In GitLab 12.4, you can optionally allow GitLab to manage replication of Object Storage for
-**secondary** nodes. For more information, see [Object Storage replication][os-conf].
+**secondary** nodes. For more information, see [Object Storage replication](../replication/object_storage.md).
 
 ### Review the configuration of each **secondary** node
 
@@ -65,7 +77,7 @@ supports everything the **primary** node does **before** scheduling a planned fa
 
 Run the following on both **primary** and **secondary** nodes:
 
-```sh
+```shell
 gitlab-rake gitlab:check
 gitlab-rake gitlab:geo:check
 ```
@@ -79,7 +91,7 @@ The SSH host keys and `/etc/gitlab/gitlab-secrets.json` files should be
 identical on all nodes. Check this by running the following on all nodes and
 comparing the output:
 
-```sh
+```shell
 sudo sha256sum /etc/ssh/ssh_host* /etc/gitlab/gitlab-secrets.json
 ```
 
@@ -95,7 +107,7 @@ ensure these processes are close to 100% as possible during active use.
 Navigate to the **Admin Area > Geo** dashboard on the **secondary** node to
 review status. Replicated objects (shown in green) should be close to 100%,
 and there should be no failures (shown in red). If a large proportion of
-objects aren't yet replicated (shown in grey), consider giving the node more
+objects aren't yet replicated (shown in gray), consider giving the node more
 time to complete
 
 ![Replication status](img/replication-status.png)
@@ -113,7 +125,7 @@ or removing references to the missing data.
 
 ### Verify the integrity of replicated data
 
-This [content was moved to another location][background-verification].
+This [content was moved to another location](background_verification.md).
 
 ### Notify users of scheduled maintenance
 
@@ -126,7 +138,7 @@ will take to finish syncing. An example message would be:
 
 ## Prevent updates to the **primary** node
 
-Until a [read-only mode][ce-19739] is implemented, updates must be prevented
+Until a [read-only mode](https://gitlab.com/gitlab-org/gitlab/-/issues/14609) is implemented, updates must be prevented
 from happening manually. Note that your **secondary** node still needs read-only
 access to the **primary** node during the maintenance window.
 
@@ -136,7 +148,7 @@ access to the **primary** node during the maintenance window.
 
    For instance, you might run the following commands on the server(s) making up your **primary** node:
 
-   ```sh
+   ```shell
    sudo iptables -A INPUT -p tcp -s <secondary_node_ip> --destination-port 22 -j ACCEPT
    sudo iptables -A INPUT -p tcp -s <your_ip> --destination-port 22 -j ACCEPT
    sudo iptables -A INPUT --destination-port 22 -j REJECT
@@ -162,8 +174,8 @@ access to the **primary** node during the maintenance window.
    existing Git repository with an SSH remote URL. The server should refuse
    connection.
 
-1. Disable non-Geo periodic background jobs on the primary node by navigating
-   to **Admin Area > Monitoring > Background Jobs > Cron** , pressing `Disable All`,
+1. Disable non-Geo periodic background jobs on the **primary** node by navigating
+   to **Admin Area > Monitoring > Background Jobs > Cron**, pressing `Disable All`,
    and then pressing `Enable` for the `geo_sidekiq_cron_config_worker` cron job.
    This job will re-enable several other cron jobs that are essential for planned
    failover to complete successfully.
@@ -186,8 +198,8 @@ access to the **primary** node during the maintenance window.
 
 1. On the **secondary** node, navigate to **Admin Area > Monitoring > Background Jobs > Queues**
    and wait for all the `geo` queues to drop to 0 queued and 0 running jobs.
-1. On the **secondary** node, use [these instructions][foreground-verification]
-   to verify the integrity of CI artifacts, LFS objects and uploads in file
+1. On the **secondary** node, use [these instructions](../../raketasks/check.md)
+   to verify the integrity of CI artifacts, LFS objects, and uploads in file
    storage.
 
 At this point, your **secondary** node will contain an up-to-date copy of everything the
@@ -195,24 +207,12 @@ At this point, your **secondary** node will contain an up-to-date copy of everyt
 
 ## Promote the **secondary** node
 
-Finally, follow the [Disaster Recovery docs][disaster-recovery] to promote the
+Finally, follow the [Disaster Recovery docs](index.md) to promote the
 **secondary** node to a **primary** node. This process will cause a brief outage on the **secondary** node, and users may need to log in again.
 
 Once it is completed, the maintenance window is over! Your new **primary** node will now
 begin to diverge from the old one. If problems do arise at this point, failing
-back to the old **primary** node [is possible][bring-primary-back], but likely to result
-in the loss of any data uploaded to the new primary in the meantime.
+back to the old **primary** node [is possible](bring_primary_back.md), but likely to result
+in the loss of any data uploaded to the new **primary** in the meantime.
 
 Don't forget to remove the broadcast message after failover is complete.
-
-[bring-primary-back]: bring_primary_back.md
-[ce-19739]: https://gitlab.com/gitlab-org/gitlab-foss/issues/19739
-[container-registry]: ../replication/container_registry.md
-[disaster-recovery]: index.md
-[ee-4930]: https://gitlab.com/gitlab-org/gitlab/issues/4930
-[ee-5064]: https://gitlab.com/gitlab-org/gitlab/issues/5064
-[foreground-verification]: ../../raketasks/check.md
-[background-verification]: background_verification.md
-[limitations]: ../replication/index.md#current-limitations
-[moving-repositories]: ../../operations/moving_repositories.md
-[os-conf]: ../replication/object_storage.md

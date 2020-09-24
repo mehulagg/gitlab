@@ -1,4 +1,10 @@
 import { commitActionTypes, FILE_VIEW_MODE_EDITOR } from '../constants';
+import {
+  relativePathToAbsolute,
+  isAbsolute,
+  isRootRelative,
+  isBase64DataUrl,
+} from '~/lib/utils/url_utility';
 
 export const dataStructure = () => ({
   id: '',
@@ -6,10 +12,7 @@ export const dataStructure = () => ({
   // it can also contain a prefix `pending-` for files opened in review mode
   key: '',
   type: '',
-  projectId: '',
-  branchId: '',
   name: '',
-  url: '',
   path: '',
   tempFile: false,
   tree: [],
@@ -18,33 +21,14 @@ export const dataStructure = () => ({
   active: false,
   changed: false,
   staged: false,
-  replaces: false,
-  lastCommitPath: '',
   lastCommitSha: '',
-  lastCommit: {
-    id: '',
-    url: '',
-    message: '',
-    updatedAt: '',
-    author: '',
-  },
-  blamePath: '',
-  commitsPath: '',
-  permalink: '',
   rawPath: '',
-  binary: false,
-  html: '',
   raw: '',
   content: '',
-  parentTreeUrl: '',
-  renderError: false,
-  base64: false,
   editorRow: 1,
   editorColumn: 1,
   fileLanguage: '',
-  eol: '',
   viewMode: FILE_VIEW_MODE_EDITOR,
-  previewMode: null,
   size: 0,
   parentPath: null,
   lastOpenedAt: 0,
@@ -56,61 +40,43 @@ export const dataStructure = () => ({
 export const decorateData = entity => {
   const {
     id,
-    projectId,
-    branchId,
     type,
-    url,
     name,
     path,
-    renderError,
     content = '',
     tempFile = false,
     active = false,
     opened = false,
     changed = false,
-    parentTreeUrl = '',
-    base64 = false,
-    binary = false,
     rawPath = '',
-    previewMode,
     file_lock,
-    html,
     parentPath = '',
   } = entity;
 
   return Object.assign(dataStructure(), {
     id,
-    projectId,
-    branchId,
     key: `${name}-${type}-${id}`,
     type,
     name,
-    url,
     path,
     tempFile,
     opened,
     active,
-    parentTreeUrl,
     changed,
-    renderError,
     content,
-    base64,
-    binary,
     rawPath,
-    previewMode,
     file_lock,
-    html,
     parentPath,
   });
 };
 
-export const findEntry = (tree, type, name, prop = 'name') =>
-  tree.find(f => f.type === type && f[prop] === name);
-
-export const findIndexOfFile = (state, file) => state.findIndex(f => f.path === file.path);
-
 export const setPageTitle = title => {
   document.title = title;
+};
+
+export const setPageTitleForFile = (state, file) => {
+  const title = [file.path, state.currentBranchId, state.currentProjectId, 'GitLab'].join(' · ');
+  setPageTitle(title);
 };
 
 export const commitActionForFile = file => {
@@ -118,7 +84,7 @@ export const commitActionForFile = file => {
     return commitActionTypes.move;
   } else if (file.deleted) {
     return commitActionTypes.delete;
-  } else if (file.tempFile && !file.replaces) {
+  } else if (file.tempFile) {
     return commitActionTypes.create;
   }
 
@@ -149,15 +115,14 @@ export const createCommitPayload = ({
     file_path: f.path,
     previous_path: f.prevPath || undefined,
     content: f.prevPath && !f.changed ? null : f.content || undefined,
-    encoding: f.base64 ? 'base64' : 'text',
-    last_commit_id:
-      newBranch || f.deleted || f.prevPath || f.replaces ? undefined : f.lastCommitSha,
+    encoding: isBase64DataUrl(f.rawPath) ? 'base64' : 'text',
+    last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
   })),
   start_sha: newBranch ? rootGetters.lastCommit.id : undefined,
 });
 
 export const createNewMergeRequestUrl = (projectUrl, source, target) =>
-  `${projectUrl}/merge_requests/new?merge_request[source_branch]=${source}&merge_request[target_branch]=${target}&nav_source=webide`;
+  `${projectUrl}/-/merge_requests/new?merge_request[source_branch]=${source}&merge_request[target_branch]=${target}&nav_source=webide`;
 
 const sortTreesByTypeAndName = (a, b) => {
   if (a.type === 'tree' && b.type === 'blob') {
@@ -212,15 +177,6 @@ export const mergeTrees = (fromTree, toTree) => {
   return toTree;
 };
 
-export const escapeFileUrl = fileUrl => encodeURIComponent(fileUrl).replace(/%2F/g, '/');
-
-export const replaceFileUrl = (url, oldPath, newPath) => {
-  // Add `/-/` so that we don't accidentally replace project path
-  const result = url.replace(`/-/${escapeFileUrl(oldPath)}`, `/-/${escapeFileUrl(newPath)}`);
-
-  return result;
-};
-
 export const swapInStateArray = (state, arr, key, entryPath) =>
   Object.assign(state, {
     [arr]: state[arr].map(f => (f.key === key ? state.entries[entryPath] : f)),
@@ -270,6 +226,44 @@ export const pathsAreEqual = (a, b) => {
   return cleanA === cleanB;
 };
 
-// if the contents of a file dont end with a newline, this function adds a newline
-export const addFinalNewlineIfNeeded = content =>
-  content.charAt(content.length - 1) !== '\n' ? `${content}\n` : content;
+export function extractMarkdownImagesFromEntries(mdFile, entries) {
+  /**
+   * Regex to identify an image tag in markdown, like:
+   *
+   * ![img alt goes here](/img.png)
+   * ![img alt](../img 1/img.png "my image title")
+   * ![img alt](https://gitlab.com/assets/logo.svg "title here")
+   *
+   */
+  const reMdImage = /!\[([^\]]*)\]\((.*?)(?:(?="|\))"([^"]*)")?\)/gi;
+  const prefix = 'gl_md_img_';
+  const images = {};
+
+  let content = mdFile.content || mdFile.raw;
+  let i = 0;
+
+  content = content.replace(reMdImage, (_, alt, path, title) => {
+    const imagePath = (isRootRelative(path) ? path : relativePathToAbsolute(path, mdFile.path))
+      .substr(1)
+      .trim();
+
+    const imageContent = entries[imagePath]?.content || entries[imagePath]?.raw;
+
+    if (!isAbsolute(path) && imageContent) {
+      const ext = path.includes('.')
+        ? path
+            .split('.')
+            .pop()
+            .trim()
+        : 'jpeg';
+      const src = `data:image/${ext};base64,${imageContent}`;
+      i += 1;
+      const key = `{{${prefix}${i}}}`;
+      images[key] = { alt, src, title };
+      return key;
+    }
+    return title ? `![${alt}](${path}"${title}")` : `![${alt}](${path})`;
+  });
+
+  return { content, images };
+}

@@ -1,4 +1,7 @@
-- page_title 'LDAP Synchronization'
+- page_title _('LDAP Synchronization')
+%h3.page-title LDAP Group Settings
+= render 'groups/ldap_group_settings/form', group: @group
+
 %h3.page-title LDAP synchronizations
 = render 'ldap_group_links/form', group: @group
 = render 'ldap_group_links/ldap_group_links', group: @group

@@ -20,7 +20,6 @@ class UploadsController < ApplicationController
 
   skip_before_action :authenticate_user!
   before_action :upload_mount_satisfied?
-  before_action :find_model
   before_action :authorize_access!, only: [:show]
   before_action :authorize_create_access!, only: [:create, :authorize]
   before_action :verify_workhorse_api!, only: [:authorize]
@@ -42,6 +41,8 @@ class UploadsController < ApplicationController
       case model
       when Note
         can?(current_user, :read_project, model.project)
+      when Snippet, ProjectSnippet
+        can?(current_user, :read_snippet, model)
       when User
         # We validate the current user has enough (writing)
         # access to itself when a secret is given.

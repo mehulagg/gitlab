@@ -1,8 +1,7 @@
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import tooltip from '~/vue_shared/directives/tooltip';
-import icon from '~/vue_shared/components/icon.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 const mixins = {
@@ -100,9 +99,6 @@ const mixins = {
       default: () => ({}),
     },
   },
-  components: {
-    icon,
-  },
   directives: {
     tooltip,
   },
@@ -130,7 +126,7 @@ const mixins = {
       return this.assignees.length > 0;
     },
     hasMilestone() {
-      return !_.isEmpty(this.milestone);
+      return !isEmpty(this.milestone);
     },
     iconName() {
       if (this.isMergeRequest && this.isMerged) {
@@ -144,7 +140,9 @@ const mixins = {
         return 'merge-request-status closed issue-token-state-icon-closed';
       }
 
-      return this.isOpen ? 'issue-token-state-icon-open' : 'issue-token-state-icon-closed';
+      return this.isOpen
+        ? 'issue-token-state-icon-open gl-text-green-500'
+        : 'issue-token-state-icon-closed gl-text-blue-500';
     },
     computedLinkElementType() {
       return this.path.length > 0 ? 'a' : 'span';
@@ -159,7 +157,7 @@ const mixins = {
       return this.displayReference.split(this.pathIdSeparator).pop();
     },
     createdAtInWords() {
-      return this.createdAt ? this.timeFormated(this.createdAt) : '';
+      return this.createdAt ? this.timeFormatted(this.createdAt) : '';
     },
     createdAtTimestamp() {
       return this.createdAt ? formatDate(new Date(this.createdAt)) : '';
@@ -168,10 +166,10 @@ const mixins = {
       return this.mergedAt ? formatDate(new Date(this.mergedAt)) : '';
     },
     mergedAtInWords() {
-      return this.mergedAt ? this.timeFormated(this.mergedAt) : '';
+      return this.mergedAt ? this.timeFormatted(this.mergedAt) : '';
     },
     closedAtInWords() {
-      return this.closedAt ? this.timeFormated(this.closedAt) : '';
+      return this.closedAt ? this.timeFormatted(this.closedAt) : '';
     },
     closedAtTimestamp() {
       return this.closedAt ? formatDate(new Date(this.closedAt)) : '';

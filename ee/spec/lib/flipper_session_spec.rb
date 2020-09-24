@@ -2,7 +2,7 @@
 
 require 'fast_spec_helper'
 
-describe FlipperSession do
+RSpec.describe FlipperSession do
   describe '#flipper_id' do
     context 'without passing in an ID' do
       it 'returns a flipper_session:UUID' do

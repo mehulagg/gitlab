@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Sum of issues weights on issue board' do
       let(:label_board_list) do
         EE::Resource::Board::BoardList::Project::LabelBoardList.fabricate_via_api!
@@ -12,19 +12,16 @@ module QA
       let(:weight_for_issue_2) { 3 }
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         Resource::Issue.fabricate_via_api! do |issue|
           issue.project = label_board_list.project
-          issue.title = 'Issue 1'
           issue.labels = [label]
           issue.weight = weight_for_issue_1
         end
 
         Resource::Issue.fabricate_via_api! do |issue|
           issue.project = label_board_list.project
-          issue.title = 'Issue 2'
           issue.labels = [label]
           issue.weight = weight_for_issue_2
         end
@@ -33,8 +30,8 @@ module QA
         Page::Project::Menu.perform(&:go_to_boards)
       end
 
-      it 'shows the sum of issues weights in the board list\'s header' do
-        EE::Page::Component::IssueBoard::Show.perform do |show|
+      it 'shows the sum of issues weights in the board list\'s header', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/603' do
+        Page::Component::IssueBoard::Show.perform do |show|
           expect(show.boards_list_header_with_index(1)).to have_content(weight_for_issue_1 + weight_for_issue_2)
         end
       end

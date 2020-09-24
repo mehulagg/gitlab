@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Profile > Password' do
+RSpec.describe 'Profile > Password' do
   let(:user) { create(:user) }
 
   def fill_passwords(password, confirmation)
@@ -42,7 +42,7 @@ describe 'Profile > Password' do
           fill_passwords('mypassword', 'mypassword')
 
           page.within('.flash-notice') do
-            expect(page).to have_content('Password was successfully updated. Please login with it')
+            expect(page).to have_content('Password was successfully updated. Please sign in again.')
           end
         end
       end
@@ -63,7 +63,7 @@ describe 'Profile > Password' do
 
         visit edit_profile_password_path
 
-        expect(page).to have_gitlab_http_status(404)
+        expect(page).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -73,7 +73,7 @@ describe 'Profile > Password' do
       it 'renders 404' do
         visit edit_profile_password_path
 
-        expect(page).to have_gitlab_http_status(404)
+        expect(page).to have_gitlab_http_status(:not_found)
       end
     end
   end

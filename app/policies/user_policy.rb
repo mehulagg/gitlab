@@ -10,6 +10,9 @@ class UserPolicy < BasePolicy
   desc "The profile is private"
   condition(:private_profile, scope: :subject, score: 0) { @subject.private_profile? }
 
+  desc "The user is blocked"
+  condition(:blocked_user, scope: :subject, score: 0) { @subject.blocked? }
+
   rule { ~restricted_public_level }.enable :read_user
   rule { ~anonymous }.enable :read_user
 
@@ -17,8 +20,12 @@ class UserPolicy < BasePolicy
     enable :destroy_user
     enable :update_user
     enable :update_user_status
+    enable :read_user_personal_access_tokens
   end
 
   rule { default }.enable :read_user_profile
-  rule { private_profile & ~(user_is_self | admin) }.prevent :read_user_profile
+  rule { (private_profile | blocked_user) & ~(user_is_self | admin) }.prevent :read_user_profile
+  rule { user_is_self | admin }.enable :disable_two_factor
 end
+
+UserPolicy.prepend_if_ee('EE::UserPolicy')

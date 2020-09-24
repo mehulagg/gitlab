@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::GeoReplication, :geo, :geo_fdw, api: true do
+RSpec.describe API::GeoReplication, :request_store, :geo, api: true do
   include ApiHelpers
   include ::EE::GeoHelpers
 
@@ -16,14 +16,14 @@ describe API::GeoReplication, :geo, :geo_fdw, api: true do
   let(:user) { create(:user) }
 
   before do
-    set_current_geo_node!(secondary)
+    stub_current_geo_node(secondary)
   end
 
   describe 'GET /geo_replication/designs' do
     it 'retrieves the designs if admin is logged in' do
       get api("/geo_replication/designs", admin)
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response).to match_response_schema('public_api/v4/geo_designs', dir: 'ee')
     end
 
@@ -38,7 +38,7 @@ describe API::GeoReplication, :geo, :geo_fdw, api: true do
 
       get api("/geo_replication/designs", admin), params: { search: 'bla' }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response).to match_response_schema('public_api/v4/geo_designs', dir: 'ee')
       expect(json_response.size).to eq(1)
       expect(json_response.first['project_id']).to eq(project.id)
@@ -47,7 +47,7 @@ describe API::GeoReplication, :geo, :geo_fdw, api: true do
     it 'denies access if not admin' do
       get api('/geo_replication/designs', user)
 
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 
@@ -59,14 +59,14 @@ describe API::GeoReplication, :geo, :geo_fdw, api: true do
 
       put api("/geo_replication/designs/#{project.id}/resync", admin)
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(design_registry.reload.state).to eq('pending')
     end
 
     it 'denies access if not admin' do
       put api('/geo_replication/designs/1/resync', user)
 
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 
@@ -77,7 +77,7 @@ describe API::GeoReplication, :geo, :geo_fdw, api: true do
 
       post api("/geo_replication/designs/resync", admin)
 
-      expect(response).to have_gitlab_http_status(201)
+      expect(response).to have_gitlab_http_status(:created)
 
       ::Geo::DesignRegistry.all.each do |registry|
         expect(registry.state).to eq('pending')
@@ -87,7 +87,7 @@ describe API::GeoReplication, :geo, :geo_fdw, api: true do
     it 'denies access if not admin' do
       post api('/geo_replication/designs/resync', user)
 
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 end

@@ -16,12 +16,14 @@ module QA
         attribute :start_date_fixed
         attribute :due_date_is_fixed
         attribute :due_date_fixed
+        attribute :confidential
 
         def initialize
           @start_date_is_fixed = false
           @start_date_fixed = nil
           @due_date_is_fixed = false
           @due_date_fixed = nil
+          @confidential = false
         end
 
         def fabricate!
@@ -29,13 +31,12 @@ module QA
 
           QA::Page::Group::Menu.perform(&:click_group_epics_link)
 
-          QA::EE::Page::Group::Epic::Index.perform do |page| # rubocop:disable QA/AmbiguousPageObjectName
-            page.click_new_epic
-            page.set_title(@title)
-            page.create_new_epic
-            page.wait(interval: 1) do
-              page.has_text?(@title)
-            end
+          QA::EE::Page::Group::Epic::Index.perform do |index|
+            index.click_new_epic
+            index.set_title(@title)
+            index.enable_confidential_epic if @confidential
+            index.create_new_epic
+            index.has_text?(@title, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           end
         end
 
@@ -53,7 +54,8 @@ module QA
             start_date_is_fixed: @start_date_is_fixed,
             start_date_fixed: @start_date_fixed,
             due_date_is_fixed: @due_date_is_fixed,
-            due_date_fixed: @due_date_fixed
+            due_date_fixed: @due_date_fixed,
+            confidential: @confidential
           }
         end
       end

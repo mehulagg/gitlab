@@ -38,13 +38,13 @@ module TreeHelper
   # many paths, as with a repository tree that has thousands of items.
   def fast_project_blob_path(project, blob_path)
     ActionDispatch::Journey::Router::Utils.escape_path(
-      File.join(relative_url_root, project.path_with_namespace, 'blob', blob_path)
+      File.join(relative_url_root, project.path_with_namespace, '-', 'blob', blob_path)
     )
   end
 
   def fast_project_tree_path(project, tree_path)
     ActionDispatch::Journey::Router::Utils.escape_path(
-      File.join(relative_url_root, project.path_with_namespace, 'tree', tree_path)
+      File.join(relative_url_root, project.path_with_namespace, '-', 'tree', tree_path)
     )
   end
 
@@ -158,7 +158,9 @@ module TreeHelper
   def breadcrumb_data_attributes
     attrs = {
       can_collaborate: can_collaborate_with_project?(@project).to_s,
-      new_blob_path: project_new_blob_path(@project, @id),
+      new_blob_path: project_new_blob_path(@project, @ref),
+      upload_path: project_create_blob_path(@project, @ref),
+      new_dir_path: project_create_dir_path(@project, @ref),
       new_branch_path: new_project_branch_path(@project),
       new_tag_path: new_project_tag_path(@project),
       can_edit_tree: can_edit_tree?.to_s
@@ -192,8 +194,41 @@ module TreeHelper
       project_path: project.full_path,
       project_short_path: project.path,
       ref: ref,
+      escaped_ref: ActionDispatch::Journey::Router::Utils.escape_path(ref),
       full_name: project.name_with_namespace
     }
+  end
+
+  def web_ide_url_data(project)
+    can_push_code = current_user&.can?(:push_code, project)
+    fork_path = current_user&.fork_of(project)&.full_path
+
+    if fork_path && !can_push_code
+      { path: fork_path, is_fork: true }
+    else
+      { path: project.full_path, is_fork: false }
+    end
+  end
+
+  def vue_ide_link_data(project, ref)
+    can_collaborate = can_collaborate_with_project?(project)
+    can_create_mr_from_fork = can?(current_user, :fork_project, project) && can?(current_user, :create_merge_request_in, project)
+    show_web_ide_button = (can_collaborate || current_user&.already_forked?(project) || can_create_mr_from_fork)
+
+    {
+      web_ide_url_data: web_ide_url_data(project),
+      needs_to_fork: !can_collaborate && !current_user&.already_forked?(project),
+      show_web_ide_button: show_web_ide_button,
+      show_gitpod_button: show_web_ide_button && Gitlab::Gitpod.feature_and_settings_enabled?(project),
+      gitpod_url: full_gitpod_url(project, ref),
+      gitpod_enabled: current_user&.gitpod_enabled
+    }
+  end
+
+  def full_gitpod_url(project, ref)
+    return "" unless Gitlab::Gitpod.feature_and_settings_enabled?(project)
+
+    "#{Gitlab::CurrentSettings.gitpod_url}##{project_tree_url(project, tree_join(ref, @path || ''))}"
   end
 
   def directory_download_links(project, ref, archive_prefix)

@@ -1,20 +1,14 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GlRepository do
+RSpec.describe ::Gitlab::GlRepository do
   describe '.parse' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:group) { create(:group) }
 
-    it 'parses a design gl_repository' do
-      expect(described_class.parse("design-#{project.id}")).to eq([project, EE::Gitlab::GlRepository::DESIGN])
-    end
-  end
-
-  describe '.types' do
-    it 'contains both the EE and CE repository types' do
-      expected_types = Gitlab::GlRepository::TYPES.merge(EE::Gitlab::GlRepository::EE_TYPES)
-
-      expect(described_class.types).to eq(expected_types)
+    # Group Wiki is a GitLab Starter feature
+    it 'parses a group wiki gl_repository' do
+      expect(described_class.parse("group-#{group.id}-wiki")).to eq([group, nil, Gitlab::GlRepository::WIKI])
     end
   end
 end

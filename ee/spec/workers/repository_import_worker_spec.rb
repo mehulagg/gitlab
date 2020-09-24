@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RepositoryImportWorker do
+RSpec.describe RepositoryImportWorker do
   let(:project) { create(:project, :import_scheduled) }
 
   it 'updates the error on custom project template Import/Export' do
@@ -11,7 +11,9 @@ describe RepositoryImportWorker do
 
     project.update(import_type: 'gitlab_custom_project_template')
     project.import_state.update(jid: '123')
-    expect_any_instance_of(Projects::ImportService).to receive(:execute).and_return({ status: :error, message: error })
+    expect_next_instance_of(Projects::ImportService) do |service|
+      expect(service).to receive(:execute).and_return({ status: :error, message: error })
+    end
 
     expect do
       subject.perform(project.id)
@@ -24,12 +26,23 @@ describe RepositoryImportWorker do
     let(:project) { create(:project, :mirror, :import_scheduled) }
 
     it 'adds mirror in front of the mirror scheduler queue' do
-      expect_any_instance_of(Projects::ImportService).to receive(:execute)
-        .and_return({ status: :ok })
+      expect_next_instance_of(Projects::ImportService) do |service|
+        expect(service).to receive(:execute).and_return({ status: :ok })
+      end
 
       expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!)
 
       subject.perform(project.id)
+    end
+  end
+
+  describe 'sidekiq options' do
+    it 'disables retry' do
+      expect(described_class.sidekiq_options['retry']).to eq(false)
+    end
+
+    it 'sets default status expiration' do
+      expect(described_class.sidekiq_options['status_expiration']).to eq(Gitlab::Import::StuckImportJob::IMPORT_JOBS_EXPIRATION)
     end
   end
 end

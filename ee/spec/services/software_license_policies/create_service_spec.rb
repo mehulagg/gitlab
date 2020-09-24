@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePolicies::CreateService do
+RSpec.describe SoftwareLicensePolicies::CreateService do
   let(:project) { create(:project) }
   let(:params) { { name: 'ExamplePL/2.1', approval_status: 'blacklisted' } }
 
@@ -13,7 +13,7 @@ describe SoftwareLicensePolicies::CreateService do
   end
 
   before do
-    stub_licensed_features(license_management: true)
+    stub_licensed_features(license_scanning: true)
   end
 
   subject { described_class.new(project, user, params) }
@@ -21,7 +21,7 @@ describe SoftwareLicensePolicies::CreateService do
   describe '#execute' do
     context 'with license management unavailable' do
       before do
-        stub_licensed_features(license_management: false)
+        stub_licensed_features(license_scanning: false)
       end
 
       it 'does not creates a software license policy' do
@@ -30,34 +30,42 @@ describe SoftwareLicensePolicies::CreateService do
     end
 
     context 'with a user who is allowed to admin' do
-      it 'creates one software license policy correctly' do
-        expect { subject.execute }.to change { project.software_license_policies.count }.from(0).to(1)
-
-        software_license_policy = project.software_license_policies.last
-        expect(software_license_policy).to be_persisted
-        expect(software_license_policy.name).to eq(params[:name])
-        expect(software_license_policy.approval_status).to eq('blacklisted')
-      end
-
-      context "when valid parameters are specified" do
-        let(:result) { subject.execute }
-
-        before do
-          allow(RefreshLicenseComplianceChecksWorker).to receive(:perform_async)
-          result
+      context 'when valid parameters are specified' do
+        where(:approval_status, :expected_classification) do
+          [
+            %w[allowed allowed],
+            %w[approved allowed],
+            %w[denied denied],
+            %w[blacklisted denied]
+          ]
         end
 
-        specify { expect(result[:status]).to be(:success) }
-        specify { expect(result[:software_license_policy]).to be_present }
-        specify { expect(result[:software_license_policy]).to be_persisted }
-        specify { expect(result[:software_license_policy].name).to eql(params[:name]) }
-        specify { expect(result[:software_license_policy].approval_status).to eql('blacklisted') }
-        specify { expect(RefreshLicenseComplianceChecksWorker).to have_received(:perform_async).with(project.id) }
+        with_them do
+          let(:params) { { name: 'MIT', approval_status: approval_status } }
+          let(:result) { subject.execute }
+
+          before do
+            allow(RefreshLicenseComplianceChecksWorker).to receive(:perform_async)
+            result
+          end
+
+          it 'creates one software license policy correctly' do
+            expect(project.software_license_policies.count).to be(1)
+            expect(result[:status]).to be(:success)
+            expect(result[:software_license_policy]).to be_present
+            expect(result[:software_license_policy]).to be_persisted
+            expect(result[:software_license_policy].name).to eql(params[:name])
+            expect(result[:software_license_policy].classification).to eql(expected_classification)
+            expect(RefreshLicenseComplianceChecksWorker).to have_received(:perform_async).with(project.id)
+          end
+        end
       end
 
       context "when an argument error is raised" do
         before do
-          allow_any_instance_of(Project).to receive(:software_license_policies).and_raise(ArgumentError)
+          allow_next_instance_of(Project) do |instance|
+            allow(instance).to receive(:software_license_policies).and_raise(ArgumentError)
+          end
         end
 
         specify { expect(subject.execute[:status]).to be(:error) }

@@ -40,23 +40,30 @@ class PipelineSerializer < BaseSerializer
 
   def preloaded_relations
     [
-      :stages,
-      :retryable_builds,
       :cancelable_statuses,
-      :trigger_requests,
+      :latest_statuses_ordered_by_stage,
+      :latest_builds_report_results,
       :manual_actions,
+      :retryable_builds,
       :scheduled_actions,
-      :artifacts,
-      :merge_request,
+      :stages,
+      :trigger_requests,
+      :user,
       {
+        downloadable_artifacts: {
+          project: [:route, { namespace: :route }],
+          job: []
+        },
+        failed_builds: %i(project metadata),
+        merge_request: {
+          source_project: [:route, { namespace: :route }],
+          target_project: [:route, { namespace: :route }]
+        },
         pending_builds: :project,
         project: [:route, { namespace: :route }],
-        artifacts: {
-          project: [:route, { namespace: :route }]
-        }
-      },
-      { triggered_by_pipeline: [:project, :user] },
-      { triggered_pipelines: [:project, :user] }
+        triggered_by_pipeline: [{ project: [:route, { namespace: :route }] }, :user],
+        triggered_pipelines: [{ project: [:route, { namespace: :route }] }, :user, :source_job]
+      }
     ]
   end
 end

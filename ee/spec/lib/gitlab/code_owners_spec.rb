@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CodeOwners do
+RSpec.describe Gitlab::CodeOwners do
   include FakeBlobHelpers
 
   let!(:code_owner) { create(:user, username: 'owner-1') }
@@ -29,7 +29,7 @@ describe Gitlab::CodeOwners do
       end
 
       it 'returns users for a blob' do
-        expect(described_class.for_blob(blob)).to include(code_owner)
+        expect(described_class.for_blob(project, blob)).to include(code_owner)
       end
     end
 
@@ -39,15 +39,45 @@ describe Gitlab::CodeOwners do
       end
 
       it 'returns no users' do
-        expect(described_class.for_blob(blob)).to be_empty
+        expect(described_class.for_blob(project, blob)).to be_empty
       end
+    end
+  end
+
+  describe ".fast_path_lookup and .slow_path_lookup" do
+    let(:codeowner_lookup_ref) { merge_request.target_branch }
+    let(:codeowner_content) { 'files/ruby/feature.rb @owner-1' }
+    let(:merge_request) do
+      create(
+        :merge_request,
+        source_project: project,
+        source_branch: 'feature',
+        target_project: project,
+        target_branch: 'with-codeowners'
+      )
+    end
+
+    before do
+      stub_licensed_features(code_owners: true)
+    end
+
+    it "return equivalent results" do
+      fast_results = described_class.entries_for_merge_request(merge_request).first
+
+      expect(merge_request.merge_request_diff).to receive(:overflow?).and_return(true)
+
+      slow_results = described_class.entries_for_merge_request(merge_request).first
+
+      expect(slow_results.users).to eq(fast_results.users)
+      expect(slow_results.groups).to eq(fast_results.groups)
+      expect(slow_results.pattern).to eq(fast_results.pattern)
     end
   end
 
   describe '.entries_for_merge_request' do
     let(:codeowner_lookup_ref) { merge_request.target_branch }
     let(:merge_request) do
-      build(
+      create(
         :merge_request,
         source_project: project,
         source_branch: 'feature',
@@ -71,14 +101,26 @@ describe Gitlab::CodeOwners do
       end
 
       context 'when merge_request_diff is specified' do
-        let(:merge_request_diff) { double(:merge_request_diff) }
-
         it 'returns owners at the specified ref' do
-          expect(merge_request).to receive(:modified_paths).with(past_merge_request_diff: merge_request_diff).and_return(['docs/CODEOWNERS'])
+          expect(described_class).to receive(:fast_path_lookup).and_call_original
+          expect(merge_request).to receive(:modified_paths).with(past_merge_request_diff: merge_request.merge_request_diff).and_return(['docs/CODEOWNERS'])
 
-          entry = described_class.entries_for_merge_request(merge_request, merge_request_diff: merge_request_diff).first
+          entry = described_class.entries_for_merge_request(merge_request, merge_request_diff: merge_request.merge_request_diff).first
 
           expect(entry.users).to eq([code_owner])
+        end
+      end
+
+      context 'when the merge request is large (>1_000 files)' do
+        before do
+          expect(merge_request.merge_request_diff).to receive(:overflow?).and_return(true)
+        end
+
+        it 'generates paths via .slow_path_lookup' do
+          expect(described_class).not_to receive(:fast_path_lookup)
+          expect(described_class).to receive(:slow_path_lookup).and_call_original
+
+          described_class.entries_for_merge_request(merge_request)
         end
       end
     end
@@ -89,7 +131,7 @@ describe Gitlab::CodeOwners do
       end
 
       it 'skips reading codeowners and returns an empty array' do
-        expect(merge_request).not_to receive(:modified_paths)
+        expect(described_class).not_to receive(:loader_for_merge_request)
 
         expect(described_class.entries_for_merge_request(merge_request)).to eq([])
       end

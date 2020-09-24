@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe NotesHelper do
+RSpec.describe NotesHelper do
   include RepoHelpers
 
   let(:owner) { create(:owner) }
@@ -22,6 +22,36 @@ describe NotesHelper do
     project.add_maintainer(maintainer)
     project.add_reporter(reporter)
     project.add_guest(guest)
+  end
+
+  describe '#note_target_title' do
+    context 'note does not exist' do
+      it 'returns nil' do
+        expect(helper.note_target_title(nil)).to be_blank
+      end
+    end
+
+    context 'target does not exist' do
+      it 'returns nil' do
+        note = Note.new
+        expect(helper.note_target_title(note)).to be_blank
+      end
+    end
+
+    context 'when given a design target' do
+      it 'returns nil' do
+        note = build_stubbed(:note_on_design)
+        expect(helper.note_target_title(note)).to be_blank
+      end
+    end
+
+    context 'when given a non-design target' do
+      it 'returns the issue title' do
+        issue = build_stubbed(:issue, title: 'Issue 1')
+        note = build_stubbed(:note, noteable: issue)
+        expect(helper.note_target_title(note)).to eq('Issue 1')
+      end
+    end
   end
 
   describe "#notes_max_access_for_users" do
@@ -47,9 +77,9 @@ describe NotesHelper do
 
     context 'for a merge request discusion' do
       let(:merge_request) { create(:merge_request, source_project: project, target_project: project, importing: true) }
-      let!(:merge_request_diff1) { merge_request.merge_request_diffs.create(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
-      let!(:merge_request_diff2) { merge_request.merge_request_diffs.create(head_commit_sha: nil) }
-      let!(:merge_request_diff3) { merge_request.merge_request_diffs.create(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
+      let!(:merge_request_diff1) { merge_request.merge_request_diffs.create!(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
+      let!(:merge_request_diff2) { merge_request.merge_request_diffs.create!(head_commit_sha: nil) }
+      let!(:merge_request_diff3) { merge_request.merge_request_diffs.create!(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
 
       context 'for a diff discussion' do
         context 'when the discussion is active' do
@@ -62,10 +92,8 @@ describe NotesHelper do
 
         context 'when the discussion is on an older merge request version' do
           let(:position) do
-            Gitlab::Diff::Position.new(
-              old_path: ".gitmodules",
-              new_path: ".gitmodules",
-              old_line: nil,
+            build(:text_diff_position, :added,
+              file: ".gitmodules",
               new_line: 4,
               diff_refs: merge_request_diff1.diff_refs
             )
@@ -86,9 +114,8 @@ describe NotesHelper do
 
         context 'when the discussion is on a comparison between merge request versions' do
           let(:position) do
-            Gitlab::Diff::Position.new(
-              old_path: ".gitmodules",
-              new_path: ".gitmodules",
+            build(:text_diff_position,
+              file: ".gitmodules",
               old_line: 4,
               new_line: 4,
               diff_refs: merge_request_diff3.compare_with(merge_request_diff1.head_commit_sha).diff_refs
@@ -198,7 +225,7 @@ describe NotesHelper do
     it 'return snippet notes path for personal snippet' do
       @snippet = create(:personal_snippet)
 
-      expect(helper.notes_url).to eq("/snippets/#{@snippet.id}/notes")
+      expect(helper.notes_url).to eq("/-/snippets/#{@snippet.id}/notes")
     end
 
     it 'return project notes path for project snippet' do
@@ -223,7 +250,7 @@ describe NotesHelper do
     it 'return snippet notes path for personal snippet' do
       note = create(:note_on_personal_snippet)
 
-      expect(helper.note_url(note)).to eq("/snippets/#{note.noteable.id}/notes/#{note.id}")
+      expect(helper.note_url(note)).to eq("/-/snippets/#{note.noteable.id}/notes/#{note.id}")
     end
 
     it 'return project notes path for project snippet' do
@@ -257,7 +284,7 @@ describe NotesHelper do
       @snippet = create(:project_snippet, project: @project)
       @note = create(:note_on_personal_snippet)
 
-      expect(helper.form_resources).to eq([@project.namespace, @project, @note])
+      expect(helper.form_resources).to eq([@project, @note])
     end
 
     it 'returns namespace, project and note path for other noteables' do
@@ -265,7 +292,7 @@ describe NotesHelper do
       @project = create(:project, path: 'test', namespace: namespace)
       @note = create(:note_on_issue, project: @project)
 
-      expect(helper.form_resources).to eq([@project.namespace, @project, @note])
+      expect(helper.form_resources).to eq([@project, @note])
     end
   end
 
@@ -275,7 +302,7 @@ describe NotesHelper do
     let(:note) { create(:note_on_issue, noteable: issue, project: project) }
 
     it 'returns the noteable url with an anchor to the note' do
-      expect(noteable_note_url(note)).to match("/#{project.namespace.path}/#{project.path}/issues/#{issue.iid}##{dom_id(note)}")
+      expect(noteable_note_url(note)).to match("/#{project.namespace.path}/#{project.path}/-/issues/#{issue.iid}##{dom_id(note)}")
     end
   end
 

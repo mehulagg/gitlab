@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::DashboardController do
+RSpec.describe Admin::DashboardController do
   describe '#index' do
     render_views
 
@@ -11,7 +11,7 @@ describe Admin::DashboardController do
 
       get :index
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     it "does not allow an auditor user to access the page" do
@@ -19,7 +19,7 @@ describe Admin::DashboardController do
 
       get :index
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it "does not allow a regular user to access the page" do
@@ -27,7 +27,7 @@ describe Admin::DashboardController do
 
       get :index
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it 'shows the license breakdown' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRules::CreateService do
+RSpec.describe ApprovalRules::CreateService do
   let(:project) { create(:project) }
   let(:user) { project.creator }
 
@@ -76,12 +76,105 @@ describe ApprovalRules::CreateService do
         expect(result[:message]).to include('Prohibited')
       end
     end
+
+    context 'when approval rule with empty users and groups is being created' do
+      subject { described_class.new(target, user, { user_ids: [], group_ids: [] }) }
+
+      it 'sets default attributes for any-approver rule' do
+        rule = subject.execute[:rule]
+
+        expect(rule[:rule_type]).to eq('any_approver')
+        expect(rule[:name]).to eq('All Members')
+      end
+    end
+
+    context 'when any-approver rule exists' do
+      before do
+        target.approval_rules.create!(rule_type: :any_approver, name: 'All members')
+      end
+
+      context 'multiple approval rules are not enabled' do
+        subject { described_class.new(target, user, { user_ids: [1], group_ids: [] }) }
+
+        it 'removes the rule if a regular one is created' do
+          expect { subject.execute }.to change(
+            target.approval_rules.any_approver, :count
+          ).from(1).to(0)
+        end
+      end
+
+      context 'multiple approval rules are enabled' do
+        subject { described_class.new(target, user, { user_ids: [1], group_ids: [] }) }
+
+        before do
+          stub_licensed_features(multiple_approval_rules: true)
+        end
+
+        it 'does not remove any approval rule' do
+          expect { subject.execute }.not_to change(target.approval_rules.any_approver, :count)
+        end
+      end
+    end
   end
 
   context 'when target is project' do
     let(:target) { project }
 
     it_behaves_like "creatable"
+
+    context 'when protected_branch_ids param is present' do
+      let(:protected_branch) { create(:protected_branch, project: target) }
+
+      subject do
+        described_class.new(
+          target,
+          user,
+          name: 'developers',
+          approvals_required: 1,
+          protected_branch_ids: [protected_branch.id]
+        ).execute
+      end
+
+      context 'and multiple approval rules is enabled' do
+        before do
+          stub_licensed_features(multiple_approval_rules: true)
+        end
+
+        it 'associates the approval rule to the protected branch' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:rule].protected_branches).to eq([protected_branch])
+        end
+
+        context 'but user cannot administer project' do
+          before do
+            allow(Ability).to receive(:allowed?).and_call_original
+            allow(Ability).to receive(:allowed?).with(user, :admin_project, target).and_return(false)
+          end
+
+          it 'does not associate the approval rule to the protected branch' do
+            expect(subject[:status]).to eq(:success)
+            expect(subject[:rule].protected_branches).to be_empty
+          end
+        end
+
+        context 'but protected branch is for another project' do
+          let(:another_project) { create(:project) }
+          let(:protected_branch) { create(:protected_branch, project: another_project) }
+
+          it 'does not associate the approval rule to the protected branch' do
+            expect(subject[:status]).to eq(:success)
+            expect(subject[:rule].protected_branches).to be_empty
+          end
+        end
+      end
+
+      context 'and multiple approval rules is disabled' do
+        it 'does not associate the approval rule to the protected branch' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:rule].protected_branches).to be_empty
+        end
+      end
+    end
 
     ApprovalProjectRule::REPORT_TYPES_BY_DEFAULT_NAME.keys.each do |rule_name|
       context "when the rule name is `#{rule_name}`" do
@@ -102,14 +195,19 @@ describe ApprovalRules::CreateService do
     it_behaves_like "creatable"
 
     context 'when project rule id is present' do
+      let_it_be(:project_user) { create(:user) }
+      let_it_be(:public_group) { create(:group, :public) }
+      let(:project_user_approvers) { [project_user] }
+      let(:group_user_approvers) { [public_group] }
+      let(:merge_request_approvers) { {} }
       let(:project_rule) do
         create(
           :approval_project_rule,
           project: project,
           name: 'bar',
           approvals_required: 1,
-          users: [create(:user)],
-          groups: [create(:group)]
+          users: project_user_approvers,
+          groups: group_user_approvers
         )
       end
 
@@ -117,24 +215,68 @@ describe ApprovalRules::CreateService do
         described_class.new(target, user, {
           name: 'foo',
           approvals_required: 0,
-          approval_project_rule_id: project_rule.id,
-          user_ids: [],
-          group_ids: []
-        }).execute
+          approval_project_rule_id: project_rule.id
+        }.merge(merge_request_approvers)).execute
       end
 
       let(:rule) { result[:rule] }
 
-      it 'associates with project rule' do
+      before do
+        project.add_developer(project_user)
+      end
+
+      it 'associates with project rule and copies its properites' do
         expect(result[:status]).to eq(:success)
         expect(rule.approvals_required).to eq(0)
         expect(rule.approval_project_rule).to eq(project_rule)
-      end
-
-      it 'copies properties from the project rule' do
         expect(rule.name).to eq(project_rule.name)
+        expect(rule.rule_type).to eq('regular')
         expect(rule.users).to match(project_rule.users)
         expect(rule.groups).to match(project_rule.groups)
+      end
+
+      context 'when project rule includes no specific approvers' do
+        let(:project_user_approvers) { User.none }
+        let(:group_user_approvers) { Group.none }
+
+        it 'associates with project rule and copies its properties' do
+          expect(result[:status]).to eq(:success)
+          expect(rule.approvals_required).to eq(0)
+          expect(rule.approval_project_rule).to eq(project_rule)
+          expect(rule.name).to eq(project_rule.name)
+          expect(rule.rule_type).to eq('any_approver')
+          expect(rule.users).to match([])
+          expect(rule.groups).to match([])
+        end
+      end
+
+      context 'when merge request includes empty approvers' do
+        let(:merge_request_approvers) do
+          {
+            user_ids: [],
+            group_ids: []
+          }
+        end
+
+        it 'sets any approver' do
+          expect(result[:status]).to eq(:success)
+          expect(rule.name).to eq(project_rule.name)
+          expect(rule.rule_type).to eq('any_approver')
+          expect(rule.users).to eq([])
+          expect(rule.groups).to eq([])
+        end
+      end
+
+      context 'when merge request overrides approvers' do
+        let(:merge_request_approvers) { { user_ids: [user.id] } }
+
+        it 'sets single user as the approver' do
+          expect(result[:status]).to eq(:success)
+          expect(rule.name).to eq(project_rule.name)
+          expect(rule.rule_type).to eq('regular')
+          expect(rule.users).to eq([user])
+          expect(rule.groups).to eq([])
+        end
       end
 
       context 'when project rule is under the same project as MR' do

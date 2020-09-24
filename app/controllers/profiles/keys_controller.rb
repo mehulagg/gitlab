@@ -42,19 +42,19 @@ class Profiles::KeysController < Profiles::ApplicationController
         if user.present?
           render plain: user.all_ssh_keys.join("\n")
         else
-          return render_404
+          render_404
         end
       rescue => e
         render html: e.message
       end
     else
-      return render_404
+      render_404
     end
   end
 
   private
 
   def key_params
-    params.require(:key).permit(:title, :key)
+    params.require(:key).permit(:title, :key, :expires_at)
   end
 end

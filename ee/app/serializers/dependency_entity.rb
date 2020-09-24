@@ -3,8 +3,13 @@
 class DependencyEntity < Grape::Entity
   include RequestAwareEntity
 
+  class AncestorEntity < Grape::Entity
+    expose :name, :version
+  end
+
   class LocationEntity < Grape::Entity
-    expose :blob_path, :path
+    expose :blob_path, :path, :top_level
+    expose :ancestors, using: AncestorEntity
   end
 
   class VulnerabilityEntity < Grape::Entity
@@ -23,10 +28,10 @@ class DependencyEntity < Grape::Entity
   private
 
   def can_read_vulnerabilities?
-    can?(request.user, :read_project_security_dashboard, request.project)
+    can?(request.user, :read_vulnerability, request.project)
   end
 
   def can_read_licenses?
-    can?(request.user, :read_software_license_policy, request.project)
+    can?(request.user, :read_licenses, request.project)
   end
 end

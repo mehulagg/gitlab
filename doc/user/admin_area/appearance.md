@@ -5,7 +5,7 @@ disqus_identifier: 'https://docs.gitlab.com/ee/customization/branded_login_page.
 
 # GitLab Appearance **(CORE ONLY)**
 
-There are several options for customizing the appearance of a self hosted instance
+There are several options for customizing the appearance of a self-managed instance
 of GitLab. These settings are accessed from the **Admin Area** in the **Appearance**
 section.
 
@@ -15,7 +15,7 @@ By default, the navigation bar has the GitLab logo, but this can be customized w
 any image desired. It is optimized for images 28px high (any width), but any image can be
 used (less than 1MB) and it will automatically be resized.
 
-![navbar header logo screenshot](img/appearance_header_logo_v12_3.png)
+![Navigation bar header logo screenshot](img/appearance_header_logo_v12_3.png)
 
 Once you select and upload an image, click **Update appearance settings** at the bottom
 of the page to activate it in the GitLab instance.
@@ -25,7 +25,7 @@ GitLab pipeline emails will also display the custom logo.
 
 ## Favicon
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/14497) in GitLab 11.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/14497) in GitLab 11.0.
 
 By default, the favicon (used by the browser as the tab icon, as well as the CI status icon)
 uses the GitLab logo, but this can be customized with any icon desired. It must be a
@@ -38,16 +38,16 @@ of the page to activate it in the GitLab instance.
 
 ## System header and footer messages
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/5023) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.7.
-> - [Added](https://gitlab.com/gitlab-org/gitlab-foss/issues/55057) to [GitLab Core](https://about.gitlab.com/pricing/) in 11.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5023) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.7.
+> - [Added](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/55057) to [GitLab Core](https://about.gitlab.com/pricing/) in 11.9.
 
 You can add a small header message, a small footer message, or both, to the interface
 of your GitLab instance. These messages will appear on all projects and pages of the
 instance, including the sign in / sign up page. The default color is white text on
 an orange background, but this can be customized by clicking on **Customize colors**.
 
-Limited [markdown](../markdown.md) is supported, such as bold, italics, and links, for
-example. Other markdown features, including lists, images and quotes, are not supported,
+Limited [Markdown](../markdown.md) is supported, such as bold, italics, and links, for
+example. Other Markdown features, including lists, images, and quotes are not supported
 as the header and footer messages can only be a single line.
 
 ![header and footer screenshot](img/appearance_header_footer_v12_3.png)
@@ -61,7 +61,7 @@ to activate it in the GitLab instance.
 ## Sign in / Sign up pages
 
 You can replace the default message on the sign in / sign up page with your own message
-and logo. You can make full use of [markdown](../markdown.md) in the description:
+and logo. You can make full use of [Markdown](../markdown.md) in the description:
 
 ![sign in message screenshot](img/appearance_sign_in_v12_3.png)
 
@@ -81,7 +81,7 @@ You can add also add a [customized help message](settings/help_page.md) below th
 ## New project pages
 
 You can add a new project guidelines message to the **New project page** within GitLab.
-You can make full use of [markdown](../markdown.md) in the description:
+You can make full use of [Markdown](../markdown.md) in the description:
 
 ![new project message screenshot](img/appearance_new_project_v12_3.png)
 

@@ -1,0 +1,7 @@
+- breadcrumb_title _('Dependency List')
+- page_title _('Dependency List')
+
+#js-dependencies-app{ data: { endpoint: project_dependencies_path(@project, format: :json),
+  documentation_path: help_page_path('user/application_security/dependency_list/index'),
+  support_documentation_path: help_page_path('user/application_security/dependency_scanning/index', anchor: 'supported-languages-and-package-managers'),
+  empty_state_svg_path: image_path('illustrations/Dependency-list-empty-state.svg') } }

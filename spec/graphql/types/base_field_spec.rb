@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Types::BaseField do
+RSpec.describe Types::BaseField do
   context 'when considering complexity' do
     let(:resolver) do
       Class.new(described_class) do
@@ -46,7 +46,15 @@ describe Types::BaseField do
       expect(field.to_graphql.complexity).to eq 12
     end
 
-    context 'when field has a resolver proc' do
+    context 'when field has a resolver' do
+      context 'when a valid complexity is already set' do
+        let(:field) { described_class.new(name: 'test', type: GraphQL::STRING_TYPE.connection_type, resolver_class: resolver, complexity: 2, max_page_size: 100, null: true) }
+
+        it 'uses this complexity' do
+          expect(field.to_graphql.complexity).to eq 2
+        end
+      end
+
       context 'and is a connection' do
         let(:field) { described_class.new(name: 'test', type: GraphQL::STRING_TYPE.connection_type, resolver_class: resolver, max_page_size: 100, null: true) }
 
@@ -110,6 +118,76 @@ describe Types::BaseField do
           expect(field.to_graphql.complexity).to eq 12
         end
       end
+    end
+
+    describe '#visible?' do
+      context 'and has a feature_flag' do
+        let(:flag) { :test_feature }
+        let(:field) { described_class.new(name: 'test', type: GraphQL::STRING_TYPE, feature_flag: flag, null: false) }
+        let(:context) { {} }
+
+        before do
+          skip_feature_flags_yaml_validation
+        end
+
+        it 'returns false if the feature is not enabled' do
+          stub_feature_flags(flag => false)
+
+          expect(field.visible?(context)).to eq(false)
+        end
+
+        it 'returns true if the feature is enabled' do
+          expect(field.visible?(context)).to eq(true)
+        end
+      end
+    end
+  end
+
+  describe '#description' do
+    context 'feature flag given' do
+      let(:field) { described_class.new(name: 'test', type: GraphQL::STRING_TYPE, feature_flag: flag, null: false, description: 'Test description') }
+      let(:flag) { :test_flag }
+
+      it 'prepends the description' do
+        expect(field.description). to eq 'Test description. Available only when feature flag `test_flag` is enabled'
+      end
+
+      context 'falsey feature_flag values' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:flag, :feature_value) do
+          ''  | false
+          ''  | true
+          nil | false
+          nil | true
+        end
+
+        with_them do
+          it 'returns the correct description' do
+            expect(field.description).to eq('Test description')
+          end
+        end
+      end
+    end
+  end
+
+  include_examples 'Gitlab-style deprecations' do
+    def subject(args = {})
+      base_args = { name: 'test', type: GraphQL::STRING_TYPE, null: true }
+
+      described_class.new(**base_args.merge(args))
+    end
+
+    it 'interacts well with the `feature_flag` property' do
+      field = subject(
+        deprecated: { milestone: '1.10', reason: 'Deprecation reason' },
+        description: 'Field description',
+        feature_flag: 'foo_flag'
+      )
+
+      expectation = 'Field description. Available only when feature flag `foo_flag` is enabled. Deprecated in 1.10: Deprecation reason'
+
+      expect(field.description).to eq(expectation)
     end
   end
 end

@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { GlModal, GlLink, GlIntersperse } from '@gitlab/ui';
 
 import DependenciesLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';
@@ -17,9 +17,7 @@ describe('DependencyLicenseLinks component', () => {
   const factory = ({ numLicenses, numLicensesWithUrl = 0, title = 'test-dependency' } = {}) => {
     const licenses = addUrls(createLicenses(numLicenses), numLicensesWithUrl);
 
-    const localVue = createLocalVue();
-    wrapper = shallowMount(localVue.extend(DependenciesLicenseLinks), {
-      localVue,
+    wrapper = shallowMount(DependenciesLicenseLinks, {
       propsData: {
         licenses,
         title,
@@ -51,7 +49,7 @@ describe('DependencyLicenseLinks component', () => {
   it.each([3, 5, 8, 13])('limits the number of visible licenses to 2', numLicenses => {
     factory({ numLicenses });
 
-    expect(findLicenseListItems().length).toBe(2);
+    expect(findLicenseListItems()).toHaveLength(2);
   });
 
   it.each`
@@ -67,9 +65,9 @@ describe('DependencyLicenseLinks component', () => {
     ({ numLicenses, numLicensesWithUrl, expectedNumVisibleLinks, expectedNumModalLinks }) => {
       factory({ numLicenses, numLicensesWithUrl });
 
-      expect(findLicensesList().findAll(GlLink).length).toBe(expectedNumVisibleLinks);
+      expect(findLicensesList().findAll(GlLink)).toHaveLength(expectedNumVisibleLinks);
 
-      expect(findModal().findAll(GlLink).length).toBe(expectedNumModalLinks);
+      expect(findModal().findAll(GlLink)).toHaveLength(expectedNumModalLinks);
     },
   );
 
@@ -110,7 +108,7 @@ describe('DependencyLicenseLinks component', () => {
     ({ numLicenses, expectedNumModals }) => {
       factory({ numLicenses, expectedNumModals });
 
-      expect(wrapper.findAll(GlModal).length).toBe(expectedNumModals);
+      expect(wrapper.findAll(GlModal)).toHaveLength(expectedNumModals);
     },
   );
 
@@ -161,6 +159,6 @@ describe('DependencyLicenseLinks component', () => {
   `('contains the correct modal content', ({ numLicenses, expectedLicensesInModal }) => {
     factory({ numLicenses });
 
-    expect(findModalItem().length).toBe(expectedLicensesInModal);
+    expect(findModalItem()).toHaveLength(expectedLicensesInModal);
   });
 });

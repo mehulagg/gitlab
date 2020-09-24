@@ -89,7 +89,7 @@ are as follows:
   (`pool.source_project`)
 
 > TODO Fix invalid SQL data for pools created prior to GitLab 11.11
-> <https://gitlab.com/gitlab-org/gitaly/issues/1653>.
+> <https://gitlab.com/gitlab-org/gitaly/-/issues/1653>.
 
 ### Assumptions
 
@@ -111,7 +111,7 @@ are as follows:
   contents of the pool repository are a Git clone of the source
   project repository.
 - The occasion for creating a pool is when an existing eligible
-  (public, hashed storage, non-forked) GitLab project gets forked and
+  (non-private, hashed storage, non-forked) GitLab project gets forked and
   this project does not belong to a pool repository yet. The fork
   parent project becomes the source project of the new pool, and both
   the fork parent and the fork child project become members of the new
@@ -133,7 +133,7 @@ are as follows:
   repository.
 
 > TODO should forks of forks be deduplicated?
-> <https://gitlab.com/gitlab-org/gitaly/issues/1532>
+> <https://gitlab.com/gitlab-org/gitaly/-/issues/1532>
 
 ### Consequences
 
@@ -191,4 +191,4 @@ the secondary, at which stage Git objects will get deduplicated.
 
 > TODO How do we handle the edge case where at the time the Geo
 > secondary tries to create the pool repository, the source project does
-> not exist? <https://gitlab.com/gitlab-org/gitaly/issues/1533>
+> not exist? <https://gitlab.com/gitlab-org/gitaly/-/issues/1533>

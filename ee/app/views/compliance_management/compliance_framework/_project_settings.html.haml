@@ -1,0 +1,8 @@
+- return unless current_user.can?(:admin_compliance_framework, @project)
+
+.row
+  .form-group.col-md-9.mb-5
+    = f.fields_for :compliance_framework_setting, ComplianceManagement::ComplianceFramework::ProjectSettings.new do |cf|
+      = cf.label :framework, _('Compliance framework (optional)'), class: 'label-bold'
+      %p.text-secondary= _('Select required regulatory standard')
+      = cf.select :framework, options_for_select(compliance_framework_options, @project.compliance_framework_setting&.framework), { selected: '', disabled: '', prompt: _('Choose your framework'), include_blank: _('None') }, class: 'form-control'

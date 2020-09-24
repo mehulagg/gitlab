@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::MultiVersionInstanceProxy do
+RSpec.describe Elastic::MultiVersionInstanceProxy do
   let(:snippet) { create(:project_snippet) }
 
   subject { described_class.new(snippet) }
@@ -13,6 +13,24 @@ describe Elastic::MultiVersionInstanceProxy do
 
       expect(result).to be_a(Elastic::V12p1::SnippetInstanceProxy)
       expect(result.target).to eq(snippet)
+    end
+
+    context 'repository' do
+      let(:project) { create(:project, :repository) }
+      let(:repository) { project.repository }
+      let(:wiki) { project.wiki }
+
+      it 'returns instance proxy in specified version' do
+        repository_proxy = described_class.new(repository)
+        repository_result = repository_proxy.version('V12p1')
+        wiki_proxy = described_class.new(wiki)
+        wiki_result = wiki_proxy.version('V12p1')
+
+        expect(repository_result).to be_a(Elastic::V12p1::RepositoryInstanceProxy)
+        expect(repository_result.target).to eq(repository)
+        expect(wiki_result).to be_a(Elastic::V12p1::ProjectWikiInstanceProxy)
+        expect(wiki_result.target).to eq(wiki)
+      end
     end
   end
 

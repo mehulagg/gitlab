@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "allOf": [
+    { "$ref": "../../../../../../spec/fixtures/api/schemas/entities/discussion.json" },
+    {
+      "properties" : {
+        "notes": {
+          "items": {
+            "properties" : {
+              "author": {
+                "properties": {
+                  "is_gitlab_employee": { "type": "boolean"}
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

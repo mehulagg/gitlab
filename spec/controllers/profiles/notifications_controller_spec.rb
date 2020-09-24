@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Profiles::NotificationsController do
+RSpec.describe Profiles::NotificationsController do
   let(:user) do
     create(:user) do |user|
-      user.emails.create(email: 'original@example.com')
-      user.emails.create(email: 'new@example.com')
+      user.emails.create(email: 'original@example.com', confirmed_at: Time.current)
+      user.emails.create(email: 'new@example.com', confirmed_at: Time.current)
       user.notification_email = 'original@example.com'
       user.save!
     end
@@ -22,8 +22,8 @@ describe Profiles::NotificationsController do
     end
 
     context 'with groups that do not have notification preferences' do
-      set(:group) { create(:group) }
-      set(:subgroup) { create(:group, parent: group) }
+      let_it_be(:group) { create(:group) }
+      let_it_be(:subgroup) { create(:group, parent: group) }
 
       before do
         group.add_developer(user)
@@ -37,7 +37,7 @@ describe Profiles::NotificationsController do
         expect(assigns(:group_notifications).map(&:source_id)).to include(subgroup.id)
       end
 
-      it 'has an N+1 (but should not)' do
+      it 'does not have an N+1' do
         sign_in(user)
 
         control = ActiveRecord::QueryRecorder.new do
@@ -46,10 +46,71 @@ describe Profiles::NotificationsController do
 
         create_list(:group, 2, parent: group)
 
-        # We currently have an N + 1, switch to `not_to` once fixed
         expect do
           get :show
-        end.to exceed_query_limit(control)
+        end.not_to exceed_query_limit(control)
+      end
+    end
+
+    context 'with group notifications' do
+      let(:notifications_per_page) { 5 }
+
+      let_it_be(:group) { create(:group) }
+      let_it_be(:subgroups) { create_list(:group, 10, parent: group) }
+
+      before do
+        group.add_developer(user)
+        sign_in(user)
+        allow(Kaminari.config).to receive(:default_per_page).and_return(notifications_per_page)
+      end
+
+      it 'paginates the groups' do
+        get :show
+
+        expect(assigns(:group_notifications).count).to eq(5)
+      end
+
+      context 'when the user is not a member' do
+        let(:notifications_per_page) { 20 }
+
+        let_it_be(:public_group) { create(:group, :public) }
+
+        it 'does not show public groups', :aggregate_failures do
+          get :show
+
+          # Let's make sure we're grabbing all groups in one page, just in case
+          expect(assigns(:user_groups).count).to eq(11)
+          expect(assigns(:user_groups)).not_to include(public_group)
+        end
+      end
+    end
+
+    context 'with project notifications' do
+      let!(:notification_setting) { create(:notification_setting, source: project, user: user, level: :watch) }
+
+      before do
+        sign_in(user)
+        get :show
+      end
+
+      context 'when project is public' do
+        let(:project) { create(:project, :public) }
+
+        it 'shows notification setting for project' do
+          expect(assigns(:project_notifications).map(&:source_id)).to include(project.id)
+        end
+      end
+
+      context 'when project is public' do
+        let(:project) { create(:project, :private) }
+
+        it 'shows notification setting for project' do
+          # notification settings for given project were created before project was set to private
+          expect(user.notification_settings.for_projects.map(&:source_id)).to include(project.id)
+
+          # check that notification settings for project where user does not have access are filtered
+          expect(assigns(:project_notifications)).to be_empty
+        end
       end
     end
   end

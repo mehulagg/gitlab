@@ -1,8 +1,11 @@
 ---
+stage: Growth
+group: Conversion
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto
 ---
 
-# Activate all GitLab Enterprise Edition functionality with a license **(STARTER ONLY)**
+# Activate GitLab EE with a license **(STARTER ONLY)**
 
 To activate all GitLab Enterprise Edition (EE) functionality, you need to upload
 a license. Once you've received your license from GitLab Inc., you can upload it
@@ -10,8 +13,8 @@ by **signing into your GitLab instance as an admin** or add it at
 installation time.
 
 The license has the form of a base64 encoded ASCII text with a `.gitlab-license`
-extension and can be obtained when you [purchase one][pricing] or when you sign
-up for a [free trial].
+extension and can be obtained when you [purchase one](https://about.gitlab.com/pricing/) or when you sign
+up for a [free trial](https://about.gitlab.com/free-trial/).
 
 NOTE: **Note:**
 As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an
@@ -24,17 +27,17 @@ will be locked.
 
 The very first time you visit your GitLab EE installation signed in as an admin,
 you should see a note urging you to upload a license with a link that takes you
-straight to the License admin area.
+straight to **Admin Area > License**.
 
 Otherwise, you can:
 
 1. Navigate manually to the **Admin Area** by clicking the wrench icon in the menu bar.
 
-   ![Admin area icon](img/admin_wrench.png)
+   ![Admin Area icon](img/admin_wrench.png)
 
 1. And then going to the **License** tab and click on **Upload New License**.
 
-   ![License admin area](img/license_admin_area.png)
+   ![License Admin Area](img/license_admin_area.png)
 
 1. If you've received a `.gitlab-license` file, you should have already downloaded
    it in your local machine. You can then upload it directly by choosing the
@@ -57,19 +60,19 @@ It is also possible to specify a custom location and filename for the license.
 Source installations should set the `GITLAB_LICENSE_FILE` environment
 variable with the path to a valid GitLab Enterprise Edition license.
 
-```sh
+```shell
 export GITLAB_LICENSE_FILE="/path/to/license/file"
 ```
 
 Omnibus installations should add this entry to `gitlab.rb`:
 
 ```ruby
-gitlab_rails['license_file'] = "/path/to/license/file"
+gitlab_rails['initial_license_file'] = "/path/to/license/file"
 ```
 
-CAUTION:: **Caution:**
+CAUTION: **Caution:**
 These methods will only add a license at the time of installation. Use the
-admin area in the web ui to renew or upgrade licenses.
+Admin Area in the web user interface to renew or upgrade licenses.
 
 ---
 
@@ -99,22 +102,36 @@ In order to get back all the previous functionality, a new license must be uploa
 To fall back to having only the Core features active, you'll need to delete the
 expired license(s).
 
+### Remove a license
+
+To remove a license from a self-managed instance:
+
+1. Go to the [Admin Area](index.md) (click the wrench in the top navigation bar).
+1. Click **License** in the left sidebar.
+1. Click **Remove License**.
+
 ## License history
 
 It's possible to upload and view more than one license,
 but only the latest license will be used as the active license.
 
-[free trial]: https://about.gitlab.com/free-trial/
-[pricing]: https://about.gitlab.com/pricing/
+## Troubleshooting
 
-<!-- ## Troubleshooting
+### There is no License tab in the Admin Area
 
-Include any troubleshooting steps that you can foresee. If you know beforehand what issues
-one might have when setting this up, or when something is changed, or on upgrading, it's
-important to describe those, too. Think of things that may go wrong and include them here.
-This is important to minimize requests for support, and to avoid doc comments with
-questions that you know someone might ask.
+If you originally installed Community Edition rather than Enterprise Edition you will need to
+[upgrade to Enterprise Edition](../../update/README.md#community-to-enterprise-edition)
+before uploading your license.
 
-Each scenario can be a third-level heading, e.g. `### Getting error message X`.
-If you have none to add when creating a doc, leave this section in place
-but commented out to help encourage others to add to it in the future. -->
+GitLab.com users cannot upload and use a self-managed license. If you
+wish to use paid features on GitLab.com, a separate subscription may be
+[purchased](../../subscriptions/gitlab_com/index.md).
+
+### Users exceed license limit upon renewal
+
+If you've added new users to your GitLab instance prior to renewal you may need to
+purchase additional seats to cover those users. If this is the case and a license
+without enough users is uploaded a message is displayed prompting you to purchase
+additional users. More information on how to determine the required number of users
+and how to add additional seats can be found in the
+[licensing FAQ](https://about.gitlab.com/pricing/licensing-faq/).

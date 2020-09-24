@@ -8,8 +8,9 @@ module Gitlab
           attr_accessor :path
           attr_reader :name
 
-          def initialize(name)
+          def initialize(name, path: nil)
             @name = name
+            @path = path
           end
 
           def hash

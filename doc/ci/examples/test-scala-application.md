@@ -1,10 +1,13 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: tutorial
 ---
 
 # Test and deploy a Scala application to Heroku
 
-This example demonstrates the integration of GitLab CI with Scala
+This example demonstrates the integration of GitLab CI/CD with Scala
 applications using SBT. You can view or fork the [example project](https://gitlab.com/gitlab-examples/scala-sbt)
 and view the logs of its past [CI jobs](https://gitlab.com/gitlab-examples/scala-sbt/-/jobs?scope=finished).
 
@@ -14,7 +17,7 @@ The following `.gitlab-ci.yml` should be added in the root of your
 repository to trigger CI:
 
 ``` yaml
-image: java:8
+image: openjdk:8
 
 stages:
   - test
@@ -60,7 +63,7 @@ You can use other versions of Scala and SBT by defining them in
 
 Add the `Coverage was \[\d+.\d+\%\]` regular expression in the
 **Settings ➔ Pipelines ➔ Coverage report** project setting to
-retrieve the [test coverage](../../user/project/pipelines/settings.md#test-coverage-report-badge)
+retrieve the [test coverage](../pipelines/settings.md#test-coverage-report-badge)
 rate from the build trace and have it displayed with your jobs.
 
 **Pipelines** must be enabled for this option to appear.
@@ -74,5 +77,5 @@ in the `.gitlab-ci.yml` file with your application's name.
 ## Heroku API key
 
 You can look up your Heroku API key in your
-[account](https://dashboard.heroku.com/account). Add a [protected variable](../variables/README.md#protected-environment-variables) with
+[account](https://dashboard.heroku.com/account). Add a [protected variable](../variables/README.md#protect-a-custom-variable) with
 this value in **Project ➔ Variables** with key `HEROKU_API_KEY`.

@@ -1,25 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DependencyListJobFailedAlert component matches the snapshot 1`] = `
-<dependencylistalert-stub
-  headertext="Job failed to generate the dependency list"
-  type="danger"
+<gl-alert-stub
+  dismissible="true"
+  dismisslabel="Dismiss"
+  primarybuttonlink=""
+  primarybuttontext=""
+  secondarybuttonlink="/jobs/foo/3210"
+  secondarybuttontext="View job"
+  title="Job failed to generate the dependency list"
+  variant="danger"
 >
-  <p>
+  <span>
     The 
     <code>
       dependency_scanning
     </code>
      job has failed and cannot generate the list. Please ensure the job is running properly and run the pipeline again.
-  </p>
-   
-  <glbutton-stub
-    class="btn-inverted btn-danger mb-2"
-    href="/jobs/foo/3210"
-  >
-    
-    View job
-  
-  </glbutton-stub>
-</dependencylistalert-stub>
+  </span>
+</gl-alert-stub>
 `;

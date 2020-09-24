@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
+RSpec.describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
   include PrometheusHelpers
   include ReactiveCachingHelpers
 
@@ -18,11 +18,34 @@ describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
   let(:environment_query) { Gitlab::Prometheus::Queries::EnvironmentQuery }
 
   describe '#query' do
+    describe 'validate_query' do
+      let(:environment) { build_stubbed(:environment, slug: 'env-slug') }
+      let(:validation_query) { Gitlab::Prometheus::Queries::ValidateQuery.name }
+      let(:query) { 'avg(response)' }
+      let(:validation_respone) { { data: { valid: true } } }
+
+      around do |example|
+        freeze_time { example.run }
+      end
+
+      context 'with valid data' do
+        subject { service.query(:validate, query) }
+
+        before do
+          stub_reactive_cache(service, validation_respone, validation_query, query)
+        end
+
+        it 'returns query data' do
+          is_expected.to eq(query: { valid: true })
+        end
+      end
+    end
+
     describe 'environment' do
       let(:environment) { build_stubbed(:environment, slug: 'env-slug') }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       context 'with valid data' do
@@ -62,7 +85,7 @@ describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
       let(:deployment_query) { Gitlab::Prometheus::Queries::DeploymentQuery }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       context 'with valid data' do
@@ -84,7 +107,7 @@ describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
       let(:time_window) { [1552642245.067, 1552642095.831] }
 
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       context 'with valid data' do
@@ -103,6 +126,7 @@ describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
 
   describe '#calculate_reactive_cache' do
     let(:environment) { create(:environment, slug: 'env-slug') }
+
     before do
       service.manual_configuration = true
       service.active = true
@@ -113,7 +137,7 @@ describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
     end
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     context 'when service is inactive' do
@@ -129,7 +153,6 @@ describe PrometheusAdapter, :use_clean_rails_memory_store_caching do
         stub_all_prometheus_requests(environment.slug)
       end
 
-      it { expect(subject.to_json).to eq(prometheus_data.to_json) }
       it { expect(subject.to_json).to eq(prometheus_data.to_json) }
     end
 

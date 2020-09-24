@@ -9,7 +9,7 @@ module EE
     override :group_member_data
     def group_member_data(model)
       super.tap do |data|
-        data[:group_plan] = model.group.plan&.name
+        data[:group_plan] = model.group.gitlab_subscription&.plan_name
       end
     end
 

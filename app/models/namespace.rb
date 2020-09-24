@@ -11,6 +11,7 @@ class Namespace < ApplicationRecord
   include FeatureGate
   include FromUnion
   include Gitlab::Utils::StrongMemoize
+  include IgnorableColumns
 
   # Prevent users from creating unreasonably deep level of nesting.
   # The number 20 was taken based on maximum nesting level of
@@ -21,6 +22,7 @@ class Namespace < ApplicationRecord
 
   has_many :projects, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :project_statistics
+  has_one :namespace_settings, inverse_of: :namespace, class_name: 'NamespaceSetting', autosave: true
 
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
@@ -31,6 +33,7 @@ class Namespace < ApplicationRecord
 
   belongs_to :parent, class_name: "Namespace"
   has_many :children, class_name: "Namespace", foreign_key: :parent_id
+  has_many :custom_emoji, inverse_of: :namespace
   has_one :chat_team, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :root_storage_statistics, class_name: 'Namespace::RootStorageStatistics'
   has_one :aggregation_schedule, class_name: 'Namespace::AggregationSchedule'
@@ -45,6 +48,15 @@ class Namespace < ApplicationRecord
     presence: true,
     length: { maximum: 255 },
     namespace_path: true
+
+  # Introduce minimal path length of 2 characters.
+  # Allow change of other attributes without forcing users to
+  # rename their user or group. At the same time prevent changing
+  # the path without complying with new 2 chars requirement.
+  # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/225214
+  validates :path, length: { minimum: 2 }, if: :path_changed?
+
+  validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
   validate :nesting_level_allowed
 
@@ -66,6 +78,7 @@ class Namespace < ApplicationRecord
   after_destroy :rm_dir
 
   scope :for_user, -> { where('type IS NULL') }
+  scope :sort_by_type, -> { order(Gitlab::Database.nulls_first_order(:type)) }
 
   scope :with_statistics, -> do
     joins('LEFT JOIN project_statistics ps ON ps.namespace_id = namespaces.id')
@@ -75,6 +88,7 @@ class Namespace < ApplicationRecord
         'COALESCE(SUM(ps.storage_size), 0) AS storage_size',
         'COALESCE(SUM(ps.repository_size), 0) AS repository_size',
         'COALESCE(SUM(ps.wiki_size), 0) AS wiki_size',
+        'COALESCE(SUM(ps.snippets_size), 0) AS snippets_size',
         'COALESCE(SUM(ps.lfs_objects_size), 0) AS lfs_objects_size',
         'COALESCE(SUM(ps.build_artifacts_size), 0) AS build_artifacts_size',
         'COALESCE(SUM(ps.packages_size), 0) AS packages_size'
@@ -93,11 +107,11 @@ class Namespace < ApplicationRecord
 
     # Searches for namespaces matching the given query.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
-    # query - The search query as a String
+    # query - The search query as a String.
     #
-    # Returns an ActiveRecord::Relation
+    # Returns an ActiveRecord::Relation.
     def search(query)
       fuzzy_search(query, [:name, :path])
     end
@@ -121,12 +135,22 @@ class Namespace < ApplicationRecord
       uniquify.string(path) { |s| Namespace.find_by_path_or_name(s) }
     end
 
+    def clean_name(value)
+      value.scan(Gitlab::Regex.group_name_regex_chars).join(' ')
+    end
+
     def find_by_pages_host(host)
       gitlab_host = "." + Settings.pages.host.downcase
-      name = host.downcase.delete_suffix(gitlab_host)
+      host = host.downcase
+      return unless host.ends_with?(gitlab_host)
 
-      Namespace.find_by_full_path(name)
+      name = host.delete_suffix(gitlab_host)
+      Namespace.where(parent_id: nil).by_path(name)
     end
+  end
+
+  def default_branch_protection
+    super || Gitlab::CurrentSettings.default_branch_protection
   end
 
   def visibility_level_field
@@ -163,6 +187,10 @@ class Namespace < ApplicationRecord
     kind == 'user'
   end
 
+  def group?
+    type == 'Group'
+  end
+
   def find_fork_of(project)
     return unless project.fork_network
 
@@ -182,7 +210,11 @@ class Namespace < ApplicationRecord
   # any ancestor can disable emails for all descendants
   def emails_disabled?
     strong_memoize(:emails_disabled) do
-      self_and_ancestors.where(emails_disabled: true).exists?
+      if parent_id
+        self_and_ancestors.where(emails_disabled: true).exists?
+      else
+        !!emails_disabled
+      end
     end
   end
 
@@ -191,7 +223,7 @@ class Namespace < ApplicationRecord
     Gitlab.config.lfs.enabled
   end
 
-  def shared_runners_enabled?
+  def any_project_with_shared_runners_enabled?
     projects.with_shared_runners.any?
   end
 
@@ -260,6 +292,8 @@ class Namespace < ApplicationRecord
   end
 
   def root_ancestor
+    return self if persisted? && parent_id.nil?
+
     strong_memoize(:root_ancestor) do
       self_and_ancestors.reorder(nil).find_by(parent_id: nil)
     end
@@ -313,13 +347,35 @@ class Namespace < ApplicationRecord
   end
 
   def pages_virtual_domain
-    Pages::VirtualDomain.new(all_projects_with_pages, trim_prefix: full_path)
+    Pages::VirtualDomain.new(
+      all_projects_with_pages.includes(:route, :project_feature),
+      trim_prefix: full_path
+    )
+  end
+
+  def any_project_with_pages_deployed?
+    all_projects.with_pages_deployed.any?
   end
 
   def closest_setting(name)
     self_and_ancestors(hierarchy_order: :asc)
       .find { |n| !n.read_attribute(name).nil? }
       .try(name)
+  end
+
+  def actual_plan
+    Plan.default
+  end
+
+  def actual_limits
+    # We default to PlanLimits.new otherwise a lot of specs would fail
+    # On production each plan should already have associated limits record
+    # https://gitlab.com/gitlab-org/gitlab/issues/36037
+    actual_plan.actual_limits
+  end
+
+  def actual_plan_name
+    actual_plan.name
   end
 
   private
@@ -355,7 +411,7 @@ class Namespace < ApplicationRecord
 
   def nesting_level_allowed
     if ancestors.count > Group::NUMBER_OF_ANCESTORS_ALLOWED
-      errors.add(:parent_id, "has too deep level of nesting")
+      errors.add(:parent_id, 'has too deep level of nesting')
     end
   end
 

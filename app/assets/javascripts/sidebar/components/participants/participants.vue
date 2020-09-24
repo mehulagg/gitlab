@@ -1,8 +1,8 @@
 <script>
+import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { __, n__, sprintf } from '~/locale';
 import tooltip from '~/vue_shared/directives/tooltip';
 import userAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
 
 export default {
   directives: {
@@ -10,6 +10,7 @@ export default {
   },
   components: {
     userAvatarImage,
+    GlIcon,
     GlLoadingIcon,
   },
   props: {
@@ -27,6 +28,11 @@ export default {
       type: Number,
       required: false,
       default: 7,
+    },
+    showParticipantLabel: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   data() {
@@ -80,6 +86,7 @@ export default {
 <template>
   <div>
     <div
+      v-if="showParticipantLabel"
       v-tooltip
       :title="participantLabel"
       class="sidebar-collapsed-icon"
@@ -88,23 +95,19 @@ export default {
       data-boundary="viewport"
       @click="onClickCollapsedIcon"
     >
-      <i class="fa fa-users" aria-hidden="true"> </i>
-      <gl-loading-icon v-if="loading" class="js-participants-collapsed-loading-icon" />
-      <span v-else class="js-participants-collapsed-count"> {{ participantCount }} </span>
+      <gl-icon name="users" />
+      <gl-loading-icon v-if="loading" />
+      <span v-else data-testid="collapsed-count"> {{ participantCount }} </span>
     </div>
-    <div class="title hide-collapsed">
-      <gl-loading-icon
-        v-if="loading"
-        :inline="true"
-        class="js-participants-expanded-loading-icon"
-      />
+    <div v-if="showParticipantLabel" class="title hide-collapsed">
+      <gl-loading-icon v-if="loading" :inline="true" />
       {{ participantLabel }}
     </div>
     <div class="participants-list hide-collapsed">
       <div
         v-for="participant in visibleParticipants"
         :key="participant.id"
-        class="participants-author js-participants-author"
+        class="participants-author"
       >
         <a :href="participant.web_url" class="author-link">
           <user-avatar-image
@@ -119,11 +122,7 @@ export default {
       </div>
     </div>
     <div v-if="hasMoreParticipants" class="participants-more hide-collapsed">
-      <button
-        type="button"
-        class="btn-transparent btn-blank js-toggle-participants-button"
-        @click="toggleMoreParticipants"
-      >
+      <button type="button" class="btn-transparent btn-link" @click="toggleMoreParticipants">
         {{ toggleLabel }}
       </button>
     </div>

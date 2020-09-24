@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module Geo
-  class FileRemovalWorker
+  class FileRemovalWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include Gitlab::Geo::LogHelpers
     include GeoQueue
+
+    loggable_arguments 0
 
     def perform(file_path)
       remove_file!(file_path)

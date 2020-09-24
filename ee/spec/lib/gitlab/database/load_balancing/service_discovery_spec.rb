@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::ServiceDiscovery do
+RSpec.describe Gitlab::Database::LoadBalancing::ServiceDiscovery do
   let(:service) do
     described_class.new(nameserver: 'localhost', port: 8600, record: 'foo')
   end

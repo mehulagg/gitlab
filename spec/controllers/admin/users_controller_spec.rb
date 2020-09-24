@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe Admin::UsersController do
+RSpec.describe Admin::UsersController do
   let(:user) { create(:user) }
+
   let_it_be(:admin) { create(:admin) }
 
   before do
@@ -21,6 +22,12 @@ describe Admin::UsersController do
       get :index, params: { filter: 'admins' }
 
       expect(assigns(:users)).to eq([admin])
+    end
+
+    it 'eager loads authorized projects association' do
+      get :index
+
+      expect(assigns(:users).first.association(:authorized_projects)).to be_loaded
     end
   end
 
@@ -46,7 +53,7 @@ describe Admin::UsersController do
     it 'deletes user and ghosts their contributions' do
       delete :destroy, params: { id: user.username }, format: :json
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(User.exists?(user.id)).to be_falsy
       expect(issue.reload.author).to be_ghost
     end
@@ -54,7 +61,7 @@ describe Admin::UsersController do
     it 'deletes the user and their contributions when hard delete is specified' do
       delete :destroy, params: { id: user.username, hard_delete: true }, format: :json
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(User.exists?(user.id)).to be_falsy
       expect(Issue.exists?(issue.id)).to be_falsy
     end
@@ -155,7 +162,7 @@ describe Admin::UsersController do
       put :block, params: { id: user.username }
       user.reload
       expect(user.blocked?).to be_truthy
-      expect(flash[:notice]).to eq 'Successfully blocked'
+      expect(flash[:notice]).to eq _('Successfully blocked')
     end
   end
 
@@ -171,7 +178,7 @@ describe Admin::UsersController do
         put :unblock, params: { id: user.username }
         user.reload
         expect(user.blocked?).to be_truthy
-        expect(flash[:alert]).to eq 'This user cannot be unlocked manually from GitLab'
+        expect(flash[:alert]).to eq _('This user cannot be unlocked manually from GitLab')
       end
     end
 
@@ -184,7 +191,7 @@ describe Admin::UsersController do
         put :unblock, params: { id: user.username }
         user.reload
         expect(user.blocked?).to be_falsey
-        expect(flash[:notice]).to eq 'Successfully unblocked'
+        expect(flash[:notice]).to eq _('Successfully unblocked')
       end
     end
   end
@@ -217,28 +224,44 @@ describe Admin::UsersController do
   end
 
   describe 'PATCH disable_two_factor' do
-    it 'disables 2FA for the user' do
-      expect(user).to receive(:disable_two_factor!)
-      allow(subject).to receive(:user).and_return(user)
+    subject { patch :disable_two_factor, params: { id: user.to_param } }
 
-      go
+    context 'for a user that has 2FA enabled' do
+      let(:user) { create(:user, :two_factor) }
+
+      it 'disables 2FA for the user' do
+        subject
+
+        expect(user.reload.two_factor_enabled?).to eq(false)
+      end
+
+      it 'redirects back' do
+        subject
+
+        expect(response).to redirect_to(admin_user_path(user))
+      end
+
+      it 'displays a notice on success' do
+        subject
+
+        expect(flash[:notice])
+          .to eq _('Two-factor authentication has been disabled for this user')
+      end
     end
 
-    it 'redirects back' do
-      go
+    context 'for a user that does not have 2FA enabled' do
+      it 'redirects back' do
+        subject
 
-      expect(response).to redirect_to(admin_user_path(user))
-    end
+        expect(response).to redirect_to(admin_user_path(user))
+      end
 
-    it 'displays an alert' do
-      go
+      it 'displays an alert on failure' do
+        subject
 
-      expect(flash[:notice])
-        .to eq 'Two-factor Authentication has been disabled for this user'
-    end
-
-    def go
-      patch :disable_two_factor, params: { id: user.to_param }
+        expect(flash[:alert])
+          .to eq _('Two-factor authentication is not enabled for this user')
+      end
     end
   end
 
@@ -249,91 +272,159 @@ describe Admin::UsersController do
 
     it 'shows only one error message for an invalid email' do
       post :create, params: { user: attributes_for(:user, email: 'bogus') }
-      expect(assigns[:user].errors).to contain_exactly("Email is invalid")
+
+      errors = assigns[:user].errors
+      expect(errors).to contain_exactly(errors.full_message(:email, I18n.t('errors.messages.invalid')))
+    end
+
+    context 'admin notes' do
+      it 'creates the user with note' do
+        note = '2020-05-12 | Note | DCMA | Link'
+        user_params = attributes_for(:user, note: note)
+
+        expect { post :create, params: { user: user_params } }.to change { User.count }.by(1)
+
+        new_user = User.last
+        expect(new_user.note).to eq(note)
+      end
     end
   end
 
   describe 'POST update' do
     context 'when the password has changed' do
-      def update_password(user, password, password_confirmation = nil)
+      def update_password(user, password = User.random_password, password_confirmation = password)
         params = {
           id: user.to_param,
           user: {
             password: password,
-            password_confirmation: password_confirmation || password
+            password_confirmation: password_confirmation
           }
         }
 
         post :update, params: params
       end
 
-      context 'when the admin changes his own password' do
-        it 'updates the password' do
-          expect { update_password(admin, 'AValidPassword1') }
-            .to change { admin.reload.encrypted_password }
-        end
+      context 'when admin changes their own password' do
+        context 'when password is valid' do
+          it 'updates the password' do
+            expect { update_password(admin) }
+              .to change { admin.reload.encrypted_password }
+          end
 
-        it 'does not set the new password to expire immediately' do
-          expect { update_password(admin, 'AValidPassword1') }
-            .not_to change { admin.reload.password_expires_at }
+          it 'does not set the new password to expire immediately' do
+            expect { update_password(admin) }
+              .not_to change { admin.reload.password_expired? }
+          end
+
+          it 'does not enqueue the `admin changed your password` email' do
+            expect { update_password(admin) }
+              .not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+
+          it 'enqueues the `password changed` email' do
+            expect { update_password(admin) }
+              .to have_enqueued_mail(DeviseMailer, :password_change)
+          end
         end
       end
 
-      context 'when the new password is valid' do
-        it 'redirects to the user' do
-          update_password(user, 'AValidPassword1')
+      context 'when admin changes the password of another user' do
+        context 'when the new password is valid' do
+          it 'redirects to the user' do
+            update_password(user)
 
-          expect(response).to redirect_to(admin_user_path(user))
-        end
+            expect(response).to redirect_to(admin_user_path(user))
+          end
 
-        it 'updates the password' do
-          expect { update_password(user, 'AValidPassword1') }
-            .to change { user.reload.encrypted_password }
-        end
+          it 'updates the password' do
+            expect { update_password(user) }
+              .to change { user.reload.encrypted_password }
+          end
 
-        it 'sets the new password to expire immediately' do
-          expect { update_password(user, 'AValidPassword1') }
-            .to change { user.reload.password_expires_at }.to be_within(2.seconds).of(Time.now)
+          it 'sets the new password to expire immediately' do
+            expect { update_password(user) }
+              .to change { user.reload.password_expired? }.from(false).to(true)
+          end
+
+          it 'enqueues the `admin changed your password` email' do
+            expect { update_password(user) }
+              .to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+
+          it 'does not enqueue the `password changed` email' do
+            expect { update_password(user) }
+              .not_to have_enqueued_mail(DeviseMailer, :password_change)
+          end
         end
       end
 
       context 'when the new password is invalid' do
+        let(:password) { 'invalid' }
+
         it 'shows the edit page again' do
-          update_password(user, 'invalid')
+          update_password(user, password)
 
           expect(response).to render_template(:edit)
         end
 
         it 'returns the error message' do
-          update_password(user, 'invalid')
+          update_password(user, password)
 
           expect(assigns[:user].errors).to contain_exactly(a_string_matching(/too short/))
         end
 
         it 'does not update the password' do
-          expect { update_password(user, 'invalid') }
+          expect { update_password(user, password) }
             .not_to change { user.reload.encrypted_password }
         end
       end
 
       context 'when the new password does not match the password confirmation' do
+        let(:password) { 'some_password' }
+        let(:password_confirmation) { 'not_same_as_password' }
+
         it 'shows the edit page again' do
-          update_password(user, 'AValidPassword1', 'AValidPassword2')
+          update_password(user, password, password_confirmation)
 
           expect(response).to render_template(:edit)
         end
 
         it 'returns the error message' do
-          update_password(user, 'AValidPassword1', 'AValidPassword2')
+          update_password(user, password, password_confirmation)
 
           expect(assigns[:user].errors).to contain_exactly(a_string_matching(/doesn't match/))
         end
 
         it 'does not update the password' do
-          expect { update_password(user, 'AValidPassword1', 'AValidPassword2') }
+          expect { update_password(user, password, password_confirmation) }
             .not_to change { user.reload.encrypted_password }
         end
       end
+    end
+
+    context 'admin notes' do
+      it 'updates the note for the user' do
+        note = '2020-05-12 | Note | DCMA | Link'
+        params = {
+          id: user.to_param,
+          user: {
+            note: note
+          }
+        }
+
+        expect { post :update, params: params }.to change { user.reload.note }.to(note)
+      end
+    end
+  end
+
+  describe "DELETE #remove_email" do
+    it 'deletes the email' do
+      email = create(:email, user: user)
+
+      delete :remove_email, params: { id: user.username, email_id: email.id }
+
+      expect(user.reload.emails).not_to include(email)
+      expect(flash[:notice]).to eq('Successfully removed email.')
     end
   end
 
@@ -346,7 +437,7 @@ describe Admin::UsersController do
       it "shows a notice" do
         post :impersonate, params: { id: user.username }
 
-        expect(flash[:alert]).to eq("You cannot impersonate a blocked user")
+        expect(flash[:alert]).to eq(_('You cannot impersonate a blocked user'))
       end
 
       it "doesn't sign us in as the user" do
@@ -396,7 +487,7 @@ describe Admin::UsersController do
       it "shows error page" do
         post :impersonate, params: { id: user.username }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, concepts
 ---
 
@@ -52,7 +55,7 @@ from the command line.
 Here is a quick example to revert a merge commit using the second parent as the
 mainline:
 
-```bash
+```shell
 git revert -m 2 7a39eb0
 ```
 

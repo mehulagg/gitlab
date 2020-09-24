@@ -1,14 +1,19 @@
 # frozen_string_literal: true
 
-# We store events about issuable label changes in a separate table (not as
-# other system notes), but we still want to display notes about label changes
-# as classic system notes in UI.  This service generates "synthetic" notes for
-# label event changes and merges them with classic notes and sorts them by
-# creation time.
+# We store events about issuable label changes and weight changes in separate tables (not as
+# other system notes), but we still want to display notes about label and weight changes
+# as classic system notes in UI.  This service merges synthetic label and weight notes
+# with classic notes and sorts them by creation time.
 
 module ResourceEvents
   class MergeIntoNotesService
     include Gitlab::Utils::StrongMemoize
+
+    SYNTHETIC_NOTE_BUILDER_SERVICES = [
+      SyntheticLabelNotesBuilderService,
+      SyntheticMilestoneNotesBuilderService,
+      SyntheticStateNotesBuilderService
+    ].freeze
 
     attr_reader :resource, :current_user, :params
 
@@ -19,39 +24,17 @@ module ResourceEvents
     end
 
     def execute(notes = [])
-      (notes + label_notes).sort_by { |n| n.created_at }
+      (notes + synthetic_notes).sort_by(&:created_at)
     end
 
     private
 
-    def label_notes
-      label_events_by_discussion_id.map do |discussion_id, events|
-        LabelNote.from_events(events, resource: resource, resource_parent: resource_parent)
-      end
-    end
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def label_events_by_discussion_id
-      return [] unless resource.respond_to?(:resource_label_events)
-
-      events = resource.resource_label_events.includes(:label, user: :status)
-      events = since_fetch_at(events)
-
-      events.group_by { |event| event.discussion_id }
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
-    def since_fetch_at(events)
-      return events unless params[:last_fetched_at].present?
-
-      last_fetched_at = Time.at(params.fetch(:last_fetched_at).to_i)
-      events.created_after(last_fetched_at - NotesFinder::FETCH_OVERLAP)
-    end
-
-    def resource_parent
-      strong_memoize(:resource_parent) do
-        resource.project || resource.group
+    def synthetic_notes
+      SYNTHETIC_NOTE_BUILDER_SERVICES.flat_map do |service|
+        service.new(resource, current_user, params).execute
       end
     end
   end
 end
+
+ResourceEvents::MergeIntoNotesService.prepend_if_ee('EE::ResourceEvents::MergeIntoNotesService')

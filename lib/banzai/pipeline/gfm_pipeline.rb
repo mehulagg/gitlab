@@ -3,8 +3,6 @@
 module Banzai
   module Pipeline
     class GfmPipeline < BasePipeline
-      prepend_if_ee('EE::Banzai::Pipeline::GfmPipeline') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
       # These filters transform GitLab Flavored Markdown (GFM) to HTML.
       # The nodes and marks referenced in app/assets/javascripts/behaviors/markdown/editor_extensions.js
       # consequently transform that same HTML to GFM to be copied to the clipboard.
@@ -14,14 +12,11 @@ module Banzai
       def self.filters
         @filters ||= FilterArray[
           Filter::PlantumlFilter,
-
           # Must always be before the SanitizationFilter to prevent XSS attacks
           Filter::SpacedLinkFilter,
-
           Filter::SanitizationFilter,
           Filter::AssetProxyFilter,
           Filter::SyntaxHighlightFilter,
-
           Filter::MathFilter,
           Filter::ColorFilter,
           Filter::MermaidFilter,
@@ -29,21 +24,26 @@ module Banzai
           Filter::AudioLinkFilter,
           Filter::ImageLazyLoadFilter,
           Filter::ImageLinkFilter,
-          Filter::InlineMetricsFilter,
-          Filter::InlineGrafanaMetricsFilter,
+          *metrics_filters,
           Filter::TableOfContentsFilter,
+          Filter::TableOfContentsTagFilter,
           Filter::AutolinkFilter,
           Filter::ExternalLinkFilter,
           Filter::SuggestionFilter,
           Filter::FootnoteFilter,
-
           *reference_filters,
-
           Filter::EmojiFilter,
           Filter::TaskListFilter,
           Filter::InlineDiffFilter,
-
           Filter::SetDirectionFilter
+        ]
+      end
+
+      def self.metrics_filters
+        [
+          Filter::InlineMetricsFilter,
+          Filter::InlineGrafanaMetricsFilter,
+          Filter::InlineClusterMetricsFilter
         ]
       end
 
@@ -51,6 +51,7 @@ module Banzai
         [
           Filter::UserReferenceFilter,
           Filter::ProjectReferenceFilter,
+          Filter::DesignReferenceFilter,
           Filter::IssueReferenceFilter,
           Filter::ExternalIssueReferenceFilter,
           Filter::MergeRequestReferenceFilter,
@@ -58,7 +59,8 @@ module Banzai
           Filter::CommitRangeReferenceFilter,
           Filter::CommitReferenceFilter,
           Filter::LabelReferenceFilter,
-          Filter::MilestoneReferenceFilter
+          Filter::MilestoneReferenceFilter,
+          Filter::AlertReferenceFilter
         ]
       end
 
@@ -70,3 +72,5 @@ module Banzai
     end
   end
 end
+
+Banzai::Pipeline::GfmPipeline.prepend_if_ee('EE::Banzai::Pipeline::GfmPipeline')

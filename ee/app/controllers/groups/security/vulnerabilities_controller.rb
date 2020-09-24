@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 
-class Groups::Security::VulnerabilitiesController < Groups::ApplicationController
-  include VulnerabilitiesApiFeatureGate # must come first
-  include SecurityDashboardsPermissions
-  include VulnerabilityFindingsActions
-  include VulnerabilityFindingsHistory
+module Groups
+  module Security
+    class VulnerabilitiesController < Groups::ApplicationController
+      layout 'group'
 
-  alias_method :vulnerable, :group
+      def index
+        render :unavailable unless dashboard_available?
+      end
 
-  private
+      private
 
-  def vulnerabilities_action_enabled?
-    Feature.disabled?(:vulnerability_findings_api)
+      def dashboard_available?
+        can?(current_user, :read_group_security_dashboard, group)
+      end
+    end
   end
 end

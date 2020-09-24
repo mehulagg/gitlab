@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
+/* eslint-disable @gitlab/vue-require-i18n-strings */
 /**
  * Renders a deploy board.
  *
@@ -9,11 +9,16 @@
  * - Button Actions.
  * [Mockup](https://gitlab.com/gitlab-org/gitlab-foss/uploads/2f655655c0eadf655d0ae7467b53002a/environments__deploy-graphic.png)
  */
-import _ from 'underscore';
-import { n__, s__, sprintf } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { isEmpty } from 'lodash';
+import {
+  GlLoadingIcon,
+  GlLink,
+  GlTooltipDirective,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import deployBoardSvg from 'ee_empty_states/icons/_deploy_board.svg';
-import { GlLoadingIcon, GlLink } from '@gitlab/ui';
+import { n__, s__, sprintf } from '~/locale';
+import { STATUS_MAP, CANARY_STATUS } from '../constants';
 
 export default {
   components: {
@@ -22,7 +27,8 @@ export default {
     GlLink,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   props: {
     deployBoardData: {
@@ -55,7 +61,7 @@ export default {
   },
   computed: {
     canRenderDeployBoard() {
-      return !this.isEmpty && !_.isEmpty(this.deployBoardData);
+      return !this.isEmpty && !isEmpty(this.deployBoardData);
     },
     legacyLabelWarningMessage() {
       return sprintf(
@@ -93,6 +99,17 @@ export default {
     deployBoardSvg() {
       return deployBoardSvg;
     },
+    deployBoardActions() {
+      return this.deployBoardData.rollback_url || this.deployBoardData.abort_url;
+    },
+    statuses() {
+      // Canary is not a pod status but it needs to be in the legend.
+      // Hence adding it here.
+      return {
+        ...STATUS_MAP,
+        CANARY_STATUS,
+      };
+    },
   },
 };
 </script>
@@ -101,65 +118,75 @@ export default {
     <gl-loading-icon v-if="isLoading" class="loading-icon" />
     <template v-else>
       <div v-if="hasLegacyAppLabel" class="bs-callout bs-callout-warning mb-0 mt-0">
-        <span v-html="legacyLabelWarningMessage"></span>
-        <gl-link target="blank" :href="deployBoardsHelpPath">
+        <span v-safe-html="legacyLabelWarningMessage"></span>
+        <gl-link target="_blank" :href="deployBoardsHelpPath">
           <strong>{{ __('More Information') }}</strong>
         </gl-link>
       </div>
 
-      <div v-if="canRenderDeployBoard" class="deploy-board-information">
-        <section class="deploy-board-status">
-          <span v-tooltip :title="instanceIsCompletedText">
-            <span class="percentage text-center text-plain">{{ deployBoardData.completion }}%</span>
-            <span class="text text-center text-secondary">{{ __('Complete') }}</span>
-          </span>
-        </section>
+      <div v-if="canRenderDeployBoard" class="deploy-board-information p-3">
+        <div class="deploy-board-information">
+          <section class="deploy-board-status">
+            <span v-gl-tooltip :title="instanceIsCompletedText">
+              <span ref="percentage" class="text-center text-plain gl-font-lg"
+                >{{ deployBoardData.completion }}%</span
+              >
+              <span class="text text-center text-secondary">{{ __('Complete') }}</span>
+            </span>
+          </section>
 
-        <section class="deploy-board-instances">
-          <p class="deploy-board-instances-text text-secondary">
-            <span>{{ instanceTitle }}</span>
-            <span class="total-instances">({{ instanceCount }})</span>
-          </p>
+          <section class="deploy-board-instances">
+            <span class="deploy-board-instances-text gl-font-base text-secondary">
+              {{ instanceTitle }} ({{ instanceCount }})
+            </span>
 
-          <div class="deploy-board-instances-container d-flex flex-wrap flex-row">
-            <template v-for="(instance, i) in deployBoardData.instances">
-              <instance-component
-                :key="i"
-                :status="instance.status"
-                :tooltip-text="instance.tooltip"
-                :pod-name="instance.pod_name"
-                :logs-path="logsPath"
-                :stable="instance.stable"
-              />
-            </template>
-          </div>
-        </section>
+            <div class="deploy-board-instances-container d-flex flex-wrap flex-row">
+              <template v-for="(instance, i) in deployBoardData.instances">
+                <instance-component
+                  :key="i"
+                  :status="instance.status"
+                  :tooltip-text="instance.tooltip"
+                  :pod-name="instance.pod_name"
+                  :logs-path="logsPath"
+                  :stable="instance.stable"
+                />
+              </template>
+            </div>
+            <div class="deploy-board-legend d-flex mt-3">
+              <div
+                v-for="status in statuses"
+                :key="status.text"
+                class="d-flex justify-content-center align-items-center mr-3"
+              >
+                <instance-component :status="status.class" :stable="status.stable" />
+                <span class="legend-text ml-2">{{ status.text }}</span>
+              </div>
+            </div>
+          </section>
 
-        <section
-          v-if="deployBoardData.rollback_url || deployBoardData.abort_url"
-          class="deploy-board-actions"
-        >
-          <a
-            v-if="deployBoardData.rollback_url"
-            :href="deployBoardData.rollback_url"
-            class="btn"
-            data-method="post"
-            rel="nofollow"
-            >{{ __('Rollback') }}</a
-          >
-          <a
-            v-if="deployBoardData.abort_url"
-            :href="deployBoardData.abort_url"
-            class="btn btn-red btn-inverted"
-            data-method="post"
-            rel="nofollow"
-            >{{ __('Abort') }}</a
-          >
-        </section>
+          <section v-if="deployBoardActions" class="deploy-board-actions">
+            <gl-link
+              v-if="deployBoardData.rollback_url"
+              :href="deployBoardData.rollback_url"
+              class="btn"
+              data-method="post"
+              rel="nofollow"
+              >{{ __('Rollback') }}</gl-link
+            >
+            <gl-link
+              v-if="deployBoardData.abort_url"
+              :href="deployBoardData.abort_url"
+              class="btn btn-red btn-inverted"
+              data-method="post"
+              rel="nofollow"
+              >{{ __('Abort') }}</gl-link
+            >
+          </section>
+        </div>
       </div>
 
       <div v-if="canRenderEmptyState" class="deploy-board-empty">
-        <section class="deploy-board-empty-state-svg" v-html="deployBoardSvg"></section>
+        <section v-safe-html="deployBoardSvg" class="deploy-board-empty-state-svg"></section>
 
         <section class="deploy-board-empty-state-text">
           <span class="deploy-board-empty-state-title d-flex">{{

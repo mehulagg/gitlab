@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CodeOwners::UsersLoader do
+RSpec.describe Gitlab::CodeOwners::UsersLoader do
   let(:text) do
     <<~TXT
     This is a long text that mentions some users.

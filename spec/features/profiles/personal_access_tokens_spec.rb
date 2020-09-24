@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Profile > Personal Access Tokens', :js do
+RSpec.describe 'Profile > Personal Access Tokens', :js do
   let(:user) { create(:user) }
 
   def active_personal_access_tokens
@@ -86,7 +86,7 @@ describe 'Profile > Personal Access Tokens', :js do
       accept_confirm { click_on "Revoke" }
 
       expect(page).to have_selector(".settings-message")
-      expect(no_personal_access_tokens_message).to have_text("This user has no active Personal Access Tokens.")
+      expect(no_personal_access_tokens_message).to have_text("This user has no active personal access tokens.")
     end
 
     it "removes expired tokens from 'active' section" do
@@ -94,20 +94,17 @@ describe 'Profile > Personal Access Tokens', :js do
       visit profile_personal_access_tokens_path
 
       expect(page).to have_selector(".settings-message")
-      expect(no_personal_access_tokens_message).to have_text("This user has no active Personal Access Tokens.")
+      expect(no_personal_access_tokens_message).to have_text("This user has no active personal access tokens.")
     end
 
     context "when revocation fails" do
       it "displays an error message" do
         visit profile_personal_access_tokens_path
-        allow_any_instance_of(PersonalAccessToken).to receive(:update!).and_return(false)
-
-        errors = ActiveModel::Errors.new(PersonalAccessToken.new).tap { |e| e.add(:name, "cannot be nil") }
-        allow_any_instance_of(PersonalAccessToken).to receive(:errors).and_return(errors)
+        allow_any_instance_of(PersonalAccessTokens::RevokeService).to receive(:revocation_permitted?).and_return(false)
 
         accept_confirm { click_on "Revoke" }
         expect(active_personal_access_tokens).to have_text(personal_access_token.name)
-        expect(page).to have_content("Could not revoke")
+        expect(page).to have_content("Not permitted to revoke")
       end
     end
   end

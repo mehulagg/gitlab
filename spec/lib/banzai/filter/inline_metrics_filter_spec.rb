@@ -2,69 +2,77 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::InlineMetricsFilter do
+RSpec.describe Banzai::Filter::InlineMetricsFilter do
   include FilterSpecHelper
 
-  let(:input) { %(<a href="#{url}">example</a>) }
-  let(:doc) { filter(input) }
+  let(:environment_id) { 12 }
+  let(:dashboard_url) { urls.metrics_dashboard_namespace_project_environment_url(*params, **query_params, embedded: true) }
 
-  context 'when the document has an external link' do
-    let(:url) { 'https://foo.com' }
+  let(:query_params) do
+    {
+      dashboard: 'config/prometheus/common_metrics.yml',
+      group: 'System metrics (Kubernetes)',
+      title: 'Core Usage (Pod Average)',
+      y_label: 'Cores per Pod'
+    }
+  end
 
-    it 'leaves regular non-metrics links unchanged' do
-      expect(doc.to_s).to eq(input)
+  context 'with /-/environments/:environment_id/metrics URL' do
+    let(:params) { ['group', 'project', environment_id] }
+    let(:trigger_url) { urls.metrics_namespace_project_environment_url(*params, **query_params) }
+
+    context 'with no query params' do
+      let(:query_params) { {} }
+
+      it_behaves_like 'a metrics embed filter'
+    end
+
+    context 'with query params' do
+      it_behaves_like 'a metrics embed filter'
     end
   end
 
-  context 'when the document has a metrics dashboard link' do
-    let(:params) { ['foo', 'bar', 12] }
-    let(:url) { urls.metrics_namespace_project_environment_url(*params) }
-
-    it 'leaves the original link unchanged' do
-      expect(doc.at_css('a').to_s).to eq(input)
+  context 'with /-/metrics?environment=:environment_id URL' do
+    let(:params) { %w(group project) }
+    let(:trigger_url) { urls.namespace_project_metrics_dashboard_url(*params, **query_params) }
+    let(:dashboard_url) do
+      urls.metrics_dashboard_namespace_project_environment_url(
+        *params.append(environment_id),
+        **query_params.except(:environment),
+        embedded: true
+      )
     end
 
-    it 'appends a metrics charts placeholder with dashboard url after metrics links' do
-      node = doc.at_css('.js-render-metrics')
-      expect(node).to be_present
-
-      dashboard_url = urls.metrics_dashboard_namespace_project_environment_url(*params, embedded: true)
-      expect(node.attribute('data-dashboard-url').to_s).to eq(dashboard_url)
-    end
-
-    context 'when the metrics dashboard link is part of a paragraph' do
-      let(:paragraph) { %(This is an <a href="#{url}">example</a> of metrics.) }
-      let(:input) { %(<p>#{paragraph}</p>) }
-
-      it 'appends the charts placeholder after the enclosing paragraph' do
-        expect(doc.at_css('p').to_s).to include(paragraph)
-        expect(doc.at_css('.js-render-metrics')).to be_present
+    context 'with query params' do
+      it_behaves_like 'a metrics embed filter' do
+        before do
+          query_params.merge!(environment: environment_id)
+        end
       end
     end
 
-    context 'with dashboard params specified' do
-      let(:params) do
-        [
-          'foo',
-          'bar',
-          12,
-          {
-            embedded: true,
-            dashboard: 'config/prometheus/common_metrics.yml',
-            group: 'System metrics (Kubernetes)',
-            title: 'Core Usage (Pod Average)',
-            y_label: 'Cores per Pod'
-          }
-        ]
-      end
+    context 'with only environment in query params' do
+      let(:query_params) { { environment: environment_id } }
 
-      it 'appends a metrics charts placeholder with dashboard url after metrics links' do
-        node = doc.at_css('.js-render-metrics')
-        expect(node).to be_present
+      it_behaves_like 'a metrics embed filter'
+    end
 
-        dashboard_url = urls.metrics_dashboard_namespace_project_environment_url(*params)
-        expect(node.attribute('data-dashboard-url').to_s).to eq(dashboard_url)
+    context 'with no query params' do
+      let(:query_params) { {} }
+
+      it 'ignores metrics URL without environment parameter' do
+        input = %(<a href="#{trigger_url}">example</a>)
+        filtered_input = filter(input).to_s
+
+        expect(CGI.unescape_html(filtered_input)).to eq(input)
       end
     end
+  end
+
+  it 'leaves links to other dashboards unchanged' do
+    url = urls.namespace_project_grafana_api_metrics_dashboard_url('foo', 'bar')
+    input = %(<a href="#{url}">example</a>)
+
+    expect(filter(input).to_s).to eq(input)
   end
 end

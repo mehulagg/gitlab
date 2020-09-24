@@ -1,0 +1,24 @@
+{
+  "version": "2.0",
+  "licenses": [
+    {
+      "id": "WTFPL",
+      "name": "WTFPL License",
+      "url": "http://www.wtfpl.net/",
+      "count": 1
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "wtfpl_init",
+      "licenses": [
+        "WTFPL"
+      ],
+      "url": "https://rubygems.org/gems/wtfpl_init",
+      "description": "Download WTFPL license file and rename to LICENSE.md or something",
+      "paths": [
+        "."
+      ]
+    }
+  ]
+}

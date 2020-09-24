@@ -124,14 +124,18 @@
 .settings-message {
   padding: 5px;
   line-height: 1.3;
-  color: $orange-700;
-  background-color: $orange-100;
+  color: $gray-900;
+  background-color: $orange-50;
   border: 1px solid $orange-200;
   border-radius: $border-radius-base;
 }
 
+.empty-variables {
+  padding: 20px 0;
+}
+
 .warning-title {
-  color: $orange-500;
+  color: $gray-900;
 }
 
 .danger-title {
@@ -179,7 +183,7 @@
 
     .option-description,
     .option-disabled-reason {
-      margin-left: 30px;
+      margin-left: 20px;
       color: $project-option-descr-color;
       margin-top: -5px;
     }
@@ -257,7 +261,7 @@
     }
 
     .card-header .label-count {
-      color: $white-light;
+      color: $white;
       background: $common-gray-dark;
     }
 
@@ -297,7 +301,7 @@
   }
 
   .loading-metrics .metrics-load-spinner {
-    color: $gl-gray-700;
+    color: $gray-700;
   }
 
   .metrics-list {
@@ -321,22 +325,13 @@
 
 .saml-settings.info-well {
   .form-control[readonly] {
-    background: $white-light;
+    background: $white;
   }
 }
 
 .modal-doorkeepr-auth {
   .modal-body {
     padding: $gl-padding;
-  }
-}
-
-.deprecated-service {
-  cursor: default;
-
-  a {
-    font-weight: $gl-font-weight-bold;
-    color: $white-light;
   }
 }
 
@@ -351,8 +346,8 @@
   }
 
   .btn-clipboard {
-    background-color: $white-light;
-    border: 1px solid $gray-200;
+    background-color: $white;
+    border: 1px solid $gray-100;
   }
 
   .deploy-token-help-block {
@@ -364,9 +359,44 @@
 .mirror-error-badge {
   background-color: $red-400;
   border-radius: $border-radius-default;
-  color: $white-light;
+  color: $white;
 }
 
 .push-pull-table {
   margin-top: 1em;
+}
+
+.ci-variable-table,
+.deploy-freeze-table {
+  table {
+    thead {
+      border-bottom: 1px solid $white-normal;
+    }
+
+    tr {
+      td,
+      th {
+        padding-left: 0;
+      }
+
+      th {
+        background-color: transparent;
+        font-weight: $gl-font-weight-bold;
+        border: 0;
+      }
+
+      // When tables are "stacked", restore td padding
+      @media(max-width: map-get($grid-breakpoints, lg)) {
+        td {
+          padding-left: $gl-spacing-scale-5;
+        }
+      }
+    }
+  }
+
+  @media(max-width: map-get($grid-breakpoints, lg)-1) {
+    .truncated-container {
+      justify-content: flex-end;
+    }
+  }
 }

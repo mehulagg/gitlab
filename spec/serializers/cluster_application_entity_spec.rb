@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe ClusterApplicationEntity do
+RSpec.describe ClusterApplicationEntity do
   describe '#as_json' do
     let(:application) { build(:clusters_applications_helm, version: '0.1.1') }
+
     subject { described_class.new(application).as_json }
 
     it 'has name' do
@@ -56,6 +57,36 @@ describe ClusterApplicationEntity do
 
       it 'includes external_ip' do
         expect(subject[:external_ip]).to eq('111.222.111.222')
+      end
+    end
+
+    context 'for knative application' do
+      let(:pages_domain) { create(:pages_domain, :instance_serverless) }
+      let(:application) { build(:clusters_applications_knative, :installed) }
+
+      before do
+        create(:serverless_domain_cluster, knative: application, pages_domain: pages_domain)
+      end
+
+      it 'includes available domains' do
+        expect(subject[:available_domains].length).to eq(1)
+        expect(subject[:available_domains].first).to eq(id: pages_domain.id, domain: pages_domain.domain)
+      end
+
+      it 'includes pages_domain' do
+        expect(subject[:pages_domain]).to eq(id: pages_domain.id, domain: pages_domain.domain)
+      end
+    end
+
+    context 'for fluentd application' do
+      let(:application) { build(:clusters_applications_fluentd, :installed) }
+
+      it 'includes host, port, protocol and log fields' do
+        expect(subject[:port]).to eq(514)
+        expect(subject[:host]).to eq("example.com")
+        expect(subject[:protocol]).to eq("tcp")
+        expect(subject[:waf_log_enabled]).to be true
+        expect(subject[:cilium_log_enabled]).to be true
       end
     end
   end

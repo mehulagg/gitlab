@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe CreatePipelineWorker do
+RSpec.describe CreatePipelineWorker do
   describe '#perform' do
     let(:worker) { described_class.new }
 
     context 'when a project not found' do
       it 'does not call the Service' do
         expect(Ci::CreatePipelineService).not_to receive(:new)
-        expect { worker.perform(99, create(:user).id, 'master', :web) }.to raise_error(ActiveRecord::RecordNotFound)
+        expect { worker.perform(non_existing_record_id, create(:user).id, 'master', :web) }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 
@@ -18,7 +18,7 @@ describe CreatePipelineWorker do
 
       it 'does not call the Service' do
         expect(Ci::CreatePipelineService).not_to receive(:new)
-        expect { worker.perform(project.id, 99, project.default_branch, :web) }.to raise_error(ActiveRecord::RecordNotFound)
+        expect { worker.perform(project.id, non_existing_record_id, project.default_branch, :web) }.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
 

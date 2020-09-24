@@ -26,6 +26,13 @@
         "type": "object",
         "properties": {}
       }
+    },
+    "protected_branches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {}
+      }
     }
   },
   "additionalProperties": false

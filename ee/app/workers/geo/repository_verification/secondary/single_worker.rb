@@ -3,7 +3,7 @@
 module Geo
   module RepositoryVerification
     module Secondary
-      class SingleWorker
+      class SingleWorker # rubocop:disable Scalability/IdempotentWorker
         include ApplicationWorker
         include GeoQueue
         include ExclusiveLeaseGuard

@@ -15,7 +15,8 @@ module EE
     override :new_issuable
     def new_issuable(issuable, author)
       if issuable.is_a?(MergeRequest)
-        create_approval_required_todos(issuable, issuable.overall_approvers(exclude_code_owners: true), author)
+        approvers = issuable.overall_approvers(exclude_code_owners: true)
+        create_approval_required_todos(issuable, approvers, author)
       end
 
       super
@@ -27,6 +28,16 @@ module EE
 
     def update_epic(epic, current_user, skip_users = [])
       create_mention_todos(nil, epic, current_user, nil, skip_users)
+    end
+
+    # When a merge train is aborted for some reason, we should:
+    #
+    #  * create a todo for each merge request participant
+    #
+    def merge_train_removed(merge_request)
+      merge_request.merge_participants.each do |user|
+        create_merge_train_removed_todo(merge_request, user)
+      end
     end
 
     private
@@ -44,7 +55,20 @@ module EE
 
     def create_approval_required_todos(merge_request, approvers, author)
       attributes = attributes_for_todo(merge_request.project, merge_request, author, ::Todo::APPROVAL_REQUIRED)
+
+      # Preload project_authorizations to prevent n+1 queries
+      merge_request.project.team.max_member_access_for_user_ids(approvers.map(&:id))
+
+      approvers = approvers.select do |approver|
+        approver.can?(:approve_merge_request, merge_request)
+      end
+
       create_todos(approvers, attributes)
+    end
+
+    def create_merge_train_removed_todo(merge_request, user)
+      attributes = attributes_for_todo(merge_request.project, merge_request, user, ::Todo::MERGE_TRAIN_REMOVED)
+      create_todos(user, attributes)
     end
   end
 end

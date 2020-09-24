@@ -1,16 +1,43 @@
 {
-  "image": "registry.gitlab.com/bikebilly/auto-devops-10-6/feature-branch:e7315ba964febb11bac8f5cd6ec433db8a3a1583",
-  "unapproved": ["CVE-2017-15650"],
+  "version": "2.4",
   "vulnerabilities": [
     {
-      "featurename": "musl",
-      "featureversion": "1.1.14-r15",
-      "vulnerability": "CVE-2017-15650",
-      "namespace": "alpine:v3.4",
-      "description": "",
-      "link": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15650",
-      "severity": "Medium",
-      "fixedby": "1.1.14-r16"
+      "id": "e987fa54ff94e1d0e716814861459d2eb10bd27a0ba8ca243428669d8885ce68",
+      "category": "container_scanning",
+      "message": "CVE-2017-15650 in musl",
+      "description": "musl:1.1.18-r3 is affected by CVE-2017-15650",
+      "cve": "alpine:v3.7:musl:CVE-2017-15650",
+      "severity": "High",
+      "confidence": "Unknown",
+      "solution": "Upgrade musl from 1.1.18-r3 to 1.1.18-r4",
+      "scanner": {
+        "id": "klar",
+        "name": "klar"
+      },
+      "location": {
+        "dependency": {
+          "package": {
+            "name": "musl"
+          },
+          "version": "1.1.18-r3"
+        },
+        "operating_system": "alpine:v3.7",
+        "image": "registry.gitlab.com/bikebilly/auto-devops-10-6/feature-branch:e7315ba964febb11bac8f5cd6ec433db8a3a1583"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2017-15650",
+          "value": "CVE-2017-15650",
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15650"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15650"
+        }
+      ]
     }
-  ]
+  ],
+  "remediations": []
 }

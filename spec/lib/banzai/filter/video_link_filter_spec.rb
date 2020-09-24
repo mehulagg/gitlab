@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::VideoLinkFilter do
+RSpec.describe Banzai::Filter::VideoLinkFilter do
   def filter(doc, contexts = {})
     contexts.reverse_merge!({
       project: project
@@ -32,7 +32,7 @@ describe Banzai::Filter::VideoLinkFilter do
 
       expect(video.name).to eq 'video'
       expect(video['src']).to eq src
-      expect(video['width']).to eq "100%"
+      expect(video['width']).to eq "400"
 
       expect(paragraph.name).to eq 'p'
 

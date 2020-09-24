@@ -12,7 +12,8 @@ module Gitlab
         push_protected_branch: 'You are not allowed to push code to protected branches on this project.',
         create_protected_branch: 'You are not allowed to create protected branches on this project.',
         invalid_commit_create_protected_branch: 'You can only use an existing protected branch ref as the basis of a new protected branch.',
-        non_web_create_protected_branch: 'You can only create protected branches using the web interface and API.'
+        non_web_create_protected_branch: 'You can only create protected branches using the web interface and API.',
+        prohibited_hex_branch_name: 'You cannot create a branch with a 40-character hexadecimal branch name.'
       }.freeze
 
       LOG_MESSAGES = {
@@ -28,21 +29,30 @@ module Gitlab
 
         logger.log_timed(LOG_MESSAGES[:delete_default_branch_check]) do
           if deletion? && branch_name == project.default_branch
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:delete_default_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:delete_default_branch]
           end
         end
 
+        prohibited_branch_checks
         protected_branch_checks
       end
 
       private
+
+      def prohibited_branch_checks
+        return unless Feature.enabled?(:prohibit_hexadecimal_branch_names, project, default_enabled: true)
+
+        if branch_name =~ /\A\h{40}\z/
+          raise GitAccess::ForbiddenError, ERROR_MESSAGES[:prohibited_hex_branch_name]
+        end
+      end
 
       def protected_branch_checks
         logger.log_timed(LOG_MESSAGES[:protected_branch_checks]) do
           return unless ProtectedBranch.protected?(project, branch_name) # rubocop:disable Cop/AvoidReturnFromBlocks
 
           if forced_push?
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:force_push_protected_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:force_push_protected_branch]
           end
         end
 
@@ -62,15 +72,15 @@ module Gitlab
           break if user_access.can_push_to_branch?(branch_name)
 
           unless user_access.can_merge_to_branch?(branch_name)
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:create_protected_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:create_protected_branch]
           end
 
           unless safe_commit_for_new_protected_branch?
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:invalid_commit_create_protected_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:invalid_commit_create_protected_branch]
           end
 
           unless updated_from_web?
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_web_create_protected_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:non_web_create_protected_branch]
           end
         end
       end
@@ -78,11 +88,11 @@ module Gitlab
       def protected_branch_deletion_checks
         logger.log_timed(LOG_MESSAGES[:protected_branch_deletion_checks]) do
           unless user_access.can_delete_branch?(branch_name)
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_master_delete_protected_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:non_master_delete_protected_branch]
           end
 
           unless updated_from_web?
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_web_delete_protected_branch]
+            raise GitAccess::ForbiddenError, ERROR_MESSAGES[:non_web_delete_protected_branch]
           end
         end
       end
@@ -91,11 +101,11 @@ module Gitlab
         logger.log_timed(LOG_MESSAGES[:protected_branch_push_checks]) do
           if matching_merge_request?
             unless user_access.can_merge_to_branch?(branch_name) || user_access.can_push_to_branch?(branch_name)
-              raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:merge_protected_branch]
+              raise GitAccess::ForbiddenError, ERROR_MESSAGES[:merge_protected_branch]
             end
           else
             unless user_access.can_push_to_branch?(branch_name)
-              raise GitAccess::UnauthorizedError, push_to_protected_branch_rejected_message
+              raise GitAccess::ForbiddenError, push_to_protected_branch_rejected_message
             end
           end
         end

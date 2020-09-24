@@ -30,7 +30,7 @@ RSpec.describe 'Dashboard Issues' do
 
     it 'shows issues when current user is author', :js do
       reset_filters
-      input_filtered_search("author:#{current_user.to_reference}")
+      input_filtered_search("author:=#{current_user.to_reference}")
 
       expect(page).to have_content(authored_issue.title)
       expect(page).to have_content(authored_issue_on_public_project.title)
@@ -73,7 +73,7 @@ RSpec.describe 'Dashboard Issues' do
 
       find('.new-project-item-link').click
 
-      expect(page).to have_current_path("#{project_path}/issues/new")
+      expect(page).to have_current_path("#{project_path}/-/issues/new")
 
       page.within('#content-body') do
         expect(page).to have_selector('.issue-form')

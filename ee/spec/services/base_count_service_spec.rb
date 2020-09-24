@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BaseCountService do
+RSpec.describe BaseCountService do
   include ::EE::GeoHelpers
 
   describe '#cache_options' do

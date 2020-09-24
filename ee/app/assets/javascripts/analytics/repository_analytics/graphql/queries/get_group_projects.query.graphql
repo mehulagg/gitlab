@@ -1,0 +1,10 @@
+query getGroupProjects($groupFullPath: ID!) {
+  group(fullPath: $groupFullPath) {
+    projects {
+      nodes {
+        name
+        id
+      }
+    }
+  }
+}

@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::ChangeAccess do
-  describe '#exec' do
+RSpec.describe Gitlab::Checks::ChangeAccess do
+  describe '#validate!' do
     include_context 'push rules checks context'
 
     let(:push_rule) { create(:push_rule, deny_delete_tag: true) }
@@ -13,9 +13,11 @@ describe Gitlab::Checks::ChangeAccess do
     it_behaves_like 'check ignored when push rule unlicensed'
 
     it 'calls push rules validators' do
-      expect_any_instance_of(EE::Gitlab::Checks::PushRuleCheck).to receive(:validate!)
+      expect_next_instance_of(EE::Gitlab::Checks::PushRuleCheck) do |instance|
+        expect(instance).to receive(:validate!)
+      end
 
-      subject.exec
+      subject.validate!
     end
   end
 end

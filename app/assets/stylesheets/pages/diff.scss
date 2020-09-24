@@ -10,12 +10,28 @@
   .file-title-flex-parent {
     border-top-left-radius: $border-radius-default;
     border-top-right-radius: $border-radius-default;
+    box-shadow: 0 -2px 0 0 var(--white);
     cursor: pointer;
 
+    .dropdown-menu {
+      cursor: auto;
+    }
+
+    @media (max-width: map-get($grid-breakpoints, sm)-1) {
+      .file-header-content {
+        width: 0;
+        flex: 1;
+      }
+
+      .file-actions {
+        margin-left: $gl-spacing-scale-2;
+      }
+    }
+
     @media (min-width: map-get($grid-breakpoints, md)) {
-      // The `-1` below is to prevent two borders from clashing up against eachother -
+      // The `+11` is to ensure the file header border shows when scrolled -
       // the bottom of the compare-versions header and the top of the file header
-      $mr-file-header-top: $mr-version-controls-height + $header-height + $mr-tabs-height - 1;
+      $mr-file-header-top: $mr-version-controls-height + $header-height + $mr-tabs-height + 11;
 
       position: -webkit-sticky;
       position: sticky;
@@ -29,7 +45,7 @@
         left: -11px;
         width: 10px;
         height: calc(100% + 1px);
-        background: $white-light;
+        background: $white;
         pointer-events: none;
       }
 
@@ -62,11 +78,6 @@
       background-color: $gray-normal;
     }
 
-    a,
-    button {
-      color: $gray-700;
-    }
-
     svg {
       vertical-align: middle;
       top: -1px;
@@ -96,7 +107,7 @@
   }
 
   .diff-content {
-    background: $white-light;
+    background: $white;
     color: $gl-text-color;
     border-radius: 0 0 3px 3px;
 
@@ -106,7 +117,7 @@
 
     .file-mode-changed {
       padding: 10px;
-      color: $gl-gray-500;
+      color: $gray-500;
     }
 
     .suppressed-container {
@@ -137,11 +148,11 @@
 
     .frame {
       display: inline-block;
-      background-color: $white-light;
+      background-color: $white;
       line-height: 0;
 
       img {
-        border: 1px solid $white-light;
+        border: 1px solid $white;
         background-image: linear-gradient(45deg,
         $border-color 25%,
         transparent 25%,
@@ -185,7 +196,7 @@
 
       .swipe-wrap {
         overflow: hidden;
-        border-right: 1px solid $gl-gray-400;
+        border-right: 1px solid $gray-300;
         position: absolute;
         display: block;
         top: 13px;
@@ -194,7 +205,7 @@
         &.left-oriented {
           /* only for commit view (different swipe viewer) */
           border-right: 0;
-          border-left: 1px solid $gl-gray-400;
+          border-left: 1px solid $gray-300;
         }
       }
 
@@ -424,6 +435,10 @@
     margin-left: 0;
     border-left: 0;
   }
+
+  .file-actions .dropdown {
+    height: 28px;
+  }
 }
 
 table.code {
@@ -450,7 +465,7 @@ table.code {
     vertical-align: top;
 
     span {
-      white-space: pre-wrap;
+      white-space: break-spaces;
 
       &.context-cell {
         display: inline-block;
@@ -472,6 +487,7 @@ table.code {
       text-align: right;
       width: 50px;
       position: relative;
+      white-space: nowrap;
 
       a {
         transition: none;
@@ -517,6 +533,10 @@ table.code {
           position: absolute;
           left: 0.5em;
         }
+
+        &.with-coverage::before {
+          left: 0;
+        }
       }
 
       &.new {
@@ -524,6 +544,10 @@ table.code {
           content: '+';
           position: absolute;
           left: 0.5em;
+        }
+
+        &.with-coverage::before {
+          left: 0;
         }
       }
     }
@@ -550,7 +574,7 @@ table.code {
 
 .diff-stats {
   align-items: center;
-  padding: 0 0.25rem;
+  padding: 0 1rem;
 
   .diff-stats-group {
     padding: 0 0.25rem;
@@ -562,7 +586,7 @@ table.code {
 
   &.is-compare-versions-header {
     .diff-stats-group {
-      padding: 0 0.5rem;
+      padding: 0 0.25rem;
     }
   }
 }
@@ -687,7 +711,7 @@ table.code {
   position: absolute;
   left: 0;
   margin-right: 0;
-  border-color: $white-light;
+  border-color: $white;
   cursor: pointer;
   transition: all 0.1s ease-out;
   @include code-icon-size();
@@ -737,7 +761,7 @@ table.code {
 
   .collapse-icon,
   path {
-    fill: $white-light;
+    fill: $white;
   }
 
   &:focus {
@@ -755,7 +779,7 @@ table.code {
     @include media-breakpoint-up(sm) {
       margin-left: -$gl-padding;
       padding-left: $gl-padding;
-      background-color: $white-light;
+      background-color: $white;
     }
   }
 
@@ -763,7 +787,7 @@ table.code {
     position: -webkit-sticky;
     position: sticky;
     top: $header-height;
-    background-color: $white-light;
+    background-color: $white;
     z-index: 200;
 
     .with-performance-bar & {
@@ -867,27 +891,27 @@ table.code {
     display: block;
     width: 100%;
     height: 10px;
-    background-color: $white-light;
+    background-color: $white;
     background-image: linear-gradient(45deg,
     transparent,
     transparent 73%,
     $diff-jagged-border-gradient-color 75%,
-    $white-light 80%),
+    $white 80%),
       linear-gradient(225deg,
     transparent,
     transparent 73%,
     $diff-jagged-border-gradient-color 75%,
-    $white-light 80%),
+    $white 80%),
       linear-gradient(135deg,
     transparent,
     transparent 73%,
     $diff-jagged-border-gradient-color 75%,
-    $white-light 80%),
+    $white 80%),
       linear-gradient(-45deg,
     transparent,
     transparent 73%,
     $diff-jagged-border-gradient-color 75%,
-    $white-light 80%);
+    $white 80%);
     background-position: 5px 5px, 0 5px, 0 5px, 5px 5px;
     background-size: 10px 10px;
     background-repeat: repeat;
@@ -930,11 +954,10 @@ table.code {
   }
 }
 
-.files:not([data-can-create-note='true']) .frame {
+.files:not([data-can-create-note]) .frame {
   cursor: auto;
 }
 
-.frame,
 .frame.click-to-comment,
 .btn-transparent.image-diff-overlay-add-comment {
   position: relative;
@@ -976,8 +999,8 @@ table.code {
 .notes > .badge.badge-pill {
   position: absolute;
   background-color: $blue-400;
-  color: $white-light;
-  border: $white-light 1px solid;
+  color: $white;
+  border: $white 1px solid;
   min-height: $gl-padding;
   padding: 5px 8px;
   border-radius: 12px;
@@ -988,7 +1011,8 @@ table.code {
 }
 
 .frame .badge.badge-pill,
-.frame .image-comment-badge {
+.frame .image-comment-badge,
+.frame .comment-indicator {
   // Center align badges on the frame
   transform: translate(-50%, -50%);
 }
@@ -1032,7 +1056,7 @@ table.code {
   }
 
   &.collapsed {
-    background-color: $white-light;
+    background-color: $white;
 
     .diff-notes-collapse,
     .note,
@@ -1057,8 +1081,8 @@ table.code {
 .diff-tree-list {
   position: -webkit-sticky;
   position: sticky;
-  $top-pos: $header-height + $mr-tabs-height + $mr-version-controls-height + 10px;
-  top: $header-height + $mr-tabs-height + $mr-version-controls-height + 10px;
+  $top-pos: $header-height + $mr-tabs-height + $mr-version-controls-height + 15px;
+  top: $top-pos;
   max-height: calc(100vh - #{$top-pos});
   z-index: 202;
 
@@ -1095,10 +1119,7 @@ table.code {
 
 .tree-list-scroll {
   max-height: 100%;
-  padding-top: $grid-size;
   padding-bottom: $grid-size;
-  border-top: 1px solid $border-color;
-  border-bottom: 1px solid $border-color;
   overflow-y: scroll;
   overflow-x: auto;
 }

@@ -1,9 +1,8 @@
 <script>
-import { sprintf, s__ } from '~/locale';
+import { GlIcon } from '@gitlab/ui';
+import { sprintf, s__, __ } from '~/locale';
 import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
 import tooltip from '~/vue_shared/directives/tooltip';
-import icon from '~/vue_shared/components/icon.vue';
-
 import { TIME_DIFF } from '../constants';
 
 export default {
@@ -11,7 +10,7 @@ export default {
     tooltip,
   },
   components: {
-    icon,
+    GlIcon,
   },
   props: {
     syncStatusUnavailable: {
@@ -40,7 +39,11 @@ export default {
         return s__('GeoNodes|Full');
       }
 
-      return `${s__('GeoNodes|Selective')} (${this.selectiveSyncType})`;
+      // Renaming namespaces to groups in the UI for Geo Selective Sync
+      const syncLabel =
+        this.selectiveSyncType === 'namespaces' ? __('groups') : this.selectiveSyncType;
+
+      return sprintf(s__('GeoNodes|Selective (%{syncLabel})'), { syncLabel });
     },
     eventTimestampEmpty() {
       return this.lastEvent.timeStamp === 0 || this.cursorLastEvent.timeStamp === 0;
@@ -108,18 +111,18 @@ export default {
 </script>
 
 <template>
-  <div class="node-detail-value">
-    <span v-if="syncStatusUnavailable" class="node-detail-value-bold"> {{ __('Unknown') }} </span>
+  <div class="mt-1 node-sync-settings">
+    <strong v-if="syncStatusUnavailable"> {{ __('Unknown') }} </strong>
     <span
       v-else
       v-tooltip
       :title="syncStatusTooltip"
-      class="node-sync-settings"
+      class="d-flex align-items-center"
       data-placement="bottom"
     >
-      <strong>{{ syncType }}</strong>
-      <icon name="retry" class="sync-status-icon prepend-left-5" />
-      <span v-if="!eventTimestampEmpty" class="sync-status-event-info prepend-left-5">
+      <strong data-testid="syncType">{{ syncType }}</strong>
+      <gl-icon name="retry" class="ml-2" />
+      <span v-if="!eventTimestampEmpty" class="ml-2">
         {{ syncStatusEventInfo }}
       </span>
     </span>

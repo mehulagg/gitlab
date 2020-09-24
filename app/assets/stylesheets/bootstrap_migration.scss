@@ -6,9 +6,9 @@ $brand-info: $blue-500;
 $brand-warning: $orange-500;
 $brand-danger: $red-500;
 
-$border-radius-base: 3px !default;
+$border-radius-base: $gl-border-radius-base;
 
-$modal-body-bg: $white-light;
+$modal-body-bg: $white;
 $input-border: $border-color;
 
 $padding-base-vertical: $gl-vert-padding;
@@ -23,7 +23,7 @@ body,
   // Override default font size used in non-csslab UI
   // Use rem to keep default font-size at 14px on body so 1rem still
   // fits 8px grid, but also allow users to change browser font size
-  font-size: .875rem;
+  font-size: 0.875rem;
 }
 
 legend {
@@ -32,23 +32,14 @@ legend {
 }
 
 button,
-html [type="button"],
-[type="reset"],
-[type="submit"],
-[role="button"] {
+html [type='button'],
+[type='reset'],
+[type='submit'],
+[role='button'] {
   // Override bootstrap reboot
+  /* stylelint-disable-next-line property-no-vendor-prefix */
   -webkit-appearance: inherit;
   cursor: pointer;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: $gl-text-color;
-  font-weight: 600;
 }
 
 h1,
@@ -87,7 +78,7 @@ h5,
   font-size: $gl-font-size;
 }
 
-input[type="file"] {
+input[type='file'] {
   // Bootstrap 4 file input height is taller by default
   // which makes them look ugly
   line-height: 1;
@@ -120,8 +111,8 @@ kbd {
 
 code {
   padding: 2px 4px;
-  color: $red-600;
-  background-color: $red-100;
+  color: $code-color;
+  background-color: $gray-50;
   border-radius: $border-radius-default;
 
   .code > & {
@@ -168,7 +159,7 @@ table {
 .bg-danger,
 .bg-warning {
   .card-header {
-    color: $white-light;
+    color: $white;
   }
 }
 
@@ -197,7 +188,7 @@ h3.popover-header {
 
 // Add to .label so that old system notes that are saved to the db
 // will still receive the correct styling
-.badge,
+.badge:not(.gl-badge),
 .label {
   padding: 4px 5px;
   font-size: 12px;
@@ -221,7 +212,7 @@ h3.popover-header {
 }
 
 .info-well {
-  background: $gray-50;
+  background: $gray-10;
   color: $gl-text-color;
   border: 1px solid $border-color;
   border-radius: 4px;
@@ -310,11 +301,11 @@ pre code {
 .alert-info,
 .alert-warning,
 .alert-danger {
-  color: $white-light;
+  color: $white;
 
   h4,
   .alert-link {
-    color: $white-light;
+    color: $white;
   }
 }
 
@@ -324,8 +315,8 @@ input[type=color].form-control {
 
 .toggle-sidebar-button {
   .collapse-text,
-  .icon-angle-double-left,
-  .icon-angle-double-right {
+  .icon-chevron-double-lg-left,
+  .icon-chevron-double-lg-right {
     color: $gl-text-color-secondary;
   }
 }

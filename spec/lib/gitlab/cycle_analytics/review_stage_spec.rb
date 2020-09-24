@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'lib/gitlab/cycle_analytics/shared_stage_spec'
 
-describe Gitlab::CycleAnalytics::ReviewStage do
+RSpec.describe Gitlab::CycleAnalytics::ReviewStage do
   let(:stage_name) { :review }
   let(:project) { create(:project) }
   let(:issue_1) { create(:issue, project: project, created_at: 90.minutes.ago) }
@@ -28,7 +27,7 @@ describe Gitlab::CycleAnalytics::ReviewStage do
 
   describe '#project_median' do
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     it 'counts median from issues with metrics' do
@@ -71,7 +70,7 @@ describe Gitlab::CycleAnalytics::ReviewStage do
 
     describe '#group_median' do
       around do |example|
-        Timecop.freeze { example.run }
+        freeze_time { example.run }
       end
 
       it 'counts median from issues with metrics' do

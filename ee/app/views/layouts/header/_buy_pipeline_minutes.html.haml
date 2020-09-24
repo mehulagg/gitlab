@@ -1,0 +1,31 @@
+- return unless show_buy_pipeline_minutes?(project, namespace)
+
+- link_text = s_("CurrentUser|Buy Pipeline minutes")
+- link_emoji = emoji_icon('clock9', 'aria-hidden': true)
+- link_class = 'ci-minutes-emoji js-buy-pipeline-minutes-link'
+- data_attributes = { 'track-event': 'click_buy_ci_minutes', 'track-label': current_user.namespace.actual_plan_name, 'track-property': 'user_dropdown' }
+- path = profile_usage_quotas_path
+
+- content_for :buy_pipeline_with_subtext do
+  .gl-pb-2
+    = link_text
+    = link_emoji
+  %span.small.gl-pb-3.gl-text-orange-800
+    = s_("CurrentUser|One of your groups is running out")
+
+- if show_pipeline_minutes_notification_dot?(project, namespace)
+  - link_class << ' js-follow-link'
+
+  %li.js-buy-pipeline-minutes-notification-callout{ data: { feature_id: ::Ci::RunnersHelper::BUY_PIPELINE_MINUTES_NOTIFICATION_DOT,
+    dismiss_endpoint: user_callouts_path } }
+    = link_to path, class: link_class, data: data_attributes do
+      = yield :buy_pipeline_with_subtext
+- elsif show_buy_pipeline_with_subtext?(project, namespace)
+  %li
+    = link_to path, class: link_class, data: data_attributes do
+      = yield :buy_pipeline_with_subtext
+- else
+  %li
+    = link_to path, class: link_class, data: data_attributes do
+      = link_text
+      = link_emoji

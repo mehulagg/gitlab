@@ -1,6 +1,6 @@
 # Hash Indexes
 
-PostgreSQL supports hash indexes besides the regular btree
+PostgreSQL supports hash indexes besides the regular B-tree
 indexes. Hash indexes however are to be avoided at all costs. While they may
 _sometimes_ provide better performance the cost of rehashing can be very high.
 More importantly: at least until PostgreSQL 10.0 hash indexes are not
@@ -14,7 +14,7 @@ documentation:
 > answers to queries that subsequently use them. For these reasons, hash index
 > use is presently discouraged.
 
-RuboCop is configured to register an offence when it detects the use of a hash
+RuboCop is configured to register an offense when it detects the use of a hash
 index.
 
-Instead of using hash indexes you should use regular btree indexes.
+Instead of using hash indexes you should use regular B-tree indexes.

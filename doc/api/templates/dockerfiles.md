@@ -12,11 +12,11 @@ information on Dockerfiles, see the
 
 Get all Dockerfile templates.
 
-```
+```plaintext
 GET /templates/dockerfiles
 ```
 
-```bash
+```shell
 curl https://gitlab.example.com/api/v4/templates/dockerfiles
 ```
 
@@ -91,6 +91,14 @@ Example response:
   {
     "key": "Ruby-alpine",
     "name": "Ruby-alpine"
+  },
+  {
+    "key": "Rust",
+    "name": "Rust"
+  },
+  {
+    "key": "Swift",
+    "name": "Swift"
   }
 ]
 ```
@@ -99,7 +107,7 @@ Example response:
 
 Get a single Dockerfile template.
 
-```
+```plaintext
 GET /templates/dockerfiles/:key
 ```
 
@@ -107,7 +115,7 @@ GET /templates/dockerfiles/:key
 | ---------- | ------ | -------- | ----------- |
 | `key`      | string | yes      | The key of the Dockerfile template |
 
-```bash
+```shell
 curl https://gitlab.example.com/api/v4/templates/dockerfiles/Binary
 ```
 
@@ -116,7 +124,7 @@ Example response:
 ```json
 {
   "name": "Binary",
-  "content": "# This file is a template, and might need editing before it works on your project.\n# This Dockerfile installs a compiled binary into a bare system.\n# You must either commit your compiled binary into source control (not recommended)\n# or build the binary first as part of a CI/CD pipeline.\n\nFROM buildpack-deps:jessie\n\nWORKDIR /usr/local/bin\n\n# Change `app` to whatever your binary is called\nAdd app .\nCMD [\"./app\"]\n"
+  "content": "# This file is a template, and might need editing before it works on your project.\n# This Dockerfile installs a compiled binary into a bare system.\n# You must either commit your compiled binary into source control (not recommended)\n# or build the binary first as part of a CI/CD pipeline.\n\nFROM buildpack-deps:buster\n\nWORKDIR /usr/local/bin\n\n# Change `app` to whatever your binary is called\nAdd app .\nCMD [\"./app\"]\n"
 }
 ```
 

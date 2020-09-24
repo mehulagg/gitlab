@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::RolloutStatus do
+RSpec.describe Gitlab::Kubernetes::RolloutStatus do
   include KubernetesHelpers
 
   let(:track) { nil }
@@ -66,12 +66,12 @@ describe Gitlab::Kubernetes::RolloutStatus do
 
       it 'stores the union of deployment instances' do
         expected = [
-          { status: 'running', pod_name: "two", tooltip: 'two (two) Running', track: 'any', stable: false },
-          { status: 'running', pod_name: "two", tooltip: 'two (two) Running', track: 'any', stable: false },
-          { status: 'running', pod_name: "two", tooltip: 'two (two) Running', track: 'any', stable: false },
-          { status: 'running', pod_name: "one", tooltip: 'one (one) Running', track: 'stable', stable: true },
-          { status: 'running', pod_name: "one", tooltip: 'one (one) Running', track: 'stable', stable: true },
-          { status: 'running', pod_name: "one", tooltip: 'one (one) Running', track: 'stable', stable: true }
+          { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'any', stable: false },
+          { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'any', stable: false },
+          { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'any', stable: false },
+          { status: 'running', pod_name: "one", tooltip: 'one (Running)', track: 'stable', stable: true },
+          { status: 'running', pod_name: "one", tooltip: 'one (Running)', track: 'stable', stable: true },
+          { status: 'running', pod_name: "one", tooltip: 'one (Running)', track: 'stable', stable: true }
         ]
 
         expect(rollout_status.instances).to eq(expected)
@@ -87,12 +87,12 @@ describe Gitlab::Kubernetes::RolloutStatus do
 
       it 'stores the union of deployment instances' do
         expected = [
-          { status: 'running', pod_name: "two", tooltip: 'two (two) Running', track: 'canary', stable: false },
-          { status: 'running', pod_name: "two", tooltip: 'two (two) Running', track: 'canary', stable: false },
-          { status: 'running', pod_name: "two", tooltip: 'two (two) Running', track: 'canary', stable: false },
-          { status: 'running', pod_name: "one", tooltip: 'one (one) Running', track: 'stable', stable: true },
-          { status: 'running', pod_name: "one", tooltip: 'one (one) Running', track: 'stable', stable: true },
-          { status: 'running', pod_name: "one", tooltip: 'one (one) Running', track: 'stable', stable: true }
+          { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
+          { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
+          { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
+          { status: 'running', pod_name: "one", tooltip: 'one (Running)', track: 'stable', stable: true },
+          { status: 'running', pod_name: "one", tooltip: 'one (Running)', track: 'stable', stable: true },
+          { status: 'running', pod_name: "one", tooltip: 'one (Running)', track: 'stable', stable: true }
         ]
 
         expect(rollout_status.instances).to eq(expected)

@@ -1,7 +1,7 @@
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import COLUMNS from '../constants';
 
 export default class GroupMemberStore {
@@ -43,7 +43,7 @@ export default class GroupMemberStore {
   sortMembers(sortByColumn) {
     if (sortByColumn) {
       this.state.currentSortedColumn = sortByColumn;
-      this.state.sortOrders[sortByColumn] = this.state.sortOrders[sortByColumn] * -1;
+      this.state.sortOrders[sortByColumn] *= -1;
 
       const currentColumnOrder = this.state.sortOrders[sortByColumn] || 1;
       const members = this.state.members.slice().sort((a, b) => {

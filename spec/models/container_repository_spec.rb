@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContainerRepository do
+RSpec.describe ContainerRepository do
   let(:group) { create(:group, name: 'group') }
   let(:project) { create(:project, path: 'test', group: group) }
 
@@ -19,13 +19,25 @@ describe ContainerRepository do
       .with(headers: { 'Accept' => ContainerRegistry::Client::ACCEPTED_TYPES.join(', ') })
       .to_return(
         status: 200,
-        body: JSON.dump(tags: ['test_tag']),
+        body: Gitlab::Json.dump(tags: ['test_tag']),
         headers: { 'Content-Type' => 'application/json' })
   end
 
   describe 'associations' do
     it 'belongs to the project' do
       expect(repository).to belong_to(:project)
+    end
+  end
+
+  describe '.exists_by_path?' do
+    it 'returns true for known container repository paths' do
+      path = ContainerRegistry::Path.new("#{project.full_path}/#{repository.name}")
+      expect(described_class.exists_by_path?(path)).to be_truthy
+    end
+
+    it 'returns false for unknown container repository paths' do
+      path = ContainerRegistry::Path.new('you/dont/know/me')
+      expect(described_class.exists_by_path?(path)).to be_falsey
     end
   end
 
@@ -69,6 +81,12 @@ describe ContainerRepository do
     end
   end
 
+  describe '#tags_count' do
+    it 'returns the count of tags' do
+      expect(repository.tags_count).to eq(1)
+    end
+  end
+
   describe '#has_tags?' do
     it 'has tags' do
       expect(repository).to have_tags
@@ -85,7 +103,7 @@ describe ContainerRepository do
     context 'when action succeeds' do
       it 'returns status that indicates success' do
         expect(repository.client)
-          .to receive(:delete_repository_tag)
+          .to receive(:delete_repository_tag_by_digest)
           .twice
           .and_return(true)
 
@@ -96,11 +114,41 @@ describe ContainerRepository do
     context 'when action fails' do
       it 'returns status that indicates failure' do
         expect(repository.client)
-          .to receive(:delete_repository_tag)
+          .to receive(:delete_repository_tag_by_digest)
           .twice
           .and_return(false)
 
         expect(repository.delete_tags!).to be_falsey
+      end
+    end
+  end
+
+  describe '#delete_tag_by_name' do
+    let(:repository) do
+      create(:container_repository, name: 'my_image',
+                                    tags: { latest: '123', rc1: '234' },
+                                    project: project)
+    end
+
+    context 'when action succeeds' do
+      it 'returns status that indicates success' do
+        expect(repository.client)
+          .to receive(:delete_repository_tag_by_name)
+          .with(repository.path, "latest")
+          .and_return(true)
+
+        expect(repository.delete_tag_by_name('latest')).to be_truthy
+      end
+    end
+
+    context 'when action fails' do
+      it 'returns status that indicates failure' do
+        expect(repository.client)
+          .to receive(:delete_repository_tag_by_name)
+          .with(repository.path, "latest")
+          .and_return(false)
+
+        expect(repository.delete_tag_by_name('latest')).to be_falsey
       end
     end
   end
@@ -133,6 +181,33 @@ describe ContainerRepository do
       it 'returns false' do
         expect(repository).not_to be_root_repository
       end
+    end
+  end
+
+  describe '#start_expiration_policy!' do
+    subject { repository.start_expiration_policy! }
+
+    it 'sets the expiration policy started at to now' do
+      Timecop.freeze do
+        expect { subject }
+          .to change { repository.expiration_policy_started_at }.from(nil).to(Time.zone.now)
+      end
+    end
+  end
+
+  describe '#reset_expiration_policy_started_at!' do
+    subject { repository.reset_expiration_policy_started_at! }
+
+    before do
+      repository.start_expiration_policy!
+    end
+
+    it 'resets the expiration policy started at' do
+      started_at = repository.expiration_policy_started_at
+
+      expect(started_at).not_to be_nil
+      expect { subject }
+          .to change { repository.expiration_policy_started_at }.from(started_at).to(nil)
     end
   end
 
@@ -266,5 +341,15 @@ describe ContainerRepository do
 
       it { is_expected.to eq([]) }
     end
+  end
+
+  describe '.search_by_name' do
+    let!(:another_repository) do
+      create(:container_repository, name: 'my_foo_bar', project: project)
+    end
+
+    subject { described_class.search_by_name('my_image') }
+
+    it { is_expected.to contain_exactly(repository) }
   end
 end

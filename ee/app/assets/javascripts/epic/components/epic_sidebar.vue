@@ -12,6 +12,10 @@ import SidebarDatePickerCollapsed from '~/vue_shared/components/sidebar/collapse
 import SidebarLabels from './sidebar_items/sidebar_labels.vue';
 import SidebarParticipants from '~/sidebar/components/participants/participants.vue';
 import SidebarSubscription from './sidebar_items/sidebar_subscription.vue';
+import ConfidentialIssueSidebar from '~/sidebar/components/confidential/confidential_issue_sidebar.vue';
+
+import notesEventHub from '~/notes/event_hub';
+import sidebarEventHub from '~/sidebar/event_hub';
 
 import { dateTypes } from '../constants';
 
@@ -26,10 +30,12 @@ export default {
     AncestorsTree,
     SidebarParticipants,
     SidebarSubscription,
+    ConfidentialIssueSidebar,
   },
   computed: {
     ...mapState([
       'canUpdate',
+      'allowSubEpics',
       'sidebarCollapsed',
       'participants',
       'startDateSourcingMilestoneTitle',
@@ -44,6 +50,7 @@ export default {
       'dueDateFromMilestones',
       'epicStartDateSaveInProgress',
       'epicDueDateSaveInProgress',
+      'fullPath',
     ]),
     ...mapGetters([
       'isUserSignedIn',
@@ -61,9 +68,15 @@ export default {
   },
   mounted() {
     this.toggleSidebarFlag(epicUtils.getCollapsedGutter());
+    this.fetchEpicDetails();
+    sidebarEventHub.$on('updateIssuableConfidentiality', this.updateEpicConfidentiality);
+  },
+  beforeDestroy() {
+    sidebarEventHub.$off('updateIssuableConfidentiality', this.updateEpicConfidentiality);
   },
   methods: {
     ...mapActions([
+      'fetchEpicDetails',
       'toggleSidebar',
       'toggleSidebarFlag',
       'toggleStartDateType',
@@ -114,6 +127,9 @@ export default {
         newDate: date,
         dateTypeIsFixed: true,
       });
+    },
+    updateEpicConfidentiality(confidential) {
+      notesEventHub.$emit('notesApp.updateIssuableConfidentiality', confidential);
     },
   },
 };
@@ -184,9 +200,16 @@ export default {
         @toggleCollapse="toggleSidebar({ sidebarCollapsed })"
       />
       <sidebar-labels :can-update="canUpdate" :sidebar-collapsed="sidebarCollapsed" />
-      <div class="block ancestors">
+      <div v-if="allowSubEpics" class="block ancestors">
         <ancestors-tree :ancestors="ancestors" :is-fetching="false" />
       </div>
+
+      <confidential-issue-sidebar
+        :is-editable="canUpdate"
+        :full-path="fullPath"
+        issuable-type="epic"
+      />
+
       <div class="block participants">
         <sidebar-participants
           :participants="participants"

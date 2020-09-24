@@ -1,6 +1,14 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::AfterExportStrategies::BaseAfterExportStrategy do
+RSpec.describe Gitlab::ImportExport::AfterExportStrategies::BaseAfterExportStrategy do
+  before do
+    allow_next_instance_of(ProjectExportWorker) do |job|
+      allow(job).to receive(:jid).and_return(SecureRandom.hex(8))
+    end
+  end
+
   let!(:service) { described_class.new }
   let!(:project) { create(:project, :with_export) }
   let(:shared) { project.import_export_shared }

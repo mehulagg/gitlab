@@ -18,10 +18,10 @@ module Gitlab
         end
 
         def check
-          return unless defined?(::Puma)
+          return unless Gitlab::Runtime.puma?
 
           stats = Puma.stats
-          stats = JSON.parse(stats)
+          stats = Gitlab::Json.parse(stats)
 
           # If `workers` is missing this means that
           # Puma server is running in single mode

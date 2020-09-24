@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Groups::RoadmapController do
+RSpec.describe Groups::RoadmapController do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
 
@@ -18,7 +18,7 @@ describe Groups::RoadmapController do
           get group_roadmap_path(group, layout: layout)
         end.not_to change { user.reload.roadmap_layout }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -36,7 +36,7 @@ describe Groups::RoadmapController do
             get group_roadmap_path(group)
           end.not_to change { user.reload.roadmap_layout }
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
@@ -45,7 +45,7 @@ describe Groups::RoadmapController do
           expect(Users::UpdateService).not_to receive(:new).with(user, user: user, roadmap_layout: a_kind_of(String))
           get group_roadmap_path(group, layout: 'FOO')
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
@@ -58,7 +58,7 @@ describe Groups::RoadmapController do
             get group_roadmap_path(group, layout: layout)
           end.to change { user.reload.roadmap_layout }.to(layout.downcase)
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end

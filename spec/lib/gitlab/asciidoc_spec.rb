@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'nokogiri'
 
 module Gitlab
-  describe Asciidoc do
+  RSpec.describe Asciidoc do
     include FakeBlobHelpers
 
     before do
@@ -43,6 +43,27 @@ module Gitlab
             .with(input, expected_asciidoc_opts).and_return(html)
 
           render(input, context)
+        end
+      end
+
+      context "with requested path" do
+        input = <<~ADOC
+          Document name: {docname}.
+        ADOC
+
+        it "ignores {docname} when not available" do
+          expect(render(input, {})).to include(input.strip)
+        end
+
+        [
+          ['/',                   '',       'root'],
+          ['README',              'README', 'just a filename'],
+          ['doc/api/',            '',       'a directory'],
+          ['doc/api/README.adoc', 'README', 'a complete path']
+        ].each do |path, basename, desc|
+          it "sets {docname} for #{desc}" do
+            expect(render(input, { requested_path: path })).to include(": #{basename}.")
+          end
         end
       end
 
@@ -383,7 +404,7 @@ module Gitlab
             ++++
 
             stem:[2+2] is 4
-            MD
+          MD
 
           expect(render(input, context)).to include('<pre data-math-style="display" class="code math js-render-math"><code>eta_x gamma</code></pre>')
           expect(render(input, context)).to include('<p><code data-math-style="inline" class="code math js-render-math">2+2</code> is 4</p>')
@@ -397,6 +418,50 @@ module Gitlab
           expect(output).to include("a href=\"README.adoc\"")
         end
       end
+
+      context 'with mermaid diagrams' do
+        it 'adds class js-render-mermaid to the output' do
+          input = <<~MD
+            [mermaid]
+            ....
+            graph LR
+                A[Square Rect] -- Link text --> B((Circle))
+                A --> C(Round Rect)
+                B --> D{Rhombus}
+                C --> D
+            ....
+          MD
+
+          output = <<~HTML
+            <pre data-mermaid-style="display" class="js-render-mermaid">graph LR
+                A[Square Rect] -- Link text --&gt; B((Circle))
+                A --&gt; C(Round Rect)
+                B --&gt; D{Rhombus}
+                C --&gt; D</pre>
+          HTML
+
+          expect(render(input, context)).to include(output.strip)
+        end
+
+        it 'applies subs in diagram block' do
+          input = <<~MD
+            :class-name: AveryLongClass
+
+            [mermaid,subs=+attributes]
+            ....
+            classDiagram
+            Class01 <|-- {class-name} : Cool
+            ....
+          MD
+
+          output = <<~HTML
+            <pre data-mermaid-style="display" class="js-render-mermaid">classDiagram
+            Class01 &lt;|-- AveryLongClass : Cool</pre>
+          HTML
+
+          expect(render(input, context)).to include(output.strip)
+        end
+      end
     end
 
     context 'with project' do
@@ -408,6 +473,7 @@ module Gitlab
           requested_path: requested_path
         }
       end
+
       let(:commit)         { project.commit(ref) }
       let(:project)        { create(:project, :repository) }
       let(:ref)            { 'asciidoc' }
@@ -423,6 +489,24 @@ module Gitlab
           current_file += 'README.adoc' if requested_path.end_with? '/'
 
           create_file(current_file, "= AsciiDoc\n")
+        end
+
+        def many_includes(target)
+          Array.new(10, "include::#{target}[]").join("\n")
+        end
+
+        context 'cyclic imports' do
+          before do
+            create_file('doc/api/a.adoc', many_includes('b.adoc'))
+            create_file('doc/api/b.adoc', many_includes('a.adoc'))
+          end
+
+          let(:include_path) { 'a.adoc' }
+          let(:requested_path) { 'doc/api/README.md' }
+
+          it 'completes successfully' do
+            is_expected.to include('<p>Include this:</p>')
+          end
         end
 
         context 'with path to non-existing file' do
@@ -451,6 +535,7 @@ module Gitlab
 
         context 'with path to a binary file' do
           let(:blob) { fake_blob(path: 'dk.png', binary: true) }
+
           include_examples :invalid_include
         end
 
@@ -480,7 +565,6 @@ module Gitlab
               ['../sample.adoc',    'doc/sample.adoc',     'relative path to a file up one directory'],
               ['../../sample.adoc', 'sample.adoc',         'relative path for a file up multiple directories']
             ].each do |include_path_, file_path_, desc|
-
               context "the file is specified by #{desc}" do
                 let(:include_path) { include_path_ }
                 let(:file_path) { file_path_ }
@@ -500,6 +584,7 @@ module Gitlab
 
             context 'without a commit (only ref)' do
               let(:commit) { nil }
+
               include_examples :valid_include
             end
           end
@@ -511,8 +596,31 @@ module Gitlab
 
             context 'without a commit (only ref)' do
               let(:commit) { nil }
+
               include_examples :valid_include
             end
+          end
+        end
+
+        context 'when repository is passed into the context' do
+          let(:wiki_repo) { project.wiki.repository }
+          let(:include_path) { 'wiki_file.adoc' }
+
+          before do
+            project.create_wiki
+            context.merge!(repository: wiki_repo)
+          end
+
+          context 'when the file exists' do
+            before do
+              create_file(include_path, 'Content from wiki', repository: wiki_repo)
+            end
+
+            it { is_expected.to include('<p>Content from wiki</p>') }
+          end
+
+          context 'when the file does not exist' do
+            it { is_expected.to include("[ERROR: include::#{include_path}[] - unresolved directive]")}
           end
         end
 
@@ -560,8 +668,8 @@ module Gitlab
           end
         end
 
-        def create_file(path, content)
-          project.repository.create_file(project.creator, path, content,
+        def create_file(path, content, repository: project.repository)
+          repository.create_file(project.creator, path, content,
             message: "Add #{path}", branch_name: 'asciidoc')
         end
       end

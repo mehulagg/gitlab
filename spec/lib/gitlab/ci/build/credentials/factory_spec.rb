@@ -2,22 +2,28 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Credentials::Factory do
+RSpec.describe Gitlab::Ci::Build::Credentials::Factory do
   let(:build) { create(:ci_build, name: 'spinach', stage: 'test', stage_idx: 0) }
 
   subject { described_class.new(build).create! }
 
-  class TestProvider
-    def initialize(build); end
-  end
-
   before do
-    allow_any_instance_of(described_class).to receive(:providers).and_return([TestProvider])
+    stub_const('TestProvider', Class.new)
+
+    TestProvider.class_eval do
+      def initialize(build); end
+    end
+
+    allow_next_instance_of(described_class) do |instance|
+      allow(instance).to receive(:providers).and_return([TestProvider])
+    end
   end
 
   context 'when provider is valid' do
     before do
-      allow_any_instance_of(TestProvider).to receive(:valid?).and_return(true)
+      allow_next_instance_of(TestProvider) do |instance|
+        allow(instance).to receive(:valid?).and_return(true)
+      end
     end
 
     it 'generates an array of credentials objects' do
@@ -29,7 +35,9 @@ describe Gitlab::Ci::Build::Credentials::Factory do
 
   context 'when provider is not valid' do
     before do
-      allow_any_instance_of(TestProvider).to receive(:valid?).and_return(false)
+      allow_next_instance_of(TestProvider) do |instance|
+        allow(instance).to receive(:valid?).and_return(false)
+      end
     end
 
     it 'generates an array without specific credential object' do

@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Geo::PruneEventLogWorker, :geo do
+RSpec.describe Geo::PruneEventLogWorker, :geo do
   include ::EE::GeoHelpers
 
   subject(:worker) { described_class.new }
 
-  set(:primary) { create(:geo_node, :primary) }
-  set(:secondary) { create(:geo_node) }
+  let_it_be(:primary) { create(:geo_node, :primary) }
+  let_it_be(:secondary, refind: true) { create(:geo_node) }
 
   describe '#perform' do
     context 'current node secondary' do
@@ -90,7 +90,7 @@ describe Geo::PruneEventLogWorker, :geo do
       end
 
       context 'multiple secondary nodes' do
-        set(:secondary2) { create(:geo_node) }
+        let_it_be(:secondary2) { create(:geo_node) }
         let!(:events) { create_list(:geo_event_log, 5, :updated_event) }
 
         it 'aborts when there is a node without status' do

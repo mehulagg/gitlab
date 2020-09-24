@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Ci::EnsureStageService, '#execute' do
-  set(:project) { create(:project) }
-  set(:user) { create(:user) }
+RSpec.describe Ci::EnsureStageService, '#execute' do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
 
   let(:stage) { create(:ci_stage_entity) }
   let(:job) { build(:ci_build) }
@@ -44,7 +44,7 @@ describe Ci::EnsureStageService, '#execute' do
     it 'retries up to two times' do
       job.assign_attributes(stage_id: nil)
 
-      expect(service).to receive(:find_stage).exactly(2).times
+      expect(service).to receive(:find_stage).twice
 
       expect { service.execute(job) }
         .to raise_error(Ci::EnsureStageService::EnsureStageError)

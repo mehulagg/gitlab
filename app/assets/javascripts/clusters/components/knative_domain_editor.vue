@@ -1,7 +1,14 @@
 <script>
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import {
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownDivider,
+  GlDeprecatedDropdownItem,
+  GlLoadingIcon,
+  GlSearchBoxByType,
+  GlSprintf,
+  GlButton,
+} from '@gitlab/ui';
 import ClipboardButton from '../../vue_shared/components/clipboard_button.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 
 import { APPLICATION_STATUS } from '~/clusters/constants';
@@ -10,9 +17,14 @@ const { UPDATING, UNINSTALLING } = APPLICATION_STATUS;
 
 export default {
   components: {
-    LoadingButton,
+    GlButton,
     ClipboardButton,
     GlLoadingIcon,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownDivider,
+    GlDeprecatedDropdownItem,
+    GlSearchBoxByType,
+    GlSprintf,
   },
   props: {
     knative: {
@@ -22,7 +34,13 @@ export default {
     ingressDnsHelpPath: {
       type: String,
       default: '',
+      required: false,
     },
+  },
+  data() {
+    return {
+      searchQuery: '',
+    };
   },
   computed: {
     saveButtonDisabled() {
@@ -48,8 +66,24 @@ export default {
         return this.knative.hostname;
       },
       set(hostname) {
-        this.$emit('set', hostname);
+        this.selectCustomDomain(hostname);
       },
+    },
+    domainDropdownText() {
+      return this.knativeHostname || s__('ClusterIntegration|Select existing domain or use new');
+    },
+    availableDomains() {
+      return this.knative.availableDomains || [];
+    },
+    filteredDomains() {
+      const query = this.searchQuery.toLowerCase();
+      return this.availableDomains.filter(({ domain }) => domain.toLowerCase().includes(query));
+    },
+    showDomainsDropdown() {
+      return this.availableDomains.length > 0;
+    },
+    validationError() {
+      return this.knative.validationError;
     },
   },
   watch: {
@@ -57,6 +91,14 @@ export default {
       if (updateSuccessful) {
         this.$toast.show(s__('ClusterIntegration|Knative domain name was updated successfully.'));
       }
+    },
+  },
+  methods: {
+    selectDomain({ id, domain }) {
+      this.$emit('set', { domain, domainId: id });
+    },
+    selectCustomDomain(domain) {
+      this.$emit('set', { domain, domainId: null });
     },
   },
 };
@@ -71,22 +113,57 @@ export default {
       {{ s__('ClusterIntegration|Something went wrong while updating Knative domain name.') }}
     </div>
 
-    <template>
-      <div
-        :class="{ 'col-md-6': knativeInstalled, 'col-12': !knativeInstalled }"
-        class="form-group col-sm-12 mb-0"
+    <div
+      :class="{ 'col-md-6': knativeInstalled, 'col-12': !knativeInstalled }"
+      class="form-group col-sm-12 mb-0"
+    >
+      <label for="knative-domainname">
+        <strong>{{ s__('ClusterIntegration|Knative Domain Name:') }}</strong>
+      </label>
+
+      <gl-deprecated-dropdown
+        v-if="showDomainsDropdown"
+        :text="domainDropdownText"
+        toggle-class="dropdown-menu-toggle"
+        class="w-100 mb-2"
       >
-        <label for="knative-domainname">
-          <strong>{{ s__('ClusterIntegration|Knative Domain Name:') }}</strong>
-        </label>
-        <input
-          id="knative-domainname"
-          v-model="knativeHostname"
-          type="text"
-          class="form-control js-knative-domainname"
+        <gl-search-box-by-type
+          v-model.trim="searchQuery"
+          :placeholder="s__('ClusterIntegration|Search domains')"
+          class="gl-m-3"
         />
-      </div>
-    </template>
+        <gl-deprecated-dropdown-item
+          v-for="domain in filteredDomains"
+          :key="domain.id"
+          @click="selectDomain(domain)"
+        >
+          <span class="ml-1">{{ domain.domain }}</span>
+        </gl-deprecated-dropdown-item>
+        <template v-if="searchQuery">
+          <gl-deprecated-dropdown-divider />
+          <gl-deprecated-dropdown-item key="custom-domain" @click="selectCustomDomain(searchQuery)">
+            <span class="ml-1">
+              <gl-sprintf :message="s__('ClusterIntegration|Use %{query}')">
+                <template #query>
+                  <code>{{ searchQuery }}</code>
+                </template>
+              </gl-sprintf>
+            </span>
+          </gl-deprecated-dropdown-item>
+        </template>
+      </gl-deprecated-dropdown>
+
+      <input
+        v-else
+        id="knative-domainname"
+        v-model="knativeHostname"
+        type="text"
+        class="form-control js-knative-domainname"
+      />
+
+      <span v-if="validationError" class="gl-field-error">{{ validationError }}</span>
+    </div>
+
     <template v-if="knativeInstalled">
       <div class="form-group col-sm-12 col-md-6 pl-md-0 mb-0 mt-3 mt-md-0">
         <label for="knative-endpoint">
@@ -138,13 +215,16 @@ export default {
         }}
       </p>
 
-      <loading-button
-        class="btn-success js-knative-save-domain-button mt-3 ml-3"
+      <gl-button
+        class="js-knative-save-domain-button gl-mt-5 gl-ml-5"
+        variant="success"
+        category="primary"
         :loading="saving"
         :disabled="saveButtonDisabled"
-        :label="saveButtonLabel"
-        @click="$emit('save', knativeHostname)"
-      />
+        @click="$emit('save')"
+      >
+        {{ saveButtonLabel }}
+      </gl-button>
     </template>
   </div>
 </template>

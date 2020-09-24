@@ -1,33 +1,51 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
-import _ from 'underscore';
+import { unescape } from 'lodash';
+import { GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import { stripHtml } from '~/lib/utils/text_utility';
-import Flash from '../../../flash';
-import GLForm from '../../../gl_form';
-import markdownHeader from './header.vue';
-import markdownToolbar from './toolbar.vue';
-import icon from '../icon.vue';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import GLForm from '~/gl_form';
+import MarkdownHeader from './header.vue';
+import MarkdownToolbar from './toolbar.vue';
+import GlMentions from '~/vue_shared/components/gl_mentions.vue';
 import Suggestions from '~/vue_shared/components/markdown/suggestions.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {
-    markdownHeader,
-    markdownToolbar,
-    icon,
+    GlMentions,
+    MarkdownHeader,
+    MarkdownToolbar,
+    GlIcon,
     Suggestions,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
-    markdownPreviewPath: {
+    /**
+     * This prop should be bound to the value of the `<textarea>` element
+     * that is rendered as a child of this component (in the `textarea` slot)
+     */
+    textareaValue: {
       type: String,
-      required: false,
-      default: '',
+      required: true,
     },
     markdownDocsPath: {
       type: String,
       required: true,
+    },
+    isSubmitting: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    markdownPreviewPath: {
+      type: String,
+      required: false,
+      default: '',
     },
     addSpacingClasses: {
       type: Boolean,
@@ -104,7 +122,7 @@ export default {
           return text;
         }
 
-        return _.unescape(stripHtml(richText).replace(/\n/g, ''));
+        return unescape(stripHtml(richText).replace(/\n/g, ''));
       }
 
       return '';
@@ -123,7 +141,7 @@ export default {
     addMultipleToDiscussionWarning() {
       return sprintf(
         __(
-          '%{icon}You are about to add %{usersTag} people to the discussion. Proceed with caution.',
+          '%{icon}You are about to add %{usersTag} people to the discussion. They will all receive a notification.',
         ),
         {
           icon: '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>',
@@ -133,19 +151,32 @@ export default {
       );
     },
   },
+  watch: {
+    isSubmitting(isSubmitting) {
+      if (!isSubmitting || !this.$refs['markdown-preview'].querySelectorAll) {
+        return;
+      }
+      const mediaInPreview = this.$refs['markdown-preview'].querySelectorAll('video, audio');
+
+      if (mediaInPreview) {
+        mediaInPreview.forEach(media => {
+          media.pause();
+        });
+      }
+    },
+  },
   mounted() {
-    /*
-        GLForm class handles all the toolbar buttons
-      */
+    // GLForm class handles all the toolbar buttons
     return new GLForm($(this.$refs['gl-form']), {
       emojis: this.enableAutocomplete,
-      members: this.enableAutocomplete,
-      issues: this.enableAutocomplete,
-      mergeRequests: this.enableAutocomplete,
+      members: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+      issues: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
+      mergeRequests: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
       epics: this.enableAutocomplete,
       milestones: this.enableAutocomplete,
-      labels: this.enableAutocomplete,
+      labels: this.enableAutocomplete && !this.glFeatures.tributeAutocomplete,
       snippets: this.enableAutocomplete,
+      vulnerabilities: this.enableAutocomplete,
     });
   },
   beforeDestroy() {
@@ -160,24 +191,17 @@ export default {
 
       this.previewMarkdown = true;
 
-      /*
-          Can't use `$refs` as the component is technically in the parent component
-          so we access the VNode & then get the element
-        */
-      const text = this.$slots.textarea[0].elm.value;
-
-      if (text) {
+      if (this.textareaValue) {
         this.markdownPreviewLoading = true;
         this.markdownPreview = __('Loading…');
         axios
-          .post(this.markdownPreviewPath, { text })
+          .post(this.markdownPreviewPath, { text: this.textareaValue })
           .then(response => this.renderMarkdown(response.data))
           .catch(() => new Flash(__('Error loading markdown preview')));
       } else {
         this.renderMarkdown();
       }
     },
-
     showWriteTab() {
       this.markdownPreview = '';
       this.previewMarkdown = false;
@@ -205,7 +229,7 @@ export default {
 <template>
   <div
     ref="gl-form"
-    :class="{ 'prepend-top-default append-bottom-default': addSpacingClasses }"
+    :class="{ 'gl-mt-3 gl-mb-3': addSpacingClasses }"
     class="js-vue-markdown-field md-area position-relative"
   >
     <markdown-header
@@ -219,13 +243,16 @@ export default {
     />
     <div v-show="!previewMarkdown" class="md-write-holder">
       <div class="zen-backdrop">
-        <slot name="textarea"></slot>
+        <gl-mentions v-if="glFeatures.tributeAutocomplete">
+          <slot name="textarea"></slot>
+        </gl-mentions>
+        <slot v-else name="textarea"></slot>
         <a
-          class="zen-control zen-control-leave js-zen-leave"
+          class="zen-control zen-control-leave js-zen-leave gl-text-gray-500"
           href="#"
-          :aria-label="__('Enter zen mode')"
+          :aria-label="__('Leave zen mode')"
         >
-          <icon :size="32" name="screen-normal" />
+          <gl-icon :size="16" name="minimize" />
         </a>
         <markdown-toolbar
           :markdown-docs-path="markdownDocsPath"

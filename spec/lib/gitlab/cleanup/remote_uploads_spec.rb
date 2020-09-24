@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::Cleanup::RemoteUploads do
+RSpec.describe Gitlab::Cleanup::RemoteUploads do
   context 'when object_storage is enabled' do
     let(:connection) { double }
     let(:directory) { double }
@@ -11,6 +11,7 @@ describe Gitlab::Cleanup::RemoteUploads do
         create(:upload, path: 'dir/file2', store: ObjectStorage::Store::LOCAL)
       ]
     end
+
     let(:remote_files) do
       [
         double(key: 'dir/file1'),

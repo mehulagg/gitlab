@@ -1,5 +1,4 @@
 ---
 extends: ../../../spec/frontend/.eslintrc.yml
 rules:
-  jest/no-jasmine-globals: off
   jest/valid-describe: off

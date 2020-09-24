@@ -1,35 +1,29 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :smoke do
+  RSpec.describe 'Plan', :smoke, :reliable do
     describe 'mention' do
-      before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
-
-        @user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
-
-        project = Resource::Project.fabricate_via_api! do |resource|
-          resource.name = 'project-to-test-mention'
-          resource.visibility = 'private'
+      let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
+      let(:project) do
+        Resource::Project.fabricate_via_api! do |project|
+          project.name = 'project-to-test-mention'
+          project.visibility = 'private'
         end
-        project.visit!
-
-        Page::Project::Show.perform(&:go_to_members_settings)
-        Page::Project::Settings::Members.perform do |members|
-          members.add_member(@user.username)
-        end
-
-        issue = Resource::Issue.fabricate_via_api! do |issue|
-          issue.title = 'issue to test mention'
-          issue.project = project
-        end
-        issue.visit!
       end
 
-      it 'user mentions another user in an issue' do
+      before do
+        Flow::Login.sign_in
+
+        project.add_member(user)
+
+        Resource::Issue.fabricate_via_api! do |issue|
+          issue.project = project
+        end.visit!
+      end
+
+      it 'mentions another user in an issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/446' do
         Page::Project::Issue::Show.perform do |show|
-          at_username = "@#{@user.username}"
+          at_username = "@#{user.username}"
 
           show.select_all_activities_filter
           show.comment(at_username)

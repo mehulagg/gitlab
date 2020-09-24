@@ -1,3 +1,10 @@
-import initRegistryImages from '~/registry/index';
+import registryExplorer from '~/registry/explorer/index';
 
-document.addEventListener('DOMContentLoaded', initRegistryImages);
+document.addEventListener('DOMContentLoaded', () => {
+  const explorer = registryExplorer();
+
+  if (explorer) {
+    explorer.attachBreadcrumb();
+    explorer.attachMainComponent();
+  }
+});

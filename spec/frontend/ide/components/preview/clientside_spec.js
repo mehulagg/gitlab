@@ -16,6 +16,17 @@ const dummyPackageJson = () => ({
     main: 'index.js',
   }),
 });
+const expectedSandpackOptions = () => ({
+  files: {},
+  entry: '/index.js',
+  showOpenInCodeSandbox: true,
+});
+const expectedSandpackSettings = () => ({
+  fileResolver: {
+    isFile: expect.any(Function),
+    readFile: expect.any(Function),
+  },
+});
 
 describe('IDE clientside preview', () => {
   let wrapper;
@@ -54,23 +65,10 @@ describe('IDE clientside preview', () => {
     });
 
     wrapper = shallowMount(Clientside, {
-      sync: false,
       store,
       localVue,
     });
   };
-
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -92,6 +90,46 @@ describe('IDE clientside preview', () => {
     it('creates sandpack manager', () => {
       expect(smooshpack.Manager).toHaveBeenCalledWith(
         '#ide-preview',
+        expectedSandpackOptions(),
+        expectedSandpackSettings(),
+      );
+    });
+
+    it('pings usage', () => {
+      expect(storeClientsideActions.pingUsage).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('with codesandboxBundlerUrl', () => {
+    const TEST_BUNDLER_URL = 'https://test.gitlab-static.test';
+
+    beforeEach(() => {
+      createComponent({
+        getters: { packageJson: dummyPackageJson },
+        state: { codesandboxBundlerUrl: TEST_BUNDLER_URL },
+      });
+
+      return waitForCalls();
+    });
+
+    it('creates sandpack manager with bundlerURL', () => {
+      expect(smooshpack.Manager).toHaveBeenCalledWith('#ide-preview', expectedSandpackOptions(), {
+        ...expectedSandpackSettings(),
+        bundlerURL: TEST_BUNDLER_URL,
+      });
+    });
+  });
+
+  describe('with codesandboxBundlerURL', () => {
+    beforeEach(() => {
+      createComponent({ getters: { packageJson: dummyPackageJson } });
+
+      return waitForCalls();
+    });
+
+    it('creates sandpack manager', () => {
+      expect(smooshpack.Manager).toHaveBeenCalledWith(
+        '#ide-preview',
         {
           files: {},
           entry: '/index.js',
@@ -104,10 +142,6 @@ describe('IDE clientside preview', () => {
           },
         },
       );
-    });
-
-    it('pings usage', () => {
-      expect(storeClientsideActions.pingUsage).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -245,24 +279,16 @@ describe('IDE clientside preview', () => {
       });
 
       it('calls getFileData', () => {
-        expect(storeActions.getFileData).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            path: 'package.json',
-            makeFileActive: false,
-          },
-          undefined, // vuex callback
-        );
+        expect(storeActions.getFileData).toHaveBeenCalledWith(expect.any(Object), {
+          path: 'package.json',
+          makeFileActive: false,
+        });
       });
 
       it('calls getRawFileData', () => {
-        expect(storeActions.getRawFileData).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            path: 'package.json',
-          },
-          undefined, // vuex callback
-        );
+        expect(storeActions.getRawFileData).toHaveBeenCalledWith(expect.any(Object), {
+          path: 'package.json',
+        });
       });
     });
 

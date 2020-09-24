@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Mutations::Todos::MarkDone do
+RSpec.describe Mutations::Todos::MarkDone do
+  include GraphqlHelpers
+
   let_it_be(:current_user) { create(:user) }
   let_it_be(:author) { create(:user) }
   let_it_be(:other_user) { create(:user) }
@@ -12,7 +14,9 @@ describe Mutations::Todos::MarkDone do
 
   let_it_be(:other_user_todo) { create(:todo, user: other_user, author: author, state: :pending) }
 
-  let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }) }
+  let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
+
+  specify { expect(described_class).to require_graphql_authorizations(:update_todo) }
 
   describe '#resolve' do
     it 'marks a single todo as done' do
@@ -58,9 +62,5 @@ describe Mutations::Todos::MarkDone do
 
   def mark_done_mutation(todo)
     mutation.resolve(id: global_id_of(todo))
-  end
-
-  def global_id_of(todo)
-    todo.to_global_id.to_s
   end
 end

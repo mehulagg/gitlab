@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ChatMessage::IssueMessage do
+RSpec.describe ChatMessage::IssueMessage do
   subject { described_class.new(args) }
 
   let(:args) do
@@ -31,7 +31,7 @@ describe ChatMessage::IssueMessage do
   context 'without markdown' do
     let(:color) { '#C95823' }
 
-    context '#initialize' do
+    describe '#initialize' do
       before do
         args[:object_attributes][:description] = nil
       end

@@ -1,5 +1,3 @@
-import { s__ } from '~/locale';
-
 export default () => ({
   blobPath: {
     head: null,
@@ -7,16 +5,15 @@ export default () => ({
   },
 
   sourceBranch: null,
+  canReadVulnerabilityFeedback: false,
   vulnerabilityFeedbackPath: null,
   vulnerabilityFeedbackHelpPath: null,
   createVulnerabilityFeedbackIssuePath: null,
   createVulnerabilityFeedbackMergeRequestPath: null,
   createVulnerabilityFeedbackDismissalPath: null,
   pipelineId: null,
-  canCreateIssuePermission: false,
-  canCreateFeedbackPermission: false,
 
-  sastContainer: {
+  containerScanning: {
     paths: {
       head: null,
       base: null,
@@ -28,6 +25,8 @@ export default () => ({
 
     newIssues: [],
     resolvedIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
   },
   dast: {
     paths: {
@@ -41,8 +40,26 @@ export default () => ({
 
     newIssues: [],
     resolvedIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
+    scans: [],
   },
+  coverageFuzzing: {
+    paths: {
+      head: null,
+      base: null,
+      diffEndpoint: null,
+    },
 
+    isLoading: false,
+    hasError: false,
+
+    newIssues: [],
+    resolvedIssues: [],
+    allIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
+  },
   dependencyScanning: {
     paths: {
       head: null,
@@ -56,70 +73,29 @@ export default () => ({
     newIssues: [],
     resolvedIssues: [],
     allIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
+  },
+  secretScanning: {
+    paths: {
+      head: null,
+      base: null,
+      diffEndpoint: null,
+    },
+
+    isLoading: false,
+    hasError: false,
+
+    newIssues: [],
+    resolvedIssues: [],
+    allIssues: [],
+    baseReportOutofDate: false,
+    hasBaseReport: false,
   },
 
   modal: {
     title: null,
 
-    // Dynamic data rendered for each issue
-    data: {
-      description: {
-        value: null,
-        text: s__('ciReport|Description'),
-        isLink: false,
-      },
-      file: {
-        value: null,
-        url: null,
-        text: s__('ciReport|File'),
-        isLink: true,
-      },
-      identifiers: {
-        value: [],
-        text: s__('ciReport|Identifiers'),
-        isLink: false,
-      },
-      severity: {
-        value: null,
-        text: s__('ciReport|Severity'),
-        isLink: false,
-      },
-      confidence: {
-        value: null,
-        text: s__('ciReport|Confidence'),
-        isLink: false,
-      },
-      className: {
-        value: null,
-        text: s__('ciReport|Class'),
-        isLink: false,
-      },
-      methodName: {
-        value: null,
-        text: s__('ciReport|Method'),
-        isLink: false,
-      },
-      image: {
-        value: null,
-        text: s__('ciReport|Image'),
-        isLink: false,
-      },
-      namespace: {
-        value: null,
-        text: s__('ciReport|Namespace'),
-        isLink: false,
-      },
-      links: {
-        value: [],
-        text: s__('ciReport|Links'),
-        isLink: false,
-      },
-      instances: {
-        value: [],
-        text: s__('ciReport|Instances'),
-        isLink: false,
-      },
-    },
     learnMoreUrl: null,
 
     vulnerability: {
@@ -128,10 +104,12 @@ export default () => ({
       hasMergeRequest: false,
     },
 
-    isCreatingNewIssue: false,
-    isDismissingVulnerability: false,
     isShowingDeleteButtons: false,
     isCommentingOnDismissal: false,
     error: null,
   },
+
+  isCreatingIssue: false,
+  isDismissingVulnerability: false,
+  isCreatingMergeRequest: false,
 });

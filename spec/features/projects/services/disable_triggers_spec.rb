@@ -2,17 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Disable individual triggers' do
-  let(:project) { create(:project) }
-  let(:user) { project.owner }
-  let(:checkbox_selector) { 'input[type=checkbox][id$=_events]' }
+RSpec.describe 'Disable individual triggers', :js do
+  include_context 'project service activation'
+
+  let(:checkbox_selector) { 'input[name$="_events]"]' }
 
   before do
-    sign_in(user)
-
-    visit(project_settings_integrations_path(project))
-
-    click_link(service_name)
+    visit_project_integration(service_name)
   end
 
   context 'service has multiple supported events' do
@@ -22,7 +18,7 @@ describe 'Disable individual triggers' do
       event_count = HipchatService.supported_events.count
 
       expect(page).to have_content "Trigger"
-      expect(page).to have_css(checkbox_selector, count: event_count)
+      expect(page).to have_css(checkbox_selector, visible: :all, count: event_count)
     end
   end
 
@@ -31,7 +27,7 @@ describe 'Disable individual triggers' do
 
     it "doesn't show unnecessary Trigger checkboxes" do
       expect(page).not_to have_content "Trigger"
-      expect(page).not_to have_css(checkbox_selector)
+      expect(page).not_to have_css(checkbox_selector, visible: :all)
     end
   end
 end

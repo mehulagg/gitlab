@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline do
+RSpec.describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: group) }
@@ -32,7 +32,7 @@ describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline d
     before do
       create(:issue, project: project, title: 'chosen issue title')
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     it 'finds the issue' do
@@ -47,7 +47,7 @@ describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline d
     before do
       project.repository.index_commits_and_blobs
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     it 'finds files' do
@@ -65,7 +65,7 @@ describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline d
       wiki.create_page('test.md', '# term')
       wiki.index_wiki_blobs
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     it 'finds pages' do
@@ -80,7 +80,7 @@ describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline d
   describe 'commit search' do
     before do
       project.repository.index_commits_and_blobs
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     it 'finds commits' do
@@ -89,5 +89,11 @@ describe 'Group elastic search', :js, :elastic, :sidekiq_might_not_need_inline d
 
       expect(page).to have_selector('.commit-list > .commit')
     end
+  end
+end
+
+RSpec.describe 'Group elastic search redactions', :elastic do
+  it_behaves_like 'a redacted search results page' do
+    let(:search_path) { group_path(public_group) }
   end
 end

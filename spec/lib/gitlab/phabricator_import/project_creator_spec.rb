@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::ProjectCreator do
+RSpec.describe Gitlab::PhabricatorImport::ProjectCreator do
   let(:user) { create(:user) }
   let(:params) do
     { path: 'new-phab-import',
       phabricator_server_url: 'http://phab.example.com',
       api_token: 'the-token' }
   end
+
   subject(:creator) { described_class.new(user, params) }
 
   describe '#execute' do

@@ -3,13 +3,13 @@
 import $ from 'jquery';
 import { __ } from './locale';
 import axios from './lib/utils/axios_utils';
-import createFlash from './flash';
+import { deprecatedCreateFlash as createFlash } from './flash';
 import FilesCommentButton from './files_comment_button';
 import initImageDiffHelper from './image_diff/helpers/init_image_diff';
 import syntaxHighlight from './syntax_highlight';
 
 const WRAPPER = '<div class="diff-content"></div>';
-const LOADING_HTML = '<i class="fa fa-spinner fa-spin"></i>';
+const LOADING_HTML = '<span class="spinner"></span>';
 const ERROR_HTML =
   '<div class="nothing-here-block"><i class="fa fa-warning"></i> Could not load diff</div>';
 const COLLAPSED_HTML =

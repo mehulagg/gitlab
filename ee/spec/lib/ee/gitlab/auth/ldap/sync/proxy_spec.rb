@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'net/ldap/dn'
 
-describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
+RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Proxy do
   include LdapHelpers
 
   let(:adapter) { ldap_adapter }
@@ -66,7 +66,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
         sync_proxy.dns_for_group_cn('ldap_group1')
 
         expect(sync_proxy).not_to receive(:ldap_group_member_dns)
-        expect(EE::Gitlab::Auth::LDAP::Group).not_to receive(:find_by_cn)
+        expect(EE::Gitlab::Auth::Ldap::Group).not_to receive(:find_by_cn)
 
         sync_proxy.dns_for_group_cn('ldap_group1')
       end
@@ -119,7 +119,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
       end
 
       it 'raises exception' do
-        expect { sync_proxy.dns_for_group_cn('ldap_group1') }.to raise_error(::Gitlab::Auth::LDAP::LDAPConnectionError)
+        expect { sync_proxy.dns_for_group_cn('ldap_group1') }.to raise_error(::Gitlab::Auth::Ldap::LdapConnectionError)
       end
     end
   end
@@ -143,7 +143,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
       end
 
       it 'retrieves the user from LDAP' do
-        expect(::Gitlab::Auth::LDAP::Person).to receive(:find_by_uid)
+        expect(::Gitlab::Auth::Ldap::Person).to receive(:find_by_uid)
 
         sync_proxy.dn_for_uid('jane_doe')
       end
@@ -153,7 +153,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
 
         expect(sync_proxy).not_to receive(:member_uid_to_dn)
         expect(Identity).not_to receive(:find_by)
-        expect(::Gitlab::Auth::LDAP::Person).not_to receive(:find_by_uid)
+        expect(::Gitlab::Auth::Ldap::Person).not_to receive(:find_by_uid)
 
         sync_proxy.dn_for_uid('jane_doe')
       end
@@ -197,7 +197,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
       end
 
       it 'does not query LDAP' do
-        expect(::Gitlab::Auth::LDAP::Person).not_to receive(:find_by_uid)
+        expect(::Gitlab::Auth::Ldap::Person).not_to receive(:find_by_uid)
       end
 
       it 'retrieves the DN from the identity' do
@@ -214,7 +214,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Proxy do
       end
 
       it 'raises exception' do
-        expect { sync_proxy.dns_for_group_cn('ldap_group1') }.to raise_error(::Gitlab::Auth::LDAP::LDAPConnectionError)
+        expect { sync_proxy.dns_for_group_cn('ldap_group1') }.to raise_error(::Gitlab::Auth::Ldap::LdapConnectionError)
       end
     end
   end

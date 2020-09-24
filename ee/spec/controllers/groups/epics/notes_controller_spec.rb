@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::Epics::NotesController do
+RSpec.describe Groups::Epics::NotesController do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:epic) { create(:epic, group: group) }
@@ -39,7 +39,7 @@ describe Groups::Epics::NotesController do
 
     context 'with cross-reference system note that is not visible to the current user', :request_store do
       it "does not return any note" do
-        expect_any_instance_of(Note).to receive(:cross_reference_not_visible_for?).and_return(true)
+        expect_any_instance_of(Note).to receive(:readable_by?).and_return(false)
 
         get :index, params: request_params
 
@@ -66,13 +66,13 @@ describe Groups::Epics::NotesController do
     it "returns status 302 for html" do
       post :create, params: request_params.merge(format: :html)
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
     end
 
     it "returns status 200 for json" do
       post :create, params: request_params
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(parsed_response[:id]).not_to be_nil
     end
 
@@ -95,7 +95,7 @@ describe Groups::Epics::NotesController do
       it "creates reply note for discussion" do
         post :create, params: request_params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(parsed_response[:errors]).to be_nil
       end
     end
@@ -143,7 +143,7 @@ describe Groups::Epics::NotesController do
       it "returns status 200" do
         delete :destroy, params: request_params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it "deletes the note" do
@@ -159,7 +159,7 @@ describe Groups::Epics::NotesController do
       it "returns status 404" do
         delete :destroy, params: request_params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -183,7 +183,7 @@ describe Groups::Epics::NotesController do
         post(:toggle_award_emoji, params: request_params.merge(name: "thumbsup"))
       end.to change { note.award_emoji.count }.by(1)
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     it "removes the already awarded emoji" do
@@ -193,7 +193,7 @@ describe Groups::Epics::NotesController do
         post(:toggle_award_emoji, params: request_params.merge(name: "thumbsup"))
       end.to change { AwardEmoji.count }.by(-1)
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 end

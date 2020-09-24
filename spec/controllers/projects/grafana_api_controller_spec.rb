@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GrafanaApiController do
+RSpec.describe Projects::GrafanaApiController do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 
@@ -20,8 +20,8 @@ describe Projects::GrafanaApiController do
         proxy_path: 'api/v1/query_range',
         datasource_id: '1',
         query: 'rate(relevant_metric)',
-        start: '1570441248',
-        end: '1570444848',
+        start_time: '1570441248',
+        end_time: '1570444848',
         step: '900'
       }
     end
@@ -50,7 +50,10 @@ describe Projects::GrafanaApiController do
         expect(Grafana::ProxyService)
           .to have_received(:new)
           .with(project, '1', 'api/v1/query_range',
-                params.slice(:query, :start, :end, :step).stringify_keys)
+                 { 'query' => params[:query],
+                   'start' => params[:start_time],
+                   'end'   => params[:end_time],
+                   'step'  => params[:step] })
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq({})
@@ -128,10 +131,11 @@ describe Projects::GrafanaApiController do
         get :metrics_dashboard, params: params
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response).to eq({
+        expect(json_response).to include({
           'dashboard' => '{}',
           'status' => 'success'
         })
+        expect(json_response).to include('metrics_data')
       end
     end
 
@@ -162,18 +166,6 @@ describe Projects::GrafanaApiController do
         let(:service_result) { { status: :error, message: 'error message' } }
 
         it_behaves_like 'error response', :bad_request
-      end
-    end
-
-    context 'when grafana embeds are not enabled' do
-      before do
-        stub_feature_flags(gfm_grafana_integration: false)
-      end
-
-      it 'returns 403 immediately' do
-        get :metrics_dashboard, params: params
-
-        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end

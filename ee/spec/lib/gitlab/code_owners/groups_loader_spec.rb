@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CodeOwners::GroupsLoader do
+RSpec.describe Gitlab::CodeOwners::GroupsLoader do
   let(:text) do
     <<~TXT
     This is a long text that mentions some groups.
@@ -52,6 +52,18 @@ describe Gitlab::CodeOwners::GroupsLoader do
         create(:group, path: "GROUP-2")
         project.invited_groups << group
 
+        load_groups
+
+        expect(entry).to have_received(:add_matching_groups_from).with([group])
+      end
+    end
+
+    context "input matches project.group" do
+      let(:group) { create(:group) }
+      let(:project) { create(:project, :repository, namespace: group) }
+      let(:text) { "@#{project.group.full_path}" }
+
+      it "returns the project's group" do
         load_groups
 
         expect(entry).to have_received(:add_matching_groups_from).with([group])

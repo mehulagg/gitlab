@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class PagesDomainRemovalCronWorker
+class PagesDomainRemovalCronWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include CronjobQueue
 
@@ -8,10 +8,10 @@ class PagesDomainRemovalCronWorker
   worker_resource_boundary :cpu
 
   def perform
-    PagesDomain.for_removal.find_each do |domain|
-      domain.destroy!
+    PagesDomain.for_removal.with_logging_info.find_each do |domain|
+      with_context(project: domain.project) { domain.destroy! }
     rescue => e
-      Raven.capture_exception(e)
+      Gitlab::ErrorTracking.track_exception(e)
     end
   end
 end

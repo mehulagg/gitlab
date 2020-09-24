@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe InternalRedirect do
+RSpec.describe InternalRedirect do
   let(:controller_class) do
     Class.new do
       include InternalRedirect
@@ -12,6 +12,7 @@ describe InternalRedirect do
       end
     end
   end
+
   subject(:controller) { controller_class.new }
 
   describe '#host_allowed?' do

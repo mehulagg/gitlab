@@ -2,13 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Projects > Files > User browses LFS files' do
+RSpec.describe 'Projects > Files > User browses LFS files' do
   let(:project) { create(:project, :repository) }
   let(:user) { project.owner }
 
   before do
-    stub_feature_flags(vue_file_list: false)
-
     sign_in(user)
   end
 
@@ -21,7 +19,17 @@ describe 'Projects > Files > User browses LFS files' do
 
     it 'is possible to see raw content of LFS pointer' do
       click_link 'files'
+
+      page.within('.repo-breadcrumb') do
+        expect(page).to have_link('files')
+      end
+
       click_link 'lfs'
+
+      page.within('.repo-breadcrumb') do
+        expect(page).to have_link('lfs')
+      end
+
       click_link 'lfs_object.iso'
 
       expect(page).to have_content 'version https://git-lfs.github.com/spec/v1'
@@ -40,6 +48,11 @@ describe 'Projects > Files > User browses LFS files' do
 
     it 'shows an LFS object' do
       click_link('files')
+
+      page.within('.repo-breadcrumb') do
+        expect(page).to have_link('files')
+      end
+
       click_link('lfs')
       click_link('lfs_object.iso')
 

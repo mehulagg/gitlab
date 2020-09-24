@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::CycleAnalyticsController do
+RSpec.describe Projects::CycleAnalyticsController do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -22,6 +22,13 @@ describe Projects::CycleAnalyticsController do
           })
 
       expect(response).to be_successful
+    end
+  end
+
+  context 'tracking visits to html page' do
+    it_behaves_like 'tracking unique visits', :show do
+      let(:request_params) { { namespace_id: project.namespace, project_id: project } }
+      let(:target_id) { 'p_analytics_valuestream' }
     end
   end
 
@@ -60,4 +67,6 @@ describe Projects::CycleAnalyticsController do
       end
     end
   end
+
+  include_examples GracefulTimeoutHandling
 end

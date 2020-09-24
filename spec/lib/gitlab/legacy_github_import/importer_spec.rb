@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::LegacyGithubImport::Importer do
+RSpec.describe Gitlab::LegacyGithubImport::Importer do
   shared_examples 'Gitlab::LegacyGithubImport::Importer#execute' do
     let(:expected_not_called) { [] }
 
@@ -43,7 +45,7 @@ describe Gitlab::LegacyGithubImport::Importer do
       allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
 
       allow_any_instance_of(Octokit::Client).to receive(:rate_limit!).and_raise(Octokit::NotFound)
-      allow_any_instance_of(Gitlab::Shell).to receive(:import_repository).and_raise(Gitlab::Shell::Error)
+      allow(project.wiki.repository).to receive(:import_repository).and_raise(Gitlab::Git::CommandError)
 
       allow_any_instance_of(Octokit::Client).to receive(:user).and_return(octocat)
       allow_any_instance_of(Octokit::Client).to receive(:labels).and_return([label1, label2])
@@ -167,13 +169,9 @@ describe Gitlab::LegacyGithubImport::Importer do
         errors: [
           { type: :label, url: "#{api_root}/repos/octocat/Hello-World/labels/bug", errors: "Validation failed: Title can't be blank, Title is invalid" },
           { type: :issue, url: "#{api_root}/repos/octocat/Hello-World/issues/1348", errors: "Validation failed: Title can't be blank" },
-          { type: :wiki, errors: "Gitlab::Shell::Error" }
+          { type: :wiki, errors: "Gitlab::Git::CommandError" }
         ]
       }
-
-      unless project.gitea_import?
-        error[:errors] << { type: :release, url: "#{api_root}/repos/octocat/Hello-World/releases/2", errors: "Validation failed: Description can't be blank" }
-      end
 
       described_class.new(project).execute
 
@@ -203,7 +201,7 @@ describe Gitlab::LegacyGithubImport::Importer do
         let(:gh_pull_request) { Gitlab::LegacyGithubImport::PullRequestFormatter.new(project, closed_pull_request) }
 
         it 'does remove branches' do
-          expect(subject).to receive(:remove_branch).at_least(2).times
+          expect(subject).to receive(:remove_branch).at_least(:twice)
           subject.send(:clean_up_restored_branches, gh_pull_request)
         end
       end
@@ -240,6 +238,7 @@ describe Gitlab::LegacyGithubImport::Importer do
       labels: [double(name: 'Label #2')]
     )
   end
+
   let(:closed_pull_request) do
     double(
       number: 1347,
@@ -263,6 +262,7 @@ describe Gitlab::LegacyGithubImport::Importer do
   context 'when importing a GitHub project' do
     let(:api_root) { 'https://api.github.com' }
     let(:repo_root) { 'https://github.com' }
+
     subject { described_class.new(project) }
 
     it_behaves_like 'Gitlab::LegacyGithubImport::Importer#execute'
@@ -285,6 +285,7 @@ describe Gitlab::LegacyGithubImport::Importer do
   context 'when importing a Gitea project' do
     let(:api_root) { 'https://try.gitea.io/api/v1' }
     let(:repo_root) { 'https://try.gitea.io' }
+
     subject { described_class.new(project) }
 
     before do
@@ -294,6 +295,7 @@ describe Gitlab::LegacyGithubImport::Importer do
     it_behaves_like 'Gitlab::LegacyGithubImport::Importer#execute' do
       let(:expected_not_called) { [:import_releases, [:import_comments, :pull_requests]] }
     end
+
     it_behaves_like 'Gitlab::LegacyGithubImport::Importer#execute an error occurs'
     it_behaves_like 'Gitlab::LegacyGithubImport unit-testing'
 

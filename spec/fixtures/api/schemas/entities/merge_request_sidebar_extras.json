@@ -3,6 +3,8 @@
   "properties" : {
     "id": { "type": "integer" },
     "iid": { "type": "integer" },
+    "project_emails_disabled": { "type": "boolean" },
+    "subscribe_disabled_description": { "type": "string" },
     "subscribed": { "type": "boolean" },
     "time_estimate": { "type": "integer" },
     "total_time_spent": { "type": "integer" },
@@ -13,6 +15,10 @@
       "items": { "$ref": "../public_api/v4/user/basic.json" }
     },
     "assignees": {
+      "type": "array",
+      "items": { "$ref": "../public_api/v4/user/basic.json" }
+    },
+    "reviewers": {
       "type": "array",
       "items": { "$ref": "../public_api/v4/user/basic.json" }
     }

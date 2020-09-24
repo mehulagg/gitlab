@@ -1,0 +1,10 @@
+#import "ee/security_dashboard/graphql/project.fragment.graphql"
+
+mutation addProjectToSecurityDashboard($id: ID!) {
+  addProjectToSecurityDashboard(input: { id: $id }) {
+    errors
+    project {
+      ...Project
+    }
+  }
+}

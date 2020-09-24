@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets].freeze
+  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :state].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
 
     resources_results = [
+      recent_merge_requests_autocomplete(term),
+      recent_issues_autocomplete(term),
       groups_autocomplete(term),
       projects_autocomplete(term)
     ].flatten
@@ -31,13 +33,14 @@ module SearchHelper
     from = collection.offset_value + 1
     to = collection.offset_value + collection.to_a.size
     count = collection.total_count
+    term_element = "<span>&nbsp;<code>#{h(term)}</code>&nbsp;</span>".html_safe
 
     search_entries_info_template(collection) % {
       from: from,
       to: to,
       count: count,
       scope: search_entries_scope_label(scope, count),
-      term: term
+      term_element: term_element
     }
   end
 
@@ -57,8 +60,6 @@ module SearchHelper
       ns_('SearchResults|comment', 'SearchResults|comments', count)
     when 'projects'
       ns_('SearchResults|project', 'SearchResults|projects', count)
-    when 'snippet_blobs'
-      ns_('SearchResults|snippet result', 'SearchResults|snippet results', count)
     when 'snippet_titles'
       ns_('SearchResults|snippet', 'SearchResults|snippets', count)
     when 'users'
@@ -72,9 +73,9 @@ module SearchHelper
 
   def search_entries_info_template(collection)
     if collection.total_pages > 1
-      s_("SearchResults|Showing %{from} - %{to} of %{count} %{scope} for \"%{term}\"")
+      s_("SearchResults|Showing %{from} - %{to} of %{count} %{scope} for%{term_element}").html_safe
     else
-      s_("SearchResults|Showing %{count} %{scope} for \"%{term}\"")
+      s_("SearchResults|Showing %{count} %{scope} for%{term_element}").html_safe
     end
   end
 
@@ -85,20 +86,7 @@ module SearchHelper
     }).html_safe
   end
 
-  def find_project_for_result_blob(projects, result)
-    @project
-  end
-
-  # Used in EE
-  def blob_projects(results)
-    nil
-  end
-
-  def parse_search_result(result)
-    result
-  end
-
-  # Overriden in EE
+  # Overridden in EE
   def search_blob_title(project, path)
     path
   end
@@ -142,7 +130,7 @@ module SearchHelper
 
   # Autocomplete results for the current project, if it's defined
   def project_autocomplete
-    if @project && @project.repository.exists? && @project.repository.root_ref
+    if @project && @project.repository.root_ref
       ref = @ref || @project.repository.root_ref
 
       [
@@ -192,6 +180,34 @@ module SearchHelper
       }
     end
   end
+
+  def recent_merge_requests_autocomplete(term, limit = 5)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).limit(limit).map do |mr|
+      {
+        category: "Recent merge requests",
+        id: mr.id,
+        label: search_result_sanitize(mr.title),
+        url: merge_request_path(mr),
+        avatar_url: mr.project.avatar_url || ''
+      }
+    end
+  end
+
+  def recent_issues_autocomplete(term, limit = 5)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).limit(limit).map do |i|
+      {
+        category: "Recent issues",
+        id: i.id,
+        label: search_result_sanitize(i.title),
+        url: issue_path(i),
+        avatar_url: i.project.avatar_url || ''
+      }
+    end
+  end
   # rubocop: enable CodeReuse/ActiveRecord
 
   def search_result_sanitize(str)
@@ -221,11 +237,11 @@ module SearchHelper
     end
   end
 
-  def search_filter_input_options(type)
+  def search_filter_input_options(type, placeholder = _('Search or filter results...'))
     opts =
       {
         id: "filtered-search-#{type}",
-        placeholder: _('Search or filter results...'),
+        placeholder: placeholder,
         data: {
           'username-params' => UserSerializer.new.represent(@users)
         },
@@ -243,6 +259,7 @@ module SearchHelper
       opts[:data]['group-id'] = @group.id
       opts[:data]['labels-endpoint'] = group_labels_path(@group)
       opts[:data]['milestones-endpoint'] = group_milestones_path(@group)
+      opts[:data]['releases-endpoint'] = group_releases_path(@group)
     else
       opts[:data]['labels-endpoint'] = dashboard_labels_path
       opts[:data]['milestones-endpoint'] = dashboard_milestones_path
@@ -263,17 +280,23 @@ module SearchHelper
 
   # Sanitize a HTML field for search display. Most tags are stripped out and the
   # maximum length is set to 200 characters.
-  def search_md_sanitize(object, field)
-    html = markdown_field(object, field)
-    html = Truncato.truncate(
-      html,
+  def search_md_sanitize(source)
+    source = Truncato.truncate(
+      source,
       count_tags: false,
       count_tail: false,
       max_length: 200
     )
 
+    html = markdown(source)
+
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
+  end
+
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
   end
 
   def show_user_search_tab?

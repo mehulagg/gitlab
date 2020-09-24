@@ -1,19 +1,28 @@
 # Project import/export administration **(CORE ONLY)**
 
->**Note:**
->
-> - [Introduced][ce-3050] in GitLab 8.9.
-> - Importing will not be possible if the import instance version is lower
->   than that of the exporter.
-> - For existing installations, the project import option has to be enabled in
->   application settings (`/admin/application_settings`) under 'Import sources'.
-> - The exports are stored in a temporary [shared directory][tmp] and are deleted
->   every 24 hours by a specific worker.
-> - ImportExport can use object storage automatically starting from GitLab 11.3
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/3050) in GitLab 8.9.
+> - From GitLab 11.3, import/export can use object storage automatically.
 
-The GitLab Import/Export version can be checked by using:
+GitLab provides Rake tasks relating to project import and export. For more information, see:
 
-```bash
+- [Project import/export documentation](../../user/project/settings/import_export.md).
+- [Project import/export API](../../api/project_import_export.md).
+- [Developer documentation: project import/export](../../development/import_export.md)
+
+## Project import status
+
+You can query an import through the [Project import/export API](../../api/project_import_export.md#import-status).
+As described in the API documentation, the query may return an import error or exceptions.
+
+## Import large projects
+
+If you have a larger project, consider using a Rake task, as described in our [developer documentation](../../development/import_project.md#importing-via-a-rake-task).
+
+## Import/export tasks
+
+The GitLab import/export version can be checked by using the following command:
+
+```shell
 # Omnibus installations
 sudo gitlab-rake gitlab:import_export:version
 
@@ -21,9 +30,9 @@ sudo gitlab-rake gitlab:import_export:version
 bundle exec rake gitlab:import_export:version RAILS_ENV=production
 ```
 
-The current list of DB tables that will get exported can be listed by using:
+The current list of DB tables that will be exported can be listed by using the following command:
 
-```bash
+```shell
 # Omnibus installations
 sudo gitlab-rake gitlab:import_export:data
 
@@ -31,5 +40,12 @@ sudo gitlab-rake gitlab:import_export:data
 bundle exec rake gitlab:import_export:data RAILS_ENV=production
 ```
 
-[ce-3050]: https://gitlab.com/gitlab-org/gitlab-foss/issues/3050
-[tmp]: ../../development/shared_files.md
+Note the following:
+
+- Importing is only possible if the version of the import and export GitLab instances are
+  compatible as described in the [Version history](../../user/project/settings/import_export.md#version-history).
+- The project import option must be enabled in
+  application settings (`/admin/application_settings/general`) under **Import sources**, which is available
+  under **Admin Area > Settings > Visibility and access controls**.
+- The exports are stored in a temporary [shared directory](../../development/shared_files.md)
+  and are deleted every 24 hours by a specific worker.

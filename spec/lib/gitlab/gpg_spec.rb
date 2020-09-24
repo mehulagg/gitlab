@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Gpg do
+RSpec.describe Gitlab::Gpg do
   describe '.fingerprints_from_key' do
     before do
       # make sure that each method is using the temporary keychain
@@ -177,6 +177,25 @@ describe Gitlab::Gpg do
       end.not_to raise_error
     end
 
+    it 'tracks an exception when cleaning up the tmp dir fails' do
+      expected_exception = described_class::CleanupError.new('cleanup failed')
+      expected_tmp_dir = nil
+
+      expect(described_class).to receive(:cleanup_tmp_dir).and_raise(expected_exception)
+      allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
+
+      described_class.using_tmp_keychain do
+        expected_tmp_dir = described_class.current_home_dir
+        FileUtils.touch(File.join(expected_tmp_dir, 'dummy.file'))
+      end
+
+      expect(Gitlab::ErrorTracking).to have_received(:track_and_raise_for_dev_exception).with(
+        expected_exception,
+        issue_url: 'https://gitlab.com/gitlab-org/gitlab/issues/20918',
+        tmp_dir: expected_tmp_dir, contents: ['dummy.file']
+      )
+    end
+
     shared_examples 'multiple deletion attempts of the tmp-dir' do |seconds|
       let(:tmp_dir) do
         tmp_dir = Dir.mktmpdir
@@ -189,15 +208,15 @@ describe Gitlab::Gpg do
         allow(FileUtils).to receive(:remove_entry).with(any_args).and_call_original
       end
 
-      it "tries for #{seconds}" do
-        expect(Retriable).to receive(:retriable).with(a_hash_including(max_elapsed_time: seconds))
+      it "tries for #{seconds} or 15 times" do
+        expect(Retriable).to receive(:retriable).with(a_hash_including(max_elapsed_time: seconds, tries: 15))
 
         described_class.using_tmp_keychain {}
       end
 
       it 'tries at least 2 times to remove the tmp dir before raising', :aggregate_failures do
-        expect(Retriable).to receive(:sleep).at_least(2).times
-        expect(FileUtils).to receive(:remove_entry).with(tmp_dir).at_least(2).times.and_raise('Deletion failed')
+        expect(Retriable).to receive(:sleep).at_least(:twice)
+        expect(FileUtils).to receive(:remove_entry).with(tmp_dir).at_least(:twice).and_raise('Deletion failed')
 
         expect { described_class.using_tmp_keychain { } }.to raise_error(described_class::CleanupError)
       end
@@ -211,22 +230,13 @@ describe Gitlab::Gpg do
 
         expect(File.exist?(tmp_dir)).to be false
       end
-
-      it 'does not retry when the feature flag is disabled' do
-        stub_feature_flags(gpg_cleanup_retries: false)
-
-        expect(FileUtils).to receive(:remove_entry).with(tmp_dir, true).and_call_original
-        expect(Retriable).not_to receive(:retriable)
-
-        described_class.using_tmp_keychain {}
-      end
     end
 
     it_behaves_like 'multiple deletion attempts of the tmp-dir', described_class::FG_CLEANUP_RUNTIME_S
 
     context 'when running in Sidekiq' do
       before do
-        allow(Sidekiq).to receive(:server?).and_return(true)
+        allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
       end
 
       it_behaves_like 'multiple deletion attempts of the tmp-dir', described_class::BG_CLEANUP_RUNTIME_S
@@ -234,7 +244,7 @@ describe Gitlab::Gpg do
   end
 end
 
-describe Gitlab::Gpg::CurrentKeyChain do
+RSpec.describe Gitlab::Gpg::CurrentKeyChain do
   around do |example|
     Gitlab::Gpg.using_tmp_keychain do
       example.run

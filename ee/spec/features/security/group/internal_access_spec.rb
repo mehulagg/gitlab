@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe '[EE] Internal Group access' do
+RSpec.describe '[EE] Internal Group access' do
   include AccessMatchers
 
-  set(:group)   { create(:group, :internal) }
-  set(:project) { create(:project, :internal, group: group) }
-  set(:project_guest) do
+  let_it_be(:group)   { create(:group, :internal) }
+  let_it_be(:project) { create(:project, :internal, group: group) }
+  let_it_be(:project_guest) do
     create(:user) do |user|
       project.add_guest(user)
     end
@@ -39,26 +39,27 @@ describe '[EE] Internal Group access' do
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe 'GET /groups/:path/issues' do
+  describe 'GET /groups/:path/-/issues' do
     subject { issues_group_path(group) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe 'GET /groups/:path/merge_requests' do
+  describe 'GET /groups/:path/-/merge_requests' do
     let(:project) { create(:project, :internal, :repository, group: group) }
+
     subject { merge_requests_group_path(group) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe 'GET /groups/:path/group_members' do
+  describe 'GET /groups/:path/-/group_members' do
     subject { group_group_members_path(group) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe 'GET /groups/:path/edit' do
+  describe 'GET /groups/:path/-/edit' do
     subject { edit_group_path(group) }
 
     it { is_expected.to be_denied_for(:auditor) }

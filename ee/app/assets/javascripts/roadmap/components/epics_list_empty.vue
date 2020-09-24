@@ -1,12 +1,15 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { s__, sprintf } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
-import { PRESET_TYPES, emptyStateDefault, emptyStateWithFilters } from '../constants';
+import CommonMixin from '../mixins/common_mixin';
+import { emptyStateDefault, emptyStateWithFilters } from '../constants';
 
 import initEpicCreate from '../../epic/epic_bundle';
 
 export default {
+  mixins: [CommonMixin],
   props: {
     presetType: {
       type: String,
@@ -43,7 +46,7 @@ export default {
       let startDate;
       let endDate;
 
-      if (this.presetType === PRESET_TYPES.QUARTERS) {
+      if (this.presetTypeQuarters) {
         const quarterStart = this.timeframeStart.range[0];
         const quarterEnd = this.timeframeEnd.range[2];
         startDate = dateInWords(
@@ -52,14 +55,14 @@ export default {
           quarterStart.getFullYear() === quarterEnd.getFullYear(),
         );
         endDate = dateInWords(quarterEnd, true);
-      } else if (this.presetType === PRESET_TYPES.MONTHS) {
+      } else if (this.presetTypeMonths) {
         startDate = dateInWords(
           this.timeframeStart,
           true,
           this.timeframeStart.getFullYear() === this.timeframeEnd.getFullYear(),
         );
         endDate = dateInWords(this.timeframeEnd, true);
-      } else if (this.presetType === PRESET_TYPES.WEEKS) {
+      } else if (this.presetTypeWeeks) {
         const end = new Date(this.timeframeEnd.getTime());
         end.setDate(end.getDate() + 6);
 

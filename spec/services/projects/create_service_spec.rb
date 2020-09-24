@@ -2,11 +2,10 @@
 
 require 'spec_helper'
 
-describe Projects::CreateService, '#execute' do
+RSpec.describe Projects::CreateService, '#execute' do
   include ExternalAuthorizationServiceHelpers
   include GitHelpers
 
-  let(:gitlab_shell) { Gitlab::Shell.new }
   let(:user) { create :user }
   let(:opts) do
     {
@@ -42,6 +41,18 @@ describe Projects::CreateService, '#execute' do
       expect(user).to receive(:invalidate_personal_projects_count)
 
       create_project(user, opts)
+    end
+
+    it 'builds associated project settings' do
+      project = create_project(user, opts)
+
+      expect(project.project_setting).to be_new_record
+    end
+
+    it_behaves_like 'storing arguments in the application context' do
+      let(:expected_params) { { project: subject.full_path, related_class: described_class.to_s } }
+
+      subject { create_project(user, opts) }
     end
   end
 
@@ -80,6 +91,116 @@ describe Projects::CreateService, '#execute' do
       expect(project.namespace).to eq(group)
       expect(project.team.owners).to include(user)
       expect(user.authorized_projects).to include(project)
+    end
+  end
+
+  context 'group sharing', :sidekiq_inline do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:shared_group) { create(:group) }
+    let_it_be(:shared_group_user) { create(:user) }
+    let(:opts) do
+      {
+        name: 'GitLab',
+        namespace_id: shared_group.id
+      }
+    end
+
+    before do
+      create(:group_group_link, shared_group: shared_group, shared_with_group: group)
+
+      shared_group.add_maintainer(shared_group_user)
+      group.add_developer(user)
+    end
+
+    it 'updates authorization' do
+      shared_group_project = create_project(shared_group_user, opts)
+
+      expect(
+        Ability.allowed?(shared_group_user, :read_project, shared_group_project)
+      ).to be_truthy
+      expect(
+        Ability.allowed?(user, :read_project, shared_group_project)
+      ).to be_truthy
+    end
+  end
+
+  context 'membership overrides', :sidekiq_inline do
+    let_it_be(:group) { create(:group, :private) }
+    let_it_be(:subgroup_for_projects) { create(:group, :private, parent: group) }
+    let_it_be(:subgroup_for_access) { create(:group, :private, parent: group) }
+    let_it_be(:group_maintainer) { create(:user) }
+    let(:group_access_level) { Gitlab::Access::REPORTER }
+    let(:subgroup_access_level) { Gitlab::Access::DEVELOPER }
+    let(:share_max_access_level) { Gitlab::Access::MAINTAINER }
+    let(:opts) do
+      {
+        name: 'GitLab',
+        namespace_id: subgroup_for_projects.id
+      }
+    end
+
+    before do
+      group.add_maintainer(group_maintainer)
+
+      create(:group_group_link, shared_group: subgroup_for_projects,
+                                shared_with_group: subgroup_for_access,
+                                group_access: share_max_access_level)
+    end
+
+    context 'membership is higher from group hierarchy' do
+      let(:group_access_level) { Gitlab::Access::MAINTAINER }
+
+      it 'updates authorization' do
+        create(:group_member, access_level: subgroup_access_level, group: subgroup_for_access, user: user)
+        create(:group_member, access_level: group_access_level, group: group, user: user)
+
+        subgroup_project = create_project(group_maintainer, opts)
+
+        project_authorization = ProjectAuthorization.where(
+          project_id: subgroup_project.id,
+          user_id: user.id,
+          access_level: group_access_level)
+
+        expect(project_authorization).to exist
+      end
+    end
+
+    context 'membership is higher from group share' do
+      let(:subgroup_access_level) { Gitlab::Access::MAINTAINER }
+
+      context 'share max access level is not limiting' do
+        it 'updates authorization' do
+          create(:group_member, access_level: group_access_level, group: group, user: user)
+          create(:group_member, access_level: subgroup_access_level, group: subgroup_for_access, user: user)
+
+          subgroup_project = create_project(group_maintainer, opts)
+
+          project_authorization = ProjectAuthorization.where(
+            project_id: subgroup_project.id,
+            user_id: user.id,
+            access_level: subgroup_access_level)
+
+          expect(project_authorization).to exist
+        end
+      end
+
+      context 'share max access level is limiting' do
+        let(:share_max_access_level) { Gitlab::Access::DEVELOPER }
+
+        it 'updates authorization' do
+          create(:group_member, access_level: group_access_level, group: group, user: user)
+          create(:group_member, access_level: subgroup_access_level, group: subgroup_for_access, user: user)
+
+          subgroup_project = create_project(group_maintainer, opts)
+
+          project_authorization = ProjectAuthorization.where(
+            project_id: subgroup_project.id,
+            user_id: user.id,
+            access_level: share_max_access_level)
+
+          expect(project_authorization).to exist
+        end
+      end
     end
   end
 
@@ -125,13 +246,21 @@ describe Projects::CreateService, '#execute' do
   end
 
   context 'import data' do
-    it 'stores import data and URL' do
-      import_data = { data: { 'test' => 'some data' } }
-      project = create_project(user, { name: 'test', import_url: 'http://import-url', import_data: import_data })
+    let(:import_data) { { data: { 'test' => 'some data' } } }
+    let(:imported_project) { create_project(user, { name: 'test', import_url: 'http://import-url', import_data: import_data }) }
 
-      expect(project.import_data).to be_persisted
-      expect(project.import_data.data).to eq(import_data[:data])
-      expect(project.import_url).to eq('http://import-url')
+    it 'does not write repository config' do
+      expect_next_instance_of(Project) do |project|
+        expect(project).not_to receive(:write_repository_config)
+      end
+
+      imported_project
+    end
+
+    it 'stores import data and URL' do
+      expect(imported_project.import_data).to be_persisted
+      expect(imported_project.import_data.data).to eq(import_data[:data])
+      expect(imported_project.import_url).to eq('http://import-url')
     end
   end
 
@@ -247,7 +376,9 @@ describe Projects::CreateService, '#execute' do
 
   context 'repository creation' do
     it 'synchronously creates the repository' do
-      expect_any_instance_of(Project).to receive(:create_repository)
+      expect_next_instance_of(Project) do |instance|
+        expect(instance).to receive(:create_repository)
+      end
 
       project = create_project(user, opts)
       expect(project).to be_valid
@@ -256,8 +387,6 @@ describe Projects::CreateService, '#execute' do
     end
 
     context 'when another repository already exists on disk' do
-      let(:repository_storage) { 'default' }
-
       let(:opts) do
         {
           name: 'Existing',
@@ -266,13 +395,15 @@ describe Projects::CreateService, '#execute' do
       end
 
       context 'with legacy storage' do
+        let(:fake_repo_path) { File.join(TestEnv.repos_path, user.namespace.full_path, 'existing.git') }
+
         before do
           stub_application_setting(hashed_storage_enabled: false)
-          gitlab_shell.create_repository(repository_storage, "#{user.namespace.full_path}/existing", 'group/project')
+          TestEnv.create_bare_repository(fake_repo_path)
         end
 
         after do
-          gitlab_shell.remove_repository(repository_storage, "#{user.namespace.full_path}/existing")
+          FileUtils.rm_rf(fake_repo_path)
         end
 
         it 'does not allow to create a project when path matches existing repository on disk' do
@@ -297,17 +428,15 @@ describe Projects::CreateService, '#execute' do
       context 'with hashed storage' do
         let(:hash) { '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b' }
         let(:hashed_path) { '@hashed/6b/86/6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b' }
+        let(:fake_repo_path) { File.join(TestEnv.repos_path, "#{hashed_path}.git") }
 
         before do
           allow(Digest::SHA2).to receive(:hexdigest) { hash }
-        end
-
-        before do
-          gitlab_shell.create_repository(repository_storage, hashed_path, 'group/project')
+          TestEnv.create_bare_repository(fake_repo_path)
         end
 
         after do
-          gitlab_shell.remove_repository(repository_storage, hashed_path)
+          FileUtils.rm_rf(fake_repo_path)
         end
 
         it 'does not allow to create a project when path matches existing repository on disk' do
@@ -323,39 +452,114 @@ describe Projects::CreateService, '#execute' do
   end
 
   context 'when readme initialization is requested' do
-    it 'creates README.md' do
-      opts[:initialize_with_readme] = '1'
+    let(:project) { create_project(user, opts) }
 
-      project = create_project(user, opts)
-
-      expect(project.repository.commit_count).to be(1)
-      expect(project.repository.readme.name).to eql('README.md')
-      expect(project.repository.readme.data).to include('# GitLab')
-    end
-  end
-
-  context 'when there is an active service template' do
     before do
-      create(:service, project: nil, template: true, active: true)
+      opts[:initialize_with_readme] = '1'
     end
 
-    it 'creates a service from this template' do
-      project = create_project(user, opts)
+    shared_examples 'creates README.md' do
+      it { expect(project.repository.commit_count).to be(1) }
+      it { expect(project.repository.readme.name).to eql('README.md') }
+      it { expect(project.repository.readme.data).to include('# GitLab') }
+    end
 
-      expect(project.services.count).to eq 1
+    it_behaves_like 'creates README.md'
+
+    context 'and a default_branch_name is specified' do
+      before do
+        allow(Gitlab::CurrentSettings)
+          .to receive(:default_branch_name)
+          .and_return('example_branch')
+      end
+
+      it_behaves_like 'creates README.md'
+
+      it 'creates README.md within the specified branch rather than master' do
+        branches = project.repository.branches
+
+        expect(branches.size).to eq(1)
+        expect(branches.collect(&:name)).to contain_exactly('example_branch')
+      end
     end
   end
 
-  context 'when a bad service template is created' do
-    it 'sets service to be inactive' do
-      opts[:import_url] = 'http://www.gitlab.com/gitlab-org/gitlab-foss'
-      create(:service, type: 'DroneCiService', project: nil, template: true, active: true)
+  describe 'create service for the project' do
+    subject(:project) { create_project(user, opts) }
 
-      project = create_project(user, opts)
-      service = project.services.first
+    context 'with an active service template' do
+      let!(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
 
-      expect(project).to be_persisted
-      expect(service.active).to be false
+      it 'creates a service from the template' do
+        expect(project.services.count).to eq(1)
+        expect(project.services.first.api_url).to eq(template_integration.api_url)
+        expect(project.services.first.inherit_from_id).to be_nil
+      end
+
+      context 'with an active instance-level integration' do
+        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+
+        it 'creates a service from the instance-level integration' do
+          expect(project.services.count).to eq(1)
+          expect(project.services.first.api_url).to eq(instance_integration.api_url)
+          expect(project.services.first.inherit_from_id).to eq(instance_integration.id)
+        end
+
+        context 'with an active group-level integration' do
+          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+          let!(:group) do
+            create(:group).tap do |group|
+              group.add_owner(user)
+            end
+          end
+
+          let(:opts) do
+            {
+              name: 'GitLab',
+              namespace_id: group.id
+            }
+          end
+
+          it 'creates a service from the group-level integration' do
+            expect(project.services.count).to eq(1)
+            expect(project.services.first.api_url).to eq(group_integration.api_url)
+            expect(project.services.first.inherit_from_id).to eq(group_integration.id)
+          end
+
+          context 'with an active subgroup' do
+            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup) do
+              create(:group, parent: group).tap do |subgroup|
+                subgroup.add_owner(user)
+              end
+            end
+
+            let(:opts) do
+              {
+                name: 'GitLab',
+                namespace_id: subgroup.id
+              }
+            end
+
+            it 'creates a service from the group-level integration' do
+              expect(project.services.count).to eq(1)
+              expect(project.services.first.api_url).to eq(subgroup_integration.api_url)
+              expect(project.services.first.inherit_from_id).to eq(subgroup_integration.id)
+            end
+          end
+        end
+      end
+    end
+
+    context 'when there is an invalid integration' do
+      before do
+        create(:service, :template, type: 'DroneCiService', active: true)
+      end
+
+      it 'creates an inactive service' do
+        expect(project).to be_persisted
+        expect(project.services.first.active).to be false
+      end
     end
   end
 
@@ -384,6 +588,67 @@ describe Projects::CreateService, '#execute' do
     rugged = rugged_repo(project.repository)
 
     expect(rugged.config['gitlab.fullpath']).to eq project.full_path
+  end
+
+  context 'when project has access to shared service' do
+    context 'Prometheus application is shared via group cluster' do
+      let(:cluster) { create(:cluster, :group, groups: [group]) }
+      let(:group) do
+        create(:group).tap do |group|
+          group.add_owner(user)
+        end
+      end
+
+      before do
+        create(:clusters_applications_prometheus, :installed, cluster: cluster)
+      end
+
+      it 'creates PrometheusService record', :aggregate_failures do
+        project = create_project(user, opts.merge!(namespace_id: group.id))
+        service = project.prometheus_service
+
+        expect(service.active).to be true
+        expect(service.manual_configuration?).to be false
+        expect(service.persisted?).to be true
+      end
+    end
+
+    context 'Prometheus application is shared via instance cluster' do
+      let(:cluster) { create(:cluster, :instance) }
+
+      before do
+        create(:clusters_applications_prometheus, :installed, cluster: cluster)
+      end
+
+      it 'creates PrometheusService record', :aggregate_failures do
+        project = create_project(user, opts)
+        service = project.prometheus_service
+
+        expect(service.active).to be true
+        expect(service.manual_configuration?).to be false
+        expect(service.persisted?).to be true
+      end
+
+      it 'cleans invalid record and logs warning', :aggregate_failures do
+        invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
+        allow_next_instance_of(Project) do |instance|
+          allow(instance).to receive(:build_prometheus_service).and_return(invalid_service_record)
+        end
+
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) }))
+        project = create_project(user, opts)
+
+        expect(project.prometheus_service).to be_nil
+      end
+    end
+
+    context 'shared Prometheus application is not available' do
+      it 'does not persist PrometheusService record', :aggregate_failures do
+        project = create_project(user, opts)
+
+        expect(project.prometheus_service).to be_nil
+      end
+    end
   end
 
   context 'with external authorization enabled' do
@@ -419,6 +684,98 @@ describe Projects::CreateService, '#execute' do
 
       expect(project.errors[:external_authorization_classification_label]).to be_present
       expect(project).not_to be_persisted
+    end
+  end
+
+  it_behaves_like 'measurable service' do
+    before do
+      opts.merge!(
+        current_user: user,
+        path: 'foo'
+      )
+    end
+
+    let(:base_log_data) do
+      {
+        class: Projects::CreateService.name,
+        current_user: user.name,
+        project_full_path: "#{user.namespace.full_path}/#{opts[:path]}"
+      }
+    end
+
+    after do
+      create_project(user, opts)
+    end
+  end
+
+  context 'with specialized_project_authorization_workers' do
+    let_it_be(:other_user) { create(:user) }
+    let_it_be(:group) { create(:group) }
+
+    let(:opts) do
+      {
+        name: 'GitLab',
+        namespace_id: group.id
+      }
+    end
+
+    before do
+      group.add_maintainer(user)
+      group.add_developer(other_user)
+    end
+
+    it 'updates authorization for current_user' do
+      project = create_project(user, opts)
+
+      expect(
+        Ability.allowed?(user, :read_project, project)
+      ).to be_truthy
+    end
+
+    it 'schedules authorization update for users with access to group' do
+      expect(AuthorizedProjectsWorker).not_to(
+        receive(:bulk_perform_async)
+      )
+      expect(AuthorizedProjectUpdate::ProjectCreateWorker).to(
+        receive(:perform_async).and_call_original
+      )
+      expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).to(
+        receive(:bulk_perform_in)
+          .with(1.hour,
+                array_including([user.id], [other_user.id]),
+                batch_delay: 30.seconds, batch_size: 100)
+          .and_call_original
+      )
+
+      create_project(user, opts)
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(specialized_project_authorization_workers: false)
+      end
+
+      it 'updates authorization for current_user' do
+        project = create_project(user, opts)
+
+        expect(
+          Ability.allowed?(user, :read_project, project)
+        ).to be_truthy
+      end
+
+      it 'uses AuthorizedProjectsWorker' do
+        expect(AuthorizedProjectsWorker).to(
+          receive(:bulk_perform_async).with(array_including([user.id], [other_user.id])).and_call_original
+        )
+        expect(AuthorizedProjectUpdate::ProjectCreateWorker).not_to(
+          receive(:perform_async)
+        )
+        expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).not_to(
+          receive(:bulk_perform_in)
+        )
+
+        create_project(user, opts)
+      end
     end
   end
 

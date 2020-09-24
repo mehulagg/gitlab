@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::UpgradeService do
+RSpec.describe Clusters::Applications::UpgradeService do
   describe '#execute' do
     let(:application) { create(:clusters_applications_helm, :scheduled) }
     let!(:install_command) { application.install_command }
     let(:service) { described_class.new(application) }
-    let(:helm_client) { instance_double(Gitlab::Kubernetes::Helm::Api) }
+    let(:helm_client) { instance_double(Gitlab::Kubernetes::Helm::API) }
 
     before do
       allow(service).to receive(:install_command).and_return(install_command)
@@ -51,7 +51,7 @@ describe Clusters::Applications::UpgradeService do
         service.execute
 
         expect(application).to be_update_errored
-        expect(application.status_reason).to match('Kubernetes error: 500')
+        expect(application.status_reason).to eq(_('Kubernetes error: %{error_code}') % { error_code: 500 })
       end
     end
 
@@ -73,7 +73,7 @@ describe Clusters::Applications::UpgradeService do
         service.execute
 
         expect(application).to be_update_errored
-        expect(application.status_reason).to eq('Failed to upgrade.')
+        expect(application.status_reason).to eq(_('Failed to upgrade.'))
       end
     end
   end

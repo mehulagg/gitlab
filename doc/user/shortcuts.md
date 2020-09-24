@@ -6,7 +6,10 @@ disqus_identifier: 'https://docs.gitlab.com/ee/workflow/shortcuts.html'
 # GitLab keyboard shortcuts
 
 GitLab has many useful keyboard shortcuts to make it easier to access different features.
-You can see the quick reference sheet within GitLab itself with <kbd>Shift</kbd> + <kbd>?</kbd>.
+You can see a modal listing keyboard shortcuts within GitLab itself by pressing <kbd>?</kbd>,
+or clicking **Keyboard shortcuts** in the Help menu at the top right.
+In [GitLab 12.8 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/22113),
+keyboard shortcuts can be disabled using the **Enable**/**Disable** toggle in this modal window.
 
 The [Global Shortcuts](#global-shortcuts) work from any area of GitLab, but you must
 be in specific pages for the other shortcuts to be available, as explained in each
@@ -24,19 +27,26 @@ These shortcuts are available in most areas of GitLab
 | <kbd>Shift</kbd> + <kbd>a</kbd> | Go to your Activity page. |
 | <kbd>Shift</kbd> + <kbd>l</kbd> | Go to your Milestones page. |
 | <kbd>Shift</kbd> + <kbd>s</kbd> | Go to your Snippets page. |
-| <kbd>s</kbd>                    | Put cursor in the issues/merge requests search. |
+| <kbd>s</kbd> / <kbd>/</kbd>     | Put cursor in the search bar. |
 | <kbd>Shift</kbd> + <kbd>i</kbd> | Go to your Issues page. |
 | <kbd>Shift</kbd> + <kbd>m</kbd> | Go to your Merge requests page.|
 | <kbd>Shift</kbd> + <kbd>t</kbd> | Go to your To-Do List page. |
 | <kbd>p</kbd> + <kbd>b</kbd>     | Show/hide the Performance Bar. |
 
 Additionally, the following shortcuts are available when editing text in text fields,
-for example comments, replies, or issue and merge request descriptions:
+for example comments, replies, issue descriptions, and merge request descriptions:
 
 | Keyboard Shortcut                                                      | Description |
 | ---------------------------------------------------------------------- | ----------- |
 | <kbd>↑</kbd>                                                           | Edit your last comment. You must be in a blank text field below a thread, and you must already have at least one comment in the thread. |
 | <kbd>⌘</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>p</kbd> | Toggle Markdown preview, when editing text in a text field that has **Write** and **Preview** tabs at the top. |
+| <kbd>⌘</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>b</kbd>                    | Bold the selected text (surround it with `**`). |
+| <kbd>⌘</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>i</kbd>                    | Italicize the selected text (surround it with `_`). |
+| <kbd>⌘</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>k</kbd>                    | Add a link (surround the selected text with `[]()`). |
+
+NOTE: **Note:**
+The shortcuts for editing in text fields are always enabled, even when
+other keyboard shortcuts are disabled as explained above.
 
 ## Project
 
@@ -52,7 +62,7 @@ relatively quickly to work, and they will take you to another page in the projec
 | <kbd>t</kbd>                | Go to the project file search page. (**Repository > Files**, click **Find Files**). |
 | <kbd>g</kbd> + <kbd>c</kbd> | Go to the project commits list (**Repository > Commits**). |
 | <kbd>g</kbd> + <kbd>n</kbd> | Go to the [repository graph](#repository-graph) page (**Repository > Graph**). |
-| <kbd>g</kbd> + <kbd>d</kbd> | Go to repository charts (**Repository > Charts**). |
+| <kbd>g</kbd> + <kbd>d</kbd> | Go to repository charts (**Analytics > Repository Analytics**). |
 | <kbd>g</kbd> + <kbd>i</kbd> | Go to the project issues list (**Issues > List**). |
 | <kbd>i</kbd>                | Go to the New Issue page (**Issues**, click **New Issue** ). |
 | <kbd>g</kbd> + <kbd>b</kbd> | Go to the project issue boards list (**Issues > Boards**). |
@@ -75,10 +85,11 @@ These shortcuts are available when viewing issues and merge requests.
 | <kbd>m</kbd>                 | Change milestone. |
 | <kbd>l</kbd>                 | Change label. |
 | <kbd>r</kbd>                 | Start writing a comment. If any text is selected, it will be quoted in the comment. Can't be used to reply within a thread. |
-| <kbd>n</kbd>                 | Move to next unresolved discussion (Merge requests only). |
-| <kbd>p</kbd>                 | Move to previous unresolved discussion (Merge requests only). |
-| <kbd>]</kbd> or <kbd>j</kbd> | Move to next file (Merge requests only). |
-| <kbd>[</kbd> or <kbd>k</kbd> | Move to previous file (Merge requests only). |
+| <kbd>n</kbd>                 | Move to next unresolved discussion (merge requests only). |
+| <kbd>p</kbd>                 | Move to previous unresolved discussion (merge requests only). |
+| <kbd>]</kbd> or <kbd>j</kbd> | Move to next file (merge requests only). |
+| <kbd>[</kbd> or <kbd>k</kbd> | Move to previous file (merge requests only). |
+| <kbd>b</kbd>                 | Copy source branch name (merge requests only). |
 
 ### Project Files
 
@@ -123,6 +134,15 @@ This shortcut is available when viewing a [wiki page](project/wiki/index.md):
 | Keyboard Shortcut | Description |
 | ----------------- | ----------- |
 | <kbd>e</kbd>      | Edit wiki page. |
+
+### Filtered Search
+
+These shortcuts are available when using a [filtered search input](search/index.md):
+
+| Keyboard Shortcut                                     | Description |
+| ----------------------------------------------------- | ----------- |
+| <kbd>⌘</kbd> (Mac) + <kbd>⌫</kbd>                     | Clear entire search filter. |
+| <kbd>⌥</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>⌫</kbd>   | Clear one token at a time. |
 
 ## Epics **(ULTIMATE)**
 

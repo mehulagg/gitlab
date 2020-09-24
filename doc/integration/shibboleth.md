@@ -8,7 +8,7 @@ In order to enable Shibboleth support in GitLab we need to use Apache instead of
 
 To enable the Shibboleth OmniAuth provider you must configure Apache Shibboleth module.
 The installation and configuration of the module itself is out of the scope of this document.
-Check <https://wiki.shibboleth.net/confluence/display/SP3/Apache> for more info.
+Check <https://wiki.shibboleth.net/confluence/display/SP3/Apache> for more information.
 
 You can find Apache config in [GitLab Recipes](https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/web-server/apache).
 
@@ -16,7 +16,7 @@ The following changes are needed to enable Shibboleth:
 
 1. Protect OmniAuth Shibboleth callback URL:
 
-   ```
+   ```apache
    <Location /users/auth/shibboleth/callback>
      AuthType shibboleth
      ShibRequestSetting requireSession 1
@@ -36,7 +36,7 @@ The following changes are needed to enable Shibboleth:
 
 1. Exclude Shibboleth URLs from rewriting. Add `RewriteCond %{REQUEST_URI} !/Shibboleth.sso` and `RewriteCond %{REQUEST_URI} !/shibboleth-sp`. Config should look like this:
 
-   ```
+   ```apache
    # Apache equivalent of Nginx try files
    RewriteEngine on
    RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
@@ -46,8 +46,12 @@ The following changes are needed to enable Shibboleth:
    RequestHeader set X_FORWARDED_PROTO 'https'
    ```
 
-1. Edit `/etc/gitlab/gitlab.rb` configuration file to enable OmniAuth and add
-   Shibboleth as an OmniAuth provider. User attributes will be sent from the
+   NOTE: **Note:**
+   Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
+   earlier version, you'll need to explicitly enable it in `/etc/gitlab/gitlab.rb`.
+
+1. In addition, add Shibboleth to `/etc/gitlab/gitlab.rb` as an OmniAuth provider.
+   User attributes will be sent from the
    Apache reverse proxy to GitLab as headers with the names from the Shibboleth
    attribute mapping. Therefore the values of the `args` hash
    should be in the form of `"HTTP_ATTRIBUTE"`. The keys in the hash are arguments
@@ -62,7 +66,7 @@ The following changes are needed to enable Shibboleth:
 
    The file should look like this:
 
-   ```
+   ```ruby
    external_url 'https://gitlab.example.com'
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
 
@@ -71,7 +75,6 @@ The following changes are needed to enable Shibboleth:
 
    gitlab_rails['omniauth_allow_single_sign_on'] = true
    gitlab_rails['omniauth_block_auto_created_users'] = false
-   gitlab_rails['omniauth_enabled'] = true
    gitlab_rails['omniauth_providers'] = [
      {
        "name"  => "'shibboleth"',
@@ -98,7 +101,7 @@ On the sign in page, there should now be a "Sign in with: Shibboleth" icon below
 The order of the first 2 Location directives is important. If they are reversed,
 you will not get a Shibboleth session!
 
-```
+```plaintext
 <Location />
   Require all granted
   ProxyPassReverse http://127.0.0.1:8181

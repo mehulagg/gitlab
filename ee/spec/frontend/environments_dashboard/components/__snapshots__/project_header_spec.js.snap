@@ -2,49 +2,49 @@
 
 exports[`Project Header matches the snapshot 1`] = `
 <div
-  class="d-flex align-items-center page-title-holder text-secondary justify-content-between pb-2"
+  class="d-flex align-items-center page-title-holder text-secondary justify-content-between pb-2 mb-3"
 >
   <div
     class="d-flex align-items-center"
   >
-    <projectavatar-stub
+    <project-avatar-stub
       class="flex-shrink-0"
       project="[object Object]"
       size="20"
     />
      
-    <gllink-stub
+    <gl-link-stub
       class="js-namespace-link text-secondary"
       href="/hello"
     >
       <span
-        class="js-namespace append-right-8"
+        class="js-namespace gl-mr-3"
       >
          hello 
       </span>
-    </gllink-stub>
+    </gl-link-stub>
      
     <span
-      class="append-right-8"
+      class="gl-mr-3"
     >
       &gt;
     </span>
      
-    <projectavatar-stub
+    <project-avatar-stub
       class="flex-shrink-0"
       project="[object Object]"
       size="20"
     />
      
-    <gllink-stub
+    <gl-link-stub
       class="js-project-link text-secondary"
     >
       <span
-        class="js-name append-right-8"
+        class="js-name gl-mr-3"
       >
          world 
       </span>
-    </gllink-stub>
+    </gl-link-stub>
   </div>
    
   <div
@@ -52,12 +52,11 @@ exports[`Project Header matches the snapshot 1`] = `
   >
     <button
       class="js-more-actions-toggle d-flex align-items-center ml-2 btn btn-transparent"
-      data-original-title="More actions"
       data-toggle="dropdown"
-      title=""
+      title="More actions"
       type="button"
     >
-      <icon-stub
+      <gl-icon-stub
         class="text-secondary"
         name="ellipsis_v"
         size="16"
@@ -68,15 +67,20 @@ exports[`Project Header matches the snapshot 1`] = `
       class="dropdown-menu dropdown-menu-right"
     >
       <li>
-        <glbutton-stub
+        <gl-button-stub
+          buttontextclasses=""
+          category="primary"
           class="js-remove-button"
+          icon=""
+          size="medium"
+          variant="link"
         >
           <span
             class="text-danger"
           >
              Remove 
           </span>
-        </glbutton-stub>
+        </gl-button-stub>
       </li>
     </ul>
   </div>

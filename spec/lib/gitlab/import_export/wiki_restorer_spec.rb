@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::WikiRestorer do
+RSpec.describe Gitlab::ImportExport::WikiRestorer do
   describe 'restore a wiki Git repo' do
     let!(:project_with_wiki) { create(:project, :wiki_repo) }
     let!(:project_without_wiki) { create(:project) }

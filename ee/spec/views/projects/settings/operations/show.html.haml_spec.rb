@@ -2,9 +2,16 @@
 
 require 'spec_helper'
 
-describe 'projects/settings/operations/show' do
-  let(:project) { create(:project, :repository) }
-  let(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
+RSpec.describe 'projects/settings/operations/show' do
+  let_it_be(:project, refind: true) { create(:project, :repository) }
+  let_it_be(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
+
+  let(:operations_show_locals) do
+    {
+      prometheus_service: project.find_or_initialize_service('prometheus'),
+      alerts_service: project.find_or_initialize_service('alerts')
+    }
+  end
 
   before do
     assign(:project, project)
@@ -26,7 +33,7 @@ describe 'projects/settings/operations/show' do
       end
 
       it 'links to project.tracing_external_url' do
-        render
+        render template: 'projects/settings/operations/show', locals: operations_show_locals
 
         expect(rendered).to have_link('Tracing', href: tracing_url)
       end
@@ -40,7 +47,7 @@ describe 'projects/settings/operations/show' do
         end
 
         it 'sanitizes external_url' do
-          render
+          render template: 'projects/settings/operations/show', locals: operations_show_locals
 
           expect(tracing_setting.external_url).to eq(malicious_tracing_url)
           expect(rendered).to have_link('Tracing', href: cleaned_url)
@@ -59,7 +66,7 @@ describe 'projects/settings/operations/show' do
       end
 
       it 'links to Tracing page' do
-        render
+        render template: 'projects/settings/operations/show', locals: operations_show_locals
 
         expect(rendered).to have_link('Tracing', href: project_tracing_path(project))
       end

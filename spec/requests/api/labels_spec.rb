@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Labels do
+RSpec.describe API::Labels do
   def put_labels_api(route_type, user, spec_params, request_params = {})
     if route_type == :deprecated
       put api("/projects/#{project.id}/labels", user),
@@ -17,7 +17,7 @@ describe API::Labels do
 
   let(:user) { create(:user) }
   let(:project) { create(:project, creator_id: user.id, namespace: user.namespace) }
-  let!(:label1) { create(:label, title: 'label1', project: project) }
+  let!(:label1) { create(:label, description: 'the best label', title: 'label1', project: project) }
   let!(:priority_label) { create(:label, title: 'bug', project: project, priority: 3) }
 
   route_types = [:deprecated, :rest]
@@ -27,7 +27,7 @@ describe API::Labels do
       it "returns 200 if name is changed (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, new_name: 'New Label')
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['name']).to eq('New Label')
         expect(json_response['color']).to eq(label1.color)
       end
@@ -35,7 +35,7 @@ describe API::Labels do
       it "returns 200 if colors is changed (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, color: '#FFFFFF')
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['name']).to eq(label1.name)
         expect(json_response['color']).to eq('#FFFFFF')
       end
@@ -43,7 +43,7 @@ describe API::Labels do
       it "returns 200 if a priority is added (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, priority: 3)
 
-        expect(response.status).to eq(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['name']).to eq(label1.name)
         expect(json_response['priority']).to eq(3)
       end
@@ -51,7 +51,7 @@ describe API::Labels do
       it "returns 400 if no new parameters given (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params)
 
-        expect(response).to have_gitlab_http_status(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq('new_name, color, description, priority are missing, '\
                                              'at least one parameter must be provided')
       end
@@ -59,27 +59,27 @@ describe API::Labels do
       it "returns 400 when color code is too short (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, color: '#FF')
 
-        expect(response).to have_gitlab_http_status(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['message']['color']).to eq(['must be a valid color code'])
       end
 
       it "returns 400 for too long color code (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, color: '#FFAAFFFF')
 
-        expect(response).to have_gitlab_http_status(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['message']['color']).to eq(['must be a valid color code'])
       end
 
       it "returns 400 for invalid priority (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, priority: 'foo')
 
-        expect(response).to have_gitlab_http_status(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
       end
 
       it "returns 200 if name and colors and description are changed (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, new_name: 'New Label', color: '#FFFFFF', description: 'test')
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['name']).to eq('New Label')
         expect(json_response['color']).to eq('#FFFFFF')
         expect(json_response['description']).to eq('test')
@@ -88,14 +88,14 @@ describe API::Labels do
       it "returns 400 for invalid name (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, new_name: ',', color: '#FFFFFF')
 
-        expect(response).to have_gitlab_http_status(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['message']['title']).to eq(['is invalid'])
       end
 
       it "returns 200 if description is changed (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, description: 'test')
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['id']).to eq(expected_response_label_id)
         expect(json_response['description']).to eq('test')
       end
@@ -103,7 +103,7 @@ describe API::Labels do
       it "returns 200 if priority is changed (#{route_type} route)" do
         put_labels_api(route_type, user, spec_params, priority: 10)
 
-        expect(response.status).to eq(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['id']).to eq(expected_response_label_id)
         expect(json_response['priority']).to eq(10)
       end
@@ -124,7 +124,7 @@ describe API::Labels do
       put api("/projects/#{project.id}/labels", user),
           params: request_params
 
-      expect(response.status).to eq(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['id']).to eq(expected_response_label_id)
       expect(json_response['priority']).to be_nil
     end
@@ -144,7 +144,7 @@ describe API::Labels do
       put api("/projects/#{project.id}/labels/#{label_id}", user),
           params: request_params
 
-      expect(response.status).to eq(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['id']).to eq(expected_response_label_id)
       expect(json_response['priority']).to be_nil
     end
@@ -162,14 +162,14 @@ describe API::Labels do
     it 'returns 204 for existing label (deprecated route)' do
       delete api("/projects/#{project.id}/labels", user), params: spec_params
 
-      expect(response).to have_gitlab_http_status(204)
+      expect(response).to have_gitlab_http_status(:no_content)
     end
 
     it 'returns 204 for existing label (rest route)' do
       label_id = spec_params[:name] || spec_params[:label_id]
       delete api("/projects/#{project.id}/labels/#{label_id}", user), params: spec_params.except(:name, :label_id)
 
-      expect(response).to have_gitlab_http_status(204)
+      expect(response).to have_gitlab_http_status(:no_content)
     end
   end
 
@@ -188,7 +188,7 @@ describe API::Labels do
     it 'returns all available labels to the project' do
       get api("/projects/#{project.id}/labels", user)
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response).to include_pagination_headers
       expect(json_response).to all(match_schema('public_api/v4/labels/project_label'))
       expect(json_response.size).to eq(3)
@@ -205,7 +205,7 @@ describe API::Labels do
       it 'includes counts in the response' do
         get api("/projects/#{project.id}/labels", user), params: { with_counts: true }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to all(match_schema('public_api/v4/labels/project_label_with_counts'))
         expect(json_response.size).to eq(3)
@@ -219,7 +219,7 @@ describe API::Labels do
                                            'closed_issues_count' => 1,
                                            'open_merge_requests_count' => 0,
                                            'name' => label1.name,
-                                           'description' => nil,
+                                           'description' => 'the best label',
                                            'color' => a_string_matching(/^#\h{6}$/),
                                            'text_color' => a_string_matching(/^#\h{6}$/),
                                            'priority' => nil,
@@ -264,7 +264,7 @@ describe API::Labels do
       it 'returns all available labels for the project, parent group and ancestor groups' do
         get api("/projects/#{project.id}/labels", user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response).to all(match_schema('public_api/v4/labels/label'))
@@ -287,7 +287,7 @@ describe API::Labels do
       it 'returns all available labels for the project and the parent group only' do
         get api("/projects/#{project.id}/labels", user), params: { include_ancestor_groups: false }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response).to all(match_schema('public_api/v4/labels/label'))
@@ -307,7 +307,7 @@ describe API::Labels do
              priority: 2
            }
 
-      expect(response).to have_gitlab_http_status(201)
+      expect(response).to have_gitlab_http_status(:created)
       expect(json_response['name']).to eq('Foo')
       expect(json_response['color']).to eq('#FFAABB')
       expect(json_response['description']).to eq('test')
@@ -321,7 +321,7 @@ describe API::Labels do
              color: '#FFAABB'
            }
 
-      expect(response.status).to eq(201)
+      expect(response).to have_gitlab_http_status(:created)
       expect(json_response['name']).to eq('Foo & Bar')
       expect(json_response['color']).to eq('#FFAABB')
       expect(json_response['description']).to be_nil
@@ -336,7 +336,7 @@ describe API::Labels do
              priority: 3
            }
 
-      expect(response.status).to eq(201)
+      expect(response).to have_gitlab_http_status(:created)
       expect(json_response['name']).to eq('Foo & Bar')
       expect(json_response['color']).to eq('#FFAABB')
       expect(json_response['description']).to be_nil
@@ -345,12 +345,12 @@ describe API::Labels do
 
     it 'returns a 400 bad request if name not given' do
       post api("/projects/#{project.id}/labels", user), params: { color: '#FFAABB' }
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it 'returns a 400 bad request if color not given' do
       post api("/projects/#{project.id}/labels", user), params: { name: 'Foobar' }
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it 'returns 400 for invalid color' do
@@ -359,7 +359,7 @@ describe API::Labels do
              name: 'Foo',
              color: '#FFAA'
            }
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['message']['color']).to eq(['must be a valid color code'])
     end
 
@@ -369,7 +369,7 @@ describe API::Labels do
              name: 'Foo',
              color: '#FFAAFFFF'
            }
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['message']['color']).to eq(['must be a valid color code'])
     end
 
@@ -379,7 +379,7 @@ describe API::Labels do
              name: ',',
              color: '#FFAABB'
            }
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['message']['title']).to eq(['is invalid'])
     end
 
@@ -394,7 +394,7 @@ describe API::Labels do
              color: '#FFAABB'
            }
 
-      expect(response).to have_gitlab_http_status(409)
+      expect(response).to have_gitlab_http_status(:conflict)
       expect(json_response['message']).to eq('Label already exists')
     end
 
@@ -406,7 +406,7 @@ describe API::Labels do
              priority: 'foo'
            }
 
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it 'returns 409 if label already exists in project' do
@@ -415,7 +415,7 @@ describe API::Labels do
              name: 'label1',
              color: '#FFAABB'
            }
-      expect(response).to have_gitlab_http_status(409)
+      expect(response).to have_gitlab_http_status(:conflict)
       expect(json_response['message']).to eq('Label already exists')
     end
   end
@@ -432,14 +432,14 @@ describe API::Labels do
     it 'returns 404 for non existing label' do
       delete api("/projects/#{project.id}/labels", user), params: { name: 'label2' }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 Label Not Found')
     end
 
     it 'returns 400 for wrong parameters' do
       delete api("/projects/#{project.id}/labels", user)
 
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it 'fails if label_id and name are given in params' do
@@ -449,7 +449,7 @@ describe API::Labels do
             name: priority_label.name
           }
 
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
 
     it_behaves_like '412 response' do
@@ -480,7 +480,7 @@ describe API::Labels do
             new_name: 'label3'
           }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it 'returns 404 if label by id does not exist' do
@@ -490,13 +490,13 @@ describe API::Labels do
             new_name: 'label3'
           }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it 'returns 400 if no label name and id is given' do
       put api("/projects/#{project.id}/labels", user), params: { new_name: 'label2' }
 
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['error']).to eq('label_id, name are missing, exactly one parameter must be provided')
     end
 
@@ -508,7 +508,7 @@ describe API::Labels do
             new_name: 'New Label'
           }
 
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
     end
   end
 
@@ -523,7 +523,7 @@ describe API::Labels do
     it 'returns 200 if label is promoted' do
       put api("/projects/#{project.id}/labels/promote", user), params: { name: label1.name }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['name']).to eq(label1.name)
       expect(json_response['color']).to eq(label1.color)
     end
@@ -535,7 +535,7 @@ describe API::Labels do
         .to change(project.labels, :count).by(-1)
         .and change(group.labels, :count).by(0)
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     it 'returns 403 if guest promotes label' do
@@ -544,19 +544,19 @@ describe API::Labels do
 
       put api("/projects/#{project.id}/labels/promote", guest), params: { name: label1.name }
 
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
 
     it 'returns 404 if label does not exist' do
       put api("/projects/#{project.id}/labels/promote", user), params: { name: 'unknown' }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it 'returns 400 if no label name given' do
       put api("/projects/#{project.id}/labels/promote", user)
 
-      expect(response).to have_gitlab_http_status(400)
+      expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response['error']).to eq('name is missing')
     end
   end
@@ -566,7 +566,7 @@ describe API::Labels do
       it "subscribes to the label" do
         post api("/projects/#{project.id}/labels/#{label1.title}/subscribe", user)
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response["name"]).to eq(label1.title)
         expect(json_response["subscribed"]).to be_truthy
       end
@@ -576,7 +576,7 @@ describe API::Labels do
       it "subscribes to the label" do
         post api("/projects/#{project.id}/labels/#{label1.id}/subscribe", user)
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response["name"]).to eq(label1.title)
         expect(json_response["subscribed"]).to be_truthy
       end
@@ -590,15 +590,15 @@ describe API::Labels do
       it "returns 304" do
         post api("/projects/#{project.id}/labels/#{label1.id}/subscribe", user)
 
-        expect(response).to have_gitlab_http_status(304)
+        expect(response).to have_gitlab_http_status(:not_modified)
       end
     end
 
     context "when label ID is not found" do
       it "returns 404 error" do
-        post api("/projects/#{project.id}/labels/1234/subscribe", user)
+        post api("/projects/#{project.id}/labels/#{non_existing_record_id}/subscribe", user)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -612,7 +612,7 @@ describe API::Labels do
       it "unsubscribes from the label" do
         post api("/projects/#{project.id}/labels/#{label1.title}/unsubscribe", user)
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response["name"]).to eq(label1.title)
         expect(json_response["subscribed"]).to be_falsey
       end
@@ -622,7 +622,7 @@ describe API::Labels do
       it "unsubscribes from the label" do
         post api("/projects/#{project.id}/labels/#{label1.id}/unsubscribe", user)
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response["name"]).to eq(label1.title)
         expect(json_response["subscribed"]).to be_falsey
       end
@@ -636,15 +636,15 @@ describe API::Labels do
       it "returns 304" do
         post api("/projects/#{project.id}/labels/#{label1.id}/unsubscribe", user)
 
-        expect(response).to have_gitlab_http_status(304)
+        expect(response).to have_gitlab_http_status(:not_modified)
       end
     end
 
     context "when label ID is not found" do
       it "returns 404 error" do
-        post api("/projects/#{project.id}/labels/1234/unsubscribe", user)
+        post api("/projects/#{project.id}/labels/#{non_existing_record_id}/unsubscribe", user)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

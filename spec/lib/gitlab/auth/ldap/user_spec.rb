@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::LDAP::User do
+RSpec.describe Gitlab::Auth::Ldap::User do
   include LdapHelpers
 
   let(:ldap_user) { described_class.new(auth_hash) }
@@ -14,9 +14,11 @@ describe Gitlab::Auth::LDAP::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash) do
     OmniAuth::AuthHash.new(uid: 'uid=John Smith,ou=People,dc=example,dc=com', provider: 'ldapmain', info: info)
   end
+
   let(:ldap_user_upper_case) { described_class.new(auth_hash_upper_case) }
   let(:info_upper_case) do
     {
@@ -25,6 +27,7 @@ describe Gitlab::Auth::LDAP::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash_upper_case) do
     OmniAuth::AuthHash.new(uid: 'uid=John Smith,ou=People,dc=example,dc=com', provider: 'ldapmain', info: info_upper_case)
   end
@@ -137,6 +140,18 @@ describe Gitlab::Auth::LDAP::User do
 
         expect(gl_user).to be_persisted
         expect(gl_user).to be_confirmed
+      end
+    end
+
+    context 'when the current minimum password length is different from the default minimum password length' do
+      before do
+        stub_application_setting minimum_password_length: 21
+      end
+
+      it 'creates the user' do
+        ldap_user.save
+
+        expect(gl_user).to be_persisted
       end
     end
   end

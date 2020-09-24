@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Runner do
+RSpec.describe Clusters::Applications::Runner do
   let(:ci_runner) { create(:ci_runner) }
 
   include_examples 'cluster application core specs', :clusters_applications_runner
@@ -174,7 +174,9 @@ describe Clusters::Applications::Runner do
     subject { create(:clusters_applications_runner, :scheduled, runner: ci_runner) }
 
     it 'calls prepare_uninstall' do
-      expect_any_instance_of(described_class).to receive(:prepare_uninstall).and_call_original
+      expect_next_instance_of(described_class) do |instance|
+        expect(instance).to receive(:prepare_uninstall).and_call_original
+      end
 
       subject.make_uninstalling!
     end

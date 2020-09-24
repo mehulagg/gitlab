@@ -6,14 +6,14 @@ module QA
       class License < QA::Resource::Base
         def fabricate!(license)
           QA::Page::Main::Login.perform(&:sign_in_using_admin_credentials)
-          QA::Page::Main::Menu.perform(&:click_admin_area)
+          QA::Page::Main::Menu.perform(&:go_to_admin_area)
           QA::Page::Admin::Menu.perform(&:click_license_menu_link)
 
-          EE::Page::Admin::License.perform do |page| # rubocop:disable QA/AmbiguousPageObjectName
-            page.add_new_license(license) unless page.license?
+          EE::Page::Admin::License.perform do |license_page|
+            license_page.add_new_license(license) unless license_page.license?
           end
 
-          QA::Page::Main::Menu.perform(&:sign_out)
+          QA::Page::Main::Menu.perform(&:sign_out_if_signed_in)
         end
       end
     end

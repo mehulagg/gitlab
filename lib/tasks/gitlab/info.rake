@@ -1,6 +1,6 @@
 namespace :gitlab do
   namespace :env do
-    desc "GitLab | Show information about GitLab and its environment"
+    desc 'GitLab | Env | Show information about GitLab and its environment'
     task info: :gitlab_environment do
       # check if there is an RVM environment
       rvm_version = run_and_match(%w(rvm --version), /[\d\.]+/).try(:to_s)
@@ -82,15 +82,10 @@ namespace :gitlab do
       puts "Using Omniauth:\t#{Gitlab::Auth.omniauth_enabled? ? "yes".color(:green) : "no"}"
       puts "Omniauth Providers: #{omniauth_providers.join(', ')}" if Gitlab::Auth.omniauth_enabled?
 
-      # check Gitolite version
-      gitlab_shell_version_file = "#{Gitlab.config.gitlab_shell.path}/VERSION"
-      if File.readable?(gitlab_shell_version_file)
-        gitlab_shell_version = File.read(gitlab_shell_version_file)
-      end
-
+      # check Gitlab Shell version
       puts ""
       puts "GitLab Shell".color(:yellow)
-      puts "Version:\t#{gitlab_shell_version || "unknown".color(:red)}"
+      puts "Version:\t#{Gitlab::Shell.version || "unknown".color(:red)}"
       puts "Repository storage paths:"
       Gitlab::GitalyClient::StorageSettings.allow_disk_access do
         Gitlab.config.repositories.storages.each do |name, repository_storage|

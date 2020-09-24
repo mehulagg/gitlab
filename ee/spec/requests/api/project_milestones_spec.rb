@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectMilestones do
+RSpec.describe API::ProjectMilestones do
   let(:user) { create(:user) }
   let!(:project) { create(:project, namespace: user.namespace ) }
   let!(:milestone) { create(:milestone, project: project, title: 'version2', description: 'open milestone', start_date: Date.today, due_date: Date.today + 3.days) }
@@ -17,11 +17,15 @@ describe API::ProjectMilestones do
   it 'matches V4 EE-specific response schema for a list of issues' do
     get api(issues_route, user)
 
-    expect(response).to have_gitlab_http_status(200)
+    expect(response).to have_gitlab_http_status(:ok)
     expect(response).to match_response_schema('public_api/v4/issues', dir: 'ee')
   end
 
   it_behaves_like 'group and project milestone burndowns', '/projects/:id/milestones/:milestone_id/burndown_events' do
+    let(:route) { "/projects/#{project.id}/milestones" }
+  end
+
+  it_behaves_like 'group and project milestone burnups', '/projects/:id/milestones/:milestone_id/burnup_events' do
     let(:route) { "/projects/#{project.id}/milestones" }
   end
 end

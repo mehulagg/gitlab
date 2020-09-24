@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Runner
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -17,38 +20,39 @@ First, in your `.gitlab-ci.yml` add:
 
 ```yaml
 services:
-  - postgres:latest
+  - postgres:12.2-alpine
 
 variables:
   POSTGRES_DB: nice_marmot
   POSTGRES_USER: runner
   POSTGRES_PASSWORD: ""
+  POSTGRES_HOST_AUTH_METHOD: trust
 ```
 
 NOTE: **Note:**
-The `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` variables can't be set in
-the GitLab UI. To set them, assign them to a variable
-[in the UI](../variables/README.md#via-the-ui), and then assign that
-variable to the `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` variables in
-your `.gitlab-ci.yml`.
+The `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_HOST_AUTH_METHOD`
+variables can't be set in the GitLab UI. To set them, assign them to a variable
+[in the UI](../variables/README.md#create-a-custom-variable-in-the-ui), and then assign that
+variable to the `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_HOST_AUTH_METHOD`
+variables in your `.gitlab-ci.yml`.
 
 And then configure your application to use the database, for example:
 
 ```yaml
 Host: postgres
 User: runner
-Password:
+Password: ''
 Database: nice_marmot
 ```
 
 If you are wondering why we used `postgres` for the `Host`, read more at
 [How services are linked to the job](../docker/using_docker_images.md#how-services-are-linked-to-the-job).
 
-You can also use any other docker image available on [Docker Hub][hub-pg].
+You can also use any other Docker image available on [Docker Hub](https://hub.docker.com/_/postgres).
 For example, to use PostgreSQL 9.3 the service becomes `postgres:9.3`.
 
 The `postgres` image can accept some environment variables. For more details
-check the documentation on [Docker Hub][hub-pg].
+check the documentation on [Docker Hub](https://hub.docker.com/_/postgres).
 
 ## Use PostgreSQL with the Shell executor
 
@@ -57,13 +61,13 @@ GitLab Runner with the Shell executor.
 
 First install the PostgreSQL server:
 
-```bash
+```shell
 sudo apt-get install -y postgresql postgresql-client libpq-dev
 ```
 
 The next step is to create a user, so login to PostgreSQL:
 
-```bash
+```shell
 sudo -u postgres psql -d template1
 ```
 
@@ -72,7 +76,7 @@ application. Change `$password` in the command below to a real strong password.
 
 *__Note:__ Do not type `template1=#`, this is part of the PostgreSQL prompt.*
 
-```bash
+```shell
 template1=# CREATE USER runner WITH PASSWORD '$password' CREATEDB;
 ```
 
@@ -83,20 +87,20 @@ testing framework you have tools that drop and create databases.*
 
 Create the database and grant all privileges on it for the user `runner`:
 
-```bash
+```shell
 template1=# CREATE DATABASE nice_marmot OWNER runner;
 ```
 
 If all went well you can now quit the database session:
 
-```bash
+```shell
 template1=# \q
 ```
 
 Now, try to connect to the newly created database with the user `runner` to
 check that everything is in place.
 
-```bash
+```shell
 psql -U runner -h localhost -d nice_marmot -W
 ```
 
@@ -114,12 +118,9 @@ Database: nice_marmot
 
 ## Example project
 
-We have set up an [Example PostgreSQL Project][postgres-example-repo] for your
+We have set up an [Example PostgreSQL Project](https://gitlab.com/gitlab-examples/postgres) for your
 convenience that runs on [GitLab.com](https://gitlab.com) using our publicly
 available [shared runners](../runners/README.md).
 
-Want to hack on it? Simply fork it, commit and push  your changes. Within a few
+Want to hack on it? Simply fork it, commit and push your changes. Within a few
 moments the changes will be picked by a public runner and the job will begin.
-
-[hub-pg]: https://hub.docker.com/_/postgres
-[postgres-example-repo]: https://gitlab.com/gitlab-examples/postgres

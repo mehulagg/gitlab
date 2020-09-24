@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Emails::CreateService do
+RSpec.describe Emails::CreateService do
   let(:user) { create(:user) }
   let(:opts) { { email: 'new@email.com', user: user } }
 
@@ -16,7 +16,7 @@ describe Emails::CreateService do
 
     it 'creates an email with additional attributes' do
       expect { service.execute(confirmation_token: 'abc') }.to change { Email.count }.by(1)
-      expect(Email.where(opts).first.confirmation_token).to eq 'abc'
+      expect(Email.find_by(opts).confirmation_token).to eq 'abc'
     end
 
     it 'has the right user association' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicLinks::DestroyService do
+RSpec.describe EpicLinks::DestroyService do
   describe '#execute' do
     let(:group) { create(:group) }
     let(:user) { create(:user) }
@@ -46,6 +46,10 @@ describe EpicLinks::DestroyService do
     end
 
     context 'when epics feature is disabled' do
+      before do
+        stub_licensed_features(epics: false)
+      end
+
       subject { remove_epic_relation(child_epic) }
 
       include_examples 'returns not found error'

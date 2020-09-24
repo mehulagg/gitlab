@@ -1,13 +1,16 @@
 <script>
-import { GlPopover, GlSkeletonLoading } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+/* eslint-disable vue/no-v-html */
+import { GlPopover, GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlIcon } from '@gitlab/ui';
 import UserAvatarImage from '../user_avatar/user_avatar_image.vue';
 import { glEmojiTag } from '../../../emoji';
 
+const MAX_SKELETON_LINES = 4;
+
 export default {
   name: 'UserPopover',
+  maxSkeletonLines: MAX_SKELETON_LINES,
   components: {
-    Icon,
+    GlIcon,
     GlPopover,
     GlSkeletonLoading,
     UserAvatarImage,
@@ -22,82 +25,71 @@ export default {
       required: true,
       default: null,
     },
-    loaded: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     statusHtml() {
+      if (!this.user.status) {
+        return '';
+      }
+
       if (this.user.status.emoji && this.user.status.message_html) {
         return `${glEmojiTag(this.user.status.emoji)} ${this.user.status.message_html}`;
       } else if (this.user.status.message_html) {
         return this.user.status.message_html;
       }
+
       return '';
     },
-    nameIsLoading() {
-      return !this.user.name;
-    },
-    jobInfoIsLoading() {
-      return !this.user.loaded && this.user.organization === null;
-    },
-    locationIsLoading() {
-      return !this.user.loaded && this.user.location === null;
+    userIsLoading() {
+      return !this.user?.loaded;
     },
   },
 };
 </script>
 
 <template>
-  <gl-popover :target="target" boundary="viewport" placement="top" offset="0, 1" show>
-    <div class="user-popover d-flex">
-      <div class="p-1 flex-shrink-1">
-        <user-avatar-image :img-src="user.avatarUrl" :size="60" css-classes="mr-2" />
+  <!-- 200ms delay so not every mouseover triggers Popover -->
+  <gl-popover :target="target" :delay="200" boundary="viewport" triggers="hover" placement="top">
+    <div class="gl-p-3 gl-line-height-normal gl-display-flex" data-testid="user-popover">
+      <div class="gl-p-2 flex-shrink-1">
+        <user-avatar-image :img-src="user.avatarUrl" :size="60" css-classes="gl-mr-3!" />
       </div>
-      <div class="p-1 w-100">
-        <h5 class="m-0">
-          {{ user.name }}
+      <div class="gl-p-2 gl-w-full">
+        <template v-if="userIsLoading">
+          <!-- `gl-skeleton-loading` does not support equal length lines -->
+          <!-- This can be migrated to `gl-skeleton-loader` when https://gitlab.com/gitlab-org/gitlab-ui/-/issues/872 is completed -->
           <gl-skeleton-loading
-            v-if="nameIsLoading"
+            v-for="n in $options.maxSkeletonLines"
+            :key="n"
             :lines="1"
-            class="animation-container-small mb-1"
+            class="animation-container-small gl-mb-2"
           />
-        </h5>
-        <div class="text-secondary mb-2">
-          <span v-if="user.username">@{{ user.username }}</span>
-          <gl-skeleton-loading v-else :lines="1" class="animation-container-small mb-1" />
-        </div>
-        <div class="text-secondary">
-          <div v-if="user.bio" class="js-bio d-flex mb-1">
-            <icon name="profile" class="category-icon flex-shrink-0" />
-            <span class="ml-1">{{ user.bio }}</span>
+        </template>
+        <template v-else>
+          <div class="gl-mb-3">
+            <h5 class="gl-m-0">
+              {{ user.name }}
+            </h5>
+            <span class="gl-text-gray-500">@{{ user.username }}</span>
           </div>
-          <div v-if="user.organization" class="js-organization d-flex mb-1">
-            <icon v-show="!jobInfoIsLoading" name="work" class="category-icon flex-shrink-0" />
-            <span class="ml-1">{{ user.organization }}</span>
+          <div class="gl-text-gray-500">
+            <div v-if="user.bio" class="gl-display-flex gl-mb-2">
+              <gl-icon name="profile" class="gl-text-gray-400 gl-flex-shrink-0" />
+              <span ref="bio" class="gl-ml-2" v-html="user.bioHtml"></span>
+            </div>
+            <div v-if="user.workInformation" class="gl-display-flex gl-mb-2">
+              <gl-icon name="work" class="gl-text-gray-400 gl-flex-shrink-0" />
+              <span ref="workInformation" class="gl-ml-2">{{ user.workInformation }}</span>
+            </div>
           </div>
-          <gl-skeleton-loading
-            v-if="jobInfoIsLoading"
-            :lines="1"
-            class="animation-container-small mb-1"
-          />
-        </div>
-        <div class="js-location text-secondary d-flex">
-          <icon
-            v-show="!locationIsLoading && user.location"
-            name="location"
-            class="category-icon flex-shrink-0"
-          />
-          <span v-if="user.location" class="ml-1">{{ user.location }}</span>
-          <gl-skeleton-loading
-            v-if="locationIsLoading"
-            :lines="1"
-            class="animation-container-small mb-1"
-          />
-        </div>
-        <div v-if="user.status" class="mt-2"><span v-html="statusHtml"></span></div>
+          <div v-if="user.location" class="js-location gl-text-gray-500 gl-display-flex">
+            <gl-icon name="location" class="gl-text-gray-400 flex-shrink-0" />
+            <span class="gl-ml-2">{{ user.location }}</span>
+          </div>
+          <div v-if="statusHtml" class="js-user-status gl-mt-3">
+            <span v-html="statusHtml"></span>
+          </div>
+        </template>
       </div>
     </div>
   </gl-popover>

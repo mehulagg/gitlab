@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::UpdateService, services: true do
+RSpec.describe Boards::UpdateService, services: true do
   describe '#execute' do
     let(:project) { create(:project, group: group) }
     let(:group) { create(:group) }
@@ -34,28 +34,24 @@ describe Boards::UpdateService, services: true do
       milestone = create(:milestone, group: group)
       label = create(:group_label, group: board.group)
       user = create(:user)
+      params = { milestone_id: milestone.id, assignee_id: assignee.id, label_ids: [label.id], hide_backlog_list: true, hide_closed_list: true }
+      service = described_class.new(group, user, params)
 
-      service = described_class.new(group, user,
-                                    milestone_id: milestone.id,
-                                    assignee_id: assignee.id,
-                                    label_ids: [label.id])
       service.execute(board)
 
-      expect(board.reload).to have_attributes(milestone: milestone,
-                                              assignee: assignee,
-                                              labels: [label])
+      expected_attributes = { milestone: milestone, assignee: assignee, labels: [label], hide_backlog_list: true, hide_closed_list: true }
+      expect(board.reload).to have_attributes(expected_attributes)
     end
 
     it 'filters unpermitted params when scoped issue board is not enabled' do
       stub_licensed_features(scoped_issue_board: false)
-      params = { milestone_id: double, assignee_id: double, label_ids: double, weight: double }
+      params = { milestone_id: double, assignee_id: double, label_ids: double, weight: double, hide_backlog_list: true, hide_closed_list: true }
 
       service = described_class.new(project, double, params)
       service.execute(board)
 
-      expect(board.reload).to have_attributes(milestone: nil,
-                                              assignee: nil,
-                                              labels: [])
+      expected_attributes = { milestone: nil, assignee: nil, labels: [], hide_backlog_list: false, hide_closed_list: false }
+      expect(board.reload).to have_attributes(expected_attributes)
     end
 
     it_behaves_like 'setting a milestone scope' do
@@ -66,7 +62,7 @@ describe Boards::UpdateService, services: true do
       end
     end
 
-    context '#set_labels' do
+    describe '#set_labels' do
       def expect_label_assigned(user, board, input_labels, expected_labels)
         service = described_class.new(board.resource_parent, user, labels: input_labels.join(','))
         service.execute(board)

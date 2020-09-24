@@ -1,0 +1,5 @@
+%p
+  = _('Iteration changed to')
+  %strong= link_to(@iteration.name, @iteration_url)
+  - if date_range = timebox_date_range(@iteration)
+    = "(#{date_range})"

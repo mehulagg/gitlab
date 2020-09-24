@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::API::Entities::GeoNodeStatus do
+RSpec.describe EE::API::Entities::GeoNodeStatus do
   include ::EE::GeoHelpers
 
   let(:geo_node_status) { build(:geo_node_status) }

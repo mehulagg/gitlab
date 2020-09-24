@@ -1,8 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
 import { GlButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-
 import DropdownHeader from 'ee/vue_shared/components/sidebar/epics_select/dropdown_header.vue';
 
 describe('EpicsSelect', () => {
@@ -34,13 +32,7 @@ describe('EpicsSelect', () => {
         expect(buttonEl.classes()).toEqual(
           expect.arrayContaining(['dropdown-title-button', 'dropdown-menu-close']),
         );
-      });
-
-      it('should render close button icon', () => {
-        const iconEl = wrapper.find(GlButton).find(Icon);
-
-        expect(iconEl.exists()).toBe(true);
-        expect(iconEl.attributes('name')).toBe('close');
+        expect(buttonEl.props('icon')).toBe('close');
       });
     });
   });

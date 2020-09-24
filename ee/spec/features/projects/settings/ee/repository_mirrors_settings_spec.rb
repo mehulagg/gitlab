@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project settings > [EE] repository' do
+RSpec.describe 'Project settings > [EE] repository' do
   include Select2Helper
 
   let(:user) { create(:user) }
@@ -23,7 +23,7 @@ describe 'Project settings > [EE] repository' do
         expect(page).to have_selector('#url')
         expect(page).to have_selector('#mirror_direction')
         expect(page).to have_no_selector('#project_mirror', visible: false)
-        expect(page).to have_no_selector('#project_mirror_user_id', visible: false)
+        expect(page).to have_no_selector('#mirror_user_id_select', visible: false)
         expect(page).to have_no_selector('#project_mirror_overwrites_diverged_branches')
         expect(page).to have_no_selector('#project_mirror_trigger_builds')
         expect(page).to have_no_selector('#project_pull_mirror_branch_prefix')
@@ -43,7 +43,7 @@ describe 'Project settings > [EE] repository' do
         expect(page).to have_selector('#url')
         expect(page).to have_selector('#mirror_direction')
         expect(page).to have_selector('#project_mirror', visible: false)
-        expect(page).to have_selector('#project_mirror_user_id', visible: false)
+        expect(page).to have_selector('#mirror_user_id_select', visible: false)
         expect(page).to have_selector('#project_mirror_overwrites_diverged_branches')
         expect(page).to have_selector('#project_mirror_trigger_builds')
         expect(page).to have_selector('#project_pull_mirror_branch_prefix')

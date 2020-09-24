@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
-shared_examples_for "chat service" do |service_name|
+RSpec.shared_examples "chat service" do |service_name|
   describe "Associations" do
     it { is_expected.to belong_to :project }
     it { is_expected.to have_one :service_hook }
@@ -80,7 +78,7 @@ shared_examples_for "chat service" do |service_name|
 
       it_behaves_like "triggered #{service_name} service"
 
-      it "specifies the webhook when it is configured" do
+      it "specifies the webhook when it is configured", if: defined?(client) do
         expect(client).to receive(:new).with(client_arguments).and_return(double(:chat_service).as_null_object)
 
         subject.execute(sample_data)
@@ -200,7 +198,8 @@ shared_examples_for "chat service" do |service_name|
           message: "user created page: Awesome wiki_page"
         }
       end
-      let(:wiki_page) { create(:wiki_page, wiki: project.wiki, attrs: opts) }
+
+      let(:wiki_page) { create(:wiki_page, wiki: project.wiki, **opts) }
       let(:sample_data) { Gitlab::DataBuilder::WikiPage.build(wiki_page, user, "create") }
 
       it_behaves_like "triggered #{service_name} service"
@@ -252,6 +251,7 @@ shared_examples_for "chat service" do |service_name|
                project: project, status: status,
                sha: project.commit.sha, ref: project.default_branch)
       end
+
       let(:sample_data) { Gitlab::DataBuilder::Pipeline.build(pipeline) }
 
       context "with failed pipeline" do

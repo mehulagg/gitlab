@@ -1,11 +1,12 @@
 <script>
-import { createNamespacedHelpers, mapState, mapActions } from 'vuex';
-import { sprintf, s__ } from '~/locale';
-import _ from 'underscore';
+/* eslint-disable vue/no-v-html */
+import { createNamespacedHelpers, mapState, mapActions, mapGetters } from 'vuex';
+import { escape } from 'lodash';
 import { GlFormInput, GlFormCheckbox } from '@gitlab/ui';
-import ClusterFormDropdown from './cluster_form_dropdown.vue';
-import RegionDropdown from './region_dropdown.vue';
+import { sprintf, s__ } from '~/locale';
+import ClusterFormDropdown from '~/create_cluster/components/cluster_form_dropdown.vue';
 import { KUBERNETES_VERSIONS } from '../constants';
+import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 const { mapState: mapRolesState, mapActions: mapRolesActions } = createNamespacedHelpers('roles');
 const { mapState: mapRegionsState, mapActions: mapRegionsActions } = createNamespacedHelpers(
@@ -22,13 +23,14 @@ const {
   mapState: mapSecurityGroupsState,
   mapActions: mapSecurityGroupsActions,
 } = createNamespacedHelpers('securityGroups');
+const { mapState: mapInstanceTypesState } = createNamespacedHelpers('instanceTypes');
 
 export default {
   components: {
     ClusterFormDropdown,
-    RegionDropdown,
     GlFormInput,
     GlFormCheckbox,
+    LoadingButton,
   },
   props: {
     gitlabManagedClusterHelpPath: {
@@ -36,6 +38,10 @@ export default {
       required: true,
     },
     kubernetesIntegrationHelpPath: {
+      type: String,
+      required: true,
+    },
+    externalLinkIcon: {
       type: String,
       required: true,
     },
@@ -51,8 +57,12 @@ export default {
       'selectedSubnet',
       'selectedRole',
       'selectedSecurityGroup',
+      'selectedInstanceType',
+      'nodeCount',
       'gitlabManagedCluster',
+      'isCreatingCluster',
     ]),
+    ...mapGetters(['subnetValid']),
     ...mapRolesState({
       roles: 'items',
       isLoadingRoles: 'isLoadingItems',
@@ -83,6 +93,11 @@ export default {
       isLoadingSecurityGroups: 'isLoadingItems',
       loadingSecurityGroupsError: 'loadingItemsError',
     }),
+    ...mapInstanceTypesState({
+      instanceTypes: 'items',
+      isLoadingInstanceTypes: 'isLoadingItems',
+      loadingInstanceTypesError: 'loadingItemsError',
+    }),
     kubernetesVersions() {
       return KUBERNETES_VERSIONS;
     },
@@ -98,8 +113,32 @@ export default {
     securityGroupDropdownDisabled() {
       return !this.selectedVpc;
     },
+    createClusterButtonDisabled() {
+      return (
+        !this.clusterName ||
+        !this.environmentScope ||
+        !this.kubernetesVersion ||
+        !this.selectedRegion ||
+        !this.selectedKeyPair ||
+        !this.selectedVpc ||
+        !this.subnetValid ||
+        !this.selectedRole ||
+        !this.selectedSecurityGroup ||
+        !this.selectedInstanceType ||
+        !this.nodeCount ||
+        this.isCreatingCluster
+      );
+    },
+    displaySubnetError() {
+      return Boolean(this.loadingSubnetsError) || this.selectedSubnet?.length === 1;
+    },
+    createClusterButtonLabel() {
+      return this.isCreatingCluster
+        ? s__('ClusterIntegration|Creating Kubernetes cluster')
+        : s__('ClusterIntegration|Create Kubernetes cluster');
+    },
     kubernetesIntegrationHelpText() {
-      const escapedUrl = _.escape(this.kubernetesIntegrationHelpPath);
+      const escapedUrl = escape(this.kubernetesIntegrationHelpPath);
 
       return sprintf(
         s__(
@@ -115,11 +154,26 @@ export default {
     roleDropdownHelpText() {
       return sprintf(
         s__(
-          'ClusterIntegration|Select the IAM Role to allow Amazon EKS and the Kubernetes control plane to manage AWS resources on your behalf. To use a new role name, first create one on %{startLink}Amazon Web Services%{endLink}.',
+          'ClusterIntegration|Your service role is distinct from the provision role used when authenticating. It will allow Amazon EKS and the Kubernetes control plane to manage AWS resources on your behalf. To use a new role, first create one on %{startLink}Amazon Web Services %{externalLinkIcon} %{endLink}.',
         ),
         {
           startLink:
-            '<a href="https://console.aws.amazon.com/iam/home?#roles" target="_blank" rel="noopener noreferrer">',
+            '<a href="https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html#create-service-role" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
+          endLink: '</a>',
+        },
+        false,
+      );
+    },
+    regionsDropdownHelpText() {
+      return sprintf(
+        s__(
+          'ClusterIntegration|Learn more about %{startLink}Regions %{externalLinkIcon}%{endLink}.',
+        ),
+        {
+          startLink:
+            '<a href="https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
           endLink: '</a>',
         },
         false,
@@ -128,11 +182,12 @@ export default {
     keyPairDropdownHelpText() {
       return sprintf(
         s__(
-          'ClusterIntegration|Select the key pair name that will be used to create EC2 nodes. To use a new key pair name, first create one on %{startLink}Amazon Web Services%{endLink}.',
+          'ClusterIntegration|Select the key pair name that will be used to create EC2 nodes. To use a new key pair name, first create one on %{startLink}Amazon Web Services %{externalLinkIcon} %{endLink}.',
         ),
         {
           startLink:
             '<a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
           endLink: '</a>',
         },
         false,
@@ -141,11 +196,12 @@ export default {
     vpcDropdownHelpText() {
       return sprintf(
         s__(
-          'ClusterIntegration|Select a VPC to use for your EKS Cluster resources. To use a new VPC, first create one on %{startLink}Amazon Web Services%{endLink}.',
+          'ClusterIntegration|Select a VPC to use for your EKS Cluster resources. To use a new VPC, first create one on %{startLink}Amazon Web Services %{externalLinkIcon} %{endLink}.',
         ),
         {
           startLink:
-            '<a href="https://console.aws.amazon.com/vpc/home?#vpc" target="_blank" rel="noopener noreferrer">',
+            '<a href="https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html#vpc-create" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
           endLink: '</a>',
         },
         false,
@@ -154,31 +210,54 @@ export default {
     subnetDropdownHelpText() {
       return sprintf(
         s__(
-          'ClusterIntegration|Choose the %{startLink}subnets%{endLink} in your VPC where your worker nodes will run.',
+          'ClusterIntegration|Choose the %{startLink}subnets %{externalLinkIcon} %{endLink} in your VPC where your worker nodes will run.',
         ),
         {
           startLink:
             '<a href="https://console.aws.amazon.com/vpc/home?#subnets" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
           endLink: '</a>',
         },
         false,
       );
     },
+    subnetValidationErrorText() {
+      if (this.loadingSubnetsError) {
+        return s__('ClusterIntegration|Could not load subnets for the selected VPC');
+      }
+
+      return s__('ClusterIntegration|You should select at least two subnets');
+    },
     securityGroupDropdownHelpText() {
       return sprintf(
         s__(
-          'ClusterIntegration|Choose the %{startLink}security groups%{endLink} to apply to the EKS-managed Elastic Network Interfaces that are created in your worker node subnets.',
+          'ClusterIntegration|Choose the %{startLink}security group %{externalLinkIcon} %{endLink} to apply to the EKS-managed Elastic Network Interfaces that are created in your worker node subnets.',
         ),
         {
           startLink:
             '<a href="https://console.aws.amazon.com/vpc/home?#securityGroups" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
+          endLink: '</a>',
+        },
+        false,
+      );
+    },
+    instanceTypesDropdownHelpText() {
+      return sprintf(
+        s__(
+          'ClusterIntegration|Choose the worker node %{startLink}instance type %{externalLinkIcon} %{endLink}.',
+        ),
+        {
+          startLink:
+            '<a href="https://aws.amazon.com/ec2/instance-types" target="_blank" rel="noopener noreferrer">',
+          externalLinkIcon: this.externalLinkIcon,
           endLink: '</a>',
         },
         false,
       );
     },
     gitlabManagedHelpText() {
-      const escapedUrl = _.escape(this.gitlabManagedClusterHelpPath);
+      const escapedUrl = escape(this.gitlabManagedClusterHelpPath);
 
       return sprintf(
         s__(
@@ -198,6 +277,7 @@ export default {
   },
   methods: {
     ...mapActions([
+      'createCluster',
       'setClusterName',
       'setEnvironmentScope',
       'setKubernetesVersion',
@@ -207,6 +287,8 @@ export default {
       'setRole',
       'setKeyPair',
       'setSecurityGroup',
+      'setInstanceType',
+      'setNodeCount',
       'setGitlabManagedCluster',
     ]),
     ...mapRegionsActions({ fetchRegions: 'fetchItems' }),
@@ -217,23 +299,29 @@ export default {
     ...mapSecurityGroupsActions({ fetchSecurityGroups: 'fetchItems' }),
     setRegionAndFetchVpcsAndKeyPairs(region) {
       this.setRegion({ region });
+      this.setVpc({ vpc: null });
+      this.setKeyPair({ keyPair: null });
+      this.setSubnet({ subnet: [] });
+      this.setSecurityGroup({ securityGroup: null });
       this.fetchVpcs({ region });
       this.fetchKeyPairs({ region });
     },
     setVpcAndFetchSubnets(vpc) {
       this.setVpc({ vpc });
-      this.fetchSubnets({ vpc });
-      this.fetchSecurityGroups({ vpc });
+      this.setSubnet({ subnet: [] });
+      this.setSecurityGroup({ securityGroup: null });
+      this.fetchSubnets({ vpc, region: this.selectedRegion });
+      this.fetchSecurityGroups({ vpc, region: this.selectedRegion });
     },
   },
 };
 </script>
 <template>
   <form name="eks-cluster-configuration-form">
-    <h2>
+    <h4>
       {{ s__('ClusterIntegration|Enter the details for your Amazon EKS Kubernetes cluster') }}
-    </h2>
-    <p v-html="kubernetesIntegrationHelpText"></p>
+    </h4>
+    <div class="mb-3" v-html="kubernetesIntegrationHelpText"></div>
     <div class="form-group">
       <label class="label-bold" for="eks-cluster-name">{{
         s__('ClusterIntegration|Kubernetes cluster name')
@@ -266,18 +354,17 @@ export default {
         :empty-text="s__('ClusterIntegration|Kubernetes version not found')"
         @input="setKubernetesVersion({ kubernetesVersion: $event })"
       />
-      <p class="form-text text-muted" v-html="roleDropdownHelpText"></p>
     </div>
     <div class="form-group">
-      <label class="label-bold" for="eks-role">{{ s__('ClusterIntegration|Role name') }}</label>
+      <label class="label-bold" for="eks-role">{{ s__('ClusterIntegration|Service role') }}</label>
       <cluster-form-dropdown
         field-id="eks-role"
         field-name="eks-role"
-        :input="selectedRole"
+        :value="selectedRole"
         :items="roles"
         :loading="isLoadingRoles"
         :loading-text="s__('ClusterIntegration|Loading IAM Roles')"
-        :placeholder="s__('ClusterIntergation|Select role name')"
+        :placeholder="s__('ClusterIntergation|Select service role')"
         :search-field-placeholder="s__('ClusterIntegration|Search IAM Roles')"
         :empty-text="s__('ClusterIntegration|No IAM Roles found')"
         :has-errors="Boolean(loadingRolesError)"
@@ -288,13 +375,21 @@ export default {
     </div>
     <div class="form-group">
       <label class="label-bold" for="eks-role">{{ s__('ClusterIntegration|Region') }}</label>
-      <region-dropdown
+      <cluster-form-dropdown
+        field-id="eks-region"
+        field-name="eks-region"
         :value="selectedRegion"
-        :regions="regions"
-        :error="loadingRegionsError"
+        :items="regions"
         :loading="isLoadingRegions"
+        :loading-text="s__('ClusterIntegration|Loading Regions')"
+        :placeholder="s__('ClusterIntergation|Select a region')"
+        :search-field-placeholder="s__('ClusterIntegration|Search regions')"
+        :empty-text="s__('ClusterIntegration|No region found')"
+        :has-errors="Boolean(loadingRegionsError)"
+        :error-message="s__('ClusterIntegration|Could not load regions from your AWS account')"
         @input="setRegionAndFetchVpcsAndKeyPairs($event)"
       />
+      <p class="form-text text-muted" v-html="regionsDropdownHelpText"></p>
     </div>
     <div class="form-group">
       <label class="label-bold" for="eks-key-pair">{{
@@ -303,7 +398,7 @@ export default {
       <cluster-form-dropdown
         field-id="eks-key-pair"
         field-name="eks-key-pair"
-        :input="selectedKeyPair"
+        :value="selectedKeyPair"
         :items="keyPairs"
         :disabled="keyPairDropdownDisabled"
         :disabled-text="s__('ClusterIntegration|Select a region to choose a Key Pair')"
@@ -323,7 +418,7 @@ export default {
       <cluster-form-dropdown
         field-id="eks-vpc"
         field-name="eks-vpc"
-        :input="selectedVpc"
+        :value="selectedVpc"
         :items="vpcs"
         :loading="isLoadingVpcs"
         :disabled="vpcDropdownDisabled"
@@ -339,11 +434,12 @@ export default {
       <p class="form-text text-muted" v-html="vpcDropdownHelpText"></p>
     </div>
     <div class="form-group">
-      <label class="label-bold" for="eks-role">{{ s__('ClusterIntegration|Subnet') }}</label>
+      <label class="label-bold" for="eks-role">{{ s__('ClusterIntegration|Subnets') }}</label>
       <cluster-form-dropdown
         field-id="eks-subnet"
         field-name="eks-subnet"
-        :input="selectedSubnet"
+        multiple
+        :value="selectedSubnet"
         :items="subnets"
         :loading="isLoadingSubnets"
         :disabled="subnetDropdownDisabled"
@@ -352,20 +448,20 @@ export default {
         :placeholder="s__('ClusterIntergation|Select a subnet')"
         :search-field-placeholder="s__('ClusterIntegration|Search subnets')"
         :empty-text="s__('ClusterIntegration|No subnet found')"
-        :has-errors="Boolean(loadingSubnetsError)"
-        :error-message="s__('ClusterIntegration|Could not load subnets for the selected VPC')"
+        :has-errors="displaySubnetError"
+        :error-message="subnetValidationErrorText"
         @input="setSubnet({ subnet: $event })"
       />
       <p class="form-text text-muted" v-html="subnetDropdownHelpText"></p>
     </div>
     <div class="form-group">
       <label class="label-bold" for="eks-security-group">{{
-        s__('ClusterIntegration|Security groups')
+        s__('ClusterIntegration|Security group')
       }}</label>
       <cluster-form-dropdown
         field-id="eks-security-group"
         field-name="eks-security-group"
-        :input="selectedSecurityGroup"
+        :value="selectedSecurityGroup"
         :items="securityGroups"
         :loading="isLoadingSecurityGroups"
         :disabled="securityGroupDropdownDisabled"
@@ -383,12 +479,54 @@ export default {
       <p class="form-text text-muted" v-html="securityGroupDropdownHelpText"></p>
     </div>
     <div class="form-group">
+      <label class="label-bold" for="eks-instance-type">{{
+        s__('ClusterIntegration|Instance type')
+      }}</label>
+      <cluster-form-dropdown
+        field-id="eks-instance-type"
+        field-name="eks-instance-type"
+        :value="selectedInstanceType"
+        :items="instanceTypes"
+        :loading="isLoadingInstanceTypes"
+        :loading-text="s__('ClusterIntegration|Loading instance types')"
+        :placeholder="s__('ClusterIntergation|Select an instance type')"
+        :search-field-placeholder="s__('ClusterIntegration|Search instance types')"
+        :empty-text="s__('ClusterIntegration|No instance type found')"
+        :has-errors="Boolean(loadingInstanceTypesError)"
+        :error-message="s__('ClusterIntegration|Could not load instance types')"
+        @input="setInstanceType({ instanceType: $event })"
+      />
+      <p class="form-text text-muted" v-html="instanceTypesDropdownHelpText"></p>
+    </div>
+    <div class="form-group">
+      <label class="label-bold" for="eks-node-count">{{
+        s__('ClusterIntegration|Number of nodes')
+      }}</label>
+      <gl-form-input
+        id="eks-node-count"
+        type="number"
+        min="1"
+        step="1"
+        :value="nodeCount"
+        @input="setNodeCount({ nodeCount: $event })"
+      />
+    </div>
+    <div class="form-group">
       <gl-form-checkbox
         :checked="gitlabManagedCluster"
         @input="setGitlabManagedCluster({ gitlabManagedCluster: $event })"
         >{{ s__('ClusterIntegration|GitLab-managed cluster') }}</gl-form-checkbox
       >
       <p class="form-text text-muted" v-html="gitlabManagedHelpText"></p>
+    </div>
+    <div class="form-group">
+      <loading-button
+        class="js-create-cluster btn-success"
+        :disabled="createClusterButtonDisabled"
+        :loading="isCreatingCluster"
+        :label="createClusterButtonLabel"
+        @click="createCluster()"
+      />
     </div>
   </form>
 </template>

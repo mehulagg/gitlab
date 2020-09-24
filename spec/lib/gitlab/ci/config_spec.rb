@@ -2,14 +2,15 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config do
+RSpec.describe Gitlab::Ci::Config do
   include StubRequests
 
-  set(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
 
   before do
-    allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-      .to receive(:check_execution_time!)
+    allow_next_instance_of(Gitlab::Ci::Config::External::Context) do |instance|
+      allow(instance).to receive(:check_execution_time!)
+    end
   end
 
   let(:config) do
@@ -19,7 +20,7 @@ describe Gitlab::Ci::Config do
   context 'when config is valid' do
     let(:yml) do
       <<-EOS
-        image: ruby:2.2
+        image: ruby:2.7
 
         rspec:
           script:
@@ -31,7 +32,7 @@ describe Gitlab::Ci::Config do
     describe '#to_hash' do
       it 'returns hash created from string' do
         hash = {
-          image: 'ruby:2.2',
+          image: 'ruby:2.7',
           rspec: {
             script: ['gem install rspec',
                      'rspec']
@@ -78,33 +79,13 @@ describe Gitlab::Ci::Config do
 
         it { is_expected.to eq %w[.pre stage1 stage2 .post] }
       end
-
-      context 'with feature disabled' do
-        before do
-          stub_feature_flags(ci_pre_post_pipeline_stages: false)
-        end
-
-        let(:yml) do
-          <<-EOS
-            stages:
-              - stage1
-              - stage2
-            job1:
-              stage: stage1
-              script:
-                - ls
-          EOS
-        end
-
-        it { is_expected.to eq %w[stage1 stage2] }
-      end
     end
   end
 
   context 'when using extendable hash' do
     let(:yml) do
       <<-EOS
-        image: ruby:2.2
+        image: ruby:2.7
 
         rspec:
           script: rspec
@@ -117,7 +98,7 @@ describe Gitlab::Ci::Config do
 
     it 'correctly extends the hash' do
       hash = {
-        image: 'ruby:2.2',
+        image: 'ruby:2.7',
         rspec: { script: 'rspec' },
         test: {
           extends: 'rspec',
@@ -156,7 +137,7 @@ describe Gitlab::Ci::Config do
 
       describe '.new' do
         it 'raises error' do
-          expect(Gitlab::Sentry).to receive(:track_exception)
+          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
 
           expect { config }.to raise_error(
             described_class::ConfigError,
@@ -207,7 +188,7 @@ describe Gitlab::Ci::Config do
         let(:yml) do
           <<-EOS
             image:
-              name: ruby:2.2
+              name: ruby:2.7
               ports:
                 - 80
           EOS
@@ -221,12 +202,12 @@ describe Gitlab::Ci::Config do
       context 'in the job image' do
         let(:yml) do
           <<-EOS
-            image: ruby:2.2
+            image: ruby:2.7
 
             test:
               script: rspec
               image:
-                name: ruby:2.2
+                name: ruby:2.7
                 ports:
                   - 80
           EOS
@@ -240,11 +221,11 @@ describe Gitlab::Ci::Config do
       context 'in the services' do
         let(:yml) do
           <<-EOS
-            image: ruby:2.2
+            image: ruby:2.7
 
             test:
               script: rspec
-              image: ruby:2.2
+              image: ruby:2.7
               services:
                 - name: test
                   alias: test
@@ -285,7 +266,7 @@ describe Gitlab::Ci::Config do
         - #{local_location}
         - #{remote_location}
 
-      image: ruby:2.2
+      image: ruby:2.7
       HEREDOC
     end
 
@@ -315,7 +296,7 @@ describe Gitlab::Ci::Config do
         }
         composed_hash = {
           before_script: before_script_values,
-          image: "ruby:2.2",
+          image: "ruby:2.7",
           rspec: { script: ["bundle exec rspec"] },
           variables: variables
         }
@@ -331,7 +312,7 @@ describe Gitlab::Ci::Config do
         HEREDOC
       end
 
-      it 'raises error YamlProcessor validationError' do
+      it 'raises ConfigError' do
         expect { config }.to raise_error(
           described_class::ConfigError,
           "Included file `invalid` does not have YAML extension!"
@@ -348,7 +329,7 @@ describe Gitlab::Ci::Config do
         HEREDOC
       end
 
-      it 'raises error YamlProcessor validationError' do
+      it 'raises ConfigError' do
         expect { config }.to raise_error(
           described_class::ConfigError,
           'Include `{"remote":"http://url","local":"/local/file.yml"}` needs to match exactly one accessor!'
@@ -358,44 +339,20 @@ describe Gitlab::Ci::Config do
 
     context "when it takes too long to evaluate includes" do
       before do
-        allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-          .to receive(:check_execution_time!)
-          .and_call_original
-
-        allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-          .to receive(:set_deadline)
-          .with(described_class::TIMEOUT_SECONDS)
-          .and_call_original
-
-        allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-          .to receive(:execution_expired?)
-          .and_return(true)
+        allow_next_instance_of(Gitlab::Ci::Config::External::Context) do |instance|
+          allow(instance).to receive(:check_execution_time!).and_call_original
+          allow(instance).to receive(:set_deadline).with(described_class::TIMEOUT_SECONDS).and_call_original
+          allow(instance).to receive(:execution_expired?).and_return(true)
+        end
       end
 
       it 'raises error TimeoutError' do
-        expect(Gitlab::Sentry).to receive(:track_exception)
+        expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
 
         expect { config }.to raise_error(
           described_class::ConfigError,
           'Resolving config took longer than expected'
         )
-      end
-    end
-
-    context 'when context expansion timeout is disabled' do
-      before do
-        allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-          .to receive(:check_execution_time!)
-          .and_call_original
-
-        allow(Feature)
-          .to receive(:enabled?)
-          .with(:ci_limit_yaml_expansion, project, default_enabled: true)
-          .and_return(false)
-      end
-
-      it 'does not raises errors' do
-        expect { config }.not_to raise_error
       end
     end
 
@@ -424,7 +381,7 @@ describe Gitlab::Ci::Config do
         include:
           - #{remote_location}
 
-        image: ruby:2.2
+        image: ruby:2.7
         HEREDOC
       end
 
@@ -435,7 +392,7 @@ describe Gitlab::Ci::Config do
       end
 
       it 'takes precedence' do
-        expect(config.to_hash).to eq({ image: 'ruby:2.2' })
+        expect(config.to_hash).to eq({ image: 'ruby:2.7' })
       end
     end
 
@@ -545,6 +502,77 @@ describe Gitlab::Ci::Config do
             }
           })
         end
+      end
+    end
+
+    context 'when including file from artifact' do
+      let(:config) do
+        described_class.new(
+          gitlab_ci_yml,
+          project: nil,
+          sha: nil,
+          user: nil,
+          parent_pipeline: parent_pipeline)
+      end
+
+      let(:gitlab_ci_yml) do
+        <<~HEREDOC
+        include:
+          - artifact: generated.yml
+            job: rspec
+        HEREDOC
+      end
+
+      let(:parent_pipeline) { nil }
+
+      context 'when used in the context of a child pipeline' do
+        # This job has ci_build_artifacts.zip artifact archive which
+        # contains generated.yml
+        let!(:job) { create(:ci_build, :artifacts, name: 'rspec', pipeline: parent_pipeline) }
+        let(:parent_pipeline) { create(:ci_pipeline) }
+
+        it 'returns valid config' do
+          expect(config).to be_valid
+        end
+
+        context 'when job key is missing' do
+          let(:gitlab_ci_yml) do
+            <<~HEREDOC
+            include:
+              - artifact: generated.yml
+            HEREDOC
+          end
+
+          it 'raises an error' do
+            expect { config }.to raise_error(
+              described_class::ConfigError,
+              'Job must be provided when including configs from artifacts'
+            )
+          end
+        end
+
+        context 'when artifact key is missing' do
+          let(:gitlab_ci_yml) do
+            <<~HEREDOC
+            include:
+              - job: rspec
+            HEREDOC
+          end
+
+          it 'raises an error' do
+            expect { config }.to raise_error(
+              described_class::ConfigError,
+              /needs to match exactly one accessor!/
+            )
+          end
+        end
+      end
+
+      it 'disallows the use in parent pipelines' do
+        expect { config }.to raise_error(
+          described_class::ConfigError,
+          'Including configs from artifacts is only allowed when triggering child pipelines'
+        )
       end
     end
   end

@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 module API
-  class Triggers < Grape::API
+  class Triggers < Grape::API::Instance
     include PaginationParams
+
+    HTTP_GITLAB_EVENT_HEADER = "HTTP_#{WebHookService::GITLAB_EVENT_HEADER}".underscore.upcase
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Trigger a GitLab project pipeline' do
-        success Entities::Pipeline
+        success Entities::Ci::Pipeline
       end
       params do
         requires :ref, type: String, desc: 'The commit sha or name of a branch or tag', allow_blank: false
@@ -18,6 +20,8 @@ module API
       end
       post ":id/(ref/:ref/)trigger/pipeline", requirements: { ref: /.+/ } do
         Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42283')
+
+        forbidden! if gitlab_pipeline_hook_request?
 
         # validate variables
         params[:variables] = params[:variables].to_h
@@ -28,13 +32,13 @@ module API
         project = find_project(params[:id])
         not_found! unless project
 
-        result = Ci::PipelineTriggerService.new(project, nil, params).execute
+        result = ::Ci::PipelineTriggerService.new(project, nil, params).execute
         not_found! unless result
 
         if result[:http_status]
           render_api_error!(result[:message], result[:http_status])
         else
-          present result[:pipeline], with: Entities::Pipeline
+          present result[:pipeline], with: Entities::Ci::Pipeline
         end
       end
 
@@ -105,6 +109,8 @@ module API
         trigger = user_project.triggers.find(params.delete(:trigger_id))
         break not_found!('Trigger') unless trigger
 
+        authorize! :admin_trigger, trigger
+
         if trigger.update(declared_params(include_missing: false))
           present trigger, with: Entities::Trigger, current_user: current_user
         else
@@ -126,6 +132,12 @@ module API
         break not_found!('Trigger') unless trigger
 
         destroy_conditionally!(trigger)
+      end
+    end
+
+    helpers do
+      def gitlab_pipeline_hook_request?
+        request.get_header(HTTP_GITLAB_EVENT_HEADER) == WebHookService.hook_to_event(:pipeline_hooks)
       end
     end
   end

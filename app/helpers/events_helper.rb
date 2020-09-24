@@ -4,12 +4,14 @@ module EventsHelper
   ICON_NAMES_BY_EVENT_TYPE = {
     'pushed to' => 'commit',
     'pushed new' => 'commit',
+    'updated' => 'commit',
     'created' => 'status_open',
     'opened' => 'status_open',
     'closed' => 'status_closed',
     'accepted' => 'fork',
     'commented on' => 'comment',
     'deleted' => 'remove',
+    'destroyed' => 'remove',
     'imported' => 'import',
     'joined' => 'users'
   }.freeze
@@ -27,7 +29,11 @@ module EventsHelper
 
   def event_action_name(event)
     target =  if event.target_type
-                if event.note?
+                if event.design? || event.design_note?
+                  'design'
+                elsif event.wiki_page?
+                  'wiki page'
+                elsif event.note?
                   event.note_target_type
                 else
                   event.target_type.titleize.downcase
@@ -56,9 +62,26 @@ module EventsHelper
   end
 
   def event_filter_visible(feature_key)
+    return designs_visible? if feature_key == :designs
     return true unless @project
 
     @project.feature_available?(feature_key, current_user)
+  end
+
+  def designs_visible?
+    if @project
+      design_activity_enabled?(@project)
+    elsif @group
+      design_activity_enabled?(@group)
+    elsif @projects
+      @projects.with_namespace.include_project_feature.any? { |p| design_activity_enabled?(p) }
+    else
+      true
+    end
+  end
+
+  def design_activity_enabled?(project)
+    Ability.allowed?(current_user, :read_design_activity, project)
   end
 
   def comments_visible?
@@ -68,10 +91,12 @@ module EventsHelper
   end
 
   def event_preposition(event)
-    if event.push_action? || event.commented_action? || event.target
-      "at"
+    if event.wiki_page?
+      'in the wiki for'
     elsif event.milestone?
-      "in"
+      'in'
+    elsif event.push_action? || event.commented_action? || event.target
+      'at'
     end
   end
 
@@ -89,6 +114,12 @@ module EventsHelper
       words << "at"
     elsif event.milestone?
       words << "##{event.target_iid}" if event.target_iid
+      words << "in"
+    elsif event.design?
+      words << event.design.to_reference
+      words << "in"
+    elsif event.wiki_page?
+      words << event.target_title
       words << "in"
     elsif event.target
       prefix =
@@ -165,18 +196,41 @@ module EventsHelper
       project_issue_url(event.project, id: event.note_target, anchor: dom_id(event.target))
     elsif event.merge_request_note?
       project_merge_request_url(event.project, id: event.note_target, anchor: dom_id(event.target))
+    elsif event.design_note?
+      design_url(event.note_target, anchor: dom_id(event.note))
     else
-      polymorphic_url([event.project.namespace.becomes(Namespace),
-                       event.project, event.note_target],
+      polymorphic_url([event.project, event.note_target],
                         anchor: dom_id(event.target))
     end
+  end
+
+  def event_wiki_title_html(event)
+    capture do
+      concat content_tag(:span, _('wiki page'), class: "event-target-type gl-mr-2")
+      concat link_to(event.target_title, event_wiki_page_target_url(event),
+                     title: event.target_title,
+                     class: 'has-tooltip event-target-link gl-mr-2')
+    end
+  end
+
+  def event_design_title_html(event)
+    capture do
+      concat content_tag(:span, _('design'), class: "event-target-type gl-mr-2")
+      concat link_to(event.design.reference_link_text, design_url(event.design),
+                     title: event.target_title,
+                     class: 'has-tooltip event-design event-target-link gl-mr-2')
+    end
+  end
+
+  def event_wiki_page_target_url(event)
+    project_wiki_url(event.project, event.target&.canonical_slug || Wiki::HOMEPAGE)
   end
 
   def event_note_title_html(event)
     if event.note_target
       capture do
-        concat content_tag(:span, event.note_target_type, class: "event-target-type append-right-4")
-        concat link_to(event.note_target_reference, event_note_target_url(event), title: event.target_title, class: 'has-tooltip event-target-link append-right-4')
+        concat content_tag(:span, event.note_target_type, class: "event-target-type gl-mr-2")
+        concat link_to(event.note_target_reference, event_note_target_url(event), title: event.target_title, class: 'has-tooltip event-target-link gl-mr-2')
       end
     else
       content_tag(:strong, '(deleted)')
@@ -195,6 +249,18 @@ module EventsHelper
     sprite_icon(icon_name, size: size) if icon_name
   end
 
+  DESIGN_ICONS = {
+    'created' => 'upload',
+    'updated' => 'pencil',
+    'destroyed' => ICON_NAMES_BY_EVENT_TYPE['destroyed'],
+    'archived' => 'archive'
+  }.freeze
+
+  def design_event_icon(action, size: 24)
+    icon_name = DESIGN_ICONS[action]
+    sprite_icon(icon_name, size: size) if icon_name
+  end
+
   def icon_for_profile_event(event)
     if current_path?('users#show')
       content_tag :div, class: "system-note-image #{event.action_name.parameterize}-icon" do
@@ -209,7 +275,9 @@ module EventsHelper
 
   def inline_event_icon(event)
     unless current_path?('users#show')
-      content_tag :span, class: "system-note-image-inline d-none d-sm-flex append-right-4 #{event.action_name.parameterize}-icon align-self-center" do
+      content_tag :span, class: "system-note-image-inline d-none d-sm-flex gl-mr-2 #{event.action_name.parameterize}-icon align-self-center" do
+        next design_event_icon(event.action, size: 14) if event.design?
+
         icon_for_event(event.action_name, size: 14)
       end
     end
@@ -221,6 +289,16 @@ module EventsHelper
       concat "&nbsp;".html_safe
       concat content_tag(:span, event.author.to_reference, class: "username")
     end
+  end
+
+  private
+
+  def design_url(design, opts = {})
+    designs_project_issue_url(
+      design.project,
+      design.issue,
+      opts.merge(vueroute: design.filename)
+    )
   end
 end
 

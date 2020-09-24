@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 
 export default {
@@ -27,9 +27,9 @@ export default {
      * @param {String} resetStoreKey Store key for the visible pipeline that will need to be reset
      * @param {Object} pipeline The clicked pipeline
      */
-    clickPipeline(parentPipeline, pipeline, openMethod, closeMethod) {
+    clickPipeline(pipeline, openMethod, closeMethod) {
       if (!pipeline.isExpanded) {
-        this.mediator.store[openMethod](parentPipeline, pipeline);
+        this.mediator.store[openMethod](pipeline);
         this.mediator.store.toggleLoading(pipeline);
         this.mediator.poll.stop();
 
@@ -41,25 +41,18 @@ export default {
         this.mediator.poll.enable({ data: this.mediator.getExpandedParameters() });
       }
     },
-    clickTriggeredByPipeline(parentPipeline, pipeline) {
-      this.clickPipeline(
-        parentPipeline,
-        pipeline,
-        'openTriggeredByPipeline',
-        'closeTriggeredByPipeline',
-      );
+    resetTriggeredPipelines(parentPipeline, pipeline) {
+      this.mediator.store.resetTriggeredPipelines(parentPipeline, pipeline);
     },
-    clickTriggeredPipeline(parentPipeline, pipeline) {
-      this.clickPipeline(
-        parentPipeline,
-        pipeline,
-        'openTriggeredPipeline',
-        'closeTriggeredPipeline',
-      );
+    clickTriggeredByPipeline(pipeline) {
+      this.clickPipeline(pipeline, 'openPipeline', 'closePipeline');
+    },
+    clickTriggeredPipeline(pipeline) {
+      this.clickPipeline(pipeline, 'openPipeline', 'closePipeline');
     },
     requestRefreshPipelineGraph() {
       // When an action is clicked
-      // (wether in the dropdown or in the main nodes, we refresh the big graph)
+      // (whether in the dropdown or in the main nodes, we refresh the big graph)
       this.mediator
         .refreshPipeline()
         .catch(() => flash(__('An error occurred while making the request.')));

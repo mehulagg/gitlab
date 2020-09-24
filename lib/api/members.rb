@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Members < Grape::API
+  class Members < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! }
@@ -18,42 +18,37 @@ module API
         end
         params do
           optional :query, type: String, desc: 'A query string to search for members'
-          optional :user_ids, type: Array[Integer], desc: 'Array of user ids to look up for membership'
+          optional :user_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of user ids to look up for membership'
+          optional :show_seat_info, type: Boolean, desc: 'Show seat information for members'
+          use :optional_filter_params_ee
           use :pagination
         end
-        # rubocop: disable CodeReuse/ActiveRecord
+
         get ":id/members" do
           source = find_source(source_type, params[:id])
 
-          members = source.members.where.not(user_id: nil).includes(:user)
-          members = members.joins(:user).merge(User.search(params[:query])) if params[:query].present?
-          members = members.where(user_id: params[:user_ids]) if params[:user_ids].present?
-          members = paginate(members)
+          members = paginate(retrieve_members(source, params: params))
 
-          present members, with: Entities::Member
+          present_members members
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
         desc 'Gets a list of group or project members viewable by the authenticated user, including those who gained membership through ancestor group.' do
           success Entities::Member
         end
         params do
           optional :query, type: String, desc: 'A query string to search for members'
-          optional :user_ids, type: Array[Integer], desc: 'Array of user ids to look up for membership'
+          optional :user_ids, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of user ids to look up for membership'
+          optional :show_seat_info, type: Boolean, desc: 'Show seat information for members'
           use :pagination
         end
-        # rubocop: disable CodeReuse/ActiveRecord
+
         get ":id/members/all" do
           source = find_source(source_type, params[:id])
 
-          members = find_all_members(source_type, source)
-          members = members.includes(:user).references(:user).merge(User.search(params[:query])) if params[:query].present?
-          members = members.where(user_id: params[:user_ids]) if params[:user_ids].present?
-          members = paginate(members)
+          members = paginate(retrieve_members(source, params: params, deep: true))
 
-          present members, with: Entities::Member
+          present_members members
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
         desc 'Gets a member of a group or project.' do
           success Entities::Member
@@ -68,7 +63,7 @@ module API
           members = source.members
           member = members.find_by!(user_id: params[:user_id])
 
-          present member, with: Entities::Member
+          present_members member
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
@@ -82,10 +77,10 @@ module API
         get ":id/members/all/:user_id" do
           source = find_source(source_type, params[:id])
 
-          members = find_all_members(source_type, source)
+          members = find_all_members(source)
           member = members.find_by!(user_id: params[:user_id])
 
-          present member, with: Entities::Member
+          present_members member
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
@@ -108,12 +103,12 @@ module API
           user = User.find_by_id(params[:user_id])
           not_found!('User') unless user
 
-          member = source.add_user(user, params[:access_level], current_user: current_user, expires_at: params[:expires_at])
+          member = create_member(current_user, user, source, params)
 
           if !member
             not_allowed! # This currently can only be reached in EE
-          elsif member.persisted? && member.valid?
-            present member, with: Entities::Member
+          elsif member.valid? && member.persisted?
+            present_members(member)
           else
             render_validation_error!(member)
           end
@@ -140,7 +135,7 @@ module API
               .execute(member)
 
           if updated_member.valid?
-            present updated_member, with: Entities::Member
+            present_members updated_member
           else
             render_validation_error!(updated_member)
           end
@@ -150,6 +145,8 @@ module API
         desc 'Removes a user from a group or project.'
         params do
           requires :user_id, type: Integer, desc: 'The user ID of the member'
+          optional :unassign_issuables, type: Boolean, default: false,
+                   desc: 'Flag indicating if the removed member should be unassigned from any issues or merge requests within given group or project'
         end
         # rubocop: disable CodeReuse/ActiveRecord
         delete ":id/members/:user_id" do
@@ -157,7 +154,7 @@ module API
           member = source.members.find_by!(user_id: params[:user_id])
 
           destroy_conditionally!(member) do
-            ::Members::DestroyService.new(current_user).execute(member)
+            ::Members::DestroyService.new(current_user).execute(member, unassign_issuables: params[:unassign_issuables])
           end
         end
         # rubocop: enable CodeReuse/ActiveRecord
@@ -165,3 +162,5 @@ module API
     end
   end
 end
+
+API::Members.prepend_if_ee('EE::API::Members')

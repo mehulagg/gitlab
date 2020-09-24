@@ -1,6 +1,6 @@
 .tree-content-holder.js-tree-content{ data: tree_content_data(@logs_path, @project, @path) }
   .table-holder.bordered-box
-    %table.table#tree-slider{ class: "table_#{@hex_path} tree-table qa-file-tree" }
+    %table.table#tree-slider{ class: "table_#{@hex_path} tree-table" }
       %thead
         %tr
           %th= s_('ProjectFileTree|Name')
@@ -10,7 +10,7 @@
       - if @path.present?
         %tr.tree-item
           %td.tree-item-file-name
-            = link_to "..", project_tree_path(@project, up_dir_path), class: 'prepend-left-10'
+            = link_to "..", project_tree_path(@project, up_dir_path), class: 'gl-ml-3'
           %td
           %td.d-none.d-sm-table-cell
 

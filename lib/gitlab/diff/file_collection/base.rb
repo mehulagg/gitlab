@@ -8,7 +8,7 @@ module Gitlab
 
         attr_reader :project, :diff_options, :diff_refs, :fallback_diff_refs, :diffable
 
-        delegate :count, :size, :real_size, to: :diff_files
+        delegate :count, :size, :real_size, to: :raw_diff_files
 
         def self.default_options
           ::Commit.max_diff_options.merge(ignore_whitespace_change: false, expanded: false, include_stats: true)
@@ -31,7 +31,23 @@ module Gitlab
         end
 
         def diff_files
-          @diff_files ||= diffs.decorate! { |diff| decorate_diff!(diff) }
+          raw_diff_files
+        end
+
+        def raw_diff_files
+          @raw_diff_files ||= diffs.decorate! { |diff| decorate_diff!(diff) }
+        end
+
+        def diff_file_paths
+          diff_files.map(&:file_path)
+        end
+
+        def pagination_data
+          {
+            current_page: nil,
+            next_page: nil,
+            total_pages: nil
+          }
         end
 
         # This mutates `diff_files` lines.
@@ -44,12 +60,20 @@ module Gitlab
           end
         end
 
-        def diff_file_with_old_path(old_path)
-          diff_files.find { |diff_file| diff_file.old_path == old_path }
+        def diff_file_with_old_path(old_path, a_mode = nil)
+          if Feature.enabled?(:file_identifier_hash) && a_mode.present?
+            diff_files.find { |diff_file| diff_file.old_path == old_path && diff_file.a_mode == a_mode }
+          else
+            diff_files.find { |diff_file| diff_file.old_path == old_path }
+          end
         end
 
-        def diff_file_with_new_path(new_path)
-          diff_files.find { |diff_file| diff_file.new_path == new_path }
+        def diff_file_with_new_path(new_path, b_mode = nil)
+          if Feature.enabled?(:file_identifier_hash) && b_mode.present?
+            diff_files.find { |diff_file| diff_file.new_path == new_path && diff_file.b_mode == b_mode }
+          else
+            diff_files.find { |diff_file| diff_file.new_path == new_path }
+          end
         end
 
         def clear_cache
@@ -64,13 +88,16 @@ module Gitlab
 
         def diff_stats_collection
           strong_memoize(:diff_stats) do
-            # There are scenarios where we don't need to request Diff Stats,
-            # when caching for instance.
-            next unless @include_stats
-            next unless diff_refs
+            next unless fetch_diff_stats?
 
             @repository.diff_stats(diff_refs.base_sha, diff_refs.head_sha)
           end
+        end
+
+        def fetch_diff_stats?
+          # There are scenarios where we don't need to request Diff Stats,
+          # when caching for instance.
+          @include_stats && diff_refs
         end
 
         def decorate_diff!(diff)

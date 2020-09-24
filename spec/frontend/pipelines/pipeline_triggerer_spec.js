@@ -1,8 +1,15 @@
-import { mount } from '@vue/test-utils';
-import pipelineTriggerer from '~/pipelines/components/pipeline_triggerer.vue';
+import { shallowMount } from '@vue/test-utils';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import pipelineTriggerer from '~/pipelines/components/pipelines_list/pipeline_triggerer.vue';
 
 describe('Pipelines Triggerer', () => {
   let wrapper;
+
+  const expectComponentWithProps = (Component, props = {}) => {
+    const componentWrapper = wrapper.find(Component);
+    expect(componentWrapper.isVisible()).toBe(true);
+    expect(componentWrapper.props()).toEqual(expect.objectContaining(props));
+  };
 
   const mockData = {
     pipeline: {
@@ -15,9 +22,8 @@ describe('Pipelines Triggerer', () => {
   };
 
   const createComponent = () => {
-    wrapper = mount(pipelineTriggerer, {
+    wrapper = shallowMount(pipelineTriggerer, {
       propsData: mockData,
-      sync: false,
     });
   };
 
@@ -30,17 +36,15 @@ describe('Pipelines Triggerer', () => {
   });
 
   it('should render a table cell', () => {
-    expect(wrapper.contains('.table-section')).toBe(true);
+    expect(wrapper.find('.table-section').exists()).toBe(true);
   });
 
-  it('should render triggerer information when triggerer is provided', () => {
-    const link = wrapper.find('.js-pipeline-url-user');
-
-    expect(link.attributes('href')).toEqual(mockData.pipeline.user.path);
-    expect(link.find('.js-user-avatar-image-toolip').text()).toEqual(mockData.pipeline.user.name);
-    expect(link.find('img.avatar').attributes('src')).toEqual(
-      `${mockData.pipeline.user.avatar_url}?width=26`,
-    );
+  it('should pass triggerer information when triggerer is provided', () => {
+    expectComponentWithProps(UserAvatarLink, {
+      linkHref: mockData.pipeline.user.path,
+      tooltipText: mockData.pipeline.user.name,
+      imgSrc: mockData.pipeline.user.avatar_url,
+    });
   });
 
   it('should render "API" when no triggerer is provided', () => {
@@ -50,7 +54,7 @@ describe('Pipelines Triggerer', () => {
       },
     });
 
-    wrapper.vm.$nextTick(() => {
+    return wrapper.vm.$nextTick(() => {
       expect(wrapper.find('.js-pipeline-url-api').text()).toEqual('API');
     });
   });

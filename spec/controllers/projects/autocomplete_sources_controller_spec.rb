@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::AutocompleteSourcesController do
+RSpec.describe Projects::AutocompleteSourcesController do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, namespace: group) }
   let_it_be(:issue) { create(:issue, project: project) }
@@ -65,7 +65,7 @@ describe Projects::AutocompleteSourcesController do
 
         get :milestones, format: :json, params: { namespace_id: group.path, project_id: project.path }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

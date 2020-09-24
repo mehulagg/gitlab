@@ -28,7 +28,7 @@ In Google's side:
    - **Authorized redirect URIs** - Enter your domain name followed by the
      callback URIs one at a time:
 
-     ```
+     ```plaintext
      https://gitlab.example.com/users/auth/google_oauth2/callback
      https://gitlab.example.com/-/google_api/auth/callback
      ```
@@ -54,13 +54,13 @@ On your GitLab server:
 
    For Omnibus GitLab:
 
-   ```sh
+   ```shell
    sudo editor /etc/gitlab/gitlab.rb
    ```
 
    For installations from source:
 
-   ```sh
+   ```shell
    cd /home/git/gitlab
    sudo -u git -H editor config/gitlab.yml
    ```
@@ -108,13 +108,10 @@ On your GitLab server:
    ```
 
 1. Save the configuration file.
-1. [Reconfigure][] or [restart GitLab][] for the changes to take effect if you
+1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect if you
    installed GitLab via Omnibus or from source respectively.
 
 On the sign in page there should now be a Google icon below the regular sign in
 form. Click the icon to begin the authentication process. Google will ask the
 user to sign in and authorize the GitLab application. If everything goes well
 the user will be returned to GitLab and will be signed in.
-
-[reconfigure]: ../administration/restart_gitlab.md#omnibus-gitlab-reconfigure
-[restart GitLab]: ../administration/restart_gitlab.md#installations-from-source

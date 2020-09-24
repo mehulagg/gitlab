@@ -1,7 +1,8 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapActions, mapState } from 'vuex';
+import { escape } from 'lodash';
 import { sprintf, n__, s__ } from '~/locale';
-import _ from 'underscore';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 export default {
@@ -33,7 +34,7 @@ export default {
           'ApprovalRuleRemove|You are about to remove the %{name} approver group which has %{nMembers}.',
         ),
         {
-          name: `<strong>${_.escape(this.rule.name)}</strong>`,
+          name: `<strong>${escape(this.rule.name)}</strong>`,
           nMembers: `<strong>${nMembers}</strong>`,
         },
         false,

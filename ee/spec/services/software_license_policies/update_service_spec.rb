@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePolicies::UpdateService do
+RSpec.describe SoftwareLicensePolicies::UpdateService do
   let(:project) { create(:project)}
 
   let(:user) do
@@ -11,16 +11,10 @@ describe SoftwareLicensePolicies::UpdateService do
     end
   end
 
-  let(:software_license_policy) do
-    create(
-      :software_license_policy,
-      software_license: create(:software_license, name: 'ExamplePL/2.1'),
-      approval_status: 'blacklisted'
-    )
-  end
+  let(:software_license_policy) { create(:software_license_policy, :denied) }
 
   before do
-    stub_licensed_features(license_management: true)
+    stub_licensed_features(license_scanning: true)
   end
 
   describe '#execute' do
@@ -35,14 +29,14 @@ describe SoftwareLicensePolicies::UpdateService do
 
       context 'with license management unavailable' do
         before do
-          stub_licensed_features(license_management: false)
+          stub_licensed_features(license_scanning: false)
         end
 
         it 'does not update the software license policy' do
           update_software_license_policy(opts)
 
           expect(software_license_policy).to be_valid
-          expect(software_license_policy.approval_status).not_to eq(opts[:approval_status])
+          expect(software_license_policy.classification).not_to eq(opts[:approval_status])
         end
       end
 
@@ -52,7 +46,7 @@ describe SoftwareLicensePolicies::UpdateService do
           update_software_license_policy(opts)
 
           expect(software_license_policy).to be_valid
-          expect(software_license_policy.approval_status).to eq(opts[:approval_status])
+          expect(software_license_policy).to be_allowed
           expect(RefreshLicenseComplianceChecksWorker).to have_received(:perform_async).with(project.id)
         end
       end
@@ -64,7 +58,7 @@ describe SoftwareLicensePolicies::UpdateService do
           update_software_license_policy(opts)
 
           expect(software_license_policy).to be_valid
-          expect(software_license_policy.approval_status).not_to eq(opts[:approval_status])
+          expect(software_license_policy.classification).not_to eq(opts[:classification])
         end
       end
     end

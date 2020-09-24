@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LicenseScanningReportLicenseEntity do
+RSpec.describe LicenseScanningReportLicenseEntity do
   include LicenseScanningReportHelper
 
   let(:user) { build(:user) }
@@ -18,6 +18,10 @@ describe LicenseScanningReportLicenseEntity do
 
   describe '#as_json' do
     subject { entity.as_json }
+
+    it 'emits the correct approval_status' do
+      expect(subject[:classification][:approval_status]).to eq('unclassified')
+    end
 
     it 'contains the correct dependencies' do
       expect(subject[:dependencies].count).to eq(2)

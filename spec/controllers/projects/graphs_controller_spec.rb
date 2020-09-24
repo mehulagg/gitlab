@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GraphsController do
+RSpec.describe Projects::GraphsController do
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
 
@@ -40,6 +40,54 @@ describe Projects::GraphsController do
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:charts)
+      end
+
+      context 'when anonymous users can read build report results' do
+        it 'sets the daily coverage options' do
+          freeze_time do
+            get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+
+            expect(assigns[:daily_coverage_options]).to eq(
+              base_params: {
+                start_date: Date.current - 90.days,
+                end_date: Date.current,
+                ref_path: project.repository.expand_ref('master'),
+                param_type: 'coverage'
+              },
+              download_path: namespace_project_ci_daily_build_group_report_results_path(
+                namespace_id: project.namespace,
+                project_id: project,
+                format: :csv
+              ),
+              graph_api_path: namespace_project_ci_daily_build_group_report_results_path(
+                namespace_id: project.namespace,
+                project_id: project,
+                format: :json
+              )
+            )
+          end
+        end
+      end
+
+      context 'when anonymous users cannot read build report results' do
+        before do
+          project.update_column(:public_builds, false)
+
+          get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+        end
+
+        it 'does not set daily coverage options' do
+          expect(assigns[:daily_coverage_options]).to be_nil
+        end
+      end
+
+      it_behaves_like 'tracking unique visits', :charts do
+        before do
+          sign_in(user)
+        end
+
+        let(:request_params) { { namespace_id: project.namespace.path, project_id: project.path, id: 'master' } }
+        let(:target_id) { 'p_analytics_repo' }
       end
     end
 

@@ -12,15 +12,22 @@ export default function mountProjectSettingsApprovals(el) {
     return null;
   }
 
+  const { vulnerabilityCheckHelpPagePath, licenseCheckHelpPagePath } = el.dataset;
+
   const store = createStore(projectSettingsModule(), {
     ...el.dataset,
     prefix: 'project-settings',
     allowMultiRule: parseBoolean(el.dataset.allowMultiRule),
+    canEdit: parseBoolean(el.dataset.canEdit),
   });
 
   return new Vue({
     el,
     store,
+    provide: {
+      vulnerabilityCheckHelpPagePath,
+      licenseCheckHelpPagePath,
+    },
     render(h) {
       return h(ProjectSettingsApp);
     },

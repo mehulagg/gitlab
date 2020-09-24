@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::EnvironmentsFinder, '#execute' do
+RSpec.describe Clusters::EnvironmentsFinder, '#execute' do
   let(:current_user) { create(:user) }
   let(:last_deployment) { create(:deployment, :success, :on_cluster) }
   let(:cluster) { last_deployment.cluster }

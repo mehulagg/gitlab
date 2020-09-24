@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Files > Template type dropdown selector', :js do
+RSpec.describe 'Projects > Files > Template type dropdown selector', :js do
   let(:project) { create(:project, :repository) }
   let(:user) { project.owner }
 
@@ -40,10 +40,6 @@ describe 'Projects > Files > Template type dropdown selector', :js do
       check_type_selector_display(true)
     end
 
-    it 'is displayed when input matches' do
-      check_type_selector_display(true)
-    end
-
     it 'selects every template type correctly' do
       try_selecting_all_types
     end
@@ -72,6 +68,11 @@ describe 'Projects > Files > Template type dropdown selector', :js do
 
     it 'toggle is set to the correct value' do
       select_template('gitignore', 'Actionscript')
+      check_type_selector_toggle_text('.gitignore')
+    end
+
+    it 'sets the toggle text when selecting the template type' do
+      select_template_type('.gitignore')
       check_type_selector_toggle_text('.gitignore')
     end
 

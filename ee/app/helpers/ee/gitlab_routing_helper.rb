@@ -4,7 +4,6 @@ module EE
   module GitlabRoutingHelper
     include ::ProjectsHelper
     include ::ApplicationSettingsHelper
-    include ::API::Helpers::RelatedResourcesHelpers
 
     def geo_primary_web_url(project_or_wiki)
       File.join(::Gitlab::Geo.primary_node.url, project_or_wiki.full_path)
@@ -36,7 +35,21 @@ module EE
     end
 
     def license_management_settings_path(project)
-      project_settings_ci_cd_path(project, anchor: 'js-license-management')
+      project_licenses_path(project, anchor: 'policies')
+    end
+
+    def vulnerability_path(entity, *args)
+      project_security_vulnerability_path(entity.project, entity, *args)
+    end
+
+    def project_vulnerability_path(project, vulnerability, *args)
+      project_security_vulnerability_path(project, vulnerability, *args)
+    end
+
+    def upgrade_plan_path(group)
+      return profile_billings_path if group.blank?
+
+      group_billings_path(group)
     end
 
     def self.url_helper(route_name)

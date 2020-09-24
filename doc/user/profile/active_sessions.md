@@ -2,10 +2,9 @@
 type: howto
 ---
 
-# Active Sessions
+# Active sessions
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/17867)
->   in GitLab 10.8.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17867) in GitLab 10.8.
 
 GitLab lists all devices that have logged into your account. This allows you to
 review the sessions, and revoke any you don't recognize.
@@ -17,6 +16,23 @@ review the sessions, and revoke any you don't recognize.
 1. Click **Active Sessions** in the sidebar.
 
 ![Active sessions list](img/active_sessions_list.png)
+
+## Active sessions limit
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31611) in GitLab 12.6.
+
+GitLab allows users to have up to 100 active sessions at once. If the number of active sessions
+exceeds 100, the oldest ones are deleted.
+
+## Revoking a session
+
+1. Use the previous steps to navigate to **Active Sessions**.
+1. Click on **Revoke** besides a session. The current session cannot be revoked, as this would sign you out of GitLab.
+
+NOTE: **Note:**
+When any session is revoked all **Remember me** tokens for all
+devices will be revoked. See ['Why do I keep getting signed out?'](index.md#why-do-i-keep-getting-signed-out)
+for more information about the **Remember me** feature.
 
 <!-- ## Troubleshooting
 

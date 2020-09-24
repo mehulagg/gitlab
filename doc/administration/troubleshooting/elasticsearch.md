@@ -1,5 +1,8 @@
 # Troubleshooting Elasticsearch
 
+To install and configure Elasticsearch, and for common and known issues,
+visit the [administrator documentation](../../integration/elasticsearch.md).
+
 Troubleshooting Elasticsearch requires:
 
 - Knowledge of common terms.
@@ -8,7 +11,7 @@ Troubleshooting Elasticsearch requires:
 ## Common terminology
 
 - **Lucene**: A full-text search library written in Java.
-- **Near Realtime (NRT)**: Refers to the slight latency from the time to index a
+- **Near real time (NRT)**: Refers to the slight latency from the time to index a
   document to the time when it becomes searchable.
 - **Cluster**: A collection of one or more nodes that work together to hold all
   the data, providing indexing and search capabilities.
@@ -106,7 +109,7 @@ graph TD;
   D2 --> |Yes| D4
   D4 --> |No| D5
   D4 --> |Yes| D6
-  D{Is the error concerning<br>the beta indexer?}
+  D{Is the error concerning<br>the Go indexer?}
   D1[It would be best<br>to speak with an<br>Elasticsearch admin.]
   D2{Is the ICU development<br>package installed?}
   D3>This package is required.<br>Install the package<br>and retry.]
@@ -171,7 +174,7 @@ To do this:
    pp s.search_objects.class.name
    ```
 
-The ouput from the last command is the key here. If it shows:
+The output from the last command is the key here. If it shows:
 
 - `ActiveRecord::Relation`, **it is not** using Elasticsearch.
 - `Kaminari::PaginatableArray`, **it is** using Elasticsearch.
@@ -186,7 +189,7 @@ Moving past that, it is best to attempt the same search using the [Elasticsearch
 
 If the results:
 
-- Sync up, then there is not a technical "issue" per se. Instead, it might be a problem
+- Sync up, then there is not a technical "issue." Instead, it might be a problem
   with the Elasticsearch filters we are using. This can be complicated, so it is best to
   escalate to GitLab support to check these and guide you on the potential on whether or
   not a feature request is needed.
@@ -203,8 +206,8 @@ The best place to start is to determine if the issue is with creating an empty i
 If it is, check on the Elasticsearch side to determine if the `gitlab-production` (the
 name for the GitLab index) exists. If it exists, manually delete it on the Elasticsearch
 side and attempt to recreate it from the
-[`create_empty_index`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks)
-rake task.
+[`recreate_index`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks)
+Rake task.
 
 If you still encounter issues, try creating an index manually on the Elasticsearch
 instance. The details of the index aren't important here, as we want to test if indices
@@ -220,7 +223,7 @@ during the indexing of projects. If errors do occur, they will either stem from 
   something you are familiar with, contact GitLab support for guidance.
 - Within the Elasticsearch instance itself. See if the error is [documented and has a fix](../../integration/elasticsearch.md#troubleshooting). If not, speak with your Elasticsearch admin.
 
-If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following rake tasks:
+If the indexing process does not present errors, you will want to check the status of the indexed projects. You can do this via the following Rake tasks:
 
 - [`sudo gitlab-rake gitlab:elastic:index_projects_status`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows the overall status)
 - [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](../../integration/elasticsearch.md#gitlab-elasticsearch-rake-tasks) (shows specific projects that are not indexed)
@@ -245,18 +248,22 @@ much to "integrate" here.
 
 If the issue is:
 
-- Not concerning the beta indexer, it is almost always an
+- With the Go indexer, check if the ICU development package is installed.
+  This is a required package so make sure you install it.
+  Go indexer was a beta indexer which can be optionally turned on/off, but in 12.3 it reached stable status and is now the default.
+- Not concerning the Go indexer, it is almost always an
   Elasticsearch-side issue. This means you should reach out to your Elasticsearch admin
   regarding the error(s) you are seeing. If you are unsure here, it never hurts to reach
   out to GitLab support.
-- With the beta indexer, check if the ICU development package is installed.
-  This is a required package so make sure you install it.
 
 Beyond that, you will want to review the error. If it is:
 
 - Specifically from the indexer, this could be a bug/issue and should be escalated to
   GitLab support.
 - An OS issue, you will want to reach out to your systems administrator.
+- A `Faraday::TimeoutError (execution expired)` error **and** you're using a proxy,
+  [set a custom  `gitlab_rails['env']` environment variable, called `no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
+  with the IP address of your Elasticsearch host.
 
 ### Troubleshooting performance
 
@@ -270,7 +277,7 @@ Generally speaking, ensure:
 - The Elasticsearch server have enough RAM and CPU cores.
 - That sharding **is** being used.
 
-Going into some more detail here, if Elasticsearch is running on the same server as GitLab, resource contention is **very** likely to occur. Ideally, Elasticsearch, which requires ample resources, should be running on its own server (maybe coupled with logstash and kibana).
+Going into some more detail here, if Elasticsearch is running on the same server as GitLab, resource contention is **very** likely to occur. Ideally, Elasticsearch, which requires ample resources, should be running on its own server (maybe coupled with Logstash and Kibana).
 
 When it comes to Elasticsearch, RAM is the key resource. Elasticsearch themselves recommend:
 
@@ -324,21 +331,21 @@ feel free to update that page with issues you encounter and solutions.
 
 ## Replication
 
-Setting up Elasticsearch isn't too bad, but it can be a bit finnicky and time consuming.
+Setting up Elasticsearch isn't too bad, but it can be a bit finicky and time consuming.
 
-The eastiest method is to spin up a docker container with the required version and
+The easiest method is to spin up a Docker container with the required version and
 bind ports 9200/9300 so it can be used.
 
-The following is an example of running a docker container of Elasticsearch v7.2.0:
+The following is an example of running a Docker container of Elasticsearch v7.2.0:
 
-```bash
+```shell
 docker pull docker.elastic.co/elasticsearch/elasticsearch:7.2.0
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.2.0
 ```
 
 From here, you can:
 
-- Grab the IP of the docker container (use `docker inspect <container_id>`)
+- Grab the IP of the Docker container (use `docker inspect <container_id>`)
 - Use `<IP.add.re.ss:9200>` to communicate with it.
 
 This is a quick method to test out Elasticsearch, but by no means is this a

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class HelpController < ApplicationController
-  skip_before_action :authenticate_user!
+  skip_before_action :authenticate_user!, unless: :public_visibility_restricted?
 
   layout 'help'
 
@@ -26,7 +26,7 @@ class HelpController < ApplicationController
 
     respond_to do |format|
       format.any(:markdown, :md, :html) do
-        # Note: We are purposefully NOT using `Rails.root.join`
+        # Note: We are purposefully NOT using `Rails.root.join` because of https://gitlab.com/gitlab-org/gitlab/-/issues/216028.
         path = File.join(Rails.root, 'doc', "#{@path}.md")
 
         if File.exist?(path)
@@ -36,13 +36,13 @@ class HelpController < ApplicationController
           render 'show.html.haml'
         else
           # Force template to Haml
-          render 'errors/not_found.html.haml', layout: 'errors', status: 404
+          render 'errors/not_found.html.haml', layout: 'errors', status: :not_found
         end
       end
 
       # Allow access to specific media files in the doc folder
       format.any(:png, :gif, :jpeg, :mp4, :mp3) do
-        # Note: We are purposefully NOT using `Rails.root.join`
+        # Note: We are purposefully NOT using `Rails.root.join` because of https://gitlab.com/gitlab-org/gitlab/-/issues/216028.
         path = File.join(Rails.root, 'doc', "#{@path}.#{params[:format]}")
 
         if File.exist?(path)

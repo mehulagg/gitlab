@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::GitDeduplicationService do
+RSpec.describe Projects::GitDeduplicationService do
   include ExclusiveLeaseHelpers
 
   let(:pool) { create(:pool_repository, :ready) }
@@ -58,6 +58,65 @@ describe Projects::GitDeduplicationService do
 
             service.execute
           end
+
+          context 'when visibility level of the project' do
+            before do
+              allow(pool.source_project).to receive(:repository_access_level).and_return(ProjectFeature::ENABLED)
+            end
+
+            context 'is private' do
+              it 'does not call fetch' do
+                allow(pool.source_project).to receive(:visibility_level).and_return(Gitlab::VisibilityLevel::PRIVATE)
+                expect(pool.object_pool).not_to receive(:fetch)
+
+                service.execute
+              end
+            end
+
+            context 'is public' do
+              it 'calls fetch' do
+                allow(pool.source_project).to receive(:visibility_level).and_return(Gitlab::VisibilityLevel::PUBLIC)
+                expect(pool.object_pool).to receive(:fetch)
+
+                service.execute
+              end
+            end
+
+            context 'is internal' do
+              it 'calls fetch' do
+                allow(pool.source_project).to receive(:visibility_level).and_return(Gitlab::VisibilityLevel::INTERNAL)
+                expect(pool.object_pool).to receive(:fetch)
+
+                service.execute
+              end
+            end
+          end
+
+          context 'when the repository access level' do
+            before do
+              allow(pool.source_project).to receive(:visibility_level).and_return(Gitlab::VisibilityLevel::PUBLIC)
+            end
+
+            context 'is private' do
+              it 'does not call fetch' do
+                allow(pool.source_project).to receive(:repository_access_level).and_return(ProjectFeature::PRIVATE)
+
+                expect(pool.object_pool).not_to receive(:fetch)
+
+                service.execute
+              end
+            end
+
+            context 'is greater than private' do
+              it 'calls fetch' do
+                allow(pool.source_project).to receive(:repository_access_level).and_return(ProjectFeature::PUBLIC)
+
+                expect(pool.object_pool).to receive(:fetch)
+
+                service.execute
+              end
+            end
+          end
         end
 
         it 'links the repository to the object pool' do
@@ -80,7 +139,7 @@ describe Projects::GitDeduplicationService do
         end
 
         it 'fails when a lease is already out' do
-          expect(service).to receive(:log_error).with('Cannot obtain an exclusive lease. There must be another instance already in execution.')
+          expect(service).to receive(:log_error).with("Cannot obtain an exclusive lease for #{service.class.name}. There must be another instance already in execution.")
 
           service.execute
         end

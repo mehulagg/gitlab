@@ -9,7 +9,7 @@ class DiffNote < Note
   include Gitlab::Utils::StrongMemoize
 
   def self.noteable_types
-    %w(MergeRequest Commit)
+    %w(MergeRequest Commit DesignManagement::Design)
   end
 
   validates :original_position, presence: true
@@ -21,8 +21,14 @@ class DiffNote < Note
   validate :positions_complete
   validate :verify_supported
 
-  before_validation :set_line_code, if: :on_text?
-  after_save :keep_around_commits
+  before_validation :set_line_code, if: :on_text?, unless: :importing?
+  after_save :keep_around_commits, unless: :importing?
+
+  NoteDiffFileCreationError = Class.new(StandardError)
+
+  DIFF_LINE_NOT_FOUND_MESSAGE = "Failed to find diff line for: %{file_path}, old_line: %{old_line}, new_line: %{new_line}"
+  DIFF_FILE_NOT_FOUND_MESSAGE = "Failed to find diff file"
+
   after_commit :create_diff_file, on: :create
 
   def discussion_class(*)
@@ -33,7 +39,16 @@ class DiffNote < Note
     return unless should_create_diff_file?
 
     diff_file = fetch_diff_file
+    raise NoteDiffFileCreationError, DIFF_FILE_NOT_FOUND_MESSAGE unless diff_file
+
     diff_line = diff_file.line_for_position(self.original_position)
+    unless diff_line
+      raise NoteDiffFileCreationError, DIFF_LINE_NOT_FOUND_MESSAGE % {
+          file_path: diff_file.file_path,
+          old_line: original_position.old_line,
+          new_line: original_position.new_line
+      }
+    end
 
     creation_params = diff_file.diff.to_hash
       .except(:too_large)
@@ -45,6 +60,8 @@ class DiffNote < Note
   # Returns the diff file from `position`
   def latest_diff_file
     strong_memoize(:latest_diff_file) do
+      next if for_design?
+
       position.diff_file(repository)
     end
   end
@@ -52,6 +69,8 @@ class DiffNote < Note
   # Returns the diff file from `original_position`
   def diff_file
     strong_memoize(:diff_file) do
+      next if for_design?
+
       enqueue_diff_file_creation_job if should_create_diff_file?
 
       fetch_diff_file
@@ -88,10 +107,6 @@ class DiffNote < Note
     line&.suggestible?
   end
 
-  def discussion_first_note?
-    self == discussion.first_note
-  end
-
   def banzai_render_context(field)
     super.merge(suggestions_filter_enabled: true)
   end
@@ -108,32 +123,33 @@ class DiffNote < Note
   end
 
   def should_create_diff_file?
-    on_text? && note_diff_file.nil? && discussion_first_note?
+    on_text? && note_diff_file.nil? && start_of_discussion?
   end
 
   def fetch_diff_file
     return note_diff_file.raw_diff_file if note_diff_file
 
-    file =
-      if created_at_diff?(noteable.diff_refs)
-        # We're able to use the already persisted diffs (Postgres) if we're
-        # presenting a "current version" of the MR discussion diff.
-        # So no need to make an extra Gitaly diff request for it.
-        # As an extra benefit, the returned `diff_file` already
-        # has `highlighted_diff_lines` data set from Redis on
-        # `Diff::FileCollection::MergeRequestDiff`.
-        noteable.diffs(original_position.diff_options).diff_files.first
-      else
-        original_position.diff_file(repository)
-      end
+    if created_at_diff?(noteable.diff_refs)
+      # We're able to use the already persisted diffs (Postgres) if we're
+      # presenting a "current version" of the MR discussion diff.
+      # So no need to make an extra Gitaly diff request for it.
+      # As an extra benefit, the returned `diff_file` already
+      # has `highlighted_diff_lines` data set from Redis on
+      # `Diff::FileCollection::MergeRequestDiff`.
+      file = original_position.find_diff_file_from(noteable)
+      # if line is not found in persisted diffs, fallback and retrieve file from repository using gitaly
+      # This is required because of https://gitlab.com/gitlab-org/gitlab/issues/42676
+      file = nil if file&.line_for_position(original_position).nil? && importing?
+    end
 
+    file ||= original_position.diff_file(repository)
     file&.unfold_diff_lines(position)
 
     file
   end
 
   def supported?
-    for_commit? || self.noteable.has_complete_diff_refs?
+    for_commit? || for_design? || self.noteable.has_complete_diff_refs?
   end
 
   def set_line_code
@@ -149,7 +165,7 @@ class DiffNote < Note
   def positions_complete
     return if self.original_position.complete? && self.position.complete?
 
-    errors.add(:position, "is invalid")
+    errors.add(:position, "is incomplete")
   end
 
   def keep_around_commits
@@ -172,5 +188,3 @@ class DiffNote < Note
     noteable.respond_to?(:repository) ? noteable.repository : project.repository
   end
 end
-
-DiffNote.prepend_if_ee('::EE::DiffNote')

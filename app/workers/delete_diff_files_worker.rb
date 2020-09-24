@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DeleteDiffFilesWorker
+class DeleteDiffFilesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :source_code_management
@@ -12,11 +12,11 @@ class DeleteDiffFilesWorker
     return if merge_request_diff.without_files?
 
     MergeRequestDiff.transaction do
-      merge_request_diff.clean!
-
       MergeRequestDiffFile
         .where(merge_request_diff_id: merge_request_diff.id)
         .delete_all
+
+      merge_request_diff.clean!
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord

@@ -2,6 +2,7 @@
 
 module Geo
   class RepositoryUpdatedEvent < ApplicationRecord
+    extend ::Gitlab::Utils::Override
     include Geo::Model
     include Geo::Eventable
 
@@ -23,6 +24,15 @@ module Geo
 
     def self.source_for(repository)
       REPOSITORY_TYPE_MAP[repository.repo_type]
+    end
+
+    override :consumer_klass_name
+    def consumer_klass_name
+      if design?
+        ::Gitlab::Geo::LogCursor::Events::DesignRepositoryUpdatedEvent.name.demodulize
+      else
+        super
+      end
     end
   end
 end

@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :ci_bridge, class: Ci::Bridge do
+  factory :ci_bridge, class: 'Ci::Bridge' do
     name { 'bridge' }
     stage { 'test' }
     stage_idx { 0 }
     ref { 'master' }
     tag { false }
-    created_at { 'Di 29. Okt 09:50:00 CET 2013' }
+    created_at { '2013-10-29 09:50:00 CET' }
     status { :created }
+    scheduling_type { 'stage' }
 
     pipeline factory: :ci_pipeline
 
@@ -37,6 +38,29 @@ FactoryBot.define do
           bridge_needs: { pipeline: evaluator.upstream.full_path }
         )
       end
+    end
+
+    trait :started do
+      started_at { '2013-10-29 09:51:28 CET' }
+    end
+
+    trait :finished do
+      started
+      finished_at { '2013-10-29 09:53:28 CET' }
+    end
+
+    trait :failed do
+      finished
+      status { 'failed' }
+    end
+
+    trait :skipped do
+      started
+      status { 'skipped' }
+    end
+
+    trait :strategy_depend do
+      options { { trigger: { strategy: 'depend' } } }
     end
   end
 end

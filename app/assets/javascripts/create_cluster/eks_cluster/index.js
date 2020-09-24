@@ -14,9 +14,12 @@ export default el => {
     createRoleArnHelpPath,
     externalId,
     accountId,
+    instanceTypes,
     hasCredentials,
     createRolePath,
+    createClusterPath,
     externalLinkIcon,
+    roleArn,
   } = el.dataset;
 
   return new Vue({
@@ -26,7 +29,10 @@ export default el => {
         hasCredentials: parseBoolean(hasCredentials),
         externalId,
         accountId,
+        instanceTypes: JSON.parse(instanceTypes),
         createRolePath,
+        createClusterPath,
+        roleArn,
       },
     }),
     components: {

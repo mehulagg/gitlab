@@ -1,17 +1,27 @@
 <script>
-import { mapActions } from 'vuex';
-import { GlButton, GlSkeletonLoading } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { mapActions, mapState } from 'vuex';
+import {
+  GlDeprecatedButton,
+  GlFormCheckbox,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSprintf,
+  GlIcon,
+} from '@gitlab/ui';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import convertReportType from 'ee/vue_shared/security_reports/store/utils/convert_report_type';
+import getPrimaryIdentifier from 'ee/vue_shared/security_reports/store/utils/get_primary_identifier';
 import VulnerabilityActionButtons from './vulnerability_action_buttons.vue';
 import VulnerabilityIssueLink from './vulnerability_issue_link.vue';
+import { DASHBOARD_TYPES } from '../store/constants';
 
 export default {
   name: 'SecurityDashboardTableRow',
   components: {
-    GlButton,
+    GlDeprecatedButton,
+    GlFormCheckbox,
     GlSkeletonLoading,
-    Icon,
+    GlSprintf,
+    GlIcon,
     SeverityBadge,
     VulnerabilityActionButtons,
     VulnerabilityIssueLink,
@@ -29,15 +39,20 @@ export default {
     },
   },
   computed: {
-    confidence() {
-      return this.vulnerability.confidence || '–';
-    },
+    ...mapState(['dashboardType']),
+    ...mapState('vulnerabilities', ['selectedVulnerabilities']),
     severity() {
       return this.vulnerability.severity || ' ';
     },
-    projectFullName() {
-      const { project } = this.vulnerability;
-      return project && project.full_name;
+    vulnerabilityIdentifier() {
+      return getPrimaryIdentifier(this.vulnerability.identifiers, 'external_type');
+    },
+    vulnerabilityNamespace() {
+      const { project, location } = this.vulnerability;
+      if (this.dashboardType === DASHBOARD_TYPES.GROUP) {
+        return project && project.full_name;
+      }
+      return location && (location.image || location.file || location.path);
     },
     isDismissed() {
       return Boolean(this.vulnerability.dismissal_feedback);
@@ -55,33 +70,73 @@ export default {
       const path = this.vulnerability.create_vulnerability_feedback_issue_path;
       return Boolean(path) && !this.hasIssue;
     },
+    extraIdentifierCount() {
+      const { identifiers } = this.vulnerability;
+      return identifiers?.length - 1;
+    },
+    isSelected() {
+      return Boolean(this.selectedVulnerabilities[this.vulnerability.id]);
+    },
+    shouldShowExtraIdentifierCount() {
+      return this.extraIdentifierCount > 0;
+    },
+    useConvertReportType() {
+      return convertReportType(this.vulnerability.report_type);
+    },
+    vulnerabilityVendor() {
+      return this.vulnerability.scanner?.vendor;
+    },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['openModal']),
+    ...mapActions('vulnerabilities', ['openModal', 'selectVulnerability', 'deselectVulnerability']),
+    toggleVulnerability() {
+      if (this.isSelected) {
+        return this.deselectVulnerability(this.vulnerability);
+      }
+      return this.selectVulnerability(this.vulnerability);
+    },
   },
 };
 </script>
 
 <template>
-  <div class="gl-responsive-table-row vulnerabilities-row p-2" :class="{ dismissed: isDismissed }">
-    <div class="table-section section-10">
+  <div
+    class="gl-responsive-table-row vulnerabilities-row p-2"
+    :class="{ dismissed: isDismissed, 'gl-bg-blue-50': isSelected }"
+  >
+    <div class="table-section section-5">
+      <gl-form-checkbox
+        :checked="isSelected"
+        :inline="true"
+        class="my-0 ml-1 mr-3"
+        @change="toggleVulnerability"
+      />
+    </div>
+
+    <div class="table-section section-15">
       <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Severity') }}</div>
-      <div class="table-mobile-content"><severity-badge :severity="severity" /></div>
+      <div class="table-mobile-content">
+        <severity-badge :severity="severity" class="text-right text-md-left" />
+      </div>
     </div>
 
     <div class="table-section flex-grow-1">
       <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Vulnerability') }}</div>
-      <div class="table-mobile-content vulnerability-info">
+      <div
+        class="table-mobile-content gl-white-space-normal"
+        data-qa-selector="vulnerability_info_content"
+      >
         <gl-skeleton-loading v-if="isLoading" class="mt-2 js-skeleton-loader" :lines="2" />
         <template v-else>
-          <gl-button
-            class="vulnerability-title d-inline"
+          <gl-deprecated-button
+            ref="vulnerability-title"
+            class="d-inline gl-reset-line-height gl-reset-text-align gl-white-space-normal"
             variant="blank"
             @click="openModal({ vulnerability })"
-            >{{ vulnerability.name }}</gl-button
+            >{{ vulnerability.name }}</gl-deprecated-button
           >
           <template v-if="isDismissed">
-            <icon
+            <gl-icon
               v-show="vulnerability.dismissal_feedback.comment_details"
               name="comment"
               class="text-warning vertical-align-middle"
@@ -97,16 +152,39 @@ export default {
             :project-name="vulnerability.project.name"
           />
           <br />
-          <span v-if="projectFullName" class="vulnerability-namespace">
-            {{ projectFullName }}
-          </span>
+          <small v-if="vulnerabilityNamespace" class="gl-text-gray-500 gl-word-break-all">
+            {{ vulnerabilityNamespace }}
+          </small>
         </template>
       </div>
     </div>
 
-    <div class="table-section section-10 ml-md-2">
-      <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Confidence') }}</div>
-      <div class="table-mobile-content text-capitalize">{{ confidence }}</div>
+    <div class="table-section gl-white-space-normal section-15">
+      <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Identifier') }}</div>
+      <div class="table-mobile-content">
+        <div class="gl-text-overflow-ellipsis gl-overflow-hidden" :title="vulnerabilityIdentifier">
+          {{ vulnerabilityIdentifier }}
+        </div>
+        <div v-if="shouldShowExtraIdentifierCount" class="gl-text-gray-300">
+          <gl-sprintf :message="__('+ %{count} more')">
+            <template #count>
+              {{ extraIdentifierCount }}
+            </template>
+          </gl-sprintf>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-section section-15">
+      <div class="table-mobile-header" role="rowheader">{{ s__('Reports|Scanner') }}</div>
+      <div class="table-mobile-content">
+        <div class="text-capitalize">
+          {{ useConvertReportType }}
+        </div>
+        <div v-if="vulnerabilityVendor" class="gl-text-gray-300" data-testid="vulnerability-vendor">
+          {{ vulnerabilityVendor }}
+        </div>
+      </div>
     </div>
 
     <div class="table-section section-20">
@@ -123,47 +201,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style scoped>
-@media (min-width: 768px) {
-  .vulnerabilities-row:last-child {
-    border-bottom: 1px solid transparent;
-  }
-
-  .vulnerabilities-row:hover,
-  .vulnerabilities-row:focus {
-    background: #f6fafd;
-    border-bottom: 1px solid #c1daf4;
-    border-top: 1px solid #c1daf4;
-    margin-top: -1px;
-  }
-
-  .vulnerabilities-row .action-buttons {
-    opacity: 0;
-  }
-
-  .vulnerabilities-row:hover .action-buttons,
-  .vulnerabilities-row:focus-within .action-buttons {
-    opacity: 1;
-  }
-}
-
-.vulnerability-info {
-  white-space: normal;
-}
-
-.vulnerability-title {
-  text-align: inherit;
-  white-space: normal;
-  line-height: inherit;
-}
-
-.vulnerability-namespace {
-  color: #707070;
-  font-size: 0.8em;
-}
-
-.dismissed .table-mobile-content:not(.action-buttons) {
-  opacity: 0.5;
-}
-</style>

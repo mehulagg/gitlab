@@ -2,6 +2,7 @@
 
 require_relative '../qa'
 require 'rspec/retry'
+require 'rspec-parameterized'
 
 if ENV['CI'] && QA::Runtime::Env.knapsack? && !ENV['NO_KNAPSACK']
   require 'knapsack'
@@ -12,15 +13,15 @@ QA::Runtime::Browser.configure!
 
 QA::Runtime::Scenario.from_env(QA::Runtime::Env.runtime_scenario_attributes) if QA::Runtime::Env.runtime_scenario_attributes
 
-%w[helpers shared_examples].each do |d|
-  Dir[::File.join(__dir__, d, '**', '*.rb')].each { |f| require f }
-end
+Dir[::File.join(__dir__, "support/helpers/*.rb")].sort.each { |f| require f }
+Dir[::File.join(__dir__, "support/shared_contexts/*.rb")].sort.each { |f| require f }
+Dir[::File.join(__dir__, "support/shared_examples/*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
   QA::Specs::Helpers::Quarantine.configure_rspec
 
   config.before do |example|
-    QA::Runtime::Logger.debug("Starting test: #{example.full_description}") if QA::Runtime::Env.debug?
+    QA::Runtime::Logger.debug("\nStarting test: #{example.full_description}\n")
   end
 
   config.after(:context) do
@@ -62,9 +63,10 @@ RSpec.configure do |config|
   # show exception that triggers a retry if verbose_retry is set to true
   config.display_try_failure_messages = true
 
-  if ENV['CI']
+  if ENV['CI'] && !QA::Runtime::Env.disable_rspec_retry?
+    non_quarantine_retries = QA::Runtime::Env.ci_project_name =~ /staging|canary|production/ ? 3 : 2
     config.around do |example|
-      retry_times = example.metadata.key?(:quarantine) ? 1 : 2
+      retry_times = example.metadata.key?(:quarantine) ? 1 : non_quarantine_retries
       example.run_with_retry retry: retry_times
     end
   end

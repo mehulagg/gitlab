@@ -9,9 +9,7 @@ module Gitlab
       #
       class JobArtifactRetriever < BaseRetriever
         def execute
-          unless job_artifact.present?
-            return error('Job artifact not found')
-          end
+          return error('Job artifact not found') unless job_artifact.present?
 
           unless job_artifact.file.present? && job_artifact.file.exists?
             log_error("Could not upload job artifact because it does not have a file", id: job_artifact.id)

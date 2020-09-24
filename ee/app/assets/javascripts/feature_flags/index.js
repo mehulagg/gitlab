@@ -13,19 +13,28 @@ export default () =>
         dataset: document.querySelector(this.$options.el).dataset,
       };
     },
+    provide() {
+      return {
+        projectName: this.dataset.projectName,
+        featureFlagsHelpPagePath: this.dataset.featureFlagsHelpPagePath,
+        errorStateSvgPath: this.dataset.errorStateSvgPath,
+      };
+    },
     render(createElement) {
       return createElement('feature-flags-component', {
         props: {
           endpoint: this.dataset.endpoint,
-          errorStateSvgPath: this.dataset.errorStateSvgPath,
-          featureFlagsHelpPagePath: this.dataset.featureFlagsHelpPagePath,
-          featureFlagsAnchoredHelpPagePath: this.dataset.featureFlagsAnchoredHelpPagePath,
+          projectId: this.dataset.projectId,
+          featureFlagsClientLibrariesHelpPagePath: this.dataset
+            .featureFlagsClientLibrariesHelpPagePath,
+          featureFlagsClientExampleHelpPagePath: this.dataset.featureFlagsClientExampleHelpPagePath,
           unleashApiUrl: this.dataset.unleashApiUrl,
           unleashApiInstanceId: this.dataset.unleashApiInstanceId || '',
           csrfToken: csrf.token,
           canUserConfigure: this.dataset.canUserAdminFeatureFlag,
           newFeatureFlagPath: this.dataset.newFeatureFlagPath,
           rotateInstanceIdPath: this.dataset.rotateInstanceIdPath,
+          newUserListPath: this.dataset.newUserListPath,
         },
       });
     },

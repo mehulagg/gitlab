@@ -1,5 +1,5 @@
-import _ from 'underscore';
-import '~/gl_dropdown';
+import { escape } from 'lodash';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class CreateItemDropdown {
   /**
@@ -28,7 +28,7 @@ export default class CreateItemDropdown {
   }
 
   buildDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.getData.bind(this),
       filterable: true,
       filterRemote: this.getDataRemote,
@@ -37,14 +37,14 @@ export default class CreateItemDropdown {
       },
       selectable: true,
       toggleLabel(selected) {
-        return selected && 'id' in selected ? _.escape(selected.title) : this.defaultToggleLabel;
+        return selected && 'id' in selected ? escape(selected.title) : this.defaultToggleLabel;
       },
       fieldName: this.fieldName,
       text(item) {
-        return _.escape(item.text);
+        return escape(item.text);
       },
       id(item) {
-        return _.escape(item.id);
+        return escape(item.id);
       },
       onFilter: this.toggleCreateNewButton.bind(this),
       clicked: options => {
@@ -67,12 +67,12 @@ export default class CreateItemDropdown {
     e.preventDefault();
 
     this.refreshData();
-    this.$dropdown.data('glDropdown').selectRowAtIndex();
+    this.$dropdown.data('deprecatedJQueryDropdown').selectRowAtIndex();
   }
 
   refreshData() {
     // Refresh the dropdown's data, which ends up calling `getData`
-    this.$dropdown.data('glDropdown').remote.execute();
+    this.$dropdown.data('deprecatedJQueryDropdown').remote.execute();
   }
 
   getData(term, callback) {

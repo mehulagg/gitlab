@@ -1,4 +1,4 @@
-- page_title "Merge Conflicts", "#{@merge_request.title} (#{@merge_request.to_reference}", "Merge Requests"
+- page_title _("Merge Conflicts"), "#{@merge_request.title} (#{@merge_request.to_reference}", _("Merge Requests")
 - content_for :page_specific_javascripts do
   = page_specific_javascript_tag('lib/ace.js')
 = render "projects/merge_requests/mr_title"
@@ -6,12 +6,12 @@
 .merge-request-details.issuable-details
   = render "projects/merge_requests/mr_box"
 
-= render 'shared/issuable/sidebar', issuable_sidebar: @issuable_sidebar, assignees: @merge_request.assignees
+= render 'shared/issuable/sidebar', issuable_sidebar: @issuable_sidebar, assignees: @merge_request.assignees, source_branch: @merge_request.source_branch
 
 #conflicts{ "v-cloak" => "true", data: { conflicts_path: conflicts_project_merge_request_path(@merge_request.project, @merge_request, format: :json),
     resolve_conflicts_path: resolve_conflicts_project_merge_request_path(@merge_request.project, @merge_request) } }
   .loading{ "v-if" => "isLoading" }
-    %i.fa.fa-spinner.fa-spin
+    .spinner.spinner-md
 
   .nothing-here-block{ "v-if" => "hasError" }
     {{conflictsData.errorMessage}}

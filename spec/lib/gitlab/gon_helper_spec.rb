@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GonHelper do
+RSpec.describe Gitlab::GonHelper do
   let(:helper) do
     Class.new do
       include Gitlab::GonHelper
@@ -10,23 +10,25 @@ describe Gitlab::GonHelper do
   end
 
   describe '#push_frontend_feature_flag' do
+    before do
+      skip_feature_flags_yaml_validation
+    end
+
     it 'pushes a feature flag to the frontend' do
       gon = instance_double('gon')
+      thing = stub_feature_flag_gate('thing')
+
+      stub_feature_flags(my_feature_flag: thing)
 
       allow(helper)
         .to receive(:gon)
         .and_return(gon)
 
-      expect(Feature)
-        .to receive(:enabled?)
-        .with(:my_feature_flag, 10)
-        .and_return(true)
-
       expect(gon)
         .to receive(:push)
         .with({ features: { 'myFeatureFlag' => true } }, true)
 
-      helper.push_frontend_feature_flag(:my_feature_flag, 10)
+      helper.push_frontend_feature_flag(:my_feature_flag, thing)
     end
   end
 

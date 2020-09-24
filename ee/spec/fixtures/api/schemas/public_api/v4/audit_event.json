@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "required" : [
+    "id",
+    "created_at",
+    "author_id",
+    "entity_id",
+    "entity_type",
+    "details"
+  ],
+  "properties" : {
+    "id": { "type": "integer" },
+    "created_at": { "type": ["string", "null"] },
+    "author_id": { "type": "integer" },
+    "entity_id": { "type": "integer" },
+    "entity_type": { "type": "string" },
+    "details": {
+      "type": "object",
+      "required": ["author_name", "entity_path", "target_details", "target_id", "target_type"],
+      "properties" : {
+        "author_name": { "type": "string" },
+        "entity_path": { "type": "string" },
+        "target_details": { "type": "string" },
+        "target_id": { "type": "integer" },
+        "target_type": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

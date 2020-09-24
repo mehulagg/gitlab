@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SQL::Pattern do
+RSpec.describe Gitlab::SQL::Pattern do
   describe '.to_pattern' do
     subject(:to_pattern) { User.to_pattern(query) }
 
@@ -205,6 +205,16 @@ describe Gitlab::SQL::Pattern do
 
       it 'returns a joining LIKE condition using a AND' do
         expect(fuzzy_arel_match.to_sql).to match(/title.+I?LIKE '\%foo\%' AND .*title.*I?LIKE '\%baz\%' AND .*title.*I?LIKE '\%really bar\%'/)
+      end
+    end
+
+    context 'when passing an Arel column' do
+      let(:query) { 'foo' }
+
+      subject(:fuzzy_arel_match) { Project.fuzzy_arel_match(Route.arel_table[:path], query) }
+
+      it 'returns a condition with the table and column name' do
+        expect(fuzzy_arel_match.to_sql).to match(/"routes"."path".*ILIKE '\%foo\%'/)
       end
     end
   end

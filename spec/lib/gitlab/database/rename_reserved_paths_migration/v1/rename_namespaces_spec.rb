@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameNamespaces, :delete do
+RSpec.describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameNamespaces, :delete do
   let(:migration) { FakeRenameReservedPathMigrationV1.new }
   let(:subject) { described_class.new(['the-path'], migration) }
   let(:namespace) { create(:group, name: 'the-path') }
@@ -95,6 +95,7 @@ describe Gitlab::Database::RenameReservedPathsMigration::V1::RenameNamespaces, :
 
   describe '#move_repositories' do
     let(:namespace) { create(:group, name: 'hello-group') }
+
     it 'moves a project for a namespace' do
       create(:project, :repository, :legacy_storage, namespace: namespace, path: 'hello-project')
       expected_path = File.join(TestEnv.repos_path, 'bye-group', 'hello-project.git')

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard Projects' do
+RSpec.describe 'Dashboard Projects' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, name: 'awesome stuff') }
   let(:project2) { create(:project, :public, name: 'Community project') }
@@ -125,7 +125,7 @@ describe 'Dashboard Projects' do
   end
 
   context 'when on Starred projects tab', :js do
-    it 'shows the empty state when there are no starred projects' do
+    it 'shows the empty state when there are no starred projects', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222357' do
       visit(starred_dashboard_projects_path)
 
       element = page.find('.row.empty-state')
@@ -173,16 +173,8 @@ describe 'Dashboard Projects' do
       end
     end
 
-    context 'guest user of project and project has private pipelines' do
-      let(:guest_user) { create(:user) }
-
-      before do
-        project.update(public_builds: false)
-        project.add_guest(guest_user)
-        sign_in(guest_user)
-      end
-
-      it 'shows that the last pipeline passed' do
+    shared_examples 'hidden pipeline status' do
+      it 'does not show the pipeline status' do
         visit dashboard_projects_path
 
         page.within('.controls') do
@@ -192,6 +184,34 @@ describe 'Dashboard Projects' do
           expect(page).not_to have_link('Pipeline: passed')
         end
       end
+    end
+
+    context 'guest user of project and project has private pipelines' do
+      let(:guest_user) { create(:user) }
+
+      before do
+        project.update(public_builds: false)
+        project.add_guest(guest_user)
+        sign_in(guest_user)
+      end
+
+      it_behaves_like 'hidden pipeline status'
+    end
+
+    context 'when dashboard_pipeline_status is disabled' do
+      before do
+        stub_feature_flags(dashboard_pipeline_status: false)
+      end
+
+      it_behaves_like 'hidden pipeline status'
+    end
+
+    context "when last_pipeline is missing" do
+      before do
+        project.last_pipeline.delete
+      end
+
+      it_behaves_like 'hidden pipeline status'
     end
   end
 
@@ -232,13 +252,15 @@ describe 'Dashboard Projects' do
 
     ActiveRecord::QueryRecorder.new { visit dashboard_projects_path }.count
 
-    # There are three known N+1 queries:
+    # There are seven known N+1 queries: https://gitlab.com/gitlab-org/gitlab/-/issues/214037
     # 1. Project#open_issues_count
     # 2. Project#open_merge_requests_count
     # 3. Project#forks_count
-    #
-    # In addition, ProjectsHelper#load_pipeline_status also adds an
-    # additional query.
-    expect { visit dashboard_projects_path }.not_to exceed_query_limit(control_count + 4)
+    # 4. ProjectsHelper#load_pipeline_status
+    # 5. RendersMemberAccess#preload_max_member_access_for_collection
+    # 6. User#max_member_access_for_project_ids
+    # 7. CommitWithPipeline#last_pipeline
+
+    expect { visit dashboard_projects_path }.not_to exceed_query_limit(control_count + 7)
   end
 end

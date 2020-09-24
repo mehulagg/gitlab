@@ -1,19 +1,38 @@
 import $ from 'jquery';
 import initRelatedItemsTree from 'ee/related_items_tree/related_items_tree_bundle';
-import initRoadmap from 'ee/roadmap/roadmap_bundle';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default class EpicTabs {
   constructor() {
     this.epicTreesEnabled = gon.features && gon.features.epicTrees;
-    this.wrapper = document.querySelector('.content-wrapper .container-fluid:not(.breadcrumbs)');
+    this.wrapper = document.querySelector('.js-epic-container:not(.breadcrumbs)');
     this.epicTabs = this.wrapper.querySelector('.js-epic-tabs-container');
     this.discussionFilterContainer = this.epicTabs.querySelector('.js-discussion-filter-container');
+    const allowSubEpics = parseBoolean(this.epicTabs.dataset.allowSubEpics);
 
     initRelatedItemsTree();
 
-    this.roadmapTabLoaded = false;
+    // We need to execute Roadmap tab related
+    // logic only when sub-epics feature is available.
+    if (allowSubEpics) {
+      this.roadmapTabLoaded = false;
 
-    this.bindEvents();
+      this.loadRoadmapBundle();
+      this.bindEvents();
+    }
+  }
+
+  /**
+   * This method loads Roadmap app bundle asynchronously.
+   *
+   * @param {boolean} allowSubEpics
+   */
+  loadRoadmapBundle() {
+    import('ee/roadmap/roadmap_bundle')
+      .then(roadmapBundle => {
+        this.initRoadmap = roadmapBundle.default;
+      })
+      .catch(() => {});
   }
 
   bindEvents() {
@@ -26,7 +45,7 @@ export default class EpicTabs {
   onRoadmapShow() {
     this.wrapper.classList.remove('container-limited');
     if (!this.roadmapTabLoaded) {
-      initRoadmap();
+      this.initRoadmap();
       this.roadmapTabLoaded = true;
     }
   }

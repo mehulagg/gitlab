@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Thread Comments Merge Request', :js do
+RSpec.describe 'Thread Comments Merge Request', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project) }
@@ -12,6 +12,9 @@ describe 'Thread Comments Merge Request', :js do
     sign_in(user)
 
     visit project_merge_request_path(project, merge_request)
+
+    # Wait for MR widget to load
+    wait_for_requests
   end
 
   it_behaves_like 'thread comments', 'merge request'

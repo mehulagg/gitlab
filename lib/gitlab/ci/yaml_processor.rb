@@ -1,179 +1,120 @@
 # frozen_string_literal: true
 
+# This is the CI Linter component that runs the syntax validations
+# while parsing the YAML config into a data structure that is
+# then presented to the caller as result object.
+# After syntax validations (done by Ci::Config), this component also
+# runs logical validation on the built data structure.
 module Gitlab
   module Ci
     class YamlProcessor
       ValidationError = Class.new(StandardError)
 
-      include Gitlab::Config::Entry::LegacyValidationHelpers
+      def self.validation_message(content, opts = {})
+        result = new(content, opts).execute
 
-      attr_reader :stages, :jobs
+        result.errors.first
+      end
 
-      def initialize(config, opts = {})
-        @ci_config = Gitlab::Ci::Config.new(config, **opts)
-        @config = @ci_config.to_hash
+      def initialize(config_content, opts = {})
+        @config_content = config_content
+        @opts = opts
+      end
+
+      def execute
+        if @config_content.blank?
+          return Result.new(errors: ['Please provide content of .gitlab-ci.yml'])
+        end
+
+        @ci_config = Gitlab::Ci::Config.new(@config_content, **@opts)
 
         unless @ci_config.valid?
-          raise ValidationError, @ci_config.errors.first
+          return Result.new(ci_config: @ci_config, errors: @ci_config.errors, warnings: @ci_config.warnings)
         end
 
-        initial_parsing
+        run_logical_validations!
+
+        Result.new(ci_config: @ci_config, warnings: @ci_config&.warnings)
+
       rescue Gitlab::Ci::Config::ConfigError => e
-        raise ValidationError, e.message
-      end
+        Result.new(ci_config: @ci_config, errors: [e.message], warnings: @ci_config&.warnings)
 
-      def builds
-        @jobs.map do |name, _|
-          build_attributes(name)
-        end
-      end
-
-      def build_attributes(name)
-        job = @jobs.fetch(name.to_sym, {})
-
-        { stage_idx: @stages.index(job[:stage]),
-          stage: job[:stage],
-          tag_list: job[:tags],
-          name: job[:name].to_s,
-          allow_failure: job[:ignore],
-          when: job[:when] || 'on_success',
-          environment: job[:environment_name],
-          coverage_regex: job[:coverage],
-          yaml_variables: yaml_variables(name),
-          needs_attributes: job.dig(:needs, :job),
-          interruptible: job[:interruptible],
-          rules: job[:rules],
-          options: {
-            image: job[:image],
-            services: job[:services],
-            artifacts: job[:artifacts],
-            cache: job[:cache],
-            dependencies: job[:dependencies],
-            job_timeout: job[:timeout],
-            before_script: job[:before_script],
-            script: job[:script],
-            after_script: job[:after_script],
-            environment: job[:environment],
-            retry: job[:retry],
-            parallel: job[:parallel],
-            instance: job[:instance],
-            start_in: job[:start_in],
-            trigger: job[:trigger],
-            bridge_needs: job.dig(:needs, :bridge)&.first
-          }.compact }.compact
-      end
-
-      def stage_builds_attributes(stage)
-        @jobs.values
-          .select { |job| job[:stage] == stage }
-          .map { |job| build_attributes(job[:name]) }
-      end
-
-      def stages_attributes
-        @stages.uniq.map do |stage|
-          seeds = stage_builds_attributes(stage).map do |attributes|
-            job = @jobs.fetch(attributes[:name].to_sym)
-
-            attributes
-              .merge(only: job.fetch(:only, {}))
-              .merge(except: job.fetch(:except, {}))
-          end
-
-          { name: stage, index: @stages.index(stage), builds: seeds }
-        end
-      end
-
-      def self.validation_message(content, opts = {})
-        return 'Please provide content of .gitlab-ci.yml' if content.blank?
-
-        begin
-          Gitlab::Ci::YamlProcessor.new(content, opts)
-          nil
-        rescue ValidationError => e
-          e.message
-        end
+      rescue ValidationError => e
+        Result.new(ci_config: @ci_config, errors: [e.message], warnings: @ci_config&.warnings)
       end
 
       private
 
-      def initial_parsing
-        ##
-        # Global config
-        #
-        @variables = @ci_config.variables
+      def run_logical_validations!
         @stages = @ci_config.stages
-
-        ##
-        # Jobs
-        #
-        @jobs = Ci::Config::Normalizer.new(@ci_config.jobs).normalize_jobs
+        @jobs = @ci_config.normalized_jobs
 
         @jobs.each do |name, job|
-          # logical validation for job
-
-          validate_job_stage!(name, job)
-          validate_job_dependencies!(name, job)
-          validate_job_needs!(name, job)
-          validate_job_environment!(name, job)
+          validate_job!(name, job)
         end
       end
 
-      def yaml_variables(name)
-        variables = (@variables || {})
-          .merge(job_variables(name))
-
-        variables.map do |key, value|
-          { key: key.to_s, value: value, public: true }
-        end
-      end
-
-      def job_variables(name)
-        job = @jobs[name.to_sym]
-        return {} unless job
-
-        job[:variables] || {}
+      def validate_job!(name, job)
+        validate_job_stage!(name, job)
+        validate_job_dependencies!(name, job)
+        validate_job_needs!(name, job)
+        validate_dynamic_child_pipeline_dependencies!(name, job)
+        validate_job_environment!(name, job)
       end
 
       def validate_job_stage!(name, job)
         return unless job[:stage]
 
         unless job[:stage].is_a?(String) && job[:stage].in?(@stages)
-          raise ValidationError, "#{name} job: stage parameter should be #{@stages.join(", ")}"
+          error!("#{name} job: chosen stage does not exist; available stages are #{@stages.join(", ")}")
         end
       end
 
       def validate_job_dependencies!(name, job)
         return unless job[:dependencies]
 
-        stage_index = @stages.index(job[:stage])
-
         job[:dependencies].each do |dependency|
-          raise ValidationError, "#{name} job: undefined dependency: #{dependency}" unless @jobs[dependency.to_sym]
+          validate_job_dependency!(name, dependency)
+        end
+      end
 
-          dependency_stage_index = @stages.index(@jobs[dependency.to_sym][:stage])
+      def validate_dynamic_child_pipeline_dependencies!(name, job)
+        return unless includes = job.dig(:trigger, :include)
 
-          unless dependency_stage_index.present? && dependency_stage_index < stage_index
-            raise ValidationError, "#{name} job: dependency #{dependency} is not defined in prior stages"
-          end
+        Array(includes).each do |included|
+          next unless included.is_a?(Hash)
+          next unless dependency = included[:job]
+
+          validate_job_dependency!(name, dependency)
         end
       end
 
       def validate_job_needs!(name, job)
-        return unless job.dig(:needs, :job)
+        return unless needs = job.dig(:needs, :job)
 
-        stage_index = @stages.index(job[:stage])
-
-        job.dig(:needs, :job).each do |need|
-          need_job_name = need[:name]
-
-          raise ValidationError, "#{name} job: undefined need: #{need_job_name}" unless @jobs[need_job_name.to_sym]
-
-          needs_stage_index = @stages.index(@jobs[need_job_name.to_sym][:stage])
-
-          unless needs_stage_index.present? && needs_stage_index < stage_index
-            raise ValidationError, "#{name} job: need #{need_job_name} is not defined in prior stages"
-          end
+        needs.each do |need|
+          validate_job_dependency!(name, need[:name], 'need')
         end
+      end
+
+      def validate_job_dependency!(name, dependency, dependency_type = 'dependency')
+        unless @jobs[dependency.to_sym]
+          error!("#{name} job: undefined #{dependency_type}: #{dependency}")
+        end
+
+        job_stage_index = stage_index(name)
+        dependency_stage_index = stage_index(dependency)
+
+        # A dependency might be defined later in the configuration
+        # with a stage that does not exist
+        unless dependency_stage_index.present? && dependency_stage_index < job_stage_index
+          error!("#{name} job: #{dependency_type} #{dependency} is not defined in prior stages")
+        end
+      end
+
+      def stage_index(name)
+        stage = @jobs.dig(name.to_sym, :stage)
+        @stages.index(stage)
       end
 
       def validate_job_environment!(name, job)
@@ -189,20 +130,24 @@ module Gitlab
 
         on_stop_job = @jobs[on_stop.to_sym]
         unless on_stop_job
-          raise ValidationError, "#{name} job: on_stop job #{on_stop} is not defined"
+          error!("#{name} job: on_stop job #{on_stop} is not defined")
         end
 
         unless on_stop_job[:environment]
-          raise ValidationError, "#{name} job: on_stop job #{on_stop} does not have environment defined"
+          error!("#{name} job: on_stop job #{on_stop} does not have environment defined")
         end
 
         unless on_stop_job[:environment][:name] == environment[:name]
-          raise ValidationError, "#{name} job: on_stop job #{on_stop} have different environment name"
+          error!("#{name} job: on_stop job #{on_stop} have different environment name")
         end
 
         unless on_stop_job[:environment][:action] == 'stop'
-          raise ValidationError, "#{name} job: on_stop job #{on_stop} needs to have action stop defined"
+          error!("#{name} job: on_stop job #{on_stop} needs to have action stop defined")
         end
+      end
+
+      def error!(message)
+        raise ValidationError.new(message)
       end
     end
   end

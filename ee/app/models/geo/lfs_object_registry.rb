@@ -4,15 +4,22 @@ class Geo::LfsObjectRegistry < Geo::BaseRegistry
   include ::ShaAttribute
   include ::Geo::Syncable
 
+  MODEL_CLASS = ::LfsObject
+  MODEL_FOREIGN_KEY = :lfs_object_id
+
   sha_attribute :sha256
 
   belongs_to :lfs_object, class_name: 'LfsObject'
 
-  def self.lfs_object_id_in(ids)
-    where(lfs_object_id: ids)
+  # If false, RegistryConsistencyService will frequently check the end of the
+  # table to quickly handle new replicables.
+  def self.has_create_events?
+    false
   end
 
-  def self.lfs_object_id_not_in(ids)
-    where.not(lfs_object_id: ids)
+  def self.delete_for_model_ids(lfs_object_ids)
+    lfs_object_ids.map do |lfs_object_id|
+      delete_worker_class.perform_async(:lfs, lfs_object_id)
+    end
   end
 end

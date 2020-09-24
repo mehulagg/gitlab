@@ -45,6 +45,11 @@ module Geo
         return false
       end
 
+      if project.design_repository.exists? && !move_design_repository
+        log_error('Design repository cannot be moved')
+        return false
+      end
+
       true
     rescue => ex
       log_error('Repository cannot be moved', error: ex)
@@ -56,7 +61,35 @@ module Geo
     end
 
     def move_wiki_repository
-      gitlab_shell.mv_repository(project.repository_storage, "#{old_disk_path}.wiki", "#{new_disk_path}.wiki")
+      gitlab_shell.mv_repository(project.repository_storage, old_wiki_disk_path, new_wiki_disk_path)
+    end
+
+    def move_design_repository
+      gitlab_shell.mv_repository(project.repository_storage, old_design_disk_path, new_design_disk_path)
+    end
+
+    def wiki_path_suffix
+      Gitlab::GlRepository::WIKI.path_suffix
+    end
+
+    def old_wiki_disk_path
+      "#{old_disk_path}#{wiki_path_suffix}"
+    end
+
+    def new_wiki_disk_path
+      "#{new_disk_path}#{wiki_path_suffix}"
+    end
+
+    def design_path_suffix
+      ::Gitlab::GlRepository::DESIGN.path_suffix
+    end
+
+    def old_design_disk_path
+      "#{old_disk_path}#{design_path_suffix}"
+    end
+
+    def new_design_disk_path
+      "#{new_disk_path}#{design_path_suffix}"
     end
   end
 end

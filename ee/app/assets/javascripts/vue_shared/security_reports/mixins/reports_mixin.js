@@ -5,7 +5,8 @@ export default {
     checkReportStatus(loading, error) {
       if (loading) {
         return LOADING;
-      } else if (error) {
+      }
+      if (error) {
         return ERROR;
       }
 

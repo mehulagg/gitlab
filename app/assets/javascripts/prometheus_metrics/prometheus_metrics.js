@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import { escape } from 'lodash';
 import { s__, n__, sprintf } from '~/locale';
 import axios from '../lib/utils/axios_utils';
 import PANEL_STATE from './constants';
@@ -26,6 +26,10 @@ export default class PrometheusMetrics {
     this.helpMetricsPath = this.$monitoredMetricsPanel.data('metrics-help-path');
 
     this.$panelToggle.on('click', e => this.handlePanelToggle(e));
+  }
+
+  init() {
+    this.loadActiveMetrics();
   }
 
   /* eslint-disable class-methods-use-this */
@@ -69,13 +73,13 @@ export default class PrometheusMetrics {
       if (metric.active_metrics > 0) {
         totalExporters += 1;
         this.$monitoredMetricsList.append(
-          `<li>${_.escape(metric.group)}<span class="badge">${_.escape(
+          `<li>${escape(metric.group)}<span class="badge">${escape(
             metric.active_metrics,
           )}</span></li>`,
         );
         totalMonitoredMetrics += metric.active_metrics;
         if (metric.metrics_missing_requirements > 0) {
-          this.$missingEnvVarMetricsList.append(`<li>${_.escape(metric.group)}</li>`);
+          this.$missingEnvVarMetricsList.append(`<li>${escape(metric.group)}</li>`);
           totalMissingEnvVarMetrics += 1;
         }
       }
@@ -83,16 +87,15 @@ export default class PrometheusMetrics {
 
     if (totalMonitoredMetrics === 0) {
       const emptyCommonMetricsText = sprintf(
-        s__(
-          'PrometheusService|<p class="text-tertiary">No <a href="%{docsUrl}">common metrics</a> were found</p>',
-        ),
+        s__('PrometheusService|No %{docsUrlStart}common metrics%{docsUrlEnd} were found'),
         {
-          docsUrl: this.helpMetricsPath,
+          docsUrlStart: `<a href="${this.helpMetricsPath}">`,
+          docsUrlEnd: '</a>',
         },
         false,
       );
       this.$monitoredMetricsEmpty.empty();
-      this.$monitoredMetricsEmpty.append(emptyCommonMetricsText);
+      this.$monitoredMetricsEmpty.append(`<p class="text-tertiary">${emptyCommonMetricsText}</p>`);
       this.showMonitoringMetricsPanelState(PANEL_STATE.EMPTY);
     } else {
       const metricsCountText = sprintf(

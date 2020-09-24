@@ -1,0 +1,171 @@
+{
+  "report": {
+    "status": "ok",
+    "job_path": "/auto-remediation-group/yarn-remediation/builds/144",
+    "generated_at": "2019-10-24T15:06:46.176Z"
+  },
+  "licenses": [
+    {
+      "name": "(BSD-3-Clause OR GPL-2.0)",
+      "url": null,
+      "components": [
+        {
+          "name": "node-forge",
+          "blob_path": null
+        }
+      ]
+    },
+    {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+      "components": [
+        {
+          "name": "ejs",
+          "blob_path": null
+        },
+        {
+          "name": "saml2-js",
+          "blob_path": null
+        }
+      ]
+    },
+    {
+      "name": "ISC",
+      "url": "http://en.wikipedia.org/wiki/ISC_license",
+      "components": [
+        {
+          "name": "sax",
+          "blob_path": null
+        }
+      ]
+    },
+    {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/mit-license",
+      "components": [
+        {
+          "name": "async",
+          "blob_path": null
+        },
+        {
+          "name": "debug",
+          "blob_path": null
+        },
+        {
+          "name": "define-properties",
+          "blob_path": null
+        },
+        {
+          "name": "es-abstract",
+          "blob_path": null
+        },
+        {
+          "name": "es-to-primitive",
+          "blob_path": null
+        },
+        {
+          "name": "function-bind",
+          "blob_path": null
+        },
+        {
+          "name": "has",
+          "blob_path": null
+        },
+        {
+          "name": "has-symbols",
+          "blob_path": null
+        },
+        {
+          "name": "is-callable",
+          "blob_path": null
+        },
+        {
+          "name": "is-date-object",
+          "blob_path": null
+        },
+        {
+          "name": "is-regex",
+          "blob_path": null
+        },
+        {
+          "name": "is-symbol",
+          "blob_path": null
+        },
+        {
+          "name": "lodash",
+          "blob_path": null
+        },
+        {
+          "name": "lodash-node",
+          "blob_path": null
+        },
+        {
+          "name": "ms",
+          "blob_path": null
+        },
+        {
+          "name": "object-inspect",
+          "blob_path": null
+        },
+        {
+          "name": "object-keys",
+          "blob_path": null
+        },
+        {
+          "name": "object.getownpropertydescriptors",
+          "blob_path": null
+        },
+        {
+          "name": "string.prototype.trimleft",
+          "blob_path": null
+        },
+        {
+          "name": "string.prototype.trimright",
+          "blob_path": null
+        },
+        {
+          "name": "underscore",
+          "blob_path": null
+        },
+        {
+          "name": "util.promisify",
+          "blob_path": null
+        },
+        {
+          "name": "xml-crypto",
+          "blob_path": null
+        },
+        {
+          "name": "xml-encryption",
+          "blob_path": null
+        },
+        {
+          "name": "xml2js",
+          "blob_path": null
+        },
+        {
+          "name": "xmlbuilder",
+          "blob_path": null
+        },
+        {
+          "name": "xpath",
+          "blob_path": null
+        },
+        {
+          "name": "xpath.js",
+          "blob_path": null
+        }
+      ]
+    },
+    {
+      "name": "MIT*",
+      "url": null,
+      "components": [
+        {
+          "name": "xmldom",
+          "blob_path": null
+        }
+      ]
+    }
+  ]
+}

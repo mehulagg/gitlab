@@ -15,7 +15,10 @@ class FileUploader < GitlabUploader
   prepend ObjectStorage::Extension::RecordsUploads
 
   MARKDOWN_PATTERN = %r{\!?\[.*?\]\(/uploads/(?<secret>[0-9a-f]{32})/(?<file>.*?)\)}.freeze
-  DYNAMIC_PATH_PATTERN = %r{.*(?<secret>\h{32})/(?<identifier>.*)}.freeze
+  DYNAMIC_PATH_PATTERN = %r{.*(?<secret>\b(\h{10}|\h{32}))\/(?<identifier>.*)}.freeze
+  VALID_SECRET_PATTERN = %r{\A\h{10,32}\z}.freeze
+
+  InvalidSecret = Class.new(StandardError)
 
   after :remove, :prune_store_dir
 
@@ -36,7 +39,7 @@ class FileUploader < GitlabUploader
 
   def self.base_dir(model, store = Store::LOCAL)
     decorated_model = model
-    decorated_model = Storage::HashedProject.new(model) if store == Store::REMOTE
+    decorated_model = Storage::Hashed.new(model) if store == Store::REMOTE
 
     model_path_segment(decorated_model)
   end
@@ -57,7 +60,7 @@ class FileUploader < GitlabUploader
   # Returns a String without a trailing slash
   def self.model_path_segment(model)
     case model
-    when Storage::HashedProject then model.disk_path
+    when Storage::Hashed then model.disk_path
     else
       model.hashed_storage?(:attachments) ? model.disk_path : model.full_path
     end
@@ -153,6 +156,10 @@ class FileUploader < GitlabUploader
 
   def secret
     @secret ||= self.class.generate_secret
+
+    raise InvalidSecret unless @secret =~ VALID_SECRET_PATTERN
+
+    @secret
   end
 
   # return a new uploader with a file copy on another project

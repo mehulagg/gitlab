@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Status::Pipeline::Delayed do
+RSpec.describe Gitlab::Ci::Status::Pipeline::Delayed do
   let(:pipeline) { double('pipeline') }
 
   subject do
@@ -23,6 +23,7 @@ describe Gitlab::Ci::Status::Pipeline::Delayed do
 
   describe '.matches?' do
     let(:user) { double('user') }
+
     subject { described_class.matches?(pipeline, user) }
 
     context 'when pipeline is scheduled' do

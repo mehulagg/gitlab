@@ -1,13 +1,13 @@
 /**
  * Common code between environmets app and folder view
  */
-import _ from 'underscore';
+import { isEqual, isFunction, omitBy } from 'lodash';
 import Visibility from 'visibilityjs';
 import EnvironmentsStore from 'ee_else_ce/environments/stores/environments_store';
 import Poll from '../../lib/utils/poll';
 import { getParameterByName } from '../../lib/utils/common_utils';
 import { s__ } from '../../locale';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import eventHub from '../event_hub';
 
 import EnvironmentsService from '../services/environments_service';
@@ -27,6 +27,10 @@ export default {
   data() {
     const store = new EnvironmentsStore();
 
+    const isDetailView = document.body.contains(
+      document.getElementById('environments-detail-view'),
+    );
+
     return {
       store,
       state: store.state,
@@ -36,7 +40,9 @@ export default {
       page: getParameterByName('page') || '1',
       requestData: {},
       environmentInStopModal: {},
+      environmentInDeleteModal: {},
       environmentInRollbackModal: {},
+      isDetailView,
     };
   },
 
@@ -48,16 +54,17 @@ export default {
       const response = this.filterNilValues(resp.config.params);
       const request = this.filterNilValues(this.requestData);
 
-      if (_.isEqual(response, request)) {
+      if (isEqual(response, request)) {
         this.store.storeAvailableCount(resp.data.available_count);
         this.store.storeStoppedCount(resp.data.stopped_count);
         this.store.storeEnvironments(resp.data.environments);
+        this.store.setReviewAppDetails(resp.data.review_app);
         this.store.setPagination(resp.headers);
       }
     },
 
     filterNilValues(obj) {
-      return _.omit(obj, value => _.isUndefined(value) || _.isNull(value));
+      return omitBy(obj, value => value === undefined || value === null);
     },
 
     /**
@@ -90,16 +97,19 @@ export default {
       Flash(s__('Environments|An error occurred while fetching the environments.'));
     },
 
-    postAction({ endpoint, errorMessage }) {
+    postAction({
+      endpoint,
+      errorMessage = s__('Environments|An error occurred while making the request.'),
+    }) {
       if (!this.isMakingRequest) {
         this.isLoading = true;
 
         this.service
           .postAction(endpoint)
           .then(() => this.fetchEnvironments())
-          .catch(() => {
+          .catch(err => {
             this.isLoading = false;
-            Flash(errorMessage || s__('Environments|An error occurred while making the request.'));
+            Flash(isFunction(errorMessage) ? errorMessage(err.response.data) : errorMessage);
           });
       }
     },
@@ -117,6 +127,10 @@ export default {
       this.environmentInStopModal = environment;
     },
 
+    updateDeleteModal(environment) {
+      this.environmentInDeleteModal = environment;
+    },
+
     updateRollbackModal(environment) {
       this.environmentInRollbackModal = environment;
     },
@@ -129,6 +143,30 @@ export default {
       this.postAction({ endpoint, errorMessage });
     },
 
+    deleteEnvironment(environment) {
+      const endpoint = environment.delete_path;
+      const { onSingleEnvironmentPage } = environment;
+      const errorMessage = s__(
+        'Environments|An error occurred while deleting the environment. Check if the environment stopped; if not, stop it and try again.',
+      );
+
+      this.service
+        .deleteAction(endpoint)
+        .then(() => {
+          if (!onSingleEnvironmentPage) {
+            // Reload as a first solution to bust the ETag cache
+            window.location.reload();
+            return;
+          }
+          const url = window.location.href.split('/');
+          url.pop();
+          window.location.href = url.join('/');
+        })
+        .catch(() => {
+          Flash(errorMessage);
+        });
+    },
+
     rollbackEnvironment(environment) {
       const { retryUrl, isLastDeployment } = environment;
       const errorMessage = isLastDeployment
@@ -137,6 +175,13 @@ export default {
             'Environments|An error occurred while rolling back the environment, please try again',
           );
       this.postAction({ endpoint: retryUrl, errorMessage });
+    },
+
+    cancelAutoStop(autoStopPath) {
+      const errorMessage = ({ message }) =>
+        message ||
+        s__('Environments|An error occurred while canceling the auto stop, please try again');
+      this.postAction({ endpoint: autoStopPath, errorMessage });
     },
   },
 
@@ -167,46 +212,60 @@ export default {
     this.service = new EnvironmentsService(this.endpoint);
     this.requestData = { page: this.page, scope: this.scope, nested: true };
 
-    this.poll = new Poll({
-      resource: this.service,
-      method: 'fetchEnvironments',
-      data: this.requestData,
-      successCallback: this.successCallback,
-      errorCallback: this.errorCallback,
-      notificationCallback: isMakingRequest => {
-        this.isMakingRequest = isMakingRequest;
-      },
-    });
+    if (!this.isDetailView) {
+      this.poll = new Poll({
+        resource: this.service,
+        method: 'fetchEnvironments',
+        data: this.requestData,
+        successCallback: this.successCallback,
+        errorCallback: this.errorCallback,
+        notificationCallback: isMakingRequest => {
+          this.isMakingRequest = isMakingRequest;
+        },
+      });
 
-    if (!Visibility.hidden()) {
-      this.isLoading = true;
-      this.poll.makeRequest();
-    } else {
-      this.fetchEnvironments();
+      if (!Visibility.hidden()) {
+        this.isLoading = true;
+        this.poll.makeRequest();
+      } else {
+        this.fetchEnvironments();
+      }
+
+      Visibility.change(() => {
+        if (!Visibility.hidden()) {
+          this.poll.restart();
+        } else {
+          this.poll.stop();
+        }
+      });
     }
 
-    Visibility.change(() => {
-      if (!Visibility.hidden()) {
-        this.poll.restart();
-      } else {
-        this.poll.stop();
-      }
-    });
-
     eventHub.$on('postAction', this.postAction);
+
     eventHub.$on('requestStopEnvironment', this.updateStopModal);
     eventHub.$on('stopEnvironment', this.stopEnvironment);
 
+    eventHub.$on('requestDeleteEnvironment', this.updateDeleteModal);
+    eventHub.$on('deleteEnvironment', this.deleteEnvironment);
+
     eventHub.$on('requestRollbackEnvironment', this.updateRollbackModal);
     eventHub.$on('rollbackEnvironment', this.rollbackEnvironment);
+
+    eventHub.$on('cancelAutoStop', this.cancelAutoStop);
   },
 
   beforeDestroy() {
     eventHub.$off('postAction', this.postAction);
+
     eventHub.$off('requestStopEnvironment', this.updateStopModal);
     eventHub.$off('stopEnvironment', this.stopEnvironment);
 
+    eventHub.$off('requestDeleteEnvironment', this.updateDeleteModal);
+    eventHub.$off('deleteEnvironment', this.deleteEnvironment);
+
     eventHub.$off('requestRollbackEnvironment', this.updateRollbackModal);
     eventHub.$off('rollbackEnvironment', this.rollbackEnvironment);
+
+    eventHub.$off('cancelAutoStop', this.cancelAutoStop);
   },
 };

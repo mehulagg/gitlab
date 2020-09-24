@@ -59,10 +59,11 @@
     border-radius: $border-radius-base;
     transition: border-color ease-in-out 0.15s,
       box-shadow ease-in-out 0.15s;
-    background-color: $white-light;
+    background-color: $white;
 
     &.is-focused {
-      @extend .form-control:focus;
+      border-color: $input-focus-border-color;
+      box-shadow: $input-focus-box-shadow;
 
       .comment-toolbar,
       .nav-links {
@@ -96,7 +97,7 @@
 
 .issuable-note-warning {
   color: $orange-600;
-  background-color: $orange-100;
+  background-color: $orange-50;
   border-radius: $border-radius-default $border-radius-default 0 0;
   border: 1px solid $border-gray-normal;
   border-bottom: 0;
@@ -151,7 +152,7 @@
   }
 
   .sidebar-item-value & {
-    fill: $gray-700;
+    fill: $gray-500;
   }
 }
 
@@ -173,7 +174,7 @@
 }
 
 .discussion-form {
-  background-color: $white-light;
+  background-color: $white;
 
   @include media-breakpoint-down(xs) {
     .user-avatar-link {
@@ -217,7 +218,7 @@ table {
   font-size: 14px;
 
   .md-area {
-    background-color: $white-light;
+    background-color: $white;
   }
 }
 
@@ -235,7 +236,7 @@ table {
 
   &.alert-dismissable {
     .close {
-      color: $white-light;
+      color: $white;
       opacity: 0.85;
       font-weight: $gl-font-weight-normal;
 
@@ -253,11 +254,11 @@ table {
     background-color: $gray-light;
     border-radius: 0 0 3px 3px;
     padding: $gl-padding;
-    border-top: 1px solid $gray-100;
+    border-top: 1px solid $gray-50;
 
     + .new-note {
       background-color: $gray-light;
-      border-top: 1px solid $gray-100;
+      border-top: 1px solid $gray-50;
     }
 
     &.is-replying {
@@ -281,7 +282,7 @@ table {
     display: table;
 
     svg {
-      fill: $gray-darkest;
+      fill: $gray-500;
     }
 
     .btn-group {
@@ -359,14 +360,6 @@ table {
   }
 }
 
-.toolbar-button-icon {
-  position: relative;
-  top: 1px;
-  margin-right: $gl-padding-4;
-  color: inherit;
-  font-size: 16px;
-}
-
 .toolbar-text {
   font-size: 14px;
   line-height: 16px;
@@ -416,7 +409,7 @@ table {
     float: right;
 
     i {
-      color: $white-light;
+      color: $white;
       padding-right: 2px;
       margin-top: 2px;
     }
@@ -489,6 +482,7 @@ table {
   border: 0;
   font-size: 14px;
   line-height: 16px;
+  vertical-align: initial;
 
   &:hover,
   &:focus {
@@ -497,6 +491,10 @@ table {
     .text-attach-file {
       text-decoration: underline;
     }
+  }
+
+  .gl-icon:not(:last-child) {
+    margin-right: 0;
   }
 }
 

@@ -1,95 +1,220 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
-import ciHeader from '../../vue_shared/components/header_ci_component.vue';
-import eventHub from '../event_hub';
+import { GlAlert, GlButton, GlLoadingIcon, GlModal, GlModalDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
+import axios from '~/lib/utils/axios_utils';
+import ciHeader from '~/vue_shared/components/header_ci_component.vue';
+import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
+import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
+import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constants';
+
+const DELETE_MODAL_ID = 'pipeline-delete-modal';
 
 export default {
   name: 'PipelineHeaderSection',
   components: {
     ciHeader,
+    GlAlert,
+    GlButton,
     GlLoadingIcon,
+    GlModal,
   },
-  props: {
-    pipeline: {
-      type: Object,
-      required: true,
+  directives: {
+    GlModal: GlModalDirective,
+  },
+  errorTexts: {
+    [LOAD_FAILURE]: __('We are currently unable to fetch data for the pipeline header.'),
+    [POST_FAILURE]: __('An error occurred while making the request.'),
+    [DELETE_FAILURE]: __('An error occurred while deleting the pipeline.'),
+    [DEFAULT]: __('An unknown error occurred.'),
+  },
+  inject: {
+    // Receive `cancel`, `delete`, `fullProject` and `retry`
+    paths: {
+      default: {},
     },
-    isLoading: {
-      type: Boolean,
-      required: true,
+    pipelineId: {
+      default: '',
+    },
+    pipelineIid: {
+      default: '',
+    },
+  },
+  apollo: {
+    pipeline: {
+      query: getPipelineQuery,
+      variables() {
+        return {
+          fullPath: this.paths.fullProject,
+          iid: this.pipelineIid,
+        };
+      },
+      update: data => data.project.pipeline,
+      error() {
+        this.reportFailure(LOAD_FAILURE);
+      },
+      pollInterval: 10000,
+      watchLoading(isLoading) {
+        if (!isLoading) {
+          // To ensure apollo has updated the cache,
+          // we only remove the loading state in sync with GraphQL
+          this.isCanceling = false;
+          this.isRetrying = false;
+        }
+      },
     },
   },
   data() {
     return {
-      actions: this.getActions(),
+      pipeline: null,
+      failureType: null,
+      isCanceling: false,
+      isRetrying: false,
+      isDeleting: false,
     };
   },
-
   computed: {
+    deleteModalConfirmationText() {
+      return __(
+        'Are you sure you want to delete this pipeline? Doing so will expire all pipeline caches and delete all related objects, such as builds, logs, artifacts, and triggers. This action cannot be undone.',
+      );
+    },
+    hasError() {
+      return this.failureType;
+    },
+    hasPipelineData() {
+      return Boolean(this.pipeline);
+    },
+    isLoadingInitialQuery() {
+      return this.$apollo.queries.pipeline.loading && !this.hasPipelineData;
+    },
     status() {
-      return this.pipeline.details && this.pipeline.details.status;
+      return this.pipeline?.status;
     },
     shouldRenderContent() {
-      return !this.isLoading && Object.keys(this.pipeline).length;
+      return !this.isLoadingInitialQuery && this.hasPipelineData;
+    },
+    failure() {
+      switch (this.failureType) {
+        case LOAD_FAILURE:
+          return {
+            text: this.$options.errorTexts[LOAD_FAILURE],
+            variant: 'danger',
+          };
+        case POST_FAILURE:
+          return {
+            text: this.$options.errorTexts[POST_FAILURE],
+            variant: 'danger',
+          };
+        case DELETE_FAILURE:
+          return {
+            text: this.$options.errorTexts[DELETE_FAILURE],
+            variant: 'danger',
+          };
+        default:
+          return {
+            text: this.$options.errorTexts[DEFAULT],
+            variant: 'danger',
+          };
+      }
     },
   },
-
-  watch: {
-    pipeline() {
-      this.actions = this.getActions();
-    },
-  },
-
   methods: {
-    postAction(action) {
-      const index = this.actions.indexOf(action);
-
-      this.$set(this.actions[index], 'isLoading', true);
-
-      eventHub.$emit('headerPostAction', action);
+    reportFailure(errorType) {
+      this.failureType = errorType;
     },
-
-    getActions() {
-      const actions = [];
-
-      if (this.pipeline.retry_path) {
-        actions.push({
-          label: __('Retry'),
-          path: this.pipeline.retry_path,
-          cssClass: 'js-retry-button btn btn-inverted-secondary',
-          type: 'button',
-          isLoading: false,
-        });
+    async postAction(path) {
+      try {
+        await axios.post(path);
+        this.$apollo.queries.pipeline.refetch();
+      } catch {
+        this.reportFailure(POST_FAILURE);
       }
+    },
+    async cancelPipeline() {
+      this.isCanceling = true;
+      this.postAction(this.paths.cancel);
+    },
+    async retryPipeline() {
+      this.isRetrying = true;
+      this.postAction(this.paths.retry);
+    },
+    async deletePipeline() {
+      this.isDeleting = true;
+      this.$apollo.queries.pipeline.stopPolling();
 
-      if (this.pipeline.cancel_path) {
-        actions.push({
-          label: __('Cancel running'),
-          path: this.pipeline.cancel_path,
-          cssClass: 'js-btn-cancel-pipeline btn btn-danger',
-          type: 'button',
-          isLoading: false,
-        });
+      try {
+        const { request } = await axios.delete(this.paths.delete);
+        redirectTo(setUrlFragment(request.responseURL, 'delete_success'));
+      } catch {
+        this.$apollo.queries.pipeline.startPolling();
+        this.reportFailure(DELETE_FAILURE);
+        this.isDeleting = false;
       }
-
-      return actions;
     },
   },
+  DELETE_MODAL_ID,
 };
 </script>
 <template>
   <div class="pipeline-header-container">
+    <gl-alert v-if="hasError" :variant="failure.variant">{{ failure.text }}</gl-alert>
     <ci-header
       v-if="shouldRenderContent"
-      :status="status"
-      :item-id="pipeline.id"
-      :time="pipeline.created_at"
+      :status="pipeline.detailedStatus"
+      :time="pipeline.createdAt"
       :user="pipeline.user"
-      :actions="actions"
+      :item-id="Number(pipelineId)"
       item-name="Pipeline"
-      @actionClicked="postAction"
-    />
-    <gl-loading-icon v-if="isLoading" :size="2" class="prepend-top-default append-bottom-default" />
+    >
+      <gl-button
+        v-if="pipeline.retryable"
+        :loading="isRetrying"
+        :disabled="isRetrying"
+        category="secondary"
+        variant="info"
+        data-testid="retryPipeline"
+        class="js-retry-button"
+        @click="retryPipeline()"
+      >
+        {{ __('Retry') }}
+      </gl-button>
+
+      <gl-button
+        v-if="pipeline.cancelable"
+        :loading="isCanceling"
+        :disabled="isCanceling"
+        variant="danger"
+        data-testid="cancelPipeline"
+        @click="cancelPipeline()"
+      >
+        {{ __('Cancel running') }}
+      </gl-button>
+
+      <gl-button
+        v-if="pipeline.userPermissions.destroyPipeline"
+        v-gl-modal="$options.DELETE_MODAL_ID"
+        :loading="isDeleting"
+        :disabled="isDeleting"
+        class="gl-ml-3"
+        variant="danger"
+        category="secondary"
+        data-testid="deletePipeline"
+      >
+        {{ __('Delete') }}
+      </gl-button>
+    </ci-header>
+    <gl-loading-icon v-if="isLoadingInitialQuery" size="lg" class="gl-mt-3 gl-mb-3" />
+
+    <gl-modal
+      :modal-id="$options.DELETE_MODAL_ID"
+      :title="__('Delete pipeline')"
+      :ok-title="__('Delete pipeline')"
+      ok-variant="danger"
+      @ok="deletePipeline()"
+    >
+      <p>
+        {{ deleteModalConfirmationText }}
+      </p>
+    </gl-modal>
   </div>
 </template>

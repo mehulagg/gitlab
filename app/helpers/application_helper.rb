@@ -4,6 +4,8 @@ require 'digest/md5'
 require 'uri'
 
 module ApplicationHelper
+  include StartupCssHelper
+
   # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-app-views
   # rubocop: disable CodeReuse/ActiveRecord
   def render_if_exists(partial, locals = {})
@@ -54,6 +56,10 @@ module ApplicationHelper
     args.any? { |v| v.to_s.downcase == action_name }
   end
 
+  def admin_section?
+    controller.class.ancestors.include?(Admin::ApplicationController)
+  end
+
   def last_commit(project)
     if project.repo_exists?
       time_ago_with_tooltip(project.repository.commit.committed_date)
@@ -92,6 +98,26 @@ module ApplicationHelper
 
   def simple_sanitize(str)
     sanitize(str, tags: %w(a span))
+  end
+
+  def body_data
+    {
+      page: body_data_page,
+      page_type_id: controller.params[:id],
+      find_file: find_file_path,
+      group: @group&.path
+    }.merge(project_data)
+  end
+
+  def project_data
+    return {} unless @project
+
+    {
+      project_id: @project.id,
+      project: @project.path,
+      group: @project.group&.path,
+      namespace_id: @project.namespace&.id
+    }
   end
 
   def body_data_page
@@ -170,6 +196,10 @@ module ApplicationHelper
     'https://' + promo_host
   end
 
+  def contact_sales_url
+    promo_url + '/sales'
+  end
+
   def support_url
     Gitlab::CurrentSettings.current_application_settings.help_page_support_url.presence || promo_url + '/getting-help/'
   end
@@ -179,7 +209,7 @@ module ApplicationHelper
   end
 
   def external_storage_url_or_path(path, project = @project)
-    return path unless static_objects_external_storage_enabled?
+    return path if @snippet || !static_objects_external_storage_enabled?
 
     uri = URI(Gitlab::CurrentSettings.static_objects_external_storage_url)
     path = URI(path) # `path` could have query parameters, so we need to split query and path apart
@@ -207,8 +237,16 @@ module ApplicationHelper
     "#{request.path}?#{options.compact.to_param}"
   end
 
+  def stylesheet_link_tag_defer(path)
+    if use_startup_css?
+      stylesheet_link_tag(path, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
+    else
+      stylesheet_link_tag(path, media: "all")
+    end
+  end
+
   def outdated_browser?
-    browser.ie? && browser.version.to_i < 10
+    browser.ie?
   end
 
   def path_to_key(key, admin = false)
@@ -237,6 +275,7 @@ module ApplicationHelper
   def page_class
     class_names = []
     class_names << 'issue-boards-page' if current_controller?(:boards)
+    class_names << 'environment-logs-page' if current_controller?(:logs)
     class_names << 'with-performance-bar' if performance_bar_enabled?
     class_names << system_message_class
     class_names
@@ -310,6 +349,15 @@ module ApplicationHelper
     }
   end
 
+  def page_startup_api_calls
+    @api_startup_calls
+  end
+
+  def add_page_startup_api_call(api_path, options: {})
+    @api_startup_calls ||= {}
+    @api_startup_calls[api_path] = options
+  end
+
   def autocomplete_data_sources(object, noteable_type)
     return {} unless object && noteable_type
 
@@ -322,6 +370,15 @@ module ApplicationHelper
       commands: commands_project_autocomplete_sources_path(object, type: noteable_type, type_id: params[:id]),
       snippets: snippets_project_autocomplete_sources_path(object)
     }
+  end
+
+  def asset_to_string(name)
+    app = Rails.application
+    if Rails.configuration.assets.compile
+      app.assets.find_asset(name).to_s
+    else
+      controller.view_context.render(file: Rails.root.join('public/assets', app.assets_manifest.assets[name]).to_s)
+    end
   end
 
   private

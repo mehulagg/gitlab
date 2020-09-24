@@ -6,16 +6,16 @@ module QA
       attr_accessor :name, :expires_at
 
       attribute :username do
-        Page::Project::Settings::Repository.perform do |page| # rubocop:disable QA/AmbiguousPageObjectName
-          page.expand_deploy_tokens do |token|
+        Page::Project::Settings::Repository.perform do |repository_page|
+          repository_page.expand_deploy_tokens do |token|
             token.token_username
           end
         end
       end
 
       attribute :password do
-        Page::Project::Settings::Repository.perform do |page| # rubocop:disable QA/AmbiguousPageObjectName
-          page.expand_deploy_tokens do |token|
+        Page::Project::Settings::Repository.perform do |repository_page|
+          repository_page.expand_deploy_tokens do |token|
             token.token_password
           end
         end
@@ -31,9 +31,7 @@ module QA
       def fabricate!
         project.visit!
 
-        Page::Project::Menu.act do
-          go_to_repository_settings
-        end
+        Page::Project::Menu.perform(&:go_to_repository_settings)
 
         Page::Project::Settings::Repository.perform do |setting|
           setting.expand_deploy_tokens do |page|

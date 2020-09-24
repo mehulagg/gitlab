@@ -37,7 +37,7 @@ describe('Approvals ModalRuleRemove', () => {
       ...options.propsData,
     };
 
-    wrapper = shallowMount(localVue.extend(ModalRuleRemove), {
+    wrapper = shallowMount(ModalRuleRemove, {
       ...options,
       localVue,
       store,
@@ -50,7 +50,7 @@ describe('Approvals ModalRuleRemove', () => {
       data: TEST_RULE,
     };
     actions = {
-      deleteRule: jasmine.createSpy('deleteRule'),
+      deleteRule: jest.fn(),
     };
   });
 
@@ -61,7 +61,7 @@ describe('Approvals ModalRuleRemove', () => {
 
     expect(modal.exists()).toBe(true);
     expect(modal.props()).toEqual(
-      jasmine.objectContaining({
+      expect.objectContaining({
         modalModule: MODAL_MODULE,
         modalId: TEST_MODAL_ID,
       }),
@@ -97,6 +97,6 @@ describe('Approvals ModalRuleRemove', () => {
     const modal = wrapper.find(GlModalVuex);
     modal.vm.$emit('ok', new Event('submit'));
 
-    expect(actions.deleteRule).toHaveBeenCalledWith(jasmine.anything(), TEST_RULE.id, undefined);
+    expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
   });
 });

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::GroupClusters do
+RSpec.describe API::GroupClusters do
   include KubernetesHelpers
 
   let(:current_user) { create(:user) }
@@ -26,7 +26,7 @@ describe API::GroupClusters do
       it 'responds with 403' do
         get api("/groups/#{group.id}/clusters", developer_user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -36,7 +36,7 @@ describe API::GroupClusters do
       end
 
       it 'responds with 200' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'includes pagination headers' do
@@ -70,7 +70,7 @@ describe API::GroupClusters do
       it 'responds with 403' do
         get api("/groups/#{group.id}/clusters/#{cluster_id}", developer_user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -140,7 +140,7 @@ describe API::GroupClusters do
         let(:cluster_id) { 123 }
 
         it 'returns 404' do
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -157,6 +157,7 @@ describe API::GroupClusters do
 
     let(:api_url) { 'https://kubernetes.example.com' }
     let(:authorization_type) { 'rbac' }
+    let(:management_project_id) { create(:project, group: group).id }
 
     let(:platform_kubernetes_attributes) do
       {
@@ -171,7 +172,8 @@ describe API::GroupClusters do
         name: 'test-cluster',
         domain: 'domain.example.com',
         managed: false,
-        platform_kubernetes_attributes: platform_kubernetes_attributes
+        platform_kubernetes_attributes: platform_kubernetes_attributes,
+        management_project_id: management_project_id
       }
     end
 
@@ -179,7 +181,7 @@ describe API::GroupClusters do
       it 'responds with 403' do
         post api("/groups/#{group.id}/clusters/user", developer_user), params: cluster_params
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -190,7 +192,7 @@ describe API::GroupClusters do
 
       context 'with valid params' do
         it 'responds with 201' do
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
         end
 
         it 'creates a new Cluster::Cluster' do
@@ -203,6 +205,7 @@ describe API::GroupClusters do
           expect(cluster_result.name).to eq('test-cluster')
           expect(cluster_result.domain).to eq('domain.example.com')
           expect(cluster_result.managed).to be_falsy
+          expect(cluster_result.management_project_id).to eq management_project_id
           expect(platform_kubernetes.rbac?).to be_truthy
           expect(platform_kubernetes.api_url).to eq(api_url)
           expect(platform_kubernetes.token).to eq('sample-token')
@@ -234,11 +237,23 @@ describe API::GroupClusters do
         end
       end
 
+      context 'current user does not have access to management_project_id' do
+        let(:management_project_id) { create(:project).id }
+
+        it 'responds with 400' do
+          expect(response).to have_gitlab_http_status(:bad_request)
+        end
+
+        it 'returns validation errors' do
+          expect(json_response['message']['management_project_id'].first).to match('don\'t have permission')
+        end
+      end
+
       context 'with invalid params' do
         let(:api_url) { 'invalid_api_url' }
 
         it 'responds with 400' do
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
         end
 
         it 'does not create a new Clusters::Cluster' do
@@ -251,7 +266,38 @@ describe API::GroupClusters do
       end
     end
 
-    context 'when user tries to add multiple clusters' do
+    context 'non-authorized user' do
+      before do
+        post api("/groups/#{group.id}/clusters/user", developer_user), params: cluster_params
+      end
+
+      it 'responds with 403' do
+        expect(response).to have_gitlab_http_status(:forbidden)
+
+        expect(json_response['message']).to eq('403 Forbidden')
+      end
+    end
+  end
+
+  describe 'PUT /groups/:id/clusters/:cluster_id' do
+    let(:api_url) { 'https://kubernetes.example.com' }
+
+    let(:platform_kubernetes_attributes) do
+      {
+        api_url: api_url,
+        token: 'sample-token'
+      }
+    end
+
+    let(:cluster_params) do
+      {
+        name: 'test-cluster',
+        environment_scope: 'test/*',
+        platform_kubernetes_attributes: platform_kubernetes_attributes
+      }
+    end
+
+    context 'when another cluster exists' do
       before do
         create(:cluster, :provided_by_gcp, :group,
                groups: [group])
@@ -259,21 +305,12 @@ describe API::GroupClusters do
         post api("/groups/#{group.id}/clusters/user", current_user), params: cluster_params
       end
 
-      it 'responds with 400' do
-        expect(response).to have_gitlab_http_status(400)
-        expect(json_response['message']['base'].first).to include('Instance does not support multiple Kubernetes clusters')
-      end
-    end
-
-    context 'non-authorized user' do
-      before do
-        post api("/groups/#{group.id}/clusters/user", developer_user), params: cluster_params
+      it 'responds with 201' do
+        expect(response).to have_gitlab_http_status(:created)
       end
 
-      it 'responds with 403' do
-        expect(response).to have_gitlab_http_status(403)
-
-        expect(json_response['message']).to eq('403 Forbidden')
+      it 'allows multiple clusters to be associated to group' do
+        expect(group.reload.clusters.count).to eq(2)
       end
     end
   end
@@ -305,7 +342,7 @@ describe API::GroupClusters do
       it 'responds with 403' do
         put api("/groups/#{group.id}/clusters/#{cluster.id}", developer_user), params: update_params
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -320,7 +357,7 @@ describe API::GroupClusters do
 
       context 'with valid params' do
         it 'responds with 200' do
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'updates cluster attributes' do
@@ -333,7 +370,7 @@ describe API::GroupClusters do
         let(:domain) { 'invalid domain' }
 
         it 'responds with 400' do
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
         end
 
         it 'does not update cluster attributes' do
@@ -350,7 +387,7 @@ describe API::GroupClusters do
         let(:management_project_id) { create(:project).id }
 
         it 'responds with 400' do
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
         end
 
         it 'returns validation errors' do
@@ -368,11 +405,11 @@ describe API::GroupClusters do
           end
 
           it 'responds with 400' do
-            expect(response).to have_gitlab_http_status(400)
+            expect(response).to have_gitlab_http_status(:bad_request)
           end
 
           it 'returns validation error' do
-            expect(json_response['message']['platform_kubernetes.base'].first).to eq('Cannot modify managed Kubernetes cluster')
+            expect(json_response['message']['platform_kubernetes.base'].first).to eq(_('Cannot modify managed Kubernetes cluster'))
           end
         end
 
@@ -380,7 +417,7 @@ describe API::GroupClusters do
           let(:domain) { 'new-domain.com' }
 
           it 'responds with 200' do
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
       end
@@ -408,7 +445,7 @@ describe API::GroupClusters do
         end
 
         it 'responds with 200' do
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'updates platform kubernetes attributes' do
@@ -424,7 +461,7 @@ describe API::GroupClusters do
         let(:cluster) { create(:cluster, :group, :provided_by_user) }
 
         it 'responds with 404' do
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -442,7 +479,7 @@ describe API::GroupClusters do
       it 'responds with 403' do
         delete api("/groups/#{group.id}/clusters/#{cluster.id}", developer_user), params: cluster_params
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -452,7 +489,7 @@ describe API::GroupClusters do
       end
 
       it 'responds with 204' do
-        expect(response).to have_gitlab_http_status(204)
+        expect(response).to have_gitlab_http_status(:no_content)
       end
 
       it 'deletes the cluster' do
@@ -463,7 +500,7 @@ describe API::GroupClusters do
         let(:cluster) { create(:cluster, :group, :provided_by_user) }
 
         it 'responds with 404' do
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end

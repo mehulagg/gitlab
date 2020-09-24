@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Peek::Views::Rugged, :request_store do
+RSpec.describe Peek::Views::Rugged, :request_store do
   subject { described_class.new }
 
   let(:project) { create(:project) }
@@ -16,7 +16,7 @@ describe Peek::Views::Rugged, :request_store do
   end
 
   it 'returns aggregated results' do
-    ::Gitlab::RuggedInstrumentation.query_time += 1.234
+    ::Gitlab::RuggedInstrumentation.add_query_time(1.234)
     ::Gitlab::RuggedInstrumentation.increment_query_count
     ::Gitlab::RuggedInstrumentation.increment_query_count
 

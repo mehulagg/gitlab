@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::Importer do
+RSpec.describe Gitlab::PhabricatorImport::Importer do
   it { expect(described_class).to be_async }
 
   it "acts like it's importing repositories" do
@@ -11,6 +11,7 @@ describe Gitlab::PhabricatorImport::Importer do
 
   describe '#execute' do
     let(:project) { create(:project, :import_scheduled) }
+
     subject(:importer) { described_class.new(project) }
 
     it 'sets a custom jid that will be kept up to date' do

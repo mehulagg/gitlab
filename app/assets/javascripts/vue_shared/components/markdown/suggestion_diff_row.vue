@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 export default {
   name: 'SuggestionDiffRow',
   props: {
@@ -8,6 +9,9 @@ export default {
     },
   },
   computed: {
+    displayAsCell() {
+      return !(this.line.rich_text || this.line.text);
+    },
     lineType() {
       return this.line.type;
     },
@@ -23,10 +27,14 @@ export default {
     <td class="diff-line-num new_line border-top-0 border-bottom-0" :class="lineType">
       {{ line.new_line }}
     </td>
-    <td class="line_content" :class="lineType">
-      <span v-if="line.text">{{ line.text }}</span>
-      <!-- TODO: replace this hack with zero-width whitespace when we have rich_text from BE -->
-      <span v-else>&#8203;</span>
+    <td
+      class="line_content"
+      :class="[{ 'd-table-cell': displayAsCell }, lineType]"
+      data-testid="suggestion-diff-content"
+    >
+      <span v-if="line.rich_text" class="line" v-html="line.rich_text"></span>
+      <span v-else-if="line.text" class="line">{{ line.text }}</span>
+      <span v-else class="line"></span>
     </td>
   </tr>
 </template>

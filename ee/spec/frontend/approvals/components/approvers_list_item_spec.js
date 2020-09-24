@@ -1,11 +1,10 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
-import Avatar from '~/vue_shared/components/project_avatar/default.vue';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from 'ee/approvals/constants';
 import ApproversListItem from 'ee/approvals/components/approvers_list_item.vue';
 import HiddenGroupsItem from 'ee/approvals/components/hidden_groups_item.vue';
+import Avatar from '~/vue_shared/components/project_avatar/default.vue';
 
-const localVue = createLocalVue();
 const TEST_USER = {
   id: 1,
   type: TYPE_USER,
@@ -22,10 +21,8 @@ describe('Approvals ApproversListItem', () => {
   let wrapper;
 
   const factory = (options = {}) => {
-    wrapper = shallowMount(localVue.extend(ApproversListItem), {
+    wrapper = shallowMount(ApproversListItem, {
       ...options,
-      localVue,
-      sync: false,
     });
   };
 
@@ -53,7 +50,9 @@ describe('Approvals ApproversListItem', () => {
       const button = wrapper.find(GlButton);
       button.vm.$emit('click');
 
-      expect(wrapper.emittedByOrder()).toEqual([{ name: 'remove', args: [TEST_USER] }]);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().remove).toEqual([[TEST_USER]]);
+      });
     });
   });
 

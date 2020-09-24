@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 
-describe BambooService, :use_clean_rails_memory_store_caching do
+RSpec.describe BambooService, :use_clean_rails_memory_store_caching do
   include ReactiveCachingHelpers
   include StubRequests
 
   let(:bamboo_url) { 'http://gitlab.com/bamboo' }
 
+  let_it_be(:project) { create(:project) }
+
   subject(:service) do
-    described_class.create(
-      project: create(:project),
+    described_class.create!(
+      project: project,
       properties: {
         bamboo_url: bamboo_url,
         username: 'mic',
@@ -83,7 +85,7 @@ describe BambooService, :use_clean_rails_memory_store_caching do
           bamboo_service = service
 
           bamboo_service.bamboo_url = 'http://gitlab1.com'
-          bamboo_service.save
+          bamboo_service.save!
 
           expect(bamboo_service.password).to be_nil
         end
@@ -92,7 +94,7 @@ describe BambooService, :use_clean_rails_memory_store_caching do
           bamboo_service = service
 
           bamboo_service.username = 'some_name'
-          bamboo_service.save
+          bamboo_service.save!
 
           expect(bamboo_service.password).to eq('password')
         end
@@ -102,7 +104,7 @@ describe BambooService, :use_clean_rails_memory_store_caching do
 
           bamboo_service.bamboo_url = 'http://gitlab_edited.com'
           bamboo_service.password = 'password'
-          bamboo_service.save
+          bamboo_service.save!
 
           expect(bamboo_service.password).to eq('password')
           expect(bamboo_service.bamboo_url).to eq('http://gitlab_edited.com')
@@ -115,7 +117,7 @@ describe BambooService, :use_clean_rails_memory_store_caching do
 
         bamboo_service.bamboo_url = 'http://gitlab_edited.com'
         bamboo_service.password = 'password'
-        bamboo_service.save
+        bamboo_service.save!
 
         expect(bamboo_service.password).to eq('password')
         expect(bamboo_service.bamboo_url).to eq('http://gitlab_edited.com')
@@ -148,7 +150,7 @@ describe BambooService, :use_clean_rails_memory_store_caching do
   end
 
   shared_examples 'reactive cache calculation' do
-    context '#build_page' do
+    describe '#build_page' do
       subject { service.calculate_reactive_cache('123', 'unused')[:build_page] }
 
       it 'returns a specific URL when status is 500' do
@@ -180,7 +182,7 @@ describe BambooService, :use_clean_rails_memory_store_caching do
       end
     end
 
-    context '#commit_status' do
+    describe '#commit_status' do
       subject { service.calculate_reactive_cache('123', 'unused')[:commit_status] }
 
       it 'sets commit status to :error when status is 500' do
@@ -223,6 +225,19 @@ describe BambooService, :use_clean_rails_memory_store_caching do
         stub_request(body: bamboo_response(build_state: 'FOO BAR!'))
 
         is_expected.to eq(:error)
+      end
+
+      Gitlab::HTTP::HTTP_ERRORS.each do |http_error|
+        it "sets commit status to :error with a #{http_error.name} error" do
+          WebMock.stub_request(:get, 'http://gitlab.com/bamboo/rest/api/latest/result/byChangeset/123?os_authType=basic')
+            .to_raise(http_error)
+
+          expect(Gitlab::ErrorTracking)
+            .to receive(:log_exception)
+            .with(instance_of(http_error), project_id: project.id)
+
+          is_expected.to eq(:error)
+        end
       end
     end
   end

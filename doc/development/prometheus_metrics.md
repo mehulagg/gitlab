@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Working with Prometheus Metrics
 
 ## Adding to the library
@@ -11,18 +17,23 @@ The requirement for adding a new metric is to make each query to have an unique 
 ```yaml
 - group: Response metrics (NGINX Ingress)
   metrics:
-  - title: "Throughput"
-    y_label: "Requests / Sec"
-    queries:
-    - id: response_metrics_nginx_ingress_throughput_status_code
-      query_range: 'sum(rate(nginx_upstream_responses_total{upstream=~"%{kube_namespace}-%{ci_environment_slug}-.*"}[2m])) by (status_code)'
-      unit: req / sec
-      label: Status Code
+    - title: "Throughput"
+      y_axis:
+        name: "Requests / Sec"
+        format: "number"
+        precision: 2
+      queries:
+        - id: response_metrics_nginx_ingress_throughput_status_code
+          query_range: 'sum(rate(nginx_upstream_responses_total{upstream=~"%{kube_namespace}-%{ci_environment_slug}-.*"}[2m])) by (status_code)'
+          unit: req / sec
+          label: Status Code
 ```
 
 ### Update existing metrics
 
-After you add or change existing _common_ metric you have to create a new database migration that will query and update all existing metrics.
+After you add or change an existing common metric, you must [re-run the import script](../administration/raketasks/maintenance.md#import-common-metrics) that will query and update all existing metrics.
+
+Or, you can create a database migration:
 
 NOTE: **Note:**
 If a query metric (which is identified by `id:`) is removed it will not be removed from database by default.
@@ -53,7 +64,7 @@ to monitor itself.
 ### Adding a new metric
 
 This section describes how to add new metrics for self-monitoring
-([example](https://gitlab.com/gitlab-org/gitlab/merge_requests/15440)).
+([example](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/15440)).
 
 1. Select the [type of metric](https://gitlab.com/gitlab-org/prometheus-client-mmap#metrics):
 

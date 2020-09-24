@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # Based on spec/requests/api/groups_spec.rb
 # Should follow closely in order to ensure all situations are covered
-describe 'getting group information' do
+RSpec.describe 'getting group information', :do_not_mock_admin_mode do
   include GraphqlHelpers
   include UploadHelpers
 
@@ -51,11 +51,12 @@ describe 'getting group information' do
 
       it "returns one of user1's groups" do
         project = create(:project, namespace: group2, path: 'Foo')
+        issue = create(:issue, project: create(:project, group: group1))
         create(:project_group_link, project: project, group: group1)
 
         post_graphql(group_query(group1), current_user: user1)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(graphql_data['group']['id']).to eq(group1.to_global_id.to_s)
         expect(graphql_data['group']['name']).to eq(group1.name)
         expect(graphql_data['group']['path']).to eq(group1.path)
@@ -67,6 +68,8 @@ describe 'getting group information' do
         expect(graphql_data['group']['fullName']).to eq(group1.full_name)
         expect(graphql_data['group']['fullPath']).to eq(group1.full_path)
         expect(graphql_data['group']['parentId']).to eq(group1.parent_id)
+        expect(graphql_data['group']['issues']['nodes'].count).to eq(1)
+        expect(graphql_data['group']['issues']['nodes'][0]['iid']).to eq(issue.iid.to_s)
       end
 
       it "does not return a non existing group" do
@@ -86,18 +89,13 @@ describe 'getting group information' do
       end
 
       it 'avoids N+1 queries' do
-        control_count = ActiveRecord::QueryRecorder.new do
-          post_graphql(group_query(group1), current_user: admin)
-        end.count
+        pending('See: https://gitlab.com/gitlab-org/gitlab/-/issues/245272')
 
         queries = [{ query: group_query(group1) },
                    { query: group_query(group2) }]
 
-        expect do
-          post_multiplex(queries, current_user: admin)
-        end.not_to exceed_query_limit(control_count)
-
-        expect(graphql_errors).to contain_exactly(nil, nil)
+        expect { post_multiplex(queries, current_user: admin) }
+          .to issue_same_number_of_queries_as { post_graphql(group_query(group1), current_user: admin) }
       end
     end
 

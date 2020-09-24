@@ -4,7 +4,9 @@ module ErrorTracking
   class ProjectErrorTrackingSetting < ApplicationRecord
     include Gitlab::Utils::StrongMemoize
     include ReactiveCaching
+    include Gitlab::Routing
 
+    SENTRY_API_ERROR_TYPE_BAD_REQUEST = 'bad_request_for_sentry_api'
     SENTRY_API_ERROR_TYPE_MISSING_KEYS = 'missing_keys_in_sentry_response'
     SENTRY_API_ERROR_TYPE_NON_20X_RESPONSE = 'non_20x_response_from_sentry'
     SENTRY_API_ERROR_INVALID_SIZE = 'invalid_size_of_sentry_response'
@@ -20,10 +22,13 @@ module ErrorTracking
     }x.freeze
 
     self.reactive_cache_key = ->(setting) { [setting.class.model_name.singular, setting.project_id] }
+    self.reactive_cache_work_type = :external_dependency
 
     belongs_to :project
 
     validates :api_url, length: { maximum: 255 }, public_url: { enforce_sanitization: true, ascii_only: true }, allow_nil: true
+
+    validates :enabled, inclusion: { in: [true, false] }
 
     validates :api_url, presence: { message: 'is a required field' }, if: :enabled
 
@@ -71,7 +76,9 @@ module ErrorTracking
     end
 
     def sentry_client
-      Sentry::Client.new(api_url, token)
+      strong_memoize(:sentry_client) do
+        Sentry::Client.new(api_url, token)
+      end
     end
 
     def sentry_external_url
@@ -79,13 +86,15 @@ module ErrorTracking
     end
 
     def list_sentry_issues(opts = {})
-      with_reactive_cache('list_issues', opts.stringify_keys) do |result|
+      with_reactive_cache_set('list_issues', opts.stringify_keys) do |result|
         result
       end
     end
 
     def list_sentry_projects
-      { projects: sentry_client.list_projects }
+      handle_exceptions do
+        { projects: sentry_client.projects }
+      end
     end
 
     def issue_details(opts = {})
@@ -100,32 +109,37 @@ module ErrorTracking
       end
     end
 
-    def calculate_reactive_cache(request, opts)
-      case request
-      when 'list_issues'
-        { issues: sentry_client.list_issues(**opts.symbolize_keys) }
-      when 'issue_details'
-        {
-          issue: sentry_client.issue_details(**opts.symbolize_keys)
-        }
-      when 'issue_latest_event'
-        {
-          latest_event: sentry_client.issue_latest_event(**opts.symbolize_keys)
-        }
+    def update_issue(opts = {} )
+      handle_exceptions do
+        { updated: sentry_client.update_issue(opts) }
       end
-    rescue Sentry::Client::Error => e
-      { error: e.message, error_type: SENTRY_API_ERROR_TYPE_NON_20X_RESPONSE }
-    rescue Sentry::Client::MissingKeysError => e
-      { error: e.message, error_type: SENTRY_API_ERROR_TYPE_MISSING_KEYS }
-    rescue Sentry::Client::ResponseInvalidSizeError => e
-      { error: e.message, error_type: SENTRY_API_ERROR_INVALID_SIZE }
+    end
+
+    def calculate_reactive_cache(request, opts)
+      handle_exceptions do
+        case request
+        when 'list_issues'
+          sentry_client.list_issues(**opts.symbolize_keys)
+        when 'issue_details'
+          issue = sentry_client.issue_details(**opts.symbolize_keys)
+          { issue: add_gitlab_issue_details(issue) }
+        when 'issue_latest_event'
+          {
+            latest_event: sentry_client.issue_latest_event(**opts.symbolize_keys)
+          }
+        end
+      end
+    end
+
+    def expire_issues_cache
+      clear_reactive_cache_set!('list_issues')
     end
 
     # http://HOST/api/0/projects/ORG/PROJECT
     # ->
     # http://HOST/ORG/PROJECT
     def self.extract_sentry_external_url(url)
-      url.sub('api/0/projects/', '')
+      url&.sub('api/0/projects/', '')
     end
 
     def api_host
@@ -136,6 +150,36 @@ module ErrorTracking
     end
 
     private
+
+    def add_gitlab_issue_details(issue)
+      issue.gitlab_commit = match_gitlab_commit(issue.first_release_version)
+      issue.gitlab_commit_path = project_commit_path(project, issue.gitlab_commit) if issue.gitlab_commit
+
+      issue
+    end
+
+    def match_gitlab_commit(release_version)
+      return unless release_version
+
+      commit = project.repository.commit(release_version)
+
+      commit&.id
+    end
+
+    def handle_exceptions
+      yield
+    rescue Sentry::Client::Error => e
+      { error: e.message, error_type: SENTRY_API_ERROR_TYPE_NON_20X_RESPONSE }
+    rescue Sentry::Client::MissingKeysError => e
+      { error: e.message, error_type: SENTRY_API_ERROR_TYPE_MISSING_KEYS }
+    rescue Sentry::Client::ResponseInvalidSizeError => e
+      { error: e.message, error_type: SENTRY_API_ERROR_INVALID_SIZE }
+    rescue Sentry::Client::BadRequestError => e
+      { error: e.message, error_type: SENTRY_API_ERROR_TYPE_BAD_REQUEST }
+    rescue StandardError => e
+      Gitlab::ErrorTracking.track_exception(e)
+      { error: 'Unexpected Error' }
+    end
 
     def project_name_from_slug
       @project_name_from_slug ||= project_slug_from_api_url&.titleize

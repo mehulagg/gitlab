@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Git::BranchPushService do
+RSpec.describe Git::BranchPushService do
   include RepoHelpers
 
-  set(:user)     { create(:user) }
-  let(:blankrev) { Gitlab::Git::BLANK_SHA }
-  let(:oldrev)   { sample_commit.parent_id }
-  let(:newrev)   { sample_commit.id }
-  let(:ref)      { 'refs/heads/master' }
+  let_it_be(:user) { create(:user) }
+  let(:blankrev)   { Gitlab::Git::BLANK_SHA }
+  let(:oldrev)     { sample_commit.parent_id }
+  let(:newrev)     { sample_commit.id }
+  let(:ref)        { 'refs/heads/master' }
 
   let(:params) do
     { change: { oldrev: oldrev, newrev: newrev, ref: ref } }
@@ -20,7 +20,7 @@ describe Git::BranchPushService do
   end
 
   context 'with pull project' do
-    set(:project) { create(:project, :repository, :mirror) }
+    let_it_be(:project) { create(:project, :repository, :mirror) }
 
     before do
       allow(project.repository).to receive(:commit).and_call_original
@@ -42,20 +42,8 @@ describe Git::BranchPushService do
         stub_ee_application_setting(elasticsearch_indexing?: true)
       end
 
-      context 'when the project is locked by elastic.rake', :clean_gitlab_redis_shared_state do
-        before do
-          Gitlab::Redis::SharedState.with { |redis| redis.sadd(:elastic_projects_indexing, project.id) }
-        end
-
-        it 'does not run ElasticCommitIndexerWorker' do
-          expect(ElasticCommitIndexerWorker).not_to receive(:perform_async)
-
-          subject.execute
-        end
-      end
-
       it 'runs ElasticCommitIndexerWorker' do
-        expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, oldrev, newrev)
+        expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id)
 
         subject.execute
       end
@@ -95,7 +83,7 @@ describe Git::BranchPushService do
           end
 
           it 'runs ElasticCommitIndexerWorker' do
-            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, oldrev, newrev)
+            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id)
 
             subject.execute
           end
@@ -110,7 +98,7 @@ describe Git::BranchPushService do
           end
 
           it 'runs ElasticCommitIndexerWorker' do
-            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, oldrev, newrev)
+            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id)
 
             subject.execute
           end
@@ -148,91 +136,6 @@ describe Git::BranchPushService do
           subject.execute
         end
       end
-    end
-  end
-
-  context 'Jira Connect hooks' do
-    set(:project) { create(:project, :repository) }
-    let(:branch_to_sync) { nil }
-    let(:commits_to_sync) { [] }
-
-    shared_examples 'enqueues Jira sync worker' do
-      it do
-        Sidekiq::Testing.fake! do
-          expect(JiraConnect::SyncBranchWorker).to receive(:perform_async)
-            .with(project.id, branch_to_sync, commits_to_sync)
-            .and_call_original
-
-          expect { subject.execute }.to change(JiraConnect::SyncBranchWorker.jobs, :size).by(1)
-        end
-      end
-    end
-
-    shared_examples 'does not enqueue Jira sync worker' do
-      it do
-        Sidekiq::Testing.fake! do
-          expect { subject.execute }.not_to change(JiraConnect::SyncBranchWorker.jobs, :size)
-        end
-      end
-    end
-
-    context 'when feature is enabled' do
-      before do
-        stub_feature_flags(jira_connect_app: true)
-      end
-
-      context 'has Jira dev panel integration license' do
-        before do
-          stub_licensed_features(jira_dev_panel_integration: true)
-        end
-
-        context 'with a Jira subscription' do
-          before do
-            create(:jira_connect_subscription, namespace: project.namespace)
-          end
-
-          context 'branch name contains Jira issue key' do
-            let(:branch_to_sync) { 'branch-JIRA-123' }
-            let(:ref) { "refs/heads/#{branch_to_sync}" }
-
-            it_behaves_like 'enqueues Jira sync worker'
-          end
-
-          context 'commit message contains Jira issue key' do
-            let(:commits_to_sync) { [newrev] }
-
-            before do
-              allow_any_instance_of(Commit).to receive(:safe_message).and_return('Commit with key JIRA-123')
-            end
-
-            it_behaves_like 'enqueues Jira sync worker'
-          end
-
-          context 'branch name and commit message does not contain Jira issue key' do
-            it_behaves_like 'does not enqueue Jira sync worker'
-          end
-        end
-
-        context 'without a Jira subscription' do
-          it_behaves_like 'does not enqueue Jira sync worker'
-        end
-      end
-
-      context 'does not have Jira dev panel integration license' do
-        before do
-          stub_licensed_features(jira_dev_panel_integration: false)
-        end
-
-        it_behaves_like 'does not enqueue Jira sync worker'
-      end
-    end
-
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(jira_connect_app: false)
-      end
-
-      it_behaves_like 'does not enqueue Jira sync worker'
     end
   end
 end

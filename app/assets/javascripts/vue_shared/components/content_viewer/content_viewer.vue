@@ -8,6 +8,7 @@ export default {
     content: {
       type: String,
       default: '',
+      required: false,
     },
     path: {
       type: String,
@@ -18,6 +19,16 @@ export default {
       required: false,
       default: 0,
     },
+    filePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    commitSha: {
+      type: String,
+      required: false,
+      default: '',
+    },
     projectPath: {
       type: String,
       required: false,
@@ -27,6 +38,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    images: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
   computed: {
@@ -52,9 +68,12 @@ export default {
     <component
       :is="viewer"
       :path="path"
+      :file-path="filePath"
       :file-size="fileSize"
       :project-path="projectPath"
       :content="content"
+      :images="images"
+      :commit-sha="commitSha"
     />
   </div>
 </template>

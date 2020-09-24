@@ -16,7 +16,6 @@ module Gitlab
     # rubocop: disable CodeReuse/ActiveRecord
     def preload(groups)
       groups_and_ancestors = groups_and_ancestors_for(groups)
-
       # A Hash mapping group IDs to their corresponding Group instances.
       groups_map = groups_and_ancestors.each_with_object({}) do |group, hash|
         hash[group.id] = group
@@ -32,7 +31,7 @@ module Gitlab
 
           while current
 
-            if (plan_id = current.plan_id)
+            if (plan_id = current.hosted_plan_id)
               hash[group.id] << plan_id
               all_plan_ids << plan_id
             end
@@ -61,7 +60,8 @@ module Gitlab
       Gitlab::ObjectHierarchy
         .new(groups)
         .base_and_ancestors
-        .select(:id, :parent_id, :plan_id)
+        .join_gitlab_subscription
+        .select('namespaces.id', 'namespaces.parent_id', 'gitlab_subscriptions.hosted_plan_id')
     end
   end
 end

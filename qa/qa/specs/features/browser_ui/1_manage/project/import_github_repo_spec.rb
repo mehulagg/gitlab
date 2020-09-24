@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  # https://gitlab.com/gitlab-org/gitlab-foss/issues/58158
-  context 'Manage', :github, :quarantine do
+  RSpec.describe 'Manage', :github, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/issues/26952', type: :bug } do
     describe 'Project import from GitHub' do
       let(:imported_project) do
         Resource::ProjectImportedFromGithub.fabricate! do |project|
@@ -20,11 +19,12 @@ module QA
         delete delete_project_request.url
 
         expect_status(202)
+
+        Page::Main::Menu.perform(&:sign_out_if_signed_in)
       end
 
-      it 'user imports a GitHub repo' do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+      it 'user imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/385' do
+        Flow::Login.sign_in
 
         imported_project # import the project
 
@@ -62,12 +62,9 @@ module QA
 
           Page::Project::Issue::Show.perform do |issue_page|
             expect(issue_page).to have_comment(comment_text)
-          end
-
-          Page::Issuable::Sidebar.perform do |issuable|
-            expect(issuable).to have_label('enhancement')
-            expect(issuable).to have_label('help wanted')
-            expect(issuable).to have_label('good first issue')
+            expect(issue_page).to have_label('enhancement')
+            expect(issue_page).to have_label('help wanted')
+            expect(issue_page).to have_label('good first issue')
           end
         end
       end
@@ -91,9 +88,9 @@ module QA
         expect(page).to have_content('[Review comment] Nice blank line.')
         expect(page).to have_content('[Single diff comment] Much better without this line!')
 
-        Page::Issuable::Sidebar.perform do |issuable|
-          expect(issuable).to have_label('bug')
-          expect(issuable).to have_label('enhancement')
+        Page::MergeRequest::Show.perform do |merge_request|
+          expect(merge_request).to have_label('bug')
+          expect(merge_request).to have_label('enhancement')
         end
       end
 

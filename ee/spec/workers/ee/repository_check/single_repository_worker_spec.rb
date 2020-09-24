@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-describe EE::RepositoryCheck::SingleRepositoryWorker do
+RSpec.describe EE::RepositoryCheck::SingleRepositoryWorker do
   include ::EE::GeoHelpers
 
-  set(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
 
   subject(:worker) { RepositoryCheck::SingleRepositoryWorker.new }
 
   context 'Geo primary' do
-    set(:primary) { create(:geo_node, :primary) }
+    let_it_be(:primary) { create(:geo_node, :primary) }
 
     before do
       stub_current_geo_node(primary)
@@ -26,8 +26,8 @@ describe EE::RepositoryCheck::SingleRepositoryWorker do
   end
 
   context 'Geo secondary' do
-    set(:project_registry) { create(:geo_project_registry, project: project) }
-    set(:secondary) { create(:geo_node) }
+    let_it_be(:project_registry) { create(:geo_project_registry, project: project) }
+    let_it_be(:secondary) { create(:geo_node) }
 
     before do
       stub_current_geo_node(secondary)

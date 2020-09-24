@@ -24,6 +24,6 @@ class OmniauthKerberosSpnegoController < ApplicationController
     # when the browser has given up.
     #
     headers['Www-Authenticate'] = spnego_challenge
-    render 'errors/kerberos_denied.html.haml', layout: 'errors', status: 401
+    render 'errors/kerberos_denied.html.haml', layout: 'errors', status: :unauthorized
   end
 end

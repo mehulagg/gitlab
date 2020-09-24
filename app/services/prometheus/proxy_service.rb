@@ -5,30 +5,47 @@ module Prometheus
     include ReactiveCaching
     include Gitlab::Utils::StrongMemoize
 
-    self.reactive_cache_key = ->(service) { service.cache_key }
+    self.reactive_cache_key = ->(service) { [] }
     self.reactive_cache_lease_timeout = 30.seconds
-    self.reactive_cache_refresh_interval = 30.seconds
+
+    # reactive_cache_refresh_interval should be set to a value higher than
+    # reactive_cache_lifetime.  If the refresh_interval is less than lifetime
+    # then the ReactiveCachingWorker will re-query prometheus for this
+    # PromQL query even though it's (probably) already been picked up by
+    # the frontend
+    # refresh_interval should be set less than lifetime only if this data
+    # is expected to change *and* be fetched again by the frontend
+    self.reactive_cache_refresh_interval = 90.seconds
     self.reactive_cache_lifetime = 1.minute
+    self.reactive_cache_work_type = :external_dependency
     self.reactive_cache_worker_finder = ->(_id, *args) { from_cache(*args) }
 
     attr_accessor :proxyable, :method, :path, :params
 
+    PROMETHEUS_QUERY_API = 'query'
+    PROMETHEUS_QUERY_RANGE_API = 'query_range'
+    PROMETHEUS_SERIES_API = 'series'
+
     PROXY_SUPPORT = {
-      'query' => {
+      PROMETHEUS_QUERY_API => {
         method: ['GET'],
         params: %w(query time timeout)
       },
-      'query_range' => {
+      PROMETHEUS_QUERY_RANGE_API => {
         method: ['GET'],
         params: %w(query start end step timeout)
+      },
+      PROMETHEUS_SERIES_API => {
+        method: %w(GET),
+        params: %w(match start end)
       }
     }.freeze
 
     def self.from_cache(proxyable_class_name, proxyable_id, method, path, params)
       proxyable_class = begin
         proxyable_class_name.constantize
-      rescue NameError
-        nil
+                        rescue NameError
+                          nil
       end
       return unless proxyable_class
 
@@ -106,11 +123,23 @@ module Prometheus
     end
 
     def filter_params(params, path)
+      params = substitute_params(params)
+
       params.slice(*PROXY_SUPPORT.dig(path, :params))
     end
 
     def can_proxy?
       PROXY_SUPPORT.dig(@path, :method)&.include?(@method)
+    end
+
+    def substitute_params(params)
+      start_time = params[:start_time]
+      end_time   = params[:end_time]
+
+      params['start'] = start_time if start_time
+      params['end']   = end_time if end_time
+
+      params
     end
   end
 end

@@ -1,17 +1,30 @@
 import Vue from 'vue';
 
+import { issuableTypesMap } from '~/related_issues/constants';
 import * as types from './mutation_types';
 
 export default {
   [types.SET_INITIAL_CONFIG](
     state,
-    { epicsEndpoint, issuesEndpoint, autoCompleteEpics, autoCompleteIssues, userSignedIn },
+    {
+      epicsEndpoint,
+      issuesEndpoint,
+      autoCompleteEpics,
+      autoCompleteIssues,
+      projectsEndpoint,
+      userSignedIn,
+      allowSubEpics,
+      allowIssuableHealthStatus,
+    },
   ) {
     state.epicsEndpoint = epicsEndpoint;
     state.issuesEndpoint = issuesEndpoint;
     state.autoCompleteEpics = autoCompleteEpics;
     state.autoCompleteIssues = autoCompleteIssues;
+    state.projectsEndpoint = projectsEndpoint;
     state.userSignedIn = userSignedIn;
+    state.allowSubEpics = allowSubEpics;
+    state.allowIssuableHealthStatus = allowIssuableHealthStatus;
   },
 
   [types.SET_INITIAL_PARENT_ITEM](state, data) {
@@ -19,9 +32,12 @@ export default {
     state.childrenFlags[state.parentItem.reference] = {};
   },
 
-  [types.SET_CHILDREN_COUNT](state, { epicsCount, issuesCount }) {
-    state.epicsCount = epicsCount;
-    state.issuesCount = issuesCount;
+  [types.SET_CHILDREN_COUNT](state, data) {
+    state.descendantCounts = data;
+  },
+
+  [types.SET_HEALTH_STATUS](state, data) {
+    state.healthStatus = data;
   },
 
   [types.SET_ITEM_CHILDREN](state, { parentItem, children, append }) {
@@ -128,11 +144,21 @@ export default {
 
     state.showAddItemForm = toggleState;
     state.showCreateEpicForm = false;
+    state.showCreateIssueForm = false;
   },
 
   [types.TOGGLE_CREATE_EPIC_FORM](state, { toggleState }) {
     state.showCreateEpicForm = toggleState;
     state.showAddItemForm = false;
+    state.showCreateIssueForm = false;
+    state.issuableType = issuableTypesMap.EPIC;
+  },
+
+  [types.TOGGLE_CREATE_ISSUE_FORM](state, { toggleState }) {
+    state.showCreateIssueForm = toggleState;
+    state.showAddItemForm = false;
+    state.showCreateEpicForm = false;
+    state.issuableType = issuableTypesMap.ISSUE;
   },
 
   [types.SET_PENDING_REFERENCES](state, references) {
@@ -140,13 +166,17 @@ export default {
   },
 
   [types.ADD_PENDING_REFERENCES](state, references) {
-    state.pendingReferences.push(...references);
+    const nonDuplicateReferences = references.filter(ref => !state.pendingReferences.includes(ref));
+    state.pendingReferences.push(...nonDuplicateReferences);
   },
 
   [types.REMOVE_PENDING_REFERENCE](state, indexToRemove) {
     state.pendingReferences = state.pendingReferences.filter(
       (ref, index) => index !== indexToRemove,
     );
+    if (state.pendingReferences.length === 0) {
+      state.itemAddFailure = false;
+    }
   },
 
   [types.SET_ITEM_INPUT_VALUE](state, itemInputValue) {
@@ -161,8 +191,13 @@ export default {
     state.itemAddInProgress = false;
     state.itemsFetchResultEmpty = false;
   },
-  [types.RECEIVE_ADD_ITEM_FAILURE](state) {
+  [types.RECEIVE_ADD_ITEM_FAILURE](state, { itemAddFailureType, itemAddFailureMessage }) {
     state.itemAddInProgress = false;
+    state.itemAddFailure = true;
+    state.itemAddFailureMessage = itemAddFailureMessage;
+    if (itemAddFailureType) {
+      state.itemAddFailureType = itemAddFailureType;
+    }
   },
 
   [types.REQUEST_CREATE_ITEM](state) {
@@ -183,5 +218,48 @@ export default {
 
     // Insert at new position
     state.children[parentItem.reference].splice(newIndex, 0, targetItem);
+  },
+
+  [types.MOVE_ITEM](
+    state,
+    { oldParentItem, newParentItem, targetItem, oldIndex, newIndex, isFirstChild },
+  ) {
+    // Remove from old position in previous parent
+    state.children[oldParentItem.reference].splice(oldIndex, 1);
+    if (state.children[oldParentItem.reference].length === 0) {
+      state.childrenFlags[oldParentItem.reference].itemHasChildren = false;
+    }
+
+    // Insert at new position in new parent
+    if (isFirstChild) {
+      Vue.set(state.children, newParentItem.parentReference, [targetItem]);
+      Vue.set(state.childrenFlags, newParentItem.parentReference, {
+        itemExpanded: true,
+        itemHasChildren: true,
+      });
+    } else {
+      state.children[newParentItem.parentReference].splice(newIndex, 0, targetItem);
+    }
+  },
+  [types.MOVE_ITEM_FAILURE](
+    state,
+    { oldParentItem, newParentItem, targetItem, oldIndex, newIndex },
+  ) {
+    // Remove from new position in new parent
+    state.children[newParentItem.parentReference].splice(newIndex, 1);
+
+    // Insert at old position in old parent
+    state.children[oldParentItem.reference].splice(oldIndex, 0, targetItem);
+  },
+
+  [types.REQUEST_PROJECTS](state) {
+    state.projectsFetchInProgress = true;
+  },
+  [types.RECIEVE_PROJECTS_SUCCESS](state, projects) {
+    state.projects = projects;
+    state.projectsFetchInProgress = false;
+  },
+  [types.RECIEVE_PROJECTS_FAILURE](state) {
+    state.projectsFetchInProgress = false;
   },
 };

@@ -5,6 +5,7 @@ module Ci
   # We should migrate this object to actual database record in the future
   class LegacyStage
     include StaticModel
+    include Presentable
 
     attr_reader :pipeline, :name
 
@@ -19,7 +20,7 @@ module Ci
     end
 
     def groups
-      @groups ||= Ci::Group.fabricate(self)
+      @groups ||= Ci::Group.fabricate(project, self)
     end
 
     def to_param
@@ -31,13 +32,17 @@ module Ci
     end
 
     def status
-      @status ||= statuses.latest.slow_composite_status
+      @status ||= statuses.latest.composite_status
     end
 
     def detailed_status(current_user)
       Gitlab::Ci::Status::Stage::Factory
         .new(self, current_user)
         .fabricate!
+    end
+
+    def latest_statuses
+      statuses.ordered.latest
     end
 
     def statuses

@@ -5,11 +5,11 @@ module Gitlab
     module Summary
       class Commit < Base
         def title
-          n_('Commit', 'Commits', value)
+          n_('Commit', 'Commits', value.to_i)
         end
 
         def value
-          @value ||= count_commits
+          @value ||= commits_count ? Value::PrettyNumeric.new(commits_count) : Value::None.new
         end
 
         private
@@ -18,10 +18,10 @@ module Gitlab
         # a limit. Since we need a commit count, we _can't_ enforce a limit, so
         # the easiest way forward is to replicate the relevant portions of the
         # `log` function here.
-        def count_commits
+        def commits_count
           return unless ref
 
-          gitaly_commit_client.commit_count(ref, after: @from, before: @to)
+          @commits_count ||= gitaly_commit_client.commit_count(ref, after: @from, before: @to)
         end
 
         def gitaly_commit_client

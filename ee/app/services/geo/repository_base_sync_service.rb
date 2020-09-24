@@ -67,15 +67,16 @@ module Geo
     def redownload_repository
       log_info("Redownloading #{type}")
 
-      return if fetch_snapshot
+      if fetch_snapshot_into_temp_repo
+        set_temp_repository_as_main
+
+        return
+      end
 
       log_info("Attempting to fetch repository via git")
 
       # `git fetch` needs an empty bare repository to fetch into
-      unless gitlab_shell.create_repository(project.repository_storage, disk_path_temp, project.full_path)
-        raise Gitlab::Shell::Error, 'Can not create a temporary repository'
-      end
-
+      temp_repo.create_repository
       fetch_geo_mirror(temp_repo)
 
       set_temp_repository_as_main
@@ -113,7 +114,7 @@ module Geo
     # returned in an inconsistent state. However, a subsequent git fetch
     # will be enqueued by the log cursor, which should resolve any problems
     # it is possible to fix.
-    def fetch_snapshot
+    def fetch_snapshot_into_temp_repo
       # Snapshots will miss the data that are shared in object pools, and snapshotting should
       # be avoided to guard against data loss.
       return if project.pool_repository
@@ -138,13 +139,21 @@ module Geo
     def mark_sync_as_successful(missing_on_primary: false)
       log_info("Marking #{type} sync as successful")
 
-      persisted = registry.finish_sync!(type, missing_on_primary)
+      persisted = registry.finish_sync!(type, missing_on_primary, primary_checksummed?)
 
       reschedule_sync unless persisted
 
       log_info("Finished #{type} sync",
               update_delay_s: update_delay_in_seconds,
               download_time_s: download_time_in_seconds)
+    end
+
+    def primary_checksummed?
+      primary_checksum.present?
+    end
+
+    def primary_checksum
+      project.repository_state&.public_send("#{type}_verification_checksum") # rubocop:disable GitlabSecurity/PublicSend
     end
 
     def reschedule_sync
@@ -204,7 +213,7 @@ module Geo
     end
 
     def temp_repo
-      @temp_repo ||= ::Repository.new(repository.full_path, repository.project, disk_path: disk_path_temp, repo_type: repository.repo_type)
+      @temp_repo ||= ::Repository.new(repository.full_path, repository.container, shard: repository.shard, disk_path: disk_path_temp, repo_type: repository.repo_type)
     end
 
     def clean_up_temporary_repository

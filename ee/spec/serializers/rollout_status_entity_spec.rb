@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RolloutStatusEntity do
+RSpec.describe RolloutStatusEntity do
   include KubernetesHelpers
 
   let(:rollout_status) { kube_deployment_rollout_status }

@@ -6,7 +6,7 @@ FactoryBot.define do
     project
   end
 
-  factory :insights_issues_by_team, class: Hash do
+  factory :insights_issues_by_team, class: 'Hash' do
     initialize_with do
       {
         Manage: 1,
@@ -17,7 +17,7 @@ FactoryBot.define do
     end
   end
 
-  factory :insights_merge_requests_per_month, class: Hash do
+  factory :insights_merge_requests_per_month, class: 'Hash' do
     initialize_with do
       {
         'January 2019' => 1,
@@ -27,7 +27,7 @@ FactoryBot.define do
     end
   end
 
-  factory :insights_issues_by_team_per_month, class: Hash do
+  factory :insights_issues_by_team_per_month, class: 'Hash' do
     initialize_with do
       {
         'January 2019' => {

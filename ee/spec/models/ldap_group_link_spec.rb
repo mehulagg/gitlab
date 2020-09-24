@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LdapGroupLink do
+RSpec.describe LdapGroupLink do
   let(:klass) { described_class }
   let(:ldap_group_link) { build :ldap_group_link }
 
@@ -60,7 +60,7 @@ describe LdapGroupLink do
       end
 
       it 'defaults to the first ldap server if empty' do
-        expect( klass.new.provider ).to eql Gitlab::Auth::LDAP::Config.providers.first
+        expect( klass.new.provider ).to eql Gitlab::Auth::Ldap::Config.providers.first
       end
     end
   end

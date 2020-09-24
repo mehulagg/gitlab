@@ -24,6 +24,8 @@ module GemExtensions
             )
           end
 
+          # Code copied from gem, to disable checks
+          # rubocop:disable Style/MultilineIfModifier
           def update_document(options = {})
             if attributes_in_database = self.instance_variable_get(:@__changed_model_attributes).presence
               attributes = if respond_to?(:as_indexed_json)
@@ -35,13 +37,14 @@ module GemExtensions
               client.update(
                 { index: index_name,
                   type:  document_type,
-                  id:    self.es_id,
+                  id:    self.es_id, # Changed
                   body:  { doc: attributes } }.merge(options)
-              )
+              ) unless attributes.empty?
             else
               index_document(options)
             end
           end
+          # rubocop:enable Style/MultilineIfModifier
 
           def update_document_attributes(attributes, options = {})
             client.update(

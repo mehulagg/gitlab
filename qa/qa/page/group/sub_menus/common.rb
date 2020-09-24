@@ -5,7 +5,12 @@ module QA
     module Group
       module SubMenus
         module Common
+          extend QA::Page::PageConcern
+          include QA::Page::SubMenus::Common
+
           def self.included(base)
+            super
+
             base.class_eval do
               view 'app/views/layouts/nav/sidebar/_group.html.haml' do
                 element :group_sidebar
@@ -13,23 +18,10 @@ module QA
             end
           end
 
-          def hover_element(element)
-            within_sidebar do
-              find_element(element).hover
-              yield
-            end
-          end
+          private
 
-          def within_sidebar
-            within_element(:group_sidebar) do
-              yield
-            end
-          end
-
-          def within_submenu(element)
-            within_element(element) do
-              yield
-            end
+          def sidebar_element
+            :group_sidebar
           end
         end
       end

@@ -1,17 +1,23 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Irker IRC Gateway
 
 GitLab provides a way to push update messages to an Irker server. When
 configured, pushes to a project will trigger the service to send data directly
 to the Irker server.
 
-See the project homepage for further info: <https://gitlab.com/esr/irker>
+See the project homepage for further information: <https://gitlab.com/esr/irker>
 
 ## Needed setup
 
 You will first need an Irker daemon. You can download the Irker code from its
 repository on <https://gitlab.com/esr/irker>:
 
-```
+```shell
 git clone https://gitlab.com/esr/irker.git
 ```
 
@@ -26,9 +32,9 @@ need to follow the firsts steps of the next section.
 ## Complete these steps in GitLab
 
 1. Navigate to the project you want to configure for notifications.
-1. Navigate to the [Integrations page](project_services.md#accessing-the-project-services)
+1. Navigate to the [Integrations page](overview.md#accessing-integrations)
 1. Click "Irker".
-1. Select the "Active" checkbox.
+1. Ensure that the **Active** toggle is enabled.
 1. Enter the server host address where `irkerd` runs (defaults to `localhost`)
    in the `Server host` field on the Web page
 1. Enter the server port of `irkerd` (e.g. defaults to 6659) in the
@@ -47,7 +53,7 @@ Irker accepts channel names of the form `chan` and `#chan`, both for the
 case, `Aorimn` is treated as a nick and no more as a channel name.
 
 Irker can also join password-protected channels. Users need to append
-`?key=thesecretpassword` to the chan name.  When using this feature remember to
+`?key=thesecretpassword` to the channel name. When using this feature remember to
 **not** put the `#` sign in front of the channel name; failing to do so will
 result on irker joining a channel literally named `#chan?key=password` henceforth
 leaking the channel key through the `/whois` IRC command (depending on IRC server

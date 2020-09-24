@@ -6,7 +6,7 @@ RSpec.describe Gitlab::SPDX::Catalogue do
   subject { described_class.new(catalogue_hash) }
 
   let(:spdx_json) { IO.read(Rails.root.join("spec", "fixtures", "spdx.json")) }
-  let(:catalogue_hash) { JSON.parse(spdx_json, symbolize_names: true) }
+  let(:catalogue_hash) { Gitlab::Json.parse(spdx_json, symbolize_names: true) }
 
   describe "#version" do
     let(:version) { SecureRandom.uuid }
@@ -18,6 +18,16 @@ RSpec.describe Gitlab::SPDX::Catalogue do
     it { expect(subject.count).to eql(catalogue_hash[:licenses].count) }
     it { expect(subject.map(&:id)).to match_array(catalogue_hash[:licenses].map { |x| x[:licenseId] }) }
     it { expect(subject.map(&:name)).to match_array(catalogue_hash[:licenses].map { |x| x[:name] }) }
+
+    specify do
+      deprecrated_gpl = subject.find { |license| license.id == 'GPL-1.0' }
+      expect(deprecrated_gpl.deprecated).to be_truthy
+    end
+
+    specify do
+      gpl = subject.find { |license| license.id == 'GPL-1.0-only' }
+      expect(gpl.deprecated).to be_falsey
+    end
 
     context "when some of the licenses are missing an identifier" do
       let(:catalogue_hash) do

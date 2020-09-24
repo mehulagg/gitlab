@@ -16,13 +16,13 @@ mobile applications.
 On the client side, you can use [OmniAuth::OpenIDConnect](https://github.com/jjbohn/omniauth-openid-connect/) for Rails
 applications, or any of the other available [client implementations](https://openid.net/developers/libraries/#connect).
 
-GitLab's implementation uses the [doorkeeper-openid_connect] gem, refer
+GitLab's implementation uses the [doorkeeper-openid_connect](https://github.com/doorkeeper-gem/doorkeeper-openid_connect "Doorkeeper::OpenidConnect website") gem, refer
 to its README for more details about which parts of the specifications
 are supported.
 
 ## Enabling OpenID Connect for OAuth applications
 
-Refer to the [OAuth guide] for basic information on how to set up OAuth
+Refer to the [OAuth guide](oauth_provider.md) for basic information on how to set up OAuth
 applications in GitLab. To enable OIDC for an application, all you have to do
 is select the `openid` scope in the application settings.
 
@@ -37,14 +37,11 @@ Currently the following user information is shared with clients:
 | `auth_time`      | `integer` | The timestamp for the user's last authentication
 | `name`           | `string`  | The user's full name
 | `nickname`       | `string`  | The user's GitLab username
-| `email`          | `string`  | The user's public email address
-| `email_verified` | `boolean` | Whether the user's public email address was verified
+| `email`          | `string`  | The user's email address<br>This is the user's *primary* email address if the application has access to the `email` claim and the user's *public* email address otherwise
+| `email_verified` | `boolean` | Whether the user's email address was verified
 | `website`        | `string`  | URL for the user's website
 | `profile`        | `string`  | URL for the user's GitLab profile
 | `picture`        | `string`  | URL for the user's GitLab avatar
 | `groups`         | `array`   | Names of the groups the user is a member of
 
-Only the `sub` and `sub_legacy` claims are included in the ID token, all other claims are available from the `/oauth/userinfo` endpoint used by OIDC clients.
-
-[doorkeeper-openid_connect]: https://github.com/doorkeeper-gem/doorkeeper-openid_connect "Doorkeeper::OpenidConnect website"
-[OAuth guide]: oauth_provider.md "GitLab as OAuth2 authentication service provider"
+The claims `sub`, `sub_legacy`, `email` and `email_verified` are included in the ID token, all other claims are available from the `/oauth/userinfo` endpoint used by OIDC clients.

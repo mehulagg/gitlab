@@ -25,9 +25,9 @@ RSpec.describe Geo::ProjectSyncWorker do
 
     context 'when project could not be found' do
       it 'logs an error and returns' do
-        expect(subject).to receive(:log_error).with("Couldn't find project, skipping syncing", project_id: 999)
+        expect(subject).to receive(:log_error).with("Couldn't find project, skipping syncing", project_id: non_existing_record_id)
 
-        expect { subject.perform(999) }.not_to raise_error
+        expect { subject.perform(non_existing_record_id) }.not_to raise_error
       end
     end
 

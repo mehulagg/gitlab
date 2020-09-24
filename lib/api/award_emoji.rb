@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class AwardEmoji < Grape::API
+  class AwardEmoji < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! }
@@ -27,7 +27,6 @@ module API
           ":id/#{awardable_string}/:#{awardable_id_string}/award_emoji",
           ":id/#{awardable_string}/:#{awardable_id_string}/notes/:note_id/award_emoji"
         ].each do |endpoint|
-
           desc 'Get a list of project +awardable+ award emoji' do
             detail 'This feature was introduced in 8.9'
             success Entities::AwardEmoji
@@ -128,6 +127,8 @@ module API
         case awardable
         when Note
           read_ability(awardable.noteable)
+        when Snippet, ProjectSnippet
+          :read_snippet
         else
           :"read_#{awardable.class.to_s.underscore}"
         end

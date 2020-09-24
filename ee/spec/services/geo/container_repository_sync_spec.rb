@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::ContainerRepositorySync, :geo do
+RSpec.describe Geo::ContainerRepositorySync, :geo do
   let(:group) { create(:group, name: 'group') }
   let(:project) { create(:project, path: 'test', group: group) }
 
@@ -31,7 +31,7 @@ describe Geo::ContainerRepositorySync, :geo do
           })
       .to_return(
         status: 200,
-        body: JSON.dump(tags: %w(obsolete)),
+        body: Gitlab::Json.dump(tags: %w(obsolete)),
         headers: { 'Content-Type' => 'application/json' })
 
     stub_request(:get, "http://primary.registry.gitlab/v2/group/test/my_image/tags/list")
@@ -39,7 +39,7 @@ describe Geo::ContainerRepositorySync, :geo do
         headers: { 'Authorization' => 'bearer pull-token' })
       .to_return(
         status: 200,
-        body: JSON.dump(tags: %w(tag-to-sync)),
+        body: Gitlab::Json.dump(tags: %w(tag-to-sync)),
         headers: { 'Content-Type' => 'application/json' })
 
     stub_request(:head, "http://primary.registry.gitlab/v2/group/test/my_image/manifests/tag-to-sync")
@@ -80,9 +80,26 @@ describe Geo::ContainerRepositorySync, :geo do
   describe 'execute' do
     it 'determines list of tags to sync and to remove correctly' do
       expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:aaaaa')
-      expect_any_instance_of(described_class).to receive(:sync_tag).with('tag-to-sync').and_call_original
+      expect_next_instance_of(described_class) do |instance|
+        expect(instance).to receive(:sync_tag).with('tag-to-sync').and_call_original
+      end
 
       described_class.new(container_repository).execute
+    end
+
+    context 'when primary repository has no tags' do
+      it 'considers the primary repository empty and does not fail' do
+        stub_request(:get, "http://primary.registry.gitlab/v2/group/test/my_image/tags/list")
+          .with(
+            headers: { 'Authorization' => 'bearer pull-token' })
+          .to_return(
+            status: 200,
+            headers: { 'Content-Type' => 'application/json' })
+
+        expect(container_repository).to receive(:delete_tag_by_digest).with('sha256:aaaaa')
+
+        described_class.new(container_repository).execute
+      end
     end
   end
 end

@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Gitlab::Graphql::Authorization' do
-  set(:user) { create(:user) }
+RSpec.describe 'Gitlab::Graphql::Authorization' do
+  include GraphqlHelpers
 
+  let_it_be(:user) { create(:user) }
   let(:permission_single) { :foo }
   let(:permission_collection) { [:foo, :bar] }
   let(:test_object) { double(name: 'My name') }
-  let(:query_string) { '{ item() { name } }' }
+  let(:query_string) { '{ item { name } }' }
   let(:result) { execute_query(query_type)['data'] }
 
   subject { result['item'] }
@@ -176,7 +177,7 @@ describe 'Gitlab::Graphql::Authorization' do
   end
 
   describe 'type authorizations when applied to a relay connection' do
-    let(:query_string) { '{ item() { edges { node { name } } } }' }
+    let(:query_string) { '{ item { edges { node { name } } } }' }
     let(:second_test_object) { double(name: 'Second thing') }
 
     let(:type) do
@@ -256,6 +257,7 @@ describe 'Gitlab::Graphql::Authorization' do
         type.field :id, GraphQL::ID_TYPE, null: false
       end
     end
+
     let(:project_type) do |type|
       type_factory do |type|
         type.graphql_name 'FakeProjectType'
@@ -263,11 +265,13 @@ describe 'Gitlab::Graphql::Authorization' do
                    resolve: -> (_, _, _) { Issue.where(project: [visible_project, other_project]).order(id: :asc) }
       end
     end
+
     let(:query_type) do
       query_factory do |query|
         query.field :test_project, project_type, null: false, resolve: -> (_, _, _) { visible_project }
       end
     end
+
     let(:query_string) do
       <<~QRY
         { testProject { testIssues(first: 3) { edges { node { id } } } } }
@@ -299,38 +303,5 @@ describe 'Gitlab::Graphql::Authorization' do
     permissions.each do |permission|
       allow(Ability).to receive(:allowed?).with(user, permission, test_object).and_return(true)
     end
-  end
-
-  def type_factory
-    Class.new(Types::BaseObject) do
-      graphql_name 'TestType'
-
-      field :name, GraphQL::STRING_TYPE, null: true
-
-      yield(self) if block_given?
-    end
-  end
-
-  def query_factory
-    Class.new(Types::BaseObject) do
-      graphql_name 'TestQuery'
-
-      yield(self) if block_given?
-    end
-  end
-
-  def execute_query(query_type)
-    schema = Class.new(GraphQL::Schema) do
-      use Gitlab::Graphql::Authorize
-      use Gitlab::Graphql::Connections
-
-      query(query_type)
-    end
-
-    schema.execute(
-      query_string,
-      context: { current_user: user },
-      variables: {}
-    )
   end
 end

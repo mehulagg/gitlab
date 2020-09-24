@@ -1,19 +1,17 @@
 <script>
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import tooltip from '~/vue_shared/directives/tooltip';
-import { GlLoadingIcon } from '@gitlab/ui';
-
-import Icon from '~/vue_shared/components/icon.vue';
 
 const MARK_TEXT = __('Mark as done');
-const TODO_TEXT = __('Add a To Do');
+const TODO_TEXT = __('Add a To-Do');
 
 export default {
   directives: {
     tooltip,
   },
   components: {
-    Icon,
+    GlIcon,
     GlLoadingIcon,
   },
   props: {
@@ -59,6 +57,9 @@ export default {
     collapsedButtonIcon() {
       return this.isTodo ? 'todo-done' : 'todo-add';
     },
+    collapsedButtonIconVisible() {
+      return this.collapsed && !this.isActionActive;
+    },
   },
   methods: {
     handleButtonClick() {
@@ -82,8 +83,12 @@ export default {
     data-boundary="viewport"
     @click="handleButtonClick"
   >
-    <icon v-show="collapsed" :class="collapsedButtonIconClasses" :name="collapsedButtonIcon" />
-    <span v-show="!collapsed" class="issuable-todo-inner"> {{ buttonLabel }} </span>
+    <gl-icon
+      v-show="collapsedButtonIconVisible"
+      :class="collapsedButtonIconClasses"
+      :name="collapsedButtonIcon"
+    />
+    <span v-show="!collapsed" class="issuable-todo-inner">{{ buttonLabel }}</span>
     <gl-loading-icon v-show="isActionActive" :inline="true" />
   </button>
 </template>

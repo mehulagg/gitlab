@@ -7,10 +7,14 @@ module QA
     # creating it if it doesn't yet exist.
     #
     class Sandbox < Base
+      include Members
+
       attr_accessor :path
 
       attribute :id
       attribute :runners_token
+      attribute :name
+      attribute :full_path
 
       def initialize
         @path = Runtime::Namespace.sandbox_name
@@ -39,6 +43,14 @@ module QA
         resource_web_url(api_get)
       rescue ResourceNotFoundError
         super
+
+        # If the group was just created the runners token might not be
+        # available via the API immediately.
+        Support::Retrier.retry_on_exception(sleep_interval: 5) do
+          resource = resource_web_url(api_get)
+          populate(:runners_token)
+          resource
+        end
       end
 
       def api_get_path
@@ -51,6 +63,10 @@ module QA
 
       def api_post_path
         '/groups'
+      end
+
+      def api_delete_path
+        "/groups/#{id}"
       end
 
       def api_post_body

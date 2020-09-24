@@ -6,7 +6,7 @@ module Git
       execute_branch_hooks
 
       super.tap do
-        enqueue_update_gpg_signatures
+        enqueue_update_signatures
       end
     end
 
@@ -75,6 +75,7 @@ module Git
 
     def branch_change_hooks
       enqueue_process_commit_messages
+      enqueue_jira_connect_sync_messages
     end
 
     def branch_remove_hooks
@@ -103,14 +104,33 @@ module Git
       end
     end
 
-    def enqueue_update_gpg_signatures
-      unsigned = GpgSignature.unsigned_commit_shas(limited_commits.map(&:sha))
+    def enqueue_jira_connect_sync_messages
+      return unless project.jira_subscription_exists?
+
+      branch_to_sync = branch_name if Atlassian::JiraIssueKeyExtractor.has_keys?(branch_name)
+      commits_to_sync = limited_commits.select { |commit| Atlassian::JiraIssueKeyExtractor.has_keys?(commit.safe_message) }.map(&:sha)
+
+      if branch_to_sync || commits_to_sync.any?
+        JiraConnect::SyncBranchWorker.perform_async(project.id, branch_to_sync, commits_to_sync)
+      end
+    end
+
+    def unsigned_x509_shas(commits)
+      X509CommitSignature.unsigned_commit_shas(commits.map(&:sha))
+    end
+
+    def unsigned_gpg_shas(commits)
+      GpgSignature.unsigned_commit_shas(commits.map(&:sha))
+    end
+
+    def enqueue_update_signatures
+      unsigned = unsigned_x509_shas(limited_commits) & unsigned_gpg_shas(limited_commits)
       return if unsigned.empty?
 
       signable = Gitlab::Git::Commit.shas_with_signatures(project.repository, unsigned)
       return if signable.empty?
 
-      CreateGpgSignatureWorker.perform_async(signable, project.id)
+      CreateCommitSignatureWorker.perform_async(signable, project.id)
     end
 
     # It's not sufficient to just check for a blank SHA as it's possible for the

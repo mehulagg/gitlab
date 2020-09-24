@@ -6,6 +6,10 @@ module EE
       false
     end
 
+    def group_managed_account?
+      false
+    end
+
     private
 
     def override_member_permission

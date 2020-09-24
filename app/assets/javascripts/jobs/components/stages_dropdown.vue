@@ -1,13 +1,11 @@
 <script>
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { GlLink } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
     CiIcon,
-    Icon,
     GlLink,
   },
   props: {
@@ -26,7 +24,7 @@ export default {
   },
   computed: {
     hasRef() {
-      return !_.isEmpty(this.pipeline.ref);
+      return !isEmpty(this.pipeline.ref);
     },
     isTriggeredByMergeRequest() {
       return Boolean(this.pipeline.merge_request);
@@ -83,7 +81,7 @@ export default {
     <button
       type="button"
       data-toggle="dropdown"
-      class="js-selected-stage dropdown-menu-toggle prepend-top-8"
+      class="js-selected-stage dropdown-menu-toggle gl-mt-3"
     >
       {{ selectedStage }} <i class="fa fa-chevron-down"></i>
     </button>

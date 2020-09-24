@@ -1,15 +1,14 @@
 <script>
-import _ from 'underscore';
+/* eslint-disable vue/no-v-html */
+import { uniqueId } from 'lodash';
 import { mapActions } from 'vuex';
 import { GlButton } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   name: 'ManualVariablesForm',
   components: {
     GlButton,
-    Icon,
   },
   props: {
     action: {
@@ -19,7 +18,9 @@ export default {
       validator(value) {
         return (
           value === null ||
-          (_.has(value, 'path') && _.has(value, 'method') && _.has(value, 'button_title'))
+          (Object.prototype.hasOwnProperty.call(value, 'path') &&
+            Object.prototype.hasOwnProperty.call(value, 'method') &&
+            Object.prototype.hasOwnProperty.call(value, 'button_title'))
         );
       },
     },
@@ -78,7 +79,7 @@ export default {
       const newVariable = {
         key: this.key,
         secret_value: this.secretValue,
-        id: _.uniqueId(),
+        id: uniqueId(),
       };
 
       this.variables.push(newVariable);
@@ -98,7 +99,7 @@ export default {
 };
 </script>
 <template>
-  <div class="js-manual-vars-form col-12">
+  <div class="col-12" data-testid="manual-vars-form">
     <label>{{ s__('CiVariables|Variables') }}</label>
 
     <div class="ci-table">
@@ -110,7 +111,7 @@ export default {
       <div v-for="variable in variables" :key="variable.id" class="gl-responsive-table-row">
         <div class="table-section section-50">
           <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Key') }}</div>
-          <div class="table-mobile-content append-right-10">
+          <div class="table-mobile-content gl-mr-3">
             <input
               :ref="`${$options.inputTypes.key}-${variable.id}`"
               v-model="variable.key"
@@ -122,7 +123,7 @@ export default {
 
         <div class="table-section section-50">
           <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Value') }}</div>
-          <div class="table-mobile-content append-right-10">
+          <div class="table-mobile-content gl-mr-3">
             <input
               :ref="`${$options.inputTypes.value}-${variable.id}`"
               v-model="variable.secret_value"
@@ -135,16 +136,19 @@ export default {
         <div class="table-section section-10">
           <div class="table-mobile-header" role="rowheader"></div>
           <div class="table-mobile-content justify-content-end">
-            <gl-button class="btn-transparent btn-blank w-25" @click="deleteVariable(variable.id)">
-              <icon name="clear" />
-            </gl-button>
+            <gl-button
+              category="tertiary"
+              icon="clear"
+              :aria-label="__('Delete variable')"
+              @click="deleteVariable(variable.id)"
+            />
           </div>
         </div>
       </div>
       <div class="gl-responsive-table-row">
         <div class="table-section section-50">
           <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Key') }}</div>
-          <div class="table-mobile-content append-right-10">
+          <div class="table-mobile-content gl-mr-3">
             <input
               ref="inputKey"
               v-model="key"
@@ -156,7 +160,7 @@ export default {
 
         <div class="table-section section-50">
           <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Value') }}</div>
-          <div class="table-mobile-content append-right-10">
+          <div class="table-mobile-content gl-mr-3">
             <input
               ref="inputSecretValue"
               v-model="secretValue"
@@ -167,11 +171,16 @@ export default {
         </div>
       </div>
     </div>
-    <div class="d-flex prepend-top-default justify-content-center">
+    <div class="d-flex gl-mt-3 justify-content-center">
       <p class="text-muted" v-html="helpText"></p>
     </div>
     <div class="d-flex justify-content-center">
-      <gl-button variant="primary" @click="triggerManualJob(variables)">
+      <gl-button
+        variant="info"
+        category="primary"
+        :aria-label="__('Trigger manual job')"
+        @click="triggerManualJob(variables)"
+      >
         {{ action.button_title }}
       </gl-button>
     </div>

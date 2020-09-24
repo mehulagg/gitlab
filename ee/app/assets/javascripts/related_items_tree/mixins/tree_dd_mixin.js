@@ -1,7 +1,7 @@
 import Draggable from 'vuedraggable';
 
 import defaultSortableConfig from '~/sortable/sortable_config';
-import { idProp, relativePositions } from '../constants';
+import { idProp, relativePositions, treeItemChevronBtnClassName } from '../constants';
 
 export default {
   computed: {
@@ -12,11 +12,16 @@ export default {
       const options = {
         ...defaultSortableConfig,
         fallbackOnBody: false,
-        group: this.parentItem.reference,
+        group: 'sortable-container',
         tag: 'ul',
         'ghost-class': 'tree-item-drag-active',
         'data-parent-reference': this.parentItem.reference,
+        'data-parent-id': this.parentItem.id,
         value: this.children,
+        // This filters out/ignores all the chevron buttons (used for
+        // expanding and collapsing epic tree items) so the drag action
+        // can only be performed on the actual item card.
+        filter: `.${treeItemChevronBtnClassName}`,
       };
 
       return this.userSignedIn ? options : {};
@@ -100,22 +105,33 @@ export default {
      *
      * @param {object} event Object representing drag end event.
      */
-    handleDragOnEnd({ oldIndex, newIndex }) {
+    handleDragOnEnd(params) {
+      const { oldIndex, newIndex, from, to } = params;
       document.body.classList.remove('is-dragging');
-
-      // If both old and new index of target are same,
-      // nothing was moved, we do an early return.
-      if (oldIndex === newIndex) return;
 
       const targetItem = this.children[oldIndex];
 
-      this.reorderItem({
-        treeReorderMutation: this.getTreeReorderMutation({ oldIndex, newIndex, targetItem }),
-        parentItem: this.parentItem,
-        targetItem,
-        oldIndex,
-        newIndex,
-      });
+      if (from === to) {
+        // If both old and new index of target are same,
+        // nothing was moved, we do an early return.
+        if (oldIndex === newIndex) return;
+
+        this.reorderItem({
+          treeReorderMutation: this.getTreeReorderMutation({ oldIndex, newIndex, targetItem }),
+          parentItem: this.parentItem,
+          targetItem,
+          oldIndex,
+          newIndex,
+        });
+      } else {
+        this.moveItem({
+          oldParentItem: this.parentItem,
+          newParentItem: to.dataset,
+          targetItem,
+          oldIndex,
+          newIndex,
+        });
+      }
     },
   },
 };

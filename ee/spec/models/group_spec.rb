@@ -2,12 +2,8 @@
 
 require 'spec_helper'
 
-describe Group do
+RSpec.describe Group do
   let(:group) { create(:group) }
-
-  it_behaves_like Vulnerable do
-    let(:vulnerable) { group }
-  end
 
   it { is_expected.to include_module(EE::Group) }
 
@@ -19,8 +15,18 @@ describe Group do
     it { is_expected.to belong_to(:file_template_project).class_name('Project').without_validating_presence }
     it { is_expected.to have_many(:dependency_proxy_blobs) }
     it { is_expected.to have_many(:cycle_analytics_stages) }
+    it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:ip_restrictions) }
+    it { is_expected.to have_many(:allowed_email_domains) }
     it { is_expected.to have_one(:dependency_proxy_setting) }
+    it { is_expected.to have_one(:deletion_schedule) }
+    it { is_expected.to have_one(:group_wiki_repository) }
+    it { is_expected.to belong_to(:push_rule) }
+
+    it_behaves_like 'model with wiki' do
+      let(:container) { create(:group, :nested, :wiki_repo) }
+      let(:container_without_wiki) { create(:group, :nested) }
+    end
   end
 
   describe 'scopes' do
@@ -47,9 +53,76 @@ describe Group do
         expect(group.checked_file_template_project).to be_present
       end
     end
+
+    describe '.aimed_for_deletion' do
+      let!(:date) { 10.days.ago }
+
+      subject(:relation) { described_class.aimed_for_deletion(date) }
+
+      it 'only includes groups that are marked for deletion on or before the specified date' do
+        group_not_marked_for_deletion = create(:group)
+
+        group_marked_for_deletion_after_specified_date = create(:group_with_deletion_schedule,
+                                                                marked_for_deletion_on: date + 2.days)
+
+        group_marked_for_deletion_before_specified_date = create(:group_with_deletion_schedule,
+                                                                 marked_for_deletion_on: date - 2.days)
+
+        group_marked_for_deletion_on_specified_date = create(:group_with_deletion_schedule,
+                                                             marked_for_deletion_on: date)
+
+        expect(relation).to include(group_marked_for_deletion_before_specified_date,
+                                    group_marked_for_deletion_on_specified_date)
+        expect(relation).not_to include(group_marked_for_deletion_after_specified_date,
+                                        group_not_marked_for_deletion)
+      end
+    end
+
+    describe '.for_epics' do
+      let_it_be(:epic1) { create(:epic) }
+      let_it_be(:epic2) { create(:epic) }
+
+      it 'returns groups only for selected epics' do
+        epics = ::Epic.where(id: epic1)
+        expect(described_class.for_epics(epics)).to contain_exactly(epic1.group)
+      end
+    end
+
+    describe '.with_managed_accounts_enabled' do
+      subject { described_class.with_managed_accounts_enabled }
+
+      let!(:group_with_with_managed_accounts_enabled) { create(:group_with_managed_accounts) }
+      let!(:group_without_managed_accounts_enabled) { create(:group) }
+
+      it 'includes the groups that has managed accounts enabled' do
+        expect(subject).to contain_exactly(group_with_with_managed_accounts_enabled)
+      end
+    end
+
+    describe '.with_no_pat_expiry_policy' do
+      subject { described_class.with_no_pat_expiry_policy }
+
+      let!(:group_with_pat_expiry_policy) { create(:group, max_personal_access_token_lifetime: 1) }
+      let!(:group_with_no_pat_expiry_policy) { create(:group, max_personal_access_token_lifetime: nil) }
+
+      it 'includes the groups that has no PAT expiry policy set' do
+        expect(subject).to contain_exactly(group_with_no_pat_expiry_policy)
+      end
+    end
   end
 
   describe 'validations' do
+    context 'max_personal_access_token_lifetime' do
+      it { is_expected.to allow_value(1).for(:max_personal_access_token_lifetime) }
+      it { is_expected.to allow_value(nil).for(:max_personal_access_token_lifetime) }
+      it { is_expected.to allow_value(10).for(:max_personal_access_token_lifetime) }
+      it { is_expected.to allow_value(365).for(:max_personal_access_token_lifetime) }
+      it { is_expected.not_to allow_value("value").for(:max_personal_access_token_lifetime) }
+      it { is_expected.not_to allow_value(2.5).for(:max_personal_access_token_lifetime) }
+      it { is_expected.not_to allow_value(-5).for(:max_personal_access_token_lifetime) }
+      it { is_expected.not_to allow_value(366).for(:max_personal_access_token_lifetime) }
+    end
+
     context 'validates if custom_project_templates_group_id is allowed' do
       let(:subgroup_1) { create(:group, parent: group) }
 
@@ -142,44 +215,141 @@ describe Group do
     end
   end
 
-  describe '#vulnerable_projects' do
-    it "fetches the group's projects that have vulnerabilities" do
-      vulnerable_project = create(:project, namespace: group)
-      _safe_project = create(:project, namespace: group)
-      create(:vulnerabilities_occurrence, project: vulnerable_project)
+  describe '.groups_user_can_read_epics' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:private_group) { create(:group, :private) }
 
-      vulnerable_projects = group.vulnerable_projects
-
-      expect(vulnerable_projects.count).to be(1)
-      expect(vulnerable_projects.first).to eq(vulnerable_project)
+    subject do
+      groups = described_class.where(id: private_group.id)
+      described_class.groups_user_can_read_epics(groups, user)
     end
 
-    it 'does not include projects that only have dismissed vulnerabilities' do
-      project = create(:project, namespace: group)
-      vulnerability = create(:vulnerabilities_occurrence, project: project)
-      create(
-        :vulnerability_feedback,
-        project_fingerprint: vulnerability.project_fingerprint,
-        feedback_type: :dismissal
-      )
-
-      vulnerable_projects = group.vulnerable_projects
-
-      expect(vulnerable_projects).to be_empty
+    it 'does not return inaccessible groups' do
+      expect(subject).to be_empty
     end
 
-    it 'only uses 1 query' do
-      project_one = create(:project, namespace: group)
-      project_two = create(:project, namespace: group)
-      create(:vulnerabilities_occurrence, project: project_one)
-      dismissed_vulnerability = create(:vulnerabilities_occurrence, project: project_two)
-      create(
-        :vulnerability_feedback,
-        project_fingerprint: dismissed_vulnerability.project_fingerprint,
-        feedback_type: :dismissal
-      )
+    context 'with authorized user' do
+      before do
+        private_group.add_developer(user)
+      end
 
-      expect { group.vulnerable_projects }.not_to exceed_query_limit(1)
+      context 'with epics enabled' do
+        before do
+          stub_licensed_features(epics: true)
+        end
+
+        it 'returns epic groups user can access' do
+          expect(subject).to eq [private_group]
+        end
+      end
+
+      context 'with epics disabled' do
+        before do
+          stub_licensed_features(epics: false)
+        end
+
+        it 'returns an empty list' do
+          expect(subject).to be_empty
+        end
+      end
+    end
+
+    context 'getting group root ancestor' do
+      let_it_be(:subgroup1) { create(:group, :private, parent: private_group) }
+      let_it_be(:subgroup2) { create(:group, :private, parent: subgroup1) }
+
+      shared_examples 'group root ancestor' do
+        it 'does not exceed SQL queries count' do
+          groups = described_class.where(id: subgroup1)
+          control_count = ActiveRecord::QueryRecorder.new do
+            described_class.groups_user_can_read_epics(groups, user, params)
+          end.count
+
+          groups = described_class.where(id: [subgroup1, subgroup2])
+          expect { described_class.groups_user_can_read_epics(groups, user, params) }
+            .not_to exceed_query_limit(control_count + extra_query_count)
+        end
+      end
+
+      context 'when same_root is false' do
+        let(:params) { { same_root: false } }
+
+        # extra 6 queries:
+        # * getting root_ancestor
+        # * getting root ancestor's saml_provider
+        # * check if group has projects
+        # * max_member_access_for_user_from_shared_groups
+        # * max_member_access_for_user
+        # * self_and_ancestors_ids
+        it_behaves_like 'group root ancestor' do
+          let(:extra_query_count) { 6 }
+        end
+      end
+
+      context 'when same_root is true' do
+        let(:params) { { same_root: true } }
+
+        # avoids 2 queries from the list above:
+        # * getting root ancestor
+        # * getting root ancestor's saml_provider
+        it_behaves_like 'group root ancestor' do
+          let(:extra_query_count) { 4 }
+        end
+      end
+    end
+  end
+
+  describe '#vulnerabilities' do
+    subject { group.vulnerabilities }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability) { create(:vulnerability, project: group_project) }
+    let!(:subgroup_vulnerability) { create(:vulnerability, project: subgroup_project) }
+    let!(:archived_vulnerability) { create(:vulnerability, project: archived_project) }
+    let!(:deleted_vulnerability) { create(:vulnerability, project: deleted_project) }
+
+    it 'returns vulnerabilities for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability, subgroup_vulnerability)
+    end
+  end
+
+  describe '#vulnerability_scanners' do
+    subject { group.vulnerability_scanners }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_scanner) { create(:vulnerabilities_scanner, project: group_project) }
+    let!(:subgroup_vulnerability_scanner) { create(:vulnerabilities_scanner, project: subgroup_project) }
+    let!(:archived_vulnerability_scanner) { create(:vulnerabilities_scanner, project: archived_project) }
+    let!(:deleted_vulnerability_scanner) { create(:vulnerabilities_scanner, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_scanner, subgroup_vulnerability_scanner)
+    end
+  end
+
+  describe '#vulnerability_historical_statistics' do
+    subject { group.vulnerability_historical_statistics }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: group_project) }
+    let!(:subgroup_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: subgroup_project) }
+    let!(:archived_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: archived_project) }
+    let!(:deleted_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_historical_statistic, subgroup_vulnerability_historical_statistic)
     end
   end
 
@@ -236,8 +406,6 @@ describe Group do
   end
 
   describe '#file_template_project' do
-    it { expect(group.private_methods).to include(:file_template_project) }
-
     before do
       stub_licensed_features(custom_file_templates_for_namespace: true)
     end
@@ -285,6 +453,101 @@ describe Group do
 
       it 'returns a comma separated string of ranges of its ip_restriction records' do
         expect(group.ip_restriction_ranges).to eq('192.168.0.0/24,10.0.0.0/8')
+      end
+    end
+  end
+
+  describe '#root_ancestor_ip_restrictions' do
+    let(:root_group) { create(:group) }
+    let!(:ip_restriction) { create(:ip_restriction, group: root_group) }
+
+    it 'returns the ip restrictions configured for the root group' do
+      nested_group = create(:group, parent: root_group)
+      deep_nested_group = create(:group, parent: nested_group)
+      very_deep_nested_group = create(:group, parent: deep_nested_group)
+
+      expect(root_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+      expect(nested_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+      expect(deep_nested_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+      expect(very_deep_nested_group.root_ancestor_ip_restrictions).to contain_exactly(ip_restriction)
+    end
+  end
+
+  describe '#allowed_email_domains_list' do
+    subject { group.allowed_email_domains_list }
+
+    context 'group with no associated allowed_email_domains records' do
+      it 'returns nil' do
+        expect(subject).to be_nil
+      end
+    end
+
+    context 'group with associated allowed_email_domains records' do
+      let(:domains) { ['acme.com', 'twitter.com'] }
+
+      before do
+        domains.each do |domain|
+          create(:allowed_email_domain, group: group, domain: domain)
+        end
+      end
+
+      it 'returns a comma separated string of domains of its allowed_email_domains records' do
+        expect(subject).to eq(domains.join(","))
+      end
+    end
+  end
+
+  describe '#root_ancestor_allowed_email_domains' do
+    let(:root_group) { create(:group) }
+    let!(:allowed_email_domain) { create(:allowed_email_domain, group: root_group) }
+
+    it 'returns the email domain restrictions configured for the root group' do
+      nested_group = create(:group, parent: root_group)
+      deep_nested_group = create(:group, parent: nested_group)
+      very_deep_nested_group = create(:group, parent: deep_nested_group)
+
+      expect(root_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+      expect(nested_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+      expect(deep_nested_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+      expect(very_deep_nested_group.root_ancestor_allowed_email_domains).to contain_exactly(allowed_email_domain)
+    end
+  end
+
+  describe '#predefined_push_rule' do
+    context 'group with no associated push_rules record' do
+      let!(:sample) { create(:push_rule_sample) }
+
+      it 'returns instance push rule' do
+        expect(group.predefined_push_rule).to eq(sample)
+      end
+    end
+
+    context 'group with associated push_rules record' do
+      context 'with its own push rule' do
+        let(:push_rule) { create(:push_rule) }
+
+        it 'returns its own push rule' do
+          group.update(push_rule: push_rule)
+
+          expect(group.predefined_push_rule).to eq(push_rule)
+        end
+      end
+
+      context 'with push rule from ancestor' do
+        let(:group) { create(:group, push_rule: push_rule) }
+        let(:push_rule) { create(:push_rule) }
+        let(:subgroup_1) { create(:group, parent: group) }
+        let!(:subgroup_1_1) { create(:group, parent: subgroup_1) }
+
+        it 'returns push rule from closest ancestor' do
+          expect(subgroup_1_1.predefined_push_rule).to eq(push_rule)
+        end
+      end
+    end
+
+    context 'there are no push rules' do
+      it 'returns nil' do
+        expect(group.predefined_push_rule).to be_nil
       end
     end
   end
@@ -385,22 +648,11 @@ describe Group do
           is_expected.to be true
         end
 
-        it 'returns true for groups with group template already set within grace period' do
+        it 'returns false for groups with group template already set but not in proper plan' do
           group.update!(custom_project_templates_group_id: create(:group, parent: group).id)
           group.reload
 
-          Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE - 1.day) do
-            is_expected.to be true
-          end
-        end
-
-        it 'returns false for groups with group template already set after grace period' do
-          group.update!(custom_project_templates_group_id: create(:group, parent: group).id)
-          group.reload
-
-          Timecop.freeze(GroupsWithTemplatesFinder::CUT_OFF_DATE + 1.day) do
-            is_expected.to be false
-          end
+          is_expected.to be false
         end
       end
 
@@ -409,8 +661,73 @@ describe Group do
           stub_licensed_features(group_project_templates: false)
         end
 
-        it 'returns false unlicensed instance' do
+        it 'returns false for unlicensed instance' do
           is_expected.to be false
+        end
+      end
+    end
+  end
+
+  describe '#minimal_access_role_allowed?' do
+    subject { group.minimal_access_role_allowed? }
+
+    context 'licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      it 'returns true for licensed instance' do
+        is_expected.to be true
+      end
+
+      it 'returns false for subgroup in licensed instance' do
+        expect(create(:group, parent: group).minimal_access_role_allowed?).to be false
+      end
+    end
+
+    context 'unlicensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+      end
+
+      it 'returns false unlicensed instance' do
+        is_expected.to be false
+      end
+    end
+  end
+
+  describe '#member?' do
+    subject { group.member?(user) }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, group: group)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      context 'when group is a subgroup' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when group is a top-level group' do
+        it { is_expected.to be_truthy }
+
+        it 'accepts higher level as argument' do
+          expect(group.member?(user, ::Gitlab::Access::DEVELOPER)).to be_falsey
         end
       end
     end
@@ -449,8 +766,8 @@ describe Group do
     end
   end
 
-  describe '#beta_feature_available?' do
-    it_behaves_like 'an entity with beta feature support' do
+  describe '#alpha/beta_feature_available?' do
+    it_behaves_like 'an entity with alpha/beta feature support' do
       let(:entity) { group }
     end
   end
@@ -513,5 +830,286 @@ describe Group do
         expect(insights_config).to eq(key: 'monthlyBugsCreated')
       end
     end
+  end
+
+  describe '#self_or_ancestor_marked_for_deletion' do
+    context 'delayed deletion feature is not available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
+        create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
+      end
+
+      it 'returns nil' do
+        expect(group.self_or_ancestor_marked_for_deletion).to be_nil
+      end
+    end
+
+    context 'delayed deletion feature is available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+      end
+
+      context 'the group has been marked for deletion' do
+        before do
+          create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
+        end
+
+        it 'returns the group' do
+          expect(group.self_or_ancestor_marked_for_deletion).to eq(group)
+        end
+      end
+
+      context 'the parent group has been marked for deletion' do
+        let(:parent_group) { create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago) }
+        let(:group) { create(:group, parent: parent_group) }
+
+        it 'returns the parent group' do
+          expect(group.self_or_ancestor_marked_for_deletion).to eq(parent_group)
+        end
+      end
+
+      context 'no group has been marked for deletion' do
+        let(:parent_group) { create(:group) }
+        let(:group) { create(:group, parent: parent_group) }
+
+        it 'returns nil' do
+          expect(group.self_or_ancestor_marked_for_deletion).to be_nil
+        end
+      end
+
+      context 'ordering' do
+        let(:group_a) { create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago) }
+        let(:subgroup_a) { create(:group_with_deletion_schedule, marked_for_deletion_on: 1.day.ago, parent: group_a) }
+        let(:group) { create(:group, parent: subgroup_a) }
+
+        it 'returns the first group that is marked for deletion, up its ancestry chain' do
+          expect(group.self_or_ancestor_marked_for_deletion).to eq(subgroup_a)
+        end
+      end
+    end
+  end
+
+  describe '#marked_for_deletion?' do
+    subject { group.marked_for_deletion? }
+
+    context 'delayed deletion feature is available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+      end
+
+      context 'when the group is marked for delayed deletion' do
+        before do
+          create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when the group is not marked for delayed deletion' do
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'delayed deletion feature is not available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
+      end
+
+      context 'when the group is marked for delayed deletion' do
+        before do
+          create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when the group is not marked for delayed deletion' do
+        it { is_expected.to be_falsey }
+      end
+    end
+  end
+
+  describe '#adjourned_deletion?' do
+    subject { group.adjourned_deletion? }
+
+    shared_examples_for 'returns false' do
+      it { is_expected.to be_falsey }
+    end
+
+    shared_examples_for 'returns true' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'delayed deletion feature is available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+      end
+
+      context 'when delayed deletion period is set to more than 0' do
+        before do
+          stub_application_setting(deletion_adjourned_period: 1)
+        end
+
+        it_behaves_like 'returns true'
+      end
+
+      context 'when delayed deletion period is set to 0' do
+        before do
+          stub_application_setting(deletion_adjourned_period: 0)
+        end
+
+        it_behaves_like 'returns false'
+      end
+    end
+
+    context 'delayed deletion feature is not available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
+      end
+
+      context 'when delayed deletion period is set to more than 0' do
+        before do
+          stub_application_setting(deletion_adjourned_period: 1)
+        end
+
+        it_behaves_like 'returns false'
+      end
+
+      context 'when delayed deletion period is set to 0' do
+        before do
+          stub_application_setting(deletion_adjourned_period: 0)
+        end
+
+        it_behaves_like 'returns false'
+      end
+    end
+  end
+
+  describe '#personal_access_token_expiration_policy_available?' do
+    subject { group.personal_access_token_expiration_policy_available? }
+
+    let(:group) { build(:group) }
+
+    context 'when the group does not enforce managed accounts' do
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the group enforces managed accounts' do
+      before do
+        allow(group).to receive(:enforced_group_managed_accounts?).and_return(true)
+      end
+
+      context 'with `personal_access_token_expiration_policy` licensed' do
+        before do
+          stub_licensed_features(personal_access_token_expiration_policy: true)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'with `personal_access_token_expiration_policy` not licensed' do
+        before do
+          stub_licensed_features(personal_access_token_expiration_policy: false)
+        end
+
+        it { is_expected.to be_falsey }
+      end
+    end
+  end
+
+  describe '#update_personal_access_tokens_lifetime' do
+    subject { group.update_personal_access_tokens_lifetime }
+
+    let(:limit) { 1 }
+    let(:group) { build(:group, max_personal_access_token_lifetime: limit) }
+
+    shared_examples_for 'it does not call the update lifetime service' do
+      it 'doesn not call the update lifetime service' do
+        expect(::PersonalAccessTokens::Groups::UpdateLifetimeService).not_to receive(:new)
+
+        subject
+      end
+    end
+
+    context 'when the group does not enforce managed accounts' do
+      it_behaves_like 'it does not call the update lifetime service'
+    end
+
+    context 'when the group enforces managed accounts' do
+      before do
+        allow(group).to receive(:enforced_group_managed_accounts?).and_return(true)
+      end
+
+      context 'with `personal_access_token_expiration_policy` not licensed' do
+        before do
+          stub_licensed_features(personal_access_token_expiration_policy: false)
+        end
+
+        it_behaves_like 'it does not call the update lifetime service'
+      end
+
+      context 'with `personal_access_token_expiration_policy` licensed' do
+        before do
+          stub_licensed_features(personal_access_token_expiration_policy: true)
+        end
+
+        context 'when the group does not enforce a PAT expiry policy' do
+          let(:limit) { nil }
+
+          it_behaves_like 'it does not call the update lifetime service'
+        end
+
+        context 'when the group enforces a PAT expiry policy' do
+          it 'executes the update lifetime service' do
+            expect_next_instance_of(::PersonalAccessTokens::Groups::UpdateLifetimeService, group) do |service|
+              expect(service).to receive(:execute)
+            end
+
+            subject
+          end
+        end
+      end
+    end
+  end
+
+  describe '#max_personal_access_token_lifetime_from_now' do
+    subject { group.max_personal_access_token_lifetime_from_now }
+
+    let(:days_from_now) { nil }
+    let(:group) { build(:group, max_personal_access_token_lifetime: days_from_now) }
+
+    context 'when max_personal_access_token_lifetime is defined' do
+      let(:days_from_now) { 30 }
+
+      it 'is a date time' do
+        expect(subject).to be_a Time
+      end
+
+      it 'is in the future' do
+        expect(subject).to be > Time.zone.now
+      end
+
+      it 'is in days_from_now' do
+        expect(subject.to_date - Date.today).to eq days_from_now
+      end
+    end
+
+    context 'when max_personal_access_token_lifetime is nil' do
+      it 'is nil' do
+        expect(subject).to be_nil
+      end
+    end
+  end
+
+  describe '#owners_emails' do
+    let(:user) { create(:user, email: 'bob@example.com') }
+
+    before do
+      group.add_owner(user)
+    end
+
+    subject { group.owners_emails }
+
+    it { is_expected.to match([user.email]) }
   end
 end

@@ -2,24 +2,28 @@
 
 require 'spec_helper'
 
-describe QuickActions::InterpretService do
-  let(:project) { create(:project, :public) }
-  let(:developer) { create(:user) }
-  let(:developer2) { create(:user) }
-  let(:issue) { create(:issue, project: project) }
+RSpec.describe QuickActions::InterpretService do
+  let_it_be(:public_project) { create(:project, :public) }
+  let_it_be(:repository_project) { create(:project, :repository) }
+  let_it_be(:project) { public_project }
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:developer2) { create(:user) }
+  let_it_be_with_reload(:issue) { create(:issue, project: project) }
   let(:milestone) { create(:milestone, project: project, title: '9.10') }
   let(:commit) { create(:commit, project: project) }
-  let(:inprogress) { create(:label, project: project, title: 'In Progress') }
-  let(:helmchart) { create(:label, project: project, title: 'Helm Chart Registry') }
-  let(:bug) { create(:label, project: project, title: 'Bug') }
-  let(:note) { build(:note, commit_id: merge_request.diff_head_sha) }
+  let_it_be(:inprogress) { create(:label, project: project, title: 'In Progress') }
+  let_it_be(:helmchart) { create(:label, project: project, title: 'Helm Chart Registry') }
+  let_it_be(:bug) { create(:label, project: project, title: 'Bug') }
   let(:service) { described_class.new(project, developer) }
+
+  before_all do
+    public_project.add_developer(developer)
+    repository_project.add_developer(developer)
+  end
 
   before do
     stub_licensed_features(multiple_issue_assignees: false,
                            multiple_merge_request_assignees: false)
-
-    project.add_developer(developer)
   end
 
   describe '#execute' do
@@ -146,7 +150,6 @@ describe QuickActions::InterpretService do
 
     shared_examples 'multiword label name starting without ~' do
       it 'fetches label ids and populates add_label_ids if content contains /label' do
-        helmchart # populate the label
         _, updates = service.execute(content, issuable)
 
         expect(updates).to eq(add_label_ids: [helmchart.id])
@@ -155,7 +158,6 @@ describe QuickActions::InterpretService do
 
     shared_examples 'label name is included in the middle of another label name' do
       it 'ignores the sublabel when the content contains the includer label name' do
-        helmchart # populate the label
         create(:label, project: project, title: 'Chart')
 
         _, updates = service.execute(content, issuable)
@@ -361,7 +363,7 @@ describe QuickActions::InterpretService do
         expect(updates).to eq(spend_time: {
                                 duration: 3600,
                                 user_id: developer.id,
-                                spent_at: DateTime.now.to_date
+                                spent_at: DateTime.current.to_date
                               })
       end
 
@@ -379,7 +381,7 @@ describe QuickActions::InterpretService do
         expect(updates).to eq(spend_time: {
                                 duration: -1800,
                                 user_id: developer.id,
-                                spent_at: DateTime.now.to_date
+                                spent_at: DateTime.current.to_date
                               })
       end
     end
@@ -492,8 +494,8 @@ describe QuickActions::InterpretService do
       end
     end
 
-    shared_examples 'merge command' do
-      let(:project) { create(:project, :repository) }
+    shared_examples 'merge immediately command' do
+      let(:project) { repository_project }
 
       it 'runs merge command if content contains /merge' do
         _, updates, _ = service.execute(content, issuable)
@@ -504,7 +506,18 @@ describe QuickActions::InterpretService do
       it 'returns them merge message' do
         _, _, message = service.execute(content, issuable)
 
-        expect(message).to eq('Scheduled to merge this merge request when the pipeline succeeds.')
+        expect(message).to eq('Merged this merge request.')
+      end
+    end
+
+    shared_examples 'merge automatically command' do
+      let(:project) { repository_project }
+
+      it 'runs merge command if content contains /merge and returns merge message' do
+        _, updates, message = service.execute(content, issuable)
+
+        expect(updates).to eq(merge: merge_request.diff_head_sha)
+        expect(message).to eq('Scheduled to merge this merge request (Merge when pipeline succeeds).')
       end
     end
 
@@ -570,7 +583,7 @@ describe QuickActions::InterpretService do
       it 'returns move issue failure message when the referenced issue is not found' do
         _, _, message = service.execute('/move invalid', issue)
 
-        expect(message).to eq("Failed to move this issue because target project doesn't exist.")
+        expect(message).to eq(_("Failed to move this issue because target project doesn't exist."))
       end
     end
 
@@ -589,7 +602,7 @@ describe QuickActions::InterpretService do
 
       context 'when issuable is already confidential' do
         before do
-          issuable.update(confidential: true)
+          issuable.update!(confidential: true)
         end
 
         it 'does not return the success message' do
@@ -675,9 +688,21 @@ describe QuickActions::InterpretService do
     context 'merge command' do
       let(:service) { described_class.new(project, developer, { merge_request_diff_head_sha: merge_request.diff_head_sha }) }
 
-      it_behaves_like 'merge command' do
+      it_behaves_like 'merge immediately command' do
         let(:content) { '/merge' }
         let(:issuable) { merge_request }
+      end
+
+      context 'when the head pipeline of merge request is running' do
+        before do
+          create(:ci_pipeline, :detached_merge_request_pipeline, merge_request: merge_request)
+          merge_request.update_head_pipeline
+        end
+
+        it_behaves_like 'merge automatically command' do
+          let(:content) { '/merge' }
+          let(:issuable) { merge_request }
+        end
       end
 
       context 'can not be merged when logged user does not have permissions' do
@@ -699,7 +724,7 @@ describe QuickActions::InterpretService do
       end
 
       context 'when sha is missing' do
-        let(:project) { create(:project, :repository) }
+        let(:project) { repository_project }
         let(:service) { described_class.new(project, developer, {}) }
 
         it 'precheck passes and returns merge command' do
@@ -769,7 +794,7 @@ describe QuickActions::InterpretService do
         let(:issuable) { issue }
       end
 
-      it_behaves_like 'assign command', :quarantine do
+      it_behaves_like 'assign command', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27989' do
         let(:content) { "/assign @#{developer.username} @#{developer2.username}" }
         let(:issuable) { merge_request }
       end
@@ -804,9 +829,22 @@ describe QuickActions::InterpretService do
       let(:issuable) { issue }
     end
 
-    it_behaves_like 'empty command' do
+    it_behaves_like 'empty command', "Failed to assign a user because no user was found." do
       let(:content) { '/assign' }
       let(:issuable) { issue }
+    end
+
+    context 'assigning to a group' do
+      let_it_be(:group) { create(:group, :public) }
+
+      before_all do
+        group.add_developer(create(:user))
+      end
+
+      it_behaves_like 'empty command', "Failed to assign a user because no user was found." do
+        let(:content) { "/assign #{group.to_reference}" }
+        let(:issuable) { issue }
+      end
     end
 
     context 'unassign command' do
@@ -821,7 +859,7 @@ describe QuickActions::InterpretService do
         end
 
         it 'returns the unassign message for all the assignee if content contains /unassign' do
-          issue.update(assignee_ids: [developer.id, developer2.id])
+          issue.update!(assignee_ids: [developer.id, developer2.id])
           _, _, message = service.execute(content, issue)
 
           expect(message).to eq("Removed assignees #{developer.to_reference} and #{developer2.to_reference}.")
@@ -837,7 +875,7 @@ describe QuickActions::InterpretService do
         end
 
         it 'returns the unassign message for all the assignee if content contains /unassign' do
-          merge_request.update(assignee_ids: [developer.id, developer2.id])
+          merge_request.update!(assignee_ids: [developer.id, developer2.id])
           _, _, message = service.execute(content, merge_request)
 
           expect(message).to eq("Removed assignees #{developer.to_reference} and #{developer2.to_reference}.")
@@ -856,9 +894,14 @@ describe QuickActions::InterpretService do
     end
 
     context 'only group milestones available' do
-      let(:group) { create(:group) }
-      let(:project) { create(:project, :public, namespace: group) }
-      let(:milestone) { create(:milestone, group: group, title: '10.0') }
+      let_it_be(:ancestor_group) { create(:group) }
+      let_it_be(:group) { create(:group, parent: ancestor_group) }
+      let_it_be(:project) { create(:project, :public, namespace: group) }
+      let_it_be(:milestone) { create(:milestone, group: ancestor_group, title: '10.0') }
+
+      before_all do
+        project.add_developer(developer)
+      end
 
       it_behaves_like 'milestone command' do
         let(:content) { "/milestone %#{milestone.title}" }
@@ -1125,7 +1168,7 @@ describe QuickActions::InterpretService do
 
         _, _, message = service.execute('/due invalid date', issue)
 
-        expect(message).to eq('Failed to set due date because the date format is invalid.')
+        expect(message).to eq(_('Failed to set due date because the date format is invalid.'))
       end
 
       it_behaves_like 'due command' do
@@ -1217,7 +1260,7 @@ describe QuickActions::InterpretService do
         end
 
         it_behaves_like 'empty command' do
-          let(:content) { "/copy_metadata imaginary#1234" }
+          let(:content) { "/copy_metadata imaginary##{non_existing_record_iid}" }
           let(:issuable) { issue }
         end
 
@@ -1251,12 +1294,12 @@ describe QuickActions::InterpretService do
           let(:issuable) { issue }
         end
 
-        it_behaves_like 'empty command', 'Failed to mark this issue as a duplicate because referenced issue was not found.' do
-          let(:content) { "/duplicate imaginary#1234" }
+        it_behaves_like 'empty command', _('Failed to mark this issue as a duplicate because referenced issue was not found.') do
+          let(:content) { "/duplicate imaginary##{non_existing_record_iid}" }
           let(:issuable) { issue }
         end
 
-        it_behaves_like 'empty command', 'Failed to mark this issue as a duplicate because referenced issue was not found.' do
+        it_behaves_like 'empty command', _('Failed to mark this issue as a duplicate because referenced issue was not found.') do
           let(:other_project) { create(:project, :private) }
           let(:issue_duplicate) { create(:issue, project: other_project) }
 
@@ -1321,11 +1364,6 @@ describe QuickActions::InterpretService do
         let(:issuable) { issue }
       end
 
-      it_behaves_like 'empty command', 'Failed to mark this issue as a duplicate because referenced issue was not found.' do
-        let(:content) { '/duplicate #{issue.to_reference}' }
-        let(:issuable) { issue }
-      end
-
       it_behaves_like 'empty command' do
         let(:content) { '/lock' }
         let(:issuable) { issue }
@@ -1370,6 +1408,7 @@ describe QuickActions::InterpretService do
       context 'if issuable is a Commit' do
         let(:content) { '/award :100:' }
         let(:issuable) { commit }
+
         it_behaves_like 'empty command'
       end
     end
@@ -1437,14 +1476,14 @@ describe QuickActions::InterpretService do
     end
 
     context '/board_move command' do
-      let(:todo) { create(:label, project: project, title: 'To Do') }
-      let(:inreview) { create(:label, project: project, title: 'In Review') }
+      let_it_be(:todo) { create(:label, project: project, title: 'To Do') }
+      let_it_be(:inreview) { create(:label, project: project, title: 'In Review') }
       let(:content) { %{/board_move ~"#{inreview.title}"} }
 
-      let!(:board) { create(:board, project: project) }
-      let!(:todo_list) { create(:list, board: board, label: todo) }
-      let!(:inreview_list) { create(:list, board: board, label: inreview) }
-      let!(:inprogress_list) { create(:list, board: board, label: inprogress) }
+      let_it_be(:board) { create(:board, project: project) }
+      let_it_be(:todo_list) { create(:list, board: board, label: todo) }
+      let_it_be(:inreview_list) { create(:list, board: board, label: inreview) }
+      let_it_be(:inprogress_list) { create(:list, board: board, label: inprogress) }
 
       it 'populates remove_label_ids for all current board columns' do
         issue.update!(label_ids: [todo.id, inprogress.id])
@@ -1497,23 +1536,27 @@ describe QuickActions::InterpretService do
       context 'if the given label does not exist' do
         let(:issuable) { issue }
         let(:content) { '/board_move ~"Fake Label"' }
+
         it_behaves_like 'empty command', 'Failed to move this issue because label was not found.'
       end
 
       context 'if multiple labels are given' do
         let(:issuable) { issue }
         let(:content) { %{/board_move ~"#{inreview.title}" ~"#{todo.title}"} }
+
         it_behaves_like 'empty command', 'Failed to move this issue because only a single label can be provided.'
       end
 
       context 'if the given label is not a list on the board' do
         let(:issuable) { issue }
         let(:content) { %{/board_move ~"#{bug.title}"} }
+
         it_behaves_like 'empty command', 'Failed to move this issue because label was not found.'
       end
 
       context 'if issuable is not an Issue' do
         let(:issuable) { merge_request }
+
         it_behaves_like 'empty command'
       end
     end
@@ -1575,6 +1618,10 @@ describe QuickActions::InterpretService do
       context "when logged user cannot create_merge_requests in the project" do
         let(:project) { create(:project, :archived) }
 
+        before do
+          project.add_developer(developer)
+        end
+
         it_behaves_like 'empty command'
       end
 
@@ -1595,6 +1642,126 @@ describe QuickActions::InterpretService do
         _, _, message = service.execute(content, issuable)
 
         expect(message).to eq("Created branch '#{branch_name}' and a merge request to resolve this issue.")
+      end
+    end
+
+    context 'submit_review command' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:note) do
+        [
+          'I like it',
+          '/submit_review'
+        ]
+      end
+
+      with_them do
+        let(:content) { '/submit_review' }
+        let!(:draft_note) { create(:draft_note, note: note, merge_request: merge_request, author: developer) }
+
+        it 'submits the users current review' do
+          _, _, message = service.execute(content, merge_request)
+
+          expect { draft_note.reload }.to raise_error(ActiveRecord::RecordNotFound)
+          expect(message).to eq('Submitted the current review.')
+        end
+      end
+    end
+
+    context 'relate command' do
+      let_it_be_with_refind(:group) { create(:group) }
+
+      shared_examples 'relate command' do
+        it 'relates issues' do
+          service.execute(content, issue)
+
+          expect(IssueLink.where(source: issue).map(&:target)).to match_array(issues_related)
+        end
+      end
+
+      context 'user is member of group' do
+        before do
+          group.add_developer(developer)
+        end
+
+        context 'relate a single issue' do
+          let(:other_issue) { create(:issue, project: project) }
+          let(:issues_related) { [other_issue] }
+          let(:content) { "/relate #{other_issue.to_reference}" }
+
+          it_behaves_like 'relate command'
+        end
+
+        context 'relate multiple issues at once' do
+          let(:second_issue) { create(:issue, project: project) }
+          let(:third_issue) { create(:issue, project: project) }
+          let(:issues_related) { [second_issue, third_issue] }
+          let(:content) { "/relate #{second_issue.to_reference} #{third_issue.to_reference}" }
+
+          it_behaves_like 'relate command'
+        end
+
+        context 'empty relate command' do
+          let(:issues_related) { [] }
+          let(:content) { '/relate' }
+
+          it_behaves_like 'relate command'
+        end
+
+        context 'already having related issues' do
+          let(:second_issue) { create(:issue, project: project) }
+          let(:third_issue) { create(:issue, project: project) }
+          let(:issues_related) { [second_issue, third_issue] }
+          let(:content) { "/relate #{third_issue.to_reference(project)}" }
+
+          before do
+            create(:issue_link, source: issue, target: second_issue)
+          end
+
+          it_behaves_like 'relate command'
+        end
+
+        context 'cross project' do
+          let(:another_group) { create(:group, :public) }
+          let(:other_project) { create(:project, group: another_group) }
+
+          before do
+            another_group.add_developer(developer)
+          end
+
+          context 'relate a cross project issue' do
+            let(:other_issue) { create(:issue, project: other_project) }
+            let(:issues_related) { [other_issue] }
+            let(:content) { "/relate #{other_issue.to_reference(project)}" }
+
+            it_behaves_like 'relate command'
+          end
+
+          context 'relate multiple cross projects issues at once' do
+            let(:second_issue) { create(:issue, project: other_project) }
+            let(:third_issue) { create(:issue, project: other_project) }
+            let(:issues_related) { [second_issue, third_issue] }
+            let(:content) { "/relate #{second_issue.to_reference(project)} #{third_issue.to_reference(project)}" }
+
+            it_behaves_like 'relate command'
+          end
+
+          context 'relate a non-existing issue' do
+            let(:issues_related) { [] }
+            let(:content) { "/relate imaginary##{non_existing_record_iid}" }
+
+            it_behaves_like 'relate command'
+          end
+
+          context 'relate a private issue' do
+            let(:private_project) { create(:project, :private) }
+            let(:other_issue) { create(:issue, project: private_project) }
+            let(:issues_related) { [] }
+            let(:content) { "/relate #{other_issue.to_reference(project)}" }
+
+            it_behaves_like 'relate command'
+          end
+        end
       end
     end
   end
@@ -1695,13 +1862,12 @@ describe QuickActions::InterpretService do
         merge_request.update!(label_ids: [bug.id])
         _, explanations = service.explain(content, merge_request)
 
-        expect(explanations).to eq(['Removes all labels.'])
+        expect(explanations).to eq([_('Removes all labels.')])
       end
     end
 
     describe 'relabel command' do
-      let(:content) { '/relabel Bug' }
-      let!(:bug) { create(:label, project: project, title: 'Bug') }
+      let(:content) { "/relabel #{bug.title}" }
       let(:feature) { create(:label, project: project, title: 'Feature') }
 
       it 'includes label name' do
@@ -1794,8 +1960,7 @@ describe QuickActions::InterpretService do
     end
 
     describe 'board move command' do
-      let(:content) { '/board_move ~bug' }
-      let!(:bug) { create(:label, project: project, title: 'bug') }
+      let(:content) { "/board_move ~#{bug.title}" }
       let!(:board) { create(:board, project: project) }
 
       it 'includes the label name' do
@@ -1856,13 +2021,13 @@ describe QuickActions::InterpretService do
         it 'uses the default branch name' do
           _, explanations = service.explain(content, issue)
 
-          expect(explanations).to eq(['Creates a branch and a merge request to resolve this issue.'])
+          expect(explanations).to eq([_('Creates a branch and a merge request to resolve this issue.')])
         end
 
         it 'returns the execution message using the default branch name' do
           _, _, message = service.execute(content, issue)
 
-          expect(message).to eq('Created a branch and a merge request to resolve this issue.')
+          expect(message).to eq(_('Created a branch and a merge request to resolve this issue.'))
         end
       end
 
@@ -1883,7 +2048,7 @@ describe QuickActions::InterpretService do
       end
     end
 
-    context "#commands_executed_count" do
+    describe "#commands_executed_count" do
       it 'counts commands executed' do
         content = "/close and \n/assign me and \n/title new title"
 

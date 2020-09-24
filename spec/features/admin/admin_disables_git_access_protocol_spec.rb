@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Admin disables Git access protocol', :js do
+RSpec.describe 'Admin disables Git access protocol', :js do
   include StubENV
   include MobileHelpers
 
@@ -121,7 +121,7 @@ describe 'Admin disables Git access protocol', :js do
   end
 
   def switch_git_protocol(value)
-    visit admin_application_settings_path
+    visit general_admin_application_settings_path
 
     page.within('.as-visibility-access') do
       find('#application_setting_enabled_git_access_protocol').find(:xpath, "option[#{value}]").select_option

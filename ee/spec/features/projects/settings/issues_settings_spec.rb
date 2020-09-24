@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project settings > Issues', :js do
+RSpec.describe 'Project settings > Issues', :js do
   let(:project) { create(:project, :public) }
   let(:user) { create(:user) }
 

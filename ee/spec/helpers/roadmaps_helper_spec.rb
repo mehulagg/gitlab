@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe RoadmapsHelper do
+RSpec.describe RoadmapsHelper do
   before do
     allow(helper).to receive(:current_user) { user }
   end

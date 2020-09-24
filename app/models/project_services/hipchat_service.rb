@@ -184,7 +184,7 @@ class HipchatService < Service
     description = obj_attr[:description]
     title = render_line(obj_attr[:title])
 
-    merge_request_url = "#{project_url}/merge_requests/#{merge_request_id}"
+    merge_request_url = "#{project_url}/-/merge_requests/#{merge_request_id}"
     merge_request_link = "<a href=\"#{merge_request_url}\">merge request !#{merge_request_id}</a>"
     message = ["#{user_name} #{state} #{merge_request_link} in " \
       "#{project_link}: <b>#{title}</b>"]
@@ -252,8 +252,8 @@ class HipchatService < Service
     status = pipeline_attributes[:status]
     duration = pipeline_attributes[:duration]
 
-    branch_link = "<a href=\"#{project_url}/commits/#{CGI.escape(ref)}\">#{ref}</a>"
-    pipeline_url = "<a href=\"#{project_url}/pipelines/#{pipeline_id}\">##{pipeline_id}</a>"
+    branch_link = "<a href=\"#{project_url}/-/commits/#{CGI.escape(ref)}\">#{ref}</a>"
+    pipeline_url = "<a href=\"#{project_url}/-/pipelines/#{pipeline_id}\">##{pipeline_id}</a>"
 
     "#{project_link}: Pipeline #{pipeline_url} of #{branch_link} #{ref_type} by #{user_name} #{humanized_status(status)} in #{duration} second(s)"
   end

@@ -6,7 +6,7 @@ class EventsFinder
 
   MAX_PER_PAGE = 100
 
-  attr_reader :source, :params, :current_user
+  attr_reader :source, :params, :current_user, :scope
 
   requires_cross_project_access unless: -> { source.is_a?(Project) }, model: Event
 
@@ -15,6 +15,7 @@ class EventsFinder
   # Arguments:
   #   source - which user or project to looks for events on
   #   current_user - only return events for projects visible to this user
+  #   scope - return all events across a user's projects
   #   params:
   #     action: string
   #     target_type: string
@@ -27,11 +28,14 @@ class EventsFinder
   def initialize(params = {})
     @source = params.delete(:source)
     @current_user = params.delete(:current_user)
+    @scope = params.delete(:scope)
     @params = params
   end
 
   def execute
-    events = source.events
+    return Event.none if cannot_access_private_profile?
+
+    events = get_events
 
     events = by_current_user_access(events)
     events = by_action(events)
@@ -41,11 +45,18 @@ class EventsFinder
     events = sort(events)
 
     events = events.with_associations if params[:with_associations]
-
     paginated_filtered_by_user_visibility(events)
   end
 
   private
+
+  def get_events
+    if current_user && scope == 'all'
+      EventCollection.new(current_user.authorized_projects).all_project_events
+    else
+      source.events
+    end
+  end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def by_current_user_access(events)
@@ -56,9 +67,10 @@ class EventsFinder
 
   # rubocop: disable CodeReuse/ActiveRecord
   def by_action(events)
-    return events unless Event::ACTIONS[params[:action]]
+    safe_action = Event.actions[params[:action]]
+    return events unless safe_action
 
-    events.where(action: Event::ACTIONS[params[:action]])
+    events.where(action: safe_action)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -85,6 +97,10 @@ class EventsFinder
     events.where('events.created_at > ?', params[:after].end_of_day)
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def cannot_access_private_profile?
+    source.is_a?(User) && !Ability.allowed?(current_user, :read_user_profile, source)
+  end
 
   def sort(events)
     return events unless params[:sort]

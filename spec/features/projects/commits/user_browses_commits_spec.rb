@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User browses commits' do
+RSpec.describe 'User browses commits' do
   include RepoHelpers
 
   let(:user) { create(:user) }
@@ -41,7 +41,7 @@ describe 'User browses commits' do
       .and have_selector('ul.breadcrumb a', count: 4)
   end
 
-  it 'renders diff links to both the previous and current image' do
+  it 'renders diff links to both the previous and current image', :js do
     visit project_commit_path(project, sample_image_commit.id)
 
     links = page.all('.file-actions a')
@@ -56,8 +56,6 @@ describe 'User browses commits' do
       project.enable_ci
 
       create(:ci_build, pipeline: pipeline)
-
-      allow_any_instance_of(Ci::Pipeline).to receive(:ci_yaml_file).and_return('')
     end
 
     it 'renders commit ci info' do
@@ -78,15 +76,22 @@ describe 'User browses commits' do
   end
 
   context 'secondary email' do
+    let(:user) { create(:user) }
+
     it 'finds a commit by a secondary email' do
-      user =
-        create(:user) do |user|
-          create(:email, { user: user, email: 'dmitriy.zaporozhets@gmail.com' })
-        end
+      create(:email, :confirmed, user: user, email: 'dmitriy.zaporozhets@gmail.com')
 
       visit(project_commit_path(project, sample_commit.parent_id))
 
       check_author_link(sample_commit.author_email, user)
+    end
+
+    it 'links to an unverified e-mail address instead of the user' do
+      create(:email, user: user, email: 'dmitriy.zaporozhets@gmail.com')
+
+      visit(project_commit_path(project, sample_commit.parent_id))
+
+      check_author_email(sample_commit.author_email)
     end
   end
 
@@ -94,8 +99,12 @@ describe 'User browses commits' do
     let(:commit) { create(:commit, project: project) }
 
     it 'renders successfully' do
-      allow_any_instance_of(Gitlab::Diff::File).to receive(:blob).and_return(nil)
-      allow_any_instance_of(Gitlab::Diff::File).to receive(:binary?).and_return(true)
+      allow_next_instance_of(Gitlab::Diff::File) do |instance|
+        allow(instance).to receive(:blob).and_return(nil)
+      end
+      allow_next_instance_of(Gitlab::Diff::File) do |instance|
+        allow(instance).to receive(:binary?).and_return(true)
+      end
 
       visit(project_commit_path(project, commit))
 
@@ -126,6 +135,33 @@ describe 'User browses commits' do
       expect(body).to have_selector('title', text: "#{project.name}:master commits")
         .and have_selector('author email', text: commit.author_email)
         .and have_selector('entry summary', text: commit.description[0..10].delete("\r\n"))
+    end
+
+    context "when commit has a filename with pathspec characters" do
+      let(:path) { ':wq' }
+      let(:filename) { File.join(path, 'test.txt') }
+      let(:ref) { project.repository.root_ref }
+      let(:newrev) { project.repository.commit('master').sha }
+      let(:short_newrev) { project.repository.commit('master').short_id }
+      let(:message) { 'Glob characters'}
+
+      before do
+        create_file_in_repo(project, ref, ref, filename, 'Test file', commit_message: message)
+        visit project_commits_path(project, "#{ref}/#{path}", limit: 1)
+        wait_for_requests
+      end
+
+      it 'searches commit', :js do
+        expect(page).to have_content(message)
+
+        fill_in 'commits-search', with: 'bogus12345'
+
+        expect(page).to have_content "Your search didn't match any commits"
+
+        fill_in 'commits-search', with: 'Glob'
+
+        expect(page).to have_content message
+      end
     end
 
     context 'when a commit links to a confidential issue' do
@@ -260,4 +296,10 @@ def check_author_link(email, author)
 
   expect(author_link['href']).to eq(user_path(author))
   expect(find('.commit-author-name').text).to eq(author.name)
+end
+
+def check_author_email(email)
+  author_link = find('.commit-author-link')
+
+  expect(author_link['href']).to eq("mailto:#{email}")
 end

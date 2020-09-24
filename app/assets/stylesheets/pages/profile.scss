@@ -17,12 +17,6 @@
   display: inline-block;
 }
 
-.account-btn-link,
-.profile-settings-sidebar a,
-.settings-sidebar a {
-  color: $blue-600;
-}
-
 .private-tokens-reset div.reset-action:not(:first-child) {
   padding-top: 15px;
 }
@@ -80,17 +74,12 @@
 
 // Middle dot divider between each element in a list of items.
 .middle-dot-divider {
-  &::after {
-    content: '\00B7'; // Middle Dot
-    padding: 0 6px;
-    font-weight: $gl-font-weight-bold;
-  }
+  @include middle-dot-divider;
+}
 
-  &:last-child {
-    &::after {
-      content: '';
-      padding: 0;
-    }
+.middle-dot-divider-sm {
+  @include media-breakpoint-up(sm) {
+    @include middle-dot-divider;
   }
 }
 
@@ -122,22 +111,18 @@
       float: left;
     }
   }
+}
 
-  .description {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+.ssh-keys-list {
+  .last-used-at,
+  .expires,
+  .key-created-at {
+    line-height: 32px;
   }
 }
 
 .key-created-at {
   line-height: 42px;
-}
-
-.profile-settings-content {
-  a {
-    color: $blue-600;
-  }
 }
 
 .provider-btn-group {
@@ -169,10 +154,6 @@
   margin-left: -3px;
   line-height: 22px;
   background-color: $gray-light;
-
-  &.not-active {
-    color: $blue-500;
-  }
 }
 
 .oauth-applications {
@@ -216,10 +197,6 @@
 }
 
 .user-profile {
-  .cover-controls a {
-    margin-left: 5px;
-  }
-
   .profile-header {
     margin: 0 $gl-padding;
 
@@ -248,6 +225,10 @@
   .activities-block {
     .event-item {
       padding-left: 40px;
+    }
+
+    .gl-label-scoped {
+      --label-inset-border: inset 0 0 0 1px currentColor;
     }
 
     @include media-breakpoint-up(lg) {
@@ -280,7 +261,8 @@
   }
 }
 
-table.u2f-registrations {
+table.u2f-registrations,
+.webauthn-registrations {
   th:not(:last-child),
   td:not(:last-child) {
     border-right: solid 1px transparent;
@@ -292,10 +274,6 @@ table.u2f-registrations {
 }
 
 .oauth-application-show {
-  .scope-name {
-    font-weight: $gl-font-weight-bold;
-  }
-
   .scopes-list {
     padding-left: 18px;
   }
@@ -317,52 +295,52 @@ table.u2f-registrations {
 
   .landing {
     padding: 32px;
+  }
 
-    .close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      opacity: 1;
+  .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    opacity: 1;
+
+    .dismiss-icon {
+      float: right;
+      cursor: pointer;
+      color: $blue-300;
+    }
+
+    &:hover {
+      background-color: transparent;
+      border: 0;
 
       .dismiss-icon {
-        float: right;
-        cursor: pointer;
-        color: $blue-300;
-      }
-
-      &:hover {
-        background-color: transparent;
-        border: 0;
-
-        .dismiss-icon {
-          color: $blue-400;
-        }
+        color: $blue-400;
       }
     }
+  }
 
-    .svg-container {
-      margin-right: 30px;
-      display: inline-block;
+  .svg-container {
+    margin-right: 30px;
+    display: inline-block;
+
+    svg {
+      height: 110px;
+      vertical-align: top;
+    }
+
+    &.convdev {
+      margin: 0 0 0 30px;
 
       svg {
-        height: 110px;
-        vertical-align: top;
-      }
-
-      &.convdev {
-        margin: 0 0 0 30px;
-
-        svg {
-          height: 127px;
-        }
+        height: 127px;
       }
     }
+  }
 
-    .user-callout-copy {
-      display: inline-block;
-      vertical-align: top;
-      max-width: 570px;
-    }
+  .user-callout-copy {
+    display: inline-block;
+    vertical-align: top;
+    max-width: 570px;
   }
 
   @include media-breakpoint-down(xs) {
@@ -372,40 +350,23 @@ table.u2f-registrations {
       display: block;
     }
 
-    .landing {
-      .svg-container,
-      .user-callout-copy {
-        margin: 0 auto;
-        display: block;
+    .svg-container,
+    .user-callout-copy {
+      margin: 0 auto;
+      display: block;
+
+      svg {
+        height: 75px;
+      }
+
+      &.convdev {
+        margin: $gl-padding auto 0;
 
         svg {
-          height: 75px;
-        }
-
-        &.convdev {
-          margin: $gl-padding auto 0;
-
-          svg {
-            height: 120px;
-          }
+          height: 120px;
         }
       }
     }
-  }
-}
-
-.nav-wip {
-  border: 1px solid $blue-500;
-  background: $blue-50;
-  padding: $gl-padding;
-  margin-bottom: $gl-padding;
-
-  a {
-    color: $blue-500;
-  }
-
-  p:last-child {
-    margin-bottom: 0;
   }
 }
 
@@ -433,10 +394,8 @@ table.u2f-registrations {
 }
 
 .edit-user {
-  .clear-user-status {
-    svg {
-      fill: $gl-text-color-secondary;
-    }
+  svg {
+    fill: $gl-text-color-secondary;
   }
 
   .form-group > label {
@@ -453,10 +412,6 @@ table.u2f-registrations {
 
     .no-emoji-placeholder {
       position: relative;
-
-      svg {
-        fill: $gl-text-color-secondary;
-      }
     }
   }
 
@@ -478,7 +433,7 @@ table.u2f-registrations {
 }
 
 .gitlab-slack-well {
-  background-color: $white-light;
+  background-color: $white;
   box-shadow: none;
   max-width: $add-to-slack-well-max-width;
 }
@@ -491,21 +446,4 @@ table.u2f-registrations {
 .gitlab-slack-popup {
   width: 100%;
   max-width: $add-to-slack-popup-max-width;
-}
-
-.gitlab-slack-right-arrow svg {
-  fill: $white-dark;
-  width: $right-arrow-size;
-  height: $right-arrow-size;
-  vertical-align: text-bottom;
-}
-
-.gitlab-slack-double-headed-arrow {
-  vertical-align: text-top;
-
-  svg {
-    fill: $gray-darker;
-    width: $double-headed-arrow-width;
-    height: $double-headed-arrow-height;
-  }
 }

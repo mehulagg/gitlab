@@ -6,7 +6,7 @@ module Geo
 
     def initialize(params)
       @params = params.dup
-      @params[:namespace_ids] = @params[:namespace_ids].to_s.split(',')
+      @params[:namespace_ids] = @params[:namespace_ids].to_s.split(',') if @params[:namespace_ids].is_a? String
     end
 
     def execute

@@ -6,17 +6,19 @@
 # Use Gitlab::Metrics::Dashboard::Finder to retrive dashboards.
 module Metrics
   module Dashboard
-    class GrafanaMetricEmbedService < ::Metrics::Dashboard::BaseService
+    class GrafanaMetricEmbedService < ::Metrics::Dashboard::BaseEmbedService
       include ReactiveCaching
 
       SEQUENCE = [
-        ::Gitlab::Metrics::Dashboard::Stages::GrafanaFormatter
+        ::Gitlab::Metrics::Dashboard::Stages::GrafanaFormatter,
+        ::Gitlab::Metrics::Dashboard::Stages::PanelIdsInserter
       ].freeze
 
       self.reactive_cache_key = ->(service) { service.cache_key }
       self.reactive_cache_lease_timeout = 30.seconds
       self.reactive_cache_refresh_interval = 30.minutes
       self.reactive_cache_lifetime = 30.minutes
+      self.reactive_cache_work_type = :external_dependency
       self.reactive_cache_worker_finder = ->(_id, *args) { from_cache(*args) }
 
       class << self
@@ -24,14 +26,14 @@ module Metrics
         # to uniquely identify a grafana dashboard.
         def valid_params?(params)
           [
-            params[:embedded],
+            embedded?(params[:embedded]),
             params[:grafana_url]
           ].all?
         end
 
         def from_cache(project_id, user_id, grafana_url)
           project = Project.find(project_id)
-          user = User.find(user_id)
+          user = User.find(user_id) if user_id.present?
 
           new(project, user, grafana_url: grafana_url)
         end
@@ -54,7 +56,7 @@ module Metrics
       end
 
       def cache_key(*args)
-        [project.id, current_user.id, grafana_url]
+        [project.id, current_user&.id, grafana_url]
       end
 
       # Required for ReactiveCaching; Usage overridden by
@@ -78,7 +80,7 @@ module Metrics
 
       def fetch_dashboard
         uid = GrafanaUidParser.new(grafana_url, project).parse
-        raise DashboardProcessingError.new('Dashboard uid not found') unless uid
+        raise DashboardProcessingError.new(_('Dashboard uid not found')) unless uid
 
         response = client.get_dashboard(uid: uid)
 
@@ -87,7 +89,7 @@ module Metrics
 
       def fetch_datasource(dashboard)
         name = DatasourceNameParser.new(grafana_url, dashboard).parse
-        raise DashboardProcessingError.new('Datasource name not found') unless name
+        raise DashboardProcessingError.new(_('Datasource name not found')) unless name
 
         response = client.get_datasource(name: name)
 
@@ -111,9 +113,9 @@ module Metrics
       end
 
       def parse_json(json)
-        JSON.parse(json, symbolize_names: true)
+        Gitlab::Json.parse(json, symbolize_names: true)
       rescue JSON::ParserError
-        raise DashboardProcessingError.new('Grafana response contains invalid json')
+        raise DashboardProcessingError.new(_('Grafana response contains invalid json'))
       end
     end
 
@@ -133,12 +135,14 @@ module Metrics
       def uid_regex
         base_url = @project.grafana_integration.grafana_url.chomp('/')
 
-        %r{(#{Regexp.escape(base_url)}\/d\/(?<uid>\w+)\/)}x
+        %r{^(#{Regexp.escape(base_url)}\/d\/(?<uid>.+)\/)}x
       end
     end
 
     # Identifies the name of the datasource for a dashboard
-    # based on the panelId query parameter found in the url
+    # based on the panelId query parameter found in the url.
+    #
+    # If no panel is specified, defaults to the first valid panel.
     class DatasourceNameParser
       def initialize(grafana_url, grafana_dashboard)
         @grafana_url, @grafana_dashboard = grafana_url, grafana_dashboard
@@ -146,14 +150,28 @@ module Metrics
 
       def parse
         @grafana_dashboard[:dashboard][:panels]
-          .find { |panel| panel[:id].to_s == query_params[:panelId] }
+          .find { |panel| panel_id ? matching_panel?(panel) : valid_panel?(panel) }
           .try(:[], :datasource)
       end
 
       private
 
+      def panel_id
+        query_params[:panelId]
+      end
+
       def query_params
         Gitlab::Metrics::Dashboard::Url.parse_query(@grafana_url)
+      end
+
+      def matching_panel?(panel)
+        panel[:id].to_s == panel_id
+      end
+
+      def valid_panel?(panel)
+        ::Grafana::Validator
+          .new(@grafana_dashboard, nil, panel, query_params)
+          .valid?
       end
     end
   end

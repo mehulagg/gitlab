@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Rack Attack global throttles' do
+RSpec.describe 'Rack Attack global throttles' do
   include RackAttackSpecHelpers
 
   let(:settings) { Gitlab::CurrentSettings.current_application_settings }
@@ -53,7 +53,7 @@ describe 'Rack Attack global throttles' do
         # At first, allow requests under the rate limit.
         requests_per_period.times do
           get url_that_does_not_require_authentication
-          expect(response).to have_http_status 200
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         # the last straw
@@ -63,7 +63,7 @@ describe 'Rack Attack global throttles' do
       it 'allows requests after throttling and then waiting for the next period' do
         requests_per_period.times do
           get url_that_does_not_require_authentication
-          expect(response).to have_http_status 200
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         expect_rejection { get url_that_does_not_require_authentication }
@@ -71,7 +71,7 @@ describe 'Rack Attack global throttles' do
         Timecop.travel(period.from_now) do
           requests_per_period.times do
             get url_that_does_not_require_authentication
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           expect_rejection { get url_that_does_not_require_authentication }
@@ -81,21 +81,35 @@ describe 'Rack Attack global throttles' do
       it 'counts requests from different IPs separately' do
         requests_per_period.times do
           get url_that_does_not_require_authentication
-          expect(response).to have_http_status 200
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
-        expect_any_instance_of(Rack::Attack::Request).to receive(:ip).at_least(:once).and_return('1.2.3.4')
+        expect_next_instance_of(Rack::Attack::Request) do |instance|
+          expect(instance).to receive(:ip).at_least(:once).and_return('1.2.3.4')
+        end
 
         # would be over limit for the same IP
         get url_that_does_not_require_authentication
-        expect(response).to have_http_status 200
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       context 'when the request is to the api internal endpoints' do
         it 'allows requests over the rate limit' do
           (1 + requests_per_period).times do
             get url_api_internal, params: { secret_token: Gitlab::Shell.secret_token }
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
+      end
+
+      context 'when the request is authenticated by a runner token' do
+        let(:request_jobs_url) { '/api/v4/jobs/request' }
+        let(:runner) { create(:ci_runner) }
+
+        it 'does not cont as unauthenticated' do
+          (1 + requests_per_period).times do
+            post request_jobs_url, params: { token: runner.token }
+            expect(response).to have_gitlab_http_status(:no_content)
           end
         end
       end
@@ -103,7 +117,7 @@ describe 'Rack Attack global throttles' do
       it 'logs RackAttack info into structured logs' do
         requests_per_period.times do
           get url_that_does_not_require_authentication
-          expect(response).to have_http_status 200
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         arguments = {
@@ -129,7 +143,7 @@ describe 'Rack Attack global throttles' do
       it 'allows requests over the rate limit' do
         (1 + requests_per_period).times do
           get url_that_does_not_require_authentication
-          expect(response).to have_http_status 200
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end
@@ -213,6 +227,7 @@ describe 'Rack Attack global throttles' do
       let(:protected_path_that_does_not_require_authentication) do
         '/users/sign_in'
       end
+
       let(:post_params) { { user: { login: 'username', password: 'password' } } }
 
       before do
@@ -229,7 +244,7 @@ describe 'Rack Attack global throttles' do
         it 'allows requests over the rate limit' do
           (1 + requests_per_period).times do
             post protected_path_that_does_not_require_authentication, params: post_params
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
       end
@@ -243,24 +258,10 @@ describe 'Rack Attack global throttles' do
         it 'rejects requests over the rate limit' do
           requests_per_period.times do
             post protected_path_that_does_not_require_authentication, params: post_params
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           expect_rejection { post protected_path_that_does_not_require_authentication, params: post_params }
-        end
-
-        context 'when Omnibus throttle is present' do
-          before do
-            allow(Gitlab::Throttle)
-              .to receive(:omnibus_protected_paths_present?).and_return(true)
-          end
-
-          it 'allows requests over the rate limit' do
-            (1 + requests_per_period).times do
-              post protected_path_that_does_not_require_authentication, params: post_params
-              expect(response).to have_http_status 200
-            end
-          end
         end
       end
     end
@@ -297,28 +298,6 @@ describe 'Rack Attack global throttles' do
 
         it_behaves_like 'rate-limited token-authenticated requests'
       end
-
-      context 'when Omnibus throttle is present' do
-        let(:request_args) { [api(api_partial_url, personal_access_token: token)] }
-        let(:other_user_request_args) { [api(api_partial_url, personal_access_token: other_user_token)] }
-
-        before do
-          settings_to_set[:"#{throttle_setting_prefix}_requests_per_period"] = requests_per_period
-          settings_to_set[:"#{throttle_setting_prefix}_period_in_seconds"] = period_in_seconds
-          settings_to_set[:"#{throttle_setting_prefix}_enabled"] = true
-          stub_application_setting(settings_to_set)
-
-          allow(Gitlab::Throttle)
-            .to receive(:omnibus_protected_paths_present?).and_return(true)
-        end
-
-        it 'allows requests over the rate limit' do
-          (1 + requests_per_period).times do
-            post(*request_args)
-            expect(response).not_to have_http_status 429
-          end
-        end
-      end
     end
 
     describe 'web requests authenticated with regular login' do
@@ -338,27 +317,6 @@ describe 'Rack Attack global throttles' do
       end
 
       it_behaves_like 'rate-limited web authenticated requests'
-
-      context 'when Omnibus throttle is present' do
-        before do
-          settings_to_set[:"#{throttle_setting_prefix}_requests_per_period"] = requests_per_period
-          settings_to_set[:"#{throttle_setting_prefix}_period_in_seconds"] = period_in_seconds
-          settings_to_set[:"#{throttle_setting_prefix}_enabled"] = true
-          stub_application_setting(settings_to_set)
-
-          allow(Gitlab::Throttle)
-            .to receive(:omnibus_protected_paths_present?).and_return(true)
-
-          login_as(user)
-        end
-
-        it 'allows requests over the rate limit' do
-          (1 + requests_per_period).times do
-            post url_that_requires_authentication
-            expect(response).not_to have_http_status 429
-          end
-        end
-      end
     end
   end
 end

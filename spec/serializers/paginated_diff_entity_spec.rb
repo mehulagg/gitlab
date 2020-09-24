@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PaginatedDiffEntity do
+RSpec.describe PaginatedDiffEntity do
   let(:user) { create(:user) }
   let(:request) { double('request', current_user: user) }
   let(:merge_request) { create(:merge_request, :with_diffs) }
@@ -14,6 +14,7 @@ describe PaginatedDiffEntity do
       pagination_data: diff_batch.pagination_data
     }
   end
+
   let(:entity) { described_class.new(diff_batch, options) }
 
   subject { entity.as_json }
@@ -26,8 +27,18 @@ describe PaginatedDiffEntity do
     expect(subject[:pagination]).to eq(
       current_page: 2,
       next_page: 3,
-      next_page_href: "/#{merge_request.project.full_path}/merge_requests/#{merge_request.iid}/diffs_batch.json?page=3",
+      next_page_href: "/#{merge_request.project.full_path}/-/merge_requests/#{merge_request.iid}/diffs_batch.json?page=3",
       total_pages: 7
     )
+  end
+
+  context 'when code_navigation feature flag is disabled' do
+    it 'does not execute Gitlab::CodeNavigationPath' do
+      stub_feature_flags(code_navigation: false)
+
+      expect(Gitlab::CodeNavigationPath).not_to receive(:new)
+
+      subject
+    end
   end
 end

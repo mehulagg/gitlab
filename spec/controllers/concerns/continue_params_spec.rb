@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContinueParams do
+RSpec.describe ContinueParams do
   let(:controller_class) do
     Class.new(ActionController::Base) do
       include ContinueParams
@@ -12,6 +12,7 @@ describe ContinueParams do
       end
     end
   end
+
   subject(:controller) { controller_class.new }
 
   def strong_continue_params(params)

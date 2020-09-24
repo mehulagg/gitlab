@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Projects::DeploymentsController do
+RSpec.describe Projects::DeploymentsController do
   include ApiHelpers
 
   let(:user) { create(:user) }
-  let(:project) { create(:project) }
+  let(:project) { create(:project, :repository) }
   let(:environment) { create(:environment, name: 'production', project: project) }
 
   before do
@@ -36,6 +36,52 @@ describe Projects::DeploymentsController do
       expect(response).to be_ok
       expect(response).to match_response_schema('deployments')
     end
+
+    context 'anonymous user' do
+      let(:anonymous_user) { create(:user) }
+
+      before do
+        sign_in(anonymous_user)
+      end
+
+      context 'project and metrics dashboard are public' do
+        before do
+          project.update!(
+            visibility_level: Gitlab::VisibilityLevel::PUBLIC,
+            project_feature_attributes: {
+              metrics_dashboard_access_level: Gitlab::VisibilityLevel::PUBLIC
+            }
+          )
+        end
+
+        it 'returns a list with deployments information' do
+          create(:deployment, :success, environment: environment)
+
+          get :index, params: deployment_params
+
+          expect(response).to be_ok
+        end
+      end
+
+      context 'project and metrics dashboard are private' do
+        before do
+          project.update!(
+            visibility_level: Gitlab::VisibilityLevel::PRIVATE,
+            project_feature_attributes: {
+              metrics_dashboard_access_level: Gitlab::VisibilityLevel::PRIVATE
+            }
+          )
+        end
+
+        it 'responds with not found' do
+          create(:deployment, :success, environment: environment)
+
+          get :index, params: deployment_params
+
+          expect(response).to be_not_found
+        end
+      end
+    end
   end
 
   describe 'GET #metrics' do
@@ -59,9 +105,9 @@ describe Projects::DeploymentsController do
           end
         end
 
-        it 'returns a empty response 204 resposne' do
+        it 'returns an empty 204 response' do
           get :metrics, params: deployment_params(id: deployment.to_param)
-          expect(response).to have_gitlab_http_status(204)
+          expect(response).to have_gitlab_http_status(:no_content)
           expect(response.body).to eq('')
         end
       end
@@ -100,7 +146,7 @@ describe Projects::DeploymentsController do
 
           get :metrics, params: deployment_params(id: failed_deployment.to_param)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -129,7 +175,7 @@ describe Projects::DeploymentsController do
 
         it 'returns a empty response 204 response' do
           get :additional_metrics, params: deployment_params(id: deployment.to_param, format: :json)
-          expect(response).to have_gitlab_http_status(204)
+          expect(response).to have_gitlab_http_status(:no_content)
           expect(response.body).to eq('')
         end
       end

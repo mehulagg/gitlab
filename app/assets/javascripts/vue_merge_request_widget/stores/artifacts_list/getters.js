@@ -11,6 +11,3 @@ export const title = state => {
 
   return n__('View exposed artifact', 'View %d exposed artifacts', state.artifacts.length);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

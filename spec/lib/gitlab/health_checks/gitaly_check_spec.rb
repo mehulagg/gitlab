@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::HealthChecks::GitalyCheck do
+RSpec.describe Gitlab::HealthChecks::GitalyCheck do
   let(:result_class) { Gitlab::HealthChecks::Result }
   let(:repository_storages) { ['default'] }
 

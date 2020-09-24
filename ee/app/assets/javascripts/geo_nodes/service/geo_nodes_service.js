@@ -1,5 +1,5 @@
-import axios from '~/lib/utils/axios_utils';
 import Api from 'ee/api';
+import axios from '~/lib/utils/axios_utils';
 
 export default class GeoNodesService {
   constructor() {

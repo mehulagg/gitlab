@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 
-describe Projects::ErrorTrackingHelper do
+RSpec.describe Projects::ErrorTrackingHelper do
   include Gitlab::Routing.url_helpers
 
-  set(:project) { create(:project) }
-  set(:current_user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project) }
+  let_it_be(:current_user) { create(:user) }
 
   describe '#error_tracking_data' do
     let(:can_enable_error_tracking) { true }
     let(:setting_path) { project_settings_operations_path(project) }
+    let(:list_path) { project_error_tracking_index_path(project) }
+    let(:project_path) { project.full_path }
 
     let(:index_path) do
       project_error_tracking_index_path(project, format: :json)
@@ -30,6 +32,8 @@ describe Projects::ErrorTrackingHelper do
           'user-can-enable-error-tracking' => 'true',
           'enable-error-tracking-link' => setting_path,
           'error-tracking-enabled' => 'false',
+          'list-path' => list_path,
+          'project-path' => project_path,
           'illustration-path' => match_asset_path('/assets/illustrations/cluster_popover.svg')
         )
       end
@@ -73,6 +77,32 @@ describe Projects::ErrorTrackingHelper do
           'user-can-enable-error-tracking' => 'false'
         )
       end
+    end
+  end
+
+  describe '#error_details_data' do
+    let(:issue_id) { 1234 }
+    let(:route_params) { [project.owner, project, issue_id, { format: :json }] }
+    let(:project_path) { project.full_path }
+    let(:stack_trace_path) { stack_trace_namespace_project_error_tracking_index_path(*route_params) }
+    let(:issues_path) { project_issues_path(project) }
+
+    let(:result) { helper.error_details_data(project, issue_id) }
+
+    it 'returns the correct issue id' do
+      expect(result['issue-id']).to eq issue_id
+    end
+
+    it 'returns the correct project path' do
+      expect(result['project-path']).to eq project_path
+    end
+
+    it 'returns the correct stack trace path' do
+      expect(result['issue-stack-trace-path']).to eq stack_trace_path
+    end
+
+    it 'creates an issue and redirects to issue show page' do
+      expect(result['project-issues-path']).to eq issues_path
     end
   end
 end

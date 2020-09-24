@@ -1,11 +1,14 @@
-# Issue links API **(STARTER)**
+# Issue links API **(CORE)**
+
+> The simple "relates to" relationship [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212329) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.4.
 
 ## List issue relations
 
-Get a list of related issues of a given issue, sorted by the relationship creation datetime (ascending).
+Get a list of a given issue's [related issues](../user/project/issues/related_issues.md),
+sorted by the relationship creation datetime (ascending).
 Issues will be filtered according to the user authorizations.
 
-```
+```plaintext
 GET /projects/:id/issues/:issue_iid/links
 ```
 
@@ -48,6 +51,7 @@ Parameters:
     "web_url": "http://example.com/example/example/issues/14",
     "confidential": false,
     "weight": null,
+    "link_type": "relates_to"
   }
 ]
 ```
@@ -56,7 +60,7 @@ Parameters:
 
 Creates a two-way relation between two issues. User must be allowed to update both issues in order to succeed.
 
-```
+```plaintext
 POST /projects/:id/issues/:issue_iid/links
 ```
 
@@ -66,6 +70,13 @@ POST /projects/:id/issues/:issue_iid/links
 | `issue_iid` | integer | yes      | The internal ID of a project's issue |
 | `target_project_id` | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) of a target project  |
 | `target_issue_iid` | integer/string | yes      | The internal ID of a target project's issue |
+| `link_type` | string  | no | The type of the relation ("relates_to", "blocks", "is_blocked_by"), defaults to "relates_to"). |
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/4/issues/1/links?target_project_id=5&target_issue_iid=1"
+```
+
+Example response:
 
 ```json
 {
@@ -128,7 +139,8 @@ POST /projects/:id/issues/:issue_iid/links
     "web_url": "http://example.com/example/example/issues/14",
     "confidential": false,
     "weight": null,
-  }
+  },
+  "link_type": "relates_to"
 }
 ```
 
@@ -136,7 +148,7 @@ POST /projects/:id/issues/:issue_iid/links
 
 Deletes an issue link, thus removes the two-way relationship.
 
-```
+```plaintext
 DELETE /projects/:id/issues/:issue_iid/links/:issue_link_id
 ```
 
@@ -145,6 +157,7 @@ DELETE /projects/:id/issues/:issue_iid/links/:issue_link_id
 | `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user  |
 | `issue_iid` | integer | yes      | The internal ID of a project's issue |
 | `issue_link_id` | integer/string | yes      | The ID of an issue relationship |
+| `link_type` | string  | no | The type of the relation ('relates_to', 'blocks', 'is_blocked_by'), defaults to 'relates_to' |
 
 ```json
 {
@@ -207,6 +220,7 @@ DELETE /projects/:id/issues/:issue_iid/links/:issue_link_id
     "web_url": "http://example.com/example/example/issues/14",
     "confidential": false,
     "weight": null,
-  }
+  },
+  "link_type": "relates_to"
 }
 ```

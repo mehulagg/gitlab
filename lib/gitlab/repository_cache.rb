@@ -7,7 +7,8 @@ module Gitlab
 
     def initialize(repository, extra_namespace: nil, backend: Rails.cache)
       @repository = repository
-      @namespace = "#{repository.full_path}:#{repository.project.id}"
+      @namespace = "#{repository.full_path}"
+      @namespace += ":#{repository.project.id}" if repository.project
       @namespace = "#{@namespace}:#{extra_namespace}" if extra_namespace
       @backend = backend
     end
@@ -32,8 +33,8 @@ module Gitlab
       backend.read(cache_key(key))
     end
 
-    def write(key, value)
-      backend.write(cache_key(key), value)
+    def write(key, value, *args)
+      backend.write(cache_key(key), value, *args)
     end
 
     def fetch_without_caching_false(key, &block)

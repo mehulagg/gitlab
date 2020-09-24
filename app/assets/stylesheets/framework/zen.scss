@@ -1,6 +1,6 @@
 .zen-backdrop {
   &.fullscreen {
-    background-color: $white-light;
+    background-color: $white;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -35,7 +35,7 @@
 
 .zen-control {
   padding: 0;
-  color: $gl-gray-700;
+  color: $gray-700;
   background: none;
   border: 0;
 }

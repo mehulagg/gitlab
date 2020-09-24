@@ -1,7 +1,7 @@
 import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/analytics/productivity_analytics/store/actions';
 import SET_ENDPOINT from 'ee/analytics/productivity_analytics/store/mutation_types';
-import getInitialState from 'ee/analytics/productivity_analytics/store/modules/filters/state';
+import getInitialState from 'ee/analytics/productivity_analytics/store/state';
 
 describe('Productivity analytics actions', () => {
   describe('setEndpoint', () => {

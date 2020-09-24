@@ -7,19 +7,10 @@ module Mutations
 
       graphql_name 'UpdateEpic'
 
-      argument :iid, GraphQL::STRING_TYPE,
-               required: true,
-               description: "The iid of the epic to mutate"
-
       argument :state_event,
                 Types::EpicStateEventEnum,
                 required: false,
                 description: 'State event for the epic'
-
-      field :epic,
-            Types::EpicType,
-            null: true,
-            description: 'The epic after mutation'
 
       authorize :admin_epic
 

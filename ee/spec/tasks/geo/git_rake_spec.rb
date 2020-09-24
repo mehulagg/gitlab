@@ -2,9 +2,9 @@
 
 require 'rake_helper'
 
-describe 'geo:git:housekeeping' do
-  set(:project) { create(:project, :repository) }
-  set(:registry) { ::Geo::ProjectRegistry.find_or_create_by!(project: project) }
+RSpec.describe 'geo:git:housekeeping' do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:registry) { ::Geo::ProjectRegistry.find_or_create_by!(project: project) }
 
   shared_examples 'housekeeping task' do |task_name, period_name|
     it "sets existing projects syncs_gc count to #{period_name}-1" do

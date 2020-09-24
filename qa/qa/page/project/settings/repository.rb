@@ -5,41 +5,55 @@ module QA
     module Project
       module Settings
         class Repository < Page::Base
-          include Common
-
-          view 'app/views/projects/deploy_keys/_index.html.haml' do
-            element :deploy_keys_settings
-          end
+          include QA::Page::Settings::Common
 
           view 'app/views/projects/protected_branches/shared/_index.html.haml' do
-            element :protected_branches_settings
+            element :protected_branches_settings_content
           end
 
           view 'app/views/projects/mirrors/_mirror_repos.html.haml' do
-            element :mirroring_repositories_settings_section
+            element :mirroring_repositories_settings_content
+          end
+
+          view 'app/views/shared/deploy_tokens/_index.html.haml' do
+            element :deploy_tokens_settings_content
+          end
+
+          view 'app/views/shared/deploy_keys/_index.html.haml' do
+            element :deploy_keys_settings_content
+          end
+
+          view 'app/views/projects/protected_tags/shared/_index.html.haml' do
+            element :protected_tag_settings_content
+          end
+
+          def expand_deploy_tokens(&block)
+            expand_content(:deploy_tokens_settings_content) do
+              Settings::DeployTokens.perform(&block)
+            end
           end
 
           def expand_deploy_keys(&block)
-            expand_section(:deploy_keys_settings) do
-              DeployKeys.perform(&block)
+            expand_content(:deploy_keys_settings_content) do
+              Settings::DeployKeys.perform(&block)
             end
           end
 
           def expand_protected_branches(&block)
-            expand_section(:protected_branches_settings) do
+            expand_content(:protected_branches_settings_content) do
               ProtectedBranches.perform(&block)
             end
           end
 
-          def expand_deploy_tokens(&block)
-            expand_section(:deploy_tokens_settings) do
-              DeployTokens.perform(&block)
+          def expand_mirroring_repositories(&block)
+            expand_content(:mirroring_repositories_settings_content) do
+              MirroringRepositories.perform(&block)
             end
           end
 
-          def expand_mirroring_repositories(&block)
-            expand_section(:mirroring_repositories_settings_section) do
-              MirroringRepositories.perform(&block)
+          def expand_protected_tags(&block)
+            expand_content(:protected_tag_settings_content) do
+              ProtectedTags.perform(&block)
             end
           end
         end

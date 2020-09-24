@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::SharedProjectsController do
+RSpec.describe Groups::SharedProjectsController do
   def get_shared_projects(params = {})
     get :index, params: params.reverse_merge(format: :json, group_id: group.full_path)
   end
@@ -13,13 +13,13 @@ describe Groups::SharedProjectsController do
     Projects::GroupLinks::CreateService.new(
       project,
       user,
-      link_group_access: ProjectGroupLink::DEVELOPER
+      link_group_access: Gitlab::Access::DEVELOPER
     ).execute(group)
   end
 
-  let_it_be(:group) { create(:group) }
-  let_it_be(:user) { create(:user) }
-  let_it_be(:shared_project) do
+  let!(:group) { create(:group) }
+  let!(:user) { create(:user) }
+  let!(:shared_project) do
     shared_project = create(:project, namespace: user.namespace)
     share_project(shared_project)
 

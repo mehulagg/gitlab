@@ -1,6 +1,7 @@
 ---
-type: reference
-last_updated: 2018-06-04
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Exploring GitLab Pages
@@ -21,8 +22,8 @@ In brief, this is what you need to upload your website in GitLab Pages:
 
 1. Domain of the instance: domain name that is used for GitLab Pages
    (ask your administrator).
-1. GitLab CI/CD: a `.gitlab-ci.yml` file with a specific job named [`pages`][pages] in the root directory of your repository.
-1. A directory called `public` in your site's repo containing the content
+1. GitLab CI/CD: a `.gitlab-ci.yml` file with a specific job named [`pages`](../../../ci/yaml/README.md#pages) in the root directory of your repository.
+1. A directory called `public` in your site's repository containing the content
    to be published.
 1. GitLab Runner enabled for the project.
 
@@ -33,7 +34,7 @@ If you are using [GitLab Pages on GitLab.com](#gitlab-pages-on-gitlabcom) to hos
 - The domain name for GitLab Pages on GitLab.com is `gitlab.io`.
 - Custom domains and TLS support are enabled.
 - Shared runners are enabled by default, provided for free and can be used to
-  build your website. If you want you can still bring your own Runner.
+  build your website. If you want you can still bring your own runner.
 
 ## Example projects
 
@@ -59,13 +60,8 @@ If the case of `404.html`, there are different scenarios. For example:
 
 ## Redirects in GitLab Pages
 
-Since you cannot use any custom server configuration files, like `.htaccess` or
-any `.conf` file, if you want to redirect a page to another
-location, you can use the [HTTP meta refresh tag][metarefresh].
-
-Some static site generators provide plugins for that functionality so that you
-don't have to create and edit HTML files manually. For example, Jekyll has the
-[redirect-from plugin](https://github.com/jekyll/jekyll-redirect-from).
+You can configure redirects for your site using a `_redirects` file. To learn more, read
+the [redirects documentation](redirects.md).
 
 ## GitLab Pages Access Control **(CORE)**
 
@@ -84,12 +80,10 @@ will be deleted.
 
 When using Pages under the general domain of a GitLab instance (`*.example.io`),
 you _cannot_ use HTTPS with sub-subdomains. That means that if your
-username/groupname contains a dot, for example `foo.bar`, the domain
+username or group name contains a dot, for example `foo.bar`, the domain
 `https://foo.bar.example.io` will _not_ work. This is a limitation of the
-[HTTP Over TLS protocol][rfc]. HTTP pages will continue to work provided you
+[HTTP Over TLS protocol](https://tools.ietf.org/html/rfc2818#section-3.1). HTTP pages will continue to work provided you
 don't redirect HTTP to HTTPS.
-
-[rfc]: https://tools.ietf.org/html/rfc2818#section-3.1 "HTTP Over TLS RFC"
 
 GitLab Pages [does **not** support group websites for subgroups](../../group/subgroups/index.md#limitations).
 You can only create the highest-level group website.
@@ -102,7 +96,7 @@ Learn how to set up GitLab CI/CD for specific use cases.
 
 Supposed your repository contained the following files:
 
-```
+```plaintext
 ├── index.html
 ├── css
 │   └── main.css
@@ -117,19 +111,19 @@ is so `cp` doesn't also copy `public/` to itself in an infinite loop:
 ```yaml
 pages:
   script:
-  - mkdir .public
-  - cp -r * .public
-  - mv .public public
+    - mkdir .public
+    - cp -r * .public
+    - mv .public public
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
+    - master
 ```
 
 ### `.gitlab-ci.yml` for a static site generator
 
-See this document for a [step-by-step guide](getting_started_part_four.md).
+See this document for a [step-by-step guide](getting_started/pages_from_scratch.md).
 
 ### `.gitlab-ci.yml` for a repository where there's also actual code
 
@@ -144,7 +138,7 @@ orphan branch (let's name it `pages`) that will host your static generator site.
 
 You can create a new empty branch like this:
 
-```bash
+```shell
 git checkout --orphan pages
 ```
 
@@ -155,26 +149,23 @@ commits. Push the source files of your static generator in the `pages` branch.
 Below is a copy of `.gitlab-ci.yml` where the most significant line is the last
 one, specifying to execute everything in the `pages` branch:
 
-```
-image: ruby:2.1
+```yaml
+image: ruby:2.6
 
 pages:
   script:
-  - gem install jekyll
-  - jekyll build -d public/
+    - gem install jekyll
+    - jekyll build -d public/
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - pages
+    - pages
 ```
 
-See an example that has different files in the [`master` branch][jekyll-master]
-and the source files for Jekyll are in a [`pages` branch][jekyll-pages] which
+See an example that has different files in the [`master` branch](https://gitlab.com/pages/jekyll-branched/tree/master)
+and the source files for Jekyll are in a [`pages` branch](https://gitlab.com/pages/jekyll-branched/tree/pages) which
 also includes `.gitlab-ci.yml`.
-
-[jekyll-master]: https://gitlab.com/pages/jekyll-branched/tree/master
-[jekyll-pages]: https://gitlab.com/pages/jekyll-branched/tree/pages
 
 ### Serving compressed assets
 
@@ -188,7 +179,7 @@ compressed files, it will serve that version instead of the uncompressed one.
 To take advantage of this feature, the artifact you upload to the Pages should
 have this structure:
 
-```
+```plaintext
 public/
 ├─┬ index.html
 │ └ index.html.gz
@@ -219,14 +210,14 @@ needing to compress files on-demand.
 
 ### Resolving ambiguous URLs
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/issues/95) in GitLab 11.8
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/95) in GitLab 11.8
 
 GitLab Pages makes assumptions about which files to serve when receiving a
 request for a URL that does not include an extension.
 
 Consider a Pages site deployed with the following files:
 
-```
+```plaintext
 public/
 ├─┬ index.html
 │ ├ data.html
@@ -286,19 +277,4 @@ No, you don't. You can create your project first and it will be accessed under
 
 ## Known issues
 
-For a list of known issues, visit GitLab's [public issue tracker].
-
-[jekyll]: http://jekyllrb.com/
-[pages-daemon]: https://gitlab.com/gitlab-org/gitlab-pages
-[gitlab ci]: https://about.gitlab.com/gitlab-ci
-[gitlab runner]: https://docs.gitlab.com/runner/
-[pages]: ../../../ci/yaml/README.md#pages
-[yaml]: ../../../ci/yaml/README.md
-[staticgen]: https://www.staticgen.com/
-[pages-jekyll]: https://gitlab.com/pages/jekyll
-[metarefresh]: https://en.wikipedia.org/wiki/Meta_refresh
-[public issue tracker]: https://gitlab.com/gitlab-org/gitlab-foss/issues?label_name=pages
-[quick start guide]: ../../../ci/quick_start/README.md
-[pages-index-guide]: index.md
-[pages-quick]: getting_started_part_one.md
-[video-pages-fork]: https://youtu.be/TWqh9MtT4Bg
+For a list of known issues, visit GitLab's [public issue tracker](https://gitlab.com/gitlab-org/gitlab/-/issues?label_name[]=Category%3APages).

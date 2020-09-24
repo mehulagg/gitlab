@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::OverwriteProjectService do
+RSpec.describe Projects::OverwriteProjectService do
   include ProjectForksHelper
 
   let(:user) { create(:user) }
@@ -16,6 +16,8 @@ describe Projects::OverwriteProjectService do
   subject { described_class.new(project_to, user) }
 
   before do
+    project_to.project_feature.reload
+
     allow(project_to).to receive(:import_data).and_return(double(data: { 'original_path' => project_from.path }))
   end
 

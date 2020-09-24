@@ -8,12 +8,15 @@ module EE
       project.feature_available?(:merge_pipelines) && super
     end
 
-    # As of GitLab 12.1, merge trains option is enabled by default for all projects.
-    # We should drop `merge_trains_enabled` column after this application has been deployed.
-    # See more https://gitlab.com/gitlab-org/gitlab/issues/11222.
+    ##
+    # The `disable_merge_trains` feature flag is meant to be used for dogfooding
+    # pipelines for merged results in gitlab-org/gitlab project.
+    # This feature flag is never meant to be enabled for the entire instance.
+    # See more context in https://gitlab.com/gitlab-org/gitlab/issues/200037
     def merge_trains_enabled?
-      merge_pipelines_enabled? && project.feature_available?(:merge_trains) &&
-        ::Feature.enabled?(:merge_trains_enabled, project, default_enabled: true)
+      return false if ::Feature.enabled?(:disable_merge_trains, project)
+
+      merge_pipelines_enabled? && project.feature_available?(:merge_trains)
     end
 
     def merge_pipelines_were_disabled?

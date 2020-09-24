@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class ProjectSyncWorker
+  class ProjectSyncWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include GeoQueue
     include Gitlab::Geo::LogHelpers
@@ -13,6 +13,8 @@ module Geo
     sidekiq_retries_exhausted do |msg, _|
       Sidekiq.logger.warn "Failed #{msg['class']} with #{msg['args']}: #{msg['error_message']}"
     end
+
+    loggable_arguments 1
 
     # rubocop: disable CodeReuse/ActiveRecord
     def perform(project_id, options = {})

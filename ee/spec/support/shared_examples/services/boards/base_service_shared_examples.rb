@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'setting a milestone scope' do
+RSpec.shared_examples 'setting a milestone scope' do
   before do
     stub_licensed_features(scoped_issue_board: true)
   end

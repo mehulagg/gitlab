@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Protected branch support', :ldap_no_tls do
       let(:branch_name) { 'protected-branch' }
       let(:commit_message) { 'Protected push commit message' }
       let(:project) do
-        Resource::Project.fabricate! do |resource|
+        Resource::Project.fabricate_via_api! do |resource|
           resource.name = 'protected-branch-project'
           resource.initialize_with_readme = true
         end
@@ -18,7 +18,7 @@ module QA
       end
 
       context 'when developers and maintainers are allowed to push to a protected branch' do
-        it 'user with push rights successfully pushes to the protected branch' do
+        it 'user with push rights successfully pushes to the protected branch', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/447' do
           create_protected_branch(allowed_to_push: {
             roles: Resource::ProtectedBranch::Roles::DEVS_AND_MAINTAINERS
           })
@@ -30,7 +30,7 @@ module QA
       end
 
       context 'when developers and maintainers are not allowed to push to a protected branch' do
-        it 'user without push rights fails to push to the protected branch' do
+        it 'user without push rights fails to push to the protected branch', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/449' do
           create_protected_branch(allowed_to_push: {
             roles: Resource::ProtectedBranch::Roles::NO_ONE
           })

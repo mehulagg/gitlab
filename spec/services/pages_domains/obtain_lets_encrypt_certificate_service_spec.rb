@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PagesDomains::ObtainLetsEncryptCertificateService do
+RSpec.describe PagesDomains::ObtainLetsEncryptCertificateService do
   include LetsEncryptHelpers
 
   let(:pages_domain) { create(:pages_domain, :without_certificate, :without_key) }
@@ -32,9 +32,9 @@ describe PagesDomains::ObtainLetsEncryptCertificateService do
   def stub_lets_encrypt_order(url, status)
     order = ::Gitlab::LetsEncrypt::Order.new(acme_order_double(status: status))
 
-    allow_any_instance_of(::Gitlab::LetsEncrypt::Client).to(
-      receive(:load_order).with(url).and_return(order)
-    )
+    allow_next_instance_of(::Gitlab::LetsEncrypt::Client) do |instance|
+      allow(instance).to receive(:load_order).with(url).and_return(order)
+    end
 
     order
   end
@@ -119,7 +119,7 @@ describe PagesDomains::ObtainLetsEncryptCertificateService do
 
       cert = OpenSSL::X509::Certificate.new
       cert.subject = cert.issuer = OpenSSL::X509::Name.parse(subject)
-      cert.not_before = Time.now
+      cert.not_before = Time.current
       cert.not_after = 1.year.from_now
       cert.public_key = key.public_key
       cert.serial = 0x0
@@ -161,6 +161,32 @@ describe PagesDomains::ObtainLetsEncryptCertificateService do
       service.execute
 
       expect(PagesDomainAcmeOrder.find_by_id(existing_order.id)).to be_nil
+    end
+  end
+
+  context 'when order is invalid' do
+    let(:existing_order) do
+      create(:pages_domain_acme_order, pages_domain: pages_domain)
+    end
+
+    let!(:api_order) do
+      stub_lets_encrypt_order(existing_order.url, 'invalid')
+    end
+
+    it 'saves error to domain and deletes acme order' do
+      expect do
+        service.execute
+      end.to change { pages_domain.reload.auto_ssl_failed }.from(false).to(true)
+
+      expect(PagesDomainAcmeOrder.find_by_id(existing_order.id)).to be_nil
+    end
+
+    it 'sends notification' do
+      expect_next_instance_of(NotificationService) do |notification_service|
+        expect(notification_service).to receive(:pages_domain_auto_ssl_failed).with(pages_domain)
+      end
+
+      service.execute
     end
   end
 end

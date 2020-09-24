@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::BlobService do
+RSpec.describe Gitlab::GitalyClient::BlobService do
   let(:project) { create(:project, :repository) }
   let(:storage_name) { project.repository_storage }
   let(:relative_path) { project.disk_path + '.git' }
@@ -10,7 +12,7 @@ describe Gitlab::GitalyClient::BlobService do
   describe '#get_new_lfs_pointers' do
     let(:revision) { 'master' }
     let(:limit) { 5 }
-    let(:not_in) { ['branch-a', 'branch-b'] }
+    let(:not_in) { %w[branch-a branch-b] }
     let(:expected_params) do
       { revision: revision, limit: limit, not_in_refs: not_in, not_in_all: false }
     end
@@ -44,14 +46,12 @@ describe Gitlab::GitalyClient::BlobService do
   end
 
   describe '#get_all_lfs_pointers' do
-    let(:revision) { 'master' }
-
-    subject { client.get_all_lfs_pointers(revision) }
+    subject { client.get_all_lfs_pointers }
 
     it 'sends a get_all_lfs_pointers message' do
       expect_any_instance_of(Gitaly::BlobService::Stub)
         .to receive(:get_all_lfs_pointers)
-        .with(gitaly_request_with_params(revision: revision), kind_of(Hash))
+        .with(gitaly_request_with_params({}), kind_of(Hash))
         .and_return([])
 
       subject

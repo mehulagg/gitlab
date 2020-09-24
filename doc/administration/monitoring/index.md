@@ -1,8 +1,14 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Monitoring GitLab
 
 Explore our features to monitor your GitLab instance:
 
-- [GitLab self-monitoring](gitlab_instance_administration_project/index.md): The
+- [GitLab self-monitoring](gitlab_self_monitoring_project/index.md): The
   GitLab instance administration project helps to monitor the GitLab instance and
   take action on alerts.
 - [Performance monitoring](performance/index.md): GitLab Performance Monitoring makes it possible to measure a wide variety of statistics of your instance.

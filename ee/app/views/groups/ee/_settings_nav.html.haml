@@ -1,14 +1,16 @@
-- if Gitlab::Auth::LDAP::Config.group_sync_enabled? && can?(current_user, :admin_ldap_group_links, @group)
+- administration_nav_item_disabled = Feature.disabled?(:group_administration_nav_item, @group)
+
+- if Gitlab::Auth::Ldap::Config.group_sync_enabled? && can?(current_user, :admin_ldap_group_links, @group)
   = nav_link(path: 'ldap_group_links#index') do
     = link_to group_ldap_group_links_path(@group), title: 'LDAP Group', class: 'qa-ldap-synchronization-link' do
       %span
         LDAP Synchronization
 
-- if show_saml_in_sidebar?(@group)
+- if show_saml_in_sidebar?(@group) && administration_nav_item_disabled
   = nav_link(path: 'saml_providers#show') do
-    = link_to group_saml_providers_path(@group), title: 'SAML SSO', class: 'qa-group-saml-sso-link' do
+    = link_to group_saml_providers_path(@group), title: _('SAML SSO'), data: { qa_selector: 'group_saml_sso_link' } do
       %span
-        SAML SSO
+        = _('SAML SSO')
 
 - if @group.feature_available?(:group_webhooks) || show_promotions?
   = nav_link(path: 'hooks#index') do
@@ -22,15 +24,14 @@
       %span
         Audit Events
 
--# Check if this is not a sub group
-- if License.feature_available?(:usage_quotas) && @group.parent.nil?
-  = nav_link(path: 'usage_quota#index') do
+- if show_usage_quotas_in_sidebar? && @group.parent.nil? && administration_nav_item_disabled
+  = nav_link(path: 'usage_quotas#index') do
     = link_to group_usage_quotas_path(@group), title: s_('UsageQuota|Usage Quotas') do
       %span
         = s_('UsageQuota|Usage Quotas')
 
-- if Gitlab::CurrentSettings.should_check_namespace_plan?
+- if show_billing_in_sidebar? && administration_nav_item_disabled
   = nav_link(path: 'billings#index') do
-    = link_to group_billings_path(@group), title: 'Billing' do
+    = link_to group_billings_path(@group), title: _('Billing') do
       %span
-        Billing
+        = _('Billing')

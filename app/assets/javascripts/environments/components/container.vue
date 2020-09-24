@@ -1,8 +1,7 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
-import containerMixin from 'ee_else_ce/environments/mixins/container_mixin';
-import EnvironmentTable from '../components/environments_table.vue';
+import EnvironmentTable from './environments_table.vue';
 
 export default {
   components: {
@@ -10,8 +9,12 @@ export default {
     TablePagination,
     GlLoadingIcon,
   },
-  mixins: [containerMixin],
   props: {
+    canaryDeploymentFeatureId: {
+      type: String,
+      required: false,
+      default: null,
+    },
     isLoading: {
       type: Boolean,
       required: true,
@@ -28,6 +31,31 @@ export default {
       type: Boolean,
       required: true,
     },
+    deployBoardsHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    helpCanaryDeploymentsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    lockPromotionSvgPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    showCanaryDeploymentCallout: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    userCalloutsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   methods: {
     onChangePage(page) {
@@ -39,12 +67,7 @@ export default {
 
 <template>
   <div class="environments-container">
-    <gl-loading-icon
-      v-if="isLoading"
-      :size="3"
-      class="prepend-top-default"
-      label="Loading environments"
-    />
+    <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-3" label="Loading environments" />
 
     <slot name="emptyState"></slot>
 

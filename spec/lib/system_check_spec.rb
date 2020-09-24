@@ -3,20 +3,23 @@
 require 'spec_helper'
 require 'rake_helper'
 
-describe SystemCheck do
-  class SimpleCheck < SystemCheck::BaseCheck
-    def check?
-      true
-    end
-  end
-
-  class OtherCheck < SystemCheck::BaseCheck
-    def check?
-      false
-    end
-  end
-
+RSpec.describe SystemCheck do
   before do
+    stub_const('SimpleCheck', Class.new(SystemCheck::BaseCheck))
+    stub_const('OtherCheck', Class.new(SystemCheck::BaseCheck))
+
+    SimpleCheck.class_eval do
+      def check?
+        true
+      end
+    end
+
+    OtherCheck.class_eval do
+      def check?
+        false
+      end
+    end
+
     silence_output
   end
 

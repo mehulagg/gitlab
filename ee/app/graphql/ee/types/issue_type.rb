@@ -6,17 +6,31 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        field :epic, ::Types::EpicType, null: true, description: 'The epic to which issue belongs'
+        field :epic, ::Types::EpicType, null: true,
+              description: 'Epic to which this issue belongs'
 
-        field :weight, GraphQL::INT_TYPE, # rubocop:disable Graphql/Descriptions
-              null: true,
-              resolve: -> (obj, _args, _ctx) { obj.supports_weight? ? obj.weight : nil }
+        field :iteration, ::Types::IterationType, null: true,
+              description: 'Iteration of the issue',
+              resolve: -> (obj, _args, _ctx) { ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Iteration, obj.sprint_id).find }
 
-        field :designs, ::Types::DesignManagement::DesignCollectionType, # rubocop:disable Graphql/Descriptions
-              null: true, method: :design_collection,
-              deprecation_reason: 'use design_collection'
+        field :weight, GraphQL::INT_TYPE, null: true,
+              description: 'Weight of the issue',
+              resolve: -> (obj, _args, _ctx) { obj.weight_available? ? obj.weight : nil }
 
-        field :design_collection, ::Types::DesignManagement::DesignCollectionType, null: true # rubocop:disable Graphql/Descriptions
+        field :blocked, GraphQL::BOOLEAN_TYPE, null: false,
+              description: 'Indicates the issue is blocked',
+              resolve: -> (obj, _args, ctx) {
+                ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(ctx, obj.id)
+              }
+
+        field :health_status,
+          ::Types::HealthStatusEnum,
+          null: true,
+          description: 'Current health status. Returns null if `save_issuable_health_status` feature flag is disabled.',
+          resolve: -> (obj, _, _) { obj.supports_health_status? ? obj.health_status : nil }
+
+        field :status_page_published_incident, GraphQL::BOOLEAN_TYPE, null: true,
+          description: 'Indicates whether an issue is published to the status page'
       end
     end
   end

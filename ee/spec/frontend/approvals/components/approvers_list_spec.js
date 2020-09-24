@@ -1,10 +1,9 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import ApproversListEmpty from 'ee/approvals/components/approvers_list_empty.vue';
 import ApproversListItem from 'ee/approvals/components/approvers_list_item.vue';
 import ApproversList from 'ee/approvals/components/approvers_list.vue';
 import { TYPE_USER, TYPE_GROUP } from 'ee/approvals/constants';
 
-const localVue = createLocalVue();
 const TEST_APPROVERS = [
   { id: 1, type: TYPE_GROUP },
   { id: 1, type: TYPE_USER },
@@ -16,9 +15,8 @@ describe('ApproversList', () => {
   let wrapper;
 
   const factory = (options = {}) => {
-    wrapper = shallowMount(localVue.extend(ApproversList), {
+    wrapper = shallowMount(ApproversList, {
       ...options,
-      localVue,
       propsData,
     });
   };
@@ -64,9 +62,11 @@ describe('ApproversList', () => {
         const item = wrapper.findAll(ApproversListItem).at(idx);
         item.vm.$emit('remove', approver);
 
-        const expected = TEST_APPROVERS.filter((x, i) => i !== idx);
+        return wrapper.vm.$nextTick().then(() => {
+          const expected = TEST_APPROVERS.filter((x, i) => i !== idx);
 
-        expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [expected] }]);
+          expect(wrapper.emitted().input).toEqual([[expected]]);
+        });
       });
     });
   });

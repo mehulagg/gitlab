@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sets approvers', :js do
+RSpec.describe 'Merge request > User sets approvers', :js do
   include ProjectForksHelper
   include FeatureApprovalHelper
 
   let(:user) { create(:user) }
-  let(:project) { create(:project, :public, :repository, approvals_before_merge: 1) }
+  let(:project) { create(:project, :public, :repository) }
   let!(:config_selector) { '.js-approval-rules' }
   let!(:modal_selector) { '#mr-edit-approvals-create-modal' }
 
@@ -24,7 +24,7 @@ describe 'Merge request > User sets approvers', :js do
     end
 
     it 'does not allow setting the author as an approver but allows setting the current user as an approver' do
-      open_modal
+      open_modal(text: 'Add approval rule')
       open_approver_select
 
       expect(find('.select2-results')).not_to have_content(author.name)
@@ -46,7 +46,7 @@ describe 'Merge request > User sets approvers', :js do
     end
 
     it 'allows setting other users as approvers but does not allow setting the current user as an approver, and filters non members from approvers list', :sidekiq_might_not_need_inline do
-      open_modal
+      open_modal(text: 'Add approval rule')
       open_approver_select
 
       expect(find('.select2-results')).to have_content(other_user.name)
@@ -71,7 +71,7 @@ describe 'Merge request > User sets approvers', :js do
 
         visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature' })
 
-        open_modal
+        open_modal(text: 'Add approval rule')
         open_approver_select
 
         expect(find('.select2-results')).not_to have_content(group.name)
@@ -84,7 +84,10 @@ describe 'Merge request > User sets approvers', :js do
 
         find('.select2-results .user-result', text: group.name).click
         close_approver_select
-        click_button 'Update approval rule'
+
+        within('.modal-content') do
+          click_button 'Add approval rule'
+        end
 
         click_on("Submit merge request")
         wait_for_all_requests
@@ -137,7 +140,7 @@ describe 'Merge request > User sets approvers', :js do
 
         visit edit_project_merge_request_path(project, merge_request)
 
-        open_modal
+        open_modal(text: 'Add approval rule')
         open_approver_select
 
         expect(find('.select2-results')).not_to have_content(group.name)
@@ -150,7 +153,9 @@ describe 'Merge request > User sets approvers', :js do
 
         find('.select2-results .user-result', text: group.name).click
         close_approver_select
-        click_button 'Update approval rule'
+        within('.modal-content') do
+          click_button 'Add approval rule'
+        end
 
         click_on("Save changes")
         wait_for_all_requests

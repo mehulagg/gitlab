@@ -1,5 +1,7 @@
 import { shallowMount, mount } from '@vue/test-utils';
 import StageEventList from 'ee/analytics/cycle_analytics/components/stage_event_list.vue';
+import StageEventItem from 'ee/analytics/cycle_analytics/components/stage_event_item.vue';
+import StageBuildItem from 'ee/analytics/cycle_analytics/components/stage_build_item.vue';
 
 import {
   issueStage,
@@ -12,8 +14,6 @@ import {
   testEvents,
   stagingStage,
   stagingEvents,
-  productionStage,
-  productionEvents,
   codeStage,
   codeEvents,
 } from '../mock_data';
@@ -79,44 +79,46 @@ describe('Stage', () => {
 
   describe('Default stages', () => {
     it.each`
-      name            | stage
-      ${'Issue'}      | ${issueStage}
-      ${'Plan'}       | ${planStage}
-      ${'Review'}     | ${reviewStage}
-      ${'Test'}       | ${testStage}
-      ${'Code'}       | ${codeStage}
-      ${'Staging'}    | ${stagingStage}
-      ${'Production'} | ${productionStage}
+      name         | stage
+      ${'Issue'}   | ${issueStage}
+      ${'Plan'}    | ${planStage}
+      ${'Review'}  | ${reviewStage}
+      ${'Test'}    | ${testStage}
+      ${'Code'}    | ${codeStage}
+      ${'Staging'} | ${stagingStage}
     `('$name stage will render the stage description', ({ stage }) => {
       wrapper = createComponent({ props: { stage, events: [] } });
       expect(wrapper.find($sel.description).text()).toEqual(stage.description);
     });
 
     it.each`
-      name            | stage              | eventList
-      ${'Issue'}      | ${issueStage}      | ${issueEvents}
-      ${'Plan'}       | ${planStage}       | ${planEvents}
-      ${'Review'}     | ${reviewStage}     | ${reviewEvents}
-      ${'Code'}       | ${codeStage}       | ${codeEvents}
-      ${'Production'} | ${productionStage} | ${productionEvents}
+      name        | stage          | eventList
+      ${'Issue'}  | ${issueStage}  | ${issueEvents}
+      ${'Plan'}   | ${planStage}   | ${planEvents}
+      ${'Review'} | ${reviewStage} | ${reviewEvents}
+      ${'Code'}   | ${codeStage}   | ${codeEvents}
     `('$name stage will render the list of events', ({ stage, eventList }) => {
-      wrapper = createComponent({ props: { stage, events: eventList } });
-      eventList.forEach((item, index) => {
+      // stages generated from fixtures may not have events
+      const events = eventList.length ? eventList : generateEvents(5);
+      wrapper = createComponent({
+        props: { stage, events },
+      });
+
+      events.forEach((item, index) => {
         const elem = wrapper.findAll($sel.item).at(index);
         expect(elem.find($sel.title).text()).toContain(item.title);
       });
     });
 
     it.each`
-      name            | stage              | eventList
-      ${'Issue'}      | ${issueStage}      | ${issueEvents}
-      ${'Plan'}       | ${planStage}       | ${planEvents}
-      ${'Review'}     | ${reviewStage}     | ${reviewEvents}
-      ${'Code'}       | ${codeStage}       | ${codeEvents}
-      ${'Production'} | ${productionStage} | ${productionEvents}
+      name        | stage          | eventList
+      ${'Issue'}  | ${issueStage}  | ${issueEvents}
+      ${'Plan'}   | ${planStage}   | ${planEvents}
+      ${'Review'} | ${reviewStage} | ${reviewEvents}
+      ${'Code'}   | ${codeStage}   | ${codeEvents}
     `('$name stage will render the items as StageEventItems', ({ stage, eventList }) => {
       wrapper = createComponent({ props: { events: eventList, stage }, stubs: mockStubs });
-      expect(wrapper.find('stage-event-item-stub').exists()).toBe(true);
+      expect(wrapper.find(StageEventItem).exists()).toBe(true);
     });
 
     it.each`
@@ -125,7 +127,7 @@ describe('Stage', () => {
       ${'Staging'} | ${stagingStage} | ${stagingEvents}
     `('$name stage will render the items as StageBuildItems', ({ stage, eventList }) => {
       wrapper = createComponent({ props: { events: eventList, stage }, stubs: mockStubs });
-      expect(wrapper.find('stage-build-item-stub').exists()).toBe(true);
+      expect(wrapper.find(StageBuildItem).exists()).toBe(true);
     });
 
     describe('Test stage', () => {

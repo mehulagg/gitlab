@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Sanitizers::SVG do
+RSpec.describe Gitlab::Sanitizers::SVG do
   let(:scrubber) { Gitlab::Sanitizers::SVG::Scrubber.new }
   let(:namespace) { double(Nokogiri::XML::Namespace, prefix: 'xlink', href: 'http://www.w3.org/1999/xlink') }
   let(:namespaced_attr) { double(Nokogiri::XML::Attr, name: 'href', namespace: namespace, value: '#awesome_id') }
@@ -14,7 +14,9 @@ describe Gitlab::Sanitizers::SVG do
     let(:sanitized) { File.read(sanitized_svg_path) }
 
     it 'delegates sanitization to scrubber' do
-      expect_any_instance_of(Gitlab::Sanitizers::SVG::Scrubber).to receive(:scrub).at_least(:once)
+      expect_next_instance_of(Gitlab::Sanitizers::SVG::Scrubber) do |instance|
+        expect(instance).to receive(:scrub).at_least(:once)
+      end
       described_class.clean(data)
     end
 

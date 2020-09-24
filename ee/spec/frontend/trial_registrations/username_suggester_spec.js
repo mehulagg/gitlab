@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import { setHTMLFixture } from 'helpers/fixtures';
 import UsernameSuggester from 'ee/pages/trial_registrations/new/username_suggester';
+import axios from '~/lib/utils/axios_utils';
 
 describe('UsernameSuggester', () => {
   let axiosMock;
@@ -111,7 +111,7 @@ describe('UsernameSuggester', () => {
     it('does not suggests username if suggester is already running', () => {
       suggester.isLoading = true;
 
-      expect(axiosMock.history.get.length).toBe(0);
+      expect(axiosMock.history.get).toHaveLength(0);
       expect(username).toHaveValue('');
     });
 
@@ -128,7 +128,7 @@ describe('UsernameSuggester', () => {
       suggester.suggestUsername();
 
       setImmediate(() => {
-        expect(axiosMock.history.get.length).toBe(1);
+        expect(axiosMock.history.get).toHaveLength(1);
         expect(suggester.isLoading).toBe(false);
         expect(username).toHaveValue(expectedUsername);
       });
@@ -145,7 +145,7 @@ describe('UsernameSuggester', () => {
       suggester.suggestUsername();
 
       setImmediate(() => {
-        expect(axiosMock.history.get.length).toBe(1);
+        expect(axiosMock.history.get).toHaveLength(1);
         expect(suggester.isLoading).toBe(false);
         expect(username).toHaveValue('');
         expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(

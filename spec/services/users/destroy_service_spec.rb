@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::DestroyService do
+RSpec.describe Users::DestroyService do
   describe "Deletes a user and all their personal projects" do
     let!(:user)      { create(:user) }
     let!(:admin)     { create(:admin) }
@@ -15,9 +15,21 @@ describe Users::DestroyService do
       it 'deletes the user' do
         user_data = service.execute(user)
 
-        expect { user_data['email'].to eq(user.email) }
+        expect(user_data['email']).to eq(user.email)
         expect { User.find(user.id) }.to raise_error(ActiveRecord::RecordNotFound)
         expect { Namespace.find(namespace.id) }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+
+      it 'deletes user associations in batches' do
+        expect(user).to receive(:destroy_dependent_associations_in_batches)
+
+        service.execute(user)
+      end
+
+      it 'does not include snippets when deleting in batches' do
+        expect(user).to receive(:destroy_dependent_associations_in_batches).with({ exclude: [:snippets] })
+
+        service.execute(user)
       end
 
       it 'will delete the project' do
@@ -26,6 +38,70 @@ describe Users::DestroyService do
         end
 
         service.execute(user)
+      end
+
+      it 'calls the bulk snippet destroy service for the user personal snippets' do
+        repo1 = create(:personal_snippet, :repository, author: user).snippet_repository
+        repo2 = create(:project_snippet, :repository, project: project, author: user).snippet_repository
+
+        aggregate_failures do
+          expect(gitlab_shell.repository_exists?(repo1.shard_name, repo1.disk_path + '.git')).to be_truthy
+          expect(gitlab_shell.repository_exists?(repo2.shard_name, repo2.disk_path + '.git')).to be_truthy
+        end
+
+        # Call made when destroying user personal projects
+        expect(Snippets::BulkDestroyService).to receive(:new)
+          .with(admin, project.snippets).and_call_original
+
+        # Call to remove user personal snippets and for
+        # project snippets where projects are not user personal
+        # ones
+        expect(Snippets::BulkDestroyService).to receive(:new)
+          .with(admin, user.snippets.only_personal_snippets).and_call_original
+
+        service.execute(user)
+
+        aggregate_failures do
+          expect(gitlab_shell.repository_exists?(repo1.shard_name, repo1.disk_path + '.git')).to be_falsey
+          expect(gitlab_shell.repository_exists?(repo2.shard_name, repo2.disk_path + '.git')).to be_falsey
+        end
+      end
+
+      it 'calls the bulk snippet destroy service with hard delete option if it is present' do
+        # this avoids getting into Projects::DestroyService as it would
+        # call Snippets::BulkDestroyService first!
+        allow(user).to receive(:personal_projects).and_return([])
+
+        expect_next_instance_of(Snippets::BulkDestroyService) do |bulk_destroy_service|
+          expect(bulk_destroy_service).to receive(:execute).with(hard_delete: true).and_call_original
+        end
+
+        service.execute(user, hard_delete: true)
+      end
+
+      it 'does not delete project snippets that the user is the author of' do
+        repo = create(:project_snippet, :repository, author: user).snippet_repository
+        service.execute(user)
+        expect(gitlab_shell.repository_exists?(repo.shard_name, repo.disk_path + '.git')).to be_truthy
+        expect(User.ghost.snippets).to include(repo.snippet)
+      end
+
+      context 'when an error is raised deleting snippets' do
+        it 'does not delete user' do
+          snippet = create(:personal_snippet, :repository, author: user)
+
+          bulk_service = double
+          allow(Snippets::BulkDestroyService).to receive(:new).and_call_original
+          allow(Snippets::BulkDestroyService).to receive(:new).with(admin, user.snippets).and_return(bulk_service)
+          allow(bulk_service).to receive(:execute).and_return(ServiceResponse.error(message: 'foo'))
+
+          aggregate_failures do
+            expect { service.execute(user) }
+              .to raise_error(Users::DestroyService::DestroyError, 'foo' )
+            expect(snippet.reload).not_to be_nil
+            expect(gitlab_shell.repository_exists?(snippet.repository_storage, snippet.disk_path + '.git')).to be_truthy
+          end
+        end
       end
     end
 
@@ -105,10 +181,17 @@ describe Users::DestroyService do
 
       before do
         solo_owned.group_members = [member]
-        service.execute(user)
+      end
+
+      it 'returns the user with attached errors' do
+        expect(service.execute(user)).to be(user)
+        expect(user.errors.full_messages).to eq([
+          'You must transfer ownership or delete groups before you can remove user'
+        ])
       end
 
       it 'does not delete the user' do
+        service.execute(user)
         expect(User.find(user.id)).to eq user
       end
     end

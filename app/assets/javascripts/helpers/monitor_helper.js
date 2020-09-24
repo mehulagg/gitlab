@@ -1,5 +1,62 @@
-/* eslint-disable import/prefer-default-export */
-import _ from 'underscore';
+/**
+ * @param {String} queryLabel - Default query label for chart
+ * @param {Object} metricAttributes - Default metric attribute values (e.g. method, instance)
+ * @returns {String} The formatted query label
+ * @example
+ * singleAttributeLabel('app', {__name__: "up", app: "prometheus"}) -> "app: prometheus"
+ */
+const singleAttributeLabel = (queryLabel, metricAttributes) => {
+  if (!queryLabel) return '';
+  const relevantAttribute = queryLabel.toLowerCase().replace(' ', '_');
+  const value = metricAttributes[relevantAttribute];
+  if (!value) return '';
+  return `${queryLabel}: ${value}`;
+};
+
+/**
+ * @param {String} queryLabel - Default query label for chart
+ * @param {Object} metricAttributes - Default metric attribute values (e.g. method, instance)
+ * @returns {String} The formatted query label
+ * @example
+ * templatedLabel('__name__', {__name__: "up", app: "prometheus"}) -> "__name__"
+ */
+const templatedLabel = (queryLabel, metricAttributes) => {
+  if (!queryLabel) return '';
+  // eslint-disable-next-line array-callback-return
+  Object.entries(metricAttributes).map(([templateVar, label]) => {
+    const regex = new RegExp(`{{\\s*${templateVar}\\s*}}`, 'g');
+    // eslint-disable-next-line no-param-reassign
+    queryLabel = queryLabel.replace(regex, label);
+  });
+
+  return queryLabel;
+};
+
+/**
+ * @param {Object} metricAttributes - Default metric attribute values (e.g. method, instance)
+ * @returns {String} The formatted query label
+ * @example
+ * multiMetricLabel('', {__name__: "up", app: "prometheus"}) -> "__name__: up, app: prometheus"
+ */
+const multiMetricLabel = metricAttributes => {
+  return Object.entries(metricAttributes)
+    .map(([templateVar, label]) => `${templateVar}: ${label}`)
+    .join(', ');
+};
+
+/**
+ * @param {String} queryLabel - Default query label for chart
+ * @param {Object} metricAttributes - Default metric attribute values (e.g. method, instance)
+ * @returns {String} The formatted query label
+ */
+export const getSeriesLabel = (queryLabel, metricAttributes) => {
+  return (
+    singleAttributeLabel(queryLabel, metricAttributes) ||
+    templatedLabel(queryLabel, metricAttributes) ||
+    multiMetricLabel(metricAttributes) ||
+    queryLabel
+  );
+};
 
 /**
  * @param {Array} queryResults - Array of Result objects
@@ -7,24 +64,10 @@ import _ from 'underscore';
  * @returns {Array} The formatted values
  */
 export const makeDataSeries = (queryResults, defaultConfig) =>
-  queryResults
-    .map(result => {
-      const data = result.values.filter(([, value]) => !Number.isNaN(value));
-      if (!data.length) {
-        return null;
-      }
-      const relevantMetric = defaultConfig.name.toLowerCase().replace(' ', '_');
-      const name = result.metric[relevantMetric];
-      const series = { data };
-      if (name) {
-        series.name = `${defaultConfig.name}: ${name}`;
-      } else {
-        const template = _.template(defaultConfig.name, {
-          interpolate: /\{\{(.+?)\}\}/g,
-        });
-        series.name = template(result.metric);
-      }
-
-      return { ...defaultConfig, ...series };
-    })
-    .filter(series => series !== null);
+  queryResults.map(result => {
+    return {
+      ...defaultConfig,
+      data: result.values,
+      name: getSeriesLabel(defaultConfig.name, result.metric),
+    };
+  });

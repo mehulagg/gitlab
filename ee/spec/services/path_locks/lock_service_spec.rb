@@ -2,13 +2,15 @@
 
 require 'spec_helper'
 
-describe PathLocks::LockService do
+RSpec.describe PathLocks::LockService do
   let(:current_user) { create(:user) }
   let(:project)      { create(:project) }
   let(:path)         { 'app/models' }
 
   it 'locks path' do
-    allow_any_instance_of(described_class).to receive(:can?).and_return(true)
+    allow_next_instance_of(described_class) do |instance|
+      allow(instance).to receive(:can?).and_return(true)
+    end
     described_class.new(project, current_user).execute(path)
 
     expect(project.path_locks.find_by(path: path)).to be_truthy

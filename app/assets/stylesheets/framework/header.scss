@@ -1,6 +1,6 @@
 .navbar-gitlab {
   padding: 0 16px;
-  z-index: 1000;
+  z-index: $header-zindex;
   margin-bottom: 0;
   min-height: $header-height;
   border: 0;
@@ -18,7 +18,7 @@
       width: 55px;
       height: 14px;
       margin: 0;
-      fill: $white-light;
+      fill: $white;
     }
   }
 
@@ -95,7 +95,7 @@
 
     .dropdown.open {
       > a {
-        border-bottom-color: $white-light;
+        border-bottom-color: $white;
       }
     }
 
@@ -209,10 +209,10 @@
           text-decoration: none;
           outline: 0;
           opacity: 1;
-          color: $white-light;
+          color: $white;
 
           &.header-user-dropdown-toggle .header-user-avatar {
-            border-color: $white-light;
+            border-color: $white;
           }
         }
       }
@@ -224,20 +224,19 @@
       .impersonated-user,
       .impersonated-user:hover {
         margin-right: 1px;
-        background-color: $white-light;
+        background-color: $white;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
       }
 
       .impersonation-btn,
       .impersonation-btn:hover {
-        background-color: $white-light;
+        background-color: $white;
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
 
-        i {
+        svg {
           color: $orange-500;
-          font-size: 20px;
         }
       }
     }
@@ -264,7 +263,7 @@
       &:focus {
         text-decoration: none;
         outline: 0;
-        color: $white-light;
+        color: $white;
       }
     }
 
@@ -441,7 +440,7 @@
   margin: 4px 0 4px 2px;
 
   &:hover {
-    background-color: $white-light;
+    background-color: $white;
   }
 }
 
@@ -452,22 +451,22 @@
     font-weight: $gl-font-weight-normal;
     margin-left: -6px;
     font-size: 11px;
-    color: $white-light;
+    color: $white;
     padding: 0 5px;
     line-height: 12px;
     border-radius: 7px;
     box-shadow: 0 1px 0 rgba($gl-header-color, 0.2);
 
     &.green-badge {
-      background-color: $green-500;
+      background-color: $green-400;
     }
 
     &.merge-requests-count {
-      background-color: $orange-600;
+      background-color: $orange-400;
     }
 
     &.todos-count {
-      background-color: $blue-500;
+      background-color: $blue-400;
     }
   }
 
@@ -552,6 +551,13 @@
     svg {
       vertical-align: text-top;
     }
+
+    a.upgrade-plan-link gl-emoji,
+    a.ci-minutes-emoji gl-emoji,
+    a.trial-link gl-emoji {
+      font-size: $gl-font-size;
+      vertical-align: baseline;
+    }
   }
 }
 
@@ -562,6 +568,14 @@
   border: 1px solid $gray-normal;
 }
 
+.header-user-notification-dot {
+  background-color: $orange-300;
+  height: 12px;
+  width: 12px;
+  right: 8px;
+  top: -8px;
+}
+
 .with-performance-bar .navbar-gitlab {
   top: $performance-bar-height;
 }
@@ -569,7 +583,7 @@
 .navbar-empty {
   justify-content: center;
   height: $header-height;
-  background: $white-light;
+  background: $white;
   border-bottom: 1px solid $white-normal;
 
   .tanuki-logo,

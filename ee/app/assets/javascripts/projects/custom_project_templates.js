@@ -13,6 +13,7 @@ const bindEvents = () => {
   const $projectFieldsFormInput = $('.project-fields-form input#project_use_custom_template');
   const $subgroupWithTemplatesIdInput = $('.js-project-group-with-project-templates-id');
   const $namespaceSelect = $projectFieldsForm.find('.js-select-namespace');
+  let hasUserDefinedProjectName = false;
 
   if ($newProjectForm.length !== 1 || $useCustomTemplateBtn.length === 0) {
     return;
@@ -55,11 +56,12 @@ const bindEvents = () => {
 
   function chooseTemplate() {
     const subgroupId = $(this).data('subgroup-id');
+    const groupId = $(this).data('parent-group-id');
     const templateName = $(this).data('template-name');
 
     if (subgroupId) {
       $subgroupWithTemplatesIdInput.val(subgroupId);
-      $namespaceSelect.val(subgroupId).trigger('change');
+      $namespaceSelect.val(groupId).trigger('change');
 
       hideNonRootParentPathOptions();
 
@@ -86,11 +88,22 @@ const bindEvents = () => {
     const $activeTabProjectName = $('.tab-pane.active #project_name');
     const $activeTabProjectPath = $('.tab-pane.active #project_path');
     $activeTabProjectName.focus();
-    $activeTabProjectName.keyup(() =>
-      projectNew.onProjectNameChange($activeTabProjectName, $activeTabProjectPath),
+    $activeTabProjectName.on('keyup', () => {
+      projectNew.onProjectNameChange($activeTabProjectName, $activeTabProjectPath);
+      hasUserDefinedProjectName = $activeTabProjectName.val().trim().length > 0;
+    });
+    $activeTabProjectPath.on('keyup', () =>
+      projectNew.onProjectPathChange(
+        $activeTabProjectName,
+        $activeTabProjectPath,
+        hasUserDefinedProjectName,
+      ),
     );
 
-    $projectFieldsForm.find('.js-select-namespace:first').val(subgroupId);
+    $projectFieldsForm
+      .find('.js-select-namespace')
+      .first()
+      .val(groupId);
   }
 
   $useCustomTemplateBtn.on('change', chooseTemplate);

@@ -11,7 +11,7 @@
     padding: 10px;
   }
 
-  > .deploy-board-information {
+  .deploy-board-information {
     display: flex;
     justify-content: space-between;
 
@@ -21,21 +21,13 @@
       width: 70px;
       flex-wrap: wrap;
       justify-content: center;
-      margin: 20px 0 20px 5px;
+      margin: 20px 0 0 5px;
     }
 
     .deploy-board-instances {
       order: 2;
       margin-left: 20px;
       width: 100%;
-    }
-
-    .deploy-board-instances-text {
-      font-size: 12px;
-    }
-
-    .deploy-board-instances-container {
-      margin-top: -8px;
     }
 
     .deploy-board-actions {
@@ -67,6 +59,13 @@
       font-size: 17px;
       line-height: 40px;
     }
+  }
+
+  .deploy-board-legend .legend-text {
+    color: $gl-text-color;
+    font-size: $gl-font-size-small;
+    font-weight: $gl-font-weight-bold;
+    line-height: $gl-line-height-14;
   }
 }
 
@@ -119,7 +118,7 @@
 
 .alert-modal-message {
   margin-left: -1rem;
-  margin-right: -3rem;
+  margin-right: -1rem;
   margin-top: -1rem;
 }
 
@@ -150,11 +149,11 @@
 
   &-message {
     max-width: 600px;
-    color: $gray-700;
+    color: $gray-500;
   }
 
   &-close {
-    color: $gray-700;
+    color: $gray-500;
     cursor: pointer;
   }
 

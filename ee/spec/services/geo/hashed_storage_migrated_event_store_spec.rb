@@ -2,16 +2,25 @@
 
 require 'spec_helper'
 
-describe Geo::HashedStorageMigratedEventStore do
+RSpec.describe Geo::HashedStorageMigratedEventStore do
   include EE::GeoHelpers
 
-  set(:secondary_node) { create(:geo_node) }
+  let_it_be(:secondary_node) { create(:geo_node) }
 
-  let(:project) { create(:project, path: 'bar') }
+  let(:project) { create(:project, :design_repo, path: 'bar') }
   let(:old_disk_path) { "#{project.namespace.full_path}/foo" }
   let(:old_wiki_disk_path) { "#{old_disk_path}.wiki" }
+  let(:old_design_disk_path) { "#{old_disk_path}.design" }
 
-  subject { described_class.new(project, old_storage_version: nil, old_disk_path: old_disk_path, old_wiki_disk_path: old_wiki_disk_path) }
+  subject do
+    described_class.new(
+      project,
+      old_storage_version: nil,
+      old_disk_path: old_disk_path,
+      old_wiki_disk_path: old_wiki_disk_path,
+      old_design_disk_path: old_design_disk_path
+    )
+  end
 
   before do
     TestEnv.clean_test_path
@@ -35,7 +44,9 @@ describe Geo::HashedStorageMigratedEventStore do
           old_disk_path: old_disk_path,
           new_disk_path: project.disk_path,
           old_wiki_disk_path: old_wiki_disk_path,
-          new_wiki_disk_path: project.wiki.disk_path
+          new_wiki_disk_path: project.wiki.disk_path,
+          old_design_disk_path: old_design_disk_path,
+          new_design_disk_path: project.design_repository.disk_path
         )
       end
     end

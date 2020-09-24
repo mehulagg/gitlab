@@ -1,5 +1,0 @@
----
-title: Pass pipeline variables when expanding Bridge downstream variables.
-merge_request: 18875
-author:
-type: fixed

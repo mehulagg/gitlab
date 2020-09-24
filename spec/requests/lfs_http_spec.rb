@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Git LFS API and storage' do
+RSpec.describe 'Git LFS API and storage' do
   include LfsHttpHelpers
   include ProjectForksHelper
   include WorkhorseHelpers
 
-  set(:project) { create(:project, :repository) }
-  set(:other_project) { create(:project, :repository) }
-  set(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project, :repository) }
+  let_it_be(:other_project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let!(:lfs_object) { create(:lfs_object, :with_file) }
 
   let(:headers) do
@@ -17,6 +17,8 @@ describe 'Git LFS API and storage' do
       'X-Sendfile-Type' => sendfile
     }.compact
   end
+
+  let(:include_workhorse_jwt_header) { true }
   let(:authorization) { }
   let(:sendfile) { }
   let(:pipeline) { create(:ci_empty_pipeline, project: project) }
@@ -227,7 +229,7 @@ describe 'Git LFS API and storage' do
                 end
 
                 it 'responds with redirect' do
-                  expect(response).to have_gitlab_http_status(302)
+                  expect(response).to have_gitlab_http_status(:found)
                 end
 
                 it 'responds with the file location' do
@@ -547,12 +549,6 @@ describe 'Git LFS API and storage' do
           project.lfs_objects << lfs_object
         end
 
-        context 'when Deploy Token is valid' do
-          let(:deploy_token) { create(:deploy_token, projects: [project]) }
-
-          it_behaves_like 'an authorized request', renew_authorization: false
-        end
-
         context 'when Deploy Token is not valid' do
           let(:deploy_token) { create(:deploy_token, projects: [project], read_repository: false) }
 
@@ -562,7 +558,14 @@ describe 'Git LFS API and storage' do
         context 'when Deploy Token is not related to the project' do
           let(:deploy_token) { create(:deploy_token, projects: [other_project]) }
 
-          it_behaves_like 'LFS http 404 response'
+          it_behaves_like 'LFS http 401 response'
+        end
+
+        # TODO: We should fix this test case that causes flakyness by alternating the result of the above test cases.
+        context 'when Deploy Token is valid' do
+          let(:deploy_token) { create(:deploy_token, projects: [project]) }
+
+          it_behaves_like 'an authorized request', renew_authorization: false
         end
       end
 
@@ -690,22 +693,34 @@ describe 'Git LFS API and storage' do
           end
 
           context 'when pushing an LFS object that already exists' do
+            shared_examples_for 'batch upload with existing LFS object' do
+              it_behaves_like 'LFS http 200 response'
+
+              it 'responds with links the object to the project' do
+                expect(json_response['objects']).to be_kind_of(Array)
+                expect(json_response['objects'].first).to include(sample_object)
+                expect(lfs_object.projects.pluck(:id)).not_to include(project.id)
+                expect(lfs_object.projects.pluck(:id)).to include(other_project.id)
+                expect(json_response['objects'].first['actions']['upload']['href']).to eq(objects_url(project, sample_oid, sample_size))
+                expect(json_response['objects'].first['actions']['upload']['header']).to include('Content-Type' => 'application/octet-stream')
+              end
+
+              it_behaves_like 'process authorization header', renew_authorization: true
+            end
+
             let(:update_lfs_permissions) do
               other_project.lfs_objects << lfs_object
             end
 
-            it_behaves_like 'LFS http 200 response'
-
-            it 'responds with links the object to the project' do
-              expect(json_response['objects']).to be_kind_of(Array)
-              expect(json_response['objects'].first).to include(sample_object)
-              expect(lfs_object.projects.pluck(:id)).not_to include(project.id)
-              expect(lfs_object.projects.pluck(:id)).to include(other_project.id)
-              expect(json_response['objects'].first['actions']['upload']['href']).to eq(objects_url(project, sample_oid, sample_size))
-              expect(json_response['objects'].first['actions']['upload']['header']).to include('Content-Type' => 'application/octet-stream')
+            context 'in another project' do
+              it_behaves_like 'batch upload with existing LFS object'
             end
 
-            it_behaves_like 'process authorization header', renew_authorization: true
+            context 'in source of fork project' do
+              let(:project) { fork_project(other_project) }
+
+              it_behaves_like 'batch upload with existing LFS object'
+            end
           end
 
           context 'when pushing a LFS object that does not exist' do
@@ -771,7 +786,7 @@ describe 'Git LFS API and storage' do
           let(:authorization) { authorize_deploy_key }
 
           let(:update_user_permissions) do
-            project.deploy_keys_projects.create(deploy_key: key, can_push: true)
+            project.deploy_keys_projects.create!(deploy_key: key, can_push: true)
           end
 
           it_behaves_like 'pushes new LFS objects', renew_authorization: false
@@ -907,7 +922,7 @@ describe 'Git LFS API and storage' do
               it_behaves_like 'LFS http 200 response'
 
               it 'uses the gitlab-workhorse content type' do
-                expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+                expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
               end
             end
 
@@ -976,7 +991,7 @@ describe 'Git LFS API and storage' do
 
           context 'and workhorse requests upload finalize for a new LFS object' do
             before do
-              lfs_object.destroy
+              lfs_object.destroy!
             end
 
             context 'with object storage disabled' do
@@ -994,7 +1009,7 @@ describe 'Git LFS API and storage' do
                 end
 
                 let(:tmp_object) do
-                  fog_connection.directories.new(key: 'lfs-objects').files.create(
+                  fog_connection.directories.new(key: 'lfs-objects').files.create( # rubocop: disable Rails/SaveBang
                     key: 'tmp/uploads/12312300',
                     body: 'content'
                   )
@@ -1011,7 +1026,7 @@ describe 'Git LFS API and storage' do
                     it 'responds with status 403' do
                       subject
 
-                      expect(response).to have_gitlab_http_status(403)
+                      expect(response).to have_gitlab_http_status(:forbidden)
                     end
                   end
                 end
@@ -1027,7 +1042,7 @@ describe 'Git LFS API and storage' do
                   it 'responds with status 200' do
                     subject
 
-                    expect(response).to have_gitlab_http_status(200)
+                    expect(response).to have_gitlab_http_status(:ok)
 
                     object = LfsObject.find_by_oid(sample_oid)
                     expect(object).to be_present
@@ -1063,14 +1078,24 @@ describe 'Git LFS API and storage' do
             end
           end
 
-          context 'invalid tempfiles' do
+          context 'without the lfs object' do
             before do
-              lfs_object.destroy
+              lfs_object.destroy!
             end
 
             it 'rejects slashes in the tempfile name (path traversal)' do
               put_finalize('../bar', with_tempfile: true)
-              expect(response).to have_gitlab_http_status(403)
+              expect(response).to have_gitlab_http_status(:bad_request)
+            end
+
+            context 'not sending the workhorse jwt header' do
+              let(:include_workhorse_jwt_header) { false }
+
+              it 'rejects the request' do
+                put_finalize(with_tempfile: true)
+
+                expect(response).to have_gitlab_http_status(:unprocessable_entity)
+              end
             end
           end
         end
@@ -1193,8 +1218,8 @@ describe 'Git LFS API and storage' do
 
             it_behaves_like 'LFS http 200 response'
 
-            it 'LFS object is linked to the source project' do
-              expect(lfs_object.projects.pluck(:id)).to include(upstream_project.id)
+            it 'LFS object is linked to the forked project' do
+              expect(lfs_object.projects.pluck(:id)).to include(project.id)
             end
           end
         end
@@ -1296,7 +1321,8 @@ describe 'Git LFS API and storage' do
         method: :put,
         file_key: :file,
         params: args.merge(file: uploaded_file),
-        headers: finalize_headers
+        headers: finalize_headers,
+        send_rewritten_field: include_workhorse_jwt_header
       )
     end
 

@@ -4,6 +4,7 @@
 
 module Gitlab
   module GonHelper
+    include StartupCssHelper
     include WebpackHelper
 
     def add_gon_variables
@@ -28,6 +29,7 @@ module Gitlab
       gon.sprite_file_icons      = IconsHelper.sprite_file_icons_path
       gon.emoji_sprites_css_path = ActionController::Base.helpers.stylesheet_path('emoji_sprites')
       gon.test_env               = Rails.env.test?
+      gon.disable_animations     = Gitlab.config.gitlab['disable_animations']
       gon.suggested_label_colors = LabelsHelper.suggested_colors
       gon.first_day_of_week      = current_user&.first_day_of_week || Gitlab::CurrentSettings.first_day_of_week
       gon.ee                     = Gitlab.ee?
@@ -41,10 +43,16 @@ module Gitlab
 
       # Initialize gon.features with any flags that should be
       # made globally available to the frontend
-      push_frontend_feature_flag(:suppress_ajax_navigation_errors, default_enabled: true)
+      push_frontend_feature_flag(:snippets_vue, default_enabled: true)
+      push_frontend_feature_flag(:monaco_blobs, default_enabled: true)
+      push_frontend_feature_flag(:monaco_ci, default_enabled: true)
+      push_frontend_feature_flag(:snippets_edit_vue, default_enabled: true)
+      push_frontend_feature_flag(:webperf_experiment, default_enabled: false)
+      push_frontend_feature_flag(:snippets_binary_blob, default_enabled: false)
+      push_frontend_feature_flag(:usage_data_api, default_enabled: false)
 
-      # Flag controls a GFM feature used across many routes.
-      push_frontend_feature_flag(:gfm_grafana_integration)
+      # Startup CSS feature is a special one as it can be enabled by means of cookies and params
+      gon.push({ features: { 'startupCss' => use_startup_css? } }, true)
     end
 
     # Exposes the state of a feature flag to the frontend code.

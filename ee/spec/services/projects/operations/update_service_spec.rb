@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Projects::Operations::UpdateService do
-  set(:user) { create(:user) }
+RSpec.describe Projects::Operations::UpdateService do
+  let_it_be(:user) { create(:user) }
 
   let(:project) { create(:project) }
   let(:result) { subject.execute }
@@ -99,93 +99,86 @@ describe Projects::Operations::UpdateService do
       end
     end
 
-    context 'alerting setting' do
+    context 'status page setting' do
       before do
-        stub_licensed_features(prometheus_alerts: true)
         project.add_maintainer(user)
       end
 
       shared_examples 'no operation' do
         it 'does nothing' do
           expect(result[:status]).to eq(:success)
-          expect(project.reload.alerting_setting).to be_nil
+          expect(project.reload.status_page_setting).to be_nil
         end
       end
 
       context 'with valid params' do
-        let(:params) { { alerting_setting_attributes: alerting_params } }
+        let(:params) do
+          {
+            status_page_setting_attributes: attributes_for(:status_page_setting, aws_s3_bucket_name: 'test')
+          }
+        end
 
-        shared_examples 'setting creation' do
-          it 'creates a setting' do
-            expect(project.alerting_setting).to be_nil
+        context 'with an existing setting' do
+          before do
+            create(:status_page_setting, project: project)
+          end
+
+          it 'updates the setting' do
+            expect(project.status_page_setting).not_to be_nil
 
             expect(result[:status]).to eq(:success)
-            expect(project.reload.alerting_setting).not_to be_nil
+            expect(project.reload.status_page_setting.aws_s3_bucket_name)
+              .to eq('test')
           end
-        end
 
-        context 'when regenerate_token is not set' do
-          let(:alerting_params) { { token: 'some token' } }
-
-          context 'with an existing setting' do
-            let!(:alerting_setting) do
-              create(:project_alerting_setting, project: project)
+          context 'with aws key and secret blank' do
+            let(:params) do
+              {
+                status_page_setting_attributes: {
+                  aws_access_key: '',
+                  aws_secret_key: '',
+                  aws_s3_bucket_name: '',
+                  aws_region: '',
+                  status_page_url: ''
+                }
+              }
             end
 
-            it 'ignores provided token' do
+            it 'destroys the status_page_setting entry in DB' do
               expect(result[:status]).to eq(:success)
-              expect(project.reload.alerting_setting.token)
-                .to eq(alerting_setting.token)
+
+              expect(project.reload.status_page_setting).to be_nil
             end
           end
 
-          context 'without an existing setting' do
-            it_behaves_like 'setting creation'
-          end
-        end
-
-        context 'when regenerate_token is set' do
-          let(:alerting_params) { { regenerate_token: true } }
-
-          context 'with an existing setting' do
-            let(:token) { 'some token' }
-
-            let!(:alerting_setting) do
-              create(:project_alerting_setting, project: project, token: token)
+          context 'with not all keys blank' do
+            let(:params) do
+              {
+                status_page_setting_attributes: {
+                  aws_s3_bucket_name: 'test',
+                  aws_region: 'ap-southeast-2',
+                  aws_access_key: '',
+                  aws_secret_key: project.reload.status_page_setting.masked_aws_secret_key,
+                  status_page_url: 'https://status.gitlab.com'
+                }
+              }
             end
 
-            it 'regenerates token' do
-              expect(result[:status]).to eq(:success)
-              expect(project.reload.alerting_setting.token).not_to eq(token)
-            end
-          end
-
-          context 'without an existing setting' do
-            it_behaves_like 'setting creation'
-
-            context 'without license' do
-              before do
-                stub_licensed_features(prometheus_alerts: false)
-              end
-
-              it_behaves_like 'no operation'
-            end
-
-            context 'with insufficient permissions' do
-              before do
-                project.add_reporter(user)
-              end
-
-              it_behaves_like 'no operation'
+            it 'returns a validation error' do
+              expect(result[:status]).to eq(:error)
             end
           end
         end
-      end
 
-      context 'with empty params' do
-        let(:params) { {} }
+        context 'without an existing setting' do
+          it 'creates a setting' do
+            expect(project.status_page_setting).to be_nil
 
-        it_behaves_like 'no operation'
+            expect(result[:status]).to eq(:success)
+            expect(project.reload.status_page_setting.aws_s3_bucket_name)
+              .to eq('test')
+          end
+        end
       end
     end
   end

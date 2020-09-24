@@ -6,10 +6,12 @@ module QA
       module Project
         module SubMenus
           module Settings
-            include QA::Page::Project::SubMenus::Common
+            extend QA::Page::PageConcern
 
-            def self.included(base)
+            def self.prepended(base)
               base.class_eval do
+                prepend QA::Page::Project::SubMenus::Common
+
                 view 'ee/app/views/projects/sidebar/_settings_audit_events.html.haml' do
                   element :audit_events_settings_link
                 end

@@ -15,6 +15,6 @@ export default () => ({
     generatedAt: '',
   },
   filter: FILTER.all,
-  sortField: 'name',
+  sortField: 'severity',
   sortOrder: SORT_ORDER.ascending,
 });

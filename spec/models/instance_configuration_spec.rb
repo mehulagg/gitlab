@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe InstanceConfiguration do
+RSpec.describe InstanceConfiguration do
   context 'without cache' do
     describe '#settings' do
       describe '#ssh_algorithms_hashes' do
@@ -48,6 +48,7 @@ describe InstanceConfiguration do
 
       describe '#gitlab_pages' do
         let(:gitlab_pages) { subject.settings[:gitlab_pages] }
+
         it 'returns Settings.pages' do
           gitlab_pages.delete(:ip_address)
 
@@ -73,6 +74,7 @@ describe InstanceConfiguration do
 
       describe '#gitlab_ci' do
         let(:gitlab_ci) { subject.settings[:gitlab_ci] }
+
         it 'returns Settings.gitalb_ci' do
           gitlab_ci.delete(:artifacts_max_size)
 
@@ -108,7 +110,7 @@ describe InstanceConfiguration do
       end
 
       it 'expires after EXPIRATION_TIME' do
-        allow(Time).to receive(:now).and_return(Time.now + described_class::EXPIRATION_TIME)
+        allow(Time).to receive(:now).and_return(Time.current + described_class::EXPIRATION_TIME)
         Rails.cache.cleanup
 
         expect(Rails.cache.read(described_class::CACHE_KEY)).to eq(nil)

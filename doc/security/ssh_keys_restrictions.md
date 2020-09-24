@@ -1,5 +1,8 @@
 ---
 type: reference, howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Restrict allowed SSH key technologies and minimum length
@@ -17,8 +20,8 @@ algorithms.
 GitLab allows you to restrict the allowed SSH key technology as well as specify
 the minimum key length for each technology.
 
-In the Admin area under **Settings** (`/admin/application_settings`), look for
-the "Visibility and Access Controls" area:
+In **Admin Area > Settings** (`/admin/application_settings/general`), expand the
+**Visibility and access controls** section:
 
 ![SSH keys restriction admin settings](img/ssh_keys_restrictions_settings.png)
 

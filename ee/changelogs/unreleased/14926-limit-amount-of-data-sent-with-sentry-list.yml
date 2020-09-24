@@ -1,5 +1,0 @@
----
-title: Enforce a max size accepted for sentry issues list
-merge_request: 19649
-author:
-type: changed

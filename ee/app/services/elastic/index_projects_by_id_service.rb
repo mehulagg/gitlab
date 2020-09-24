@@ -3,18 +3,11 @@
 module Elastic
   class IndexProjectsByIdService
     def execute(project_ids: [], namespace_ids: [])
-      queue_name = ElasticFullIndexWorker.queue
-
-      project_ids.each do |project_id|
-        ElasticIndexerWorker
-          .set(queue: queue_name)
-          .perform_async(:index, 'Project', project_id, nil)
-      end
+      projects = Project.find(project_ids)
+      Elastic::ProcessInitialBookkeepingService.backfill_projects!(*projects)
 
       namespace_ids.each do |namespace_id|
-        ElasticNamespaceIndexerWorker
-          .set(queue: queue_name)
-          .perform_async(namespace_id, :index)
+        ElasticNamespaceIndexerWorker.perform_async(namespace_id, :index)
       end
     end
   end

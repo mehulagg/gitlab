@@ -6,14 +6,12 @@
 #
 module Gitlab
   module Auth
-    module LDAP
+    module Ldap
       class Access
-        prepend_if_ee('::EE::Gitlab::Auth::LDAP::Access') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
         attr_reader :provider, :user, :ldap_identity
 
         def self.open(user, &block)
-          Gitlab::Auth::LDAP::Adapter.open(user.ldap_identity.provider) do |adapter|
+          Gitlab::Auth::Ldap::Adapter.open(user.ldap_identity.provider) do |adapter|
             block.call(self.new(user, adapter))
           end
         end
@@ -49,8 +47,8 @@ module Gitlab
               return true
             end
 
-            # Block user in GitLab if he/she was blocked in AD
-            if Gitlab::Auth::LDAP::Person.disabled_via_active_directory?(ldap_identity.extern_uid, adapter)
+            # Block user in GitLab if they were blocked in AD
+            if Gitlab::Auth::Ldap::Person.disabled_via_active_directory?(ldap_identity.extern_uid, adapter)
               block_user(user, 'is disabled in Active Directory')
               false
             else
@@ -62,7 +60,7 @@ module Gitlab
             block_user(user, 'does not exist anymore')
             false
           end
-        rescue LDAPConnectionError
+        rescue LdapConnectionError
           false
         end
 
@@ -73,11 +71,11 @@ module Gitlab
         private
 
         def adapter
-          @adapter ||= Gitlab::Auth::LDAP::Adapter.new(provider)
+          @adapter ||= Gitlab::Auth::Ldap::Adapter.new(provider)
         end
 
         def ldap_config
-          Gitlab::Auth::LDAP::Config.new(provider)
+          Gitlab::Auth::Ldap::Config.new(provider)
         end
 
         def ldap_user
@@ -87,7 +85,7 @@ module Gitlab
         end
 
         def find_ldap_user
-          Gitlab::Auth::LDAP::Person.find_by_dn(ldap_identity.extern_uid, adapter)
+          Gitlab::Auth::Ldap::Person.find_by_dn(ldap_identity.extern_uid, adapter)
         end
 
         def block_user(user, reason)
@@ -118,3 +116,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Auth::Ldap::Access.prepend_if_ee('::EE::Gitlab::Auth::Ldap::Access')

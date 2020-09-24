@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::DestroyService do
+RSpec.describe Clusters::DestroyService do
   describe '#execute' do
     subject { described_class.new(cluster.user, params).execute(cluster) }
 
@@ -45,7 +45,7 @@ describe Clusters::DestroyService do
           expect(Clusters::Cluster.where(id: cluster.id).exists?).not_to be_falsey
         end
 
-        it 'transition cluster#cleanup_status from cleanup_not_started to uninstalling_applications' do
+        it 'transition cluster#cleanup_status from cleanup_not_started to cleanup_uninstalling_applications' do
           expect { subject }.to change { cluster.cleanup_status_name }
             .from(:cleanup_not_started)
             .to(:cleanup_uninstalling_applications)

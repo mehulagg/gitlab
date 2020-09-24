@@ -3,13 +3,45 @@
 require 'base64'
 
 module API
-  class Geo < Grape::API
+  class Geo < Grape::API::Instance
     resource :geo do
       helpers do
         def sanitized_node_status_params
-          allowed_attributes = GeoNodeStatus.attribute_names - ['id']
-          valid_attributes = params.keys & allowed_attributes
-          params.slice(*valid_attributes)
+          valid_attributes = GeoNodeStatus.attribute_names - GeoNodeStatus::RESOURCE_STATUS_FIELDS - ['id']
+          sanitized_params = params.slice(*valid_attributes)
+
+          # sanitize status field
+          sanitized_params['status'] = sanitized_params['status'].slice(*GeoNodeStatus::RESOURCE_STATUS_FIELDS) if sanitized_params['status']
+
+          sanitized_params
+        end
+
+        # Check if a Geo request is legit or fail the flow
+        #
+        # @param [Hash] attributes to be matched against JWT
+        def authorize_geo_transfer!(**attributes)
+          unauthorized! unless geo_jwt_decoder.valid_attributes?(**attributes)
+        end
+      end
+
+      params do
+        requires :replicable_name, type: String, desc: 'Replicable name (eg. package_file)'
+        requires :replicable_id, type: Integer, desc: 'The replicable ID that needs to be transferred'
+      end
+      get 'retrieve/:replicable_name/:replicable_id' do
+        check_gitlab_geo_request_ip!
+        params_sym = params.symbolize_keys
+        authorize_geo_transfer!(params_sym)
+
+        decoded_params = geo_jwt_decoder.decode
+        service = ::Geo::BlobUploadService.new(**params_sym, decoded_params: decoded_params)
+        response = service.execute
+
+        if response[:code] == :ok
+          file = response[:file]
+          present_carrierwave_file!(file)
+        else
+          error! response, response.delete(:code)
         end
       end
 
@@ -27,11 +59,11 @@ module API
       end
       get 'transfers/:type/:id' do
         check_gitlab_geo_request_ip!
+        authorize_geo_transfer!(file_type: params[:type], file_id: params[:id])
 
-        service = ::Geo::FileUploadService.new(params, headers['Authorization'])
+        decoded_params = geo_jwt_decoder.decode
+        service = ::Geo::FileUploadService.new(params, decoded_params)
         response = service.execute
-
-        unauthorized! unless response.present?
 
         if response[:code] == :ok
           file = response[:file]
@@ -56,10 +88,55 @@ module API
         end
       end
 
-      # git push over SSH secondary -> primary related proxying logic
+      # git over SSH secondary endpoints -> primary related proxying logic
       #
-      resource 'proxy_git_push_ssh' do
+      resource 'proxy_git_ssh' do
         format :json
+
+        # For git clone/pull
+
+        # Responsible for making HTTP GET /repo.git/info/refs?service=git-upload-pack
+        # request *from* secondary gitlab-shell to primary
+        #
+        params do
+          requires :secret_token, type: String
+          requires :data, type: Hash do
+            requires :gl_id, type: String
+            requires :primary_repo, type: String
+          end
+        end
+        post 'info_refs_upload_pack' do
+          authenticate_by_gitlab_shell_token!
+          params.delete(:secret_token)
+
+          response = Gitlab::Geo::GitSSHProxy.new(params['data']).info_refs_upload_pack
+
+          status(response.code)
+          response.body
+        end
+
+        # Responsible for making HTTP POST /repo.git/git-upload-pack
+        # request *from* secondary gitlab-shell to primary
+        #
+        params do
+          requires :secret_token, type: String
+          requires :data, type: Hash do
+            requires :gl_id, type: String
+            requires :primary_repo, type: String
+          end
+          requires :output, type: String, desc: 'Output from git-upload-pack'
+        end
+        post 'upload_pack' do
+          authenticate_by_gitlab_shell_token!
+          params.delete(:secret_token)
+
+          response = Gitlab::Geo::GitSSHProxy.new(params['data']).upload_pack(params['output'])
+
+          status(response.code)
+          response.body
+        end
+
+        # For git push
 
         # Responsible for making HTTP GET /repo.git/info/refs?service=git-receive-pack
         # request *from* secondary gitlab-shell to primary
@@ -71,11 +148,11 @@ module API
             requires :primary_repo, type: String
           end
         end
-        post 'info_refs' do
+        post 'info_refs_receive_pack' do
           authenticate_by_gitlab_shell_token!
           params.delete(:secret_token)
 
-          response = Gitlab::Geo::GitPushSSHProxy.new(params['data']).info_refs
+          response = Gitlab::Geo::GitSSHProxy.new(params['data']).info_refs_receive_pack
           status(response.code)
           response.body
         end
@@ -91,11 +168,11 @@ module API
           end
           requires :output, type: String, desc: 'Output from git-receive-pack'
         end
-        post 'push' do
+        post 'receive_pack' do
           authenticate_by_gitlab_shell_token!
           params.delete(:secret_token)
 
-          response = Gitlab::Geo::GitPushSSHProxy.new(params['data']).push(params['output'])
+          response = Gitlab::Geo::GitSSHProxy.new(params['data']).receive_pack(params['output'])
           status(response.code)
           response.body
         end

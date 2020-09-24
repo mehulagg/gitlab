@@ -1,6 +1,8 @@
-# Integrity Check Rake Task
+# Integrity check Rake task **(CORE ONLY)**
 
-## Repository Integrity
+GitLab provides Rake tasks to check the integrity of various components.
+
+## Repository integrity
 
 Even though Git is very resilient and tries to prevent data integrity issues,
 there are times when things go wrong. The following Rake tasks intend to
@@ -20,7 +22,7 @@ to prevent data integrity issues. However, if a Git operation is interrupted the
 locks may not be cleaned up properly.
 
 The following symptoms may indicate a problem with repository integrity. If users
-experience these symptoms you may use the rake tasks described below to determine
+experience these symptoms you may use the Rake tasks described below to determine
 exactly which repositories are causing the trouble.
 
 - Receiving an error when trying to push code - `remote: error: cannot lock ref`
@@ -33,17 +35,17 @@ integrity check described previously.
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake gitlab:git:fsck
 ```
 
 **Source Installation**
 
-```bash
+```shell
 sudo -u git -H bundle exec rake gitlab:git:fsck RAILS_ENV=production
 ```
 
-## Uploaded Files Integrity
+## Uploaded files integrity
 
 Various types of files can be uploaded to a GitLab installation by users.
 These integrity checks can detect missing files. Additionally, for locally
@@ -58,7 +60,7 @@ Currently, integrity checks are supported for the following types of file:
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake gitlab:artifacts:check
 sudo gitlab-rake gitlab:lfs:check
 sudo gitlab-rake gitlab:uploads:check
@@ -66,7 +68,7 @@ sudo gitlab-rake gitlab:uploads:check
 
 **Source Installation**
 
-```bash
+```shell
 sudo -u git -H bundle exec rake gitlab:artifacts:check RAILS_ENV=production
 sudo -u git -H bundle exec rake gitlab:lfs:check RAILS_ENV=production
 sudo -u git -H bundle exec rake gitlab:uploads:check RAILS_ENV=production
@@ -82,7 +84,7 @@ Variable  | Type    | Description
 `ID_TO`   | integer | Specifies the ID value to end at, inclusive of the value.
 `VERBOSE` | boolean | Causes failures to be listed individually, rather than being summarized.
 
-```bash
+```shell
 sudo gitlab-rake gitlab:artifacts:check BATCH=100 ID_FROM=50 ID_TO=250
 sudo gitlab-rake gitlab:lfs:check BATCH=100 ID_FROM=50 ID_TO=250
 sudo gitlab-rake gitlab:uploads:check BATCH=100 ID_FROM=50 ID_TO=250
@@ -90,7 +92,7 @@ sudo gitlab-rake gitlab:uploads:check BATCH=100 ID_FROM=50 ID_TO=250
 
 Example output:
 
-```
+```shell
 $ sudo gitlab-rake gitlab:uploads:check
 Checking integrity of Uploads
 - 1..1350: Failures: 0
@@ -107,7 +109,7 @@ Done!
 
 Example verbose output:
 
-```
+```shell
 $ sudo gitlab-rake gitlab:uploads:check VERBOSE=1
 Checking integrity of Uploads
 - 1..1350: Failures: 0
@@ -127,11 +129,28 @@ Checking integrity of Uploads
 Done!
 ```
 
-## LDAP Check
+## LDAP check
 
-The LDAP check Rake task will test the bind_dn and password credentials
+The LDAP check Rake task will test the bind DN and password credentials
 (if configured) and will list a sample of LDAP users. This task is also
 executed as part of the `gitlab:check` task, but can run independently.
 See [LDAP Rake Tasks - LDAP Check](ldap.md#check) for details.
 
-[git-fsck]: https://git-scm.com/docs/git-fsck
+## Troubleshooting
+
+The following are solutions to problems you might discover using the Rake tasks documented
+above.
+
+### Dangling commits
+
+`gitlab:git:fsck` can find dangling commits. To fix them, try
+[manually triggering housekeeping](../housekeeping.md#manual-housekeeping)
+for the affected project(s).
+
+If the issue persists, try triggering `gc` via the
+[Rails Console](../troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session):
+
+```ruby
+p = Project.find_by_path("project-name")
+Projects::HousekeepingService.new(p, :gc).execute
+```

@@ -8,11 +8,11 @@ module Gitlab
 
     class << self
       def enabled?
-        config.enabled && config.address
+        config.enabled && config.address.present?
       end
 
       def supports_wildcard?
-        config.address && config.address.include?(WILDCARD_PLACEHOLDER)
+        config.address.present? && config.address.include?(WILDCARD_PLACEHOLDER)
       end
 
       def supports_issue_creation?
@@ -28,8 +28,9 @@ module Gitlab
         config.address.sub(WILDCARD_PLACEHOLDER, "#{key}#{UNSUBSCRIBE_SUFFIX}")
       end
 
-      def key_from_address(address)
-        regex = address_regex
+      def key_from_address(address, wildcard_address: nil)
+        wildcard_address ||= config.address
+        regex = address_regex(wildcard_address)
         return unless regex
 
         match = address.match(regex)
@@ -55,13 +56,12 @@ module Gitlab
 
       private
 
-      def address_regex
-        wildcard_address = config.address
+      def address_regex(wildcard_address)
         return unless wildcard_address
 
         regex = Regexp.escape(wildcard_address)
         regex = regex.sub(Regexp.escape(WILDCARD_PLACEHOLDER), '(.+)')
-        Regexp.new(/\A#{regex}\z/).freeze
+        Regexp.new(/\A<?#{regex}>?\z/).freeze
       end
     end
   end

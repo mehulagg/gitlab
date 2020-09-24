@@ -14,7 +14,7 @@ I/O. The information on this page can be used for either scenario.
 ### Benchmarking with `fio`
 
 We recommend using
-[fio](https://fio.readthedocs.io/en/latest/fio_doc.html) to test I/O
+[Fio](https://fio.readthedocs.io/en/latest/fio_doc.html) to test I/O
 performance. This test should be run both on the NFS server and on the
 application nodes that talk to the NFS server.
 
@@ -25,8 +25,8 @@ To install:
 
 Then run the following:
 
-```sh
-fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=/path/to/git-data/testfile --bs=4k --iodepth=64 --size=4G --readwrite=randrw --rwmixread=75
+```shell
+fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --readwrite=randrw --rwmixread=75 --size=4G --filename=/path/to/git-data/testfile
 ```
 
 This will create a 4GB file in `/path/to/git-data/testfile`. It performs
@@ -37,7 +37,7 @@ completes.
 The output will vary depending on what version of `fio` installed. The following
 is an example output from `fio` v2.2.10 on a networked solid-state drive (SSD):
 
-```
+```plaintext
 test: (g=0): rw=randrw, bs=4K-4K/4K-4K/4K-4K, ioengine=libaio, iodepth=64
     fio-2.2.10
     Starting 1 process
@@ -65,7 +65,8 @@ operations per second.
 
 ### Simple benchmarking
 
-NOTE: **Note:** This test is naive but may be useful if `fio` is not
+NOTE: **Note:**
+This test is naive but may be useful if `fio` is not
 available on the system. It's possible to receive good results on this
 test but still have poor performance due to read speed and various other
 factors.
@@ -78,32 +79,32 @@ executed, and then read the same 1,000 files.
    [repository storage path](../repository_storage_paths.md).
 1. Create a temporary directory for the test so it's easy to remove the files later:
 
-   ```sh
+   ```shell
    mkdir test; cd test
    ```
 
 1. Run the command:
 
-   ```sh
+   ```shell
    time for i in {0..1000}; do echo 'test' > "test${i}.txt"; done
    ```
 
 1. To benchmark read performance, run the command:
 
-   ```sh
+   ```shell
    time for i in {0..1000}; do cat "test${i}.txt" > /dev/null; done
    ```
 
 1. Remove the test files:
 
-  ```sh
+  ```shell
   cd ../; rm -rf test
   ```
 
 The output of the `time for ...` commands will look similar to the following. The
 important metric is the `real` time.
 
-```sh
+```shell
 $ time for i in {0..1000}; do echo 'test' > "test${i}.txt"; done
 
 real    0m0.116s

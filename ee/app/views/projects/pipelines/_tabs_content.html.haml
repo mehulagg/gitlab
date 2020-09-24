@@ -1,46 +1,36 @@
 - pipeline = local_assigns.fetch(:pipeline)
 - project = local_assigns.fetch(:project)
 
-- sast_endpoint = pipeline.downloadable_path_for_report_type(:sast)
-- dependency_scanning_endpoint = pipeline.downloadable_path_for_report_type(:dependency_scanning)
-- dast_endpoint = pipeline.downloadable_path_for_report_type(:dast)
-- sast_container_endpoint = pipeline.downloadable_path_for_report_type(:container_scanning)
-- blob_path = project_blob_path(project, pipeline.sha)
 - license_management_settings_path = can?(current_user, :admin_software_license_policy, project) ? license_management_settings_path(project) : nil
-- licenses_api_path = licenses_project_pipeline_path(project, pipeline) if project.feature_available?(:license_management)
+- licenses_api_path = licenses_project_pipeline_path(project, pipeline) if project.feature_available?(:license_scanning)
 - vulnerabilities_endpoint_path = expose_path(api_v4_projects_vulnerability_findings_path(id: project.id, params: { pipeline_id: pipeline.id, scope: 'dismissed' }))
+- vulnerability_exports_endpoint_path = expose_path(api_v4_security_projects_vulnerability_exports_path(id: project.id))
+- codequality_report_download_path = pipeline.downloadable_path_for_report_type(:codequality)
 
 - if pipeline.expose_security_dashboard?
   #js-tab-security.build-security.tab-pane
-    - if Feature.enabled?(:pipeline_report_api, default_enabled: true)
-      #js-security-report-app{ data: { dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
-      empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
-      pipeline_id: pipeline.id,
-      project_id: project.id,
-      vulnerabilities_endpoint: vulnerabilities_endpoint_path,
-      vulnerability_feedback_help_path: help_page_path('user/application_security/index') } }
-    - else
-      #js-security-report-app{ data: { head_blob_path: blob_path,
-      sast_head_path: sast_endpoint,
-      dependency_scanning_head_path: dependency_scanning_endpoint,
-      dast_head_path: dast_endpoint,
-      sast_container_head_path: sast_container_endpoint,
-      pipeline_id: pipeline.id,
-      source_branch: pipeline.ref,
-      vulnerability_feedback_path: project_vulnerability_feedback_index_path(project),
-      vulnerability_feedback_help_path: help_page_path('user/application_security/index'),
-      sast_help_path: help_page_path('user/application_security/sast/index'),
-      dependency_scanning_help_path: help_page_path('user/application_security/dependency_scanning/index'),
-      dast_help_path: help_page_path('user/application_security/dast/index'),
-      sast_container_help_path: help_page_path('user/application_security/container_scanning/index'),
-      create_vulnerability_feedback_issue_path: create_vulnerability_feedback_issue_path(project),
-      create_vulnerability_feedback_merge_request_path: create_vulnerability_feedback_merge_request_path(project),
-      create_vulnerability_feedback_dismissal_path: create_vulnerability_feedback_dismissal_path(project) } }
+    #js-security-report-app{ data: { dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
+    empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+    pipeline_id: pipeline.id,
+    pipeline_iid: pipeline.iid,
+    project_id: project.id,
+    source_branch: pipeline.source_ref,
+    pipeline_jobs_path: expose_path(api_v4_projects_pipelines_jobs_path(id: project.id, pipeline_id: pipeline.id)),
+    vulnerabilities_endpoint: vulnerabilities_endpoint_path,
+    vulnerability_exports_endpoint: vulnerability_exports_endpoint_path,
+    vulnerability_feedback_help_path: help_page_path('user/application_security/index'),
+    empty_state_unauthorized_svg_path: image_path('illustrations/user-not-logged-in.svg'),
+    empty_state_forbidden_svg_path: image_path('illustrations/lock_promotion.svg'),
+    project_full_path: project.path_with_namespace } }
 
 - if pipeline.expose_license_scanning_data?
   #js-tab-licenses.tab-pane
-    #js-licenses-app{ data: { license_head_path: pipeline.downloadable_path_for_report_type(:license_management),
-    api_url: license_management_api_url(project),
+    #js-licenses-app{ data: { api_url: license_management_api_url(project),
     license_management_settings_path: license_management_settings_path,
     licenses_api_path: licenses_api_path,
     can_manage_licenses: can?(current_user, :admin_software_license_policy, project).to_s } }
+
+- if codequality_report_download_path
+  #js-tab-codequality.tab-pane
+    #js-pipeline-codequality-report{ data: { codequality_report_download_path: codequality_report_download_path,
+    blob_path: project_blob_path(project, pipeline.commit) } }

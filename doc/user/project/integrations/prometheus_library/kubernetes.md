@@ -1,6 +1,12 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Monitoring Kubernetes
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/8935) in GitLab 9.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8935) in GitLab 9.0.
 
 GitLab has support for automatically detecting and monitoring Kubernetes metrics.
 
@@ -13,13 +19,13 @@ integration services must be enabled.
 
 - Average Memory Usage (MB):
 
-  ```
+  ```prometheus
   avg(sum(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}) by (job)) without (job) / count(avg(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}) without (job)) /1024/1024
   ```
 
 - Average CPU Utilization (%):
 
-  ```
+  ```prometheus
   avg(sum(rate(container_cpu_usage_seconds_total{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}[15m])) by (job)) without (job) / count(sum(rate(container_cpu_usage_seconds_total{container_name!="POD",pod_name=~"^%{ci_environment_slug}-([^c].*|c([^a]|a([^n]|n([^a]|a([^r]|r[^y])))).*|)-(.*)",namespace="%{kube_namespace}"}[15m])) by (pod_name))
   ```
 
@@ -38,7 +44,7 @@ Instead, the [Deployment](https://kubernetes.io/docs/concepts/workloads/controll
 
 ## Displaying Canary metrics **(PREMIUM)**
 
-> Introduced in [GitLab 10.2](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/15201).
+> Introduced in [GitLab 10.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/15201).
 
 GitLab also gathers Kubernetes metrics for [canary deployments](../../canary_deployments.md), allowing easy comparison between the current deployed version and the canary.
 
@@ -48,12 +54,12 @@ These metrics expect the [Deployment](https://kubernetes.io/docs/concepts/worklo
 
 - Average Memory Usage (MB)
 
-  ```
+  ```prometheus
   avg(sum(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-canary-(.*)",namespace="%{kube_namespace}"}) by (job)) without (job) / count(avg(container_memory_usage_bytes{container_name!="POD",pod_name=~"^%{ci_environment_slug}-canary-(.*)",namespace="%{kube_namespace}"}) without (job)) /1024/1024
   ```
 
 - Average CPU Utilization (%)
 
-  ```
+  ```prometheus
   avg(sum(rate(container_cpu_usage_seconds_total{container_name!="POD",pod_name=~"^%{ci_environment_slug}-canary-(.*)",namespace="%{kube_namespace}"}[15m])) by (job)) without (job) / count(sum(rate(container_cpu_usage_seconds_total{container_name!="POD",pod_name=~"^%{ci_environment_slug}-canary-(.*)",namespace="%{kube_namespace}"}[15m])) by (pod_name))
   ```

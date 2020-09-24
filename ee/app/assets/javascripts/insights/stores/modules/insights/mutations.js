@@ -1,4 +1,6 @@
-import _ from 'underscore';
+import { pick } from 'lodash';
+
+import { transformChartDataForGlCharts } from './helpers';
 import * as types from './mutation_types';
 
 export default {
@@ -7,12 +9,10 @@ export default {
     state.configLoading = true;
   },
   [types.RECEIVE_CONFIG_SUCCESS](state, data) {
-    const validConfig = _.pick(
+    state.configData = pick(
       data,
       Object.keys(data).filter(key => data[key].title && data[key].charts),
     );
-
-    state.configData = validConfig;
     state.configLoading = false;
   },
   [types.RECEIVE_CONFIG_ERROR](state) {
@@ -21,11 +21,12 @@ export default {
   },
 
   [types.RECEIVE_CHART_SUCCESS](state, { chart, data }) {
-    const { type } = chart;
+    const { type, description } = chart;
 
     state.chartData[chart.title] = {
       type,
-      data,
+      description,
+      data: transformChartDataForGlCharts(chart, data),
       loaded: true,
     };
   },
@@ -34,7 +35,7 @@ export default {
 
     state.chartData[chart.title] = {
       type,
-      data: null,
+      data: {},
       loaded: false,
       error,
     };
@@ -51,8 +52,5 @@ export default {
       acc[key] = {};
       return acc;
     }, {});
-  },
-  [types.SET_PAGE_LOADING](state, pageLoading) {
-    state.pageLoading = pageLoading;
   },
 };

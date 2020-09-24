@@ -3,15 +3,16 @@
 module Gitlab
   module Auth
     MissingPersonalAccessTokenError = Class.new(StandardError)
+    IpBlacklisted = Class.new(StandardError)
 
     # Scopes used for GitLab API access
-    API_SCOPES = [:api, :read_user].freeze
+    API_SCOPES = [:api, :read_user, :read_api].freeze
 
     # Scopes used for GitLab Repository access
     REPOSITORY_SCOPES = [:read_repository, :write_repository].freeze
 
     # Scopes used for GitLab Docker Registry access
-    REGISTRY_SCOPES = [:read_registry].freeze
+    REGISTRY_SCOPES = [:read_registry, :write_registry].freeze
 
     # Scopes used for GitLab as admin
     ADMIN_SCOPES = [:sudo].freeze
@@ -25,6 +26,8 @@ module Gitlab
     # Default scopes for OAuth applications that don't define their own
     DEFAULT_SCOPES = [:api].freeze
 
+    CI_JOB_USER = 'gitlab-ci-token'
+
     class << self
       prepend_if_ee('EE::Gitlab::Auth') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
@@ -35,6 +38,10 @@ module Gitlab
       def find_for_git_client(login, password, project:, ip:)
         raise "Must provide an IP for rate limiting" if ip.nil?
 
+        rate_limiter = Gitlab::Auth::IpRateLimiter.new(ip)
+
+        raise IpBlacklisted if !skip_rate_limit?(login: login) && rate_limiter.banned?
+
         # `user_with_password_for_git` should be the last check
         # because it's the most expensive, especially when LDAP
         # is enabled.
@@ -43,13 +50,13 @@ module Gitlab
           build_access_token_check(login, password) ||
           lfs_token_check(login, password, project) ||
           oauth_access_token_check(login, password) ||
-          personal_access_token_check(password) ||
-          deploy_token_check(login, password) ||
+          personal_access_token_check(password, project) ||
+          deploy_token_check(login, password, project) ||
           user_with_password_for_git(login, password) ||
           Gitlab::Auth::Result.new
 
-        rate_limit!(ip, success: result.success?, login: login) unless skip_rate_limit?(login: login)
-        Gitlab::Auth::UniqueIpsLimiter.limit_user!(result.actor)
+        rate_limit!(rate_limiter, success: result.success?, login: login)
+        look_to_limit_user(result.actor)
 
         return result if result.success? || authenticate_using_internal_or_ldap_password?
 
@@ -58,7 +65,15 @@ module Gitlab
         raise Gitlab::Auth::MissingPersonalAccessTokenError
       end
 
-      def find_with_user_password(login, password)
+      # Find and return a user if the provided password is valid for various
+      # authenticators (OAuth, LDAP, Local Database).
+      #
+      # Specify `increment_failed_attempts: true` to increment Devise `failed_attempts`.
+      # CAUTION: Avoid incrementing failed attempts when authentication falls through
+      # different mechanisms, as in `.find_for_git_client`. This may lead to
+      # unwanted access locks when the value provided for `password` was actually
+      # a PAT, deploy token, etc.
+      def find_with_user_password(login, password, increment_failed_attempts: false)
         # Avoid resource intensive checks if login credentials are not provided
         return unless login.present? && password.present?
 
@@ -83,23 +98,27 @@ module Gitlab
           else
             # If no user is provided, try LDAP.
             #   LDAP users are only authenticated via LDAP
-            authenticators << Gitlab::Auth::LDAP::Authentication
+            authenticators << Gitlab::Auth::Ldap::Authentication
           end
 
           authenticators.compact!
 
           # return found user that was authenticated first for given login credentials
-          authenticators.find do |auth|
+          authenticated_user = authenticators.find do |auth|
             authenticated_user = auth.login(login, password)
             break authenticated_user if authenticated_user
           end
+
+          user_auth_attempt!(user, success: !!authenticated_user) if increment_failed_attempts
+
+          authenticated_user
         end
       end
 
-      # rubocop:disable Gitlab/RailsLogger
-      def rate_limit!(ip, success:, login:)
-        rate_limiter = Gitlab::Auth::IpRateLimiter.new(ip)
-        return unless rate_limiter.enabled?
+      private
+
+      def rate_limit!(rate_limiter, success:, login:)
+        return if skip_rate_limit?(login: login)
 
         if success
           # Repeated login 'failures' are normal behavior for some Git clients so
@@ -109,24 +128,25 @@ module Gitlab
         else
           # Register a login failure so that Rack::Attack can block the next
           # request from this IP if needed.
-          rate_limiter.register_fail!
-
-          if rate_limiter.banned?
-            Rails.logger.info "IP #{ip} failed to login " \
+          # This returns true when the failures are over the threshold and the IP
+          # is banned.
+          if rate_limiter.register_fail!
+            Gitlab::AppLogger.info "IP #{rate_limiter.ip} failed to login " \
               "as #{login} but has been temporarily banned from Git auth"
           end
         end
       end
-      # rubocop:enable Gitlab/RailsLogger
-
-      private
 
       def skip_rate_limit?(login:)
-        ::Ci::Build::CI_REGISTRY_USER == login
+        CI_JOB_USER == login
+      end
+
+      def look_to_limit_user(actor)
+        Gitlab::Auth::UniqueIpsLimiter.limit_user!(actor) if actor.is_a?(User)
       end
 
       def authenticate_using_internal_or_ldap_password?
-        Gitlab::CurrentSettings.password_authentication_enabled_for_git? || Gitlab::Auth::LDAP::Config.enabled?
+        Gitlab::CurrentSettings.password_authentication_enabled_for_git? || Gitlab::Auth::Ldap::Config.enabled?
       end
 
       def service_request_check(login, password, project)
@@ -156,25 +176,31 @@ module Gitlab
         Gitlab::Auth::Result.new(user, nil, :gitlab_or_ldap, full_authentication_abilities)
       end
 
-      # rubocop: disable CodeReuse/ActiveRecord
       def oauth_access_token_check(login, password)
         if login == "oauth2" && password.present?
           token = Doorkeeper::AccessToken.by_token(password)
 
           if valid_oauth_token?(token)
-            user = User.find_by(id: token.resource_owner_id)
+            user = User.id_in(token.resource_owner_id).first
+            return unless user&.can?(:log_in)
+
             Gitlab::Auth::Result.new(user, nil, :oauth, full_authentication_abilities)
           end
         end
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
-      def personal_access_token_check(password)
+      def personal_access_token_check(password, project)
         return unless password.present?
 
         token = PersonalAccessTokensFinder.new(state: 'active').find_by_token(password)
 
-        if token && valid_scoped_token?(token, all_available_scopes)
+        return unless token
+
+        return if project && token.user.project_bot? && !project.bots.include?(token.user)
+
+        return unless valid_scoped_token?(token, all_available_scopes)
+
+        if token.user.project_bot? || token.user.can?(:log_in)
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
@@ -190,7 +216,9 @@ module Gitlab
       def abilities_for_scopes(scopes)
         abilities_by_scope = {
           api: full_authentication_abilities,
+          read_api: read_only_authentication_abilities,
           read_registry: [:read_container_image],
+          write_registry: [:create_container_image],
           read_repository: [:download_code],
           write_repository: [:download_code, :push_code]
         }
@@ -200,7 +228,7 @@ module Gitlab
         end.uniq
       end
 
-      def deploy_token_check(login, password)
+      def deploy_token_check(login, password, project)
         return unless password.present?
 
         token = DeployToken.active.find_by_token(password)
@@ -208,10 +236,15 @@ module Gitlab
         return unless token && login
         return if login != token.username
 
+        # Registry access (with jwt) does not have access to project
+        return if project && !token.has_access_to?(project)
+        # When repository is disabled, no resources are accessible via Deploy Token
+        return if project&.repository_access_level == ::ProjectFeature::DISABLED
+
         scopes = abilities_for_scopes(token.scopes)
 
         if valid_scoped_token?(token, all_available_scopes)
-          Gitlab::Auth::Result.new(token, token.project, :deploy_token, scopes)
+          Gitlab::Auth::Result.new(token, project, :deploy_token, scopes)
         end
       end
 
@@ -244,7 +277,7 @@ module Gitlab
       end
 
       def build_access_token_check(login, password)
-        return unless login == 'gitlab-ci-token'
+        return unless login == CI_JOB_USER
         return unless password
 
         build = find_build_by_token(password)
@@ -252,6 +285,8 @@ module Gitlab
         return unless build.project.builds_enabled?
 
         if build.user
+          return unless build.user.can?(:log_in)
+
           # If user is assigned to build, use restricted credentials of user
           Gitlab::Auth::Result.new(build.user, build.project, :build, build_authentication_abilities)
         else
@@ -325,6 +360,10 @@ module Gitlab
         REGISTRY_SCOPES
       end
 
+      def resource_bot_scopes
+        Gitlab::Auth::API_SCOPES + Gitlab::Auth::REPOSITORY_SCOPES + Gitlab::Auth.registry_scopes - [:read_user]
+      end
+
       private
 
       def non_admin_available_scopes
@@ -332,7 +371,14 @@ module Gitlab
       end
 
       def find_build_by_token(token)
-        ::Ci::Build.running.find_by_token(token)
+        ::Ci::AuthJobFinder.new(token: token).execute
+      end
+
+      def user_auth_attempt!(user, success:)
+        return unless user && Gitlab::Database.read_write?
+        return user.unlock_access! if success
+
+        user.increment_failed_attempts!
       end
     end
   end

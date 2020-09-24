@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectImportScheduleWorker do
+RSpec.describe ProjectImportScheduleWorker do
   describe '#perform' do
     it 'does nothing if the database is read-only' do
       project = create(:project)
@@ -16,7 +16,9 @@ describe ProjectImportScheduleWorker do
     it 'schedules an import for a project' do
       import_state = create(:import_state)
 
-      allow_any_instance_of(EE::Project).to receive(:add_import_job).and_return(nil)
+      allow_next_instance_of(EE::Project) do |instance|
+        allow(instance).to receive(:add_import_job).and_return(nil)
+      end
 
       expect do
         subject.perform(import_state.project_id)

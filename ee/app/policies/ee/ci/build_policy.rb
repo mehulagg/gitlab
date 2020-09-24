@@ -7,30 +7,26 @@ module EE
       prepended do
         condition(:deployable_by_user) { deployable_by_user? }
 
-        rule { ~deployable_by_user }.policy do
+        condition(:protected_environment_access) do
+          project = @subject.project
+          environment = @subject.environment
+
+          if environment && project.protected_environments_feature_available?
+            protected_environment = project.protected_environment_by_name(environment)
+
+            !!protected_environment&.accessible_to?(user)
+          else
+            false
+          end
+        end
+
+        rule { ~deployable_by_user & ~protected_environment_access}.policy do
           prevent :update_build
         end
 
-        condition(:is_web_ide_terminal, scope: :subject) do
-          @subject.pipeline.webide?
-        end
-
-        rule { is_web_ide_terminal & can?(:create_web_ide_terminal) & (admin | owner_of_job) }.policy do
-          enable :read_web_ide_terminal
-          enable :update_web_ide_terminal
-        end
-
-        rule { is_web_ide_terminal & ~can?(:update_web_ide_terminal) }.policy do
-          prevent :create_build_terminal
-        end
-
-        rule { can?(:update_web_ide_terminal) & terminal }.policy do
-          enable :create_build_terminal
-          enable :create_build_service_proxy
-        end
-
-        rule { ~can?(:build_service_proxy_enabled) }.policy do
-          prevent :create_build_service_proxy
+        rule { protected_environment_access }.policy do
+          enable :update_commit_status
+          enable :update_build
         end
 
         private

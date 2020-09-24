@@ -4,7 +4,7 @@ import { getIdenticonBackgroundClass, getIdenticonTitle } from '~/helpers/avatar
 export default {
   props: {
     entityId: {
-      type: Number,
+      type: [Number, String],
       required: true,
     },
     entityName: {
@@ -29,7 +29,7 @@ export default {
 </script>
 
 <template>
-  <div :class="[sizeClass, identiconBackgroundClass]" class="avatar identicon">
+  <div ref="identicon" :class="[sizeClass, identiconBackgroundClass]" class="avatar identicon">
     {{ identiconTitle }}
   </div>
 </template>

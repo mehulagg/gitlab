@@ -18,7 +18,7 @@ module Gitlab
             variables: variables
           })
         rescue => e
-          Gitlab::Sentry.track_exception(e)
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
           default_initial_values(query)
         end
 
@@ -34,11 +34,11 @@ module Gitlab
 
           memo[:depth] = depth
           memo[:complexity] = complexity
-          memo[:duration] = duration(memo[:time_started]).round(1)
+          memo[:duration_s] = duration(memo[:time_started]).round(1)
 
           GraphqlLogger.info(memo.except!(:time_started, :query))
         rescue => e
-          Gitlab::Sentry.track_exception(e)
+          Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
         end
 
         private
@@ -52,8 +52,7 @@ module Gitlab
         end
 
         def duration(time_started)
-          nanoseconds = Gitlab::Metrics::System.monotonic_time - time_started
-          nanoseconds * 1000000
+          Gitlab::Metrics::System.monotonic_time - time_started
         end
 
         def default_initial_values(query)
@@ -62,7 +61,7 @@ module Gitlab
             query_string: nil,
             query: query,
             variables: nil,
-            duration: nil
+            duration_s: nil
           }
         end
       end

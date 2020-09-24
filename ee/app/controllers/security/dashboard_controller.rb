@@ -2,8 +2,6 @@
 
 module Security
   class DashboardController < ::Security::ApplicationController
-    def show
-      head :ok
-    end
+    layout 'instance_security'
   end
 end

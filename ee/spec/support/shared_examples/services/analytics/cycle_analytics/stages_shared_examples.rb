@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'permission check for cycle analytics stage services' do |required_license|
+RSpec.shared_examples 'permission check for cycle analytics stage services' do |required_license|
   context 'when user has no access' do
     before do
       group.add_user(user, :guest)

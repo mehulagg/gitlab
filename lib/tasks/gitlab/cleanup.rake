@@ -13,7 +13,7 @@ namespace :gitlab do
 
         print "#{user.name} (#{user.ldap_identity.extern_uid}) ..."
 
-        if Gitlab::Auth::LDAP::Access.allowed?(user)
+        if Gitlab::Auth::Ldap::Access.allowed?(user)
           puts " [OK]".color(:green)
         else
           if block_flag
@@ -64,6 +64,40 @@ namespace :gitlab do
       end
     end
 
+    desc 'GitLab | Cleanup | Clean orphan LFS file references'
+    task orphan_lfs_file_references: :gitlab_environment do
+      warn_user_is_not_gitlab
+
+      project = find_project
+
+      unless project
+        logger.info "Specify the project with PROJECT_ID={number} or PROJECT_PATH={namespace/project-name}".color(:red)
+        exit
+      end
+
+      cleaner = Gitlab::Cleanup::OrphanLfsFileReferences.new(
+        project,
+        dry_run: dry_run?,
+        logger: logger,
+        limit: limit
+      )
+
+      cleaner.run!
+
+      if dry_run?
+        logger.info "To clean up these files run this command with DRY_RUN=false".color(:yellow)
+      end
+    end
+
+    desc 'GitLab | Cleanup | Clean orphan LFS files'
+    task orphan_lfs_files: :gitlab_environment do
+      warn_user_is_not_gitlab
+
+      removed_files = RemoveUnreferencedLfsObjectsWorker.new.perform
+
+      logger.info "Removed unreferenced LFS files: #{removed_files.count}".color(:green)
+    end
+
     namespace :sessions do
       desc "GitLab | Cleanup | Sessions | Clean ActiveSession lookup keys"
       task active_sessions_lookup_keys: :gitlab_environment do
@@ -92,7 +126,7 @@ namespace :gitlab do
               lookup_key_count = redis.scard(key)
 
               session_ids = ActiveSession.session_ids_for_user(user_id)
-              entries = ActiveSession.raw_active_session_entries(session_ids, user_id)
+              entries = ActiveSession.raw_active_session_entries(redis, session_ids, user_id)
               session_ids_and_entries = session_ids.zip(entries)
 
               inactive_session_ids = session_ids_and_entries.map do |session_id, session|
@@ -134,6 +168,14 @@ namespace :gitlab do
 
     def niceness
       ENV['NICENESS'].presence
+    end
+
+    def find_project
+      if ENV['PROJECT_ID']
+        Project.find_by_id(ENV['PROJECT_ID']&.to_i)
+      elsif ENV['PROJECT_PATH']
+        Project.find_by_full_path(ENV['PROJECT_PATH'])
+      end
     end
 
     # rubocop:disable Gitlab/RailsLogger

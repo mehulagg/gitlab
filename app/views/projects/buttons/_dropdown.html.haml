@@ -1,5 +1,5 @@
 - can_create_issue = show_new_issue_link?(@project)
-- can_create_project_snippet = can?(current_user, :create_project_snippet, @project)
+- can_create_project_snippet = can?(current_user, :create_snippet, @project)
 - can_push_code = can?(current_user, :push_code, @project)
 - create_mr_from_new_fork = can?(current_user, :fork_project, @project) && can?(current_user, :create_merge_request_in, @project)
 - merge_project = merge_request_source_project_for_project(@project)
@@ -7,10 +7,10 @@
 - show_menu = can_create_issue || can_create_project_snippet || can_push_code || create_mr_from_new_fork || merge_project
 
 - if show_menu
-  .project-action-button.dropdown.inline
-    %a.btn.dropdown-toggle.has-tooltip.qa-create-new-dropdown{ href: '#', title: _('Create new...'), 'data-toggle' => 'dropdown', 'data-container' => 'body', 'aria-label' => _('Create new...'), 'data-display' => 'static' }
-      = icon('plus')
-      = icon("caret-down")
+  .project-action-button.dropdown.inline<
+    %a.btn.btn-default.gl-button.dropdown-toggle.has-tooltip.qa-create-new-dropdown{ href: '#', title: _('Create new...'), 'data-toggle' => 'dropdown', 'data-container' => 'body', 'aria-label' => _('Create new...'), 'data-display' => 'static' }
+      = sprite_icon('plus', css_class: 'gl-icon')
+      = sprite_icon("chevron-down", css_class: 'gl-icon')
     %ul.dropdown-menu.dropdown-menu-right.project-home-dropdown
       - if can_create_issue || merge_project || can_create_project_snippet
         %li.dropdown-header= _('This project')

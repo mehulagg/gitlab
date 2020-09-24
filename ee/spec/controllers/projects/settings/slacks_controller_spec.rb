@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Settings::SlacksController do
+RSpec.describe Projects::Settings::SlacksController do
   let(:project) { create(:project, :public) }
   let(:user) { create(:user) }
 
@@ -36,7 +36,7 @@ describe Projects::Settings::SlacksController do
 
         get :slack_auth, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(redirect_url(project))
         expect(flash[:alert]).to be_nil
       end
@@ -46,7 +46,7 @@ describe Projects::Settings::SlacksController do
 
         get :slack_auth, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(redirect_url(project))
         expect(flash[:alert]).to eq('error')
       end
@@ -56,7 +56,7 @@ describe Projects::Settings::SlacksController do
       it 'returns 403' do
         get :slack_auth, params: { namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end

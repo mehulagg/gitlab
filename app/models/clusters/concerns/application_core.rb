@@ -15,7 +15,7 @@ module Clusters
         def set_initial_status
           return unless not_installable?
 
-          self.status = status_states[:installable] if cluster&.application_helm_available?
+          self.status = status_states[:installable]
         end
 
         def can_uninstall?
@@ -59,6 +59,24 @@ module Clusters
         def post_uninstall
           # Override if your application needs any action after
           # being uninstalled by Helm
+        end
+
+        def logger
+          @logger ||= Gitlab::Kubernetes::Logger.build
+        end
+
+        def log_exception(error, event)
+          logger.error({
+            exception: error.class.name,
+            status_code: error.error_code,
+            cluster_id: cluster&.id,
+            application_id: id,
+            class_name: self.class.name,
+            event: event,
+            message: error.message
+          })
+
+          Gitlab::ErrorTracking.track_exception(error, cluster_id: cluster&.id, application_id: id)
         end
       end
     end

@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import createStore from 'ee/billings/stores';
 import SubscriptionApp from 'ee/billings/components/app.vue';
 import SubscriptionTable from 'ee/billings/components/subscription_table.vue';
@@ -15,15 +15,11 @@ describe('SubscriptionApp component', () => {
   };
 
   const factory = (props = appProps) => {
-    const localVue = createLocalVue();
-
     store = createStore();
     jest.spyOn(store, 'dispatch').mockImplementation();
 
     wrapper = shallowMount(SubscriptionApp, {
-      localVue,
       store,
-      sync: false,
       propsData: { ...props },
     });
   };

@@ -2,19 +2,19 @@
 
 require 'spec_helper'
 
-describe API::ProjectEvents do
+RSpec.describe API::ProjectEvents do
   let(:user) { create(:user) }
   let(:non_member) { create(:user) }
   let(:private_project) { create(:project, :private, creator_id: user.id, namespace: user.namespace) }
   let(:closed_issue) { create(:closed_issue, project: private_project, author: user) }
-  let!(:closed_issue_event) { create(:event, project: private_project, author: user, target: closed_issue, action: Event::CLOSED, created_at: Date.new(2016, 12, 30)) }
+  let!(:closed_issue_event) { create(:event, project: private_project, author: user, target: closed_issue, action: :closed, created_at: Date.new(2016, 12, 30)) }
 
   describe 'GET /projects/:id/events' do
     context 'when unauthenticated ' do
       it 'returns 404 for private project' do
         get api("/projects/#{private_project.id}/events")
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'returns 200 status for a public project' do
@@ -22,28 +22,28 @@ describe API::ProjectEvents do
 
         get api("/projects/#{public_project.id}/events")
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
     context 'with inaccessible events' do
       let(:public_project) { create(:project, :public, creator_id: user.id, namespace: user.namespace) }
       let(:confidential_issue) { create(:closed_issue, confidential: true, project: public_project, author: user) }
-      let!(:confidential_event) { create(:event, project: public_project, author: user, target: confidential_issue, action: Event::CLOSED) }
+      let!(:confidential_event) { create(:event, project: public_project, author: user, target: confidential_issue, action: :closed) }
       let(:public_issue) { create(:closed_issue, project: public_project, author: user) }
-      let!(:public_event) { create(:event, project: public_project, author: user, target: public_issue, action: Event::CLOSED) }
+      let!(:public_event) { create(:event, project: public_project, author: user, target: public_issue, action: :closed) }
 
       it 'returns only accessible events' do
         get api("/projects/#{public_project.id}/events", non_member)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.size).to eq(1)
       end
 
       it 'returns all events when the user has access' do
         get api("/projects/#{public_project.id}/events", user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.size).to eq(2)
       end
     end
@@ -53,19 +53,19 @@ describe API::ProjectEvents do
 
       before do
         create(:event,
+               :closed,
                project: public_project,
                target: create(:issue, project: public_project, title: 'Issue 1'),
-               action: Event::CLOSED,
                created_at: Date.parse('2018-12-10'))
         create(:event,
+               :closed,
                project: public_project,
                target: create(:issue, confidential: true, project: public_project, title: 'Confidential event'),
-               action: Event::CLOSED,
                created_at: Date.parse('2018-12-11'))
         create(:event,
+               :closed,
                project: public_project,
                target: create(:issue, project: public_project, title: 'Issue 2'),
-               action: Event::CLOSED,
                created_at: Date.parse('2018-12-12'))
       end
 
@@ -92,7 +92,7 @@ describe API::ProjectEvents do
       it 'returns 404' do
         get api("/projects/#{private_project.id}/events", non_member)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -100,16 +100,16 @@ describe API::ProjectEvents do
       it 'returns project events' do
         get api("/projects/#{private_project.id}/events?action=closed&target_type=issue&after=2016-12-1&before=2016-12-31", user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.size).to eq(1)
       end
 
       it 'returns 404 if project does not exist' do
-        get api("/projects/1234/events", user)
+        get api("/projects/#{non_existing_record_id}/events", user)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       context 'when the requesting token does not have "api" scope' do
@@ -118,7 +118,7 @@ describe API::ProjectEvents do
         it 'returns a "403" response' do
           get api("/projects/#{private_project.id}/events", personal_access_token: token)
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
     end
@@ -142,7 +142,7 @@ describe API::ProjectEvents do
           get api("/projects/#{private_project.id}/events", user), params: { target_type: :merge_request }
         end.not_to exceed_all_query_limit(control_count)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response.size).to eq(2)
         expect(json_response.map { |r| r['target_id'] }).to match_array([merge_request1.id, merge_request2.id])

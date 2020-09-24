@@ -2,10 +2,11 @@ import './filtered_search_token_keys';
 
 export default class FilteredSearchTokenizer {
   static processTokens(input, allowedKeys) {
-    // Regex extracts `(token):(symbol)(value)`
+    // Regex extracts `(token):(operator)(symbol)(value)`
     // Values that start with a double quote must end in a double quote (same for single)
+
     const tokenRegex = new RegExp(
-      `(${allowedKeys.join('|')}):([~%@]?)(?:('[^']*'{0,1})|("[^"]*"{0,1})|(\\S+))`,
+      `(${allowedKeys.join('|')}):(=|!=)?([~%@&]?)(?:('[^']*'{0,1})|("[^"]*"{0,1})|(\\S+))`,
       'g',
     );
     const tokens = [];
@@ -13,13 +14,21 @@ export default class FilteredSearchTokenizer {
     let lastToken = null;
     const searchToken =
       input
-        .replace(tokenRegex, (match, key, symbol, v1, v2, v3) => {
+        .replace(tokenRegex, (match, key, operator, symbol, v1, v2, v3) => {
+          const prefixedTokens = ['~', '%', '@', '&'];
+          const comparisonTokens = ['!=', '='];
           let tokenValue = v1 || v2 || v3;
           let tokenSymbol = symbol;
           let tokenIndex = '';
+          let tokenOperator = operator;
 
-          if (tokenValue === '~' || tokenValue === '%' || tokenValue === '@') {
+          if (prefixedTokens.includes(tokenValue)) {
             tokenSymbol = tokenValue;
+            tokenValue = '';
+          }
+
+          if (comparisonTokens.includes(tokenValue)) {
+            tokenOperator = tokenValue;
             tokenValue = '';
           }
 
@@ -33,6 +42,7 @@ export default class FilteredSearchTokenizer {
               key,
               value: tokenValue || '',
               symbol: tokenSymbol || '',
+              operator: tokenOperator || '',
             });
           }
 
@@ -43,13 +53,12 @@ export default class FilteredSearchTokenizer {
 
     if (tokens.length > 0) {
       const last = tokens[tokens.length - 1];
-      const lastString = `${last.key}:${last.symbol}${last.value}`;
+      const lastString = `${last.key}:${last.operator}${last.symbol}${last.value}`;
       lastToken =
         input.lastIndexOf(lastString) === input.length - lastString.length ? last : searchToken;
     } else {
       lastToken = searchToken;
     }
-
     return {
       tokens,
       lastToken,

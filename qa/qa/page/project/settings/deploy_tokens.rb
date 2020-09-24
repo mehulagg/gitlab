@@ -5,7 +5,7 @@ module QA
     module Project
       module Settings
         class DeployTokens < Page::Base
-          view 'app/views/projects/deploy_tokens/_form.html.haml' do
+          view 'app/views/shared/deploy_tokens/_form.html.haml' do
             element :deploy_token_name
             element :deploy_token_expires_at
             element :deploy_token_read_repository
@@ -13,7 +13,7 @@ module QA
             element :create_deploy_token
           end
 
-          view 'app/views/projects/deploy_tokens/_new_deploy_token.html.haml' do
+          view 'app/views/shared/deploy_tokens/_new_deploy_token.html.haml' do
             element :created_deploy_token_section
             element :deploy_token_user
             element :deploy_token
@@ -51,9 +51,7 @@ module QA
           private
 
           def within_new_project_deploy_token
-            wait(reload: false) do
-              has_css?(element_selector_css(:created_deploy_token_section))
-            end
+            has_element?(:created_deploy_token_section, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
 
             within_element(:created_deploy_token_section) do
               yield

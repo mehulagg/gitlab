@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Ci::PipelineBridgeStatusService do
+RSpec.describe Ci::PipelineBridgeStatusService do
+  let_it_be(:project) { create(:project) }
   let(:user) { build(:user) }
-  let(:project) { build(:project) }
   let(:pipeline) { build(:ci_pipeline, project: project) }
 
   describe '#execute' do
@@ -19,20 +19,6 @@ describe Ci::PipelineBridgeStatusService do
 
       it 'calls inherit_status_from_upstream on downstream bridges' do
         expect(bridge).to receive(:inherit_status_from_upstream!)
-
-        subject
-      end
-    end
-
-    context 'when pipeline has upstream bridge' do
-      let(:bridge) { build(:ci_bridge) }
-
-      before do
-        pipeline.source_bridge = bridge
-      end
-
-      it 'calls inherit_status_from_downstream on upstream bridge' do
-        expect(bridge).to receive(:inherit_status_from_downstream!).with(pipeline)
 
         subject
       end

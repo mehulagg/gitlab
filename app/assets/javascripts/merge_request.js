@@ -1,8 +1,9 @@
-/* eslint-disable func-names, no-var, no-underscore-dangle, one-var, consistent-return */
+/* eslint-disable func-names, no-underscore-dangle, consistent-return */
 
 import $ from 'jquery';
+import axios from './lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import TaskList from './task_list';
 import MergeRequestTabs from './merge_request_tabs';
 import IssuablesHelper from './helpers/issuables_helper';
@@ -24,7 +25,7 @@ function MergeRequest(opts) {
   this.initCommitMessageListeners();
   this.closeReopenReportToggle = IssuablesHelper.initCloseReopenReport();
 
-  if ($('a.btn-close').length) {
+  if ($('.description.js-task-list-container').length) {
     this.taskList = new TaskList({
       dataType: 'merge_request',
       fieldName: 'description',
@@ -64,12 +65,26 @@ MergeRequest.prototype.showAllCommits = function() {
 };
 
 MergeRequest.prototype.initMRBtnListeners = function() {
-  var _this;
-  _this = this;
-  return $('a.btn-close, a.btn-reopen').on('click', function(e) {
-    var $this, shouldSubmit;
-    $this = $(this);
-    shouldSubmit = $this.hasClass('btn-comment');
+  const _this = this;
+
+  $('.report-abuse-link').on('click', e => {
+    // this is needed because of the implementation of
+    // the dropdown toggle and Report Abuse needing to be
+    // linked to another page.
+    e.stopPropagation();
+  });
+
+  return $('.btn-close, .btn-reopen').on('click', function(e) {
+    const $this = $(this);
+    const shouldSubmit = $this.hasClass('btn-comment');
+    if ($this.hasClass('js-btn-issue-action')) {
+      const url = $this.data('endpoint');
+      return axios
+        .put(url)
+        .then(() => window.location.reload())
+        .catch(() => createFlash(__('Something went wrong.')));
+    }
+
     if (shouldSubmit && $this.data('submitted')) {
       return;
     }
@@ -88,8 +103,7 @@ MergeRequest.prototype.initMRBtnListeners = function() {
 };
 
 MergeRequest.prototype.submitNoteForm = function(form, $button) {
-  var noteText;
-  noteText = form.find('textarea.js-note-text').val();
+  const noteText = form.find('textarea.js-note-text').val();
   if (noteText.trim().length > 0) {
     form.submit();
     $button.data('submitted', true);
@@ -99,7 +113,7 @@ MergeRequest.prototype.submitNoteForm = function(form, $button) {
 
 MergeRequest.prototype.initCommitMessageListeners = function() {
   $(document).on('click', 'a.js-with-description-link', e => {
-    var textarea = $('textarea.js-commit-message');
+    const textarea = $('textarea.js-commit-message');
     e.preventDefault();
 
     textarea.val(textarea.data('messageWithDescription'));
@@ -108,7 +122,7 @@ MergeRequest.prototype.initCommitMessageListeners = function() {
   });
 
   $(document).on('click', 'a.js-without-description-link', e => {
-    var textarea = $('textarea.js-commit-message');
+    const textarea = $('textarea.js-commit-message');
     e.preventDefault();
 
     textarea.val(textarea.data('messageWithoutDescription'));

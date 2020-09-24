@@ -1,6 +1,7 @@
-/* eslint-disable func-names, no-var, no-underscore-dangle, no-param-reassign, consistent-return, one-var, no-else-return */
+/* eslint-disable func-names, no-underscore-dangle, no-param-reassign, consistent-return */
 
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
 
 // LineHighlighter
 //
@@ -54,6 +55,7 @@ LineHighlighter.prototype.bindEvents = function() {
 
   $fileHolder.on('click', 'a[data-line-number]', this.clickHandler);
   $fileHolder.on('highlight:line', this.highlightHash);
+  window.addEventListener('hashchange', e => this.highlightHash(e.target.location.hash));
 };
 
 LineHighlighter.prototype.highlightHash = function(newHash) {
@@ -82,13 +84,13 @@ LineHighlighter.prototype.highlightHash = function(newHash) {
 };
 
 LineHighlighter.prototype.clickHandler = function(event) {
-  var current, lineNumber, range;
+  let range;
   event.preventDefault();
   this.clearHighlight();
-  lineNumber = $(event.target)
+  const lineNumber = $(event.target)
     .closest('a')
     .data('lineNumber');
-  current = this.hashToRange(this._hash);
+  const current = this.hashToRange(this._hash);
   if (!(current[0] && event.shiftKey)) {
     // If there's no current selection, or there is but Shift wasn't held,
     // treat this like a single-line selection.
@@ -121,16 +123,14 @@ LineHighlighter.prototype.clearHighlight = function() {
 //
 // Returns an Array
 LineHighlighter.prototype.hashToRange = function(hash) {
-  var first, last, matches;
   // ?L(\d+)(?:-(\d+))?$/)
-  matches = hash.match(/^#?L(\d+)(?:-(\d+))?$/);
+  const matches = hash.match(/^#?L(\d+)(?:-(\d+))?$/);
   if (matches && matches.length) {
-    first = parseInt(matches[1], 10);
-    last = matches[2] ? parseInt(matches[2], 10) : null;
+    const first = parseInt(matches[1], 10);
+    const last = matches[2] ? parseInt(matches[2], 10) : null;
     return [first, last];
-  } else {
-    return [null, null];
   }
+  return [null, null];
 };
 
 // Highlight a single line
@@ -153,14 +153,13 @@ LineHighlighter.prototype.highlightRange = function(range) {
     }
 
     return results;
-  } else {
-    return this.highlightLine(range[0]);
   }
+  return this.highlightLine(range[0]);
 };
 
 // Set the URL hash string
 LineHighlighter.prototype.setHash = function(firstLineNumber, lastLineNumber) {
-  var hash;
+  let hash;
   if (lastLineNumber) {
     hash = `#L${firstLineNumber}-${lastLineNumber}`;
   } else {

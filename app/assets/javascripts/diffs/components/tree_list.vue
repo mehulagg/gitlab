@@ -1,18 +1,17 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlTooltipDirective } from '@gitlab/ui';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import FileRow from '~/vue_shared/components/file_row.vue';
-import FileRowStats from './file_row_stats.vue';
+import FileTree from '~/vue_shared/components/file_tree.vue';
+import DiffFileRow from './diff_file_row.vue';
 
 export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   components: {
-    Icon,
-    FileRow,
+    GlIcon,
+    FileTree,
   },
   props: {
     hideFileStats: {
@@ -26,7 +25,7 @@ export default {
     };
   },
   computed: {
-    ...mapState('diffs', ['tree', 'renderTreeList']),
+    ...mapState('diffs', ['tree', 'renderTreeList', 'currentDiffFileId', 'viewedDiffFileIds']),
     ...mapGetters('diffs', ['allBlobs']),
     filteredTreeList() {
       const search = this.search.toLowerCase().trim();
@@ -48,9 +47,6 @@ export default {
         return acc;
       }, []);
     },
-    fileRowExtraComponent() {
-      return this.hideFileStats ? null : FileRowStats;
-    },
   },
   methods: {
     ...mapActions('diffs', ['toggleTreeOpen', 'scrollToFile']),
@@ -58,17 +54,18 @@ export default {
       this.search = '';
     },
   },
-  searchPlaceholder: sprintf(s__('MergeRequest|Filter files or search with %{modifier_key}+p'), {
-    modifier_key: /Mac/i.test(navigator.userAgent) ? 'cmd' : 'ctrl',
+  searchPlaceholder: sprintf(s__('MergeRequest|Search files (%{modifier_key}P)'), {
+    modifier_key: /Mac/i.test(navigator.userAgent) ? '⌘' : 'Ctrl+',
   }),
+  DiffFileRow,
 };
 </script>
 
 <template>
   <div class="tree-list-holder d-flex flex-column">
-    <div class="append-bottom-8 position-relative tree-list-search d-flex">
+    <div class="gl-mb-3 position-relative tree-list-search d-flex">
       <div class="flex-fill d-flex">
-        <icon name="search" class="position-absolute tree-list-icon" />
+        <gl-icon name="search" class="position-absolute tree-list-icon" />
         <label for="diff-tree-search" class="sr-only">{{ $options.searchPlaceholder }}</label>
         <input
           id="diff-tree-search"
@@ -85,20 +82,21 @@ export default {
           class="position-absolute bg-transparent tree-list-icon tree-list-clear-icon border-0 p-0"
           @click="clearSearch"
         >
-          <icon name="close" />
+          <gl-icon name="close" />
         </button>
       </div>
     </div>
     <div :class="{ 'pt-0 tree-list-blobs': !renderTreeList }" class="tree-list-scroll">
       <template v-if="filteredTreeList.length">
-        <file-row
+        <file-tree
           v-for="file in filteredTreeList"
           :key="file.key"
           :file="file"
           :level="0"
-          :hide-extra-on-tree="true"
-          :extra-component="fileRowExtraComponent"
-          :show-changed-icon="true"
+          :viewed-files="viewedDiffFileIds"
+          :hide-file-stats="hideFileStats"
+          :file-row-component="$options.DiffFileRow"
+          :current-diff-file-id="currentDiffFileId"
           @toggleTreeOpen="toggleTreeOpen"
           @clickFile="scrollToFile"
         />

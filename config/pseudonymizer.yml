@@ -47,7 +47,6 @@ tables:
   epics:
     whitelist:
     - id
-    - milestone_id
     - group_id
     - author_id
     - assignee_id
@@ -93,7 +92,7 @@ tables:
     - updated_at
     - description
     - milestone_id
-    - state
+    - state_id
     - updated_by_id
     - weight
     - due_date
@@ -174,7 +173,7 @@ tables:
     - created_at
     - updated_at
     - milestone_id
-    - state
+    - state_id
     - merge_status
     - target_project_id
     - updated_by_id
@@ -240,7 +239,6 @@ tables:
     - repository_size_limit
     - require_two_factor_authentication
     - two_factor_grace_period
-    - plan_id
     - project_creation_level
   members:
     whitelist:
@@ -467,10 +465,9 @@ tables:
     - auditor
     - require_two_factor_authentication_from_group
     - two_factor_grace_period
-    - ghost
     - last_activity_on
     - notified_of_own_activity
-    - bot_type
+    - user_type
     - preferred_language
     - theme_id
 

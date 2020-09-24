@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
 require_relative '../../../rubocop/cop/avoid_route_redirect_leading_slash'
 
-describe RuboCop::Cop::AvoidRouteRedirectLeadingSlash do
+RSpec.describe RuboCop::Cop::AvoidRouteRedirectLeadingSlash, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -14,14 +14,14 @@ describe RuboCop::Cop::AvoidRouteRedirectLeadingSlash do
   end
 
   it 'registers an offense when redirect has a leading slash' do
-    expect_offense(<<~PATTERN.strip_indent)
+    expect_offense(<<~PATTERN)
       root to: redirect("/-/route")
                ^^^^^^^^^^^^^^^^^^^^ Do not use a leading "/" in route redirects
     PATTERN
   end
 
   it 'does not register an offense when redirect does not have a leading slash' do
-    expect_no_offenses(<<~PATTERN.strip_indent)
+    expect_no_offenses(<<~PATTERN)
       root to: redirect("-/route")
     PATTERN
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Search::FoundBlob do
+RSpec.describe Gitlab::Search::FoundBlob do
   let(:project) { create(:project, :public, :repository) }
 
   describe 'parsing content results' do
@@ -154,6 +154,16 @@ describe Gitlab::Search::FoundBlob do
 
         it { expect(subject.basename).to eq('a/b/c.whatever') }
       end
+    end
+  end
+
+  describe 'policy' do
+    let(:project) { build(:project, :repository) }
+
+    subject { described_class.new(project: project) }
+
+    it 'works with policy' do
+      expect(Ability.allowed?(project.creator, :read_blob, subject)).to be_truthy
     end
   end
 end

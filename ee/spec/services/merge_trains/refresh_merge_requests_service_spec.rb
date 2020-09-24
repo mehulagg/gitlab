@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe MergeTrains::RefreshMergeRequestsService do
+RSpec.describe MergeTrains::RefreshMergeRequestsService do
   include ExclusiveLeaseHelpers
 
   let(:project) { create(:project) }
-  set(:maintainer_1) { create(:user) }
-  set(:maintainer_2) { create(:user) }
+  let_it_be(:maintainer_1) { create(:user) }
+  let_it_be(:maintainer_2) { create(:user) }
   let(:service) { described_class.new(project, maintainer_1) }
 
   before do
@@ -45,6 +45,28 @@ describe MergeTrains::RefreshMergeRequestsService do
       allow(refresh_service_2).to receive(:execute) { refresh_service_2_result }
     end
 
+    shared_examples 'logging results' do |count|
+      context 'when ci_merge_train_logging is enabled' do
+        it 'logs results' do
+          expect(Sidekiq.logger).to receive(:info).exactly(count).times
+
+          subject
+        end
+      end
+
+      context 'when ci_merge_train_logging is disabled' do
+        before do
+          stub_feature_flags(ci_merge_train_logging: false)
+        end
+
+        it 'does not log results' do
+          expect(Sidekiq.logger).not_to receive(:info)
+
+          subject
+        end
+      end
+    end
+
     context 'when merge request 1 is passed' do
       let(:merge_request) { merge_request_1 }
 
@@ -55,18 +77,7 @@ describe MergeTrains::RefreshMergeRequestsService do
         subject
       end
 
-      context 'when merge_trains_parallel_pipelines feature flag is disabled' do
-        before do
-          stub_feature_flags(merge_trains_parallel_pipelines: false)
-        end
-
-        it 'does not refresh merge request 2' do
-          expect(refresh_service_1).to receive(:execute).with(merge_request_1)
-          expect(refresh_service_2).not_to receive(:execute).with(merge_request_2)
-
-          subject
-        end
-      end
+      it_behaves_like 'logging results', 3
 
       context 'when refresh service 1 returns error status' do
         let(:refresh_service_1_result) { { status: :error, message: 'Failed to create ref' } }
@@ -77,6 +88,8 @@ describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 3
       end
 
       context 'when refresh service 1 returns success status and did not create a pipeline' do
@@ -88,6 +101,8 @@ describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 3
       end
 
       context 'when refresh service 1 returns success status and created a pipeline' do
@@ -99,6 +114,8 @@ describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 3
       end
 
       context 'when merge request 1 is not on a merge train' do
@@ -110,6 +127,23 @@ describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
+
+        it_behaves_like 'logging results', 0
+      end
+
+      context 'when merge request 1 was on a merge train' do
+        before do
+          allow(merge_request_1.merge_train).to receive(:cleanup_ref)
+          merge_request_1.merge_train.update_column(:status, MergeTrain.state_machines[:status].states[:merged].value)
+        end
+
+        it 'does not refresh' do
+          expect(refresh_service_1).not_to receive(:execute).with(merge_request_1)
+
+          subject
+        end
+
+        it_behaves_like 'logging results', 0
       end
 
       context 'when the other thread has already been processing the merge train' do
@@ -132,26 +166,8 @@ describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
-      end
 
-      context 'when merge_trains_efficient_refresh is disabled' do
-        before do
-          stub_feature_flags(merge_trains_efficient_refresh: false)
-        end
-
-        context 'when the exclusive lock has already been taken' do
-          let(:lease_key) do
-            "merge_train:#{merge_request_1.target_project_id}-#{merge_request_1.target_branch}"
-          end
-
-          before do
-            stub_exclusive_lease_taken(lease_key)
-          end
-
-          it 'raises FailedToObtainLockError' do
-            expect { subject }.to raise_error(Gitlab::ExclusiveLeaseHelpers::FailedToObtainLockError)
-          end
-        end
+        it_behaves_like 'logging results', 1
       end
     end
 
@@ -165,6 +181,8 @@ describe MergeTrains::RefreshMergeRequestsService do
         subject
       end
 
+      it_behaves_like 'logging results', 2
+
       context 'when merge request 1 was tried to be refreshed while the system is refreshing merge request 2' do
         before do
           allow_any_instance_of(described_class).to receive(:unsafe_refresh).with(merge_request_2) do
@@ -177,62 +195,23 @@ describe MergeTrains::RefreshMergeRequestsService do
 
           subject
         end
-      end
-    end
-  end
 
-  describe '#max_concurrency' do
-    subject { service.send(:max_concurrency) }
+        it_behaves_like 'logging results', 4
 
-    context 'when `merge_trains_parallel_pipelines` feature flag is enabled' do
-      before do
-        stub_feature_flags(merge_trains_parallel_pipelines: true)
-      end
-
-      context 'when `merge_trains_high_concurrency` feature flag is enabled' do
-        before do
-          stub_feature_flags(merge_trains_high_concurrency: true)
-        end
-
-        it 'returns high concurrency' do
-          is_expected.to eq(described_class::HIGH_CONCURRENCY)
-        end
-      end
-
-      context 'when `merge_trains_high_concurrency` feature flag is disabled' do
-        before do
-          stub_feature_flags(merge_trains_high_concurrency: false)
-        end
-
-        context 'when `merge_trains_medium_concurrency` feature flag is enabled' do
+        context 'when merge request 1 has already been merged' do
           before do
-            stub_feature_flags(merge_trains_medium_concurrency: true)
+            allow(merge_request_1.merge_train).to receive(:cleanup_ref)
+            merge_request_1.merge_train.update_column(:status, MergeTrain.state_machines[:status].states[:merged].value)
           end
 
-          it 'returns medium concurrency' do
-            is_expected.to eq(described_class::MEDIUM_CONCURRENCY)
+          it 'does not refresh the merge request 1' do
+            expect(AutoMergeProcessWorker).not_to receive(:perform_async).with(merge_request_1.id)
+
+            subject
           end
+
+          it_behaves_like 'logging results', 1
         end
-
-        context 'when `merge_trains_medium_concurrency` feature flag is disabled' do
-          before do
-            stub_feature_flags(merge_trains_medium_concurrency: false)
-          end
-
-          it 'returns low concurrency' do
-            is_expected.to eq(described_class::LOW_CONCURRENCY)
-          end
-        end
-      end
-    end
-
-    context 'when `merge_trains_parallel_pipelines` feature flag is disabled' do
-      before do
-        stub_feature_flags(merge_trains_parallel_pipelines: false)
-      end
-
-      it 'returns no concurrency' do
-        is_expected.to eq(described_class::NO_CONCURRENCY)
       end
     end
   end

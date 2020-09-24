@@ -24,6 +24,13 @@ module Gitlab
 
         EVENTS = ENUM_MAPPING.keys.freeze
 
+        INTERNAL_EVENTS = [
+          StageEvents::CodeStageStart,
+          StageEvents::IssueStageEnd,
+          StageEvents::PlanStageStart,
+          StageEvents::ProductionStageEnd
+        ].freeze
+
         # Defines which start_event and end_event pairs are allowed
         PAIRING_RULES = {
           StageEvents::PlanStageStart => [
@@ -53,7 +60,7 @@ module Gitlab
 
         # hash for defining ActiveRecord enum: identifier => number
         def self.to_enum
-          enum_mapping.each_with_object({}) { |(k, v), hash| hash[k.identifier] = v }
+          enum_mapping.transform_keys { |k| k.identifier }
         end
 
         def self.pairing_rules
@@ -66,6 +73,11 @@ module Gitlab
 
         def self.enum_mapping
           ENUM_MAPPING
+        end
+
+        # Events that are specific to the 7 default stages
+        def self.internal_events
+          INTERNAL_EVENTS
         end
       end
     end

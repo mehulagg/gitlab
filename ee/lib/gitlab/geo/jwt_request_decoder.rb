@@ -4,6 +4,7 @@ module Gitlab
   module Geo
     class JwtRequestDecoder
       include LogHelpers
+      include ::Gitlab::Utils::StrongMemoize
 
       IAT_LEEWAY = 60.seconds.to_i
 
@@ -15,11 +16,33 @@ module Gitlab
       attr_reader :auth_header
 
       def initialize(auth_header)
+        @include_disabled = false
         @auth_header = auth_header
       end
 
+      # Return decoded attributes from given header
+      #
+      # @return [Hash] decoded attributes
       def decode
-        decode_geo_request
+        strong_memoize(:decoded_authorization) do
+          decode_geo_request
+        end
+      end
+
+      def include_disabled!
+        @include_disabled = true
+      end
+
+      # Check if set of attributes match against attributes decoded from JWT
+      #
+      # @param [Hash] attributes to be matched against JWT
+      # @return bool true
+      def valid_attributes?(**attributes)
+        decoded_attributes = decode
+
+        return false if decoded_attributes.nil?
+
+        attributes.all? { |attribute, value| decoded_attributes[attribute] == value }
       end
 
       private
@@ -52,7 +75,7 @@ module Gitlab
           )
 
           message = decoded.first
-          data = JSON.parse(message['data']) if message
+          data = Gitlab::Json.parse(message['data']) if message
           data&.deep_symbolize_keys!
           data
         rescue JWT::ImmatureSignature, JWT::ExpiredSignature
@@ -61,16 +84,26 @@ module Gitlab
           raise InvalidSignatureTimeError.new(message)
         rescue JWT::DecodeError => e
           log_error("Error decoding Geo request: #{e}")
-          return
+          nil
         end
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
       def hmac_secret(access_key)
-        @hmac_secret ||= begin
-                           geo_node = GeoNode.find_by(access_key: access_key, enabled: true)
-                           geo_node&.secret_access_key
-                         end
+        node_params = { access_key: access_key }
+
+        # By default, we fail authorization for requests from disabled nodes because
+        # it is a convenient place to block nearly all requests from disabled
+        # secondaries. The `include_disabled` option can safely override this
+        # check for `enabled`.
+        #
+        # A request is authorized if the access key in the Authorization header
+        # matches the access key of the requesting node, **and** the decoded data
+        # matches the requested resource.
+        node_params[:enabled] = true unless @include_disabled
+
+        @geo_node ||= GeoNode.find_by(node_params)
+        @geo_node&.secret_access_key
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

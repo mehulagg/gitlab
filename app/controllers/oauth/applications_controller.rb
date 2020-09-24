@@ -2,17 +2,21 @@
 
 class Oauth::ApplicationsController < Doorkeeper::ApplicationsController
   include Gitlab::GonHelper
-  include Gitlab::Allowable
   include PageLayoutHelper
   include OauthApplications
   include Gitlab::Experimentation::ControllerConcern
+  include InitializesCurrentUserMode
 
-  before_action :verify_user_oauth_applications_enabled, except: :index
-  before_action :authenticate_user!
+  # Defined by the `Doorkeeper::ApplicationsController` and is redundant as we call `authenticate_user!` below. Not
+  # defining or skipping this will result in a `403` response to all requests.
+  skip_before_action :authenticate_admin!
+
+  prepend_before_action :verify_user_oauth_applications_enabled, except: :index
+  prepend_before_action :authenticate_user!
   before_action :add_gon_variables
   before_action :load_scopes, only: [:index, :create, :edit, :update]
 
-  helper_method :can?
+  around_action :set_locale
 
   layout 'profile'
 
@@ -57,12 +61,16 @@ class Oauth::ApplicationsController < Doorkeeper::ApplicationsController
   end
 
   rescue_from ActiveRecord::RecordNotFound do |exception|
-    render "errors/not_found", layout: "errors", status: 404
+    render "errors/not_found", layout: "errors", status: :not_found
   end
 
   def create_application_params
     application_params.tap do |params|
       params[:owner] = current_user
     end
+  end
+
+  def set_locale(&block)
+    Gitlab::I18n.with_user_locale(current_user, &block)
   end
 end

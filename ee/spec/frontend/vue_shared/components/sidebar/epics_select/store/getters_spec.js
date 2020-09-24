@@ -1,8 +1,7 @@
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-
 import * as getters from 'ee/vue_shared/components/sidebar/epics_select/store/getters';
 
 import createDefaultState from 'ee/vue_shared/components/sidebar/epics_select/store/state';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockEpics } from '../../mock_data';
 
@@ -27,7 +26,7 @@ describe('EpicsSelect', () => {
 
           const epics = getters.groupEpics(state);
 
-          expect(epics.length).toBe(normalizedEpics.length);
+          expect(epics).toHaveLength(normalizedEpics.length);
           epics.forEach((epic, index) => {
             expect.objectContaining({
               ...normalizedEpics[index],
@@ -40,7 +39,7 @@ describe('EpicsSelect', () => {
 
           const epics = getters.groupEpics(state);
 
-          expect(epics.length).toBe(1);
+          expect(epics).toHaveLength(1);
           expect(epics[0]).toEqual(
             expect.objectContaining({
               ...normalizedEpics[0],
@@ -53,7 +52,7 @@ describe('EpicsSelect', () => {
 
           const epics = getters.groupEpics(state);
 
-          expect(epics.length).toBe(1);
+          expect(epics).toHaveLength(1);
           expect(epics[0]).toEqual(
             expect.objectContaining({
               ...normalizedEpics[0],
@@ -66,7 +65,7 @@ describe('EpicsSelect', () => {
 
           const epics = getters.groupEpics(state);
 
-          expect(epics.length).toBe(1);
+          expect(epics).toHaveLength(1);
           expect(epics[0]).toEqual(
             expect.objectContaining({
               ...normalizedEpics[1],
@@ -79,12 +78,24 @@ describe('EpicsSelect', () => {
 
           const epics = getters.groupEpics(state);
 
-          expect(epics.length).toBe(1);
+          expect(epics).toHaveLength(1);
           expect(epics[0]).toEqual(
             expect.objectContaining({
               ...normalizedEpics[1],
             }),
           );
+        });
+      });
+
+      describe('isDropdownVariantSidebar', () => {
+        it('returns `true` when `state.variant` is "sidebar"', () => {
+          expect(getters.isDropdownVariantSidebar({ variant: 'sidebar' })).toBe(true);
+        });
+      });
+
+      describe('isDropdownVariantStandalone', () => {
+        it('returns `true` when `state.variant` is "standalone"', () => {
+          expect(getters.isDropdownVariantStandalone({ variant: 'standalone' })).toBe(true);
         });
       });
     });

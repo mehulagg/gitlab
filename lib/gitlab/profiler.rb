@@ -2,6 +2,8 @@
 
 module Gitlab
   module Profiler
+    extend WithRequestStore
+
     FILTERED_STRING = '[FILTERED]'
 
     IGNORE_BACKTRACES = %w[
@@ -58,27 +60,25 @@ module Gitlab
 
       logger = create_custom_logger(logger, private_token: private_token)
 
-      RequestStore.begin!
+      result = with_request_store do
+        # Make an initial call for an asset path in development mode to avoid
+        # sprockets dominating the profiler output.
+        ActionController::Base.helpers.asset_path('katex.css') if Rails.env.development?
 
-      # Make an initial call for an asset path in development mode to avoid
-      # sprockets dominating the profiler output.
-      ActionController::Base.helpers.asset_path('katex.css') if Rails.env.development?
+        # Rails loads internationalization files lazily the first time a
+        # translation is needed. Running this prevents this overhead from showing
+        # up in profiles.
+        ::I18n.t('.')[:test_string]
 
-      # Rails loads internationalization files lazily the first time a
-      # translation is needed. Running this prevents this overhead from showing
-      # up in profiles.
-      ::I18n.t('.')[:test_string]
+        # Remove API route mounting from the profile.
+        app.get('/api/v4/users')
 
-      # Remove API route mounting from the profile.
-      app.get('/api/v4/users')
-
-      result = with_custom_logger(logger) do
-        with_user(user) do
-          RubyProf.profile { app.public_send(verb, url, params: post_data, headers: headers) } # rubocop:disable GitlabSecurity/PublicSend
+        with_custom_logger(logger) do
+          with_user(user) do
+            RubyProf.profile { app.public_send(verb, url, params: post_data, headers: headers) } # rubocop:disable GitlabSecurity/PublicSend
+          end
         end
       end
-
-      RequestStore.end!
 
       log_load_times_by_model(logger)
 
@@ -107,19 +107,13 @@ module Gitlab
 
             super
 
-            Gitlab::Profiler.clean_backtrace(caller).each do |caller_line|
+            Gitlab::BacktraceCleaner.clean_backtrace(caller).each do |caller_line|
               stripped_caller_line = caller_line.sub("#{Rails.root}/", '')
 
               super("  ↳ #{stripped_caller_line}")
             end
           end
         end
-      end
-    end
-
-    def self.clean_backtrace(backtrace)
-      Array(Rails.backtrace_cleaner.clean(backtrace)).reject do |line|
-        line.match(Regexp.union(IGNORE_BACKTRACES))
       end
     end
 
@@ -174,9 +168,9 @@ module Gitlab
     # rubocop: enable CodeReuse/ActiveRecord
 
     def self.print_by_total_time(result, options = {})
-      default_options = { sort_method: :total_time }
+      default_options = { sort_method: :total_time, filter_by: :total_time }
 
-      Gitlab::Profiler::TotalTimeFlatPrinter.new(result).print(STDOUT, default_options.merge(options))
+      RubyProf::FlatPrinter.new(result).print(STDOUT, default_options.merge(options))
     end
   end
 end

@@ -14,13 +14,13 @@ module EE
             logger.log_timed(LOG_MESSAGE) do
               unless branch_name_allowed_by_push_rule?
                 message = ERROR_MESSAGE % { branch_name_regex: push_rule.branch_name_regex }
-                raise ::Gitlab::GitAccess::UnauthorizedError.new(message)
+                raise ::Gitlab::GitAccess::ForbiddenError.new(message)
               end
             end
 
             PushRules::CommitCheck.new(change_access).validate!
           rescue ::PushRule::MatchError => e
-            raise ::Gitlab::GitAccess::UnauthorizedError, e.message
+            raise ::Gitlab::GitAccess::ForbiddenError, e.message
           end
 
           private

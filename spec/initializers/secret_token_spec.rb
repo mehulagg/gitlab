@@ -3,13 +3,12 @@
 require 'spec_helper'
 require_relative '../../config/initializers/01_secret_token'
 
-describe 'create_tokens' do
+RSpec.describe 'create_tokens' do
   include StubENV
 
   let(:secrets) { ActiveSupport::OrderedOptions.new }
-
-  HEX_KEY = /\h{128}/.freeze
-  RSA_KEY = /\A-----BEGIN RSA PRIVATE KEY-----\n.+\n-----END RSA PRIVATE KEY-----\n\Z/m.freeze
+  let(:hex_key) { /\h{128}/.freeze }
+  let(:rsa_key) { /\A-----BEGIN RSA PRIVATE KEY-----\n.+\n-----END RSA PRIVATE KEY-----\n\Z/m.freeze }
 
   before do
     allow(File).to receive(:write)
@@ -18,6 +17,30 @@ describe 'create_tokens' do
     allow(Rails).to receive_message_chain(:root, :join) { |string| string }
     allow(self).to receive(:warn)
     allow(self).to receive(:exit)
+  end
+
+  describe 'ensure acknowledged secrets in any installations' do
+    let(:acknowledged_secrets) do
+      %w[secret_key_base otp_key_base db_key_base openid_connect_signing_key]
+    end
+
+    it 'does not allow to add a new secret without a proper handling' do
+      create_tokens
+
+      secrets_hash = YAML.load_file(Rails.root.join('config/secrets.yml'))
+
+      secrets_hash.each do |environment, secrets|
+        new_secrets = secrets.keys - acknowledged_secrets
+
+        expect(new_secrets).to be_empty,
+         <<~EOS
+           CAUTION:
+           It looks like you have just added new secret(s) #{new_secrets.inspect} to the secrets.yml.
+           Please read the development guide for GitLab secrets at doc/development/application_secrets.md before you proceed this change.
+           If you're absolutely sure that the change is safe, please add the new secrets to the 'acknowledged_secrets' in order to silence this warning.
+         EOS
+      end
+    end
   end
 
   context 'setting secret keys' do
@@ -35,7 +58,7 @@ describe 'create_tokens' do
         keys = secrets.values_at(:secret_key_base, :otp_key_base, :db_key_base)
 
         expect(keys.uniq).to eq(keys)
-        expect(keys).to all(match(HEX_KEY))
+        expect(keys).to all(match(hex_key))
       end
 
       it 'generates an RSA key for openid_connect_signing_key' do
@@ -44,7 +67,7 @@ describe 'create_tokens' do
         keys = secrets.values_at(:openid_connect_signing_key)
 
         expect(keys.uniq).to eq(keys)
-        expect(keys).to all(match(RSA_KEY))
+        expect(keys).to all(match(rsa_key))
       end
 
       it 'warns about the secrets to add to secrets.yml' do

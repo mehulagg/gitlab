@@ -1,19 +1,33 @@
 <script>
+import { debounce } from 'lodash';
+import {
+  GlIcon,
+  GlLoadingIcon,
+  GlAvatar,
+  GlDropdown,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
+  GlSearchBoxByType,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import { s__, __ } from '~/locale';
-import $ from 'jquery';
-import _ from 'underscore';
-import Icon from '~/vue_shared/components/icon.vue';
-import { GlLoadingIcon, GlButton, GlAvatar } from '@gitlab/ui';
 import Api from '~/api';
-import { renderAvatar, renderIdenticon } from '~/helpers/avatar_helper';
+import { DATA_REFETCH_DELAY } from '../constants';
+import { filterBySearchTerm } from '../utils';
 
 export default {
   name: 'GroupsDropdownFilter',
   components: {
-    Icon,
+    GlIcon,
     GlLoadingIcon,
-    GlButton,
     GlAvatar,
+    GlDropdown,
+    GlDropdownSectionHeader,
+    GlDropdownItem,
+    GlSearchBoxByType,
+  },
+  directives: {
+    SafeHtml,
   },
   props: {
     label: {
@@ -26,59 +40,60 @@ export default {
       required: false,
       default: () => ({}),
     },
+    defaultGroup: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
   },
   data() {
     return {
       loading: true,
-      selectedGroup: {},
+      selectedGroup: this.defaultGroup || {},
+      groups: [],
+      searchTerm: '',
     };
   },
   computed: {
     selectedGroupName() {
       return this.selectedGroup.name || __('Choose a group');
     },
+    selectedGroupId() {
+      return this.selectedGroup?.id;
+    },
+    availableGroups() {
+      return filterBySearchTerm(this.groups, this.searchTerm);
+    },
+    noResultsAvailable() {
+      const { loading, availableGroups } = this;
+      return !loading && !availableGroups.length;
+    },
+  },
+  watch: {
+    searchTerm() {
+      this.search();
+    },
   },
   mounted() {
-    $(this.$refs.groupsDropdown).glDropdown({
-      selectable: true,
-      filterable: true,
-      filterRemote: true,
-      fieldName: 'group_id',
-      search: {
-        fields: ['full_name'],
-      },
-      clicked: this.onClick.bind(this),
-      data: this.fetchData.bind(this),
-      renderRow: group => this.rowTemplate(group),
-      text: group => group.name,
-      opened: e => e.target.querySelector('.dropdown-input-field').focus(),
-    });
+    this.search();
   },
   methods: {
-    onClick({ selectedObj, e }) {
-      e.preventDefault();
-      this.selectedGroup = selectedObj;
+    search: debounce(function debouncedSearch() {
+      this.fetchData();
+    }, DATA_REFETCH_DELAY),
+    onClick({ group }) {
+      this.selectedGroup = group;
       this.$emit('selected', this.selectedGroup);
     },
-    fetchData(term, callback) {
+    fetchData() {
       this.loading = true;
-
-      return Api.groups(term, this.queryParams, groups => {
+      return Api.groups(this.searchTerm, this.queryParams).then(groups => {
         this.loading = false;
-        callback(groups);
+        this.groups = groups;
       });
     },
-    rowTemplate(group) {
-      return `
-            <li>
-              <a href='#' class='dropdown-menu-link d-flex'>
-                ${this.avatarTemplate(group)}
-                <div class="js-group-path align-middle">${this.formatGroupPath(
-                  group.full_name,
-                )}</div>
-              </a>
-            </li>
-          `;
+    isGroupSelected(id) {
+      return this.selectedGroupId === id;
     },
     /**
      * Formats the group's full name.
@@ -93,32 +108,17 @@ export default {
       const parts = fullName.split('/');
       const lastPart = parts.length - 1;
       return parts
-        .map((part, idx) =>
-          idx === lastPart ? `<strong>${_.escape(part.trim())}</strong>` : _.escape(part.trim()),
-        )
+        .map((part, idx) => (idx === lastPart ? `<strong>${part.trim()}</strong>` : part.trim()))
         .join(' / ');
-    },
-    avatarTemplate(group) {
-      return group.avatar_url !== null
-        ? renderAvatar(group, { sizeClass: 's16 rect-avatar flex-shrink-0' })
-        : renderIdenticon(group, {
-            sizeClass: 's16 rect-avatar d-flex justify-content-center flex-column flex-shrink-0',
-          });
     },
   },
 };
 </script>
 
 <template>
-  <div>
-    <div ref="groupsDropdown" class="dropdown dropdown-groups">
-      <gl-button
-        class="dropdown-menu-toggle wide shadow-none bg-white"
-        type="button"
-        data-toggle="dropdown"
-        aria-expanded="false"
-        :aria-label="label"
-      >
+  <gl-dropdown ref="groupsDropdown" class="dropdown dropdown-groups" toggle-class="gl-shadow-none">
+    <template #button-content>
+      <div class="gl-display-flex gl-flex-fill-1">
         <gl-avatar
           v-if="selectedGroup.name"
           :src="selectedGroup.avatar_url"
@@ -127,20 +127,42 @@ export default {
           :size="16"
           shape="rect"
           :alt="selectedGroup.name"
-          class="d-inline-flex align-text-bottom"
+          class="gl-display-inline-flex gl-vertical-align-middle gl-mr-2"
         />
         {{ selectedGroupName }}
-        <icon name="chevron-down" />
-      </gl-button>
-      <div class="dropdown-menu dropdown-menu-selectable dropdown-menu-full-width">
-        <div class="dropdown-title">{{ __('Groups') }}</div>
-        <div class="dropdown-input">
-          <input class="dropdown-input-field" type="search" :placeholder="__('Search groups')" />
-          <icon name="search" class="dropdown-input-search" data-hidden="true" />
-        </div>
-        <div class="dropdown-content"></div>
-        <gl-loading-icon class="dropdown-loading" />
       </div>
-    </div>
-  </div>
+      <gl-icon class="gl-ml-2" name="chevron-down" />
+    </template>
+    <gl-dropdown-section-header>{{ __('Groups') }}</gl-dropdown-section-header>
+    <gl-search-box-by-type v-model.trim="searchTerm" class="gl-m-3" />
+    <gl-dropdown-item
+      v-for="group in availableGroups"
+      :key="group.id"
+      :is-check-item="true"
+      :is-checked="isGroupSelected(group.id)"
+      @click.prevent="onClick({ group, isSelected: isGroupSelected(group.id) })"
+    >
+      <div class="gl-display-flex">
+        <gl-avatar
+          class="gl-mr-2 gl-vertical-align-middle"
+          :alt="group.name"
+          :size="16"
+          :entity-id="group.id"
+          :entity-name="group.name"
+          :src="group.avatar_url"
+          shape="rect"
+        />
+        <div
+          v-safe-html="formatGroupPath(group.full_name)"
+          class="js-group-path align-middle"
+        ></div>
+      </div>
+    </gl-dropdown-item>
+    <gl-dropdown-item v-show="noResultsAvailable" class="gl-pointer-events-none text-secondary">{{
+      __('No matching results')
+    }}</gl-dropdown-item>
+    <gl-dropdown-item v-if="loading">
+      <gl-loading-icon size="lg" />
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>

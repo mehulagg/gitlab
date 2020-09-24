@@ -1,6 +1,13 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference
+---
+
 # Git Attributes
 
-GitLab supports defining custom [Git attributes][gitattributes] such as what
+GitLab supports defining custom [Git attributes](https://git-scm.com/docs/gitattributes) such as what
 files to treat as binary, and what language to use for syntax highlighting
 diffs.
 
@@ -18,5 +25,3 @@ ignored.
 The `.gitattributes` file can be used to define which language to use when
 syntax highlighting files and diffs. See ["Syntax
 Highlighting"](highlighting.md) for more information.
-
-[gitattributes]: https://git-scm.com/docs/gitattributes

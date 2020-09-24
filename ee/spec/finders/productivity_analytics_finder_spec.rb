@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProductivityAnalyticsFinder do
+RSpec.describe ProductivityAnalyticsFinder do
   subject { described_class.new(current_user, search_params.merge(state: :merged)) }
 
   let(:current_user) { create(:admin) }
@@ -17,7 +17,7 @@ describe ProductivityAnalyticsFinder do
   describe '.scalar_params' do
     subject { described_class.scalar_params }
 
-    it { is_expected.to include(:merged_at_before, :merged_at_after) }
+    it { is_expected.to include(:merged_before, :merged_after) }
   end
 
   describe '#execute' do
@@ -54,10 +54,10 @@ describe ProductivityAnalyticsFinder do
         Timecop.freeze { example.run }
       end
 
-      context 'with merged_at_after specified as timestamp' do
+      context 'with merged_after specified as timestamp' do
         let(:search_params) do
           {
-            merged_at_after: 25.days.ago.to_s
+            merged_after: 25.days.ago.to_s
           }
         end
 
@@ -68,11 +68,11 @@ describe ProductivityAnalyticsFinder do
         end
       end
 
-      context 'with merged_at_after and merged_at_before specified' do
+      context 'with merged_after and merged_before specified' do
         let(:search_params) do
           {
-            merged_at_after: 30.days.ago.to_s,
-            merged_at_before: 20.days.ago.to_s
+            merged_after: 30.days.ago.to_s,
+            merged_before: 20.days.ago.to_s
           }
         end
 
@@ -83,9 +83,9 @@ describe ProductivityAnalyticsFinder do
         end
       end
 
-      context 'with merged_at_after earlier than PA start date' do
+      context 'with merged_after earlier than PA start date' do
         let(:search_params) do
-          { merged_at_after: 3.years.ago.to_s }
+          { merged_after: 3.years.ago.to_s }
         end
 
         it 'uses start_date as filter value' do

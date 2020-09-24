@@ -7,7 +7,10 @@ module Gitlab
       ERROR_MESSAGE = 'LFS objects are missing. Ensure LFS is properly set up or try a manual "git lfs push --all".'
 
       def validate!
+        # This feature flag is used for disabling integrify check on some envs
+        # because these costy calculations may cause performance issues
         return unless Feature.enabled?(:lfs_check, default_enabled: true)
+
         return unless project.lfs_enabled?
         return if skip_lfs_integrity_check
 
@@ -15,7 +18,7 @@ module Gitlab
           lfs_check = Checks::LfsIntegrity.new(project, newrev, logger.time_left)
 
           if lfs_check.objects_missing?
-            raise GitAccess::UnauthorizedError, ERROR_MESSAGE
+            raise GitAccess::ForbiddenError, ERROR_MESSAGE
           end
         end
       end

@@ -13,8 +13,8 @@ class InstanceClusterablePresenter < ClusterablePresenter
   end
 
   override :index_path
-  def index_path
-    admin_clusters_path
+  def index_path(options = {})
+    admin_clusters_path(options)
   end
 
   override :new_path
@@ -37,6 +37,11 @@ class InstanceClusterablePresenter < ClusterablePresenter
     update_applications_admin_cluster_path(cluster, application)
   end
 
+  override :clear_cluster_cache_path
+  def clear_cluster_cache_path(cluster)
+    clear_cache_admin_cluster_path(cluster)
+  end
+
   override :cluster_path
   def cluster_path(cluster, params = {})
     admin_cluster_path(cluster, params)
@@ -50,6 +55,11 @@ class InstanceClusterablePresenter < ClusterablePresenter
   override :create_gcp_clusters_path
   def create_gcp_clusters_path
     create_gcp_admin_clusters_path
+  end
+
+  override :create_aws_clusters_path
+  def create_aws_clusters_path
+    create_aws_admin_clusters_path
   end
 
   override :authorize_aws_role_path
@@ -70,6 +80,10 @@ class InstanceClusterablePresenter < ClusterablePresenter
   override :learn_more_link
   def learn_more_link
     link_to(s_('ClusterIntegration|Learn more about instance Kubernetes clusters'), help_page_path('user/instance/clusters/index'), target: '_blank', rel: 'noopener noreferrer')
+  end
+
+  def metrics_dashboard_path(cluster)
+    metrics_dashboard_admin_cluster_path(cluster)
   end
 end
 

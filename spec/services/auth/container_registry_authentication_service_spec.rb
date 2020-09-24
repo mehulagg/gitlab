@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Auth::ContainerRegistryAuthenticationService do
+RSpec.describe Auth::ContainerRegistryAuthenticationService do
   let(:current_project) { nil }
   let(:current_user) { nil }
   let(:current_params) { {} }
@@ -20,7 +20,9 @@ describe Auth::ContainerRegistryAuthenticationService do
 
   before do
     allow(Gitlab.config.registry).to receive_messages(enabled: true, issuer: 'rspec', key: nil)
-    allow_any_instance_of(JSONWebToken::RSAToken).to receive(:key).and_return(rsa_key)
+    allow_next_instance_of(JSONWebToken::RSAToken) do |instance|
+      allow(instance).to receive(:key).and_return(rsa_key)
+    end
   end
 
   shared_examples 'an authenticated' do
@@ -33,11 +35,11 @@ describe Auth::ContainerRegistryAuthenticationService do
     it { expect(payload).to include('access') }
 
     context 'a expirable' do
-      let(:expires_at) { Time.at(payload['exp']) }
+      let(:expires_at) { Time.zone.at(payload['exp']) }
       let(:expire_delay) { 10 }
 
       context 'for default configuration' do
-        it { expect(expires_at).not_to be_within(2.seconds).of(Time.now + expire_delay.minutes) }
+        it { expect(expires_at).not_to be_within(2.seconds).of(Time.current + expire_delay.minutes) }
       end
 
       context 'for changed configuration' do
@@ -45,7 +47,7 @@ describe Auth::ContainerRegistryAuthenticationService do
           stub_application_setting(container_registry_token_expire_delay: expire_delay)
         end
 
-        it { expect(expires_at).to be_within(2.seconds).of(Time.now + expire_delay.minutes) }
+        it { expect(expires_at).to be_within(2.seconds).of(Time.current + expire_delay.minutes) }
       end
     end
   end
@@ -203,6 +205,20 @@ describe Auth::ContainerRegistryAuthenticationService do
 
         it_behaves_like 'an inaccessible'
         it_behaves_like 'not a container repository factory'
+
+        it 'logs an auth warning' do
+          expect(Gitlab::AuthLogger).to receive(:warn).with(
+            message: 'Denied container registry permissions',
+            scope_type: 'repository',
+            requested_project_path: project.full_path,
+            requested_actions: ['*'],
+            authorized_actions: [],
+            user_id: current_user.id,
+            username: current_user.username
+          )
+
+          subject
+        end
       end
 
       context 'disallow developer to delete images since registry 2.7' do
@@ -638,6 +654,19 @@ describe Auth::ContainerRegistryAuthenticationService do
         it_behaves_like 'not a container repository factory'
       end
     end
+
+    context 'for project that disables repository' do
+      let(:project) { create(:project, :public, :repository_disabled) }
+
+      context 'disallow when pulling' do
+        let(:current_params) do
+          { scopes: ["repository:#{project.full_path}:pull"] }
+        end
+
+        it_behaves_like 'an inaccessible'
+        it_behaves_like 'not a container repository factory'
+      end
+    end
   end
 
   context 'registry catalog browsing authorized as admin' do
@@ -764,8 +793,17 @@ describe Auth::ContainerRegistryAuthenticationService do
       { scopes: ["repository:#{project.full_path}:pull"] }
     end
 
-    context 'when deploy token has read_registry as a scope' do
-      let(:current_user) { create(:deploy_token, projects: [project]) }
+    context 'when deploy token has read and write registry as scopes' do
+      let(:current_user) { create(:deploy_token, write_registry: true, projects: [project]) }
+
+      shared_examples 'able to login' do
+        context 'registry provides read_container_image authentication_abilities' do
+          let(:current_params) { {} }
+          let(:authentication_abilities) { [:read_container_image] }
+
+          it_behaves_like 'an authenticated'
+        end
+      end
 
       context 'for public project' do
         let(:project) { create(:project, :public) }
@@ -779,8 +817,10 @@ describe Auth::ContainerRegistryAuthenticationService do
             { scopes: ["repository:#{project.full_path}:push"] }
           end
 
-          it_behaves_like 'an inaccessible'
+          it_behaves_like 'a pushable'
         end
+
+        it_behaves_like 'able to login'
       end
 
       context 'for internal project' do
@@ -795,8 +835,10 @@ describe Auth::ContainerRegistryAuthenticationService do
             { scopes: ["repository:#{project.full_path}:push"] }
           end
 
-          it_behaves_like 'an inaccessible'
+          it_behaves_like 'a pushable'
         end
+
+        it_behaves_like 'able to login'
       end
 
       context 'for private project' do
@@ -811,13 +853,31 @@ describe Auth::ContainerRegistryAuthenticationService do
             { scopes: ["repository:#{project.full_path}:push"] }
           end
 
-          it_behaves_like 'an inaccessible'
+          it_behaves_like 'a pushable'
         end
+
+        it_behaves_like 'able to login'
       end
     end
 
     context 'when deploy token does not have read_registry scope' do
       let(:current_user) { create(:deploy_token, projects: [project], read_registry: false) }
+
+      shared_examples 'unable to login' do
+        context 'registry provides no container authentication_abilities' do
+          let(:current_params) { {} }
+          let(:authentication_abilities) { [] }
+
+          it_behaves_like 'a forbidden'
+        end
+
+        context 'registry provides inapplicable container authentication_abilities' do
+          let(:current_params) { {} }
+          let(:authentication_abilities) { [:download_code] }
+
+          it_behaves_like 'a forbidden'
+        end
+      end
 
       context 'for public project' do
         let(:project) { create(:project, :public) }
@@ -825,6 +885,8 @@ describe Auth::ContainerRegistryAuthenticationService do
         context 'when pulling' do
           it_behaves_like 'a pullable'
         end
+
+        it_behaves_like 'unable to login'
       end
 
       context 'for internal project' do
@@ -833,6 +895,8 @@ describe Auth::ContainerRegistryAuthenticationService do
         context 'when pulling' do
           it_behaves_like 'an inaccessible'
         end
+
+        it_behaves_like 'unable to login'
       end
 
       context 'for private project' do
@@ -841,6 +905,15 @@ describe Auth::ContainerRegistryAuthenticationService do
         context 'when pulling' do
           it_behaves_like 'an inaccessible'
         end
+
+        context 'when logging in' do
+          let(:current_params) { {} }
+          let(:authentication_abilities) { [] }
+
+          it_behaves_like 'a forbidden'
+        end
+
+        it_behaves_like 'unable to login'
       end
     end
 

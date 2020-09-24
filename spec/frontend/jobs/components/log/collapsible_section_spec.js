@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import CollpasibleSection from '~/jobs/components/log/collapsible_section.vue';
+import CollapsibleSection from '~/jobs/components/log/collapsible_section.vue';
 import { collapsibleSectionClosed, collapsibleSectionOpened } from './mock_data';
 
 describe('Job Log Collapsible Section', () => {
@@ -11,8 +11,7 @@ describe('Job Log Collapsible Section', () => {
   const findCollapsibleLineSvg = () => wrapper.find('.collapsible-line svg');
 
   const createComponent = (props = {}) => {
-    wrapper = mount(CollpasibleSection, {
-      sync: true,
+    wrapper = mount(CollapsibleSection, {
       propsData: {
         ...props,
       },
@@ -36,7 +35,7 @@ describe('Job Log Collapsible Section', () => {
     });
 
     it('renders an icon with the closed state', () => {
-      expect(findCollapsibleLineSvg().classes()).toContain('ic-angle-right');
+      expect(findCollapsibleLineSvg().attributes('data-testid')).toBe('angle-right-icon');
     });
   });
 
@@ -53,7 +52,7 @@ describe('Job Log Collapsible Section', () => {
     });
 
     it('renders an icon with the open state', () => {
-      expect(findCollapsibleLineSvg().classes()).toContain('ic-angle-down');
+      expect(findCollapsibleLineSvg().attributes('data-testid')).toBe('angle-down-icon');
     });
 
     it('renders collapsible lines content', () => {
@@ -68,6 +67,9 @@ describe('Job Log Collapsible Section', () => {
     });
 
     findCollapsibleLine().trigger('click');
-    expect(wrapper.emitted('onClickCollapsibleLine').length).toBe(1);
+
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted('onClickCollapsibleLine').length).toBe(1);
+    });
   });
 });

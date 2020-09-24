@@ -3,30 +3,36 @@
 module QA
   module Support
     module Waiter
-      DEFAULT_MAX_WAIT_TIME = 60
+      extend Repeater
 
       module_function
 
-      def wait(max: DEFAULT_MAX_WAIT_TIME, interval: 0.1)
-        QA::Runtime::Logger.debug("with wait: max #{max}; interval #{interval}")
-        start = Time.now
-
-        while Time.now - start < max
-          result = yield
-          if result
-            log_end(Time.now - start)
-            return result
-          end
-
-          sleep(interval)
+      def wait_until(max_duration: singleton_class::DEFAULT_MAX_WAIT_TIME, reload_page: nil, sleep_interval: 0.1, raise_on_failure: true, retry_on_exception: false, log: true)
+        if log
+          QA::Runtime::Logger.debug(
+            <<~MSG.tr("\n", ' ')
+              with wait_until: max_duration: #{max_duration};
+              reload_page: #{reload_page};
+              sleep_interval: #{sleep_interval};
+              raise_on_failure: #{raise_on_failure}
+            MSG
+          )
         end
-        log_end(Time.now - start)
 
-        false
-      end
+        result = nil
+        self.repeat_until(
+          max_duration: max_duration,
+          reload_page: reload_page,
+          sleep_interval: sleep_interval,
+          raise_on_failure: raise_on_failure,
+          retry_on_exception: retry_on_exception,
+          log: log
+        ) do
+          result = yield
+        end
+        QA::Runtime::Logger.debug("ended wait_until") if log
 
-      def self.log_end(duration)
-        QA::Runtime::Logger.debug("ended wait after #{duration} seconds")
+        result
       end
     end
   end

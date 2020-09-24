@@ -2,6 +2,7 @@
 
 module Clusters
   class Cluster < ApplicationRecord
+    prepend HasEnvironmentScope
     include Presentable
     include Gitlab::Utils::StrongMemoize
     include FromUnion
@@ -11,17 +12,23 @@ module Clusters
     self.table_name = 'clusters'
 
     APPLICATIONS = {
-      Applications::Helm.application_name => Applications::Helm,
-      Applications::Ingress.application_name => Applications::Ingress,
-      Applications::CertManager.application_name => Applications::CertManager,
-      Applications::Prometheus.application_name => Applications::Prometheus,
-      Applications::Runner.application_name => Applications::Runner,
-      Applications::Jupyter.application_name => Applications::Jupyter,
-      Applications::Knative.application_name => Applications::Knative,
-      Applications::ElasticStack.application_name => Applications::ElasticStack
+      Clusters::Applications::Helm.application_name => Clusters::Applications::Helm,
+      Clusters::Applications::Ingress.application_name => Clusters::Applications::Ingress,
+      Clusters::Applications::CertManager.application_name => Clusters::Applications::CertManager,
+      Clusters::Applications::Crossplane.application_name => Clusters::Applications::Crossplane,
+      Clusters::Applications::Prometheus.application_name => Clusters::Applications::Prometheus,
+      Clusters::Applications::Runner.application_name => Clusters::Applications::Runner,
+      Clusters::Applications::Jupyter.application_name => Clusters::Applications::Jupyter,
+      Clusters::Applications::Knative.application_name => Clusters::Applications::Knative,
+      Clusters::Applications::ElasticStack.application_name => Clusters::Applications::ElasticStack,
+      Clusters::Applications::Fluentd.application_name => Clusters::Applications::Fluentd,
+      Clusters::Applications::Cilium.application_name => Clusters::Applications::Cilium
     }.freeze
     DEFAULT_ENVIRONMENT = '*'
     KUBE_INGRESS_BASE_DOMAIN = 'KUBE_INGRESS_BASE_DOMAIN'
+    APPLICATIONS_ASSOCIATIONS = APPLICATIONS.values.map(&:association_name).freeze
+
+    self.reactive_cache_work_type = :external_dependency
 
     belongs_to :user
     belongs_to :management_project, class_name: '::Project', optional: true
@@ -29,9 +36,14 @@ module Clusters
     has_many :cluster_projects, class_name: 'Clusters::Project'
     has_many :projects, through: :cluster_projects, class_name: '::Project'
     has_one :cluster_project, -> { order(id: :desc) }, class_name: 'Clusters::Project'
+    has_many :deployment_clusters
+    has_many :deployments, inverse_of: :cluster
+    has_many :successful_deployments, -> { success }, class_name: 'Deployment'
+    has_many :environments, -> { distinct }, through: :deployments
 
     has_many :cluster_groups, class_name: 'Clusters::Group'
     has_many :groups, through: :cluster_groups, class_name: '::Group'
+    has_many :groups_projects, through: :groups, source: :projects, class_name: '::Project'
 
     # we force autosave to happen when we save `Cluster` model
     has_one :provider_gcp, class_name: 'Clusters::Providers::Gcp', autosave: true
@@ -47,15 +59,20 @@ module Clusters
     has_one_cluster_application :helm
     has_one_cluster_application :ingress
     has_one_cluster_application :cert_manager
+    has_one_cluster_application :crossplane
     has_one_cluster_application :prometheus
     has_one_cluster_application :runner
     has_one_cluster_application :jupyter
     has_one_cluster_application :knative
     has_one_cluster_application :elastic_stack
+    has_one_cluster_application :fluentd
+    has_one_cluster_application :cilium
 
     has_many :kubernetes_namespaces
+    has_many :metrics_dashboard_annotations, class_name: 'Metrics::Dashboard::Annotation', inverse_of: :cluster
 
     accepts_nested_attributes_for :provider_gcp, update_only: true
+    accepts_nested_attributes_for :provider_aws, update_only: true
     accepts_nested_attributes_for :platform_kubernetes, update_only: true
 
     validates :name, cluster_name: true
@@ -67,12 +84,14 @@ module Clusters
     validate :no_groups, unless: :group_type?
     validate :no_projects, unless: :project_type?
     validate :unique_management_project_environment_scope
+    validate :unique_environment_scope
 
     after_save :clear_reactive_cache!
 
     delegate :status, to: :provider, allow_nil: true
     delegate :status_reason, to: :provider, allow_nil: true
     delegate :on_creation?, to: :provider, allow_nil: true
+    delegate :knative_pre_installed?, to: :provider, allow_nil: true
 
     delegate :active?, to: :platform_kubernetes, prefix: true, allow_nil: true
     delegate :rbac?, to: :platform_kubernetes, prefix: true, allow_nil: true
@@ -80,6 +99,7 @@ module Clusters
     delegate :available?, to: :application_ingress, prefix: true, allow_nil: true
     delegate :available?, to: :application_prometheus, prefix: true, allow_nil: true
     delegate :available?, to: :application_knative, prefix: true, allow_nil: true
+    delegate :available?, to: :application_elastic_stack, prefix: true, allow_nil: true
     delegate :external_ip, to: :application_ingress, prefix: true, allow_nil: true
     delegate :external_hostname, to: :application_ingress, prefix: true, allow_nil: true
 
@@ -112,11 +132,24 @@ module Clusters
     scope :gcp_installed, -> { gcp_provided.joins(:provider_gcp).merge(Clusters::Providers::Gcp.with_status(:created)) }
     scope :aws_installed, -> { aws_provided.joins(:provider_aws).merge(Clusters::Providers::Aws.with_status(:created)) }
 
-    scope :managed, -> { where(managed: true) }
+    scope :with_enabled_modsecurity, -> { joins(:application_ingress).merge(::Clusters::Applications::Ingress.modsecurity_enabled) }
+    scope :with_available_elasticstack, -> { joins(:application_elastic_stack).merge(::Clusters::Applications::ElasticStack.available) }
+    scope :with_available_cilium, -> { joins(:application_cilium).merge(::Clusters::Applications::Cilium.available) }
+    scope :distinct_with_deployed_environments, -> { joins(:environments).merge(::Deployment.success).distinct }
+    scope :preload_elasticstack, -> { preload(:application_elastic_stack) }
+    scope :preload_environments, -> { preload(:environments) }
 
+    scope :managed, -> { where(managed: true) }
+    scope :with_persisted_applications, -> { eager_load(*APPLICATIONS_ASSOCIATIONS) }
     scope :default_environment, -> { where(environment_scope: DEFAULT_ENVIRONMENT) }
+    scope :with_management_project, -> { where.not(management_project: nil) }
 
     scope :for_project_namespace, -> (namespace_id) { joins(:projects).where(projects: { namespace_id: namespace_id }) }
+    scope :with_application_prometheus, -> { includes(:application_prometheus).joins(:application_prometheus) }
+    scope :with_project_alert_service_data, -> (project_ids) do
+      conditions = { projects: { alerts_service: [:data] } }
+      includes(conditions).joins(conditions).where(projects: { id: project_ids })
+    end
 
     def self.ancestor_clusters_for_clusterable(clusterable, hierarchy_order: :asc)
       return [] if clusterable.is_a?(Instance)
@@ -172,11 +205,36 @@ module Clusters
       end
     end
 
+    def all_projects
+      return projects if project_type?
+      return groups_projects if group_type?
+
+      ::Project.all
+    end
+
     def status_name
       return cleanup_status_name if cleanup_errored?
       return :cleanup_ongoing unless cleanup_not_started?
 
       provider&.status_name || connection_status.presence || :created
+    end
+
+    def connection_error
+      with_reactive_cache do |data|
+        data[:connection_error]
+      end
+    end
+
+    def node_connection_error
+      with_reactive_cache do |data|
+        data[:node_connection_error]
+      end
+    end
+
+    def metrics_connection_error
+      with_reactive_cache do |data|
+        data[:metrics_connection_error]
+      end
     end
 
     def connection_status
@@ -185,16 +243,34 @@ module Clusters
       end
     end
 
+    def nodes
+      with_reactive_cache do |data|
+        data[:nodes]
+      end
+    end
+
     def calculate_reactive_cache
       return unless enabled?
 
-      { connection_status: retrieve_connection_status }
+      connection_data.merge(Gitlab::Kubernetes::Node.new(self).all)
+    end
+
+    def persisted_applications
+      APPLICATIONS_ASSOCIATIONS.map(&method(:public_send)).compact
     end
 
     def applications
-      APPLICATIONS.values.map do |application_class|
-        public_send(application_class.association_name) || public_send("build_#{application_class.association_name}") # rubocop:disable GitlabSecurity/PublicSend
+      APPLICATIONS.each_value.map do |application_class|
+        find_or_build_application(application_class)
       end
+    end
+
+    def find_or_build_application(application_class)
+      raise ArgumentError, "#{application_class} is not in APPLICATIONS" unless APPLICATIONS.value?(application_class)
+
+      association_name = application_class.association_name
+
+      public_send(association_name) || public_send("build_#{association_name}") # rubocop:disable GitlabSecurity/PublicSend
     end
 
     def provider
@@ -231,15 +307,14 @@ module Clusters
       platform_kubernetes.kubeclient if kubernetes?
     end
 
-    def kubernetes_namespace_for(environment)
-      project = environment.project
-      persisted_namespace = Clusters::KubernetesNamespaceFinder.new(
-        self,
-        project: project,
-        environment_name: environment.name
-      ).execute
+    def kubernetes_namespace_for(environment, deployable: environment.last_deployable)
+      if deployable && environment.project_id != deployable.project_id
+        raise ArgumentError, 'environment.project_id must match deployable.project_id'
+      end
 
-      persisted_namespace&.namespace || Gitlab::Kubernetes::DefaultNamespace.new(self, project: project).from_environment_slug(environment.slug)
+      managed_namespace(environment) ||
+        ci_configured_namespace(deployable) ||
+        default_namespace(environment)
     end
 
     def allow_user_defined_namespace?
@@ -258,8 +333,33 @@ module Clusters
       end
     end
 
-    def knative_pre_installed?
-      provider&.knative_pre_installed?
+    def delete_cached_resources!
+      kubernetes_namespaces.delete_all(:delete_all)
+    end
+
+    def clusterable
+      return unless cluster_type
+
+      case cluster_type
+      when 'project_type'
+        project
+      when 'group_type'
+        group
+      when 'instance_type'
+        instance
+      else
+        raise NotImplementedError
+      end
+    end
+
+    def serverless_domain
+      strong_memoize(:serverless_domain) do
+        self.application_knative&.serverless_domain_cluster
+      end
+    end
+
+    def prometheus_adapter
+      application_prometheus
     end
 
     private
@@ -272,39 +372,46 @@ module Clusters
         .where.not(id: id)
 
       if duplicate_management_clusters.any?
-        errors.add(:environment_scope, "cannot add duplicated environment scope")
+        errors.add(:environment_scope, 'cannot add duplicated environment scope')
       end
+    end
+
+    def unique_environment_scope
+      if clusterable.present? && clusterable.clusters.where(environment_scope: environment_scope).where.not(id: id).exists?
+        errors.add(:environment_scope, 'cannot add duplicated environment scope')
+      end
+    end
+
+    def managed_namespace(environment)
+      Clusters::KubernetesNamespaceFinder.new(
+        self,
+        project: environment.project,
+        environment_name: environment.name
+      ).execute&.namespace
+    end
+
+    def ci_configured_namespace(deployable)
+      # YAML configuration of namespaces not supported for managed clusters
+      return if managed?
+
+      deployable&.expanded_kubernetes_namespace
+    end
+
+    def default_namespace(environment)
+      Gitlab::Kubernetes::DefaultNamespace.new(
+        self,
+        project: environment.project
+      ).from_environment_slug(environment.slug)
     end
 
     def instance_domain
       @instance_domain ||= Gitlab::CurrentSettings.auto_devops_domain
     end
 
-    def retrieve_connection_status
-      kubeclient.core_client.discover
-    rescue *Gitlab::Kubernetes::Errors::CONNECTION
-      :unreachable
-    rescue *Gitlab::Kubernetes::Errors::AUTHENTICATION
-      :authentication_failure
-    rescue Kubeclient::HttpError => e
-      kubeclient_error_status(e.message)
-    rescue => e
-      Gitlab::Sentry.track_acceptable_exception(e, extra: { cluster_id: id })
+    def connection_data
+      result = ::Gitlab::Kubernetes::KubeClient.graceful_request(id) { kubeclient.core_client.discover }
 
-      :unknown_failure
-    else
-      :connected
-    end
-
-    # KubeClient uses the same error class
-    # For connection errors (eg. timeout) and
-    # for Kubernetes errors.
-    def kubeclient_error_status(message)
-      if message&.match?(/timed out|timeout/i)
-        :unreachable
-      else
-        :authentication_failure
-      end
+      { connection_status: result[:status], connection_error: result[:connection_error] }.compact
     end
 
     # To keep backward compatibility with AUTO_DEVOPS_DOMAIN
@@ -327,7 +434,7 @@ module Clusters
 
     def restrict_modification
       if provider&.on_creation?
-        errors.add(:base, "cannot modify during creation")
+        errors.add(:base, _('Cannot modify provider during creation'))
         return false
       end
 

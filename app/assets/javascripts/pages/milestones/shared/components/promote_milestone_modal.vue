@@ -1,6 +1,6 @@
 <script>
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -68,7 +68,7 @@ export default {
     footer-primary-button-variant="warning"
     @submit="onSubmit"
   >
-    <template slot="title">
+    <template #title>
       {{ title }}
     </template>
     <div>

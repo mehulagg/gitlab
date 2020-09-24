@@ -22,6 +22,16 @@ export default {
       type: String,
       required: true,
     },
+    newSize: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    oldSize: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -102,6 +112,7 @@ export default {
       <div class="image">
         <image-viewer
           :path="imagePath"
+          :file-size="isNew ? newSize : oldSize"
           :inner-css-classes="[
             'frame',
             {

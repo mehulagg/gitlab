@@ -1,0 +1,5 @@
+---
+title: Add rake geo:replication:pause to pause replication from a secondary node
+merge_request: 29515
+author:
+type: added

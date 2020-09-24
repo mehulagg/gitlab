@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
+RSpec.describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
   include KubernetesHelpers
 
   let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
@@ -28,7 +28,6 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
     stub_kubeclient_get_secret_error(api_url, 'gitlab-token')
     stub_kubeclient_create_secret(api_url)
 
-    stub_kubeclient_get_role_binding(api_url, "gitlab-#{namespace}", namespace: namespace)
     stub_kubeclient_put_role_binding(api_url, "gitlab-#{namespace}", namespace: namespace)
     stub_kubeclient_get_namespace(api_url, namespace: namespace)
     stub_kubeclient_get_service_account_error(api_url, "#{namespace}-service-account", namespace: namespace)
@@ -37,6 +36,8 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
     stub_kubeclient_put_secret(api_url, "#{namespace}-token", namespace: namespace)
     stub_kubeclient_put_role(api_url, Clusters::Kubernetes::GITLAB_KNATIVE_SERVING_ROLE_NAME, namespace: namespace)
     stub_kubeclient_put_role_binding(api_url, Clusters::Kubernetes::GITLAB_KNATIVE_SERVING_ROLE_BINDING_NAME, namespace: namespace)
+    stub_kubeclient_put_role(api_url, Clusters::Kubernetes::GITLAB_CROSSPLANE_DATABASE_ROLE_NAME, namespace: namespace)
+    stub_kubeclient_put_role_binding(api_url, Clusters::Kubernetes::GITLAB_CROSSPLANE_DATABASE_ROLE_BINDING_NAME, namespace: namespace)
 
     stub_kubeclient_get_secret(
       api_url,
@@ -55,9 +56,21 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
       end.to change(Clusters::KubernetesNamespace, :count).by(1)
     end
 
-    it 'creates project service account' do
-      expect_any_instance_of(Clusters::Kubernetes::CreateOrUpdateServiceAccountService).to receive(:execute).once
-
+    it 'creates project service account and namespace' do
+      account_service = double(Clusters::Kubernetes::CreateOrUpdateServiceAccountService)
+      expect(Clusters::Kubernetes::CreateOrUpdateServiceAccountService).to(
+        receive(:namespace_creator).with(
+          cluster.platform.kubeclient,
+          service_account_name: "#{namespace}-service-account",
+          service_account_namespace: namespace,
+          service_account_namespace_labels: {
+            'app.gitlab.com/app' => project.full_path_slug,
+            'app.gitlab.com/env' => environment.slug
+          },
+          rbac: true
+        ).and_return(account_service)
+      )
+      expect(account_service).to receive(:execute).once
       subject
     end
 
@@ -68,6 +81,29 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
       expect(kubernetes_namespace.namespace).to eq(namespace)
       expect(kubernetes_namespace.service_account_name).to eq("#{namespace}-service-account")
       expect(kubernetes_namespace.encrypted_service_account_token).to be_present
+    end
+
+    context 'without environment' do
+      before do
+        kubernetes_namespace.environment = nil
+      end
+
+      it 'creates project service account and namespace' do
+        account_service = double(Clusters::Kubernetes::CreateOrUpdateServiceAccountService)
+        expect(Clusters::Kubernetes::CreateOrUpdateServiceAccountService).to(
+          receive(:namespace_creator).with(
+            cluster.platform.kubeclient,
+            service_account_name: "#{namespace}-service-account",
+            service_account_namespace: namespace,
+            service_account_namespace_labels: {
+              'app.gitlab.com/app' => project.full_path_slug
+            },
+            rbac: true
+          ).and_return(account_service)
+        )
+        expect(account_service).to receive(:execute).once
+        subject
+      end
     end
   end
 
@@ -123,7 +159,9 @@ describe Clusters::Kubernetes::CreateOrUpdateNamespaceService, '#execute' do
       end
 
       it 'creates project service account' do
-        expect_any_instance_of(Clusters::Kubernetes::CreateOrUpdateServiceAccountService).to receive(:execute).once
+        expect_next_instance_of(Clusters::Kubernetes::CreateOrUpdateServiceAccountService) do |instance|
+          expect(instance).to receive(:execute).once
+        end
 
         subject
       end

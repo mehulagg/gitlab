@@ -15,6 +15,10 @@ export default {
       type: Function,
       required: true,
     },
+    path: {
+      type: String,
+      required: true,
+    },
     isOpen: {
       type: Boolean,
       required: true,
@@ -60,7 +64,7 @@ export default {
       return rawTimestamp ? formatDate(new Date(rawTimestamp)) : '';
     },
     getTimestampInWords(rawTimestamp) {
-      return rawTimestamp ? this.timeFormated(rawTimestamp) : '';
+      return rawTimestamp ? this.timeFormatted(rawTimestamp) : '';
     },
   },
 };
@@ -68,13 +72,15 @@ export default {
 
 <template>
   <gl-tooltip :target="getTargetRef()">
-    <span class="bold">
-      {{ stateText }}
-    </span>
-    {{ stateTimeInWords }}
-    <br />
-    <span class="text-tertiary">
-      {{ stateTimestamp }}
-    </span>
+    <div ref="statePath" class="bold">
+      {{ path }}
+    </div>
+    <div class="text-tertiary">
+      <span ref="stateText" class="bold">
+        {{ stateText }}
+      </span>
+      {{ stateTimeInWords }}
+      <div ref="stateTimestamp">{{ stateTimestamp }}</div>
+    </div>
   </gl-tooltip>
 </template>

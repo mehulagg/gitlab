@@ -41,21 +41,12 @@
       width: 20%;
     }
 
-    .fa,
-    svg {
-      color: $cycle-analytics-light-gray;
-
-      &:hover {
-        color: $gl-text-color;
-      }
-    }
-
     .stage-header {
-      width: 18.5%;
+      width: 20.5%;
     }
 
     .median-header {
-      width: 21.5%;
+      width: 19.5%;
     }
 
     .event-header {
@@ -103,18 +94,6 @@
         }
       }
     }
-  }
-
-  .js-ca-dropdown {
-    top: $gl-padding-top;
-  }
-
-  .fa-spinner {
-    font-size: 28px;
-    position: relative;
-    margin-left: -20px;
-    left: 50%;
-    margin-top: 36px;
   }
 
   .stage-panel-body {
@@ -199,8 +178,7 @@
 
   .stage-events {
     width: 60%;
-    overflow: scroll;
-    height: 467px;
+    min-height: 467px;
   }
 
   .stage-event-list {
@@ -370,26 +348,6 @@
       width: 78px;
       display: inline-block;
       margin-bottom: 20px;
-    }
-  }
-}
-
-.cycle-analytics-overview {
-  padding-top: 100px;
-
-  .overview-details {
-    display: flex;
-    align-items: center;
-  }
-
-  .overview-image {
-    text-align: right;
-  }
-
-  .overview-icon {
-    svg {
-      width: 365px;
-      height: 227px;
     }
   }
 }

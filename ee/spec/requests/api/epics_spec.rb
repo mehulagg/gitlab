@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe API::Epics do
-  let(:user) { create(:user) }
+RSpec.describe API::Epics do
+  let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
-  let(:label) { create(:label) }
-  let(:epic) { create(:labeled_epic, group: group, labels: [label]) }
+  let(:label) { create(:group_label, group: group) }
+  let!(:epic) { create(:labeled_epic, group: group, labels: [label]) }
   let(:params) { nil }
 
   shared_examples 'error requests' do
@@ -17,7 +17,7 @@ describe API::Epics do
 
         get api(url, user), params: params
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       context 'when epics feature is enabled' do
@@ -31,7 +31,7 @@ describe API::Epics do
 
           get api(url, user), params: params
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -41,8 +41,6 @@ describe API::Epics do
     let(:extra_date_fields) { %w[start_date_is_fixed start_date_fixed due_date_is_fixed due_date_fixed] }
 
     context 'when permission is absent' do
-      RSpec::Matchers.define_negated_matcher :exclude, :include
-
       it 'returns epic with extra date fields' do
         get api(url, user), params: params
 
@@ -77,7 +75,7 @@ describe API::Epics do
       end
 
       it 'returns 200 status' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'matches the response schema' do
@@ -85,7 +83,6 @@ describe API::Epics do
       end
 
       it 'avoids N+1 queries', :request_store do
-        epic
         # Avoid polluting queries with inserts for personal access token
         pat = create(:personal_access_token, user: user)
         subgroup_1 = create(:group, parent: group)
@@ -101,7 +98,52 @@ describe API::Epics do
         create_list(:labeled_epic, 2, group: group, labels: [label_2])
 
         expect { get api(url, personal_access_token: pat), params: params }.not_to exceed_all_query_limit(control)
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      context 'with_label_details' do
+        let(:params) do
+          {
+            include_descendant_groups: true,
+            with_labels_details: true
+          }
+        end
+
+        it 'avoids N+1 queries', :request_store do
+          # Avoid polluting queries with inserts for personal access token
+          pat = create(:personal_access_token, user: user)
+          subgroup_1 = create(:group, parent: group)
+          subgroup_2 = create(:group, parent: subgroup_1)
+          label_1 = create(:group_label, title: 'foo', group: group)
+          epic1 = create(:epic, group: subgroup_2)
+          create(:label_link, label: label_1, target: epic1)
+
+          control = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+            get api(url, personal_access_token: pat), params: params
+          end.count
+
+          label_2 = create(:label)
+          create_list(:labeled_epic, 4, group: group, labels: [label_2])
+
+          expect do
+            get api(url, personal_access_token: pat), params: params
+          end.not_to exceed_all_query_limit(control)
+        end
+
+        it 'returns labels with details' do
+          label_1 = create(:group_label, title: 'foo', group: group)
+          label_2 = create(:label, title: 'bar', project: project)
+
+          create(:label_link, label: label_1, target: epic)
+          create(:label_link, label: label_2, target: epic)
+
+          get api(url), params: { labels: [label.title, label_1.title, label_2.title], with_labels_details: true }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect_paginated_array_response([epic.id])
+          expect(json_response.first['labels'].pluck('name')).to match_array([label.title, label_1.title, label_2.title])
+          expect(json_response.last['labels'].first).to match_schema('/public_api/v4/label_basic')
+        end
       end
     end
 
@@ -114,6 +156,7 @@ describe API::Epics do
                created_at: 3.days.ago,
                updated_at: 2.days.ago)
       end
+
       let!(:epic2) do
         create(:epic,
                author: user2,
@@ -123,6 +166,7 @@ describe API::Epics do
                created_at: 2.days.ago,
                updated_at: 3.days.ago)
       end
+
       let!(:label) { create(:group_label, title: 'a-test', group: group) }
       let!(:label_link) { create(:label_link, label: label, target: epic2) }
 
@@ -134,6 +178,15 @@ describe API::Epics do
         get api(url), params: { author_id: user2.id }
 
         expect_paginated_array_response([epic2.id])
+      end
+
+      it 'returns epics reacted to by current user' do
+        create(:award_emoji, awardable: epic, user: user, name: 'star')
+        create(:award_emoji, awardable: epic2, user: user2, name: 'star')
+
+        get api(url, user), params: { my_reaction_emoji: 'Any', scope: 'all' }
+
+        expect_paginated_array_response([epic.id])
       end
 
       it 'returns epics matching given search string for title' do
@@ -166,7 +219,7 @@ describe API::Epics do
 
         get api(url)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
 
         expect(json_response).to contain_exactly(
           a_hash_including('upvotes' => 1, 'downvotes' => 0),
@@ -271,27 +324,53 @@ describe API::Epics do
       end
 
       it 'returns an array of epics with any label' do
-        get api(url), params: { labels: IssuesFinder::FILTER_ANY }
+        get api(url), params: { labels: IssuableFinder::Params::FILTER_ANY }
 
         expect_paginated_array_response(epic2.id)
       end
 
       it 'returns an array of epics with any label with labels param as array' do
-        get api(url), params: { labels: [IssuesFinder::FILTER_ANY] }
+        get api(url), params: { labels: [IssuableFinder::Params::FILTER_ANY] }
 
         expect_paginated_array_response(epic2.id)
       end
 
       it 'returns an array of epics with no label' do
-        get api(url), params: { labels: IssuesFinder::FILTER_NONE }
+        get api(url), params: { labels: IssuableFinder::Params::FILTER_NONE }
 
         expect_paginated_array_response(epic.id)
       end
 
       it 'returns an array of epics with no label with labels param as array' do
-        get api(url), params: { labels: [IssuesFinder::FILTER_NONE] }
+        get api(url), params: { labels: [IssuableFinder::Params::FILTER_NONE] }
 
         expect_paginated_array_response(epic.id)
+      end
+
+      describe "#to_reference" do
+        it 'exposes reference path' do
+          get api(url)
+
+          expect(json_response.first['references']['short']).to eq("&#{epic2.iid}")
+          expect(json_response.first['references']['relative']).to eq("&#{epic2.iid}")
+          expect(json_response.first['references']['full']).to eq("#{epic2.group.path}&#{epic2.iid}")
+        end
+
+        context 'referencing from parent group' do
+          let(:parent_group) { create(:group) }
+
+          before do
+            group.update(parent_id: parent_group.id)
+          end
+
+          it 'exposes full reference path' do
+            get api("/groups/#{parent_group.path}/epics")
+
+            expect(json_response.first['references']['short']).to eq("&#{epic2.iid}")
+            expect(json_response.first['references']['relative']).to eq("#{parent_group.path}/#{epic2.group.path}&#{epic2.iid}")
+            expect(json_response.first['references']['full']).to eq("#{parent_group.path}/#{epic2.group.path}&#{epic2.iid}")
+          end
+        end
       end
 
       it_behaves_like 'can admin epics'
@@ -347,8 +426,6 @@ describe API::Epics do
 
       before do
         stub_licensed_features(epics: true)
-
-        epic
       end
 
       it 'excludes descendant group epics' do
@@ -360,7 +437,7 @@ describe API::Epics do
       it 'includes ancestor group epics' do
         get api(url), params: { include_ancestor_groups: true }
 
-        expect_paginated_array_response([epic.id, subgroup2_epic.id, subgroup_epic.id])
+        expect_paginated_array_response([subgroup2_epic.id, subgroup_epic.id, epic.id])
       end
     end
 
@@ -385,14 +462,14 @@ describe API::Epics do
       end
 
       context 'when viewing the first page' do
-        let(:expected) { [epic3.id, epic2.id] }
+        let(:expected) { [epic.id, epic3.id] }
         let(:page) { 1 }
 
         it_behaves_like 'paginated API endpoint'
       end
 
       context 'viewing the second page' do
-        let(:expected) { [epic1.id] }
+        let(:expected) { [epic2.id, epic1.id] }
         let(:page) { 2 }
 
         it_behaves_like 'paginated API endpoint'
@@ -413,7 +490,7 @@ describe API::Epics do
       it 'returns 200 status' do
         get api(url)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'matches the response schema' do
@@ -437,6 +514,24 @@ describe API::Epics do
         expect(json_response['closed_at']).to be_present
       end
 
+      it 'exposes full reference path' do
+        get api(url)
+
+        expect(json_response['references']['short']).to eq("&#{epic.iid}")
+        expect(json_response['references']['relative']).to eq("&#{epic.iid}")
+        expect(json_response['references']['full']).to eq("#{epic.group.path}&#{epic.iid}")
+      end
+
+      it 'exposes links' do
+        get api(url)
+
+        links = json_response['_links']
+
+        expect(links['self']).to end_with("/api/v4/groups/#{epic.group.id}/epics/#{epic.iid}")
+        expect(links['epic_issues']).to end_with("/api/v4/groups/#{epic.group.id}/epics/#{epic.iid}/issues")
+        expect(links['group']).to end_with("/api/v4/groups/#{epic.group.id}")
+      end
+
       it_behaves_like 'can admin epics'
     end
   end
@@ -451,7 +546,8 @@ describe API::Epics do
         labels: 'label1',
         due_date_fixed: '2018-07-17',
         due_date_is_fixed: true,
-        parent_id: parent_epic.id
+        parent_id: parent_epic.id,
+        confidential: true
       }
     end
 
@@ -467,7 +563,7 @@ describe API::Epics do
         it 'returns 400' do
           post api(url, user), params: { description: 'epic description' }
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
         end
       end
 
@@ -477,7 +573,7 @@ describe API::Epics do
         end
 
         it 'returns 201 status' do
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
         end
 
         it 'matches the response schema' do
@@ -497,6 +593,7 @@ describe API::Epics do
           expect(epic.labels.first.title).to eq('label1')
           expect(epic.parent).to eq(parent_epic)
           expect(epic.relative_position).not_to be_nil
+          expect(epic.confidential).to be_truthy
         end
 
         context 'when deprecated start_date and end_date params are present' do
@@ -518,7 +615,7 @@ describe API::Epics do
 
         post api(url, user), params: params
 
-        expect(response.status).to eq(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response['title']).to include 'new epic'
         expect(json_response['description']).to include 'epic description'
         expect(json_response['labels']).to include 'label1'
@@ -527,6 +624,17 @@ describe API::Epics do
         expect(json_response['labels']).to include 'bar'
         expect(json_response['labels']).to include '&'
         expect(json_response['labels']).to include '?'
+      end
+
+      it 'creates a new epic with no labels' do
+        params[:labels] = nil
+
+        post api(url, user), params: params
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(json_response['title']).to include 'new epic'
+        expect(json_response['description']).to include 'epic description'
+        expect(json_response['labels']).to be_empty
       end
     end
   end
@@ -539,7 +647,8 @@ describe API::Epics do
         description: 'new description',
         labels: 'label2',
         start_date_fixed: "2018-07-17",
-        start_date_is_fixed: true
+        start_date_is_fixed: true,
+        confidential: true
       }
     end
 
@@ -554,7 +663,7 @@ describe API::Epics do
         it 'returns 403 forbidden error' do
           put api(url, user), params: params
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
@@ -564,7 +673,7 @@ describe API::Epics do
 
           put api(url, user)
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
         end
       end
 
@@ -579,7 +688,7 @@ describe API::Epics do
           end
 
           it 'returns 200 status' do
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           it 'matches the response schema' do
@@ -597,15 +706,37 @@ describe API::Epics do
             expect(result.start_date_is_fixed).to eq(true)
             expect(result.due_date_fixed).to eq(nil)
             expect(result.due_date_is_fixed).to be_falsey
+            expect(result.confidential).to be_truthy
           end
         end
 
+        it 'clears labels when labels param is nil' do
+          params[:labels] = 'label1'
+          put api(url, user), params: params
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['title']).to include 'new title'
+          expect(json_response['description']).to include 'new description'
+          expect(json_response['labels']).to contain_exactly('label1')
+
+          params[:labels] = nil
+          put api(url, user), params: params
+
+          expect(response).to have_gitlab_http_status(:ok)
+          json_response = Gitlab::Json.parse(response.body)
+          expect(json_response['title']).to include 'new title'
+          expect(json_response['description']).to include 'new description'
+          expect(json_response['labels']).to be_empty
+        end
+
         it 'updates the epic with labels param as array' do
+          stub_const("Gitlab::QueryLimiting::Transaction::THRESHOLD", 110)
+
           params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
 
           put api(url, user), params: params
 
-          expect(response.status).to eq(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['title']).to include 'new title'
           expect(json_response['description']).to include 'new description'
           expect(json_response['labels']).to include 'label1'
@@ -682,7 +813,7 @@ describe API::Epics do
 
           delete api(url, user)
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
@@ -694,7 +825,7 @@ describe API::Epics do
         it 'returns 204 status' do
           delete api(url, user)
 
-          expect(response).to have_gitlab_http_status(204)
+          expect(response).to have_gitlab_http_status(:no_content)
         end
 
         it 'removes an epic' do

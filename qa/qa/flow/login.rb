@@ -5,29 +5,34 @@ module QA
     module Login
       module_function
 
-      def while_signed_in(as: nil)
+      def while_signed_in(as: nil, address: :gitlab)
         Page::Main::Menu.perform(&:sign_out_if_signed_in)
 
-        sign_in(as: as)
+        sign_in(as: as, address: address)
 
-        yield
+        result = yield
 
         Page::Main::Menu.perform(&:sign_out)
+        result
       end
 
-      def while_signed_in_as_admin
-        while_signed_in(as: Runtime::User.admin) do
+      def while_signed_in_as_admin(address: :gitlab)
+        while_signed_in(as: Runtime::User.admin, address: address) do
           yield
         end
       end
 
-      def sign_in(as: nil)
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform { |login| login.sign_in_using_credentials(user: as) }
+      def sign_in(as: nil, address: :gitlab, skip_page_validation: false)
+        Runtime::Browser.visit(address, Page::Main::Login)
+        Page::Main::Login.perform { |login| login.sign_in_using_credentials(user: as, skip_page_validation: skip_page_validation) }
       end
 
-      def sign_in_as_admin
-        sign_in(as: Runtime::User.admin)
+      def sign_in_as_admin(address: :gitlab)
+        sign_in(as: Runtime::User.admin, address: address)
+      end
+
+      def sign_in_unless_signed_in(as: nil, address: :gitlab)
+        sign_in(as: as, address: address) unless Page::Main::Menu.perform(&:signed_in?)
       end
     end
   end

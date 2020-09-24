@@ -2,11 +2,18 @@
 
 require 'spec_helper'
 
-describe Groups::Settings::CiCdController do
+RSpec.describe Groups::Settings::CiCdController do
   include ExternalAuthorizationServiceHelpers
 
-  let(:group) { create(:group) }
-  let(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:sub_group) { create(:group, parent: group) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:project_2) { create(:project, group: sub_group) }
+  let_it_be(:runner_group) { create(:ci_runner, :group, groups: [group]) }
+  let_it_be(:runner_project_1) { create(:ci_runner, :project, projects: [project])}
+  let_it_be(:runner_project_2) { create(:ci_runner, :project, projects: [project_2])}
+  let_it_be(:runner_project_3) { create(:ci_runner, :project, projects: [project, project_2])}
 
   before do
     sign_in(user)
@@ -18,11 +25,12 @@ describe Groups::Settings::CiCdController do
         group.add_owner(user)
       end
 
-      it 'renders show with 200 status code' do
+      it 'renders show with 200 status code and correct runners' do
         get :show, params: { group_id: group }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:show)
+        expect(assigns(:group_runners)).to match_array([runner_group, runner_project_1, runner_project_2, runner_project_3])
       end
     end
 
@@ -34,7 +42,8 @@ describe Groups::Settings::CiCdController do
       it 'renders a 404' do
         get :show, params: { group_id: group }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(assigns(:group_runners)).to be_nil
       end
     end
 
@@ -47,7 +56,7 @@ describe Groups::Settings::CiCdController do
       it 'renders show with 200 status code' do
         get :show, params: { group_id: group }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end
@@ -79,7 +88,7 @@ describe Groups::Settings::CiCdController do
       it 'renders a 404' do
         subject
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -99,7 +108,7 @@ describe Groups::Settings::CiCdController do
         group.add_maintainer(user)
       end
 
-      it { is_expected.to have_gitlab_http_status(404) }
+      it { is_expected.to have_gitlab_http_status(:not_found) }
     end
 
     context 'when user has enough privileges' do
@@ -170,7 +179,7 @@ describe Groups::Settings::CiCdController do
         group.add_owner(user)
       end
 
-      it { is_expected.to have_gitlab_http_status(404) }
+      it { is_expected.to have_gitlab_http_status(:not_found) }
     end
 
     context 'when user is an admin' do
@@ -180,32 +189,38 @@ describe Groups::Settings::CiCdController do
         group.add_owner(user)
       end
 
-      it { is_expected.to redirect_to(group_settings_ci_cd_path) }
-
-      context 'when service execution went wrong' do
-        let(:update_service) { double }
-
-        before do
-          allow(Groups::UpdateService).to receive(:new).and_return(update_service)
-          allow(update_service).to receive(:execute).and_return(false)
-          allow_any_instance_of(Group).to receive_message_chain(:errors, :full_messages)
-            .and_return(['Error 1'])
-
-          subject
-        end
-
-        it 'returns a flash alert' do
-          expect(response).to set_flash[:alert]
-            .to eq("There was a problem updating the pipeline settings: [\"Error 1\"].")
-        end
+      context 'when admin mode is disabled' do
+        it { is_expected.to have_gitlab_http_status(:not_found) }
       end
 
-      context 'when service execution was successful' do
-        it 'returns a flash notice' do
-          subject
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { is_expected.to redirect_to(group_settings_ci_cd_path) }
 
-          expect(response).to set_flash[:notice]
-            .to eq('Pipeline settings was updated for the group')
+        context 'when service execution went wrong' do
+          let(:update_service) { double }
+
+          before do
+            allow(Groups::UpdateService).to receive(:new).and_return(update_service)
+            allow(update_service).to receive(:execute).and_return(false)
+            allow_any_instance_of(Group).to receive_message_chain(:errors, :full_messages)
+              .and_return(['Error 1'])
+
+            subject
+          end
+
+          it 'returns a flash alert' do
+            expect(response).to set_flash[:alert]
+              .to eq("There was a problem updating the pipeline settings: [\"Error 1\"].")
+          end
+        end
+
+        context 'when service execution was successful' do
+          it 'returns a flash notice' do
+            subject
+
+            expect(response).to set_flash[:notice]
+              .to eq('Pipeline settings was updated for the group')
+          end
         end
       end
     end

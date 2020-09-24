@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :ci_reports_security_locations_container_scanning, class: ::Gitlab::Ci::Reports::Security::Locations::ContainerScanning do
+  factory :ci_reports_security_locations_container_scanning, class: '::Gitlab::Ci::Reports::Security::Locations::ContainerScanning' do
     image { 'registry.gitlab.com/my/project:latest' }
     operating_system { 'debian:9' }
     package_name { 'glibc' }

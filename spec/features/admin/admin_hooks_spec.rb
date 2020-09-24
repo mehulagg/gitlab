@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Admin::Hooks' do
+RSpec.describe 'Admin::Hooks' do
   let(:user) { create(:admin) }
 
   before do
@@ -28,13 +28,31 @@ describe 'Admin::Hooks' do
     end
 
     it 'renders plugins list as well' do
-      allow(Gitlab::Plugin).to receive(:files).and_return(['foo.rb', 'bar.clj'])
+      allow(Gitlab::FileHook).to receive(:files).and_return(['foo.rb', 'bar.clj'])
 
       visit admin_hooks_path
 
-      expect(page).to have_content('Plugins')
+      expect(page).to have_content('File Hooks')
       expect(page).to have_content('foo.rb')
       expect(page).to have_content('bar.clj')
+    end
+
+    context 'deprecation warning' do
+      it 'shows warning for plugins directory' do
+        allow(Gitlab::FileHook).to receive(:files).and_return(['plugins/foo.rb'])
+
+        visit admin_hooks_path
+
+        expect(page).to have_content('Plugins directory is deprecated and will be removed in 14.0')
+      end
+
+      it 'does not show warning for file_hooks directory' do
+        allow(Gitlab::FileHook).to receive(:files).and_return(['file_hooks/foo.rb'])
+
+        visit admin_hooks_path
+
+        expect(page).not_to have_content('Plugins directory is deprecated and will be removed in 14.0')
+      end
     end
   end
 
@@ -85,7 +103,7 @@ describe 'Admin::Hooks' do
       it 'from hooks list page' do
         visit admin_hooks_path
 
-        accept_confirm { click_link 'Remove' }
+        accept_confirm { click_link 'Delete' }
         expect(page).not_to have_content(hook_url)
       end
 
@@ -93,7 +111,7 @@ describe 'Admin::Hooks' do
         visit admin_hooks_path
         click_link 'Edit'
 
-        accept_confirm { click_link 'Remove' }
+        accept_confirm { click_link 'Delete' }
         expect(page).not_to have_content(hook_url)
       end
     end

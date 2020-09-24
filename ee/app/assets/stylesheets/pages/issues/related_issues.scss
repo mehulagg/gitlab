@@ -9,14 +9,6 @@ $token-spacing-bottom: 0.5em;
   color: $gl-text-color-secondary;
 }
 
-.related-issues-header-issue-count {
-  margin-left: 0.5em;
-}
-
-.related-issues-add-related-issues-form-with-break {
-  border-bottom: 1px solid $border-color;
-}
-
 .related-issues-token-body {
   padding: 0;
 
@@ -58,4 +50,8 @@ $token-spacing-bottom: 0.5em;
 
 .issue-token-end {
   order: 1;
+}
+
+.linked-issues-card-body > * + * {
+  margin-top: $gl-padding;
 }

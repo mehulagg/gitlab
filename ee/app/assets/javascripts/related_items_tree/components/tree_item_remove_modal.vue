@@ -1,6 +1,7 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapState, mapActions } from 'vuex';
-import _ from 'underscore';
+import { escape } from 'lodash';
 
 import { GlModal } from '@gitlab/ui';
 
@@ -30,13 +31,13 @@ export default {
 
         if (this.removeItemType === ChildType.Epic) {
           Object.assign(sprintfParams, {
-            targetEpicTitle: _.escape(this.removeItemModalProps.item.title),
-            parentEpicTitle: _.escape(this.parentItem.title),
+            targetEpicTitle: escape(this.removeItemModalProps.item.title),
+            parentEpicTitle: escape(this.parentItem.title),
           });
         } else {
           Object.assign(sprintfParams, {
-            targetIssueTitle: _.escape(this.removeItemModalProps.item.title),
-            parentEpicTitle: _.escape(this.parentItem.title),
+            targetIssueTitle: escape(this.removeItemModalProps.item.title),
+            parentEpicTitle: escape(this.parentItem.title),
           });
         }
 

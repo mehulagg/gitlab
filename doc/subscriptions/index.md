@@ -2,319 +2,191 @@
 type: index, reference
 ---
 
-# Customer Docs
+# GitLab subscription **(STARTER)**
 
-This section contains information for:
+GitLab offers tiers of features. Your subscription determines which tier you
+have access to. Subscriptions are valid for 12 months.
 
-- New customers about choosing [which GitLab](#which-gitlab) is right for you.
-- Existing customers about [managing subscriptions](#managing-subscriptions).
+GitLab provides special subscriptions to participants in:
 
-Also see our [subscription FAQ](https://about.gitlab.com/pricing/licensing-faq/).
+- [Education](#gitlab-for-education-subscriptions)
+- [Open Source](#gitlab-for-open-source-subscriptions)
 
-## Which GitLab?
+## Choose a GitLab subscription
 
-There are two ways to use GitLab:
+When choosing a subscription, there are two factors to consider:
 
-- [GitLab.com](#gitlabcom): GitLab's SaaS offering. You don't need to install
-  anything to use GitLab.com, you only need to
-  [sign up](https://gitlab.com/users/sign_in) and start using GitLab straight away.
-- [GitLab self-managed](#gitlab-self-managed): Install, administer, and maintain
+- [GitLab.com or self-managed](#choose-between-gitlabcom-or-self-managed)
+- [GitLab tier](#choose-a-gitlab-tier)
+
+### Choose between GitLab.com or self-managed
+
+There are some differences in how a subscription applies, depending if you use
+GitLab.com or a self-managed instance:
+
+- [GitLab.com](gitlab_com/index.md): GitLab's software-as-a-service offering.
+  You don't need to install anything to use GitLab.com, you only need to
+  [sign up](https://gitlab.com/users/sign_up) and start using GitLab straight away.
+- [GitLab self-managed](self_managed/index.md): Install, administer, and maintain
   your own GitLab instance.
 
-The following sections outline tiers and features within GitLab.com
-and GitLab self-managed.
-
-### GitLab.com
-
-GitLab.com is hosted, managed, and administered by GitLab, Inc., with
-[free and paid subscriptions](https://about.gitlab.com/pricing/) for individuals
-and teams in the following tiers:
-
-| Tier   | Includes same features available in                 |
-|:-------|:----------------------------------------------------|
-| Free   | [Core](#gitlab-self-managed) self-managed tier.     |
-| Bronze | [Starter](#gitlab-self-managed) self-managed tier.  |
-| Silver | [Premium](#gitlab-self-managed) self-managed tier.  |
-| Gold   | [Ultimate](#gitlab-self-managed) self-managed tier. |
-
-GitLab.com subscriptions grant access
-to the same features available in GitLab self-managed, **except
-[administration](../administration/index.md) tools and settings**.
-
-GitLab.com allows you to apply your subscription to a group or your personal user.
-
-When applied to:
-
-- A **group**, the group, all subgroups, and all projects under the selected
-  group on GitLab.com will have the features of the associated plan. It is
-  recommended to go with a group plan when managing projects and users of an
-  organization.
-- A **personal userspace** instead, all projects will have features with the
-  subscription applied, but as it is not a group, group features will not be available.
-
-TIP: **Tip:**
-To support the open source community and encourage the development of open
-source projects, GitLab grants access to **Gold** features for all GitLab.com
-**public** projects, regardless of the subscription.
-
-The following resources are available for more information on GitLab.com:
-
-- [Feature comparison](https://about.gitlab.com/pricing/gitlab-com/feature-comparison/), for information on what features are available at each tier.
-- [GitLab pricing page](https://about.gitlab.com/pricing/), for subscription information and a free trial.
-- Our [product marketing page](https://about.gitlab.com/handbook/marketing/product-marketing/), for additional information including:
-  - How [different tiers are licensed](https://about.gitlab.com/handbook/marketing/product-marketing/#tiers).
-  - The different [GitLab distributions](https://about.gitlab.com/handbook/marketing/product-marketing/#distributions).
-
-#### Subscribing to GitLab.com
-
-To subscribe to GitLab.com:
-
-1. Create a user account for yourself using our
-   [sign up page](https://gitlab.com/users/sign_in#register-pane).
-1. Create a [group](../user/group/index.md). GitLab groups help assemble related
-   projects together allowing you to grant members access to several projects
-   at once. A group is not required if you plan on having projects inside a personal
-   namespace.
-1. Create additional users and
-   [add them to the group](../user/group/index.md#add-users-to-a-group).
-1. Select the **Bronze**, **Silver**, or **Gold** GitLab.com plan through the
-   [GitLab Subscription Manager](https://customers.gitlab.com/).
-1. Link your GitLab.com account with your GitLab Subscription Manager account.
-   Once signed into the GitLab Subscription Manager, if your account is not
-   already linked, you will prompted to link your account with a
-   **Link my GitLab Account** button.
-1. Associate the group with the subscription.
-
-TIP: **Tip:**
-You can also go to the [**My Account**](https://customers.gitlab.com/customers/edit)
-page to add or change the GitLab.com account link.
-
-### GitLab self-managed
-
-With GitLab self-managed, you deploy your own GitLab instance on-premises or on a cloud of your choice.
-GitLab self-managed is available for [free and with paid subscriptions](https://about.gitlab.com/pricing/#self-managed) in the following tiers:
-
-| Tier     | Includes                                       |
-|:---------|:-----------------------------------------------|
-| Core     | Core features.                                 |
-| Starter  | Core and Starter features.                     |
-| Premium  | Core, Starter, and Premium features.           |
-| Ultimate | Core, Starter, Premium, and Ultimate features. |
-
-The following resources are available for more information on GitLab self-managed:
-
-- [Feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/), for information on what features are available at each tier.
-- [GitLab pricing page](https://about.gitlab.com/pricing/#self-managed), for subscription information and a free trial.
-- Our [product marketing page](https://about.gitlab.com/handbook/marketing/product-marketing/), for additional information including:
-  - How [different tiers are licensed](https://about.gitlab.com/handbook/marketing/product-marketing/#tiers).
-  - The different [GitLab distributions](https://about.gitlab.com/handbook/marketing/product-marketing/#distributions).
-
-#### Subscribing through GitLab self-managed
-
-To subscribe to GitLab through a self-managed installation:
-
-1. [Install](https://about.gitlab.com/install/) GitLab.
-1. Complete the installation with
-   [administration tasks](../administration/index.md).
-1. Select the **Starter**, **Premium**, or **Ultimate** self-managed plan
-   through the [GitLab Subscription Manager](https://customers.gitlab.com/).
-1. Apply your license file. After purchase, a license file is sent to the email
-   address associated to the GitLab Subscription Manager account,
-   which needs to be
-   [uploaded to your GitLab instance](../user/admin_area/license.md#uploading-your-license).
-
-TIP: **Tip:**
-If you are purchasing a subscription for an existing **Core** self-managed
-instance, ensure you are purchasing enough seats to
-[cover your users](../user/admin_area/index.md#administering-users).
-
-## Managing subscriptions
-
-You can view and manage subscriptions through our
-[GitLab Subscription Manager](https://customers.gitlab.com/).
-
-### View subscription and seats
-
-Visit the
-[GitLab Subscription Manager](https://customers.gitlab.com/subscriptions) to
-view and manage:
-
-- The subscriptions you have purchased.
-- The number of seats associated with the subscription.
-- Retrieve copies of invoices.
-- Change the credit card on file.
-
-For more information, please see our:
-
-- [Subscription FAQ](https://about.gitlab.com/pricing/licensing-faq/).
-- [Pricing page](https://about.gitlab.com/pricing/), which includes information
-  on our [true-up pricing policy](https://about.gitlab.com/handbook/ceo/pricing/#true-up-pricing)
-  when adding more users other than at the time of purchase.
+On a self-managed instance, a GitLab subscription provides the same set of
+features for _all_ users. On GitLab.com, you can apply a subscription to either
+a group or a personal namespace.
 
 NOTE: **Note:**
-The GitLab Subscription Manager account can have the same email address as your
-GitLab.com account, but is a _separate_ login. If the two accounts are
-linked together, you can use the **Or sign in with GitLab.com**
-link underneath the **Sign In** button.
+Subscriptions cannot be transferred between GitLab.com and GitLab self-managed.
+A new subscription must be purchased and applied as needed.
 
-### Change billing information
+### Choose a GitLab tier
 
-To change billing information:
+Pricing is [tier-based](https://about.gitlab.com/pricing/), allowing you to choose
+the features which fit your budget. For information on what features are available
+at each tier for each product, see:
 
-1. Log in to [GitLab Subscription Manager](https://customers.gitlab.com/customers/sign_in).
-1. Go to the **My Account** page.
-1. Make the required changes to the **Account Details** information.
-1. Click **Update Account**.
+- [GitLab.com feature comparison](https://about.gitlab.com/pricing/gitlab-com/feature-comparison/)
+- [Self-managed feature comparison](https://about.gitlab.com/pricing/self-managed/feature-comparison/)
 
-NOTE: **Note:**
-Future purchases will use the information in this section.
-The email listed in this section is used for the GitLab Subscription Manager
-login and for license-related email communication.
+## Find your subscription
 
-### Manage GitLab.com account
+The following chart should help you determine your subscription model. Click
+on the list item to go to the respective help page.
 
-This section provided information specific to managing subscriptions with a
-GitLab.com account.
+```mermaid
+graph TD
 
-#### Change linked account
+A(Is your user account on GitLab.com?)
+A --> B(Yes)
+A --> C(No)
+B --> D(fa:fa-link View your subscription on GitLab.com)
+C --> E(fa:fa-link View your self-hosted subscription)
 
-To change the GitLab.com account associated with a GitLab Subscription Manager
+click D "./gitlab_com/index.html#view-your-gitlabcom-subscription"
+click E "./self_managed/index.html#view-your-subscription"
+```
+
+## Customers portal
+
+With the [Customers Portal](https://customers.gitlab.com/) you can:
+
+- [Change your personal details](#change-your-personal-details)
+- [Change your company details](#change-your-company-details)
+- [Change your payment method](#change-your-payment-method)
+- [Change the linked account](#change-the-linked-account)
+- [Change the associated namespace](#change-the-associated-namespace)
+- [Change customers portal account password](#change-customer-portal-account-password)
+
+### Change your personal details
+
+Your personal details are used on invoices. Your email address is used for the Customers Portal
+login and license-related email.
+
+To change your personal details, including name and billing address:
+
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
+1. Select **My account > Account details**.
+1. Expand the **Personal details** section.
+1. Edit your personal details.
+1. Click **Save changes**.
+
+### Change your company details
+
+To change your company details, including company name and VAT number:
+
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
+1. Select **My account > Account details**.
+1. Expand the **Company details** section.
+1. Edit the company details.
+1. Click **Save changes**.
+
+### Change your payment method
+
+Purchases in the Customers Portal require a credit card on record as a payment method. You can add
+multiple credit cards to your account, so that purchases for different products are charged to the
+correct card.
+
+If you would like to use an alternative method to pay, please [contact our Sales
+team](https://about.gitlab.com/sales/).
+
+To change your payment method:
+
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
+1. Select **My account > Payment methods**.
+1. **Edit** an existing payment method's information or **Add new payment method**.
+1. Click **Save Changes**.
+
+#### Set a default payment method
+
+Automatic renewal of a subscription is charged to your default payment method. To mark a payment
+method as the default:
+
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
+1. Select **My account > Payment methods**.
+1. **Edit** the selected payment method and check the **Make default payment method** checkbox.
+1. Click **Save Changes**.
+
+### Change the linked account
+
+To change the GitLab.com account associated with your Customers Portal
 account:
 
 1. Log in to the
-   [GitLab Subscription Manager](https://customers.gitlab.com/customers/sign_in).
-1. Go to [GitLab.com](https://gitlab.com) in a separate browser tab. Ensure you
+   [Customers Portal](https://customers.gitlab.com/customers/sign_in).
+1. In a separate browser tab, go to [GitLab.com](https://gitlab.com) and ensure you
    are not logged in.
-1. On the GitLab Subscription Manager page, click
-   [**My Account**](https://customers.gitlab.com/customers/edit) in the top menu.
-1. Under **Your GitLab.com account**, click **Change linked account** button.
-1. Log in to [GitLab.com](https://gitlab.com) account to link to.
+1. On the Customers Portal page, click **My account > Account details**.
+1. Under **Your GitLab.com account**, click **Change linked account**.
+1. Log in to the [GitLab.com](https://gitlab.com) account you want to link to the Customers Portal
+   account.
 
-#### Change associated namespace
+### Change the associated namespace
 
 With a linked GitLab.com account:
 
-1. Log in to the [GitLab Subscription Manager](https://customers.gitlab.com/customers/sign_in).
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
 1. Navigate to the **Manage Purchases** page.
-1. Click **Change linked group**.
+1. Click **Change linked namespace**.
 1. Select the desired group from the **This subscription is for** dropdown.
 1. Click **Proceed to checkout**.
 
 Subscription charges are calculated based on the total number of users in a group, including its subgroups and nested projects. If the total number of users exceeds the number of seats in your subscription, you will be charged for the additional users.
 
-### Confirm or upgrade your subscription
+### Change customer portal account password
 
-To see the status of your GitLab.com subscription, you can click on the
-**Billings** section of the relevant namespace:
+To change the password for this customers portal account:
 
-- For individuals:
-  1. Go to **User Avatar > Settings**.
-  1. Click **Billing**.
-- For groups, go to the group's **Settings** dropdown, under **Billing**.
+1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in).
+1. Select the **My account** drop-down and click on **Account details**.
+1. Make the required changes to the **Your password** section.
+1. Click **Save changes**.
 
-The following table describes details of your subscription for groups:
+## GitLab for Education subscriptions
 
-| Field | Description |
-| ------ | ------ |
-| Seats in subscription | If this is a paid plan, represents the number of seats you've paid to support in your group. |
-| Seats currently in use | Number of active seats currently in use. |
-| Max seats used | Highest number of seats you've used. If this exceeds the seats in subscription, you may owe an additional fee for the additional users. |
-| Seats owed | If your max seats used exceeds the seats in your subscription, you'll owe an additional fee for the users you've added. |
-| Subscription start date | Date your subscription started. If this is for a Free plan, is the date you transitioned off your group's paid plan. |
-| Subscription end date | Date your current subscription will end. Does not apply to Free plans. |
+The GitLab Education license can only be used for instructional-use or
+non-commercial academic research.
 
-#### Extra Shared Runners pipeline minutes
+Find more information how to apply and renew at
+[GitLab for Education](https://about.gitlab.com/solutions/education/).
 
-If you're using GitLab.com, you can purchase additional CI minutes so your
-pipelines will not be blocked after you have used all your CI minutes from your
-main quota. Additional minutes:
+## GitLab for Open Source subscriptions
 
-- Are only used once the shared quota included in your subscription runs out.
-- Roll over month to month.
+All [GitLab for Open Source](https://about.gitlab.com/solutions/open-source/program/)
+requests, including subscription renewals, must be made by using the application process.
+If you have any questions, send an email to `opensource@gitlab.com` for assistance.
 
-In order to purchase additional minutes, you should follow these steps:
-
-1. Go to **Group > Settings > Pipelines quota**. Once you are on that page, click on **Buy additional minutes**.
-
-   ![Buy additional minutes](img/buy_btn.png)
-
-1. Locate the subscription card that is linked to your group on GitLab.com,
-   click on **Buy more CI minutes**, and complete the details about the transaction.
-
-   ![Buy additional minutes](img/buy_minutes_card.png)
-
-1. Once we have processed your payment, the extra CI minutes
-   will be synced to your Group and you can visualize it from the
-   **Group > Settings > Pipelines quota** page:
-
-   ![Additional minutes](img/additional_minutes.png)
-
-   The **Additional minutes** displayed now includes the purchased additional CI minutes, plus any
-   minutes rolled over from last month.
-
-Be aware that:
-
-1. If you have purchased extra CI minutes before the purchase of a paid plan,
-   we will calculate a pro-rated charge for your paid plan. That means you may
-   be charged for less than one year since your subscription was previously
-   created with the extra CI minutes.
-1. Once the extra CI minutes has been assigned to a Group they cannot be transferred
-   to a different Group.
-1. If you have some minutes used over your default quota, these minutes will
-   be deducted from your Additional Minutes quota immediately after your purchase of additional
-   minutes.
-
-##### What happens when my CI minutes run out
-
-When the CI minutes run out, an email is sent automatically to notify the owner(s)
-of the group/namespace, including a link to [purchase more minutes](https://customers.gitlab.com/plans).
-
-If you are not the owner of the group, you will need to contact them to let them know they need to
-[purchase more minutes](https://customers.gitlab.com/plans).
-
-## Subscription changes and your data
-
-When your subscription or trial expires, GitLab does not delete your data.
-
-However, depending on the tier and feature, your data may become inaccessible.
-
-Please note that some features may not behave as expected if a graceful
-fallback is not currently implemented. For example,
-[environment specific variables not being passed](https://gitlab.com/gitlab-org/gitlab-foss/issues/52825).
-
-If you renew or upgrade, your data will again be accessible.
-
-### Self-managed data
-
-For self-managed customers, there is a two-week grace period when your features
-will continue to work as-is, after which the entire instance will become read
-only.
-
-However, if you remove the license, you will immediately revert to Core
-features.
-
-## Need help?
-
-[GitLab's Documentation](https://docs.gitlab.com/) offers a wide range of
-topics covering the use and administration of GitLab.
-
-We also encourage all users to search our project trackers for known issues and
-existing feature requests in:
-
-- [GitLab CE](https://gitlab.com/gitlab-org/gitlab-foss/issues/) for features
-  included in all tiers.
-- [GitLab EE](https://gitlab.com/gitlab-org/gitlab/issues/) for paid-tier
-  features.
-
-These issues are the best avenue for getting updates on specific product plans
-and for communicating directly with the relevant GitLab team members.
-
-### Contacting Support
+## Contact Support
 
 Learn more about:
 
 - The tiers of [GitLab Support](https://about.gitlab.com/support/).
 - [Submit a request via the Support Portal](https://support.gitlab.com/hc/en-us/requests/new).
+
+We also encourage all users to search our project trackers for known issues and
+existing feature requests in the
+[GitLab project](https://gitlab.com/gitlab-org/gitlab/-/issues/).
+
+These issues are the best avenue for getting updates on specific product plans
+and for communicating directly with the relevant GitLab team members.
 
 <!-- ## Troubleshooting
 

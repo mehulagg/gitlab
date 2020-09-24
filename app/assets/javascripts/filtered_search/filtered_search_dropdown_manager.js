@@ -1,10 +1,11 @@
+import { last } from 'lodash';
 import AvailableDropdownMappings from 'ee_else_ce/filtered_search/available_dropdown_mappings';
-import _ from 'underscore';
 import DropLab from '~/droplab/drop_lab';
 import FilteredSearchContainer from './container';
 import FilteredSearchTokenKeys from './filtered_search_token_keys';
 import DropdownUtils from './dropdown_utils';
 import FilteredSearchVisualTokens from './filtered_search_visual_tokens';
+import { DROPDOWN_TYPE } from './constants';
 
 export default class FilteredSearchDropdownManager {
   constructor({
@@ -12,6 +13,7 @@ export default class FilteredSearchDropdownManager {
     labelsEndpoint = '',
     milestonesEndpoint = '',
     releasesEndpoint = '',
+    epicsEndpoint = '',
     tokenizer,
     page,
     isGroup,
@@ -26,6 +28,7 @@ export default class FilteredSearchDropdownManager {
     this.labelsEndpoint = removeTrailingSlash(labelsEndpoint);
     this.milestonesEndpoint = removeTrailingSlash(milestonesEndpoint);
     this.releasesEndpoint = removeTrailingSlash(releasesEndpoint);
+    this.epicsEndpoint = removeTrailingSlash(epicsEndpoint);
     this.tokenizer = tokenizer;
     this.filteredSearchTokenKeys = filteredSearchTokenKeys || FilteredSearchTokenKeys;
     this.filteredSearchInput = this.container.querySelector('.filtered-search');
@@ -53,24 +56,22 @@ export default class FilteredSearchDropdownManager {
 
   setupMapping() {
     const supportedTokens = this.filteredSearchTokenKeys.getKeys();
-    const availableMappings = new AvailableDropdownMappings(
-      this.container,
-      this.runnerTagsEndpoint,
-      this.labelsEndpoint,
-      this.milestonesEndpoint,
-      this.releasesEndpoint,
-      this.groupsOnly,
-      this.includeAncestorGroups,
-      this.includeDescendantGroups,
-    );
+
+    const availableMappings = new AvailableDropdownMappings({ ...this });
 
     this.mapping = availableMappings.getAllowedMappings(supportedTokens);
   }
 
-  static addWordToInput(tokenName, tokenValue = '', clicked = false, options = {}) {
+  static addWordToInput({
+    tokenName,
+    tokenOperator = '',
+    tokenValue = '',
+    clicked = false,
+    options = {},
+  }) {
     const { uppercaseTokenName = false, capitalizeTokenValue = false } = options;
     const input = FilteredSearchContainer.container.querySelector('.filtered-search');
-    FilteredSearchVisualTokens.addFilterVisualToken(tokenName, tokenValue, {
+    FilteredSearchVisualTokens.addFilterVisualToken(tokenName, tokenOperator, tokenValue, {
       uppercaseTokenName,
       capitalizeTokenValue,
     });
@@ -119,7 +120,7 @@ export default class FilteredSearchDropdownManager {
         filter: key,
       };
       const extraArguments = mappingKey.extraArguments || {};
-      const glArguments = Object.assign({}, defaultArguments, extraArguments);
+      const glArguments = { ...defaultArguments, ...extraArguments };
 
       // Passing glArguments to `new glClass(<arguments>)`
       mappingKey.reference = new (Function.prototype.bind.apply(glClass, [null, glArguments]))();
@@ -129,7 +130,10 @@ export default class FilteredSearchDropdownManager {
       mappingKey.reference.init();
     }
 
-    if (this.currentDropdown === 'hint') {
+    if (
+      this.currentDropdown === DROPDOWN_TYPE.hint ||
+      this.currentDropdown === DROPDOWN_TYPE.operator
+    ) {
       // Force the dropdown to show if it was clicked from the hint dropdown
       forceShowList = true;
     }
@@ -148,13 +152,19 @@ export default class FilteredSearchDropdownManager {
       this.droplab = new DropLab();
     }
 
+    if (dropdownName === DROPDOWN_TYPE.operator) {
+      this.load(dropdownName, firstLoad);
+      return;
+    }
+
     const match = this.filteredSearchTokenKeys.searchByKey(dropdownName.toLowerCase());
     const shouldOpenFilterDropdown =
       match && this.currentDropdown !== match.key && this.mapping[match.key];
-    const shouldOpenHintDropdown = !match && this.currentDropdown !== 'hint';
+    const shouldOpenHintDropdown = !match && this.currentDropdown !== DROPDOWN_TYPE.hint;
 
     if (shouldOpenFilterDropdown || shouldOpenHintDropdown) {
-      const key = match && match.key ? match.key : 'hint';
+      const key = match && match.key ? match.key : DROPDOWN_TYPE.hint;
+
       this.load(key, firstLoad);
     }
   }
@@ -169,19 +179,32 @@ export default class FilteredSearchDropdownManager {
     if (this.currentDropdown) {
       this.updateCurrentDropdownOffset();
     }
-
     if (lastToken === searchToken && lastToken !== null) {
       // Token is not fully initialized yet because it has no value
       // Eg. token = 'label:'
 
       const split = lastToken.split(':');
-      const dropdownName = _.last(split[0].split(' '));
-      this.loadDropdown(split.length > 1 ? dropdownName : '');
+      const dropdownName = last(split[0].split(' '));
+      const possibleOperatorToken = last(split[1]);
+
+      const hasOperator = FilteredSearchVisualTokens.permissibleOperatorValues.includes(
+        possibleOperatorToken && possibleOperatorToken.trim(),
+      );
+
+      let dropdownToOpen = '';
+
+      if (split.length > 1) {
+        const lastOperatorToken = FilteredSearchVisualTokens.getLastTokenOperator();
+        dropdownToOpen = hasOperator && lastOperatorToken ? dropdownName : DROPDOWN_TYPE.operator;
+      }
+
+      this.loadDropdown(dropdownToOpen);
     } else if (lastToken) {
+      const lastOperator = FilteredSearchVisualTokens.getLastTokenOperator();
       // Token has been initialized into an object because it has a value
-      this.loadDropdown(lastToken.key);
+      this.loadDropdown(lastOperator ? lastToken.key : DROPDOWN_TYPE.operator);
     } else {
-      this.loadDropdown('hint');
+      this.loadDropdown(DROPDOWN_TYPE.hint);
     }
   }
 

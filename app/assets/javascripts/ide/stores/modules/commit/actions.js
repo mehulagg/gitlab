@@ -1,14 +1,13 @@
-import $ from 'jquery';
 import { sprintf, __ } from '~/locale';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import * as rootTypes from '../../mutation_types';
 import { createCommitPayload, createNewMergeRequestUrl } from '../../utils';
-import router from '../../../ide_router';
 import service from '../../../services';
 import * as types from './mutation_types';
 import consts from './constants';
-import { activityBarViews } from '../../../constants';
+import { leftSidebarViews } from '../../../constants';
 import eventHub from '../../../eventhub';
+import { parseCommitError } from '../../../lib/errors';
 
 export const updateCommitMessage = ({ commit }, message) => {
   commit(types.UPDATE_COMMIT_MESSAGE, message);
@@ -44,7 +43,7 @@ export const setLastCommitMessage = ({ commit, rootGetters }, data) => {
   const commitMsg = sprintf(
     __('Your changes have been committed. Commit %{commitId} %{commitStats}'),
     {
-      commitId: `<a href="${currentProject.web_url}/commit/${data.short_id}" class="commit-sha">${data.short_id}</a>`,
+      commitId: `<a href="${currentProject.web_url}/-/commit/${data.short_id}" class="commit-sha">${data.short_id}</a>`,
       commitStats,
     },
     false,
@@ -56,7 +55,7 @@ export const setLastCommitMessage = ({ commit, rootGetters }, data) => {
 export const updateFilesAfterCommit = ({ commit, dispatch, rootState, rootGetters }, { data }) => {
   const selectedProject = rootGetters.currentProject;
   const lastCommit = {
-    commit_path: `${selectedProject.web_url}/commit/${data.id}`,
+    commit_path: `${selectedProject.web_url}/-/commit/${data.id}`,
     commit: {
       id: data.id,
       message: data.message,
@@ -106,17 +105,21 @@ export const updateFilesAfterCommit = ({ commit, dispatch, rootState, rootGetter
 };
 
 export const commitChanges = ({ commit, state, getters, dispatch, rootState, rootGetters }) => {
+  // Pull commit options out because they could change
+  // During some of the pre and post commit processing
+  const { shouldCreateMR, isCreatingNewBranch, branchName } = getters;
   const newBranch = state.commitAction !== consts.COMMIT_TO_CURRENT_BRANCH;
   const stageFilesPromise = rootState.stagedFiles.length
     ? Promise.resolve()
     : dispatch('stageAllChanges', null, { root: true });
 
+  commit(types.CLEAR_ERROR);
   commit(types.UPDATE_LOADING, true);
 
   return stageFilesPromise
     .then(() => {
       const payload = createCommitPayload({
-        branch: getters.branchName,
+        branch: branchName,
         newBranch,
         getters,
         state,
@@ -125,6 +128,12 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
       });
 
       return service.commit(rootState.currentProjectId, payload);
+    })
+    .catch(e => {
+      commit(types.UPDATE_LOADING, false);
+      commit(types.SET_ERROR, parseCommitError(e));
+
+      throw e;
     })
     .then(({ data }) => {
       commit(types.UPDATE_LOADING, false);
@@ -149,7 +158,7 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
       dispatch('updateCommitMessage', '');
       return dispatch('updateFilesAfterCommit', {
         data,
-        branch: getters.branchName,
+        branch: branchName,
       })
         .then(() => {
           commit(rootTypes.CLEAR_STAGED_CHANGES, null, { root: true });
@@ -158,15 +167,15 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
             commit(rootTypes.SET_LAST_COMMIT_MSG, '', { root: true });
           }, 5000);
 
-          if (state.shouldCreateMR) {
+          if (shouldCreateMR) {
             const { currentProject } = rootGetters;
-            const targetBranch = getters.isCreatingNewBranch
+            const targetBranch = isCreatingNewBranch
               ? rootState.currentBranchId
               : currentProject.default_branch;
 
             dispatch(
               'redirectToUrl',
-              createNewMergeRequestUrl(currentProject.web_url, getters.branchName, targetBranch),
+              createNewMergeRequestUrl(currentProject.web_url, branchName, targetBranch),
               { root: true },
             );
           }
@@ -189,12 +198,14 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
                 throw e;
               });
           } else {
-            dispatch('updateActivityBarView', activityBarViews.edit, { root: true });
+            dispatch('updateActivityBarView', leftSidebarViews.edit.name, { root: true });
             dispatch('updateViewer', 'editor', { root: true });
 
             if (rootGetters.activeFile) {
-              router.push(
-                `/project/${rootState.currentProjectId}/blob/${getters.branchName}/-/${rootGetters.activeFile.path}`,
+              dispatch(
+                'router/push',
+                `/project/${rootState.currentProjectId}/blob/${branchName}/-/${rootGetters.activeFile.path}`,
+                { root: true },
               );
             }
           }
@@ -210,29 +221,5 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
             { root: true },
           ),
         );
-    })
-    .catch(err => {
-      if (err.response.status === 400) {
-        $('#ide-create-branch-modal').modal('show');
-      } else {
-        dispatch(
-          'setErrorMessage',
-          {
-            text: __('An error occurred whilst committing your changes.'),
-            action: () =>
-              dispatch('commitChanges').then(() =>
-                dispatch('setErrorMessage', null, { root: true }),
-              ),
-            actionText: __('Please try again'),
-          },
-          { root: true },
-        );
-        window.dispatchEvent(new Event('resize'));
-      }
-
-      commit(types.UPDATE_LOADING, false);
     });
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

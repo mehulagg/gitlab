@@ -20,6 +20,28 @@ class EnvironmentStatus
     build_environments_status(mr, user, mr.merge_pipeline)
   end
 
+  def self.for_deployed_merge_request(mr, user)
+    statuses = []
+
+    mr.recent_visible_deployments.each do |deploy|
+      env = deploy.environment
+
+      next unless Ability.allowed?(user, :read_environment, env)
+
+      statuses <<
+        EnvironmentStatus.new(deploy.project, env, mr, deploy.sha)
+    end
+
+    # Existing projects that used deployments prior to the introduction of
+    # explicitly linked merge requests won't have any data using this new
+    # approach, so we fall back to retrieving deployments based on CI pipelines.
+    if statuses.any?
+      statuses
+    else
+      after_merge_request(mr, user)
+    end
+  end
+
   def initialize(project, environment, merge_request, sha)
     @project = project
     @environment = environment
@@ -40,14 +62,22 @@ class EnvironmentStatus
   end
 
   def changes
-    return [] unless has_route_map?
-
-    changed_files.map { |file| build_change(file) }.compact
+    strong_memoize(:changes) do
+      has_route_map? ? changed_files.map { |file| build_change(file) }.compact : []
+    end
   end
 
   def changed_files
     merge_request.merge_request_diff
       .merge_request_diff_files.where(deleted_file: false)
+  end
+
+  def changed_paths
+    changes.map { |change| change[:path] }
+  end
+
+  def changed_urls
+    changes.map { |change| change[:external_url] }
   end
 
   def has_route_map?
@@ -78,7 +108,7 @@ class EnvironmentStatus
   def self.build_environments_status(mr, user, pipeline)
     return [] unless pipeline
 
-    pipeline.environments.available.map do |environment|
+    pipeline.environments.includes(:project).available.map do |environment|
       next unless Ability.allowed?(user, :read_environment, environment)
 
       EnvironmentStatus.new(pipeline.project, environment, mr, pipeline.sha)

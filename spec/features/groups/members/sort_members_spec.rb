@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Groups > Members > Sort members' do
+RSpec.describe 'Groups > Members > Sort members' do
   let(:owner)     { create(:user, name: 'John Doe') }
   let(:developer) { create(:user, name: 'Mary Jane', last_sign_in_at: 5.days.ago) }
   let(:group)     { create(:group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     create(:group_member, :owner, user: owner, group: group, created_at: 5.days.ago)
     create(:group_member, :developer, user: developer, group: group, created_at: 3.days.ago)
 

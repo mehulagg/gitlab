@@ -13,6 +13,7 @@ module Ci
       end
 
       job.trace.archive!
+      job.remove_pending_state!
 
       # TODO: Remove this logging once we confirmed new live trace architecture is functional.
       # See https://gitlab.com/gitlab-com/gl-infra/infrastructure/issues/4667.
@@ -46,10 +47,10 @@ module Ci
         message: "Failed to archive trace. message: #{error.message}.",
         job_id: job.id)
 
-      Gitlab::Sentry
-        .track_exception(error,
+      Gitlab::ErrorTracking
+        .track_and_raise_for_dev_exception(error,
                           issue_url: 'https://gitlab.com/gitlab-org/gitlab-foss/issues/51502',
-                         extra: { job_id: job.id })
+                          job_id: job.id )
     end
   end
 end

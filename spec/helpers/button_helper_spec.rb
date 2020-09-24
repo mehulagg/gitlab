@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ButtonHelper do
+RSpec.describe ButtonHelper do
   describe 'http_clone_button' do
     let(:user) { create(:user) }
     let(:project) { build_stubbed(:project) }
@@ -173,7 +173,7 @@ describe ButtonHelper do
           expect(element.attr('data-clipboard-text')).to eq(nil)
           expect(element.inner_text).to eq("")
 
-          expect(element.to_html).to include sprite_icon('duplicate')
+          expect(element.to_html).to include sprite_icon('copy-to-clipboard')
         end
       end
 

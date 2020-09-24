@@ -20,6 +20,12 @@ module EE
 
             milestone_burndown_events_for(user_group)
           end
+
+          get ':id/milestones/:milestone_id/burnup_events' do
+            authorize! :read_group, user_group
+
+            milestone_burnup_events_for(user_group)
+          end
         end
       end
     end

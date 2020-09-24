@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe FileUploader do
+RSpec.describe FileUploader do
   let(:group) { create(:group, name: 'awesome') }
   let(:project) { create(:project, :legacy_storage, namespace: group, name: 'project') }
   let(:uploader) { described_class.new(project, :avatar) }
-  let(:upload) { double(model: project, path: 'secret/foo.jpg') }
+  let(:upload) { double(model: project, path: "#{secret}/foo.jpg") }
+  let(:secret) { "55dc16aa0edd05693fd98b5051e83321" } # this would be nicer as SecureRandom.hex, but the shared_examples breaks
 
   subject { uploader }
 
@@ -14,7 +15,7 @@ describe FileUploader do
     include_examples 'builds correct paths',
                      store_dir: %r{awesome/project/\h+},
                      upload_path: %r{\h+/<filename>},
-                     absolute_path: %r{#{described_class.root}/awesome/project/secret/foo.jpg}
+                     absolute_path: %r{#{described_class.root}/awesome/project/55dc16aa0edd05693fd98b5051e83321/foo.jpg}
   end
 
   context 'legacy storage' do
@@ -51,11 +52,11 @@ describe FileUploader do
   end
 
   describe 'initialize' do
-    let(:uploader) { described_class.new(double, secret: 'secret') }
+    let(:uploader) { described_class.new(double, secret: secret) }
 
     it 'accepts a secret parameter' do
       expect(described_class).not_to receive(:generate_secret)
-      expect(uploader.secret).to eq('secret')
+      expect(uploader.secret).to eq(secret)
     end
   end
 
@@ -144,18 +145,95 @@ describe FileUploader do
   end
 
   describe '.extract_dynamic_path' do
-    it 'works with hashed storage' do
-      path = 'export/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a/test/uploads/72a497a02fe3ee09edae2ed06d390038/dummy.txt'
+    shared_examples 'a valid secret' do |root_path|
+      context 'with a 32-byte hexadecimal secret' do
+        let(:secret) { SecureRandom.hex }
+        let(:path) { File.join(*[root_path, secret, 'dummy.txt'].compact) }
 
-      expect(described_class.extract_dynamic_path(path)[:identifier]).to eq('dummy.txt')
-      expect(described_class.extract_dynamic_path(path)[:secret]).to eq('72a497a02fe3ee09edae2ed06d390038')
+        it 'extracts the secret' do
+          expect(described_class.extract_dynamic_path(path)[:secret]).to eq(secret)
+        end
+
+        it 'extracts the identifier' do
+          expect(described_class.extract_dynamic_path(path)[:identifier]).to eq('dummy.txt')
+        end
+      end
+
+      context 'with a 10-byte hexadecimal secret' do
+        let(:secret) { SecureRandom.hex[0, 10] }
+        let(:path) { File.join(*[root_path, secret, 'dummy.txt'].compact) }
+
+        it 'extracts the secret' do
+          expect(described_class.extract_dynamic_path(path)[:secret]).to eq(secret)
+        end
+
+        it 'extracts the identifier' do
+          expect(described_class.extract_dynamic_path(path)[:identifier]).to eq('dummy.txt')
+        end
+      end
+
+      context 'with an invalid secret' do
+        let(:secret) { 'foo' }
+        let(:path) { File.join(*[root_path, secret, 'dummy.txt'].compact) }
+
+        it 'returns nil' do
+          expect(described_class.extract_dynamic_path(path)).to be_nil
+        end
+      end
+    end
+
+    context 'with an absolute path without a slash in the beginning' do
+      it_behaves_like 'a valid secret', 'export/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a/test/uploads'
+    end
+
+    context 'with an absolute path with a slash in the beginning' do
+      it_behaves_like 'a valid secret', '/export/4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a/test/uploads'
+    end
+
+    context 'with an relative path without a slash in the beginning' do
+      it_behaves_like 'a valid secret', nil
+    end
+
+    context 'with an relative path with a slash in the beginning' do
+      it_behaves_like 'a valid secret', '/'
     end
   end
 
   describe '#secret' do
     it 'generates a secret if none is provided' do
-      expect(described_class).to receive(:generate_secret).and_return('secret')
-      expect(uploader.secret).to eq('secret')
+      expect(described_class).to receive(:generate_secret).and_return(secret)
+      expect(uploader.secret).to eq(secret)
+      expect(uploader.secret.size).to eq(32)
+    end
+
+    context "validation" do
+      before do
+        uploader.instance_variable_set(:@secret, secret)
+      end
+
+      context "32-byte hexadecimal" do
+        let(:secret) { SecureRandom.hex }
+
+        it "returns the secret" do
+          expect(uploader.secret).to eq(secret)
+        end
+      end
+
+      context "10-byte hexadecimal" do
+        let(:secret) { SecureRandom.hex[0, 10] }
+
+        it "returns the secret" do
+          expect(uploader.secret).to eq(secret)
+        end
+      end
+
+      context "invalid secret supplied" do
+        let(:secret) { "%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2F%2E%2E%2Fgrafana%2Fconf%2F" }
+
+        it "raises an exception" do
+          expect { uploader.secret }.to raise_error(described_class::InvalidSecret)
+        end
+      end
     end
   end
 

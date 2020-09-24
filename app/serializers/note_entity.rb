@@ -46,6 +46,10 @@ class NoteEntity < API::Entities::Note
     SystemNoteHelper.system_note_icon_name(note)
   end
 
+  expose :is_noteable_author do |note|
+    note.noteable_author?(request.noteable)
+  end
+
   expose :discussion_id do |note|
     note.discussion_id(request.noteable)
   end
@@ -79,3 +83,5 @@ class NoteEntity < API::Entities::Note
     request.current_user
   end
 end
+
+NoteEntity.prepend_if_ee('EE::NoteEntity')

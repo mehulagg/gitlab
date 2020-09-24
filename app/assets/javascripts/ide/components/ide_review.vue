@@ -10,7 +10,7 @@ export default {
     EditorModeDropdown,
   },
   computed: {
-    ...mapGetters(['currentMergeRequest', 'activeFile']),
+    ...mapGetters(['currentMergeRequest', 'activeFile', 'getUrlForPath']),
     ...mapState(['viewer', 'currentMergeRequestId']),
     showLatestChangesText() {
       return !this.currentMergeRequestId || this.viewer === viewerTypes.diff;
@@ -24,7 +24,7 @@ export default {
   },
   mounted() {
     if (this.activeFile && this.activeFile.pending && !this.activeFile.deleted) {
-      this.$router.push(`/project${this.activeFile.url}`, () => {
+      this.$router.push(this.getUrlForPath(this.activeFile.path), () => {
         this.updateViewer('editor');
       });
     } else if (this.activeFile && this.activeFile.deleted) {
@@ -43,7 +43,7 @@ export default {
 
 <template>
   <ide-tree-list :viewer-type="viewer" header-class="ide-review-header">
-    <template slot="header">
+    <template #header>
       <div class="ide-review-button-holder">
         {{ __('Review') }}
         <editor-mode-dropdown
@@ -53,7 +53,7 @@ export default {
           @click="updateViewer"
         />
       </div>
-      <div class="prepend-top-5 ide-review-sub-header">
+      <div class="gl-mt-2 ide-review-sub-header">
         <template v-if="showLatestChangesText">
           {{ __('Latest changes') }}
         </template>

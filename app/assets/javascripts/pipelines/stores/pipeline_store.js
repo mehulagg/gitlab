@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import _ from 'underscore';
 
 export default class PipelineStore {
   constructor() {
@@ -16,7 +15,7 @@ export default class PipelineStore {
    * @param {Object} pipeline
    */
   storePipeline(pipeline = {}) {
-    const pipelineCopy = Object.assign({}, pipeline);
+    const pipelineCopy = { ...pipeline };
 
     if (pipelineCopy.triggered_by) {
       pipelineCopy.triggered_by = [pipelineCopy.triggered_by];
@@ -55,16 +54,24 @@ export default class PipelineStore {
    */
   parseTriggeredByPipelines(oldPipeline = {}, newPipeline) {
     // keep old value in case it's opened because we're polling
-
     Vue.set(newPipeline, 'isExpanded', oldPipeline.isExpanded || false);
     // add isLoading property
     Vue.set(newPipeline, 'isLoading', false);
 
+    // Because there can only ever be one `triggered_by` for any given pipeline,
+    // the API returns an object for the value instead of an Array. However,
+    // it's easier to deal with an array in the FE so we convert it.
     if (newPipeline.triggered_by) {
-      if (!_.isArray(newPipeline.triggered_by)) {
+      if (!Array.isArray(newPipeline.triggered_by)) {
         Object.assign(newPipeline, { triggered_by: [newPipeline.triggered_by] });
       }
-      this.parseTriggeredByPipelines(oldPipeline, newPipeline.triggered_by[0]);
+
+      if (newPipeline.triggered_by?.length > 0) {
+        newPipeline.triggered_by.forEach(el => {
+          const oldTriggeredBy = oldPipeline.triggered_by?.find(element => element.id === el.id);
+          this.parseTriggeredPipelines(oldTriggeredBy, el);
+        });
+      }
     }
   }
 

@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe 'Projects > Settings > For a forked project', :js do
+RSpec.describe 'Projects > Settings > For a forked project', :js do
   let(:user) { create(:user) }
-  let(:project) { create(:project, :repository) }
+  let(:project) { create(:project, :repository, create_templates: :issue) }
   let(:role) { :maintainer }
 
   before do
@@ -22,13 +22,61 @@ describe 'Projects > Settings > For a forked project', :js do
   end
 
   describe 'Settings > Operations' do
+    describe 'Incidents' do
+      let(:create_issue) { 'Create an issue. Issues are created for each alert triggered.' }
+      let(:send_email) { 'Send a separate email notification to Developers.' }
+
+      before do
+        create(:project_incident_management_setting, send_email: true, project: project)
+        visit project_settings_operations_path(project)
+
+        wait_for_requests
+        click_expand_incident_management_button
+      end
+
+      it 'renders form for incident management' do
+        expect(page).to have_selector('h4', text: 'Incidents')
+      end
+
+      it 'sets correct default values' do
+        expect(find_field(create_issue)).not_to be_checked
+        expect(find_field(send_email)).to be_checked
+      end
+
+      it 'updates form values' do
+        check(create_issue)
+        uncheck(send_email)
+        click_on('No template selected')
+        click_on('bug')
+
+        save_form
+        click_expand_incident_management_button
+
+        expect(find_field(create_issue)).to be_checked
+        expect(page).to have_selector(:id, 'alert-integration-settings-issue-template', text: 'bug')
+        expect(find_field(send_email)).not_to be_checked
+      end
+
+      def click_expand_incident_management_button
+        within '.qa-incident-management-settings' do
+          click_button('Expand')
+        end
+      end
+
+      def save_form
+        page.within ".qa-incident-management-settings" do
+          click_on 'Save changes'
+        end
+      end
+    end
+
     context 'error tracking settings form' do
       let(:sentry_list_projects_url) { 'http://sentry.example.com/api/0/projects/' }
 
       context 'success path' do
         let(:projects_sample_response) do
           Gitlab::Utils.deep_indifferent_access(
-            JSON.parse(fixture_file('sentry/list_projects_sample_response.json'))
+            Gitlab::Json.parse(fixture_file('sentry/list_projects_sample_response.json'))
           )
         end
 
@@ -61,7 +109,7 @@ describe 'Projects > Settings > For a forked project', :js do
 
           within('div#project-dropdown') do
             click_button('Select project')
-            click_button('Sentry | Internal')
+            click_button('Sentry | internal')
           end
 
           click_button('Save changes')
@@ -104,17 +152,7 @@ describe 'Projects > Settings > For a forked project', :js do
     end
 
     context 'grafana integration settings form' do
-      it 'is not present when the feature flag is disabled' do
-        stub_feature_flags(gfm_grafana_integration: false)
-
-        visit project_settings_operations_path(project)
-
-        wait_for_requests
-
-        expect(page).to have_no_css('.js-grafana-integration')
-      end
-
-      it 'is present when the feature flag is enabled' do
+      it 'successfully fills and completes the form' do
         visit project_settings_operations_path(project)
 
         wait_for_requests

@@ -1,6 +1,6 @@
 import Sortable from 'sortablejs';
 import { s__ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getBoardSortableDefaultOptions,
   sortableStart,
@@ -29,6 +29,7 @@ const initManualOrdering = (draggableSelector = 'li.issue') => {
     issueList,
     getBoardSortableDefaultOptions({
       scroll: true,
+      fallbackTolerance: 1,
       dataIdAttr: 'data-id',
       fallbackOnBody: false,
       group: {

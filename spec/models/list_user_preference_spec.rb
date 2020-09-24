@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe ListUserPreference do
-  set(:user) { create(:user) }
-  set(:list) { create(:list) }
+RSpec.describe ListUserPreference do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:list) { create(:list) }
 
   before do
     list.update_preferences_for(user, { collapsed: true })

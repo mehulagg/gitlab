@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationHelper do
+RSpec.describe ApplicationHelper do
   describe 'current_controller?' do
     before do
       stub_controller_name('foo')
@@ -71,6 +71,28 @@ describe ApplicationHelper do
     end
   end
 
+  describe '#admin_section?' do
+    context 'when controller is under the admin namespace' do
+      before do
+        allow(helper).to receive(:controller).and_return(Admin::UsersController.new)
+      end
+
+      it 'returns true' do
+        expect(helper.admin_section?).to eq(true)
+      end
+    end
+
+    context 'when controller is not under the admin namespace' do
+      before do
+        allow(helper).to receive(:controller).and_return(UsersController.new)
+      end
+
+      it 'returns true' do
+        expect(helper.admin_section?).to eq(false)
+      end
+    end
+  end
+
   describe 'simple_sanitize' do
     let(:a_tag) { '<a href="#">Foo</a>' }
 
@@ -90,8 +112,11 @@ describe ApplicationHelper do
   end
 
   describe 'time_ago_with_tooltip' do
+    around do |example|
+      Time.use_zone('UTC') { example.run }
+    end
+
     def element(*arguments)
-      Time.zone = 'UTC'
       @time = Time.zone.parse('2015-07-02 08:23')
       element = helper.time_ago_with_tooltip(@time, *arguments)
 
@@ -143,6 +168,42 @@ describe ApplicationHelper do
     it { expect(helper.active_when(false)).to eq(nil) }
   end
 
+  describe '#promo_host' do
+    subject { helper.promo_host }
+
+    it 'returns the url' do
+      is_expected.to eq('about.gitlab.com')
+    end
+  end
+
+  describe '#promo_url' do
+    subject { helper.promo_url }
+
+    it 'returns the url' do
+      is_expected.to eq('https://about.gitlab.com')
+    end
+
+    it 'changes if promo_host changes' do
+      allow(helper).to receive(:promo_host).and_return('foobar.baz')
+
+      is_expected.to eq('https://foobar.baz')
+    end
+  end
+
+  describe '#contact_sales_url' do
+    subject { helper.contact_sales_url }
+
+    it 'returns the url' do
+      is_expected.to eq('https://about.gitlab.com/sales')
+    end
+
+    it 'changes if promo_url changes' do
+      allow(helper).to receive(:promo_url).and_return('https://somewhere.else')
+
+      is_expected.to eq('https://somewhere.else/sales')
+    end
+  end
+
   describe '#support_url' do
     context 'when alternate support url is specified' do
       let(:alternate_url) { 'http://company.example.com/getting-help' }
@@ -184,6 +245,16 @@ describe ApplicationHelper do
     end
   end
 
+  describe '#page_startup_api_calls' do
+    it 'returns map containing JS Page Startup Calls' do
+      helper.add_page_startup_api_call("testURL")
+
+      startup_calls = helper.page_startup_api_calls
+
+      expect(startup_calls["testURL"]).to eq({})
+    end
+  end
+
   describe '#autocomplete_data_sources' do
     let(:project) { create(:project) }
     let(:noteable_type) { Issue }
@@ -202,6 +273,15 @@ describe ApplicationHelper do
 
     context 'when external storage is disabled' do
       it 'returns the passed path' do
+        expect(helper.external_storage_url_or_path('/foo/bar', project)).to eq('/foo/bar')
+      end
+    end
+
+    context 'when @snippet is set' do
+      it 'returns the passed path' do
+        snippet = create(:snippet)
+        assign(:snippet, snippet)
+
         expect(helper.external_storage_url_or_path('/foo/bar', project)).to eq('/foo/bar')
       end
     end
@@ -233,6 +313,122 @@ describe ApplicationHelper do
           expect(helper.external_storage_url_or_path('/foo/bar', project)).to eq('https://cdn.gitlab.com/foo/bar')
         end
       end
+    end
+  end
+
+  describe '#body_data' do
+    context 'when @project is not set' do
+      it 'does not include project data in the body data elements' do
+        expect(helper.body_data).to eq(
+          {
+            page: 'application',
+            page_type_id: nil,
+            find_file: nil,
+            group: nil
+          }
+        )
+      end
+
+      context 'when @group is set' do
+        it 'sets group in the body data elements' do
+          group = create(:group)
+
+          assign(:group, group)
+
+          expect(helper.body_data).to eq(
+            {
+              page: 'application',
+              page_type_id: nil,
+              find_file: nil,
+              group: group.path
+            }
+          )
+        end
+      end
+    end
+
+    context 'when @project is set' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:user) { create(:user) }
+
+      before do
+        assign(:project, project)
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it 'includes all possible body data elements and associates the project elements with project' do
+        expect(helper).to receive(:can?).with(nil, :download_code, project)
+        expect(helper.body_data).to eq(
+          {
+            page: 'application',
+            page_type_id: nil,
+            find_file: nil,
+            group: nil,
+            project_id: project.id,
+            project: project.name,
+            namespace_id: project.namespace.id
+          }
+        )
+      end
+
+      context 'when @project is owned by a group' do
+        let_it_be(:project) { create(:project, :repository, group: create(:group)) }
+
+        it 'includes all possible body data elements and associates the project elements with project' do
+          expect(helper).to receive(:can?).with(nil, :download_code, project)
+          expect(helper.body_data).to eq(
+            {
+              page: 'application',
+              page_type_id: nil,
+              find_file: nil,
+              group: project.group.name,
+              project_id: project.id,
+              project: project.name,
+              namespace_id: project.namespace.id
+            }
+          )
+        end
+      end
+
+      context 'when controller is issues' do
+        before do
+          stub_controller_method(:controller_path, 'projects:issues')
+        end
+
+        context 'when params[:id] is present and the issue exsits and action_name is show' do
+          it 'sets all project and id elements correctly related to the issue' do
+            issue = create(:issue, project: project)
+            stub_controller_method(:action_name, 'show')
+            stub_controller_method(:params, { id: issue.id })
+
+            expect(helper).to receive(:can?).with(nil, :download_code, project).and_return(false)
+            expect(helper.body_data).to eq(
+              {
+                page: 'projects:issues:show',
+                page_type_id: issue.id,
+                find_file: nil,
+                group: nil,
+                project_id: issue.project.id,
+                project: issue.project.name,
+                namespace_id: issue.project.namespace.id
+              }
+            )
+          end
+        end
+      end
+
+      context 'when current_user has download_code permission' do
+        it 'returns find_file with the default branch' do
+          allow(helper).to receive(:current_user).and_return(user)
+
+          expect(helper).to receive(:can?).with(user, :download_code, project).and_return(true)
+          expect(helper.body_data[:find_file]).to end_with(project.default_branch)
+        end
+      end
+    end
+
+    def stub_controller_method(method_name, value)
+      allow(helper.controller).to receive(method_name).and_return(value)
     end
   end
 end

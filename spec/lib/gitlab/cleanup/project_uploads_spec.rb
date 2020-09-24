@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Gitlab::Cleanup::ProjectUploads do
+RSpec.describe Gitlab::Cleanup::ProjectUploads do
   subject { described_class.new(logger: logger) }
 
   let(:logger) { double(:logger) }
 
   before do
-    allow(logger).to receive(:info).at_least(1).times
-    allow(logger).to receive(:debug).at_least(1).times
+    allow(logger).to receive(:info).at_least(:once)
+    allow(logger).to receive(:debug).at_least(:once)
   end
 
   describe '#run!' do

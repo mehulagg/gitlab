@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::ClustersController do
+RSpec.describe Admin::ClustersController do
   include AccessMatchersForController
   include GoogleApi::CloudPlatformHelpers
 
@@ -27,7 +27,7 @@ describe Admin::ClustersController do
           create(:cluster, :disabled, :provided_by_gcp, :production_environment, :instance)
         end
 
-        it 'lists available clusters' do
+        it 'lists available clusters and displays html' do
           get_index
 
           expect(response).to have_gitlab_http_status(:ok)
@@ -35,19 +35,45 @@ describe Admin::ClustersController do
           expect(assigns(:clusters)).to match_array([enabled_cluster, disabled_cluster])
         end
 
+        it 'lists available clusters and renders json serializer' do
+          get_index(format: :json)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to match_response_schema('cluster_list')
+        end
+
+        it 'sets the polling interval header for json requests' do
+          get_index(format: :json)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.headers['Poll-Interval']).to eq("10000")
+        end
+
         context 'when page is specified' do
           let(:last_page) { Clusters::Cluster.instance_type.page.total_pages }
+          let(:total_count) { Clusters::Cluster.instance_type.page.total_count }
 
           before do
-            allow(Clusters::Cluster).to receive(:paginates_per).and_return(1)
-            create_list(:cluster, 2, :provided_by_gcp, :production_environment, :instance)
+            create_list(:cluster, 30, :provided_by_gcp, :production_environment, :instance)
           end
 
           it 'redirects to the page' do
+            expect(last_page).to be > 1
+
             get_index(page: last_page)
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(assigns(:clusters).current_page).to eq(last_page)
+          end
+
+          it 'displays cluster list for associated page' do
+            expect(last_page).to be > 1
+
+            get_index(page: last_page, format: :json)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response.headers['X-Page'].to_i).to eq(last_page)
+            expect(response.headers['X-Total'].to_i).to eq(total_count)
           end
         end
       end
@@ -73,7 +99,9 @@ describe Admin::ClustersController do
   end
 
   describe 'GET #new' do
-    def get_new(provider: 'gcp')
+    let(:user) { admin }
+
+    def go(provider: 'gcp')
       get :new, params: { provider: provider }
     end
 
@@ -84,29 +112,11 @@ describe Admin::ClustersController do
           GoogleApi::CloudPlatform::Client.session_key_for_redirect_uri(key)
         end
 
-        before do
-          stub_feature_flags(create_eks_clusters: false)
-          allow(SecureRandom).to receive(:hex).and_return(key)
-        end
+        context 'when selected provider is gke and no valid gcp token exists' do
+          it 'redirects to gcp authorize_url' do
+            go
 
-        it 'has authorize_url' do
-          get_new
-
-          expect(assigns(:authorize_url)).to include(key)
-          expect(session[session_key_for_redirect_uri]).to eq(new_admin_cluster_path)
-        end
-
-        context 'when create_eks_clusters feature flag is enabled' do
-          before do
-            stub_feature_flags(create_eks_clusters: true)
-          end
-
-          context 'when selected provider is gke and no valid gcp token exists' do
-            it 'redirects to gcp authorize_url' do
-              get_new
-
-              expect(response).to redirect_to(assigns(:authorize_url))
-            end
+            expect(response).to redirect_to(assigns(:authorize_url))
           end
         end
       end
@@ -117,7 +127,7 @@ describe Admin::ClustersController do
         end
 
         it 'does not have authorize_url' do
-          get_new
+          go
 
           expect(assigns(:authorize_url)).to be_nil
         end
@@ -129,7 +139,7 @@ describe Admin::ClustersController do
         end
 
         it 'has new object' do
-          get_new
+          go
 
           expect(assigns(:gcp_cluster)).to be_an_instance_of(Clusters::ClusterPresenter)
         end
@@ -150,16 +160,51 @@ describe Admin::ClustersController do
 
     describe 'functionality for existing cluster' do
       it 'has new object' do
-        get_new
+        go
 
         expect(assigns(:user_cluster)).to be_an_instance_of(Clusters::ClusterPresenter)
       end
     end
 
+    include_examples 'GET new cluster shared examples'
+
     describe 'security' do
-      it { expect { get_new }.to be_allowed_for(:admin) }
-      it { expect { get_new }.to be_denied_for(:user) }
-      it { expect { get_new }.to be_denied_for(:external) }
+      it { expect { go }.to be_allowed_for(:admin) }
+      it { expect { go }.to be_denied_for(:user) }
+      it { expect { go }.to be_denied_for(:external) }
+    end
+  end
+
+  it_behaves_like 'GET #metrics_dashboard for dashboard', 'Cluster health' do
+    let(:cluster) { create(:cluster, :instance, :provided_by_gcp) }
+
+    let(:metrics_dashboard_req_params) do
+      {
+        id: cluster.id
+      }
+    end
+  end
+
+  describe 'GET #prometheus_proxy' do
+    let(:user) { admin }
+    let(:proxyable) do
+      create(:cluster, :instance, :provided_by_gcp)
+    end
+
+    it_behaves_like 'metrics dashboard prometheus api proxy' do
+      context 'with anonymous user' do
+        let(:prometheus_body) { nil }
+
+        before do
+          sign_out(admin)
+        end
+
+        it 'returns 404' do
+          get :prometheus_proxy, params: prometheus_proxy_params
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
     end
   end
 
@@ -227,16 +272,17 @@ describe Admin::ClustersController do
 
     describe 'security' do
       before do
-        allow_any_instance_of(described_class)
-          .to receive(:token_in_session).and_return('token')
-        allow_any_instance_of(described_class)
-          .to receive(:expires_at_in_session).and_return(1.hour.since.to_i.to_s)
-        allow_any_instance_of(GoogleApi::CloudPlatform::Client)
-          .to receive(:projects_zones_clusters_create) do
-          OpenStruct.new(
-            self_link: 'projects/gcp-project-12345/zones/us-central1-a/operations/ope-123',
-            status: 'RUNNING'
-          )
+        allow_next_instance_of(described_class) do |instance|
+          allow(instance).to receive(:token_in_session).and_return('token')
+          allow(instance).to receive(:expires_at_in_session).and_return(1.hour.since.to_i.to_s)
+        end
+        allow_next_instance_of(GoogleApi::CloudPlatform::Client) do |instance|
+          allow(instance).to receive(:projects_zones_clusters_create) do
+            OpenStruct.new(
+              self_link: 'projects/gcp-project-12345/zones/us-central1-a/operations/ope-123',
+              status: 'RUNNING'
+            )
+          end
         end
 
         allow(WaitForClusterCreationWorker).to receive(:perform_in).and_return(nil)
@@ -245,6 +291,69 @@ describe Admin::ClustersController do
       it { expect { post_create_gcp }.to be_allowed_for(:admin) }
       it { expect { post_create_gcp }.to be_denied_for(:user) }
       it { expect { post_create_gcp }.to be_denied_for(:external) }
+    end
+  end
+
+  describe 'POST #create_aws' do
+    let(:params) do
+      {
+        cluster: {
+          name: 'new-cluster',
+          provider_aws_attributes: {
+            key_name: 'key',
+            role_arn: 'arn:role',
+            region: 'region',
+            vpc_id: 'vpc',
+            instance_type: 'instance type',
+            num_nodes: 3,
+            security_group_id: 'security group',
+            subnet_ids: %w(subnet1 subnet2)
+          }
+        }
+      }
+    end
+
+    def post_create_aws
+      post :create_aws, params: params
+    end
+
+    it 'creates a new cluster' do
+      expect(ClusterProvisionWorker).to receive(:perform_async)
+      expect { post_create_aws }.to change { Clusters::Cluster.count }
+        .and change { Clusters::Providers::Aws.count }
+
+      cluster = Clusters::Cluster.instance_type.first
+
+      expect(response).to have_gitlab_http_status(:created)
+      expect(response.location).to eq(admin_cluster_path(cluster))
+      expect(cluster).to be_aws
+      expect(cluster).to be_kubernetes
+    end
+
+    context 'params are invalid' do
+      let(:params) do
+        {
+          cluster: { name: '' }
+        }
+      end
+
+      it 'does not create a cluster' do
+        expect { post_create_aws }.not_to change { Clusters::Cluster.count }
+
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        expect(response.content_type).to eq('application/json')
+        expect(response.body).to include('is invalid')
+      end
+    end
+
+    describe 'security' do
+      before do
+        allow(WaitForClusterCreationWorker).to receive(:perform_in)
+      end
+
+      it { expect { post_create_aws }.to be_allowed_for(:admin) }
+      it { expect { post_create_aws }.to be_denied_for(:user) }
+      it { expect { post_create_aws }.to be_denied_for(:external) }
     end
   end
 
@@ -319,14 +428,13 @@ describe Admin::ClustersController do
   end
 
   describe 'POST authorize AWS role for EKS cluster' do
-    let(:role_arn) { 'arn:aws:iam::123456789012:role/role-name' }
-    let(:role_external_id) { '12345' }
+    let!(:role) { create(:aws_role, user: admin) }
 
+    let(:role_arn) { 'arn:new-role' }
     let(:params) do
       {
         cluster: {
-          role_arn: role_arn,
-          role_external_id: role_external_id
+          role_arn: role_arn
         }
       }
     end
@@ -335,25 +443,61 @@ describe Admin::ClustersController do
       post :authorize_aws_role, params: params
     end
 
-    it 'creates an Aws::Role record' do
-      expect { go }.to change { Aws::Role.count }
-
-      expect(response.status).to eq 201
-
-      role = Aws::Role.last
-      expect(role.user).to eq admin
-      expect(role.role_arn).to eq role_arn
-      expect(role.role_external_id).to eq role_external_id
+    before do
+      allow(Clusters::Aws::FetchCredentialsService).to receive(:new)
+        .and_return(double(execute: double))
     end
 
-    context 'role cannot be created' do
+    it 'updates the associated role with the supplied ARN' do
+      go
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(role.reload.role_arn).to eq(role_arn)
+    end
+
+    context 'supplied role is invalid' do
       let(:role_arn) { 'invalid-role' }
 
-      it 'does not create a record' do
-        expect { go }.not_to change { Aws::Role.count }
+      it 'does not update the associated role' do
+        expect { go }.not_to change { role.role_arn }
 
-        expect(response.status).to eq 422
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
+    end
+
+    describe 'security' do
+      before do
+        allow_next_instance_of(Clusters::Aws::AuthorizeRoleService) do |service|
+          response = double(status: :ok, body: double)
+
+          allow(service).to receive(:execute).and_return(response)
+        end
+      end
+
+      it { expect { go }.to be_allowed_for(:admin) }
+      it { expect { go }.to be_denied_for(:user) }
+      it { expect { go }.to be_denied_for(:external) }
+    end
+  end
+
+  describe 'DELETE clear cluster cache' do
+    let(:cluster) { create(:cluster, :instance) }
+    let!(:kubernetes_namespace) do
+      create(:cluster_kubernetes_namespace,
+        cluster: cluster,
+        project: create(:project)
+      )
+    end
+
+    def go
+      delete :clear_cache, params: { id: cluster }
+    end
+
+    it 'deletes the namespaces associated with the cluster' do
+      expect { go }.to change { Clusters::KubernetesNamespace.count }
+
+      expect(response).to redirect_to(admin_cluster_path(cluster))
+      expect(cluster.kubernetes_namespaces).to be_empty
     end
 
     describe 'security' do
@@ -383,7 +527,9 @@ describe Admin::ClustersController do
       end
 
       it 'invokes schedule_status_update on each application' do
-        expect_any_instance_of(Clusters::Applications::Ingress).to receive(:schedule_status_update)
+        expect_next_instance_of(Clusters::Applications::Ingress) do |instance|
+          expect(instance).to receive(:schedule_status_update)
+        end
 
         get_cluster_status
       end
@@ -487,7 +633,7 @@ describe Admin::ClustersController do
             put_update(format: :json)
 
             cluster.reload
-            expect(response).to have_http_status(:no_content)
+            expect(response).to have_gitlab_http_status(:no_content)
             expect(cluster.enabled).to be_falsey
             expect(cluster.name).to eq('my-new-cluster-name')
             expect(cluster).not_to be_managed
@@ -507,7 +653,7 @@ describe Admin::ClustersController do
           it 'rejects changes' do
             put_update(format: :json)
 
-            expect(response).to have_http_status(:bad_request)
+            expect(response).to have_gitlab_http_status(:bad_request)
           end
         end
       end

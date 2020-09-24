@@ -1,15 +1,16 @@
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlSprintf, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import UserPopover from '~/vue_shared/components/user_popover/user_popover.vue';
-import { mount } from '@vue/test-utils';
 
 const DEFAULT_PROPS = {
-  loaded: true,
   user: {
     username: 'root',
     name: 'Administrator',
     location: 'Vienna',
     bio: null,
-    organization: null,
+    workInformation: null,
     status: null,
+    loaded: true,
   },
 };
 
@@ -27,38 +28,44 @@ describe('User Popover Component', () => {
     wrapper.destroy();
   });
 
-  describe('Empty', () => {
-    beforeEach(() => {
-      wrapper = mount(UserPopover, {
-        propsData: {
-          target: document.querySelector('.js-user-link'),
-          user: {
-            name: null,
-            username: null,
-            location: null,
-            bio: null,
-            organization: null,
-            status: null,
-          },
-        },
-        sync: false,
-      });
-    });
+  const findUserStatus = () => wrapper.find('.js-user-status');
+  const findTarget = () => document.querySelector('.js-user-link');
 
-    it('should return skeleton loaders', () => {
-      expect(wrapper.findAll('.animation-container').length).toBe(4);
+  const createWrapper = (props = {}, options = {}) => {
+    wrapper = shallowMount(UserPopover, {
+      propsData: {
+        ...DEFAULT_PROPS,
+        target: findTarget(),
+        ...props,
+      },
+      stubs: {
+        'gl-sprintf': GlSprintf,
+      },
+      ...options,
+    });
+  };
+
+  describe('when user is loading', () => {
+    it('displays skeleton loaders', () => {
+      createWrapper({
+        user: {
+          name: null,
+          username: null,
+          location: null,
+          bio: null,
+          workInformation: null,
+          status: null,
+          loaded: false,
+        },
+      });
+
+      expect(wrapper.findAll(GlSkeletonLoading)).toHaveLength(4);
     });
   });
 
   describe('basic data', () => {
     it('should show basic fields', () => {
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...DEFAULT_PROPS,
-          target: document.querySelector('.js-user-link'),
-        },
-        sync: false,
-      });
+      createWrapper();
 
       expect(wrapper.text()).toContain(DEFAULT_PROPS.user.name);
       expect(wrapper.text()).toContain(DEFAULT_PROPS.user.username);
@@ -66,121 +73,127 @@ describe('User Popover Component', () => {
     });
 
     it('shows icon for location', () => {
-      const iconEl = wrapper.find('.js-location svg');
+      const iconEl = wrapper.find(GlIcon);
 
-      expect(iconEl.find('use').element.getAttribute('xlink:href')).toContain('location');
+      expect(iconEl.props('name')).toEqual('location');
     });
   });
 
   describe('job data', () => {
-    it('should show only bio if no organization is available', () => {
-      const testProps = Object.assign({}, DEFAULT_PROPS);
-      testProps.user.bio = 'Engineer';
+    const findWorkInformation = () => wrapper.find({ ref: 'workInformation' });
+    const findBio = () => wrapper.find({ ref: 'bio' });
+    const bio = 'My super interesting bio';
 
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...testProps,
-          target: document.querySelector('.js-user-link'),
-        },
-        sync: false,
-      });
+    it('should show only bio if work information is not available', () => {
+      const user = { ...DEFAULT_PROPS.user, bio, bioHtml: bio };
 
-      expect(wrapper.text()).toContain('Engineer');
+      createWrapper({ user });
+
+      expect(findBio().text()).toBe('My super interesting bio');
+      expect(findWorkInformation().exists()).toBe(false);
     });
 
-    it('should show only organization if no bio is available', () => {
-      const testProps = Object.assign({}, DEFAULT_PROPS);
-      testProps.user.organization = 'GitLab';
+    it('should show work information when it is available', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        workInformation: 'Frontend Engineer at GitLab',
+      };
 
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...testProps,
-          target: document.querySelector('.js-user-link'),
-        },
-        sync: false,
-      });
+      createWrapper({ user });
 
-      expect(wrapper.text()).toContain('GitLab');
+      expect(findWorkInformation().text()).toBe('Frontend Engineer at GitLab');
     });
 
-    it('should display bio and organization in separate lines', () => {
-      const testProps = Object.assign({}, DEFAULT_PROPS);
-      testProps.user.bio = 'Engineer';
-      testProps.user.organization = 'GitLab';
+    it('should display bio and work information in separate lines', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        bio,
+        bioHtml: bio,
+        workInformation: 'Frontend Engineer at GitLab',
+      };
 
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...DEFAULT_PROPS,
-          target: document.querySelector('.js-user-link'),
-        },
-        sync: false,
-      });
+      createWrapper({ user });
 
-      expect(wrapper.find('.js-bio').text()).toContain('Engineer');
-      expect(wrapper.find('.js-organization').text()).toContain('GitLab');
+      expect(findBio().text()).toBe('My super interesting bio');
+      expect(findWorkInformation().text()).toBe('Frontend Engineer at GitLab');
     });
 
-    it('should not encode special characters in bio and organization', () => {
-      const testProps = Object.assign({}, DEFAULT_PROPS);
-      testProps.user.bio = 'Manager & Team Lead';
-      testProps.user.organization = 'Me & my <funky> Company';
+    it('should not encode special characters in bio', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        bio: 'I like CSS',
+        bioHtml: 'I like <b>CSS</b>',
+      };
 
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...DEFAULT_PROPS,
-          target: document.querySelector('.js-user-link'),
-        },
-        sync: false,
-      });
+      createWrapper({ user });
 
-      expect(wrapper.find('.js-bio').text()).toContain('Manager & Team Lead');
-      expect(wrapper.find('.js-organization').text()).toContain('Me & my <funky> Company');
+      expect(findBio().html()).toContain('I like <b>CSS</b>');
     });
 
     it('shows icon for bio', () => {
-      const iconEl = wrapper.find('.js-bio svg');
+      const user = {
+        ...DEFAULT_PROPS.user,
+        bio: 'My super interesting bio',
+      };
 
-      expect(iconEl.find('use').element.getAttribute('xlink:href')).toContain('profile');
+      createWrapper({ user });
+
+      expect(
+        wrapper.findAll(GlIcon).filter(icon => icon.props('name') === 'profile').length,
+      ).toEqual(1);
     });
 
-    it('shows icon for organization', () => {
-      const iconEl = wrapper.find('.js-organization svg');
+    it('shows icon for work information', () => {
+      const user = {
+        ...DEFAULT_PROPS.user,
+        workInformation: 'GitLab',
+      };
 
-      expect(iconEl.find('use').element.getAttribute('xlink:href')).toContain('work');
+      createWrapper({ user });
+
+      expect(wrapper.findAll(GlIcon).filter(icon => icon.props('name') === 'work').length).toEqual(
+        1,
+      );
     });
   });
 
   describe('status data', () => {
     it('should show only message', () => {
-      const testProps = Object.assign({}, DEFAULT_PROPS);
-      testProps.user.status = { message_html: 'Hello World' };
+      const user = { ...DEFAULT_PROPS.user, status: { message_html: 'Hello World' } };
 
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...DEFAULT_PROPS,
-          target: document.querySelector('.js-user-link'),
-        },
-        sync: false,
-      });
+      createWrapper({ user });
 
+      expect(findUserStatus().exists()).toBe(true);
       expect(wrapper.text()).toContain('Hello World');
     });
 
     it('should show message and emoji', () => {
-      const testProps = Object.assign({}, DEFAULT_PROPS);
-      testProps.user.status = { emoji: 'basketball_player', message_html: 'Hello World' };
+      const user = {
+        ...DEFAULT_PROPS.user,
+        status: { emoji: 'basketball_player', message_html: 'Hello World' },
+      };
 
-      wrapper = mount(UserPopover, {
-        propsData: {
-          ...DEFAULT_PROPS,
-          target: document.querySelector('.js-user-link'),
-          status: { emoji: 'basketball_player', message_html: 'Hello World' },
-        },
-        sync: false,
-      });
+      createWrapper({ user });
 
+      expect(findUserStatus().exists()).toBe(true);
       expect(wrapper.text()).toContain('Hello World');
       expect(wrapper.html()).toContain('<gl-emoji data-name="basketball_player"');
+    });
+
+    it('hides the div when status is null', () => {
+      const user = { ...DEFAULT_PROPS.user, status: null };
+
+      createWrapper({ user });
+
+      expect(findUserStatus().exists()).toBe(false);
+    });
+
+    it('hides the div when status is empty', () => {
+      const user = { ...DEFAULT_PROPS.user, status: { emoji: '', message_html: '' } };
+
+      createWrapper({ user });
+
+      expect(findUserStatus().exists()).toBe(false);
     });
   });
 });

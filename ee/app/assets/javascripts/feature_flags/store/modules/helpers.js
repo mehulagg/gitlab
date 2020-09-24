@@ -1,13 +1,15 @@
-import _ from 'underscore';
+import { isEmpty, uniqueId, isString } from 'lodash';
 import {
   ROLLOUT_STRATEGY_ALL_USERS,
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
   ROLLOUT_STRATEGY_USER_ID,
+  ROLLOUT_STRATEGY_GITLAB_USER_LIST,
   INTERNAL_ID_PREFIX,
   DEFAULT_PERCENT_ROLLOUT,
   PERCENT_ROLLOUT_GROUP_ID,
   fetchPercentageParams,
   fetchUserIdParams,
+  LEGACY_FLAG,
 } from '../../constants';
 
 /**
@@ -21,13 +23,16 @@ export const mapToScopesViewModel = scopesFromRails =>
       strat => strat.name === ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
     );
 
-    const rolloutStrategy = percentStrategy ? percentStrategy.name : ROLLOUT_STRATEGY_ALL_USERS;
-
     const rolloutPercentage = fetchPercentageParams(percentStrategy) || DEFAULT_PERCENT_ROLLOUT;
 
     const userStrategy = (s.strategies || []).find(
       strat => strat.name === ROLLOUT_STRATEGY_USER_ID,
     );
+
+    const rolloutStrategy =
+      (percentStrategy && percentStrategy.name) ||
+      (userStrategy && userStrategy.name) ||
+      ROLLOUT_STRATEGY_ALL_USERS;
 
     const rolloutUserIds = (fetchUserIdParams(userStrategy) || '')
       .split(',')
@@ -46,7 +51,7 @@ export const mapToScopesViewModel = scopesFromRails =>
 
       // eslint-disable-next-line no-underscore-dangle
       shouldBeDestroyed: Boolean(s._destroy),
-      shouldIncludeUserIds: rolloutUserIds.length > 0,
+      shouldIncludeUserIds: rolloutUserIds.length > 0 && percentStrategy !== null,
     };
   });
 /**
@@ -56,28 +61,31 @@ export const mapToScopesViewModel = scopesFromRails =>
  */
 export const mapFromScopesViewModel = params => {
   const scopes = (params.scopes || []).map(s => {
-    const percentParameters = {};
+    const parameters = {};
     if (s.rolloutStrategy === ROLLOUT_STRATEGY_PERCENT_ROLLOUT) {
-      percentParameters.groupId = PERCENT_ROLLOUT_GROUP_ID;
-      percentParameters.percentage = s.rolloutPercentage;
+      parameters.groupId = PERCENT_ROLLOUT_GROUP_ID;
+      parameters.percentage = s.rolloutPercentage;
+    } else if (s.rolloutStrategy === ROLLOUT_STRATEGY_USER_ID) {
+      parameters.userIds = (s.rolloutUserIds || '').replace(/, /g, ',');
     }
 
     const userIdParameters = {};
-    if (s.shouldIncludeUserIds || s.rolloutStrategy === ROLLOUT_STRATEGY_USER_ID) {
+
+    if (s.shouldIncludeUserIds && s.rolloutStrategy !== ROLLOUT_STRATEGY_USER_ID) {
       userIdParameters.userIds = (s.rolloutUserIds || '').replace(/, /g, ',');
     }
 
     // Strip out any internal IDs
-    const id = _.isString(s.id) && s.id.startsWith(INTERNAL_ID_PREFIX) ? undefined : s.id;
+    const id = isString(s.id) && s.id.startsWith(INTERNAL_ID_PREFIX) ? undefined : s.id;
 
     const strategies = [
       {
         name: s.rolloutStrategy,
-        parameters: percentParameters,
+        parameters,
       },
     ];
 
-    if (!_.isEmpty(userIdParameters)) {
+    if (!isEmpty(userIdParameters)) {
       strategies.push({ name: ROLLOUT_STRATEGY_USER_ID, parameters: userIdParameters });
     }
 
@@ -92,13 +100,17 @@ export const mapFromScopesViewModel = params => {
     };
   });
 
-  return {
+  const model = {
     operations_feature_flag: {
       name: params.name,
       description: params.description,
+      active: params.active,
       scopes_attributes: scopes,
+      version: LEGACY_FLAG,
     },
   };
+
+  return model;
 };
 
 /**
@@ -114,7 +126,7 @@ export const createNewEnvironmentScope = (overrides = {}, featureFlagPermissions
   const defaultScope = {
     environmentScope: '',
     active: false,
-    id: _.uniqueId(INTERNAL_ID_PREFIX),
+    id: uniqueId(INTERNAL_ID_PREFIX),
     rolloutStrategy: ROLLOUT_STRATEGY_ALL_USERS,
     rolloutPercentage: DEFAULT_PERCENT_ROLLOUT,
     rolloutUserIds: '',
@@ -132,3 +144,70 @@ export const createNewEnvironmentScope = (overrides = {}, featureFlagPermissions
 
   return newScope;
 };
+
+const mapStrategyScopesToRails = scopes =>
+  scopes.length === 0
+    ? [{ environment_scope: '*' }]
+    : scopes.map(s => ({
+        id: s.id,
+        _destroy: s.shouldBeDestroyed,
+        environment_scope: s.environmentScope,
+      }));
+
+const mapStrategyScopesToView = scopes =>
+  scopes.map(s => ({
+    id: s.id,
+    // eslint-disable-next-line no-underscore-dangle
+    shouldBeDestroyed: Boolean(s._destroy),
+    environmentScope: s.environment_scope,
+  }));
+
+const mapStrategiesParametersToViewModel = params => {
+  if (params.userIds) {
+    return { ...params, userIds: params.userIds.split(',').join(', ') };
+  }
+  return params;
+};
+
+export const mapStrategiesToViewModel = strategiesFromRails =>
+  (strategiesFromRails || []).map(s => ({
+    id: s.id,
+    name: s.name,
+    parameters: mapStrategiesParametersToViewModel(s.parameters),
+    userListId: s.user_list?.id,
+    // eslint-disable-next-line no-underscore-dangle
+    shouldBeDestroyed: Boolean(s._destroy),
+    scopes: mapStrategyScopesToView(s.scopes),
+  }));
+
+const mapStrategiesParametersToRails = params => {
+  if (params.userIds) {
+    return { ...params, userIds: params.userIds.split(', ').join(',') };
+  }
+  return params;
+};
+
+const mapStrategyToRails = strategy => {
+  const mappedStrategy = {
+    id: strategy.id,
+    name: strategy.name,
+    _destroy: strategy.shouldBeDestroyed,
+    scopes_attributes: mapStrategyScopesToRails(strategy.scopes || []),
+    parameters: mapStrategiesParametersToRails(strategy.parameters),
+  };
+
+  if (strategy.name === ROLLOUT_STRATEGY_GITLAB_USER_LIST) {
+    mappedStrategy.user_list_id = strategy.userListId;
+  }
+  return mappedStrategy;
+};
+
+export const mapStrategiesToRails = params => ({
+  operations_feature_flag: {
+    name: params.name,
+    description: params.description,
+    version: params.version,
+    active: params.active,
+    strategies_attributes: (params.strategies || []).map(mapStrategyToRails),
+  },
+});

@@ -8,8 +8,12 @@ module Gitlab
         @extractor = extractor
       end
 
+      # Generate a list of all project members who are mentioned in the
+      #   CODEOWNERS file, and load them to the matching entry.
+      #
       def load_to(entries)
         members = project.members_among(users)
+
         entries.each do |entry|
           entry.add_matching_users_from(members)
         end

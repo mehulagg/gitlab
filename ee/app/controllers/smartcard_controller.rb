@@ -5,25 +5,58 @@ class SmartcardController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   before_action :check_feature_availability
-  before_action :check_certificate_headers
+  before_action :check_certificate_required_host_and_port, only: :extract_certificate
+  before_action :check_ngingx_certificate_header, only: :extract_certificate
+  before_action :check_certificate_param, only: :verify_certificate
 
   def auth
-    certificate = Gitlab::Auth::Smartcard::Certificate.new(certificate_header)
-    sign_in_with(certificate)
+    redirect_to extract_certificate_smartcard_url(extract_certificate_url_options)
   end
 
-  def ldap_auth
-    certificate = Gitlab::Auth::Smartcard::LDAPCertificate.new(params[:provider], certificate_header)
-    sign_in_with(certificate)
+  def extract_certificate
+    redirect_to verify_certificate_smartcard_url(verify_certificate_url_options)
+  end
+
+  def verify_certificate
+    sign_in_with(client_certificate)
   end
 
   private
 
+  def extract_certificate_url_options
+    {
+      host: ::Gitlab.config.smartcard.client_certificate_required_host,
+      port: ::Gitlab.config.smartcard.client_certificate_required_port,
+      provider: params[:provider]
+    }.compact
+  end
+
+  def verify_certificate_url_options
+    {
+      host: ::Gitlab.config.gitlab.host,
+      port: ::Gitlab.config.gitlab.port,
+      provider: params[:provider],
+      client_certificate: request.headers['HTTP_X_SSL_CLIENT_CERTIFICATE']
+    }.compact
+  end
+
+  def client_certificate
+    if ldap_provider?
+      Gitlab::Auth::Smartcard::LdapCertificate.new(params[:provider], certificate_param)
+    else
+      Gitlab::Auth::Smartcard::Certificate.new(certificate_param)
+    end
+  end
+
+  def ldap_provider?
+    params[:provider].present?
+  end
+
   def sign_in_with(certificate)
     user = certificate.find_or_create_user
-    unless user
+    unless user&.persisted?
       flash[:alert] = _('Failed to signing using smartcard authentication')
-      redirect_to new_user_session_path(port: Gitlab.config.gitlab.port)
+      redirect_to new_user_session_path
 
       return
     end
@@ -33,13 +66,43 @@ class SmartcardController < ApplicationController
     sign_in_and_redirect(user)
   end
 
+  def nginx_certificate_header
+    request.headers['HTTP_X_SSL_CLIENT_CERTIFICATE']
+  end
+
+  def certificate_param
+    param = params[:client_certificate]
+    return unless param
+
+    unescaped_param = CGI.unescape(param)
+    if unescaped_param.include?("\n")
+      # NGINX forwarding the $ssl_client_escaped_cert variable
+      unescaped_param
+    else
+      # older version of NGINX forwarding the now deprecated $ssl_client_cert variable
+      param.gsub(/ (?!CERTIFICATE)/, "\n")
+    end
+  end
+
   def check_feature_availability
     render_404 unless ::Gitlab::Auth::Smartcard.enabled?
   end
 
-  def check_certificate_headers
-    # Failing on requests coming from the port not requiring client side certificate
-    unless certificate_header.present?
+  def check_certificate_required_host_and_port
+    unless request.host == ::Gitlab.config.smartcard.client_certificate_required_host &&
+      request.port == ::Gitlab.config.smartcard.client_certificate_required_port
+      render_404
+    end
+  end
+
+  def check_ngingx_certificate_header
+    unless nginx_certificate_header.present?
+      access_denied!(_('Smartcard authentication failed: client certificate header is missing.'), 401)
+    end
+  end
+
+  def check_certificate_param
+    unless certificate_param.present?
       access_denied!(_('Smartcard authentication failed: client certificate header is missing.'), 401)
     end
   end
@@ -50,20 +113,6 @@ class SmartcardController < ApplicationController
 
   def log_audit_event(user, options = {})
     AuditEventService.new(user, user, options).for_authentication.security_event
-  end
-
-  def certificate_header
-    header = request.headers['HTTP_X_SSL_CLIENT_CERTIFICATE']
-    return unless header
-
-    unescaped_header = CGI.unescape(header)
-    if unescaped_header.include?("\n")
-      # NGINX forwarding the $ssl_client_escaped_cert variable
-      unescaped_header
-    else
-      # older version of NGINX forwarding the now deprecated $ssl_client_cert variable
-      header.gsub(/ (?!CERTIFICATE)/, "\n")
-    end
   end
 
   def after_sign_in_path_for(resource)

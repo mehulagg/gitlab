@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :geo_upload_registry, class: Geo::UploadRegistry do
+  factory :geo_upload_registry, class: 'Geo::UploadRegistry' do
     sequence(:file_id)
     file_type { :file }
     success { true }
@@ -17,6 +17,11 @@ FactoryBot.define do
     trait :failed do
       success { false }
       retry_count { 1 }
+    end
+
+    trait :never_synced do
+      success { false }
+      retry_count { nil }
     end
 
     trait :with_file do

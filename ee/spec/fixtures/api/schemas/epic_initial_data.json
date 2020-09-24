@@ -4,6 +4,7 @@
     "properties": {
       "labels": {},
       "participants": {},
-      "subscribed": {}
+      "subscribed": {},
+      "canCreate": false
     }
 }

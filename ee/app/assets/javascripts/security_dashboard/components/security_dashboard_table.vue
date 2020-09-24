@@ -1,36 +1,34 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { GlEmptyState } from '@gitlab/ui';
+import { GlEmptyState, GlFormCheckbox } from '@gitlab/ui';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
 import SecurityDashboardTableRow from './security_dashboard_table_row.vue';
+import SelectionSummary from './selection_summary_vuex.vue';
 
 export default {
   name: 'SecurityDashboardTable',
   components: {
     GlEmptyState,
+    GlFormCheckbox,
     Pagination,
     SecurityDashboardTableRow,
-  },
-  props: {
-    dashboardDocumentation: {
-      type: String,
-      required: true,
-    },
-    emptyStateSvgPath: {
-      type: String,
-      required: true,
-    },
+    SelectionSummary,
   },
   computed: {
     ...mapState('vulnerabilities', [
       'errorLoadingVulnerabilities',
       'errorLoadingVulnerabilitiesCount',
       'isLoadingVulnerabilities',
+      'isDismissingVulnerabilities',
       'pageInfo',
       'vulnerabilities',
     ]),
     ...mapGetters('filters', ['activeFilters']),
-    ...mapGetters('vulnerabilities', ['dashboardListError']),
+    ...mapGetters('vulnerabilities', [
+      'dashboardListError',
+      'hasSelectedAllVulnerabilities',
+      'isSelectingVulnerabilities',
+    ]),
     showEmptyState() {
       return (
         this.vulnerabilities &&
@@ -44,26 +42,46 @@ export default {
     },
   },
   methods: {
-    ...mapActions('vulnerabilities', ['fetchVulnerabilities', 'openModal']),
+    ...mapActions('vulnerabilities', [
+      'deselectAllVulnerabilities',
+      'fetchVulnerabilities',
+      'openModal',
+      'selectAllVulnerabilities',
+    ]),
     fetchPage(page) {
       this.fetchVulnerabilities({ ...this.activeFilters, page });
+    },
+    handleSelectAll() {
+      return this.hasSelectedAllVulnerabilities
+        ? this.deselectAllVulnerabilities()
+        : this.selectAllVulnerabilities();
     },
   },
 };
 </script>
 
 <template>
-  <div class="ci-table js-security-dashboard-table">
-    <div
-      class="gl-responsive-table-row table-row-header vulnerabilities-row-header px-2"
-      role="row"
-    >
-      <div class="table-section section-10" role="rowheader">{{ s__('Reports|Severity') }}</div>
+  <div class="ci-table js-security-dashboard-table" data-qa-selector="security_report_content">
+    <selection-summary v-if="isSelectingVulnerabilities" />
+    <div class="gl-responsive-table-row table-row-header gl-bg-gray-50 text-2 px-2" role="row">
+      <div class="table-section section-5">
+        <gl-form-checkbox
+          :checked="hasSelectedAllVulnerabilities"
+          class="my-0 ml-1 mr-3"
+          @change="handleSelectAll"
+        />
+      </div>
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Severity') }}
+      </div>
       <div class="table-section flex-grow-1" role="rowheader">
         {{ s__('Reports|Vulnerability') }}
       </div>
-      <div class="table-section section-10 ml-md-2" role="rowheader">
-        {{ s__('Reports|Confidence') }}
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Identifier') }}
+      </div>
+      <div class="table-section section-15" role="rowheader">
+        {{ s__('Reports|Scanner') }}
       </div>
       <div class="table-section section-20" role="rowheader"></div>
     </div>
@@ -73,14 +91,14 @@ export default {
         <div class="flash-text container-fluid container-limited limit-container-width">
           {{
             s__(
-              'Security Dashboard|Error fetching the vulnerability list. Please check your network connection and try again.',
+              'SecurityReports|Error fetching the vulnerability list. Please check your network connection and try again.',
             )
           }}
         </div>
       </div>
     </div>
 
-    <template v-if="isLoadingVulnerabilities">
+    <template v-if="isLoadingVulnerabilities || isDismissingVulnerabilities">
       <security-dashboard-table-row v-for="n in 10" :key="n" :is-loading="true" />
     </template>
 
@@ -92,37 +110,23 @@ export default {
         @openModal="openModal({ vulnerability })"
       />
 
-      <gl-empty-state
-        v-if="showEmptyState"
-        :title="s__(`Security Reports|We've found no vulnerabilities for your group`)"
-        :svg-path="emptyStateSvgPath"
-        :description="
-          s__(
-            `Security Reports|While it's rare to have no vulnerabilities for your group, it can happen. In any event, we ask that you please double check your settings to make sure you've set up your dashboard correctly.`,
-          )
-        "
-        :primary-button-link="dashboardDocumentation"
-        :primary-button-text="s__('Security Reports|Learn more about setting up your dashboard')"
-      />
+      <slot v-if="showEmptyState" name="emptyState">
+        <gl-empty-state
+          :title="s__(`We've found no vulnerabilities`)"
+          :description="
+            s__(
+              `While it's rare to have no vulnerabilities, it can happen. In any event, we ask that you please double check your settings to make sure you've set up your dashboard correctly.`,
+            )
+          "
+        />
+      </slot>
 
       <pagination
         v-if="showPagination"
         :change="fetchPage"
         :page-info="pageInfo"
-        class="justify-content-center prepend-top-default"
+        class="justify-content-center gl-mt-3"
       />
     </template>
   </div>
 </template>
-
-<style>
-.vulnerabilities-row-header {
-  background-color: #fafafa;
-  font-size: 14px;
-}
-
-.vulnerabilities-row .table-section,
-.vulnerabilities-row-header .table-section {
-  min-width: 120px;
-}
-</style>

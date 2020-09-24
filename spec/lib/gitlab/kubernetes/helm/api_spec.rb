@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::Helm::Api do
+RSpec.describe Gitlab::Kubernetes::Helm::API do
   let(:client) { double('kubernetes client') }
   let(:helm) { described_class.new(client) }
   let(:gitlab_namespace) { Gitlab::Kubernetes::Helm::NAMESPACE }
-  let(:namespace) { Gitlab::Kubernetes::Namespace.new(gitlab_namespace, client) }
+  let(:gitlab_namespace_labels) { Gitlab::Kubernetes::Helm::NAMESPACE_LABELS }
+  let(:namespace) { Gitlab::Kubernetes::Namespace.new(gitlab_namespace, client, labels: gitlab_namespace_labels) }
   let(:application_name) { 'app-name' }
   let(:rbac) { false }
   let(:files) { {} }
@@ -21,13 +24,17 @@ describe Gitlab::Kubernetes::Helm::Api do
   subject { helm }
 
   before do
-    allow(Gitlab::Kubernetes::Namespace).to receive(:new).with(gitlab_namespace, client).and_return(namespace)
+    allow(Gitlab::Kubernetes::Namespace).to(
+      receive(:new).with(gitlab_namespace, client, labels: gitlab_namespace_labels).and_return(namespace)
+    )
     allow(client).to receive(:create_config_map)
   end
 
   describe '#initialize' do
     it 'creates a namespace object' do
-      expect(Gitlab::Kubernetes::Namespace).to receive(:new).with(gitlab_namespace, client)
+      expect(Gitlab::Kubernetes::Namespace).to(
+        receive(:new).with(gitlab_namespace, client, labels: gitlab_namespace_labels)
+      )
 
       subject
     end
@@ -85,7 +92,6 @@ describe Gitlab::Kubernetes::Helm::Api do
       allow(client).to receive(:get_config_map).and_return(nil)
       allow(client).to receive(:create_config_map).and_return(nil)
       allow(client).to receive(:create_service_account).and_return(nil)
-      allow(client).to receive(:create_cluster_role_binding).and_return(nil)
       allow(client).to receive(:delete_pod).and_return(nil)
       allow(namespace).to receive(:ensure_exists!).once
     end
@@ -129,7 +135,7 @@ describe Gitlab::Kubernetes::Helm::Api do
     context 'without a service account' do
       it 'does not create a service account on kubeclient' do
         expect(client).not_to receive(:create_service_account)
-        expect(client).not_to receive(:create_cluster_role_binding)
+        expect(client).not_to receive(:update_cluster_role_binding)
 
         subject.install(command)
       end
@@ -153,15 +159,14 @@ describe Gitlab::Kubernetes::Helm::Api do
           )
         end
 
-        context 'service account and cluster role binding does not exist' do
+        context 'service account does not exist' do
           before do
             expect(client).to receive(:get_service_account).with('tiller', 'gitlab-managed-apps').and_raise(Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil))
-            expect(client).to receive(:get_cluster_role_binding).with('tiller-admin').and_raise(Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil))
           end
 
           it 'creates a service account, followed the cluster role binding on kubeclient' do
             expect(client).to receive(:create_service_account).with(service_account_resource).once.ordered
-            expect(client).to receive(:create_cluster_role_binding).with(cluster_role_binding_resource).once.ordered
+            expect(client).to receive(:update_cluster_role_binding).with(cluster_role_binding_resource).once.ordered
 
             subject.install(command)
           end
@@ -170,21 +175,6 @@ describe Gitlab::Kubernetes::Helm::Api do
         context 'service account already exists' do
           before do
             expect(client).to receive(:get_service_account).with('tiller', 'gitlab-managed-apps').and_return(service_account_resource)
-            expect(client).to receive(:get_cluster_role_binding).with('tiller-admin').and_raise(Kubeclient::ResourceNotFoundError.new(404, 'Not found', nil))
-          end
-
-          it 'updates the service account, followed by creating the cluster role binding' do
-            expect(client).to receive(:update_service_account).with(service_account_resource).once.ordered
-            expect(client).to receive(:create_cluster_role_binding).with(cluster_role_binding_resource).once.ordered
-
-            subject.install(command)
-          end
-        end
-
-        context 'service account and cluster role binding already exists' do
-          before do
-            expect(client).to receive(:get_service_account).with('tiller', 'gitlab-managed-apps').and_return(service_account_resource)
-            expect(client).to receive(:get_cluster_role_binding).with('tiller-admin').and_return(cluster_role_binding_resource)
           end
 
           it 'updates the service account, followed by creating the cluster role binding' do
@@ -209,7 +199,7 @@ describe Gitlab::Kubernetes::Helm::Api do
       context 'legacy abac cluster' do
         it 'does not create a service account on kubeclient' do
           expect(client).not_to receive(:create_service_account)
-          expect(client).not_to receive(:create_cluster_role_binding)
+          expect(client).not_to receive(:update_cluster_role_binding)
 
           subject.install(command)
         end

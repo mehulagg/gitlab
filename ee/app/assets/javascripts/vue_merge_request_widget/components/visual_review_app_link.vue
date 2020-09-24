@@ -1,14 +1,27 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+/* eslint-disable vue/no-v-html */
+import {
+  GlButton,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
+  GlModal,
+  GlSearchBoxByType,
+  GlModalDirective,
+  GlIcon,
+} from '@gitlab/ui';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import { GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
+import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 import { s__, sprintf } from '~/locale';
 
 export default {
   components: {
     GlButton,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
     GlModal,
-    Icon,
+    GlSearchBoxByType,
+    GlIcon,
+    ReviewAppLink,
     ModalCopyButton,
   },
   directives: {
@@ -19,6 +32,11 @@ export default {
       type: Object,
       required: true,
     },
+    changes: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
     cssClass: {
       type: String,
       required: false,
@@ -28,10 +46,15 @@ export default {
       type: String,
       required: true,
     },
+    viewAppDisplay: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       modalId: 'visual-review-app-info',
+      changesSearchTerm: '',
     };
   },
   computed: {
@@ -55,6 +78,9 @@ export default {
       };
       /* eslint-enable no-useless-escape */
     },
+    filteredChanges() {
+      return this.changes.filter(change => change.path.includes(this.changesSearchTerm));
+    },
     instructionText() {
       return {
         intro: {
@@ -62,7 +88,7 @@ export default {
             'VisualReviewApp|Follow the steps below to enable Visual Reviews inside your application.',
           ),
           p2: s__(
-            'VisualReviewApp|Steps 1 and 2 (and sometimes 3) are performed once by the developer before requesting feedback. Steps 3 (if necessary), 4, and 5 are performed by the reviewer each time they perform a review.',
+            'VisualReviewApp|Steps 1 and 2 (and sometimes 3) are performed once by the developer before requesting feedback. Steps 3 (if necessary), 4 is performed by the reviewer each time they perform a review.',
           ),
         },
         step1: sprintf(
@@ -86,20 +112,7 @@ export default {
         ),
         step3: sprintf(
           s__(
-            'VisualReviewApp|%{stepStart}Step 3%{stepEnd}. Open the Review App and provide a %{linkStart}personal access token%{linkEnd}.',
-          ),
-          {
-            stepStart: '<strong>',
-            stepEnd: '</strong>',
-            linkStart:
-              '<a href="https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html">',
-            linkEnd: '</a>',
-          },
-          false,
-        ),
-        step4: sprintf(
-          s__(
-            `VisualReviewApp|%{stepStart}Step 4%{stepEnd}. If not previously %{linkStart}configured%{linkEnd} by a developer, enter the merge request ID for the review when prompted. The ID of this merge request is %{stepStart}%{mrId}%{stepStart}.`,
+            `VisualReviewApp|%{stepStart}Step 3%{stepEnd}. If not previously %{linkStart}configured%{linkEnd} by a developer, enter the merge request ID for the review when prompted. The ID of this merge request is %{stepStart}%{mrId}%{stepStart}.`,
           ),
           {
             stepStart: '<strong>',
@@ -111,8 +124,8 @@ export default {
           },
           false,
         ),
-        step5: sprintf(
-          s__('VisualReviewApp|%{stepStart}Step 5%{stepEnd}. Leave feedback in the Review App.'),
+        step4: sprintf(
+          s__('VisualReviewApp|%{stepStart}Step 4%{stepEnd}. Leave feedback in the Review App.'),
           {
             stepStart: '<strong>',
             stepEnd: '</strong>',
@@ -124,6 +137,20 @@ export default {
     modalTitle() {
       return s__('VisualReviewApp|Enable Visual Reviews');
     },
+    shouldShowChanges() {
+      return this.changes.length > 0;
+    },
+    isSearchEmpty() {
+      return this.filteredChanges.length === 0;
+    },
+  },
+  methods: {
+    cancel() {
+      this.$refs.modal.cancel();
+    },
+    ok() {
+      this.$refs.modal.ok();
+    },
   },
 };
 </script>
@@ -131,25 +158,23 @@ export default {
   <div class="inline">
     <gl-button
       v-gl-modal="modalId"
-      class="btn btn-default btn-sm prepend-left-8 js-review-button"
+      category="secondary"
+      class="gl-ml-3 js-review-button"
+      size="small"
       :class="cssClass"
       type="button"
     >
       {{ s__('VisualReviewApp|Review') }}
     </gl-button>
     <gl-modal
+      ref="modal"
       :modal-id="modalId"
       :title="modalTitle"
+      lazy
+      static
       size="lg"
       class="text-2 ws-normal"
-      ok-variant="success"
     >
-      <template slot="modal-ok">
-        <a :href="link" target="_blank" rel="noopener noreferrer nofollow" class="text-white">
-          {{ s__('VisualReviewApp|Open review app') }}
-          <icon class="fwhite" name="external-link" />
-        </a>
-      </template>
       <p v-html="instructionText.intro.p1"></p>
       <p v-html="instructionText.intro.p2"></p>
       <div>
@@ -165,17 +190,55 @@ export default {
         </div>
       </div>
       <p v-html="instructionText.step2"></p>
-      <p v-html="instructionText.step3"></p>
       <p>
-        <span v-html="instructionText.step4"></span>
+        <span v-html="instructionText.step3"></span>
         <modal-copy-button
           :title="copyToClipboard.mrId"
           :text="appMetadata.mergeRequestId.toString()"
           :modal-id="modalId"
-          css-classes="border-0 gl-pt-0 gl-pr-0 gl-pl-1 gl-pb-0"
+          css-classes="border-0 gl-pt-0 gl-pr-0 gl-pl-2 gl-pb-0"
         />
       </p>
-      <p v-html="instructionText.step5"></p>
+      <p v-html="instructionText.step4"></p>
+      <template #modal-footer>
+        <gl-button category="secondary" @click="cancel">
+          {{ s__('VisualReviewApp|Cancel') }}
+        </gl-button>
+        <gl-deprecated-dropdown
+          v-if="shouldShowChanges"
+          dropup
+          right
+          split
+          :split-href="link"
+          data-track-event="open_review_app"
+          data-track-label="review_app"
+          @click="ok"
+        >
+          <gl-search-box-by-type v-model.trim="changesSearchTerm" class="gl-m-3" />
+          <template #button-content>
+            {{ s__('VisualReviewApp|Open review app') }}
+            <gl-icon class="fgray" name="external-link" />
+          </template>
+          <gl-deprecated-dropdown-item
+            v-for="change in filteredChanges"
+            :key="change.path"
+            :href="change.external_url"
+            data-track-event="open_review_app"
+            data-track-label="review_app"
+            >{{ change.path }}</gl-deprecated-dropdown-item
+          >
+
+          <div v-show="isSearchEmpty" class="text-secondary p-2">
+            {{ s__('VisualReviewApp|No review app found or available.') }}
+          </div>
+        </gl-deprecated-dropdown>
+        <review-app-link
+          v-else
+          :display="viewAppDisplay"
+          :link="link"
+          css-class="js-deploy-url deploy-link btn btn-default btn-sm inline"
+        />
+      </template>
     </gl-modal>
   </div>
 </template>

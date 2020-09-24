@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/workflow.html'
 ---
 
@@ -6,25 +9,25 @@ disqus_identifier: 'https://docs.gitlab.com/ee/workflow/workflow.html'
 
 1. Clone project:
 
-   ```bash
+   ```shell
    git clone git@example.com:project-name.git
    ```
 
 1. Create branch with your feature:
 
-   ```bash
+   ```shell
    git checkout -b $feature_name
    ```
 
 1. Write code. Commit changes:
 
-   ```bash
+   ```shell
    git commit -am "My feature is ready"
    ```
 
 1. Push your branch to GitLab:
 
-   ```bash
+   ```shell
    git push origin $feature_name
    ```
 

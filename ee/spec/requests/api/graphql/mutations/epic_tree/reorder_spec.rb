@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Updating an epic tree' do
+RSpec.describe 'Updating an epic tree' do
   include GraphqlHelpers
 
   let(:current_user) { create(:user) }
@@ -21,13 +21,15 @@ describe 'Updating an epic tree' do
   end
 
   let(:relative_position) { :after }
+  let(:new_parent_id) { nil }
   let(:variables) do
     {
       base_epic_id: GitlabSchema.id_from_object(base_epic).to_s,
       moved: {
         id: GitlabSchema.id_from_object(epic2).to_s,
         adjacent_reference_id: GitlabSchema.id_from_object(epic1).to_s,
-        relative_position: relative_position
+        relative_position: relative_position,
+        new_parent_id: new_parent_id
       }
     }
   end
@@ -47,9 +49,9 @@ describe 'Updating an epic tree' do
     end
   end
 
-  context 'when epic feature is enabled' do
+  context 'when epics and subepics features are enabled' do
     before do
-      stub_licensed_features(epics: true)
+      stub_licensed_features(epics: true, subepics: true)
     end
 
     context 'when the user does not have permission' do
@@ -80,6 +82,28 @@ describe 'Updating an epic tree' do
 
             expect(mutation_response['array']).to be_nil
           end
+
+          context 'when a new_parent_id is provided' do
+            let(:new_parent_id) { GitlabSchema.id_from_object(base_epic).to_s }
+
+            before do
+              other_epic = create(:epic, group: group)
+              epic2.update(parent: other_epic)
+            end
+
+            it 'updates the epics relative positions and updates the parent' do
+              post_graphql_mutation(mutation, current_user: current_user)
+
+              expect(epic1.reload.relative_position).to be > epic2.reload.relative_position
+              expect(epic2.parent).to eq base_epic
+            end
+
+            it 'returns nil in errors' do
+              post_graphql_mutation(mutation, current_user: current_user)
+
+              expect(mutation_response['array']).to be_nil
+            end
+          end
         end
 
         context 'when relative_position is invalid' do
@@ -90,7 +114,7 @@ describe 'Updating an epic tree' do
           end
 
           it_behaves_like 'a mutation that returns top-level errors',
-                          errors: ['Variable epicTreeReorderInput of type EpicTreeReorderInput! was provided invalid value for moved.relativePosition (Expected "invalid" to be one of: before, after)']
+                          errors: ['Variable $epicTreeReorderInput of type EpicTreeReorderInput! was provided invalid value for moved.relativePosition (Expected "invalid" to be one of: before, after)']
         end
 
         context 'when object being moved is not supported type' do
@@ -106,7 +130,7 @@ describe 'Updating an epic tree' do
           end
         end
 
-        context 'when moving an epic fails due to another parent' do
+        context 'when moving an epic fails due to the parents of the relative position object and the moving object mismatching' do
           let(:epic2) { create(:epic, relative_position: 20) }
 
           it_behaves_like 'a mutation that does not update the tree'
@@ -114,7 +138,25 @@ describe 'Updating an epic tree' do
           it 'returns the error message' do
             post_graphql_mutation(mutation, current_user: current_user)
 
-            expect(mutation_response['errors']).to eq(['Both objects have to belong to the same parent epic.'])
+            expect(mutation_response['errors']).to eq(["The sibling object's parent must match the current parent epic."])
+          end
+        end
+
+        context 'when the new parent is another epic and subepics feature is disabled' do
+          let(:new_parent_id) { GitlabSchema.id_from_object(base_epic).to_s }
+
+          before do
+            stub_licensed_features(epics: true, subepics: false)
+            other_epic = create(:epic, group: group)
+            epic2.update(parent: other_epic)
+          end
+
+          it_behaves_like 'a mutation that does not update the tree'
+
+          it 'returns the error message' do
+            post_graphql_mutation(mutation, current_user: current_user)
+
+            expect(mutation_response['errors']).to eq(['You don\'t have permissions to move the objects.'])
           end
         end
       end
@@ -136,9 +178,31 @@ describe 'Updating an epic tree' do
 
           expect(mutation_response['array']).to be_nil
         end
+
+        context 'when a new_parent_id is provided' do
+          let(:new_parent_id) { GitlabSchema.id_from_object(base_epic).to_s }
+
+          before do
+            other_epic = create(:epic, group: group)
+            epic_issue2.update(epic: other_epic)
+          end
+
+          it "updates the epic's relative positions and parent" do
+            post_graphql_mutation(mutation, current_user: current_user)
+
+            expect(epic_issue1.reload.relative_position).to be > epic_issue2.reload.relative_position
+            expect(epic_issue2.parent).to eq base_epic
+          end
+
+          it 'returns nil in errors' do
+            post_graphql_mutation(mutation, current_user: current_user)
+
+            expect(mutation_response['array']).to be_nil
+          end
+        end
       end
 
-      context 'when moving an issue fails due to another parent' do
+      context 'when moving an issue fails due to the parents of the relative position object and the moving object mismatching' do
         let(:epic_issue2) { create(:epic_issue, relative_position: 20) }
 
         before do
@@ -151,7 +215,7 @@ describe 'Updating an epic tree' do
         it 'returns the error message' do
           post_graphql_mutation(mutation, current_user: current_user)
 
-          expect(mutation_response['errors']).to eq(['Both objects have to belong to the same parent epic.'])
+          expect(mutation_response['errors']).to eq(["The sibling object's parent must match the current parent epic."])
         end
       end
     end

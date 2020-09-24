@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::HealthChecks::UnicornCheck do
+RSpec.describe Gitlab::HealthChecks::UnicornCheck do
   let(:result_class) { Gitlab::HealthChecks::Result }
   let(:readiness) { described_class.readiness }
   let(:metrics) { described_class.metrics }
@@ -24,6 +26,7 @@ describe Gitlab::HealthChecks::UnicornCheck do
 
   context 'when Unicorn is not loaded' do
     before do
+      allow(Gitlab::Runtime).to receive(:unicorn?).and_return(false)
       hide_const('Unicorn')
     end
 
@@ -37,6 +40,7 @@ describe Gitlab::HealthChecks::UnicornCheck do
     let(:http_server_class) { Struct.new(:worker_processes) }
 
     before do
+      allow(Gitlab::Runtime).to receive(:unicorn?).and_return(true)
       stub_const('Unicorn::HttpServer', http_server_class)
     end
 

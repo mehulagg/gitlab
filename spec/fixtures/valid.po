@@ -73,9 +73,6 @@ msgid_plural "Branches"
 msgstr[0] "Rama"
 msgstr[1] "Ramas"
 
-msgid "Branch <strong>%{branch_name}</strong> was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}"
-msgstr "La rama <strong>%{branch_name}</strong> fue creada. Para configurar el auto despliegue, escoge una plantilla Yaml para GitLab CI y envía tus cambios. %{link_to_autodeploy_doc}"
-
 msgid "BranchSwitcherPlaceholder|Search branches"
 msgstr "Buscar ramas"
 
@@ -267,11 +264,11 @@ msgstr "Eventos de notificaciones personalizadas"
 msgid "Custom notification levels are the same as participating levels. With custom notification levels you will also receive notifications for select events. To find out more, check out %{notification_link}."
 msgstr "Los niveles de notificación personalizados son los mismos que los niveles participantes. Con los niveles de notificación personalizados, también recibirá notificaciones para eventos seleccionados. Para obtener más información, consulte %{notification_link}."
 
-msgid "Cycle Analytics"
-msgstr "Cycle Analytics"
+msgid "Value Stream Analytics"
+msgstr "Value Stream Analytics"
 
-msgid "Cycle Analytics gives an overview of how much time it takes to go from idea to production in your project."
-msgstr "Cycle Analytics ofrece una visión general de cuánto tiempo tarda en pasar de idea a producción en su proyecto."
+msgid "Value Stream Analytics gives an overview of how much time it takes to go from idea to production in your project."
+msgstr "Value Stream Analytics ofrece una visión general de cuánto tiempo tarda en pasar de idea a producción en su proyecto."
 
 msgid "CycleAnalyticsStage|Code"
 msgstr "Código"
@@ -412,8 +409,8 @@ msgstr "Importar repositorio"
 msgid "Interval Pattern"
 msgstr "Patrón de intervalo"
 
-msgid "Introducing Cycle Analytics"
-msgstr "Introducción a Cycle Analytics"
+msgid "Introducing Value Stream Analytics"
+msgstr "Introducción a Value Stream Analytics"
 
 msgid "Jobs for last month"
 msgstr "Trabajos del mes pasado"
@@ -1074,7 +1071,7 @@ msgstr "Va a eliminar %{project_name_with_namespace}. ¡El proyecto eliminado NO
 msgid "You are going to remove the fork relationship to source project %{forked_from_project}. Are you ABSOLUTELY sure?"
 msgstr "Vas a eliminar el enlace de la bifurcación con el proyecto original %{forked_from_project}. ¿Estás TOTALMENTE seguro?"
 
-msgid "You are going to transfer %{project_name_with_namespace} to another owner. Are you ABSOLUTELY sure?"
+msgid "You are going to transfer %{project_name_with_namespace} to another namespace. Are you ABSOLUTELY sure?"
 msgstr "Vas a transferir %{project_name_with_namespace} a otro propietario. ¿Estás TOTALMENTE seguro?"
 
 msgid "You can only add files when you are on a branch"

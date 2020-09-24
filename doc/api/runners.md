@@ -1,37 +1,41 @@
+---
+stage: Verify
+group: Runner
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Runners API
 
-> [Introduced][ce-2640] in GitLab 8.5
-
-[ce-2640]: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/2640
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/2640) in GitLab 8.5.
 
 ## Registration and authentication tokens
 
-There are two tokens to take into account when connecting a Runner with GitLab.
+There are two tokens to take into account when connecting a runner with GitLab.
 
 | Token | Description |
 | ----- | ----------- |
-| Registration token   | Token used to [register the Runner](https://docs.gitlab.com/runner/register/). It can be [obtained through GitLab](../ci/runners/README.md). |
-| Authentication token | Token used to authenticate the Runner with the GitLab instance. It is obtained either automatically when [registering a Runner](https://docs.gitlab.com/runner/register/), or manually when [registering the Runner via the Runners API](#register-a-new-runner). |
+| Registration token   | Token used to [register the runner](https://docs.gitlab.com/runner/register/). It can be [obtained through GitLab](../ci/runners/README.md). |
+| Authentication token | Token used to authenticate the runner with the GitLab instance. It is obtained either automatically when [registering a runner](https://docs.gitlab.com/runner/register/), or manually when [registering the runner via the Runner API](#register-a-new-runner). |
 
-Here's an example of how the two tokens are used in Runner registration:
+Here's an example of how the two tokens are used in runner registration:
 
-1. You register the Runner via the GitLab API using a registration token, and an
+1. You register the runner via the GitLab API using a registration token, and an
    authentication token is returned.
 1. You use that authentication token and add it to the
-   [Runner's configuration file](https://docs.gitlab.com/runner/commands/#configuration-file):
+   [runner's configuration file](https://docs.gitlab.com/runner/commands/#configuration-file):
 
    ```toml
    [[runners]]
      token = "<authentication_token>"
    ```
 
-GitLab and Runner are then connected.
+GitLab and the runner are then connected.
 
 ## List owned runners
 
 Get a list of specific runners available to the user.
 
-```
+```plaintext
 GET /runners
 GET /runners?scope=active
 GET /runners?type=project_type
@@ -44,9 +48,9 @@ GET /runners?tag_list=tag1,tag2
 | `scope`     | string         | no       | Deprecated: Use `type` or `status` instead. The scope of specific runners to show, one of: `active`, `paused`, `online`, `offline`; showing all runners if none provided |
 | `type`      | string         | no       | The type of runners to show, one of: `instance_type`, `group_type`, `project_type` |
 | `status`    | string         | no       | The status of runners to show, one of: `active`, `paused`, `online`, `offline` |
-| `tag_list`  | string array   | no       | List of of the runner's tags |
+| `tag_list`  | string array   | no       | List of the runner's tags |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners"
 ```
 
@@ -82,7 +86,7 @@ Example response:
 Get a list of all runners in the GitLab instance (specific and shared). Access
 is restricted to users with `admin` privileges.
 
-```
+```plaintext
 GET /runners/all
 GET /runners/all?scope=online
 GET /runners/all?type=project_type
@@ -95,9 +99,9 @@ GET /runners/all?tag_list=tag1,tag2
 | `scope`     | string         | no       | Deprecated: Use `type` or `status` instead. The scope of runners to show, one of: `specific`, `shared`, `active`, `paused`, `online`, `offline`; showing all runners if none provided |
 | `type`      | string         | no       | The type of runners to show, one of: `instance_type`, `group_type`, `project_type` |
 | `status`    | string         | no       | The status of runners to show, one of: `active`, `paused`, `online`, `offline` |
-| `tag_list`  | string array   | no       | List of of the runner's tags |
+| `tag_list`  | string array   | no       | List of the runner's tags |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/all"
 ```
 
@@ -152,7 +156,7 @@ Example response:
 
 Get details of a runner.
 
-```
+```plaintext
 GET /runners/:id
 ```
 
@@ -160,9 +164,13 @@ GET /runners/:id
 |-----------|---------|----------|---------------------|
 | `id`      | integer | yes      | The ID of a runner  |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6"
 ```
+
+NOTE: **Note:**
+The `token` attribute in the response was deprecated [in GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/issues/214320).
+and removed in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/214322).
 
 Example response:
 
@@ -188,7 +196,6 @@ Example response:
             "path_with_namespace": "gitlab-org/gitlab-foss"
         }
     ],
-    "token": "205086a8e3b9a2b818ffac9b89d102",
     "revision": null,
     "tag_list": [
         "ruby",
@@ -204,7 +211,7 @@ Example response:
 
 Update details of a runner.
 
-```
+```plaintext
 PUT /runners/:id
 ```
 
@@ -217,11 +224,15 @@ PUT /runners/:id
 | `run_untagged`| boolean | no       | Flag indicating the runner can execute untagged jobs |
 | `locked`      | boolean | no       | Flag indicating the runner is locked |
 | `access_level` | string | no       | The access_level of the runner; `not_protected` or `ref_protected` |
-| `maximum_timeout` | integer | no   | Maximum timeout set when this Runner will handle the job |
+| `maximum_timeout` | integer | no   | Maximum timeout set when this runner will handle the job |
 
-```
+```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6" --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
 ```
+
+NOTE: **Note:**
+The `token` attribute in the response was deprecated [in GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/issues/214320).
+and removed in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/214322).
 
 Example response:
 
@@ -247,7 +258,6 @@ Example response:
             "path_with_namespace": "gitlab-org/gitlab-foss"
         }
     ],
-    "token": "205086a8e3b9a2b818ffac9b89d102",
     "revision": null,
     "tag_list": [
         "ruby",
@@ -265,7 +275,7 @@ Example response:
 
 Remove a runner.
 
-```
+```plaintext
 DELETE /runners/:id
 ```
 
@@ -273,17 +283,17 @@ DELETE /runners/:id
 |-----------|---------|----------|---------------------|
 | `id`      | integer | yes      | The ID of a runner  |
 
-```
+```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6"
 ```
 
 ## List runner's jobs
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/15432) in GitLab 10.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/15432) in GitLab 10.3.
 
-List jobs that are being processed or were processed by specified Runner.
+List jobs that are being processed or were processed by specified runner.
 
-```
+```plaintext
 GET /runners/:id/jobs
 ```
 
@@ -294,7 +304,7 @@ GET /runners/:id/jobs
 | `order_by`| string  | no       | Order jobs by `id`. |
 | `sort`    | string  | no       | Sort jobs in `asc` or `desc` order (default: `desc`) |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/1/jobs?status=running"
 ```
 
@@ -373,7 +383,7 @@ Example response:
 List all runners (specific and shared) available in the project. Shared runners
 are listed if at least one shared runner is defined.
 
-```
+```plaintext
 GET /projects/:id/runners
 GET /projects/:id/runners?scope=active
 GET /projects/:id/runners?type=project_type
@@ -387,9 +397,9 @@ GET /projects/:id/runners?tag_list=tag1,tag2
 | `scope`    | string         | no       | Deprecated: Use `type` or `status` instead. The scope of specific runners to show, one of: `active`, `paused`, `online`, `offline`; showing all runners if none provided |
 | `type`     | string         | no       | The type of runners to show, one of: `instance_type`, `group_type`, `project_type` |
 | `status`   | string         | no       | The status of runners to show, one of: `active`, `paused`, `online`, `offline` |
-| `tag_list` | string array   | no       | List of of the runner's tags |
+| `tag_list` | string array   | no       | List of the runner's tags |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/runners"
 ```
 
@@ -424,7 +434,7 @@ Example response:
 
 Enable an available specific runner in the project.
 
-```
+```plaintext
 POST /projects/:id/runners
 ```
 
@@ -433,7 +443,7 @@ POST /projects/:id/runners
 | `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `runner_id` | integer | yes      | The ID of a runner  |
 
-```
+```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/runners" --form "runner_id=9"
 ```
 
@@ -458,7 +468,7 @@ Disable a specific runner from the project. It works only if the project isn't
 the only project associated with the specified runner. If so, an error is
 returned. Use the [Remove a runner](#remove-a-runner) call instead.
 
-```
+```plaintext
 DELETE /projects/:id/runners/:runner_id
 ```
 
@@ -467,15 +477,75 @@ DELETE /projects/:id/runners/:runner_id
 | `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `runner_id` | integer | yes      | The ID of a runner  |
 
-```
+```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/runners/9"
 ```
 
-## Register a new Runner
+## List group's runners
 
-Register a new Runner for the instance.
+List all runners (specific and shared) available in the group as well it's ancestor groups.
+Shared runners are listed if at least one shared runner is defined.
 
+```plaintext
+GET /groups/:id/runners
+GET /groups/:id/runners?type=group_type
+GET /groups/:id/runners?status=active
+GET /groups/:id/runners?tag_list=tag1,tag2
 ```
+
+| Attribute  | Type           | Required | Description         |
+|------------|----------------|----------|---------------------|
+| `id`       | integer        | yes      | The ID of the group owned by the authenticated user |
+| `type`     | string         | no       | The type of runners to show, one of: `instance_type`, `group_type`, `project_type` |
+| `status`   | string         | no       | The status of runners to show, one of: `active`, `paused`, `online`, `offline` |
+| `tag_list` | string array   | no       | List of the runner's tags |
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/9/runners"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 3,
+    "description": "Shared",
+    "ip_address": "127.0.0.1",
+    "active": true,
+    "is_shared": true,
+    "name": "gitlab-runner",
+    "online": null,
+    "status": "not_connected"
+  },
+  {
+    "id": 6,
+    "description": "Test",
+    "ip_address": "127.0.0.1",
+    "active": true,
+    "is_shared": true,
+    "name": "gitlab-runner",
+    "online": false,
+    "status": "offline"
+  },
+  {
+    "id": 8,
+    "description": "Test 2",
+    "ip_address": "127.0.0.1",
+    "active": true,
+    "is_shared": false,
+    "name": "gitlab-runner",
+    "online": null,
+    "status": "not_connected"
+  }
+]
+```
+
+## Register a new runner
+
+Register a new runner for the instance.
+
+```plaintext
 POST /runners
 ```
 
@@ -484,14 +554,14 @@ POST /runners
 | `token`      | string  | yes      | [Registration token](#registration-and-authentication-tokens).  |
 | `description`| string  | no       | Runner's description|
 | `info`       | hash    | no       | Runner's metadata   |
-| `active`     | boolean | no       | Whether the Runner is active   |
-| `locked`     | boolean | no       | Whether the Runner should be locked for current project |
-| `run_untagged` | boolean | no     | Whether the Runner should handle untagged jobs |
-| `tag_list`   | string array | no  | List of Runner's tags |
+| `active`     | boolean | no       | Whether the runner is active   |
+| `locked`     | boolean | no       | Whether the runner should be locked for current project |
+| `run_untagged` | boolean | no     | Whether the runner should handle untagged jobs |
+| `tag_list`   | string array | no  | List of runner's tags |
 | `access_level`    | string | no   | The access_level of the runner; `not_protected` or `ref_protected` |
-| `maximum_timeout` | integer | no  | Maximum timeout set when this Runner will handle the job |
+| `maximum_timeout` | integer | no  | Maximum timeout set when this runner will handle the job |
 
-```
+```shell
 curl --request POST "https://gitlab.example.com/api/v4/runners" --form "token=<registration_token>" --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
 ```
 
@@ -510,11 +580,11 @@ Example response:
 }
 ```
 
-## Delete a registered Runner
+## Delete a registered runner
 
-Deletes a registered Runner.
+Deletes a registered runner.
 
-```
+```plaintext
 DELETE /runners
 ```
 
@@ -522,7 +592,7 @@ DELETE /runners
 |-------------|---------|----------|---------------------|
 | `token`     | string  | yes      | Runner's [authentication token](#registration-and-authentication-tokens).  |
 
-```
+```shell
 curl --request DELETE "https://gitlab.example.com/api/v4/runners" --form "token=<authentication_token>"
 ```
 
@@ -532,11 +602,11 @@ Response:
 |-----------|---------------------------------|
 | 204       | Runner was deleted              |
 
-## Verify authentication for a registered Runner
+## Verify authentication for a registered runner
 
-Validates authentication credentials for a registered Runner.
+Validates authentication credentials for a registered runner.
 
-```
+```plaintext
 POST /runners/verify
 ```
 
@@ -544,7 +614,7 @@ POST /runners/verify
 |-------------|---------|----------|---------------------|
 | `token`     | string  | yes      | Runner's [authentication token](#registration-and-authentication-tokens).  |
 
-```
+```shell
 curl --request POST "https://gitlab.example.com/api/v4/runners/verify" --form "token=<authentication_token>"
 ```
 

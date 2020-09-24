@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Namespaces::ScheduleAggregationWorker, '#perform', :clean_gitlab_redis_shared_state do
+RSpec.describe Namespaces::ScheduleAggregationWorker, '#perform', :clean_gitlab_redis_shared_state do
   let(:group) { create(:group) }
 
   subject(:worker) { described_class.new }
@@ -48,9 +48,20 @@ describe Namespaces::ScheduleAggregationWorker, '#perform', :clean_gitlab_redis_
 
   context 'when namespace does not exist' do
     it 'logs the error' do
-      expect(Gitlab::SidekiqLogger).to receive(:error).once
+      expect(Gitlab::ErrorTracking).to receive(:track_exception).once
 
-      worker.perform(12345)
+      worker.perform(non_existing_record_id)
+    end
+  end
+
+  it_behaves_like 'an idempotent worker' do
+    let(:job_args) { [group.id] }
+
+    it 'creates a single aggregation schedule' do
+      expect { worker.perform(*job_args) }
+        .to change { Namespace::AggregationSchedule.count }.by(1)
+      expect { worker.perform(*job_args) }
+        .not_to change { Namespace::AggregationSchedule.count }
     end
   end
 

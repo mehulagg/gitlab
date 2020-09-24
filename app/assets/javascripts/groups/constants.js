@@ -8,7 +8,7 @@ export const ACTIVE_TAB_ARCHIVED = 'archived';
 
 export const GROUPS_LIST_HOLDER_CLASS = '.js-groups-list-holder';
 export const GROUPS_FILTER_FORM_CLASS = '.js-group-filter-form';
-export const CONTENT_LIST_CLASS = '.content-list';
+export const CONTENT_LIST_CLASS = '.groups-list';
 
 export const COMMON_STR = {
   FAILURE: __('An error occurred. Please try again.'),
@@ -39,7 +39,9 @@ export const GROUP_VISIBILITY_TYPE = {
 export const PROJECT_VISIBILITY_TYPE = {
   public: __('Public - The project can be accessed without any authentication.'),
   internal: __('Internal - The project can be accessed by any logged in user.'),
-  private: __('Private - Project access must be granted explicitly to each user.'),
+  private: __(
+    'Private - Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group.',
+  ),
 };
 
 export const VISIBILITY_TYPE_ICON = {

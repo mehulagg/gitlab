@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Keys::LastUsedService do
+RSpec.describe Keys::LastUsedService do
   it 'does not run on read-only GitLab instances', :clean_gitlab_redis_shared_state do
     key = create(:key, last_used_at: 1.year.ago)
     original_time = key.last_used_at

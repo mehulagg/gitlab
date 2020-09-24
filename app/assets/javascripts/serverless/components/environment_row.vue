@@ -47,14 +47,14 @@ export default {
 <template>
   <li :id="envId" :class="isOpenClass" class="group-row has-children">
     <div
-      class="group-row-contents d-flex justify-content-end align-items-center"
+      class="group-row-contents d-flex justify-content-end align-items-center py-2"
       role="button"
       @click.stop="toggleOpen"
     >
       <div class="folder-toggle-wrap d-flex align-items-center">
         <item-caret :is-group-open="isOpen" />
       </div>
-      <div class="group-text flex-grow title namespace-title prepend-left-default">
+      <div class="group-text flex-grow title namespace-title gl-ml-3">
         {{ envName }}
       </div>
     </div>

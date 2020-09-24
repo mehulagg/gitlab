@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state do
+RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state do
   include ProjectForksHelper
 
   describe '#execute' do
@@ -27,13 +27,13 @@ describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state 
     end
 
     let(:ci_yaml) do
-      {
+      YAML.dump({
         test: {
           stage: 'test',
           script: 'echo',
           only: ['merge_requests']
         }
-      }
+      })
     end
 
     before do
@@ -41,7 +41,7 @@ describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state 
       target_project.add_developer(user)
       source_project.merge_pipelines_enabled = merge_pipelines_enabled
       stub_licensed_features(merge_pipelines: merge_pipelines_license)
-      stub_ci_pipeline_yaml_file(YAML.dump(ci_yaml))
+      stub_ci_pipeline_yaml_file(ci_yaml)
     end
 
     shared_examples_for 'detached merge request pipeline' do
@@ -76,14 +76,6 @@ describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state 
       it_behaves_like 'detached merge request pipeline'
     end
 
-    context 'when ci_use_merge_request_ref feature flag is disabled' do
-      before do
-        stub_feature_flags(ci_use_merge_request_ref: false)
-      end
-
-      it_behaves_like 'detached merge request pipeline'
-    end
-
     context 'when merge request is submitted from fork' do
       let(:source_project) { fork_project(project, nil, repository: true) }
 
@@ -109,6 +101,38 @@ describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state 
       let(:target_branch) { 'feature_conflict' }
 
       it_behaves_like 'detached merge request pipeline'
+    end
+
+    context 'when workflow:rules are specified' do
+      let(:source_branch) { 'feature' }
+      let(:target_branch) { 'feature_conflict' }
+
+      context 'when bridge job is used' do
+        let(:config) do
+          {
+            workflow: {
+              rules: [
+                { if: '$CI_MERGE_REQUEST_ID' }
+              ]
+            },
+            bridge_job: {
+              needs: { pipeline: 'some/project' }
+            }
+          }
+        end
+
+        it_behaves_like 'detached merge request pipeline'
+      end
+    end
+
+    context 'when .gitlab-ci.yml is invalid' do
+      let(:ci_yaml) { 'invalid yaml file' }
+
+      it 'persists a pipeline with a config error' do
+        expect { subject }.to change { Ci::Pipeline.count }.by(1)
+        expect(merge_request.all_pipelines.last).to be_failed
+        expect(merge_request.all_pipelines.last).to be_config_error
+      end
     end
   end
 end

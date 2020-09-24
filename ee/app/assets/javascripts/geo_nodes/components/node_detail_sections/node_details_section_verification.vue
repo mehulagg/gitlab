@@ -1,19 +1,22 @@
 <script>
-import { s__ } from '~/locale';
+import { GlPopover, GlLink, GlIcon, GlSprintf } from '@gitlab/ui';
 
-import { VALUE_TYPE, HELP_INFO_URL } from '../../constants';
+import { sprintf, s__ } from '~/locale';
 
-import DetailsSectionMixin from '../../mixins/details_section_mixin';
+import { HELP_INFO_URL } from '../../constants';
 
 import GeoNodeDetailItem from '../geo_node_detail_item.vue';
 import SectionRevealButton from './section_reveal_button.vue';
 
 export default {
   components: {
+    GlIcon,
+    GlPopover,
+    GlLink,
+    GlSprintf,
     GeoNodeDetailItem,
     SectionRevealButton,
   },
-  mixins: [DetailsSectionMixin],
   props: {
     nodeDetails: {
       type: Object,
@@ -27,115 +30,84 @@ export default {
   data() {
     return {
       showSectionItems: false,
-      primaryNodeDetailItems: this.getPrimaryNodeDetailItems(),
-      secondaryNodeDetailItems: this.getSecondaryNodeDetailItems(),
     };
   },
   computed: {
     nodeDetailItems() {
       return this.nodeTypePrimary
-        ? this.getPrimaryNodeDetailItems()
-        : this.getSecondaryNodeDetailItems();
+        ? this.nodeDetails.checksumStatuses
+        : this.nodeDetails.verificationStatuses;
+    },
+    nodeText() {
+      return this.nodeTypePrimary ? s__('GeoNodes|secondary nodes') : s__('GeoNodes|primary node');
     },
   },
   methods: {
-    getPrimaryNodeDetailItems() {
-      return [
-        {
-          itemTitle: s__('GeoNodes|Repository checksum progress'),
-          itemValue: this.nodeDetails.repositoriesChecksummed,
-          itemValueType: VALUE_TYPE.GRAPH,
-          successLabel: s__('GeoNodes|Checksummed'),
-          neutraLabel: s__('GeoNodes|Not checksummed'),
-          failureLabel: s__('GeoNodes|Failed'),
-          helpInfo: {
-            title: s__(
-              'GeoNodes|Repositories checksummed for verification with their counterparts on Secondary nodes',
-            ),
-            url: HELP_INFO_URL,
-            urlText: s__('GeoNodes|Learn more about Repository checksum progress'),
-          },
-        },
-        {
-          itemTitle: s__('GeoNodes|Wiki checksum progress'),
-          itemValue: this.nodeDetails.wikisChecksummed,
-          itemValueType: VALUE_TYPE.GRAPH,
-          successLabel: s__('GeoNodes|Checksummed'),
-          neutraLabel: s__('GeoNodes|Not checksummed'),
-          failureLabel: s__('GeoNodes|Failed'),
-          helpInfo: {
-            title: s__(
-              'GeoNodes|Wikis checksummed for verification with their counterparts on Secondary nodes',
-            ),
-            url: HELP_INFO_URL,
-            urlText: s__('GeoNodes|Learn more about Wiki checksum progress'),
-          },
-        },
-      ];
-    },
-    getSecondaryNodeDetailItems() {
-      return [
-        {
-          itemTitle: s__('GeoNodes|Repository verification progress'),
-          itemValue: this.nodeDetails.verifiedRepositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-          successLabel: s__('GeoNodes|Verified'),
-          neutraLabel: s__('GeoNodes|Unverified'),
-          failureLabel: s__('GeoNodes|Failed'),
-          helpInfo: {
-            title: s__(
-              'GeoNodes|Repositories verified with their counterparts on the Primary node',
-            ),
-            url: HELP_INFO_URL,
-            urlText: s__('GeoNodes|Learn more about Repository verification'),
-          },
-        },
-        {
-          itemTitle: s__('GeoNodes|Wiki verification progress'),
-          itemValue: this.nodeDetails.verifiedWikis,
-          itemValueType: VALUE_TYPE.GRAPH,
-          successLabel: s__('GeoNodes|Verified'),
-          neutraLabel: s__('GeoNodes|Unverified'),
-          failureLabel: s__('GeoNodes|Failed'),
-          helpInfo: {
-            title: s__('GeoNodes|Wikis verified with their counterparts on the Primary node'),
-            url: HELP_INFO_URL,
-            urlText: s__('GeoNodes|Learn more about Wiki verification'),
-          },
-        },
-      ];
-    },
     handleSectionToggle(toggleState) {
       this.showSectionItems = toggleState;
     },
+    itemValue(nodeDetailItem) {
+      return {
+        totalCount: nodeDetailItem.itemValue.totalCount,
+        successCount: this.nodeTypePrimary
+          ? nodeDetailItem.itemValue.checksumSuccessCount
+          : nodeDetailItem.itemValue.verificationSuccessCount,
+        failureCount: this.nodeTypePrimary
+          ? nodeDetailItem.itemValue.checksumFailureCount
+          : nodeDetailItem.itemValue.verificationFailureCount,
+      };
+    },
+    itemTitle(nodeDetailItem) {
+      return this.nodeTypePrimary
+        ? sprintf(s__('Geo|%{itemTitle} checksum progress'), {
+            itemTitle: nodeDetailItem.itemTitle,
+          })
+        : sprintf(s__('Geo|%{itemTitle} verification progress'), {
+            itemTitle: nodeDetailItem.itemTitle,
+          });
+    },
   },
+  HELP_INFO_URL,
 };
 </script>
 
 <template>
-  <div class="row-fluid clearfix node-detail-section verification-section">
-    <div class="col-md-12">
+  <div class="row-fluid clearfix py-3 border-top border-color-default verification-section">
+    <div class="col-md-12 d-flex align-items-center">
       <section-reveal-button
         :button-title="__('Verification information')"
         @toggleButton="handleSectionToggle"
       />
+      <gl-icon
+        ref="verificationInfo"
+        tabindex="0"
+        name="question"
+        class="text-primary-600 ml-1 cursor-pointer"
+      />
+      <gl-popover :target="() => $refs.verificationInfo.$el" placement="top" triggers="hover focus">
+        <p>
+          <gl-sprintf
+            :message="
+              s__('GeoNodes|Replicated data is verified with the %{nodeText} using checksums')
+            "
+          >
+            <template #nodeText>
+              {{ nodeText }}
+            </template>
+          </gl-sprintf>
+        </p>
+        <gl-link class="mt-3" :href="$options.HELP_INFO_URL" target="_blank">{{
+          __('More information')
+        }}</gl-link>
+      </gl-popover>
     </div>
     <template v-if="showSectionItems">
-      <div class="col-md-6 prepend-left-15 prepend-top-10 section-items-container">
+      <div class="col-md-6 ml-2 mt-2 section-items-container">
         <geo-node-detail-item
           v-for="(nodeDetailItem, index) in nodeDetailItems"
           :key="index"
-          :css-class="nodeDetailItem.cssClass"
-          :item-title="nodeDetailItem.itemTitle"
-          :item-value="nodeDetailItem.itemValue"
-          :item-value-type="nodeDetailItem.itemValueType"
-          :item-value-stale="statusInfoStale"
-          :item-value-stale-tooltip="statusInfoStaleMessage"
-          :success-label="nodeDetailItem.successLabel"
-          :neutral-label="nodeDetailItem.neutraLabel"
-          :failure-label="nodeDetailItem.failureLabel"
-          :custom-type="nodeDetailItem.customType"
-          :help-info="nodeDetailItem.helpInfo"
+          :item-title="itemTitle(nodeDetailItem)"
+          :item-value="itemValue(nodeDetailItem)"
         />
       </div>
     </template>

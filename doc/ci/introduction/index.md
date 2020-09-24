@@ -1,17 +1,20 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: "An overview of Continuous Integration, Continuous Delivery, and Continuous Deployment, as well as an introduction to GitLab CI/CD."
 type: concepts
 ---
 
 # Introduction to CI/CD with GitLab
 
-In this document we'll present an overview of the concepts of Continuous Integration,
+In this document, we'll present an overview of the concepts of Continuous Integration,
 Continuous Delivery, and Continuous Deployment, as well as an introduction to
 GitLab CI/CD.
 
-NOTE: **Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.**
-Watch our
-["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
+NOTE: **Note:**
+Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
+Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
 
 ## Introduction to CI/CD methodologies
@@ -31,7 +34,7 @@ to be applied according to what best suits your strategy.
 
 ### Continuous Integration
 
-Consider an application which has its code stored in a Git
+Consider an application that has its code stored in a Git
 repository in GitLab. Developers push code changes every day,
 multiple times a day. For every push to the repository, you
 can create a set of scripts to build and test your application
@@ -76,6 +79,9 @@ to apply all the continuous methods (Continuous Integration,
 Delivery, and Deployment) to your software with no third-party
 application or integration needed.
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For an overview, see [Introduction to GitLab CI](https://www.youtube.com/watch?v=l5705U8s_nQ&t=397) from a recent GitLab meetup.
+
 ### How GitLab CI/CD works
 
 To use GitLab CI/CD, all you need is an application codebase hosted in a
@@ -94,7 +100,7 @@ To add scripts to that file, you'll need to organize them in a
 sequence that suits your application and are in accordance with
 the tests you wish to perform. To visualize the process, imagine
 that all the scripts you add to the configuration file are the
-same as the commands you run on a terminal in your computer.
+same as the commands you run on a terminal on your computer.
 
 Once you've added your `.gitlab-ci.yml` configuration file to your
 repository, GitLab will detect it and run your scripts with the
@@ -105,7 +111,7 @@ The scripts are grouped into **jobs**, and together they compose
 a **pipeline**. A minimalist example of `.gitlab-ci.yml` file
 could contain:
 
-```yml
+```yaml
 before_script:
   - apt-get install rubygems ruby-dev -y
 
@@ -121,7 +127,7 @@ Both of them compose a **pipeline** triggered at every push
 to any branch of the repository.
 
 GitLab CI/CD not only executes the jobs you've
-set, but also shows you what's happening during execution, as you
+set but also shows you what's happening during execution, as you
 would see in your terminal:
 
 ![job running](img/job_running.png)
@@ -133,7 +139,7 @@ displayed by GitLab:
 ![pipeline status](img/pipeline_status.png)
 
 At the end, if anything goes wrong, you can easily
-[roll back](../environments.md#retrying-and-rolling-back) all the changes:
+[roll back](../environments/index.md#retrying-and-rolling-back) all the changes:
 
 ![rollback button](img/rollback.png)
 
@@ -164,7 +170,7 @@ Once you're happy with your implementation:
 
 GitLab CI/CD is capable of doing a lot more, but this workflow
 exemplifies GitLab's ability to track the entire process,
-without the need of any external tool to deliver your software.
+without the need for an external tool to deliver your software.
 And, most usefully, you can visualize all the steps through
 the GitLab UI.
 
@@ -172,7 +178,7 @@ the GitLab UI.
 
 If we take a deeper look into the basic workflow, we can see
 the features available in GitLab at each stage of the DevOps
-lifecycle, as shown on the illustration below.
+lifecycle, as shown in the illustration below.
 
 ![Deeper look into the basic CI/CD workflow](img/gitlab_workflow_example_extended_v12_3.png)
 
@@ -182,9 +188,10 @@ according to each stage (Verify, Package, Release).
 
 1. **Verify**:
    - Automatically build and test your application with Continuous Integration.
-   - Analyze your source code quality with [GitLab Code Quality](../../user/project/merge_requests/code_quality.md). **(STARTER)**
-   - Determine the performance impact of code changes with [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md). **(PREMIUM)**
-   - Perform a series of tests, such as [Container Scanning](../../user/application_security/container_scanning/index.md) **(ULTIMATE)**, [Dependency Scanning](../../user/application_security/dependency_scanning/index.md) **(ULTIMATE)**, and [JUnit tests](../junit_test_reports.md).
+   - Analyze your source code quality with [GitLab Code Quality](../../user/project/merge_requests/code_quality.md).
+   - Determine the browser performance impact of code changes with [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md). **(PREMIUM)**
+   - Determine the server performance impact of code changes with [Load Performance Testing](../../user/project/merge_requests/load_performance_testing.md). **(PREMIUM)**
+   - Perform a series of tests, such as [Container Scanning](../../user/application_security/container_scanning/index.md) **(ULTIMATE)**, [Dependency Scanning](../../user/application_security/dependency_scanning/index.md) **(ULTIMATE)**, and [Unit tests](../unit_test_reports.md).
    - Deploy your changes with [Review Apps](../review_apps/index.md) to preview the app changes on every branch.
 1. **Package**:
    - Store Docker images with [Container Registry](../../user/packages/container_registry/index.md).
@@ -196,23 +203,23 @@ according to each stage (Verify, Package, Release).
    - Continuous Delivery, manually click to deploy your app to production.
    - Deploy static websites with [GitLab Pages](../../user/project/pages/index.md).
    - Ship features to only a portion of your pods and let a percentage of your user base to visit the temporarily deployed feature with [Canary Deployments](../../user/project/canary_deployments.md). **(PREMIUM)**
-   - Deploy your features behind [Feature Flags](../../user/project/operations/feature_flags.md). **(PREMIUM)**
+   - Deploy your features behind [Feature Flags](../../operations/feature_flags.md). **(PREMIUM)**
    - Add release notes to any Git tag with [GitLab Releases](../../user/project/releases/index.md).
    - View of the current health and status of each CI environment running on Kubernetes with [Deploy Boards](../../user/project/deploy_boards.md). **(PREMIUM)**
-   - Deploy your application to a production environment in a Kubernetes cluster with [Auto Deploy](../../topics/autodevops/index.md#auto-deploy).
+   - Deploy your application to a production environment in a Kubernetes cluster with [Auto Deploy](../../topics/autodevops/stages.md#auto-deploy).
 
 With GitLab CI/CD you can also:
 
 - Easily set up your app's entire lifecycle with [Auto DevOps](../../topics/autodevops/index.md).
-- Deploy your app to different [environments](../environments.md).
+- Deploy your app to different [environments](../environments/index.md).
 - Install your own [GitLab Runner](https://docs.gitlab.com/runner/).
-- [Schedule pipelines](../../user/project/pipelines/schedules.md).
+- [Schedule pipelines](../pipelines/schedules.md).
 - Check for app vulnerabilities with [Security Test reports](../../user/application_security/index.md). **(ULTIMATE)**
 
 To see all CI/CD features, navigate back to the [CI/CD index](../README.md).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-Watch the video [GitLab CI Live Demo](https://www.youtube.com/watch?v=pBe4t1CD8Fc) with a deeper overview of GitLab CI/CD.
+Watch the video [GitLab CI Live Demo](https://youtu.be/l5705U8s_nQ?t=369) with a deeper overview of GitLab CI/CD.
 
 ### Setting up GitLab CI/CD for the first time
 
@@ -220,13 +227,16 @@ To get started with GitLab CI/CD, you need to familiarize yourself
 with the [`.gitlab-ci.yml`](../yaml/README.md) configuration file
 syntax and with its attributes.
 
-This document [introduces the concepts of GitLab CI/CD in the scope of GitLab Pages](../../user/project/pages/getting_started_part_four.md), for deploying static websites.
+This document [introduces the concepts of GitLab CI/CD in the scope of GitLab Pages](../../user/project/pages/getting_started/pages_from_scratch.md), for deploying static websites.
 Although it's meant for users who want to write their own Pages
 script from scratch, it also serves as an introduction to the setup process for GitLab CI/CD.
-It covers the very first general steps of writing a CI/CD configuration
+It covers the first general steps of writing a CI/CD configuration
 file, so we recommend you read through it to understand GitLab's CI/CD
 logic, and learn how to write your own script (or tweak an
 existing one) for any application.
 
 For a deep view of GitLab's CI/CD configuration options, check the
 [`.gitlab-ci.yml` full reference](../yaml/README.md).
+
+For help making your pipelines faster and more efficient, see the
+[pipeline efficiency documentation](../pipelines/pipeline_efficiency.md).

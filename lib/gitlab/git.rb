@@ -13,7 +13,6 @@ module Gitlab
     TAG_REF_PREFIX = "refs/tags/"
     BRANCH_REF_PREFIX = "refs/heads/"
 
-    BaseError = Class.new(StandardError)
     CommandError = Class.new(BaseError)
     CommitError = Class.new(BaseError)
     OSError = Class.new(BaseError)
@@ -33,16 +32,6 @@ module Gitlab
         else
           nil
         end
-      end
-
-      def committer_hash(email:, name:)
-        return if email.nil? || name.nil?
-
-        {
-          email: email,
-          name: name,
-          time: Time.now
-        }
       end
 
       def tag_name(ref)
@@ -88,6 +77,7 @@ module Gitlab
       end
 
       def shas_eql?(sha1, sha2)
+        return true if sha1.nil? && sha2.nil?
         return false if sha1.nil? || sha2.nil?
         return false unless sha1.class == sha2.class
 

@@ -11,17 +11,20 @@ class DiffsEntity < Grape::Entity
     merge_request&.source_branch
   end
 
+  expose :source_branch_exists do |diffs|
+    merge_request&.source_branch_exists?
+  end
+
   expose :target_branch_name do |diffs|
     merge_request&.target_branch
   end
 
   expose :commit do |diffs, options|
-    CommitEntity.represent options[:commit], options.merge(
-      type: :full,
-      commit_url_params: { merge_request_iid: merge_request&.iid },
-      pipeline_ref: merge_request&.source_branch,
-      pipeline_project: merge_request&.source_project
-    )
+    CommitEntity.represent(options[:commit], commit_options(options))
+  end
+
+  expose :context_commits, using: API::Entities::Commit, if: -> (diffs, options) { merge_request&.project&.context_commits_enabled? } do |diffs|
+    options[:context_commits]
   end
 
   expose :merge_request_diff, using: MergeRequestDiffEntity do |diffs|
@@ -42,13 +45,13 @@ class DiffsEntity < Grape::Entity
 
   # rubocop: disable CodeReuse/ActiveRecord
   expose :added_lines do |diffs|
-    diffs.diff_files.sum(&:added_lines)
+    diffs.raw_diff_files.sum(&:added_lines)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   # rubocop: disable CodeReuse/ActiveRecord
   expose :removed_lines do |diffs|
-    diffs.diff_files.sum(&:removed_lines)
+    diffs.raw_diff_files.sum(&:removed_lines)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -66,14 +69,53 @@ class DiffsEntity < Grape::Entity
 
   expose :diff_files do |diffs, options|
     submodule_links = Gitlab::SubmoduleLinks.new(merge_request.project.repository)
-    DiffFileEntity.represent(diffs.diff_files, options.merge(submodule_links: submodule_links))
+
+    DiffFileEntity.represent(diffs.diff_files,
+      options.merge(submodule_links: submodule_links, code_navigation_path: code_navigation_path(diffs)))
   end
 
   expose :merge_request_diffs, using: MergeRequestDiffEntity, if: -> (_, options) { options[:merge_request_diffs]&.any? } do |diffs|
     options[:merge_request_diffs]
   end
 
+  expose :definition_path_prefix, if: -> (diff_file) { Feature.enabled?(:code_navigation, merge_request.project, default_enabled: true) } do |diffs|
+    project_blob_path(merge_request.project, diffs.diff_refs&.head_sha)
+  end
+
   def merge_request
     options[:merge_request]
+  end
+
+  private
+
+  def code_navigation_path(diffs)
+    return unless Feature.enabled?(:code_navigation, merge_request.project, default_enabled: true)
+
+    Gitlab::CodeNavigationPath.new(merge_request.project, diffs.diff_refs&.head_sha)
+  end
+
+  def commit_ids
+    @commit_ids ||= merge_request.recent_commits.map(&:id)
+  end
+
+  def commit_neighbors(commit_id)
+    index = commit_ids.index(commit_id)
+
+    return [] unless index
+
+    [(index > 0 ? commit_ids[index - 1] : nil), commit_ids[index + 1]]
+  end
+
+  def commit_options(options)
+    next_commit_id, prev_commit_id = *commit_neighbors(options[:commit]&.id)
+
+    options.merge(
+      type: :full,
+      commit_url_params: { merge_request_iid: merge_request&.iid },
+      pipeline_ref: merge_request&.source_branch,
+      pipeline_project: merge_request&.source_project,
+      prev_commit_id: prev_commit_id,
+      next_commit_id: next_commit_id
+    )
   end
 end

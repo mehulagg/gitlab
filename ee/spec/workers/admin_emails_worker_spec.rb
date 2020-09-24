@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AdminEmailsWorker do
+RSpec.describe AdminEmailsWorker do
   context "recipients" do
     let(:group) { create(:group) }
     let(:project) { create(:project) }

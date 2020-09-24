@@ -1,85 +1,9 @@
-- page_title 'Audit Log'
-- entity_type = params[:entity_type]
+- page_title _('Audit Log')
 
-.todos-filters
-  .row-content-block.second-block
-    = form_tag admin_audit_logs_path, method: :get, class: 'filter-form' do
-      .filter-item.inline
-        - if entity_type.present?
-          = hidden_field_tag(:entity_type, entity_type)
-
-        = dropdown_tag(audit_entity_type_label(entity_type),
-          options: { toggle_class: 'js-type-search js-filter-submit js-type-filter',
-          dropdown_class: 'dropdown-menu-type dropdown-menu-selectable dropdown-menu-action js-filter-submit',
-          placeholder: 'Search types',
-          data: { field_name: 'entity_type', data: audit_entity_type_options, default_label: 'All Events' } })
-
-      - if params[:entity_type] == 'User'
-        .filter-item.inline
-          - if params[:entity_id].present?
-            = hidden_field_tag(:entity_id, params[:entity_id], class:'hidden-filter-value')
-
-          = dropdown_tag(@entity&.name || _('Search users'),
-            options: { toggle_class: 'js-user-search js-filter-submit', filter: true,
-            dropdown_class: 'dropdown-menu-user dropdown-menu-selectable',
-            placeholder: _('Search users'),
-            data: { first_user: (current_user.username if current_user), null_user: true, current_user: true, field_name: 'entity_id' } })
-
-      - elsif params[:entity_type] == 'Project'
-        .filter-item.inline
-          = project_select_tag(:entity_id, { class: 'project-item-select hidden-filter-value',
-            toggle_class: 'js-project-search js-project-filter js-filter-submit',
-            dropdown_class: 'dropdown-menu-selectable dropdown-menu-project js-filter-submit',
-            placeholder: @entity&.full_name || _('Search projects'), idAttribute: 'id',
-            data: { order_by: 'last_activity_at', idattribute: 'id', all_projects: 'true', simple_filter: true } })
-
-      - elsif params[:entity_type] == 'Group'
-        .filter-item.inline
-          = groups_select_tag(:entity_id, { required: true, class: 'group-item-select project-item-select hidden-filter-value',
-            toggle_class: 'js-group-search js-group-filter js-filter-submit',
-            dropdown_class: 'dropdown-menu-selectable dropdown-menu-group js-filter-submit',
-            placeholder: @entity&.full_path || _('Search groups'), idAttribute: 'id',
-            data: { order_by: 'last_activity_at', idattribute: 'id', all_available: true } })
-
-      .prepend-top-10
-        .form-group
-          = label_tag :created_after, _('Created after'), class: 'label-bold'
-          = date_field_tag :created_after, params[:created_after],
-            class: 'form-control', placeholder: 'YYYY-MM-DD'
-
-
-        .form-group
-          = label_tag :created_before, _('Created before'), class: 'label-bold'
-          = date_field_tag :created_before, params[:created_before],
-            class: 'form-control', placeholder: 'YYYY-MM-DD'
-
-        = submit_tag _('Search'), class: 'btn'
-
-- if @events.present?
-  %table#events-table.table
-    %thead
-      %tr
-        %th Author
-        %th Object
-        %th Action
-        %th Target
-        %th IP Address
-        %th Date
-    %tbody
-      - @events.map(&:present).each do |event|
-        %tr{ data: { qa_selector: 'admin_audit_log_row_content' } }
-          %td
-            - if (author_link = event.author_name)
-              = author_link
-            - else
-              #{event.details[:author_name]} <small>(removed)</small>
-          %td
-            - if (object_link = event.object)
-              = object_link
-            - else
-              #{event.details[:entity_path]} <small>(removed)</small>
-          %td= sanitize(event.action, tags: %w(strong))
-          %td= event.target
-          %td= event.ip_address
-          %td= event.date
-  = paginate_without_count @events
+#js-audit-log-app{ data: { form_path: admin_audit_logs_path,
+  events: @events.to_json,
+  is_last_page: @is_last_page.to_json,
+  filter_qa_selector: 'admin_audit_log_filter',
+  table_qa_selector: 'admin_audit_log_table',
+  filter_token_options: admin_audit_event_tokens.to_json,
+  export_url: export_url } }

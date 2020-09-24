@@ -5,7 +5,8 @@ import { handleLocationHash } from '~/lib/utils/common_utils';
 import howToMerge from '~/how_to_merge';
 import initPipelines from '~/commit/pipelines/pipelines_bundle';
 import initVueIssuableSidebarApp from '~/issuable_sidebar/sidebar_bundle';
-import initWidget from '../../../vue_merge_request_widget';
+import initSourcegraph from '~/sourcegraph';
+import loadAwardsHandler from '~/awards_handler';
 
 export default function() {
   new ZenMode(); // eslint-disable-line no-new
@@ -18,5 +19,6 @@ export default function() {
   new ShortcutsIssuable(true); // eslint-disable-line no-new
   handleLocationHash();
   howToMerge();
-  initWidget();
+  initSourcegraph();
+  loadAwardsHandler();
 }

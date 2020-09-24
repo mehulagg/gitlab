@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
+import { mockAssigneesList } from 'jest/boards/mock_data';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import IssueAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
-import { mockAssigneesList } from '../../../../javascripts/boards/mock_data';
 
 const TEST_CSS_CLASSES = 'test-classes';
 const TEST_MAX_VISIBLE = 4;
@@ -17,10 +17,14 @@ describe('IssueAssigneesComponent', () => {
         assignees: mockAssigneesList,
         ...props,
       },
-      sync: false,
     });
-    vm = wrapper.vm; // eslint-disable-line
+    vm = wrapper.vm;
   };
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
 
   const findTooltipText = () => wrapper.find('.js-assignee-tooltip').text();
   const findAvatars = () => wrapper.findAll(UserAvatarLink);
@@ -65,7 +69,7 @@ describe('IssueAssigneesComponent', () => {
 
           expect(findOverflowCounter().exists()).toBe(true);
           expect(findOverflowCounter().text()).toEqual(expectedHidden.toString());
-          expect(findOverflowCounter().attributes('data-original-title')).toEqual(
+          expect(findOverflowCounter().attributes('title')).toEqual(
             `${hiddenCount} more assignees`,
           );
         });
@@ -123,6 +127,22 @@ describe('IssueAssigneesComponent', () => {
 
       it('renders assignee @username', () => {
         expect(findTooltipText()).toContain('@monserrate.gleichner');
+      });
+
+      it('does not render `@` when username not available', () => {
+        const userName = 'User without username';
+        factory({
+          assignees: [
+            {
+              name: userName,
+            },
+          ],
+        });
+
+        const tooltipText = findTooltipText();
+
+        expect(tooltipText).toContain(userName);
+        expect(tooltipText).not.toContain('@');
       });
     });
   });

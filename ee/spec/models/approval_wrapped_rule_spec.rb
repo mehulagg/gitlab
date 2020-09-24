@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalWrappedRule do
+RSpec.describe ApprovalWrappedRule do
   using RSpec::Parameterized::TableSyntax
 
   let(:merge_request) { create(:merge_request) }
@@ -138,6 +138,20 @@ describe ApprovalWrappedRule do
     end
   end
 
+  describe "#commented_approvers" do
+    let(:rule) { create(:approval_project_rule, project: merge_request.project, approvals_required: approvals_required, users: [approver1, approver3]) }
+
+    it "returns an array" do
+      expect(subject.commented_approvers).to be_an(Array)
+    end
+
+    it "returns an array of approvers who have commented" do
+      create(:note, project: merge_request.project, noteable: merge_request, author: approver1)
+
+      expect(subject.commented_approvers).to eq([approver1])
+    end
+  end
+
   describe '#unactioned_approvers' do
     context 'when some approvers has not approved yet' do
       before do
@@ -165,58 +179,10 @@ describe ApprovalWrappedRule do
   end
 
   describe '#approvals_required' do
-    context 'for regular rules' do
-      let(:rule) { create(:approval_merge_request_rule, approvals_required: 19) }
+    let(:rule) { create(:approval_merge_request_rule, approvals_required: 19) }
 
-      it 'returns the attribute saved on the model' do
-        expect(subject.approvals_required).to eq(19)
-      end
-    end
-
-    context 'for code owner rules' do
-      where(:feature_enabled, :approver_count, :expected_required_approvals) do
-        true  | 0 | 0
-        true  | 2 | 1
-        false | 2 | 0
-        false | 0 | 0
-      end
-
-      with_them do
-        let(:rule) do
-          create(:code_owner_rule,
-                 merge_request: merge_request,
-                 users: create_list(:user, approver_count))
-        end
-
-        let(:branch) { subject.project.repository.branches.find { |b| b.name == merge_request.target_branch } }
-
-        context "when project.code_owner_approval_required_available? is true" do
-          before do
-            allow(subject.project)
-              .to receive(:code_owner_approval_required_available?).and_return(true)
-          end
-
-          context "when the project doesn't require code owner approval on all MRs" do
-            it 'returns the expected number of approvals for protected_branches that do require approval' do
-              allow(subject.project)
-                .to receive(:merge_requests_require_code_owner_approval?).and_return(false)
-              allow(ProtectedBranch)
-                .to receive(:branch_requires_code_owner_approval?).with(subject.project, branch.name).and_return(feature_enabled)
-
-              expect(subject.approvals_required).to eq(expected_required_approvals)
-            end
-          end
-        end
-
-        context "when project.code_owner_approval_required_available? is falsy" do
-          it "returns nil" do
-            allow(subject.project)
-              .to receive(:code_owner_approval_required_available?).and_return(false)
-
-            expect(subject.approvals_required).to eq(0)
-          end
-        end
-      end
+    it 'returns the attribute saved on the model' do
+      expect(subject.approvals_required).to eq(19)
     end
   end
 end

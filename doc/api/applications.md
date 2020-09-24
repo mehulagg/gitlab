@@ -1,6 +1,6 @@
 # Applications API
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/8160) in GitLab 10.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8160) in GitLab 10.5.
 
 Applications API operates on OAuth applications for:
 
@@ -16,22 +16,23 @@ Create an application by posting a JSON payload.
 
 Returns `200` if the request succeeds.
 
-```text
+```plaintext
 POST /applications
 ```
 
 Parameters:
 
-| Attribute      | Type   | Required | Description                      |
-|:---------------|:-------|:---------|:---------------------------------|
-| `name`         | string | yes      | Name of the application.         |
-| `redirect_uri` | string | yes      | Redirect URI of the application. |
-| `scopes`       | string | yes      | Scopes of the application.       |
+| Attribute      | Type    | Required | Description                      |
+|:---------------|:--------|:---------|:---------------------------------|
+| `name`         | string  | yes      | Name of the application.         |
+| `redirect_uri` | string  | yes      | Redirect URI of the application. |
+| `scopes`       | string  | yes      | Scopes of the application.       |
+| `confidential` | boolean | no       | The application will be used where the client secret can be kept confidential. Native mobile apps and Single Page Apps are considered non-confidential. Defaults to `true` if not supplied |
 
 Example request:
 
-```sh
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=MyApplication&redirect_uri=http://redirect.uri&scopes=" https://gitlab.example.com/api/v4/applications
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "name=MyApplication&redirect_uri=http://redirect.uri&scopes=" "https://gitlab.example.com/api/v4/applications"
 ```
 
 Example response:
@@ -42,7 +43,8 @@ Example response:
     "application_id": "5832fc6e14300a0d962240a8144466eef4ee93ef0d218477e55f11cf12fc3737",
     "application_name": "MyApplication",
     "secret": "ee1dd64b6adc89cf7e2c23099301ccc2c61b441064e9324d963c46902a85ec34",
-    "callback_url": "http://redirect.uri"
+    "callback_url": "http://redirect.uri",
+    "confidential": true
 }
 ```
 
@@ -50,14 +52,14 @@ Example response:
 
 List all registered applications.
 
-```text
+```plaintext
 GET /applications
 ```
 
 Example request:
 
-```sh
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/applications
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/applications"
 ```
 
 Example response:
@@ -68,7 +70,8 @@ Example response:
         "id":1,
         "application_id": "5832fc6e14300a0d962240a8144466eef4ee93ef0d218477e55f11cf12fc3737",
         "application_name": "MyApplication",
-        "callback_url": "http://redirect.uri"
+        "callback_url": "http://redirect.uri",
+        "confidential": true
     }
 ]
 ```
@@ -82,7 +85,7 @@ Delete a specific application.
 
 Returns `204` if the request succeeds.
 
-```text
+```plaintext
 DELETE /applications/:id
 ```
 
@@ -90,10 +93,10 @@ Parameters:
 
 | Attribute | Type    | Required | Description                                         |
 |:----------|:--------|:---------|:----------------------------------------------------|
-| `id`      | integer | yes      | The id of the application (not the application_id). |
+| `id`      | integer | yes      | The ID of the application (not the application_id). |
 
 Example request:
 
-```sh
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/applications/:id
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/applications/:id"
 ```

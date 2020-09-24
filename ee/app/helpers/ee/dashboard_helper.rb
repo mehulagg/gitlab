@@ -28,7 +28,7 @@ module EE
     end
 
     def has_start_trial?
-      !current_license && current_user.admin?
+      !current_user.has_current_license? && current_user.admin?
     end
 
     private
@@ -36,17 +36,23 @@ module EE
     override :get_dashboard_nav_links
     def get_dashboard_nav_links
       super.tap do |links|
-        links << :analytics if ::Gitlab::Analytics.any_features_enabled?
-
         if can?(current_user, :read_operations_dashboard)
-          links << :environments if ::Feature.enabled?(:environments_dashboard, current_user)
+          links << :environments
           links << :operations
         end
 
-        if ::Feature.enabled?(:security_dashboard) && can?(current_user, :read_security_dashboard)
+        if security_dashboard_available?
           links << :security
         end
       end
+    end
+
+    def security_dashboard_available?
+      security_dashboard = InstanceSecurityDashboard.new(current_user)
+
+      ::Feature.enabled?(:instance_security_dashboard, default_enabled: true) &&
+        security_dashboard.feature_available?(:security_dashboard) &&
+        can?(current_user, :read_instance_security_dashboard, security_dashboard)
     end
   end
 end

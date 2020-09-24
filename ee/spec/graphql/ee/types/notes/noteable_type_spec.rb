@@ -1,10 +1,17 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Types::Notes::NoteableType do
+RSpec.describe EE::Types::Notes::NoteableType do
+  let(:extended_class) { Types::Notes::NoteableType }
+
   describe ".resolve_type" do
-    it 'knows the correct type for EE objects' do
-      expect(described_class.resolve_type(build(:design), {})).to eq(Types::DesignManagement::DesignType)
+    it 'knows the correct type for objects' do
+      expect(extended_class.resolve_type(build(:issue), {})).to eq(Types::IssueType)
+      expect(extended_class.resolve_type(build(:merge_request), {})).to eq(Types::MergeRequestType)
+      expect(extended_class.resolve_type(build(:design), {})).to eq(Types::DesignManagement::DesignType)
+      expect(extended_class.resolve_type(build(:alert_management_alert), {})).to eq(Types::AlertManagement::AlertType)
+      expect(extended_class.resolve_type(build(:vulnerability), {})).to eq(Types::VulnerabilityType)
     end
   end
 end

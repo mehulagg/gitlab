@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::MilestonesImporter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::Importer::MilestonesImporter, :clean_gitlab_redis_cache do
   let(:project) { create(:project, import_source: 'foo/bar') }
   let(:client) { double(:client) }
   let(:importer) { described_class.new(project, client) }
@@ -78,8 +80,9 @@ describe Gitlab::GithubImport::Importer::MilestonesImporter, :clean_gitlab_redis
 
   describe '#build_milestones_cache' do
     it 'builds the milestones cache' do
-      expect_any_instance_of(Gitlab::GithubImport::MilestoneFinder)
-        .to receive(:build_cache)
+      expect_next_instance_of(Gitlab::GithubImport::MilestoneFinder) do |instance|
+        expect(instance).to receive(:build_cache)
+      end
 
       importer.build_milestones_cache
     end

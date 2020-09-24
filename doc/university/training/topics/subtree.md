@@ -11,13 +11,13 @@ comments: false
 
 ## Subtree Aliases
 
-- Add: `git subtree add --prefix <target-folder> <url> <branch> --squash`.
-- Pull: `git subtree add --prefix <target-folder> <url> <branch> --squash`.
-- Push: `git subtree add --prefix <target-folder> <url> <branch>`.
+- Add: `git subtree add --prefix <target-folder> <url> <branch> --squash`
+- Pull: `git subtree pull --prefix <target-folder> <url> <branch> --squash`
+- Push: `git subtree add --prefix <target-folder> <url> <branch>`
 - Ex: `git config alias.sbp 'subtree pull --prefix st /
-  git@gitlab.com:balameb/subtree-nested-example.git master --squash'`.
+  git@gitlab.com:balameb/subtree-nested-example.git master --squash'`
 
-```sh
+```shell
   # Add an alias
   # Add
   git config alias.sba 'subtree add --prefix st /
@@ -37,7 +37,7 @@ comments: false
 
 ```
 
-```sh
+```shell
   # Adding, or committing won't change the sub repo at remote
   # even if we push
   git add -A

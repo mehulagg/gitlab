@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Security::DependencyListService do
+RSpec.describe Security::DependencyListService do
   describe '#execute' do
     let!(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report) }
 
     subject { described_class.new(pipeline: pipeline, params: params).execute }
 
     before do
-      stub_licensed_features(dependency_list: true)
+      stub_licensed_features(dependency_scanning: true)
     end
 
     context 'without params' do

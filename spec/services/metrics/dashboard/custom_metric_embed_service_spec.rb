@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::CustomMetricEmbedService do
+RSpec.describe Metrics::Dashboard::CustomMetricEmbedService do
   include MetricsDashboardHelpers
 
-  set(:project) { build(:project) }
-  set(:user) { create(:user) }
-  set(:environment) { create(:environment, project: project) }
+  let_it_be(:project, reload: true) { build(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:environment) { create(:environment, project: project) }
 
   before do
     project.add_maintainer(user)
@@ -35,8 +35,14 @@ describe Metrics::Dashboard::CustomMetricEmbedService do
 
     it { is_expected.to be_truthy }
 
-    context 'not embedded' do
+    context 'missing embedded' do
       let(:params) { valid_params.except(:embedded) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'not embedded' do
+      let(:params) { valid_params.merge(embedded: 'false') }
 
       it { is_expected.to be_falsey }
     end
@@ -105,7 +111,8 @@ describe Metrics::Dashboard::CustomMetricEmbedService do
       it_behaves_like 'valid embedded dashboard service response'
 
       it 'does not cache the unprocessed dashboard' do
-        expect(Gitlab::Metrics::Dashboard::Cache).not_to receive(:fetch)
+        # Fail spec if any method of Cache class is called.
+        stub_const('Gitlab::Metrics::Dashboard::Cache', double)
 
         described_class.new(*service_params).get_dashboard
       end
@@ -115,11 +122,18 @@ describe Metrics::Dashboard::CustomMetricEmbedService do
 
         it_behaves_like 'valid embedded dashboard service response'
 
-        it 'includes both metrics' do
+        it 'includes both metrics in a single panel' do
           result = service_call
-          included_queries = all_queries(result[:dashboard])
 
-          expect(included_queries).to include('avg(metric_2)', 'avg(metric)')
+          panel_groups = result[:dashboard][:panel_groups]
+          panels = panel_groups[0][:panels]
+          metrics = panels[0][:metrics]
+          queries = metrics.map { |metric| metric[:query_range] }
+
+          expect(panel_groups.length).to eq(1)
+          expect(panels.length).to eq(1)
+          expect(metrics.length).to eq(2)
+          expect(queries).to include('avg(metric_2)', 'avg(metric)')
         end
       end
     end
@@ -128,18 +142,6 @@ describe Metrics::Dashboard::CustomMetricEmbedService do
       let!(:metric) { create(:prometheus_metric, project: create(:project)) }
 
       it_behaves_like 'misconfigured dashboard service response', :not_found
-    end
-  end
-
-  private
-
-  def all_queries(dashboard)
-    dashboard[:panel_groups].flat_map do |group|
-      group[:panels].flat_map do |panel|
-        panel[:metrics].map do |metric|
-          metric[:query_range]
-        end
-      end
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'group epic roadmap', :js do
+RSpec.describe 'group epic roadmap', :js do
   include FilteredSearchHelpers
   include MobileHelpers
 
@@ -24,6 +24,8 @@ describe 'group epic roadmap', :js do
 
   before do
     stub_licensed_features(epics: true)
+    stub_feature_flags(unfiltered_epic_aggregates: false)
+    stub_feature_flags(async_filtering: false)
 
     sign_in(user)
   end
@@ -74,18 +76,6 @@ describe 'group epic roadmap', :js do
       it 'renders all group epics within roadmap' do
         page.within('.roadmap-container .epics-list-section') do
           expect(page).to have_selector('.epics-list-item .epic-title', count: 3)
-        end
-      end
-
-      it 'resizing browser window causes Roadmap to re-render' do
-        page.within('.group-epics-roadmap .roadmap-container') do
-          initial_style = find('.roadmap-shell')[:style]
-
-          page.current_window.resize_to(2500, 1000)
-          wait_for_requests
-
-          expect(find('.roadmap-shell')[:style]).not_to eq(initial_style)
-          restore_window_size
         end
       end
     end
@@ -162,6 +152,40 @@ describe 'group epic roadmap', :js do
         page.within('.content-wrapper .content') do
           expect(page).not_to have_css('.epics-filters')
         end
+      end
+    end
+  end
+
+  context 'when over 1000 epics exist for the group' do
+    before do
+      stub_const('Groups::RoadmapController::EPICS_ROADMAP_LIMIT', 1)
+      create_list(:epic, 2, group: group, start_date: 10.days.ago, end_date: 1.day.ago)
+      visit group_roadmap_path(group)
+      wait_for_requests
+    end
+
+    describe 'roadmap page' do
+      it 'renders warning callout banner' do
+        page.within('.content-wrapper .content') do
+          expect(page).to have_selector('.js-epics-limit-callout', count: 1)
+          expect(find('.js-epics-limit-callout')).to have_content 'Some of your epics may not be visible. A roadmap is limited to the first 1,000 epics, in your selected sort order.'
+        end
+
+        page.within('.js-epics-limit-callout') do
+          expect(find_link('Learn more')[:href]).to eq("https://docs.gitlab.com/ee/user/group/roadmap/")
+        end
+      end
+
+      it 'is removed after dismissal and even after reload' do
+        page.within('.js-epics-limit-callout') do
+          find('.js-close-callout').click
+        end
+
+        expect(page).not_to have_selector('.js-epics-limit-callout')
+
+        refresh
+
+        expect(page).not_to have_selector('.js-epics-limit-callout')
       end
     end
   end

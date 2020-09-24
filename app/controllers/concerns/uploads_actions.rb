@@ -1,10 +1,17 @@
 # frozen_string_literal: true
 
 module UploadsActions
+  extend ActiveSupport::Concern
   include Gitlab::Utils::StrongMemoize
   include SendFileUpload
 
   UPLOAD_MOUNTS = %w(avatar attachment file logo header_logo favicon).freeze
+
+  included do
+    prepend_before_action :set_request_format_from_path_extension
+    skip_before_action :default_cache_headers, only: :show
+    rescue_from FileUploader::InvalidSecret, with: :render_404
+  end
 
   def create
     uploader = UploadService.new(model, params[:file], uploader_class).execute
@@ -29,25 +36,20 @@ module UploadsActions
   def show
     return render_404 unless uploader&.exists?
 
-    # We need to reset caching from the applications controller to get rid of the no-store value
-    headers['Cache-Control'] = ''
-    headers['Pragma'] = ''
-
     ttl, directives = *cache_settings
     ttl ||= 0
     directives ||= { private: true, must_revalidate: true }
 
     expires_in ttl, directives
 
-    disposition = uploader.embeddable? ? 'inline' : 'attachment'
+    file_uploader = [uploader, *uploader.versions.values].find do |version|
+      version.filename == params[:filename]
+    end
 
-    uploaders = [uploader, *uploader.versions.values]
-    uploader = uploaders.find { |version| version.filename == params[:filename] }
-
-    return render_404 unless uploader
+    return render_404 unless file_uploader
 
     workhorse_set_content_type!
-    send_upload(uploader, attachment: uploader.filename, disposition: disposition)
+    send_upload(file_uploader, attachment: file_uploader.filename, disposition: content_disposition)
   end
 
   def authorize
@@ -63,6 +65,28 @@ module UploadsActions
   end
 
   private
+
+  # Based on ActionDispatch::Http::MimeNegotiation. We have an
+  # initializer that monkey-patches this method out (so that repository
+  # paths don't guess a format based on extension), but we do want this
+  # behavior when serving uploads.
+  def set_request_format_from_path_extension
+    path = request.headers['action_dispatch.original_path'] || request.headers['PATH_INFO']
+
+    if match = path&.match(/\.(\w+)\z/)
+      format = Mime[match.captures.first]
+
+      request.format = format.symbol if format
+    end
+  end
+
+  def content_disposition
+    if uploader.embeddable? || uploader.pdf?
+      'inline'
+    else
+      'attachment'
+    end
+  end
 
   def uploader_class
     raise NotImplementedError

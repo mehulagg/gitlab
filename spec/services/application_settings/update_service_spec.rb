@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSettings::UpdateService do
+RSpec.describe ApplicationSettings::UpdateService do
   include ExternalAuthorizationServiceHelpers
 
   let(:application_settings) { create(:application_setting) }
@@ -332,6 +332,22 @@ describe ApplicationSettings::UpdateService do
       expect(application_settings.throttle_protected_paths_period_in_seconds).to eq(600)
       expect(application_settings.throttle_protected_paths_requests_per_period).to eq(100)
       expect(application_settings.protected_paths).to eq(['/users/password', '/users/sign_in'])
+    end
+  end
+
+  context 'when issues_create_limit is passed' do
+    let(:params) do
+      {
+        issues_create_limit: 600
+      }
+    end
+
+    it 'updates issues_create_limit value' do
+      subject.execute
+
+      application_settings.reload
+
+      expect(application_settings.issues_create_limit).to eq(600)
     end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectPushRule < Grape::API
+  class ProjectPushRule < Grape::API::Instance
     before { authenticate! }
     before { authorize_admin_project }
     before { check_project_feature_available!(:push_rules) }
@@ -78,7 +78,8 @@ module API
         not_found!('Push Rule') unless push_rule
 
         push_rule.destroy
-        status 204
+
+        no_content!
       end
     end
   end

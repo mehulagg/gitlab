@@ -2,27 +2,25 @@
 
 require 'spec_helper'
 
-describe ContainerRepositoryEntity do
-  let(:entity) do
-    described_class.new(repository, request: request)
-  end
-
-  set(:project) { create(:project) }
-  set(:user) { create(:user) }
-  set(:repository) { create(:container_repository, project: project) }
-
+RSpec.describe ContainerRepositoryEntity do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:repository) { create(:container_repository, project: project) }
+  let(:entity) { described_class.new(repository, request: request) }
   let(:request) { double('request') }
 
   subject { entity.as_json }
 
   before do
     stub_container_registry_config(enabled: true)
+    stub_container_registry_tags(repository: :any,
+      tags: %w[stable latest])
     allow(request).to receive(:project).and_return(project)
     allow(request).to receive(:current_user).and_return(user)
   end
 
   it 'exposes required informations' do
-    expect(subject).to include(:id, :path, :location, :tags_path)
+    expect(subject).to include(:id, :path, :location, :tags_path, :tags_count)
   end
 
   context 'when project is not preset in the request' do

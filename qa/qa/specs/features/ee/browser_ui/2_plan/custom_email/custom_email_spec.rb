@@ -3,16 +3,15 @@
 require 'securerandom'
 
 module QA
-  context 'Plan' do
-    describe 'Custom email' do
+  RSpec.describe 'Plan', :reliable do
+    describe 'Custom email', :requires_admin do
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_admin_credentials)
-        Page::Main::Menu.perform(&:click_admin_area)
+        Flow::Login.sign_in_as_admin
+        Page::Main::Menu.perform(&:go_to_admin_area)
         Page::Admin::Menu.perform(&:go_to_preferences_settings)
       end
 
-      it 'customizes email with additional text' do
+      it 'customizes email with additional text', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/554' do
         random_custom_text = "Testing custom email - #{SecureRandom.hex(8)}"
 
         EE::Page::Admin::Settings::Preferences.perform do |preferences|

@@ -38,7 +38,7 @@ class CohortsService
 
       {
         registration_month: registration_month,
-        activity_months: activity_months,
+        activity_months: activity_months[1..-1],
         total: activity_months.first[:total],
         inactive: inactive
       }
@@ -63,7 +63,7 @@ class CohortsService
     overall_total = month_totals.first
 
     month_totals.map do |total|
-      { total: total, percentage: total.zero? ? 0 : 100 * total / overall_total }
+      { total: total, percentage: total == 0 ? 0 : 100 * total / overall_total }
     end
   end
 
@@ -88,7 +88,7 @@ class CohortsService
         User
           .where('created_at > ?', MONTHS_INCLUDED.months.ago.end_of_month)
           .group(created_at_month, last_activity_on_month)
-          .reorder("#{created_at_month} ASC", "#{last_activity_on_month} ASC")
+          .reorder(Arel.sql("#{created_at_month} ASC, #{last_activity_on_month} ASC"))
           .count
       end
   end

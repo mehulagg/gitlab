@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::SystemNotes::MergeRequestsService do
+RSpec.describe ::SystemNotes::MergeRequestsService do
   include Gitlab::Routing
 
   let_it_be(:group) { create(:group) }
@@ -14,7 +14,7 @@ describe ::SystemNotes::MergeRequestsService do
   let(:service) { described_class.new(noteable: noteable, project: project, author: author) }
 
   describe '.merge_when_pipeline_succeeds' do
-    let(:pipeline) { build(:ci_pipeline_without_jobs )}
+    let(:pipeline) { build(:ci_pipeline) }
 
     subject { service.merge_when_pipeline_succeeds(pipeline.sha) }
 
@@ -52,8 +52,8 @@ describe ::SystemNotes::MergeRequestsService do
   end
 
   describe '.handle_merge_request_wip' do
-    context 'adding wip note' do
-      let(:noteable) { create(:merge_request, source_project: project, title: 'WIP Lorem ipsum') }
+    context 'adding draft note' do
+      let(:noteable) { create(:merge_request, source_project: project, title: 'Draft: Lorem ipsum') }
 
       subject { service.handle_merge_request_wip }
 
@@ -238,6 +238,41 @@ describe ::SystemNotes::MergeRequestsService do
 
     it 'sets the new merge request note text' do
       expect(subject.note).to eq("created merge request #{merge_request.to_reference(project)} to address this issue")
+    end
+  end
+
+  describe '.picked_into_branch' do
+    let(:branch_name) { 'a-branch' }
+    let(:commit_sha) { project.commit.sha }
+    let(:merge_request) { noteable }
+
+    subject { service.picked_into_branch(branch_name, commit_sha) }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'cherry_pick' }
+    end
+
+    it "posts the 'picked merge request' system note" do
+      expect(subject.note).to eq("picked the changes into the branch [`#{branch_name}`](/#{project.full_path}/-/tree/#{branch_name}) with commit #{commit_sha}")
+    end
+
+    it 'links the merge request and the cherry-pick commit' do
+      expect(subject.noteable).to eq(merge_request)
+      expect(subject.commit_id).to eq(commit_sha)
+    end
+  end
+
+  describe '#approve_mr' do
+    subject { described_class.new(noteable: noteable, project: project, author: author).approve_mr }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'approved' }
+    end
+
+    context 'when merge request approved' do
+      it 'sets the note text' do
+        expect(subject.note).to eq "approved this merge request"
+      end
     end
   end
 end

@@ -3,9 +3,9 @@
 module Types
   class EpicStateEventEnum < BaseEnum
     graphql_name 'EpicStateEvent'
-    description 'State event of a GitLab Epic'
+    description 'State event of an epic'
 
-    value 'REOPEN', value: 'reopen', description: 'Reopen the Epic'
-    value 'CLOSE', value: 'close', description: 'Close the Epic'
+    value 'REOPEN', value: 'reopen', description: 'Reopen the epic'
+    value 'CLOSE', value: 'close', description: 'Close the epic'
   end
 end

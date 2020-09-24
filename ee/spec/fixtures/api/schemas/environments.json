@@ -8,6 +8,7 @@
             "minItems": 1,
             "type": "array"
         },
+        "review_app": { "$ref": "review_app.json" },
         "available_count": {
             "type": "integer"
         },

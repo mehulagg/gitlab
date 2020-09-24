@@ -1,3 +1,5 @@
+import { LEGACY_FLAG } from '../../../constants';
+
 export default () => ({
   endpoint: null,
   path: null,
@@ -10,4 +12,7 @@ export default () => ({
   isLoading: false,
   hasError: false,
   iid: null,
+  active: true,
+  strategies: [],
+  version: LEGACY_FLAG,
 });

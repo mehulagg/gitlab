@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'gitlab:cleanup rake tasks' do
+RSpec.describe 'gitlab:cleanup rake tasks' do
   before do
     Rake.application.rake_require 'tasks/gitlab/cleanup'
   end
@@ -16,10 +16,10 @@ describe 'gitlab:cleanup rake tasks' do
     let!(:logger) { double(:logger) }
 
     before do
-      expect(main_object).to receive(:logger).and_return(logger).at_least(1).times
+      expect(main_object).to receive(:logger).and_return(logger).at_least(:once)
 
-      allow(logger).to receive(:info).at_least(1).times
-      allow(logger).to receive(:debug).at_least(1).times
+      allow(logger).to receive(:info).at_least(:once)
+      allow(logger).to receive(:debug).at_least(:once)
     end
 
     context 'with a fixable orphaned project upload file' do
@@ -117,6 +117,71 @@ describe 'gitlab:cleanup rake tasks' do
 
         rake_task
       end
+    end
+  end
+
+  describe 'gitlab:cleanup:orphan_lfs_file_references' do
+    subject(:rake_task) { run_rake_task('gitlab:cleanup:orphan_lfs_file_references') }
+
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_env('PROJECT_ID', project.id)
+    end
+
+    it 'runs the task without errors' do
+      expect(Gitlab::Cleanup::OrphanLfsFileReferences)
+        .to receive(:new).and_call_original
+
+      expect { rake_task }.not_to raise_error
+    end
+
+    context 'with DRY_RUN set to false' do
+      before do
+        stub_env('DRY_RUN', 'false')
+      end
+
+      it 'passes dry_run correctly' do
+        expect(Gitlab::Cleanup::OrphanLfsFileReferences)
+          .to receive(:new)
+          .with(project,
+                limit: anything,
+                dry_run: false,
+                logger: anything)
+          .and_call_original
+
+        rake_task
+      end
+    end
+
+    context 'with LIMIT set to 100' do
+      before do
+        stub_env('LIMIT', '100')
+      end
+
+      it 'passes limit as integer' do
+        expect(Gitlab::Cleanup::OrphanLfsFileReferences)
+          .to receive(:new)
+          .with(project,
+                limit: 100,
+                dry_run: true,
+                logger: anything)
+          .and_call_original
+
+        rake_task
+      end
+    end
+  end
+
+  describe 'gitlab:cleanup:orphan_lfs_files' do
+    subject(:rake_task) { run_rake_task('gitlab:cleanup:orphan_lfs_files') }
+
+    it 'runs RemoveUnreferencedLfsObjectsWorker' do
+      expect_any_instance_of(RemoveUnreferencedLfsObjectsWorker)
+        .to receive(:perform)
+        .and_call_original
+
+      rake_task
     end
   end
 

@@ -1,0 +1,6 @@
+%tr
+  %td
+    = project.name
+  %td
+    = user_avatar_without_link(user: project.owner, size: 32)
+    = project.owner.name

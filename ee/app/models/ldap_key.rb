@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class LDAPKey < Key
-  include EE::UsageStatistics # rubocop: disable Cop/InjectEnterpriseEditionModule
+  include UsageStatistics
 
   def can_delete?
     false

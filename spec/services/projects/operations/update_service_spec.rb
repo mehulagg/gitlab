@@ -2,20 +2,102 @@
 
 require 'spec_helper'
 
-describe Projects::Operations::UpdateService do
-  set(:user) { create(:user) }
-  set(:project) { create(:project) }
+RSpec.describe Projects::Operations::UpdateService do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project, refind: true) { create(:project) }
 
   let(:result) { subject.execute }
 
   subject { described_class.new(project, user, params) }
 
   describe '#execute' do
+    context 'alerting setting' do
+      before do
+        project.add_maintainer(user)
+      end
+
+      shared_examples 'no operation' do
+        it 'does nothing' do
+          expect(result[:status]).to eq(:success)
+          expect(project.reload.alerting_setting).to be_nil
+        end
+      end
+
+      context 'with valid params' do
+        let(:params) { { alerting_setting_attributes: alerting_params } }
+
+        shared_examples 'setting creation' do
+          it 'creates a setting' do
+            expect(project.alerting_setting).to be_nil
+
+            expect(result[:status]).to eq(:success)
+            expect(project.reload.alerting_setting).not_to be_nil
+          end
+        end
+
+        context 'when regenerate_token is not set' do
+          let(:alerting_params) { { token: 'some token' } }
+
+          context 'with an existing setting' do
+            let!(:alerting_setting) do
+              create(:project_alerting_setting, project: project)
+            end
+
+            it 'ignores provided token' do
+              expect(result[:status]).to eq(:success)
+              expect(project.reload.alerting_setting.token)
+                .to eq(alerting_setting.token)
+            end
+          end
+
+          context 'without an existing setting' do
+            it_behaves_like 'setting creation'
+          end
+        end
+
+        context 'when regenerate_token is set' do
+          let(:alerting_params) { { regenerate_token: true } }
+
+          context 'with an existing setting' do
+            let(:token) { 'some token' }
+
+            let!(:alerting_setting) do
+              create(:project_alerting_setting, project: project, token: token)
+            end
+
+            it 'regenerates token' do
+              expect(result[:status]).to eq(:success)
+              expect(project.reload.alerting_setting.token).not_to eq(token)
+            end
+          end
+
+          context 'without an existing setting' do
+            it_behaves_like 'setting creation'
+
+            context 'with insufficient permissions' do
+              before do
+                project.add_reporter(user)
+              end
+
+              it_behaves_like 'no operation'
+            end
+          end
+        end
+      end
+
+      context 'with empty params' do
+        let(:params) { {} }
+
+        it_behaves_like 'no operation'
+      end
+    end
+
     context 'metrics dashboard setting' do
       let(:params) do
         {
           metrics_setting_attributes: {
-            external_dashboard_url: 'http://gitlab.com'
+            external_dashboard_url: 'http://gitlab.com',
+            dashboard_timezone: 'utc'
           }
         }
       end
@@ -27,6 +109,7 @@ describe Projects::Operations::UpdateService do
           expect(project.reload.metrics_setting.external_dashboard_url).to eq(
             'http://gitlab.com'
           )
+          expect(project.metrics_setting.dashboard_timezone).to eq('utc')
         end
       end
 
@@ -41,22 +124,25 @@ describe Projects::Operations::UpdateService do
           expect(project.reload.metrics_setting.external_dashboard_url).to eq(
             'http://gitlab.com'
           )
+          expect(project.metrics_setting.dashboard_timezone).to eq('utc')
+        end
+      end
+
+      context 'with blank external_dashboard_url' do
+        let(:params) do
+          {
+            metrics_setting_attributes: {
+              external_dashboard_url: '',
+              dashboard_timezone: 'utc'
+            }
+          }
         end
 
-        context 'with blank external_dashboard_url in params' do
-          let(:params) do
-            {
-              metrics_setting_attributes: {
-                external_dashboard_url: ''
-              }
-            }
-          end
+        it 'updates dashboard_timezone' do
+          expect(result[:status]).to eq(:success)
 
-          it 'destroys the metrics_setting entry in DB' do
-            expect(result[:status]).to eq(:success)
-
-            expect(project.reload.metrics_setting).to be_nil
-          end
+          expect(project.reload.metrics_setting.external_dashboard_url).to be(nil)
+          expect(project.metrics_setting.dashboard_timezone).to eq('utc')
         end
       end
     end
@@ -145,6 +231,48 @@ describe Projects::Operations::UpdateService do
         end
       end
 
+      context 'partial_update' do
+        let(:params) do
+          {
+            error_tracking_setting_attributes: {
+              enabled: true
+            }
+          }
+        end
+
+        context 'with setting' do
+          before do
+            create(:project_error_tracking_setting, :disabled, project: project)
+          end
+
+          it 'service succeeds' do
+            expect(result[:status]).to eq(:success)
+          end
+
+          it 'updates attributes' do
+            expect { result }
+              .to change { project.reload.error_tracking_setting.enabled }
+              .from(false)
+              .to(true)
+          end
+
+          it 'only updates enabled attribute' do
+            result
+
+            expect(project.error_tracking_setting.previous_changes.keys)
+              .to contain_exactly('enabled')
+          end
+        end
+
+        context 'without setting' do
+          it 'does not create a setting' do
+            expect(result[:status]).to eq(:error)
+
+            expect(project.reload.error_tracking_setting).to be_nil
+          end
+        end
+      end
+
       context 'with masked param token' do
         let(:params) do
           {
@@ -210,7 +338,7 @@ describe Projects::Operations::UpdateService do
           integration = project.reload.grafana_integration
 
           expect(integration.grafana_url).to eq(expected_attrs[:grafana_url])
-          expect(integration.token).to eq(expected_attrs[:token])
+          expect(integration.send(:token)).to eq(expected_attrs[:token])
         end
       end
 
@@ -226,7 +354,7 @@ describe Projects::Operations::UpdateService do
           integration = project.reload.grafana_integration
 
           expect(integration.grafana_url).to eq(expected_attrs[:grafana_url])
-          expect(integration.token).to eq(expected_attrs[:token])
+          expect(integration.send(:token)).to eq(expected_attrs[:token])
         end
 
         context 'with all grafana attributes blank in params' do
@@ -244,6 +372,61 @@ describe Projects::Operations::UpdateService do
 
             expect(project.reload.grafana_integration).to be_nil
           end
+        end
+      end
+    end
+
+    context 'prometheus integration' do
+      context 'prometheus params were passed into service' do
+        let(:prometheus_service) do
+          build_stubbed(:prometheus_service, project: project, properties: {
+            api_url: "http://example.prometheus.com",
+            manual_configuration: "0"
+          })
+        end
+
+        let(:params) do
+          {
+            prometheus_integration_attributes: {
+              'api_url' => 'http://new.prometheus.com',
+              'manual_configuration' => '1'
+            }
+          }
+        end
+
+        it 'uses Project#find_or_initialize_service to include instance defined defaults and pass them to Projects::UpdateService', :aggregate_failures do
+          project_update_service = double(Projects::UpdateService)
+
+          expect(project)
+            .to receive(:find_or_initialize_service)
+            .with('prometheus')
+            .and_return(prometheus_service)
+          expect(Projects::UpdateService).to receive(:new) do |project_arg, user_arg, update_params_hash|
+            expect(project_arg).to eq project
+            expect(user_arg).to eq user
+            expect(update_params_hash[:prometheus_service_attributes]).to include('properties' => { 'api_url' => 'http://new.prometheus.com', 'manual_configuration' => '1' })
+            expect(update_params_hash[:prometheus_service_attributes]).not_to include(*%w(id project_id created_at updated_at))
+          end.and_return(project_update_service)
+          expect(project_update_service).to receive(:execute)
+
+          subject.execute
+        end
+      end
+
+      context 'prometheus params were not passed into service' do
+        let(:params) { { something: :else } }
+
+        it 'does not pass any prometheus params into Projects::UpdateService', :aggregate_failures do
+          project_update_service = double(Projects::UpdateService)
+
+          expect(project).not_to receive(:find_or_initialize_service)
+          expect(Projects::UpdateService)
+            .to receive(:new)
+            .with(project, user, {})
+            .and_return(project_update_service)
+          expect(project_update_service).to receive(:execute)
+
+          subject.execute
         end
       end
     end

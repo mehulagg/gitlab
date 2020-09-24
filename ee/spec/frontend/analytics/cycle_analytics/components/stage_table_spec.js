@@ -1,12 +1,12 @@
-import Vue from 'vue';
 import { shallowMount, mount } from '@vue/test-utils';
+import { getByText } from '@testing-library/dom';
+import { GlLoadingIcon } from '@gitlab/ui';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
-import { issueEvents, issueStage, allowedStages, groupLabels } from '../mock_data';
+import { issueEvents, issueStage, allowedStages } from '../mock_data';
 
 let wrapper = null;
 const $sel = {
   nav: '.stage-nav',
-  navItems: '.stage-nav-item',
   eventList: '.stage-events',
   events: '.stage-event-item',
   description: '.events-description',
@@ -15,46 +15,54 @@ const $sel = {
   illustration: '.empty-state .svg-content',
 };
 
-const headers = ['Stage', 'Median', issueStage.legend, 'Total Time'];
+const headers = ['Stage', 'Median', issueStage.legend, 'Time'];
 const noDataSvgPath = 'path/to/no/data';
-const noAccessSvgPath = 'path/to/no/access';
+const tooMuchDataError = "We don't have enough data to show this stage.";
+
+const StageTableNavSlot = {
+  name: 'stage-table-nav-slot-stub',
+  template: '<ul><li v-for="stage in stages">{{ stage.title }}</li></ul>',
+};
 
 function createComponent(props = {}, shallow = false) {
   const func = shallow ? shallowMount : mount;
   return func(StageTable, {
     propsData: {
-      stages: allowedStages,
       currentStage: issueStage,
-      currentStageEvents: issueEvents,
-      labels: groupLabels,
       isLoading: false,
+      isLoadingStage: false,
       isEmptyStage: false,
-      isAddingCustomStage: false,
+      currentStageEvents: issueEvents,
       noDataSvgPath,
-      noAccessSvgPath,
-      canEditStages: false,
-      customStageFormEvents: [],
+      customStageFormActive: false,
       ...props,
     },
+    slots: {
+      nav: StageTableNavSlot,
+    },
+    mocks: {
+      stages: allowedStages,
+    },
     stubs: {
+      'stage-nav-item': true,
       'gl-loading-icon': true,
     },
-    sync: false,
   });
 }
 
 describe('StageTable', () => {
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   describe('headers', () => {
     beforeEach(() => {
       wrapper = createComponent();
     });
 
-    afterEach(() => {
-      wrapper.destroy();
-    });
     it('will render the headers', () => {
       const renderedHeaders = wrapper.findAll($sel.headers);
-      expect(renderedHeaders.length).toEqual(headers.length);
+      expect(renderedHeaders).toHaveLength(headers.length);
 
       const headerText = wrapper.find($sel.headersList).text();
       headers.forEach(title => {
@@ -68,17 +76,13 @@ describe('StageTable', () => {
       wrapper = createComponent();
     });
 
-    afterEach(() => {
-      wrapper.destroy();
-    });
-
     it('will render the events list', () => {
       expect(wrapper.find($sel.eventList).exists()).toBeTruthy();
     });
 
     it('will render the correct stages', () => {
-      const evs = wrapper.findAll({ name: 'StageNavItem' });
-      expect(evs.length).toEqual(allowedStages.length);
+      const evs = wrapper.find(StageTableNavSlot).findAll('li');
+      expect(evs).toHaveLength(allowedStages.length);
 
       const nav = wrapper.find($sel.nav).html();
       allowedStages.forEach(stage => {
@@ -98,7 +102,7 @@ describe('StageTable', () => {
 
     it('will render the correct events', () => {
       const evs = wrapper.findAll($sel.events);
-      expect(evs.length).toEqual(issueEvents.length);
+      expect(evs).toHaveLength(issueEvents.length);
 
       const evshtml = wrapper.find($sel.eventList).html();
       issueEvents.forEach(ev => {
@@ -106,42 +110,32 @@ describe('StageTable', () => {
       });
     });
 
-    function selectStage(index) {
-      wrapper
-        .findAll($sel.navItems)
-        .at(index)
-        .trigger('click');
-    }
-
-    describe('when a stage is clicked', () => {
-      it('will emit `selectStage`', done => {
-        expect(wrapper.emitted('selectStage')).toBeUndefined();
-
-        selectStage(1);
-
-        Vue.nextTick(() => {
-          expect(wrapper.emitted().selectStage.length).toEqual(1);
-          done();
-        });
-      });
-
-      it('will emit `selectStage` with the new stage title', done => {
-        const secondStage = allowedStages[1];
-
-        selectStage(1);
-
-        Vue.nextTick(() => {
-          const [params] = wrapper.emitted('selectStage')[0];
-          expect(params).toMatchObject({ title: secondStage.title });
-          done();
-        });
-      });
+    it('will not display the default data message', () => {
+      expect(wrapper.html()).not.toContain(tooMuchDataError);
     });
   });
 
   it('isLoading = true', () => {
     wrapper = createComponent({ isLoading: true }, true);
-    expect(wrapper.find('gl-loading-icon-stub').exists()).toEqual(true);
+    expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
+  });
+
+  describe('isLoadingStage = true', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ isLoadingStage: true }, true);
+    });
+
+    it('will render the list of stages', () => {
+      const navEl = wrapper.find($sel.nav).element;
+
+      allowedStages.forEach(stage => {
+        expect(getByText(navEl, stage.title, { selector: 'li' })).not.toBe(null);
+      });
+    });
+
+    it('will render a loading icon', () => {
+      expect(wrapper.find(GlLoadingIcon).exists()).toEqual(true);
+    });
   });
 
   describe('isEmptyStage = true', () => {
@@ -149,32 +143,28 @@ describe('StageTable', () => {
       wrapper = createComponent({ isEmptyStage: true });
     });
 
-    afterEach(() => {
-      wrapper.destroy();
-    });
-
     it('will render the empty stage illustration', () => {
       expect(wrapper.find($sel.illustration).exists()).toBeTruthy();
       expect(wrapper.find($sel.illustration).html()).toContain(noDataSvgPath);
     });
 
-    it('will display the no data message', () => {
-      expect(wrapper.html()).toContain("We don't have enough data to show this stage.");
+    it('will display the default no data message', () => {
+      expect(wrapper.html()).toContain(tooMuchDataError);
     });
   });
 
-  describe('canEditStages = true', () => {
+  describe('emptyStateMessage set', () => {
+    const emptyStateMessage = 'Too much data';
     beforeEach(() => {
-      wrapper = createComponent({
-        canEditStages: true,
-      });
+      wrapper = createComponent({ isEmptyStage: true, emptyStateMessage });
     });
 
-    afterEach(() => {
-      wrapper.destroy();
+    it('will not display the default data message', () => {
+      expect(wrapper.html()).not.toContain(tooMuchDataError);
     });
-    it('will render the add a stage button', () => {
-      expect(wrapper.html()).toContain('Add a stage');
+
+    it('will display the custom message', () => {
+      expect(wrapper.html()).toContain(emptyStateMessage);
     });
   });
 });

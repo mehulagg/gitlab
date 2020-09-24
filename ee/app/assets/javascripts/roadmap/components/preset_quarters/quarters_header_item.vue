@@ -18,10 +18,6 @@ export default {
       type: Array,
       required: true,
     },
-    itemWidth: {
-      type: Number,
-      required: true,
-    },
   },
   data() {
     const currentDate = new Date();
@@ -32,11 +28,6 @@ export default {
     };
   },
   computed: {
-    itemStyles() {
-      return {
-        width: `${this.itemWidth}px`,
-      };
-    },
     quarterBeginDate() {
       return this.timeframeItem.range[0];
     },
@@ -66,7 +57,7 @@ export default {
 </script>
 
 <template>
-  <span :style="itemStyles" class="timeline-header-item">
+  <span class="timeline-header-item">
     <div :class="timelineHeaderClass" class="item-label">{{ timelineHeaderLabel }}</div>
     <quarters-header-sub-item :timeframe-item="timeframeItem" :current-date="currentDate" />
   </span>

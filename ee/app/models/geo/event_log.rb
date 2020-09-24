@@ -17,7 +17,8 @@ module Geo
                        Geo::LfsObjectDeletedEvent
                        Geo::JobArtifactDeletedEvent
                        Geo::UploadDeletedEvent
-                       Geo::ContainerRepositoryUpdatedEvent].freeze
+                       Geo::ContainerRepositoryUpdatedEvent
+                       Geo::Event].freeze
 
     belongs_to :cache_invalidation_event,
       class_name: 'Geo::CacheInvalidationEvent',
@@ -71,6 +72,10 @@ module Geo
       class_name: 'Geo::ContainerRepositoryUpdatedEvent',
       foreign_key: :container_repository_updated_event_id
 
+    belongs_to :geo_event,
+      class_name: 'Geo::Event',
+      foreign_key: :geo_event_id,
+      inverse_of: :geo_event_log
     def self.latest_event
       order(id: :desc).first
     end
@@ -79,7 +84,7 @@ module Geo
       last_processed = Geo::EventLogState.last_processed
       return first unless last_processed
 
-      where('id > ?', last_processed.event_id).first
+      find_by('id > ?', last_processed.event_id)
     end
 
     def self.event_classes
@@ -90,6 +95,7 @@ module Geo
       includes(reflections.keys)
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def event
       repository_created_event ||
         repository_updated_event ||
@@ -103,8 +109,10 @@ module Geo
         upload_deleted_event ||
         reset_checksum_event ||
         cache_invalidation_event ||
-        container_repository_updated_event
+        container_repository_updated_event ||
+        geo_event
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def project_id
       event.try(:project_id)

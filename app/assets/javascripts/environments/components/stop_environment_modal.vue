@@ -1,9 +1,7 @@
 <script>
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
-import { GlTooltipDirective } from '@gitlab/ui';
+/* eslint-disable @gitlab/vue-require-i18n-strings */
+import { GlSprintf, GlTooltipDirective } from '@gitlab/ui';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
-import { s__, sprintf } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import eventHub from '../event_hub';
 
 export default {
@@ -12,7 +10,7 @@ export default {
 
   components: {
     GlModal: DeprecatedModal2,
-    LoadingButton,
+    GlSprintf,
   },
 
   directives: {
@@ -23,27 +21,6 @@ export default {
     environment: {
       type: Object,
       required: true,
-    },
-  },
-
-  computed: {
-    noStopActionMessage() {
-      return sprintf(
-        s__(
-          `Environments|Note that this action will stop the environment,
-        but it will %{emphasisStart}not%{emphasisEnd} have an effect on any existing deployment
-        due to no “stop environment action” being defined
-        in the %{ciConfigLinkStart}.gitlab-ci.yml%{ciConfigLinkEnd} file.`,
-        ),
-        {
-          emphasisStart: '<strong>',
-          emphasisEnd: '</strong>',
-          ciConfigLinkStart:
-            '<a href="https://docs.gitlab.com/ee/ci/yaml/" target="_blank" rel="noopener noreferrer">',
-          ciConfigLinkEnd: '</a>',
-        },
-        false,
-      );
     },
   },
 
@@ -62,20 +39,37 @@ export default {
     footer-primary-button-variant="danger"
     @submit="onSubmit"
   >
-    <template slot="header">
+    <template #header>
       <h4 class="modal-title d-flex mw-100">
         Stopping
-        <span v-gl-tooltip :title="environment.name" class="text-truncate ml-1 mr-1 flex-fill">{{
-          environment.name
-        }}</span>
-        ?
+        <span v-gl-tooltip :title="environment.name" class="text-truncate ml-1 mr-1 flex-fill">
+          {{ environment.name }}?
+        </span>
       </h4>
     </template>
 
     <p>{{ s__('Environments|Are you sure you want to stop this environment?') }}</p>
 
     <div v-if="!environment.has_stop_action" class="warning_message">
-      <p v-html="noStopActionMessage"></p>
+      <p>
+        <gl-sprintf
+          :message="
+            s__(`Environments|Note that this action will stop the environment,
+        but it will %{emphasisStart}not%{emphasisEnd} have an effect on any existing deployment
+        due to no “stop environment action” being defined
+        in the %{ciConfigLinkStart}.gitlab-ci.yml%{ciConfigLinkEnd} file.`)
+          "
+        >
+          <template #emphasis="{ content }">
+            <strong>{{ content }}</strong>
+          </template>
+          <template #ciConfigLink="{ content }">
+            <a href="https://docs.gitlab.com/ee/ci/yaml/" target="_blank" rel="noopener noreferrer">
+              {{ content }}</a
+            >
+          </template>
+        </gl-sprintf>
+      </p>
       <a
         href="https://docs.gitlab.com/ee/ci/environments.html#stopping-an-environment"
         target="_blank"

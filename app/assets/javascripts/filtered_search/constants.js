@@ -1,2 +1,13 @@
-/* eslint-disable import/prefer-default-export */
 export const USER_TOKEN_TYPES = ['author', 'assignee'];
+
+export const DROPDOWN_TYPE = {
+  hint: 'hint',
+  operator: 'operator',
+};
+
+export const FILTER_TYPE = {
+  none: 'none',
+  any: 'any',
+};
+
+export const MAX_HISTORY_SIZE = 5;

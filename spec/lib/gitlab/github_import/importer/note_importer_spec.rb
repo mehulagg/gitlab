@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::NoteImporter do
+RSpec.describe Gitlab::GithubImport::Importer::NoteImporter do
   let(:client) { double(:client) }
   let(:project) { create(:project) }
   let(:user) { create(:user) }
@@ -141,9 +143,9 @@ describe Gitlab::GithubImport::Importer::NoteImporter do
 
   describe '#find_noteable_id' do
     it 'returns the ID of the noteable' do
-      expect_any_instance_of(Gitlab::GithubImport::IssuableFinder)
-        .to receive(:database_id)
-        .and_return(10)
+      expect_next_instance_of(Gitlab::GithubImport::IssuableFinder) do |instance|
+        expect(instance).to receive(:database_id).and_return(10)
+      end
 
       expect(importer.find_noteable_id).to eq(10)
     end

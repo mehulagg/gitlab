@@ -3,11 +3,16 @@
 module Notes
   class UpdateService < BaseService
     def execute(note)
-      return note unless note.editable?
+      return note unless note.editable? && params.present?
 
       old_mentioned_users = note.mentioned_users(current_user).to_a
 
-      note.update(params.merge(updated_by: current_user))
+      note.assign_attributes(params.merge(updated_by: current_user))
+
+      note.with_transaction_returning_status do
+        update_confidentiality(note)
+        note.save
+      end
 
       only_commands = false
 
@@ -20,7 +25,7 @@ module Notes
         note.note = content
       end
 
-      unless only_commands
+      unless only_commands || note.for_personal_snippet?
         note.create_new_cross_references!(current_user)
 
         update_todos(note, old_mentioned_users)
@@ -51,6 +56,8 @@ module Notes
       # We must add the error after we call #save because errors are reset
       # when #save is called
       note.errors.add(:commands_only, message.presence || _('Commands did not apply'))
+      # Allow consumers to detect problems applying commands
+      note.errors.add(:commands, _('Commands did not apply')) unless message.present?
 
       Notes::DestroyService.new(project, current_user).execute(note)
     end
@@ -73,5 +80,16 @@ module Notes
 
       TodoService.new.update_note(note, current_user, old_mentioned_users)
     end
+
+    # This method updates confidentiality of all discussion notes at once
+    def update_confidentiality(note)
+      return unless params.key?(:confidential)
+      return unless note.is_a?(DiscussionNote) # we don't need to do bulk update for single notes
+      return unless note.start_of_discussion? # don't update all notes if a response is being updated
+
+      Note.id_in(note.discussion.notes.map(&:id)).update_all(confidential: params[:confidential])
+    end
   end
 end
+
+Notes::UpdateService.prepend_if_ee('EE::Notes::UpdateService')

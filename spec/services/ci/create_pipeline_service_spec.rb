@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-describe Ci::CreatePipelineService do
+RSpec.describe Ci::CreatePipelineService do
   include ProjectForksHelper
 
-  set(:project) { create(:project, :repository) }
+  let_it_be(:project, reload: true) { create(:project, :repository) }
   let(:user) { create(:admin) }
   let(:ref_name) { 'refs/heads/master' }
 
   before do
-    stub_repository_ci_yaml_file(sha: anything)
+    stub_ci_pipeline_yaml_file(gitlab_ci_yaml)
   end
 
   describe '#execute' do
@@ -65,6 +65,7 @@ describe Ci::CreatePipelineService do
         expect(pipeline.iid).not_to be_nil
         expect(pipeline.repository_source?).to be true
         expect(pipeline.builds.first).to be_kind_of(Ci::Build)
+        expect(pipeline.yaml_errors).not_to be_present
       end
 
       it 'increments the prometheus counter' do
@@ -76,10 +77,23 @@ describe Ci::CreatePipelineService do
         pipeline
       end
 
+      it 'records pipeline size in a prometheus histogram' do
+        histogram = spy('pipeline size histogram')
+
+        allow(Gitlab::Ci::Pipeline::Metrics)
+          .to receive(:new).and_return(histogram)
+
+        execute_service
+
+        expect(histogram).to have_received(:observe)
+          .with({ source: 'push' }, 5)
+      end
+
       context 'when merge requests already exist for this source branch' do
         let(:merge_request_1) do
           create(:merge_request, source_branch: 'feature', target_branch: "master", source_project: project)
         end
+
         let(:merge_request_2) do
           create(:merge_request, source_branch: 'feature', target_branch: "v1.1.0", source_project: project)
         end
@@ -181,6 +195,7 @@ describe Ci::CreatePipelineService do
 
             expect(head_pipeline).to be_persisted
             expect(head_pipeline.yaml_errors).to be_present
+            expect(head_pipeline.messages).to be_present
             expect(merge_request.reload.head_pipeline).to eq head_pipeline
           end
         end
@@ -208,7 +223,7 @@ describe Ci::CreatePipelineService do
 
       context 'auto-cancel enabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'enabled')
+          project.update!(auto_cancel_pending_pipelines: 'enabled')
         end
 
         it 'does not cancel HEAD pipeline' do
@@ -233,7 +248,7 @@ describe Ci::CreatePipelineService do
         end
 
         it 'cancel created outdated pipelines', :sidekiq_might_not_need_inline do
-          pipeline_on_previous_commit.update(status: 'created')
+          pipeline_on_previous_commit.update!(status: 'created')
           pipeline
 
           expect(pipeline_on_previous_commit.reload).to have_attributes(status: 'canceled', auto_canceled_by_id: pipeline.id)
@@ -361,11 +376,11 @@ describe Ci::CreatePipelineService do
 
             context 'when build that is not marked as interruptible is running' do
               it 'cancels running outdated pipelines', :sidekiq_might_not_need_inline do
-                pipeline_on_previous_commit
-                  .builds
-                  .find_by_name('build_2_1')
-                  .tap(&:enqueue!)
-                  .run!
+                build_2_1 = pipeline_on_previous_commit
+                  .builds.find_by_name('build_2_1')
+
+                build_2_1.enqueue!
+                build_2_1.reset.run!
 
                 pipeline
 
@@ -376,12 +391,12 @@ describe Ci::CreatePipelineService do
           end
 
           context 'when an uninterruptible build is running' do
-            it 'does not cancel running outdated pipelines', :sidekiq_might_not_need_inline do
-              pipeline_on_previous_commit
-                .builds
-                .find_by_name('build_3_1')
-                .tap(&:enqueue!)
-                .run!
+            it 'does not cancel running outdated pipelines', :sidekiq_inline do
+              build_3_1 = pipeline_on_previous_commit
+                .builds.find_by_name('build_3_1')
+
+              build_3_1.enqueue!
+              build_3_1.reset.run!
 
               pipeline
 
@@ -424,7 +439,7 @@ describe Ci::CreatePipelineService do
 
       context 'auto-cancel disabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'disabled')
+          project.update!(auto_cancel_pending_pipelines: 'disabled')
         end
 
         it 'does not auto cancel pending non-HEAD pipelines' do
@@ -474,6 +489,67 @@ describe Ci::CreatePipelineService do
       end
     end
 
+    context 'config evaluation' do
+      context 'when config is in a file in repository' do
+        before do
+          content = YAML.dump(rspec: { script: 'echo' })
+          stub_ci_pipeline_yaml_file(content)
+        end
+
+        it 'pull it from the repository' do
+          pipeline = execute_service
+          expect(pipeline).to be_repository_source
+          expect(pipeline.builds.map(&:name)).to eq ['rspec']
+        end
+      end
+
+      context 'when config is from Auto-DevOps' do
+        before do
+          stub_ci_pipeline_yaml_file(nil)
+          allow_any_instance_of(Project).to receive(:auto_devops_enabled?).and_return(true)
+          create(:project_auto_devops, project: project)
+        end
+
+        it 'pull it from Auto-DevOps' do
+          pipeline = execute_service
+          expect(pipeline).to be_auto_devops_source
+          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch test])
+        end
+      end
+
+      context 'when config is not found' do
+        before do
+          stub_ci_pipeline_yaml_file(nil)
+        end
+
+        it 'attaches errors to the pipeline' do
+          pipeline = execute_service
+
+          expect(pipeline.errors.full_messages).to eq ['Missing CI config file']
+          expect(pipeline).not_to be_persisted
+        end
+      end
+
+      context 'when an unexpected error is raised' do
+        before do
+          expect(Gitlab::Ci::YamlProcessor).to receive(:new)
+            .and_raise(RuntimeError, 'undefined failure')
+        end
+
+        it 'saves error in pipeline' do
+          pipeline = execute_service
+
+          expect(pipeline.yaml_errors).to include('Undefined error')
+        end
+
+        it 'logs error' do
+          expect(Gitlab::ErrorTracking).to receive(:track_exception).and_call_original
+
+          execute_service
+        end
+      end
+    end
+
     context 'when yaml is invalid' do
       let(:ci_yaml) { 'invalid: file: fiile' }
       let(:message) { 'Message' }
@@ -493,7 +569,7 @@ describe Ci::CreatePipelineService do
           let(:ci_yaml) do
             <<-EOS
               image:
-                name: ruby:2.2
+                name: ruby:2.7
                 ports:
                   - 80
             EOS
@@ -505,12 +581,12 @@ describe Ci::CreatePipelineService do
         context 'in the job image' do
           let(:ci_yaml) do
             <<-EOS
-              image: ruby:2.2
+              image: ruby:2.7
 
               test:
                 script: rspec
                 image:
-                  name: ruby:2.2
+                  name: ruby:2.7
                   ports:
                     - 80
             EOS
@@ -522,11 +598,11 @@ describe Ci::CreatePipelineService do
         context 'in the service' do
           let(:ci_yaml) do
             <<-EOS
-              image: ruby:2.2
+              image: ruby:2.7
 
               test:
                 script: rspec
-                image: ruby:2.2
+                image: ruby:2.7
                 services:
                   - name: test
                     ports:
@@ -536,6 +612,25 @@ describe Ci::CreatePipelineService do
 
           it_behaves_like 'a failed pipeline'
         end
+      end
+    end
+
+    context 'when an unexpected error is raised' do
+      before do
+        expect(Gitlab::Ci::YamlProcessor).to receive(:new)
+          .and_raise(RuntimeError, 'undefined failure')
+      end
+
+      it 'saves error in pipeline' do
+        pipeline = execute_service
+
+        expect(pipeline.yaml_errors).to include('Undefined error')
+      end
+
+      it 'logs error' do
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).and_call_original
+
+        execute_service
       end
     end
 
@@ -701,6 +796,25 @@ describe Ci::CreatePipelineService do
       end
     end
 
+    context 'with environment with auto_stop_in' do
+      before do
+        config = YAML.dump(
+          deploy: {
+            environment: { name: "review/$CI_COMMIT_REF_NAME", auto_stop_in: '1 day' },
+            script: 'ls'
+          })
+
+        stub_ci_pipeline_yaml_file(config)
+      end
+
+      it 'creates the environment with auto stop in' do
+        result = execute_service
+
+        expect(result).to be_persisted
+        expect(result.builds.first.options[:environment][:auto_stop_in]).to eq('1 day')
+      end
+    end
+
     context 'with environment name including persisted variables' do
       before do
         config = YAML.dump(
@@ -718,6 +832,32 @@ describe Ci::CreatePipelineService do
 
         expect(result).to be_persisted
         expect(Environment.find_by(name: "review/id1/id2")).to be_present
+      end
+    end
+
+    context 'environment with Kubernetes configuration' do
+      let(:kubernetes_namespace) { 'custom-namespace' }
+
+      before do
+        config = YAML.dump(
+          deploy: {
+            environment: {
+              name: "environment-name",
+              kubernetes: { namespace: kubernetes_namespace }
+            },
+            script: 'ls'
+          }
+        )
+
+        stub_ci_pipeline_yaml_file(config)
+      end
+
+      it 'stores the requested namespace' do
+        result = execute_service
+        build = result.builds.first
+
+        expect(result).to be_persisted
+        expect(build.options.dig(:environment, :kubernetes, :namespace)).to eq(kubernetes_namespace)
       end
     end
 
@@ -766,6 +906,7 @@ describe Ci::CreatePipelineService do
         stub_ci_pipeline_yaml_file(YAML.dump({
           rspec: { script: 'rspec', retry: retry_value }
         }))
+        rspec_job.update!(options: { retry: retry_value })
       end
 
       context 'as an integer' do
@@ -773,8 +914,6 @@ describe Ci::CreatePipelineService do
 
         it 'correctly creates builds with auto-retry value configured' do
           expect(pipeline).to be_persisted
-          expect(rspec_job.options_retry_max).to eq 2
-          expect(rspec_job.options_retry_when).to eq ['always']
         end
       end
 
@@ -783,8 +922,44 @@ describe Ci::CreatePipelineService do
 
         it 'correctly creates builds with auto-retry value configured' do
           expect(pipeline).to be_persisted
-          expect(rspec_job.options_retry_max).to eq 2
-          expect(rspec_job.options_retry_when).to eq ['runner_system_failure']
+        end
+      end
+    end
+
+    context 'with resource group' do
+      context 'when resource group is defined' do
+        before do
+          config = YAML.dump(
+            test: { stage: 'test', script: 'ls', resource_group: resource_group_key }
+          )
+
+          stub_ci_pipeline_yaml_file(config)
+        end
+
+        let(:resource_group_key) { 'iOS' }
+
+        it 'persists the association correctly' do
+          result = execute_service
+          deploy_job = result.builds.find_by_name!(:test)
+          resource_group = project.resource_groups.find_by_key!(resource_group_key)
+
+          expect(result).to be_persisted
+          expect(deploy_job.resource_group.key).to eq(resource_group_key)
+          expect(project.resource_groups.count).to eq(1)
+          expect(resource_group.builds.count).to eq(1)
+          expect(resource_group.resources.count).to eq(1)
+          expect(resource_group.resources.first.build).to eq(nil)
+        end
+
+        context 'when resource group key includes predefined variables' do
+          let(:resource_group_key) { '$CI_COMMIT_REF_NAME-$CI_JOB_NAME' }
+
+          it 'interpolates the variables into the key correctly' do
+            result = execute_service
+
+            expect(result).to be_persisted
+            expect(project.resource_groups.exists?(key: 'master-test')).to eq(true)
+          end
         end
       end
     end
@@ -801,6 +976,70 @@ describe Ci::CreatePipelineService do
 
           expect(pipeline).to be_persisted
           expect(pipeline.builds.find_by(name: 'rspec').options[:job_timeout]).to eq 123
+        end
+      end
+    end
+
+    context 'with release' do
+      shared_examples_for 'a successful release pipeline' do
+        before do
+          stub_ci_pipeline_yaml_file(YAML.dump(config))
+        end
+
+        it 'is valid config' do
+          pipeline = execute_service
+          build = pipeline.builds.first
+          expect(pipeline).to be_kind_of(Ci::Pipeline)
+          expect(pipeline).to be_valid
+          expect(pipeline.yaml_errors).not_to be_present
+          expect(pipeline).to be_persisted
+          expect(build).to be_kind_of(Ci::Build)
+          expect(build.options).to eq(config[:release].except(:stage, :only).with_indifferent_access)
+          expect(build).to be_persisted
+        end
+      end
+
+      context 'simple example' do
+        it_behaves_like 'a successful release pipeline' do
+          let(:config) do
+            {
+              release: {
+                script: ["make changelog | tee release_changelog.txt"],
+                release: {
+                  tag_name: "v0.06",
+                  description: "./release_changelog.txt"
+                }
+              }
+            }
+          end
+        end
+      end
+
+      context 'example with all release metadata' do
+        it_behaves_like 'a successful release pipeline' do
+          let(:config) do
+            {
+              release: {
+                script: ["make changelog | tee release_changelog.txt"],
+                release: {
+                  name: "Release $CI_TAG_NAME",
+                  tag_name: "v0.06",
+                  description: "./release_changelog.txt",
+                  assets: {
+                    links: [
+                      {
+                        name: "cool-app.zip",
+                        url: "http://my.awesome.download.site/1.0-$CI_COMMIT_SHORT_SHA.zip"
+                      },
+                      {
+                        url: "http://my.awesome.download.site/1.0-$CI_COMMIT_SHORT_SHA.exe"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          end
         end
       end
     end
@@ -893,21 +1132,6 @@ describe Ci::CreatePipelineService do
       end
 
       it_behaves_like 'when ref is protected'
-    end
-
-    context 'when ref is not protected' do
-      context 'when trigger belongs to no one' do
-        let(:user) {}
-        let(:trigger) { create(:ci_trigger, owner: nil) }
-        let(:trigger_request) { create(:ci_trigger_request, trigger: trigger) }
-        let(:pipeline) { execute_service(trigger_request: trigger_request) }
-
-        it 'creates an unprotected pipeline' do
-          expect(pipeline).to be_persisted
-          expect(pipeline).not_to be_protected
-          expect(Ci::Pipeline.count).to eq(1)
-        end
-      end
     end
 
     context 'when pipeline is running for a tag' do
@@ -1260,15 +1484,6 @@ describe Ci::CreatePipelineService do
               end
             end
           end
-
-          context 'when merge request is not specified' do
-            let(:merge_request) { nil }
-
-            it 'does not create a detached merge request pipeline' do
-              expect(pipeline).not_to be_persisted
-              expect(pipeline.errors[:merge_request]).to eq(["can't be blank"])
-            end
-          end
         end
 
         context "when config does not have merge_requests keywords" do
@@ -1297,17 +1512,6 @@ describe Ci::CreatePipelineService do
                 target_project: project,
                 target_branch: 'master')
             end
-
-            it 'does not create a detached merge request pipeline' do
-              expect(pipeline).not_to be_persisted
-
-              expect(pipeline.errors[:base])
-                .to eq(['No stages / jobs for this pipeline.'])
-            end
-          end
-
-          context 'when merge request is not specified' do
-            let(:merge_request) { nil }
 
             it 'does not create a detached merge request pipeline' do
               expect(pipeline).not_to be_persisted
@@ -1410,6 +1614,7 @@ describe Ci::CreatePipelineService do
 
       context 'when source is web' do
         let(:source) { :web }
+        let(:merge_request) { nil }
 
         context "when config has merge_requests keywords" do
           let(:config) do
@@ -1431,30 +1636,11 @@ describe Ci::CreatePipelineService do
             }
           end
 
-          context 'when merge request is specified' do
-            let(:merge_request) do
-              create(:merge_request,
-                source_project: project,
-                source_branch: Gitlab::Git.ref_name(ref_name),
-                target_project: project,
-                target_branch: 'master')
-            end
-
-            it 'does not create a merge request pipeline' do
-              expect(pipeline).not_to be_persisted
-              expect(pipeline.errors[:merge_request]).to eq(["must be blank"])
-            end
-          end
-
-          context 'when merge request is not specified' do
-            let(:merge_request) { nil }
-
-            it 'creates a branch pipeline' do
-              expect(pipeline).to be_persisted
-              expect(pipeline).to be_web
-              expect(pipeline.merge_request).to be_nil
-              expect(pipeline.builds.order(:stage_id).pluck(:name)).to eq(%w[build pages])
-            end
+          it 'creates a branch pipeline' do
+            expect(pipeline).to be_persisted
+            expect(pipeline).to be_web
+            expect(pipeline.merge_request).to be_nil
+            expect(pipeline.builds.order(:stage_id).pluck(:name)).to eq(%w[build pages])
           end
         end
       end
@@ -1495,20 +1681,34 @@ describe Ci::CreatePipelineService do
           expect(pipeline).to be_persisted
           expect(pipeline.builds.pluck(:name)).to contain_exactly("build_a", "test_a")
         end
+
+        it 'bulk inserts all needs' do
+          expect(Ci::BuildNeed).to receive(:bulk_insert!).and_call_original
+
+          expect(pipeline).to be_persisted
+        end
       end
 
       context 'when pipeline on feature is created' do
         let(:ref_name) { 'refs/heads/feature' }
+
+        shared_examples 'has errors' do
+          it 'contains the expected errors' do
+            expect(pipeline.builds).to be_empty
+            expect(pipeline.yaml_errors).to eq("test_a: needs 'build_a'")
+            expect(pipeline.error_messages.map(&:content)).to contain_exactly("test_a: needs 'build_a'")
+            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
+          end
+        end
 
         context 'when save_on_errors is enabled' do
           let(:pipeline) { execute_service(save_on_errors: true) }
 
           it 'does create a pipeline as test_a depends on build_a' do
             expect(pipeline).to be_persisted
-            expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to eq("test_a: needs 'build_a'")
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
           end
+
+          it_behaves_like 'has errors'
         end
 
         context 'when save_on_errors is disabled' do
@@ -1516,10 +1716,9 @@ describe Ci::CreatePipelineService do
 
           it 'does not create a pipeline as test_a depends on build_a' do
             expect(pipeline).not_to be_persisted
-            expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to be_nil
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
           end
+
+          it_behaves_like 'has errors'
         end
       end
 
@@ -1537,9 +1736,9 @@ describe Ci::CreatePipelineService do
       let(:ref_name)    { 'refs/heads/master' }
       let(:pipeline)    { execute_service }
       let(:build_names) { pipeline.builds.pluck(:name) }
-      let(:regular_job) { pipeline.builds.find_by(name: 'regular-job') }
-      let(:rules_job)   { pipeline.builds.find_by(name: 'rules-job') }
-      let(:delayed_job) { pipeline.builds.find_by(name: 'delayed-job') }
+      let(:regular_job) { find_job('regular-job') }
+      let(:rules_job)   { find_job('rules-job') }
+      let(:delayed_job) { find_job('delayed-job') }
 
       shared_examples 'rules jobs are excluded' do
         it 'only persists the job without rules' do
@@ -1548,6 +1747,10 @@ describe Ci::CreatePipelineService do
           expect(rules_job).to be_nil
           expect(delayed_job).to be_nil
         end
+      end
+
+      def find_job(name)
+        pipeline.builds.find_by(name: name)
       end
 
       before do
@@ -1569,6 +1772,12 @@ describe Ci::CreatePipelineService do
                 - if: $CI_COMMIT_REF_NAME =~ /master/
                   when: manual
 
+            negligible-job:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  allow_failure: true
+
             delayed-job:
               script: "echo See you later, World!"
               rules:
@@ -1587,11 +1796,23 @@ describe Ci::CreatePipelineService do
         context 'with matches' do
           it 'creates a pipeline with the vanilla and manual jobs' do
             expect(pipeline).to be_persisted
-            expect(build_names).to contain_exactly('regular-job', 'delayed-job', 'master-job')
+            expect(build_names).to contain_exactly(
+              'regular-job', 'delayed-job', 'master-job', 'negligible-job'
+            )
           end
 
           it 'assigns job:when values to the builds' do
-            expect(pipeline.builds.pluck(:when)).to contain_exactly('on_success', 'delayed', 'manual')
+            expect(find_job('regular-job').when).to eq('on_success')
+            expect(find_job('master-job').when).to eq('manual')
+            expect(find_job('negligible-job').when).to eq('on_success')
+            expect(find_job('delayed-job').when).to eq('delayed')
+          end
+
+          it 'assigns job:allow_failure values to the builds' do
+            expect(find_job('regular-job').allow_failure).to eq(false)
+            expect(find_job('master-job').allow_failure).to eq(false)
+            expect(find_job('negligible-job').allow_failure).to eq(true)
+            expect(find_job('delayed-job').allow_failure).to eq(false)
           end
 
           it 'assigns start_in for delayed jobs' do
@@ -1614,6 +1835,7 @@ describe Ci::CreatePipelineService do
               rules:
                 - if: $VAR == 'present' && $OTHER || $CI_COMMIT_REF_NAME
                   when: manual
+                  allow_failure: true
           EOY
         end
 
@@ -1621,6 +1843,7 @@ describe Ci::CreatePipelineService do
           expect(pipeline).to be_persisted
           expect(build_names).to contain_exactly('regular-job')
           expect(regular_job.when).to eq('manual')
+          expect(regular_job.allow_failure).to eq(true)
         end
       end
 
@@ -1647,6 +1870,13 @@ describe Ci::CreatePipelineService do
                   - README.md
                   when: delayed
                   start_in: 4 hours
+
+            negligible-job:
+              script: "can be failed sometimes"
+              rules:
+                - changes:
+                  - README.md
+                  allow_failure: true
           EOY
         end
 
@@ -1659,7 +1889,7 @@ describe Ci::CreatePipelineService do
           it 'creates two jobs' do
             expect(pipeline).to be_persisted
             expect(build_names)
-              .to contain_exactly('regular-job', 'rules-job', 'delayed-job')
+              .to contain_exactly('regular-job', 'rules-job', 'delayed-job', 'negligible-job')
           end
 
           it 'sets when: for all jobs' do
@@ -1667,6 +1897,10 @@ describe Ci::CreatePipelineService do
             expect(rules_job.when).to eq('manual')
             expect(delayed_job.when).to eq('delayed')
             expect(delayed_job.options[:start_in]).to eq('4 hours')
+          end
+
+          it 'sets allow_failure: for negligible job' do
+            expect(find_job('negligible-job').allow_failure).to eq(true)
           end
         end
 
@@ -1709,12 +1943,14 @@ describe Ci::CreatePipelineService do
 
             rules-job:
               script: "echo hello world, $CI_COMMIT_REF_NAME"
+              allow_failure: true
               rules:
                 - changes:
                   - README.md
                   when: manual
                 - if: $CI_COMMIT_REF_NAME == "master"
                   when: on_success
+                  allow_failure: false
 
             delayed-job:
               script: "echo See you later, World!"
@@ -1723,6 +1959,7 @@ describe Ci::CreatePipelineService do
                   - README.md
                   when: delayed
                   start_in: 4 hours
+                  allow_failure: true
                 - if: $CI_COMMIT_REF_NAME == "master"
                   when: delayed
                   start_in: 1 hour
@@ -1746,6 +1983,12 @@ describe Ci::CreatePipelineService do
             expect(rules_job.when).to eq('manual')
             expect(delayed_job.when).to eq('delayed')
             expect(delayed_job.options[:start_in]).to eq('4 hours')
+          end
+
+          it 'sets allow_failure: for all jobs' do
+            expect(regular_job.allow_failure).to eq(false)
+            expect(rules_job.allow_failure).to eq(true)
+            expect(delayed_job.allow_failure).to eq(true)
           end
         end
 
@@ -1786,6 +2029,7 @@ describe Ci::CreatePipelineService do
                 - if: $CI_COMMIT_REF_NAME =~ /master/
                   changes: [README.md]
                   when: on_success
+                  allow_failure: true
                 - if: $CI_COMMIT_REF_NAME =~ /master/
                   changes: [app.rb]
                   when: manual
@@ -1803,6 +2047,7 @@ describe Ci::CreatePipelineService do
             expect(regular_job).to be_persisted
             expect(rules_job).to be_persisted
             expect(rules_job.when).to eq('manual')
+            expect(rules_job.allow_failure).to eq(false)
           end
         end
 
@@ -1825,6 +2070,227 @@ describe Ci::CreatePipelineService do
           let(:ref_name) { 'refs/heads/feature' }
 
           it_behaves_like 'rules jobs are excluded'
+        end
+      end
+
+      context 'with complex if: allow_failure usages' do
+        let(:config) do
+          <<-EOY
+            job-1:
+              script: "exit 1"
+              allow_failure: true
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  allow_failure: false
+
+            job-2:
+              script: "exit 1"
+              allow_failure: true
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /nonexistant-branch/
+                  allow_failure: false
+
+            job-3:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /nonexistant-branch/
+                  allow_failure: true
+
+            job-4:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  allow_failure: false
+
+            job-5:
+              script: "exit 1"
+              allow_failure: false
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  allow_failure: true
+
+            job-6:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /nonexistant-branch/
+                  allow_failure: false
+                - allow_failure: true
+          EOY
+        end
+
+        it 'creates a pipeline' do
+          expect(pipeline).to be_persisted
+          expect(build_names).to contain_exactly('job-1', 'job-4', 'job-5', 'job-6')
+        end
+
+        it 'assigns job:allow_failure values to the builds' do
+          expect(find_job('job-1').allow_failure).to eq(false)
+          expect(find_job('job-4').allow_failure).to eq(false)
+          expect(find_job('job-5').allow_failure).to eq(true)
+          expect(find_job('job-6').allow_failure).to eq(true)
+        end
+      end
+
+      context 'with complex if: allow_failure & when usages' do
+        let(:config) do
+          <<-EOY
+            job-1:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  when: manual
+
+            job-2:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  when: manual
+                  allow_failure: true
+
+            job-3:
+              script: "exit 1"
+              allow_failure: true
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  when: manual
+
+            job-4:
+              script: "exit 1"
+              allow_failure: true
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  when: manual
+                  allow_failure: false
+
+            job-5:
+              script: "exit 1"
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /nonexistant-branch/
+                  when: manual
+                  allow_failure: false
+                - when: always
+                  allow_failure: true
+
+            job-6:
+              script: "exit 1"
+              allow_failure: false
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /master/
+                  when: manual
+
+            job-7:
+              script: "exit 1"
+              allow_failure: false
+              rules:
+                - if: $CI_COMMIT_REF_NAME =~ /nonexistant-branch/
+                  when: manual
+                - when: :on_failure
+                  allow_failure: true
+          EOY
+        end
+
+        it 'creates a pipeline' do
+          expect(pipeline).to be_persisted
+          expect(build_names).to contain_exactly(
+            'job-1', 'job-2', 'job-3', 'job-4', 'job-5', 'job-6', 'job-7'
+          )
+        end
+
+        it 'assigns job:allow_failure values to the builds' do
+          expect(find_job('job-1').allow_failure).to eq(false)
+          expect(find_job('job-2').allow_failure).to eq(true)
+          expect(find_job('job-3').allow_failure).to eq(true)
+          expect(find_job('job-4').allow_failure).to eq(false)
+          expect(find_job('job-5').allow_failure).to eq(true)
+          expect(find_job('job-6').allow_failure).to eq(false)
+          expect(find_job('job-7').allow_failure).to eq(true)
+        end
+
+        it 'assigns job:when values to the builds' do
+          expect(find_job('job-1').when).to eq('manual')
+          expect(find_job('job-2').when).to eq('manual')
+          expect(find_job('job-3').when).to eq('manual')
+          expect(find_job('job-4').when).to eq('manual')
+          expect(find_job('job-5').when).to eq('always')
+          expect(find_job('job-6').when).to eq('manual')
+          expect(find_job('job-7').when).to eq('on_failure')
+        end
+      end
+
+      context 'with deploy freeze period `if:` clause' do
+        # '0 23 * * 5' == "At 23:00 on Friday."", '0 7 * * 1' == "At 07:00 on Monday.""
+        let!(:freeze_period) { create(:ci_freeze_period, project: project, freeze_start: '0 23 * * 5', freeze_end: '0 7 * * 1') }
+
+        context 'with 2 jobs' do
+          let(:config) do
+            <<-EOY
+            stages:
+              - test
+              - deploy
+
+            test-job:
+              script:
+                - echo 'running TEST stage'
+
+            deploy-job:
+              stage: deploy
+              script:
+                - echo 'running DEPLOY stage'
+              rules:
+                - if: $CI_DEPLOY_FREEZE == null
+            EOY
+          end
+
+          context 'when outside freeze period' do
+            it 'creates two jobs' do
+              Timecop.freeze(2020, 4, 10, 22, 59) do
+                expect(pipeline).to be_persisted
+                expect(build_names).to contain_exactly('test-job', 'deploy-job')
+              end
+            end
+          end
+
+          context 'when inside freeze period' do
+            it 'creates one job' do
+              Timecop.freeze(2020, 4, 10, 23, 1) do
+                expect(pipeline).to be_persisted
+                expect(build_names).to contain_exactly('test-job')
+              end
+            end
+          end
+        end
+
+        context 'with 1 job' do
+          let(:config) do
+            <<-EOY
+            stages:
+              - deploy
+
+            deploy-job:
+              stage: deploy
+              script:
+                - echo 'running DEPLOY stage'
+              rules:
+                - if: $CI_DEPLOY_FREEZE == null
+            EOY
+          end
+
+          context 'when outside freeze period' do
+            it 'creates two jobs' do
+              Timecop.freeze(2020, 4, 10, 22, 59) do
+                expect(pipeline).to be_persisted
+                expect(build_names).to contain_exactly('deploy-job')
+              end
+            end
+          end
+
+          context 'when inside freeze period' do
+            it 'does not create the pipeline' do
+              Timecop.freeze(2020, 4, 10, 23, 1) do
+                expect(pipeline).not_to be_persisted
+              end
+            end
+          end
         end
       end
     end

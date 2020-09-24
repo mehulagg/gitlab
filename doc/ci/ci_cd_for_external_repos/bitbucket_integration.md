@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto
 ---
 
@@ -16,7 +19,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
 
    ![Create project](img/external_repository.png)
 
-   GitLab will import the repository and enable [Pull Mirroring][pull-mirroring].
+   GitLab will import the repository and enable [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository).
 
 1. In GitLab create a
    [Personal Access Token](../../user/profile/personal_access_tokens.md)
@@ -29,8 +32,8 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
    The web hook URL should be set to the GitLab API to trigger pull mirroring,
    using the Personal Access Token we just generated for authentication.
 
-   ```text
-   https://gitlab.com/api/v4/projects/<NAMESPACE>%2F<PROJECT>/mirror/pull?private_token=<PERSONAL_ACCESS_TOKEN>
+   ```plaintext
+   https://gitlab.com/api/v4/projects/<PROJECT_ID>/mirror/pull?private_token=<PERSONAL_ACCESS_TOKEN>
    ```
 
    The web hook Trigger should be set to 'Repository Push'.
@@ -65,7 +68,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
    Create a file `build_status` and insert the script below and run
    `chmod +x build_status` in your terminal to make the script executable.
 
-   ```bash
+   ```shell
    #!/usr/bin/env bash
 
    # Push GitLab CI/CD build status to Bitbucket Cloud
@@ -150,8 +153,6 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
 
 GitLab is now configured to mirror changes from Bitbucket, run CI/CD pipelines
 configured in `.gitlab-ci.yml` and push the status to Bitbucket.
-
-[pull-mirroring]: ../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository-starter
 
 <!-- ## Troubleshooting
 

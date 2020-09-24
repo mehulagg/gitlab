@@ -2,16 +2,17 @@
 
 require 'spec_helper'
 
-describe MergeTrains::RefreshMergeRequestService do
-  set(:project) { create(:project, :repository) }
-  set(:maintainer) { create(:user) }
+RSpec.describe MergeTrains::RefreshMergeRequestService do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:maintainer) { create(:user) }
   let(:service) { described_class.new(project, maintainer, require_recreate: require_recreate) }
   let(:require_recreate) { false }
 
   before do
+    stub_feature_flags(disable_merge_trains: false)
     project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
+    project.update!(merge_pipelines_enabled: true)
   end
 
   describe '#execute' do
@@ -26,9 +27,9 @@ describe MergeTrains::RefreshMergeRequestService do
     shared_examples_for 'drops the merge request from the merge train' do
       let(:expected_reason) { 'unknown' }
 
-      it do
+      specify do
         expect_next_instance_of(AutoMerge::MergeTrainService) do |service|
-          expect(service).to receive(:abort).with(merge_request, kind_of(String), hash_including(process_next: false))
+          expect(service).to receive(:abort).with(merge_request, expected_reason, hash_including(process_next: false))
         end
 
         subject
@@ -38,7 +39,7 @@ describe MergeTrains::RefreshMergeRequestService do
     shared_examples_for 'creates a pipeline for merge train' do
       let(:previous_ref) { 'refs/heads/master' }
 
-      it do
+      specify do
         expect_next_instance_of(MergeTrains::CreatePipelineService, project, maintainer) do |pipeline_service|
           allow(pipeline_service).to receive(:execute) { { status: :success, pipeline: pipeline } }
           expect(pipeline_service).to receive(:execute).with(merge_request, previous_ref)
@@ -47,6 +48,7 @@ describe MergeTrains::RefreshMergeRequestService do
         result = subject
         expect(result[:status]).to eq(:success)
         expect(result[:pipeline_created]).to eq(true)
+        expect(merge_request.merge_train).to be_fresh
       end
     end
 
@@ -71,7 +73,7 @@ describe MergeTrains::RefreshMergeRequestService do
     end
 
     shared_examples_for 'does not create a pipeline' do
-      it do
+      specify do
         expect(service).not_to receive(:create_pipeline!)
 
         result = subject
@@ -80,9 +82,9 @@ describe MergeTrains::RefreshMergeRequestService do
       end
     end
 
-    context 'when merge train project configuration is disabled' do
+    context 'when merge pipelines project configuration is disabled' do
       before do
-        project.update!(merge_trains_enabled: false)
+        project.update!(merge_pipelines_enabled: false)
       end
 
       it_behaves_like 'drops the merge request from the merge train' do
@@ -90,7 +92,7 @@ describe MergeTrains::RefreshMergeRequestService do
       end
 
       after do
-        project.update!(merge_trains_enabled: true)
+        project.update!(merge_pipelines_enabled: true)
       end
     end
 
@@ -121,9 +123,9 @@ describe MergeTrains::RefreshMergeRequestService do
         merge_request.update!(squash: true)
       end
 
-      it_behaves_like 'drops the merge request from the merge train' do
-        let(:expected_reason) { 'merge train does not support squash merge' }
-      end
+      let(:pipeline) { create(:ci_pipeline) }
+
+      it_behaves_like 'creates a pipeline for merge train'
     end
 
     context 'when previous ref is not found' do
@@ -146,7 +148,9 @@ describe MergeTrains::RefreshMergeRequestService do
 
         context 'when it failed to create a pipeline' do
           before do
-            allow_any_instance_of(MergeTrains::CreatePipelineService).to receive(:execute) { { result: :error, message: 'failed to create pipeline' } }
+            allow_next_instance_of(MergeTrains::CreatePipelineService) do |instance|
+              allow(instance).to receive(:execute) { { result: :error, message: 'failed to create pipeline' } }
+            end
           end
 
           it_behaves_like 'drops the merge request from the merge train' do
@@ -161,7 +165,7 @@ describe MergeTrains::RefreshMergeRequestService do
       let(:previous_ref_sha) { project.repository.commit('refs/heads/master').sha }
 
       before do
-        merge_request.merge_train.update!(pipeline: pipeline)
+        merge_request.merge_train.refresh_pipeline!(pipeline.id)
       end
 
       context 'when the pipeline is not stale' do
@@ -169,7 +173,9 @@ describe MergeTrains::RefreshMergeRequestService do
       end
 
       context 'when the pipeline is stale' do
-        let(:previous_ref_sha) { project.repository.commits('refs/heads/master', limit: 2).last.sha }
+        before do
+          merge_request.merge_train.update_column(:status, MergeTrain.state_machines[:status].states[:stale].value)
+        end
 
         it_behaves_like 'cancels and recreates a pipeline for the merge train'
       end
@@ -186,26 +192,45 @@ describe MergeTrains::RefreshMergeRequestService do
       let(:previous_ref_sha) { project.repository.commit('refs/heads/master').sha }
 
       before do
-        merge_request.merge_train.update!(pipeline: pipeline)
+        merge_request.merge_train.refresh_pipeline!(pipeline.id)
+        merge_request.merge_params[:sha] = merge_request.diff_head_sha
+        merge_request.save
       end
 
       context 'when the merge request is the first queue' do
         it 'merges the merge request' do
           expect(merge_request).to receive(:cleanup_refs).with(only: :train)
+          expect(merge_request.merge_train).to receive(:start_merge!).and_call_original
+          expect(merge_request.merge_train).to receive(:finish_merge!).and_call_original
           expect_next_instance_of(MergeRequests::MergeService, project, maintainer, anything) do |service|
-            expect(service).to receive(:execute).with(merge_request)
+            expect(service).to receive(:execute).with(merge_request, skip_discussions_check: true).and_call_original
           end
 
-          expect { subject }.to change { MergeTrain.count }.by(-1)
+          expect { subject }
+            .to change { merge_request.merge_train.status_name }.from(:fresh).to(:merged)
         end
 
         context 'when it failed to merge the merge request' do
           before do
-            allow_any_instance_of(MergeRequests::MergeService).to receive(:execute) { { result: :error } }
+            allow(merge_request).to receive(:mergeable_state?) { true }
+            merge_request.update(merge_error: 'Branch has been updated since the merge was requested.')
+            allow_next_instance_of(MergeRequests::MergeService) do |instance|
+              allow(instance).to receive(:execute) { { result: :error } }
+            end
+          end
+
+          it 'does not finish merge and drops the merge request from train' do
+            expect(merge_request).to be_on_train
+            expect(merge_request.merge_train).to receive(:start_merge!).and_call_original
+            expect(merge_request.merge_train).not_to receive(:finish_merge!)
+
+            subject
+
+            expect(merge_request).not_to be_on_train
           end
 
           it_behaves_like 'drops the merge request from the merge train' do
-            let(:expected_reason) { 'failed to merge' }
+            let(:expected_reason) { 'failed to merge. Branch has been updated since the merge was requested.' }
           end
         end
       end

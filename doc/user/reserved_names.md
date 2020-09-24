@@ -55,7 +55,6 @@ Currently the following names are reserved as top level groups:
 - `apple-touch-icon.png`
 - `assets`
 - `autocomplete`
-- `ci`
 - `dashboard`
 - `deploy.html`
 - `explore`
@@ -69,7 +68,6 @@ Currently the following names are reserved as top level groups:
 - `invites`
 - `jwt`
 - `login`
-- `notification_settings`
 - `oauth`
 - `profile`
 - `projects`

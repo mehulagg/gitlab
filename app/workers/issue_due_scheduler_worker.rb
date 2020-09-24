@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class IssueDueSchedulerWorker
+class IssueDueSchedulerWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
-  include CronjobQueue
+  include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
   feature_category :issue_tracking
 
@@ -10,7 +10,7 @@ class IssueDueSchedulerWorker
   def perform
     project_ids = Issue.opened.due_tomorrow.group(:project_id).pluck(:project_id).map { |id| [id] }
 
-    MailScheduler::IssueDueWorker.bulk_perform_async(project_ids)
+    MailScheduler::IssueDueWorker.bulk_perform_async(project_ids) # rubocop:disable Scalability/BulkPerformWithContext
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :cluster_kubernetes_namespace, class: Clusters::KubernetesNamespace do
+  factory :cluster_kubernetes_namespace, class: 'Clusters::KubernetesNamespace' do
     association :cluster, :project, :provided_by_gcp
 
     after(:build) do |kubernetes_namespace|
@@ -10,15 +10,18 @@ FactoryBot.define do
       if cluster.project_type?
         cluster_project = cluster.cluster_project
 
-        kubernetes_namespace.project = cluster_project.project
+        kubernetes_namespace.project = cluster_project&.project
         kubernetes_namespace.cluster_project = cluster_project
       end
 
-      kubernetes_namespace.namespace ||=
-        Gitlab::Kubernetes::DefaultNamespace.new(
-          cluster,
-          project: kubernetes_namespace.project
-        ).from_environment_slug(kubernetes_namespace.environment&.slug)
+      if kubernetes_namespace.project
+        kubernetes_namespace.namespace ||=
+          Gitlab::Kubernetes::DefaultNamespace.new(
+            cluster,
+            project: kubernetes_namespace.project
+          ).from_environment_slug(kubernetes_namespace.environment&.slug)
+      end
+
       kubernetes_namespace.service_account_name ||= "#{kubernetes_namespace.namespace}-service-account"
     end
 

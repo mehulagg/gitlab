@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": ["id", "status", "title", "links", "updated_at", "created_at"],
+  "properties": {
+    "id": { "type": "integer" },
+    "status": {
+      "type": "string",
+      "enum": ["opened", "closed"]
+    },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "links": {
+      "type": "object",
+      "properties": {
+        "details": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "updated_at": { "type": "date" },
+    "created_at": { "type": "date" }
+  }
+}

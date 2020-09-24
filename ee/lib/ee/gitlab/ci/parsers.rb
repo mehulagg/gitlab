@@ -10,11 +10,15 @@ module EE
           def parsers
             super.merge({
                 license_management: ::Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning,
+                license_scanning: ::Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning,
                 dependency_scanning: ::Gitlab::Ci::Parsers::Security::DependencyScanning,
                 container_scanning: ::Gitlab::Ci::Parsers::Security::ContainerScanning,
                 dast: ::Gitlab::Ci::Parsers::Security::Dast,
                 sast: ::Gitlab::Ci::Parsers::Security::Sast,
-                metrics: ::Gitlab::Ci::Parsers::Metrics::Generic
+                coverage_fuzzing: ::Gitlab::Ci::Parsers::Security::CoverageFuzzing,
+                secret_detection: ::Gitlab::Ci::Parsers::Security::SecretDetection,
+                metrics: ::Gitlab::Ci::Parsers::Metrics::Generic,
+                requirements: ::Gitlab::Ci::Parsers::RequirementsManagement::Requirement
             })
           end
         end

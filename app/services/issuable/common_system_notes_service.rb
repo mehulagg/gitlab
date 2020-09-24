@@ -4,23 +4,27 @@ module Issuable
   class CommonSystemNotesService < ::BaseService
     attr_reader :issuable
 
-    def execute(issuable, old_labels: [], is_update: true)
+    def execute(issuable, old_labels: [], old_milestone: nil, is_update: true)
       @issuable = issuable
 
-      if is_update
-        if issuable.previous_changes.include?('title')
-          create_title_change_note(issuable.previous_changes['title'].first)
+      # We disable touch so that created system notes do not update
+      # the noteable's updated_at field
+      ActiveRecord::Base.no_touching do
+        if is_update
+          if issuable.previous_changes.include?('title')
+            create_title_change_note(issuable.previous_changes['title'].first)
+          end
+
+          handle_description_change_note
+
+          handle_time_tracking_note if issuable.is_a?(TimeTrackable)
+          create_discussion_lock_note if issuable.previous_changes.include?('discussion_locked')
         end
 
-        handle_description_change_note
-
-        handle_time_tracking_note if issuable.is_a?(TimeTrackable)
-        create_discussion_lock_note if issuable.previous_changes.include?('discussion_locked')
+        create_due_date_note if issuable.previous_changes.include?('due_date')
+        create_milestone_change_event(old_milestone) if issuable.previous_changes.include?('milestone_id')
+        create_labels_note(old_labels) if old_labels && issuable.labels != old_labels
       end
-
-      create_due_date_note if issuable.previous_changes.include?('due_date')
-      create_milestone_note if issuable.previous_changes.include?('milestone_id')
-      create_labels_note(old_labels) if old_labels && issuable.labels != old_labels
     end
 
     private
@@ -90,8 +94,9 @@ module Issuable
       SystemNoteService.change_time_spent(issuable, issuable.project, issuable.time_spent_user)
     end
 
-    def create_milestone_note
-      SystemNoteService.change_milestone(issuable, issuable.project, current_user, issuable.milestone)
+    def create_milestone_change_event(old_milestone)
+      ResourceEvents::ChangeMilestoneService.new(issuable, current_user, old_milestone: old_milestone)
+        .execute
     end
 
     def create_due_date_note

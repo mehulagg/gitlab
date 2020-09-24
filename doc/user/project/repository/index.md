@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: concepts, howto
 ---
 
@@ -27,6 +30,12 @@ that you [connect with GitLab via SSH](../../../ssh/README.md).
 
 ## Files
 
+Use a repository to store your files in GitLab. In [GitLab 12.10 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/33806),
+you'll see on the repository's file tree an icon next to the file name
+according to its extension:
+
+![Repository file icons](img/file_ext_icons_repo_v12_10.png)
+
 ### Create and edit files
 
 Host your codebase in GitLab repositories by pushing your files to GitLab.
@@ -34,7 +43,7 @@ You can either use the user interface (UI), or connect your local computer
 with GitLab [through the command line](../../../gitlab-basics/command-line-commands.md#start-working-on-your-project).
 
 To configure [GitLab CI/CD](../../../ci/README.md) to build, test, and deploy
-you code, add a file called [`.gitlab-ci.yml`](../../../ci/quick_start/README.md)
+your code, add a file called [`.gitlab-ci.yml`](../../../ci/quick_start/README.md)
 to your repository's root.
 
 **From the user interface:**
@@ -48,6 +57,8 @@ it's easier to do so [via GitLab UI](web_editor.md):
 - [File templates](web_editor.md#template-dropdowns)
 - [Create a directory](web_editor.md#create-a-directory)
 - [Start a merge request](web_editor.md#tips)
+- [Find file history](git_history.md)
+- [Identify changes by line (Git blame)](git_blame.md)
 
 **From the command line:**
 
@@ -72,13 +83,13 @@ according to the markup language.
 | --------------- | ---------- |
 | Plain text | `txt` |
 | [Markdown](../../markdown.md) | `mdown`, `mkd`, `mkdn`, `md`, `markdown` |
-| [reStructuredText](http://docutils.sourceforge.net/rst.html) | `rst` |
+| [reStructuredText](https://docutils.sourceforge.io/rst.html) | `rst` |
 | [AsciiDoc](../../asciidoc.md) | `adoc`, `ad`, `asciidoc` |
 | [Textile](https://textile-lang.com/) | `textile` |
 | [rdoc](http://rdoc.sourceforge.net/doc/index.html)  | `rdoc` |
-| [Orgmode](https://orgmode.org/) | `org` |
+| [Org mode](https://orgmode.org/) | `org` |
 | [creole](http://www.wikicreole.org/) | `creole` |
-| [Mediawiki](https://www.mediawiki.org/wiki/MediaWiki) | `wiki`, `mediawiki` |
+| [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki) | `wiki`, `mediawiki` |
 
 ### Repository README and index files
 
@@ -100,19 +111,40 @@ Some things to note about precedence:
 
 ### Jupyter Notebook files
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/2508) in GitLab 9.1
-
-[Jupyter](https://jupyter.org) Notebook (previously IPython Notebook) files are used for
+[Jupyter](https://jupyter.org/) Notebook (previously IPython Notebook) files are used for
 interactive computing in many fields and contain a complete record of the
-user's sessions and include code, narrative text, equations and rich output.
+user's sessions and include code, narrative text, equations, and rich output.
 
-When added to a repository, Jupyter Notebooks with a `.ipynb` extension will be
-rendered to HTML when viewed.
+[Read how to use Jupyter notebooks with GitLab.](jupyter_notebooks/index.md)
 
-![Jupyter Notebook Rich Output](img/jupyter_notebook.png)
+### OpenAPI viewer
 
-Interactive features, including JavaScript plots, will not work when viewed in
-GitLab.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/19515) in GitLab 12.6.
+
+GitLab can render OpenAPI specification files with its file viewer, provided
+their filenames include `openapi` or `swagger` and their extension is `yaml`,
+`yml`, or `json`. The following examples are all correct:
+
+- `openapi.yml`
+- `openapi.yaml`
+- `openapi.json`
+- `swagger.yml`
+- `swagger.yaml`
+- `swagger.json`
+- `gitlab_swagger.yml`
+- `openapi_gitlab.yml`
+- `OpenAPI.YML`
+- `openapi.Yaml`
+- `openapi.JSON`
+- `openapi.gitlab.yml`
+- `gitlab.openapi.yml`
+
+Then, to render them:
+
+1. Navigate to the OpenAPI file in your repository in GitLab's UI.
+1. Click the "Display OpenAPI" button which is located between the "Display source"
+   and "Edit" buttons (when an OpenAPI file is found, it replaces the
+   "Display rendered file" button).
 
 ## Branches
 
@@ -133,8 +165,8 @@ Via command line, you can commit multiple times before pushing.
   you will trigger a pipeline per push, not per commit.
   - **Skip pipelines:**
   You can add to you commit message the keyword
-  [`[ci skip]`](../../../ci/yaml/README.md#skipping-jobs)
-  and GitLab CI will skip that pipeline.
+  [`[ci skip]`](../../../ci/yaml/README.md#skip-pipeline)
+  and GitLab CI/CD will skip that pipeline.
   - **Cross-link issues and merge requests:**
   [Cross-linking](../issues/crosslinking_issues.md#from-commit-messages)
   is great to keep track of what's is somehow related in your workflow.
@@ -157,7 +189,8 @@ updated every 15 minutes at most, so may not reflect recent activity. The displa
 
 The project size may differ slightly from one instance to another due to compression, housekeeping, and other factors.
 
-[Repository size limit](../../admin_area/settings/account_and_limit_settings.md) may be set by admins. GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#repository-size-limit).
+[Repository size limit](../../admin_area/settings/account_and_limit_settings.md) may be set by admins.
+GitLab.com's repository size limit [is set by GitLab](../../gitlab_com/index.md#account-and-limit-settings).
 
 ## Contributors
 
@@ -170,7 +203,7 @@ of commits to the fewest, and displayed on a nice graph:
 
 ## Repository graph
 
-The repository graph displays visually the Git flow strategy used in that repository:
+The repository graph displays the history of the repository network visually, including branches and merges. This can help you visualize the Git flow strategy used in the repository:
 
 ![repository Git flow](img/repo_graph.png)
 
@@ -186,11 +219,13 @@ minutes.
 ![Repository Languages bar](img/repository_languages_v12_2.gif)
 
 Not all files are detected, among others; documentation,
-vendored code, and most markup languages are excluded. This behaviour can be
+vendored code, and most markup languages are excluded. This behavior can be
 adjusted by overriding the default. For example, to enable `.proto` files to be
 detected, add the following to `.gitattributes` in the root of your repository.
 
-> *.proto linguist-detectable=true
+```plaintext
+*.proto linguist-detectable=true
+```
 
 ## Locked files **(PREMIUM)**
 
@@ -203,7 +238,7 @@ You can access your repos via [repository API](../../../api/repositories.md).
 
 ## Clone in Apple Xcode
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/45820) in GitLab 11.0
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/45820) in GitLab 11.0
 
 Projects that contain a `.xcodeproj` or `.xcworkspace` directory can now be cloned
 in Xcode using the new **Open in Xcode** button, located next to the Git URL
@@ -211,7 +246,7 @@ used for cloning your project. The button is only shown on macOS.
 
 ## Download Source Code
 
-> Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/24704) in GitLab 11.11.
+> Support for directory download was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/24704) in GitLab 11.11.
 
 The source code stored in a repository can be downloaded from the UI.
 By clicking the download icon, a dropdown will open with links to download the following:

@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-class RepositoryRemoveRemoteWorker
+class RepositoryRemoveRemoteWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include ExclusiveLeaseGuard
 
   feature_category :source_code_management
+  loggable_arguments 1
 
   LEASE_TIMEOUT = 1.hour
 

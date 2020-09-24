@@ -3,6 +3,8 @@
 module KubernetesHelpers
   include Gitlab::Kubernetes
 
+  NODE_NAME = "gke-cluster-applications-default-pool-49b7f225-v527"
+
   def kube_response(body)
     { body: body.to_json }
   end
@@ -11,12 +13,20 @@ module KubernetesHelpers
     kube_response(kube_pods_body)
   end
 
+  def nodes_response
+    kube_response(nodes_body)
+  end
+
+  def nodes_metrics_response
+    kube_response(nodes_metrics_body)
+  end
+
   def kube_pod_response
     kube_response(kube_pod)
   end
 
   def kube_logs_response
-    kube_response(kube_logs_body)
+    { body: kube_logs_body }
   end
 
   def kube_deployments_response
@@ -27,10 +37,24 @@ module KubernetesHelpers
     WebMock.stub_request(:get, api_url + '/api/v1').to_return(kube_response(kube_v1_discovery_body))
     WebMock
       .stub_request(:get, api_url + '/apis/extensions/v1beta1')
-      .to_return(kube_response(kube_v1beta1_discovery_body))
+      .to_return(kube_response(kube_extensions_v1beta1_discovery_body))
+    WebMock
+      .stub_request(:get, api_url + '/apis/apps/v1')
+      .to_return(kube_response(kube_apps_v1_discovery_body))
     WebMock
       .stub_request(:get, api_url + '/apis/rbac.authorization.k8s.io/v1')
       .to_return(kube_response(kube_v1_rbac_authorization_discovery_body))
+    WebMock
+      .stub_request(:get, api_url + '/apis/metrics.k8s.io/v1beta1')
+      .to_return(kube_response(kube_metrics_v1beta1_discovery_body))
+  end
+
+  def stub_kubeclient_discover_istio(api_url)
+    stub_kubeclient_discover_base(api_url)
+
+    WebMock
+      .stub_request(:get, api_url + '/apis/networking.istio.io/v1alpha3')
+      .to_return(kube_response(kube_istio_discovery_body))
   end
 
   def stub_kubeclient_discover(api_url)
@@ -49,6 +73,12 @@ module KubernetesHelpers
       .to_return(status: [404, "Resource Not Found"])
   end
 
+  def stub_kubeclient_discover_knative_found(api_url)
+    WebMock
+      .stub_request(:get, api_url + '/apis/serving.knative.dev/v1alpha1')
+      .to_return(kube_response(kube_knative_discovery_body))
+  end
+
   def stub_kubeclient_service_pods(response = nil, options = {})
     stub_kubeclient_discover(service.api_url)
 
@@ -57,6 +87,22 @@ module KubernetesHelpers
     pods_url = service.api_url + "/api/v1/#{namespace_path}pods"
 
     WebMock.stub_request(:get, pods_url).to_return(response || kube_pods_response)
+  end
+
+  def stub_kubeclient_nodes(api_url)
+    stub_kubeclient_discover_base(api_url)
+
+    nodes_url = api_url + "/api/v1/nodes"
+
+    WebMock.stub_request(:get, nodes_url).to_return(nodes_response)
+  end
+
+  def stub_kubeclient_nodes_and_nodes_metrics(api_url)
+    stub_kubeclient_nodes(api_url)
+
+    nodes_url = api_url + "/apis/metrics.k8s.io/v1beta1/nodes"
+
+    WebMock.stub_request(:get, nodes_url).to_return(nodes_metrics_response)
   end
 
   def stub_kubeclient_pods(namespace, status: nil)
@@ -84,7 +130,7 @@ module KubernetesHelpers
     end
 
     logs_url = service.api_url + "/api/v1/namespaces/#{namespace}/pods/#{pod_name}" \
-    "/log?#{container_query_param}tailLines=#{Clusters::Platforms::Kubernetes::LOGS_LIMIT}"
+    "/log?#{container_query_param}tailLines=#{::PodLogs::KubernetesService::LOGS_LIMIT}&timestamps=true"
 
     if status
       response = { status: status }
@@ -184,28 +230,8 @@ module KubernetesHelpers
       .to_return(kube_response({}))
   end
 
-  def stub_kubeclient_get_cluster_role_binding_error(api_url, name, status: 404)
-    WebMock.stub_request(:get, api_url + "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/#{name}")
-      .to_return(status: [status, "Internal Server Error"])
-  end
-
-  def stub_kubeclient_create_cluster_role_binding(api_url)
-    WebMock.stub_request(:post, api_url + '/apis/rbac.authorization.k8s.io/v1/clusterrolebindings')
-      .to_return(kube_response({}))
-  end
-
-  def stub_kubeclient_get_role_binding(api_url, name, namespace: 'default')
-    WebMock.stub_request(:get, api_url + "/apis/rbac.authorization.k8s.io/v1/namespaces/#{namespace}/rolebindings/#{name}")
-      .to_return(kube_response({}))
-  end
-
-  def stub_kubeclient_get_role_binding_error(api_url, name, namespace: 'default', status: 404)
-    WebMock.stub_request(:get, api_url + "/apis/rbac.authorization.k8s.io/v1/namespaces/#{namespace}/rolebindings/#{name}")
-      .to_return(status: [status, "Internal Server Error"])
-  end
-
-  def stub_kubeclient_create_role_binding(api_url, namespace: 'default')
-    WebMock.stub_request(:post, api_url + "/apis/rbac.authorization.k8s.io/v1/namespaces/#{namespace}/rolebindings")
+  def stub_kubeclient_put_cluster_role_binding(api_url, name)
+    WebMock.stub_request(:put, api_url + "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/#{name}")
       .to_return(kube_response({}))
   end
 
@@ -229,6 +255,16 @@ module KubernetesHelpers
       .to_return(kube_response({}))
   end
 
+  def stub_kubeclient_get_gateway(api_url, name, namespace: 'default')
+    WebMock.stub_request(:get, api_url + "/apis/networking.istio.io/v1alpha3/namespaces/#{namespace}/gateways/#{name}")
+      .to_return(kube_response(kube_istio_gateway_body(name, namespace)))
+  end
+
+  def stub_kubeclient_put_gateway(api_url, name, namespace: 'default')
+    WebMock.stub_request(:put, api_url + "/apis/networking.istio.io/v1alpha3/namespaces/#{namespace}/gateways/#{name}")
+      .to_return(kube_response({}))
+  end
+
   def kube_v1_secret_body(**options)
     {
       "kind" => "SecretList",
@@ -247,6 +283,7 @@ module KubernetesHelpers
     {
       "kind" => "APIResourceList",
       "resources" => [
+        { "name" => "nodes", "namespaced" => false, "kind" => "Node" },
         { "name" => "pods", "namespaced" => true, "kind" => "Pod" },
         { "name" => "deployments", "namespaced" => true, "kind" => "Deployment" },
         { "name" => "secrets", "namespaced" => true, "kind" => "Secret" },
@@ -257,15 +294,40 @@ module KubernetesHelpers
     }
   end
 
-  def kube_v1beta1_discovery_body
+  # From Kubernetes 1.16+ Deployments are no longer served from apis/extensions
+  def kube_1_16_extensions_v1beta1_discovery_body
     {
       "kind" => "APIResourceList",
       "resources" => [
-        { "name" => "pods", "namespaced" => true, "kind" => "Pod" },
+        { "name" => "ingresses", "namespaced" => true, "kind" => "Deployment" }
+      ]
+    }
+  end
+
+  def kube_knative_discovery_body
+    {
+      "kind" => "APIResourceList",
+      "resources" => []
+    }
+  end
+
+  def kube_extensions_v1beta1_discovery_body
+    {
+      "kind" => "APIResourceList",
+      "resources" => [
         { "name" => "deployments", "namespaced" => true, "kind" => "Deployment" },
-        { "name" => "secrets", "namespaced" => true, "kind" => "Secret" },
-        { "name" => "serviceaccounts", "namespaced" => true, "kind" => "ServiceAccount" },
-        { "name" => "services", "namespaced" => true, "kind" => "Service" }
+        { "name" => "ingresses", "namespaced" => true, "kind" => "Ingress" }
+      ]
+    }
+  end
+
+  # Yes, deployments are defined in both apis/extensions/v1beta1 and apis/v1
+  # (for Kubernetes < 1.16). This matches what Kubenetes API server returns.
+  def kube_apps_v1_discovery_body
+    {
+      "kind" => "APIResourceList",
+      "resources" => [
+        { "name" => "deployments", "namespaced" => true, "kind" => "Deployment" }
       ]
     }
   end
@@ -279,6 +341,125 @@ module KubernetesHelpers
         { "name" => "rolebindings", "namespaced" => true, "kind" => "RoleBinding" },
         { "name" => "roles", "namespaced" => true, "kind" => "Role" }
       ]
+    }
+  end
+
+  def kube_metrics_v1beta1_discovery_body
+    {
+      "kind" => "APIResourceList",
+      "resources" => [
+        { "name" => "nodes", "namespaced" => false, "kind" => "NodeMetrics" },
+        { "name" => "pods", "namespaced" => true, "kind" => "PodMetrics" }
+      ]
+    }
+  end
+
+  def kube_istio_discovery_body
+    {
+      "kind" => "APIResourceList",
+      "apiVersion" => "v1",
+      "groupVersion" => "networking.istio.io/v1alpha3",
+      "resources" => [
+        {
+          "name" => "gateways",
+          "singularName" => "gateway",
+          "namespaced" => true,
+          "kind" => "Gateway",
+          "verbs" => %w[delete deletecollection get list patch create update watch],
+          "shortNames" => %w[gw],
+          "categories" => %w[istio-io networking-istio-io]
+        },
+        {
+          "name" => "serviceentries",
+          "singularName" => "serviceentry",
+          "namespaced" => true,
+          "kind" => "ServiceEntry",
+          "verbs" => %w[delete deletecollection get list patch create update watch],
+          "shortNames" => %w[se],
+          "categories" => %w[istio-io networking-istio-io]
+        },
+        {
+          "name" => "destinationrules",
+          "singularName" => "destinationrule",
+          "namespaced" => true,
+          "kind" => "DestinationRule",
+          "verbs" => %w[delete deletecollection get list patch create update watch],
+          "shortNames" => %w[dr],
+          "categories" => %w[istio-io networking-istio-io]
+        },
+        {
+          "name" => "envoyfilters",
+          "singularName" => "envoyfilter",
+          "namespaced" => true,
+          "kind" => "EnvoyFilter",
+          "verbs" => %w[delete deletecollection get list patch create update watch],
+          "categories" => %w[istio-io networking-istio-io]
+        },
+        {
+          "name" => "sidecars",
+          "singularName" => "sidecar",
+          "namespaced" => true,
+          "kind" => "Sidecar",
+          "verbs" => %w[delete deletecollection get list patch create update watch],
+          "categories" => %w[istio-io networking-istio-io]
+        },
+        {
+          "name" => "virtualservices",
+          "singularName" => "virtualservice",
+          "namespaced" => true,
+          "kind" => "VirtualService",
+          "verbs" => %w[delete deletecollection get list patch create update watch],
+          "shortNames" => %w[vs],
+          "categories" => %w[istio-io networking-istio-io]
+        }
+      ]
+    }
+  end
+
+  def kube_istio_gateway_body(name, namespace)
+    {
+      "apiVersion" => "networking.istio.io/v1alpha3",
+      "kind" => "Gateway",
+      "metadata" => {
+        "generation" => 1,
+        "labels" => {
+          "networking.knative.dev/ingress-provider" => "istio",
+          "serving.knative.dev/release" => "v0.7.0"
+        },
+        "name" => name,
+        "namespace" => namespace,
+        "selfLink" => "/apis/networking.istio.io/v1alpha3/namespaces/#{namespace}/gateways/#{name}"
+      },
+      "spec" => {
+        "selector" => {
+          "istio" => "ingressgateway"
+        },
+        "servers" => [
+          {
+            "hosts" => [
+              "*"
+            ],
+            "port" => {
+              "name" => "http",
+              "number" => 80,
+              "protocol" => "HTTP"
+            }
+          },
+          {
+            "hosts" => [
+              "*"
+            ],
+            "port" => {
+              "name" => "https",
+              "number" => 443,
+              "protocol" => "HTTPS"
+            },
+            "tls" => {
+              "mode" => "PASSTHROUGH"
+            }
+          }
+        ]
+      }
     }
   end
 
@@ -301,8 +482,22 @@ module KubernetesHelpers
     }
   end
 
+  def nodes_body
+    {
+      "kind" => "NodeList",
+      "items" => [kube_node]
+    }
+  end
+
+  def nodes_metrics_body
+    {
+      "kind" => "List",
+      "items" => [kube_node_metrics]
+    }
+  end
+
   def kube_logs_body
-    "Log 1\nLog 2\nLog 3"
+    "2019-12-13T14:04:22.123456Z Log 1\n2019-12-13T14:04:23.123456Z Log 2\n2019-12-13T14:04:24.123456Z Log 3"
   end
 
   def kube_deployments_body
@@ -322,18 +517,18 @@ module KubernetesHelpers
   def kube_knative_services_body(**options)
     {
       "kind" => "List",
-      "items" => [knative_07_service(options)]
+      "items" => [knative_09_service(options)]
     }
   end
 
   # This is a partial response, it will have many more elements in reality but
   # these are the ones we care about at the moment
-  def kube_pod(name: "kube-pod", environment_slug: "production", namespace: "project-namespace", project_slug: "project-path-slug", status: "Running", track: nil)
+  def kube_pod(name: "kube-pod", container_name: "container-0", environment_slug: "production", namespace: "project-namespace", project_slug: "project-path-slug", status: "Running", track: nil)
     {
       "metadata" => {
         "name" => name,
         "namespace" => namespace,
-        "generate_name" => "generated-name-with-suffix",
+        "generateName" => "generated-name-with-suffix",
         "creationTimestamp" => "2016-11-25T19:55:19Z",
         "annotations" => {
           "app.gitlab.com/env" => environment_slug,
@@ -345,11 +540,45 @@ module KubernetesHelpers
       },
       "spec" => {
         "containers" => [
-          { "name" => "container-0" },
-          { "name" => "container-1" }
+          { "name" => "#{container_name}" },
+          { "name" => "#{container_name}-1" }
         ]
       },
       "status" => { "phase" => status }
+    }
+  end
+
+  # This is a partial response, it will have many more elements in reality but
+  # these are the ones we care about at the moment
+  def kube_node
+    {
+      "metadata" => {
+        "name" => NODE_NAME
+      },
+      "status" => {
+        "capacity" => {
+          "cpu" => "2",
+          "memory" => "7657228Ki"
+        },
+        "allocatable" => {
+          "cpu" => "1930m",
+          "memory" => "5777164Ki"
+        }
+      }
+    }
+  end
+
+  # This is a partial response, it will have many more elements in reality but
+  # these are the ones we care about at the moment
+  def kube_node_metrics
+    {
+      "metadata" => {
+        "name" => NODE_NAME
+      },
+      "usage" => {
+        "cpu" => "144208668n",
+        "memory" => "1789048Ki"
+      }
     }
   end
 
@@ -359,7 +588,7 @@ module KubernetesHelpers
       "metadata" => {
         "name" => name,
         "namespace" => namespace,
-        "generate_name" => "generated-name-with-suffix",
+        "generateName" => "generated-name-with-suffix",
         "creationTimestamp" => "2016-11-25T19:55:19Z",
         "labels" => {
           "serving.knative.dev/service" => name
@@ -390,16 +619,13 @@ module KubernetesHelpers
       },
       "spec" => { "replicas" => 3 },
       "status" => {
-        "observedGeneration" => 4,
-        "replicas" => 3,
-        "updatedReplicas" => 3,
-        "availableReplicas" => 3
+        "observedGeneration" => 4
       }
     }
   end
 
   # noinspection RubyStringKeysInHashInspection
-  def knative_06_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production')
+  def knative_06_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production', cluster_id: 9)
     { "apiVersion" => "serving.knative.dev/v1alpha1",
       "kind" => "Service",
       "metadata" =>
@@ -454,12 +680,12 @@ module KubernetesHelpers
         "url" => "http://#{name}.#{namespace}.#{domain}"
       },
       "environment_scope" => environment,
-      "cluster_id" => 9,
+      "cluster_id" => cluster_id,
       "podcount" => 0 }
   end
 
   # noinspection RubyStringKeysInHashInspection
-  def knative_07_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production')
+  def knative_07_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production', cluster_id: 5)
     { "apiVersion" => "serving.knative.dev/v1alpha1",
       "kind" => "Service",
       "metadata" =>
@@ -506,12 +732,64 @@ module KubernetesHelpers
           "traffic" => [{ "latestRevision" => true, "percent" => 100, "revisionName" => "#{name}-92tsj" }],
           "url" => "http://#{name}.#{namespace}.#{domain}" },
       "environment_scope" => environment,
-      "cluster_id" => 5,
+      "cluster_id" => cluster_id,
       "podcount" => 0 }
   end
 
   # noinspection RubyStringKeysInHashInspection
-  def knative_05_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production')
+  def knative_09_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production', cluster_id: 5)
+    { "apiVersion" => "serving.knative.dev/v1alpha1",
+      "kind" => "Service",
+      "metadata" =>
+        { "annotations" =>
+            { "serving.knative.dev/creator" => "system:serviceaccount:#{namespace}:#{namespace}-service-account",
+              "serving.knative.dev/lastModifier" => "system:serviceaccount:#{namespace}:#{namespace}-service-account" },
+          "creationTimestamp" => "2019-10-22T21:19:13Z",
+          "generation" => 1,
+          "labels" => { "service" => name },
+          "name" => name,
+          "namespace" => namespace,
+          "resourceVersion" => "289726",
+          "selfLink" => "/apis/serving.knative.dev/v1alpha1/namespaces/#{namespace}/services/#{name}",
+          "uid" => "988349fa-f511-11e9-9ea1-42010a80005e" },
+      "spec" => {
+        "template" => {
+          "metadata" => {
+            "annotations" => { "Description" => description },
+            "creationTimestamp" => "2019-10-22T21:19:12Z",
+            "labels" => { "service" => name }
+          },
+          "spec" => {
+            "containers" => [{
+                               "env" =>
+                                 [{ "name" => "timestamp", "value" => "2019-10-22 21:19:12" }],
+                               "image" => "image_name",
+                               "name" => "user-container",
+                               "resources" => {}
+                             }],
+            "timeoutSeconds" => 300
+          }
+        },
+        "traffic" => [{ "latestRevision" => true, "percent" => 100 }]
+      },
+      "status" =>
+        { "address" => { "url" => "http://#{name}.#{namespace}.svc.cluster.local" },
+          "conditions" =>
+            [{ "lastTransitionTime" => "2019-10-22T21:20:15Z", "status" => "True", "type" => "ConfigurationsReady" },
+             { "lastTransitionTime" => "2019-10-22T21:20:15Z", "status" => "True", "type" => "Ready" },
+             { "lastTransitionTime" => "2019-10-22T21:20:15Z", "status" => "True", "type" => "RoutesReady" }],
+          "latestCreatedRevisionName" => "#{name}-92tsj",
+          "latestReadyRevisionName" => "#{name}-92tsj",
+          "observedGeneration" => 1,
+          "traffic" => [{ "latestRevision" => true, "percent" => 100, "revisionName" => "#{name}-92tsj" }],
+          "url" => "http://#{name}.#{namespace}.#{domain}" },
+      "environment_scope" => environment,
+      "cluster_id" => cluster_id,
+      "podcount" => 0 }
+  end
+
+  # noinspection RubyStringKeysInHashInspection
+  def knative_05_service(name: 'kubetest', namespace: 'default', domain: 'example.com', description: 'a knative service', environment: 'production', cluster_id: 8)
     { "apiVersion" => "serving.knative.dev/v1alpha1",
       "kind" => "Service",
       "metadata" =>
@@ -561,7 +839,7 @@ module KubernetesHelpers
           "observedGeneration" => 1,
           "traffic" => [{ "percent" => 100, "revisionName" => "#{name}-58qgr" }] },
       "environment_scope" => environment,
-      "cluster_id" => 8,
+      "cluster_id" => cluster_id,
       "podcount" => 0 }
   end
 

@@ -1,22 +1,18 @@
-/* eslint-disable class-methods-use-this, @gitlab/i18n/no-non-i18n-strings */
+/* eslint-disable class-methods-use-this, @gitlab/require-i18n-strings */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import { uniq } from 'lodash';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
 import { __ } from './locale';
 import { updateTooltipTitle } from './lib/utils/common_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
-import bp from './breakpoints';
+import * as Emoji from '~/emoji';
 
 const animationEndEventString = 'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd';
 const transitionEndEventString = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
-const requestAnimationFrame =
-  window.requestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
-  window.mozRequestAnimationFrame ||
-  window.setTimeout;
 
 const FROM_SENTENCE_REGEX = /(?:, and | and |, )/; // For separating lists produced by ruby's Array#toSentence
 
@@ -266,7 +262,7 @@ export class AwardsHandler {
       top: `${$addBtn.offset().top + $addBtn.outerHeight()}px`,
     };
     // for xs screen we position the element on center
-    if (bp.getBreakpointSize() === 'xs') {
+    if (bp.getBreakpointSize() === 'xs' || bp.getBreakpointSize() === 'sm') {
       css.left = '5%';
     } else if (position === 'right') {
       css.left = `${$addBtn.offset().left - $menu.outerWidth() + 20}px`;
@@ -506,12 +502,14 @@ export class AwardsHandler {
     const options = {
       scrollTop: $('.awards').offset().top - 110,
     };
+
+    // eslint-disable-next-line no-jquery/no-animate
     return $('body, html').animate(options, 200);
   }
 
   addEmojiToFrequentlyUsedList(emoji) {
     if (this.emoji.isEmojiNameValid(emoji)) {
-      this.frequentlyUsedEmojis = _.uniq(this.getFrequentlyUsedEmojis().concat(emoji));
+      this.frequentlyUsedEmojis = uniq(this.getFrequentlyUsedEmojis().concat(emoji));
       Cookies.set('frequently_used_emojis', this.frequentlyUsedEmojis.join(','), { expires: 365 });
     }
   }
@@ -520,9 +518,7 @@ export class AwardsHandler {
     return (
       this.frequentlyUsedEmojis ||
       (() => {
-        const frequentlyUsedEmojis = _.uniq(
-          (Cookies.get('frequently_used_emojis') || '').split(','),
-        );
+        const frequentlyUsedEmojis = uniq((Cookies.get('frequently_used_emojis') || '').split(','));
         this.frequentlyUsedEmojis = frequentlyUsedEmojis.filter(inputName =>
           this.emoji.isEmojiNameValid(inputName),
         );
@@ -576,7 +572,7 @@ export class AwardsHandler {
   }
 
   findMatchingEmojiElements(query) {
-    const emojiMatches = this.emoji.filterEmojiNamesByAlias(query);
+    const emojiMatches = this.emoji.queryEmojiNames(query);
     const $emojiElements = $('.emoji-menu-list:not(.frequent-emojis) [data-name]');
     const $matchingElements = $emojiElements.filter(
       (i, elm) => emojiMatches.indexOf(elm.dataset.name) >= 0,
@@ -619,7 +615,7 @@ export class AwardsHandler {
 let awardsHandlerPromise = null;
 export default function loadAwardsHandler(reload = false) {
   if (!awardsHandlerPromise || reload) {
-    awardsHandlerPromise = import(/* webpackChunkName: 'emoji' */ './emoji').then(Emoji => {
+    awardsHandlerPromise = Emoji.initEmojiMap().then(() => {
       const awardsHandler = new AwardsHandler(Emoji);
       awardsHandler.bindEvents();
       return awardsHandler;

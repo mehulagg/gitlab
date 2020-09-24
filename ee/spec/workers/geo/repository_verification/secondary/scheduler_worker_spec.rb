@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryVerification::Secondary::SchedulerWorker, :clean_gitlab_redis_cache do
+RSpec.describe Geo::RepositoryVerification::Secondary::SchedulerWorker, :clean_gitlab_redis_cache do
   include ::EE::GeoHelpers
 
-  set(:healthy_not_verified) { create(:project) }
+  let_it_be(:healthy_not_verified) { create(:project) }
 
   let!(:secondary) { create(:geo_node) }
   let(:healthy_shard) { healthy_not_verified.repository.storage }

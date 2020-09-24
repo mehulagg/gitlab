@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StorageShard do
+RSpec.describe StorageShard do
   describe '.all' do
     it 'returns an array of StorageShard objects' do
       shards = described_class.all

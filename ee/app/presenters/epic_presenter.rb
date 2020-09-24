@@ -14,17 +14,17 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def group_epic_path
-    url_builder.group_epic_path(epic.group, epic)
+    url_builder.build(epic, only_path: true)
   end
 
   def group_epic_url
-    url_builder.group_epic_url(epic.group, epic)
+    url_builder.build(epic)
   end
 
   def group_epic_link_path
     return unless epic.parent
 
-    url_builder.group_epic_link_path(epic.group, epic.parent.iid, epic.id)
+    url_builder.group_epic_link_path(epic.parent.group, epic.parent.iid, epic.id)
   end
 
   def epic_reference(full: false)
@@ -44,7 +44,6 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
   def initial_data
     {
       labels: epic.labels,
-      participants: participants,
       subscribed: subscribed?
     }
   end
@@ -61,6 +60,7 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
   def base_attributes(author_icon)
     {
       epic_id: epic.id,
+      epic_iid: epic.iid,
       created: epic.created_at,
       author: epic_author(author_icon),
       ancestors: epic_ancestors(epic.ancestors.inc_group),
@@ -79,7 +79,7 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
       toggle_subscription_path: toggle_subscription_group_epic_path(group, epic),
       labels_web_url: group_labels_path(group),
       epics_web_url: group_epics_path(group),
-      scoped_labels_documentation_link: help_page_path('user/project/labels.md', anchor: 'scoped-labels')
+      new_epic_web_url: new_group_epic_path(group)
     }
 
     paths[:todo_delete_path] = dashboard_todo_path(epic_pending_todo) if epic_pending_todo.present?
@@ -90,7 +90,7 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
   # todo:
   #
   # rename the hash keys to something more like inherited_source rather than milestone
-  # as now source can be noth milestone and child epic, but it does require a bunch of renaming on frontend as well
+  # as now source can be both milestone and child epic, but it does require a bunch of renaming on frontend as well
   def start_dates
     {
       start_date: epic.start_date,
@@ -121,10 +121,6 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
     }
   end
 
-  def participants
-    UserEntity.represent(epic.participants)
-  end
-
   def epic_pending_todo
     current_user.pending_todo_for(epic) if current_user
   end
@@ -134,7 +130,8 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
       name: epic.author.name,
       url: user_path(epic.author),
       username: "@#{epic.author.username}",
-      src: author_icon
+      src: author_icon,
+      is_gitlab_employee: epic.author.gitlab_employee?
     }
   end
 
@@ -149,10 +146,5 @@ class EpicPresenter < Gitlab::View::Presenter::Delegated
         human_readable_timestamp: remaining_days_in_words(epic.end_date, epic.start_date)
       }
     end
-  end
-
-  # important for using routing helpers in GraphQL
-  def url_builder
-    @url_builder ||= Gitlab::UrlBuilder.new(epic)
   end
 end

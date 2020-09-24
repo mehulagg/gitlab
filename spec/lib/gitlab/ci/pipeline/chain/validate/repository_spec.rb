@@ -2,11 +2,10 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Chain::Validate::Repository do
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::Repository do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:pipeline) { build_stubbed(:ci_pipeline) }
-
   let!(:step) { described_class.new(pipeline, command) }
 
   before do
@@ -69,6 +68,7 @@ describe Gitlab::Ci::Pipeline::Chain::Validate::Repository do
         proj.repository.add_tag(user, 'master', 'master')
       end
     end
+
     let(:command) do
       Gitlab::Ci::Pipeline::Chain::Command.new(
         project: project, current_user: user, origin_ref: 'master')

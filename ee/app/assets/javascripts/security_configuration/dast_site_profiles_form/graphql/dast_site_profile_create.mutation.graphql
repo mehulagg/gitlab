@@ -1,0 +1,8 @@
+mutation dastSiteProfileCreate($fullPath: ID!, $profileName: String!, $targetUrl: String) {
+  dastSiteProfileCreate(
+    input: { fullPath: $fullPath, profileName: $profileName, targetUrl: $targetUrl }
+  ) {
+    id
+    errors
+  }
+}

@@ -3,7 +3,7 @@
 describe QA::Page::Base do
   describe 'page helpers' do
     it 'exposes helpful page helpers' do
-      expect(subject).to respond_to :refresh, :wait, :scroll_to
+      expect(subject).to respond_to :refresh, :wait_until, :scroll_to
     end
   end
 
@@ -23,12 +23,12 @@ describe QA::Page::Base do
 
     it 'makes it possible to define page views' do
       expect(subject.views.size).to eq 2
-      expect(subject.views).to all(be_an_instance_of QA::Page::View)
+      expect(subject.views).to all(be_an_instance_of(QA::Page::View))
     end
 
     it 'populates views objects with data about elements' do
       expect(subject.elements.size).to eq 3
-      expect(subject.elements).to all(be_an_instance_of QA::Page::Element)
+      expect(subject.elements).to all(be_an_instance_of(QA::Page::Element))
       expect(subject.elements.map(&:name))
         .to eq [:something, :something_else, :another_element]
     end
@@ -62,18 +62,18 @@ describe QA::Page::Base do
     end
   end
 
-  describe '#wait' do
+  describe '#wait_until' do
     subject { Class.new(described_class).new }
 
     context 'when the condition is true' do
       it 'does not refresh' do
         expect(subject).not_to receive(:refresh)
 
-        subject.wait(max: 0.01) { true }
+        subject.wait_until(max_duration: 0.01, raise_on_failure: false) { true }
       end
 
       it 'returns true' do
-        expect(subject.wait(max: 0.1) { true }).to be_truthy
+        expect(subject.wait_until(max_duration: 0.1, raise_on_failure: false) { true }).to be_truthy
       end
     end
 
@@ -81,13 +81,101 @@ describe QA::Page::Base do
       it 'refreshes' do
         expect(subject).to receive(:refresh).at_least(:once)
 
-        subject.wait(max: 0.01) { false }
+        subject.wait_until(max_duration: 0.01, raise_on_failure: false) { false }
       end
 
       it 'returns false' do
         allow(subject).to receive(:refresh)
 
-        expect(subject.wait(max: 0.01) { false }).to be_falsey
+        expect(subject.wait_until(max_duration: 0.01, raise_on_failure: false) { false }).to be_falsey
+      end
+    end
+  end
+
+  describe '#all_elements' do
+    before do
+      allow(subject).to receive(:all)
+    end
+
+    it 'raises an error if count or minimum are not specified' do
+      expect { subject.all_elements(:foo) }.to raise_error ArgumentError
+    end
+
+    it 'does not raise an error if :minimum, :maximum, :count, or :between is specified' do
+      [:minimum, :maximum, :count, :between].each do |param|
+        expect { subject.all_elements(:foo, param => 1) }.not_to raise_error
+      end
+    end
+  end
+
+  context 'elements' do
+    subject do
+      Class.new(described_class) do
+        view 'path/to/some/view.html.haml' do
+          element :something, required: true
+          element :something_else
+        end
+      end
+    end
+
+    describe '#elements' do
+      it 'returns all elements' do
+        expect(subject.elements.size).to eq(2)
+      end
+    end
+
+    describe '#required_elements' do
+      it 'returns only required elements' do
+        expect(subject.required_elements.size).to eq(1)
+      end
+    end
+
+    describe '#visible?', 'Page is currently visible' do
+      let(:page) { subject.new }
+
+      context 'with elements' do
+        context 'on the page' do
+          before do
+            # required elements not there, meaning not on page
+            allow(page).to receive(:has_no_element?).and_return(false)
+          end
+
+          it 'is visible' do
+            expect(page).to be_visible
+          end
+        end
+
+        context 'not on the page' do
+          before do
+            # required elements are not on the page
+            allow(page).to receive(:has_no_element?).and_return(true)
+          end
+
+          it 'is not visible' do
+            expect(page).not_to be_visible
+          end
+        end
+
+        it 'does not raise error if page has elements' do
+          expect { page.visible? }.not_to raise_error
+        end
+      end
+
+      context 'no elements' do
+        subject do
+          Class.new(described_class) do
+            view 'path/to/some/view.html.haml' do
+              element :something
+              element :something_else
+            end
+          end
+        end
+
+        let(:page) { subject.new }
+
+        it 'raises error if page has no required elements' do
+          expect { page.visible? }.to raise_error(described_class::NoRequiredElementsError)
+        end
       end
     end
   end

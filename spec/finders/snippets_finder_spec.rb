@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SnippetsFinder do
+RSpec.describe SnippetsFinder do
   include ExternalAuthorizationServiceHelpers
   include Gitlab::Allowable
 
@@ -60,10 +60,20 @@ describe SnippetsFinder do
     end
 
     context 'filter by author' do
-      it 'returns all public and internal snippets' do
-        snippets = described_class.new(create(:user), author: user).execute
+      context 'when the author is a User object' do
+        it 'returns all public and internal snippets' do
+          snippets = described_class.new(create(:user), author: user).execute
 
-        expect(snippets).to contain_exactly(internal_personal_snippet, public_personal_snippet)
+          expect(snippets).to contain_exactly(internal_personal_snippet, public_personal_snippet)
+        end
+      end
+
+      context 'when the author is the User id' do
+        it 'returns all public and internal snippets' do
+          snippets = described_class.new(create(:user), author: user.id).execute
+
+          expect(snippets).to contain_exactly(internal_personal_snippet, public_personal_snippet)
+        end
       end
 
       it 'returns internal snippets' do
@@ -101,13 +111,33 @@ describe SnippetsFinder do
 
         expect(snippets).to contain_exactly(private_personal_snippet, internal_personal_snippet, public_personal_snippet)
       end
+
+      context 'when author is not valid' do
+        it 'returns quickly' do
+          finder = described_class.new(admin, author: non_existing_record_id)
+
+          expect(finder).not_to receive(:init_collection)
+          expect(Snippet).to receive(:none).and_call_original
+          expect(finder.execute).to be_empty
+        end
+      end
     end
 
-    context 'project snippets' do
-      it 'returns public personal and project snippets for unauthorized user' do
-        snippets = described_class.new(nil, project: project).execute
+    context 'filter by project' do
+      context 'when project is a Project object' do
+        it 'returns public personal and project snippets for unauthorized user' do
+          snippets = described_class.new(nil, project: project).execute
 
-        expect(snippets).to contain_exactly(public_project_snippet)
+          expect(snippets).to contain_exactly(public_project_snippet)
+        end
+      end
+
+      context 'when project is a Project id' do
+        it 'returns public personal and project snippets for unauthorized user' do
+          snippets = described_class.new(nil, project: project.id).execute
+
+          expect(snippets).to contain_exactly(public_project_snippet)
+        end
       end
 
       it 'returns public and internal snippets for non project members' do
@@ -175,6 +205,49 @@ describe SnippetsFinder do
             )
         end
       end
+
+      context 'when project is not valid' do
+        it 'returns quickly' do
+          finder = described_class.new(admin, project: non_existing_record_id)
+
+          expect(finder).not_to receive(:init_collection)
+          expect(Snippet).to receive(:none).and_call_original
+          expect(finder.execute).to be_empty
+        end
+      end
+    end
+
+    context 'filter by snippet type' do
+      context 'when filtering by only_personal snippet' do
+        it 'returns only personal snippet' do
+          snippets = described_class.new(admin, only_personal: true).execute
+
+          expect(snippets).to contain_exactly(private_personal_snippet,
+                                              internal_personal_snippet,
+                                              public_personal_snippet)
+        end
+      end
+
+      context 'when filtering by only_project snippet' do
+        it 'returns only project snippet' do
+          snippets = described_class.new(admin, only_project: true).execute
+
+          expect(snippets).to contain_exactly(private_project_snippet,
+                                              internal_project_snippet,
+                                              public_project_snippet)
+        end
+      end
+    end
+
+    context 'filtering by ids' do
+      it 'returns only personal snippet' do
+        snippets = described_class.new(
+          admin, ids: [private_personal_snippet.id,
+                       internal_personal_snippet.id]
+        ).execute
+
+        expect(snippets).to contain_exactly(private_personal_snippet, internal_personal_snippet)
+      end
     end
 
     context 'explore snippets' do
@@ -209,6 +282,39 @@ describe SnippetsFinder do
 
       it 'returns only personal snippets when the user cannot read cross project' do
         expect(described_class.new(user).execute).to contain_exactly(private_personal_snippet, internal_personal_snippet, public_personal_snippet)
+      end
+
+      context 'when only project snippets are required' do
+        it 'returns no records' do
+          expect(described_class.new(user, only_project: true).execute).to be_empty
+        end
+      end
+    end
+
+    context 'when project snippets are disabled' do
+      it 'returns quickly' do
+        disabled_snippets_project = create(:project, :snippets_disabled)
+        finder = described_class.new(user, project: disabled_snippets_project.id)
+
+        expect(finder).not_to receive(:init_collection)
+        expect(Snippet).to receive(:none).and_call_original
+        expect(finder.execute).to be_empty
+      end
+    end
+
+    context 'no sort param is provided' do
+      it 'returns snippets sorted by id' do
+        snippets = described_class.new(admin).execute
+
+        expect(snippets.ids).to eq(Snippet.order_id_desc.ids)
+      end
+    end
+
+    context 'sort param is provided' do
+      it 'returns snippets sorted by sort param' do
+        snippets = described_class.new(admin, sort: 'updated_desc').execute
+
+        expect(snippets.ids).to eq(Snippet.order_updated_desc.ids)
       end
     end
   end

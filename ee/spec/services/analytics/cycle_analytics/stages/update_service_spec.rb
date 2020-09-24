@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe Analytics::CycleAnalytics::Stages::UpdateService do
+RSpec.describe Analytics::CycleAnalytics::Stages::UpdateService do
   let_it_be(:group, refind: true) { create(:group) }
+  let_it_be(:value_stream, refind: true) { create(:cycle_analytics_group_value_stream, group: group) }
   let_it_be(:user, refind: true) { create(:user) }
   let(:default_stages) { Gitlab::Analytics::CycleAnalytics::DefaultStages.all }
-  let(:params) { {} }
+  let(:params) { { value_stream: value_stream } }
   let(:persisted_stages) { group.reload.cycle_analytics_stages.ordered }
 
   subject { described_class.new(parent: group, params: params, current_user: user).execute }
@@ -23,7 +24,7 @@ describe Analytics::CycleAnalytics::Stages::UpdateService do
 
   context 'when updating a default stage' do
     let(:stage) { Analytics::CycleAnalytics::GroupStage.new(default_stages.first.merge(group: group)) }
-    let(:params) { { id: stage.name, hidden: true } }
+    let(:params) { { id: stage.name, hidden: true, value_stream: value_stream } }
     let(:updated_stage) { subject.payload[:stage] }
 
     context 'when hiding a default stage' do
@@ -61,7 +62,9 @@ describe Analytics::CycleAnalytics::Stages::UpdateService do
       context 'when the update fails' do
         before do
           invalid_stage = Analytics::CycleAnalytics::GroupStage.new(name: '')
-          expect_any_instance_of(described_class).to receive(:find_stage).and_return(invalid_stage)
+          expect_next_instance_of(described_class) do |instance|
+            expect(instance).to receive(:find_stage).and_return(invalid_stage)
+          end
         end
 
         it 'returns unsuccessful service response' do
@@ -94,8 +97,8 @@ describe Analytics::CycleAnalytics::Stages::UpdateService do
   end
 
   context 'when updating a custom stage' do
-    let_it_be(:stage) { create(:cycle_analytics_group_stage, group: group) }
-    let(:params) { { id: stage.id, name: 'my new stage name' } }
+    let_it_be(:stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream) }
+    let(:params) { { id: stage.id, name: 'my new stage name', value_stream: value_stream } }
 
     it { expect(subject).to be_success }
     it { expect(subject.http_status).to eq(:ok) }
@@ -113,9 +116,25 @@ describe Analytics::CycleAnalytics::Stages::UpdateService do
   end
 
   context 'when positioning a stage' do
-    let!(:first_stage) { create(:cycle_analytics_group_stage, group: group, relative_position: 10) }
-    let!(:middle_stage) { create(:cycle_analytics_group_stage, group: group, relative_position: 11) }
-    let!(:last_stage) { create(:cycle_analytics_group_stage, group: group, relative_position: 12) }
+    let!(:first_stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream, relative_position: 10) }
+    let!(:middle_stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream, relative_position: 11) }
+    let!(:last_stage) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream, relative_position: 12) }
+
+    context 'when there are stages without position' do
+      let!(:unpositioned_stage1) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream) }
+      let!(:unpositioned_stage2) { create(:cycle_analytics_group_stage, group: group, value_stream: value_stream) }
+
+      before do
+        params[:id] = first_stage.id
+        params[:move_after_id] = unpositioned_stage2.id
+      end
+
+      it 'when moving the stage down' do
+        subject
+
+        expect(persisted_stages.last(3)).to eq([unpositioned_stage1, unpositioned_stage2, first_stage])
+      end
+    end
 
     context 'when moving the stage down' do
       before do
@@ -164,7 +183,7 @@ describe Analytics::CycleAnalytics::Stages::UpdateService do
     context 'when `move_before_id` points to a stage within a different group' do
       before do
         params[:id] = last_stage.id
-        params[:move_before_id] = create(:cycle_analytics_group_stage, group: create(:group)).id
+        params[:move_before_id] = create(:cycle_analytics_group_stage, group: create(:group), value_stream: value_stream).id
       end
 
       it { expect { subject }.to raise_error(ActiveRecord::RecordNotFound) }

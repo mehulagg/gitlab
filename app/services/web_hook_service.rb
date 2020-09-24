@@ -2,16 +2,25 @@
 
 class WebHookService
   class InternalErrorResponse
+    ERROR_MESSAGE = 'internal error'
+
     attr_reader :body, :headers, :code
 
     def initialize
       @headers = Gitlab::HTTP::Response::Headers.new({})
       @body = ''
-      @code = 'internal error'
+      @code = ERROR_MESSAGE
     end
   end
 
+  REQUEST_BODY_SIZE_LIMIT = 25.megabytes
+  GITLAB_EVENT_HEADER = 'X-Gitlab-Event'
+
   attr_accessor :hook, :data, :hook_name, :request_options
+
+  def self.hook_to_event(hook_name)
+    hook_name.to_s.singularize.titleize
+  end
 
   def initialize(hook, data, hook_name)
     @hook = hook
@@ -45,17 +54,18 @@ class WebHookService
       http_status: response.code,
       message: response.to_s
     }
-  rescue SocketError, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::OpenTimeout, Net::ReadTimeout, Gitlab::HTTP::BlockedUrlError, Gitlab::HTTP::RedirectionTooDeep => e
+  rescue SocketError, OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::OpenTimeout, Net::ReadTimeout, Gitlab::HTTP::BlockedUrlError, Gitlab::HTTP::RedirectionTooDeep, Gitlab::Json::LimitedEncoder::LimitExceeded => e
+    execution_duration = Gitlab::Metrics::System.monotonic_time - start_time
     log_execution(
       trigger: hook_name,
       url: hook.url,
       request_data: data,
       response: InternalErrorResponse.new,
-      execution_duration: Gitlab::Metrics::System.monotonic_time - start_time,
+      execution_duration: execution_duration,
       error_message: e.to_s
     )
 
-    Rails.logger.error("WebHook Error => #{e}") # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.error("WebHook Error after #{execution_duration.to_i.seconds}s => #{e}")
 
     {
       status: :error,
@@ -75,7 +85,7 @@ class WebHookService
 
   def make_request(url, basic_auth = false)
     Gitlab::HTTP.post(url,
-      body: data.to_json,
+      body: Gitlab::Json::LimitedEncoder.encode(data, limit: REQUEST_BODY_SIZE_LIMIT),
       headers: build_headers(hook_name),
       verify: hook.enable_ssl_verification,
       basic_auth: basic_auth,
@@ -92,9 +102,6 @@ class WebHookService
   end
 
   def log_execution(trigger:, url:, request_data:, response:, execution_duration:, error_message: nil)
-    # logging for ServiceHook's is not available
-    return if hook.is_a?(ServiceHook)
-
     WebHookLog.create(
       web_hook: hook,
       trigger: trigger,
@@ -113,7 +120,7 @@ class WebHookService
     @headers ||= begin
       {
         'Content-Type' => 'application/json',
-        'X-Gitlab-Event' => hook_name.singularize.titleize
+        GITLAB_EVENT_HEADER => self.class.hook_to_event(hook_name)
       }.tap do |hash|
         hash['X-Gitlab-Token'] = Gitlab::Utils.remove_line_breaks(hook.token) if hook.token.present?
       end

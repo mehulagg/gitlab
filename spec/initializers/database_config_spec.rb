@@ -2,62 +2,60 @@
 
 require 'spec_helper'
 
-describe 'Database config initializer' do
+RSpec.describe 'Database config initializer' do
   subject do
     load Rails.root.join('config/initializers/database_config.rb')
   end
 
   before do
     allow(ActiveRecord::Base).to receive(:establish_connection)
+    allow(Gitlab::Runtime).to receive(:max_threads).and_return(max_threads)
   end
 
-  context "when using Puma" do
-    let(:puma) { double('puma') }
-    let(:puma_options) { { max_threads: 8 } }
+  let(:max_threads) { 8 }
 
+  context "no existing pool size is set" do
     before do
-      stub_const("Puma", puma)
-      allow(puma).to receive_message_chain(:cli_config, :options).and_return(puma_options)
+      stub_database_config(pool_size: nil)
     end
 
-    context "and no existing pool size is set" do
-      before do
-        stub_database_config(pool_size: nil)
-      end
-
-      it "sets it to the max number of worker threads" do
-        expect { subject }.to change { Gitlab::Database.config['pool'] }.from(nil).to(8)
-      end
-    end
-
-    context "and the existing pool size is smaller than the max number of worker threads" do
-      before do
-        stub_database_config(pool_size: 7)
-      end
-
-      it "sets it to the max number of worker threads" do
-        expect { subject }.to change { Gitlab::Database.config['pool'] }.from(7).to(8)
-      end
-    end
-
-    context "and the existing pool size is larger than the max number of worker threads" do
-      before do
-        stub_database_config(pool_size: 9)
-      end
-
-      it "keeps the configured pool size" do
-        expect { subject }.not_to change { Gitlab::Database.config['pool'] }
-      end
+    it "sets it based on the max number of worker threads" do
+      expect { subject }.to change { Gitlab::Database.config['pool'] }.from(nil).to(18)
     end
   end
 
-  context "when not using Puma" do
+  context "the existing pool size is smaller than the max number of worker threads" do
     before do
-      stub_database_config(pool_size: 7)
+      stub_database_config(pool_size: 1)
     end
 
-    it "does nothing" do
-      expect { subject }.not_to change { Gitlab::Database.config['pool'] }
+    it "sets it based on the max number of worker threads" do
+      expect { subject }.to change { Gitlab::Database.config['pool'] }.from(1).to(18)
+    end
+  end
+
+  context "and the existing pool size is larger than the max number of worker threads" do
+    before do
+      stub_database_config(pool_size: 100)
+    end
+
+    it "sets it based on the max number of worker threads" do
+      expect { subject }.to change { Gitlab::Database.config['pool'] }.from(100).to(18)
+    end
+  end
+
+  context "when specifying headroom through an ENV variable" do
+    let(:headroom) { 15 }
+
+    before do
+      stub_database_config(pool_size: 1)
+      stub_env("DB_POOL_HEADROOM", headroom)
+    end
+
+    it "adds headroom on top of the calculated size" do
+      expect { subject }.to change { Gitlab::Database.config['pool'] }
+                              .from(1)
+                              .to(max_threads + headroom)
     end
   end
 

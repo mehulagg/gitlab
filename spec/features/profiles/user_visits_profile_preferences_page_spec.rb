@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User visits the profile preferences page' do
+RSpec.describe 'User visits the profile preferences page' do
   include Select2Helper
 
   let(:user) { create(:user) }
@@ -65,7 +65,7 @@ describe 'User visits the profile preferences page' do
   end
 
   describe 'User changes their language', :js do
-    it 'creates a flash message', :quarantine do
+    it 'creates a flash message', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/31404' do
       select2('en', from: '#user_preferred_language')
       click_button 'Save'
 
@@ -76,14 +76,31 @@ describe 'User visits the profile preferences page' do
 
     it 'updates their preference' do
       wait_for_requests
-      select2('eo', from: '#user_preferred_language')
+      select2('pt_BR', from: '#user_preferred_language')
       click_button 'Save'
 
       wait_for_requests
       refresh
 
-      expect(page).to have_css('html[lang="eo"]')
+      expect(page).to have_css('html[lang="pt-BR"]')
     end
+  end
+
+  describe 'User changes whitespace in code' do
+    it 'updates their preference' do
+      expect(user.render_whitespace_in_code).to be(false)
+      expect(render_whitespace_field).not_to be_checked
+      render_whitespace_field.click
+
+      click_button 'Save changes'
+
+      expect(user.reload.render_whitespace_in_code).to be(true)
+      expect(render_whitespace_field).to be_checked
+    end
+  end
+
+  def render_whitespace_field
+    find_field('user[render_whitespace_in_code]')
   end
 
   def expect_preferences_saved_message

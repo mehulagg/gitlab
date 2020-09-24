@@ -2,6 +2,7 @@
 
 class GroupMember < Member
   include FromUnion
+  include CreatedAtFilterable
 
   SOURCE_TYPE = 'Namespace'
 
@@ -12,11 +13,14 @@ class GroupMember < Member
   # Make sure group member points only to group as it source
   default_value_for :source_type, SOURCE_TYPE
   validates :source_type, format: { with: /\ANamespace\z/ }
-  default_scope { where(source_type: SOURCE_TYPE) }
+  validates :access_level, presence: true
+  validate :access_level_inclusion
+
+  default_scope { where(source_type: SOURCE_TYPE) } # rubocop:disable Cop/DefaultScope
 
   scope :of_groups, ->(groups) { where(source_id: groups.select(:id)) }
-  scope :count_users_by_group_id, -> { joins(:user).group(:source_id).count }
   scope :of_ldap_type, -> { where(ldap: true) }
+  scope :count_users_by_group_id, -> { group(:source_id).count }
 
   after_create :update_two_factor_requirement, unless: :invite?
   after_destroy :update_two_factor_requirement, unless: :invite?
@@ -44,6 +48,12 @@ class GroupMember < Member
 
   private
 
+  def access_level_inclusion
+    return if access_level.in?(Gitlab::Access.all_values)
+
+    errors.add(:access_level, "is not included in the list")
+  end
+
   def send_invite
     run_after_commit_or_now { notification_service.invite_group_member(self, @raw_invite_token) }
 
@@ -66,6 +76,7 @@ class GroupMember < Member
 
   def after_accept_invite
     notification_service.accept_group_invite(self)
+    update_two_factor_requirement
 
     super
   end

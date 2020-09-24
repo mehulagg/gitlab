@@ -5,7 +5,20 @@ module QA
     module Project
       class Show < Page::Base
         include Page::Component::ClonePanel
+        include Page::Component::Breadcrumbs
         include Page::Project::SubMenus::Settings
+
+        view 'app/assets/javascripts/repository/components/preview/index.vue' do
+          element :blob_viewer_content
+        end
+
+        view 'app/assets/javascripts/repository/components/table/row.vue' do
+          element :file_name_link
+        end
+
+        view 'app/assets/javascripts/repository/components/table/index.vue' do
+          element :file_tree_table
+        end
 
         view 'app/views/layouts/header/_new_dropdown.haml' do
           element :new_menu_toggle
@@ -17,7 +30,8 @@ module QA
         end
 
         view 'app/views/projects/_home_panel.html.haml' do
-          element :project_name
+          element :forked_from_link
+          element :project_name_content
         end
 
         view 'app/views/projects/_files.html.haml' do
@@ -37,13 +51,12 @@ module QA
           element :quick_actions
         end
 
-        view 'app/views/projects/tree/_tree_content.html.haml' do
-          element :file_tree
-        end
-
-        view 'app/views/projects/tree/_tree_header.html.haml' do
+        view 'app/assets/javascripts/repository/components/breadcrumbs.vue' do
           element :add_to_tree
           element :new_file_option
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/web_ide_link.vue' do
           element :web_ide_button
         end
 
@@ -61,9 +74,7 @@ module QA
         end
 
         def wait_for_viewers_to_load
-          wait(reload: false) do
-            has_no_element?(:spinner)
-          end
+          has_no_element?(:spinner, wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
         end
 
         def create_first_new_file!
@@ -81,14 +92,18 @@ module QA
           click_on 'Fork'
         end
 
+        def forked_from?(parent_project_name)
+          has_element?(:forked_from_link, text: parent_project_name)
+        end
+
         def click_file(filename)
-          within_element(:file_tree) do
-            click_on filename
+          within_element(:file_tree_table) do
+            click_element(:file_name_link, text: filename)
           end
         end
 
         def click_commit(commit_msg)
-          within_element(:file_tree) do
+          within_element(:file_tree_table) do
             click_on commit_msg
           end
         end
@@ -98,12 +113,26 @@ module QA
           click_link 'New issue'
         end
 
+        def has_file?(name)
+          within_element(:file_tree_table) do
+            has_element?(:file_name_link, text: name)
+          end
+        end
+
+        def has_name?(name)
+          has_element?(:project_name_content, text: name)
+        end
+
+        def has_readme_content?(text)
+          has_element?(:blob_viewer_content, text: text)
+        end
+
         def last_commit_content
           find_element(:commit_content).text
         end
 
         def new_merge_request
-          wait(reload: true) do
+          wait_until(reload: true) do
             has_css?(element_selector_css(:create_merge_request))
           end
 
@@ -114,8 +143,12 @@ module QA
           click_element :web_ide_button
         end
 
+        def has_edit_fork_button?
+          has_element?(:web_ide_button, text: 'Edit fork in Web IDE')
+        end
+
         def project_name
-          find('.qa-project-name').text
+          find_element(:project_name_content).text
         end
 
         def switch_to_branch(branch_name)
@@ -127,7 +160,7 @@ module QA
         end
 
         def wait_for_import
-          wait(reload: true) do
+          wait_until(reload: true) do
             has_css?('.tree-holder')
           end
         end

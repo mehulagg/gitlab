@@ -1,0 +1,7 @@
+- cluster_environments_path = clusterable.environments_cluster_path(@cluster)
+- active = params[:tab] == 'environments'
+
+- if !project_cluster?(@cluster) && cluster_environments_path.present?
+  %li.nav-item{ role: 'presentation' }
+    %a#cluster-environments-tab.nav-link{ class: active_when(active), href: clusterable.cluster_path(@cluster.id, params: {tab: 'environments'}) }
+      %span.js-cluster-nav-environments= _('Environments')

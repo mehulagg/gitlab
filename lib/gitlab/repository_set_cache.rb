@@ -2,12 +2,13 @@
 
 # Interface to the Redis-backed cache store for keys that use a Redis set
 module Gitlab
-  class RepositorySetCache
+  class RepositorySetCache < Gitlab::SetCache
     attr_reader :repository, :namespace, :expires_in
 
     def initialize(repository, extra_namespace: nil, expires_in: 2.weeks)
       @repository = repository
-      @namespace = "#{repository.full_path}:#{repository.project.id}"
+      @namespace = "#{repository.full_path}"
+      @namespace += ":#{repository.project.id}" if repository.project
       @namespace = "#{@namespace}:#{extra_namespace}" if extra_namespace
       @expires_in = expires_in
     end
@@ -16,24 +17,12 @@ module Gitlab
       "#{type}:#{namespace}:set"
     end
 
-    def expire(key)
-      with { |redis| redis.del(cache_key(key)) }
-    end
-
-    def exist?(key)
-      with { |redis| redis.exists(cache_key(key)) }
-    end
-
-    def read(key)
-      with { |redis| redis.smembers(cache_key(key)) }
-    end
-
     def write(key, value)
       full_key = cache_key(key)
 
       with do |redis|
         redis.multi do
-          redis.del(full_key)
+          redis.unlink(full_key)
 
           # Splitting into groups of 1000 prevents us from creating a too-long
           # Redis command
@@ -52,16 +41,6 @@ module Gitlab
       else
         write(key, yield)
       end
-    end
-
-    def include?(key, value)
-      with { |redis| redis.sismember(cache_key(key), value) }
-    end
-
-    private
-
-    def with(&blk)
-      Gitlab::Redis::Cache.with(&blk) # rubocop:disable CodeReuse/ActiveRecord
     end
   end
 end

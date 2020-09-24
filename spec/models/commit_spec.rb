@@ -2,9 +2,11 @@
 
 require 'spec_helper'
 
-describe Commit do
-  let(:project) { create(:project, :public, :repository) }
-  let(:commit)  { project.commit }
+RSpec.describe Commit do
+  let_it_be(:project) { create(:project, :public, :repository) }
+  let_it_be(:personal_snippet) { create(:personal_snippet, :repository) }
+  let_it_be(:project_snippet) { create(:project_snippet, :repository) }
+  let(:commit) { project.commit }
 
   describe 'modules' do
     subject { described_class }
@@ -17,48 +19,80 @@ describe Commit do
   end
 
   describe '.lazy' do
-    set(:project) { create(:project, :repository) }
+    shared_examples '.lazy checks' do
+      context 'when the commits are found' do
+        let(:oids) do
+          %w(
+            498214de67004b1da3d820901307bed2a68a8ef6
+            c642fe9b8b9f28f9225d7ea953fe14e74748d53b
+            6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9
+            048721d90c449b244b7b4c53a9186b04330174ec
+            281d3a76f31c812dbf48abce82ccf6860adedd81
+          )
+        end
 
-    context 'when the commits are found' do
-      let(:oids) do
-        %w(
-          498214de67004b1da3d820901307bed2a68a8ef6
-          c642fe9b8b9f28f9225d7ea953fe14e74748d53b
-          6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9
-          048721d90c449b244b7b4c53a9186b04330174ec
-          281d3a76f31c812dbf48abce82ccf6860adedd81
-        )
-      end
+        subject { oids.map { |oid| described_class.lazy(container, oid) } }
 
-      subject { oids.map { |oid| described_class.lazy(project, oid) } }
+        it 'batches requests for commits' do
+          expect(container.repository).to receive(:commits_by).once.and_call_original
 
-      it 'batches requests for commits' do
-        expect(project.repository).to receive(:commits_by).once.and_call_original
+          subject.first.title
+          subject.last.title
+        end
 
-        subject.first.title
-        subject.last.title
-      end
+        it 'maintains ordering' do
+          subject.each_with_index do |commit, i|
+            expect(commit.id).to eq(oids[i])
+          end
+        end
 
-      it 'maintains ordering' do
-        subject.each_with_index do |commit, i|
-          expect(commit.id).to eq(oids[i])
+        it 'does not attempt to replace methods via BatchLoader' do
+          subject.each do |commit|
+            expect(commit).to receive(:method_missing).and_call_original
+
+            commit.id
+          end
         end
       end
 
-      it 'does not attempt to replace methods via BatchLoader' do
-        subject.each do |commit|
-          expect(commit).to receive(:method_missing).and_call_original
+      context 'when not found' do
+        it 'returns nil as commit' do
+          commit = described_class.lazy(container, 'deadbeef').__sync
 
-          commit.id
+          expect(commit).to be_nil
         end
       end
     end
 
-    context 'when not found' do
-      it 'returns nil as commit' do
-        commit = described_class.lazy(project, 'deadbeef').__sync
+    context 'with project' do
+      let(:container) { project }
 
-        expect(commit).to be_nil
+      it_behaves_like '.lazy checks'
+    end
+
+    context 'with personal snippet' do
+      let(:container) { personal_snippet }
+
+      it_behaves_like '.lazy checks'
+    end
+
+    context 'with project snippet' do
+      let(:container) { project_snippet }
+
+      it_behaves_like '.lazy checks'
+    end
+  end
+
+  describe '#diff_refs' do
+    it 'is equal to itself' do
+      expect(commit.diff_refs).to eq(commit.diff_refs)
+    end
+
+    context 'from a factory' do
+      let(:commit) { create(:commit) }
+
+      it 'is equal to itself' do
+        expect(commit.diff_refs).to eq(commit.diff_refs)
       end
     end
   end
@@ -78,6 +112,17 @@ describe Commit do
 
       expect(Gitlab::SafeRequestStore[key]).to eq(user)
       expect(commit.author).to eq(user)
+    end
+
+    context 'with a user with an unconfirmed e-mail' do
+      before do
+        user = create(:user)
+        create(:email, user: user, email: commit.author_email)
+      end
+
+      it 'returns no user' do
+        expect(commit.author).to be_nil
+      end
     end
 
     context 'using eager loading' do
@@ -115,7 +160,7 @@ describe Commit do
       let!(:commits) { [alice_commit, bob_commit, eve_commit, jeff_commit] }
 
       before do
-        create(:email, user: bob, email: 'bob@example.com')
+        create(:email, :confirmed, user: bob, email: 'bob@example.com')
       end
 
       it 'executes only two SQL queries' do
@@ -179,16 +224,70 @@ describe Commit do
     end
   end
 
-  describe '#to_reference' do
-    let(:project) { create(:project, :repository, path: 'sample-project') }
+  describe '#committer' do
+    context 'with a confirmed e-mail' do
+      it 'returns the user' do
+        user = create(:user, email: commit.committer_email)
 
-    it 'returns a String reference to the object' do
-      expect(commit.to_reference).to eq commit.id
+        expect(commit.committer).to eq(user)
+      end
     end
 
-    it 'supports a cross-project reference' do
-      another_project = build(:project, :repository, name: 'another-project', namespace: project.namespace)
-      expect(commit.to_reference(another_project)).to eq "sample-project@#{commit.id}"
+    context 'with an unconfirmed e-mail' do
+      let(:user) { create(:user) }
+
+      before do
+        create(:email, user: user, email: commit.committer_email)
+      end
+
+      it 'returns no user' do
+        expect(commit.committer).to be_nil
+      end
+
+      it 'returns the user' do
+        expect(commit.committer(confirmed: false)).to eq(user)
+      end
+    end
+  end
+
+  describe '#to_reference' do
+    context 'with project' do
+      let(:project) { create(:project, :repository, path: 'sample-project') }
+
+      it 'returns a String reference to the object' do
+        expect(commit.to_reference).to eq commit.id
+      end
+
+      it 'supports a cross-project reference' do
+        another_project = build(:project, :repository, name: 'another-project', namespace: project.namespace)
+        expect(commit.to_reference(another_project)).to eq "sample-project@#{commit.id}"
+      end
+    end
+
+    context 'with personal snippet' do
+      let(:commit) { personal_snippet.commit }
+
+      it 'returns a String reference to the object' do
+        expect(commit.to_reference).to eq "$#{personal_snippet.id}@#{commit.id}"
+      end
+
+      it 'supports a cross-snippet reference' do
+        another_snippet = build(:personal_snippet)
+        expect(commit.to_reference(another_snippet)).to eq "$#{personal_snippet.id}@#{commit.id}"
+      end
+    end
+
+    context 'with project snippet' do
+      let(:commit) { project_snippet.commit }
+
+      it 'returns a String reference to the object' do
+        expect(commit.to_reference).to eq "$#{project_snippet.id}@#{commit.id}"
+      end
+
+      it 'supports a cross-snippet project reference' do
+        another_snippet = build(:personal_snippet)
+        expect(commit.to_reference(another_snippet)).to eq "#{project_snippet.project.path}$#{project_snippet.id}@#{commit.id}"
+      end
     end
   end
 
@@ -213,20 +312,48 @@ describe Commit do
   describe '#reference_link_text' do
     let(:project) { create(:project, :repository, path: 'sample-project') }
 
-    it 'returns a String reference to the object' do
-      expect(commit.reference_link_text).to eq commit.short_id
+    context 'with project' do
+      it 'returns a String reference to the object' do
+        expect(commit.reference_link_text).to eq commit.short_id
+      end
+
+      it 'supports a cross-project reference' do
+        another_project = build(:project, :repository, name: 'another-project', namespace: project.namespace)
+        expect(commit.reference_link_text(another_project)).to eq "sample-project@#{commit.short_id}"
+      end
     end
 
-    it 'supports a cross-project reference' do
-      another_project = build(:project, :repository, name: 'another-project', namespace: project.namespace)
-      expect(commit.reference_link_text(another_project)).to eq "sample-project@#{commit.short_id}"
+    context 'with personal snippet' do
+      let(:commit) { personal_snippet.commit }
+
+      it 'returns a String reference to the object' do
+        expect(commit.reference_link_text).to eq "$#{personal_snippet.id}@#{commit.short_id}"
+      end
+
+      it 'supports a cross-snippet reference' do
+        another_snippet = build(:personal_snippet, :repository)
+        expect(commit.reference_link_text(another_snippet)).to eq "$#{personal_snippet.id}@#{commit.short_id}"
+      end
+    end
+
+    context 'with project snippet' do
+      let(:commit) { project_snippet.commit }
+
+      it 'returns a String reference to the object' do
+        expect(commit.reference_link_text).to eq "$#{project_snippet.id}@#{commit.short_id}"
+      end
+
+      it 'supports a cross-snippet project reference' do
+        another_snippet = build(:project_snippet, :repository)
+        expect(commit.reference_link_text(another_snippet)).to eq "#{project_snippet.project.path}$#{project_snippet.id}@#{commit.short_id}"
+      end
     end
   end
 
   describe '#title' do
     it "returns no_commit_message when safe_message is blank" do
       allow(commit).to receive(:safe_message).and_return('')
-      expect(commit.title).to eq("--no commit message")
+      expect(commit.title).to eq("No commit message")
     end
 
     it 'truncates a message without a newline at natural break to 80 characters' do
@@ -257,7 +384,7 @@ eos
   describe '#full_title' do
     it "returns no_commit_message when safe_message is blank" do
       allow(commit).to receive(:safe_message).and_return('')
-      expect(commit.full_title).to eq("--no commit message")
+      expect(commit.full_title).to eq("No commit message")
     end
 
     it "returns entire message if there is no newline" do
@@ -279,7 +406,7 @@ eos
     it 'returns no_commit_message when safe_message is blank' do
       allow(commit).to receive(:safe_message).and_return(nil)
 
-      expect(commit.description).to eq('--no commit message')
+      expect(commit.description).to eq('No commit message')
     end
 
     it 'returns description of commit message if title less than 100 characters' do
@@ -317,30 +444,6 @@ eos
     it { is_expected.to respond_to(:id) }
   end
 
-  describe '#closes_issues' do
-    let(:issue) { create :issue, project: project }
-    let(:other_project) { create(:project, :public) }
-    let(:other_issue) { create :issue, project: other_project }
-    let(:committer) { create :user }
-
-    before do
-      project.add_developer(committer)
-      other_project.add_developer(committer)
-    end
-
-    it 'detects issues that this commit is marked as closing' do
-      ext_ref = "#{other_project.full_path}##{other_issue.iid}"
-
-      allow(commit).to receive_messages(
-        safe_message: "Fixes ##{issue.iid} and #{ext_ref}",
-        committer_email: committer.email
-      )
-
-      expect(commit.closes_issues).to include(issue)
-      expect(commit.closes_issues).to include(other_issue)
-    end
-  end
-
   it_behaves_like 'a mentionable' do
     subject { create(:project, :repository).commit }
 
@@ -359,7 +462,7 @@ eos
 
     it { expect(data).to be_a(Hash) }
     it { expect(data[:message]).to include('adds bar folder and branch-test text file to check Repository merged_to_root_ref method') }
-    it { expect(data[:timestamp]).to eq('2016-09-27T14:37:46Z') }
+    it { expect(data[:timestamp]).to eq('2016-09-27T14:37:46+00:00') }
     it { expect(data[:added]).to contain_exactly("bar/branch-test.txt") }
     it { expect(data[:modified]).to eq([]) }
     it { expect(data[:removed]).to eq([]) }
@@ -535,24 +638,47 @@ eos
   end
 
   describe '.from_hash' do
-    let(:new_commit) { described_class.from_hash(commit.to_hash, project) }
+    subject { described_class.from_hash(commit.to_hash, container) }
 
-    it 'returns a Commit' do
-      expect(new_commit).to be_an_instance_of(described_class)
+    shared_examples 'returns Commit' do
+      it 'returns a Commit' do
+        expect(subject).to be_an_instance_of(described_class)
+      end
+
+      it 'wraps a Gitlab::Git::Commit' do
+        expect(subject.raw).to be_an_instance_of(Gitlab::Git::Commit)
+      end
+
+      it 'stores the correct commit fields' do
+        expect(subject.id).to eq(commit.id)
+        expect(subject.message).to eq(commit.message)
+      end
     end
 
-    it 'wraps a Gitlab::Git::Commit' do
-      expect(new_commit.raw).to be_an_instance_of(Gitlab::Git::Commit)
+    context 'with project' do
+      let(:container) { project }
+
+      it_behaves_like 'returns Commit'
     end
 
-    it 'stores the correct commit fields' do
-      expect(new_commit.id).to eq(commit.id)
-      expect(new_commit.message).to eq(commit.message)
+    context 'with personal snippet' do
+      let(:container) { personal_snippet }
+
+      it_behaves_like 'returns Commit'
+    end
+
+    context 'with project snippet' do
+      let(:container) { project_snippet }
+
+      it_behaves_like 'returns Commit'
     end
   end
 
   describe '#work_in_progress?' do
-    ['squash! ', 'fixup! ', 'wip: ', 'WIP: ', '[WIP] '].each do |wip_prefix|
+    [
+      'squash! ', 'fixup! ', 'wip: ', 'WIP: ', '[WIP] ',
+      'draft: ', 'Draft - ', '[Draft] ', '(draft) ', 'Draft: '
+    ].each do |wip_prefix|
       it "detects the '#{wip_prefix}' prefix" do
         commit.message = "#{wip_prefix}#{commit.message}"
 
@@ -562,6 +688,12 @@ eos
 
     it "detects WIP for a commit just saying 'wip'" do
       commit.message = "wip"
+
+      expect(commit).to be_work_in_progress
+    end
+
+    it "detects WIP for a commit just saying 'draft'" do
+      commit.message = "draft"
 
       expect(commit).to be_work_in_progress
     end
@@ -597,16 +729,49 @@ eos
     end
   end
 
-  describe '#merge_requests' do
-    let!(:project) { create(:project, :repository) }
-    let!(:merge_request1) { create(:merge_request, source_project: project, source_branch: 'master', target_branch: 'feature') }
-    let!(:merge_request2) { create(:merge_request, source_project: project, source_branch: 'merged-target', target_branch: 'feature') }
-    let(:commit1) { merge_request1.merge_request_diff.commits.last }
-    let(:commit2) { merge_request1.merge_request_diff.commits.first }
+  describe 'signed commits' do
+    let(:gpg_signed_commit) { project.commit_by(oid: '0b4bc9a49b562e85de7cc9e834518ea6828729b9') }
+    let(:x509_signed_commit) { project.commit_by(oid: '189a6c924013fc3fe40d6f1ec1dc20214183bc97') }
+    let(:unsigned_commit) { project.commit_by(oid: '54fcc214b94e78d7a41a9a8fe6d87a5e59500e51') }
+    let!(:commit) { create(:commit, project: project) }
 
-    it 'returns merge_requests that introduced that commit' do
-      expect(commit1.merge_requests).to contain_exactly(merge_request1, merge_request2)
-      expect(commit2.merge_requests).to contain_exactly(merge_request1)
+    it 'returns signature_type properly' do
+      expect(gpg_signed_commit.signature_type).to eq(:PGP)
+      expect(x509_signed_commit.signature_type).to eq(:X509)
+      expect(unsigned_commit.signature_type).to eq(:NONE)
+      expect(commit.signature_type).to eq(:NONE)
+    end
+
+    it 'returns has_signature? properly' do
+      expect(gpg_signed_commit.has_signature?).to be_truthy
+      expect(x509_signed_commit.has_signature?).to be_truthy
+      expect(unsigned_commit.has_signature?).to be_falsey
+      expect(commit.has_signature?).to be_falsey
+    end
+  end
+
+  describe '#has_been_reverted?' do
+    let(:user) { create(:user) }
+    let(:issue) { create(:issue, author: user, project: project) }
+
+    it 'returns true if the commit has been reverted' do
+      create(:note_on_issue,
+             noteable: issue,
+             system: true,
+             note: commit.revert_description(user),
+             project: issue.project)
+
+      expect_next_instance_of(Commit) do |revert_commit|
+        expect(revert_commit).to receive(:reverts_commit?)
+          .with(commit, user)
+          .and_return(true)
+      end
+
+      expect(commit.has_been_reverted?(user, issue.notes_with_associations)).to eq(true)
+    end
+
+    it 'returns false if the commit has not been reverted' do
+      expect(commit.has_been_reverted?(user, issue.notes_with_associations)).to eq(false)
     end
   end
 end

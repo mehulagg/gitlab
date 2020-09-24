@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BoardsResponses do
+RSpec.describe BoardsResponses do
   let(:controller_class) do
     Class.new do
       include BoardsResponses
@@ -17,6 +17,7 @@ describe BoardsResponses do
 
   describe '#serialize_as_json' do
     let!(:board) { create(:board, milestone: milestone) }
+
     context 'with milestone' do
       let(:milestone) { create(:milestone) }
 
@@ -33,6 +34,7 @@ describe BoardsResponses do
 
     context 'without milestone' do
       let(:milestone) { nil }
+
       it 'serialises properly' do
         expected = { id: board.id, name: board.name }.as_json
 

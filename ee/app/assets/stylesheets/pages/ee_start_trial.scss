@@ -17,36 +17,22 @@
 
 /* Trial Banner */
 .gitlab-ee-license-banner.alert {
-  padding: 15px 35px;
-  position: relative;
-  background: $red-400;
-  color: $white-light;
-  text-align: center;
-
   @include media-breakpoint-down(md) {
-    padding: 10px 35px;
+    img {
+      width: 30px;
+    }
+
+    a {
+      margin-left: 0 !important;
+
+      &:last-child {
+        margin-top: 1rem;
+      }
+    }
   }
 
   .close {
-    color: $white-dark;
-    opacity: 0.7;
-    position: absolute;
-    top: 12px;
-    right: $gl-padding;
-
-    &:hover {
-      color: $black;
-    }
-  }
-
-  p a {
-    text-decoration: none;
-    font-weight: $gl-font-weight-bold;
-
-    &:hover {
-      color: $white-dark;
-      text-decoration: underline;
-    }
+    opacity: 0.6;
   }
 }
 
@@ -100,11 +86,11 @@
     margin-top: 10px;
     text-align: center;
     font-size: 18px;
-    color: $gl-gray-light;
+    color: $gray-600;
 
     &:hover {
       text-decoration: none;
-      color: $gl-gray-dark;
+      color: $gray-900;
     }
   }
 }

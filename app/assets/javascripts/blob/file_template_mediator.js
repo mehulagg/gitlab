@@ -1,14 +1,18 @@
-import Api from '~/api';
-
 import $ from 'jquery';
-import Flash from '../flash';
+
+import Api from '~/api';
+import toast from '~/vue_shared/plugins/global_toast';
+import { __ } from '~/locale';
+import initPopover from '~/blob/suggest_gitlab_ci_yml';
+
+import { deprecatedCreateFlash as Flash } from '../flash';
+
 import FileTemplateTypeSelector from './template_selectors/type_selector';
 import BlobCiYamlSelector from './template_selectors/ci_yaml_selector';
 import DockerfileSelector from './template_selectors/dockerfile_selector';
 import GitignoreSelector from './template_selectors/gitignore_selector';
 import LicenseSelector from './template_selectors/license_selector';
-import toast from '~/vue_shared/plugins/global_toast';
-import { __ } from '~/locale';
+import MetricsDashboardSelector from './template_selectors/metrics_dashboard_selector';
 
 export default class FileTemplateMediator {
   constructor({ editor, currentAction, projectId }) {
@@ -29,6 +33,7 @@ export default class FileTemplateMediator {
     this.templateSelectors = [
       GitignoreSelector,
       BlobCiYamlSelector,
+      MetricsDashboardSelector,
       DockerfileSelector,
       LicenseSelector,
     ].map(TemplateSelectorClass => new TemplateSelectorClass({ mediator: this }));
@@ -117,13 +122,7 @@ export default class FileTemplateMediator {
         selector.hide();
       }
     });
-
-    this.setFilename(item.name);
-
-    if (this.editor.getValue() !== '') {
-      this.setTypeSelectorToggleText(item.name);
-    }
-
+    this.setTypeSelectorToggleText(item.name);
     this.cacheToggleText();
   }
 
@@ -133,14 +132,17 @@ export default class FileTemplateMediator {
 
   selectTemplateFile(selector, query, data) {
     const self = this;
+    const { name } = selector.config;
+    const suggestCommitChanges = document.querySelector('.js-suggest-gitlab-ci-yml-commit-changes');
 
     selector.renderLoading();
 
     this.fetchFileTemplate(selector.config.type, query, data)
       .then(file => {
         this.setEditorContent(file);
+        this.setFilename(name);
         selector.renderLoaded();
-        this.typeSelector.setToggleText(selector.config.name);
+        this.typeSelector.setToggleText(name);
         toast(__(`${query} template applied`), {
           action: {
             text: __('Undo'),
@@ -150,6 +152,10 @@ export default class FileTemplateMediator {
             },
           },
         });
+
+        if (suggestCommitChanges) {
+          initPopover(suggestCommitChanges);
+        }
       })
       .catch(err => new Flash(`An error occurred while fetching the template: ${err}`));
   }

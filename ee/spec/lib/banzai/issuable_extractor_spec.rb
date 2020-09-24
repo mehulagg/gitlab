@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Banzai::IssuableExtractor do
+RSpec.describe Banzai::IssuableExtractor do
   it 'returns an instance of an epic for the node with reference' do
     epic = create(:epic)
     user = create(:user)

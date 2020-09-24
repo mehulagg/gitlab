@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Merge request approvals API **(STARTER)**
 
 Configuration for approvals on all Merge Requests (MR) in the project. Must be authenticated for all endpoints.
@@ -6,12 +13,12 @@ Configuration for approvals on all Merge Requests (MR) in the project. Must be a
 
 ### Get Configuration
 
->**Note:** This API endpoint is only available on 10.6 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
 
 You can request information about a project's approval configuration using the
 following endpoint:
 
-```
+```plaintext
 GET /projects/:id/approvals
 ```
 
@@ -25,18 +32,21 @@ GET /projects/:id/approvals
 {
   "approvals_before_merge": 2,
   "reset_approvals_on_push": true,
-  "disable_overriding_approvers_per_merge_request": false
+  "disable_overriding_approvers_per_merge_request": false,
+  "merge_requests_author_approval": true,
+  "merge_requests_disable_committers_approval": false,
+  "require_password_to_approve": true
 }
 ```
 
 ### Change configuration
 
->**Note:** This API endpoint is only available on 10.6 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
 
 If you are allowed to, you can change approval configuration using the following
 endpoint:
 
-```
+```plaintext
 POST /projects/:id/approvals
 ```
 
@@ -48,8 +58,9 @@ POST /projects/:id/approvals
 | `approvals_before_merge`                         | integer | no       | How many approvals are required before an MR can be merged. Deprecated in 12.0 in favor of Approval Rules API. |
 | `reset_approvals_on_push`                        | boolean | no       | Reset approvals on a new push                                                                       |
 | `disable_overriding_approvers_per_merge_request` | boolean | no       | Allow/Disallow overriding approvers per MR                                                          |
-| `merge_requests_author_approval`                 | boolean | no       | Allow/Disallow authors from self approving merge requests; `true` means authors cannot self approve |
+| `merge_requests_author_approval`                 | boolean | no       | Allow/Disallow authors from self approving merge requests; `true` means authors can self approve |
 | `merge_requests_disable_committers_approval`     | boolean | no       | Allow/Disallow committers from self approving merge requests                                        |
+| `require_password_to_approve`                    | boolean | no       | Require approver to enter a password in order to authenticate before adding the approval         |
 
 ```json
 {
@@ -57,17 +68,19 @@ POST /projects/:id/approvals
   "reset_approvals_on_push": true,
   "disable_overriding_approvers_per_merge_request": false,
   "merge_requests_author_approval": false,
-  "merge_requests_disable_committers_approval": false
+  "merge_requests_disable_committers_approval": false,
+  "require_password_to_approve": true
 }
 ```
 
 ### Get project-level rules
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> - `protected_branches` property was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.7.
 
 You can request information about a project's approval rules using the following endpoint:
 
-```
+```plaintext
 GET /projects/:id/approval_rules
 ```
 
@@ -130,6 +143,31 @@ GET /projects/:id/approval_rules
         "ldap_access": null
       }
     ],
+    "protected_branches": [
+      {
+        "id": 1,
+        "name": "master",
+        "push_access_levels": [
+          {
+            "access_level": 30,
+            "access_level_description": "Developers + Maintainers"
+          }
+        ],
+        "merge_access_levels": [
+          {
+            "access_level": 30,
+            "access_level_description": "Developers + Maintainers"
+          }
+        ],
+        "unprotect_access_levels": [
+          {
+            "access_level": 40,
+            "access_level_description": "Maintainers"
+          }
+        ],
+        "code_owner_approval_required": "false"
+      }
+    ],
     "contains_hidden_groups": false
   }
 ]
@@ -137,23 +175,24 @@ GET /projects/:id/approval_rules
 
 ### Create project-level rule
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can create project approval rules using the following endpoint:
 
-```
+```plaintext
 POST /projects/:id/approval_rules
 ```
 
 **Parameters:**
 
-| Attribute            | Type    | Required | Description                                               |
-|----------------------|---------|----------|-----------------------------------------------------------|
-| `id`                 | integer | yes      | The ID of a project                                       |
-| `name`               | string  | yes      | The name of the approval rule                             |
-| `approvals_required` | integer | yes      | The number of required approvals for this rule            |
-| `user_ids`           | Array   | no       | The ids of users as approvers                             |
-| `group_ids`          | Array   | no       | The ids of groups as approvers                            |
+| Attribute              | Type    | Required | Description                                                      |
+|------------------------|---------|----------|------------------------------------------------------------------|
+| `id`                   | integer | yes      | The ID of a project                                              |
+| `name`                 | string  | yes      | The name of the approval rule                                    |
+| `approvals_required`   | integer | yes      | The number of required approvals for this rule                   |
+| `user_ids`             | Array   | no       | The ids of users as approvers                                    |
+| `group_ids`            | Array   | no       | The ids of groups as approvers                                   |
+| `protected_branch_ids` | Array   | no       | **(PREMIUM)** The ids of protected branches to scope the rule by |
 
 ```json
 {
@@ -205,6 +244,31 @@ POST /projects/:id/approval_rules
       "parent_id": null,
       "ldap_cn": null,
       "ldap_access": null
+    }
+  ],
+  "protected_branches": [
+    {
+      "id": 1,
+      "name": "master",
+      "push_access_levels": [
+        {
+          "access_level": 30,
+          "access_level_description": "Developers + Maintainers"
+        }
+      ],
+      "merge_access_levels": [
+        {
+          "access_level": 30,
+          "access_level_description": "Developers + Maintainers"
+        }
+      ],
+      "unprotect_access_levels": [
+        {
+          "access_level": 40,
+          "access_level_description": "Maintainers"
+        }
+      ],
+      "code_owner_approval_required": "false"
     }
   ],
   "contains_hidden_groups": false
@@ -213,26 +277,27 @@ POST /projects/:id/approval_rules
 
 ### Update project-level rule
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can update project approval rules using the following endpoint:
 
-```
+```plaintext
 PUT /projects/:id/approval_rules/:approval_rule_id
 ```
 
-**Important:** Approvers and groups not in the `users`/`groups` param will be **removed**
+**Important:** Approvers and groups not in the `users`/`groups` parameters will be **removed**
 
 **Parameters:**
 
-| Attribute            | Type    | Required | Description                                               |
-|----------------------|---------|----------|-----------------------------------------------------------|
-| `id`                 | integer | yes      | The ID of a project                                       |
-| `approval_rule_id`   | integer | yes      | The ID of a approval rule                                 |
-| `name`               | string  | yes      | The name of the approval rule                             |
-| `approvals_required` | integer | yes      | The number of required approvals for this rule            |
-| `user_ids`           | Array   | no       | The ids of users as approvers                             |
-| `group_ids`          | Array   | no       | The ids of groups as approvers                            |
+| Attribute              | Type    | Required | Description                                                      |
+|------------------------|---------|----------|------------------------------------------------------------------|
+| `id`                   | integer | yes      | The ID of a project                                              |
+| `approval_rule_id`     | integer | yes      | The ID of a approval rule                                        |
+| `name`                 | string  | yes      | The name of the approval rule                                    |
+| `approvals_required`   | integer | yes      | The number of required approvals for this rule                   |
+| `user_ids`             | Array   | no       | The ids of users as approvers                                    |
+| `group_ids`            | Array   | no       | The ids of groups as approvers                                   |
+| `protected_branch_ids` | Array   | no       | **(PREMIUM)** The ids of protected branches to scope the rule by |
 
 ```json
 {
@@ -286,17 +351,42 @@ PUT /projects/:id/approval_rules/:approval_rule_id
       "ldap_access": null
     }
   ],
+  "protected_branches": [
+    {
+      "id": 1,
+      "name": "master",
+      "push_access_levels": [
+        {
+          "access_level": 30,
+          "access_level_description": "Developers + Maintainers"
+        }
+      ],
+      "merge_access_levels": [
+        {
+          "access_level": 30,
+          "access_level_description": "Developers + Maintainers"
+        }
+      ],
+      "unprotect_access_levels": [
+        {
+          "access_level": 40,
+          "access_level_description": "Maintainers"
+        }
+      ],
+      "code_owner_approval_required": "false"
+    }
+  ],
   "contains_hidden_groups": false
 }
 ```
 
 ### Delete project-level rule
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can delete project approval rules using the following endpoint:
 
-```
+```plaintext
 DELETE /projects/:id/approval_rules/:approval_rule_id
 ```
 
@@ -309,13 +399,15 @@ DELETE /projects/:id/approval_rules/:approval_rule_id
 
 ### Change allowed approvers
 
->**Note:** This API endpoint has been deprecated. Please use Approval Rule API instead.
->**Note:** This API endpoint is only available on 10.6 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+
+NOTE: **Note:**
+This API endpoint has been deprecated. Please use Approval Rule API instead.
 
 If you are allowed to, you can change approvers and approver groups using
 the following endpoint:
 
-```
+```plaintext
 PUT /projects/:id/approvers
 ```
 
@@ -363,7 +455,10 @@ PUT /projects/:id/approvers
   ],
   "approvals_before_merge": 2,
   "reset_approvals_on_push": true,
-  "disable_overriding_approvers_per_merge_request": false
+  "disable_overriding_approvers_per_merge_request": false,
+  "merge_requests_author_approval": true,
+  "merge_requests_disable_committers_approval": false,
+  "require_password_to_approve": true
 }
 ```
 
@@ -373,12 +468,12 @@ Configuration for approvals on a specific Merge Request. Must be authenticated f
 
 ### Get Configuration
 
->**Note:** This API endpoint is only available on 8.9 Starter and above.
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 8.9.
 
 You can request information about a merge request's approval status using the
 following endpoint:
 
-```
+```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/approvals
 ```
 
@@ -419,12 +514,12 @@ GET /projects/:id/merge_requests/:merge_request_iid/approvals
 
 ### Change approval configuration
 
->**Note:** This API endpoint is only available on 10.6 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
 
 If you are allowed to, you can change `approvals_required` using the following
 endpoint:
 
-```
+```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/approvals
 ```
 
@@ -455,13 +550,15 @@ POST /projects/:id/merge_requests/:merge_request_iid/approvals
 
 ### Change allowed approvers for Merge Request
 
->**Note:** This API endpoint has been deprecated. Please use Approval Rule API instead.
->**Note:** This API endpoint is only available on 10.6 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/183) in [GitLab Starter](https://about.gitlab.com/pricing/) 10.6.
+
+NOTE: **Note:**
+This API endpoint has been deprecated. Please use Approval Rule API instead.
 
 If you are allowed to, you can change approvers and approver groups using
 the following endpoint:
 
-```
+```plaintext
 PUT /projects/:id/merge_requests/:merge_request_iid/approvers
 ```
 
@@ -527,11 +624,11 @@ PUT /projects/:id/merge_requests/:merge_request_iid/approvers
 
 ### Get the approval state of merge requests
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/13712) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13712) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can request information about a merge request's approval state by using the following endpoint:
 
-```
+```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/approval_state
 ```
 
@@ -590,7 +687,8 @@ This includes additional information about the users who have already approved
         }
       ],
       "source_rule": null,
-      "approved": true
+      "approved": true,
+      "overridden": false
     }
   ]
 }
@@ -598,11 +696,11 @@ This includes additional information about the users who have already approved
 
 ### Get merge request level rules
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13712) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can request information about a merge request's approval rules using the following endpoint:
 
-```
+```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/approval_rules
 ```
 
@@ -667,18 +765,19 @@ GET /projects/:id/merge_requests/:merge_request_iid/approval_rules
         "ldap_access": null
       }
     ],
-    "contains_hidden_groups": false
+    "contains_hidden_groups": false,
+    "overridden": false
   }
 ]
 ```
 
 ### Create merge request level rule
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can create merge request approval rules using the following endpoint:
 
-```
+```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/approval_rules
 ```
 
@@ -751,21 +850,22 @@ will be used.
       "ldap_access": null
     }
   ],
-  "contains_hidden_groups": false
+  "contains_hidden_groups": false,
+  "overridden": false
 }
 ```
 
 ### Update merge request level rule
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can update merge request approval rules using the following endpoint:
 
-```
-PUT /projects/:id/merge_request/:merge_request_iid/approval_rules/:approval_rule_id
+```plaintext
+PUT /projects/:id/merge_requests/:merge_request_iid/approval_rules/:approval_rule_id
 ```
 
-**Important:** Approvers and groups not in the `users`/`groups` param will be **removed**
+**Important:** Approvers and groups not in the `users`/`groups` parameters will be **removed**
 
 **Important:** Updating a `report_approver` or `code_owner` rule is not allowed.
 These are system generated rules.
@@ -835,17 +935,18 @@ These are system generated rules.
       "ldap_access": null
     }
   ],
-  "contains_hidden_groups": false
+  "contains_hidden_groups": false,
+  "overridden": false
 }
 ```
 
 ### Delete merge request level rule
 
->**Note:** This API endpoint is only available on 12.3 Starter and above.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11877) in [GitLab Starter](https://about.gitlab.com/pricing/) 12.3.
 
 You can delete merge request approval rules using the following endpoint:
 
-```
+```plaintext
 DELETE /projects/:id/merge_requests/:merge_request_iid/approval_rules/:approval_rule_id
 ```
 
@@ -862,12 +963,12 @@ These are system generated rules.
 
 ## Approve Merge Request
 
->**Note:** This API endpoint is only available on 8.9 Starter and above.
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 8.9.
 
 If you are allowed to, you can approve a merge request using the following
 endpoint:
 
-```
+```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/approve
 ```
 
@@ -878,7 +979,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/approve
 | `id`                | integer | yes      | The ID of a project     |
 | `merge_request_iid` | integer | yes      | The IID of MR           |
 | `sha`               | string  | no       | The HEAD of the MR      |
-| `approval_password` **(STARTER)** | string  | no      | Current user's password. Required if [**Require user password to approve**](../user/project/merge_requests/merge_request_approvals.md#require-authentication-when-approving-a-merge-request-starter) is enabled in the project settings. |
+| `approval_password` **(STARTER)** | string  | no      | Current user's password. Required if [**Require user password to approve**](../user/project/merge_requests/merge_request_approvals.md#require-authentication-when-approving-a-merge-request) is enabled in the project settings. |
 
 The `sha` parameter works in the same way as
 when [accepting a merge request](merge_requests.md#accept-mr): if it is passed, then it must
@@ -925,12 +1026,12 @@ does not match, the response code will be `409`.
 
 ## Unapprove Merge Request
 
->**Note:** This API endpoint is only available on 9.0 Starter and above.
+>Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 9.0.
 
 If you did approve a merge request, you can unapprove it using the following
 endpoint:
 
-```
+```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/unapprove
 ```
 

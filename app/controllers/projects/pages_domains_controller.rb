@@ -7,6 +7,8 @@ class Projects::PagesDomainsController < Projects::ApplicationController
   before_action :authorize_update_pages!
   before_action :domain, except: [:new, :create]
 
+  helper_method :domain_presenter
+
   def show
   end
 
@@ -26,7 +28,14 @@ class Projects::PagesDomainsController < Projects::ApplicationController
     redirect_to project_pages_domain_path(@project, @domain)
   end
 
+  def retry_auto_ssl
+    PagesDomains::RetryAcmeOrderService.new(@domain).execute
+
+    redirect_to project_pages_domain_path(@project, @domain)
+  end
+
   def edit
+    redirect_to project_pages_domain_path(@project, @domain)
   end
 
   def create
@@ -42,10 +51,10 @@ class Projects::PagesDomainsController < Projects::ApplicationController
   def update
     if @domain.update(update_params)
       redirect_to project_pages_path(@project),
-        status: 302,
+        status: :found,
         notice: 'Domain was updated'
     else
-      render 'edit'
+      render 'show'
     end
   end
 
@@ -55,7 +64,7 @@ class Projects::PagesDomainsController < Projects::ApplicationController
     respond_to do |format|
       format.html do
         redirect_to project_pages_path(@project),
-                    status: 302,
+                    status: :found,
                     notice: 'Domain was removed'
       end
       format.js
@@ -67,7 +76,7 @@ class Projects::PagesDomainsController < Projects::ApplicationController
       flash[:alert] = @domain.errors.full_messages.join(', ')
     end
 
-    redirect_to edit_project_pages_domain_path(@project, @domain)
+    redirect_to project_pages_domain_path(@project, @domain)
   end
 
   private
@@ -77,10 +86,14 @@ class Projects::PagesDomainsController < Projects::ApplicationController
   end
 
   def update_params
-    params.require(:pages_domain).permit(:user_provided_key, :user_provided_certificate, :auto_ssl_enabled)
+    params.fetch(:pages_domain, {}).permit(:user_provided_key, :user_provided_certificate, :auto_ssl_enabled)
   end
 
   def domain
     @domain ||= @project.pages_domains.find_by_domain!(params[:id].to_s)
+  end
+
+  def domain_presenter
+    @domain_presenter ||= domain.present(current_user: current_user)
   end
 end

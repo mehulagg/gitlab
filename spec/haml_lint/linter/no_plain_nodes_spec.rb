@@ -5,7 +5,7 @@ require 'haml_lint'
 require 'haml_lint/spec'
 require Rails.root.join('haml_lint/linter/no_plain_nodes')
 
-describe HamlLint::Linter::NoPlainNodes do
+RSpec.describe HamlLint::Linter::NoPlainNodes do
   include_context 'linter'
 
   context 'reports when a tag has an inline plain node' do
@@ -52,5 +52,43 @@ describe HamlLint::Linter::NoPlainNodes do
     HAML
 
     it { is_expected.to report_lint count: 3 }
+  end
+
+  context 'does not report when a html entity' do
+    let(:haml) { '%tag &nbsp;' }
+
+    it { is_expected.not_to report_lint }
+  end
+
+  context 'does report when something that looks like a html entity' do
+    let(:haml) { '%tag &some text;' }
+
+    it { is_expected.to report_lint }
+  end
+
+  context 'does not report multiline when one or more html entities' do
+    %w(&nbsp;&gt; &#x000A9; &#187;).each do |elem|
+      let(:haml) { <<-HAML }
+        %tag
+          #{elem}
+      HAML
+
+      it elem do
+        is_expected.not_to report_lint
+      end
+    end
+  end
+
+  context 'does report multiline when one or more html entities amidst plain text' do
+    %w(&nbsp;Test Test&gt; &#x000A9;Hello &nbsp;Hello&#187;).each do |elem|
+      let(:haml) { <<-HAML }
+        %tag
+          #{elem}
+      HAML
+
+      it elem do
+        is_expected.to report_lint
+      end
+    end
   end
 end

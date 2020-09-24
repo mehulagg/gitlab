@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicPolicy do
+RSpec.describe EpicPolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }
@@ -28,17 +28,21 @@ describe EpicPolicy do
 
   shared_examples 'can only read epics' do
     it do
-      is_expected.to be_allowed(:read_epic, :read_epic_iid)
+      is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note)
       is_expected.to be_disallowed(:update_epic, :destroy_epic, :admin_epic, :create_epic)
     end
   end
 
   shared_examples 'can manage epics' do
-    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :update_epic, :admin_epic, :create_epic) }
+    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :read_note, :update_epic, :admin_epic, :create_epic) }
   end
 
   shared_examples 'all epic permissions disabled' do
-    it { is_expected.to be_disallowed(:read_epic, :read_epic_iid, :update_epic, :destroy_epic, :admin_epic, :create_epic, :create_note, :award_emoji) }
+    it { is_expected.to be_disallowed(:read_epic, :read_epic_iid, :update_epic, :destroy_epic, :admin_epic, :create_epic, :create_note, :award_emoji, :read_note) }
+  end
+
+  shared_examples 'all reporter epic permissions enabled' do
+    it { is_expected.to be_allowed(:read_epic, :read_epic_iid, :update_epic, :admin_epic, :create_epic, :create_note, :award_emoji, :read_note) }
   end
 
   shared_examples 'group member permissions' do
@@ -176,6 +180,51 @@ describe EpicPolicy do
       end
 
       it_behaves_like 'all epic permissions disabled'
+    end
+
+    context 'when epic is confidential' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:epic) { create(:epic, group: group, confidential: true) }
+
+      context 'when user is not reporter' do
+        before do
+          group.add_guest(user)
+        end
+
+        it_behaves_like 'all epic permissions disabled'
+      end
+
+      context 'when user is reporter' do
+        before do
+          group.add_reporter(user)
+        end
+
+        it_behaves_like 'all reporter epic permissions enabled'
+      end
+
+      context 'when user is developer' do
+        before do
+          group.add_developer(user)
+        end
+
+        it_behaves_like 'all reporter epic permissions enabled'
+      end
+
+      context 'when user is maintainer' do
+        before do
+          group.add_maintainer(user)
+        end
+
+        it_behaves_like 'all reporter epic permissions enabled'
+      end
+
+      context 'when user is owner' do
+        before do
+          group.add_owner(user)
+        end
+
+        it_behaves_like 'all reporter epic permissions enabled'
+      end
     end
   end
 end

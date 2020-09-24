@@ -1,19 +1,23 @@
 <script>
-import { GlTooltipDirective, GlButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import { GlTooltipDirective, GlDeprecatedButton, GlIcon } from '@gitlab/ui';
+import NoteHeader from '~/notes/components/note_header.vue';
 
 export default {
   name: 'EventItem',
   components: {
-    Icon,
-    TimeAgoTooltip,
-    GlButton,
+    GlIcon,
+    NoteHeader,
+    GlDeprecatedButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   props: {
+    id: {
+      type: [String, Number],
+      required: false,
+      default: undefined,
+    },
     author: {
       type: Object,
       required: true,
@@ -28,7 +32,7 @@ export default {
       required: false,
       default: 'plus',
     },
-    iconStyle: {
+    iconClass: {
       type: String,
       required: false,
       default: 'ci-status-icon-success',
@@ -49,53 +53,47 @@ export default {
       default: true,
     },
   },
+  computed: {
+    noteId() {
+      return this.id ? `note_${this.id}` : undefined;
+    },
+  },
 };
 </script>
 
 <template>
-  <div class="d-flex align-items-center">
-    <div class="circle-icon-container" :class="iconStyle">
-      <icon :size="16" :name="iconName" />
+  <div :id="noteId" class="d-flex align-items-center">
+    <div class="circle-icon-container gl-flex-shrink-0 gl-align-self-start" :class="iconClass">
+      <gl-icon :size="16" :name="iconName" />
     </div>
-    <div class="ml-3">
-      <div class="note-header-info pb-0">
-        <a
-          :href="author.path"
-          :data-user-id="author.id"
-          :data-username="author.username"
-          class="js-author"
-        >
-          <strong class="note-header-author-name">{{ author.name }}</strong>
-          <span v-if="author.status_tooltip_html" v-html="author.status_tooltip_html"></span>
-          <span class="note-headline-light">@{{ author.username }}</span>
-        </a>
-        <span class="note-headline-light note-headline-meta">
-          <template v-if="createdAt">
-            <span class="system-note-separator">·</span>
-            <time-ago-tooltip :time="createdAt" tooltip-placement="bottom" />
-          </template>
-        </span>
-      </div>
+    <div class="ml-3 flex-grow-1" data-qa-selector="event_item_content">
+      <note-header
+        :note-id="id"
+        :author="author"
+        :created-at="createdAt"
+        :show-spinner="false"
+        class="pb-0"
+      >
+        <slot name="header-message">&middot;</slot>
+      </note-header>
+
       <slot></slot>
     </div>
 
     <slot v-if="showRightSlot" name="right-content"></slot>
 
-    <div v-else class="d-flex flex-grow-1 align-self-start flex-row-reverse">
-      <div v-if="showActionButtons" class="action-buttons">
-        <gl-button
-          v-for="button in actionButtons"
-          :key="button.title"
-          ref="button"
-          v-gl-tooltip
-          class="px-1"
-          variant="transparent"
-          :title="button.title"
-          @click="$emit(button.emit)"
-        >
-          <icon :name="button.iconName" class="link-highlight" />
-        </gl-button>
-      </div>
+    <div v-else-if="showActionButtons" class="gl-flex-shrink-0 gl-align-self-start">
+      <gl-deprecated-button
+        v-for="button in actionButtons"
+        :key="button.title"
+        v-gl-tooltip
+        class="px-1"
+        variant="transparent"
+        :title="button.title"
+        @click="button.onClick"
+      >
+        <gl-icon :name="button.iconName" class="link-highlight" />
+      </gl-deprecated-button>
     </div>
   </div>
 </template>

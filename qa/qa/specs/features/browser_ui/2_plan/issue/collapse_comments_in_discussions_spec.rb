@@ -1,32 +1,23 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'collapse comments in issue discussions' do
       let(:my_first_reply) { 'My first reply' }
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
-        issue = Resource::Issue.fabricate_via_api! do |issue|
-          issue.title = 'issue title'
-        end
-
-        issue.visit!
+        Resource::Issue.fabricate_via_api!.visit!
 
         Page::Project::Issue::Show.perform do |show|
-          my_first_discussion = 'My first discussion'
-
           show.select_all_activities_filter
-          show.start_discussion(my_first_discussion)
-          page.assert_text(my_first_discussion)
-          show.reply_to_discussion(my_first_reply)
-          page.assert_text(my_first_reply)
+          show.start_discussion('My first discussion')
+          show.reply_to_discussion(1, my_first_reply)
         end
       end
 
-      it 'user collapses and expands reply for comments in an issue' do
+      it 'collapses and expands reply for comments in an issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/434' do
         Page::Project::Issue::Show.perform do |show|
           one_reply = "1 reply"
 

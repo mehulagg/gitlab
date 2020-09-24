@@ -1,10 +1,11 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
+import { __ } from '~/locale';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   directives: {
     tooltip,
@@ -25,12 +26,22 @@ export default {
       default: false,
     },
   },
+  computed: {
+    tooltipTitle() {
+      return this.isDisabled ? __('Required in this project.') : false;
+    },
+  },
 };
 </script>
 
 <template>
   <div class="inline">
-    <label>
+    <label
+      v-tooltip
+      :class="{ 'gl-text-gray-400': isDisabled }"
+      data-testid="squashLabel"
+      :data-title="tooltipTitle"
+    >
       <input
         :checked="value"
         :disabled="isDisabled"
@@ -51,7 +62,7 @@ export default {
       rel="noopener noreferrer nofollow"
       data-container="body"
     >
-      <icon name="question-o" />
+      <gl-icon name="question" />
     </a>
   </div>
 </template>

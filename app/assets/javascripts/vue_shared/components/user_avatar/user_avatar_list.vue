@@ -82,8 +82,12 @@ export default {
       :img-size="imgSize"
     />
     <template v-if="hasBreakpoint">
-      <gl-button v-if="hasHiddenItems" variant="link" @click="expand"> {{ expandText }} </gl-button>
-      <gl-button v-else variant="link" @click="collapse"> {{ __('show less') }} </gl-button>
+      <gl-button v-if="hasHiddenItems" variant="link" @click="expand">
+        {{ expandText }}
+      </gl-button>
+      <gl-button v-else variant="link" @click="collapse">
+        {{ __('show less') }}
+      </gl-button>
     </template>
   </div>
 </template>

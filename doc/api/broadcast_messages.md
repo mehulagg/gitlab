@@ -4,7 +4,7 @@
 
 Broadcast messages API operates on [broadcast messages](../user/admin_area/broadcast_messages.md).
 
-The broadcast message API is only accessible to administrators. All requests by:
+As of GitLab 12.8, GET requests do not require authentication. All other broadcast message API endpoints are accessible only to administrators. Non-GET requests by:
 
 - Guests will result in `401 Unauthorized`.
 - Regular users will result in `403 Forbidden`.
@@ -13,14 +13,14 @@ The broadcast message API is only accessible to administrators. All requests by:
 
 List all broadcast messages.
 
-```text
+```plaintext
 GET /broadcast_messages
 ```
 
 Example request:
 
-```sh
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages
+```shell
+curl "https://gitlab.example.com/api/v4/broadcast_messages"
 ```
 
 Example response:
@@ -34,7 +34,10 @@ Example response:
         "color":"#E75E40",
         "font":"#FFFFFF",
         "id":1,
-        "active": false
+        "active": false,
+        "target_path": "*/welcome",
+        "broadcast_type": "banner",
+        "dismissable": false
     }
 ]
 ```
@@ -43,7 +46,7 @@ Example response:
 
 Get a specific broadcast message.
 
-```text
+```plaintext
 GET /broadcast_messages/:id
 ```
 
@@ -55,8 +58,8 @@ Parameters:
 
 Example request:
 
-```sh
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages/1
+```shell
+curl "https://gitlab.example.com/api/v4/broadcast_messages/1"
 ```
 
 Example response:
@@ -69,7 +72,10 @@ Example response:
     "color":"#cecece",
     "font":"#FFFFFF",
     "id":1,
-    "active":false
+    "active":false,
+    "target_path": "*/welcome",
+    "broadcast_type": "banner",
+    "dismissable": false
 }
 ```
 
@@ -77,24 +83,27 @@ Example response:
 
 Create a new broadcast message.
 
-```text
+```plaintext
 POST /broadcast_messages
 ```
 
 Parameters:
 
-| Attribute   | Type     | Required | Description                                           |
-|:------------|:---------|:---------|:------------------------------------------------------|
-| `message`   | string   | yes      | Message to display.                                   |
-| `starts_at` | datetime | no       | Starting time (defaults to current time).             |
-| `ends_at`   | datetime | no       | Ending time (defaults to one hour from current time). |
-| `color`     | string   | no       | Background color hex code.                            |
-| `font`      | string   | no       | Foreground color hex code.                            |
+| Attribute       | Type     | Required | Description                                           |
+|:----------------|:---------|:---------|:------------------------------------------------------|
+| `message`       | string   | yes      | Message to display.                                   |
+| `starts_at`     | datetime | no       | Starting time (defaults to current time).             |
+| `ends_at`       | datetime | no       | Ending time (defaults to one hour from current time). |
+| `color`         | string   | no       | Background color hex code.                            |
+| `font`          | string   | no       | Foreground color hex code.                            |
+| `target_path`   | string   | no       | Target path of the broadcast message.                 |
+| `broadcast_type`| string   | no       | Appearance type (defaults to banner)                  |
+| `dismissable`   | boolean  | no       | Can the user dismiss the message?                     |
 
 Example request:
 
-```sh
-curl --data "message=Deploy in progress&color=#cecece" --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages
+```shell
+curl --data "message=Deploy in progress&color=#cecece" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/broadcast_messages"
 ```
 
 Example response:
@@ -107,7 +116,10 @@ Example response:
     "color":"#cecece",
     "font":"#FFFFFF",
     "id":1,
-    "active": true
+    "active": true,
+    "target_path": "*/welcome",
+    "broadcast_type": "notification",
+    "dismissable": false
 }
 ```
 
@@ -115,25 +127,28 @@ Example response:
 
 Update an existing broadcast message.
 
-```text
+```plaintext
 PUT /broadcast_messages/:id
 ```
 
 Parameters:
 
-| Attribute   | Type     | Required | Description                        |
-|:------------|:---------|:---------|:-----------------------------------|
-| `id`        | integer  | yes      | ID of broadcast message to update. |
-| `message`   | string   | no       | Message to display.                |
-| `starts_at` | datetime | no       | Starting time.                     |
-| `ends_at`   | datetime | no       | Ending time.                       |
-| `color`     | string   | no       | Background color hex code.         |
-| `font`      | string   | no       | Foreground color hex code.         |
+| Attribute       | Type     | Required | Description                           |
+|:----------------|:---------|:---------|:--------------------------------------|
+| `id`            | integer  | yes      | ID of broadcast message to update.    |
+| `message`       | string   | no       | Message to display.                   |
+| `starts_at`     | datetime | no       | Starting time.                        |
+| `ends_at`       | datetime | no       | Ending time.                          |
+| `color`         | string   | no       | Background color hex code.            |
+| `font`          | string   | no       | Foreground color hex code.            |
+| `target_path`   | string   | no       | Target path of the broadcast message. |
+| `broadcast_type`| string   | no       | Appearance type (defaults to banner)  |
+| `dismissable`   | boolean  | no       | Can the user dismiss the message?     |
 
 Example request:
 
-```sh
-curl --request PUT --data "message=Update message&color=#000" --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages/1
+```shell
+curl --request PUT --data "message=Update message&color=#000" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/broadcast_messages/1"
 ```
 
 Example response:
@@ -146,7 +161,10 @@ Example response:
     "color":"#000",
     "font":"#FFFFFF",
     "id":1,
-    "active": true
+    "active": true,
+    "target_path": "*/welcome",
+    "broadcast_type": "notification",
+    "dismissable": false
 }
 ```
 
@@ -154,7 +172,7 @@ Example response:
 
 Delete a broadcast message.
 
-```sh
+```shell
 DELETE /broadcast_messages/:id
 ```
 
@@ -166,6 +184,6 @@ Parameters:
 
 Example request:
 
-```sh
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/broadcast_messages/1
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/broadcast_messages/1"
 ```

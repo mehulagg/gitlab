@@ -1,7 +1,8 @@
 ---
-last_updated: 2019-07-04
-type: reference, howto
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pages/getting_started_part_three.html'
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Custom domains and SSL/TLS Certificates
@@ -60,6 +61,11 @@ according to the type of domain you want to use with your Pages site:
 - [For subdomains](#for-subdomains), `subdomain.example.com`.
 - [For both](#for-both-root-and-subdomains).
 
+NOTE: **Note:**
+You can [configure IPv6 on self-managed instances](../../../../administration/pages/index.md#advanced-configuration),
+but IPv6 is not currently configured for Pages on GitLab.com.
+Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/214718) for details.
+
 ##### For root domains
 
 Root domains (`example.com`) require:
@@ -92,7 +98,7 @@ as it most likely won't work if you set an [`MX` record](dns_concepts.md#mx-reco
 
 Subdomains (`subdomain.example.com`) require:
 
-- A DNS [CNAME record](dns_concepts.md#cname-record) record pointing your subdomain to the Pages server.
+- A DNS [CNAME record](dns_concepts.md#cname-record) pointing your subdomain to the Pages server.
 - A DNS [TXT record](dns_concepts.md#txt-record) to verify your domain's ownership.
 
 | From                                                    | DNS Record | To                    |
@@ -121,11 +127,11 @@ They require:
 | ------------------------------------------------- | ---------- | ---------------------- |
 | `example.com`                                     | A          | `35.185.44.232`        |
 | `_gitlab-pages-verification-code.example.com`     | TXT        | `gitlab-pages-verification-code=00112233445566778899aabbccddeeff` |
-|--------------------------------------------+--------------------------------------------|
+|---------------------------------------------------+------------+------------------------|
 | `www.example.com`                                 | CNAME      | `namespace.gitlab.io`  |
 | `_gitlab-pages-verification-code.www.example.com` | TXT        | `gitlab-pages-verification-code=00112233445566778899aabbccddeeff` |
 
-If you're using CloudFlare, check
+If you're using Cloudflare, check
 [Redirecting `www.domain.com` to `domain.com` with Cloudflare](#redirecting-wwwdomaincom-to-domaincom-with-cloudflare).
 
 > **Notes**:
@@ -134,8 +140,8 @@ If you're using CloudFlare, check
   `domain.com` to your GitLab Pages site. Use an `A` record instead.
 > - **Do not** add any special chars after the default Pages
   domain. E.g., don't point `subdomain.domain.com` to
-  or `namespace.gitlab.io/`. Some domain hosting providers may request a trailling dot (`namespace.gitlab.io.`), though.
-> - GitLab Pages IP on GitLab.com [was changed](https://about.gitlab.com/blog/2017/03/06/we-are-changing-the-ip-of-gitlab-pages-on-gitlab-com/) in 2017.
+  or `namespace.gitlab.io/`. Some domain hosting providers may request a trailing dot (`namespace.gitlab.io.`), though.
+> - GitLab Pages IP on GitLab.com [was changed](https://about.gitlab.com/releases/2017/03/06/we-are-changing-the-ip-of-gitlab-pages-on-gitlab-com/) in 2017.
 > - GitLab Pages IP on GitLab.com [has changed](https://about.gitlab.com/blog/2018/07/19/gcp-move-update/#gitlab-pages-and-custom-domains)
   from `52.167.214.135` to `35.185.44.232` in 2018.
 
@@ -162,7 +168,7 @@ from the GitLab project.
 > - Domain verification is **required for GitLab.com users**;
   for GitLab self-managed instances, your GitLab administrator has the option
   to [disabled custom domain verification](../../../../administration/pages/index.md#custom-domain-verification).
-> - [DNS propagation may take some time (up to 24h)](https://www.inmotionhosting.com/support/domain-names/dns-nameserver-changes/domain-names-dns-changes),
+> - [DNS propagation may take some time (up to 24h)](https://www.inmotionhosting.com/support/domain-names/dns-nameserver-changes/domain-names-dns-changes/),
   although it's usually a matter of minutes to complete. Until it does, verification
   will fail and attempts to visit your domain will respond with a 404.
 > - Once your domain has been verified, leave the verification record
@@ -174,13 +180,13 @@ from the GitLab project.
 To manually verify that you have properly configured the domain verification
 `TXT` DNS entry, you can run the following command in your terminal:
 
-```
+```shell
 dig _gitlab-pages-verification-code.<YOUR-PAGES-DOMAIN> TXT
 ```
 
 Expect the output:
 
-```
+```plaintext
 ;; ANSWER SECTION:
 _gitlab-pages-verification-code.<YOUR-PAGES-DOMAIN>. 300 IN TXT "gitlab-pages-verification-code=<YOUR-VERIFICATION-CODE>"
 ```
@@ -228,7 +234,9 @@ To secure your custom domain with GitLab Pages you can opt by:
 - Manually adding SSL/TLS certificates to GitLab Pages websites
   by following the steps below.
 
-### Requirements
+### Manual addition of SSL/TLS certificates
+
+You can use any certificate satisfying the following requirements:
 
 - A GitLab Pages website up and running accessible via a custom domain.
 - **A PEM certificate**: it is the certificate generated by the CA,
@@ -237,12 +245,15 @@ To secure your custom domain with GitLab Pages you can opt by:
   the part of the encryption keychain that identifies the CA.
   Usually it's combined with the PEM certificate, but there are
   some cases in which you need to add them manually.
-  [CloudFlare certs](https://about.gitlab.com/blog/2017/02/07/setting-up-gitlab-pages-with-cloudflare-certificates/)
+  [Cloudflare certs](https://about.gitlab.com/blog/2017/02/07/setting-up-gitlab-pages-with-cloudflare-certificates/)
   are one of these cases.
 - **A private key**, it's an encrypted key which validates
   your PEM against your domain.
 
-### Steps
+NOTE: **Note:**
+[Cloudflare certificates](https://about.gitlab.com/blog/2017/02/07/setting-up-gitlab-pages-with-cloudflare-certificates/), for example, meet these requirements.
+
+#### Steps
 
 - To add the certificate at the time you add a new domain, go to your
   project's **Settings > Pages > New Domain**, add the domain name and the certificate.
@@ -265,7 +276,7 @@ Sublime Text, Atom, Dreamweaver, Brackets, etc).
 
 ## Force HTTPS for GitLab Pages websites
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/28857) in GitLab 10.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/28857) in GitLab 10.7.
 
 To make your website's visitors even more secure, you can choose to
 force HTTPS for GitLab Pages. By doing so, all attempts to visit your
@@ -278,6 +289,9 @@ To enable this setting:
 
 1. Navigate to your project's **Settings > Pages**.
 1. Tick the checkbox **Force HTTPS (requires valid certificates)**.
+
+NOTE: **Note:**
+If you use Cloudflare CDN in front of GitLab Pages, make sure to set the SSL connection setting to `full` instead of `flexible`. For more details, see the [Cloudflare CDN directions](https://support.cloudflare.com/hc/en-us/articles/200170416-End-to-end-HTTPS-with-Cloudflare-Part-3-SSL-options#h_4e0d1a7c-eb71-4204-9e22-9d3ef9ef7fef).
 
 <!-- ## Troubleshooting
 

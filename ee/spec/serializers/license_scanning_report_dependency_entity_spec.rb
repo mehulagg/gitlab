@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LicenseScanningReportDependencyEntity do
+RSpec.describe LicenseScanningReportDependencyEntity do
   include LicenseScanningReportHelper
 
   let(:dependency) { create_dependency }

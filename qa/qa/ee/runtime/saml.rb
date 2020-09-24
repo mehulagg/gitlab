@@ -5,15 +5,23 @@ module QA
       module Saml
         def self.idp_base_url
           host = QA::Runtime::Env.simple_saml_hostname || 'localhost'
-          "https://#{host}:8443/simplesaml/saml2/idp"
+          "https://#{host}:8443/simplesaml"
         end
 
         def self.idp_sso_url
-          "#{idp_base_url}/SSOService.php"
+          "#{idp_base_url}/saml2/idp/SSOService.php"
+        end
+
+        def self.idp_sign_out_url
+          "#{idp_base_url}/module.php/core/authenticate.php?as=example-userpass&logout"
+        end
+
+        def self.idp_signed_out_url
+          "#{idp_base_url}/logout.php"
         end
 
         def self.idp_metadata_url
-          "#{idp_base_url}/metadata.php"
+          "#{idp_base_url}/saml2/idp/metadata.php"
         end
 
         def self.idp_issuer

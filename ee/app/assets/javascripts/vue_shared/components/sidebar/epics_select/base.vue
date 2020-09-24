@@ -5,6 +5,7 @@ import $ from 'jquery';
 import { GlLoadingIcon } from '@gitlab/ui';
 
 import { noneEpic } from 'ee/vue_shared/constants';
+import { __ } from '~/locale';
 
 import createStore from './store';
 
@@ -16,6 +17,8 @@ import DropdownButton from './dropdown_button.vue';
 import DropdownHeader from './dropdown_header.vue';
 import DropdownSearchInput from './dropdown_search_input.vue';
 import DropdownContents from './dropdown_contents.vue';
+
+import { DropdownVariant } from './constants';
 
 export default {
   store: createStore(),
@@ -48,7 +51,8 @@ export default {
     },
     blockTitle: {
       type: String,
-      required: true,
+      required: false,
+      default: __('Epic'),
     },
     initialEpic: {
       type: Object,
@@ -58,17 +62,36 @@ export default {
       type: Boolean,
       required: true,
     },
+    variant: {
+      type: String,
+      required: false,
+      default: DropdownVariant.Sidebar,
+    },
+    showHeader: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
-      showDropdown: false,
+      showDropdown: this.variant === DropdownVariant.Standalone,
     };
   },
   computed: {
-    ...mapState(['epicSelectInProgress', 'epicsFetchInProgress', 'selectedEpic']),
-    ...mapGetters(['groupEpics']),
+    ...mapState([
+      'epicSelectInProgress',
+      'epicsFetchInProgress',
+      'selectedEpic',
+      'searchQuery',
+      'selectedEpicIssueId',
+    ]),
+    ...mapGetters(['isDropdownVariantSidebar', 'isDropdownVariantStandalone', 'groupEpics']),
     dropdownSelectInProgress() {
       return this.initialEpicLoading || this.epicSelectInProgress;
+    },
+    dropdownButtonTextClass() {
+      return { 'is-default': this.isDropdownVariantStandalone };
     },
   },
   watch: {
@@ -87,6 +110,7 @@ export default {
      */
     initialEpic() {
       this.setSelectedEpic(this.initialEpic);
+      this.setSelectedEpicIssueId(this.epicIssueId);
     },
     /**
      * Initial Epic is loaded via separate Sidebar store
@@ -94,16 +118,29 @@ export default {
      */
     initialEpicLoading() {
       this.setSelectedEpic(this.initialEpic);
+      this.setSelectedEpicIssueId(this.epicIssueId);
+    },
+    /**
+     * Check if `searchQuery` presence has yielded any matching
+     * epics, if not, dispatch `fetchEpics` with search query.
+     */
+    searchQuery(value) {
+      if (value) {
+        this.fetchEpics(this.searchQuery);
+      } else {
+        this.fetchEpics();
+      }
     },
   },
   mounted() {
     this.setInitialData({
+      variant: this.variant,
       groupId: this.groupId,
       issueId: this.issueId,
-      selectedEpic: this.selectedEpic,
+      selectedEpic: this.initialEpic,
       selectedEpicIssueId: this.epicIssueId,
     });
-    $(this.$refs.dropdown).on('shown.bs.dropdown', this.handleDropdownShown);
+    $(this.$refs.dropdown).on('shown.bs.dropdown', () => this.fetchEpics());
     $(this.$refs.dropdown).on('hidden.bs.dropdown', this.handleDropdownHidden);
   },
   methods: {
@@ -112,6 +149,7 @@ export default {
       'setIssueId',
       'setSearchQuery',
       'setSelectedEpic',
+      'setSelectedEpicIssueId',
       'fetchEpics',
       'assignIssueToEpic',
       'removeIssueFromEpic',
@@ -131,17 +169,16 @@ export default {
         });
       });
     },
-    handleDropdownShown() {
-      if (this.groupEpics.length === 0) this.fetchEpics();
-    },
     handleDropdownHidden() {
-      this.showDropdown = false;
+      this.showDropdown = this.isDropdownVariantStandalone;
     },
     handleItemSelect(epic) {
-      if (epic.id === noneEpic.id && epic.title === noneEpic.title) {
+      if (this.selectedEpicIssueId && epic.id === noneEpic.id && epic.title === noneEpic.title) {
         this.removeIssueFromEpic(this.selectedEpic);
-      } else {
+      } else if (this.issueId) {
         this.assignIssueToEpic(epic);
+      } else {
+        this.$emit('onEpicSelect', epic);
       }
     },
   },
@@ -149,25 +186,31 @@ export default {
 </script>
 
 <template>
-  <div class="block epic js-epic-block">
-    <dropdown-value-collapsed :epic="selectedEpic" />
+  <div class="js-epic-block" :class="{ 'block epic': isDropdownVariantSidebar }">
+    <dropdown-value-collapsed v-if="isDropdownVariantSidebar" :epic="selectedEpic" />
     <dropdown-title
+      v-if="isDropdownVariantSidebar"
       :can-edit="canEdit"
       :block-title="blockTitle"
       :is-loading="dropdownSelectInProgress"
       @onClickEdit="handleEditClick"
     />
-    <dropdown-value v-show="!showDropdown" :epic="selectedEpic">
+    <dropdown-value v-if="isDropdownVariantSidebar" v-show="!showDropdown" :epic="selectedEpic">
       <slot></slot>
     </dropdown-value>
-    <div v-if="canEdit" v-show="showDropdown" class="epic-dropdown-container">
+    <div
+      v-if="canEdit || isDropdownVariantStandalone"
+      v-show="showDropdown"
+      class="epic-dropdown-container"
+    >
       <div ref="dropdown" class="dropdown">
-        <dropdown-button ref="dropdownButton" />
-        <div
-          class="dropdown-menu dropdown-select
-dropdown-menu-epics dropdown-menu-selectable"
-        >
-          <dropdown-header />
+        <dropdown-button
+          ref="dropdownButton"
+          :selected-epic-title="selectedEpic.title"
+          :toggle-text-class="dropdownButtonTextClass"
+        />
+        <div class="dropdown-menu dropdown-select dropdown-menu-epics dropdown-menu-selectable">
+          <dropdown-header v-if="isDropdownVariantSidebar || showHeader" />
           <dropdown-search-input @onSearchInput="setSearchQuery" />
           <dropdown-contents
             v-if="!epicsFetchInProgress"

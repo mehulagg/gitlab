@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::ClustersController do
+RSpec.describe Admin::ClustersController do
   include AccessMatchersForController
 
   let(:user) { create(:admin) }
@@ -26,38 +26,6 @@ describe Admin::ClustersController do
 
     before do
       allow(::Clusters::Instance).to receive(:new).and_return(cluster.instance)
-    end
-
-    context 'with inappropriate requests' do
-      context 'with anoymous user' do
-        before do
-          sign_out(user)
-        end
-
-        it 'renders not found' do
-          get :prometheus_proxy, params: prometheus_proxy_params
-
-          expect(response).to have_gitlab_http_status(404)
-        end
-      end
-
-      context 'with non-admin user' do
-        let(:user) { create(:user) }
-
-        before do
-          sign_in(user)
-        end
-
-        it 'renders not found' do
-          get :prometheus_proxy, params: prometheus_proxy_params
-
-          expect(response).to have_gitlab_http_status(404)
-        end
-      end
-    end
-
-    describe 'GET #metrics_dashboard' do
-      it_behaves_like 'the default dashboard'
     end
   end
 

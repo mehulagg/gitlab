@@ -2,12 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Projects > Show > User manages notifications', :js do
+RSpec.describe 'Projects > Show > User manages notifications', :js do
   let(:project) { create(:project, :public, :repository) }
 
   before do
     sign_in(project.owner)
-    visit project_path(project)
   end
 
   def click_notifications_button
@@ -15,23 +14,29 @@ describe 'Projects > Show > User manages notifications', :js do
   end
 
   it 'changes the notification setting' do
+    visit project_path(project)
     click_notifications_button
     click_link 'On mention'
 
-    wait_for_requests
+    page.within('.notification-dropdown') do
+      expect(page).not_to have_css('.gl-spinner')
+    end
 
     click_notifications_button
     expect(find('.update-notification.is-active')).to have_content('On mention')
-    expect(find('.notifications-icon use')[:'xlink:href']).to end_with('#notifications')
+    expect(page).to have_css('.notifications-icon[data-testid="notifications-icon"]')
   end
 
   it 'changes the notification setting to disabled' do
+    visit project_path(project)
     click_notifications_button
     click_link 'Disabled'
 
-    wait_for_requests
+    page.within('.notification-dropdown') do
+      expect(page).not_to have_css('.gl-spinner')
+    end
 
-    expect(find('.notifications-icon use')[:'xlink:href']).to end_with('#notifications-off')
+    expect(page).to have_css('.notifications-icon[data-testid="notifications-off-icon"]')
   end
 
   context 'custom notification settings' do
@@ -50,11 +55,14 @@ describe 'Projects > Show > User manages notifications', :js do
         :reassign_merge_request,
         :merge_merge_request,
         :failed_pipeline,
-        :success_pipeline
+        :fixed_pipeline,
+        :success_pipeline,
+        :moved_project
       ]
     end
 
     it 'shows notification settings checkbox' do
+      visit project_path(project)
       click_notifications_button
       page.find('a[data-notification-level="custom"]').click
 
@@ -70,6 +78,7 @@ describe 'Projects > Show > User manages notifications', :js do
     let(:project) { create(:project, :public, :repository, emails_disabled: true) }
 
     it 'is disabled' do
+      visit project_path(project)
       expect(page).to have_selector('.notifications-btn.disabled', visible: true)
     end
   end

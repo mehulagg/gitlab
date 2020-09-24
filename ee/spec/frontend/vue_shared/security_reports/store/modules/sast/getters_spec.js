@@ -29,7 +29,7 @@ describe('groupedSastText', () => {
     const sast = createReport();
     const result = getters.groupedSastText(sast);
 
-    expect(result).toBe('SAST detected no vulnerabilities for the source branch only');
+    expect(result).toBe('SAST detected no vulnerabilities.');
   });
 });
 

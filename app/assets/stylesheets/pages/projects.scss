@@ -143,8 +143,8 @@
 
 .group-home-panel,
 .project-home-panel {
-  padding-top: $gl-padding;
-  padding-bottom: $gl-padding;
+  margin-top: $gl-padding;
+  margin-bottom: $gl-padding;
 
   .home-panel-avatar {
     width: $home-panel-title-row-height;
@@ -159,7 +159,7 @@
     font-weight: bold;
 
     .icon {
-      font-size: $gl-font-size-large;
+      vertical-align: -1px;
     }
 
     .home-panel-topic-list {
@@ -224,12 +224,6 @@
       font-size: $gl-font-size-large;
     }
   }
-
-  .notifications-btn {
-    .fa-bell {
-      margin-right: 0;
-    }
-  }
 }
 
 .nav > .project-buttons {
@@ -270,14 +264,8 @@
   }
 
   .count-badge,
-  .btn {
+  .btn-xs {
     height: 24px;
-  }
-
-  .git-clone-holder {
-    .btn {
-      height: auto;
-    }
   }
 
   .dropdown-toggle,
@@ -365,7 +353,7 @@
 .save-project-loader {
   margin-top: 50px;
   margin-bottom: 50px;
-  color: $gl-gray-700;
+  color: $gray-700;
 }
 
 .transfer-project .select2-container {
@@ -402,7 +390,7 @@
     margin-right: $gl-padding-4;
     margin-bottom: $gl-padding-4;
     color: $gl-text-color-secondary;
-    background-color: $gray-100;
+    background-color: $gray-50;
     line-height: $gl-btn-line-height;
 
     &:hover {
@@ -441,7 +429,7 @@
 
   > li + li::before {
     padding: 0 3px;
-    color: $gl-gray-400;
+    color: $gray-300;
   }
 
   a {
@@ -478,17 +466,9 @@
     margin-right: auto;
   }
 
-  a {
-    display: block;
-    width: 100%;
-    height: 100%;
-    padding-top: $gl-padding;
-    text-decoration: none;
-
-    &.disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
+  a.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
   }
 }
 
@@ -548,7 +528,7 @@
 
     .input-group-text {
       width: 100%;
-      background-color: $white-light;
+      background-color: $white;
     }
 
     .selected-icon {
@@ -661,7 +641,7 @@
       z-index: 10;
       padding: $gl-padding-8 0;
       text-align: center;
-      background-color: $white-light;
+      background-color: $white;
       color: $gl-text-color-tertiary;
       transform: translateY(-50%);
       font-size: 12px;
@@ -798,7 +778,7 @@
     }
 
     .btn {
-      margin-top: $gl-padding;
+      margin-top: $gl-padding-8;
       padding: $gl-btn-vert-padding $gl-btn-padding;
       line-height: $gl-btn-line-height;
 
@@ -818,12 +798,16 @@
     @extend .btn;
     @extend .btn-default;
   }
+
+  .nav > li:not(:last-child) {
+    margin-right: $gl-padding-8;
+  }
 }
 
 .repository-languages-bar {
   height: 8px;
   margin-bottom: $gl-padding-8;
-  background-color: $white-light;
+  background-color: $white;
   border-radius: $border-radius-default;
 
   .progress-bar {
@@ -841,7 +825,7 @@
 }
 
 .repository-language-bar-tooltip-share {
-  color: $gray-400;
+  color: $gray-200;
 }
 
 pre.light-well {
@@ -1152,7 +1136,7 @@ pre.light-well {
 
   .form-control {
     @extend .monospace;
-    background-color: $white-light;
+    background-color: $white;
     border-color: $border-color;
     font-size: 14px;
     margin-left: -1px;
@@ -1183,7 +1167,7 @@ pre.light-well {
   }
 
   i:nth-child(2) {
-    color: $white-light;
+    color: $white;
   }
 }
 
@@ -1284,18 +1268,10 @@ pre.light-well {
   position: relative;
 
   .clear-icon {
-    @extend .fa-times;
     display: none;
     position: absolute;
-    right: 7px;
-    top: 7px;
-    color: $location-icon-color;
-
-    &::before {
-      font-family: FontAwesome;
-      font-weight: $gl-font-weight-normal;
-      font-style: normal;
-    }
+    right: 9px;
+    top: 9px;
   }
 
   &.has-value {
@@ -1387,7 +1363,7 @@ pre.light-well {
   padding: 32px;
   margin: 32px;
   border-radius: 3px;
-  background-color: $white-light;
+  background-color: $white;
 
   h3 {
     margin-top: 0;
@@ -1460,7 +1436,7 @@ pre.light-well {
 
 .project-filters {
   .btn svg {
-    color: $gl-gray-700;
+    color: $gray-700;
   }
 
   .button-filter-group {
@@ -1538,5 +1514,12 @@ pre.light-well {
     .filtered-search-dropdown {
       width: 100%;
     }
+  }
+}
+
+@include media-breakpoint-down(xs) {
+  .fork-filtered-search {
+    width: 100%;
+    margin: $gl-spacing-scale-2 0;
   }
 }

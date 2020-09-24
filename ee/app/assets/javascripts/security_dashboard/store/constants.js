@@ -1,5 +1,7 @@
 import { s__ } from '~/locale';
 
+export const VULNERABILITIES_PER_PAGE = 20;
+
 export const SEVERITY_LEVELS = {
   critical: s__('severity|Critical'),
   high: s__('severity|High'),
@@ -7,18 +9,6 @@ export const SEVERITY_LEVELS = {
   low: s__('severity|Low'),
   unknown: s__('severity|Unknown'),
   info: s__('severity|Info'),
-  undefined: s__('severity|Undefined'),
-};
-
-export const CONFIDENCE_LEVELS = {
-  confirmed: s__('confidence|Confirmed'),
-  high: s__('confidence|High'),
-  medium: s__('confidence|Medium'),
-  low: s__('confidence|Low'),
-  unknown: s__('confidence|Unknown'),
-  ignore: s__('confidence|Ignore'),
-  experimental: s__('confidence|Experimental'),
-  undefined: s__('confidence|Undefined'),
 };
 
 export const REPORT_TYPES = {
@@ -26,4 +16,22 @@ export const REPORT_TYPES = {
   dast: s__('ciReport|DAST'),
   dependency_scanning: s__('ciReport|Dependency Scanning'),
   sast: s__('ciReport|SAST'),
+  secret_detection: s__('ciReport|Secret Detection'),
+  coverage_fuzzing: s__('ciReport|Coverage Fuzzing'),
 };
+
+export const DASHBOARD_TYPES = {
+  PROJECT: 'project',
+  PIPELINE: 'pipeline',
+  GROUP: 'group',
+  INSTANCE: 'instance',
+};
+
+export const UNSCANNED_PROJECTS_DATE_RANGES = [
+  { description: s__('UnscannedProjects|5 or more days'), fromDay: 5, toDay: 15 },
+  { description: s__('UnscannedProjects|15 or more days'), fromDay: 15, toDay: 30 },
+  { description: s__('UnscannedProjects|30 or more days'), fromDay: 30, toDay: 60 },
+  { description: s__('UnscannedProjects|60 or more days'), fromDay: 60, toDay: Infinity },
+];
+
+export const PRIMARY_IDENTIFIER_TYPE = 'cve';

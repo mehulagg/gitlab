@@ -9,12 +9,17 @@ class ProjectMember < Member
   default_value_for :source_type, SOURCE_TYPE
   validates :source_type, format: { with: /\AProject\z/ }
   validates :access_level, inclusion: { in: Gitlab::Access.values }
-  default_scope { where(source_type: SOURCE_TYPE) }
+  default_scope { where(source_type: SOURCE_TYPE) } # rubocop:disable Cop/DefaultScope
 
   scope :in_project, ->(project) { where(source_id: project.id) }
   scope :in_namespaces, ->(groups) do
     joins('INNER JOIN projects ON projects.id = members.source_id')
       .where('projects.namespace_id in (?)', groups.select(:id))
+  end
+
+  scope :without_project_bots, -> do
+    left_join_users
+      .merge(User.without_project_bot)
   end
 
   class << self

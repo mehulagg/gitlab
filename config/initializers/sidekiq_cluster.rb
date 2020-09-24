@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-if ENV['ENABLE_SIDEKIQ_CLUSTER'] && Gitlab.ee?
+if ENV['ENABLE_SIDEKIQ_CLUSTER']
   Thread.new do
     Thread.current.abort_on_exception = true
 
@@ -13,6 +13,16 @@ if ENV['ENABLE_SIDEKIQ_CLUSTER'] && Gitlab.ee?
       # this case the parent PID changes and we need to terminate ourselves.
       if Process.ppid != parent
         Process.kill(:TERM, Process.pid)
+
+        # Allow sidekiq to cleanly terminate and push any running jobs back
+        # into the queue.  We use the configured timeout and add a small
+        # grace period
+        sleep(Sidekiq.options[:timeout] + 5)
+
+        # Signaling the Sidekiq Pgroup as KILL is not forwarded to
+        # a possible child process. In Sidekiq Cluster, all child Sidekiq
+        # processes are PGROUP leaders (each process has its own pgroup).
+        Process.kill(:KILL, 0)
         break
       end
     end

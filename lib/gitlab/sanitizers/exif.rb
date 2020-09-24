@@ -48,7 +48,7 @@ module Gitlab
 
       attr_reader :logger
 
-      def initialize(logger: Rails.logger) # rubocop:disable Gitlab/RailsLogger
+      def initialize(logger: Gitlab::AppLogger)
         @logger = logger
       end
 
@@ -152,7 +152,7 @@ module Gitlab
 
         raise "failed to get exif tags: #{output}" if status != 0
 
-        JSON.parse(output).first
+        Gitlab::Json.parse(output).first
       end
     end
   end

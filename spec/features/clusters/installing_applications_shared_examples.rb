@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
-shared_examples "installing applications on a cluster" do
+RSpec.shared_examples "installing applications for a cluster" do
   before do
+    # Reduce interval from 10 seconds which is too long for an automated test
+    stub_const("#{Clusters::ClustersController}::STATUS_POLLING_INTERVAL", 500)
+
     visit cluster_path
   end
 
@@ -17,52 +20,28 @@ shared_examples "installing applications on a cluster" do
   context 'when cluster is created' do
     let(:cluster) { create(:cluster, :provided_by_gcp, *cluster_factory_args) }
 
+    before do
+      page.within('.js-edit-cluster-form') do
+        click_link 'Applications'
+      end
+    end
+
     it 'user can install applications' do
       wait_for_requests
 
-      page.within('.js-cluster-application-row-helm') do
-        expect(page.find(:css, '.js-cluster-application-install-button')['disabled']).to be_nil
+      application_row = '.js-cluster-application-row-ingress'
+
+      page.within(application_row) do
+        expect(page).not_to have_css('.js-cluster-application-install-button[disabled]')
         expect(page).to have_css('.js-cluster-application-install-button', exact_text: 'Install')
       end
     end
 
-    context 'when user installs Helm' do
-      before do
-        allow(ClusterInstallAppWorker).to receive(:perform_async)
-
-        page.within('.js-cluster-application-row-helm') do
-          page.find(:css, '.js-cluster-application-install-button').click
-        end
-
-        wait_for_requests
-      end
-
-      it 'shows the status transition' do
-        page.within('.js-cluster-application-row-helm') do
-          # FE sends request and gets the response, then the buttons is "Installing"
-          expect(page).to have_css('.js-cluster-application-install-button[disabled]', exact_text: 'Installing')
-
-          Clusters::Cluster.last.application_helm.make_installing!
-
-          # FE starts polling and update the buttons to "Installing"
-          expect(page).to have_css('.js-cluster-application-install-button[disabled]', exact_text: 'Installing')
-
-          Clusters::Cluster.last.application_helm.make_installed!
-
-          expect(page).not_to have_css('button', exact_text: 'Install', visible: :all)
-          expect(page).not_to have_css('button', exact_text: 'Installing', visible: :all)
-          expect(page).to have_css('.js-cluster-application-uninstall-button:not([disabled])', exact_text: 'Uninstall')
-        end
-
-        expect(page).to have_content('Helm Tiller was successfully installed on your Kubernetes cluster')
-      end
+    it 'does not show the Helm application' do
+      expect(page).not_to have_selector(:css, '.js-cluster-application-row-helm')
     end
 
     context 'when user installs Knative' do
-      before do
-        create(:clusters_applications_helm, :installed, cluster: cluster)
-      end
-
       context 'on an abac cluster' do
         let(:cluster) { create(:cluster, :provided_by_gcp, :rbac_disabled, *cluster_factory_args) }
 
@@ -85,10 +64,6 @@ shared_examples "installing applications on a cluster" do
         end
 
         describe 'when user clicks install button' do
-          def domainname_form_value
-            page.find('.js-knative-domainname').value
-          end
-
           before do
             allow(ClusterInstallAppWorker).to receive(:perform_async)
             allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_in)
@@ -113,7 +88,7 @@ shared_examples "installing applications on a cluster" do
 
           it 'shows status transition' do
             page.within('.js-cluster-application-row-knative') do
-              expect(domainname_form_value).to eq('domain.example.org')
+              expect(page).to have_field('Knative Domain Name:', with: 'domain.example.org')
               expect(page).to have_css('.js-cluster-application-uninstall-button', exact_text: 'Uninstall')
             end
 
@@ -125,7 +100,7 @@ shared_examples "installing applications on a cluster" do
             page.within('.js-cluster-application-row-knative') do
               expect(ClusterPatchAppWorker).to receive(:perform_async)
 
-              expect(domainname_form_value).to eq('domain.example.org')
+              expect(page).to have_field('Knative Domain Name:', with: 'domain.example.org')
 
               page.find('.js-knative-domainname').set("new.domain.example.org")
 
@@ -133,7 +108,7 @@ shared_examples "installing applications on a cluster" do
 
               wait_for_requests
 
-              expect(domainname_form_value).to eq('new.domain.example.org')
+              expect(page).to have_field('Knative Domain Name:', with: 'new.domain.example.org')
             end
           end
         end
@@ -145,51 +120,66 @@ shared_examples "installing applications on a cluster" do
         allow(ClusterInstallAppWorker).to receive(:perform_async)
         allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_in)
         allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_async)
-
-        create(:clusters_applications_helm, :installed, cluster: cluster)
-
-        page.within('.js-cluster-application-row-cert_manager') do
-          click_button 'Install'
-        end
       end
 
       it 'shows status transition' do
-        def email_form_value
-          page.find('.js-email').value
-        end
-
         page.within('.js-cluster-application-row-cert_manager') do
-          expect(email_form_value).to eq(cluster.user.email)
+          click_button 'Install'
+          wait_for_requests
+
+          expect(page).to have_field('Issuer Email', with: cluster.user.email)
           expect(page).to have_css('.js-cluster-application-install-button', exact_text: 'Installing')
 
-          page.find('.js-email').set("new_email@example.org")
           Clusters::Cluster.last.application_cert_manager.make_installing!
 
-          expect(email_form_value).to eq('new_email@example.org')
+          expect(page).to have_field('Issuer Email', with: cluster.user.email)
           expect(page).to have_css('.js-cluster-application-install-button', exact_text: 'Installing')
 
           Clusters::Cluster.last.application_cert_manager.make_installed!
 
-          expect(email_form_value).to eq('new_email@example.org')
+          expect(page).to have_field('Issuer Email', with: cluster.user.email)
           expect(page).to have_css('.js-cluster-application-uninstall-button', exact_text: 'Uninstall')
         end
 
         expect(page).to have_content('Cert-Manager was successfully installed on your Kubernetes cluster')
+      end
+
+      it 'installs with custom email' do
+        custom_email = 'new_email@example.org'
+
+        page.within('.js-cluster-application-row-cert_manager') do
+          # Wait for the polling to finish
+          wait_for_requests
+
+          page.find('.js-email').set(custom_email)
+          click_button 'Install'
+          wait_for_requests
+
+          expect(page).to have_field('Issuer Email', with: custom_email)
+          expect(page).to have_css('.js-cluster-application-install-button', exact_text: 'Installing')
+
+          Clusters::Cluster.last.application_cert_manager.make_installing!
+
+          expect(page).to have_field('Issuer Email', with: custom_email)
+          expect(page).to have_css('.js-cluster-application-install-button', exact_text: 'Installing')
+
+          Clusters::Cluster.last.application_cert_manager.make_installed!
+
+          expect(page).to have_field('Issuer Email', with: custom_email)
+          expect(page).to have_css('.js-cluster-application-uninstall-button', exact_text: 'Uninstall')
+        end
       end
     end
 
     context 'when user installs Elastic Stack' do
       before do
         allow(ClusterInstallAppWorker).to receive(:perform_async)
-        allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_in)
-        allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_async)
-
-        create(:clusters_applications_helm, :installed, cluster: cluster)
-        create(:clusters_applications_ingress, :installed, external_ip: '127.0.0.1', cluster: cluster)
 
         page.within('.js-cluster-application-row-elastic_stack') do
           click_button 'Install'
         end
+
+        wait_for_requests
       end
 
       it 'shows status transition' do
@@ -214,8 +204,6 @@ shared_examples "installing applications on a cluster" do
         allow(ClusterInstallAppWorker).to receive(:perform_async)
         allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_in)
         allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_async)
-
-        create(:clusters_applications_helm, :installed, cluster: cluster)
 
         page.within('.js-cluster-application-row-ingress') do
           expect(page).to have_css('.js-cluster-application-install-button:not([disabled])')
@@ -256,4 +244,9 @@ shared_examples "installing applications on a cluster" do
       end
     end
   end
+end
+
+RSpec.shared_examples "installing applications on a cluster" do
+  it_behaves_like "installing applications for a cluster", false
+  it_behaves_like "installing applications for a cluster", true
 end

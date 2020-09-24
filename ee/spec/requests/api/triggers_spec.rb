@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe API::Triggers do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository, creator: user) }
+RSpec.describe API::Triggers do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository, :auto_devops, creator: user) }
 
   describe 'POST /projects/:project_id/trigger/pipeline' do
     context 'when triggering a pipeline from a job token' do
@@ -21,7 +21,7 @@ describe API::Triggers do
         it 'does not leak the presence of project when using valid token' do
           subject
 
-          expect(response).to have_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -31,7 +31,7 @@ describe API::Triggers do
         it 'does not leak the presence of project when using valid token' do
           subject
 
-          expect(response).to have_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -46,7 +46,7 @@ describe API::Triggers do
           it 'forbids to create a pipeline' do
             subject
 
-            expect(response).to have_http_status(400)
+            expect(response).to have_gitlab_http_status(:bad_request)
             expect(json_response['message']).to eq("base" => ["Insufficient permissions to create a new pipeline"])
           end
         end
@@ -59,7 +59,7 @@ describe API::Triggers do
           it 'creates a new pipeline' do
             expect { subject }.to change(Ci::Pipeline, :count)
 
-            expect(response).to have_http_status(201)
+            expect(response).to have_gitlab_http_status(:created)
             expect(Ci::Pipeline.last.source).to eq('pipeline')
             expect(Ci::Pipeline.last.triggered_by_pipeline).not_to be_nil
             expect(Ci::Sources::Pipeline.last).to have_attributes(
@@ -78,8 +78,8 @@ describe API::Triggers do
             it 'does not create a pipeline' do
               subject
 
-              expect(response).to have_http_status(400)
-              expect(json_response['message']).to eq('400 Job has to be running')
+              expect(response).to have_gitlab_http_status(:unauthorized)
+              expect(json_response['message']).to eq('Job is not running')
             end
           end
 
@@ -93,7 +93,7 @@ describe API::Triggers do
               expect { subject }.to change(Ci::Pipeline, :count)
                                 .and change(Ci::PipelineVariable, :count)
 
-              expect(response).to have_http_status(201)
+              expect(response).to have_gitlab_http_status(:created)
               expect(Ci::Pipeline.last.source).to eq('pipeline')
               expect(Ci::Pipeline.last.triggered_by_pipeline).not_to be_nil
               expect(Ci::Pipeline.last.variables.map { |v| { v.key => v.value } }.last).to eq(params[:variables])

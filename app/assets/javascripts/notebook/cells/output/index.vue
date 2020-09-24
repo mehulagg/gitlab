@@ -22,6 +22,7 @@ export default {
     metadata: {
       type: Object,
       default: () => ({}),
+      required: false,
     },
   },
   methods: {
@@ -62,6 +63,9 @@ export default {
     },
     rawCode(output) {
       if (output.text) {
+        if (typeof output.text === 'string') {
+          return output.text;
+        }
         return output.text.join('');
       }
 

@@ -1,0 +1,17 @@
+mutation dastScannerProfileCreate(
+  $projectFullPath: ID!
+  $profileName: String!
+  $spiderTimeout: Int!
+  $targetTimeout: Int!
+) {
+  dastScannerProfileCreate(
+    input: {
+      fullPath: $projectFullPath
+      profileName: $profileName
+      spiderTimeout: $spiderTimeout
+      targetTimeout: $targetTimeout
+    }
+  ) {
+    errors
+  }
+}

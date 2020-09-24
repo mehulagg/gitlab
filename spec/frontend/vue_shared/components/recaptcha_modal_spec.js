@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 
 import { eventHub } from '~/vue_shared/components/recaptcha_eventhub';
 
-import RecaptchaModal from '~/vue_shared/components/recaptcha_modal';
+import RecaptchaModal from '~/vue_shared/components/recaptcha_modal.vue';
 
 describe('RecaptchaModal', () => {
   const recaptchaFormId = 'recaptcha-form';
@@ -14,7 +14,6 @@ describe('RecaptchaModal', () => {
 
   beforeEach(() => {
     wrapper = shallowMount(RecaptchaModal, {
-      sync: false,
       propsData: {
         html: recaptchaHtml,
       },

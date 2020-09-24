@@ -17,10 +17,6 @@ class CommitPresenter < Gitlab::View::Presenter::Delegated
     commit.pipelines.any?
   end
 
-  def web_url
-    Gitlab::UrlBuilder.new(commit).url
-  end
-
   def signature_html
     return unless commit.has_signature?
 

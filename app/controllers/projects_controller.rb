@@ -8,6 +8,7 @@ class ProjectsController < Projects::ApplicationController
   include SendFileUpload
   include RecordUserLastActivity
   include ImportUrlParams
+  include FiltersEvents
 
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
 
@@ -21,8 +22,6 @@ class ProjectsController < Projects::ApplicationController
   before_action :assign_ref_vars, if: -> { action_name == 'show' && repo_exists? }
   before_action :tree,
     if: -> { action_name == 'show' && repo_exists? && project_view_files? }
-  before_action :lfs_blob_ids,
-    if: -> { action_name == 'show' && repo_exists? && project_view_files? }
   before_action :project_export_enabled, only: [:export, :download_export, :remove_export, :generate_new_export]
   before_action :present_project, only: [:edit]
   before_action :authorize_download_code!, only: [:refs]
@@ -31,6 +30,20 @@ class ProjectsController < Projects::ApplicationController
   before_action :authorize_admin_project!, only: [:edit, :update, :housekeeping, :download_export, :export, :remove_export, :generate_new_export]
   before_action :authorize_archive_project!, only: [:archive, :unarchive]
   before_action :event_filter, only: [:show, :activity]
+
+  # Project Export Rate Limit
+  before_action :export_rate_limit, only: [:export, :download_export, :generate_new_export]
+
+  # Experiments
+  before_action only: [:new, :create] do
+    frontend_experimentation_tracking_data(:new_create_project_ui, 'click_tab')
+    push_frontend_feature_flag(:new_create_project_ui) if experiment_enabled?(:new_create_project_ui)
+  end
+
+  before_action only: [:edit] do
+    push_frontend_feature_flag(:service_desk_custom_address, @project)
+    push_frontend_feature_flag(:approval_suggestions, @project, default_enabled: true)
+  end
 
   layout :determine_layout
 
@@ -48,15 +61,15 @@ class ProjectsController < Projects::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def edit
-    @badge_api_endpoint = expose_url(api_v4_projects_badges_path(id: @project.id))
-    render 'edit'
+    @badge_api_endpoint = expose_path(api_v4_projects_badges_path(id: @project.id))
+    render_edit
   end
 
   def create
     @project = ::Projects::CreateService.new(current_user, project_params(attributes: project_params_create_attributes)).execute
 
     if @project.saved?
-      cookies[:issue_board_welcome_hidden] = { path: project_path(@project), value: nil, expires: Time.at(0) }
+      cookies[:issue_board_welcome_hidden] = { path: project_path(@project), value: nil, expires: Time.zone.at(0) }
 
       redirect_to(
         project_path(@project, custom_import_params),
@@ -82,8 +95,9 @@ class ProjectsController < Projects::ApplicationController
         end
       else
         flash.now[:alert] = result[:message]
+        @project.reset
 
-        format.html { render 'edit' }
+        format.html { render_edit }
       end
 
       format.js
@@ -116,7 +130,7 @@ class ProjectsController < Projects::ApplicationController
       format.html
       format.json do
         load_events
-        pager_json('events/_events', @events.count)
+        pager_json('events/_events', @events.count { |event| event.visible_to_user?(current_user) })
       end
     end
   end
@@ -154,7 +168,7 @@ class ProjectsController < Projects::ApplicationController
 
     redirect_to dashboard_projects_path, status: :found
   rescue Projects::DestroyService::DestroyError => ex
-    redirect_to edit_project_path(@project), status: 302, alert: ex.message
+    redirect_to edit_project_path(@project), status: :found, alert: ex.message
   end
 
   def new_issuable_address
@@ -199,7 +213,7 @@ class ProjectsController < Projects::ApplicationController
 
     redirect_to(
       edit_project_path(@project, anchor: 'js-export-project'),
-      notice: _("Project export started. A download link will be sent by email.")
+      notice: _("Project export started. A download link will be sent by email and made available on this page.")
     )
   end
 
@@ -304,12 +318,11 @@ class ProjectsController < Projects::ApplicationController
       render 'projects/empty' if @project.empty_repo?
     else
       if can?(current_user, :read_wiki, @project)
-        @project_wiki = @project.wiki
-        @wiki_home = @project_wiki.find_page('home', params[:version_id])
+        @wiki = @project.wiki
+        @wiki_home = @wiki.find_page('home', params[:version_id])
       elsif @project.feature_available?(:issues, current_user)
         @issues = issuables_collection.page(params[:page])
-        @collection_type = 'Issue'
-        @issuable_meta_data = issuable_meta_data(@issues, @collection_type, current_user)
+        @issuable_meta_data = Gitlab::IssuableMetadata.new(current_user, @issues).data
       end
 
       render :show
@@ -337,6 +350,7 @@ class ProjectsController < Projects::ApplicationController
     @events = EventCollection
       .new(projects, offset: params[:offset].to_i, filter: event_filter)
       .to_a
+      .map(&:present)
 
     Events::RenderService.new(current_user).execute(@events, atom_request: request.format.atom?)
   end
@@ -350,6 +364,7 @@ class ProjectsController < Projects::ApplicationController
 
   def project_params_attributes
     [
+      :allow_merge_on_skipped_pipeline,
       :avatar,
       :build_allow_git_fetch,
       :build_coverage_regex,
@@ -380,15 +395,25 @@ class ProjectsController < Projects::ApplicationController
       :template_project_id,
       :merge_method,
       :initialize_with_readme,
+      :autoclose_referenced_issues,
+      :suggestion_commit_message,
+      :packages_enabled,
+      :service_desk_enabled,
 
       project_feature_attributes: %i[
         builds_access_level
         issues_access_level
+        forking_access_level
         merge_requests_access_level
         repository_access_level
         snippets_access_level
         wiki_access_level
         pages_access_level
+        metrics_dashboard_access_level
+      ],
+      project_setting_attributes: %i[
+        show_default_award_emojis
+        squash_option
       ]
     ]
   end
@@ -464,6 +489,26 @@ class ProjectsController < Projects::ApplicationController
 
   def present_project
     @project = @project.present(current_user: current_user)
+  end
+
+  def export_rate_limit
+    prefixed_action = "project_#{params[:action]}".to_sym
+
+    project_scope = params[:action] == :download_export ? @project : nil
+
+    if rate_limiter.throttled?(prefixed_action, scope: [current_user, project_scope].compact)
+      rate_limiter.log_request(request, "#{prefixed_action}_request_limit".to_sym, current_user)
+
+      render plain: _('This endpoint has been requested too many times. Try again later.'), status: :too_many_requests
+    end
+  end
+
+  def rate_limiter
+    ::Gitlab::ApplicationRateLimiter
+  end
+
+  def render_edit
+    render 'edit'
   end
 end
 

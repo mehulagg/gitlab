@@ -46,8 +46,8 @@ module Gitlab
 
       def created_instances
         filtered_pods_by_track.map do |pod|
-          metadata = pod.fetch('metadata', {})
-          pod_name = metadata['name'] || metadata['generate_name']
+          pod_metadata = pod.fetch('metadata', {})
+          pod_name = pod_metadata['name'] || pod_metadata['generateName']
           pod_status = pod.dig('status', 'phase')
 
           deployment_instance(pod_name: pod_name, pod_status: pod_status)
@@ -81,7 +81,7 @@ module Gitlab
         {
           status: pod_status&.downcase,
           pod_name: pod_name,
-          tooltip: "#{name} (#{pod_name}) #{pod_status}",
+          tooltip: "#{pod_name} (#{pod_status})",
           track: track,
           stable: stable?
         }

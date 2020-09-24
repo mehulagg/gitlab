@@ -2,14 +2,15 @@
 
 require 'spec_helper'
 
-describe RspecFlaky::Report, :aggregate_failures do
-  let(:a_hundred_days) { 3600 * 24 * 100 }
+RSpec.describe RspecFlaky::Report, :aggregate_failures do
+  let(:thirty_one_days) { 3600 * 24 * 31 }
   let(:collection_hash) do
     {
       a: { example_id: 'spec/foo/bar_spec.rb:2' },
-      b: { example_id: 'spec/foo/baz_spec.rb:3', first_flaky_at: (Time.now - a_hundred_days).to_s, last_flaky_at: (Time.now - a_hundred_days).to_s }
+      b: { example_id: 'spec/foo/baz_spec.rb:3', first_flaky_at: (Time.now - thirty_one_days).to_s, last_flaky_at: (Time.now - thirty_one_days).to_s }
     }
   end
+
   let(:suite_flaky_example_report) do
     {
       '6e869794f4cfd2badd93eb68719371d1': {
@@ -25,13 +26,14 @@ describe RspecFlaky::Report, :aggregate_failures do
       }
     }
   end
+
   let(:flaky_examples) { RspecFlaky::FlakyExamplesCollection.new(collection_hash) }
   let(:report) { described_class.new(flaky_examples) }
 
   describe '.load' do
     let!(:report_file) do
       Tempfile.new(%w[rspec_flaky_report .json]).tap do |f|
-        f.write(JSON.pretty_generate(suite_flaky_example_report))
+        f.write(Gitlab::Json.pretty_generate(suite_flaky_example_report))
         f.rewind
       end
     end
@@ -48,7 +50,7 @@ describe RspecFlaky::Report, :aggregate_failures do
 
   describe '.load_json' do
     let(:report_json) do
-      JSON.pretty_generate(suite_flaky_example_report)
+      Gitlab::Json.pretty_generate(suite_flaky_example_report)
     end
 
     it 'loads the report file' do
@@ -103,13 +105,13 @@ describe RspecFlaky::Report, :aggregate_failures do
 
         expect(File.exist?(report_file_path)).to be(true)
         expect(File.read(report_file_path))
-          .to eq(JSON.pretty_generate(report.flaky_examples.to_h))
+          .to eq(Gitlab::Json.pretty_generate(report.flaky_examples.to_h))
       end
     end
   end
 
   describe '#prune_outdated' do
-    it 'returns a new collection without the examples older than 90 days by default' do
+    it 'returns a new collection without the examples older than 30 days by default' do
       new_report = flaky_examples.to_h.dup.tap { |r| r.delete(:b) }
       new_flaky_examples = report.prune_outdated
 
@@ -119,7 +121,7 @@ describe RspecFlaky::Report, :aggregate_failures do
     end
 
     it 'accepts a given number of days' do
-      new_flaky_examples = report.prune_outdated(days: 200)
+      new_flaky_examples = report.prune_outdated(days: 32)
 
       expect(new_flaky_examples.to_h).to eq(report.to_h)
     end

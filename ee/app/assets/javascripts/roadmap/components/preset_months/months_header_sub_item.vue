@@ -1,15 +1,12 @@
 <script>
 import { getSundays } from '~/lib/utils/datetime_utility';
 
+import CommonMixin from '../../mixins/common_mixin';
+
 import { PRESET_TYPES } from '../../constants';
 
-import timelineTodayIndicator from '../timeline_today_indicator.vue';
-
 export default {
-  presetType: PRESET_TYPES.MONTHS,
-  components: {
-    timelineTodayIndicator,
-  },
+  mixins: [CommonMixin],
   props: {
     currentDate: {
       type: Date,
@@ -19,6 +16,12 @@ export default {
       type: Date,
       required: true,
     },
+  },
+  data() {
+    return {
+      presetType: PRESET_TYPES.MONTHS,
+      indicatorStyle: {},
+    };
   },
   computed: {
     headerSubItems() {
@@ -33,15 +36,11 @@ export default {
       // Show dark color text only for dates from current month and future months.
       return timeframeYear >= currentYear && timeframeMonth >= currentMonth ? 'label-dark' : '';
     },
-    hasToday() {
-      const timeframeYear = this.timeframeItem.getFullYear();
-      const timeframeMonth = this.timeframeItem.getMonth();
-
-      return (
-        this.currentDate.getMonth() === timeframeMonth &&
-        this.currentDate.getFullYear() === timeframeYear
-      );
-    },
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.indicatorStyle = this.getIndicatorStyles();
+    });
   },
   methods: {
     getSubItemValueClass(subItem) {
@@ -71,14 +70,12 @@ export default {
       :key="index"
       :class="getSubItemValueClass(subItem)"
       class="sublabel-value"
+      >{{ subItem.getDate() }}</span
     >
-      {{ subItem.getDate() }}
-    </span>
-    <timeline-today-indicator
+    <span
       v-if="hasToday"
-      :preset-type="$options.presetType"
-      :current-date="currentDate"
-      :timeframe-item="timeframeItem"
-    />
+      :style="indicatorStyle"
+      class="current-day-indicator-header preset-months position-absolute"
+    ></span>
   </div>
 </template>

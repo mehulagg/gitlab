@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequestsHelper do
+RSpec.describe MergeRequestsHelper do
   describe '#render_items_list' do
     it "returns one item in the list" do
       expect(render_items_list(["user"])).to eq("user")

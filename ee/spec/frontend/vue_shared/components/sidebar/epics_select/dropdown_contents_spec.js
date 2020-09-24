@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
 
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import DropdownContents from 'ee/vue_shared/components/sidebar/epics_select/dropdown_contents.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 import { mockEpic1, mockEpic2, mockEpics, noneEpic } from '../mock_data';
 
@@ -90,7 +90,7 @@ describe('EpicsSelect', () => {
       it('should render epics list for all provided epics', () => {
         const epicsEl = wrapper.findAll('ul > li');
 
-        expect(epicsEl.length).toBe(epics.length + 2); // includes divider & No Epic` <li>.
+        expect(epicsEl).toHaveLength(epics.length + 2); // includes divider & No Epic` <li>.
         expect(epicsEl.at(1).classes()).toContain('divider');
         expect(
           epicsEl
@@ -110,6 +110,16 @@ describe('EpicsSelect', () => {
             .find(GlLink)
             .classes(),
         ).toContain('is-active');
+      });
+
+      it('should render string "No matches found" when `epics` array is empty', () => {
+        wrapper.setProps({
+          epics: [],
+        });
+
+        return wrapper.vm.$nextTick(() => {
+          expect(wrapper.text()).toContain('No matches found');
+        });
       });
     });
   });

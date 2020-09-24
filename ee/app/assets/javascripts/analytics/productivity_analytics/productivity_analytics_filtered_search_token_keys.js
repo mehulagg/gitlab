@@ -1,7 +1,9 @@
+import { __ } from '~/locale';
 import FilteredSearchTokenKeys from '~/filtered_search/filtered_search_token_keys';
 
 const tokenKeys = [
   {
+    formattedKey: __('Author'),
     key: 'author',
     type: 'string',
     param: 'username',
@@ -10,6 +12,7 @@ const tokenKeys = [
     tag: '@author',
   },
   {
+    formattedKey: __('Milestone'),
     key: 'milestone',
     type: 'string',
     param: 'title',
@@ -18,6 +21,7 @@ const tokenKeys = [
     tag: '%milestone',
   },
   {
+    formattedKey: __('Label'),
     key: 'label',
     type: 'array',
     param: 'name[]',

@@ -15,7 +15,7 @@ require 'spec_helper'
 #     Subgroup 2_1
 # Group 2
 
-describe Projects::CreateFromTemplateService do
+RSpec.describe Projects::CreateFromTemplateService do
   using RSpec::Parameterized::TableSyntax
 
   let(:group) { create(:group) }
@@ -55,7 +55,7 @@ describe Projects::CreateFromTemplateService do
     stub_ee_application_setting(custom_project_templates_group_id: subgroup_1_2.id)
   end
 
-  context '#execute' do
+  describe '#execute' do
     context 'does not create project from custom template' do
       after do
         project = subject.execute

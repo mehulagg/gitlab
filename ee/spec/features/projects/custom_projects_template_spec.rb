@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project' do
+RSpec.describe 'Project' do
   describe 'Custom instance-level projects templates' do
     let(:user) { create(:user) }
     let(:group) { create(:group) }
@@ -40,14 +40,39 @@ describe 'Project' do
       end
 
       it 'allows creation from custom project template', :js do
-        new_name = 'example_custom_project_template'
+        new_path = 'example-custom-project-template'
+        new_name = 'Example Custom Project Template'
 
         find('#create-from-template-tab').click
         find('.project-template .custom-instance-project-templates-tab').click
         find("label[for='#{projects.first.name}']").click
 
         page.within '.project-fields-form' do
-          fill_in("project_path", with: new_name)
+          fill_in("project_name", with: new_name)
+          # Have to reset it to '' so it overwrites rather than appends
+          fill_in('project_path', with: '')
+          fill_in("project_path", with: new_path)
+
+          Sidekiq::Testing.inline! do
+            click_button "Create project"
+          end
+        end
+
+        expect(page).to have_content new_name
+        expect(Project.last.name).to eq new_name
+        expect(page).to have_current_path "/#{user.username}/#{new_path}"
+        expect(Project.last.path).to eq new_path
+      end
+
+      it 'allows creation from custom project template using only the name', :js do
+        new_path = 'example-custom-project-template'
+        new_name = 'Example Custom Project Template'
+
+        find('#create-from-template-tab').click
+        find('.project-template .custom-instance-project-templates-tab').click
+        find("label[for='#{projects.first.name}']").click
+
+        page.within '.project-fields-form' do
           fill_in("project_name", with: new_name)
 
           Sidekiq::Testing.inline! do
@@ -57,6 +82,30 @@ describe 'Project' do
 
         expect(page).to have_content new_name
         expect(Project.last.name).to eq new_name
+        expect(page).to have_current_path "/#{user.username}/#{new_path}"
+        expect(Project.last.path).to eq new_path
+      end
+
+      it 'allows creation from custom project template using only the path', :js do
+        new_path = 'example-custom-project-template'
+        new_name = 'Example Custom Project Template'
+
+        find('#create-from-template-tab').click
+        find('.project-template .custom-instance-project-templates-tab').click
+        find("label[for='#{projects.first.name}']").click
+
+        page.within '.project-fields-form' do
+          fill_in("project_path", with: new_path)
+
+          Sidekiq::Testing.inline! do
+            click_button "Create project"
+          end
+        end
+
+        expect(page).to have_content new_name
+        expect(Project.last.name).to eq new_name
+        expect(page).to have_current_path "/#{user.username}/#{new_path}"
+        expect(Project.last.path).to eq new_path
       end
 
       it 'has a working pagination', :js do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PushRulesController do
+RSpec.describe Projects::PushRulesController do
   let(:project) { create(:project, push_rule: create(:push_rule, prevent_secrets: false)) }
   let(:user) { create(:user) }
 
@@ -20,7 +20,7 @@ describe Projects::PushRulesController do
     it 'updates the push rule' do
       do_update
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
       expect(project.reload_push_rule.prevent_secrets).to be_truthy
     end
 
@@ -32,15 +32,15 @@ describe Projects::PushRulesController do
       it 'returns 404' do
         do_update
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
     shared_examples 'updateable setting' do |rule_attr, updates, new_value|
       it "#{updates ? 'updates' : 'does not update'} the setting" do
         patch :update, params: { namespace_id: project.namespace, project_id: project, id: 1, push_rule: { rule_attr => new_value } }
-
         be_new, be_old = new_value ? [be_truthy, be_falsy] : [be_falsy, be_truthy]
+
         expect(project.reload_push_rule.public_send(rule_attr)).to(updates ? be_new : be_old)
       end
     end
@@ -71,8 +71,9 @@ describe Projects::PushRulesController do
 
     PushRule::SETTINGS_WITH_GLOBAL_DEFAULT.each do |rule_attr|
       context "Updating #{rule_attr} rule" do
-        context 'as an admin' do
+        context 'as an admin in admin mode', :enable_admin_mode do
           let(:user) { create(:admin) }
+
           it_behaves_like 'a setting with global default', rule_attr, updates: true
         end
 

@@ -1,19 +1,20 @@
 import Visibility from 'visibilityjs';
 import Vue from 'vue';
-import AccessorUtilities from '~/lib/utils/accessor';
 import { GlToast } from '@gitlab/ui';
+import AccessorUtilities from '~/lib/utils/accessor';
 import PersistentUserCallout from '../persistent_user_callout';
 import { s__, sprintf } from '../locale';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Poll from '../lib/utils/poll';
 import initSettingsPanels from '../settings_panels';
 import eventHub from './event_hub';
-import { APPLICATION_STATUS, INGRESS, INGRESS_DOMAIN_SUFFIX } from './constants';
+import { APPLICATION_STATUS, CROSSPLANE, KNATIVE, FLUENTD } from './constants';
 import ClustersService from './services/clusters_service';
 import ClustersStore from './stores/clusters_store';
 import Applications from './components/applications.vue';
-import setupToggleButtons from '../toggle_buttons';
+import RemoveClusterConfirmation from './components/remove_cluster_confirmation.vue';
 import initProjectSelectDropdown from '~/project_select';
+import initServerlessSurveyBanner from '~/serverless/survey_banner';
 
 const Environments = () => import('ee_component/clusters/components/environments.vue');
 
@@ -39,7 +40,9 @@ export default class Clusters {
       installKnativePath,
       updateKnativePath,
       installElasticStackPath,
+      installCrossplanePath,
       installPrometheusPath,
+      installFluentdPath,
       managePrometheusPath,
       clusterEnvironmentsPath,
       hasRbac,
@@ -51,11 +54,13 @@ export default class Clusters {
       helpPath,
       ingressHelpPath,
       ingressDnsHelpPath,
+      ingressModSecurityHelpPath,
       environmentsHelpPath,
       clustersHelpPath,
       deployBoardsHelpPath,
       cloudRunHelpPath,
       clusterId,
+      ciliumHelpPath,
     } = document.querySelector('.js-edit-cluster-form').dataset;
 
     this.clusterId = clusterId;
@@ -67,10 +72,12 @@ export default class Clusters {
       helpPath,
       ingressHelpPath,
       ingressDnsHelpPath,
+      ingressModSecurityHelpPath,
       environmentsHelpPath,
       clustersHelpPath,
       deployBoardsHelpPath,
       cloudRunHelpPath,
+      ciliumHelpPath,
     );
     this.store.setManagePrometheusPath(managePrometheusPath);
     this.store.updateStatus(clusterStatus);
@@ -83,6 +90,7 @@ export default class Clusters {
       installHelmEndpoint: installHelmPath,
       installIngressEndpoint: installIngressPath,
       installCertManagerEndpoint: installCertManagerPath,
+      installCrossplaneEndpoint: installCrossplanePath,
       installRunnerEndpoint: installRunnerPath,
       installPrometheusEndpoint: installPrometheusPath,
       installJupyterEndpoint: installJupyterPath,
@@ -90,10 +98,10 @@ export default class Clusters {
       updateKnativeEndpoint: updateKnativePath,
       installElasticStackEndpoint: installElasticStackPath,
       clusterEnvironmentsEndpoint: clusterEnvironmentsPath,
+      installFluentdEndpoint: installFluentdPath,
     });
 
     this.installApplication = this.installApplication.bind(this);
-    this.showToken = this.showToken.bind(this);
 
     this.errorContainer = document.querySelector('.js-cluster-error');
     this.successContainer = document.querySelector('.js-cluster-success');
@@ -104,21 +112,12 @@ export default class Clusters {
     );
     this.errorReasonContainer = this.errorContainer.querySelector('.js-error-reason');
     this.successApplicationContainer = document.querySelector('.js-cluster-application-notice');
-    this.showTokenButton = document.querySelector('.js-show-cluster-token');
     this.tokenField = document.querySelector('.js-cluster-token');
-    this.ingressDomainHelpText = document.querySelector('.js-ingress-domain-help-text');
-    this.ingressDomainSnippet =
-      this.ingressDomainHelpText &&
-      this.ingressDomainHelpText.querySelector('.js-ingress-domain-snippet');
 
     initProjectSelectDropdown();
     Clusters.initDismissableCallout();
     initSettingsPanels();
 
-    const toggleButtonsContainer = document.querySelector('.js-cluster-enable-toggle-area');
-    if (toggleButtonsContainer) {
-      setupToggleButtons(toggleButtonsContainer);
-    }
     this.initApplications(clusterType);
     this.initEnvironments();
 
@@ -142,6 +141,8 @@ export default class Clusters {
         () => this.handlePollError(),
       );
     }
+
+    this.initRemoveClusterActions();
   }
 
   initApplications(type) {
@@ -164,10 +165,12 @@ export default class Clusters {
             ingressHelpPath: this.state.ingressHelpPath,
             managePrometheusPath: this.state.managePrometheusPath,
             ingressDnsHelpPath: this.state.ingressDnsHelpPath,
+            ingressModSecurityHelpPath: this.state.ingressModSecurityHelpPath,
             cloudRunHelpPath: this.state.cloudRunHelpPath,
             providerType: this.state.providerType,
             preInstalledKnative: this.state.preInstalledKnative,
             rbac: this.state.rbac,
+            ciliumHelpPath: this.state.ciliumHelpPath,
           },
         });
       },
@@ -203,6 +206,26 @@ export default class Clusters {
     });
   }
 
+  initRemoveClusterActions() {
+    const el = document.querySelector('#js-cluster-remove-actions');
+    if (el && el.dataset) {
+      const { clusterName, clusterPath, hasManagementProject } = el.dataset;
+
+      this.removeClusterAction = new Vue({
+        el,
+        render(createElement) {
+          return createElement(RemoveClusterConfirmation, {
+            props: {
+              clusterName,
+              clusterPath,
+              hasManagementProject,
+            },
+          });
+        },
+      });
+    }
+  }
+
   handleClusterEnvironmentsSuccess(data) {
     this.store.toggleFetchEnvironments(false);
     this.store.updateEnvironments(data.data);
@@ -214,31 +237,39 @@ export default class Clusters {
   }
 
   addBannerCloseHandler(el, status) {
-    el.querySelector('.js-close-banner').addEventListener('click', () => {
+    el.querySelector('.js-close').addEventListener('click', () => {
       el.classList.add('hidden');
       this.setBannerDismissedState(status, true);
     });
   }
 
   addListeners() {
-    if (this.showTokenButton) this.showTokenButton.addEventListener('click', this.showToken);
     eventHub.$on('installApplication', this.installApplication);
     eventHub.$on('updateApplication', data => this.updateApplication(data));
     eventHub.$on('saveKnativeDomain', data => this.saveKnativeDomain(data));
-    eventHub.$on('setKnativeHostname', data => this.setKnativeHostname(data));
+    eventHub.$on('setKnativeDomain', data => this.setKnativeDomain(data));
     eventHub.$on('uninstallApplication', data => this.uninstallApplication(data));
+    eventHub.$on('setCrossplaneProviderStack', data => this.setCrossplaneProviderStack(data));
+    eventHub.$on('setIngressModSecurityEnabled', data => this.setIngressModSecurityEnabled(data));
+    eventHub.$on('setIngressModSecurityMode', data => this.setIngressModSecurityMode(data));
+    eventHub.$on('resetIngressModSecurityChanges', id => this.resetIngressModSecurityChanges(id));
+    eventHub.$on('setFluentdSettings', data => this.setFluentdSettings(data));
     // Add event listener to all the banner close buttons
     this.addBannerCloseHandler(this.unreachableContainer, 'unreachable');
     this.addBannerCloseHandler(this.authenticationFailureContainer, 'authentication_failure');
   }
 
   removeListeners() {
-    if (this.showTokenButton) this.showTokenButton.removeEventListener('click', this.showToken);
     eventHub.$off('installApplication', this.installApplication);
     eventHub.$off('updateApplication', this.updateApplication);
     eventHub.$off('saveKnativeDomain');
-    eventHub.$off('setKnativeHostname');
+    eventHub.$off('setKnativeDomain');
+    eventHub.$off('setCrossplaneProviderStack');
     eventHub.$off('uninstallApplication');
+    eventHub.$off('setIngressModSecurityEnabled');
+    eventHub.$off('setIngressModSecurityMode');
+    eventHub.$off('resetIngressModSecurityChanges');
+    eventHub.$off('setFluentdSettings');
   }
 
   initPolling(method, successCallback, errorCallback) {
@@ -278,27 +309,15 @@ export default class Clusters {
 
   handleClusterStatusSuccess(data) {
     const prevStatus = this.store.state.status;
-    const prevApplicationMap = Object.assign({}, this.store.state.applications);
+    const prevApplicationMap = { ...this.store.state.applications };
 
     this.store.updateStateFromServer(data.data);
 
     this.checkForNewInstalls(prevApplicationMap, this.store.state.applications);
     this.updateContainer(prevStatus, this.store.state.status, this.store.state.statusReason);
-    this.toggleIngressDomainHelpText(
-      prevApplicationMap[INGRESS],
-      this.store.state.applications[INGRESS],
-    );
-  }
 
-  showToken() {
-    const type = this.tokenField.getAttribute('type');
-
-    if (type === 'password') {
-      this.tokenField.setAttribute('type', 'text');
-      this.showTokenButton.textContent = s__('ClusterIntegration|Hide');
-    } else {
-      this.tokenField.setAttribute('type', 'password');
-      this.showTokenButton.textContent = s__('ClusterIntegration|Show');
+    if (this.store.state.applications[KNATIVE]?.status === APPLICATION_STATUS.INSTALLED) {
+      initServerlessSurveyBanner();
     }
   }
 
@@ -404,18 +423,38 @@ export default class Clusters {
   }
 
   installApplication({ id: appId, params }) {
-    this.store.updateAppProperty(appId, 'requestReason', null);
-    this.store.updateAppProperty(appId, 'statusReason', null);
+    return Clusters.validateInstallation(appId, params)
+      .then(() => {
+        this.store.updateAppProperty(appId, 'requestReason', null);
+        this.store.updateAppProperty(appId, 'statusReason', null);
+        this.store.installApplication(appId);
 
-    this.store.installApplication(appId);
+        // eslint-disable-next-line promise/no-nesting
+        this.service.installApplication(appId, params).catch(() => {
+          this.store.notifyInstallFailure(appId);
+          this.store.updateAppProperty(
+            appId,
+            'requestReason',
+            s__('ClusterIntegration|Request to begin installing failed'),
+          );
+        });
+      })
+      .catch(error => this.store.updateAppProperty(appId, 'validationError', error));
+  }
 
-    return this.service.installApplication(appId, params).catch(() => {
-      this.store.notifyInstallFailure(appId);
-      this.store.updateAppProperty(
-        appId,
-        'requestReason',
-        s__('ClusterIntegration|Request to begin installing failed'),
-      );
+  static validateInstallation(appId, params) {
+    return new Promise((resolve, reject) => {
+      if (appId === CROSSPLANE && !params.stack) {
+        reject(s__('ClusterIntegration|Select a stack to install Crossplane.'));
+        return;
+      }
+
+      if (appId === KNATIVE && !params.hostname && !params.pages_domain_id) {
+        reject(s__('ClusterIntegration|You must specify a domain before you can install Knative.'));
+        return;
+      }
+
+      resolve();
     });
   }
 
@@ -442,11 +481,10 @@ export default class Clusters {
     });
   }
 
-  toggleIngressDomainHelpText({ externalIp }, { externalIp: newExternalIp }) {
-    if (externalIp !== newExternalIp) {
-      this.ingressDomainHelpText.classList.toggle('hide', !newExternalIp);
-      this.ingressDomainSnippet.textContent = `${newExternalIp}${INGRESS_DOMAIN_SUFFIX}`;
-    }
+  setFluentdSettings(settings = {}) {
+    Object.entries(settings).forEach(([key, value]) => {
+      this.store.updateAppProperty(FLUENTD, key, value);
+    });
   }
 
   saveKnativeDomain(data) {
@@ -457,10 +495,32 @@ export default class Clusters {
     });
   }
 
-  setKnativeHostname(data) {
+  setKnativeDomain({ id: appId, domain, domainId }) {
+    this.store.updateAppProperty(appId, 'isEditingDomain', true);
+    this.store.updateAppProperty(appId, 'hostname', domain);
+    this.store.updateAppProperty(appId, 'pagesDomain', domainId ? { id: domainId, domain } : null);
+    this.store.updateAppProperty(appId, 'validationError', null);
+  }
+
+  setCrossplaneProviderStack(data) {
     const appId = data.id;
-    this.store.updateAppProperty(appId, 'isEditingHostName', true);
-    this.store.updateAppProperty(appId, 'hostname', data.hostname);
+    this.store.updateAppProperty(appId, 'stack', data.stack.code);
+    this.store.updateAppProperty(appId, 'validationError', null);
+  }
+
+  setIngressModSecurityEnabled({ id, modSecurityEnabled }) {
+    this.store.updateAppProperty(id, 'isEditingModSecurityEnabled', true);
+    this.store.updateAppProperty(id, 'modsecurity_enabled', modSecurityEnabled);
+  }
+
+  setIngressModSecurityMode({ id, modSecurityMode }) {
+    this.store.updateAppProperty(id, 'isEditingModSecurityMode', true);
+    this.store.updateAppProperty(id, 'modsecurity_mode', modSecurityMode);
+  }
+
+  resetIngressModSecurityChanges(id) {
+    this.store.updateAppProperty(id, 'isEditingModSecurityEnabled', false);
+    this.store.updateAppProperty(id, 'isEditingModSecurityMode', false);
   }
 
   destroy() {

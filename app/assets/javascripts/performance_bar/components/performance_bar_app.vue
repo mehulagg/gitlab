@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { glEmojiTag } from '~/emoji';
 
 import AddRequest from './add_request.vue';
@@ -38,6 +39,11 @@ export default {
       keys: ['sql'],
     },
     {
+      metric: 'bullet',
+      header: s__('PerformanceBar|Bullet notifications'),
+      keys: ['notification'],
+    },
+    {
       metric: 'gitaly',
       header: s__('PerformanceBar|Gitaly calls'),
       keys: ['feature', 'request'],
@@ -50,7 +56,17 @@ export default {
     {
       metric: 'redis',
       header: s__('PerformanceBar|Redis calls'),
-      keys: ['cmd'],
+      keys: ['cmd', 'instance'],
+    },
+    {
+      metric: 'es',
+      header: s__('PerformanceBar|Elasticsearch calls'),
+      keys: ['request', 'body'],
+    },
+    {
+      metric: 'total',
+      header: s__('PerformanceBar|Frontend resources'),
+      keys: ['name', 'size'],
     },
   ],
   data() {
@@ -80,6 +96,15 @@ export default {
       }
       return '';
     },
+    downloadPath() {
+      const data = JSON.stringify(this.requests);
+      const blob = new Blob([data], { type: 'text/plain' });
+      return window.URL.createObjectURL(blob);
+    },
+    downloadName() {
+      const fileName = this.requests[0].truncatedUrl;
+      return `${fileName}_perf_bar_${Date.now()}.json`;
+    },
   },
   mounted() {
     this.currentRequest = this.requestId;
@@ -93,7 +118,11 @@ export default {
 </script>
 <template>
   <div id="js-peek" :class="env">
-    <div v-if="currentRequest" class="d-flex container-fluid container-limited qa-performance-bar">
+    <div
+      v-if="currentRequest"
+      class="d-flex container-fluid container-limited"
+      data-qa-selector="performance_bar"
+    >
       <div id="peek-view-host" class="view">
         <span
           v-if="hasHost"
@@ -121,6 +150,9 @@ export default {
         <a :href="currentRequest.details.tracing.tracing_url">{{ s__('PerformanceBar|trace') }}</a>
       </div>
       <add-request v-on="$listeners" />
+      <div v-if="currentRequest.details" id="peek-download" class="view">
+        <a :download="downloadName" :href="downloadPath">{{ s__('PerformanceBar|Download') }}</a>
+      </div>
       <request-selector
         v-if="currentRequest"
         :current-request="currentRequest"

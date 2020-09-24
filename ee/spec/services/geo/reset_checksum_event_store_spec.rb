@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Geo::ResetChecksumEventStore do
+RSpec.describe Geo::ResetChecksumEventStore do
   include EE::GeoHelpers
 
-  set(:project) { create(:project) }
-  set(:secondary_node) { create(:geo_node) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:secondary_node) { create(:geo_node) }
 
   subject { described_class.new(project) }
 

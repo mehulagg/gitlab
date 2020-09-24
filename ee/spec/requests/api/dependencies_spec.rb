@@ -2,17 +2,20 @@
 
 require 'spec_helper'
 
-describe API::Dependencies do
-  set(:project) { create(:project, :public) }
-  set(:user) { create(:user) }
+RSpec.describe API::Dependencies do
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:user) { create(:user) }
 
   describe "GET /projects/:id/dependencies" do
-    let(:request) { get api("/projects/#{project.id}/dependencies", user), params: params }
+    subject(:request) { get api("/projects/#{project.id}/dependencies", user), params: params }
+
     let(:params) { {} }
 
     before do
-      stub_licensed_features(dependency_list: true, security_dashboard: true)
+      stub_licensed_features(dependency_scanning: true, security_dashboard: true)
     end
+
+    it_behaves_like 'a gitlab tracking event', described_class.name, 'view_dependencies'
 
     context 'with an authorized user with proper permissions' do
       before do
@@ -22,7 +25,7 @@ describe API::Dependencies do
       end
 
       it 'returns all dependencies' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to match_response_schema('public_api/v4/dependencies', dir: 'ee')
 
         expect(json_response.length).to eq(21)
@@ -33,6 +36,17 @@ describe API::Dependencies do
 
         expect(vulnerability['name']).to eq('Regular Expression Denial of Service in debug')
         expect(vulnerability['severity']).to eq('unknown')
+      end
+
+      context 'with nil package_manager' do
+        let(:params) { { package_manager: nil } }
+
+        it 'returns no dependencies' do
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to match_response_schema('public_api/v4/dependencies', dir: 'ee')
+
+          expect(json_response).to eq([])
+        end
       end
 
       context 'with filter options' do
@@ -72,7 +86,7 @@ describe API::Dependencies do
       end
 
       it 'responds with 403 Forbidden' do
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -84,7 +98,7 @@ describe API::Dependencies do
       end
 
       it 'responds with 404 Not Found' do
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

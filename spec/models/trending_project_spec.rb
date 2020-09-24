@@ -2,22 +2,18 @@
 
 require 'spec_helper'
 
-describe TrendingProject do
+RSpec.describe TrendingProject do
   let(:user) { create(:user) }
-  let(:public_project1) { create(:project, :public) }
-  let(:public_project2) { create(:project, :public) }
-  let(:public_project3) { create(:project, :public) }
-  let(:private_project) { create(:project, :private) }
-  let(:internal_project) { create(:project, :internal) }
+  let(:public_project1) { create(:project, :public, :repository) }
+  let(:public_project2) { create(:project, :public, :repository) }
+  let(:public_project3) { create(:project, :public, :repository) }
+  let(:private_project) { create(:project, :private, :repository) }
+  let(:internal_project) { create(:project, :internal, :repository) }
 
   before do
-    3.times do
-      create(:note_on_commit, project: public_project1)
-    end
+    create_list(:note_on_commit, 3, project: public_project1)
 
-    2.times do
-      create(:note_on_commit, project: public_project2)
-    end
+    create_list(:note_on_commit, 2, project: public_project2)
 
     create(:note_on_commit, project: public_project3, created_at: 5.weeks.ago)
     create(:note_on_commit, project: private_project)

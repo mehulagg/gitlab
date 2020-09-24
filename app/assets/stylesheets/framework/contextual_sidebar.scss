@@ -48,7 +48,7 @@
 
   .avatar-container {
     flex: 0 0 40px;
-    background-color: $white-light;
+    background-color: $white;
   }
 
   .sidebar-context-title {
@@ -63,7 +63,7 @@
 }
 
 .settings-avatar {
-  background-color: $white-light;
+  background-color: $white;
 
   svg {
     fill: $gl-text-color-secondary;
@@ -98,11 +98,11 @@
     width: $contextual-sidebar-collapsed-width - 1px;
 
     .collapse-text,
-    .icon-angle-double-left {
+    .icon-chevron-double-lg-left {
       display: none;
     }
 
-    .icon-angle-double-right {
+    .icon-chevron-double-lg-right {
       display: block;
       margin: 0;
     }
@@ -137,7 +137,7 @@
     .badge.badge-pill:not(.fly-out-badge),
     .sidebar-context-title,
     .nav-item-name {
-      display: none;
+      @include gl-sr-only;
     }
 
     .sidebar-top-level-items > li > a {
@@ -282,7 +282,7 @@
           min-width: 150px;
           margin-top: -1px;
           padding: 4px 1px;
-          background-color: $white-light;
+          background-color: $white;
           box-shadow: 2px 1px 3px $dropdown-shadow-color;
           border: 1px solid $gray-darker;
           border-left: 0;
@@ -381,7 +381,7 @@
     margin-right: 8px;
   }
 
-  .icon-angle-double-right {
+  .icon-chevron-double-lg-right {
     display: none;
   }
 

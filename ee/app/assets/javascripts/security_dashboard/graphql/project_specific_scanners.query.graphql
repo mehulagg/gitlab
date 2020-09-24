@@ -1,0 +1,11 @@
+#import "./vulnerablity_scanner.fragment.graphql"
+
+query projectSpecificScanners($fullpath: id!) {
+  project(fullPath: $fullPath) {
+    vulnerabilityScanners {
+      nodes {
+        ...VulnerabilityScanner
+      }
+    }
+  }
+}

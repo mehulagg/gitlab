@@ -2,18 +2,12 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees diff', :js do
+RSpec.describe 'Merge request > User sees diff', :js do
   include ProjectForksHelper
   include RepoHelpers
 
   let(:project) { create(:project, :public, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project) }
-
-  before do
-    stub_feature_flags(single_mr_diff_view: false)
-  end
-
-  it_behaves_like 'rendering a single diff version'
 
   context 'when linking to note' do
     describe 'with unresolved note' do
@@ -63,17 +57,13 @@ describe 'Merge request > User sees diff', :js do
     let(:merge_request) { create(:merge_request_with_diffs, source_project: forked_project, target_project: project, author: author_user) }
     let(:changelog_id) { Digest::SHA1.hexdigest("CHANGELOG") }
 
-    before do
-      forked_project.repository.after_import
-    end
-
     context 'as author' do
       it 'shows direct edit link', :sidekiq_might_not_need_inline do
         sign_in(author_user)
         visit diffs_project_merge_request_path(project, merge_request)
 
         # Throws `Capybara::Poltergeist::InvalidSelector` if we try to use `#hash` syntax
-        expect(page).to have_selector("[id=\"#{changelog_id}\"] a.js-edit-blob")
+        expect(page).to have_selector("[id=\"#{changelog_id}\"] .js-edit-blob", visible: false)
       end
     end
 
@@ -83,6 +73,7 @@ describe 'Merge request > User sees diff', :js do
         visit diffs_project_merge_request_path(project, merge_request)
 
         # Throws `Capybara::Poltergeist::InvalidSelector` if we try to use `#hash` syntax
+        find("[id=\"#{changelog_id}\"] .js-diff-more-actions").click
         find("[id=\"#{changelog_id}\"] .js-edit-blob").click
 
         expect(page).to have_selector('.js-fork-suggestion-button', count: 1)
@@ -103,7 +94,7 @@ describe 'Merge request > User sees diff', :js do
             let c = 3;
             let d = 3;
           }
-        CONTENT
+          CONTENT
 
         new_file_content =
           <<~CONTENT
@@ -113,7 +104,7 @@ describe 'Merge request > User sees diff', :js do
             let c = 3;
             let x = 3;
           }
-        CONTENT
+          CONTENT
 
         file_name = 'xss_file.rs'
 

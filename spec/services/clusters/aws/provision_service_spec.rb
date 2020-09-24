@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe Clusters::Aws::ProvisionService do
+RSpec.describe Clusters::Aws::ProvisionService do
   describe '#execute' do
     let(:provider) { create(:cluster_provider_aws) }
 
+    let(:provision_role) { create(:aws_role, user: provider.created_by_user) }
     let(:client) { instance_double(Aws::CloudFormation::Client, create_stack: true) }
     let(:cloudformation_template) { double }
     let(:credentials) do
@@ -21,6 +22,7 @@ describe Clusters::Aws::ProvisionService do
       [
         { parameter_key: 'ClusterName', parameter_value: provider.cluster.name },
         { parameter_key: 'ClusterRole', parameter_value: provider.role_arn },
+        { parameter_key: 'KubernetesVersion', parameter_value: provider.kubernetes_version },
         { parameter_key: 'ClusterControlPlaneSecurityGroup', parameter_value: provider.security_group_id },
         { parameter_key: 'VpcId', parameter_value: provider.vpc_id },
         { parameter_key: 'Subnets', parameter_value: provider.subnet_ids.join(',') },
@@ -34,7 +36,8 @@ describe Clusters::Aws::ProvisionService do
 
     before do
       allow(Clusters::Aws::FetchCredentialsService).to receive(:new)
-        .with(provider).and_return(double(execute: credentials))
+        .with(provision_role, provider: provider)
+        .and_return(double(execute: credentials))
 
       allow(provider).to receive(:api_client)
         .and_return(client)
@@ -102,15 +105,6 @@ describe Clusters::Aws::ProvisionService do
         before do
           allow(Clusters::Aws::FetchCredentialsService).to receive(:new)
             .and_raise(Aws::Errors::MissingCredentialsError)
-        end
-
-        include_examples 'provision error', 'Amazon credentials are not configured'
-      end
-
-      context 'AWS credentials are not configured' do
-        before do
-          allow(Clusters::Aws::FetchCredentialsService).to receive(:new)
-            .and_raise(Settingslogic::MissingSetting)
         end
 
         include_examples 'provision error', 'Amazon credentials are not configured'

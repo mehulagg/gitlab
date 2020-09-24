@@ -10,8 +10,13 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
 
   before_action :feature_flag, only: [:edit, :update, :destroy]
 
+  before_action :ensure_legacy_flags_writable!, only: [:update]
+
   before_action do
     push_frontend_feature_flag(:feature_flag_permissions)
+    push_frontend_feature_flag(:feature_flags_new_version, project, default_enabled: true)
+    push_frontend_feature_flag(:feature_flags_legacy_read_only, project, default_enabled: true)
+    push_frontend_feature_flag(:feature_flags_legacy_read_only_override, project)
   end
 
   def index
@@ -94,21 +99,41 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   protected
 
   def feature_flag
-    @feature_flag ||= project.operations_feature_flags.for_list.find(params[:id])
+    @feature_flag ||= @noteable = if new_version_feature_flags_enabled?
+                                    project.operations_feature_flags.find_by_iid!(params[:iid])
+                                  else
+                                    project.operations_feature_flags.legacy_flag.find_by_iid!(params[:iid])
+                                  end
+  end
+
+  def new_version_feature_flags_enabled?
+    ::Feature.enabled?(:feature_flags_new_version, project, default_enabled: true)
+  end
+
+  def ensure_legacy_flags_writable!
+    if ::Feature.enabled?(:feature_flags_legacy_read_only, project, default_enabled: true) &&
+        ::Feature.disabled?(:feature_flags_legacy_read_only_override, project) &&
+        feature_flag.legacy_flag?
+      render_error_json(['Legacy feature flags are read-only'])
+    end
   end
 
   def create_params
     params.require(:operations_feature_flag)
-      .permit(:name, :description, :active,
+      .permit(:name, :description, :active, :version,
               scopes_attributes: [:environment_scope, :active,
-                                  strategies: [:name, parameters: [:groupId, :percentage, :userIds]]])
+                                  strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
+             strategies_attributes: [:name, :user_list_id, parameters: [:groupId, :percentage, :userIds], scopes_attributes: [:environment_scope]])
   end
 
   def update_params
     params.require(:operations_feature_flag)
           .permit(:name, :description, :active,
                   scopes_attributes: [:id, :environment_scope, :active, :_destroy,
-                                      strategies: [:name, parameters: [:groupId, :percentage, :userIds]]])
+                                      strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
+                 strategies_attributes: [:id, :name, :user_list_id, :_destroy,
+                                         parameters: [:groupId, :percentage, :userIds],
+                                         scopes_attributes: [:id, :environment_scope, :_destroy]])
   end
 
   def feature_flag_json(feature_flag)

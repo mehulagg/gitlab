@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePoliciesFinder do
+RSpec.describe SoftwareLicensePoliciesFinder do
   let(:project) { create(:project) }
   let(:software_license_policy) { create(:software_license_policy, project: project) }
 
@@ -15,7 +15,7 @@ describe SoftwareLicensePoliciesFinder do
   let(:finder) { described_class.new(user, project, params) }
 
   before do
-    stub_licensed_features(license_management: true)
+    stub_licensed_features(license_scanning: true)
   end
 
   context 'searched by name' do

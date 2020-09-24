@@ -1,13 +1,22 @@
 # frozen_string_literal: true
 
 class Admin::AuditLogsController < Admin::ApplicationController
+  include Gitlab::Utils::StrongMemoize
+  include AuditEvents::EnforcesValidDateParams
+  include AuditEvents::AuditLogsParams
+  include AuditEvents::Sortable
+  include Analytics::UniqueVisitsHelper
+
   before_action :check_license_admin_audit_log_available!
-  before_action :validate_date_params
+
+  track_unique_visits :index, target_id: 'i_compliance_audit_events'
 
   PER_PAGE = 25
 
   def index
-    @events = AuditLogFinder.new(audit_logs_params).execute.page(params[:page]).per(PER_PAGE)
+    @is_last_page = events.last_page?
+    @events = AuditEventSerializer.new.represent(events)
+
     @entity = case audit_logs_params[:entity_type]
               when 'User'
                 User.find_by_id(audit_logs_params[:entity_id])
@@ -22,21 +31,21 @@ class Admin::AuditLogsController < Admin::ApplicationController
 
   private
 
-  def audit_logs_params
-    params.permit(:entity_type, :entity_id, :created_before, :created_after)
+  def events
+    strong_memoize(:events) do
+      level = Gitlab::Audit::Levels::Instance.new
+      events = AuditLogFinder
+        .new(level: level, params: audit_logs_params)
+        .execute
+        .page(params[:page])
+        .per(PER_PAGE)
+        .without_count
+
+      Gitlab::Audit::Events::Preloader.preload!(events)
+    end
   end
 
   def check_license_admin_audit_log_available!
     render_404 unless License.feature_available?(:admin_audit_log)
-  end
-
-  def validate_date_params
-    unless valid_utc_date?(params[:created_before]) && valid_utc_date?(params[:created_after])
-      flash[:alert] = _('Invalid date format. Please use UTC format as YYYY-MM-DD')
-    end
-  end
-
-  def valid_utc_date?(date)
-    date.blank? || date =~ Gitlab::Regex.utc_date_regex
   end
 end

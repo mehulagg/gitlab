@@ -2,112 +2,163 @@
 
 require 'spec_helper'
 
-describe TrialsController do
-  shared_examples 'an authenticated endpoint' do |verb, action|
-    it 'redirects to login page' do
-      send(verb, action)
+RSpec.describe TrialsController do
+  let_it_be(:user) { create(:user, email_opted_in: true) }
 
-      expect(response).to redirect_to(new_trial_registration_url)
+  let(:dev_env_or_com) { true }
+  let(:logged_in) { true }
+
+  before do
+    allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
+    sign_in(user) if logged_in
+  end
+
+  shared_examples 'an authenticated endpoint' do
+    let(:success_status) { :ok }
+
+    context 'when not authenticated' do
+      let(:logged_in) { false }
+
+      it { is_expected.to redirect_to(new_trial_registration_url) }
+    end
+
+    context 'when authenticated' do
+      it { is_expected.to have_gitlab_http_status(success_status) }
     end
   end
 
-  before do
-    allow(::Gitlab).to receive(:com?).and_return(true)
-    stub_feature_flags(improved_trial_signup: true)
+  shared_examples 'a dot-com only feature' do
+    let(:success_status) { :ok }
+
+    context 'when not on gitlab.com and not in development environment' do
+      let(:dev_env_or_com) { false }
+
+      it { is_expected.to have_gitlab_http_status(:not_found) }
+    end
+
+    context 'when on gitlab.com or in dev environment' do
+      it { is_expected.to have_gitlab_http_status(success_status) }
+    end
   end
 
   describe '#new' do
-    it_behaves_like 'an authenticated endpoint', :get, :new
-
-    context 'when invalid - instance is not GL.com' do
-      it 'returns 404 not found' do
-        allow(::Gitlab).to receive(:com?).and_return(false)
-
-        get :new
-
-        expect(response.status).to eq(404)
-      end
+    subject do
+      get :new
+      response
     end
 
-    context 'when feature is turned off' do
-      it 'returns 404 not found' do
-        stub_feature_flags(improved_trial_signup: false)
-
-        get :new
-
-        expect(response.status).to eq(404)
-      end
-    end
+    it_behaves_like 'an authenticated endpoint'
+    it_behaves_like 'a dot-com only feature'
   end
 
   describe '#create_lead' do
-    it_behaves_like 'an authenticated endpoint', :post, :create_lead
+    let(:post_params) { {} }
+    let(:create_lead_result) { nil }
 
-    describe 'authenticated' do
-      let(:user) { create(:user) }
-      let(:create_lead_result) { nil }
+    before do
+      allow_next_instance_of(GitlabSubscriptions::CreateLeadService) do |lead_service|
+        expect(lead_service).to receive(:execute).and_return({ success: create_lead_result })
+      end
+    end
 
-      before do
-        sign_in(user)
+    subject do
+      post :create_lead, params: post_params
+      response
+    end
 
-        expect_any_instance_of(GitlabSubscriptions::CreateLeadService).to receive(:execute) do
-          { success: create_lead_result }
-        end
+    it_behaves_like 'an authenticated endpoint'
+    it_behaves_like 'a dot-com only feature'
+
+    context 'on success' do
+      let(:create_lead_result) { true }
+
+      it { is_expected.to redirect_to(select_trials_url) }
+    end
+
+    context 'on failure' do
+      let(:create_lead_result) { false }
+
+      it { is_expected.to render_template(:new) }
+    end
+
+    context 'request params to Lead Service' do
+      let(:post_params) do
+        {
+          company_name: 'Gitlab',
+          company_size: '1-99',
+          first_name: user.first_name,
+          last_name: user.last_name,
+          phone_number: '1111111111',
+          number_of_users: "20",
+          country: 'IN'
+        }
       end
 
-      context 'on success' do
-        let(:create_lead_result) { true }
-
-        it 'redirects user to Step 3' do
-          post :create_lead
-
-          expect(response).to redirect_to(select_trials_url)
-        end
+      let(:extra_params) do
+        {
+          work_email: user.email,
+          uid: user.id,
+          skip_email_confirmation: true,
+          gitlab_com_trial: true,
+          provider: 'gitlab',
+          newsletter_segment: user.email_opted_in
+        }
       end
 
-      context 'on failure' do
-        let(:create_lead_result) { false }
+      let(:expected_params) do
+        ActionController::Parameters.new(post_params).merge(extra_params).permit!
+      end
 
-        it 'renders the :new template' do
-          post :create_lead
-
-          expect(response).to render_template(:new)
+      it 'sends appropriate request params' do
+        expect_next_instance_of(GitlabSubscriptions::CreateLeadService) do |lead_service|
+          expect(lead_service).to receive(:execute).with({ trial_user: expected_params }).and_return({ success: true })
         end
+
+        subject
       end
     end
   end
 
   describe '#select' do
-    it_behaves_like 'an authenticated endpoint', :get, :select
+    subject do
+      get :select
+      response
+    end
+
+    it_behaves_like 'an authenticated endpoint'
+    it_behaves_like 'a dot-com only feature'
   end
 
   describe '#apply' do
-    let(:user) { create(:user) }
-    let(:namespace) { create(:namespace, owner_id: user.id, path: 'namespace-test') }
+    let_it_be(:namespace) { create(:namespace, owner_id: user.id, path: 'namespace-test') }
+
     let(:apply_trial_result) { nil }
+    let(:post_params) { { namespace_id: namespace.id } }
 
     before do
-      sign_in(user)
-
       allow_any_instance_of(GitlabSubscriptions::ApplyTrialService).to receive(:execute) do
         { success: apply_trial_result }
       end
     end
 
+    subject do
+      post :apply, params: post_params
+      response
+    end
+
+    it_behaves_like 'an authenticated endpoint'
+    it_behaves_like 'a dot-com only feature'
+
     context 'on success' do
       let(:apply_trial_result) { true }
 
-      it "redirects to group's path with the parameter trial as true" do
-        post :apply, params: { namespace_id: namespace.id }
-
-        expect(response).to redirect_to("/#{namespace.path}?trial=true")
-      end
+      it { is_expected.to redirect_to("/#{namespace.path}?trial=true") }
 
       context 'with a new Group' do
+        let(:post_params) { { new_group_name: 'GitLab' } }
+
         it 'creates the Group' do
-          expect do
-            post :apply, params: { new_group_name: 'GitLab' }
-          end.to change { Group.count }.to(1)
+          expect { subject }.to change { Group.count }.to(1)
         end
       end
     end
@@ -115,20 +166,37 @@ describe TrialsController do
     context 'on failure' do
       let(:apply_trial_result) { false }
 
-      it 'renders the :select view' do
-        post :apply, params: { namespace_id: namespace.id }
-
-        expect(response).to render_template(:select)
-      end
+      it { is_expected.to render_template(:select) }
 
       context 'with a new Group' do
-        it 'renders the :select view' do
-          post :apply, params: { new_group_name: 'admin' }
+        let(:post_params) { { new_group_name: 'admin' } }
 
-          expect(response).to render_template(:select)
-          expect(Group.count).to eq(0)
+        it { is_expected.to render_template(:select) }
+
+        it 'does not create the Group' do
+          expect { subject }.not_to change { Group.count }.from(0)
         end
       end
+    end
+
+    it "calls the ApplyTrialService with correct parameters" do
+      gl_com_params = { gitlab_com_trial: true, sync_to_gl: true }
+      post_params = {
+        namespace_id: namespace.id.to_s,
+        trial_entity: 'company',
+        glm_source: 'source',
+        glm_content: 'content'
+      }
+      apply_trial_params = {
+        uid: user.id,
+        trial_user:  ActionController::Parameters.new(post_params).permit(:namespace_id, :trial_entity, :glm_source, :glm_content).merge(gl_com_params)
+      }
+
+      expect_next_instance_of(GitlabSubscriptions::ApplyTrialService) do |service|
+        expect(service).to receive(:execute).with(apply_trial_params).and_return({ success: true })
+      end
+
+      post :apply, params: post_params
     end
   end
 end

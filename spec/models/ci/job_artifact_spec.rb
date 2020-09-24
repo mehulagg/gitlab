@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::JobArtifact do
+RSpec.describe Ci::JobArtifact do
   let(:artifact) { create(:ci_job_artifact, :archive) }
 
   describe "Associations" do
@@ -19,8 +19,18 @@ describe Ci::JobArtifact do
 
   it_behaves_like 'having unique enum values'
 
-  it_behaves_like 'UpdateProjectStatistics' do
-    subject { build(:ci_job_artifact, :archive, size: 106365) }
+  it_behaves_like 'UpdateProjectStatistics', :with_counter_attribute do
+    let_it_be(:job, reload: true) { create(:ci_build) }
+
+    subject { build(:ci_job_artifact, :archive, job: job, size: 107464) }
+  end
+
+  describe '.not_expired' do
+    it 'returns artifacts that have not expired' do
+      _expired_artifact = create(:ci_job_artifact, :expired)
+
+      expect(described_class.not_expired).to contain_exactly(artifact)
+    end
   end
 
   describe '.with_reports' do
@@ -54,6 +64,69 @@ describe Ci::JobArtifact do
     end
   end
 
+  describe '.accessibility_reports' do
+    subject { described_class.accessibility_reports }
+
+    context 'when there is an accessibility report' do
+      let(:artifact) { create(:ci_job_artifact, :accessibility) }
+
+      it { is_expected.to eq([artifact]) }
+    end
+
+    context 'when there are no accessibility report' do
+      let(:artifact) { create(:ci_job_artifact, :archive) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
+  describe '.coverage_reports' do
+    subject { described_class.coverage_reports }
+
+    context 'when there is a coverage report' do
+      let!(:artifact) { create(:ci_job_artifact, :cobertura) }
+
+      it { is_expected.to eq([artifact]) }
+    end
+
+    context 'when there are no coverage reports' do
+      let!(:artifact) { create(:ci_job_artifact, :archive) }
+
+      it { is_expected.to be_empty }
+    end
+  end
+
+  describe '.terraform_reports' do
+    context 'when there is a terraform report' do
+      it 'return the job artifact' do
+        artifact = create(:ci_job_artifact, :terraform)
+
+        expect(described_class.terraform_reports).to eq([artifact])
+      end
+    end
+
+    context 'when there are no terraform reports' do
+      it 'return the an empty array' do
+        expect(described_class.terraform_reports).to eq([])
+      end
+    end
+  end
+
+  describe '.associated_file_types_for' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { Ci::JobArtifact.associated_file_types_for(file_type) }
+
+    where(:file_type, :result) do
+      'codequality'         | %w(codequality)
+      'quality'             | nil
+    end
+
+    with_them do
+      it { is_expected.to eq result }
+    end
+  end
+
   describe '.erasable' do
     subject { described_class.erasable }
 
@@ -67,6 +140,17 @@ describe Ci::JobArtifact do
       let!(:artifact) { create(:ci_job_artifact, :trace) }
 
       it { is_expected.to be_empty }
+    end
+  end
+
+  describe '.downloadable' do
+    subject { described_class.downloadable }
+
+    it 'filters for downloadable artifacts' do
+      downloadable_artifact = create(:ci_job_artifact, :codequality)
+      _not_downloadable_artifact = create(:ci_job_artifact, :trace)
+
+      expect(subject).to contain_exactly(downloadable_artifact)
     end
   end
 
@@ -95,10 +179,34 @@ describe Ci::JobArtifact do
     end
   end
 
-  describe 'callbacks' do
-    subject { create(:ci_job_artifact, :archive) }
+  describe '.for_sha' do
+    let(:first_pipeline) { create(:ci_pipeline) }
+    let(:second_pipeline) { create(:ci_pipeline, project: first_pipeline.project, sha: Digest::SHA1.hexdigest(SecureRandom.hex)) }
+    let!(:first_artifact) { create(:ci_job_artifact, job: create(:ci_build, pipeline: first_pipeline)) }
+    let!(:second_artifact) { create(:ci_job_artifact, job: create(:ci_build, pipeline: second_pipeline)) }
 
+    it 'returns job artifacts for a given pipeline sha' do
+      expect(described_class.for_sha(first_pipeline.sha, first_pipeline.project.id)).to eq([first_artifact])
+      expect(described_class.for_sha(second_pipeline.sha, first_pipeline.project.id)).to eq([second_artifact])
+    end
+  end
+
+  describe '.for_job_name' do
+    it 'returns job artifacts for a given job name' do
+      first_job = create(:ci_build, name: 'first')
+      second_job = create(:ci_build, name: 'second')
+      first_artifact = create(:ci_job_artifact, job: first_job)
+      second_artifact = create(:ci_job_artifact, job: second_job)
+
+      expect(described_class.for_job_name(first_job.name)).to eq([first_artifact])
+      expect(described_class.for_job_name(second_job.name)).to eq([second_artifact])
+    end
+  end
+
+  describe 'callbacks' do
     describe '#schedule_background_upload' do
+      subject { create(:ci_job_artifact, :archive) }
+
       context 'when object storage is disabled' do
         before do
           stub_artifacts_object_storage(enabled: false)
@@ -144,7 +252,7 @@ describe Ci::JobArtifact do
     let(:artifact) { create(:ci_job_artifact, :archive, project: project) }
 
     it 'sets the size from the file size' do
-      expect(artifact.size).to eq(106365)
+      expect(artifact.size).to eq(107464)
     end
   end
 
@@ -155,8 +263,34 @@ describe Ci::JobArtifact do
     end
   end
 
+  describe 'validates if file format is supported' do
+    subject { artifact }
+
+    let(:artifact) { build(:ci_job_artifact, file_type: :license_management, file_format: :raw) }
+
+    context 'when license_management is supported' do
+      before do
+        stub_feature_flags(drop_license_management_artifact: false)
+      end
+
+      it { is_expected.to be_valid }
+    end
+
+    context 'when license_management is not supported' do
+      before do
+        stub_feature_flags(drop_license_management_artifact: true)
+      end
+
+      it { is_expected.not_to be_valid }
+    end
+  end
+
   describe 'validates file format' do
     subject { artifact }
+
+    before do
+      stub_feature_flags(drop_license_management_artifact: false)
+    end
 
     described_class::TYPE_AND_FORMAT_PAIRS.except(:trace).each do |file_type, file_format|
       context "when #{file_type} type with #{file_format} format" do
@@ -211,38 +345,58 @@ describe Ci::JobArtifact do
     end
   end
 
-  describe '#each_blob' do
-    context 'when file format is gzip' do
-      context 'when gzip file contains one file' do
-        let(:artifact) { build(:ci_job_artifact, :junit) }
+  describe 'expired?' do
+    subject { artifact.expired? }
 
-        it 'iterates blob once' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.once
-        end
-      end
+    context 'when expire_at is nil' do
+      let(:artifact) { build(:ci_job_artifact, expire_at: nil) }
 
-      context 'when gzip file contains three files' do
-        let(:artifact) { build(:ci_job_artifact, :junit_with_three_testsuites) }
-
-        it 'iterates blob three times' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.exactly(3).times
-        end
+      it 'returns false' do
+        is_expected.to be_falsy
       end
     end
 
-    context 'when file format is raw' do
-      let(:artifact) { build(:ci_job_artifact, :codequality, file_format: :raw) }
+    context 'when expire_at is in the past' do
+      let(:artifact) { build(:ci_job_artifact, expire_at: Date.yesterday) }
 
-      it 'iterates blob once' do
-        expect { |b| artifact.each_blob(&b) }.to yield_control.once
+      it 'returns true' do
+        is_expected.to be_truthy
       end
     end
 
-    context 'when there are no adapters for the file format' do
-      let(:artifact) { build(:ci_job_artifact, :junit, file_format: :zip) }
+    context 'when expire_at is in the future' do
+      let(:artifact) { build(:ci_job_artifact, expire_at: Date.tomorrow) }
 
-      it 'raises an error' do
-        expect { |b| artifact.each_blob(&b) }.to raise_error(described_class::NotSupportedAdapterError)
+      it 'returns false' do
+        is_expected.to be_falsey
+      end
+    end
+  end
+
+  describe '#expiring?' do
+    subject { artifact.expiring? }
+
+    context 'when expire_at is nil' do
+      let(:artifact) { build(:ci_job_artifact, expire_at: nil) }
+
+      it 'returns false' do
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'when expire_at is in the past' do
+      let(:artifact) { build(:ci_job_artifact, expire_at: Date.yesterday) }
+
+      it 'returns false' do
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'when expire_at is in the future' do
+      let(:artifact) { build(:ci_job_artifact, expire_at: Date.tomorrow) }
+
+      it 'returns true' do
+        is_expected.to be_truthy
       end
     end
   end
@@ -253,13 +407,13 @@ describe Ci::JobArtifact do
     it { is_expected.to be_nil }
 
     context 'when expire_at is specified' do
-      let(:expire_at) { Time.now + 7.days }
+      let(:expire_at) { Time.current + 7.days }
 
       before do
         artifact.expire_at = expire_at
       end
 
-      it { is_expected.to be_within(5).of(expire_at - Time.now) }
+      it { is_expected.to be_within(5).of(expire_at - Time.current) }
     end
   end
 
@@ -294,25 +448,8 @@ describe Ci::JobArtifact do
   describe 'file is being stored' do
     subject { create(:ci_job_artifact, :archive) }
 
-    context 'when object has nil store' do
-      before do
-        subject.update_column(:file_store, nil)
-        subject.reload
-      end
-
-      it 'is stored locally' do
-        expect(subject.file_store).to be(nil)
-        expect(subject.file).to be_file_storage
-        expect(subject.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-      end
-    end
-
     context 'when existing object has local store' do
-      it 'is stored locally' do
-        expect(subject.file_store).to be(ObjectStorage::Store::LOCAL)
-        expect(subject.file).to be_file_storage
-        expect(subject.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-      end
+      it_behaves_like 'mounted file in local store'
     end
 
     context 'when direct upload is enabled' do
@@ -321,12 +458,94 @@ describe Ci::JobArtifact do
       end
 
       context 'when file is stored' do
-        it 'is stored remotely' do
-          expect(subject.file_store).to eq(ObjectStorage::Store::REMOTE)
-          expect(subject.file).not_to be_file_storage
-          expect(subject.file.object_store).to eq(ObjectStorage::Store::REMOTE)
+        it_behaves_like 'mounted file in object store'
+      end
+    end
+  end
+
+  describe '.file_types' do
+    context 'all file types have corresponding limit' do
+      let_it_be(:plan_limits) { create(:plan_limits) }
+
+      where(:file_type) do
+        described_class.file_types.keys
+      end
+
+      with_them do
+        let(:limit_name) { "#{described_class::PLAN_LIMIT_PREFIX}#{file_type}" }
+
+        it { expect(plan_limits.attributes).to include(limit_name), file_type_limit_failure_message(file_type, limit_name) }
+      end
+    end
+  end
+
+  describe '.max_artifact_size' do
+    let(:build) { create(:ci_build) }
+
+    subject(:max_size) { described_class.max_artifact_size(type: artifact_type, project: build.project) }
+
+    context 'when file type is supported' do
+      let(:project_closest_setting) { 1024 }
+      let(:artifact_type) { 'junit' }
+      let(:limit_name) { "#{described_class::PLAN_LIMIT_PREFIX}#{artifact_type}" }
+
+      let!(:plan_limits) { create(:plan_limits, :default_plan) }
+
+      shared_examples_for 'basing off the project closest setting' do
+        it { is_expected.to eq(project_closest_setting.megabytes.to_i) }
+      end
+
+      shared_examples_for 'basing off the plan limit' do
+        it { is_expected.to eq(max_size_for_type.megabytes.to_i) }
+      end
+
+      before do
+        allow(build.project).to receive(:closest_setting).with(:max_artifacts_size).and_return(project_closest_setting)
+      end
+
+      context 'and plan limit is disabled for the given artifact type' do
+        before do
+          plan_limits.update!(limit_name => 0)
+        end
+
+        it_behaves_like 'basing off the project closest setting'
+
+        context 'and project closest setting results to zero' do
+          let(:project_closest_setting) { 0 }
+
+          it { is_expected.to eq(0) }
+        end
+      end
+
+      context 'and plan limit is enabled for the given artifact type' do
+        before do
+          plan_limits.update!(limit_name => max_size_for_type)
+        end
+
+        context 'and plan limit is smaller than project setting' do
+          let(:max_size_for_type) { project_closest_setting - 1 }
+
+          it_behaves_like 'basing off the plan limit'
+        end
+
+        context 'and plan limit is larger than project setting' do
+          let(:max_size_for_type) { project_closest_setting + 1 }
+
+          it_behaves_like 'basing off the project closest setting'
         end
       end
     end
+  end
+
+  def file_type_limit_failure_message(type, limit_name)
+    <<~MSG
+      The artifact type `#{type}` is missing its counterpart plan limit which is expected to be named `#{limit_name}`.
+
+      Please refer to https://docs.gitlab.com/ee/development/application_limits.html on how to add new plan limit columns.
+
+      Take note that while existing max size plan limits default to 0, succeeding new limits are recommended to have
+      non-zero default values. Also, remember to update the plan limits documentation (doc/administration/instance_limits.md)
+      when changes or new entries are made.
+    MSG
   end
 end

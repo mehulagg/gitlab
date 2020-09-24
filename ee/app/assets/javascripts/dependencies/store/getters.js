@@ -7,6 +7,8 @@ export const generatedAtTimeAgo = ({ currentList }, getters) =>
 export const isJobNotSetUp = ({ currentList }, getters) => getters[`${currentList}/isJobNotSetUp`];
 export const isJobFailed = ({ currentList }, getters) => getters[`${currentList}/isJobFailed`];
 export const isIncomplete = ({ currentList }, getters) => getters[`${currentList}/isIncomplete`];
+export const hasNoDependencies = ({ currentList }, getters) =>
+  getters[`${currentList}/hasNoDependencies`];
 
 export const totals = state =>
   state.listTypes.reduce(

@@ -23,7 +23,7 @@ module Gitlab
         def self.try_obtain_with_ttl
           lease = exclusive_lease.try_obtain_with_ttl
 
-          unless lease[:ttl].zero? || exclusive_lease.same_uuid?
+          unless lease[:ttl] == 0 || exclusive_lease.same_uuid?
             $stdout.puts lease_taken_message
             logger.debug(lease_taken_message)
 

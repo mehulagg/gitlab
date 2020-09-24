@@ -1,6 +1,7 @@
-/* eslint-disable func-names, no-var, no-param-reassign, one-var, operator-assignment, no-else-return, consistent-return */
+/* eslint-disable func-names, no-param-reassign, operator-assignment, consistent-return */
 import $ from 'jquery';
 import { insertText } from '~/lib/utils/common_utils';
+import Shortcuts from '~/behaviors/shortcuts/shortcuts';
 
 const LINK_TAG_PATTERN = '[{text}](url)';
 
@@ -13,8 +14,7 @@ function addBlockTags(blockTag, selected) {
 }
 
 function lineBefore(text, textarea) {
-  var split;
-  split = text
+  const split = text
     .substring(0, textarea.selectionStart)
     .trim()
     .split('\n');
@@ -28,9 +28,28 @@ function lineAfter(text, textarea) {
     .split('\n')[0];
 }
 
+function convertMonacoSelectionToAceFormat(sel) {
+  return {
+    start: {
+      row: sel.startLineNumber,
+      column: sel.startColumn,
+    },
+    end: {
+      row: sel.endLineNumber,
+      column: sel.endColumn,
+    },
+  };
+}
+
+function getEditorSelectionRange(editor) {
+  return window.gon.features?.monacoBlobs
+    ? convertMonacoSelectionToAceFormat(editor.getSelection())
+    : editor.getSelectionRange();
+}
+
 function editorBlockTagText(text, blockTag, selected, editor) {
   const lines = text.split('\n');
-  const selectionRange = editor.getSelectionRange();
+  const selectionRange = getEditorSelectionRange(editor);
   const shouldRemoveBlock =
     lines[selectionRange.start.row - 1] === blockTag &&
     lines[selectionRange.end.row + 1] === blockTag;
@@ -80,7 +99,7 @@ function moveCursor({
   editorSelectionStart,
   editorSelectionEnd,
 }) {
-  var pos;
+  let pos;
   if (textArea && !textArea.setSelectionRange) {
     return;
   }
@@ -91,8 +110,12 @@ function moveCursor({
       const endPosition = startPosition + select.length;
       return textArea.setSelectionRange(startPosition, endPosition);
     } else if (editor) {
-      editor.navigateLeft(tag.length - tag.indexOf(select));
-      editor.getSelection().selectAWord();
+      if (window.gon.features?.monacoBlobs) {
+        editor.selectWithinSelection(select, tag);
+      } else {
+        editor.navigateLeft(tag.length - tag.indexOf(select));
+        editor.getSelection().selectAWord();
+      }
       return;
     }
   }
@@ -116,7 +139,11 @@ function moveCursor({
     }
   } else if (editor && editorSelectionStart.row === editorSelectionEnd.row) {
     if (positionBetweenTags) {
-      editor.navigateLeft(tag.length);
+      if (window.gon.features?.monacoBlobs) {
+        editor.moveCursor(tag.length * -1);
+      } else {
+        editor.navigateLeft(tag.length);
+      }
     }
   }
 }
@@ -132,21 +159,16 @@ export function insertMarkdownText({
   select,
   editor,
 }) {
-  var textToInsert,
-    selectedSplit,
-    startChar,
-    removedLastNewLine,
-    removedFirstNewLine,
-    currentLineEmpty,
-    lastNewLine,
-    editorSelectionStart,
-    editorSelectionEnd;
-  removedLastNewLine = false;
-  removedFirstNewLine = false;
-  currentLineEmpty = false;
+  let removedLastNewLine = false;
+  let removedFirstNewLine = false;
+  let currentLineEmpty = false;
+  let editorSelectionStart;
+  let editorSelectionEnd;
+  let lastNewLine;
+  let textToInsert;
 
   if (editor) {
-    const selectionRange = editor.getSelectionRange();
+    const selectionRange = getEditorSelectionRange(editor);
 
     editorSelectionStart = selectionRange.start;
     editorSelectionEnd = selectionRange.end;
@@ -186,7 +208,7 @@ export function insertMarkdownText({
     }
   }
 
-  selectedSplit = selected.split('\n');
+  const selectedSplit = selected.split('\n');
 
   if (editor && !wrap) {
     lastNewLine = editor.getValue().split('\n')[editorSelectionStart.row];
@@ -207,8 +229,7 @@ export function insertMarkdownText({
     (textArea && textArea.selectionStart === 0) ||
     (editor && editorSelectionStart.column === 0 && editorSelectionStart.row === 0);
 
-  startChar = !wrap && !currentLineEmpty && !isBeginning ? '\n' : '';
-
+  const startChar = !wrap && !currentLineEmpty && !isBeginning ? '\n' : '';
   const textPlaceholder = '{text}';
 
   if (selectedSplit.length > 1 && (!wrap || (blockTag != null && blockTag !== ''))) {
@@ -224,16 +245,15 @@ export function insertMarkdownText({
           }
           if (val.indexOf(tag) === 0) {
             return String(val.replace(tag, ''));
-          } else {
-            return String(tag) + val;
           }
+          return String(tag) + val;
         })
         .join('\n');
     }
   } else if (tag.indexOf(textPlaceholder) > -1) {
     textToInsert = tag.replace(textPlaceholder, selected);
   } else {
-    textToInsert = String(startChar) + tag + selected + (wrap ? tag : ' ');
+    textToInsert = String(startChar) + tag + selected + (wrap ? tag : '');
   }
 
   if (removedFirstNewLine) {
@@ -245,7 +265,11 @@ export function insertMarkdownText({
   }
 
   if (editor) {
-    editor.insert(textToInsert);
+    if (window.gon.features?.monacoBlobs) {
+      editor.replaceSelectedText(textToInsert, select);
+    } else {
+      editor.insert(textToInsert);
+    }
   } else {
     insertText(textArea, textToInsert);
   }
@@ -263,11 +287,10 @@ export function insertMarkdownText({
 }
 
 function updateText({ textArea, tag, cursorOffset, blockTag, wrap, select, tagContent }) {
-  var $textArea, selected, text;
-  $textArea = $(textArea);
+  const $textArea = $(textArea);
   textArea = $textArea.get(0);
-  text = $textArea.val();
-  selected = selectedText(text, textArea) || tagContent;
+  const text = $textArea.val();
+  const selected = selectedText(text, textArea) || tagContent;
   $textArea.focus();
   return insertMarkdownText({
     textArea,
@@ -281,21 +304,67 @@ function updateText({ textArea, tag, cursorOffset, blockTag, wrap, select, tagCo
   });
 }
 
+/* eslint-disable @gitlab/require-i18n-strings */
+export function keypressNoteText(e) {
+  if (this.selectionStart === this.selectionEnd) {
+    return;
+  }
+  const keys = {
+    '*': '**{text}**', // wraps with bold character
+    _: '_{text}_', // wraps with italic character
+    '`': '`{text}`', // wraps with inline character
+    "'": "'{text}'", // single quotes
+    '"': '"{text}"', // double quotes
+    '[': '[{text}]', // brackets
+    '{': '{{text}}', // braces
+    '(': '({text})', // parentheses
+    '<': '<{text}>', // angle brackets
+  };
+  const tag = keys[e.key];
+
+  if (tag) {
+    e.preventDefault();
+
+    updateText({
+      tag,
+      textArea: this,
+      blockTag: '',
+      wrap: true,
+      select: '',
+      tagContent: '',
+    });
+  }
+}
+/* eslint-enable @gitlab/require-i18n-strings */
+
+export function updateTextForToolbarBtn($toolbarBtn) {
+  return updateText({
+    textArea: $toolbarBtn.closest('.md-area').find('textarea'),
+    tag: $toolbarBtn.data('mdTag'),
+    cursorOffset: $toolbarBtn.data('mdCursorOffset'),
+    blockTag: $toolbarBtn.data('mdBlock'),
+    wrap: !$toolbarBtn.data('mdPrepend'),
+    select: $toolbarBtn.data('mdSelect'),
+    tagContent: $toolbarBtn.data('mdTagContent'),
+  });
+}
+
 export function addMarkdownListeners(form) {
-  return $('.js-md', form)
+  $('.markdown-area', form)
+    .on('keydown', keypressNoteText)
+    .each(function attachTextareaShortcutHandlers() {
+      Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
+    });
+
+  const $allToolbarBtns = $('.js-md', form)
     .off('click')
     .on('click', function() {
-      const $this = $(this);
-      return updateText({
-        textArea: $this.closest('.md-area').find('textarea'),
-        tag: $this.data('mdTag'),
-        cursorOffset: $this.data('mdCursorOffset'),
-        blockTag: $this.data('mdBlock'),
-        wrap: !$this.data('mdPrepend'),
-        select: $this.data('mdSelect'),
-        tagContent: $this.data('mdTagContent'),
-      });
+      const $toolbarBtn = $(this);
+
+      return updateTextForToolbarBtn($toolbarBtn);
     });
+
+  return $allToolbarBtns;
 }
 
 export function addEditorMarkdownListeners(editor) {
@@ -318,5 +387,11 @@ export function addEditorMarkdownListeners(editor) {
 }
 
 export function removeMarkdownListeners(form) {
+  $('.markdown-area', form)
+    .off('keydown', keypressNoteText)
+    .each(function removeTextareaShortcutHandlers() {
+      Shortcuts.removeMarkdownEditorShortcuts($(this));
+    });
+
   return $('.js-md', form).off('click');
 }

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe EnvironmentPolicy do
+RSpec.describe EnvironmentPolicy do
   using RSpec::Parameterized::TableSyntax
 
   let(:project) { create(:project, :repository) }
@@ -18,9 +18,19 @@ describe EnvironmentPolicy do
     it_behaves_like 'protected environments access'
   end
 
+  describe '#destroy_environment' do
+    subject { user.can?(:destroy_environment, environment) }
+
+    before do
+      environment.stop!
+    end
+
+    it_behaves_like 'protected environments access'
+  end
+
   describe '#create_environment_terminal' do
     subject { user.can?(:create_environment_terminal, environment) }
 
-    it_behaves_like 'protected environments access', false
+    it_behaves_like 'protected environments access', developer_access: false
   end
 end

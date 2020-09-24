@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe HelpController do
+RSpec.describe HelpController do
   let(:user) { create(:user) }
 
   before do
@@ -79,12 +79,27 @@ describe HelpController do
         expect(assigns[:help_index]).to eq '[protocol-relative](//example.com)'
       end
     end
+
+    context 'restricted visibility set to public' do
+      before do
+        sign_out(user)
+
+        stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC])
+      end
+
+      it 'redirects to sign_in path' do
+        get :index
+
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
   end
 
   describe 'GET #show' do
     context 'for Markdown formats' do
       context 'when requested file exists' do
         before do
+          expect(File).to receive(:read).and_return(fixture_file('blockquote_fence_after.md'))
           get :show, params: { path: 'ssh/README' }, format: :md
         end
 
@@ -94,7 +109,7 @@ describe HelpController do
 
         it 'renders HTML' do
           expect(response).to render_template('show.html.haml')
-          expect(response.content_type).to eq 'text/html'
+          expect(response.media_type).to eq 'text/html'
         end
       end
 
@@ -111,11 +126,11 @@ describe HelpController do
         it 'renders the raw file' do
           get :show,
               params: {
-                path: 'user/project/img/labels_default_v12_1'
+                path: 'user/img/markdown_logo'
               },
               format: :png
           expect(response).to be_successful
-          expect(response.content_type).to eq 'image/png'
+          expect(response.media_type).to eq 'image/png'
           expect(response.headers['Content-Disposition']).to match(/^inline;/)
         end
       end
@@ -144,16 +159,7 @@ describe HelpController do
     end
   end
 
-  describe 'GET #ui' do
-    context 'for UI Development Kit' do
-      it 'renders found' do
-        get :ui
-        expect(response).to have_gitlab_http_status(200)
-      end
-    end
-  end
-
   def stub_readme(content)
-    allow(File).to receive(:read).and_return(content)
+    expect(File).to receive(:read).and_return(content)
   end
 end

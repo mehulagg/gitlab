@@ -20,6 +20,19 @@ module EE
         render_api_error!(e.to_s, 401)
       end
 
+      def geo_jwt_decoder
+        return unless gitlab_geo_node_token?
+
+        strong_memoize(:geo_jwt_decoder) do
+          ::Gitlab::Geo::JwtRequestDecoder.new(headers['Authorization'])
+        end
+      end
+
+      # Update the jwt_decoder to allow authorization of disabled (paused) nodes
+      def allow_paused_nodes!
+        geo_jwt_decoder.include_disabled!
+      end
+
       def check_gitlab_geo_request_ip!
         unauthorized! unless ::Gitlab::Geo.allowed_ip?(request.ip)
       end
@@ -39,10 +52,9 @@ module EE
       end
 
       def authorization_header_valid?
-        auth_header = headers['Authorization']
-        return unless auth_header
+        return unless gitlab_geo_node_token?
 
-        scope = ::Gitlab::Geo::JwtRequestDecoder.new(auth_header).decode.try { |x| x[:scope] }
+        scope = geo_jwt_decoder.decode.try { |x| x[:scope] }
         scope == ::Gitlab::Geo::API_SCOPE
       end
 
@@ -53,12 +65,6 @@ module EE
       def authorize_change_param(subject, *keys)
         keys.each do |key|
           authorize!("change_#{key}".to_sym, subject) if params.has_key?(key)
-        end
-      end
-
-      def check_sha_param!(params, merge_request)
-        if params[:sha] && merge_request.diff_head_sha != params[:sha]
-          render_api_error!("SHA does not match HEAD of source branch: #{merge_request.diff_head_sha}", 409)
         end
       end
 
@@ -104,12 +110,9 @@ module EE
         end
       end
 
-      override :find_project_issue
       # rubocop: disable CodeReuse/ActiveRecord
-      def find_project_issue(iid, project_id = nil)
-        project = project_id ? find_project!(project_id) : user_project
-
-        ::IssuesFinder.new(current_user, project_id: project.id).find_by!(iid: iid)
+      def find_group_epic(iid)
+        EpicsFinder.new(current_user, group_id: user_group.id).find_by!(iid: iid)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -137,10 +140,6 @@ module EE
 
       def private_token
         params[::APIGuard::PRIVATE_TOKEN_PARAM] || env[::APIGuard::PRIVATE_TOKEN_HEADER]
-      end
-
-      def job_token_authentication?
-        initial_current_user && @job_token_authentication # rubocop:disable Gitlab/ModuleWithInstanceVariables
       end
 
       def warden

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::Runner do
+RSpec.describe Ci::Runner do
   it_behaves_like 'having unique enum values'
 
   describe 'validation' do
@@ -25,7 +25,7 @@ describe Ci::Runner do
       end
     end
 
-    context '#exactly_one_group' do
+    describe '#exactly_one_group' do
       let(:group) { create(:group) }
       let(:runner) { create(:ci_runner, :group, groups: [group]) }
 
@@ -38,8 +38,8 @@ describe Ci::Runner do
     end
 
     context 'runner_type validations' do
-      set(:group) { create(:group) }
-      set(:project) { create(:project) }
+      let_it_be(:group) { create(:group) }
+      let_it_be(:project) { create(:project) }
       let(:group_runner) { create(:ci_runner, :group, groups: [group]) }
       let(:project_runner) { create(:ci_runner, :project, projects: [project]) }
       let(:instance_runner) { create(:ci_runner, :instance) }
@@ -76,6 +76,36 @@ describe Ci::Runner do
         group.runners << project_runner
         expect { group.save! }
           .to raise_error(ActiveRecord::RecordInvalid)
+      end
+    end
+
+    context 'cost factors validations' do
+      it 'dissalows :private_projects_minutes_cost_factor being nil' do
+        runner = build(:ci_runner, private_projects_minutes_cost_factor: nil)
+
+        expect(runner).to be_invalid
+        expect(runner.errors.full_messages).to include('Private projects minutes cost factor needs to be non-negative')
+      end
+
+      it 'dissalows :public_projects_minutes_cost_factor being nil' do
+        runner = build(:ci_runner, public_projects_minutes_cost_factor: nil)
+
+        expect(runner).to be_invalid
+        expect(runner.errors.full_messages).to include('Public projects minutes cost factor needs to be non-negative')
+      end
+
+      it 'dissalows :private_projects_minutes_cost_factor being negative' do
+        runner = build(:ci_runner, private_projects_minutes_cost_factor: -1.1)
+
+        expect(runner).to be_invalid
+        expect(runner.errors.full_messages).to include('Private projects minutes cost factor needs to be non-negative')
+      end
+
+      it 'dissalows :public_projects_minutes_cost_factor being negative' do
+        runner = build(:ci_runner, public_projects_minutes_cost_factor: -2.2)
+
+        expect(runner).to be_invalid
+        expect(runner.errors.full_messages).to include('Public projects minutes cost factor needs to be non-negative')
       end
     end
   end
@@ -233,14 +263,14 @@ describe Ci::Runner do
     subject { described_class.online }
 
     before do
-      @runner1 = create(:ci_runner, :instance, contacted_at: 1.hour.ago)
+      @runner1 = create(:ci_runner, :instance, contacted_at: 2.hours.ago)
       @runner2 = create(:ci_runner, :instance, contacted_at: 1.second.ago)
     end
 
     it { is_expected.to eq([@runner2])}
   end
 
-  describe '#online?' do
+  describe '#online?', :clean_gitlab_redis_cache do
     let(:runner) { create(:ci_runner, :instance) }
 
     subject { runner.online? }
@@ -302,7 +332,7 @@ describe Ci::Runner do
     end
 
     def stub_redis_runner_contacted_at(value)
-      Gitlab::Redis::SharedState.with do |redis|
+      Gitlab::Redis::Cache.with do |redis|
         cache_key = runner.send(:cache_attribute_key)
         expect(redis).to receive(:get).with(cache_key)
           .and_return({ contacted_at: value }.to_json).at_least(:once)
@@ -314,7 +344,7 @@ describe Ci::Runner do
     subject { described_class.offline }
 
     before do
-      @runner1 = create(:ci_runner, :instance, contacted_at: 1.hour.ago)
+      @runner1 = create(:ci_runner, :instance, contacted_at: 2.hours.ago)
       @runner2 = create(:ci_runner, :instance, contacted_at: 1.second.ago)
     end
 
@@ -322,7 +352,7 @@ describe Ci::Runner do
   end
 
   describe '#can_pick?' do
-    set(:pipeline) { create(:ci_pipeline) }
+    let_it_be(:pipeline) { create(:ci_pipeline) }
     let(:build) { create(:ci_build, pipeline: pipeline) }
     let(:runner_project) { build.project }
     let(:runner) { create(:ci_runner, :project, projects: [runner_project], tag_list: tag_list, run_untagged: run_untagged) }
@@ -526,25 +556,25 @@ describe Ci::Runner do
     it 'sets a new last_update value when it is called the first time' do
       last_update = runner.ensure_runner_queue_value
 
-      expect_value_in_queues.to eq(last_update)
+      expect(value_in_queues).to eq(last_update)
     end
 
     it 'does not change if it is not expired and called again' do
       last_update = runner.ensure_runner_queue_value
 
       expect(runner.ensure_runner_queue_value).to eq(last_update)
-      expect_value_in_queues.to eq(last_update)
+      expect(value_in_queues).to eq(last_update)
     end
 
     context 'updates runner queue after changing editable value' do
       let!(:last_update) { runner.ensure_runner_queue_value }
 
       before do
-        Ci::UpdateRunnerService.new(runner).update(description: 'new runner')
+        Ci::UpdateRunnerService.new(runner).update(description: 'new runner') # rubocop: disable Rails/SaveBang
       end
 
       it 'sets a new last_update value' do
-        expect_value_in_queues.not_to eq(last_update)
+        expect(value_in_queues).not_to eq(last_update)
       end
     end
 
@@ -556,26 +586,26 @@ describe Ci::Runner do
       end
 
       it 'has an old last_update value' do
-        expect_value_in_queues.to eq(last_update)
+        expect(value_in_queues).to eq(last_update)
       end
     end
 
-    def expect_value_in_queues
+    def value_in_queues
       Gitlab::Redis::SharedState.with do |redis|
         runner_queue_key = runner.send(:runner_queue_key)
-        expect(redis.get(runner_queue_key))
+        redis.get(runner_queue_key)
       end
     end
   end
 
-  describe '#update_cached_info' do
+  describe '#heartbeat' do
     let(:runner) { create(:ci_runner, :project) }
 
-    subject { runner.update_cached_info(architecture: '18-bit') }
+    subject { runner.heartbeat(architecture: '18-bit') }
 
     context 'when database was updated recently' do
       before do
-        runner.contacted_at = Time.now
+        runner.contacted_at = Time.current
       end
 
       it 'updates cache' do
@@ -610,7 +640,7 @@ describe Ci::Runner do
     end
 
     def expect_redis_update
-      Gitlab::Redis::SharedState.with do |redis|
+      Gitlab::Redis::Cache.with do |redis|
         redis_key = runner.send(:cache_attribute_key)
         expect(redis).to receive(:set).with(redis_key, anything, any_args)
       end
@@ -630,11 +660,11 @@ describe Ci::Runner do
 
       before do
         runner.tick_runner_queue
-        runner.destroy
+        runner.destroy!
       end
 
       it 'cleans up the queue' do
-        Gitlab::Redis::SharedState.with do |redis|
+        Gitlab::Redis::Cache.with do |redis|
           expect(redis.get(queue_key)).to be_nil
         end
       end
@@ -680,6 +710,46 @@ describe Ci::Runner do
       runner = create(:ci_runner, :project, projects: [project])
 
       expect(runner.belongs_to_one_project?).to be_truthy
+    end
+  end
+
+  describe '#belongs_to_more_than_one_project?' do
+    context 'project runner' do
+      let(:project1) { create(:project) }
+      let(:project2) { create(:project) }
+
+      context 'two projects assigned to runner' do
+        let(:runner) { create(:ci_runner, :project, projects: [project1, project2]) }
+
+        it 'returns true' do
+          expect(runner.belongs_to_more_than_one_project?).to be_truthy
+        end
+      end
+
+      context 'one project assigned to runner' do
+        let(:runner) { create(:ci_runner, :project, projects: [project1]) }
+
+        it 'returns false' do
+          expect(runner.belongs_to_more_than_one_project?).to be_falsey
+        end
+      end
+    end
+
+    context 'group runner' do
+      let(:group) { create(:group) }
+      let(:runner) { create(:ci_runner, :group, groups: [group]) }
+
+      it 'returns false' do
+        expect(runner.belongs_to_more_than_one_project?).to be_falsey
+      end
+    end
+
+    context 'shared runner' do
+      let(:runner) { create(:ci_runner, :instance) }
+
+      it 'returns false' do
+        expect(runner.belongs_to_more_than_one_project?).to be_falsey
+      end
     end
   end
 
@@ -755,11 +825,13 @@ describe Ci::Runner do
     context 'when group runner' do
       let(:runner) { create(:ci_runner, :group, description: 'Group runner', groups: [group]) }
       let(:group) { create(:group) }
+
       it { is_expected.to be_falsey }
     end
 
     context 'when shared runner' do
       let(:runner) { create(:ci_runner, :instance, description: 'Shared runner') }
+
       it { is_expected.to be_falsey }
     end
 
@@ -806,7 +878,7 @@ describe Ci::Runner do
 
     it 'can be destroyed' do
       subject
-      expect { subject.destroy }.to change { described_class.count }.by(-1)
+      expect { subject.destroy! }.to change { described_class.count }.by(-1)
     end
   end
 
@@ -835,5 +907,34 @@ describe Ci::Runner do
     subject { runner.uncached_contacted_at }
 
     it { is_expected.to eq(contacted_at_stored) }
+  end
+
+  describe '.belonging_to_group' do
+    it 'returns the specific group runner' do
+      group = create(:group)
+      runner = create(:ci_runner, :group, groups: [group])
+      unrelated_group = create(:group)
+      create(:ci_runner, :group, groups: [unrelated_group])
+
+      expect(described_class.belonging_to_group(group.id)).to contain_exactly(runner)
+    end
+
+    context 'runner belonging to parent group' do
+      let_it_be(:parent_group) { create(:group) }
+      let_it_be(:parent_runner) { create(:ci_runner, :group, groups: [parent_group]) }
+      let_it_be(:group) { create(:group, parent: parent_group) }
+
+      context 'when include_parent option is passed' do
+        it 'returns the group runner from the parent group' do
+          expect(described_class.belonging_to_group(group.id, include_ancestors: true)).to contain_exactly(parent_runner)
+        end
+      end
+
+      context 'when include_parent option is not passed' do
+        it 'does not return the group runner from the parent group' do
+          expect(described_class.belonging_to_group(group.id)).to be_empty
+        end
+      end
+    end
   end
 end

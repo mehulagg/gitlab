@@ -2,7 +2,9 @@
 
 require "spec_helper"
 
-describe "User creates wiki page" do
+RSpec.describe "User creates wiki page" do
+  include WikiHelpers
+
   let(:user) { create(:user) }
   let(:wiki) { ProjectWiki.new(project, user) }
   let(:project) { create(:project) }
@@ -14,8 +16,10 @@ describe "User creates wiki page" do
   end
 
   context "when wiki is empty" do
-    before do
+    before do |example|
       visit(project_wikis_path(project))
+
+      wait_for_svg_to_be_loaded(example)
 
       click_link "Create your first page"
     end
@@ -45,7 +49,7 @@ describe "User creates wiki page" do
         expect(page).to have_content("Create New Page")
       end
 
-      it "shows non-escaped link in the pages list", :quarantine do
+      it "shows non-escaped link in the pages list" do
         fill_in(:wiki_title, with: "one/two/three-test")
 
         page.within(".wiki-form") do
@@ -55,7 +59,7 @@ describe "User creates wiki page" do
         end
 
         expect(current_path).to include("one/two/three-test")
-        expect(page).to have_xpath("//a[@href='/#{project.full_path}/wikis/one/two/three-test']")
+        expect(page).to have_xpath("//a[@href='/#{project.full_path}/-/wikis/one/two/three-test']")
       end
 
       it "has `Create home` as a commit message", :js do
@@ -145,7 +149,25 @@ describe "User creates wiki page" do
         end
       end
 
-      it_behaves_like 'wiki file attachments', :quarantine
+      it 'creates a wiki page with Org markup', :aggregate_failures do
+        org_content = <<~ORG
+          * Heading
+          ** Subheading
+          [[home][Link to Home]]
+        ORG
+
+        page.within('.wiki-form') do
+          find('#wiki_format option[value=org]').select_option
+          fill_in(:wiki_content, with: org_content)
+          click_button('Create page')
+        end
+
+        expect(page).to have_selector('h1', text: 'Heading')
+        expect(page).to have_selector('h2', text: 'Subheading')
+        expect(page).to have_link('Link to Home', href: "/#{project.full_path}/-/wikis/home")
+      end
+
+      it_behaves_like 'wiki file attachments'
     end
 
     context "in a group namespace", :js do
@@ -157,7 +179,7 @@ describe "User creates wiki page" do
         expect(page).to have_field("wiki[message]", with: "Create home")
       end
 
-      it "creates a page from the home page", :quarantine do
+      it "creates a page from the home page" do
         page.within(".wiki-form") do
           fill_in(:wiki_content, with: "My awesome wiki!")
 
@@ -173,7 +195,7 @@ describe "User creates wiki page" do
 
   context "when wiki is not empty", :js do
     before do
-      create(:wiki_page, wiki: wiki, attrs: { title: 'home', content: 'Home page' })
+      create(:wiki_page, wiki: wiki, title: 'home', content: 'Home page')
 
       visit(project_wikis_path(project))
     end
@@ -282,28 +304,55 @@ describe "User creates wiki page" do
   describe 'sidebar feature' do
     context 'when there are some existing pages' do
       before do
-        create(:wiki_page, wiki: wiki, attrs: { title: 'home', content: 'home' })
-        create(:wiki_page, wiki: wiki, attrs: { title: 'another', content: 'another' })
+        create(:wiki_page, wiki: wiki, title: 'home', content: 'home')
+        create(:wiki_page, wiki: wiki, title: 'another', content: 'another')
       end
 
       it 'renders a default sidebar when there is no customized sidebar' do
         visit(project_wikis_path(project))
 
         expect(page).to have_content('another')
-        expect(page).to have_content('More Pages')
+        expect(page).not_to have_link('View All Pages')
       end
 
       context 'when there is a customized sidebar' do
         before do
-          create(:wiki_page, wiki: wiki, attrs: { title: '_sidebar', content: 'My customized sidebar' })
+          create(:wiki_page, wiki: wiki, title: '_sidebar', content: 'My customized sidebar')
         end
 
         it 'renders my customized sidebar instead of the default one' do
           visit(project_wikis_path(project))
 
           expect(page).to have_content('My customized sidebar')
-          expect(page).to have_content('More Pages')
           expect(page).not_to have_content('Another')
+        end
+      end
+    end
+
+    context 'when there are 15 existing pages' do
+      before do
+        (1..5).each { |i| create(:wiki_page, wiki: wiki, title: "my page #{i}") }
+        (6..10).each { |i| create(:wiki_page, wiki: wiki, title: "parent/my page #{i}") }
+        (11..15).each { |i| create(:wiki_page, wiki: wiki, title: "grandparent/parent/my page #{i}") }
+      end
+
+      it 'shows all pages in the sidebar' do
+        visit(project_wikis_path(project))
+
+        (1..15).each { |i| expect(page).to have_content("my page #{i}") }
+        expect(page).not_to have_link('View All Pages')
+      end
+
+      context 'when there are more than 15 existing pages' do
+        before do
+          create(:wiki_page, wiki: wiki, title: 'my page 16')
+        end
+
+        it 'shows the first 15 pages in the sidebar' do
+          visit(project_wikis_path(project))
+
+          expect(page).to have_text('my page', count: 15)
+          expect(page).to have_link('View All Pages')
         end
       end
     end

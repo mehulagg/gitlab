@@ -51,6 +51,8 @@ class GeoNode < ApplicationRecord
 
   scope :with_url_prefix, ->(prefix) { where('url LIKE ?', "#{prefix}%") }
   scope :secondary_nodes, -> { where(primary: false) }
+  scope :name_in, -> (names) { where(name: names) }
+  scope :ordered, -> { order(:id) }
 
   attr_encrypted :secret_access_key,
                  key: Settings.attr_encrypted_db_key_base_truncated,
@@ -63,14 +65,14 @@ class GeoNode < ApplicationRecord
   class << self
     # Set in gitlab.rb as external_url
     def current_node_url
-      RequestStore.fetch('geo_node:current_node_url') do
+      Gitlab::SafeRequestStore.fetch('geo_node:current_node_url') do
         Gitlab.config.gitlab.url
       end
     end
 
     # Set in gitlab.rb as geo_node_name
     def current_node_name
-      RequestStore.fetch('geo_node:current_node_name') do
+      Gitlab::SafeRequestStore.fetch('geo_node:current_node_name') do
         Gitlab.config.geo.node_name
       end
     end
@@ -102,7 +104,7 @@ class GeoNode < ApplicationRecord
 
     # Tries to find a GeoNode by oauth_application_id, returning nil if none could be found.
     def find_by_oauth_application_id(oauth_application_id)
-      where(oauth_application_id: oauth_application_id).take
+      find_by(oauth_application_id: oauth_application_id)
     end
 
     private
@@ -173,12 +175,29 @@ class GeoNode < ApplicationRecord
     @internal_uri ||= URI.parse(internal_url) if internal_url.present?
   end
 
+  # Geo API endpoint for retrieving a replicable item
+  #
+  # @param [String] replicable_name
+  # @param [Integer] replicable_id
+  def geo_retrieve_url(replicable_name:, replicable_id:)
+    geo_api_url("retrieve/#{replicable_name}/#{replicable_id}")
+  end
+
+  # Geo API endpoint for retrieving a file based on Uploads
+  #
+  # @deprecated
+  # @param [String] file_type
+  # @param [Integer] file_id
   def geo_transfers_url(file_type, file_id)
     geo_api_url("transfers/#{file_type}/#{file_id}")
   end
 
   def status_url
     geo_api_url('status')
+  end
+
+  def node_api_url(node)
+    api_url("geo_nodes/#{node.id}")
   end
 
   def snapshot_url(repository)
@@ -213,27 +232,52 @@ class GeoNode < ApplicationRecord
     # be called in an initializer and we don't want other callbacks
     # to mess with uninitialized dependencies.
     if clone_url_prefix_changed?
-      Rails.logger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}" # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}"
       update_column(:clone_url_prefix, clone_url_prefix)
     end
   end
 
-  def job_artifacts
-    Ci::JobArtifact.all unless selective_sync?
-
-    Ci::JobArtifact.project_id_in(projects)
-  end
-
   def container_repositories
+    return ContainerRepository.none unless Geo::ContainerRepositoryRegistry.replication_enabled?
     return ContainerRepository.all unless selective_sync?
 
     ContainerRepository.project_id_in(projects)
   end
 
+  def container_repositories_include?(container_repository_id)
+    return false unless Geo::ContainerRepositoryRegistry.replication_enabled?
+    return true unless selective_sync?
+
+    container_repositories.where(id: container_repository_id).exists?
+  end
+
+  def designs
+    projects.with_designs
+  end
+
+  def designs_include?(project_id)
+    return true unless selective_sync?
+
+    designs.where(id: project_id).exists?
+  end
+
   def lfs_objects
     return LfsObject.all unless selective_sync?
 
-    LfsObject.project_id_in(projects)
+    query = LfsObjectsProject.project_id_in(projects).select(:lfs_object_id).distinct
+    cte = Gitlab::SQL::CTE.new(:restricted_lfs_objects, query)
+    lfs_object_table = LfsObject.arel_table
+
+    inner_join_restricted_lfs_objects =
+      cte.table
+        .join(lfs_object_table, Arel::Nodes::InnerJoin)
+        .on(cte.table[:lfs_object_id].eq(lfs_object_table[:id]))
+        .join_sources
+
+    LfsObject
+      .with(cte.to_arel)
+      .from(cte.table)
+      .joins(inner_join_restricted_lfs_objects)
   end
 
   def projects
@@ -255,19 +299,19 @@ class GeoNode < ApplicationRecord
   end
 
   def replication_slots_count
-    return unless Gitlab::Database.replication_slots_supported? && primary?
+    return unless primary?
 
     PgReplicationSlot.count
   end
 
   def replication_slots_used_count
-    return unless Gitlab::Database.replication_slots_supported? && primary?
+    return unless primary?
 
     PgReplicationSlot.used_slots_count
   end
 
   def replication_slots_max_retained_wal_bytes
-    return unless Gitlab::Database.replication_slots_supported? && primary?
+    return unless primary?
 
     PgReplicationSlot.max_retained_wal
   end
@@ -305,7 +349,9 @@ class GeoNode < ApplicationRecord
 
   def update_dependents_attributes
     if self.primary?
+      self.oauth_application&.destroy
       self.oauth_application = nil
+
       update_clone_url
     else
       update_oauth_application!
@@ -315,14 +361,14 @@ class GeoNode < ApplicationRecord
   # Prevent locking yourself out
   def require_current_node_to_be_primary
     if name == self.class.current_node_name
-      errors.add(:base, 'Current node must be the primary node or you will be locking yourself out')
+      errors.add(:base, _('Current node must be the primary node or you will be locking yourself out'))
     end
   end
 
   # Prevent creating a Geo Node unless Hashed Storage is enabled
   def require_hashed_storage
     unless Gitlab::CurrentSettings.hashed_storage_enabled?
-      errors.add(:base, 'Hashed Storage must be enabled to use Geo')
+      errors.add(:base, _('Hashed Storage must be enabled to use Geo'))
     end
   end
 
@@ -375,13 +421,5 @@ class GeoNode < ApplicationRecord
 
   def projects_for_selected_shards
     Project.within_shards(selective_sync_shards)
-  end
-
-  def project_model
-    Project
-  end
-
-  def uploads_model
-    Upload
   end
 end

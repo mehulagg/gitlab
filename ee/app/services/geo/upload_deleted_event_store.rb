@@ -24,19 +24,17 @@ module Geo
       )
     end
 
-    # This is called by ProjectLogHelpers to build json log with context info
+    # This is called by LogHelpers to build json log with context info
     #
-    # @see ::Gitlab::Geo::ProjectLogHelpers
-    def base_log_data(message)
+    # @see ::Gitlab::Geo::LogHelpers
+    def extra_log_data
       {
-        class: self.class.name,
         upload_id: upload.id,
         file_path: upload.path,
         model_id: upload.model_id,
         model_type: upload.model_type,
-        uploader: upload.uploader,
-        message: message
-      }
+        uploader: upload.uploader
+      }.compact
     end
   end
 end

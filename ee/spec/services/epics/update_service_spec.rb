@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Epics::UpdateService do
+RSpec.describe Epics::UpdateService do
   let(:group) { create(:group, :internal) }
   let(:user) { create(:user) }
   let(:epic) { create(:epic, group: group) }
@@ -10,7 +10,7 @@ describe Epics::UpdateService do
   describe '#execute' do
     before do
       stub_licensed_features(epics: true)
-      group.add_master(user)
+      group.add_maintainer(user)
     end
 
     def find_note(starting_with)
@@ -39,7 +39,8 @@ describe Epics::UpdateService do
           start_date_is_fixed: true,
           due_date_fixed: '2017-10-21',
           due_date_is_fixed: true,
-          state_event: 'close'
+          state_event: 'close',
+          confidential: true
         }
       end
 
@@ -50,7 +51,8 @@ describe Epics::UpdateService do
         expect(epic).to have_attributes(opts.except(:due_date_fixed, :start_date_fixed))
         expect(epic).to have_attributes(
           start_date_fixed: Date.strptime(opts[:start_date_fixed]),
-          due_date_fixed: Date.strptime(opts[:due_date_fixed])
+          due_date_fixed: Date.strptime(opts[:due_date_fixed]),
+          confidential: true
         )
         expect(epic).to be_closed
       end
@@ -79,6 +81,49 @@ describe Epics::UpdateService do
 
         expect(note.note).to start_with('changed the description')
         expect(note.noteable).to eq(epic)
+      end
+    end
+
+    context 'after_save callback to store_mentions' do
+      let(:user2) { create(:user) }
+      let(:epic) { create(:epic, group: group, description: "simple description") }
+      let(:labels) { create_pair(:group_label, group: group) }
+
+      context 'when mentionable attributes change' do
+        let(:opts) { { description: "Description with #{user.to_reference}" } }
+
+        it 'saves mentions' do
+          expect(epic).to receive(:store_mentions!).and_call_original
+
+          expect { update_epic(opts) }.to change { EpicUserMention.count }.by(1)
+
+          expect(epic.referenced_users).to match_array([user])
+        end
+      end
+
+      context 'when mentionable attributes do not change' do
+        let(:opts) { { label_ids: labels.map(&:id) } }
+
+        it 'does not call store_mentions!' do
+          expect(epic).not_to receive(:store_mentions!).and_call_original
+
+          expect { update_epic(opts) }.not_to change { EpicUserMention.count }
+
+          expect(epic.referenced_users).to be_empty
+        end
+      end
+
+      context 'when save fails' do
+        let(:opts) { { title: '', label_ids: labels.map(&:id) } }
+
+        it 'does not call store_mentions!' do
+          expect(epic).not_to receive(:store_mentions!).and_call_original
+
+          expect { update_epic(opts) }.not_to change { EpicUserMention.count }
+
+          expect(epic.referenced_users).to be_empty
+          expect(epic.valid?).to be false
+        end
       end
     end
 
@@ -113,6 +158,7 @@ describe Epics::UpdateService do
             author: user,
             user: user)
         end
+
         let!(:todo2) do
           create(:todo, :mentioned, :pending,
             target: epic,
@@ -253,6 +299,16 @@ describe Epics::UpdateService do
     it_behaves_like 'existing issuable with scoped labels' do
       let(:issuable) { epic }
       let(:parent) { group }
+    end
+
+    context 'with quick actions in the description' do
+      let(:label) { create(:group_label, group: group) }
+
+      it 'adds labels to the epic' do
+        update_epic(description: "/label ~#{label.name}")
+
+        expect(epic.label_ids).to contain_exactly(label.id)
+      end
     end
   end
 end

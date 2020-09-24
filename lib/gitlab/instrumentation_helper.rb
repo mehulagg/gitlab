@@ -4,22 +4,56 @@ module Gitlab
   module InstrumentationHelper
     extend self
 
-    KEYS = %i(gitaly_calls gitaly_duration rugged_calls rugged_duration_ms).freeze
+    DURATION_PRECISION = 6 # microseconds
+
+    def keys
+      @keys ||= [:gitaly_calls,
+                 :gitaly_duration_s,
+                 :rugged_calls,
+                 :rugged_duration_s,
+                 :elasticsearch_calls,
+                 :elasticsearch_duration_s,
+                 *::Gitlab::Instrumentation::Redis.known_payload_keys]
+    end
 
     def add_instrumentation_data(payload)
+      instrument_gitaly(payload)
+      instrument_rugged(payload)
+      instrument_redis(payload)
+      instrument_elasticsearch(payload)
+    end
+
+    def instrument_gitaly(payload)
       gitaly_calls = Gitlab::GitalyClient.get_request_count
 
-      if gitaly_calls > 0
-        payload[:gitaly_calls] = gitaly_calls
-        payload[:gitaly_duration] = Gitlab::GitalyClient.query_time_ms
-      end
+      return if gitaly_calls == 0
 
+      payload[:gitaly_calls] = gitaly_calls
+      payload[:gitaly_duration_s] = Gitlab::GitalyClient.query_time
+    end
+
+    def instrument_rugged(payload)
       rugged_calls = Gitlab::RuggedInstrumentation.query_count
 
-      if rugged_calls > 0
-        payload[:rugged_calls] = rugged_calls
-        payload[:rugged_duration_ms] = Gitlab::RuggedInstrumentation.query_time_ms
-      end
+      return if rugged_calls == 0
+
+      payload[:rugged_calls] = rugged_calls
+      payload[:rugged_duration_s] = Gitlab::RuggedInstrumentation.query_time
+    end
+
+    def instrument_redis(payload)
+      payload.merge! ::Gitlab::Instrumentation::Redis.payload
+    end
+
+    def instrument_elasticsearch(payload)
+      # Elasticsearch integration is only available in EE but instrumentation
+      # only depends on the Gem which is also available in FOSS.
+      elasticsearch_calls = Gitlab::Instrumentation::ElasticsearchTransport.get_request_count
+
+      return if elasticsearch_calls == 0
+
+      payload[:elasticsearch_calls] = elasticsearch_calls
+      payload[:elasticsearch_duration_s] = Gitlab::Instrumentation::ElasticsearchTransport.query_time
     end
 
     # Returns the queuing duration for a Sidekiq job in seconds, as a float, if the
@@ -40,7 +74,7 @@ module Gitlab
       # Its possible that if theres clock-skew between two nodes
       # this value may be less than zero. In that event, we record the value
       # as zero.
-      [elapsed_by_absolute_time(enqueued_at_time), 0].max
+      [elapsed_by_absolute_time(enqueued_at_time), 0].max.round(DURATION_PRECISION)
     end
 
     # Calculates the time in seconds, as a float, from

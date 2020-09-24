@@ -1,8 +1,7 @@
 import Vue from 'vue';
 
-import dropdownSearchInputComponent from '~/vue_shared/components/sidebar/labels_select/dropdown_search_input.vue';
-
 import mountComponent from 'helpers/vue_mount_component_helper';
+import dropdownSearchInputComponent from '~/vue_shared/components/sidebar/labels_select/dropdown_search_input.vue';
 
 const createComponent = () => {
   const Component = Vue.extend(dropdownSearchInputComponent);
@@ -30,13 +29,11 @@ describe('DropdownSearchInputComponent', () => {
     });
 
     it('renders search icon element', () => {
-      expect(vm.$el.querySelector('.fa-search.dropdown-input-search')).not.toBeNull();
+      expect(vm.$el.querySelector('.dropdown-input-search')).not.toBeNull();
     });
 
     it('renders clear search icon element', () => {
-      expect(
-        vm.$el.querySelector('.fa-times.dropdown-input-clear.js-dropdown-input-clear'),
-      ).not.toBeNull();
+      expect(vm.$el.querySelector('.dropdown-input-clear.js-dropdown-input-clear')).not.toBeNull();
     });
   });
 });

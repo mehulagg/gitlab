@@ -5,8 +5,12 @@ module QA
     module Page
       module Dashboard
         module Projects
-          def self.prepended(page)
-            page.module_eval do
+          extend QA::Page::PageConcern
+
+          def self.prepended(base)
+            super
+
+            base.class_eval do
               view 'app/views/shared/projects/_list.html.haml' do
                 element :projects_list
               end
@@ -14,7 +18,8 @@ module QA
           end
 
           def wait_for_project_replication(project_name)
-            wait(max: Runtime::Geo.max_db_replication_time) do
+            QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_project_replication])
+            wait_until(max_duration: Runtime::Geo.max_db_replication_time) do
               filter_by_name(project_name)
 
               within_element(:projects_list) do
@@ -30,7 +35,7 @@ module QA
           def project_created?(project_name)
             fill_element(:project_filter_form, project_name)
 
-            wait(max: Runtime::Geo.max_db_replication_time) do
+            wait_until(max_duration: Runtime::Geo.max_db_replication_time) do
               within_element(:projects_list) do
                 has_text?(project_name)
               end
@@ -40,7 +45,7 @@ module QA
           def project_deleted?(project_name)
             fill_element(:project_filter_form, project_name)
 
-            wait(max: Runtime::Geo.max_db_replication_time) do
+            wait_until(max_duration: Runtime::Geo.max_db_replication_time) do
               within_element(:projects_list) do
                 has_no_text?(project_name)
               end

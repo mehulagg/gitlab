@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import $ from 'jquery';
 import Pikaday from 'pikaday';
 import dateFormat from 'dateformat';
@@ -5,6 +6,7 @@ import { __ } from '~/locale';
 import axios from './lib/utils/axios_utils';
 import { timeFor, parsePikadayDate, pikadayToString } from './lib/utils/datetime_utility';
 import boardsStore from './boards/stores/boards_store';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 class DueDateSelect {
   constructor({ $dropdown, $loading } = {}) {
@@ -34,7 +36,7 @@ class DueDateSelect {
   }
 
   initGlDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       opened: () => {
         const calendar = this.$datePicker.data('pikaday');
         calendar.show();
@@ -43,6 +45,7 @@ class DueDateSelect {
         this.$selectbox.hide();
         this.$value.css('display', '');
       },
+      shouldPropagate: false,
     });
   }
 
@@ -116,11 +119,13 @@ class DueDateSelect {
   }
 
   updateIssueBoardIssue() {
+    // eslint-disable-next-line no-jquery/no-fade
     this.$loading.fadeIn();
     this.$dropdown.trigger('loading.gl.dropdown');
     this.$selectbox.hide();
     this.$value.css('display', '');
     const fadeOutLoader = () => {
+      // eslint-disable-next-line no-jquery/no-fade
       this.$loading.fadeOut();
     };
 
@@ -135,6 +140,7 @@ class DueDateSelect {
     const hasDueDate = this.displayedDate !== __('None');
     const displayedDateStyle = hasDueDate ? 'bold' : 'no-value';
 
+    // eslint-disable-next-line no-jquery/no-fade
     this.$loading.removeClass('hidden').fadeIn();
 
     if (isDropdown) {
@@ -158,6 +164,7 @@ class DueDateSelect {
       }
       this.$sidebarCollapsedValue.attr('data-original-title', tooltipText);
 
+      // eslint-disable-next-line no-jquery/no-fade
       return this.$loading.fadeOut();
     });
   }

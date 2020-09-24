@@ -9,6 +9,11 @@ class Admin::ProjectsController < Admin::ApplicationController
   def index
     params[:sort] ||= 'latest_activity_desc'
     @sort = params[:sort]
+
+    if params[:last_repository_check_failed].present? && params[:archived].nil?
+      params[:archived] = true
+    end
+
     @projects = Admin::ProjectsFinder.new(params: params, current_user: current_user).execute
 
     respond_to do |format|
@@ -41,7 +46,7 @@ class Admin::ProjectsController < Admin::ApplicationController
 
     redirect_to admin_projects_path, status: :found
   rescue Projects::DestroyService::DestroyError => ex
-    redirect_to admin_projects_path, status: 302, alert: ex.message
+    redirect_to admin_projects_path, status: :found, alert: ex.message
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -55,7 +60,7 @@ class Admin::ProjectsController < Admin::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def repository_check
-    RepositoryCheck::SingleRepositoryWorker.perform_async(@project.id)
+    RepositoryCheck::SingleRepositoryWorker.perform_async(@project.id) # rubocop:disable CodeReuse/Worker
 
     redirect_to(
       admin_project_path(@project),

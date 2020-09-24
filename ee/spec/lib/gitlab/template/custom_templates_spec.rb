@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe "Custom file template classes" do
+RSpec.describe "Custom file template classes" do
   files = {
     'Dockerfile/foo.dockerfile' => 'CustomDockerfileTemplate Foo',
     'Dockerfile/bar.dockerfile' => 'CustomDockerfileTemplate Bar',
@@ -20,6 +20,10 @@ describe "Custom file template classes" do
     'LICENSE/bar.txt' => 'CustomLicenseTemplate Bar',
     'LICENSE/bad.xyz' => 'CustomLicenseTemplate Bad',
 
+    'metrics-dashboards/foo.yml' => 'CustomMetricsDashboardYmlTemplate Foo',
+    'metrics-dashboards/bar.yml' => 'CustomMetricsDashboardYmlTemplate Bar',
+    'metrics-dashboards/bad.xyz' => 'CustomMetricsDashboardYmlTemplate Bad',
+
     'Dockerfile/category/baz.txt' => 'CustomDockerfileTemplate category baz',
     'gitignore/category/baz.txt'  => 'CustomGitignoreTemplate category baz',
     'gitlab-ci/category/baz.yml'  => 'CustomGitlabCiYmlTemplate category baz',
@@ -32,7 +36,8 @@ describe "Custom file template classes" do
     ::Gitlab::Template::CustomDockerfileTemplate,
     ::Gitlab::Template::CustomGitignoreTemplate,
     ::Gitlab::Template::CustomGitlabCiYmlTemplate,
-    ::Gitlab::Template::CustomLicenseTemplate
+    ::Gitlab::Template::CustomLicenseTemplate,
+    ::Gitlab::Template::CustomMetricsDashboardYmlTemplate
   ].each do |template_class|
     describe template_class do
       let(:name) { template_class.name.demodulize }

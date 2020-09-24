@@ -1,8 +1,8 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import tooltip from '~/vue_shared/directives/tooltip';
 import statusIcon from '../mr_widget_status_icon.vue';
-import mrWidgetMergeHelp from '../../components/mr_widget_merge_help.vue';
 
 export default {
   name: 'MRWidgetMissingBranch',
@@ -10,7 +10,7 @@ export default {
     tooltip,
   },
   components: {
-    mrWidgetMergeHelp,
+    GlIcon,
     statusIcon,
   },
   props: {
@@ -52,7 +52,7 @@ export default {
       <span class="bold js-branch-text">
         <span class="capitalize"> {{ missingBranchName }} </span>
         {{ s__('mrWidget|branch does not exist.') }} {{ missingBranchNameMessage }}
-        <i v-tooltip :title="message" :aria-label="message" class="fa fa-question-circle"> </i>
+        <gl-icon v-tooltip :title="message" :aria-label="message" name="question-o" />
       </span>
     </div>
   </div>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller do
+RSpec.describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:admin) { create(:admin, feed_token: 'feedtoken:coldfeed') }
@@ -21,6 +21,15 @@ describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller 
 
   after do
     remove_repository(project)
+  end
+
+  it 'issues/new-issue.html' do
+    get :new, params: {
+      namespace_id: project.namespace.to_param,
+      project_id: project
+    }
+
+    expect(response).to be_successful
   end
 
   it 'issues/open-issue.html' do
@@ -66,7 +75,7 @@ describe Projects::IssuesController, '(JavaScript fixtures)', type: :controller 
   end
 end
 
-describe API::Issues, '(JavaScript fixtures)', type: :request do
+RSpec.describe API::Issues, '(JavaScript fixtures)', type: :request do
   include ApiHelpers
   include JavaScriptFixturesHelpers
 

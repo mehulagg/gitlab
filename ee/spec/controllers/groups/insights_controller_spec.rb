@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Groups::InsightsController do
-  set(:parent_group) { create(:group, :private) }
-  set(:nested_group) { create(:group, :private, parent: parent_group) }
-  set(:project) { create(:project, :private) }
-  set(:insight) { create(:insight, group: parent_group, project: project) }
-  set(:user) { create(:user) }
+RSpec.describe Groups::InsightsController do
+  let_it_be(:parent_group) { create(:group, :private) }
+  let_it_be(:nested_group) { create(:group, :private, parent: parent_group) }
+  let_it_be(:project) { create(:project, :private) }
+  let_it_be(:insight) { create(:insight, group: parent_group, project: project) }
+  let_it_be(:user) { create(:user) }
   let(:query_params) { { type: 'bar', query: { issuable_type: 'issue', collection_labels: ['bug'] }, projects: projects_params } }
   let(:projects_params) { { only: [project.id, project.full_path] } }
   let(:params) { { trailing_slash: true } }
@@ -23,7 +23,7 @@ describe Groups::InsightsController do
     it 'returns 404 status' do
       subject
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -31,7 +31,7 @@ describe Groups::InsightsController do
     it 'returns 200 status' do
       subject
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 
@@ -79,7 +79,7 @@ describe Groups::InsightsController do
         it 'does return the default config' do
           subject
 
-          expect(response.parsed_body).to eq(parent_group.default_insights_config.to_json)
+          expect(response.parsed_body).to eq(parent_group.default_insights_config.as_json)
         end
       end
 
@@ -106,7 +106,7 @@ describe Groups::InsightsController do
         it_behaves_like '200 status'
       end
 
-      describe 'GET #show.sjon' do
+      describe 'GET #show.json' do
         subject { get :show, params: params.merge(group_id: parent_group.to_param), format: :json }
 
         it_behaves_like '200 status'
@@ -116,6 +116,13 @@ describe Groups::InsightsController do
         subject { post :query, params: params.merge(query_params.merge(group_id: parent_group.to_param)), format: :json }
 
         it_behaves_like '200 status'
+      end
+
+      describe 'GET #show' do
+        it_behaves_like 'tracking unique visits', :show do
+          let(:request_params) { params.merge(group_id: parent_group.to_param) }
+          let(:target_id) { 'g_analytics_insights' }
+        end
       end
     end
 
@@ -136,6 +143,48 @@ describe Groups::InsightsController do
         subject { post :query, params: params.merge(query_params.merge(group_id: nested_group.to_param)), format: :json }
 
         it_behaves_like '200 status'
+      end
+    end
+
+    describe 'GET #embedded' do
+      subject { get :embedded, params: params.merge(group_id: parent_group.to_param) }
+
+      shared_examples 'has iframe options set' do
+        it 'sets SAMEORIGIN frame option' do
+          subject
+
+          expect(response.headers['X-Frame-Options']).to eq 'SAMEORIGIN'
+        end
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(embed_analytics_report: false)
+        end
+
+        it_behaves_like '404 status'
+        include_examples 'has iframe options set'
+      end
+
+      context 'when project is public' do
+        let_it_be(:parent_group) { create(:group, :public) }
+        let_it_be(:project) { create(:project, :public) }
+
+        it_behaves_like '200 status'
+        include_examples 'has iframe options set'
+      end
+
+      context 'when project is internal' do
+        let_it_be(:parent_group) { create(:group, :internal) }
+        let_it_be(:project) { create(:project, :internal) }
+
+        it_behaves_like '404 status'
+        include_examples 'has iframe options set'
+      end
+
+      context 'when project is private' do
+        it_behaves_like '404 status'
+        include_examples 'has iframe options set'
       end
     end
   end

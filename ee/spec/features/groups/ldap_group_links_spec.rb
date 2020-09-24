@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Edit group settings', :js do
+RSpec.describe 'Edit group settings', :js do
   include Select2Helper
 
   let(:user) { create(:user) }

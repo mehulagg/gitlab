@@ -15,8 +15,8 @@ module EE
 
     prepended do
       def stub_licensed_features(features)
-        existing_features = License::FEATURES_BY_PLAN.values.flatten.map(&:to_sym)
-        missing_features = features.keys.map(&:to_sym) - existing_features
+        # EEU_FEATURES contains all the features we know about
+        missing_features = features.keys.map(&:to_sym) - License::EEU_FEATURES
 
         if missing_features.any?
           subject = missing_features.join(', ')
@@ -34,6 +34,13 @@ module EE
       def enable_namespace_license_check!
         stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
         ::Gitlab::CurrentSettings.update!(check_namespace_plan: true)
+      end
+
+      def create_current_license(options = {})
+        License.current.destroy!
+
+        gl_license = create(:gitlab_license, options)
+        create(:license, data: gl_license.export)
       end
     end
   end

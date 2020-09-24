@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: howto
 ---
 
@@ -31,7 +34,14 @@ To create a new blank project on the **New project** page:
 1. On the **Blank project** tab, provide the following information:
    - The name of your project in the **Project name** field. You can't use
      special characters, but you can use spaces, hyphens, underscores or even
-     emoji.
+     emoji. When adding the name, the **Project slug** will auto populate.
+     The slug is what the GitLab instance will use as the URL path to the project.
+     If you want a different slug, input the project name first,
+     then change the slug after.
+   - The path to your project in the **Project slug** field. This is the URL
+     path for your project that the GitLab instance will use. If the
+     **Project name** is blank, it will auto populate when you fill in
+     the **Project slug**.
    - The **Project description (optional)** field enables you to enter a
      description for your project's dashboard, which will help others
      understand what your project is about. Though it's not required, it's a good
@@ -53,7 +63,7 @@ There are two types of project templates:
 - [Built-in templates](#built-in-templates), sourced from the following groups:
   - [`project-templates`](https://gitlab.com/gitlab-org/project-templates)
   - [`pages`](https://gitlab.com/pages)
-- [Custom project templates](#custom-project-templates-premium), for custom templates
+- [Custom project templates](#custom-project-templates), for custom templates
   configured by GitLab administrators and users.
 
 #### Built-in templates
@@ -73,15 +83,30 @@ To use a built-in template on the **New project** page:
 1. Finish creating the project by filling out the project's details. The process is
    the same as creating a [blank project](#blank-projects).
 
+##### Enterprise templates **(ULTIMATE)**
+
+GitLab is developing Enterprise templates to help you streamline audit management with selected regulatory standards. These templates automatically import issues that correspond to each regulatory requirement.
+
+To create a new project with an Enterprise template, on the **New project** page:
+
+1. On the **Create from template** tab, select the **Built-in** tab.
+1. From the list of available built-in Enterprise templates, click the:
+   - **Preview** button to look at the template source itself.
+   - **Use template** button to start creating the project.
+1. Finish creating the project by filling out the project's details. The process is the same as creating a [blank project](#blank-projects).
+
+Available Enterprise templates include:
+
+- HIPAA Audit Protocol template ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13756) in GitLab 12.10)
+
 TIP: **Tip:**
 You can improve the existing built-in templates or contribute new ones in the
 [`project-templates`](https://gitlab.com/gitlab-org/project-templates) and
-[`pages`](https://gitlab.com/pages) groups.
+[`pages`](https://gitlab.com/pages) groups by following [these steps](https://gitlab.com/gitlab-org/project-templates/contributing).
 
 #### Custom project templates **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/6860) in
-[GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6860) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
 
 Creating new projects based on custom project templates is a convenient option for
 quickly starting projects.
@@ -101,7 +126,7 @@ To use a custom project template on the **New project** page:
 
 ## Push to create a new project
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/26388) in GitLab 10.5.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26388) in GitLab 10.5.
 
 When you create a new repository locally, instead of going to GitLab to manually
 create a new project and then [clone the repo](start-using-git.md#clone-a-repository)
@@ -112,7 +137,7 @@ set to Private by default (you can later change it in the [project's settings](.
 
 This can be done by using either SSH or HTTPS:
 
-```sh
+```shell
 ## Git push using SSH
 git push --set-upstream git@gitlab.example.com:namespace/nonexistent-project.git master
 
@@ -123,7 +148,7 @@ git push --set-upstream https://gitlab.example.com/namespace/nonexistent-project
 Once the push finishes successfully, a remote message will indicate
 the command to set the remote and the URL to the new project:
 
-```text
+```plaintext
 remote:
 remote: The private project namespace/nonexistent-project was created.
 remote:

@@ -1,3 +1,10 @@
+---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference
+---
+
 # Environment Variables
 
 GitLab exposes certain environment variables which can be used to override
@@ -25,7 +32,8 @@ Variable | Type | Description
 `GITLAB_EMAIL_SUBJECT_SUFFIX`              | string  | The e-mail subject suffix used in e-mails sent by GitLab
 `GITLAB_UNICORN_MEMORY_MIN`                | integer | The minimum memory threshold (in bytes) for the Unicorn worker killer
 `GITLAB_UNICORN_MEMORY_MAX`                | integer | The maximum memory threshold (in bytes) for the Unicorn worker killer
-`GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN` | string  | Sets the initial registration token used for GitLab Runners
+`GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN` | string  | Sets the initial registration token used for runners
+`UNSTRUCTURED_RAILS_LOG`                   | string  | Enables the unstructured log in addition to JSON logs (defaults to `true`)
 
 ## Complete database variables
 
@@ -63,6 +71,7 @@ to the naming scheme `GITLAB_#{name in 1_settings.rb in upper case}`.
 To set environment variables, follow [these
 instructions](https://docs.gitlab.com/omnibus/settings/environment-variables.html).
 
-It's possible to preconfigure the GitLab docker image by adding the environment
+It's possible to preconfigure the GitLab Docker image by adding the environment
 variable `GITLAB_OMNIBUS_CONFIG` to the `docker run` command.
-For more information see the ['preconfigure-docker-container' section in the Omnibus documentation](https://docs.gitlab.com/omnibus/docker/#preconfigure-docker-container).
+For more information see the [Pre-configure Docker container](https://docs.gitlab.com/omnibus/docker/#pre-configure-docker-container)
+section in the Omnibus documentation.

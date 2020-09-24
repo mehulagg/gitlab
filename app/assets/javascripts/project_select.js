@@ -1,4 +1,4 @@
-/* eslint-disable func-names, no-var, one-var, no-else-return */
+/* eslint-disable func-names */
 
 import $ from 'jquery';
 import Api from './api';
@@ -7,7 +7,7 @@ import { s__ } from './locale';
 
 const projectSelect = () => {
   $('.ajax-project-select').each(function(i, select) {
-    var placeholder;
+    let placeholder;
     const simpleFilter = $(select).data('simpleFilter') || false;
     const isInstantiated = $(select).data('select2');
     this.groupId = $(select).data('groupId');
@@ -31,20 +31,17 @@ const projectSelect = () => {
       placeholder,
       minimumInputLength: 0,
       query: query => {
-        var finalCallback, projectsCallback;
-        finalCallback = function(projects) {
-          var data;
-          data = {
+        let projectsCallback;
+        const finalCallback = function(projects) {
+          const data = {
             results: projects,
           };
           return query.callback(data);
         };
         if (this.includeGroups) {
           projectsCallback = function(projects) {
-            var groupsCallback;
-            groupsCallback = function(groups) {
-              var data;
-              data = groups.concat(projects);
+            const groupsCallback = function(groups) {
+              const data = groups.concat(projects);
               return finalCallback(data);
             };
             return Api.groups(query.term, {}, groupsCallback);
@@ -61,6 +58,7 @@ const projectSelect = () => {
               with_merge_requests_enabled: this.withMergeRequestsEnabled,
               with_shared: this.withShared,
               include_subgroups: this.includeProjectsInSubgroups,
+              order_by: 'similarity',
             },
             projectsCallback,
           );
@@ -76,18 +74,17 @@ const projectSelect = () => {
             },
             projectsCallback,
           );
-        } else {
-          return Api.projects(
-            query.term,
-            {
-              order_by: this.orderBy,
-              with_issues_enabled: this.withIssuesEnabled,
-              with_merge_requests_enabled: this.withMergeRequestsEnabled,
-              membership: !this.allProjects,
-            },
-            projectsCallback,
-          );
         }
+        return Api.projects(
+          query.term,
+          {
+            order_by: this.orderBy,
+            with_issues_enabled: this.withIssuesEnabled,
+            with_merge_requests_enabled: this.withMergeRequestsEnabled,
+            membership: !this.allProjects,
+          },
+          projectsCallback,
+        );
       },
       id(project) {
         if (simpleFilter) return project.id;
@@ -113,7 +110,10 @@ const projectSelect = () => {
   });
 };
 
-export default () =>
-  import(/* webpackChunkName: 'select2' */ 'select2/select2')
-    .then(projectSelect)
-    .catch(() => {});
+export default () => {
+  if ($('.ajax-project-select').length) {
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(projectSelect)
+      .catch(() => {});
+  }
+};

@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryUpdatedEventStore do
+RSpec.describe Geo::RepositoryUpdatedEventStore do
   include EE::GeoHelpers
 
-  set(:project) { create(:project, :repository) }
-  set(:secondary_node) { create(:geo_node) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:secondary_node) { create(:geo_node) }
 
   let(:blankrev) { Gitlab::Git::BLANK_SHA }
   let(:refs)     { ['refs/heads/tést', 'refs/tags/tag'] }

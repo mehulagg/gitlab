@@ -6,5 +6,3 @@ export const groupedSastText = state =>
 
 export const sastStatusIcon = ({ isLoading, hasError, newIssues }) =>
   statusIcon(isLoading, hasError, newIssues.length);
-
-export default () => {};

@@ -16,11 +16,11 @@ module Projects
     private
 
     def move_lfs_objects_projects
-      non_existent_lfs_objects_projects.update_all(project_id: @project.lfs_storage_project.id)
+      non_existent_lfs_objects_projects.update_all(project_id: @project.id)
     end
 
     def remove_remaining_lfs_objects_project
-      source_project.lfs_objects_projects.destroy_all # rubocop: disable DestroyAll
+      source_project.lfs_objects_projects.destroy_all # rubocop: disable Cop/DestroyAll
     end
 
     # rubocop: disable CodeReuse/ActiveRecord

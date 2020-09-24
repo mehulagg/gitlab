@@ -2,17 +2,18 @@
 
 require 'spec_helper'
 
-describe 'User sorts merge requests' do
+RSpec.describe 'User sorts merge requests' do
   include CookieHelper
 
   let!(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
   let!(:merge_request2) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
-  set(:user) { create(:user) }
-  set(:group) { create(:group) }
-  set(:group_member) { create(:group_member, :maintainer, user: user, group: group) }
-  set(:project) { create(:project, :public, group: group) }
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:group_member) { create(:group_member, :maintainer, user: user, group: group) }
+  let_it_be(:project) { create(:project, :public, group: group) }
 
   before do
     sign_in(user)

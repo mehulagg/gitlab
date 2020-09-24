@@ -6,18 +6,19 @@ module Gitlab
       module Test
         class Junit
           JunitParserError = Class.new(Gitlab::Ci::Parsers::ParserError)
+          ATTACHMENT_TAG_REGEX = /\[\[ATTACHMENT\|(?<path>.+?)\]\]/.freeze
 
-          def parse!(xml_data, test_suite)
+          def parse!(xml_data, test_suite, **args)
             root = Hash.from_xml(xml_data)
 
             all_cases(root) do |test_case|
-              test_case = create_test_case(test_case)
+              test_case = create_test_case(test_case, args)
               test_suite.add_test_case(test_case)
             end
-          rescue Nokogiri::XML::SyntaxError
-            raise JunitParserError, "XML parsing failed"
-          rescue
-            raise JunitParserError, "JUnit parsing failed"
+          rescue Nokogiri::XML::SyntaxError => e
+            test_suite.set_suite_error("JUnit XML parsing failed: #{e}")
+          rescue StandardError => e
+            test_suite.set_suite_error("JUnit data parsing failed: #{e}")
           end
 
           private
@@ -45,16 +46,17 @@ module Gitlab
             [testcase].flatten.compact.map(&blk)
           end
 
-          def create_test_case(data)
-            if data['failure']
+          def create_test_case(data, args)
+            if data.key?('failure')
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_FAILED
               system_output = data['failure']
-            elsif data['error']
-              # For now, as an MVC, we are grouping error test cases together
-              # with failed ones. But we will improve this further on
-              # https://gitlab.com/gitlab-org/gitlab/issues/32046.
-              status = ::Gitlab::Ci::Reports::TestCase::STATUS_FAILED
+              attachment = attachment_path(data['system_out'])
+            elsif data.key?('error')
+              status = ::Gitlab::Ci::Reports::TestCase::STATUS_ERROR
               system_output = data['error']
+            elsif data.key?('skipped')
+              status = ::Gitlab::Ci::Reports::TestCase::STATUS_SKIPPED
+              system_output = data['skipped']
             else
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_SUCCESS
               system_output = nil
@@ -66,8 +68,17 @@ module Gitlab
               file: data['file'],
               execution_time: data['time'],
               status: status,
-              system_output: system_output
+              system_output: system_output,
+              attachment: attachment,
+              job: args.fetch(:job)
             )
+          end
+
+          def attachment_path(data)
+            return unless data
+
+            matches = data.match(ATTACHMENT_TAG_REGEX)
+            matches[:path] if matches
           end
         end
       end

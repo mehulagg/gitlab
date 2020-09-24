@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::IdentifierEntity do
+RSpec.describe Vulnerabilities::IdentifierEntity do
   let(:identifier) { create(:vulnerabilities_identifier) }
 
   let(:entity) do

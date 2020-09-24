@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Auth::GroupSamlIdentityFinder do
+RSpec.describe Auth::GroupSamlIdentityFinder do
   let(:uid) { 1234 }
   let!(:identity) { create(:group_saml_identity, extern_uid: uid) }
   let(:saml_provider) { identity.saml_provider }

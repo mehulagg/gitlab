@@ -6,7 +6,7 @@
         %button.close{ type: 'button', data: { dismiss: 'modal' }, aria: { label: 'Close' } }
           %span &times;
         .modal-body-contents
-          .trial-activated-graphic.prepend-top-15
+          .trial-activated-graphic.gl-mt-5
             = custom_icon('ee_trial_license_activated', size: 100)
           %h3.confirmation-title
             Your trial license was issued!
@@ -21,7 +21,7 @@
             %a#show-license.show-license{ href: '#show-license' }
               Hide license key
               = icon('chevron-up')
-            .card.trial-license-preview.prepend-top-15
+            .card.trial-license-preview.gl-mt-5
               = license_key
             .modal-footer.form-actions
               %button.btn.btn-default{ type: 'button', data: { dismiss: 'modal' } } Cancel

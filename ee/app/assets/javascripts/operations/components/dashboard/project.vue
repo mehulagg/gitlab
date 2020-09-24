@@ -1,16 +1,15 @@
 <script>
+/* eslint-disable vue/no-v-html */
+import { isEmpty } from 'lodash';
 import { mapActions } from 'vuex';
-import _ from 'underscore';
-import { GlTooltip } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
-import timeagoMixin from '~/vue_shared/mixins/timeago';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import Commit from '~/vue_shared/components/commit.vue';
 import Alerts from 'ee/vue_shared/dashboards/components/alerts.vue';
 import TimeAgo from 'ee/vue_shared/dashboards/components/time_ago.vue';
 import ProjectPipeline from 'ee/vue_shared/dashboards/components/project_pipeline.vue';
 import { STATUS_FAILED, STATUS_RUNNING } from 'ee/vue_shared/dashboards/constants';
+import { __, sprintf } from '~/locale';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
+import Commit from '~/vue_shared/components/commit.vue';
 import ProjectHeader from './project_header.vue';
 
 export default {
@@ -21,8 +20,6 @@ export default {
     Alerts,
     ProjectPipeline,
     TimeAgo,
-    GlTooltip,
-    Icon,
   },
   mixins: [timeagoMixin],
   props: {
@@ -80,15 +77,13 @@ export default {
       return __('The branch for this project has no active pipeline configuration.');
     },
     user() {
-      return this.lastPipeline && !_.isEmpty(this.lastPipeline.user)
-        ? this.lastPipeline.user
-        : null;
+      return this.lastPipeline && !isEmpty(this.lastPipeline.user) ? this.lastPipeline.user : null;
     },
     lastPipeline() {
-      return !_.isEmpty(this.project.last_pipeline) ? this.project.last_pipeline : null;
+      return !isEmpty(this.project.last_pipeline) ? this.project.last_pipeline : null;
     },
     commitRef() {
-      return this.lastPipeline && !_.isEmpty(this.lastPipeline.ref)
+      return this.lastPipeline && !isEmpty(this.lastPipeline.ref)
         ? {
             ...this.lastPipeline.ref,
             ref_url: this.lastPipeline.ref.path,
@@ -119,7 +114,10 @@ export default {
 };
 </script>
 <template>
-  <div class="js-dashboard-project dashboard-card card border-0">
+  <div
+    class="js-dashboard-project dashboard-card card border-0"
+    data-qa-selector="dashboard_project_card"
+  >
     <project-header
       :project="project"
       :has-pipeline-failed="hasPipelineFailed"

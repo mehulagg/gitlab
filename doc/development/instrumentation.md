@@ -1,9 +1,17 @@
-# Instrumenting Ruby Code
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
+# Instrumenting Ruby code
 
 [GitLab Performance Monitoring](../administration/monitoring/performance/index.md) allows instrumenting of both methods and custom
 blocks of Ruby code. Method instrumentation is the primary form of
 instrumentation with block-based instrumentation only being used when we want to
 drill down to specific regions of code within a method.
+
+Please refer to [Telemetry](telemetry/index.md) if you are tracking product usage patterns.
 
 ## Instrumenting Methods
 
@@ -85,7 +93,7 @@ Ruby code. In case of the above snippet you'd run the following:
 
 This will print out something along the lines of:
 
-```
+```plaintext
 From: /path/to/your/gitlab/lib/gitlab/metrics/instrumentation.rb @ line 148:
 Owner: #<Module:0x0055f0865c6d50>
 Visibility: public
@@ -117,9 +125,9 @@ without measuring anything.
 
 Three values are measured for a block:
 
-- The real time elapsed, stored in NAME_real_time.
-- The CPU time elapsed, stored in NAME_cpu_time.
-- The call count, stored in NAME_call_count.
+- The real time elapsed, stored in `NAME_real_time`.
+- The CPU time elapsed, stored in `NAME_cpu_time`.
+- The call count, stored in `NAME_call_count`.
 
 Both the real and CPU timings are measured in milliseconds.
 

@@ -6,13 +6,15 @@ class Projects::HooksController < Projects::ApplicationController
   # Authorize
   before_action :authorize_admin_project!
   before_action :hook_logs, only: :edit
+  before_action -> { create_rate_limit(:project_testing_hook, @project) }, only: :test
 
   respond_to :html
 
   layout "project_settings"
 
   def index
-    redirect_to project_settings_integrations_path(@project)
+    @hooks = @project.hooks
+    @hook = ProjectHook.new
   end
 
   def create
@@ -24,7 +26,7 @@ class Projects::HooksController < Projects::ApplicationController
       flash[:alert] = @hook.errors.full_messages.join.html_safe
     end
 
-    redirect_to project_settings_integrations_path(@project)
+    redirect_to action: :index
   end
 
   def edit
@@ -33,7 +35,7 @@ class Projects::HooksController < Projects::ApplicationController
   def update
     if hook.update(hook_params)
       flash[:notice] = _('Hook was successfully updated.')
-      redirect_to project_settings_integrations_path(@project)
+      redirect_to action: :index
     else
       render 'edit'
     end
@@ -44,13 +46,13 @@ class Projects::HooksController < Projects::ApplicationController
 
     set_hook_execution_notice(result)
 
-    redirect_back_or_default(default: { action: 'index' })
+    redirect_back_or_default(default: { action: :index })
   end
 
   def destroy
     hook.destroy
 
-    redirect_to project_settings_integrations_path(@project), status: :found
+    redirect_to action: :index, status: :found
   end
 
   private

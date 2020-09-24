@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::ReferenceRedactor do
+RSpec.describe Banzai::ReferenceRedactor do
   let(:user) { create(:user) }
   let(:project) { build(:project) }
   let(:redactor) { described_class.new(Banzai::RenderContext.new(project, user)) }
@@ -36,6 +36,7 @@ describe Banzai::ReferenceRedactor do
 
       context 'when data-original attribute provided' do
         let(:original_content) { '<code>foo</code>' }
+
         it 'replaces redacted reference with original content' do
           doc = Nokogiri::HTML.fragment("<a class='gfm' href='https://www.gitlab.com' data-reference-type='issue' data-original='#{original_content}'>bar</a>")
           redactor.redact([doc])
@@ -173,10 +174,11 @@ describe Banzai::ReferenceRedactor do
       doc = Nokogiri::HTML.fragment('<a data-reference-type="issue"></a>')
       node = doc.children[0]
 
-      expect_any_instance_of(Banzai::ReferenceParser::IssueParser)
-        .to receive(:nodes_visible_to_user)
-        .with(user, [node])
-        .and_return([node])
+      expect_next_instance_of(Banzai::ReferenceParser::IssueParser) do |instance|
+        expect(instance).to receive(:nodes_visible_to_user)
+          .with(user, [node])
+          .and_return([node])
+      end
 
       expect(redactor.nodes_visible_to_user([node])).to eq(Set.new([node]))
     end

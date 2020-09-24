@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupSaml::GroupManagedAccounts::CleanUpMembersService do
+RSpec.describe GroupSaml::GroupManagedAccounts::CleanUpMembersService do
   subject(:service) { described_class.new(current_user, group) }
 
   let(:group) { Group.new }

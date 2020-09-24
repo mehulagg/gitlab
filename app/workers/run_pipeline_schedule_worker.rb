@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RunPipelineScheduleWorker
+class RunPipelineScheduleWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include PipelineQueue
 
@@ -31,19 +31,17 @@ class RunPipelineScheduleWorker
 
   private
 
-  # rubocop:disable Gitlab/RailsLogger
   def error(schedule, error)
     failed_creation_counter.increment
 
-    Rails.logger.error "Failed to create a scheduled pipeline. " \
+    Gitlab::AppLogger.error "Failed to create a scheduled pipeline. " \
                        "schedule_id: #{schedule.id} message: #{error.message}"
 
-    Gitlab::Sentry
-      .track_exception(error,
+    Gitlab::ErrorTracking
+      .track_and_raise_for_dev_exception(error,
                        issue_url: 'https://gitlab.com/gitlab-org/gitlab-foss/issues/41231',
-                       extra: { schedule_id: schedule.id })
+                       schedule_id: schedule.id)
   end
-  # rubocop:enable Gitlab/RailsLogger
 
   def failed_creation_counter
     @failed_creation_counter ||=

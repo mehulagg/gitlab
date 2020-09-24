@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import { throttle } from 'lodash';
 import $ from 'jquery';
 import { Terminal } from 'xterm';
 import * as fit from 'xterm/lib/addons/fit/fit';
@@ -13,14 +13,11 @@ Terminal.applyAddon(webLinks);
 
 export default class GLTerminal {
   constructor(element, options = {}) {
-    this.options = Object.assign(
-      {},
-      {
-        cursorBlink: true,
-        screenKeys: true,
-      },
-      options,
-    );
+    this.options = {
+      cursorBlink: true,
+      screenKeys: true,
+      ...options,
+    };
 
     this.container = element;
     this.onDispose = [];
@@ -85,7 +82,7 @@ export default class GLTerminal {
 
   addScrollListener(onScrollLimit) {
     const viewport = this.container.querySelector('.xterm-viewport');
-    const listener = _.throttle(() => {
+    const listener = throttle(() => {
       onScrollLimit({
         canScrollUp: canScrollUp(viewport, SCROLL_MARGIN),
         canScrollDown: canScrollDown(viewport, SCROLL_MARGIN),

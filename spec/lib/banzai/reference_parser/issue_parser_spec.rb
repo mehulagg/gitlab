@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe Banzai::ReferenceParser::IssueParser do
+RSpec.describe Banzai::ReferenceParser::IssueParser do
   include ReferenceParserHelpers
 
   let(:project) { create(:project, :public) }
   let(:user)    { create(:user) }
   let(:issue)   { create(:issue, project: project) }
   let(:link)    { empty_html_link }
+
   subject       { described_class.new(Banzai::RenderContext.new(project, user)) }
 
   describe '#nodes_visible_to_user' do

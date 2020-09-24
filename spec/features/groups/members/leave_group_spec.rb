@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Groups > Members > Leave group' do
+RSpec.describe 'Groups > Members > Leave group' do
   let(:user) { create(:user) }
   let(:other_user) { create(:user) }
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     gitlab_sign_in(user)
   end
 
@@ -31,8 +33,7 @@ describe 'Groups > Members > Leave group' do
 
     page.accept_confirm
 
-    expect(find('.flash-notice')).to have_content "You left the \"#{group.full_name}\" group"
-    expect(page).to have_content left_group_message(group)
+    wait_for_all_requests
     expect(current_path).to eq(dashboard_groups_path)
     expect(group.users).not_to include(user)
   end

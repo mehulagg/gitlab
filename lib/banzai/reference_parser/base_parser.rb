@@ -169,7 +169,8 @@ module Banzai
       # been queried the object is returned from the cache.
       def collection_objects_for_ids(collection, ids)
         if Gitlab::SafeRequestStore.active?
-          ids = ids.map(&:to_i)
+          ids = ids.map(&:to_i).uniq
+
           cache = collection_cache[collection_cache_key(collection)]
           to_query = ids - cache.keys
 
@@ -177,7 +178,7 @@ module Banzai
             collection.where(id: to_query).each { |row| cache[row.id] = row }
           end
 
-          cache.values_at(*ids).compact
+          ids.uniq.map { |id| cache[id] }.compact
         else
           collection.where(id: ids)
         end
@@ -201,12 +202,14 @@ module Banzai
         gather_references(nodes)
       end
 
-      # Gathers the references for the given HTML nodes.
+      # Gathers the references for the given HTML nodes.  Returns visible
+      # references and a list of nodes which are not visible to the user
       def gather_references(nodes)
         nodes = nodes_user_can_reference(current_user, nodes)
-        nodes = nodes_visible_to_user(current_user, nodes)
+        visible = nodes_visible_to_user(current_user, nodes)
+        not_visible = nodes - visible
 
-        referenced_by(nodes)
+        { visible: referenced_by(visible), not_visible: not_visible }
       end
 
       # Returns a Hash containing the projects for a given list of HTML nodes.

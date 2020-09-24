@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::GroupsController do
+RSpec.describe Admin::GroupsController do
   let(:admin) { create(:admin) }
   let(:group) { create(:group) }
 
@@ -14,8 +14,9 @@ describe Admin::GroupsController do
     subject { post :reset_runners_minutes, params: { id: group } }
 
     before do
-      allow_any_instance_of(ClearNamespaceSharedRunnersMinutesService)
-          .to receive(:execute).and_return(clear_runners_minutes_service_result)
+      allow_next_instance_of(ClearNamespaceSharedRunnersMinutesService) do |instance|
+        allow(instance).to receive(:execute).and_return(clear_runners_minutes_service_result)
+      end
     end
 
     context 'when the reset is successful' do

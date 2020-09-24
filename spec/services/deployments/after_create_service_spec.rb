@@ -2,14 +2,22 @@
 
 require 'spec_helper'
 
-describe Deployments::AfterCreateService do
+RSpec.describe Deployments::AfterCreateService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:options) { { name: 'production' } }
+  let(:pipeline) do
+    create(
+      :ci_pipeline,
+      sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
+      project: project
+    )
+  end
 
   let(:job) do
     create(:ci_build,
       :with_deployment,
+      pipeline: pipeline,
       ref: 'master',
       tag: false,
       environment: 'production',
@@ -41,7 +49,7 @@ describe Deployments::AfterCreateService do
     it 'creates ref' do
       expect_any_instance_of(Repository)
         .to receive(:create_ref)
-        .with(deployment.ref, deployment.send(:ref_path))
+        .with(deployment.sha, "refs/environments/production/deployments/#{deployment.iid}")
 
       service.execute
     end
@@ -49,14 +57,6 @@ describe Deployments::AfterCreateService do
     it 'updates merge request metrics' do
       expect_any_instance_of(Deployment)
         .to receive(:update_merge_request_metrics!)
-
-      service.execute
-    end
-
-    it 'links merge requests to deployment' do
-      expect_next_instance_of(Deployments::LinkMergeRequestsService, deployment) do |link_mr_service|
-        expect(link_mr_service).to receive(:execute)
-      end
 
       service.execute
     end
@@ -115,6 +115,21 @@ describe Deployments::AfterCreateService do
         expect(subject.environment.external_url).to eq('http://master.review-apps.gitlab.com')
       end
     end
+
+    context 'when auto_stop_in are used' do
+      let(:options) do
+        { name: 'production', auto_stop_in: '1 day' }
+      end
+
+      it 'renews auto stop at' do
+        freeze_time do
+          environment.update!(auto_stop_at: nil)
+
+          expect { subject.execute }
+            .to change { environment.reset.auto_stop_at&.round }.from(nil).to(1.day.since.round)
+        end
+      end
+    end
   end
 
   describe '#expanded_environment_url' do
@@ -124,6 +139,7 @@ describe Deployments::AfterCreateService do
       let(:job) do
         create(:ci_build,
                :with_deployment,
+               pipeline: pipeline,
                ref: 'master',
                environment: 'production',
                project: project,
@@ -137,6 +153,7 @@ describe Deployments::AfterCreateService do
       let(:job) do
         create(:ci_build,
                :with_deployment,
+               pipeline: pipeline,
                ref: 'master',
                environment: 'prod-slug',
                project: project,
@@ -150,6 +167,7 @@ describe Deployments::AfterCreateService do
       let(:job) do
         create(:ci_build,
                :with_deployment,
+               pipeline: pipeline,
                yaml_variables: [{ key: :APP_HOST, value: 'host' }],
                environment: 'production',
                project: project,
@@ -159,8 +177,28 @@ describe Deployments::AfterCreateService do
       it { is_expected.to eq('http://review/host') }
     end
 
+    context 'when job variables are generated during runtime' do
+      let(:job) do
+        create(:ci_build,
+               :with_deployment,
+               pipeline: pipeline,
+               environment: 'review/$CI_COMMIT_REF_NAME',
+               project: project,
+               job_variables: [job_variable],
+               options: { environment: { name: 'review/$CI_COMMIT_REF_NAME', url: 'http://$DYNAMIC_ENV_URL' } })
+      end
+
+      let(:job_variable) do
+        build(:ci_job_variable, :dotenv_source, key: 'DYNAMIC_ENV_URL', value: 'abc.test.com')
+      end
+
+      it 'expands the environment URL from the dynamic variable' do
+        is_expected.to eq('http://abc.test.com')
+      end
+    end
+
     context 'when yaml environment does not have url' do
-      let(:job) { create(:ci_build, :with_deployment, environment: 'staging', project: project) }
+      let(:job) { create(:ci_build, :with_deployment, pipeline: pipeline, environment: 'staging', project: project) }
 
       it 'returns the external_url from persisted environment' do
         is_expected.to be_nil
@@ -187,6 +225,7 @@ describe Deployments::AfterCreateService do
           let(:job) do
             create(:ci_build,
               :with_deployment,
+              pipeline: pipeline,
               ref: 'master',
               tag: false,
               environment: 'staging',
@@ -242,32 +281,6 @@ describe Deployments::AfterCreateService do
             expect(merge_request.reload.metrics.first_deployed_to_production_at).to eq(previous_time)
           end
         end
-      end
-    end
-  end
-
-  describe '#update_environment' do
-    it 'links the merge requests' do
-      double = instance_double(Deployments::LinkMergeRequestsService)
-
-      allow(Deployments::LinkMergeRequestsService)
-        .to receive(:new)
-        .with(deployment)
-        .and_return(double)
-
-      expect(double).to receive(:execute)
-
-      service.update_environment(deployment)
-    end
-
-    context 'when the tracking of merge requests is disabled' do
-      it 'does nothing' do
-        stub_feature_flags(deployment_merge_requests: false)
-
-        expect(Deployments::LinkMergeRequestsService)
-          .not_to receive(:new)
-
-        service.update_environment(deployment)
       end
     end
   end

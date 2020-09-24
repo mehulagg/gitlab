@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Settings, 'EE Settings' do
+RSpec.describe API::Settings, 'EE Settings' do
   include StubENV
 
   let(:user) { create(:user) }
@@ -23,7 +23,7 @@ describe API::Settings, 'EE Settings' do
           file_template_project_id: project.id
         }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['help_text']).to eq('Help text')
       expect(json_response['file_template_project_id']).to eq(project.id)
     end
@@ -40,7 +40,7 @@ describe API::Settings, 'EE Settings' do
               elasticsearch_namespace_ids: namespace_ids.join(',')
             }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['elasticsearch_limit_indexing']).to eq(true)
         expect(json_response['elasticsearch_project_ids']).to eq(project_ids)
         expect(json_response['elasticsearch_namespace_ids']).to eq(namespace_ids)
@@ -61,7 +61,7 @@ describe API::Settings, 'EE Settings' do
               'CONTENT_TYPE' => 'application/json'
             }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['elasticsearch_namespace_ids']).to eq([])
         expect(ElasticsearchIndexedNamespace.count).to eq(0)
         expect(ElasticsearchIndexedProject.count).to eq(1)
@@ -85,7 +85,7 @@ describe API::Settings, 'EE Settings' do
       it 'hides the attributes in the API' do
         get api("/application/settings", admin)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         attribute_names.each do |attribute|
           expect(json_response.keys).not_to include(attribute)
         end
@@ -105,7 +105,7 @@ describe API::Settings, 'EE Settings' do
       it 'includes the attributes in the API' do
         get api("/application/settings", admin)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         attribute_names.each do |attribute|
           expect(json_response.keys).to include(attribute)
         end
@@ -113,7 +113,7 @@ describe API::Settings, 'EE Settings' do
 
       it 'allows updating the settings' do
         put api("/application/settings", admin), params: settings
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
 
         settings.each do |attribute, value|
           expect(ApplicationSetting.current.public_send(attribute)).to eq(value)
@@ -143,9 +143,68 @@ describe API::Settings, 'EE Settings' do
     it_behaves_like 'settings for licensed features'
   end
 
+  context 'group_owners_can_manage_default_branch_protection setting' do
+    let(:settings) { { group_owners_can_manage_default_branch_protection: false } }
+    let(:feature) { :default_branch_protection_restriction_in_groups }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
+  context 'delayed deletion period' do
+    let(:settings) { { deletion_adjourned_period: 5 } }
+    let(:feature) { :adjourned_deletion_for_projects_and_groups }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
   context 'custom file template project' do
     let(:settings) { { file_template_project_id: project.id } }
     let(:feature) { :custom_file_templates }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
+  context 'updating name disabled for users' do
+    let(:settings) { { updating_name_disabled_for_users: true } }
+    let(:feature) { :disable_name_update_for_users }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
+  context 'merge request approvers rules' do
+    let(:settings) do
+      {
+        disable_overriding_approvers_per_merge_request: true,
+        prevent_merge_requests_author_approval: true,
+        prevent_merge_requests_committers_approval: true
+      }
+    end
+
+    let(:feature) { :admin_merge_request_approvers_rules }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
+  context 'updating npm packages request forwarding' do
+    let(:settings) { { npm_package_requests_forwarding: true } }
+    let(:feature) { :package_forwarding }
+
+    it_behaves_like 'settings for licensed features'
+  end
+
+  context 'maintenance mode' do
+    before do
+      stub_feature_flags(maintenance_mode: true)
+    end
+
+    let(:settings) do
+      {
+        maintenance_mode: true,
+        maintenance_mode_message: 'GitLab is in maintenance'
+      }
+    end
+
+    let(:feature) { :geo }
 
     it_behaves_like 'settings for licensed features'
   end

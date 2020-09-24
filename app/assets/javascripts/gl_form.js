@@ -3,19 +3,22 @@ import autosize from 'autosize';
 import GfmAutoComplete, { defaultAutocompleteConfig } from 'ee_else_ce/gfm_auto_complete';
 import dropzoneInput from './dropzone_input';
 import { addMarkdownListeners, removeMarkdownListeners } from './lib/utils/text_markdown';
+import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 
 export default class GLForm {
   constructor(form, enableGFM = {}) {
     this.form = form;
     this.textarea = this.form.find('textarea.js-gfm-input');
-    this.enableGFM = Object.assign({}, defaultAutocompleteConfig, enableGFM);
+    this.enableGFM = { ...defaultAutocompleteConfig, ...enableGFM };
+
     // Disable autocomplete for keywords which do not have dataSources available
     const dataSources = (gl.GfmAutoComplete && gl.GfmAutoComplete.dataSources) || {};
     Object.keys(this.enableGFM).forEach(item => {
-      if (item !== 'emojis') {
-        this.enableGFM[item] = Boolean(dataSources[item]);
+      if (item !== 'emojis' && !dataSources[item]) {
+        this.enableGFM[item] = false;
       }
     });
+
     // Before we start, we should clean up any previous data for this form
     this.destroy();
     // Set up the form
@@ -29,6 +32,10 @@ export default class GLForm {
     if (this.autoComplete) {
       this.autoComplete.destroy();
     }
+    if (this.formDropzone) {
+      this.formDropzone.destroy();
+    }
+
     this.form.data('glForm', null);
   }
 
@@ -39,13 +46,13 @@ export default class GLForm {
       this.form.find('.div-dropzone').remove();
       this.form.addClass('gfm-form');
       // remove notify commit author checkbox for non-commit notes
-      gl.utils.disableButtonIfEmptyField(
+      disableButtonIfEmptyField(
         this.form.find('.js-note-text'),
         this.form.find('.js-comment-button, .js-note-new-discussion'),
       );
       this.autoComplete = new GfmAutoComplete(gl.GfmAutoComplete && gl.GfmAutoComplete.dataSources);
       this.autoComplete.setup(this.form.find('.js-gfm-input'), this.enableGFM);
-      dropzoneInput(this.form);
+      this.formDropzone = dropzoneInput(this.form, { parallelUploads: 1 });
       autosize(this.textarea);
     }
     // form and textarea event listeners
@@ -99,5 +106,9 @@ export default class GLForm {
         .closest('.md-area')
         .removeClass('is-focused');
     });
+  }
+
+  get supportsQuickActions() {
+    return Boolean(this.textarea.data('supports-quick-actions'));
   }
 }

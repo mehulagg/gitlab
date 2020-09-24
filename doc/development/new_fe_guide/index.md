@@ -1,7 +1,7 @@
 # Frontend Development Guidelines
 
 This guide contains all the information to successfully contribute to GitLab's frontend.
-This is a living document, and we welcome contributions, feedback and suggestions.
+This is a living document, and we welcome contributions, feedback, and suggestions.
 
 ## [Development](development/index.md)
 
@@ -14,10 +14,6 @@ Learn about all the dependencies that make up our frontend, including some of ou
 ## [Modules](modules/index.md)
 
 Learn about all the internal JavaScript modules that make up our frontend.
-
-## [Style guides](style/index.md)
-
-Style guides to keep our code consistent.
 
 ## [Tips](tips.md)
 

@@ -1,11 +1,11 @@
 <script>
-import { __, sprintf } from '~/locale';
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { GlLink, GlButton } from '@gitlab/ui';
+import { GlLink, GlButton, GlIcon } from '@gitlab/ui';
+import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
+import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
 import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
-import Icon from '~/vue_shared/components/icon.vue';
 import DetailRow from './sidebar_detail_row.vue';
 import ArtifactsBlock from './artifacts_block.vue';
 import TriggerBlock from './trigger_block.vue';
@@ -19,15 +19,21 @@ export default {
     ArtifactsBlock,
     CommitBlock,
     DetailRow,
-    Icon,
+    GlIcon,
     TriggerBlock,
     StagesDropdown,
     JobsContainer,
     GlLink,
     GlButton,
+    TooltipOnTruncate,
   },
   mixins: [timeagoMixin],
   props: {
+    artifactHelpUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     runnerHelpUrl: {
       type: String,
       required: false,
@@ -84,10 +90,10 @@ export default {
       );
     },
     hasArtifact() {
-      return !_.isEmpty(this.job.artifact);
+      return !isEmpty(this.job.artifact);
     },
     hasTriggers() {
-      return !_.isEmpty(this.job.trigger);
+      return !isEmpty(this.job.trigger);
     },
     hasStages() {
       return (
@@ -112,13 +118,18 @@ export default {
     <div class="sidebar-container">
       <div class="blocks-container">
         <div class="block d-flex flex-nowrap align-items-center">
-          <h4 class="my-0 mr-2 text-break-word">{{ job.name }}</h4>
+          <tooltip-on-truncate :title="job.name" truncate-target="child"
+            ><h4 class="my-0 mr-2 gl-text-truncate">
+              {{ job.name }}
+            </h4>
+          </tooltip-on-truncate>
           <div class="flex-grow-1 flex-shrink-0 text-right">
             <gl-link
               v-if="job.retry_path"
               :class="retryButtonClass"
               :href="job.retry_path"
               data-method="post"
+              data-qa-selector="retry_button"
               rel="nofollow"
               >{{ __('Retry') }}</gl-link
             >
@@ -134,19 +145,19 @@ export default {
 
           <gl-button
             :aria-label="__('Toggle Sidebar')"
-            type="button"
-            class="btn btn-blank gutter-toggle float-right d-block d-md-none js-sidebar-build-toggle"
+            class="d-md-none gl-ml-2 js-sidebar-build-toggle"
+            category="tertiary"
+            icon="chevron-double-lg-right"
             @click="toggleSidebar"
-          >
-            <i aria-hidden="true" data-hidden="true" class="fa fa-angle-double-right"></i>
-          </gl-button>
+          />
         </div>
 
         <div v-if="job.terminal_path || job.new_issue_path" class="block retry-link">
           <gl-link
             v-if="job.new_issue_path"
             :href="job.new_issue_path"
-            class="js-new-issue btn btn-success btn-inverted float-left mr-2"
+            class="btn btn-success btn-inverted float-left mr-2"
+            data-testid="job-new-issue"
             >{{ __('New issue') }}</gl-link
           >
           <gl-link
@@ -155,7 +166,7 @@ export default {
             class="js-terminal-link btn btn-primary btn-inverted visible-md-block visible-lg-block float-left"
             target="_blank"
           >
-            {{ __('Debug') }} <icon name="external-link" :size="14" />
+            {{ __('Debug') }} <gl-icon name="external-link" :size="14" />
           </gl-link>
         </div>
 
@@ -168,13 +179,13 @@ export default {
           />
           <detail-row
             v-if="job.finished_at"
-            :value="timeFormated(job.finished_at)"
+            :value="timeFormatted(job.finished_at)"
             class="js-job-finished"
             title="Finished"
           />
           <detail-row
             v-if="job.erased_at"
-            :value="timeFormated(job.erased_at)"
+            :value="timeFormatted(job.erased_at)"
             class="js-job-erased"
             title="Erased"
           />
@@ -201,7 +212,7 @@ export default {
           </p>
         </div>
 
-        <artifacts-block v-if="hasArtifact" :artifact="job.artifact" />
+        <artifacts-block v-if="hasArtifact" :artifact="job.artifact" :help-url="artifactHelpUrl" />
         <trigger-block v-if="hasTriggers" :trigger="job.trigger" />
         <commit-block
           :is-last-block="hasStages"

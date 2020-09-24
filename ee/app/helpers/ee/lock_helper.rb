@@ -5,9 +5,6 @@ module EE
     def lock_file_link(project = @project, path = @path, html_options: {})
       return unless project.feature_available?(:file_locks)
       return unless current_user
-      # Always render the link if `vue_file_list` is enabled, the link will be hidden
-      # by the vue app if the path was blank
-      return if path.blank? && !vue_file_list_enabled?
 
       path_lock = project.find_path_lock(path, downstream: true)
 
@@ -71,20 +68,6 @@ module EE
       html_options['data-qa-selector'] = 'lock_button'
 
       link_to label, '#', html_options
-    end
-
-    def render_lock_icon(path)
-      return unless @project.root_ref?(@ref)
-
-      if file_lock = @project.find_path_lock(path, exact_match: true)
-        content_tag(
-          :i,
-          nil,
-          class: "fa fa-lock prepend-left-5 append-right-5",
-          title: text_label_for_lock(file_lock, path),
-          'data-toggle' => 'tooltip'
-        )
-      end
     end
   end
 end

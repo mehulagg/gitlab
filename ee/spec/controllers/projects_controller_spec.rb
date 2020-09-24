@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectsController do
+RSpec.describe ProjectsController do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -16,19 +16,33 @@ describe ProjectsController do
 
     render_views
 
+    subject { get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path } }
+
     it 'shows the over size limit warning message if above_size_limit' do
-      allow_any_instance_of(EE::Project).to receive(:above_size_limit?).and_return(true)
+      allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+        expect(checker).to receive(:above_size_limit?).and_return(true)
+      end
       allow(controller).to receive(:current_user).and_return(user)
 
-      get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path }
+      subject
 
       expect(response.body).to match(/The size of this repository.+exceeds the limit/)
     end
 
     it 'does not show an over size warning if not above_size_limit' do
-      get :show, params: { namespace_id: public_project.namespace.path, id: public_project.path }
+      subject
 
       expect(response.body).not_to match(/The size of this repository.+exceeds the limit/)
+    end
+
+    context 'namespace storage limit' do
+      let(:namespace) { public_project.namespace }
+
+      before do
+        allow(controller).to receive(:current_user).and_return(user)
+      end
+
+      it_behaves_like 'namespace storage limit alert'
     end
   end
 
@@ -42,7 +56,7 @@ describe ProjectsController do
             id: project.path
           }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -133,7 +147,7 @@ describe ProjectsController do
         it 'does not create the project from project template' do
           expect { post :create, params: { project: templates_params } }.not_to change { Project.count }
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.body).to match(/Template name .* is unknown or invalid/)
         end
       end
@@ -154,7 +168,7 @@ describe ProjectsController do
           }
       project.reload
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
       params.except(:repository_size_limit).each do |param, value|
         expect(project.public_send(param)).to eq(value)
       end
@@ -177,7 +191,7 @@ describe ProjectsController do
           }
       project.reload
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
       expect(project.approver_groups.pluck(:group_id)).to contain_exactly(params[:approver_group_ids])
       expect(project.approvers.pluck(:user_id)).to contain_exactly(params[:approver_ids])
     end
@@ -196,30 +210,10 @@ describe ProjectsController do
           }
       project.reload
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
       params.each do |param, value|
         expect(project.public_send(param)).to eq(value)
       end
-    end
-
-    it 'updates Service Desk attributes' do
-      allow(Gitlab::IncomingEmail).to receive(:enabled?) { true }
-      allow(Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
-      stub_licensed_features(service_desk: true)
-      params = {
-        service_desk_enabled: true
-      }
-
-      put :update,
-          params: {
-            namespace_id: project.namespace,
-            id: project,
-            project: params
-          }
-      project.reload
-
-      expect(response).to have_gitlab_http_status(302)
-      expect(project.service_desk_enabled).to eq(true)
     end
 
     context 'when merge_pipelines_enabled param is specified' do
@@ -269,7 +263,6 @@ describe ProjectsController do
         {
           mirror: true,
           mirror_trigger_builds: true,
-          mirror_user_id: user.id,
           import_url: 'https://example.com'
         }
       end
@@ -295,6 +288,20 @@ describe ProjectsController do
           expect(project.mirror_user).to eq(user)
           expect(project.import_url).to eq('https://example.com')
         end
+
+        it 'ignores mirror_user_id' do
+          other_user = create(:user)
+
+          put :update,
+            params: {
+              namespace_id: project.namespace,
+              id: project,
+              project: params.merge(mirror_user_id: other_user.id)
+            }
+          project.reload
+
+          expect(project.mirror_user).to eq(user)
+        end
       end
 
       context 'when unlicensed' do
@@ -317,6 +324,105 @@ describe ProjectsController do
         end
       end
     end
+
+    context 'merge request approvers settings' do
+      shared_examples 'merge request approvers rules' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:license_value, :setting_value, :param_value, :final_value) do
+          false | false | false | false
+          false | true  | false | false
+          false | false | true  | true
+          false | true  | true  | true
+          true  | false | false | false
+          true  | true  | false | false
+          true  | false | true  | true
+          true  | true  | true  | true
+        end
+
+        with_them do
+          before do
+            stub_licensed_features(admin_merge_request_approvers_rules: license_value)
+            stub_application_setting(app_setting => setting_value)
+          end
+
+          it 'updates project if needed' do
+            put :update,
+              params: {
+                namespace_id: project.namespace,
+                id: project,
+                project: { setting => param_value }
+              }
+
+            project.reload
+
+            expect(project[setting]).to eq(final_value)
+          end
+        end
+      end
+
+      describe ':disable_overriding_approvers_per_merge_request' do
+        it_behaves_like 'merge request approvers rules' do
+          let(:app_setting) { :disable_overriding_approvers_per_merge_request }
+          let(:setting) { :disable_overriding_approvers_per_merge_request }
+        end
+      end
+
+      describe ':merge_requests_author_approval' do
+        it_behaves_like 'merge request approvers rules' do
+          let(:app_setting) { :prevent_merge_requests_author_approval }
+          let(:setting) { :merge_requests_author_approval }
+        end
+      end
+
+      describe ':merge_requests_disable_committers_approval' do
+        it_behaves_like 'merge request approvers rules' do
+          let(:app_setting) { :prevent_merge_requests_committers_approval }
+          let(:setting) { :merge_requests_disable_committers_approval }
+        end
+      end
+    end
+
+    context 'compliance framework settings' do
+      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
+      let(:params) { { compliance_framework_setting_attributes: { framework: framework } } }
+
+      context 'when unlicensed' do
+        before do
+          stub_licensed_features(compliance_framework: false)
+        end
+
+        it 'ignores any compliance framework params' do
+          put :update,
+            params: {
+                namespace_id: project.namespace,
+                id: project,
+                project: params
+            }
+          project.reload
+
+          expect(project.compliance_framework_setting).to be_nil
+        end
+      end
+
+      context 'when licensed' do
+        before do
+          stub_licensed_features(compliance_framework: true)
+        end
+
+        it 'sets the compliance framework' do
+          put :update,
+              params: {
+                  namespace_id: project.namespace,
+                  id: project,
+                  project: params
+              }
+          project.reload
+
+          expect(project.compliance_framework_setting.framework).to eq(framework)
+        end
+      end
+    end
   end
 
   describe '#download_export' do
@@ -324,7 +430,7 @@ describe ProjectsController do
 
     context 'when project export is enabled' do
       it 'logs the audit event' do
-        expect { request }.to change { SecurityEvent.count }.by(1)
+        expect { request }.to change { AuditEvent.count }.by(1)
       end
     end
 
@@ -334,7 +440,7 @@ describe ProjectsController do
       end
 
       it 'does not log an audit event' do
-        expect { request }.not_to change { SecurityEvent.count }
+        expect { request }.not_to change { AuditEvent.count }
       end
     end
   end
@@ -353,8 +459,8 @@ describe ProjectsController do
         end
 
         it 'logs the audit event' do
-          expect { request }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:custom_message]).to eq('Project archived')
+          expect { request }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:custom_message]).to eq('Project archived')
         end
       end
 
@@ -364,7 +470,7 @@ describe ProjectsController do
         end
 
         it 'does not log the audit event' do
-          expect { request }.not_to change { SecurityEvent.count }
+          expect { request }.not_to change { AuditEvent.count }
         end
       end
     end
@@ -378,8 +484,8 @@ describe ProjectsController do
         end
 
         it 'logs the audit event' do
-          expect { request }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:custom_message]).to eq('Project unarchived')
+          expect { request }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:custom_message]).to eq('Project unarchived')
         end
       end
 
@@ -389,9 +495,131 @@ describe ProjectsController do
         end
 
         it 'does not log the audit event' do
-          expect { request }.not_to change { SecurityEvent.count }
+          expect { request }.not_to change { AuditEvent.count }
         end
       end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    let(:owner) { create(:user) }
+    let(:group) { create(:group) }
+    let(:project) { create(:project, group: group)}
+
+    before do
+      group.add_user(owner, Gitlab::Access::OWNER)
+      controller.instance_variable_set(:@project, project)
+      sign_in(owner)
+    end
+
+    shared_examples 'deletes project right away' do
+      it do
+        delete :destroy, params: { namespace_id: project.namespace, id: project }
+
+        expect(project.marked_for_deletion?).to be_falsey
+        expect(response).to have_gitlab_http_status(:found)
+        expect(response).to redirect_to(dashboard_projects_path)
+      end
+    end
+
+    shared_examples 'marks project for deletion' do
+      it do
+        delete :destroy, params: { namespace_id: project.namespace, id: project }
+
+        expect(project.reload.marked_for_deletion?).to be_truthy
+        expect(response).to have_gitlab_http_status(:found)
+        expect(response).to redirect_to(project_path(project))
+      end
+    end
+
+    context 'feature is available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
+      end
+
+      context 'when feature is enabled for group' do
+        before do
+          allow(group).to receive(:delayed_project_removal?).and_return(true)
+        end
+
+        it_behaves_like 'marks project for deletion'
+
+        it 'does not mark project for deletion because of error' do
+          message = 'Error'
+
+          expect(::Projects::MarkForDeletionService).to receive_message_chain(:new, :execute).and_return({ status: :error, message: message })
+
+          delete :destroy, params: { namespace_id: project.namespace, id: project }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to render_template(:edit)
+          expect(flash[:alert]).to include(message)
+        end
+
+        context 'when instance setting is set to 0 days' do
+          it 'deletes project right away' do
+            stub_application_setting(deletion_adjourned_period: 0)
+
+            delete :destroy, params: { namespace_id: project.namespace, id: project }
+
+            expect(project.marked_for_deletion?).to be_falsey
+            expect(response).to have_gitlab_http_status(:found)
+            expect(response).to redirect_to(dashboard_projects_path)
+          end
+        end
+      end
+
+      context 'when feature is disabled for group' do
+        before do
+          allow(group).to receive(:delayed_project_removal).and_return(false)
+        end
+
+        it_behaves_like 'deletes project right away'
+      end
+
+      context 'for projects in user namespace' do
+        let(:project) { create(:project, namespace: owner.namespace)}
+
+        it_behaves_like 'deletes project right away'
+      end
+    end
+
+    context 'feature is not available' do
+      before do
+        stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
+      end
+
+      it_behaves_like 'deletes project right away'
+    end
+  end
+
+  describe 'POST #restore' do
+    let(:owner) { create(:user) }
+    let(:project) { create(:project, namespace: owner.namespace)}
+
+    before do
+      controller.instance_variable_set(:@project, project)
+      sign_in(owner)
+    end
+
+    it 'restores project deletion' do
+      post :restore, params: { namespace_id: project.namespace, project_id: project }
+
+      expect(project.reload.marked_for_deletion_at).to be_nil
+      expect(project.reload.archived).to be_falsey
+      expect(response).to have_gitlab_http_status(:found)
+      expect(response).to redirect_to(edit_project_path(project))
+    end
+
+    it 'does not restore project because of error' do
+      message = 'Error'
+      expect(::Projects::RestoreService).to receive_message_chain(:new, :execute).and_return({ status: :error, message: message })
+
+      post :restore, params: { namespace_id: project.namespace, project_id: project }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response).to render_template(:edit)
+      expect(flash[:alert]).to include(message)
     end
   end
 end

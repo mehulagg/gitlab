@@ -29,7 +29,7 @@ module IssuablesHelper
   def sidebar_milestone_tooltip_label(milestone)
     return _('Milestone') unless milestone.present?
 
-    [milestone[:title], sidebar_milestone_remaining_days(milestone) || _('Milestone')].join('<br/>')
+    [escape_once(milestone[:title]), sidebar_milestone_remaining_days(milestone) || _('Milestone')].join('<br/>')
   end
 
   def sidebar_milestone_remaining_days(milestone)
@@ -196,6 +196,8 @@ module IssuablesHelper
       author_output = link_to_member(project, issuable.author, size: 24, mobile_classes: "d-none d-sm-inline")
       author_output << link_to_member(project, issuable.author, size: 24, by_username: true, avatar: false, mobile_classes: "d-inline d-sm-none")
 
+      author_output << issuable_meta_author_slot(issuable.author, css_class: 'ml-1')
+
       if status = user_status(issuable.author)
         author_output << "#{status}".html_safe
       end
@@ -203,12 +205,23 @@ module IssuablesHelper
       author_output
     end
 
-    output << content_tag(:span, (issuable_first_contribution_icon if issuable.first_contribution?), class: 'has-tooltip prepend-left-4', title: _('1st contribution!'))
+    if access = project.team.human_max_access(issuable.author_id)
+      output << content_tag(:span, access, class: "user-access-role has-tooltip d-none d-xl-inline-block gl-ml-3 ", title: _("This user has the %{access} role in the %{name} project.") % { access: access.downcase, name: project.name })
+    elsif project.team.contributor?(issuable.author_id)
+      output << content_tag(:span, _("Contributor"), class: "user-access-role has-tooltip d-none d-xl-inline-block gl-ml-3", title: _("This user has previously committed to the %{name} project.") % { name: project.name })
+    end
 
-    output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-sm-none d-md-inline-block prepend-left-8")
+    output << content_tag(:span, (sprite_icon('first-contribution', css_class: 'gl-icon gl-vertical-align-middle') if issuable.first_contribution?), class: 'has-tooltip gl-ml-2', title: _('1st contribution!'))
+
+    output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-sm-none d-md-inline-block gl-ml-3")
     output << content_tag(:span, (issuable.task_status_short if issuable.tasks?), id: "task_status_short", class: "d-md-none")
 
     output.join.html_safe
+  end
+
+  # This is a dummy method, and has an override defined in ee
+  def issuable_meta_author_slot(author, css_class: nil)
+    nil
   end
 
   def issuable_labels_tooltip(labels, limit: 5)
@@ -240,13 +253,6 @@ module IssuablesHelper
     html.html_safe
   end
 
-  def issuable_first_contribution_icon
-    content_tag(:span, class: 'fa-stack') do
-      concat(icon('certificate', class: "fa-stack-2x"))
-      concat(content_tag(:strong, '1', class: 'fa-inverse fa-stack-1x'))
-    end
-  end
-
   def assigned_issuables_count(issuable_type)
     case issuable_type
     when :issues
@@ -269,6 +275,7 @@ module IssuablesHelper
       canUpdate: can?(current_user, :"update_#{issuable.to_ability_name}", issuable),
       canDestroy: can?(current_user, :"destroy_#{issuable.to_ability_name}", issuable),
       issuableRef: issuable.to_reference,
+      issuableStatus: issuable.state,
       markdownPreviewPath: preview_markdown_path(parent),
       markdownDocsPath: help_page_path('user/markdown'),
       lockVersion: issuable.lock_version,
@@ -279,19 +286,32 @@ module IssuablesHelper
       initialDescriptionText: issuable.description,
       initialTaskStatus: issuable.task_status
     }
-
-    data[:hasClosingMergeRequest] = issuable.merge_requests_count(current_user) != 0 if issuable.is_a?(Issue)
-    data[:zoomMeetingUrl] = ZoomMeeting.canonical_meeting_url(issuable) if issuable.is_a?(Issue)
-
-    if parent.is_a?(Group)
-      data[:groupPath] = parent.path
-    else
-      data.merge!(projectPath: ref_project.path, projectNamespace: ref_project.namespace.full_path)
-    end
-
+    data.merge!(issue_only_initial_data(issuable))
+    data.merge!(path_data(parent))
     data.merge!(updated_at_by(issuable))
 
     data
+  end
+
+  def issue_only_initial_data(issuable)
+    return {} unless issuable.is_a?(Issue)
+
+    {
+      hasClosingMergeRequest: issuable.merge_requests_count(current_user) != 0,
+      issueType: issuable.issue_type,
+      zoomMeetingUrl: ZoomMeeting.canonical_meeting_url(issuable),
+      sentryIssueIdentifier: SentryIssue.find_by(issue: issuable)&.sentry_issue_identifier, # rubocop:disable CodeReuse/ActiveRecord
+      iid: issuable.iid.to_s
+    }
+  end
+
+  def path_data(parent)
+    return { groupPath: parent.path } if parent.is_a?(Group)
+
+    {
+      projectPath: ref_project.path,
+      projectNamespace: ref_project.namespace.full_path
+    }
   end
 
   def updated_at_by(issuable)
@@ -348,15 +368,6 @@ module IssuablesHelper
     end
   end
 
-  def issuable_close_reopen_button_method(issuable)
-    case issuable
-    when Issue
-      ''
-    when MergeRequest
-      'put'
-    end
-  end
-
   def issuable_author_is_current_user(issuable)
     issuable.author == current_user
   end
@@ -375,6 +386,14 @@ module IssuablesHelper
     end
   end
 
+  def issuable_squash_option?(issuable, project)
+    if issuable.persisted?
+      issuable.squash
+    else
+      project.squash_enabled_by_default?
+    end
+  end
+
   private
 
   def sidebar_gutter_collapsed?
@@ -389,6 +408,10 @@ module IssuablesHelper
       when MergeRequest
         ref_project.repository.merge_request_template_names
       end
+  end
+
+  def issuable_templates_names(issuable)
+    issuable_templates(issuable).map { |template| template[:name] }
   end
 
   def selected_template(issuable)
@@ -448,6 +471,8 @@ module IssuablesHelper
       currentUser: issuable[:current_user],
       rootPath: root_path,
       fullPath: issuable[:project_full_path],
+      iid: issuable[:iid],
+      severity: issuable[:severity],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours
     }
   end

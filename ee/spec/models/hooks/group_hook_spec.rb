@@ -2,8 +2,12 @@
 
 require 'spec_helper'
 
-describe GroupHook do
-  describe "Associations" do
+RSpec.describe GroupHook do
+  describe 'associations' do
     it { is_expected.to belong_to :group }
+  end
+
+  it_behaves_like 'includes Limitable concern' do
+    subject { build(:group_hook, group: create(:group)) }
   end
 end

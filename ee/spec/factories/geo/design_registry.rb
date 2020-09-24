@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :geo_design_registry, class: Geo::DesignRegistry do
+  factory :geo_design_registry, class: 'Geo::DesignRegistry' do
     project
     last_sync_failure { nil }
     last_synced_at { nil }
     state { :pending }
 
-    after(:create) do |registry, evaluator|
-      create(:design, project: registry.project)
+    after(:create) do |registry|
+      issue = create(:issue, project: registry.project)
+      create(:design, project: registry.project, issue: issue)
     end
 
     trait :synced do

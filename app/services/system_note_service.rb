@@ -41,8 +41,16 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_assignees(old_assignees)
   end
 
-  def change_milestone(noteable, project, author, milestone)
-    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).change_milestone(milestone)
+  def change_issuable_reviewers(issuable, project, author, old_reviewers)
+    ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_reviewers(old_reviewers)
+  end
+
+  def relate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).relate_issue(noteable_ref)
+  end
+
+  def unrelate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).unrelate_issue(noteable_ref)
   end
 
   # Called when the due_date of a Noteable is changed
@@ -60,9 +68,7 @@ module SystemNoteService
   #
   # Returns the created Note object
   def change_due_date(noteable, project, author, due_date)
-    body = due_date ? "changed due date to #{due_date.to_s(:long)}" : 'removed due date'
-
-    create_note(NoteSummary.new(noteable, project, author, body, action: 'due_date'))
+    ::SystemNotes::TimeTrackingService.new(noteable: noteable, project: project, author: author).change_due_date(due_date)
   end
 
   # Called when the estimated time of a Noteable is changed
@@ -80,14 +86,7 @@ module SystemNoteService
   #
   # Returns the created Note object
   def change_time_estimate(noteable, project, author)
-    parsed_time = Gitlab::TimeTrackingFormatter.output(noteable.time_estimate)
-    body = if noteable.time_estimate == 0
-             "removed time estimate"
-           else
-             "changed time estimate to #{parsed_time}"
-           end
-
-    create_note(NoteSummary.new(noteable, project, author, body, action: 'time_tracking'))
+    ::SystemNotes::TimeTrackingService.new(noteable: noteable, project: project, author: author).change_time_estimate
   end
 
   # Called when the spent time of a Noteable is changed
@@ -105,21 +104,11 @@ module SystemNoteService
   #
   # Returns the created Note object
   def change_time_spent(noteable, project, author)
-    time_spent = noteable.time_spent
+    ::SystemNotes::TimeTrackingService.new(noteable: noteable, project: project, author: author).change_time_spent
+  end
 
-    if time_spent == :reset
-      body = "removed time spent"
-    else
-      spent_at = noteable.spent_at
-      parsed_time = Gitlab::TimeTrackingFormatter.output(time_spent.abs)
-      action = time_spent > 0 ? 'added' : 'subtracted'
-
-      text_parts = ["#{action} #{parsed_time} of time spent"]
-      text_parts << "at #{spent_at}" if spent_at
-      body = text_parts.join(' ')
-    end
-
-    create_note(NoteSummary.new(noteable, project, author, body, action: 'time_tracking'))
+  def close_after_error_tracking_resolve(issue, project, author)
+    ::SystemNotes::IssuablesService.new(noteable: issue, project: project, author: author).close_after_error_tracking_resolve
   end
 
   def change_status(noteable, project, author, status, source = nil)
@@ -261,21 +250,76 @@ module SystemNoteService
     ::SystemNotes::ZoomService.new(noteable: issue, project: project, author: author).zoom_link_removed
   end
 
+  def auto_resolve_prometheus_alert(noteable, project, author)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).auto_resolve_prometheus_alert
+  end
+
+  # Parameters:
+  #   - version [DesignManagement::Version]
+  #
+  # Example Note text:
+  #
+  #   "added [1 designs](link-to-version)"
+  #   "changed [2 designs](link-to-version)"
+  #
+  # Returns [Array<Note>]: the created Note objects
+  def design_version_added(version)
+    ::SystemNotes::DesignManagementService.new(noteable: version.issue, project: version.issue.project, author: version.author).design_version_added(version)
+  end
+
+  # Called when a new discussion is created on a design
+  #
+  # discussion_note - DiscussionNote
+  #
+  # Example Note text:
+  #
+  #   "started a discussion on screen.png"
+  #
+  # Returns the created Note object
+  def design_discussion_added(discussion_note)
+    design = discussion_note.noteable
+
+    ::SystemNotes::DesignManagementService.new(noteable: design.issue, project: design.project, author: discussion_note.author).design_discussion_added(discussion_note)
+  end
+
+  # Called when the merge request is approved by user
+  #
+  # noteable - Noteable object
+  # user     - User performing approve
+  #
+  # Example Note text:
+  #
+  #   "approved this merge request"
+  #
+  # Returns the created Note object
+  def approve_mr(noteable, user)
+    merge_requests_service(noteable, noteable.project, user).approve_mr
+  end
+
+  def unapprove_mr(noteable, user)
+    merge_requests_service(noteable, noteable.project, user).unapprove_mr
+  end
+
+  def change_alert_status(alert, author)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).change_alert_status(alert)
+  end
+
+  def new_alert_issue(alert, issue, author)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).new_alert_issue(issue)
+  end
+
+  def create_new_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).create_new_alert(monitoring_tool)
+  end
+
+  def change_incident_severity(incident, author)
+    ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
+  end
+
   private
 
-  def create_note(note_summary)
-    note = Note.create(note_summary.note.merge(system: true))
-    note.system_note_metadata = SystemNoteMetadata.new(note_summary.metadata) if note_summary.metadata?
-
-    note
-  end
-
-  def url_helpers
-    @url_helpers ||= Gitlab::Routing.url_helpers
-  end
-
-  def content_tag(*args)
-    ActionController::Base.helpers.content_tag(*args)
+  def merge_requests_service(noteable, project, author)
+    ::SystemNotes::MergeRequestsService.new(noteable: noteable, project: project, author: author)
   end
 end
 

@@ -1,7 +1,7 @@
 .custom-project-templates
   - if custom_project_templates.present?
     - custom_project_templates.each do |template|
-      .template-option.d-flex.align-items-center.qa-template-option-row
+      .template-option.d-flex.align-items-center{ data: { qa_selector: 'template_option_row' } }
         .avatar-container.s40
           = project_icon(template, alt: template.name, class: 'btn-template-icon avatar s40 avatar-tile', lazy: false)
         .description
@@ -11,11 +11,11 @@
           .text-muted
             = template.description
         .controls.d-flex.align-items-baseline
-          %a.btn.btn-default.append-right-10{ href: project_path(template), rel: 'noopener noreferrer', target: '_blank' }
+          %a.btn.btn-default.gl-mr-3{ href: project_path(template), rel: 'noopener noreferrer', target: '_blank' }
             = _('Preview')
-          %label.btn.btn-success.custom-template-button.choose-template.append-bottom-0{ for: template.name }
+          %label.btn.btn-success.custom-template-button.choose-template.gl-mb-0{ for: template.name }
             %input{ type: "radio", autocomplete: "off", name: "project[template_project_id]", id: template.name, value: template.id, data: { template_name: template.name } }
-            %span.qa-use-template-button
+            %span{ data: { qa_selector: 'use_template_button' } }
               = _('Use template')
 
     = paginate custom_project_templates, params: {controller: 'users', action: 'available_project_templates', username: current_user.username}, theme: 'gitlab', remote: true

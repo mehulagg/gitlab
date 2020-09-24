@@ -1,7 +1,15 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy do
+RSpec.describe Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy do
   include StubRequests
+
+  before do
+    allow_next_instance_of(ProjectExportWorker) do |job|
+      allow(job).to receive(:jid).and_return(SecureRandom.hex(8))
+    end
+  end
 
   let(:example_url) { 'http://www.example.com' }
   let(:strategy) { subject.new(url: example_url, http_method: 'post') }

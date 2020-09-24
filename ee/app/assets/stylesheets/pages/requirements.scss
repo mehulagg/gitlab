@@ -1,0 +1,102 @@
+.requirements-container {
+  // Following overrides will be removed once
+  // we add filtered search bar on the page
+  // see https://gitlab.com/gitlab-org/gitlab/-/issues/212543
+  @include media-breakpoint-down(xs) {
+    .top-area {
+      border-bottom: 0;
+
+      .nav-links.mobile-separator {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .requirement-form {
+    .requirement-form-textarea {
+      line-height: $gl-line-height-24;
+      // We need `!important` here as GlFormTextarea (based on `BFormTextarea`)
+      // somehow applies inline styles ¯\_(ツ)_/¯.
+      overflow-y: auto !important;
+    }
+  }
+}
+
+.requirements-list-container {
+  .requirements-list {
+    li .issuable-main-info {
+      // These rules prevent adjecant REQ ID from wrapping
+      // when requirement title is too long.
+      flex-basis: inherit;
+      // Value `100` ensures that requirement title
+      // takes up maximum available horizontal space
+      // while still preventing REQ ID from wrapping.
+      flex-grow: 100;
+    }
+  }
+
+  .issuable-info {
+    // The size here is specific to correctly
+    // align info row perfectly with action buttons & updated date.
+    margin-top: 9px;
+  }
+
+  .controls {
+    align-items: flex-start;
+
+    @include media-breakpoint-down(xs) {
+      .requirement-archive {
+        margin-top: $gl-padding-4;
+      }
+
+      .requirement-edit {
+        margin-right: 0;
+      }
+    }
+  }
+
+  .requirements-list-loading {
+    .animation-container {
+      // This absolute height ensures that
+      // animation container takes up average height
+      // similar to a rendered requirement item.
+      height: 51px;
+
+      .skeleton-line-1 {
+        width: 70%;
+      }
+
+      .skeleton-line-2 {
+        width: 60%;
+      }
+    }
+  }
+
+  .gl-drawer {
+    width: 480px;
+    padding-left: $gl-padding;
+    padding-right: $gl-padding;
+    box-shadow: none;
+    background-color: $gray-10;
+    border-left: 1px solid $gray-100;
+
+    @include media-breakpoint-down(sm) {
+      width: 100%;
+    }
+
+    // These overrides should not happen here,
+    // we should ideally have support for custom
+    // header and body classes in `GlDrawer`.
+    .gl-drawer-header,
+    .gl-drawer-body > * {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}
+
+.requirement-status-tooltip {
+  .tooltip-inner {
+    max-width: 100%;
+  }
+}

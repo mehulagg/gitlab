@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'getting notes for an epic' do
+RSpec.describe 'getting notes for an epic' do
   let(:noteable) { create(:epic) }
 
   before do

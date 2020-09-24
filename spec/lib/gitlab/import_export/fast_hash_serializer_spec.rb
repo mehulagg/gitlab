@@ -1,21 +1,26 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::FastHashSerializer do
+RSpec.describe Gitlab::ImportExport::FastHashSerializer do
   # FastHashSerializer#execute generates the hash which is not easily accessible
   # and includes `JSONBatchRelation` items which are serialized at this point.
   # Wrapping the result into JSON generating/parsing is for making
   # the testing more convenient. Doing this, we can check that
   # all items are properly serialized while traversing the simple hash.
-  subject { JSON.parse(JSON.generate(described_class.new(project, tree).execute)) }
+  subject { Gitlab::Json.parse(Gitlab::Json.generate(described_class.new(project, tree).execute)) }
 
-  let!(:project) { setup_project }
-  let(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { setup_project }
   let(:shared) { project.import_export_shared }
   let(:reader) { Gitlab::ImportExport::Reader.new(shared: shared) }
   let(:tree) { reader.project_tree }
 
-  before do
+  before_all do
     project.add_maintainer(user)
+  end
+
+  before do
     allow_any_instance_of(MergeRequest).to receive(:source_branch_sha).and_return('ABCD')
     allow_any_instance_of(MergeRequest).to receive(:target_branch_sha).and_return('DCBA')
   end
@@ -131,16 +136,6 @@ describe Gitlab::ImportExport::FastHashSerializer do
     expect(builds_count).to eq(1)
   end
 
-  it 'has no when YML attributes but only the DB column' do
-    allow_any_instance_of(Ci::Pipeline)
-      .to receive(:ci_yaml_file)
-      .and_return(File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci.yml')))
-
-    expect_any_instance_of(Gitlab::Ci::YamlProcessor).not_to receive(:build_attributes)
-
-    subject
-  end
-
   it 'has pipeline commits' do
     expect(subject['ci_pipelines']).not_to be_empty
   end
@@ -177,14 +172,6 @@ describe Gitlab::ImportExport::FastHashSerializer do
     expect(subject['merge_requests'].first['resource_label_events']).not_to be_empty
   end
 
-  it 'saves the correct service type' do
-    expect(subject['services'].first['type']).to eq('CustomIssueTrackerService')
-  end
-
-  it 'saves the properties for a service' do
-    expect(subject['services'].first['properties']).to eq('one' => 'value')
-  end
-
   it 'has project feature' do
     project_feature = subject['project_feature']
     expect(project_feature).not_to be_empty
@@ -217,9 +204,15 @@ describe Gitlab::ImportExport::FastHashSerializer do
     expect(subject['boards'].first['lists']).not_to be_empty
   end
 
+  context 'relation ordering' do
+    it 'orders exported pipelines by primary key' do
+      expected_order = project.ci_pipelines.reorder(:id).ids
+
+      expect(subject['ci_pipelines'].pluck('id')).to eq(expected_order)
+    end
+  end
+
   def setup_project
-    issue = create(:issue, assignees: [user])
-    snippet = create(:project_snippet)
     release = create(:release)
     group = create(:group)
 
@@ -230,12 +223,13 @@ describe Gitlab::ImportExport::FastHashSerializer do
                      :wiki_enabled,
                      :builds_private,
                      description: 'description',
-                     issues: [issue],
-                     snippets: [snippet],
                      releases: [release],
                      group: group,
                      approvals_before_merge: 1
                     )
+
+    issue = create(:issue, assignees: [user], project: project)
+    snippet = create(:project_snippet, project: project)
     project_label = create(:label, project: project)
     group_label = create(:group_label, group: group)
     create(:label_link, label: project_label, target: issue)
@@ -247,6 +241,8 @@ describe Gitlab::ImportExport::FastHashSerializer do
     ci_build = create(:ci_build, project: project, when: nil)
     ci_build.pipeline.update(project: project)
     create(:commit_status, project: project, pipeline: ci_build.pipeline)
+
+    create_list(:ci_pipeline, 5, :success, project: project)
 
     create(:milestone, project: project)
     create(:discussion_note, noteable: issue, project: project)

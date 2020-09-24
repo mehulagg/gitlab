@@ -40,7 +40,7 @@
   }
 
   &.white {
-    background-color: $white-light;
+    background-color: $white;
   }
 
   &.top-block {
@@ -69,12 +69,11 @@
   &.footer-block {
     margin-top: $gl-padding-24;
     border-bottom: 0;
-    margin-bottom: -$gl-padding;
   }
 
   &.content-component-block {
     padding: 11px 0;
-    background-color: $white-light;
+    background-color: $white;
   }
 
   .title {
@@ -97,13 +96,13 @@
   }
 
   &.build-content {
-    background-color: $white-light;
+    background-color: $white;
     border-top: 0;
   }
 }
 
 .sub-header-block {
-  background-color: $white-light;
+  background-color: $white;
   border-bottom: 1px solid $white-dark;
   padding: 11px 0;
   margin-bottom: 11px;
@@ -162,18 +161,22 @@
   }
 
   .cover-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+    @include media-breakpoint-up(sm) {
+      position: absolute;
+      top: 1rem;
+      right: 1.25rem;
+    }
 
     &.left {
-      left: 10px;
-      right: auto;
+      @include media-breakpoint-up(sm) {
+        left: 1.25rem;
+        right: auto;
+      }
     }
   }
 
   &.groups-cover-block {
-    background: $white-light;
+    background: $white;
     border-bottom: 1px solid $border-color;
     text-align: left;
     padding: 24px 0;
@@ -326,11 +329,11 @@
   }
 
   .btn {
-    margin: $btn-side-margin 5px;
+    margin: $gl-padding-8 $gl-padding-4;
 
     @include media-breakpoint-down(xs) {
       width: 100%;
-      margin: $btn-side-margin 0;
+      margin: $gl-padding-8 0;
     }
   }
 }

@@ -1,6 +1,6 @@
 import Visibility from 'visibilityjs';
 import PipelineStore from './stores/pipeline_store';
-import Flash from '../flash';
+import { deprecatedCreateFlash as Flash } from '../flash';
 import Poll from '../lib/utils/poll';
 import { __ } from '../locale';
 import PipelineService from './services/pipeline_service';
@@ -35,7 +35,7 @@ export default class pipelinesMediator {
       if (!Visibility.hidden()) {
         this.poll.restart();
       } else {
-        this.poll.stop();
+        this.stopPipelinePoll();
       }
     });
   }
@@ -51,7 +51,7 @@ export default class pipelinesMediator {
   }
 
   refreshPipeline() {
-    this.poll.stop();
+    this.stopPipelinePoll();
 
     return this.service
       .getPipeline()
@@ -62,6 +62,10 @@ export default class pipelinesMediator {
           this.store.state.expandedPipelines ? this.getExpandedParameters() : undefined,
         ),
       );
+  }
+
+  stopPipelinePoll() {
+    this.poll.stop();
   }
 
   /**

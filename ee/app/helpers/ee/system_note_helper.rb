@@ -19,9 +19,11 @@ module EE
       'weight' => 'weight',
       'relate_epic' => 'epic',
       'unrelate_epic' => 'epic',
-      'designs_added' => 'doc-image',
-      'designs_modified' => 'doc-image',
-      'designs_removed' => 'doc-image'
+      'vulnerability_detected' => 'search-dot',
+      'vulnerability_confirmed' => 'shield',
+      'vulnerability_dismissed' => 'cancel',
+      'vulnerability_resolved' => 'status_closed',
+      'published' => 'bullhorn'
     }.freeze
 
     override :system_note_icon_name

@@ -1,60 +1,102 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
+---
+
 # Project import/export
 
->**Notes:**
->
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/3050) in GitLab 8.9.
-> - Importing will not be possible if the import instance version differs from
->   that of the exporter.
-> - For GitLab admins, please read through
->   [Project import/export administration](../../../administration/raketasks/project_import_export.md).
-> - For existing installations, the project import option has to be enabled in
->   application settings (`/admin/application_settings`) under 'Import sources'.
->   Ask your administrator if you don't see the **GitLab export** button when
->   creating a new project.
-> - Starting with GitLab 10.0, administrators can disable the project export option
->   on the GitLab instance in application settings (`/admin/application_settings`)
->   under 'Visibility and Access Controls'.
-> - You can find some useful raketasks if you are an administrator in the
->   [import_export](../../../administration/raketasks/project_import_export.md) raketask.
-> - The exports are stored in a temporary [shared directory](../../../development/shared_files.md)
->   and are deleted every 24 hours by a specific worker.
-> - Group members will get exported as project members, as long as the user has
->   maintainer or admin access to the group where the exported project lives. An admin
->   in the import side is required to map the users, based on email or username.
->   Otherwise, a supplementary comment is left to mention the original author and
->   the MRs, notes or issues will be owned by the importer.
-> - Project members with owner access will get imported as maintainers.
-> - Control project Import/Export with the [API](../../../api/project_import_export.md).
-> - If an imported project contains merge requests originated from forks,
->   then new branches associated with such merge requests will be created
->   within a project during the import/export. Thus, the number of branches
->   in the exported project could be bigger than in the original project.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/3050) in GitLab 8.9.
+> - From GitLab 10.0, administrators can disable the project export option on the GitLab instance.
 
-Existing projects running on any GitLab instance or GitLab.com can be exported
-with all their related data and be moved into a new GitLab instance.
+Existing projects running on any GitLab instance or GitLab.com can be exported with all their related
+data and be moved into a new GitLab instance.
+
+The **GitLab import/export** button is displayed if the project import option is enabled.
+
+See also:
+
+- [Project import/export API](../../../api/project_import_export.md)
+- [Project import/export administration Rake tasks](../../../administration/raketasks/project_import_export.md) **(CORE ONLY)**
+- [Group import/export](../../group/settings/import_export.md)
+- [Group import/export API](../../../api/group_import_export.md)
+
+To set up a project import/export:
+
+  1. Navigate to **Admin Area > Settings > Visibility and access controls**.
+  1. Scroll to **Import sources**
+  1. Enable desired **Import sources**
+
+## Important notes
+
+Note the following:
+
+- Imports from a newer version of GitLab are not supported.
+  The Importing GitLab version must be greater than or equal to the Exporting GitLab version.
+- Imports will fail unless the import and export GitLab instances are
+  compatible as described in the [Version history](#version-history).
+- Exports are stored in a temporary [shared directory](../../../development/shared_files.md)
+  and are deleted every 24 hours by a specific worker.
+- Group members are exported as project members, as long as the user has
+  maintainer or admin access to the group where the exported project lives.
+- Project members with owner access will be imported as maintainers.
+- Using an admin account to import will map users by primary email address (self-managed only).
+  Otherwise, a supplementary comment is left to mention that the original author and
+  the MRs, notes, or issues will be owned by the importer.
+- If an imported project contains merge requests originating from forks,
+  then new branches associated with such merge requests will be created
+  within a project during the import/export. Thus, the number of branches
+  in the exported project could be bigger than in the original project.
 
 ## Version history
 
-| GitLab version   | Import/Export version |
-| ---------------- | --------------------- |
-| 11.1 to current  | 0.2.4                 |
-| 10.8             | 0.2.3                 |
-| 10.4             | 0.2.2                 |
-| 10.3             | 0.2.1                 |
-| 10.0             | 0.2.0                 |
-| 9.4.0            | 0.1.8                 |
-| 9.2.0            | 0.1.7                 |
-| 8.17.0           | 0.1.6                 |
-| 8.13.0           | 0.1.5                 |
-| 8.12.0           | 0.1.4                 |
-| 8.10.3           | 0.1.3                 |
-| 8.10.0           | 0.1.2                 |
-| 8.9.5            | 0.1.1                 |
-| 8.9.0            | 0.1.0                 |
+### 13.0+
 
- > The table reflects what GitLab version we updated the Import/Export version at.
- > For instance, 8.10.3 and 8.11 will have the same Import/Export version (0.1.3)
- > and the exports between them will be compatible.
+Starting with GitLab 13.0, GitLab can import bundles that were exported from a different GitLab deployment.
+This ability is limited to two previous GitLab [minor](../../../policy/maintenance.md#versioning)
+releases, which is similar to our process for [Security Releases](../../../policy/maintenance.md#security-releases).
+
+For example:
+
+| Current version | Can import bundles exported from |
+|-----------------|----------------------------------|
+| 13.0            | 13.0, 12.10, 12.9                |
+| 13.1            | 13.1, 13.0, 12.10                |
+
+### 12.x
+
+Prior to 13.0 this was a defined compatibility table:
+
+| Exporting GitLab version   | Importing GitLab version   |
+| -------------------------- | -------------------------- |
+| 11.7 to 12.10              | 11.7 to 12.10              |
+| 11.1 to 11.6               | 11.1 to 11.6               |
+| 10.8 to 11.0               | 10.8 to 11.0               |
+| 10.4 to 10.7               | 10.4 to 10.7               |
+| 10.3                       | 10.3                       |
+| 10.0 to 10.2               | 10.0 to 10.2               |
+| 9.4 to 9.6                 | 9.4 to 9.6                 |
+| 9.2 to 9.3                 | 9.2 to 9.3                 |
+| 8.17 to 9.1                | 8.17 to 9.1                |
+| 8.13 to 8.16               | 8.13 to 8.16               |
+| 8.12                       | 8.12                       |
+| 8.10.3 to 8.11             | 8.10.3 to 8.11             |
+| 8.10.0 to 8.10.2           | 8.10.0 to 8.10.2           |
+| 8.9.5 to 8.9.11            | 8.9.5 to 8.9.11            |
+| 8.9.0 to 8.9.4             | 8.9.0 to 8.9.4             |
+
+Projects can be exported and imported only between versions of GitLab with matching Import/Export versions.
+
+For example, 8.10.3 and 8.11 have the same Import/Export version (0.1.3)
+and the exports between them will be compatible.
+
+## Between CE and EE
+
+You can export projects from the [Community Edition to the Enterprise Edition](https://about.gitlab.com/install/ce-or-ee/) and vice versa.
+This assumes [version history](#version-history) requirements are met.
+
+If you're exporting a project from the Enterprise Edition to the Community Edition, you may lose data that is retained only in the Enterprise Edition. For more information, see [downgrading from EE to CE](../../../README.md).
 
 ## Exported contents
 
@@ -62,12 +104,13 @@ The following items will be exported:
 
 - Project and wiki repositories
 - Project uploads
-- Project configuration, including services
-- Issues with comments, merge requests with diffs and comments, labels, milestones, snippets,
+- Project configuration, excluding integrations
+- Issues with comments, merge requests with diffs and comments, labels, milestones, snippets, time tracking,
   and other project entities
-- Design Management files and data **(PREMIUM)**
+- Design Management files and data
 - LFS objects
 - Issue boards
+- Pipelines history
 
 The following items will NOT be exported:
 
@@ -82,7 +125,7 @@ The following items will NOT be exported:
 
 NOTE: **Note:**
 For more details on the specific data persisted in a project export, see the
-[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/import_export.yml) file.
+[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/project/import_export.yml) file.
 
 ## Exporting a project and its data
 
@@ -100,7 +143,7 @@ For more details on the specific data persisted in a project export, see the
    ![Email download link](img/import_export_mail_link.png)
 
 1. Alternatively, you can come back to the project settings and download the
-   file from there, or generate a new export. Once the file available, the page
+   file from there, or generate a new export. Once the file is available, the page
    should show the **Download export** button:
 
    ![Download export](img/import_export_download_export.png)
@@ -123,3 +166,26 @@ NOTE: **Note:**
 If use of the `Internal` visibility level
 [is restricted](../../../public_access/public_access.md#restricting-the-use-of-public-or-internal-projects),
 all imported projects are given the visibility of `Private`.
+
+NOTE: **Note:**
+The maximum import file size can be set by the Administrator, default is 50MB.
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](../../../api/settings.md#change-application-settings) or the [Admin UI](../../admin_area/settings/account_and_limit_settings.md).
+
+### Project import status
+
+You can query an import through the [Project import/export API](../../../api/project_import_export.md#import-status).
+As described in the API documentation, the query may return an import error or exceptions.
+
+### Import large projects **(CORE ONLY)**
+
+If you have a larger project, consider using a Rake task, as described in our [developer documentation](../../../development/import_project.md#importing-via-a-rake-task).
+
+## Rate limits
+
+To help avoid abuse, users are rate limited to:
+
+| Request Type     | Limit                                     |
+| ---------------- | ----------------------------------------- |
+| Export           | 30 projects per 5 minutes                 |
+| Download export  | 10 downloads per project every 10 minutes |
+| Import           | 30 projects per 5 minutes                 |

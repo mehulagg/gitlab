@@ -1,16 +1,12 @@
 <script>
+import { GlLink, GlDeprecatedBadge as GlBadge, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import { GlButton, GlLink, GlBadge, GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
-    ProjectAvatar,
+    GlIcon,
     ReviewAppLink,
-    GlButton,
     GlBadge,
     GlLink,
   },
@@ -33,9 +29,6 @@ export default {
       default: false,
     },
   },
-  tooltips: {
-    information: s__('EnviornmentDashboard|You are looking at the last updated environment'),
-  },
   computed: {
     headerClasses() {
       return {
@@ -44,6 +37,13 @@ export default {
         'bg-light': !this.hasErrors && !this.hasPipelineFailed,
       };
     },
+  },
+  reviewButtonText: {
+    text: s__('Review App|View app'),
+    tooltip: '',
+  },
+  tooltips: {
+    information: s__('EnvironmentDashboard|You are looking at the last updated environment'),
   },
 };
 </script>
@@ -63,7 +63,7 @@ export default {
         environment.size
       }}</gl-badge>
     </div>
-    <icon
+    <gl-icon
       v-if="environment.within_folder"
       v-gl-tooltip
       :title="$options.tooltips.information"
@@ -73,6 +73,7 @@ export default {
     <review-app-link
       v-else-if="environment.external_url"
       :link="environment.external_url"
+      :display="$options.reviewButtonText"
       css-class="btn btn-default btn-sm"
     />
   </div>

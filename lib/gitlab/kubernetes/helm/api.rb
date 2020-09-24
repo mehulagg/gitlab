@@ -3,10 +3,14 @@
 module Gitlab
   module Kubernetes
     module Helm
-      class Api
+      class API
         def initialize(kubeclient)
           @kubeclient = kubeclient
-          @namespace = Gitlab::Kubernetes::Namespace.new(Gitlab::Kubernetes::Helm::NAMESPACE, kubeclient)
+          @namespace = Gitlab::Kubernetes::Namespace.new(
+            Gitlab::Kubernetes::Helm::NAMESPACE,
+            kubeclient,
+            labels: Gitlab::Kubernetes::Helm::NAMESPACE_LABELS
+          )
         end
 
         def install(command)
@@ -95,11 +99,7 @@ module Gitlab
           command.cluster_role_binding_resource.tap do |cluster_role_binding_resource|
             break unless cluster_role_binding_resource
 
-            if cluster_role_binding_exists?(cluster_role_binding_resource)
-              kubeclient.update_cluster_role_binding(cluster_role_binding_resource)
-            else
-              kubeclient.create_cluster_role_binding(cluster_role_binding_resource)
-            end
+            kubeclient.update_cluster_role_binding(cluster_role_binding_resource)
           end
         end
 

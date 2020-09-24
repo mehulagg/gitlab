@@ -11,8 +11,8 @@ export default {
       lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
 
       return (
-        this.epic.startDate.getTime() >= firstDayOfWeek.getTime() &&
-        this.epic.startDate.getTime() <= lastDayOfWeek.getTime()
+        this.startDateValues.time >= firstDayOfWeek.getTime() &&
+        this.startDateValues.time <= lastDayOfWeek.getTime()
       );
     },
     /**
@@ -26,9 +26,9 @@ export default {
     /**
      * Check if current epic ends within current week (timeline cell)
      */
-    isTimeframeUnderEndDateForWeek(timeframeItem, epicEndDate) {
+    isTimeframeUnderEndDateForWeek(timeframeItem) {
       const lastDayOfWeek = this.getLastDayOfWeek(timeframeItem);
-      return epicEndDate.getTime() <= lastDayOfWeek.getTime();
+      return this.endDateValues.time <= lastDayOfWeek.getTime();
     },
     /**
      * Return timeline bar width for current week (timeline cell) based on
@@ -53,23 +53,23 @@ export default {
      * Implementation of this method is identical to
      * MonthsPresetMixin#getTimelineBarStartOffsetForMonths
      */
-    getTimelineBarStartOffsetForWeeks() {
+    getTimelineBarStartOffsetForWeeks(roadmapItem) {
       const daysInWeek = 7;
-      const dayWidth = this.getCellWidth() / daysInWeek;
-      const startDate = this.epic.startDate.getDay() + 1;
+      const dayWidth = this.$options.cellWidth / daysInWeek;
+      const startDate = this.startDateValues.day + 1;
       const firstDayOfWeek = this.timeframeItem.getDay() + 1;
 
       if (
-        this.epic.startDateOutOfRange ||
-        (this.epic.startDateUndefined && this.epic.endDateOutOfRange)
+        roadmapItem.startDateOutOfRange ||
+        (roadmapItem.startDateUndefined && roadmapItem.endDateOutOfRange)
       ) {
         return '';
       } else if (startDate === firstDayOfWeek) {
-        /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
+        /* eslint-disable-next-line @gitlab/require-i18n-strings */
         return 'left: 0;';
       }
 
-      /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
+      /* eslint-disable-next-line @gitlab/require-i18n-strings */
       return `left: ${startDate * dayWidth - dayWidth / 2}px;`;
     },
     /**
@@ -98,24 +98,24 @@ export default {
       let timelineBarWidth = 0;
 
       const indexOfCurrentWeek = this.timeframe.indexOf(this.timeframeItem);
-      const cellWidth = this.getCellWidth();
-      const epicStartDate = this.epic.startDate;
-      const epicEndDate = this.epic.endDate;
+      const { cellWidth } = this.$options;
+      const itemStartDate = this.startDateValues;
+      const itemEndDate = this.endDateValues;
 
       for (let i = indexOfCurrentWeek; i < this.timeframe.length; i += 1) {
         if (i === indexOfCurrentWeek) {
-          if (this.isTimeframeUnderEndDateForWeek(this.timeframe[i], epicEndDate)) {
+          if (this.isTimeframeUnderEndDateForWeek(this.timeframe[i])) {
             timelineBarWidth += this.getBarWidthForSingleWeek(
               cellWidth,
-              epicEndDate.getDay() - epicStartDate.getDay() + 1,
+              itemEndDate.day - itemStartDate.day + 1,
             );
             break;
           } else {
-            const date = epicStartDate.getDay() === 0 ? 7 : 7 - epicStartDate.getDay();
+            const date = itemStartDate.day === 0 ? 7 : 7 - itemStartDate.day;
             timelineBarWidth += this.getBarWidthForSingleWeek(cellWidth, date);
           }
-        } else if (this.isTimeframeUnderEndDateForWeek(this.timeframe[i], epicEndDate)) {
-          timelineBarWidth += this.getBarWidthForSingleWeek(cellWidth, epicEndDate.getDay() + 1);
+        } else if (this.isTimeframeUnderEndDateForWeek(this.timeframe[i])) {
+          timelineBarWidth += this.getBarWidthForSingleWeek(cellWidth, itemEndDate.day + 1);
           break;
         } else {
           timelineBarWidth += this.getBarWidthForSingleWeek(cellWidth, 7);

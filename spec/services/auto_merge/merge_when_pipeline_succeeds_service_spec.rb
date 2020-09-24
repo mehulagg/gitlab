@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe AutoMerge::MergeWhenPipelineSucceedsService do
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :repository) }
+RSpec.describe AutoMerge::MergeWhenPipelineSucceedsService do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
 
   let(:mr_merge_if_green_enabled) do
     create(:merge_request, merge_when_pipeline_succeeds: true, merge_user: user,
@@ -13,12 +13,15 @@ describe AutoMerge::MergeWhenPipelineSucceedsService do
   end
 
   let(:pipeline) do
-    create(:ci_pipeline_with_one_job, ref: mr_merge_if_green_enabled.source_branch,
-                                      project: project)
+    create(:ci_pipeline, ref: mr_merge_if_green_enabled.source_branch, project: project)
   end
 
   let(:service) do
     described_class.new(project, user, commit_message: 'Awesome message')
+  end
+
+  before_all do
+    project.add_maintainer(user)
   end
 
   describe "#available_for?" do
@@ -35,8 +38,22 @@ describe AutoMerge::MergeWhenPipelineSucceedsService do
 
     it { is_expected.to be_truthy }
 
-    context 'when the head piipeline succeeded' do
+    it 'memoizes the result' do
+      expect(mr_merge_if_green_enabled).to receive(:can_be_merged_by?).once.and_call_original
+
+      2.times { is_expected.to be_truthy }
+    end
+
+    context 'when the head pipeline succeeded' do
       let(:pipeline_status) { :success }
+
+      it { is_expected.to be_falsy }
+    end
+
+    context 'when the user does not have permission to merge' do
+      before do
+        allow(mr_merge_if_green_enabled).to receive(:can_be_merged_by?) { false }
+      end
 
       it { is_expected.to be_falsy }
     end
@@ -52,6 +69,7 @@ describe AutoMerge::MergeWhenPipelineSucceedsService do
       before do
         allow(merge_request)
           .to receive_messages(head_pipeline: pipeline, actual_head_pipeline: pipeline)
+        expect(MailScheduler::NotificationServiceWorker).to receive(:perform_async).with('merge_when_pipeline_succeeds', merge_request, user).once
 
         service.execute(merge_request)
       end
@@ -89,6 +107,7 @@ describe AutoMerge::MergeWhenPipelineSucceedsService do
 
       it 'updates the merge params' do
         expect(SystemNoteService).not_to receive(:merge_when_pipeline_succeeds)
+        expect(MailScheduler::NotificationServiceWorker).not_to receive(:perform_async).with('merge_when_pipeline_succeeds', any_args)
 
         service.execute(mr_merge_if_green_enabled)
         expect(mr_merge_if_green_enabled.merge_params).to have_key('should_remove_source_branch')

@@ -6,21 +6,15 @@ module EE
       module LabelReferenceFilter
         extend ::Gitlab::Utils::Override
 
-        override :wrap_link
-        def wrap_link(link, label)
-          content = super
-          parent = project || group
+        override :data_attributes_for
+        def data_attributes_for(text, parent, object, link_content: false, link_reference: false)
+          return super unless object.scoped_label?
 
-          if label.scoped_label? && parent && parent.feature_available?(:scoped_labels)
-            presenter = label.present(issuable_parent: parent)
-            content = ::EE::LabelsHelper.scoped_label_wrapper(content, presenter)
-          end
-
-          content
-        end
-
-        def tooltip_title(label)
-          ::EE::LabelsHelper.label_tooltip_title(label)
+          # Enabling HTML tooltips for scoped labels here but we do not need to do any additional
+          # escaping because the label's tooltips are already stripped of dangerous HTML
+          super.merge!(
+            html: true
+          )
         end
       end
     end

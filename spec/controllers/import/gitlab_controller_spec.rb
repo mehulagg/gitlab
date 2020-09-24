@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Import::GitlabController do
+RSpec.describe Import::GitlabController do
   include ImportSpecHelper
 
   let(:user) { create(:user) }
@@ -20,8 +20,9 @@ describe Import::GitlabController do
 
   describe "GET callback" do
     it "updates access token" do
-      allow_any_instance_of(Gitlab::GitlabImport::Client)
-        .to receive(:get_token).and_return(token)
+      allow_next_instance_of(Gitlab::GitlabImport::Client) do |instance|
+        allow(instance).to receive(:get_token).and_return(token)
+      end
       stub_omniauth_provider('gitlab')
 
       get :callback
@@ -33,28 +34,16 @@ describe Import::GitlabController do
 
   describe "GET status" do
     before do
-      @repo = OpenStruct.new(path: 'vim', path_with_namespace: 'asd/vim')
+      @repo = OpenStruct.new(id: 1, path: 'vim', path_with_namespace: 'asd/vim', web_url: 'https://gitlab.com/asd/vim')
       assign_session_token
     end
 
-    it "assigns variables" do
-      @project = create(:project, import_type: 'gitlab', creator_id: user.id)
-      stub_client(projects: [@repo])
-
-      get :status
-
-      expect(assigns(:already_added_projects)).to eq([@project])
-      expect(assigns(:repos)).to eq([@repo])
-    end
-
-    it "does not show already added project" do
-      @project = create(:project, import_type: 'gitlab', creator_id: user.id, import_source: 'asd/vim')
-      stub_client(projects: [@repo])
-
-      get :status
-
-      expect(assigns(:already_added_projects)).to eq([@project])
-      expect(assigns(:repos)).to eq([])
+    it_behaves_like 'import controller status' do
+      let(:repo) { @repo }
+      let(:repo_id) { @repo.id }
+      let(:import_source) { @repo.path_with_namespace }
+      let(:provider_name) { 'gitlab' }
+      let(:client_repos_field) { :projects }
     end
   end
 
@@ -64,6 +53,7 @@ describe Import::GitlabController do
     let(:gitlab_user) do
       { username: gitlab_username }.with_indifferent_access
     end
+
     let(:gitlab_repo) do
       {
         path: 'vim',
@@ -85,7 +75,7 @@ describe Import::GitlabController do
 
       post :create, format: :json
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     it 'returns 422 response when the project could not be imported' do
@@ -95,7 +85,7 @@ describe Import::GitlabController do
 
       post :create, format: :json
 
-      expect(response).to have_gitlab_http_status(422)
+      expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
 
     context "when the repository owner is the GitLab.com user" do
@@ -278,9 +268,11 @@ describe Import::GitlabController do
 
           post :create, params: { target_namespace: other_namespace.name }, format: :json
 
-          expect(response).to have_gitlab_http_status(422)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
         end
       end
+
+      it_behaves_like 'project import rate limiter'
     end
   end
 end

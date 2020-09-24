@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::AvatarsController do
+RSpec.describe Groups::AvatarsController do
   include ExternalAuthorizationServiceHelpers
 
   let(:user)  { create(:user) }
@@ -25,6 +25,6 @@ describe Groups::AvatarsController do
 
     delete :destroy, params: { group_id: group }
 
-    expect(response).to have_gitlab_http_status(302)
+    expect(response).to have_gitlab_http_status(:found)
   end
 end

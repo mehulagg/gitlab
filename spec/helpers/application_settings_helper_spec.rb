@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApplicationSettingsHelper do
+RSpec.describe ApplicationSettingsHelper do
   context 'when all protocols in use' do
     before do
       stub_application_setting(enabled_git_access_protocol: '')
@@ -39,7 +39,6 @@ describe ApplicationSettingsHelper do
 
   context 'with tracking parameters' do
     it { expect(visible_attributes).to include(*%i(snowplow_collector_hostname snowplow_cookie_domain snowplow_enabled snowplow_app_id)) }
-    it { expect(visible_attributes).to include(*%i(pendo_enabled pendo_url)) }
   end
 
   describe '.integration_expanded?' do
@@ -58,6 +57,93 @@ describe ApplicationSettingsHelper do
       helper.instance_variable_set(:@application_setting, application_setting)
 
       expect(helper.integration_expanded?('plantuml_')).to be_falsey
+    end
+  end
+
+  describe '.self_monitoring_project_data' do
+    context 'when self monitoring project does not exist' do
+      it 'returns create_self_monitoring_project_path' do
+        expect(helper.self_monitoring_project_data).to include(
+          'create_self_monitoring_project_path' =>
+            create_self_monitoring_project_admin_application_settings_path
+        )
+      end
+
+      it 'returns status_create_self_monitoring_project_path' do
+        expect(helper.self_monitoring_project_data).to include(
+          'status_create_self_monitoring_project_path' =>
+            status_create_self_monitoring_project_admin_application_settings_path
+        )
+      end
+
+      it 'returns delete_self_monitoring_project_path' do
+        expect(helper.self_monitoring_project_data).to include(
+          'delete_self_monitoring_project_path' =>
+            delete_self_monitoring_project_admin_application_settings_path
+        )
+      end
+
+      it 'returns status_delete_self_monitoring_project_path' do
+        expect(helper.self_monitoring_project_data).to include(
+          'status_delete_self_monitoring_project_path' =>
+            status_delete_self_monitoring_project_admin_application_settings_path
+        )
+      end
+
+      it 'returns self_monitoring_project_exists false' do
+        expect(helper.self_monitoring_project_data).to include(
+          'self_monitoring_project_exists' => "false"
+        )
+      end
+
+      it 'returns nil for project full_path' do
+        expect(helper.self_monitoring_project_data).to include(
+          'self_monitoring_project_full_path' => nil
+        )
+      end
+    end
+
+    context 'when self monitoring project exists' do
+      let(:project) { build(:project) }
+
+      before do
+        stub_application_setting(self_monitoring_project: project)
+      end
+
+      it 'returns self_monitoring_project_exists true' do
+        expect(helper.self_monitoring_project_data).to include(
+          'self_monitoring_project_exists' => "true"
+        )
+      end
+
+      it 'returns project full_path' do
+        expect(helper.self_monitoring_project_data).to include(
+          'self_monitoring_project_full_path' => project.full_path
+        )
+      end
+    end
+  end
+
+  describe '.storage_weights' do
+    let(:application_setting) { build(:application_setting) }
+
+    before do
+      helper.instance_variable_set(:@application_setting, application_setting)
+      stub_storage_settings({ 'default': {}, 'storage_1': {}, 'storage_2': {} })
+      allow(ApplicationSetting).to receive(:repository_storages_weighted_attributes).and_return(
+        [:repository_storages_weighted_default,
+         :repository_storages_weighted_storage_1,
+         :repository_storages_weighted_storage_2])
+
+      stub_application_setting(repository_storages_weighted: { 'default' => 100, 'storage_1' => 50, 'storage_2' => nil })
+    end
+
+    it 'returns storages correctly' do
+      expect(helper.storage_weights).to eq([
+          { name: :repository_storages_weighted_default, label: 'default', value: 100 },
+          { name: :repository_storages_weighted_storage_1, label: 'storage_1', value: 50 },
+          { name: :repository_storages_weighted_storage_2, label: 'storage_2', value: 0 }
+        ])
     end
   end
 end

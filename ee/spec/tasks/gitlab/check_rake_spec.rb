@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'EE check.rake' do
+RSpec.describe 'EE check.rake' do
   before do
     Rake.application.rake_require 'ee/lib/tasks/gitlab/check', [Rails.root.to_s]
 

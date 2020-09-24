@@ -2,19 +2,21 @@
 
 require 'spec_helper'
 
-describe API::Events do
+RSpec.describe API::Events do
   let(:user) { create(:user) }
   let(:non_member) { create(:user) }
   let(:private_project) { create(:project, :private, creator_id: user.id, namespace: user.namespace) }
   let(:closed_issue) { create(:closed_issue, project: private_project, author: user) }
-  let!(:closed_issue_event) { create(:event, project: private_project, author: user, target: closed_issue, action: Event::CLOSED, created_at: Date.new(2016, 12, 30)) }
+  let!(:closed_issue_event) { create(:event, :closed, project: private_project, author: user, target: closed_issue, created_at: Date.new(2016, 12, 30)) }
+  let(:closed_issue2) { create(:closed_issue, project: private_project, author: non_member) }
+  let!(:closed_issue_event2) { create(:event, :closed, project: private_project, author: non_member, target: closed_issue2, created_at: Date.new(2016, 12, 30)) }
 
   describe 'GET /events' do
     context 'when unauthenticated' do
       it 'returns authentication error' do
         get api('/events')
 
-        expect(response).to have_gitlab_http_status(401)
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
 
@@ -22,10 +24,23 @@ describe API::Events do
       it 'returns users events' do
         get api('/events?action=closed&target_type=issue&after=2016-12-1&before=2016-12-31', user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.size).to eq(1)
+      end
+
+      context 'when scope is passed' do
+        it 'returns all events across projects' do
+          private_project.add_developer(non_member)
+
+          get api('/events?action=closed&target_type=issue&after=2016-12-1&before=2016-12-31&scope=all', user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to be_an Array
+          expect(json_response.size).to eq(2)
+        end
       end
     end
 
@@ -35,7 +50,7 @@ describe API::Events do
       it 'returns users events' do
         get api('/events?action=closed&target_type=issue&after=2016-12-1&before=2016-12-31', personal_access_token: token)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.size).to eq(1)
@@ -48,7 +63,7 @@ describe API::Events do
       it 'returns a "403" response' do
         get api('/events', personal_access_token: token_without_scopes)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end
@@ -61,7 +76,7 @@ describe API::Events do
 
         get api("/users/#{user.id}/events", non_member)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_empty
       end
     end
@@ -75,7 +90,7 @@ describe API::Events do
 
         get api("/users/#{user.id}/events", personal_access_token: non_member_token)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_empty
       end
     end
@@ -84,7 +99,7 @@ describe API::Events do
       it 'accepts a username' do
         get api("/users/#{user.username}/events", user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.size).to eq(1)
@@ -93,10 +108,30 @@ describe API::Events do
       it 'returns the events' do
         get api("/users/#{user.id}/events", user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
         expect(json_response.size).to eq(1)
+      end
+
+      context 'when the list of events includes wiki page events' do
+        it 'returns information about the wiki event', :aggregate_failures do
+          page = create(:wiki_page, project: private_project)
+          [:created, :updated, :destroyed].each do |action|
+            create(:wiki_page_event, wiki_page: page, action: action, author: user)
+          end
+
+          get api("/users/#{user.id}/events", user)
+
+          wiki_events = json_response.select { |e| e['target_type'] == 'WikiPage::Meta' }
+          action_names = wiki_events.map { |e| e['action_name'] }
+          titles = wiki_events.map { |e| e['target_title'] }
+          slugs = wiki_events.map { |e| e.dig('wiki_page', 'slug') }
+
+          expect(action_names).to contain_exactly('created', 'updated', 'destroyed')
+          expect(titles).to all(eq(page.title))
+          expect(slugs).to all(eq(page.slug))
+        end
       end
 
       context 'when the list of events includes push events' do
@@ -112,7 +147,7 @@ describe API::Events do
         end
 
         it 'responds with HTTP 200 OK' do
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'includes the push payload as a Hash' do
@@ -156,12 +191,37 @@ describe API::Events do
           expect(json_response[0]['target_id']).to eq(closed_issue.id)
         end
       end
+
+      context 'when target users profile is private' do
+        it 'returns no events' do
+          user.update!(private_profile: true)
+          private_project.add_developer(non_member)
+
+          get api("/users/#{user.username}/events", non_member)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to include_pagination_headers
+          expect(json_response).to eq([])
+        end
+      end
+
+      context 'when scope is passed' do
+        context 'when unauthenticated' do
+          it 'returns no user events' do
+            get api("/users/#{user.username}/events?scope=all")
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_an Array
+            expect(json_response.size).to eq(0)
+          end
+        end
+      end
     end
 
     it 'returns a 404 error if not found' do
       get api('/users/42/events', user)
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 User Not Found')
     end
   end

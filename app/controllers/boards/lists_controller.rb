@@ -42,7 +42,7 @@ module Boards
       list = board.lists.destroyable.find(params[:id])
       service = Boards::Lists::DestroyService.new(board_parent, current_user)
 
-      if service.execute(list)
+      if service.execute(list).success?
         head :ok
       else
         head :unprocessable_entity
@@ -53,7 +53,7 @@ module Boards
       service = Boards::Lists::GenerateService.new(board_parent, current_user)
 
       if service.execute(board)
-        lists = board.lists.movable.preload_associations
+        lists = board.lists.movable.preload_associated_models
 
         List.preload_preferences_for_user(lists, current_user)
 

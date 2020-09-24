@@ -2,18 +2,13 @@
 
 require 'spec_helper'
 
-describe Dashboard::MilestonesController do
+RSpec.describe Dashboard::MilestonesController do
   let(:project) { create(:project) }
   let(:group) { create(:group) }
   let(:user) { create(:user) }
   let(:project_milestone) { create(:milestone, project: project) }
   let(:group_milestone) { create(:milestone, group: group) }
-  let(:milestone) do
-    DashboardMilestone.build(
-      [project],
-      project_milestone.title
-    )
-  end
+  let(:milestone) { create(:milestone, group: group) }
   let(:issue) { create(:issue, project: project, milestone: project_milestone) }
   let(:group_issue) { create(:issue, milestone: group_milestone, project: create(:project, group: group)) }
 
@@ -28,22 +23,6 @@ describe Dashboard::MilestonesController do
     group.add_developer(user)
   end
 
-  it_behaves_like 'milestone tabs'
-
-  describe "#show" do
-    render_views
-
-    def view_milestone
-      get :show, params: { id: milestone.safe_title, title: milestone.title }
-    end
-
-    it 'shows milestone page' do
-      view_milestone
-
-      expect(response).to have_gitlab_http_status(200)
-    end
-  end
-
   describe "#index" do
     let(:public_group) { create(:group, :public) }
     let!(:public_milestone) { create(:milestone, group: public_group) }
@@ -55,19 +34,17 @@ describe Dashboard::MilestonesController do
     it 'returns group and project milestones to which the user belongs' do
       get :index, format: :json
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response.size).to eq(2)
       expect(json_response.map { |i| i["name"] }).to match_array([group_milestone.name, project_milestone.name])
-      expect(json_response.map { |i| i["group_name"] }.compact).to match_array(group.name)
     end
 
     it 'returns closed group and project milestones to which the user belongs' do
       get :index, params: { state: 'closed' }, format: :json
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response.size).to eq(2)
       expect(json_response.map { |i| i["name"] }).to match_array([closed_group_milestone.name, closed_project_milestone.name])
-      expect(json_response.map { |i| i["group_name"] }.compact).to match_array(group.name)
     end
 
     it 'searches legacy project milestones by title when search_title is given' do

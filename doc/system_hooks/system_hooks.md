@@ -27,7 +27,7 @@ Your GitLab instance can perform HTTP POST requests on the following events:
 - `user_remove_from_group`
 - `user_update_for_group`
 
-The triggers for most of these are self-explanatory, but `project_update` and `project_rename` deserve some clarification: `project_update` is fired any time an attribute of a project is changed (name, description, tags, etc.) *unless* the `path` attribute is also changed. In that case, a `project_rename` is triggered instead (so that, for instance, if all you care about is the repo URL, you can just listen for `project_rename`).
+The triggers for most of these are self-explanatory, but `project_update` and `project_rename` deserve some clarification: `project_update` is fired any time an attribute of a project is changed (name, description, tags, etc.) *unless* the `path` attribute is also changed. In that case, a `project_rename` is triggered instead (so that, for instance, if all you care about is the repository URL, you can just listen for `project_rename`).
 
 `user_failed_login` is sent whenever a **blocked** user attempts to login and denied access.
 
@@ -41,7 +41,7 @@ for Push and Tag events, but we never display commits.
 
 **Request header**:
 
-```
+```plaintext
 X-Gitlab-Event: System Hook
 ```
 
@@ -296,7 +296,7 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
 }
 ```
 
-`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab-foss/issues/39675>.
+`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab/-/issues/20011>.
 
 **Group removed:**
 
@@ -313,7 +313,7 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
 }
 ```
 
-`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab-foss/issues/39675>.
+`owner_name` and `owner_email` are always `null`. Please see [issue #20011](https://gitlab.com/gitlab-org/gitlab/-/issues/20011).
 
 **Group renamed:**
 
@@ -333,7 +333,7 @@ If the user is blocked via LDAP, `state` will be `ldap_blocked`.
 }
 ```
 
-`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab-foss/issues/39675>.
+`owner_name` and `owner_email` are always `null`. Please see <https://gitlab.com/gitlab-org/gitlab/-/issues/20011>.
 
 **New Group Member:**
 
@@ -396,7 +396,7 @@ It generates one event per modified branch.
 
 **Request header**:
 
-```
+```plaintext
 X-Gitlab-Event: System Hook
 ```
 
@@ -446,8 +446,8 @@ X-Gitlab-Event: System Hook
       "timestamp": "2013-05-13T18:18:08+00:00",
       "url": "https://dev.gitlab.org/gitlab/gitlabhq/commit/c5feabde2d8cd023215af4d2ceeb7a64839fc428",
       "author": {
-        "name": "Dmitriy Zaporozhets",
-        "email": "dmitriy.zaporozhets@gmail.com"
+        "name": "Example User",
+        "email": "user@example.com"
       }
     }
   ],
@@ -462,7 +462,7 @@ It generates one event per modified tag.
 
 **Request header**:
 
-```
+```plaintext
 X-Gitlab-Event: System Hook
 ```
 
@@ -516,7 +516,7 @@ updated/merged/closed or a commit is added in the source branch.
 
 **Request header**:
 
-```
+```plaintext
 X-Gitlab-Event: System Hook
 ```
 
@@ -643,7 +643,7 @@ Triggered only once when you push to the repository (including tags).
 
 **Request header**:
 
-```
+```plaintext
 X-Gitlab-Event: System Hook
 ```
 
@@ -671,7 +671,7 @@ X-Gitlab-Event: System Hook
     "homepage":"http://example.com/jsmith/example",
     "url":"git@example.com:jsmith/example.git",
     "ssh_url":"git@example.com:jsmith/example.git",
-    "http_url":"http://example.com/jsmith/example.git",
+    "http_url":"http://example.com/jsmith/example.git"
   },
   "changes": [
     {

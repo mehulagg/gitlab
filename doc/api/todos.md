@@ -1,13 +1,19 @@
-# Todos API
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-> [Introduced][ce-3188] in GitLab 8.10.
+# To-dos API
 
-## Get a list of todos
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3188) in GitLab 8.10.
 
-Returns a list of todos. When no filter is applied, it returns all pending todos
+## Get a list of to-dos
+
+Returns a list of to-dos. When no filter is applied, it returns all pending to-dos
 for the current user. Different filters allow the user to precise the request.
 
-```
+```plaintext
 GET /todos
 ```
 
@@ -15,15 +21,15 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `action` | string | no | The action to be filtered. Can be `assigned`, `mentioned`, `build_failed`, `marked`, `approval_required`, `unmergeable` or `directly_addressed`. |
+| `action` | string | no | The action to be filtered. Can be `assigned`, `mentioned`, `build_failed`, `marked`, `approval_required`, `unmergeable`, `directly_addressed` or `merge_train_removed`. |
 | `author_id` | integer | no | The ID of an author |
 | `project_id` | integer | no | The ID of a project |
 | `group_id` | integer | no | The ID of a group |
-| `state` | string | no | The state of the todo. Can be either `pending` or `done` |
-| `type` | string | no | The type of a todo. Can be either `Issue` or `MergeRequest` |
+| `state` | string | no | The state of the to-do. Can be either `pending` or `done` |
+| `type` | string | no | The type of a to-do. Can be either `Issue`, `MergeRequest`, `DesignManagement::Design` or `AlertManagement::Alert` |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/todos
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/todos"
 ```
 
 Example Response:
@@ -98,10 +104,11 @@ Example Response:
       "subscribed": true,
       "user_notes_count": 7
     },
-    "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/merge_requests/7",
+    "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/-/merge_requests/7",
     "body": "Dolores in voluptatem tenetur praesentium omnis repellendus voluptatem quaerat.",
     "state": "pending",
-    "created_at": "2016-06-17T07:52:35.225Z"
+    "created_at": "2016-06-17T07:52:35.225Z",
+    "updated_at": "2016-06-17T07:52:35.225Z"
   },
   {
     "id": 98,
@@ -171,20 +178,21 @@ Example Response:
       "subscribed": true,
       "user_notes_count": 7
     },
-    "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/merge_requests/7",
+    "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/-/merge_requests/7",
     "body": "Dolores in voluptatem tenetur praesentium omnis repellendus voluptatem quaerat.",
     "state": "pending",
-    "created_at": "2016-06-17T07:49:24.624Z"
+    "created_at": "2016-06-17T07:49:24.624Z",
+    "updated_at": "2016-06-17T07:49:24.624Z"
   }
 ]
 ```
 
-## Mark a todo as done
+## Mark a to-do as done
 
-Marks a single pending todo given by its ID for the current user as done. The
-todo marked as done is returned in the response.
+Marks a single pending to-do given by its ID for the current user as done. The
+to-do marked as done is returned in the response.
 
-```
+```plaintext
 POST /todos/:id/mark_as_done
 ```
 
@@ -192,10 +200,10 @@ Parameters:
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer | yes | The ID of a todo |
+| `id` | integer | yes | The ID of a to-do |
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/todos/130/mark_as_done
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/todos/130/mark_as_done"
 ```
 
 Example Response:
@@ -269,23 +277,22 @@ Example Response:
       "subscribed": true,
       "user_notes_count": 7
     },
-    "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/merge_requests/7",
+    "target_url": "https://gitlab.example.com/gitlab-org/gitlab-foss/-/merge_requests/7",
     "body": "Dolores in voluptatem tenetur praesentium omnis repellendus voluptatem quaerat.",
     "state": "done",
-    "created_at": "2016-06-17T07:52:35.225Z"
+    "created_at": "2016-06-17T07:52:35.225Z",
+    "updated_at": "2016-06-17T07:52:35.225Z"
 }
 ```
 
-## Mark all todos as done
+## Mark all to-dos as done
 
-Marks all pending todos for the current user as done. It returns the HTTP status code `204` with an empty response.
+Marks all pending to-dos for the current user as done. It returns the HTTP status code `204` with an empty response.
 
-```
+```plaintext
 POST /todos/mark_as_done
 ```
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/todos/mark_as_done
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/todos/mark_as_done"
 ```
-
-[ce-3188]: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/3188

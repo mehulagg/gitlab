@@ -11,7 +11,7 @@ module AutoMerge
     end
 
     def process(merge_request)
-      return unless merge_request.actual_head_pipeline&.success?
+      return unless merge_request.actual_head_pipeline_success?
       return unless merge_request.mergeable?
 
       merge_request.merge_async(merge_request.merge_user_id, merge_request.merge_params)
@@ -30,7 +30,15 @@ module AutoMerge
     end
 
     def available_for?(merge_request)
-      merge_request.actual_head_pipeline&.active?
+      super do
+        merge_request.actual_head_pipeline&.active?
+      end
+    end
+
+    private
+
+    def notify(merge_request)
+      notification_service.async.merge_when_pipeline_succeeds(merge_request, current_user) if merge_request.saved_change_to_auto_merge_enabled?
     end
   end
 end

@@ -5,36 +5,24 @@ module Geo
   #   * Handling file requests from the secondary over the API
   #   * Returning the necessary response data to send the file back
   class FileUploadService < BaseFileService
-    attr_reader :auth_header
-    include ::Gitlab::Utils::StrongMemoize
+    attr_reader :decoded_params
 
-    def initialize(params, auth_header)
+    def initialize(params, decoded_params)
       super(params[:type], params[:id])
-      @auth_header = auth_header
+
+      @decoded_params = decoded_params
     end
 
     # Returns { code: :ok, file: CarrierWave File object } upon success
     def execute
-      return unless decoded_authorization.present? && jwt_scope_valid?
-
       retriever.execute
     end
 
     def retriever
-      retriever_klass.new(object_db_id, decoded_authorization)
+      retriever_klass.new(object_db_id, decoded_params)
     end
 
     private
-
-    def jwt_scope_valid?
-      (decoded_authorization[:file_type] == object_type.to_s) && (decoded_authorization[:file_id] == object_db_id)
-    end
-
-    def decoded_authorization
-      strong_memoize(:decoded_authorization) do
-        ::Gitlab::Geo::JwtRequestDecoder.new(auth_header).decode
-      end
-    end
 
     def retriever_klass
       return Gitlab::Geo::Replication::FileRetriever if user_upload?

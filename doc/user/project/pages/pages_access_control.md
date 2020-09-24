@@ -1,17 +1,25 @@
 ---
 type: reference, howto
+stage: Release
+group: Release Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # GitLab Pages Access Control
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/33422) in GitLab 11.5.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33422) in GitLab 11.5.
 > - Available on GitLab.com in GitLab 12.4.
 
-You can enable Pages access control on your project, so that only
+You can enable Pages access control on your project
+if your administrator has [enabled the access control feature](../../../administration/pages/index.md#access-control)
+on your GitLab instance. When enabled, only
 [members of your project](../../permissions.md#project-members-permissions)
 (at least Guest) can access your website:
 
-1. Navigate to your project's **Settings > General > Permissions**.
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a demonstration, see [Pages access controls](https://www.youtube.com/watch?v=tSPAr5mQYc8).
+
+1. Navigate to your project's **Settings > General** and expand **Visibility, project features, permissions**.
 1. Toggle the **Pages** button to enable the access control.
 
    NOTE: **Note:**

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::LabelLinksImporter do
+RSpec.describe Gitlab::GithubImport::Importer::LabelLinksImporter do
   let(:project) { create(:project) }
   let(:client) { double(:client) }
   let(:issue) do
@@ -36,7 +38,7 @@ describe Gitlab::GithubImport::Importer::LabelLinksImporter do
         .to receive(:find_target_id)
         .and_return(1)
 
-      Timecop.freeze do
+      freeze_time do
         expect(Gitlab::Database)
           .to receive(:bulk_insert)
           .with(
@@ -72,9 +74,9 @@ describe Gitlab::GithubImport::Importer::LabelLinksImporter do
 
   describe '#find_target_id' do
     it 'returns the ID of the issuable to create the label link for' do
-      expect_any_instance_of(Gitlab::GithubImport::IssuableFinder)
-        .to receive(:database_id)
-        .and_return(10)
+      expect_next_instance_of(Gitlab::GithubImport::IssuableFinder) do |instance|
+        expect(instance).to receive(:database_id).and_return(10)
+      end
 
       expect(importer.find_target_id).to eq(10)
     end

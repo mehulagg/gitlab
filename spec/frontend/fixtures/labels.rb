@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Labels (JavaScript fixtures)' do
+RSpec.describe 'Labels (JavaScript fixtures)' do
   include JavaScriptFixturesHelpers
 
   let(:admin) { create(:admin) }
@@ -36,6 +36,23 @@ describe 'Labels (JavaScript fixtures)' do
       get :index, params: {
         group_id: group
       }, format: 'json'
+
+      expect(response).to be_successful
+    end
+  end
+
+  describe API::Helpers::LabelHelpers, type: :request do
+    include JavaScriptFixturesHelpers
+    include ApiHelpers
+
+    let(:user) { create(:user) }
+
+    before do
+      group.add_owner(user)
+    end
+
+    it 'api/group_labels.json' do
+      get api("/groups/#{group.id}/labels", user)
 
       expect(response).to be_successful
     end

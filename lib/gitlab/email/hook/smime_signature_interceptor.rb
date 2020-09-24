@@ -10,7 +10,9 @@ module Gitlab
             signed_message = Gitlab::Email::Smime::Signer.sign(
               cert: certificate.cert,
               key: certificate.key,
+              ca_certs: certificate.ca_certs,
               data: message.encoded)
+
             signed_email = Mail.new(signed_message)
 
             overwrite_body(message, signed_email)
@@ -20,7 +22,7 @@ module Gitlab
           private
 
           def certificate
-            @certificate ||= Gitlab::Email::Smime::Certificate.from_files(key_path, cert_path)
+            @certificate ||= Gitlab::Email::Smime::Certificate.from_files(key_path, cert_path, ca_certs_path)
           end
 
           def key_path
@@ -29,6 +31,10 @@ module Gitlab
 
           def cert_path
             Gitlab.config.gitlab.email_smime.cert_file
+          end
+
+          def ca_certs_path
+            Gitlab.config.gitlab.email_smime.ca_certs_file
           end
 
           def overwrite_body(message, signed_email)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CacheableAttributes do
+RSpec.describe CacheableAttributes do
   let(:minimal_test_class) do
     Class.new do
       include ActiveModel::Model
@@ -135,7 +135,7 @@ describe CacheableAttributes do
         end
 
         it 'returns an uncached record and logs a warning' do
-          expect(Rails.logger).to receive(:warn).with("Cached record for TestClass couldn't be loaded, falling back to uncached record: Redis::BaseError")
+          expect(Gitlab::AppLogger).to receive(:warn).with("Cached record for TestClass couldn't be loaded, falling back to uncached record: Redis::BaseError")
 
           expect(MinimalTestClass.current).to eq(:last)
         end
@@ -147,7 +147,7 @@ describe CacheableAttributes do
         end
 
         it 'returns an uncached record and logs a warning' do
-          expect(Rails.logger).not_to receive(:warn)
+          expect(Gitlab::AppLogger).not_to receive(:warn)
 
           expect { MinimalTestClass.current }.to raise_error(Redis::BaseError)
         end
@@ -205,11 +205,11 @@ describe CacheableAttributes do
       end
     end
 
-    it 'uses RequestStore in addition to Thread memory cache', :request_store do
+    it 'uses RequestStore in addition to process memory cache', :request_store do
       # Warm up the cache
       create(:application_setting).cache!
 
-      expect(ApplicationSetting.cache_backend).to eq(Gitlab::ThreadMemoryCache.cache_backend)
+      expect(ApplicationSetting.cache_backend).to eq(Gitlab::ProcessMemoryCache.cache_backend)
       expect(ApplicationSetting.cache_backend).to receive(:read).with(ApplicationSetting.cache_key).once.and_call_original
 
       2.times { ApplicationSetting.current }

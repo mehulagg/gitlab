@@ -2,30 +2,52 @@
 
 require 'spec_helper'
 
-describe Projects::UpdateService, '#execute' do
+RSpec.describe Projects::UpdateService, '#execute' do
   include EE::GeoHelpers
 
   let(:user) { create(:user) }
+  let(:admin) { create(:user, :admin) }
   let(:project) { create(:project, :repository, creator: user, namespace: user.namespace) }
 
   context 'repository mirror' do
-    let!(:opts) do
-      {
-      }
-    end
+    let(:opts) { { mirror: true, import_url: 'http://foo.com' } }
 
     before do
       stub_licensed_features(repository_mirrors: true)
     end
 
-    it 'forces an import job' do
-      opts = {
-        import_url: 'http://foo.com',
-        mirror: true,
-        mirror_user_id: user.id,
-        mirror_trigger_builds: true
-      }
+    it 'sets mirror attributes' do
+      result = update_project(project, user, opts)
 
+      expect(result).to eq(status: :success)
+      expect(project).to have_attributes(opts)
+      expect(project.mirror_user).to eq(user)
+    end
+
+    it 'does not touch mirror_user_id for non-mirror changes' do
+      result = update_project(project, user, description: 'anything')
+
+      expect(result).to eq(status: :success)
+      expect(project.mirror_user).to be_nil
+    end
+
+    it 'forbids non-admins from setting mirror_user_id explicitly' do
+      project.team.add_maintainer(admin)
+      result = update_project(project, user, opts.merge(mirror_user_id: admin.id))
+
+      expect(result).to eq(status: :error, message: 'Mirror user is invalid')
+      expect(project.mirror_user).to be_nil
+    end
+
+    it 'allows admins to set mirror_user_id' do
+      project.team.add_maintainer(admin)
+      result = update_project(project, admin, opts.merge(mirror_user_id: user.id))
+
+      expect(result).to eq(status: :success)
+      expect(project.mirror_user).to eq(user)
+    end
+
+    it 'forces an import job' do
       expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!).once
 
       update_project(project, user, opts)
@@ -47,7 +69,7 @@ describe Projects::UpdateService, '#execute' do
       }
     end
 
-    context '#name' do
+    describe '#name' do
       include_examples 'audit event logging' do
         let!(:old_name) { project.full_name }
         let(:operation) { update_project(project, user, name: 'foobar') }
@@ -67,7 +89,7 @@ describe Projects::UpdateService, '#execute' do
       end
     end
 
-    context '#path' do
+    describe '#path' do
       include_examples 'audit event logging' do
         let(:operation) { update_project(project, user, path: 'foobar1') }
         let(:fail_condition!) do
@@ -86,11 +108,12 @@ describe Projects::UpdateService, '#execute' do
       end
     end
 
-    context '#visibility' do
+    describe '#visibility' do
       include_examples 'audit event logging' do
         let(:operation) do
           update_project(project, user, visibility_level: Gitlab::VisibilityLevel::INTERNAL)
         end
+
         let(:fail_condition!) do
           allow_any_instance_of(Project).to receive(:update).and_return(false)
         end
@@ -110,8 +133,8 @@ describe Projects::UpdateService, '#execute' do
 
   context 'triggering wiki Geo syncs', :geo do
     context 'on a Geo primary' do
-      set(:primary)   { create(:geo_node, :primary) }
-      set(:secondary) { create(:geo_node) }
+      let_it_be(:primary)   { create(:geo_node, :primary) }
+      let_it_be(:secondary) { create(:geo_node) }
 
       before do
         stub_current_geo_node(primary)
@@ -119,7 +142,7 @@ describe Projects::UpdateService, '#execute' do
 
       context 'when enabling a wiki' do
         it 'creates a RepositoryUpdatedEvent' do
-          project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+          project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
           project.reload
 
           expect do
@@ -134,7 +157,7 @@ describe Projects::UpdateService, '#execute' do
       context 'when we update project but not enabling a wiki' do
         context 'when the wiki is disabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -147,7 +170,7 @@ describe Projects::UpdateService, '#execute' do
 
         context 'when the wiki was already enabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::ENABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::ENABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -166,7 +189,7 @@ describe Projects::UpdateService, '#execute' do
       end
 
       it 'does not create a RepositoryUpdatedEvent when enabling a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         project.reload
 
         expect do
@@ -176,39 +199,6 @@ describe Projects::UpdateService, '#execute' do
 
         expect(project.wiki_enabled?).to be true
       end
-    end
-  end
-
-  describe 'repository_storage' do
-    let(:admin_user) { create(:user, admin: true) }
-    let(:user) { create(:user) }
-    let(:project) { create(:project, :repository) }
-    let(:opts) { { repository_storage: 'b' } }
-
-    before do
-      FileUtils.mkdir('tmp/tests/storage_b')
-
-      storages = {
-          'default' => Gitlab.config.repositories.storages.default,
-          'b' => { 'path' => 'tmp/tests/storage_b' }
-      }
-      stub_storage_settings(storages)
-    end
-
-    after do
-      FileUtils.rm_rf('tmp/tests/storage_b')
-    end
-
-    it 'calls the change repository storage method if the storage changed' do
-      expect(project).to receive(:change_repository_storage).with('b')
-
-      update_project(project, admin_user, opts).inspect
-    end
-
-    it "doesn't call the change repository storage for non-admin users" do
-      expect(project).not_to receive(:change_repository_storage)
-
-      update_project(project, user, opts).inspect
     end
   end
 
@@ -240,7 +230,7 @@ describe Projects::UpdateService, '#execute' do
   context 'when there are merge requests in merge train' do
     before do
       stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update(merge_pipelines_enabled: true)
+      project.update!(merge_pipelines_enabled: true)
     end
 
     let!(:first_merge_request) do
@@ -264,6 +254,70 @@ describe Projects::UpdateService, '#execute' do
         expect do
           update_project(project, user, merge_pipelines_enabled: true)
         end.not_to change { MergeTrain.count }
+      end
+    end
+  end
+
+  context 'when compliance frameworks is set' do
+    let(:project_setting) { create(:compliance_framework_project_setting) }
+
+    before do
+      stub_licensed_features(compliance_framework: true)
+      project.update!(compliance_framework_setting: project_setting)
+    end
+
+    context 'when framework is not blank' do
+      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+
+      it 'saves the framework' do
+        update_project(project, user, opts)
+
+        expect(project.reload.compliance_framework_setting.framework).to eq(framework)
+      end
+    end
+
+    context 'when framework is blank' do
+      let(:opts) { { compliance_framework_setting_attributes: { framework: '' } } }
+
+      it 'removes the framework record' do
+        update_project(project, user, opts)
+
+        expect(project.reload.compliance_framework_setting).to be_nil
+      end
+    end
+  end
+
+  context 'when compliance framework feature is disabled' do
+    before do
+      stub_licensed_features(compliance_framework: false)
+    end
+
+    context 'the project had the feature before' do
+      let(:project_setting) { create(:compliance_framework_project_setting) }
+
+      before do
+        project.update!(compliance_framework_setting: project_setting)
+      end
+
+      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+
+      it 'does not save the new framework and retains the old setting' do
+        update_project(project, user, opts)
+
+        expect(project.reload.compliance_framework_setting.framework).to eq(project_setting.framework)
+      end
+    end
+
+    context 'the project never had the feature' do
+      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+
+      it 'does not save the framework' do
+        update_project(project, user, opts)
+
+        expect(project.reload.compliance_framework_setting).to be_nil
       end
     end
   end

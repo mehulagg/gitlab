@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :environment, class: Environment do
+  factory :environment, class: 'Environment' do
     sequence(:name) { |n| "environment#{n}" }
 
     association :project, :repository
     sequence(:external_url) { |n| "https://env#{n}.example.gitlab.com" }
+
+    trait :available do
+      state { :available }
+    end
+
+    trait :stopped do
+      state { :stopped }
+    end
 
     trait :with_review_app do |environment|
       transient do
@@ -43,6 +51,14 @@ FactoryBot.define do
     trait :non_playable do
       status { 'created' }
       self.when { 'manual' }
+    end
+
+    trait :auto_stoppable do
+      auto_stop_at { 1.day.ago }
+    end
+
+    trait :will_auto_stop do
+      auto_stop_at { 1.day.from_now }
     end
   end
 end

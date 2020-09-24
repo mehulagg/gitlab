@@ -1,5 +1,0 @@
----
-title: SCIM GET /Users supports requests without a filter
-merge_request: 19421
-author:
-type: changed

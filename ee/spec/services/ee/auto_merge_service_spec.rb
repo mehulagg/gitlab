@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe AutoMergeService do
-  describe '.all_strategies' do
-    subject { described_class.all_strategies }
+RSpec.describe AutoMergeService do
+  describe '.all_strategies_ordered_by_preference' do
+    subject { described_class.all_strategies_ordered_by_preference }
 
-    it 'includes all strategies' do
-      is_expected.to include(AutoMergeService::STRATEGY_MERGE_TRAIN,
-                             AutoMergeService::STRATEGY_ADD_TO_MERGE_TRAIN_WHEN_PIPELINE_SUCCEEDS)
+    it 'returns all strategies in preference order' do
+      is_expected.to eq([AutoMergeService::STRATEGY_MERGE_TRAIN,
+                         AutoMergeService::STRATEGY_ADD_TO_MERGE_TRAIN_WHEN_PIPELINE_SUCCEEDS,
+                         AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS])
     end
   end
 end

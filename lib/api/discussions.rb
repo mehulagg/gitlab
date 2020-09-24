@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Discussions < Grape::API
+  class Discussions < Grape::API::Instance
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
     helpers ::RendersNotes
@@ -26,12 +26,12 @@ module API
         end
 
         get ":id/#{noteables_path}/:noteable_id/discussions" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
 
-          notes = readable_discussion_notes(noteable)
-          discussions = Kaminari.paginate_array(Discussion.build_collection(notes, noteable))
+          discussion_ids = paginate(noteable.discussion_ids_relation)
+          notes = readable_discussion_notes(noteable, discussion_ids)
 
-          present paginate(discussions), with: Entities::Discussion
+          present Discussion.build_collection(notes, noteable), with: Entities::Discussion
         end
 
         desc "Get a single #{noteable_type.to_s.downcase} discussion" do
@@ -42,7 +42,7 @@ module API
           requires :noteable_id, types: [Integer, String], desc: 'The ID of the noteable'
         end
         get ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
           notes = readable_discussion_notes(noteable, params[:discussion_id])
 
           if notes.empty?
@@ -74,10 +74,25 @@ module API
             optional :height, type: Integer, desc: 'Height of the image'
             optional :x, type: Integer, desc: 'X coordinate in the image'
             optional :y, type: Integer, desc: 'Y coordinate in the image'
+
+            optional :line_range, type: Hash, desc: 'Multi-line start and end' do
+              optional :start, type: Hash do
+                optional :line_code, type: String, desc: 'Start line code for multi-line note'
+                optional :type, type: String, desc: 'Start line type for multi-line note'
+                optional :old_line, type: String, desc: 'Start old_line line number'
+                optional :new_line, type: String, desc: 'Start new_line line number'
+              end
+              optional :end, type: Hash do
+                optional :line_code, type: String, desc: 'End line code for multi-line note'
+                optional :type, type: String, desc: 'End line type for multi-line note'
+                optional :old_line, type: String, desc: 'End old_line line number'
+                optional :new_line, type: String, desc: 'End new_line line number'
+              end
+            end
           end
         end
         post ":id/#{noteables_path}/:noteable_id/discussions" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
           type = params[:position] ? 'DiffNote' : 'DiscussionNote'
           id_key = noteable.is_a?(Commit) ? :commit_id : :noteable_id
 
@@ -107,7 +122,7 @@ module API
           requires :noteable_id, types: [Integer, String], desc: 'The ID of the noteable'
         end
         get ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id/notes" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
           notes = readable_discussion_notes(noteable, params[:discussion_id])
 
           if notes.empty?
@@ -127,7 +142,7 @@ module API
           optional :created_at, type: String, desc: 'The creation date of the note'
         end
         post ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id/notes" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
           notes = readable_discussion_notes(noteable, params[:discussion_id])
           first_note = notes.first
 
@@ -161,7 +176,7 @@ module API
           requires :note_id, type: Integer, desc: 'The ID of a note'
         end
         get ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id/notes/:note_id" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
 
           get_note(noteable, params[:note_id])
         end
@@ -178,7 +193,7 @@ module API
           exactly_one_of :body, :resolved
         end
         put ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id/notes/:note_id" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
 
           if params[:resolved].nil?
             update_note(noteable, params[:note_id])
@@ -196,7 +211,7 @@ module API
           requires :note_id, type: Integer, desc: 'The ID of a note'
         end
         delete ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id/notes/:note_id" do
-          noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+          noteable = find_noteable(noteable_type, params[:noteable_id])
 
           delete_note(noteable, params[:note_id])
         end
@@ -211,7 +226,7 @@ module API
             requires :resolved, type: Boolean, desc: 'Mark discussion resolved/unresolved'
           end
           put ":id/#{noteables_path}/:noteable_id/discussions/:discussion_id" do
-            noteable = find_noteable(parent_type, params[:id], noteable_type, params[:noteable_id])
+            noteable = find_noteable(noteable_type, params[:noteable_id])
 
             resolve_discussion(noteable, params[:discussion_id], params[:resolved])
           end
@@ -221,16 +236,15 @@ module API
 
     helpers do
       # rubocop: disable CodeReuse/ActiveRecord
-      def readable_discussion_notes(noteable, discussion_id = nil)
+      def readable_discussion_notes(noteable, discussion_ids)
         notes = noteable.notes
-        notes = notes.where(discussion_id: discussion_id) if discussion_id
-        notes = notes
+          .where(discussion_id: discussion_ids)
           .inc_relations_for_view
           .includes(:noteable)
           .fresh
 
         # Without RendersActions#prepare_notes_for_rendering,
-        # Note#cross_reference_not_visible_for? will attempt to render
+        # Note#system_note_with_references_visible_for? will attempt to render
         # Markdown references mentioned in the note to see whether they
         # should be redacted. For notes that reference a commit, this
         # would also incur a Gitaly call to verify the commit exists.
@@ -239,7 +253,7 @@ module API
         # because notes are redacted if they point to projects that
         # cannot be accessed by the user.
         notes = prepare_notes_for_rendering(notes)
-        notes.select { |n| n.visible_for?(current_user) }
+        notes.select { |n| n.readable_by?(current_user) }
       end
       # rubocop: enable CodeReuse/ActiveRecord
     end

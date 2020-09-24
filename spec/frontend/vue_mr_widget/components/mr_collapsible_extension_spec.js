@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import MrCollapsibleSection from '~/vue_merge_request_widget/components/mr_collapsible_extension.vue';
 import { GlLoadingIcon } from '@gitlab/ui';
+import MrCollapsibleSection from '~/vue_merge_request_widget/components/mr_collapsible_extension.vue';
 
 describe('Merge Request Collapsible Extension', () => {
   let wrapper;
@@ -42,6 +42,7 @@ describe('Merge Request Collapsible Extension', () => {
     describe('onClick', () => {
       beforeEach(() => {
         wrapper.find('button').trigger('click');
+        return wrapper.vm.$nextTick();
       });
 
       it('rendes the provided slot', () => {
@@ -60,7 +61,7 @@ describe('Merge Request Collapsible Extension', () => {
 
   describe('while loading', () => {
     beforeEach(() => {
-      mountComponent(Object.assign({}, data, { isLoading: true }));
+      mountComponent({ ...data, isLoading: true });
     });
 
     it('renders the buttons disabled', () => {
@@ -85,7 +86,7 @@ describe('Merge Request Collapsible Extension', () => {
 
   describe('with error', () => {
     beforeEach(() => {
-      mountComponent(Object.assign({}, data, { hasError: true }));
+      mountComponent({ ...data, hasError: true });
     });
 
     it('does not render the buttons', () => {

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Every Geo event' do
+RSpec.describe 'Every Geo event' do
   subject { events }
 
   it 'includes Geo::Eventable' do
@@ -18,7 +18,7 @@ describe 'Every Geo event' do
     geo   = root.join('geo')
 
     events = Dir[geo.join('**', '*.rb')]
-      .select { |path| path.end_with?('_event.rb') }
+      .select { |path| path.end_with?('event.rb') }
 
     events.map! do |path|
       ns = Pathname.new(path).relative_path_from(root).to_s.gsub('.rb', '')

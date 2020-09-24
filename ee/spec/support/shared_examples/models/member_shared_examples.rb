@@ -1,17 +1,12 @@
 # frozen_string_literal: true
-require 'spec_helper'
 
-shared_examples_for 'member validations' do
+RSpec.shared_examples 'member validations' do
   describe 'validations' do
     context 'validates SSO enforcement' do
       let(:user) { create(:user) }
       let(:identity) { create(:group_saml_identity, user: user) }
       let(:group) { identity.saml_provider.group }
       let(:entity) { group }
-
-      before do
-        stub_feature_flags(enforced_sso: true)
-      end
 
       context 'enforced SSO enabled' do
         before do
@@ -35,20 +30,10 @@ shared_examples_for 'member validations' do
           let!(:subgroup) { create(:group, parent: group) }
 
           before do
-            entity.update(group: subgroup) if entity.is_a?(Project)
-          end
-
-          it 'allows adding a group member without SSO enforced on subgroup' do
-            stub_feature_flags(enforced_sso: false, group: subgroup)
-
-            member = described_class.add_user(entity, create(:user), ProjectMember::DEVELOPER)
-
-            expect(member).to be_valid
+            entity.update!(group: subgroup) if entity.is_a?(Project)
           end
 
           it 'does not allow adding a group member with SSO enforced on subgroup' do
-            stub_feature_flags(enforced_sso: true, group: subgroup)
-
             member = described_class.add_user(entity, create(:user), ProjectMember::DEVELOPER)
 
             expect(member).not_to be_valid

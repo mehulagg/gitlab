@@ -2,15 +2,16 @@
 
 require 'spec_helper'
 
-describe SentNotificationsController do
+RSpec.describe SentNotificationsController do
   let(:user) { create(:user) }
 
   context 'Unsubscribing from an epic' do
     let(:epic) do
       create(:epic, author: user) do |epic|
-        epic.subscriptions.create(user: user, project: nil, subscribed: true)
+        epic.subscriptions.create!(user: user, project: nil, subscribed: true)
       end
     end
+
     let(:sent_notification) { create(:sent_notification, project: nil, noteable: epic, recipient: user) }
 
     before do

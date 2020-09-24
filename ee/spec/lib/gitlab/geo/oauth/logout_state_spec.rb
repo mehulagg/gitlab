@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Oauth::LogoutState do
+RSpec.describe Gitlab::Geo::Oauth::LogoutState do
   let(:salt) { 'MTAwZDhjYmQxNzUw' }
   let(:tag) { 'Y0D_b1xDW3uO-qN86c83HQ==' }
   let(:return_to) { 'http://fake-secondary.com:3000/project/test' }
@@ -22,8 +22,9 @@ describe Gitlab::Geo::Oauth::LogoutState do
     end
 
     it 'returns nil when encryption fails' do
-      allow_any_instance_of(OpenSSL::Cipher::AES256)
-        .to receive(:final) { raise OpenSSL::OpenSSLError }
+      allow_next_instance_of(OpenSSL::Cipher::AES256) do |instance|
+        allow(instance).to receive(:final) { raise OpenSSL::OpenSSLError }
+      end
 
       subject = described_class.new(token: access_token, return_to: return_to)
 
@@ -77,8 +78,9 @@ describe Gitlab::Geo::Oauth::LogoutState do
     end
 
     it 'returns nil when decryption fails' do
-      allow_any_instance_of(OpenSSL::Cipher::AES256)
-        .to receive(:final) { raise OpenSSL::OpenSSLError }
+      allow_next_instance_of(OpenSSL::Cipher::AES256) do |instance|
+        allow(instance).to receive(:final) { raise OpenSSL::OpenSSLError }
+      end
 
       subject = described_class.new(salt: salt, tag: tag, token: encrypted_token, return_to: return_to)
 

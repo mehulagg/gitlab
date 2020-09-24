@@ -3,6 +3,7 @@
 class Admin::PushRulesController < Admin::ApplicationController
   before_action :check_push_rules_available!
   before_action :push_rule
+  before_action :set_application_setting
 
   respond_to :html
 
@@ -13,6 +14,7 @@ class Admin::PushRulesController < Admin::ApplicationController
     @push_rule.update(push_rule_params)
 
     if @push_rule.valid?
+      link_push_rule_to_application_settings
       redirect_to admin_push_rule_path, notice: _('Push Rule updated successfully.')
     else
       render :show
@@ -46,4 +48,14 @@ class Admin::PushRulesController < Admin::ApplicationController
     @push_rule ||= PushRule.find_or_initialize_by(is_sample: true)
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def set_application_setting
+    @application_setting = ApplicationSetting.current_without_cache
+  end
+
+  def link_push_rule_to_application_settings
+    return if @application_setting.push_rule_id
+
+    @application_setting.update(push_rule_id: @push_rule.id)
+  end
 end

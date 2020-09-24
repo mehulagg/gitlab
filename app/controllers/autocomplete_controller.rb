@@ -4,10 +4,6 @@ class AutocompleteController < ApplicationController
   skip_before_action :authenticate_user!, only: [:users, :award_emojis, :merge_request_target_branches]
 
   def users
-    project = Autocomplete::ProjectFinder
-      .new(current_user, params)
-      .execute
-
     group = Autocomplete::GroupFinder
       .new(current_user, project, params)
       .execute
@@ -40,10 +36,32 @@ class AutocompleteController < ApplicationController
   end
 
   def merge_request_target_branches
-    merge_requests = MergeRequestsFinder.new(current_user, params).execute
-    target_branches = merge_requests.recent_target_branches
+    if target_branch_params.present?
+      merge_requests = MergeRequestsFinder.new(current_user, target_branch_params).execute
+      target_branches = merge_requests.recent_target_branches
 
-    render json: target_branches.map { |target_branch| { title: target_branch } }
+      render json: target_branches.map { |target_branch| { title: target_branch } }
+    else
+      render json: { error: _('At least one of group_id or project_id must be specified') }, status: :bad_request
+    end
+  end
+
+  def deploy_keys_with_owners
+    deploy_keys = DeployKeys::CollectKeysService.new(project, current_user).execute
+
+    render json: DeployKeySerializer.new.represent(deploy_keys, { with_owner: true, user: current_user })
+  end
+
+  private
+
+  def project
+    @project ||= Autocomplete::ProjectFinder
+      .new(current_user, params)
+      .execute
+  end
+
+  def target_branch_params
+    params.permit(:group_id, :project_id).select { |_, v| v.present? }
   end
 end
 

@@ -26,6 +26,22 @@ module Gitlab
           self
         end
 
+        def url_builder
+          Gitlab::UrlBuilder.instance
+        end
+
+        def is_a?(type)
+          super || subject.is_a?(type)
+        end
+
+        def web_url
+          url_builder.build(subject)
+        end
+
+        def web_path
+          url_builder.build(subject, only_path: true)
+        end
+
         class_methods do
           def presenter?
             true

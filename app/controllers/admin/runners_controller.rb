@@ -4,7 +4,7 @@ class Admin::RunnersController < Admin::ApplicationController
   before_action :runner, except: [:index, :tag_list]
 
   def index
-    finder = Admin::RunnersFinder.new(params: params)
+    finder = Ci::RunnersFinder.new(current_user: current_user, params: params)
     @runners = finder.execute
     @active_runners_count = Ci::Runner.online.count
     @sort = finder.sort_key
@@ -17,7 +17,6 @@ class Admin::RunnersController < Admin::ApplicationController
   def update
     if Ci::UpdateRunnerService.new(@runner).update(runner_params)
       respond_to do |format|
-        format.js
         format.html { redirect_to admin_runner_path(@runner) }
       end
     else
@@ -61,12 +60,20 @@ class Admin::RunnersController < Admin::ApplicationController
   end
 
   def runner_params
-    params.require(:runner).permit(Ci::Runner::FORM_EDITABLE)
+    params.require(:runner).permit(permitted_attrs)
+  end
+
+  def permitted_attrs
+    if Gitlab.com?
+      Ci::Runner::FORM_EDITABLE + Ci::Runner::MINUTES_COST_FACTOR_FIELDS
+    else
+      Ci::Runner::FORM_EDITABLE
+    end
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def assign_builds_and_projects
-    @builds = runner.builds.order('id DESC').first(30)
+    @builds = runner.builds.order('id DESC').preload_project_and_pipeline_project.first(30)
     @projects =
       if params[:search].present?
         ::Project.search(params[:search])
@@ -75,7 +82,8 @@ class Admin::RunnersController < Admin::ApplicationController
       end
 
     @projects = @projects.where.not(id: runner.projects.select(:id)) if runner.projects.any?
-    @projects = @projects.page(params[:page]).per(30)
+    @projects = @projects.inc_routes
+    @projects = @projects.page(params[:page]).per(30).without_count
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

@@ -1,17 +1,20 @@
 # frozen_string_literal: true
 
-# A collection of Commit instances for a specific project and Git reference.
+# A collection of Commit instances for a specific container and Git reference.
 class CommitCollection
   include Enumerable
   include Gitlab::Utils::StrongMemoize
 
-  attr_reader :project, :ref, :commits
+  attr_reader :container, :ref, :commits
 
-  # project - The project the commits belong to.
+  delegate :repository, to: :container, allow_nil: true
+  delegate :project, to: :repository, allow_nil: true
+
+  # container - The object the commits belong to.
   # commits - The Commit instances to store.
   # ref - The name of the ref (e.g. "master").
-  def initialize(project, commits, ref = nil)
-    @project = project
+  def initialize(container, commits, ref = nil)
+    @container = container
     @commits = commits
     @ref = ref
   end
@@ -39,11 +42,27 @@ class CommitCollection
   # Setting the pipeline for each commit ahead of time removes the need for running
   # a query for every commit we're displaying.
   def with_latest_pipeline(ref = nil)
+    return self unless project
+
     pipelines = project.ci_pipelines.latest_pipeline_per_commit(map(&:id), ref)
 
     each do |commit|
-      commit.set_latest_pipeline_for_ref(ref, pipelines[commit.id])
+      pipeline = pipelines[commit.id]
+      pipeline&.number_of_warnings # preload number of warnings
+
+      commit.set_latest_pipeline_for_ref(ref, pipeline)
     end
+
+    self
+  end
+
+  # Returns the collection with markdown fields preloaded.
+  #
+  # Get the markdown cache from redis using pipeline to prevent n+1 requests
+  # when rendering the markdown of an attribute (e.g. title, full_title,
+  # description).
+  def with_markdown_cache
+    Commit.preload_markdown_cache!(commits)
 
     self
   end
@@ -59,16 +78,16 @@ class CommitCollection
   # Batch load any commits that are not backed by full gitaly data, and
   # replace them in the collection.
   def enrich!
-    # A project is needed in order to fetch data from gitaly. Projects
+    # A container is needed in order to fetch data from gitaly. Containers
     # can be absent from commits in certain rare situations (like when
     # viewing a MR of a deleted fork). In these cases, assume that the
     # enriched data is not needed.
-    return self if project.blank? || fully_enriched?
+    return self if container.blank? || fully_enriched?
 
     # Batch load full Commits from the repository
     # and map to a Hash of id => Commit
     replacements = Hash[unenriched.map do |c|
-      [c.id, Commit.lazy(project, c.id)]
+      [c.id, Commit.lazy(container, c.id)]
     end.compact]
 
     # Replace the commits, keeping the same order

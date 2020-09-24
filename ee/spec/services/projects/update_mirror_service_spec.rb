@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::UpdateMirrorService do
+RSpec.describe Projects::UpdateMirrorService do
   let(:project) do
     create(:project, :repository, :mirror, import_url: Project::UNKNOWN_IMPORT_URL, only_mirror_protected_branches: false)
   end
@@ -52,6 +52,40 @@ describe Projects::UpdateMirrorService do
       expect(new_project.only_mirror_protected_branches).to be_falsey
     end
 
+    context 'when mirror user is blocked' do
+      before do
+        project.mirror_user.block
+      end
+
+      it 'fails and returns error status' do
+        expect(service.execute[:status]).to eq(:error)
+      end
+    end
+
+    context "when the URL is blocked" do
+      before do
+        allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(true)
+
+        stub_fetch_mirror(project)
+      end
+
+      it "fails and returns error status" do
+        expect(service.execute[:status]).to eq(:error)
+      end
+    end
+
+    context "when given URLs containing escaped elements" do
+      it_behaves_like "URLs containing escaped elements return expected status" do
+        let(:result) { service.execute }
+
+        before do
+          allow(project).to receive(:import_url).and_return(url)
+
+          stub_fetch_mirror(project)
+        end
+      end
+    end
+
     context "updating tags" do
       it "creates new tags" do
         stub_fetch_mirror(project)
@@ -97,6 +131,8 @@ describe Projects::UpdateMirrorService do
 
       before do
         allow(project).to receive(:import_url).and_return(mirror_path)
+
+        allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(false)
       end
 
       context 'when mirror_overwrites_diverged_branches is true' do
@@ -179,7 +215,7 @@ describe Projects::UpdateMirrorService do
             let(:protected_branch_name) { "#{branch_prefix}existing-branch" }
 
             before do
-              project.update(only_mirror_protected_branches: true)
+              project.update!(only_mirror_protected_branches: true)
             end
 
             it 'creates a new protected branch' do
@@ -259,7 +295,7 @@ describe Projects::UpdateMirrorService do
             repository = project.repository
 
             allow(project).to receive(:fetch_mirror) { create_file(repository) }
-            expect(CreateBranchService).not_to receive(:create_master_branch)
+            expect(::Branches::CreateService).not_to receive(:create_master_branch)
 
             service.execute
 
@@ -272,7 +308,7 @@ describe Projects::UpdateMirrorService do
         let(:pull_mirror_branch_prefix) { 'upstream/' }
 
         before do
-          project.update(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
+          project.update!(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
         end
 
         it "doesn't create unprefixed branches" do
@@ -315,60 +351,80 @@ describe Projects::UpdateMirrorService do
       end
     end
 
-    context 'updating Lfs objects' do
-      before do
-        stub_fetch_mirror(project)
-      end
-
-      context 'when Lfs is disabled in the project' do
-        it 'does not update Lfs objects' do
-          allow(project).to receive(:lfs_enabled?).and_return(false)
-          expect(Projects::LfsPointers::LfsObjectDownloadListService).not_to receive(:new)
-
-          service.execute
-        end
-      end
-
-      context 'when Lfs is enabled in the project' do
+    context 'updating LFS objects' do
+      context 'when repository does not change' do
         before do
           allow(project).to receive(:lfs_enabled?).and_return(true)
         end
 
-        it 'updates Lfs objects' do
-          expect(Projects::LfsPointers::LfsImportService).to receive(:new).and_call_original
-          expect_any_instance_of(Projects::LfsPointers::LfsObjectDownloadListService).to receive(:execute).and_return({})
+        it 'does not attempt to update LFS objects' do
+          expect(Projects::LfsPointers::LfsImportService).not_to receive(:new)
 
           service.execute
         end
+      end
 
-        context 'when Lfs import fails' do
-          let(:error_message) { 'error_message' }
+      context 'when repository changes' do
+        before do
+          stub_fetch_mirror(project)
+        end
 
+        context 'when Lfs is disabled in the project' do
+          it 'does not update LFS objects' do
+            allow(project).to receive(:lfs_enabled?).and_return(false)
+            expect(Projects::LfsPointers::LfsObjectDownloadListService).not_to receive(:new)
+
+            service.execute
+          end
+        end
+
+        context 'when Lfs is enabled in the project' do
           before do
-            expect_any_instance_of(Projects::LfsPointers::LfsImportService).to receive(:execute).and_return(status: :error, message: error_message)
+            allow(project).to receive(:lfs_enabled?).and_return(true)
           end
 
-          # Uncomment once https://gitlab.com/gitlab-org/gitlab-foss/issues/61834 is closed
-          # it 'fails mirror operation' do
-          #   expect_any_instance_of(Projects::LfsPointers::LfsImportService).to receive(:execute).and_return(status: :error, message: 'error message')
+          it 'updates LFS objects' do
+            expect(Projects::LfsPointers::LfsImportService).to receive(:new).and_call_original
+            expect_next_instance_of(Projects::LfsPointers::LfsObjectDownloadListService) do |instance|
+              expect(instance).to receive(:execute).and_return({})
+            end
 
-          #   result = subject.execute
-
-          #   expect(result[:status]).to eq :error
-          #   expect(result[:message]).to eq 'error message'
-          # end
-
-          # Remove once https://gitlab.com/gitlab-org/gitlab-foss/issues/61834 is closed
-          it 'does not fail mirror operation' do
-            result = subject.execute
-
-            expect(result[:status]).to eq :success
+            service.execute
           end
 
-          it 'logs the error' do
-            expect_any_instance_of(Gitlab::UpdateMirrorServiceJsonLogger).to receive(:error).with(hash_including(error_message: error_message))
+          context 'when Lfs import fails' do
+            let(:error_message) { 'error_message' }
 
-            subject.execute
+            before do
+              expect_next_instance_of(Projects::LfsPointers::LfsImportService) do |instance|
+                expect(instance).to receive(:execute).and_return(status: :error, message: error_message)
+              end
+            end
+
+            # Uncomment once https://gitlab.com/gitlab-org/gitlab-foss/issues/61834 is closed
+            # it 'fails mirror operation' do
+            #   expect_any_instance_of(Projects::LfsPointers::LfsImportService).to receive(:execute).and_return(status: :error, message: 'error message')
+
+            #   result = subject.execute
+
+            #   expect(result[:status]).to eq :error
+            #   expect(result[:message]).to eq 'error message'
+            # end
+
+            # Remove once https://gitlab.com/gitlab-org/gitlab-foss/issues/61834 is closed
+            it 'does not fail mirror operation' do
+              result = subject.execute
+
+              expect(result[:status]).to eq :success
+            end
+
+            it 'logs the error' do
+              expect_next_instance_of(Gitlab::UpdateMirrorServiceJsonLogger) do |instance|
+                expect(instance).to receive(:error).with(hash_including(error_message: error_message))
+              end
+
+              subject.execute
+            end
           end
         end
       end

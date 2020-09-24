@@ -4,6 +4,8 @@ Automate GitLab via a simple and powerful API.
 
 The main GitLab API is a [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) API. Therefore, documentation in this section assumes knowledge of REST concepts.
 
+There is also a partial [OpenAPI definition](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/api/openapi/openapi.yaml), which allows you to test the API directly from the GitLab user interface. Contributions are welcome.
+
 ## Available API resources
 
 For a list of the available resources and their endpoints, see
@@ -53,12 +55,12 @@ between v3 and v4; please read the [v3 to v4 documentation](v3_to_v4.md)
 ### Current status
 
 Currently only API version v4 is available. Version v3 was removed in
-[GitLab 11.0](https://gitlab.com/gitlab-org/gitlab-foss/issues/36819).
+[GitLab 11.0](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36819).
 
 ## Basic usage
 
 API requests should be prefixed with `api` and the API version. The API version
-is defined in [`lib/api.rb`][lib-api-url]. For example, the root of the v4 API
+is defined in [`lib/api.rb`](https://gitlab.com/gitlab-org/gitlab/tree/master/lib/api/api.rb). For example, the root of the v4 API
 is at `/api/v4`.
 
 Example of a valid API request using cURL:
@@ -75,14 +77,15 @@ end of an API URL.
 Most API requests require authentication, or will only return public data when
 authentication is not provided. For
 those cases where it is not required, this will be mentioned in the documentation
-for each individual endpoint. For example, the [`/projects/:id` endpoint](projects.md).
+for each individual endpoint. For example, the [`/projects/:id` endpoint](projects.md#get-single-project).
 
-There are four ways to authenticate with the GitLab API:
+There are several ways to authenticate with the GitLab API:
 
 1. [OAuth2 tokens](#oauth2-tokens)
-1. [Personal access tokens](#personal-access-tokens)
+1. [Personal access tokens](../user/profile/personal_access_tokens.md)
+1. [Project access tokens](../user/project/settings/project_access_tokens.md) **(CORE ONLY)**
 1. [Session cookie](#session-cookie)
-1. [GitLab CI job token](#gitlab-ci-job-token-premium) **(PREMIUM)**
+1. [GitLab CI/CD job token](#gitlab-ci-job-token) **(Specific endpoints only)**
 
 For admins who want to authenticate with the API as a specific user, or who want to build applications or scripts that do so, two options are available:
 
@@ -106,41 +109,39 @@ You can use an [OAuth2 token](oauth2.md) to authenticate with the API by passing
 Example of using the OAuth2 token in a parameter:
 
 ```shell
-curl https://gitlab.example.com/api/v4/projects?access_token=OAUTH-TOKEN
+curl "https://gitlab.example.com/api/v4/projects?access_token=OAUTH-TOKEN"
 ```
 
 Example of using the OAuth2 token in a header:
 
 ```shell
-curl --header "Authorization: Bearer OAUTH-TOKEN" https://gitlab.example.com/api/v4/projects
+curl --header "Authorization: Bearer OAUTH-TOKEN" "https://gitlab.example.com/api/v4/projects"
 ```
 
 Read more about [GitLab as an OAuth2 provider](oauth2.md).
 
-### Personal access tokens
+### Personal/project access tokens
 
-You can use a [personal access token][pat] to authenticate with the API by passing it in either the
-`private_token` parameter or the `Private-Token` header.
+Access tokens can be used to authenticate with the API by passing it in either the `private_token` parameter
+or the `PRIVATE-TOKEN` header.
 
-Example of using the personal access token in a parameter:
-
-```shell
-curl https://gitlab.example.com/api/v4/projects?private_token=<your_access_token>
-```
-
-Example of using the personal access token in a header:
+Example of using the personal/project access token in a parameter:
 
 ```shell
-curl --header "Private-Token: <your_access_token>" https://gitlab.example.com/api/v4/projects
+curl "https://gitlab.example.com/api/v4/projects?private_token=<your_access_token>"
 ```
 
-You can also use personal access tokens with OAuth-compliant headers:
+Example of using the personal/project access token in a header:
 
 ```shell
-curl --header "Authorization: Bearer <your_access_token>" https://gitlab.example.com/api/v4/projects
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects"
 ```
 
-Read more about [personal access tokens][pat].
+You can also use personal/project access tokens with OAuth-compliant headers:
+
+```shell
+curl --header "Authorization: Bearer <your_access_token>" "https://gitlab.example.com/api/v4/projects"
+```
 
 ### Session cookie
 
@@ -152,19 +153,20 @@ The primary user of this authentication method is the web frontend of GitLab its
 which can use the API as the authenticated user to get a list of their projects,
 for example, without needing to explicitly pass an access token.
 
-### GitLab CI job token **(PREMIUM)**
+### GitLab CI job token
 
-With a few API endpoints you can use a [GitLab CI job token](../user/project/new_ci_build_permissions_model.md#job-token)
+With a few API endpoints you can use a [GitLab CI/CD job token](../user/project/new_ci_build_permissions_model.md#job-token)
 to authenticate with the API:
 
-- [Get job artifacts](jobs.md#get-job-artifacts)
+- [Get job artifacts](job_artifacts.md#get-job-artifacts)
 - [Pipeline triggers](pipeline_triggers.md)
+- [Release creation](releases/index.md#create-a-release)
 
 ### Impersonation tokens
 
-> [Introduced][ce-9099] in GitLab 9.0. Needs admin permissions.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/9099) in GitLab 9.0. Needs admin permissions.
 
-Impersonation tokens are a type of [personal access token][pat]
+Impersonation tokens are a type of [personal access token](../user/profile/personal_access_tokens.md)
 that can only be created by an admin for a specific user. They are a great fit
 if you want to build applications or scripts that authenticate with the API as a specific user.
 
@@ -176,12 +178,11 @@ For more information, refer to the
 [users API](users.md#create-an-impersonation-token) docs.
 
 Impersonation tokens are used exactly like regular personal access tokens, and can be passed in either the
-`private_token` parameter or the `Private-Token` header.
+`private_token` parameter or the `PRIVATE-TOKEN` header.
 
 #### Disable impersonation
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/40385) in GitLab
-11.6.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/40385) in GitLab 11.6.
 
 By default, impersonation is enabled. To disable impersonation:
 
@@ -219,6 +220,7 @@ Only available to [administrators](../user/permissions.md).
 
 All API requests support performing an API call as if you were another user,
 provided you are authenticated as an administrator with an OAuth or Personal Access Token that has the `sudo` scope.
+The API requests are executed with the permissions of the impersonated user.
 
 You need to pass the `sudo` parameter either via query string or a header with an ID/username of
 the user you want to perform the operation as. If passed as a header, the
@@ -259,23 +261,23 @@ returned with status code `404`:
 Example of a valid API call and a request using cURL with sudo request,
 providing a username:
 
-```
+```plaintext
 GET /projects?private_token=<your_access_token>&sudo=username
 ```
 
 ```shell
-curl --header "Private-Token: <your_access_token>" --header "Sudo: username" "https://gitlab.example.com/api/v4/projects"
+curl --header "PRIVATE-TOKEN: <your_access_token>" --header "Sudo: username" "https://gitlab.example.com/api/v4/projects"
 ```
 
 Example of a valid API call and a request using cURL with sudo request,
 providing an ID:
 
-```
+```plaintext
 GET /projects?private_token=<your_access_token>&sudo=23
 ```
 
 ```shell
-curl --header "Private-Token: <your_access_token>" --header "Sudo: 23" "https://gitlab.example.com/api/v4/projects"
+curl --header "PRIVATE-TOKEN: <your_access_token>" --header "Sudo: 23" "https://gitlab.example.com/api/v4/projects"
 ```
 
 ## Status codes
@@ -313,6 +315,17 @@ The following table shows the possible return codes for API requests.
 
 ## Pagination
 
+We support two kinds of pagination methods:
+
+- Offset-based pagination. This is the default method and available on all endpoints.
+- Keyset-based pagination. Added to selected endpoints but being
+  [progressively rolled out](https://gitlab.com/groups/gitlab-org/-/epics/2039).
+
+For large collections, we recommend keyset pagination (when available) over offset
+pagination for performance reasons.
+
+### Offset-based pagination
+
 Sometimes the returned result will span across many pages. When listing
 resources you can pass the following parameters:
 
@@ -323,27 +336,30 @@ resources you can pass the following parameters:
 
 In the example below, we list 50 [namespaces](namespaces.md) per page.
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces?per_page=50
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces?per_page=50"
 ```
 
-### Pagination Link header
+#### Pagination `Link` header
 
-[Link headers](https://www.w3.org/wiki/LinkHeader) are sent back with each
-response. They have `rel` set to prev/next/first/last and contain the relevant
-URL. Please use these links instead of generating your own URLs.
+[`Link` headers](https://www.w3.org/wiki/LinkHeader) are returned with each
+response. They have `rel` set to `prev`/`next`/`first`/`last` and contain the
+relevant URL. Be sure to use these links instead of generating your own URLs.
+
+NOTE: **Note:**
+For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).
 
 In the cURL example below, we limit the output to 3 items per page (`per_page=3`)
 and we request the second page (`page=2`) of [comments](notes.md) of the issue
-with ID `8` which belongs to the project with ID `8`:
+with ID `8` which belongs to the project with ID `9`:
 
-```bash
-curl --head --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/8/issues/8/notes?per_page=3&page=2
+```shell
+curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/issues/8/notes?per_page=3&page=2"
 ```
 
 The response will then be:
 
-```
+```http
 HTTP/1.1 200 OK
 Cache-Control: no-cache
 Content-Length: 1103
@@ -362,26 +378,93 @@ X-Total: 8
 X-Total-Pages: 3
 ```
 
-### Other pagination headers
+#### Other pagination headers
 
-Additional pagination headers are also sent back.
+GitLab also returns the following additional pagination headers:
 
-| Header | Description |
-| ------ | ----------- |
-| `X-Total`       | The total number of items |
-| `X-Total-Pages` | The total number of pages |
-| `X-Per-Page`    | The number of items per page |
+| Header          | Description                                   |
+| --------------- | --------------------------------------------- |
+| `X-Total`       | The total number of items                     |
+| `X-Total-Pages` | The total number of pages                     |
+| `X-Per-Page`    | The number of items per page                  |
 | `X-Page`        | The index of the current page (starting at 1) |
-| `X-Next-Page`   | The index of the next page |
-| `X-Prev-Page`   | The index of the previous page |
+| `X-Next-Page`   | The index of the next page                    |
+| `X-Prev-Page`   | The index of the previous page                |
 
-CAUTION: **Caution:**
-For performance reasons since
-[GitLab 11.8](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/23931)
-and **behind the `api_kaminari_count_with_limit`
-[feature flag](../development/feature_flags.md)**, if the number of resources is
-more than 10,000, the `X-Total` and `X-Total-Pages` headers as well as the
-`rel="last"` `Link` are not present in the response headers.
+NOTE: **Note:**
+For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).
+
+### Keyset-based pagination
+
+Keyset-pagination allows for more efficient retrieval of pages and - in contrast to offset-based pagination - runtime
+is independent of the size of the collection.
+
+This method is controlled by the following parameters:
+
+| Parameter    | Description                            |
+| ------------ | -------------------------------------- |
+| `pagination` | `keyset` (to enable keyset pagination) |
+| `per_page`   | Number of items to list per page (default: `20`, max: `100`) |
+
+In the example below, we list 50 [projects](projects.md) per page, ordered by `id` ascending.
+
+```shell
+curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects?pagination=keyset&per_page=50&order_by=id&sort=asc"
+```
+
+The response header includes a link to the next page. For example:
+
+```http
+HTTP/1.1 200 OK
+...
+Links: <https://gitlab.example.com/api/v4/projects?pagination=keyset&per_page=50&order_by=id&sort=asc&id_after=42>; rel="next"
+Link: <https://gitlab.example.com/api/v4/projects?pagination=keyset&per_page=50&order_by=id&sort=asc&id_after=42>; rel="next"
+Status: 200 OK
+...
+```
+
+CAUTION: **Deprecation:**
+The `Links` header will be removed in GitLab 14.0 to be aligned with the [W3C `Link` specification](https://www.w3.org/wiki/LinkHeader).
+The `Link` header was [added in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33714)
+and should be used instead.
+
+The link to the next page contains an additional filter `id_after=42` which excludes records we have retrieved already.
+Note the type of filter depends on the `order_by` option used and we may have more than one additional filter.
+
+When the end of the collection has been reached and there are no additional records to retrieve, the `Link` header is absent and the resulting array is empty.
+
+We recommend using only the given link to retrieve the next page instead of building your own URL. Apart from the headers shown,
+we don't expose additional pagination headers.
+
+Keyset-based pagination is only supported for selected resources and ordering options:
+
+| Resource                  | Order                      |
+| ------------------------- | -------------------------- |
+| [Projects](projects.md)   | `order_by=id` only         |
+
+## Path parameters
+
+If an endpoint has path parameters, the documentation shows them with a preceding colon.
+
+For example:
+
+```plaintext
+DELETE /projects/:id/share/:group_id
+```
+
+The `:id` path parameter needs to be replaced with the project ID, and the `:group_id` needs to be replaced with the ID of the group. The colons `:` should not be included.
+
+The resulting cURL call for a project with ID `5` and a group ID of `17` is then:
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/share/17"
+```
+
+NOTE: **Note:**
+Path parameters that are required to be URL-encoded must be followed. If not,
+it will not match an API endpoint and respond with a 404. If there's something
+in front of the API (for example, Apache), ensure that it won't decode the URL-encoded
+path parameters.
 
 ## Namespaced path encoding
 
@@ -390,25 +473,48 @@ URL-encoded.
 
 For example, `/` is represented by `%2F`:
 
-```
+```plaintext
 GET /api/v4/projects/diaspora%2Fdiaspora
 ```
 
 NOTE: **Note:**
-A project's **path** is not necessarily the same as its **name**.  A
+A project's **path** is not necessarily the same as its **name**. A
 project's path can be found in the project's URL or in the project's settings
 under **General > Advanced > Change path**.
 
-## Branches and tags name encoding
+## File path, branches, and tags name encoding
 
-If your branch or tag contains a `/`, make sure the branch/tag name is
-URL-encoded.
+If a file path, branch or tag contains a `/`, make sure it is URL-encoded.
 
 For example, `/` is represented by `%2F`:
 
-```
+```plaintext
+GET /api/v4/projects/1/repository/files/src%2FREADME.md?ref=master
 GET /api/v4/projects/1/branches/my%2Fbranch/commits
+GET /api/v4/projects/1/repository/tags/my%2Ftag
 ```
+
+## Request Payload
+
+API Requests can use parameters sent as [query strings](https://en.wikipedia.org/wiki/Query_string)
+or as a [payload body](https://tools.ietf.org/html/draft-ietf-httpbis-p3-payload-14#section-3.2).
+GET requests usually send a query string, while PUT/POST requests usually send the payload body:
+
+- Query string:
+
+  ```shell
+  curl --request POST "https://gitlab/api/v4/projects?name=<example-name>&description=<example-description>"
+  ```
+
+- Request payload (JSON):
+
+  ```shell
+  curl --request POST --header "Content-Type: application/json" --data '{"name":"<example-name>", "description":"<example-description"}' "https://gitlab/api/v4/projects"
+  ```
+
+URL encoded query strings have a length limitation. Requests that are too large will
+result in a `414 Request-URI Too Large` error message. This can be resolved by using
+a payload body instead.
 
 ## Encoding API parameters of `array` and `hash` types
 
@@ -418,7 +524,7 @@ We can call the API with `array` and `hash` types parameters as shown below:
 
 `import_sources` is a parameter of type `array`:
 
-```bash
+```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 -d "import_sources[]=github" \
 -d "import_sources[]=bitbucket" \
@@ -429,7 +535,7 @@ https://gitlab.example.com/api/v4/some_endpoint
 
 `override_params` is a parameter of type `hash`:
 
-```bash
+```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 --form "namespace=email" \
 --form "path=impapi" \
@@ -441,13 +547,13 @@ https://gitlab.example.com/api/v4/projects/import
 
 ### Array of hashes
 
-`variables` is a parameter of type `array` containing hash key/value pairs `[{ 'key' => 'UPLOAD_TO_S3', 'value' => 'true' }]`:
+`variables` is a parameter of type `array` containing hash key/value pairs `[{ 'key': 'UPLOAD_TO_S3', 'value': 'true' }]`:
 
-```bash
-curl --globoff --request POST --header "PRIVATE-TOKEN: ********************" \
+```shell
+curl --globoff --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 "https://gitlab.example.com/api/v4/projects/169/pipeline?ref=master&variables[][key]=VAR1&variables[][value]=hello&variables[][key]=VAR2&variables[][value]=world"
 
-curl --request POST --header "PRIVATE-TOKEN: ********************" \
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 --header "Content-Type: application/json" \
 --data '{ "ref": "master", "variables": [ {"key": "VAR1", "value": "hello"}, {"key": "VAR2", "value": "world"} ] }' \
 "https://gitlab.example.com/api/v4/projects/169/pipeline"
@@ -486,7 +592,7 @@ Such errors appear in two cases:
 
 When an attribute is missing, you will get something like:
 
-```
+```http
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
 {
@@ -497,7 +603,7 @@ Content-Type: application/json
 When a validation error occurs, error messages will be different. They will
 hold all details of validation errors:
 
-```
+```http
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
 {
@@ -533,9 +639,9 @@ follows:
 
 ## Unknown route
 
-When you try to access an API URL that does not exist you will receive 404 Not Found.
+When you try to access an API URL that does not exist, you will receive 404 Not Found.
 
-```
+```http
 HTTP/1.1 404 Not Found
 Content-Type: application/json
 {
@@ -550,13 +656,13 @@ to a [W3 recommendation](http://www.w3.org/Addressing/URL/4_URI_Recommentations.
 causes a `+` to be interpreted as a space. For example, in an ISO 8601 date, you may want to pass
 a time in Mountain Standard Time, such as:
 
-```
+```plaintext
 2017-10-17T23:11:13.000+05:30
 ```
 
 The correct encoding for the query parameter would be:
 
-```
+```plaintext
 2017-10-17T23:11:13.000%2B05:30
 ```
 
@@ -571,9 +677,3 @@ For administrator documentation on rate limit settings, see
 [Rate limits](../security/rate_limits.md). To find the settings that are
 specifically used by GitLab.com, see
 [GitLab.com-specific rate limits](../user/gitlab_com/index.md#gitlabcom-specific-rate-limits).
-
-[lib-api-url]: https://gitlab.com/gitlab-org/gitlab-foss/tree/master/lib/api/api.rb
-[ce-3749]: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/3749
-[ce-5951]: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/5951
-[ce-9099]: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/9099
-[pat]: ../user/profile/personal_access_tokens.md

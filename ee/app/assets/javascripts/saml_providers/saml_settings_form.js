@@ -4,53 +4,83 @@ import DirtyFormChecker from './dirty_form_checker';
 import setupToggleButtons from '~/toggle_buttons';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
-const toggleIfEnabled = (samlSetting, toggle) => {
-  if (samlSetting) toggle.click();
-};
+const CALLOUT_SELECTOR = '.js-callout';
+const HELPER_SELECTOR = '.js-helper-text';
+const TOGGLE_SELECTOR = '.js-project-feature-toggle';
+
+function getHelperText(el) {
+  return el.parentNode.querySelector(HELPER_SELECTOR);
+}
+
+function getCallout(el) {
+  return el.parentNode.querySelector(CALLOUT_SELECTOR);
+}
+
+function getToggle(el) {
+  return el.querySelector(TOGGLE_SELECTOR);
+}
 
 export default class SamlSettingsForm {
   constructor(formSelector) {
     this.form = document.querySelector(formSelector);
-    this.samlEnabledToggleArea = this.form.querySelector('.js-group-saml-enabled-toggle-area');
-    this.samlProviderEnabledInput = this.form.querySelector('.js-group-saml-enabled-input');
-    this.samlEnforcedSSOToggleArea = this.form.querySelector(
-      '.js-group-saml-enforced-sso-toggle-area',
-    );
-    this.samlEnforcedSSOInput = this.form.querySelector('.js-group-saml-enforced-sso-input');
-    this.samlEnforcedSSOToggle = this.form.querySelector('.js-group-saml-enforced-sso-toggle');
-    this.samlEnforcedSSOHelperText = this.form.querySelector(
-      '.js-group-saml-enforced-sso-helper-text',
-    );
-    this.samlEnforcedGroupManagedAccountsToggleArea = this.form.querySelector(
-      '.js-group-saml-enforced-group-managed-accounts-toggle-area',
-    );
-    this.samlEnforcedGroupManagedAccountsInput = this.form.querySelector(
-      '.js-group-saml-enforced-group-managed-accounts-input',
-    );
-    this.samlEnforcedGroupManagedAccountsToggle = this.form.querySelector(
-      '.js-group-saml-enforced-group-managed-accounts-toggle',
-    );
-    this.samlEnforcedGroupManagedAccountsHelperText = this.form.querySelector(
-      '.js-group-saml-enforced-group-managed-accounts-helper-text',
-    );
-    this.samlEnforcedGroupManagedAccountsCallout = this.form.querySelector(
-      '.js-group-saml-enforced-group-managed-accounts-callout',
-    );
+    this.settings = [
+      {
+        name: 'group-saml',
+        el: this.form.querySelector('.js-group-saml-enabled-toggle-area'),
+      },
+      {
+        name: 'enforced-sso',
+        el: this.form.querySelector('.js-group-saml-enforced-sso-toggle-area'),
+        dependsOn: 'group-saml',
+      },
+      {
+        name: 'enforced-group-managed-accounts',
+        el: this.form.querySelector('.js-group-saml-enforced-group-managed-accounts-toggle-area'),
+        dependsOn: 'enforced-sso',
+      },
+      {
+        name: 'prohibited-outer-forks',
+        el: this.form.querySelector('.js-group-saml-prohibited-outer-forks-toggle-area'),
+        dependsOn: 'enforced-group-managed-accounts',
+      },
+    ]
+      .filter(s => s.el)
+      .map(setting => ({
+        ...setting,
+        toggle: getToggle(setting.el),
+        helperText: getHelperText(setting.el),
+        callout: getCallout(setting.el),
+        input: setting.el.querySelector('input'),
+      }));
+
     this.testButtonTooltipWrapper = this.form.querySelector('#js-saml-test-button');
     this.testButton = this.testButtonTooltipWrapper.querySelector('a');
     this.dirtyFormChecker = new DirtyFormChecker(formSelector, () => this.updateView());
   }
 
+  findSetting(name) {
+    return this.settings.find(s => s.name === name);
+  }
+
+  getValueWithDeps(name) {
+    const setting = this.findSetting(name);
+    let currentDependsOn = setting.dependsOn;
+
+    while (currentDependsOn) {
+      const { value, dependsOn } = this.findSetting(currentDependsOn);
+      if (!value) {
+        return false;
+      }
+      currentDependsOn = dependsOn;
+    }
+
+    return setting.value;
+  }
+
   init() {
     this.dirtyFormChecker.init();
-
-    setupToggleButtons(this.samlEnabledToggleArea);
-    setupToggleButtons(this.samlEnforcedSSOToggleArea);
-    setupToggleButtons(this.samlEnforcedGroupManagedAccountsToggleArea);
-    $(this.samlProviderEnabledInput).on('trigger-change', () => this.onEnableToggle());
-    $(this.samlEnforcedSSOInput).on('trigger-change', () => this.onEnableToggle());
-    $(this.samlEnforcedGroupManagedAccountsInput).on('trigger-change', () => this.onEnableToggle());
-
+    setupToggleButtons(this.form);
+    $(this.form).on('trigger-change', () => this.onEnableToggle());
     this.updateSAMLSettings();
     this.updateView();
   }
@@ -61,11 +91,10 @@ export default class SamlSettingsForm {
   }
 
   updateSAMLSettings() {
-    this.samlProviderEnabled = parseBoolean(this.samlProviderEnabledInput.value);
-    this.samlEnforcedSSOEnabled = parseBoolean(this.samlEnforcedSSOInput.value);
-    this.samlEnforcedGroupManagedAccountsEnabled = parseBoolean(
-      this.samlEnforcedGroupManagedAccountsInput.value,
-    );
+    this.settings = this.settings.map(setting => ({
+      ...setting,
+      value: parseBoolean(setting.el.querySelector('input').value),
+    }));
   }
 
   testButtonTooltip() {
@@ -80,47 +109,33 @@ export default class SamlSettingsForm {
     return __('Redirect to SAML provider to test configuration');
   }
 
-  updateSAMLToggles() {
-    if (!this.samlProviderEnabled) {
-      toggleIfEnabled(this.samlEnforcedSSOEnabled, this.samlEnforcedSSOToggle);
-      toggleIfEnabled(
-        this.samlEnforcedGroupManagedAccountsEnabled,
-        this.samlEnforcedGroupManagedAccountsToggle,
-      );
-    }
+  updateToggles() {
+    this.settings
+      .filter(setting => setting.dependsOn)
+      .forEach(setting => {
+        const { helperText, callout, toggle } = setting;
+        const isRelatedToggleOn = this.getValueWithDeps(setting.dependsOn);
+        if (helperText) {
+          helperText.style.display = isRelatedToggleOn ? 'none' : 'block';
+        }
 
-    if (!this.samlEnforcedSSOEnabled) {
-      toggleIfEnabled(
-        this.samlEnforcedGroupManagedAccountsEnabled,
-        this.samlEnforcedGroupManagedAccountsToggle,
-      );
-    }
+        toggle.classList.toggle('is-disabled', !isRelatedToggleOn);
+        toggle.disabled = !isRelatedToggleOn;
 
-    this.samlEnforcedSSOToggle.disabled = !this.samlProviderEnabled;
-    this.samlEnforcedGroupManagedAccountsToggle.disabled =
-      !this.samlProviderEnabled || !this.samlEnforcedSSOEnabled;
-  }
-
-  updateHelperTextAndCallouts() {
-    this.samlEnforcedSSOHelperText.style.display = this.samlProviderEnabled ? 'none' : 'block';
-    this.samlEnforcedGroupManagedAccountsHelperText.style.display = this.samlEnforcedSSOEnabled
-      ? 'none'
-      : 'block';
-    this.samlEnforcedGroupManagedAccountsCallout.style.display = this
-      .samlEnforcedGroupManagedAccountsEnabled
-      ? 'block'
-      : 'none';
+        if (callout) {
+          callout.style.display = setting.value && isRelatedToggleOn ? 'block' : 'none';
+        }
+      });
   }
 
   updateView() {
-    if (this.samlProviderEnabled && !this.dirtyFormChecker.isDirty) {
+    if (this.getValueWithDeps('group-saml') && !this.dirtyFormChecker.isDirty) {
       this.testButton.removeAttribute('disabled');
     } else {
       this.testButton.setAttribute('disabled', true);
     }
 
-    this.updateSAMLToggles();
-    this.updateHelperTextAndCallouts();
+    this.updateToggles();
 
     // Update tooltip using wrapper so it works when input disabled
     this.testButtonTooltipWrapper.setAttribute('title', this.testButtonTooltip());

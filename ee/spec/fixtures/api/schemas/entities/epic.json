@@ -3,13 +3,11 @@
   "properties" : {
     "id": { "type": "integer" },
     "iid": { "type": "integer" },
-    "author_id": { "type": "integer" },
     "group_id": { "type": ["integer", "null"] },
     "title": { "type": "string" },
     "lock_version": { "type": ["integer", "null"] },
     "description": { "type": ["string" , "null"] },
     "confidential": { "type": "boolean" },
-    "milestone_id": { "type": ["string", "null"] },
     "state": { "type": "string" },
     "start_date": { "type": ["date", "null"] },
     "start_date_fixed": { "type": ["date", "null"] },
@@ -20,48 +18,40 @@
     "due_date_fixed": { "type": ["date", "null"] },
     "due_date_from_milestones": { "type": ["date", "null"] },
     "due_date_is_fixed": { "type": "boolean" },
-    "updated_by_id": { "type": ["string", "null"] },
-    "created_at": { "type": "string" },
-    "updated_at": { "type": "string" },
-    "deleted_at": { "type": ["string", "null"] },
     "web_url": { "type": "string" },
-    "milestone": { "type": ["object", "null"] },
     "labels": { "type": ["array", "null"] },
     "group_name": { "type": "string" },
     "group_full_name": { "type": "string" },
-    "group": {
-      "id": { "type": "integer" },
-      "path": { "type": "string" }
-    },
-    "assignee": {
-      "id": { "type": "integer" },
-      "name": { "type": "string" },
-      "username": { "type": "string" },
-      "avatar_url": { "type": "uri" }
-    },
-    "assignees": {
-      "type": "array",
-      "items": {
-        "type": ["object", "null"],
-        "required": [
-          "id",
-          "name",
-          "username",
-          "avatar_url"
-        ],
-        "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "username": { "type": "string" },
-          "avatar_url": { "type": "uri" }
-        }
-      }
-    },
     "current_user": {
       "can_create_note": { "type": "boolean" }
     },
     "create_note_path": { "type": "string" },
     "preview_note_path": { "type": "string" }
   },
+  "required": [
+    "id",
+    "iid",
+    "group_id",
+    "title",
+    "lock_version",
+    "description",
+    "state",
+    "start_date",
+    "start_date_fixed",
+    "start_date_is_fixed",
+    "start_date_from_milestones",
+    "end_date",
+    "due_date",
+    "due_date_fixed",
+    "due_date_from_milestones",
+    "due_date_is_fixed",
+    "web_url",
+    "labels",
+    "group_name",
+    "group_full_name",
+    "current_user",
+    "create_note_path",
+    "preview_note_path"
+  ],
   "additionalProperties": false
 }

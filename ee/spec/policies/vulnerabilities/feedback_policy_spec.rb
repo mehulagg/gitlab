@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Vulnerabilities::FeedbackPolicy do
+RSpec.describe Vulnerabilities::FeedbackPolicy do
   include ExternalAuthorizationServiceHelpers
 
   let(:current_user) { create(:user) }
@@ -16,7 +16,7 @@ describe Vulnerabilities::FeedbackPolicy do
 
       context 'when issues feature is disabled' do
         before do
-          project.project_feature.update(issues_access_level: ProjectFeature::DISABLED)
+          project.project_feature.update!(issues_access_level: ProjectFeature::DISABLED)
         end
 
         it 'does not allow to create issue feedback' do
@@ -39,7 +39,7 @@ describe Vulnerabilities::FeedbackPolicy do
 
       context 'when merge request feature is disabled' do
         before do
-          project.project_feature.update(merge_requests_access_level: ProjectFeature::DISABLED)
+          project.project_feature.update!(merge_requests_access_level: ProjectFeature::DISABLED)
         end
 
         it 'does not allow to create merge request feedback' do

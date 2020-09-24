@@ -6,7 +6,7 @@ module EE
 
     prepended do
       expose :mirror
-      expose :import_url
+      expose :safe_import_url, as: :import_url
       expose :username_only_import_url
       expose :mirror_user_id
       expose :mirror_trigger_builds

@@ -30,7 +30,7 @@ const defaultClient = createDefaultClient(
       },
       readme(_, { url }) {
         return axios
-          .get(url, { params: { viewer: 'rich', format: 'json' } })
+          .get(url, { params: { format: 'json', viewer: 'rich' } })
           .then(({ data }) => ({ ...data, __typename: 'ReadmeFile' }));
       },
     },
@@ -39,7 +39,7 @@ const defaultClient = createDefaultClient(
     cacheConfig: {
       fragmentMatcher,
       dataIdFromObject: obj => {
-        /* eslint-disable @gitlab/i18n/no-non-i18n-strings */
+        /* eslint-disable @gitlab/require-i18n-strings */
         // eslint-disable-next-line no-underscore-dangle
         switch (obj.__typename) {
           // We need to create a dynamic ID for each entry
@@ -48,16 +48,17 @@ const defaultClient = createDefaultClient(
           case 'TreeEntry':
           case 'Submodule':
           case 'Blob':
-            return `${obj.flatPath}-${obj.id}`;
+            return `${encodeURIComponent(obj.flatPath)}-${obj.id}`;
           default:
             // If the type doesn't match any of the above we fallback
             // to using the default Apollo ID
             // eslint-disable-next-line no-underscore-dangle
             return obj.id || obj._id;
         }
-        /* eslint-enable @gitlab/i18n/no-non-i18n-strings */
+        /* eslint-enable @gitlab/require-i18n-strings */
       },
     },
+    assumeImmutableResults: true,
   },
 );
 

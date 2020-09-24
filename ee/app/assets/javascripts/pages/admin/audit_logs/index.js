@@ -1,3 +1,3 @@
-import AuditLogs from './audit_logs';
+import initAuditEvents from 'ee/audit_events/init_audit_events';
 
-document.addEventListener('DOMContentLoaded', () => new AuditLogs());
+initAuditEvents('#js-audit-log-app');

@@ -1,9 +1,11 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import '~/commons/bootstrap';
-import { GlTooltip, GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlTooltip, GlTooltipDirective, GlButton } from '@gitlab/ui';
 import { sprintf } from '~/locale';
-import IssueMilestone from '../../components/issue/issue_milestone.vue';
-import IssueAssignees from '../../components/issue/issue_assignees.vue';
+import IssueMilestone from './issue_milestone.vue';
+import IssueAssignees from './issue_assignees.vue';
+import IssueDueDate from '~/boards/components/issue_due_date.vue';
 import relatedIssuableMixin from '../../mixins/related_issuable_mixin';
 import CiIcon from '../ci_icon.vue';
 
@@ -13,7 +15,11 @@ export default {
     IssueMilestone,
     IssueAssignees,
     CiIcon,
+    GlIcon,
     GlTooltip,
+    IssueWeight: () => import('ee_component/boards/components/issue_card_weight.vue'),
+    IssueDueDate,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -24,6 +30,16 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    isLocked: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    lockedMessage: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   computed: {
@@ -37,12 +53,8 @@ export default {
         },
       );
     },
-    heightStyle() {
-      return {
-        minHeight: '32px',
-        width: '0px',
-        visibility: 'hidden',
-      };
+    iconClasses() {
+      return `${this.iconClass} ic-${this.iconName}`;
     },
   },
 };
@@ -54,35 +66,36 @@ export default {
       'issuable-info-container': !canReorder,
       'card-body': canReorder,
     }"
-    class="item-body d-flex align-items-center p-2 p-lg-3 py-xl-2 px-xl-3"
+    class="item-body d-flex align-items-center py-2 px-3"
   >
-    <div class="item-contents d-flex align-items-center flex-wrap flex-grow-1 flex-xl-nowrap">
+    <div
+      class="item-contents gl-display-flex gl-align-items-center gl-flex-wrap gl-flex-grow-1 flex-xl-nowrap gl-min-h-7"
+    >
       <!-- Title area: Status icon (XL) and title -->
-      <div class="item-title d-flex align-items-center mb-xl-0">
-        <span ref="iconElementXL">
-          <icon
+      <div class="item-title d-flex align-items-xl-center mb-xl-0">
+        <div ref="iconElementXL">
+          <gl-icon
             v-if="hasState"
             ref="iconElementXL"
-            :class="iconClass"
+            class="mr-2 d-block"
+            :class="iconClasses"
             :name="iconName"
-            :size="16"
             :title="stateTitle"
             :aria-label="state"
           />
-        </span>
+        </div>
         <gl-tooltip :target="() => $refs.iconElementXL">
           <span v-html="stateTitle"></span>
         </gl-tooltip>
-        <icon
+        <gl-icon
           v-if="confidential"
           v-gl-tooltip
           name="eye-slash"
-          :size="16"
           :title="__('Confidential')"
-          class="confidential-icon append-right-4 align-self-baseline align-self-md-auto mt-xl-0"
+          class="confidential-icon gl-mr-2 align-self-baseline align-self-md-auto mt-xl-0"
           :aria-label="__('Confidential')"
         />
-        <a :href="computedPath" class="sortable-link">{{ title }}</a>
+        <a :href="computedPath" class="sortable-link gl-font-weight-normal">{{ title }}</a>
       </div>
 
       <!-- Info area: meta, path, and assignees -->
@@ -97,17 +110,6 @@ export default {
           <div
             class="item-path-area item-path-id d-flex align-items-center mr-2 mt-2 mt-xl-0 ml-xl-2"
           >
-            <span ref="iconElement">
-              <icon
-                v-if="hasState"
-                :class="iconClass"
-                :name="iconName"
-                :title="stateTitle"
-                :aria-label="state"
-                data-html="true"
-                class="d-xl-none"
-              />
-            </span>
             <gl-tooltip :target="() => this.$refs.iconElement">
               <span v-html="stateTitle"></span>
             </gl-tooltip>
@@ -133,8 +135,21 @@ export default {
             />
 
             <!-- Flex order for slots is defined in the parent component: e.g. related_issues_block.vue -->
-            <slot name="dueDate"></slot>
-            <slot name="weight"></slot>
+            <span v-if="weight > 0" class="order-md-1">
+              <issue-weight
+                :weight="weight"
+                class="item-weight gl-display-flex gl-align-items-center"
+                tag-name="span"
+              />
+            </span>
+
+            <span v-if="dueDate" class="order-md-1">
+              <issue-due-date
+                :date="dueDate"
+                tooltip-placement="top"
+                css-class="item-due-date gl-display-flex gl-align-items-center"
+              />
+            </span>
 
             <issue-assignees
               v-if="hasAssignees"
@@ -153,23 +168,27 @@ export default {
       </div>
     </div>
 
-    <button
-      v-if="canRemove"
+    <span
+      v-if="isLocked"
+      ref="lockIcon"
+      v-gl-tooltip
+      class="gl-px-3 gl-display-inline-block gl-cursor-not-allowed"
+      :title="lockedMessage"
+    >
+      <gl-icon name="lock" />
+    </span>
+    <gl-button
+      v-else-if="canRemove"
       ref="removeButton"
       v-gl-tooltip
+      icon="close"
+      category="tertiary"
       :disabled="removeDisabled"
-      type="button"
-      class="btn btn-default btn-svg btn-item-remove js-issue-item-remove-button mr-xl-0 align-self-xl-center"
+      class="js-issue-item-remove-button gl-ml-3"
       data-qa-selector="remove_related_issue_button"
       :title="__('Remove')"
       :aria-label="__('Remove')"
       @click="onRemoveRequest"
-    >
-      <icon :size="16" class="btn-item-remove-icon" name="close" />
-    </button>
-
-    <!-- This element serves to set the issue card's height at a minimum of 32 px. -->
-    <!-- It fixes #59594: when the remove button is missing, issues have inconsistent heights. -->
-    <span :style="heightStyle"></span>
+    />
   </div>
 </template>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Edit group settings' do
+RSpec.describe 'Edit group settings' do
   include Select2Helper
 
   let(:user) { create(:user) }
@@ -19,7 +19,7 @@ describe 'Edit group settings' do
     context 'with LDAP enabled' do
       before do
         allow_any_instance_of(EE::Group).to receive(:ldap_synced?).and_return(true)
-        allow(Gitlab::Auth::LDAP::Config).to receive(:enabled?).and_return(true)
+        allow(Gitlab::Auth::Ldap::Config).to receive(:enabled?).and_return(true)
       end
 
       it 'is able to navigate to LDAP group section' do

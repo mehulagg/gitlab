@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe Ci::Group do
-  subject do
-    described_class.new('test', name: 'rspec', jobs: jobs)
-  end
+RSpec.describe Ci::Group do
+  let_it_be(:project) { create(:project) }
 
-  let!(:jobs) { build_list(:ci_build, 1, :success) }
+  let!(:jobs) { build_list(:ci_build, 1, :success, project: project) }
+
+  subject do
+    described_class.new(project, 'test', name: 'rspec', jobs: jobs)
+  end
 
   it { is_expected.to include_module(StaticModel) }
 
@@ -27,24 +29,8 @@ describe Ci::Group do
       [create(:ci_build, :failed)]
     end
 
-    context 'when ci_composite_status is enabled' do
-      before do
-        stub_feature_flags(ci_composite_status: true)
-      end
-
-      it 'returns a failed status' do
-        expect(subject.status).to eq('failed')
-      end
-    end
-
-    context 'when ci_composite_status is disabled' do
-      before do
-        stub_feature_flags(ci_composite_status: false)
-      end
-
-      it 'returns a failed status' do
-        expect(subject.status).to eq('failed')
-      end
+    it 'returns a failed status' do
+      expect(subject.status).to eq('failed')
     end
   end
 
@@ -53,7 +39,7 @@ describe Ci::Group do
       it 'calls the status from the object itself' do
         expect(jobs.first).to receive(:detailed_status)
 
-        expect(subject.detailed_status(double(:user)))
+        subject.detailed_status(double(:user))
       end
     end
 

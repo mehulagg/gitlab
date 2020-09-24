@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Gitlab::CustomFileTemplates do
+RSpec.describe Gitlab::CustomFileTemplates do
   using RSpec::Parameterized::TableSyntax
 
-  set(:instance_template_project) { create(:project, :custom_repo, files: template_files('instance')) }
-  set(:group) { create(:group) }
-  set(:project) { create(:project, namespace: group) }
-  set(:group_template_project) { create(:project, :custom_repo, namespace: group, files: template_files('group')) }
+  let_it_be(:instance_template_project) { create(:project, :custom_repo, files: template_files('instance')) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, namespace: group) }
+  let_it_be(:group_template_project) { create(:project, :custom_repo, namespace: group, files: template_files('group')) }
 
   subject(:templates) { described_class.new(template_finder, target_project) }
 
@@ -86,9 +86,9 @@ describe Gitlab::CustomFileTemplates do
         end
 
         context 'in a subgroup' do
-          set(:subgroup) { create(:group, parent: group) }
-          set(:subproject) { create(:project, namespace: subgroup) }
-          set(:subgroup_template_project) { create(:project, :custom_repo, namespace: subgroup, files: template_files('subgroup')) }
+          let_it_be(:subgroup) { create(:group, parent: group) }
+          let_it_be(:subproject) { create(:project, namespace: subgroup) }
+          let_it_be(:subgroup_template_project) { create(:project, :custom_repo, namespace: subgroup, files: template_files('subgroup')) }
 
           let(:target_project) { subproject }
 

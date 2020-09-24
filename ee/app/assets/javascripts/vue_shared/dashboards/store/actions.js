@@ -1,10 +1,10 @@
 import Visibility from 'visibilityjs';
+import { find } from 'lodash';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
-import _ from 'underscore';
 import * as types from './mutation_types';
 
 const API_MINIMUM_QUERY_LENGTH = 3;
@@ -33,7 +33,7 @@ export const addProjectsToDashboard = ({ state, dispatch }) =>
     .catch(() => dispatch('receiveAddProjectsToDashboardError'));
 
 export const toggleSelectedProject = ({ commit, state }, project) => {
-  if (!_.find(state.selectedProjects, { id: project.id })) {
+  if (!find(state.selectedProjects, { id: project.id })) {
     commit(types.ADD_SELECTED_PROJECT, project);
   } else {
     commit(types.REMOVE_SELECTED_PROJECT, project);
@@ -95,17 +95,23 @@ export const receiveAddProjectsToDashboardError = ({ state }) => {
   );
 };
 
-export const fetchProjects = ({ state, dispatch }) => {
+export const fetchProjects = ({ state, dispatch, commit }, page) => {
   if (eTagPoll) return;
 
   dispatch('requestProjects');
 
   eTagPoll = new Poll({
     resource: {
-      fetchProjects: () => axios.get(state.projectEndpoints.list),
+      fetchProjects: () => axios.get(state.projectEndpoints.list, { params: { page } }),
     },
     method: 'fetchProjects',
-    successCallback: ({ data }) => dispatch('receiveProjectsSuccess', data),
+    successCallback: response => {
+      const {
+        data: { projects },
+        headers,
+      } = response;
+      commit(types.RECEIVE_PROJECTS_SUCCESS, { projects, headers });
+    },
     errorCallback: () => dispatch('receiveProjectsError'),
   });
 
@@ -126,10 +132,6 @@ export const requestProjects = ({ commit }) => {
   commit(types.REQUEST_PROJECTS);
 };
 
-export const receiveProjectsSuccess = ({ commit }, data) => {
-  commit(types.RECEIVE_PROJECTS_SUCCESS, data.projects);
-};
-
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
   createFlash(__('Something went wrong, unable to get projects'));
@@ -145,7 +147,7 @@ export const removeProject = ({ dispatch }, removePath) => {
 export const receiveRemoveProjectSuccess = ({ dispatch }) => dispatch('forceProjectsRequest');
 
 export const receiveRemoveProjectError = () => {
-  createFlash(__('Something went wrong, unable to remove project'));
+  createFlash(__('Something went wrong, unable to delete project'));
 };
 
 export const setSearchQuery = ({ commit }, query) => commit(types.SET_SEARCH_QUERY, query);
@@ -163,7 +165,20 @@ export const fetchSearchResults = ({ state, dispatch }) => {
   }
 };
 
+export const fetchNextPage = ({ state, dispatch }) => {
+  if (state.pageInfo.totalPages <= state.pageInfo.currentPage) {
+    return;
+  }
+  Api.projects(state.searchQuery, { page: state.pageInfo.nextPage })
+    .then(results => dispatch('receiveNextPageSuccess', results))
+    .catch(() => dispatch('receiveSearchResultsError'));
+};
+
 export const requestSearchResults = ({ commit }) => commit(types.REQUEST_SEARCH_RESULTS);
+
+export const receiveNextPageSuccess = ({ commit }, results) => {
+  commit(types.RECEIVE_NEXT_PAGE_SUCCESS, results);
+};
 
 export const receiveSearchResultsSuccess = ({ commit }, results) => {
   commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, results);
@@ -186,5 +201,10 @@ export const setProjects = ({ commit }, projects) => {
   commit(types.SET_PROJECTS, projects);
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const paginateDashboard = ({ dispatch }, newPage) => {
+  return Promise.all([
+    dispatch('stopProjectsPolling'),
+    dispatch('clearProjectsEtagPoll'),
+    dispatch('fetchProjects', newPage),
+  ]);
+};

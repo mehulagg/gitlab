@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
+RSpec.describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
+  let_it_be(:project, reload: true) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:service) { described_class.new(project, user) }
 
   let(:merge_request) do
@@ -16,9 +16,11 @@ describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
   let(:pipeline) { merge_request.reload.all_pipelines.first }
 
   before do
+    stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: false)
+    stub_feature_flags(disable_merge_trains: false)
     stub_licensed_features(merge_trains: true, merge_pipelines: true)
     project.add_maintainer(user)
-    project.update!(merge_trains_enabled: true, merge_pipelines_enabled: true)
+    project.update!(merge_pipelines_enabled: true)
     allow(AutoMergeProcessWorker).to receive(:perform_async) { }
     merge_request.update_head_pipeline
   end
@@ -39,6 +41,10 @@ describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
 
   describe '#process' do
     subject { service.process(merge_request) }
+
+    before do
+      service.execute(merge_request)
+    end
 
     context 'when the latest pipeline in the merge request has succeeded' do
       before do
@@ -61,7 +67,11 @@ describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
         end
 
         it 'aborts auto merge' do
-          expect(service).to receive(:abort).once
+          expect(service).to receive(:abort).once.and_call_original
+
+          expect(SystemNoteService)
+            .to receive(:abort_add_to_merge_train_when_pipeline_succeeds).once
+            .with(merge_request, project, user, 'This merge request cannot be added to the merge train')
 
           subject
         end
@@ -114,6 +124,12 @@ describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
 
     it { is_expected.to eq(true) }
 
+    it 'memoizes the result' do
+      expect(merge_request).to receive(:can_be_merged_by?).once.and_call_original
+
+      2.times { is_expected.to be_truthy }
+    end
+
     context 'when merge trains option is disabled' do
       before do
         expect(merge_request.project).to receive(:merge_trains_enabled?) { false }
@@ -123,11 +139,14 @@ describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
     end
 
     context 'when merge request is submitted from a forked project' do
-      before do
-        allow(merge_request).to receive(:for_fork?) { true }
-      end
+      context 'when ci_disallow_to_create_merge_request_pipelines_in_target_project feature flag is enabled' do
+        before do
+          stub_feature_flags(ci_disallow_to_create_merge_request_pipelines_in_target_project: true)
+          allow(merge_request).to receive(:for_same_project?) { false }
+        end
 
-      it { is_expected.to eq(false) }
+        it { is_expected.to eq(false) }
+      end
     end
 
     context 'when the latest pipeline in the merge request is not active' do
@@ -144,6 +163,14 @@ describe AutoMerge::AddToMergeTrainWhenPipelineSucceedsService do
       end
 
       it { is_expected.to eq(false) }
+    end
+
+    context 'when the user does not have permission to merge' do
+      before do
+        allow(merge_request).to receive(:can_be_merged_by?) { false }
+      end
+
+      it { is_expected.to be_falsy }
     end
   end
 end

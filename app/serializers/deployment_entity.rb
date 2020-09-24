@@ -37,8 +37,15 @@ class DeploymentEntity < Grape::Entity
   expose :commit, using: CommitEntity, if: -> (*) { include_details? }
   expose :manual_actions, using: JobEntity, if: -> (*) { include_details? && can_create_deployment? }
   expose :scheduled_actions, using: JobEntity, if: -> (*) { include_details? && can_create_deployment? }
+  expose :playable_build, expose_nil: false, if: -> (*) { include_details? && can_create_deployment? } do |deployment, options|
+    JobEntity.represent(deployment.playable_build, options.merge(only: [:play_path, :retry_path]))
+  end
 
-  expose :cluster, using: ClusterBasicEntity
+  expose :cluster do |deployment, options|
+    # Until data is copied over from deployments.cluster_id, this entity must represent Deployment instead of DeploymentCluster
+    # https://gitlab.com/gitlab-org/gitlab/issues/202628
+    DeploymentClusterEntity.represent(deployment, options) unless deployment.cluster.nil?
+  end
 
   private
 
@@ -47,7 +54,7 @@ class DeploymentEntity < Grape::Entity
   end
 
   def can_create_deployment?
-    can?(request.current_user, :create_deployment, request.project)
+    can?(request.current_user, :create_deployment, project)
   end
 
   def can_read_deployables?
@@ -56,6 +63,10 @@ class DeploymentEntity < Grape::Entity
     # because it triggers a policy evaluation that involves multiple
     # Gitaly calls that might not be cached.
     #
-    can?(request.current_user, :read_build, request.project)
+    can?(request.current_user, :read_build, project)
+  end
+
+  def project
+    request.try(:project) || options[:project]
   end
 end

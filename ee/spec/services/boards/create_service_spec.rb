@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::CreateService, services: true do
+RSpec.describe Boards::CreateService, services: true do
   shared_examples 'boards create service' do
     context 'With the feature available' do
       before do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Platforms::Kubernetes do
+RSpec.describe Clusters::Platforms::Kubernetes do
   include KubernetesHelpers
 
   it { is_expected.to belong_to(:cluster) }
@@ -204,6 +204,52 @@ describe Clusters::Platforms::Kubernetes do
     end
 
     it { is_expected.to be_an_instance_of(Gitlab::Kubernetes::KubeClient) }
+
+    context 'ca_pem is a single certificate' do
+      let(:ca_pem) { File.read(Rails.root.join('spec/fixtures/clusters/ca_certificate.pem')) }
+      let(:kubernetes) do
+        build(:cluster_platform_kubernetes,
+              :configured,
+              namespace: 'a-namespace',
+              cluster: cluster,
+              ca_pem: ca_pem)
+      end
+
+      it 'adds it to cert_store' do
+        cert = OpenSSL::X509::Certificate.new(ca_pem)
+        cert_store = kubernetes.kubeclient.kubeclient_options[:ssl_options][:cert_store]
+
+        expect(cert_store.verify(cert)).to be true
+      end
+    end
+
+    context 'ca_pem is a chain' do
+      let(:cert_chain) { File.read(Rails.root.join('spec/fixtures/clusters/chain_certificates.pem')) }
+      let(:kubernetes) do
+        build(:cluster_platform_kubernetes,
+              :configured,
+              namespace: 'a-namespace',
+              cluster: cluster,
+              ca_pem: cert_chain)
+      end
+
+      it 'includes chain of certificates' do
+        cert1_file = File.read(Rails.root.join('spec/fixtures/clusters/root_certificate.pem'))
+        cert1 = OpenSSL::X509::Certificate.new(cert1_file)
+
+        cert2_file = File.read(Rails.root.join('spec/fixtures/clusters/intermediate_certificate.pem'))
+        cert2 = OpenSSL::X509::Certificate.new(cert2_file)
+
+        cert3_file = File.read(Rails.root.join('spec/fixtures/clusters/ca_certificate.pem'))
+        cert3 = OpenSSL::X509::Certificate.new(cert3_file)
+
+        cert_store = kubernetes.kubeclient.kubeclient_options[:ssl_options][:cert_store]
+
+        expect(cert_store.verify(cert1)).to be true
+        expect(cert_store.verify(cert2)).to be true
+        expect(cert_store.verify(cert3)).to be true
+      end
+    end
   end
 
   describe '#rbac?' do
@@ -290,6 +336,26 @@ describe Clusters::Platforms::Kubernetes do
         it { is_expected.to include(key: 'KUBE_TOKEN', value: platform.token, public: false, masked: true) }
         it { is_expected.to include(key: 'KUBE_NAMESPACE', value: namespace) }
         it { is_expected.to include(key: 'KUBECONFIG', value: kubeconfig, public: false, file: true) }
+
+        context 'custom namespace is provided' do
+          let(:custom_namespace) { 'custom-namespace' }
+
+          subject do
+            platform.predefined_variables(
+              project: project,
+              environment_name: environment_name,
+              kubernetes_namespace: custom_namespace
+            )
+          end
+
+          before do
+            allow(platform).to receive(:kubeconfig).with(custom_namespace).and_return(kubeconfig)
+          end
+
+          it { is_expected.to include(key: 'KUBE_TOKEN', value: platform.token, public: false, masked: true) }
+          it { is_expected.to include(key: 'KUBE_NAMESPACE', value: custom_namespace) }
+          it { is_expected.to include(key: 'KUBECONFIG', value: kubeconfig, public: false, file: true) }
+        end
       end
     end
 
@@ -341,8 +407,11 @@ describe Clusters::Platforms::Kubernetes do
 
   describe '#calculate_reactive_cache_for' do
     let(:service) { create(:cluster_platform_kubernetes, :configured) }
-    let(:pod) { kube_pod }
-    let(:namespace) { pod["metadata"]["namespace"] }
+    let(:expected_pod_cached_data) do
+      kube_pod.tap { |kp| kp['metadata'].delete('namespace') }
+    end
+
+    let(:namespace) { "project-namespace" }
     let(:environment) { instance_double(Environment, deployment_namespace: namespace) }
 
     subject { service.calculate_reactive_cache_for(environment) }
@@ -361,7 +430,7 @@ describe Clusters::Platforms::Kubernetes do
         stub_kubeclient_deployments(namespace)
       end
 
-      it { is_expected.to include(pods: [pod]) }
+      it { is_expected.to include(pods: [expected_pod_cached_data]) }
     end
 
     context 'when kubernetes responds with 500s' do

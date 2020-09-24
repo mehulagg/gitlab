@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Repository do
+RSpec.describe Repository do
   include RepoHelpers
   include GitHelpers
 
@@ -40,7 +40,7 @@ describe Repository do
   end
 
   describe '#branch_names_contains' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
     let(:repository) { project.repository }
 
     subject { repository.branch_names_contains(sample_commit.id) }
@@ -66,14 +66,16 @@ describe Repository do
   end
 
   describe 'tags_sorted_by' do
+    let(:tags_to_compare) { %w[v1.0.0 v1.1.0] }
+
     context 'name_desc' do
-      subject { repository.tags_sorted_by('name_desc').map(&:name) }
+      subject { repository.tags_sorted_by('name_desc').map(&:name) & tags_to_compare }
 
       it { is_expected.to eq(['v1.1.0', 'v1.0.0']) }
     end
 
     context 'name_asc' do
-      subject { repository.tags_sorted_by('name_asc').map(&:name) }
+      subject { repository.tags_sorted_by('name_asc').map(&:name) & tags_to_compare }
 
       it { is_expected.to eq(['v1.0.0', 'v1.1.0']) }
     end
@@ -86,8 +88,8 @@ describe Repository do
         subject { repository.tags_sorted_by('updated_desc').map(&:name) }
 
         before do
-          double_first = double(committed_date: Time.now)
-          double_last = double(committed_date: Time.now - 1.second)
+          double_first = double(committed_date: Time.current)
+          double_last = double(committed_date: Time.current - 1.second)
 
           allow(tag_a).to receive(:dereferenced_target).and_return(double_first)
           allow(tag_b).to receive(:dereferenced_target).and_return(double_last)
@@ -101,8 +103,8 @@ describe Repository do
         subject { repository.tags_sorted_by('updated_asc').map(&:name) }
 
         before do
-          double_first = double(committed_date: Time.now - 1.second)
-          double_last = double(committed_date: Time.now)
+          double_first = double(committed_date: Time.current - 1.second)
+          double_last = double(committed_date: Time.current)
 
           allow(tag_a).to receive(:dereferenced_target).and_return(double_last)
           allow(tag_b).to receive(:dereferenced_target).and_return(double_first)
@@ -115,7 +117,7 @@ describe Repository do
       context 'annotated tag pointing to a blob' do
         let(:annotated_tag_name) { 'annotated-tag' }
 
-        subject { repository.tags_sorted_by('updated_asc').map(&:name) }
+        subject { repository.tags_sorted_by('updated_asc').map(&:name) & (tags_to_compare + [annotated_tag_name]) }
 
         before do
           options = { message: 'test tag message\n',
@@ -123,8 +125,8 @@ describe Repository do
 
           rugged_repo(repository).tags.create(annotated_tag_name, 'a48e4fc218069f68ef2e769dd8dfea3991362175', options)
 
-          double_first = double(committed_date: Time.now - 1.second)
-          double_last = double(committed_date: Time.now)
+          double_first = double(committed_date: Time.current - 1.second)
+          double_last = double(committed_date: Time.current)
 
           allow(tag_a).to receive(:dereferenced_target).and_return(double_last)
           allow(tag_b).to receive(:dereferenced_target).and_return(double_first)
@@ -225,7 +227,7 @@ describe Repository do
         tree_builder = Rugged::Tree::Builder.new(rugged)
         tree_builder.insert({ oid: blob_id, name: "hello\x80world", filemode: 0100644 })
         tree_id = tree_builder.write
-        user = { email: "jcai@gitlab.com", time: Time.now, name: "John Cai" }
+        user = { email: "jcai@gitlab.com", time: Time.current.to_time, name: "John Cai" }
 
         Rugged::Commit.create(rugged, message: 'some commit message', parents: [rugged.head.target.oid], tree: tree_id, committer: user, author: user)
       end
@@ -250,6 +252,21 @@ describe Repository do
         end
       end
     end
+
+    context 'with filename with pathspec characters' do
+      let(:filename) { ':wq' }
+      let(:newrev) { project.repository.commit('master').sha }
+
+      before do
+        create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+      end
+
+      subject { repository.last_commit_for_path('master', filename, literal_pathspec: true).id }
+
+      it 'returns a commit SHA' do
+        expect(subject).to eq(newrev)
+      end
+    end
   end
 
   describe '#last_commit_id_for_path' do
@@ -272,6 +289,21 @@ describe Repository do
         expect_to_raise_storage_error do
           broken_repository.last_commit_for_path(sample_commit.id, '.gitignore').id
         end
+      end
+    end
+
+    context 'with filename with pathspec characters' do
+      let(:filename) { ':wq' }
+      let(:newrev) { project.repository.commit('master').sha }
+
+      before do
+        create_file_in_repo(project, 'master', 'master', filename, 'Test file')
+      end
+
+      subject { repository.last_commit_id_for_path('master', filename, literal_pathspec: true) }
+
+      it 'returns a commit SHA' do
+        expect(subject).to eq(newrev)
       end
     end
   end
@@ -318,15 +350,38 @@ describe Repository do
       end
     end
 
+    context "when 'author' is set" do
+      it "returns commits from that author" do
+        commit = repository.commits(nil, limit: 1).first
+        known_author = "#{commit.author_name} <#{commit.author_email}>"
+
+        expect(repository.commits(nil, author: known_author, limit: 1)).not_to be_empty
+      end
+
+      it "doesn't returns commits from an unknown author" do
+        unknown_author = "The Man With No Name <zapp@brannigan.com>"
+
+        expect(repository.commits(nil, author: unknown_author, limit: 1)).to be_empty
+      end
+    end
+
     context "when 'all' flag is set" do
       it 'returns every commit from the repository' do
         expect(repository.commits(nil, all: true, limit: 60).size).to eq(60)
       end
     end
+
+    context "when 'order' flag is set" do
+      it 'passes order option to perform the query' do
+        expect(Gitlab::Git::Commit).to receive(:where).with(a_hash_including(order: 'topo')).and_call_original
+
+        repository.commits('master', limit: 1, order: 'topo')
+      end
+    end
   end
 
   describe '#new_commits' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
     let(:repository) { project.repository }
 
     subject { repository.new_commits(rev) }
@@ -354,7 +409,7 @@ describe Repository do
   end
 
   describe '#commits_by' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
     let(:oids) { TestEnv::BRANCH_SHA.values }
 
     subject { project.repository.commits_by(oids: oids) }
@@ -370,7 +425,7 @@ describe Repository do
 
     context 'when some commits are not found ' do
       let(:oids) do
-        ['deadbeef'] + TestEnv::BRANCH_SHA.values.first(10)
+        ['deadbeef'] + TestEnv::BRANCH_SHA.each_value.first(10)
       end
 
       it 'returns only found commits' do
@@ -477,6 +532,133 @@ describe Repository do
       subject { repository.merged_to_root_ref?('non_existent_branch') }
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe "#root_ref_sha" do
+    let(:commit) { double("commit", sha: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3") }
+
+    subject { repository.root_ref_sha }
+
+    before do
+      allow(repository).to receive(:commit).with(repository.root_ref) { commit }
+    end
+
+    it { is_expected.to eq(commit.sha) }
+  end
+
+  describe "#merged_branch_names", :clean_gitlab_redis_cache do
+    subject { repository.merged_branch_names(branch_names) }
+
+    let(:branch_names) { %w(test beep boop definitely_merged) }
+    let(:already_merged) { Set.new(["definitely_merged"]) }
+
+    let(:write_hash) do
+      {
+        "test" => Gitlab::Redis::Boolean.new(false).to_s,
+        "beep" => Gitlab::Redis::Boolean.new(false).to_s,
+        "boop" => Gitlab::Redis::Boolean.new(false).to_s,
+        "definitely_merged" => Gitlab::Redis::Boolean.new(true).to_s
+      }
+    end
+
+    let(:read_hash) do
+      {
+        "test" => Gitlab::Redis::Boolean.new(false).to_s,
+        "beep" => Gitlab::Redis::Boolean.new(false).to_s,
+        "boop" => Gitlab::Redis::Boolean.new(false).to_s,
+        "definitely_merged" => Gitlab::Redis::Boolean.new(true).to_s
+      }
+    end
+
+    let(:cache) { repository.send(:redis_hash_cache) }
+    let(:cache_key) { cache.cache_key(:merged_branch_names) }
+
+    before do
+      allow(repository.raw_repository).to receive(:merged_branch_names).with(branch_names).and_return(already_merged)
+    end
+
+    it { is_expected.to eq(already_merged) }
+    it { is_expected.to be_a(Set) }
+
+    describe "cache expiry" do
+      before do
+        allow(cache).to receive(:delete).with(anything)
+      end
+
+      it "is expired when the branches caches are expired" do
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
+
+        repository.expire_branches_cache
+      end
+
+      it "is expired when the repository caches are expired" do
+        expect(cache).to receive(:delete) do |*args|
+          expect(args).to include(:merged_branch_names)
+        end
+
+        repository.expire_all_method_caches
+      end
+    end
+
+    context "cache is empty" do
+      before do
+        cache.delete(:merged_branch_names)
+      end
+
+      it { is_expected.to eq(already_merged) }
+
+      describe "cache values" do
+        it "writes the values to redis" do
+          expect(cache).to receive(:write).with(:merged_branch_names, write_hash)
+
+          subject
+        end
+
+        it "matches the supplied hash" do
+          subject
+
+          expect(cache.read_members(:merged_branch_names, branch_names)).to eq(read_hash)
+        end
+      end
+    end
+
+    context "cache is not empty" do
+      before do
+        cache.write(:merged_branch_names, write_hash)
+      end
+
+      it { is_expected.to eq(already_merged) }
+
+      it "doesn't fetch from the disk" do
+        expect(repository.raw_repository).not_to receive(:merged_branch_names)
+
+        subject
+      end
+    end
+
+    context "cache is partially complete" do
+      before do
+        allow(repository.raw_repository).to receive(:merged_branch_names).with(["boop"]).and_return([])
+        hash = write_hash.except("boop")
+        cache.write(:merged_branch_names, hash)
+      end
+
+      it { is_expected.to eq(already_merged) }
+
+      it "does fetch from the disk" do
+        expect(repository.raw_repository).to receive(:merged_branch_names).with(["boop"])
+
+        subject
+      end
+    end
+
+    context "requested branches array is empty" do
+      let(:branch_names) { [] }
+
+      it { is_expected.to eq(already_merged) }
     end
   end
 
@@ -715,6 +897,7 @@ describe Repository do
 
   describe "search_files_by_content" do
     let(:results) { repository.search_files_by_content('feature', 'master') }
+
     subject { results }
 
     it { is_expected.to be_an Array }
@@ -825,7 +1008,7 @@ describe Repository do
       end
 
       it 'returns nil' do
-        expect(Rails.logger).to receive(:info).with("Remove remote job failed to create for #{project.id} with remote name joe.")
+        expect(Gitlab::AppLogger).to receive(:info).with("Remove remote job failed to create for #{project.id} with remote name joe.")
 
         expect(repository.async_remove_remote('joe')).to be_nil
       end
@@ -845,7 +1028,7 @@ describe Repository do
   end
 
   describe '#get_raw_changes' do
-    context `with non-UTF8 bytes in paths` do
+    context 'with non-UTF8 bytes in paths' do
       let(:old_rev) { 'd0888d297eadcd7a345427915c309413b1231e65' }
       let(:new_rev) { '19950f03c765f7ac8723a73a0599764095f52fc0' }
       let(:changes) { repository.raw_changes_between(old_rev, new_rev) }
@@ -1062,6 +1245,33 @@ describe Repository do
 
       it 'is false' do
         is_expected.to eq(false)
+      end
+    end
+  end
+
+  describe '#has_ambiguous_refs?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:branch_names, :tag_names, :result) do
+      nil | nil | false
+      %w() | %w() | false
+      %w(a b) | %w() | false
+      %w() | %w(c d) | false
+      %w(a b) | %w(c d) | false
+      %w(a/b) | %w(c/d) | false
+      %w(a b) | %w(c d a/z) | true
+      %w(a b c/z) | %w(c d) | true
+      %w(a/b/z) | %w(a/b) | false # we only consider refs ambiguous before the first slash
+      %w(a/b/z) | %w(a/b a) | true
+      %w(ab) | %w(abc/d a b) | false
+    end
+
+    with_them do
+      it do
+        allow(repository).to receive(:branch_names).and_return(branch_names)
+        allow(repository).to receive(:tag_names).and_return(tag_names)
+
+        expect(repository.has_ambiguous_refs?).to eq(result)
       end
     end
   end
@@ -1297,17 +1507,13 @@ describe Repository do
     let(:empty_repository) { create(:project_empty_repo).repository }
 
     it 'returns empty array for an empty repository' do
-      # rubocop:disable Style/WordArray
-      expect(empty_repository.blobs_at(['master', 'foobar'])).to eq([])
-      # rubocop:enable Style/WordArray
+      expect(empty_repository.blobs_at(%w[master foobar])).to eq([])
     end
 
     it 'returns blob array for a non-empty repository' do
       repository.create_file(User.last, 'foobar', 'CONTENT', message: 'message', branch_name: 'master')
 
-      # rubocop:disable Style/WordArray
-      blobs = repository.blobs_at([['master', 'foobar']])
-      # rubocop:enable Style/WordArray
+      blobs = repository.blobs_at([%w[master foobar]])
 
       expect(blobs.first.name).to eq('foobar')
       expect(blobs.size).to eq(1)
@@ -1326,6 +1532,13 @@ describe Repository do
 
       repository.root_ref
       repository.root_ref
+    end
+
+    it 'returns nil if the repository does not exist' do
+      repository = create(:project).repository
+
+      expect(repository).not_to be_exists
+      expect(repository.root_ref).to be_nil
     end
 
     it_behaves_like 'asymmetric cached method', :root_ref
@@ -1502,68 +1715,57 @@ describe Repository do
       end
     end
 
-    context 'when two_step_rebase feature is enabled' do
-      before do
-        stub_feature_flags(two_step_rebase: true)
-      end
+    it_behaves_like 'a method that can rebase successfully'
 
-      it_behaves_like 'a method that can rebase successfully'
+    it 'executes the new Gitaly RPC' do
+      expect_any_instance_of(Gitlab::GitalyClient::OperationService).to receive(:rebase)
 
-      it 'executes the new Gitaly RPC' do
-        expect_any_instance_of(Gitlab::GitalyClient::OperationService).to receive(:rebase)
-        expect_any_instance_of(Gitlab::GitalyClient::OperationService).not_to receive(:user_rebase)
-
-        repository.rebase(user, merge_request)
-      end
-
-      describe 'rolling back the `rebase_commit_sha`' do
-        let(:new_sha) { Digest::SHA1.hexdigest('foo') }
-
-        it 'does not rollback when there are no errors' do
-          second_response = double(pre_receive_error: nil, git_error: nil)
-          mock_gitaly(second_response)
-
-          repository.rebase(user, merge_request)
-
-          expect(merge_request.reload.rebase_commit_sha).to eq(new_sha)
-        end
-
-        it 'does rollback when an error is encountered in the second step' do
-          second_response = double(pre_receive_error: 'my_error', git_error: nil)
-          mock_gitaly(second_response)
-
-          expect do
-            repository.rebase(user, merge_request)
-          end.to raise_error(Gitlab::Git::PreReceiveError)
-
-          expect(merge_request.reload.rebase_commit_sha).to be_nil
-        end
-
-        def mock_gitaly(second_response)
-          responses = [
-            double(rebase_sha: new_sha).as_null_object,
-            second_response
-          ]
-
-          expect_any_instance_of(
-            Gitaly::OperationService::Stub
-          ).to receive(:user_rebase_confirmable).and_return(responses.each)
-        end
-      end
+      repository.rebase(user, merge_request)
     end
 
-    context 'when two_step_rebase feature is disabled' do
-      before do
-        stub_feature_flags(two_step_rebase: false)
-      end
+    describe 'rolling back the `rebase_commit_sha`' do
+      let(:new_sha) { Digest::SHA1.hexdigest('foo') }
 
-      it_behaves_like 'a method that can rebase successfully'
-
-      it 'executes the deprecated Gitaly RPC' do
-        expect_any_instance_of(Gitlab::GitalyClient::OperationService).to receive(:user_rebase)
-        expect_any_instance_of(Gitlab::GitalyClient::OperationService).not_to receive(:rebase)
+      it 'does not rollback when there are no errors' do
+        second_response = double(pre_receive_error: nil, git_error: nil)
+        mock_gitaly(second_response)
 
         repository.rebase(user, merge_request)
+
+        expect(merge_request.reload.rebase_commit_sha).to eq(new_sha)
+      end
+
+      it 'does rollback when a PreReceiveError is encountered in the second step' do
+        second_response = double(pre_receive_error: 'my_error', git_error: nil)
+        mock_gitaly(second_response)
+
+        expect do
+          repository.rebase(user, merge_request)
+        end.to raise_error(Gitlab::Git::PreReceiveError)
+
+        expect(merge_request.reload.rebase_commit_sha).to be_nil
+      end
+
+      it 'does rollback when a GitError is encountered in the second step' do
+        second_response = double(pre_receive_error: nil, git_error: 'git error')
+        mock_gitaly(second_response)
+
+        expect do
+          repository.rebase(user, merge_request)
+        end.to raise_error(Gitlab::Git::Repository::GitError)
+
+        expect(merge_request.reload.rebase_commit_sha).to be_nil
+      end
+
+      def mock_gitaly(second_response)
+        responses = [
+          double(rebase_sha: new_sha).as_null_object,
+          second_response
+        ]
+
+        expect_any_instance_of(
+          Gitaly::OperationService::Stub
+        ).to receive(:user_rebase_confirmable).and_return(responses.each)
       end
     end
   end
@@ -1751,11 +1953,13 @@ describe Repository do
         :avatar,
         :exists?,
         :root_ref,
+        :merged_branch_names,
         :has_visible_content?,
         :issue_template_names,
         :merge_request_template_names,
-        :metrics_dashboard_paths,
-        :xcode_project?
+        :user_defined_metrics_dashboard_paths,
+        :xcode_project?,
+        :has_ambiguous_refs?
       ])
 
       repository.after_change_head
@@ -1780,14 +1984,6 @@ describe Repository do
       expect(repository).to receive(:repository_event).with(:push_tag)
 
       repository.before_push_tag
-    end
-  end
-
-  describe '#after_import' do
-    it 'flushes and builds the cache' do
-      expect(repository).to receive(:expire_content_cache)
-
-      repository.after_import
     end
   end
 
@@ -1908,7 +2104,7 @@ describe Repository do
   describe '#expire_branches_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(branch_names branch_count has_visible_content?))
+        .with(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_branches_cache
@@ -1918,7 +2114,7 @@ describe Repository do
   describe '#expire_tags_cache' do
     it 'expires the cache' do
       expect(repository).to receive(:expire_method_caches)
-        .with(%i(tag_names tag_count))
+        .with(%i(tag_names tag_count has_ambiguous_refs?))
         .and_call_original
 
       repository.expire_tags_cache
@@ -2217,7 +2413,7 @@ describe Repository do
     end
   end
 
-  describe '#tree' do
+  shared_examples '#tree' do
     context 'using a non-existing repository' do
       before do
         allow(repository).to receive(:head_commit).and_return(nil)
@@ -2235,8 +2431,15 @@ describe Repository do
     context 'using an existing repository' do
       it 'returns a Tree' do
         expect(repository.tree(:head)).to be_an_instance_of(Tree)
+        expect(repository.tree('v1.1.1')).to be_an_instance_of(Tree)
       end
     end
+  end
+
+  it_behaves_like '#tree'
+
+  describe '#tree? with Rugged enabled', :enable_rugged do
+    it_behaves_like '#tree'
   end
 
   describe '#size' do
@@ -2386,7 +2589,31 @@ describe Repository do
   end
 
   describe '#ancestor? with Gitaly enabled' do
-    it_behaves_like "#ancestor?"
+    let(:commit) { repository.commit }
+    let(:ancestor) { commit.parents.first }
+    let(:cache_key) { "ancestor:#{ancestor.id}:#{commit.id}" }
+
+    it_behaves_like '#ancestor?'
+
+    context 'caching', :request_store, :clean_gitlab_redis_cache do
+      it 'only calls out to Gitaly once' do
+        expect(repository.raw_repository).to receive(:ancestor?).once
+
+        2.times { repository.ancestor?(commit.id, ancestor.id) }
+      end
+
+      it 'returns the value from the request store' do
+        repository.__send__(:request_store_cache).write(cache_key, "it's apparent")
+
+        expect(repository.ancestor?(ancestor.id, commit.id)).to eq("it's apparent")
+      end
+
+      it 'returns the value from the redis cache' do
+        expect(repository.__send__(:cache)).to receive(:fetch).with(cache_key).and_return("it's apparent")
+
+        expect(repository.ancestor?(ancestor.id, commit.id)).to eq("it's apparent")
+      end
+    end
   end
 
   describe '#ancestor? with Rugged enabled', :enable_rugged do
@@ -2426,7 +2653,7 @@ describe Repository do
   end
 
   describe 'commit cache' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
 
     it 'caches based on SHA' do
       # Gets the commit oid, and warms the cache
@@ -2478,6 +2705,7 @@ describe Repository do
        build(:commit, author: author_c),
        build(:commit, author: author_c)]
     end
+
     let(:order_by) { nil }
     let(:sort) { nil }
 
@@ -2574,7 +2802,7 @@ describe Repository do
   end
 
   describe '#merge_base' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
     subject(:repository) { project.repository }
 
     it 'only makes one gitaly call' do
@@ -2632,8 +2860,47 @@ describe Repository do
     end
   end
 
+  describe '#create_from_bundle' do
+    let(:project) { create(:project) }
+    let(:repository) { project.repository }
+    let(:valid_bundle_path) { File.join(Dir.tmpdir, "repo-#{SecureRandom.hex}.bundle") }
+    let(:raw_repository) { repository.raw }
+
+    before do
+      allow(raw_repository).to receive(:create_from_bundle).and_return({})
+    end
+
+    after do
+      FileUtils.rm_rf(valid_bundle_path)
+    end
+
+    it 'calls out to the raw_repository to create a repo from bundle' do
+      expect(raw_repository).to receive(:create_from_bundle)
+
+      repository.create_from_bundle(valid_bundle_path)
+    end
+
+    it 'calls after_create' do
+      expect(repository).to receive(:after_create)
+
+      repository.create_from_bundle(valid_bundle_path)
+    end
+
+    context 'when exception is raised' do
+      before do
+        allow(raw_repository).to receive(:create_from_bundle).and_raise(::Gitlab::Git::BundleFile::InvalidBundleError)
+      end
+
+      it 'after_create is not executed' do
+        expect(repository).not_to receive(:after_create)
+
+        expect {repository.create_from_bundle(valid_bundle_path)}.to raise_error(::Gitlab::Git::BundleFile::InvalidBundleError)
+      end
+    end
+  end
+
   describe "#blobs_metadata" do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
     let(:repository) { project.repository }
 
     def expect_metadata_blob(thing)
@@ -2658,6 +2925,111 @@ describe Repository do
     it "performs a single gitaly call", :request_store do
       expect { repository.blobs_metadata(["bar/branch-test.txt", "readme.txt", "does/not/exist"]) }
         .to change { Gitlab::GitalyClient.get_request_count }.by(1)
+    end
+  end
+
+  describe '#project' do
+    it 'returns the project for a project snippet' do
+      snippet = create(:project_snippet)
+
+      expect(snippet.repository.project).to be(snippet.project)
+    end
+
+    it 'returns nil for a personal snippet' do
+      snippet = create(:personal_snippet)
+
+      expect(snippet.repository.project).to be_nil
+    end
+
+    it 'returns the container if it is a project' do
+      expect(repository.project).to be(project)
+    end
+
+    it 'returns nil if the container is not a project' do
+      expect(repository).to receive(:container).and_return(Group.new)
+      expect(repository.project).to be_nil
+    end
+  end
+
+  describe '#submodule_links' do
+    it 'returns an instance of Gitlab::SubmoduleLinks' do
+      expect(repository.submodule_links).to be_a(Gitlab::SubmoduleLinks)
+    end
+  end
+
+  describe '#lfs_enabled?' do
+    let_it_be(:project) { create(:project, :repository, :design_repo, lfs_enabled: true) }
+
+    subject { repository.lfs_enabled? }
+
+    context 'for a project repository' do
+      let(:repository) { project.repository }
+
+      it 'returns true when LFS is enabled' do
+        stub_lfs_setting(enabled: true)
+
+        is_expected.to be_truthy
+      end
+
+      it 'returns false when LFS is disabled' do
+        stub_lfs_setting(enabled: false)
+
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'for a project wiki repository' do
+      let(:repository) { project.wiki.repository }
+
+      it 'returns true when LFS is enabled' do
+        stub_lfs_setting(enabled: true)
+
+        is_expected.to be_truthy
+      end
+
+      it 'returns false when LFS is disabled' do
+        stub_lfs_setting(enabled: false)
+
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'for a project snippet repository' do
+      let(:snippet) { create(:project_snippet, project: project) }
+      let(:repository) { snippet.repository }
+
+      it 'returns false when LFS is enabled' do
+        stub_lfs_setting(enabled: true)
+
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'for a personal snippet repository' do
+      let(:snippet) { create(:personal_snippet) }
+      let(:repository) { snippet.repository }
+
+      it 'returns false when LFS is enabled' do
+        stub_lfs_setting(enabled: true)
+
+        is_expected.to be_falsy
+      end
+    end
+
+    context 'for a design repository' do
+      let(:repository) { project.design_repository }
+
+      it 'returns true when LFS is enabled' do
+        stub_lfs_setting(enabled: true)
+
+        is_expected.to be_truthy
+      end
+
+      it 'returns false when LFS is disabled' do
+        stub_lfs_setting(enabled: false)
+
+        is_expected.to be_falsy
+      end
     end
   end
 end

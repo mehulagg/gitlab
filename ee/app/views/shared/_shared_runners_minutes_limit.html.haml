@@ -1,13 +1,10 @@
-- project = local_assigns.fetch(:project, nil)
-- namespace = local_assigns.fetch(:namespace, project && project.shared_runners_limit_namespace)
-- scope = (project || namespace).full_path
-- has_limit = (project || namespace).shared_runners_minutes_limit_enabled?
-- can_see_status = project.nil? || can?(current_user, :create_pipeline, project)
-- ci_warning_message = ci_usage_warning_message(namespace, project)
+- notification = ::Ci::Minutes::Notification.new(local_assigns.dig(:project), local_assigns.dig(:namespace))
+- return unless notification.show?(current_user)
 
-- if has_limit && can_see_status && ci_warning_message.present?
-  %div{ class: ["pt-2", (classes if defined? classes)] }
-    .bs-callout.shared-runner-quota-message.d-none.d-sm-block.bs-callout-danger{ data: { scope: scope } }
-      %p
-        = ci_warning_message
-      = link_to _('Purchase more minutes'), ::EE::SUBSCRIPTIONS_MORE_MINUTES_URL, class: "btn btn-danger btn-inverted"
+%div{ class: [(classes if defined? classes)] }
+  .shared-runner-quota-message.gl-pt-5.gl-pb-3
+    .js-vue-alert{ 'v-cloak': true, data: { variant: notification.style,
+      primary_button_text: _('Buy more Pipeline minutes'),
+      primary_button_link: ::EE::SUBSCRIPTIONS_MORE_MINUTES_URL,
+      dismissible: 'false' } }
+      = notification.text

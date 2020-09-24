@@ -2,12 +2,27 @@
 
 require 'spec_helper'
 
-describe Gitlab::IssuablesCountForState do
+RSpec.describe Gitlab::IssuablesCountForState do
   let(:finder) do
     double(:finder, count_by_state: { opened: 2, closed: 1 })
   end
 
   let(:counter) { described_class.new(finder) }
+
+  describe 'project given' do
+    let(:project) { build(:project) }
+    let(:counter) { described_class.new(finder, project) }
+
+    it 'provides the project' do
+      expect(counter.project).to eq(project)
+    end
+  end
+
+  describe '.declarative_policy_class' do
+    subject { described_class.declarative_policy_class }
+
+    it { is_expected.to eq('IssuablePolicy') }
+  end
 
   describe '#for_state_or_opened' do
     it 'returns the number of issuables for the given state' do

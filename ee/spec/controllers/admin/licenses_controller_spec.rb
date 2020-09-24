@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::LicensesController do
+RSpec.describe Admin::LicensesController do
   let(:admin) { create(:admin) }
 
   before do

@@ -2,22 +2,23 @@
 
 require 'spec_helper'
 
-describe 'Projects > Files > User creates a directory', :js do
+RSpec.describe 'Projects > Files > User creates a directory', :js do
   let(:fork_message) do
     "You're not allowed to make changes to this project directly. "\
     "A fork of this project has been created that you can make changes in, so you can submit a merge request."
   end
+
   let(:project) { create(:project, :repository) }
   let(:project2) { create(:project, :repository, name: 'Another Project', path: 'another-project') }
   let(:project2_tree_path_root_ref) { project_tree_path(project2, project2.repository.root_ref) }
   let(:user) { create(:user) }
 
   before do
-    stub_feature_flags(vue_file_list: false)
-
     project.add_developer(user)
     sign_in(user)
     visit project_tree_path(project, 'master')
+
+    wait_for_requests
   end
 
   context 'with default target branch' do
@@ -42,6 +43,25 @@ describe 'Projects > Files > User creates a directory', :js do
 
       expect(page).to have_content('A directory with this name already exists')
       expect(current_path).to eq(project_tree_path(project, 'master'))
+    end
+  end
+
+  context 'inside sub-folder' do
+    it 'creates new directory' do
+      click_link 'files'
+
+      page.within('.repo-breadcrumb') do
+        expect(page).to have_link('files')
+      end
+
+      first('.add-to-tree').click
+      click_link('New directory')
+
+      fill_in(:dir_name, with: 'new_directory')
+      click_button('Create directory')
+
+      expect(page).to have_content('files')
+      expect(page).to have_content('new_directory')
     end
   end
 

@@ -10,13 +10,14 @@ module MergeRequests
   class MergeService < MergeRequests::MergeBaseService
     delegate :merge_jid, :state, to: :@merge_request
 
-    def execute(merge_request)
+    def execute(merge_request, options = {})
       if project.merge_requests_ff_only_enabled && !self.is_a?(FfMergeService)
         FfMergeService.new(project, current_user, params).execute(merge_request)
         return
       end
 
       @merge_request = merge_request
+      @options = options
 
       validate!
 
@@ -27,6 +28,7 @@ module MergeRequests
           success
         end
       end
+
       log_info("Merge process finished on JID #{merge_jid} with state #{state}")
     rescue MergeError => e
       handle_merge_error(log_message: e.message, save_message_on_model: true)
@@ -37,6 +39,7 @@ module MergeRequests
     def validate!
       authorization_check!
       error_check!
+      updated_check!
     end
 
     def authorization_check!
@@ -53,11 +56,20 @@ module MergeRequests
       error =
         if @merge_request.should_be_rebased?
           'Only fast-forward merge is allowed for your project. Please update your source branch'
-        elsif !@merge_request.mergeable?
+        elsif !@merge_request.mergeable?(skip_discussions_check: @options[:skip_discussions_check])
           'Merge request is not mergeable'
+        elsif !@merge_request.squash && project.squash_always?
+          'This project requires squashing commits when merge requests are accepted.'
         end
 
       raise_error(error) if error
+    end
+
+    def updated_check!
+      unless source_matches?
+        raise_error('Branch has been updated since the merge was requested. '\
+                    'Please review the changes.')
+      end
     end
 
     def commit
@@ -71,6 +83,8 @@ module MergeRequests
       end
 
       merge_request.update!(merge_commit_sha: commit_id)
+    ensure
+      merge_request.update_and_mark_in_progress_merge_commit_sha(nil)
     end
 
     def try_merge
@@ -81,8 +95,6 @@ module MergeRequests
     rescue => e
       handle_merge_error(log_message: e.message)
       raise_error('Something went wrong during merge')
-    ensure
-      merge_request.update!(in_progress_merge_commit_sha: nil)
     end
 
     def after_merge
@@ -91,7 +103,7 @@ module MergeRequests
       log_info("Post merge finished on JID #{merge_jid} with state #{state}")
 
       if delete_source_branch?
-        DeleteBranchService.new(@merge_request.source_project, branch_deletion_user)
+        ::Branches::DeleteService.new(@merge_request.source_project, branch_deletion_user)
           .execute(merge_request.source_branch)
       end
     end
@@ -113,17 +125,23 @@ module MergeRequests
     end
 
     def handle_merge_error(log_message:, save_message_on_model: false)
-      Rails.logger.error("MergeService ERROR: #{merge_request_info} - #{log_message}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("MergeService ERROR: #{merge_request_info} - #{log_message}")
       @merge_request.update(merge_error: log_message) if save_message_on_model
     end
 
     def log_info(message)
-      @logger ||= Rails.logger # rubocop:disable Gitlab/RailsLogger
+      @logger ||= Gitlab::AppLogger
       @logger.info("#{merge_request_info} - #{message}")
     end
 
     def merge_request_info
       merge_request.to_reference(full: true)
+    end
+
+    def source_matches?
+      # params-keys are symbols coming from the controller, but when they get
+      # loaded from the database they're strings
+      params.with_indifferent_access[:sha] == merge_request.diff_head_sha
     end
   end
 end

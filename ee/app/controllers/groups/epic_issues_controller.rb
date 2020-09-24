@@ -3,6 +3,7 @@
 class Groups::EpicIssuesController < Groups::ApplicationController
   include EpicRelations
 
+  before_action :check_epics_available!
   before_action :authorize_issue_link_association!, only: [:destroy, :update]
 
   def update
@@ -31,5 +32,9 @@ class Groups::EpicIssuesController < Groups::ApplicationController
 
   def link
     @link ||= EpicIssue.find(params[:id])
+  end
+
+  def authorized_object
+    'epic'
   end
 end

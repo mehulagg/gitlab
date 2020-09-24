@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::UrlSanitizer do
+RSpec.describe Gitlab::UrlSanitizer do
   using RSpec::Parameterized::TableSyntax
 
   describe '.sanitize' do
@@ -57,6 +57,30 @@ describe Gitlab::UrlSanitizer do
 
     with_them do
       it { expect(described_class.valid?(url)).to eq(value) }
+    end
+  end
+
+  describe '.valid_web?' do
+    where(:value, :url) do
+      false | nil
+      false | ''
+      false | '123://invalid:url'
+      false | 'valid@project:url.git'
+      false | 'valid:pass@project:url.git'
+      false | %w(test array)
+      false | 'ssh://example.com'
+      false | 'ssh://:@example.com'
+      false | 'ssh://foo@example.com'
+      false | 'ssh://foo:bar@example.com'
+      false | 'ssh://foo:bar@example.com/group/group/project.git'
+      false | 'git://example.com/group/group/project.git'
+      false | 'git://foo:bar@example.com/group/group/project.git'
+      true  | 'http://foo:bar@example.com/group/group/project.git'
+      true  | 'https://foo:bar@example.com/group/group/project.git'
+    end
+
+    with_them do
+      it { expect(described_class.valid_web?(url)).to eq(value) }
     end
   end
 

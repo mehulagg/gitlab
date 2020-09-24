@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe Elastic::ProcessInitialBookkeepingService do
+  let(:project) { create(:project) }
+  let(:issue) { create(:issue) }
+
+  describe '.backfill_projects!' do
+    it 'calls initial project indexing' do
+      expect(described_class).to receive(:maintain_indexed_associations)
+      expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id)
+      expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+
+      described_class.backfill_projects!(project)
+    end
+
+    it 'raises an exception if non project is provided' do
+      expect { described_class.backfill_projects!(issue) }.to raise_error(ArgumentError)
+    end
+
+    it 'uses a separate queue' do
+      expect { described_class.backfill_projects!(project) }.not_to change { Elastic::ProcessBookkeepingService.queue_size }
+    end
+  end
+end

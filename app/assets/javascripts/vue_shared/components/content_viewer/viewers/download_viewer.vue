@@ -1,17 +1,21 @@
 <script>
-import { GlLink } from '@gitlab/ui';
-import Icon from '../../icon.vue';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import { numberToHumanSize } from '../../../../lib/utils/number_utils';
 
 export default {
   components: {
     GlLink,
-    Icon,
+    GlIcon,
   },
   props: {
     path: {
       type: String,
       required: true,
+    },
+    filePath: {
+      type: String,
+      required: false,
+      default: '',
     },
     fileSize: {
       type: Number,
@@ -24,7 +28,8 @@ export default {
       return numberToHumanSize(this.fileSize);
     },
     fileName() {
-      return this.path.split('/').pop();
+      // path could be a base64 uri too, so check if filePath was passed additionally
+      return (this.filePath || this.path).split('/').pop();
     },
   },
 };
@@ -33,14 +38,20 @@ export default {
 <template>
   <div class="file-container">
     <div class="file-content">
-      <p class="prepend-top-10 file-info">
+      <p class="gl-mt-3 file-info">
         {{ fileName }}
         <template v-if="fileSize > 0">
           ({{ fileSizeReadable }})
         </template>
       </p>
-      <gl-link :href="path" class="btn btn-default" rel="nofollow" download target="_blank">
-        <icon :size="16" name="download" class="float-left append-right-8" />
+      <gl-link
+        :href="path"
+        class="btn btn-default"
+        rel="nofollow"
+        :download="fileName"
+        target="_blank"
+      >
+        <gl-icon :size="16" name="download" class="float-left gl-mr-3" />
         {{ __('Download') }}
       </gl-link>
     </div>

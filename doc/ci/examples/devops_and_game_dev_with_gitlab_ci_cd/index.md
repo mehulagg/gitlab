@@ -1,11 +1,8 @@
 ---
-author: Ryan Hall
-author_gitlab: blitzgren
-level: intermediate
-article_type: tutorial
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: tutorial
-date: 2018-03-07
-last_updated: 2019-03-11
 ---
 
 # DevOps and Game Dev with GitLab CI/CD
@@ -26,7 +23,7 @@ Creating a strong CI/CD pipeline at the beginning of developing another game, [D
 was essential for the fast pace the team worked at. This tutorial will build upon my
 [previous introductory article](https://ryanhallcs.wordpress.com/2017/03/15/devops-and-game-dev/) and go through the following steps:
 
-1. Using code from the previous article to start with a barebones [Phaser](https://phaser.io) game built by a gulp file
+1. Using code from the previous article to start with a bare-bones [Phaser](https://phaser.io) game built by a gulp file
 1. Adding and running unit tests
 1. Creating a `Weapon` class that can be triggered to spawn a `Bullet` in a given direction
 1. Adding a `Player` class that uses this weapon and moves around the screen
@@ -38,7 +35,7 @@ that's tested and deployed on every push to the `master` branch of the [codebase
 This will also provide
 boilerplate code for starting a browser-based game with the following components:
 
-- Written in [Typescript](https://www.typescriptlang.org/) and [PhaserJs](https://phaser.io)
+- Written in [TypeScript](https://www.typescriptlang.org/) and [PhaserJs](https://phaser.io)
 - Building, running, and testing with [Gulp](https://gulpjs.com)
 - Unit tests with [Chai](https://www.chaijs.com) and [Mocha](https://mochajs.org/)
 - CI/CD with GitLab
@@ -54,7 +51,7 @@ CI/CD from every new push to master. The `master` branch for this game's [reposi
 contains a completed version with all configurations. If you would like to follow along
 with this article, you can clone and work from the `devops-article` branch:
 
-```sh
+```shell
 git clone git@gitlab.com:blitzgren/gitlab-game-demo.git
 git checkout devops-article
 ```
@@ -63,7 +60,7 @@ Next, we'll create a small subset of tests that exemplify most of the states I e
 this `Weapon` class to go through. To get started, create a folder called `lib/tests`
 and add the following code to a new file `weaponTests.ts`:
 
-```ts
+```typescript
 import { expect } from 'chai';
 import { Weapon, BulletFactory } from '../lib/weapon';
 
@@ -114,7 +111,7 @@ describe('Weapon', () => {
 To build and run these tests using gulp, let's also add the following gulp functions
 to the existing `gulpfile.js` file:
 
-```ts
+```typescript
 gulp.task('build-test', function () {
     return gulp.src('src/tests/**/*.ts', { read: false })
     .pipe(tap(function (file) {
@@ -140,7 +137,7 @@ to trigger the weapon. In the `src/lib` folder create a `weapon.ts` file. We'll 
 to it: `Weapon` and `BulletFactory` which will encapsulate Phaser's **sprite** and
 **group** objects, and the logic specific to our game.
 
-```ts
+```typescript
 export class Weapon {
     private isTriggered: boolean = false;
     private currentTimer: number = 0;
@@ -210,7 +207,7 @@ export class BulletFactory {
 Lastly, we'll redo our entry point, `game.ts`, to tie together both `Player` and `Weapon` objects
 as well as add them to the update loop. Here is what the updated `game.ts` file looks like:
 
-```ts
+```typescript
 import { Player } from "./player";
 import { Weapon, BulletFactory } from "./weapon";
 
@@ -269,21 +266,21 @@ we know we will need to access everything in the `built` folder, given by GitLab
 We'll also cache `node_modules` to avoid having to do a full re-pull of those dependencies:
 just pack them up in the cache. Here is the full `build` job:
 
-```yml
+```yaml
 build:
-    stage: build
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp
-        - gulp build-test
-    cache:
-        policy: push
-        paths:
-        - node_modules
-    artifacts:
-        paths:
-        - built
+  stage: build
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp
+    - gulp build-test
+  cache:
+    policy: push
+    paths:
+      - node_modules
+  artifacts:
+    paths:
+      - built
 ```
 
 ### Test your game with GitLab CI/CD
@@ -296,20 +293,20 @@ the previous job. Lastly, by convention, we let GitLab CI/CD know this needs to 
 the `build` job by giving it a `test` [stage](../../../ci/yaml/README.md#stages).
 Following the YAML structure, the `test` job should look like this:
 
-```yml
+```yaml
 test:
-    stage: test
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp run-test
-    cache:
-        policy: push
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: test
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp run-test
+  cache:
+    policy: push
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 ```
 
 We have added unit tests for a `Weapon` class that shoots on a specified interval.
@@ -318,42 +315,42 @@ we've added test artifacts and a test stage to our GitLab CI/CD pipeline using `
 allowing us to run our tests by every push.
 Our entire `.gitlab-ci.yml` file should now look like this:
 
-```yml
+```yaml
 image: node:10
 
 build:
-    stage: build
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp
-        - gulp build-test
-    cache:
-        policy: push
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: build
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp
+    - gulp build-test
+  cache:
+    policy: push
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 
 test:
-    stage: test
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp run-test
-    cache:
-        policy: pull
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: test
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp run-test
+  cache:
+    policy: pull
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 ```
 
 ### Run your CI/CD pipeline
 
-That's it! Add all your new files, commit, and push. For a reference of what our repo should
+That's it! Add all your new files, commit, and push. For a reference of what our repository should
 look like at this point, please refer to the [final commit related to this article on my sample repository](https://gitlab.com/blitzgren/gitlab-game-demo/commit/8b36ef0ecebcf569aeb251be4ee13743337fcfe2).
 By applying both build and test stages, GitLab will run them sequentially at every push to
 our repository. If all goes well you'll end up with a green check mark on each job for the pipeline:
@@ -363,7 +360,7 @@ our repository. If all goes well you'll end up with a green check mark on each j
 You can confirm that the tests passed by clicking on the `test` job to enter the full build logs.
 Scroll to the bottom and observe, in all its passing glory:
 
-```sh
+```shell
 $ gulp run-test
 [18:37:24] Using gulpfile /builds/blitzgren/gitlab-game-demo/gulpfile.js
 [18:37:24] Starting 'run-test'...
@@ -387,8 +384,8 @@ Uploading artifacts to coordinator... ok            id=17095874 responseStatus=2
 ## Continuous Deployment
 
 We have our codebase built and tested on every push. To complete the full pipeline with Continuous Deployment,
-let's set up [free web hosting with AWS S3](https://aws.amazon.com/s/dm/optimization/server-side-test/free-tier/free_np/) and a job through which our build artifacts get
-deployed. GitLab also has a free static site hosting service we could use, [GitLab Pages](https://about.gitlab.com/product/pages/),
+let's set up [free web hosting with AWS S3](https://aws.amazon.com/free/) and a job through which our build artifacts get
+deployed. GitLab also has a free static site hosting service we can use, [GitLab Pages](https://about.gitlab.com/stages-devops-lifecycle/pages/),
 however Dark Nova specifically uses other AWS tools that necessitates using `AWS S3`.
 Read through this article that describes [deploying to both S3 and GitLab Pages](https://about.gitlab.com/blog/2016/08/26/ci-deployment-and-environments/)
 and further delves into the principles of GitLab CI/CD than discussed in this article.
@@ -417,22 +414,22 @@ credentials, which will be the same two credentials (Key ID and Secret). It's a 
 fully understand [IAM Best Practices in AWS](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html). We need to add these credentials to GitLab:
 
 1. Log into your AWS account and go to the [Security Credentials page](https://console.aws.amazon.com/iam/home#/security_credential)
-1. Click the **Access Keys** section and **Create New Access Key**. Create the key and keep the id and secret around, you'll need them later
+1. Click the **Access Keys** section and **Create New Access Key**. Create the key and keep the ID and secret around, you'll need them later
 
-   ![AWS Access Key Config](img/aws_config_window.png)
+   ![AWS Access Key Configuration](img/aws_config_window.png)
 
 1. Go to your GitLab project, click **Settings > CI/CD** on the left sidebar
 1. Expand the **Variables** section
 
    ![GitLab Secret Config](img/gitlab_config.png)
 
-1. Add a key named `AWS_KEY_ID` and copy the key id from Step 2 into the **Value** textbox
-1. Add a key named `AWS_KEY_SECRET` and copy the key secret from Step 2 into the **Value** textbox
+1. Add a key named `AWS_KEY_ID` and copy the key ID from Step 2 into the **Value** field
+1. Add a key named `AWS_KEY_SECRET` and copy the key secret from Step 2 into the **Value** field
 
 ### Deploy your game with GitLab CI/CD
 
 To deploy our build artifacts, we need to install the [AWS CLI](https://aws.amazon.com/cli/) on
-the Shared Runner. The Shared Runner also needs to be able to authenticate with your AWS
+the shared runner. The shared runner also needs to be able to authenticate with your AWS
 account to deploy the artifacts. By convention, AWS CLI will look for `AWS_ACCESS_KEY_ID`
 and `AWS_SECRET_ACCESS_KEY`. GitLab's CI gives us a way to pass the variables we
 set up in the prior section using the `variables` portion of the `deploy` job. At the end,
@@ -440,75 +437,75 @@ we add directives to ensure deployment `only` happens on pushes to `master`. Thi
 single branch still runs through CI, and only merging (or committing directly) to master will
 trigger the `deploy` job of our pipeline. Put these together to get the following:
 
-```yml
+```yaml
 deploy:
-    stage: deploy
-    variables:
-        AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
-        AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
-    script:
-        - apt-get update
-        - apt-get install -y python3-dev python3-pip
-        - easy_install3 -U pip
-        - pip3 install --upgrade awscli
-        - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
-    only:
-        - master
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
+    AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
+  script:
+    - apt-get update
+    - apt-get install -y python3-dev python3-pip
+    - easy_install3 -U pip
+    - pip3 install --upgrade awscli
+    - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
+  only:
+    - master
 ```
 
 Be sure to update the region and S3 URL in that last script command to fit your setup.
 Our final configuration file `.gitlab-ci.yml` looks like:
 
-```yml
+```yaml
 image: node:10
 
 build:
-    stage: build
-    script:
-        - npm i gulp -g
-        - npm i
-        - gulp
-        - gulp build-test
-    cache:
-        policy: push
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: build
+  script:
+    - npm i gulp -g
+    - npm i
+    - gulp
+    - gulp build-test
+  cache:
+    policy: push
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 
 test:
-    stage: test
-    script:
-        - npm i gulp -g
-        - gulp run-test
-    cache:
-        policy: pull
-        paths:
-        - node_modules/
-    artifacts:
-        paths:
-        - built/
+  stage: test
+  script:
+    - npm i gulp -g
+    - gulp run-test
+  cache:
+    policy: pull
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - built/
 
 deploy:
-    stage: deploy
-    variables:
-        AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
-        AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
-    script:
-        - apt-get update
-        - apt-get install -y python3-dev python3-pip
-        - easy_install3 -U pip
-        - pip3 install --upgrade awscli
-        - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
-    only:
-        - master
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: "$AWS_KEY_ID"
+    AWS_SECRET_ACCESS_KEY: "$AWS_KEY_SECRET"
+  script:
+    - apt-get update
+    - apt-get install -y python3-dev python3-pip
+    - easy_install3 -U pip
+    - pip3 install --upgrade awscli
+    - aws s3 sync ./built s3://gitlab-game-demo --region "us-east-1" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --cache-control "no-cache, no-store, must-revalidate" --delete
+  only:
+    - master
 ```
 
 ## Conclusion
 
 Within the [demo repository](https://gitlab.com/blitzgren/gitlab-game-demo) you can also find a handful of boilerplate code to get
-[Typescript](https://www.typescriptlang.org/), [Mocha](https://mochajs.org/), [Gulp](https://gulpjs.com/) and [Phaser](https://phaser.io) all playing
+[TypeScript](https://www.typescriptlang.org/), [Mocha](https://mochajs.org/), [Gulp](https://gulpjs.com/) and [Phaser](https://phaser.io) all playing
 together nicely with GitLab CI/CD, which is the result of lessons learned while making [Dark Nova](https://www.darknova.io).
 Using a combination of free and open source software, we have a full CI/CD pipeline, a game foundation,
 and unit tests, all running and deployed at every push to master - with shockingly little code.
@@ -516,7 +513,7 @@ Errors can be easily debugged through GitLab's build logs, and within minutes of
 you can see the changes live on your game.
 
 Setting up Continuous Integration and Continuous Deployment from the start with Dark Nova enables
-rapid but stable development. We can easily test changes in a separate [environment](../../environments.md),
+rapid but stable development. We can easily test changes in a separate [environment](../../environments/index.md),
 or multiple environments if needed. Balancing and updating a multiplayer game can be ongoing
 and tedious, but having faith in a stable deployment with GitLab CI/CD allows
 a lot of breathing room in quickly getting changes to players.
@@ -526,7 +523,7 @@ a lot of breathing room in quickly getting changes to players.
 Here are some ideas to further investigate that can speed up or improve your pipeline:
 
 - [Yarn](https://yarnpkg.com) instead of npm
-- Set up a custom [Docker](../../../ci/docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml) image that can preload dependencies and tools (like AWS CLI)
+- Set up a custom [Docker](../../../ci/docker/using_docker_images.md#define-image-and-services-from-gitlab-ciyml) image that can pre-load dependencies and tools (like AWS CLI)
 - Forward a [custom domain](https://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-custom-domain-walkthrough.html) to your game's S3 static website
 - Combine jobs if you find it unnecessary for a small project
 - Avoid the queues and set up your own [custom GitLab CI/CD runner](https://about.gitlab.com/blog/2016/03/01/gitlab-runner-with-docker/)

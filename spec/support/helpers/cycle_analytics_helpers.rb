@@ -37,7 +37,7 @@ module CycleAnalyticsHelpers
   end
 
   def create_cycle(user, project, issue, mr, milestone, pipeline)
-    issue.update(milestone: milestone)
+    issue.update!(milestone: milestone)
     pipeline.run
 
     ci_build = create(:ci_build, pipeline: pipeline, status: :success, author: user)
@@ -77,7 +77,7 @@ module CycleAnalyticsHelpers
                        .new(project, user)
                        .closed_by_merge_requests(issue)
 
-    merge_requests.each { |merge_request| MergeRequests::MergeService.new(project, user).execute(merge_request) }
+    merge_requests.each { |merge_request| MergeRequests::MergeService.new(project, user, sha: merge_request.diff_head_sha).execute(merge_request) }
   end
 
   def deploy_master(user, project, environment: 'production')

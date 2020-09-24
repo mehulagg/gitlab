@@ -2,9 +2,12 @@
 
 class Groups::IssuesAnalyticsController < Groups::ApplicationController
   include IssuableCollections
+  include Analytics::UniqueVisitsHelper
 
   before_action :authorize_read_group!
   before_action :authorize_read_issue_analytics!
+
+  track_unique_visits :show, target_id: 'g_analytics_issues'
 
   def show
     respond_to do |format|

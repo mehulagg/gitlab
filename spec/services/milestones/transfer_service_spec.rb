@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Milestones::TransferService do
+RSpec.describe Milestones::TransferService do
   describe '#execute' do
     subject(:service) { described_class.new(user, old_group, project) }
 
@@ -23,7 +23,7 @@ describe Milestones::TransferService do
         new_group.add_maintainer(user)
         project.add_maintainer(user)
         # simulate project transfer
-        project.update(group: new_group)
+        project.update!(group: new_group)
       end
 
       context 'without existing milestone at the new group level' do
@@ -38,6 +38,35 @@ describe Milestones::TransferService do
           expect(new_milestone).not_to eq(group_milestone)
           expect(new_milestone.title).to eq(group_milestone.title)
           expect(new_milestone.project_milestone?).to be_truthy
+        end
+
+        context 'when milestone is from an ancestor group' do
+          let(:old_group_ancestor) { create(:group) }
+          let(:old_group) { create(:group, parent: old_group_ancestor) }
+          let(:group_milestone) { create(:milestone, group: old_group_ancestor)}
+
+          it 'recreates the missing group milestones at project level' do
+            expect { service.execute }.to change(project.milestones, :count).by(1)
+          end
+        end
+
+        it 'deletes milestone issue counters cache for both milestones' do
+          new_milestone = create(:milestone, project: project, title: group_milestone.title)
+
+          expect_next_instance_of(Milestones::IssuesCountService, group_milestone) do |service|
+            expect(service).to receive(:delete_cache).and_call_original
+          end
+          expect_next_instance_of(Milestones::ClosedIssuesCountService, group_milestone) do |service|
+            expect(service).to receive(:delete_cache).and_call_original
+          end
+          expect_next_instance_of(Milestones::IssuesCountService, new_milestone) do |service|
+            expect(service).to receive(:delete_cache).and_call_original
+          end
+          expect_next_instance_of(Milestones::ClosedIssuesCountService, new_milestone) do |service|
+            expect(service).to receive(:delete_cache).and_call_original
+          end
+
+          service.execute
         end
 
         it 'does not apply new project milestone to issues with project milestone' do
@@ -71,7 +100,9 @@ describe Milestones::TransferService do
 
         context 'when find_or_create_milestone returns nil' do
           before do
-            allow_any_instance_of(Milestones::FindOrCreateService).to receive(:execute).and_return(nil)
+            allow_next_instance_of(Milestones::FindOrCreateService) do |instance|
+              allow(instance).to receive(:execute).and_return(nil)
+            end
           end
 
           it 'removes issues group milestone' do

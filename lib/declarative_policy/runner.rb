@@ -33,6 +33,7 @@ module DeclarativePolicy
     attr_reader :steps
     def initialize(steps)
       @steps = steps
+      @state = nil
     end
 
     # We make sure only to run any given Runner once,
@@ -169,7 +170,7 @@ module DeclarativePolicy
             lowest_score = score
           end
 
-          break if lowest_score.zero?
+          break if lowest_score == 0
         end
 
         [remaining_steps, remaining_enablers, remaining_preventers].each do |set|

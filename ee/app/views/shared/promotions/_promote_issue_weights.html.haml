@@ -1,16 +1,19 @@
 - promotion_feature = 'promote_weight_sidebar_dismissed'
+- trial_cta = Feature.enabled?(:promotion_issue_weight_trial_cta, current_user)
+- session_dismissal = Feature.enabled?(:promotion_issue_weight_session_dismiss, current_user)
+- tracking_options = { track_label: trial_cta.to_s, track_property: session_dismissal.to_s }
 
 - if show_promotions? && show_callout?(promotion_feature)
   .block.js-weight-sidebar-callout.promotion-issue-sidebar{ data: { uid: promotion_feature } }
     .sidebar-collapsed-icon{ data: { toggle: "dropdown", target: ".js-weight-sidebar-callout" } }
       %span{ data: { toggle: "tooltip", placement: "left", container: "body" }, title: _("Weight") }
-        = icon('balance-scale')
+        = sprite_icon('scale')
         %span No
     .title.hide-collapsed
-      = _('Weight')
+      = s_('Promotions|Weight')
     .hide-collapsed.js-toggle-container.promotion-issue-weight-sidebar-message
       = s_('Promotions|This feature is locked.')
-      %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#' }
+      %a.btn-link.js-toggle-button.js-weight-sidebar-callout{ href: '#', data: { track_event: 'click_callout' }.merge(tracking_options) }
         = s_('Promotions|Learn more')
         = icon('chevron-down')
       .js-toggle-content{ style:'display: none' }
@@ -24,10 +27,13 @@
           %p
             - if Gitlab::CurrentSettings.should_check_namespace_plan?
               - subscription_link_url = "#{EE::SUBSCRIPTIONS_URL}/plans"
-              - subscription_link_start = '<a href="%{url}" target="_blank" class="btn-link">'.html_safe % { url: subscription_link_url }
+              - subscription_link_start = '<a href="%{url}" target="_blank" class="btn-link tr-issue-weights-bronze-features-cta">'.html_safe % { url: subscription_link_url }
               = s_("Promotions|See the other features in the %{subscription_link_start}bronze plan%{subscription_link_end}").html_safe % { subscription_link_start: subscription_link_start, subscription_link_end: '</a>'.html_safe }
             - else
-              = _('Improve issues management with Issue weight and GitLab Enterprise Edition.')
+              = s_('Promotions|Improve issues management with Issue weight and GitLab Enterprise Edition.')
           %div
-            = render 'shared/promotions/promotion_link_project', short_form: true, target_blank: true
-            = link_to s_("Promotions|Don't show me this again"), '#', class: ['btn', 'js-close', 'js-close-callout']
+            = render 'shared/promotions/promotion_link_project', short_form: true, target_blank: !trial_cta, trial_cta: trial_cta
+            - if session_dismissal
+              = link_to s_("Promotions|Not now, thanks!"), '#', class: ['btn', 'js-close', 'js-close-callout', 'gl-mt-3', 'js-close-session', 'tr-issue-weights-not-now-cta'], data: { track_event: 'click_notnow' }.merge(tracking_options)
+            - else
+              = link_to s_("Promotions|Don't show me this again"), '#', class: ['btn', 'js-close', 'js-close-callout', 'gl-mt-3', 'tr-issue-weights-dont-show-me-again'], data: { track_event: 'click_dontshow' }.merge(tracking_options)

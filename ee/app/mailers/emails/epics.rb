@@ -29,6 +29,8 @@ module Emails
       @group = @epic.group
       @target_url = group_epic_url(@epic.group, @epic)
 
+      add_group_headers
+
       @sent_notification = SentNotification.record(@epic, recipient_id, reply_key)
     end
 

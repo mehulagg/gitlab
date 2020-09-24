@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-describe TodoService do
-  include DesignManagementTestHelpers
-
+RSpec.describe TodoService do
   let(:author) { create(:user, username: 'author') }
   let(:non_member) { create(:user, username: 'non_member') }
   let(:member) { create(:user, username: 'member') }
@@ -175,10 +173,12 @@ describe TodoService do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let!(:second_todo) do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let(:note) { create(:note, noteable: epic, project: nil, author: john_doe, note: mentions) }
 
         context 'when a note is created for an epic' do
@@ -307,33 +307,40 @@ describe TodoService do
     end
   end
 
-  describe 'Designs' do
-    let(:project) { create(:project) }
-    let(:issue) { create(:issue, project: project) }
-    let(:design) { create(:design, issue: issue) }
+  context 'Merge Requests' do
+    let(:project) { create(:project, :private, :repository) }
+    let(:merge_request) { create(:merge_request, source_project: project, author: author) }
 
-    before do
-      enable_design_management
+    context 'an approver has lost access to the project' do
+      before do
+        create(:approver, user: non_member, target: project)
+        project.members.find_by(user_id: non_member.id).destroy
+      end
 
-      project.add_guest(author)
-      project.add_developer(john_doe)
+      describe '#new_merge_request' do
+        it 'does not create a todo for the approver' do
+          service.new_merge_request(merge_request, author)
+
+          should_not_create_todo(user: non_member, target: merge_request, action: Todo::APPROVAL_REQUIRED)
+        end
+      end
     end
 
-    let(:note) do
-      build(:diff_note_on_design,
-             project: project,
-             noteable: design,
-             author: author,
-             note: "Hey #{john_doe.to_reference}")
-    end
+    describe '#merge_train_removed' do
+      let(:merge_participants) { [admin, create(:user)] }
 
-    it 'creates a todo for mentioned user on new diff note' do
-      service.new_note(note, author)
+      before do
+        allow(merge_request).to receive(:merge_participants).and_return(merge_participants)
+      end
 
-      should_create_todo(user: john_doe,
-                         target: design,
-                         action: Todo::MENTIONED,
-                         note: note)
+      it 'creates a pending todo for each merge_participant' do
+        merge_request.update!(merge_when_pipeline_succeeds: true, merge_user: admin)
+        service.merge_train_removed(merge_request)
+
+        merge_participants.each do |participant|
+          should_create_todo(user: participant, author: participant, target: merge_request, action: Todo::MERGE_TRAIN_REMOVED)
+        end
+      end
     end
   end
 

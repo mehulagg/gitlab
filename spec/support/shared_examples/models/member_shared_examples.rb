@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples_for 'inherited access level as a member of entity' do
+RSpec.shared_examples 'inherited access level as a member of entity' do
   let(:parent_entity) { create(:group) }
   let(:user) { create(:user) }
   let(:member) { entity.is_a?(Group) ? entity.group_member(user) : entity.project_member(user) }
@@ -25,21 +25,21 @@ shared_examples_for 'inherited access level as a member of entity' do
     it 'is allowed to change to be a developer of the entity' do
       entity.add_maintainer(user)
 
-      expect { member.update(access_level: Gitlab::Access::DEVELOPER) }
+      expect { member.update!(access_level: Gitlab::Access::DEVELOPER) }
         .to change { member.access_level }.to(Gitlab::Access::DEVELOPER)
     end
 
     it 'is not allowed to change to be a guest of the entity' do
       entity.add_maintainer(user)
 
-      expect { member.update(access_level: Gitlab::Access::GUEST) }
+      expect { member.update(access_level: Gitlab::Access::GUEST) } # rubocop:disable Rails/SaveBang
         .not_to change { member.reload.access_level }
     end
 
     it "shows an error if the member can't be updated" do
       entity.add_maintainer(user)
 
-      member.update(access_level: Gitlab::Access::REPORTER)
+      expect { member.update!(access_level: Gitlab::Access::REPORTER) }.to raise_error(ActiveRecord::RecordInvalid)
 
       expect(member.errors.full_messages).to eq(["Access level should be greater than or equal to Developer inherited membership from group #{parent_entity.name}"])
     end
@@ -51,16 +51,16 @@ shared_examples_for 'inherited access level as a member of entity' do
 
       non_member = entity.is_a?(Group) ? entity.group_member(non_member_user) : entity.project_member(non_member_user)
 
-      expect { non_member.update(access_level: Gitlab::Access::GUEST) }
+      expect { non_member.update!(access_level: Gitlab::Access::GUEST) }
         .to change { non_member.reload.access_level }
     end
   end
 end
 
-shared_examples_for '#valid_level_roles' do |entity_name|
+RSpec.shared_examples '#valid_level_roles' do |entity_name|
   let(:member_user) { create(:user) }
   let(:group) { create(:group) }
-  let(:entity) { create(entity_name) }
+  let(:entity) { create(entity_name) } # rubocop:disable Rails/SaveBang
   let(:entity_member) { create("#{entity_name}_member", :developer, source: entity, user: member_user) }
   let(:presenter) { described_class.new(entity_member, current_user: member_user) }
   let(:expected_roles) { { 'Developer' => 30, 'Maintainer' => 40, 'Reporter' => 20 } }

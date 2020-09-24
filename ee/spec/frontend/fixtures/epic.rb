@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epics (JavaScript fixtures)' do
+RSpec.describe 'Epics (JavaScript fixtures)' do
   include ApplicationHelper
   include JavaScriptFixturesHelpers
 

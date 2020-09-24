@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::HashedStorageMigrationService do
+RSpec.describe Geo::HashedStorageMigrationService do
   let!(:project) { create(:project, :repository, :legacy_storage) }
   let(:old_path) { project.full_path }
   let(:new_path) { "#{old_path}+renamed" }

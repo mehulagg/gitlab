@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::Conduit::Response do
-  let(:response) { described_class.new(JSON.parse(fixture_file('phabricator_responses/maniphest.search.json')))}
-  let(:error_response) { described_class.new(JSON.parse(fixture_file('phabricator_responses/auth_failed.json'))) }
+RSpec.describe Gitlab::PhabricatorImport::Conduit::Response do
+  let(:response) { described_class.new(Gitlab::Json.parse(fixture_file('phabricator_responses/maniphest.search.json')))}
+  let(:error_response) { described_class.new(Gitlab::Json.parse(fixture_file('phabricator_responses/auth_failed.json'))) }
 
   describe '.parse!' do
     it 'raises a ResponseError if the http response was not successfull' do
@@ -30,7 +30,7 @@ describe Gitlab::PhabricatorImport::Conduit::Response do
                        body: 'This is no JSON')
 
       expect { described_class.parse!(fake_response) }
-        .to raise_error(Gitlab::PhabricatorImport::Conduit::ResponseError, /unexpected token at/)
+        .to raise_error(Gitlab::PhabricatorImport::Conduit::ResponseError, /unexpected character/)
     end
 
     it 'returns a parsed response for valid input' do

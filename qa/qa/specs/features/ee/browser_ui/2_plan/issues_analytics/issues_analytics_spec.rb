@@ -1,25 +1,34 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
-    describe 'Issues analytics' do
+  RSpec.describe 'Plan', :reliable do
+    shared_examples 'issues analytics page' do
       let(:issue) do
-        Resource::Issue.fabricate_via_api! do |issue|
-          issue.title = 'Issue to test Issues Analytics'
-        end
+        Resource::Issue.fabricate_via_api!
       end
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
       end
 
       it 'displays a graph' do
-        page.visit("#{issue.project.group.web_url}/-/issues_analytics")
+        page.visit(analytics_path)
 
         EE::Page::Group::IssuesAnalytics.perform do |issues_analytics|
           expect(issues_analytics.graph).to be_visible
         end
+      end
+    end
+
+    describe 'Group level issues analytics', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/551' do
+      it_behaves_like 'issues analytics page' do
+        let(:analytics_path) { "#{issue.project.group.web_url}/-/issues_analytics" }
+      end
+    end
+
+    describe 'Project level issues analytics', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/552' do
+      it_behaves_like 'issues analytics page' do
+        let(:analytics_path) { "#{issue.project.web_url}/-/analytics/issues_analytics" }
       end
     end
   end

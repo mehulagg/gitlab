@@ -10,7 +10,7 @@ module Geo
       @old_shards        = geo_node.selective_sync_shards
 
       @params = params.dup
-      @params[:namespace_ids] = @params[:namespace_ids].to_s.split(',')
+      @params[:namespace_ids] = @params[:namespace_ids].to_s.split(',') if @params[:namespace_ids].is_a? String
     end
 
     def execute

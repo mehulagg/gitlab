@@ -1,5 +1,0 @@
-- return unless project_nav_tab?(:project_insights)
-
-= nav_link(path: 'projects/insights#show') do
-  = link_to project_insights_path(@project), title: _('Insights'), class: 'shortcuts-project-insights', data: { qa_selector: 'project_insights_link' } do
-    %span= _('Insights')

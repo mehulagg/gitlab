@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'rake gitlab:storage:*', :sidekiq do
+RSpec.describe 'rake gitlab:storage:*' do
   before do
     Rake.application.rake_require 'tasks/gitlab/storage'
 
@@ -128,10 +128,10 @@ describe 'rake gitlab:storage:*', :sidekiq do
 
     context 'with same id in range' do
       it 'displays message when project cant be found' do
-        stub_env('ID_FROM', 99999)
-        stub_env('ID_TO', 99999)
+        stub_env('ID_FROM', non_existing_record_id)
+        stub_env('ID_TO', non_existing_record_id)
 
-        expect { run_rake_task(task) }.to abort_execution.with_message(/There are no projects requiring storage migration with ID=99999/)
+        expect { run_rake_task(task) }.to abort_execution.with_message(/There are no projects requiring storage migration with ID=#{non_existing_record_id}/)
       end
 
       it 'displays a message when project exists but its already migrated' do

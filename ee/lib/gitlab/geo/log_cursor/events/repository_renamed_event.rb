@@ -26,8 +26,7 @@ module Gitlab
           end
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Renaming project',
               project_id: event.project_id,
               old_path: event.old_path_with_namespace,

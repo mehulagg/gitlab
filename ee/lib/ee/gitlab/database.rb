@@ -24,6 +24,18 @@ module EE
 
           ActiveRecord::Base.establish_connection(config)
         end
+
+        def geo_uncached_queries(&block)
+          raise 'No block given' unless block_given?
+
+          ActiveRecord::Base.uncached do
+            if ::Gitlab::Geo.secondary?
+              Geo::TrackingBase.uncached(&block)
+            else
+              yield
+            end
+          end
+        end
       end
     end
   end

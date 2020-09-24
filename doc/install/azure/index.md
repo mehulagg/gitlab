@@ -1,15 +1,23 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: 'Learn how to spin up a pre-configured GitLab VM on Microsoft Azure.'
 type: howto
 ---
 
 # Install GitLab on Microsoft Azure
 
-Azure is Microsoft's business cloud and GitLab is a pre-configured offering on the Azure Marketplace.
-Hopefully, you aren't surprised to hear that Microsoft and Azure have embraced open source software
-like Ubuntu, Red Hat Enterprise Linux, and of course - GitLab! This means that you can spin up a
-pre-configured GitLab VM and have your very own private GitLab up and running in around 30 minutes.
-Let's get started.
+CAUTION: **Deprecated:**
+The GitLab image in the Azure Marketplace is deprecated. You can track GitLab's
+efforts to [post a new image](https://gitlab.com/gitlab-com/alliances/microsoft/gitlab-tracker/-/issues/2).
+
+Azure is Microsoft's business cloud and GitLab is a pre-configured offering on
+the Azure Marketplace. Hopefully, you aren't surprised to hear that Microsoft
+and Azure have embraced open source software like Ubuntu, Red Hat Enterprise Linux,
+and of course - GitLab! This means that you can spin up a pre-configured
+GitLab VM and have your very own private GitLab up and running in around 30
+minutes. Let's get started.
 
 ## Getting started
 
@@ -21,7 +29,7 @@ First, you'll need an account on Azure. There are three ways to do this:
   services, exploring Microsoft's cloud for free. Even after the first 30 days, you never have to pay
   anything unless you decide to transition to paid services with a Pay-As-You-Go Azure subscription.
   This is a great way to try out Azure and cloud computing, and you can
-  [read more in their comprehensive FAQ][Azure-Free-Account-FAQ].
+  [read more in their comprehensive FAQ](https://azure.microsoft.com/en-us/free/free-account-faq/).
 - If you have an MSDN subscription, you can activate your Azure subscriber benefits. Your MSDN
   subscription gives you recurring Azure credits every month, so why not put those credits to use and
   try out GitLab right now?
@@ -41,8 +49,7 @@ create SQL Databases, author websites, and perform lots of other cloud tasks.
 The [Azure Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/) is an online store for pre-configured applications and
 services which have been optimized for the cloud by software vendors like GitLab,
 available on the Azure Marketplace as pre-configured solutions. In this tutorial
-we will install GitLab Community Edition, but for GitLab Enterprise Edition you
-can follow the same process.
+we will install GitLab Community Edition.
 
 To begin creating a new GitLab VM, click on the **+ New** icon, type "GitLab" into the search
 box, and then click the **"GitLab Community Edition"** search result:
@@ -67,19 +74,21 @@ The first items we need to configure are the basic settings of the underlying vi
 1. Enter a `User name` - e.g. `gitlab-admin`
 1. Select an `Authentication type`, either **SSH public key** or **Password**:
 
-   > **Note:** if you're unsure which authentication type to use, select **Password**
+   NOTE: **Note:**
+   If you're unsure which authentication type to use, select **Password**
 
    1. If you chose **SSH public key** - enter your `SSH public key` into the field provided
    _(read the [SSH documentation](../../ssh/README.md) to learn more about how to set up SSH
    public keys)_
    1. If you chose **Password** - enter the password you wish to use _(this is the password that you
-   will use later in this tutorial to [SSH] into the VM, so make sure it's a strong password/passphrase)_
+   will use later in this tutorial to [SSH](https://en.wikipedia.org/wiki/Secure_Shell) into the VM, so make sure it's a strong password/passphrase)_
 
 1. Choose the appropriate `Subscription` tier for your Azure account
 1. Choose an existing `Resource Group` or create a new one - e.g. **"GitLab-CE-Azure"**
 
-   > **Note:** a "Resource group" is a way to group related resources together for easier administration.
-   > We chose "GitLab-CE-Azure", but your resource group can have the same name as your VM.
+   NOTE **Note:**
+   A "Resource group" is a way to group related resources together for easier administration.
+   We chose "GitLab-CE-Azure", but your resource group can have the same name as your VM.
 
 1. Choose a `Location` - if you're unsure, select the default location
 
@@ -94,7 +103,8 @@ Check the settings you have entered, and then click **"OK"** when you're ready t
 Next, you need to choose the size of your VM - selecting features such as the number of CPU cores,
 the amount of RAM, the size of storage (and its speed), etc.
 
-> **Note:** in common with other cloud vendors, Azure operates a resource/usage pricing model, i.e.
+NOTE: **Note:**
+In common with other cloud vendors, Azure operates a resource/usage pricing model, i.e.
 the more resources your VM consumes the more it will cost you to run, so make your selection
 carefully. You'll see that Azure provides an _estimated_ monthly cost beneath each VM Size to help
 guide your selection.
@@ -105,10 +115,11 @@ ahead and select this one, but please choose the size which best meets your own 
 
 ![Azure - Create Virtual Machine - Size](img/azure-create-virtual-machine-size.png)
 
-> **Note:** be aware that whilst your VM is active (known as "allocated"), it will incur
+NOTE: **Note:**
+Be aware that while your VM is active (known as "allocated"), it will incur
 "compute charges" which, ultimately, you will be billed for. So, even if you're using the
 free trial credits, you'll likely want to learn
-[how to properly shutdown an Azure VM to save money](https://buildazure.com/properly-shutdown-azure-vm-to-save-money/).
+[how to properly shutdown an Azure VM to save money](https://build5nines.com/properly-shutdown-azure-vm-to-save-money/).
 
 Go ahead and click your chosen size, then click **"Select"** when you're ready to proceed to the
 next step.
@@ -131,7 +142,8 @@ new VM. You'll be billed only for the VM itself (e.g. "Standard DS1 v2") because
 
 ![Azure - Create Virtual Machine - Purchase](img/azure-create-virtual-machine-purchase.png)
 
-> **Note:** at this stage, you can review and modify the any of the settings you have made during all
+NOTE: **Note:**
+At this stage, you can review and modify the any of the settings you have made during all
 previous steps, just click on any of the four steps to re-open them.
 
 When you have read and agreed to the terms of use and are ready to proceed, click **"Purchase"**.
@@ -173,11 +185,12 @@ _(the full domain name of your own VM will be different, of course)_.
 
 Click **"Save"** for the changes to take effect.
 
-> **Note:** if you want to use your own domain name, you will need to add a DNS `A` record at your
+NOTE **Note:**
+If you want to use your own domain name, you will need to add a DNS `A` record at your
 domain registrar which points to the public IP address of your Azure VM. If you do this, you'll need
 to make sure your VM is configured to use a _static_ public IP address (i.e. not a _dynamic_ one)
 or you will have to reconfigure the DNS `A` record each time Azure reassigns your VM a new public IP
-address. Read [IP address types and allocation methods in Azure][Azure-IP-Address-Types] to learn more.
+address. Read [Public IP addresses](https://docs.microsoft.com/en-us/azure/virtual-network/public-ip-addresses) to learn more.
 
 ## Let's open some ports
 
@@ -189,7 +202,8 @@ Ports are opened by adding _security rules_ to the **"Network security group"** 
 has been assigned to. If you followed the process above, then Azure will have automatically created
 an NSG named `GitLab-CE-nsg` and assigned the `GitLab-CE` VM to it.
 
-> **Note:** if you gave your VM a different name then the NSG automatically created by Azure will
+NOTE: **Note:**
+If you gave your VM a different name then the NSG automatically created by Azure will
 also have a different name - the name you have your VM, with `-nsg` appended to it.
 
 You can navigate to the NSG settings via many different routes in the Azure Portal, but one of the
@@ -216,7 +230,7 @@ ports to enable public internet access to two services in particular:
    public access to the instance of GitLab running on our VM.
 1. **SSH** (port 22) - opening port 22 will enable our VM to respond to SSH connection requests,
    allowing public access (with authentication) to remote terminal sessions
-   _(you'll see why we need [SSH] access to our VM [later on in this tutorial](#maintaining-your-gitlab-instance))_
+   _(you'll see why we need [SSH](https://en.wikipedia.org/wiki/Secure_Shell) access to our VM [later on in this tutorial](#maintaining-your-gitlab-instance))_
 
 ### Open HTTP on Port 80
 
@@ -226,19 +240,19 @@ connections:
 ![Azure - Add inbound security rules - HTTP](img/azure-add-inbound-sec-rule-http.png)
 
 1. Enter **"HTTP"** in the `Name` field
-1. Select **HTTP** from the options in the `Service` drop-down
+1. Select **HTTP** from the options in the `Service` dropdown list
 1. Make sure the `Action` is set to **Allow**
 1. Click **"OK"**
 
 ### Open SSH on Port 22
 
 Repeat the above process, adding a second Inbound security rule to open port 22, enabling our VM to
-accept [SSH] connections:
+accept [SSH](https://en.wikipedia.org/wiki/Secure_Shell) connections:
 
 ![Azure - Add inbound security rules - SSH](img/azure-add-inbound-sec-rule-ssh.png)
 
 1. Enter **"SSH"** in the `Name` field
-1. Select **SSH** from the options in the `Service` drop-down
+1. Select **SSH** from the options in the `Service` dropdown list
 1. Make sure the `Action` is set to **Allow**
 1. Click **"OK"**
 
@@ -320,35 +334,35 @@ Under the **"Components"** section, we can see that our VM is currently running 
 GitLab. This is the version of GitLab which was contained in the Azure Marketplace
 **"GitLab Community Edition"** offering we used to build the VM when we wrote this tutorial.
 
-> **Note:** The version of GitLab in your own VM instance may well be different, but the update
+NOTE **Note:**
+The version of GitLab in your own VM instance may well be different, but the update
 process will still be the same.
 
 ### Connect via SSH
 
 To perform an update, we need to connect directly to our Azure VM instance and run some commands
 from the terminal. Our Azure VM is actually a server running Linux (Ubuntu), so we'll need to
-connect to it using SSH ([Secure Shell][SSH]).
+connect to it using SSH ([Secure Shell](https://en.wikipedia.org/wiki/Secure_Shell)).
 
 If you're running Windows, you'll need to connect using [PuTTY](https://www.putty.org) or an equivalent Windows SSH client.
 If you're running Linux or macOS, then you already have an SSH client installed.
 
-> **Note:**
->
-> - Remember that you will need to login with the username and password you specified
->   [when you created](#basics) your Azure VM
-> - If you need to reset your VM password, read
->   [how to reset SSH credentials for a user on an Azure VM](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/troubleshoot-ssh-connection).
+Remember that you will need to login with the username and password you specified
+[when you created](#basics) your Azure VM.
+
+If you need to reset your VM password, read
+[how to reset SSH credentials for a user on an Azure VM](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/troubleshoot-ssh-connection).
 
 #### SSH from the command-line
 
-If you're running [SSH] from the command-line (terminal), then type in the following command to
+If you're running [SSH](https://en.wikipedia.org/wiki/Secure_Shell) from the command-line (terminal), then type in the following command to
 connect to your VM, substituting `username` and `your-azure-domain-name.com` for the correct values.
 
 Again, remember that your Azure VM domain name will be the one you
 [set up previously in the tutorial](#set-up-a-domain-name). If you didn't set up a domain name for
 your VM, you can use the IP address in its place in the following command:
 
-```bash
+```shell
 ssh username@your-azure-domain-name.com
 ```
 
@@ -356,15 +370,15 @@ Provide your password at the prompt to authenticate.
 
 #### SSH from Windows (PuTTY)
 
-If you're using [PuTTY](https://www.putty.org) in Windows as your [SSH] client, then you might want to take a quick
-read on [using PuTTY in Windows][Using-SSH-In-Putty].
+If you're using [PuTTY](https://www.putty.org) in Windows as your [SSH](https://en.wikipedia.org/wiki/Secure_Shell) client, then you might want to take a quick
+read on [using PuTTY in Windows](https://mediatemple.net/community/products/dv/204404604/using-ssh-in-putty-).
 
 ### Updating GitLab
 
 Once you've logged in via SSH, enter the following command to update GitLab to the latest
 version:
 
-```bash
+```shell
 sudo apt-get update && sudo apt-get install gitlab-ce
 ```
 
@@ -376,7 +390,7 @@ terminal window:
 
 Once the update process has completed, you'll see a message like this:
 
-```
+```plaintext
 Upgrade complete! If your GitLab server is misbehaving try running
 
    sudo gitlab-ctl restart
@@ -412,31 +426,16 @@ Check out our other [Technical Articles](../../articles/index.md) or browse the 
 
 ### Useful links
 
-- [GitLab Community Edition][CE]
-- [GitLab Enterprise Edition][EE]
-- [Microsoft Azure][Azure]
-  - [Azure - Free Account FAQ][Azure-Free-Account-FAQ]
+- [GitLab Community Edition](https://about.gitlab.com/features/)
+- [GitLab Enterprise Edition](https://about.gitlab.com/features/#ee)
+- [Microsoft Azure](https://azure.microsoft.com/en-us/)
+  - [Azure - Free Account FAQ](https://azure.microsoft.com/en-us/free/free-account-faq/)
   - [Azure - Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/)
-  - [Azure Portal][Azure-Portal]
-  - [Azure - Pricing Calculator][Azure-Pricing-Calculator]
+  - [Azure Portal](https://portal.azure.com)
+  - [Azure - Pricing Calculator](https://azure.microsoft.com/en-us/pricing/calculator/)
   - [Azure - Troubleshoot SSH Connections to an Azure Linux VM](https://docs.microsoft.com/en-us/azure/virtual-machines/troubleshooting/troubleshoot-ssh-connection)
-  - [Azure - Properly Shutdown an Azure VM](https://buildazure.com/properly-shutdown-azure-vm-to-save-money/)
-- [SSH], [PuTTY](https://www.putty.org) and [Using SSH in PuTTY][Using-SSH-In-Putty]
-
-[Original-Blog-Post]: https://about.gitlab.com/blog/2016/07/13/how-to-setup-a-gitlab-instance-on-microsoft-azure/ "How to Set up a GitLab Instance on Microsoft Azure"
-[CE]: https://about.gitlab.com/features/
-[EE]: https://about.gitlab.com/features/#ee-starter
-
-[Azure-Troubleshoot-Linux-VM]: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/troubleshoot-app-connection "Troubleshoot application connectivity issues on a Linux virtual machine in Azure"
-[Azure-IP-Address-Types]: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-ip-addresses-overview-arm "IP address types and allocation methods in Azure"
-[Azure-How-To-Open-Ports]: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/nsg-quickstart-portal "How to open ports to a virtual machine with the Azure portal"
-[Azure]: https://azure.microsoft.com/en-us/
-[Azure-Free-Account-FAQ]: https://azure.microsoft.com/en-us/free/free-account-faq/
-[Azure-Portal]: https://portal.azure.com
-[Azure-Pricing-Calculator]: https://azure.microsoft.com/en-us/pricing/calculator/
-
-[SSH]: https://en.wikipedia.org/wiki/Secure_Shell
-[Using-SSH-In-Putty]: https://mediatemple.net/community/products/dv/204404604/using-ssh-in-putty-
+  - [Azure - Properly Shutdown an Azure VM](https://build5nines.com/properly-shutdown-azure-vm-to-save-money/)
+- [SSH](https://en.wikipedia.org/wiki/Secure_Shell), [PuTTY](https://www.putty.org) and [Using SSH in PuTTY](https://mediatemple.net/community/products/dv/204404604/using-ssh-in-putty-)
 
 <!-- ## Troubleshooting
 

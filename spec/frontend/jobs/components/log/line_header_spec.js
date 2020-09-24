@@ -22,7 +22,6 @@ describe('Job Log Header Line', () => {
 
   const createComponent = (props = {}) => {
     wrapper = mount(LineHeader, {
-      sync: false,
       propsData: {
         ...props,
       },
@@ -39,7 +38,7 @@ describe('Job Log Header Line', () => {
     });
 
     it('renders the line number component', () => {
-      expect(wrapper.contains(LineNumber)).toBe(true);
+      expect(wrapper.find(LineNumber).exists()).toBe(true);
     });
 
     it('renders a span the provided text', () => {
@@ -79,17 +78,19 @@ describe('Job Log Header Line', () => {
     it('emits toggleLine event', () => {
       wrapper.trigger('click');
 
-      expect(wrapper.emitted().toggleLine.length).toBe(1);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().toggleLine.length).toBe(1);
+      });
     });
   });
 
   describe('with duration', () => {
     beforeEach(() => {
-      createComponent(Object.assign({}, data, { duration: '00:10' }));
+      createComponent({ ...data, duration: '00:10' });
     });
 
     it('renders the duration badge', () => {
-      expect(wrapper.contains(DurationBadge)).toBe(true);
+      expect(wrapper.find(DurationBadge).exists()).toBe(true);
     });
   });
 });

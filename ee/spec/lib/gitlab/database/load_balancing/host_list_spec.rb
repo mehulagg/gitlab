@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::HostList do
+RSpec.describe Gitlab::Database::LoadBalancing::HostList do
   def expect_metrics(hosts)
     expect(Gitlab::Metrics.registry.get(:db_load_balancing_hosts).get({})).to eq(hosts)
   end

@@ -37,7 +37,7 @@ with various cloud providers.
 In order to provide modern DevOps workflows, our Application Development Platform will rely on
 [Auto DevOps](../autodevops/index.md) to provide those workflows. Auto DevOps works with
 any Kubernetes cluster; you're not limited to running on GitLab's infrastructure. Additionally, Auto DevOps offers
-an incremental consumption path. Because it is [composable](../autodevops/index.md#using-components-of-auto-devops),
+an incremental consumption path. Because it is [composable](../autodevops/customize.md#using-components-of-auto-devops),
 you can use as much or as little of the default pipeline as you'd like, and deeply customize without having to integrate a completely different platform.
 
 ### Security
@@ -47,10 +47,10 @@ that may lead to security problems and unintended use. This can be achieved by m
 which inform security teams and developers if there is something to consider changing in their apps
 before it is too late to create a preventative fix. The following features are included:
 
-- [Auto SAST (Static Application Security Testing)](../autodevops/index.md#auto-sast-ultimate)
-- [Auto Dependency Scanning](../autodevops/index.md#auto-dependency-scanning-ultimate)
-- [Auto Container Scanning](../autodevops/index.md#auto-container-scanning-ultimate)
-- [Auto DAST (Dynamic Application Security Testing)](../autodevops/index.md#auto-dast-ultimate)
+- [Auto SAST (Static Application Security Testing)](../autodevops/stages.md#auto-sast)
+- [Auto Dependency Scanning](../autodevops/stages.md#auto-dependency-scanning)
+- [Auto Container Scanning](../autodevops/stages.md#auto-container-scanning)
+- [Auto DAST (Dynamic Application Security Testing)](../autodevops/stages.md#auto-dast)
 
 ### Observability
 
@@ -58,5 +58,5 @@ Performance is a critical aspect of the user experience, and ensuring your appli
 responsibility. The Application Development Platform integrates key performance analytics and feedback
 into GitLab, automatically. The following features are included:
 
-- [Auto Monitoring](../autodevops/index.md#auto-monitoring)
-- [In-app Kubernetes Pod Logs](../../user/project/clusters/kubernetes_pod_logs.md)
+- [Auto Monitoring](../autodevops/stages.md#auto-monitoring)
+- [In-app Kubernetes Logs](../../user/project/clusters/kubernetes_pod_logs.md)

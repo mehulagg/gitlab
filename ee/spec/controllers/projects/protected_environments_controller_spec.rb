@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Projects::ProtectedEnvironmentsController do
+RSpec.describe Projects::ProtectedEnvironmentsController do
   let(:project) { create(:project) }
   let(:current_user) { create(:user) }
   let(:maintainer_access) { Gitlab::Access::MAINTAINER }
@@ -79,7 +79,7 @@ describe Projects::ProtectedEnvironmentsController do
       it 'renders 404' do
         subject
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -123,7 +123,7 @@ describe Projects::ProtectedEnvironmentsController do
       end
 
       it 'is successful' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -135,7 +135,7 @@ describe Projects::ProtectedEnvironmentsController do
       end
 
       it 'is not successful' do
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -184,7 +184,7 @@ describe Projects::ProtectedEnvironmentsController do
       it 'is not successful' do
         subject
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

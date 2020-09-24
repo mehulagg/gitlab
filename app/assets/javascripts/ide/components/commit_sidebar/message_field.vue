@@ -1,6 +1,6 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '../../../locale';
-import Icon from '../../../vue_shared/components/icon.vue';
 import popover from '../../../vue_shared/directives/popover';
 import { MAX_TITLE_LENGTH, MAX_BODY_LENGTH } from '../../constants';
 
@@ -9,7 +9,7 @@ export default {
     popover,
   },
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     text: {
@@ -83,8 +83,8 @@ export default {
         <ul class="nav-links">
           <li>
             {{ __('Commit Message') }}
-            <span v-popover="$options.popoverOptions" class="form-text text-muted prepend-left-10">
-              <icon name="question" />
+            <span v-popover="$options.popoverOptions" class="form-text text-muted gl-ml-3">
+              <gl-icon name="question" />
             </span>
           </li>
         </ul>

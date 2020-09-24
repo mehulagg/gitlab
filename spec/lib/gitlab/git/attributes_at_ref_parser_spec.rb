@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::AttributesAtRefParser, :seed_helper do
+RSpec.describe Gitlab::Git::AttributesAtRefParser, :seed_helper do
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
 

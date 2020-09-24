@@ -3,7 +3,6 @@
 module EE
   module ApplicationHelper
     extend ::Gitlab::Utils::Override
-    include ::OnboardingExperimentHelper
 
     DB_LAG_SHOW_THRESHOLD = 60 # seconds
     LOG_CURSOR_CHECK_TIME = ::Gitlab::Geo::LogCursor::Daemon::SECONDARY_CHECK_INTERVAL
@@ -14,16 +13,21 @@ module EE
     def read_only_message
       return super unless ::Gitlab::Geo.secondary?
 
-      if @limited_actions_message
-        s_('Geo|You are on a secondary, <b>read-only</b> Geo node. You may be able to make a limited amount of changes or perform a limited amount of actions on this page.').html_safe
-      else
-        message = (s_('Geo|You are on a secondary, <b>read-only</b> Geo node. If you want to make changes, you must visit this page on the %{primary_node}.') %
-          { primary_node: link_to('primary node', ::Gitlab::Geo.primary_node&.url || '#') }).html_safe
+      message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
 
-        return "#{message} #{lag_message}".html_safe if lag_message
+      message = "#{message} #{lag_message}".html_safe if lag_message
 
-        message
+      html = tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(s_('Geo|You are on a secondary, %{b_open}read-only%{b_close} Geo node.').html_safe % { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe })
+          concat(" #{message}")
+        end
       end
+
+      html.concat(tag.a(s_('Geo|Go to the primary site'), class: 'btn', href: ::Gitlab::Geo.primary_node.url, target: '_blank')) if ::Gitlab::Geo.primary_node.present?
+
+      html
     end
 
     def lag_message
@@ -34,7 +38,7 @@ module EE
 
       if unprocessed_too_old?
         minutes_behind = time_ago_in_words(next_unprocessed_event.created_at)
-        return (s_('Geo|The node is currently %{minutes_behind} behind the primary node.') %
+        (s_('Geo|The node is currently %{minutes_behind} behind the primary node.') %
           { minutes_behind: minutes_behind }).html_safe
       end
     end
@@ -58,17 +62,11 @@ module EE
 
     def ce_lookup_context
       @ce_lookup_context ||= begin
-        context = lookup_context.dup
-
-        # This could duplicate the paths we're going to modify
-        context.view_paths = lookup_context.view_paths.paths
-
-        # Discard lookup path ee/ for the new paths
-        context.view_paths.paths.delete_if do |resolver|
+        ce_view_paths = lookup_context.view_paths.paths.reject do |resolver|
           resolver.to_path.start_with?("#{Rails.root}/ee")
         end
 
-        context
+        ActionView::LookupContext.new(ce_view_paths)
       end
     end
 
@@ -117,10 +115,6 @@ module EE
       return false if project.mirror? && project.repository.up_to_date_with_upstream?(event.branch_name)
 
       show
-    end
-
-    def user_onboarding_enabled?
-      allow_access_to_onboarding?
     end
 
     private

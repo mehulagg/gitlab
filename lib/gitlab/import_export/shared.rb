@@ -56,11 +56,7 @@ module Gitlab
       end
 
       def error(error)
-        error_payload = { message: error.message }
-        error_payload[:error_backtrace] = Gitlab::Profiler.clean_backtrace(error.backtrace) if error.backtrace
-        log_error(error_payload)
-
-        Gitlab::Sentry.track_acceptable_exception(error, extra: log_base_data)
+        Gitlab::ErrorTracking.track_exception(error, log_base_data)
 
         add_error_message(error.message)
       end
@@ -96,14 +92,6 @@ module Gitlab
         else
           raise Gitlab::ImportExport::Error.new("Unsupported Exportable Type #{@exportable&.class}")
         end
-      end
-
-      def log_error(details)
-        @logger.error(log_base_data.merge(details))
-      end
-
-      def log_debug(details)
-        @logger.debug(log_base_data.merge(details))
       end
 
       def log_base_data

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::BoardsController do
+RSpec.describe Groups::BoardsController do
   let(:group) { create(:group) }
   let(:user)  { create(:user) }
 
@@ -26,14 +26,16 @@ describe Groups::BoardsController do
 
       context 'with unauthorized user' do
         before do
+          expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_cross_project, :global).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(true)
+          allow(Ability).to receive(:allowed?).with(user, :read_board, group).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           list_boards
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.content_type).to eq 'text/html'
         end
       end
@@ -69,14 +71,16 @@ describe Groups::BoardsController do
 
       context 'with unauthorized user' do
         before do
+          expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_cross_project, :global).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(true)
+          allow(Ability).to receive(:allowed?).with(user, :read_board, group).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           list_boards format: :json
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.content_type).to eq 'application/json'
         end
       end
@@ -104,14 +108,16 @@ describe Groups::BoardsController do
 
       context 'with unauthorized user' do
         before do
+          expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_cross_project, :global).and_return(true)
-          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(false)
+          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(true)
+          allow(Ability).to receive(:allowed?).with(user, :read_board, group).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           read_board board: board
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.content_type).to eq 'text/html'
         end
       end
@@ -141,14 +147,16 @@ describe Groups::BoardsController do
 
       context 'with unauthorized user' do
         before do
+          expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_cross_project, :global).and_return(true)
+          allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(true)
           allow(Ability).to receive(:allowed?).with(user, :read_group, group).and_return(false)
         end
 
         it 'returns a not found 404 response' do
           read_board board: board, format: :json
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.content_type).to eq 'application/json'
         end
       end
@@ -160,7 +168,7 @@ describe Groups::BoardsController do
 
         read_board board: another_board
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 

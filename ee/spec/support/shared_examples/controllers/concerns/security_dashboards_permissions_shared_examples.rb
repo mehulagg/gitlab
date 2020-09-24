@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
-shared_examples SecurityDashboardsPermissions do
+RSpec.shared_examples SecurityDashboardsPermissions do
   include ApiHelpers
 
   let(:security_dashboard_user) { create(:user) }
@@ -18,7 +16,7 @@ shared_examples SecurityDashboardsPermissions do
 
         security_dashboard_action
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -33,7 +31,7 @@ shared_examples SecurityDashboardsPermissions do
 
           security_dashboard_action
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
@@ -43,7 +41,7 @@ shared_examples SecurityDashboardsPermissions do
 
           security_dashboard_action
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end

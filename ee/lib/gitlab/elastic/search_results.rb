@@ -5,52 +5,45 @@ module Gitlab
     class SearchResults
       include Gitlab::Utils::StrongMemoize
 
-      attr_reader :current_user, :query, :public_and_internal_projects
+      DEFAULT_PER_PAGE = Gitlab::SearchResults::DEFAULT_PER_PAGE
 
-      # Limit search results by passed project ids
+      attr_reader :current_user, :query, :public_and_internal_projects, :filters
+
+      # Limit search results by passed projects
       # It allows us to search only for projects user has access to
-      attr_reader :limit_project_ids, :limit_projects
+      attr_reader :limit_project_ids
 
-      delegate :users, to: :generic_search_results
-      delegate :limited_users_count, to: :generic_search_results
-
-      def initialize(current_user, query, limit_project_ids, limit_projects = nil, public_and_internal_projects = true)
+      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, filters: {})
         @current_user = current_user
-        @limit_project_ids = limit_project_ids
-        @limit_projects = limit_projects
         @query = query
+        @limit_project_ids = limit_project_ids
         @public_and_internal_projects = public_and_internal_projects
+        @filters = filters
       end
 
-      def objects(scope, page = 1)
+      def objects(scope, page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil)
         page = (page || 1).to_i
 
         case scope
         when 'projects'
-          eager_load(projects, page, eager: [:route, :namespace])
+          eager_load(projects, page, per_page, preload_method, [:route, :namespace])
         when 'issues'
-          eager_load(issues, page, eager: { project: [:route, :namespace] })
+          eager_load(issues, page, per_page, preload_method, project: [:route, :namespace], labels: [], timelogs: [], assignees: [])
         when 'merge_requests'
-          eager_load(merge_requests, page, eager: { target_project: [:route, :namespace] })
+          eager_load(merge_requests, page, per_page, preload_method, target_project: [:route, :namespace])
         when 'milestones'
-          eager_load(milestones, page, eager: { project: [:route, :namespace] })
+          eager_load(milestones, page, per_page, preload_method, project: [:route, :namespace])
         when 'notes'
-          eager_load(notes, page, eager: { project: [:route, :namespace] })
+          eager_load(notes, page, per_page, preload_method, project: [:route, :namespace])
         when 'blobs'
-          blobs.page(page).per(per_page)
+          blobs(page: page, per_page: per_page)
         when 'wiki_blobs'
-          wiki_blobs.page(page).per(per_page)
+          wiki_blobs(page: page, per_page: per_page)
         when 'commits'
-          commits(page: page, per_page: per_page)
-        when 'users'
-          users.page(page).per(per_page)
+          commits(page: page, per_page: per_page, preload_method: preload_method)
         else
           Kaminari.paginate_array([])
         end
-      end
-
-      def generic_search_results
-        @generic_search_results ||= Gitlab::SearchResults.new(current_user, limit_projects, query)
       end
 
       def formatted_count(scope)
@@ -71,8 +64,6 @@ module Gitlab
           merge_requests_count.to_s
         when 'milestones'
           milestones_count.to_s
-        when 'users'
-          generic_search_results.formatted_count('users')
         end
       end
 
@@ -108,11 +99,22 @@ module Gitlab
         @milestones_count ||= milestones.total_count
       end
 
+      # mbergeron: these aliases act as an adapter to the Gitlab::SearchResults
+      # interface, which is mostly implemented by this class.
+      alias_method :limited_projects_count, :projects_count
+      alias_method :limited_notes_count, :notes_count
+      alias_method :limited_blobs_count, :blobs_count
+      alias_method :limited_wiki_blobs_count, :wiki_blobs_count
+      alias_method :limited_commits_count, :commits_count
+      alias_method :limited_issues_count, :issues_count
+      alias_method :limited_merge_requests_count, :merge_requests_count
+      alias_method :limited_milestones_count, :milestones_count
+
       def single_commit_result?
         false
       end
 
-      def self.parse_search_result(result)
+      def self.parse_search_result(result, project)
         ref = result["_source"]["blob"]["commit_sha"]
         path = result["_source"]["blob"]["path"]
         extname = File.extname(path)
@@ -156,6 +158,7 @@ module Gitlab
           ref: ref,
           startline: from + 1,
           data: data.join,
+          project: project,
           project_id: project_id
         )
       end
@@ -163,30 +166,15 @@ module Gitlab
       private
 
       # Apply some eager loading to the `records` of an ES result object without
-      # losing pagination information
-      def eager_load(es_result, page, eager:)
+      # losing pagination information. Also, take advantage of preload method if
+      # provided by the caller.
+      def eager_load(es_result, page, per_page, preload_method, eager)
         paginated_base = es_result.page(page).per(per_page)
         relation = paginated_base.records.includes(eager) # rubocop:disable CodeReuse/ActiveRecord
-        filtered_results = []
-        permitted_results = relation.select do |o|
-          ability = :"read_#{o.to_ability_name}"
-          if Ability.allowed?(current_user, ability, o)
-            true
-          else
-            # Redact any search result the user may not have access to. This
-            # could be due to incorrect data in the index or a bug in our query
-            # so we log this as an error.
-            filtered_results << { ability: ability, id: o.id, class_name: o.class.name }
-            false
-          end
-        end
-
-        if filtered_results.any?
-          logger.error(message: "redacted_search_results", filtered: filtered_results, current_user_id: current_user&.id, query: query)
-        end
+        relation = relation.public_send(preload_method) if preload_method # rubocop:disable GitlabSecurity/PublicSend
 
         Kaminari.paginate_array(
-          permitted_results,
+          relation,
           total_count: paginated_base.total_count,
           limit: per_page,
           offset: per_page * (page - 1)
@@ -209,7 +197,10 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          Issue.elastic_search(query, options: base_options)
+          options = base_options
+          options[:state] = filters[:state] if filters.key?(:state)
+
+          Issue.elastic_search(query, options: options)
         end
       end
 
@@ -228,7 +219,9 @@ module Gitlab
 
       def merge_requests
         strong_memoize(:merge_requests) do
-          options = base_options.merge(project_ids: non_guest_project_ids)
+          options = base_options
+          options[:state] = filters[:state] if filters.key?(:state)
+
           MergeRequest.elastic_search(query, options: options)
         end
       end
@@ -239,35 +232,29 @@ module Gitlab
         end
       end
 
-      def blobs
+      def blobs(page: 1, per_page: DEFAULT_PER_PAGE)
         return Kaminari.paginate_array([]) if query.blank?
 
         strong_memoize(:blobs) do
-          opt = {
-            additional_filter: repository_filter
-          }
-
-          Repository.search(
+          Repository.__elasticsearch__.elastic_search_as_found_blob(
             query,
-            type: :blob,
-            options: opt.merge({ highlight: true })
-          )[:blobs][:results].response
+            page: (page || 1).to_i,
+            per: per_page,
+            options: base_options
+          )
         end
       end
 
-      def wiki_blobs
+      def wiki_blobs(page: 1, per_page: DEFAULT_PER_PAGE)
         return Kaminari.paginate_array([]) if query.blank?
 
         strong_memoize(:wiki_blobs) do
-          opt = {
-            additional_filter: wiki_filter
-          }
-
-          ProjectWiki.search(
+          ProjectWiki.__elasticsearch__.elastic_search_as_wiki_page(
             query,
-            type: :wiki_blob,
-            options: opt.merge({ highlight: true })
-          )[:wiki_blobs][:results].response
+            page: (page || 1).to_i,
+            per: per_page,
+            options: base_options
+          )
         end
       end
 
@@ -277,112 +264,22 @@ module Gitlab
       # hitting ES twice for any page that's not page 1, and that's something we want to avoid.
       #
       # It is safe to memoize the page we get here because this method is _always_ called before `#commits_count`
-      def commits(page: 1, per_page: 20)
+      def commits(page: 1, per_page: DEFAULT_PER_PAGE, preload_method: nil)
         return Kaminari.paginate_array([]) if query.blank?
 
         strong_memoize(:commits) do
-          options = {
-            additional_filter: repository_filter
-          }
-
           Repository.find_commits_by_message_with_elastic(
             query,
             page: (page || 1).to_i,
             per_page: per_page,
-            options: options
+            options: base_options,
+            preload_method: preload_method
           )
-        end
-      end
-
-      def wiki_filter
-        blob_filter(:wiki, visible_for_guests: true)
-      end
-
-      def repository_filter
-        blob_filter(:repository)
-      end
-
-      def blob_filter(feature, visible_for_guests: false)
-        project_ids = visible_for_guests ? limit_project_ids : non_guest_project_ids
-        key_name = "#{feature}_access_level"
-
-        conditions =
-          if project_ids == :any
-            [{ exists: { field: "id" } }]
-          else
-            project_ids = Project
-              .id_in(project_ids)
-              .filter_by_feature_visibility(feature, current_user)
-              .pluck_primary_key
-
-            [{ terms: { id: project_ids } }]
-          end
-
-        if public_and_internal_projects
-          conditions << {
-                          bool: {
-                            filter: [
-                              { term: { visibility_level: Project::PUBLIC } },
-                              { term: { key_name => ProjectFeature::ENABLED } }
-                            ]
-                          }
-                        }
-
-          if current_user && !current_user.external?
-            conditions << {
-                            bool: {
-                              filter: [
-                                { term: { visibility_level: Project::INTERNAL } },
-                                { term: { key_name => ProjectFeature::ENABLED } }
-                              ]
-                            }
-                          }
-          end
-        end
-
-        {
-          has_parent: {
-            parent_type: 'project',
-            query: {
-              bool: {
-                should: conditions,
-                must_not: { term: { key_name => ProjectFeature::DISABLED } }
-              }
-            }
-          }
-        }
-      end
-
-      # rubocop: disable CodeReuse/ActiveRecord
-      def guest_project_ids
-        if current_user
-          current_user.authorized_projects
-            .where('project_authorizations.access_level = ?', Gitlab::Access::GUEST)
-            .pluck(:id)
-        else
-          []
-        end
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
-      def non_guest_project_ids
-        if limit_project_ids == :any
-          :any
-        else
-          @non_guest_project_ids ||= limit_project_ids - guest_project_ids
         end
       end
 
       def default_scope
         'projects'
-      end
-
-      def per_page
-        20
-      end
-
-      def logger
-        @logger ||= Gitlab::ProjectServiceLogger.build
       end
     end
   end

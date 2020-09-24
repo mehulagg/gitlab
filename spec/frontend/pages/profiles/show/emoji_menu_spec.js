@@ -1,7 +1,7 @@
 import $ from 'jquery';
+import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import EmojiMenu from '~/pages/profiles/show/emoji_menu';
-import { TEST_HOST } from 'helpers/test_constants';
 
 describe('EmojiMenu', () => {
   const dummyEmojiTag = '<dummy></tag>';
@@ -55,7 +55,7 @@ describe('EmojiMenu', () => {
       });
     });
 
-    it('does not make an axios requst', done => {
+    it('does not make an axios request', done => {
       jest.spyOn(axios, 'request').mockReturnValue();
 
       emojiMenu.addAward(dummyVotesBlock(), dummyAwardUrl, dummyEmoji, false, () => {

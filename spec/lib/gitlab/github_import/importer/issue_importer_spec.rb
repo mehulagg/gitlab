@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redis_cache do
   let(:project) { create(:project) }
   let(:client) { double(:client) }
   let(:user) { create(:user) }
@@ -97,7 +99,6 @@ describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redis_cach
               project_id: project.id,
               description: 'This is my issue',
               milestone_id: milestone.id,
-              state: :opened,
               state_id: 1,
               created_at: created_at,
               updated_at: updated_at
@@ -127,7 +128,6 @@ describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redis_cach
               project_id: project.id,
               description: "*Created by: alice*\n\nThis is my issue",
               milestone_id: milestone.id,
-              state: :opened,
               state_id: 1,
               created_at: created_at,
               updated_at: updated_at

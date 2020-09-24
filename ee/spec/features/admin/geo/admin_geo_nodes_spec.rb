@@ -2,8 +2,28 @@
 
 require 'spec_helper'
 
-describe 'admin Geo Nodes', :js, :geo do
+RSpec.describe 'admin Geo Nodes', :js, :geo do
   let!(:geo_node) { create(:geo_node) }
+
+  def expect_fields(node_fields)
+    node_fields.each do |field|
+      expect(page).to have_field(field)
+    end
+  end
+
+  def expect_no_fields(node_fields)
+    node_fields.each do |field|
+      expect(page).not_to have_field(field)
+    end
+  end
+
+  def expect_breadcrumb(text)
+    breadcrumbs = page.all(:css, '.breadcrumbs-list>li')
+    expect(breadcrumbs.length).to eq(3)
+    expect(breadcrumbs[0].text).to eq('Admin Area')
+    expect(breadcrumbs[1].text).to eq('Geo Nodes')
+    expect(breadcrumbs[2].text).to eq(text)
+  end
 
   before do
     allow(Gitlab::Geo).to receive(:license_allows?).and_return(true)
@@ -16,7 +36,7 @@ describe 'admin Geo Nodes', :js, :geo do
       wait_for_requests
 
       expect(page).to have_link('New node', href: new_admin_geo_node_path)
-      page.within(find('.geo-node-item', match: :first)) do
+      page.within(find('.card', match: :first)) do
         expect(page).to have_content(geo_node.url)
       end
     end
@@ -70,7 +90,28 @@ describe 'admin Geo Nodes', :js, :geo do
     end
   end
 
-  describe 'create a new Geo Nodes' do
+  describe 'node form fields' do
+    primary_only_fields = %w(node-internal-url-field node-reverification-interval-field)
+    secondary_only_fields = %w(node-selective-synchronization-field node-repository-capacity-field node-file-capacity-field node-object-storage-field)
+
+    it 'when primary renders only primary fields' do
+      geo_node.update!(primary: true)
+      visit edit_admin_geo_node_path(geo_node)
+
+      expect_fields(primary_only_fields)
+      expect_no_fields(secondary_only_fields)
+    end
+
+    it 'when secondary renders only secondary fields' do
+      geo_node.update!(primary: false)
+      visit edit_admin_geo_node_path(geo_node)
+
+      expect_no_fields(primary_only_fields)
+      expect_fields(secondary_only_fields)
+    end
+  end
+
+  describe 'create a new Geo Node' do
     let(:new_ssh_key) { attributes_for(:key)[:key] }
 
     before do
@@ -78,96 +119,39 @@ describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'creates a new Geo Node' do
-      check 'This is a primary node'
-      fill_in 'geo_node_name', with: 'a node name'
-      fill_in 'geo_node_url', with: 'https://test.gitlab.com'
-      click_button 'Add Node'
+      fill_in 'node-name-field', with: 'a node name'
+      fill_in 'node-url-field', with: 'https://test.gitlab.com'
+      click_button 'Save'
 
-      expect(current_path).to eq admin_geo_nodes_path
       wait_for_requests
+      expect(current_path).to eq admin_geo_nodes_path
 
-      page.within(find('.geo-node-item', match: :first)) do
+      page.within(find('.card', match: :first)) do
         expect(page).to have_content(geo_node.url)
       end
     end
 
-    it 'toggles the visibility of secondary only params based on primary node checkbox' do
-      primary_only_fields = [
-        'Internal URL (optional)',
-        'Re-verification interval'
-      ]
-
-      secondary_only_fields = [
-        'Selective synchronization',
-        'Repository sync capacity',
-        'File sync capacity',
-        'Object Storage replication'
-      ]
-
-      expect(page).to have_unchecked_field('This is a primary node')
-
-      primary_only_fields.each do |field|
-        expect(page).to have_field(field, visible: false)
-      end
-
-      secondary_only_fields.each do |field|
-        expect(page).to have_field(field)
-      end
-
-      check 'This is a primary node'
-
-      primary_only_fields.each do |field|
-        expect(page).to have_field(field)
-      end
-
-      secondary_only_fields.each do |field|
-        expect(page).to have_field(field, visible: false)
-      end
-
-      uncheck 'This is a primary node'
-
-      primary_only_fields.each do |field|
-        expect(page).to have_field(field, visible: false)
-      end
-
-      secondary_only_fields.each do |field|
-        expect(page).to have_field(field)
-      end
-    end
-
-    it 'returns an error message when a duplicate primary is added' do
-      create(:geo_node, :primary)
-
-      check 'This is a primary node'
-      fill_in 'geo_node_url', with: 'https://another-primary.example.com'
-      click_button 'Add Node'
-
-      expect(current_path).to eq admin_geo_nodes_path
-
-      expect(page).to have_content('Primary node already exists')
+    it 'includes Geo Nodes in breadcrumbs' do
+      expect_breadcrumb('Add New Node')
     end
   end
 
   describe 'update an existing Geo Node' do
+    before do
+      geo_node.update!(primary: true)
+
+      visit edit_admin_geo_node_path(geo_node)
+    end
+
     it 'updates an existing Geo Node' do
-      geo_node.update(primary: true)
-
-      visit admin_geo_nodes_path
-      wait_for_requests
-
-      page.within(find('.geo-node-actions', match: :first)) do
-        page.click_link('Edit')
-      end
-
-      fill_in 'URL', with: 'http://newsite.com'
-      fill_in 'Internal URL', with: 'http://internal-url.com'
-      check 'This is a primary node'
+      fill_in 'node-url-field', with: 'http://newsite.com'
+      fill_in 'node-internal-url-field', with: 'http://internal-url.com'
       click_button 'Save changes'
 
-      expect(current_path).to eq admin_geo_nodes_path
       wait_for_requests
+      expect(current_path).to eq admin_geo_nodes_path
 
-      page.within(find('.geo-node-item', match: :first)) do
+      page.within(find('.card', match: :first)) do
         expect(page).to have_content('http://newsite.com')
         expect(page).to have_content('Primary')
 
@@ -178,6 +162,10 @@ describe 'admin Geo Nodes', :js, :geo do
         end
       end
     end
+
+    it 'includes Geo Nodes in breadcrumbs' do
+      expect_breadcrumb('Edit Geo Node')
+    end
   end
 
   describe 'remove an existing Geo Node' do
@@ -187,7 +175,7 @@ describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'removes an existing Geo Node' do
-      page.within(find('.geo-node-actions', match: :first)) do
+      page.within(find('[data-testid="nodeActions"]', match: :first)) do
         page.click_button('Remove')
       end
       page.within('.modal') do
@@ -196,7 +184,42 @@ describe 'admin Geo Nodes', :js, :geo do
 
       expect(current_path).to eq admin_geo_nodes_path
       wait_for_requests
-      expect(page).not_to have_css('.geo-node-item')
+      expect(page).not_to have_css('.card')
+    end
+  end
+
+  describe 'with no Geo Nodes' do
+    before do
+      geo_node.delete
+      visit admin_geo_nodes_path
+      wait_for_requests
+    end
+
+    it 'hides the New Node button' do
+      expect(page).not_to have_link('New node', href: new_admin_geo_node_path)
+    end
+
+    it 'shows Discover GitLab Geo' do
+      page.within(find('h4')) do
+        expect(page).to have_content('Discover GitLab Geo')
+      end
+    end
+  end
+
+  describe 'Geo node form routes' do
+    routes = []
+
+    before do
+      routes = [{ path: new_admin_geo_node_path, slug: '/new' }, { path: edit_admin_geo_node_path(geo_node), slug: '/edit' }]
+    end
+
+    routes.each do |route|
+      it "#{route.slug} renders the geo form" do
+        visit route.path
+
+        expect(page).to have_css(".geo-node-form-container")
+        expect(page).not_to have_css(".js-geo-node-form")
+      end
     end
   end
 end

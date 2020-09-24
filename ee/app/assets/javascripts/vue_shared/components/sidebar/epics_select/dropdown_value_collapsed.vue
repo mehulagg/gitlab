@@ -1,10 +1,9 @@
 <script>
-import { GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -24,7 +23,7 @@ export default {
     :title="epic.title"
     class="sidebar-collapsed-icon"
   >
-    <icon name="epic" />
+    <gl-icon name="epic" />
     <span class="collapse-truncated-title mt-1">{{ epic.title }}</span>
   </div>
 </template>

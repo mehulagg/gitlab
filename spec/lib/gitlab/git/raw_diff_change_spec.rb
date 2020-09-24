@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::RawDiffChange do
+RSpec.describe Gitlab::Git::RawDiffChange do
   let(:raw_change) { }
   let(:change) { described_class.new(raw_change) }
 

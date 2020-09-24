@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::Util do
+RSpec.describe Gitlab::Git::Util do
   describe '#count_lines' do
     [
       ["", 0],

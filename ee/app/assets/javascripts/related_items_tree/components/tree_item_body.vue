@@ -1,15 +1,24 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlTooltipDirective, GlModalDirective, GlLink, GlButton } from '@gitlab/ui';
-import _ from 'underscore';
+import {
+  GlTooltipDirective,
+  GlModalDirective,
+  GlLink,
+  GlIcon,
+  GlButton,
+  GlTooltip,
+} from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 
+import ItemWeight from 'ee/boards/components/issue_card_weight.vue';
 import { __ } from '~/locale';
 
-import Icon from '~/vue_shared/components/icon.vue';
 import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
 import ItemAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import ItemDueDate from '~/boards/components/issue_due_date.vue';
-import ItemWeight from 'ee/boards/components/issue_card_weight.vue';
+
+import EpicHealthStatus from './epic_health_status.vue';
+import IssueHealthStatus from './issue_health_status.vue';
 
 import StateTooltip from './state_tooltip.vue';
 
@@ -18,14 +27,17 @@ import { ChildType, ChildState, itemRemoveModalId } from '../constants';
 export default {
   itemRemoveModalId,
   components: {
-    Icon,
+    GlIcon,
     GlLink,
+    GlTooltip,
     GlButton,
     StateTooltip,
     ItemMilestone,
     ItemAssignees,
     ItemDueDate,
     ItemWeight,
+    EpicHealthStatus,
+    IssueHealthStatus,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -42,7 +54,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['childrenFlags', 'userSignedIn']),
+    ...mapState(['childrenFlags', 'userSignedIn', 'allowSubEpics', 'allowIssuableHealthStatus']),
     itemReference() {
       return this.item.reference;
     },
@@ -59,7 +71,7 @@ export default {
       return this.item.state === ChildState.Closed;
     },
     hasMilestone() {
-      return !_.isEmpty(this.item.milestone);
+      return !isEmpty(this.item.milestone);
     },
     hasAssignees() {
       return this.item.assignees && this.item.assignees.length > 0;
@@ -71,13 +83,18 @@ export default {
       return this.item.type === ChildType.Epic ? 'epic' : 'issues';
     },
     stateIconClass() {
-      return this.isOpen ? 'issue-token-state-icon-open' : 'issue-token-state-icon-closed';
+      return this.isOpen
+        ? 'issue-token-state-icon-open gl-text-green-500'
+        : 'issue-token-state-icon-closed gl-text-blue-500';
+    },
+    itemId() {
+      return this.itemReference.split(this.item.pathIdSeparator).pop();
     },
     itemPath() {
       return this.itemReference.split(this.item.pathIdSeparator)[0];
     },
-    itemId() {
-      return this.itemReference.split(this.item.pathIdSeparator).pop();
+    itemHierarchy() {
+      return this.itemPath + this.item.pathIdSeparator + this.itemId;
     },
     computedPath() {
       return this.itemWebPath.length ? this.itemWebPath : null;
@@ -90,6 +107,32 @@ export default {
     },
     showEmptySpacer() {
       return !this.parentItem.userPermissions.adminEpic && this.userSignedIn;
+    },
+    totalEpicsCount() {
+      const { descendantCounts: { openedEpics = 0, closedEpics = 0 } = {} } = this.item;
+
+      return openedEpics + closedEpics;
+    },
+    totalIssuesCount() {
+      const { descendantCounts: { openedIssues = 0, closedIssues = 0 } = {} } = this.item;
+
+      return openedIssues + closedIssues;
+    },
+    isEpic() {
+      return this.item.type === ChildType.Epic;
+    },
+    isIssue() {
+      return this.item.type === ChildType.Issue;
+    },
+    showHealthStatus() {
+      return this.item.healthStatus && this.allowIssuableHealthStatus;
+    },
+    showIssueHealthStatus() {
+      return this.isIssue && this.isOpen && this.showHealthStatus;
+    },
+    showEpicHealthStatus() {
+      const { descendantCounts: { openedIssues = 0 } = {} } = this.item;
+      return this.isEpic && this.showHealthStatus && openedIssues > 0;
     },
   },
   methods: {
@@ -107,101 +150,154 @@ export default {
 </script>
 
 <template>
-  <div class="card card-slim sortable-row flex-grow-1">
+  <div class="card card-slim sortable-row gl-flex-grow-1">
     <div
-      class="item-body card-body d-flex align-items-center p-2 pl-xl-3"
-      :class="{ 'p-xl-1': userSignedIn, 'item-logged-out pt-xl-2 pb-xl-2': !userSignedIn }"
+      class="item-body card-body gl-display-flex gl-align-items-center gl-pr-2 gl-pl-3 gl-py-2"
+      :class="{
+        'item-logged-out': !userSignedIn,
+        'item-closed': isClosed,
+      }"
     >
-      <div class="item-contents d-flex align-items-center flex-wrap flex-grow-1 flex-xl-nowrap">
-        <div class="item-title d-flex align-items-center mb-1 mb-xl-0">
-          <icon
-            ref="stateIconLg"
-            :class="stateIconClass"
-            :name="stateIconName"
-            :size="16"
-            :aria-label="stateText"
-          />
-          <state-tooltip
-            :get-target-ref="() => $refs.stateIconLg"
-            :is-open="isOpen"
-            :state="item.state"
-            :created-at="item.createdAt"
-            :closed-at="item.closedAt || ''"
-          />
-          <icon
-            v-if="item.confidential"
-            v-gl-tooltip.hover
-            :size="16"
-            :title="__('Confidential')"
-            :aria-label="__('Confidential')"
-            name="eye-slash"
-            class="confidential-icon append-right-4 align-self-baseline align-self-md-auto mt-xl-0"
-          />
-          <gl-link :href="computedPath" class="sortable-link">{{ item.title }}</gl-link>
-        </div>
-        <div class="item-meta d-flex flex-wrap mt-xl-0 justify-content-xl-end flex-xl-nowrap">
-          <div
-            class="d-flex align-items-center item-path-id order-md-0 mt-md-0 mt-1 ml-xl-2 mr-xl-auto"
-          >
-            <icon
+      <div
+        class="item-contents gl-display-flex gl-align-items-center gl-flex-wrap gl-flex-grow-1 flex-xl-nowrap"
+      >
+        <div class="item-title-wrapper gl-flex-grow-1 gl-mr-3">
+          <div class="item-title gl-display-flex gl-mb-0 gl-pt-2 gl-pb-2">
+            <gl-icon
               ref="stateIconMd"
+              class="gl-display-block gl-mr-3"
               :class="stateIconClass"
               :name="stateIconName"
-              :size="16"
               :aria-label="stateText"
-              class="d-xl-none"
             />
             <state-tooltip
               :get-target-ref="() => $refs.stateIconMd"
+              :path="itemHierarchy"
               :is-open="isOpen"
               :state="item.state"
               :created-at="item.createdAt"
               :closed-at="item.closedAt || ''"
             />
-            <span v-gl-tooltip :title="itemPath" class="path-id-text d-inline-block">{{
-              itemPath
-            }}</span
-            >{{ item.pathIdSeparator }}{{ itemId }}
+            <gl-icon
+              v-if="item.confidential"
+              v-gl-tooltip.hover
+              :title="__('Confidential')"
+              :aria-label="__('Confidential')"
+              name="eye-slash"
+              class="confidential-icon gl-mr-2 align-self-baseline align-self-md-auto mt-xl-0"
+            />
+            <gl-link
+              v-gl-tooltip.hover
+              :aria-label="item.title"
+              :title="item.title"
+              :href="computedPath"
+              class="sortable-link ws-normal gl-font-weight-bold"
+              >{{ item.title }}</gl-link
+            >
           </div>
+
           <div
-            class="item-meta-child d-flex align-items-center order-0 flex-wrap mr-md-1 ml-md-auto ml-xl-2 mt-2 mt-md-0 flex-xl-nowrap"
+            class="item-meta gl-display-flex gl-flex-wrap mt-xl-0 flex-xl-nowrap gl-align-items-center gl-py-2 gl-ml-6"
           >
+            <span class="gl-mr-5">{{ itemHierarchy }}</span>
+            <gl-tooltip v-if="isEpic" :target="() => $refs.countBadge">
+              <p v-if="allowSubEpics" class="gl-font-weight-bold gl-m-0">
+                {{ __('Epics') }} &#8226;
+                <span class="text-secondary-400 gl-font-weight-normal"
+                  >{{
+                    sprintf(__('%{openedEpics} open, %{closedEpics} closed'), {
+                      openedEpics: item.descendantCounts && item.descendantCounts.openedEpics,
+                      closedEpics: item.descendantCounts && item.descendantCounts.closedEpics,
+                    })
+                  }}
+                </span>
+              </p>
+              <p class="gl-font-weight-bold gl-m-0">
+                {{ __('Issues') }} &#8226;
+                <span class="text-secondary-400 gl-font-weight-normal"
+                  >{{
+                    sprintf(__('%{openedIssues} open, %{closedIssues} closed'), {
+                      openedIssues: item.descendantCounts && item.descendantCounts.openedIssues,
+                      closedIssues: item.descendantCounts && item.descendantCounts.closedIssues,
+                    })
+                  }}
+                </span>
+              </p>
+            </gl-tooltip>
+
+            <div
+              v-if="isEpic"
+              ref="countBadge"
+              class="issue-count-badge text-secondary gl-display-inline-flex gl-py-0 p-lg-0"
+            >
+              <span
+                v-if="allowSubEpics"
+                class="gl-display-inline-flex gl-align-items-center gl-mr-5"
+              >
+                <gl-icon name="epic" class="gl-mr-2" />
+                {{ totalEpicsCount }}
+              </span>
+              <span class="gl-display-inline-flex gl-align-items-center gl-mr-5">
+                <gl-icon name="issues" class="gl-mr-2" />
+                {{ totalIssuesCount }}
+              </span>
+            </div>
+
             <item-milestone
               v-if="hasMilestone"
               :milestone="item.milestone"
-              class="d-flex align-items-center item-milestone mr-2 mr-md-0"
+              class="item-milestone gl-display-flex gl-align-items-center gl-mr-5"
             />
+
             <item-due-date
               v-if="item.dueDate"
               :date="item.dueDate"
               tooltip-placement="top"
-              css-class="item-due-date d-flex align-items-center ml-0 mr-2 ml-md-2 ml-sm-0 mr-sm-0"
+              css-class="item-due-date gl-display-flex gl-align-items-center gl-mr-5!"
             />
+
             <item-weight
               v-if="item.weight"
               :weight="item.weight"
-              class="item-weight d-flex align-items-center ml-2 mr-0 ml-md-2"
+              class="item-weight gl-display-flex gl-align-items-center gl-mr-5!"
               tag-name="span"
             />
+
+            <item-assignees
+              v-if="hasAssignees"
+              :assignees="item.assignees"
+              class="item-assignees gl-display-inline-flex gl-align-items-center gl-mr-5 mb-md-0 flex-xl-grow-0"
+            />
+
+            <epic-health-status
+              v-if="showEpicHealthStatus"
+              :health-status="item.healthStatus"
+              data-testid="epic-health-status"
+              class="issuable-tag-valign"
+            />
+            <issue-health-status
+              v-if="showIssueHealthStatus"
+              :health-status="item.healthStatus"
+              data-testid="issue-health-status"
+              class="issuable-tag-valign"
+            />
           </div>
-          <item-assignees
-            v-if="hasAssignees"
-            :assignees="item.assignees"
-            class="item-assignees d-inline-flex align-items-center align-self-end ml-0 ml-md-2 mt-2 mt-md-0 mt-xl-0 mr-xl-1 mb-md-0 order-2 flex-xl-grow-0"
-          />
         </div>
+
         <gl-button
           v-if="parentItem.userPermissions.adminEpic"
           v-gl-tooltip.hover
           v-gl-modal-directive="$options.itemRemoveModalId"
+          category="tertiary"
           :title="__('Remove')"
+          :aria-label="__('Remove')"
           :disabled="itemActionInProgress"
-          class="btn-svg btn-item-remove js-issue-item-remove-button qa-remove-issue-button"
+          icon="close"
+          class="js-issue-item-remove-button gl-align-self-start"
+          data-qa-selector="remove_issue_button"
           @click="handleRemoveClick"
-        >
-          <icon :size="16" name="close" class="btn-item-remove-icon" />
-        </gl-button>
-        <span v-if="showEmptySpacer" class="p-3"></span>
+        />
+        <span v-if="showEmptySpacer" class="gl-p-3"></span>
       </div>
     </div>
   </div>

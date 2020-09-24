@@ -18,9 +18,11 @@ class Badge < ApplicationRecord
   # This regex will build the new PLACEHOLDER_REGEX with the new information
   PLACEHOLDERS_REGEX = /(#{PLACEHOLDERS.keys.join('|')})/.freeze
 
-  default_scope { order_created_at_asc }
+  default_scope { order_created_at_asc } # rubocop:disable Cop/DefaultScope
 
   scope :order_created_at_asc, -> { reorder(created_at: :asc) }
+
+  scope :with_name, ->(name) { where(name: name) }
 
   validates :link_url, :image_url, addressable_url: true
   validates :type, presence: true
@@ -30,7 +32,9 @@ class Badge < ApplicationRecord
   end
 
   def rendered_image_url(project = nil)
-    build_rendered_url(image_url, project)
+    Gitlab::AssetProxy.proxy_url(
+      build_rendered_url(image_url, project)
+    )
   end
 
   private

@@ -1,4 +1,4 @@
-require './spec/support/sidekiq'
+require './spec/support/sidekiq_middleware'
 require './spec/support/helpers/test_env'
 
 class Gitlab::Seeder::Burndown
@@ -88,7 +88,7 @@ Gitlab::Seeder.quiet do
     seeder = Gitlab::Seeder::Burndown.new(project)
     seeder.seed!
   else
-    Project.all.each do |project|
+    Project.not_mass_generated.each do |project|
       seeder = Gitlab::Seeder::Burndown.new(project)
       seeder.seed!
     end

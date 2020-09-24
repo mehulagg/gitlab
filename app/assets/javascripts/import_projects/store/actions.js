@@ -1,89 +1,129 @@
 import Visibility from 'visibilityjs';
 import * as types from './mutation_types';
+import { isProjectImportable } from '../utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
-import createFlash from '~/flash';
+import { visitUrl, objectToQuery } from '~/lib/utils/url_utility';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__, sprintf } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import { jobsPathWithFilter, reposPathWithFilter } from './getters';
 
 let eTagPoll;
 
-export const clearJobsEtagPoll = () => {
+const hasRedirectInError = e => e?.response?.data?.error?.redirect;
+const redirectToUrlInError = e => visitUrl(e.response.data.error.redirect);
+const pathWithParams = ({ path, ...params }) => {
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([, value]) => value !== ''),
+  );
+  const queryString = objectToQuery(filteredParams);
+  return queryString ? `${path}?${queryString}` : path;
+};
+
+const isRequired = () => {
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  throw new Error('param is required');
+};
+
+const clearJobsEtagPoll = () => {
   eTagPoll = null;
 };
-export const stopJobsPolling = () => {
+
+const stopJobsPolling = () => {
   if (eTagPoll) eTagPoll.stop();
 };
-export const restartJobsPolling = () => {
+
+const restartJobsPolling = () => {
   if (eTagPoll) eTagPoll.restart();
 };
 
-export const setInitialData = ({ commit }, data) => commit(types.SET_INITIAL_DATA, data);
-export const setFilter = ({ commit }, filter) => commit(types.SET_FILTER, filter);
+const setFilter = ({ commit }, filter) => commit(types.SET_FILTER, filter);
 
-export const requestRepos = ({ commit }, repos) => commit(types.REQUEST_REPOS, repos);
-export const receiveReposSuccess = ({ commit }, repos) =>
-  commit(types.RECEIVE_REPOS_SUCCESS, repos);
-export const receiveReposError = ({ commit }) => commit(types.RECEIVE_REPOS_ERROR);
-export const fetchRepos = ({ state, dispatch }) => {
-  dispatch('stopJobsPolling');
-  dispatch('requestRepos');
+const setImportTarget = ({ commit }, { repoId, importTarget }) =>
+  commit(types.SET_IMPORT_TARGET, { repoId, importTarget });
 
-  const { provider } = state;
-
-  return axios
-    .get(reposPathWithFilter(state))
-    .then(({ data }) =>
-      dispatch('receiveReposSuccess', convertObjectPropsToCamelCase(data, { deep: true })),
-    )
-    .then(() => dispatch('fetchJobs'))
-    .catch(() => {
-      createFlash(
-        sprintf(s__('ImportProjects|Requesting your %{provider} repositories failed'), {
-          provider,
-        }),
-      );
-
-      dispatch('receiveReposError');
-    });
+const importAll = ({ state, dispatch }) => {
+  return Promise.all(
+    state.repositories
+      .filter(isProjectImportable)
+      .map(r => dispatch('fetchImport', r.importSource.id)),
+  );
 };
 
-export const requestImport = ({ commit, state }, repoId) => {
-  if (!state.reposBeingImported.includes(repoId)) commit(types.REQUEST_IMPORT, repoId);
-};
-export const receiveImportSuccess = ({ commit }, { importedProject, repoId }) =>
-  commit(types.RECEIVE_IMPORT_SUCCESS, { importedProject, repoId });
-export const receiveImportError = ({ commit }, repoId) =>
-  commit(types.RECEIVE_IMPORT_ERROR, repoId);
-export const fetchImport = ({ state, dispatch }, { newName, targetNamespace, repo }) => {
-  dispatch('requestImport', repo.id);
+const fetchReposFactory = ({ reposPath = isRequired() }) => ({ state, commit }) => {
+  const nextPage = state.pageInfo.page + 1;
+  commit(types.SET_PAGE, nextPage);
+  commit(types.REQUEST_REPOS);
+
+  const { provider, filter } = state;
 
   return axios
-    .post(state.importPath, {
-      ci_cd_only: state.ciCdOnly,
-      new_name: newName,
-      repo_id: repo.id,
-      target_namespace: targetNamespace,
-    })
-    .then(({ data }) =>
-      dispatch('receiveImportSuccess', {
-        importedProject: convertObjectPropsToCamelCase(data, { deep: true }),
-        repoId: repo.id,
+    .get(
+      pathWithParams({
+        path: reposPath,
+        filter: filter ?? '',
+        page: nextPage === 1 ? '' : nextPage.toString(),
       }),
     )
-    .catch(() => {
-      createFlash(s__('ImportProjects|Importing the project failed'));
+    .then(({ data }) => {
+      commit(types.RECEIVE_REPOS_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true }));
+    })
+    .catch(e => {
+      commit(types.SET_PAGE, nextPage - 1);
 
-      dispatch('receiveImportError', { repoId: repo.id });
+      if (hasRedirectInError(e)) {
+        redirectToUrlInError(e);
+      } else {
+        createFlash(
+          sprintf(s__('ImportProjects|Requesting your %{provider} repositories failed'), {
+            provider,
+          }),
+        );
+
+        commit(types.RECEIVE_REPOS_ERROR);
+      }
     });
 };
 
-export const receiveJobsSuccess = ({ commit }, updatedProjects) =>
-  commit(types.RECEIVE_JOBS_SUCCESS, updatedProjects);
-export const fetchJobs = ({ state, dispatch }) => {
-  const { filter } = state;
+const fetchImportFactory = (importPath = isRequired()) => ({ state, commit, getters }, repoId) => {
+  const { ciCdOnly } = state;
+  const importTarget = getters.getImportTarget(repoId);
 
+  commit(types.REQUEST_IMPORT, { repoId, importTarget });
+
+  const { newName, targetNamespace } = importTarget;
+  return axios
+    .post(importPath, {
+      repo_id: repoId,
+      ci_cd_only: ciCdOnly,
+      new_name: newName,
+      target_namespace: targetNamespace,
+    })
+    .then(({ data }) => {
+      commit(types.RECEIVE_IMPORT_SUCCESS, {
+        importedProject: convertObjectPropsToCamelCase(data, { deep: true }),
+        repoId,
+      });
+    })
+    .catch(e => {
+      const serverErrorMessage = e?.response?.data?.errors;
+      const flashMessage = serverErrorMessage
+        ? sprintf(
+            s__('ImportProjects|Importing the project failed: %{reason}'),
+            {
+              reason: serverErrorMessage,
+            },
+            false,
+          )
+        : s__('ImportProjects|Importing the project failed');
+
+      createFlash(flashMessage);
+
+      commit(types.RECEIVE_IMPORT_ERROR, repoId);
+    });
+};
+
+export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, dispatch }) => {
   if (eTagPoll) {
     stopJobsPolling();
     clearJobsEtagPoll();
@@ -91,14 +131,18 @@ export const fetchJobs = ({ state, dispatch }) => {
 
   eTagPoll = new Poll({
     resource: {
-      fetchJobs: () => axios.get(jobsPathWithFilter(state)),
+      fetchJobs: () => axios.get(pathWithParams({ path: jobsPath, filter: state.filter })),
     },
     method: 'fetchJobs',
     successCallback: ({ data }) =>
-      dispatch('receiveJobsSuccess', convertObjectPropsToCamelCase(data, { deep: true })),
-    errorCallback: () =>
-      createFlash(s__('ImportProjects|Update of imported projects with realtime changes failed')),
-    data: { filter },
+      commit(types.RECEIVE_JOBS_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true })),
+    errorCallback: e => {
+      if (hasRedirectInError(e)) {
+        redirectToUrlInError(e);
+      } else {
+        createFlash(s__('ImportProjects|Update of imported projects with realtime changes failed'));
+      }
+    },
   });
 
   if (!Visibility.hidden()) {
@@ -114,5 +158,39 @@ export const fetchJobs = ({ state, dispatch }) => {
   });
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+const fetchNamespacesFactory = (namespacesPath = isRequired()) => ({ commit }) => {
+  commit(types.REQUEST_NAMESPACES);
+  axios
+    .get(namespacesPath)
+    .then(({ data }) =>
+      commit(types.RECEIVE_NAMESPACES_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true })),
+    )
+    .catch(() => {
+      createFlash(s__('ImportProjects|Requesting namespaces failed'));
+
+      commit(types.RECEIVE_NAMESPACES_ERROR);
+    });
+};
+
+const setPage = ({ state, commit, dispatch }, page) => {
+  if (page === state.pageInfo.page) {
+    return null;
+  }
+
+  commit(types.SET_PAGE, page);
+  return dispatch('fetchRepos');
+};
+
+export default ({ endpoints = isRequired() }) => ({
+  clearJobsEtagPoll,
+  stopJobsPolling,
+  restartJobsPolling,
+  setFilter,
+  setImportTarget,
+  importAll,
+  setPage,
+  fetchRepos: fetchReposFactory({ reposPath: endpoints.reposPath }),
+  fetchImport: fetchImportFactory(endpoints.importPath),
+  fetchJobs: fetchJobsFactory(endpoints.jobsPath),
+  fetchNamespaces: fetchNamespacesFactory(endpoints.namespacesPath),
+});

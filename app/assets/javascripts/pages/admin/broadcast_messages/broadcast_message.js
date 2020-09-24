@@ -1,45 +1,66 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import { debounce } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import { textColorForBackground } from '~/lib/utils/color_utils';
 
 export default () => {
-  const $broadcastMessageColor = $('input#broadcast_message_color');
-  const $broadcastMessagePreview = $('div.broadcast-message-preview');
+  const $broadcastMessageColor = $('.js-broadcast-message-color');
+  const $broadcastMessageType = $('.js-broadcast-message-type');
+  const $broadcastBannerMessagePreview = $('.js-broadcast-banner-message-preview');
+  const $broadcastMessage = $('.js-broadcast-message-message');
+  const $jsBroadcastMessagePreview = $('.js-broadcast-message-preview');
+
+  const reloadPreview = function reloadPreview() {
+    const previewPath = $broadcastMessage.data('previewPath');
+    const message = $broadcastMessage.val();
+    const type = $broadcastMessageType.val();
+
+    if (message === '') {
+      $jsBroadcastMessagePreview.text(__('Your message here'));
+    } else {
+      axios
+        .post(previewPath, {
+          broadcast_message: {
+            message,
+            broadcast_type: type,
+          },
+        })
+        .then(({ data }) => {
+          $jsBroadcastMessagePreview.html(data.message);
+        })
+        .catch(() => flash(__('An error occurred while rendering preview broadcast message')));
+    }
+  };
+
   $broadcastMessageColor.on('input', function onMessageColorInput() {
     const previewColor = $(this).val();
-    $broadcastMessagePreview.css('background-color', previewColor);
+    $broadcastBannerMessagePreview.css('background-color', previewColor);
   });
 
   $('input#broadcast_message_font').on('input', function onMessageFontInput() {
     const previewColor = $(this).val();
-    $broadcastMessagePreview.css('color', previewColor);
+    $broadcastBannerMessagePreview.css('color', previewColor);
   });
 
-  const $broadcastMessage = $('textarea#broadcast_message_message');
-  const previewPath = $broadcastMessage.data('previewPath');
-  const $jsBroadcastMessagePreview = $('.js-broadcast-message-preview');
+  $broadcastMessageType.on('change', () => {
+    const $broadcastMessageColorFormGroup = $('.js-broadcast-message-background-color-form-group');
+    const $broadcastMessageDismissableFormGroup = $('.js-broadcast-message-dismissable-form-group');
+    const $broadcastNotificationMessagePreview = $('.js-broadcast-notification-message-preview');
+
+    $broadcastMessageColorFormGroup.toggleClass('hidden');
+    $broadcastMessageDismissableFormGroup.toggleClass('hidden');
+    $broadcastBannerMessagePreview.toggleClass('hidden');
+    $broadcastNotificationMessagePreview.toggleClass('hidden');
+
+    reloadPreview();
+  });
 
   $broadcastMessage.on(
     'input',
-    _.debounce(function onMessageInput() {
-      const message = $(this).val();
-      if (message === '') {
-        $jsBroadcastMessagePreview.text(__('Your message here'));
-      } else {
-        axios
-          .post(previewPath, {
-            broadcast_message: {
-              message,
-            },
-          })
-          .then(({ data }) => {
-            $jsBroadcastMessagePreview.html(data.message);
-          })
-          .catch(() => flash(__('An error occurred while rendering preview broadcast message')));
-      }
+    debounce(() => {
+      reloadPreview();
     }, 250),
   );
 
@@ -58,7 +79,7 @@ export default () => {
 
     $('.label-color-preview').css(selectedColorStyle);
 
-    return $broadcastMessagePreview.css(selectedColorStyle);
+    return $jsBroadcastMessagePreview.css(selectedColorStyle);
   };
 
   const setSuggestedColor = e => {
@@ -67,7 +88,10 @@ export default () => {
       .val(color)
       // Notify the form, that color has changed
       .trigger('input');
-    updateColorPreview();
+    // Only banner supports colors
+    if ($broadcastMessageType === 'banner') {
+      updateColorPreview();
+    }
     return e.preventDefault();
   };
 

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'airborne'
-
 module QA
   module Runtime
     module API
       class Client
         attr_reader :address, :user
+
+        AuthorizationError = Class.new(RuntimeError)
 
         def initialize(address = :gitlab, personal_access_token: nil, is_new_session: true, user: nil, ip_limits: false)
           @address = address
@@ -25,6 +25,23 @@ module QA
           end
         end
 
+        def self.as_admin
+          if Runtime::Env.admin_personal_access_token
+            Runtime::API::Client.new(:gitlab, personal_access_token: Runtime::Env.admin_personal_access_token)
+          else
+            user = Resource::User.fabricate_via_api! do |user|
+              user.username = Runtime::User.admin_username
+              user.password = Runtime::User.admin_password
+            end
+
+            unless user.admin?
+              raise AuthorizationError, "User '#{user.username}' is not an administrator."
+            end
+
+            Runtime::API::Client.new(:gitlab, user: user)
+          end
+        end
+
         private
 
         def enable_ip_limits
@@ -32,7 +49,7 @@ module QA
 
           Runtime::Browser.visit(@address, Page::Main::Login)
           Page::Main::Login.perform(&:sign_in_using_admin_credentials)
-          Page::Main::Menu.perform(&:click_admin_area)
+          Page::Main::Menu.perform(&:go_to_admin_area)
           Page::Admin::Menu.perform(&:go_to_network_settings)
 
           Page::Admin::Settings::Network.perform do |setting|
@@ -46,19 +63,24 @@ module QA
         end
 
         def create_personal_access_token
-          Page::Main::Menu.perform(&:sign_out) if @is_new_session && Page::Main::Menu.perform { |p| p.has_personal_area?(wait: 0) }
+          signed_in_initially = Page::Main::Menu.perform(&:signed_in?)
 
-          unless Page::Main::Menu.perform { |p| p.has_personal_area?(wait: 0) }
-            Runtime::Browser.visit(@address, Page::Main::Login)
-            Page::Main::Login.perform { |login| login.sign_in_using_credentials(user: @user) }
-          end
+          Page::Main::Menu.perform(&:sign_out) if @is_new_session && signed_in_initially
+
+          Flow::Login.sign_in_unless_signed_in(as: @user)
 
           token = Resource::PersonalAccessToken.fabricate!.access_token
 
           # If this is a new session, that tests that follow could fail if they
-          # try to sign in without starting a new session
+          # try to sign in without starting a new session.
+          # Also, if the browser wasn't already signed in, leaving it
+          # signed in could cause tests to fail when they try to sign
+          # in again. For example, that would happen if a test has a
+          # before(:context) block that fabricates via the API, and
+          # it's the first test to run so it creates an access token
+          #
           # Sign out so the tests can successfully sign in
-          Page::Main::Menu.perform(&:sign_out) if @is_new_session
+          Page::Main::Menu.perform(&:sign_out) if @is_new_session || !signed_in_initially
 
           token
         end

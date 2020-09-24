@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SnippetsFinder do
+RSpec.describe SnippetsFinder do
   let_it_be(:group) { create(:group, :public) }
   let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:private_project_snippet) { create(:project_snippet, :private, project: project) }
@@ -149,6 +149,44 @@ describe SnippetsFinder do
                 other_private_project_snippet
               )
           end
+        end
+      end
+    end
+
+    context 'when only_personal is passed' do
+      let(:finder_params) { { authorized_and_user_personal: true, only_personal: true } }
+
+      it 'returns only personal snippets' do
+        group.add_maintainer(user)
+
+        expect(subject)
+          .to contain_exactly(
+            public_personal_snippet,
+            internal_personal_snippet,
+            private_personal_snippet
+          )
+      end
+    end
+
+    context 'when only_project is passed' do
+      let(:finder_params) { { authorized_and_user_personal: true, only_project: true } }
+
+      it 'returns only project snippets' do
+        group.add_maintainer(user)
+
+        expect(subject)
+          .to contain_exactly(
+            public_project_snippet,
+            internal_project_snippet,
+            private_project_snippet
+          )
+      end
+
+      context 'when no personal snippets are visible' do
+        let(:user) { nil }
+
+        it 'does not return any record' do
+          expect(subject).to be_empty
         end
       end
     end

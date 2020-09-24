@@ -1,16 +1,13 @@
 export default () => ({
-  reposPath: '',
-  importPath: '',
-  jobsPath: '',
-  currentProjectId: '',
   provider: '',
-  currentUsername: '',
-  importedProjects: [],
-  providerRepos: [],
+  repositories: [],
   namespaces: [],
-  reposBeingImported: [],
+  customImportTargets: {},
   isLoadingRepos: false,
-  canSelectNamespace: false,
+  isLoadingNamespaces: false,
   ciCdOnly: false,
   filter: '',
+  pageInfo: {
+    page: 0,
+  },
 });

@@ -13,9 +13,17 @@ module AwardEmojis
         return error("User has not awarded emoji of type #{name} on the awardable", status: :forbidden)
       end
 
-      award = awards.destroy_all.first # rubocop: disable DestroyAll
+      award = awards.destroy_all.first # rubocop: disable Cop/DestroyAll
+      after_destroy(award)
 
       success(award: award)
     end
+
+    private
+
+    def after_destroy(award)
+    end
   end
 end
+
+AwardEmojis::DestroyService.prepend_if_ee('EE::AwardEmojis::DestroyService')

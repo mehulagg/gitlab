@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module QA
-  # Quarantined because relative URL isn't supported
+  # This test was quarantined because relative URL isn't supported
   # See https://gitlab.com/gitlab-org/gitlab/issues/13833
-  context 'Create', :quarantine do
-    describe 'Web IDE web terminal', :docker do
+  context 'Create', :runner, :quarantine do
+    describe 'Web IDE web terminal' do
       before do
         project = Resource::Project.fabricate_via_api! do |project|
           project.name = 'web-terminal-project'
@@ -42,18 +42,16 @@ module QA
           END
         end
 
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         project.visit!
       end
 
       after do
-        # Remove the runner even if the test fails
-        Service::DockerRun::GitlabRunner.new(@runner.name).remove! if @runner
+        @runner.remove_via_api! if @runner
       end
 
-      it 'user starts the web terminal' do
+      it 'user starts the web terminal', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/405' do
         Page::Project::Show.perform(&:open_web_ide!)
 
         # Start the web terminal and check that there were no errors

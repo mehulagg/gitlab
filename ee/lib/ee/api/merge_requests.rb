@@ -17,7 +17,9 @@ module EE
 
           params :optional_merge_requests_search_params do
             optional :approver_ids, types: [String, Array], array_none_any: true,
-                                    desc: 'Return merge requests which have specified the users with the given IDs as an individual approver'
+                     desc: 'Return merge requests which have specified the users with the given IDs as an individual approver'
+            optional :approved_by_ids, types: [String, Array], array_none_any: true,
+                     desc: 'Return merge requests which have been approved by the specified users with the given IDs'
           end
         end
       end

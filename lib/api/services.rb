@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module API
-  class Services < Grape::API
+  class Services < Grape::API::Instance
     services = Helpers::ServicesHelpers.services
     service_classes = Helpers::ServicesHelpers.service_classes
 
@@ -66,6 +66,15 @@ module API
         end
       end
 
+      desc 'Get all active project services' do
+        success Entities::ProjectServiceBasic
+      end
+      get ":id/services" do
+        services = user_project.services.active
+
+        present services, with: Entities::ProjectServiceBasic
+      end
+
       SERVICES.each do |service_slug, settings|
         desc "Set #{service_slug} service for project"
         params do
@@ -115,19 +124,17 @@ module API
       end
       get ":id/services/:service_slug" do
         service = user_project.find_or_initialize_service(params[:service_slug].underscore)
-        present service, with: Entities::ProjectService, include_passwords: current_user.admin?
+        present service, with: Entities::ProjectService
       end
     end
 
     TRIGGER_SERVICES.each do |service_slug, settings|
       helpers do
-        # rubocop: disable CodeReuse/ActiveRecord
         def slash_command_service(project, service_slug, params)
-          project.services.active.where(template: false).find do |service|
+          project.services.active.find do |service|
             service.try(:token) == params[:token] && service.to_param == service_slug.underscore
           end
         end
-        # rubocop: enable CodeReuse/ActiveRecord
       end
 
       params do

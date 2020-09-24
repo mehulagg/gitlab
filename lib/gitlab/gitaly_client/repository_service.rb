@@ -201,9 +201,9 @@ module Gitlab
         response = GitalyClient.call(@storage, :repository_service, :fsck, request, timeout: GitalyClient.long_timeout)
 
         if response.error.empty?
-          return "", 0
+          ["", 0]
         else
-          return response.error.b, 1
+          [response.error.b, 1]
         end
       end
 
@@ -332,11 +332,10 @@ module Gitlab
         GitalyClient.call(@storage, :repository_service, :search_files_by_name, request, timeout: GitalyClient.fast_timeout).flat_map(&:files)
       end
 
-      def search_files_by_content(ref, query)
+      def search_files_by_content(ref, query, options = {})
         request = Gitaly::SearchFilesByContentRequest.new(repository: @gitaly_repo, ref: ref, query: query)
         response = GitalyClient.call(@storage, :repository_service, :search_files_by_content, request, timeout: GitalyClient.default_timeout)
-
-        search_results_from_response(response)
+        search_results_from_response(response, options)
       end
 
       def disconnect_alternates
@@ -359,20 +358,42 @@ module Gitlab
         GitalyClient.call(@storage, :repository_service, :remove_repository, request, timeout: GitalyClient.long_timeout)
       end
 
+      def replicate(source_repository)
+        request = Gitaly::ReplicateRepositoryRequest.new(
+          repository: @gitaly_repo,
+          source: source_repository.gitaly_repository
+        )
+
+        GitalyClient.call(
+          @storage,
+          :repository_service,
+          :replicate_repository,
+          request,
+          remote_storage: source_repository.storage,
+          timeout: GitalyClient.long_timeout
+        )
+      end
+
       private
 
-      def search_results_from_response(gitaly_response)
+      def search_results_from_response(gitaly_response, options = {})
+        limit = options[:limit]
+
         matches = []
+        matches_count = 0
         current_match = +""
 
         gitaly_response.each do |message|
           next if message.nil?
+
+          break if limit && matches_count >= limit
 
           current_match << message.match_data
 
           if message.end_of_match
             matches << current_match
             current_match = +""
+            matches_count += 1
           end
         end
 
@@ -388,7 +409,10 @@ module Gitlab
           request,
           timeout: timeout
         )
+        write_stream_to_file(response, save_path)
+      end
 
+      def write_stream_to_file(response, save_path)
         File.open(save_path, 'wb') do |f|
           response.each do |message|
             f.write(message.data)

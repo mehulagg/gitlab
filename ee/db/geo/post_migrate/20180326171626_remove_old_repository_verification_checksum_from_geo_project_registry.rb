@@ -7,7 +7,7 @@ class RemoveOldRepositoryVerificationChecksumFromGeoProjectRegistry < ActiveReco
   end
 
   def down
-    add_column :project_registry, :repository_verification_checksum, :string # rubocop:disable Migration/AddLimitToStringColumns
-    add_column :project_registry, :wiki_verification_checksum, :string # rubocop:disable Migration/AddLimitToStringColumns
+    add_column :project_registry, :repository_verification_checksum, :string
+    add_column :project_registry, :wiki_verification_checksum, :string
   end
 end

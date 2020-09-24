@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'search/show' do
+RSpec.describe 'search/show' do
   let(:search_term) { nil }
 
   before do
@@ -32,6 +32,38 @@ describe 'search/show' do
     it 'renders partials' do
       expect(rendered).to render_template('search/_category')
       expect(rendered).to render_template('search/_results')
+    end
+
+    context 'unfurling support' do
+      let(:group) { build(:group) }
+      let(:search_results) do
+        instance_double(Gitlab::GroupSearchResults).tap do |double|
+          allow(double).to receive(:formatted_count).and_return(0)
+        end
+      end
+
+      before do
+        assign(:search_results, search_results)
+        assign(:scope, 'issues')
+        assign(:group, group)
+      end
+
+      it 'renders meta tags for a group' do
+        render
+
+        expect(view.page_description).to match(/\d+ issues for term '#{search_term}'/)
+        expect(view.page_card_attributes).to eq("Namespace" => group.full_path)
+      end
+
+      it 'renders meta tags for both group and project' do
+        project = build(:project, group: group)
+        assign(:project, project)
+
+        render
+
+        expect(view.page_description).to match(/\d+ issues for term '#{search_term}'/)
+        expect(view.page_card_attributes).to eq("Namespace" => group.full_path, "Project" => project.full_path)
+      end
     end
   end
 end

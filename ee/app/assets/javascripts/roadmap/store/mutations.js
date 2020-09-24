@@ -1,4 +1,12 @@
+import Vue from 'vue';
+
 import * as types from './mutation_types';
+
+const resetEpics = state => {
+  state.epics = [];
+  state.childrenFlags = {};
+  state.epicIds = [];
+};
 
 export default {
   [types.SET_INITIAL_DATA](state, data) {
@@ -9,12 +17,8 @@ export default {
     state.epics = epics;
   },
 
-  [types.SET_WINDOW_RESIZE_IN_PROGRESS](state, inProgress) {
-    state.windowResizeInProgress = inProgress;
-  },
-
-  [types.UPDATE_EPIC_IDS](state, epicId) {
-    state.epicIds.push(epicId);
+  [types.UPDATE_EPIC_IDS](state, epicIds) {
+    state.epicIds.push(...epicIds);
   },
 
   [types.REQUEST_EPICS](state) {
@@ -40,6 +44,35 @@ export default {
     state.epicsFetchInProgress = false;
     state.epicsFetchForTimeframeInProgress = false;
     state.epicsFetchFailure = true;
+    Object.keys(state.childrenEpics).forEach(id => {
+      Vue.set(state.childrenFlags, id, {
+        itemChildrenFetchInProgress: false,
+      });
+    });
+  },
+
+  [types.REQUEST_CHILDREN_EPICS](state, { parentItemId }) {
+    state.childrenFlags[parentItemId].itemChildrenFetchInProgress = true;
+  },
+  [types.RECEIVE_CHILDREN_SUCCESS](state, { parentItemId, children }) {
+    Vue.set(state.childrenEpics, parentItemId, children);
+    state.childrenFlags[parentItemId].itemChildrenFetchInProgress = false;
+  },
+
+  [types.INIT_EPIC_CHILDREN_FLAGS](state, { epics }) {
+    epics.forEach(item => {
+      Vue.set(state.childrenFlags, item.id, {
+        itemExpanded: false,
+        itemChildrenFetchInProgress: false,
+      });
+    });
+  },
+
+  [types.EXPAND_EPIC](state, { parentItemId }) {
+    state.childrenFlags[parentItemId].itemExpanded = true;
+  },
+  [types.COLLAPSE_EPIC](state, { parentItemId }) {
+    state.childrenFlags[parentItemId].itemExpanded = false;
   },
 
   [types.PREPEND_TIMEFRAME](state, extendedTimeframe) {
@@ -49,5 +82,47 @@ export default {
   [types.APPEND_TIMEFRAME](state, extendedTimeframe) {
     state.extendedTimeframe = extendedTimeframe;
     state.timeframe.push(...extendedTimeframe);
+  },
+
+  [types.SET_MILESTONES](state, milestones) {
+    state.milestones = milestones;
+  },
+  [types.UPDATE_MILESTONE_IDS](state, milestoneIds) {
+    state.milestoneIds.push(...milestoneIds);
+  },
+  [types.REQUEST_MILESTONES](state) {
+    state.milestonesFetchInProgress = true;
+  },
+  [types.RECEIVE_MILESTONES_SUCCESS](state, milestones) {
+    state.milestonesFetchInProgress = false;
+    state.milestonesFetchResultEmpty = milestones.length === 0;
+
+    if (!state.milestonesFetchResultEmpty) {
+      state.milestones = milestones;
+    }
+  },
+  [types.RECEIVE_MILESTONES_FAILURE](state) {
+    state.milestonesFetchInProgress = false;
+    state.milestonesFetchFailure = true;
+  },
+
+  [types.SET_BUFFER_SIZE](state, bufferSize) {
+    state.bufferSize = bufferSize;
+  },
+
+  [types.SET_FILTER_PARAMS](state, filterParams) {
+    state.filterParams = filterParams;
+    state.hasFiltersApplied = Boolean(filterParams);
+    resetEpics(state);
+  },
+
+  [types.SET_EPICS_STATE](state, epicsState) {
+    state.epicsState = epicsState;
+    resetEpics(state);
+  },
+
+  [types.SET_SORTED_BY](state, sortedBy) {
+    state.sortedBy = sortedBy;
+    resetEpics(state);
   },
 };

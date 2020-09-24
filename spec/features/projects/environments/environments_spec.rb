@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Environments page', :js do
+RSpec.describe 'Environments page', :js do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
   let(:role) { :developer }
@@ -13,7 +13,7 @@ describe 'Environments page', :js do
   end
 
   def stop_button_selector
-    %q{button[data-original-title="Stop environment"]}
+    %q{button[title="Stop environment"]}
   end
 
   describe 'page tabs' do
@@ -37,6 +37,7 @@ describe 'Environments page', :js do
 
           expect(page).to have_css('.environments-container')
           expect(page.all('.environment-name').length).to eq(1)
+          expect(page.all('[data-testid="stop-icon"]').length).to eq(1)
         end
       end
 
@@ -49,11 +50,11 @@ describe 'Environments page', :js do
         it 'renders second page of pipelines' do
           visit_environments(project, scope: 'available')
 
-          find('.js-next-button').click
+          find('.page-link.next-page-item').click
           wait_for_requests
 
-          expect(page).to have_selector('.gl-pagination .page', count: 2)
-          expect(find('.gl-pagination .page-item.active .page-link').text).to eq("2")
+          expect(page).to have_selector('.gl-pagination .page-link', count: 4)
+          expect(find('.gl-pagination .page-link.active').text).to eq("2")
         end
       end
 
@@ -71,7 +72,9 @@ describe 'Environments page', :js do
         let!(:application_prometheus) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
 
         before do
-          allow_any_instance_of(Kubeclient::Client).to receive(:proxy_url).and_raise(Kubeclient::HttpError.new(401, 'Unauthorized', nil))
+          allow_next_instance_of(Kubeclient::Client) do |instance|
+            allow(instance).to receive(:proxy_url).and_raise(Kubeclient::HttpError.new(401, 'Unauthorized', nil))
+          end
         end
 
         it 'shows one environment without error' do
@@ -103,6 +106,7 @@ describe 'Environments page', :js do
 
           expect(page).to have_css('.environments-container')
           expect(page.all('.environment-name').length).to eq(1)
+          expect(page.all('[data-testid="stop-icon"]').length).to eq(0)
         end
       end
     end
@@ -142,8 +146,8 @@ describe 'Environments page', :js do
         expect(page).to have_content('No deployments yet')
       end
 
-      it 'does not show stip button when environment is not stoppable' do
-        expect(page).not_to have_selector(stop_button_selector)
+      it 'shows stop button when environment is not stoppable' do
+        expect(page).to have_selector(stop_button_selector)
       end
     end
 
@@ -203,7 +207,7 @@ describe 'Environments page', :js do
         end
 
         it 'shows a stop button' do
-          expect(page).not_to have_selector(stop_button_selector)
+          expect(page).to have_selector(stop_button_selector)
         end
 
         it 'does not show external link button' do
@@ -297,7 +301,7 @@ describe 'Environments page', :js do
         end
 
         it 'has a dropdown for actionable jobs' do
-          expect(page).to have_selector('.dropdown-new.btn.btn-default .ic-play')
+          expect(page).to have_selector('.dropdown-new.btn.btn-default [data-testid="play-icon"]')
         end
 
         it "has link to the delayed job's action" do
@@ -368,7 +372,7 @@ describe 'Environments page', :js do
       let(:role) { :developer }
 
       it 'developer creates a new environment with a valid name' do
-        within(".top-area") { click_link 'New environment' }
+        within(".environments-section") { click_link 'New environment' }
         fill_in('Name', with: 'production')
         click_on 'Save'
 
@@ -376,7 +380,7 @@ describe 'Environments page', :js do
       end
 
       it 'developer creates a new environmetn with invalid name' do
-        within(".top-area") { click_link 'New environment' }
+        within(".environments-section") { click_link 'New environment' }
         fill_in('Name', with: 'name,with,commas')
         click_on 'Save'
 
@@ -395,10 +399,12 @@ describe 'Environments page', :js do
 
   describe 'environments folders' do
     before do
-      create(:environment, project: project,
+      create(:environment, :will_auto_stop,
+                           project: project,
                            name: 'staging/review-1',
                            state: :available)
-      create(:environment, project: project,
+      create(:environment, :will_auto_stop,
+                           project: project,
                            name: 'staging/review-2',
                            state: :available)
     end
@@ -416,6 +422,14 @@ describe 'Environments page', :js do
 
       expect(page).to have_content 'review-1'
       expect(page).to have_content 'review-2'
+      within('.ci-table') do
+        within('.gl-responsive-table-row:nth-child(3)') do
+          expect(find('.js-auto-stop').text).not_to be_empty
+        end
+        within('.gl-responsive-table-row:nth-child(4)') do
+          expect(find('.js-auto-stop').text).not_to be_empty
+        end
+      end
     end
   end
 

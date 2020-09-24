@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Analytics::CycleAnalytics::StagePresenter do
+RSpec.describe Analytics::CycleAnalytics::StagePresenter do
   let(:default_stage_params) { Gitlab::Analytics::CycleAnalytics::DefaultStages.params_for_issue_stage }
   let(:default_stage) { Analytics::CycleAnalytics::ProjectStage.new(default_stage_params) }
   let(:custom_stage) { Analytics::CycleAnalytics::ProjectStage.new(name: 'Hello') }

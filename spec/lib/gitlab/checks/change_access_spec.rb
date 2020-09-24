@@ -2,45 +2,55 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::ChangeAccess do
-  describe '#exec' do
+RSpec.describe Gitlab::Checks::ChangeAccess do
+  describe '#validate!' do
     include_context 'change access checks context'
 
     subject { change_access }
 
     context 'without failed checks' do
       it "doesn't raise an error" do
-        expect { subject.exec }.not_to raise_error
+        expect { subject.validate! }.not_to raise_error
       end
 
       it 'calls pushes checks' do
-        expect_any_instance_of(Gitlab::Checks::PushCheck).to receive(:validate!)
+        expect_next_instance_of(Gitlab::Checks::PushCheck) do |instance|
+          expect(instance).to receive(:validate!)
+        end
 
-        subject.exec
+        subject.validate!
       end
 
       it 'calls branches checks' do
-        expect_any_instance_of(Gitlab::Checks::BranchCheck).to receive(:validate!)
+        expect_next_instance_of(Gitlab::Checks::BranchCheck) do |instance|
+          expect(instance).to receive(:validate!)
+        end
 
-        subject.exec
+        subject.validate!
       end
 
       it 'calls tags checks' do
-        expect_any_instance_of(Gitlab::Checks::TagCheck).to receive(:validate!)
+        expect_next_instance_of(Gitlab::Checks::TagCheck) do |instance|
+          expect(instance).to receive(:validate!)
+        end
 
-        subject.exec
+        subject.validate!
       end
 
       it 'calls lfs checks' do
-        expect_any_instance_of(Gitlab::Checks::LfsCheck).to receive(:validate!)
+        expect_next_instance_of(Gitlab::Checks::LfsCheck) do |instance|
+          expect(instance).to receive(:validate!)
+        end
 
-        subject.exec
+        subject.validate!
       end
 
       it 'calls diff checks' do
-        expect_any_instance_of(Gitlab::Checks::DiffCheck).to receive(:validate!)
+        expect_next_instance_of(Gitlab::Checks::DiffCheck) do |instance|
+          expect(instance).to receive(:validate!)
+        end
 
-        subject.exec
+        subject.validate!
       end
     end
 
@@ -53,7 +63,7 @@ describe Gitlab::Checks::ChangeAccess do
                                      protocol: protocol,
                                      logger: logger)
 
-        expect { access.exec }.to raise_error(Gitlab::Checks::TimedLogger::TimeoutError)
+        expect { access.validate! }.to raise_error(Gitlab::Checks::TimedLogger::TimeoutError)
       end
     end
   end

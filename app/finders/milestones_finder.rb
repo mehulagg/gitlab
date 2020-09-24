@@ -3,6 +3,7 @@
 # Search for milestones
 #
 # params - Hash
+#   ids - filters by id.
 #   project_ids: Array of project ids or single project id or ActiveRecord relation.
 #   group_ids: Array of group ids or single group id or ActiveRecord relation.
 #   order - Orders by field default due date asc.
@@ -11,6 +12,7 @@
 
 class MilestonesFinder
   include FinderMethods
+  include TimeFrameFilter
 
   attr_reader :params
 
@@ -20,15 +22,23 @@ class MilestonesFinder
 
   def execute
     items = Milestone.all
+    items = by_ids(items)
     items = by_groups_and_projects(items)
     items = by_title(items)
     items = by_search_title(items)
     items = by_state(items)
+    items = by_timeframe(items)
 
     order(items)
   end
 
   private
+
+  def by_ids(items)
+    return items unless params[:ids].present?
+
+    items.id_in(params[:ids])
+  end
 
   def by_groups_and_projects(items)
     items.for_projects_and_groups(params[:project_ids], params[:group_ids])
@@ -56,10 +66,8 @@ class MilestonesFinder
     Milestone.filter_by_state(items, params[:state])
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def order(items)
-    order_statement = Gitlab::Database.nulls_last_order('due_date', 'ASC')
-    items.reorder(order_statement).order('title ASC')
+    sort_by = params[:sort].presence || 'due_date_asc'
+    items.sort_by_attribute(sort_by)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 end

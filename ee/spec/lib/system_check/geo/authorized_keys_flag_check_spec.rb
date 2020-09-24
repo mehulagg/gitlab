@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'rake_helper'
 
-describe SystemCheck::Geo::AuthorizedKeysFlagCheck do
+RSpec.describe SystemCheck::Geo::AuthorizedKeysFlagCheck do
   before do
     silence_output
   end

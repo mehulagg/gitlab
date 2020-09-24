@@ -22,7 +22,7 @@ module Elastic
     alias_method :real_class, :class
 
     def version_namespace
-      self.class.parent
+      self.class.module_parent
     end
 
     class_methods do

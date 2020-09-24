@@ -46,7 +46,7 @@ module Gitlab
       end
 
       def migration_context
-        ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths)
+        ActiveRecord::MigrationContext.new(ActiveRecord::Migrator.migrations_paths, ActiveRecord::SchemaMigration)
       end
 
       def abort_if_no_geo_config!

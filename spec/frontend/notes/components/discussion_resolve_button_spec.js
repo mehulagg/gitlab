@@ -1,16 +1,14 @@
+import { shallowMount } from '@vue/test-utils';
+import { GlButton } from '@gitlab/ui';
 import resolveDiscussionButton from '~/notes/components/discussion_resolve_button.vue';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
 
 const buttonTitle = 'Resolve discussion';
 
 describe('resolveDiscussionButton', () => {
   let wrapper;
-  let localVue;
 
   const factory = options => {
-    localVue = createLocalVue();
     wrapper = shallowMount(resolveDiscussionButton, {
-      localVue,
       ...options,
     });
   };
@@ -29,17 +27,19 @@ describe('resolveDiscussionButton', () => {
   });
 
   it('should emit a onClick event on button click', () => {
-    const button = wrapper.find({ ref: 'button' });
+    const button = wrapper.find(GlButton);
 
-    button.trigger('click');
+    button.vm.$emit('click');
 
-    expect(wrapper.emitted()).toEqual({
-      onClick: [[]],
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted()).toEqual({
+        onClick: [[]],
+      });
     });
   });
 
   it('should contain the provided button title', () => {
-    const button = wrapper.find({ ref: 'button' });
+    const button = wrapper.find(GlButton);
 
     expect(button.text()).toContain(buttonTitle);
   });
@@ -52,9 +52,9 @@ describe('resolveDiscussionButton', () => {
       },
     });
 
-    const button = wrapper.find({ ref: 'isResolvingIcon' });
+    const button = wrapper.find(GlButton);
 
-    expect(button.exists()).toEqual(true);
+    expect(button.props('loading')).toEqual(true);
   });
 
   it('should only show a loading spinner while resolving', () => {
@@ -65,10 +65,10 @@ describe('resolveDiscussionButton', () => {
       },
     });
 
-    const button = wrapper.find({ ref: 'isResolvingIcon' });
+    const button = wrapper.find(GlButton);
 
-    localVue.nextTick(() => {
-      expect(button.exists()).toEqual(false);
+    wrapper.vm.$nextTick(() => {
+      expect(button.props('loading')).toEqual(false);
     });
   });
 });

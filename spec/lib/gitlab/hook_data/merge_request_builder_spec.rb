@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::HookData::MergeRequestBuilder do
-  set(:merge_request) { create(:merge_request) }
+RSpec.describe Gitlab::HookData::MergeRequestBuilder do
+  let_it_be(:merge_request) { create(:merge_request) }
   let(:builder) { described_class.new(merge_request) }
 
   describe '#build' do

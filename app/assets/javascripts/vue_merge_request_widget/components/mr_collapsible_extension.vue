@@ -1,14 +1,12 @@
 <script>
-import { GlButton, GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
     GlButton,
-    GlLink,
     GlLoadingIcon,
-    Icon,
+    GlIcon,
   },
   props: {
     title: {
@@ -52,22 +50,23 @@ export default {
     <div class="mr-widget-extension d-flex align-items-center pl-3">
       <div v-if="hasError" class="ci-widget media">
         <div class="media-body">
-          <span class="gl-font-size-small mr-widget-margin-left gl-line-height-24 js-error-state">{{
+          <span class="gl-font-sm mr-widget-margin-left gl-line-height-24 js-error-state">{{
             title
           }}</span>
         </div>
       </div>
 
       <template v-else>
-        <gl-button
-          class="btn-blank btn s32 square append-right-default"
+        <button
+          class="btn-blank btn s32 square gl-mr-3"
+          type="button"
           :aria-label="ariaLabel"
           :disabled="isLoading"
           @click="toggleCollapsed"
         >
           <gl-loading-icon v-if="isLoading" />
-          <icon v-else :name="arrowIconName" class="js-icon" />
-        </gl-button>
+          <gl-icon v-else :name="arrowIconName" class="js-icon" />
+        </button>
         <gl-button
           variant="link"
           class="js-title"

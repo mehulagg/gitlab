@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Profile > Account' do
+RSpec.describe 'Profile > Account' do
   let(:user) { create(:user) }
 
   before do
@@ -10,8 +10,9 @@ describe 'Profile > Account' do
   end
 
   describe "Disconnect Group SAML", :js do
-    let(:group) { create(:group, :private, name: 'Test Group') }
-    let(:saml_provider) { create(:saml_provider, group: group) }
+    let_it_be(:group) { create(:group, :private, name: 'Test Group') }
+    let_it_be(:saml_provider) { create(:saml_provider, group: group) }
+    let_it_be(:unlink_label) { "SAML for Test Group" }
 
     def enable_group_saml
       stub_licensed_features(group_saml: true)
@@ -33,16 +34,52 @@ describe 'Profile > Account' do
     it 'unlinks account' do
       visit profile_account_path
 
-      unlink_label = "SAML for Test Group"
-
       expect(page).to have_content unlink_label
       click_link "Disconnect"
 
       expect(current_path).to eq profile_account_path
       expect(page).not_to have_content(unlink_label)
+    end
+
+    it 'removes access to the group' do
+      visit profile_account_path
+
+      click_link "Disconnect"
 
       visit group_path(group)
       expect(page).to have_content('Page Not Found')
+    end
+
+    context 'group has disabled SAML' do
+      before do
+        saml_provider.update!(enabled: false)
+      end
+
+      it 'lets members distrust and unlink authentication' do
+        visit profile_account_path
+
+        expect(page).to have_content unlink_label
+        click_link "Disconnect"
+
+        expect(current_path).to eq profile_account_path
+        expect(page).not_to have_content(unlink_label)
+      end
+    end
+
+    context 'group trial has expired' do
+      before do
+        stub_licensed_features(group_saml: false)
+      end
+
+      it 'lets members distrust and unlink authentication' do
+        visit profile_account_path
+
+        expect(page).to have_content unlink_label
+        click_link "Disconnect"
+
+        expect(current_path).to eq profile_account_path
+        expect(page).not_to have_content(unlink_label)
+      end
     end
   end
 end

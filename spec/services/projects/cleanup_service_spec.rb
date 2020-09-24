@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::CleanupService do
+RSpec.describe Projects::CleanupService do
   let(:project) { create(:project, :repository, bfg_object_map: fixture_file_upload('spec/fixtures/bfg_object_map.txt')) }
   let(:object_map) { project.bfg_object_map }
 
@@ -19,7 +19,7 @@ describe Projects::CleanupService do
 
     it 'runs garbage collection on the repository' do
       expect_next_instance_of(GitGarbageCollectWorker) do |worker|
-        expect(worker).to receive(:perform)
+        expect(worker).to receive(:perform).with(project.id, :gc, "project_cleanup:gc:#{project.id}")
       end
 
       service.execute

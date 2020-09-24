@@ -11,6 +11,8 @@ module Gitlab
           Issue.to_s => IssuesFinder
         }.freeze
 
+        TOP_LABELS_COUNT = 10
+
         def initialize(group:, params:, current_user:)
           @group = group
           @params = params
@@ -21,12 +23,26 @@ module Gitlab
           format_result(query_result)
         end
 
+        # top N commonly used labels for Issues or MergeRequests ordered by usage
+        # rubocop: disable CodeReuse/ActiveRecord
+        def top_labels(limit = TOP_LABELS_COUNT)
+          targets = finder
+            .execute
+            .order_by(:id_desc)
+            .limit(100)
+
+          GroupLabel
+            .top_labels_by_target(targets)
+            .limit(limit)
+        end
+        # rubocop: enable CodeReuse/ActiveRecord
+
         private
 
         attr_reader :group, :params, :finder
 
         def finder_class
-          FINDER_CLASSES.fetch(params[:subject], FINDER_CLASSES.keys.first)
+          FINDER_CLASSES.fetch(params[:subject], FINDER_CLASSES.each_value.first)
         end
 
         def format_result(result)

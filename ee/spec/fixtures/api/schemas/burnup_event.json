@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "action",
+    "milestone_id",
+    "created_at",
+    "issue_id"
+  ],
+  "properties": {
+    "event_type": {
+      "type": { "enum": [ "milestone", "weight", "state" ] }
+    },
+    "weight": {
+      "type": ["integer", "null"]
+    },
+    "milestone_id": {
+      "type": ["integer", "null"]
+    },
+    "state": {
+      "type": ["string", "null"]
+    },
+    "issue_id": {
+      "type": "integer"
+    },
+    "action": {
+      "type": ["string", "null"]
+    },
+    "created_at": {
+      "type": "date"
+    }
+  }
+}

@@ -27,24 +27,6 @@ describe QA::Support::Page::Logging do
       .to output(%r{refreshing http://current-url}).to_stdout_from_any_process
   end
 
-  it 'logs wait' do
-    expect { subject.wait(max: 0) {} }
-      .to output(/next wait uses reload: true/).to_stdout_from_any_process
-    expect { subject.wait(max: 0) {} }
-      .to output(/with wait/).to_stdout_from_any_process
-    expect { subject.wait(max: 0) {} }
-      .to output(/ended wait after .* seconds$/).to_stdout_from_any_process
-  end
-
-  it 'logs wait with reload false' do
-    expect { subject.wait(max: 0, reload: false) {} }
-      .to output(/next wait uses reload: false/).to_stdout_from_any_process
-    expect { subject.wait(max: 0, reload: false) {} }
-      .to output(/with wait/).to_stdout_from_any_process
-    expect { subject.wait(max: 0, reload: false) {} }
-      .to output(/ended wait after .* seconds$/).to_stdout_from_any_process
-  end
-
   it 'logs scroll_to' do
     expect { subject.scroll_to(:element) }
       .to output(/scrolling to :element/).to_stdout_from_any_process
@@ -117,14 +99,14 @@ describe QA::Support::Page::Logging do
     allow(page).to receive(:has_text?).and_return(true)
 
     expect { subject.has_text? 'foo' }
-      .to output(/has_text\?\('foo'\) returned true/).to_stdout_from_any_process
+      .to output(/has_text\?\('foo', wait: #{QA::Runtime::Browser::CAPYBARA_MAX_WAIT_TIME}\) returned true/).to_stdout_from_any_process
   end
 
   it 'logs has_no_text?' do
-    allow(page).to receive(:has_no_text?).with('foo').and_return(true)
+    allow(page).to receive(:has_no_text?).with('foo', any_args).and_return(true)
 
     expect { subject.has_no_text? 'foo' }
-      .to output(/has_no_text\?\('foo'\) returned true/).to_stdout_from_any_process
+      .to output(/has_no_text\?\('foo', wait: #{QA::Runtime::Browser::CAPYBARA_MAX_WAIT_TIME}\) returned true/).to_stdout_from_any_process
   end
 
   it 'logs finished_loading?' do
@@ -145,18 +127,18 @@ describe QA::Support::Page::Logging do
     it 'logs the number of elements found' do
       allow(page).to receive(:all).and_return([1, 2])
 
-      expect { subject.all_elements(:element) }
+      expect { subject.all_elements(:element, count: 2) }
         .to output(/finding all :element/).to_stdout_from_any_process
-      expect { subject.all_elements(:element) }
+      expect { subject.all_elements(:element, count: 2) }
         .to output(/found 2 :element/).to_stdout_from_any_process
     end
 
     it 'logs 0 if no elements are found' do
       allow(page).to receive(:all).and_return([])
 
-      expect { subject.all_elements(:element) }
+      expect { subject.all_elements(:element, count: 1) }
         .to output(/finding all :element/).to_stdout_from_any_process
-      expect { subject.all_elements(:element) }
+      expect { subject.all_elements(:element, count: 1) }
         .not_to output(/found 0 :elements/).to_stdout_from_any_process
     end
   end

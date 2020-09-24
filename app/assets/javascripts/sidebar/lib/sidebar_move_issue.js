@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import '~/gl_dropdown';
-import _ from 'underscore';
+import { escape } from 'lodash';
 import { __ } from '~/locale';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 function isValidProjectId(id) {
   return id > 0;
@@ -27,7 +27,7 @@ class SidebarMoveIssue {
   }
 
   initDropdown() {
-    this.$dropdownToggle.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdownToggle, {
       search: {
         fields: ['name_with_namespace'],
       },
@@ -49,7 +49,7 @@ class SidebarMoveIssue {
       renderRow: project => `
         <li>
           <a href="#" class="js-move-issue-dropdown-item">
-            ${_.escape(project.name_with_namespace)}
+            ${escape(project.name_with_namespace)}
           </a>
         </li>
       `,

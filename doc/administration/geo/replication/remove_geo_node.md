@@ -1,3 +1,10 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Removing secondary Geo nodes **(PREMIUM ONLY)**
 
 **Secondary** nodes can be removed from the Geo cluster using the Geo admin page of the **primary** node. To remove a **secondary** node:
@@ -10,13 +17,13 @@ Once removed from the Geo admin page, you must stop and uninstall the **secondar
 
 1. On the **secondary** node, stop GitLab:
 
-   ```bash
+   ```shell
    sudo gitlab-ctl stop
    ```
 
 1. On the **secondary** node, uninstall GitLab:
 
-   ```bash
+   ```shell
    # Stop gitlab and remove its supervision process
    sudo gitlab-ctl uninstall
 
@@ -31,7 +38,7 @@ Once GitLab has been uninstalled from the **secondary** node, the replication sl
 
 1. On the **primary** node, start a PostgreSQL console session:
 
-   ```bash
+   ```shell
    sudo gitlab-psql
    ```
 

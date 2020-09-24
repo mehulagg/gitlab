@@ -3,11 +3,11 @@
 # LDAP User EE mixin
 #
 # This module is intended to encapsulate EE-specific User methods
-# and be **prepended** in the `Gitlab::Auth::LDAP::User` class.
+# and be **prepended** in the `Gitlab::Auth::Ldap::User` class.
 module EE
   module Gitlab
     module Auth
-      module LDAP
+      module Ldap
         module User
           def initialize(auth_hash)
             super
@@ -43,7 +43,7 @@ module EE
           end
 
           def with_proxy(&block)
-            ::EE::Gitlab::Auth::LDAP::Sync::Proxy.open(auth_hash.provider, &block)
+            ::EE::Gitlab::Auth::Ldap::Sync::Proxy.open(auth_hash.provider, &block)
           end
         end
       end

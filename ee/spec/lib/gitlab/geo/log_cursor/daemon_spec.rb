@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
-  set(:primary) { create(:geo_node, :primary) }
-  set(:secondary) { create(:geo_node) }
-
+  let_it_be(:primary, reload: true) { create(:geo_node, :primary) }
+  let_it_be(:secondary, reload: true) { create(:geo_node) }
   let(:options) { {} }
 
   subject(:daemon) { described_class.new(options) }
@@ -134,6 +133,15 @@ describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state do
 
         expect(daemon).to receive(:handle_single_event).with(event_log)
         expect(daemon).to receive(:handle_single_event).with(second_event_log)
+
+        daemon.find_and_handle_events!
+      end
+
+      it 'exits when told to stop' do
+        allow_any_instance_of(::Gitlab::Geo::LogCursor::EventLogs).to receive(:fetch_in_batches)
+        allow(daemon).to receive(:exit?).and_return(true)
+
+        expect(daemon).not_to receive(:handle_events)
 
         daemon.find_and_handle_events!
       end
@@ -268,7 +276,7 @@ describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state do
   end
 
   describe '#handle_single_event' do
-    set(:event_log) { create(:geo_event_log, :updated_event) }
+    let_it_be(:event_log) { create(:geo_event_log, :updated_event) }
 
     it 'skips execution when no event data is found' do
       event_log = build(:geo_event_log)

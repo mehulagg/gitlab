@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Lfs::LockFileService do
+RSpec.describe Lfs::LockFileService do
   let(:project)      { create(:project) }
   let(:current_user) { create(:user) }
 
@@ -54,7 +54,9 @@ describe Lfs::LockFileService do
 
       context 'when an error is raised' do
         it "doesn't succeed" do
-          allow_any_instance_of(described_class).to receive(:create_lock!).and_raise(StandardError)
+          allow_next_instance_of(described_class) do |instance|
+            allow(instance).to receive(:create_lock!).and_raise(StandardError)
+          end
 
           expect(subject.execute[:status]).to eq(:error)
         end

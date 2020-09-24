@@ -24,6 +24,7 @@ class SshHostKey
   # This is achieved by making the lifetime shorter than the refresh interval.
   self.reactive_cache_refresh_interval = 15.minutes
   self.reactive_cache_lifetime = 10.minutes
+  self.reactive_cache_work_type = :external_dependency
 
   def self.find_by(opts = {})
     opts = HashWithIndifferentAccess.new(opts)
@@ -106,7 +107,7 @@ class SshHostKey
     if status.success? && !errors.present?
       { known_hosts: known_hosts }
     else
-      Rails.logger.debug("Failed to detect SSH host keys for #{id}: #{errors}") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.debug("Failed to detect SSH host keys for #{id}: #{errors}")
 
       { error: 'Failed to detect SSH host keys' }
     end

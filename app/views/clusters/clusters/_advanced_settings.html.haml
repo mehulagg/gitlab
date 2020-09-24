@@ -6,31 +6,40 @@
 
 - if can?(current_user, :admin_cluster, @cluster)
   - unless @cluster.provided_by_user?
-    .append-bottom-20
-      %label.append-bottom-10
-        = s_('ClusterIntegration|Google Kubernetes Engine')
+    .sub-section.form-group
+      %h4
+        = @cluster.provider_label
       %p
-        - link_gke = link_to(s_('ClusterIntegration|Google Kubernetes Engine'), @cluster.gke_cluster_url, target: '_blank', rel: 'noopener noreferrer')
-        = s_('ClusterIntegration|Manage your Kubernetes cluster by visiting %{link_gke}').html_safe % { link_gke: link_gke }
+        - provider_link = link_to(@cluster.provider_label, @cluster.provider_management_url, target: '_blank', rel: 'noopener noreferrer')
+        = html_escape(s_('ClusterIntegration|Manage your Kubernetes cluster by visiting %{provider_link}')) % { provider_link: provider_link }
 
-  = form_for @cluster, url: clusterable.cluster_path(@cluster), as: :cluster, html: { class: 'cluster_management_form' } do |field|
+  .sub-section.form-group
+    = form_for @cluster, url: clusterable.cluster_path(@cluster), as: :cluster, html: { class: 'cluster_management_form' } do |field|
+      %h4
+        = s_('ClusterIntegration|Cluster management project (alpha)')
 
-    %h5
-      = s_('ClusterIntegration|Cluster management project (alpha)')
+      %p
+        = project_select_tag('cluster[management_project_id]', class: 'hidden-filter-value', toggle_class: 'js-project-search js-project-filter js-filter-submit', dropdown_class: 'dropdown-menu-selectable dropdown-menu-project js-filter-submit',
+            placeholder: _('Select project'), idAttribute: 'id', data: { order_by: 'last_activity_at', idattribute: 'id', simple_filter: true, allow_clear: true, include_groups: false, include_projects_in_subgroups: true, group_id: group_id, user_id: user_id }, value: @cluster.management_project_id)
+        .text-muted
+          = html_escape(s_('ClusterIntegration|A cluster management project can be used to run deployment jobs with Kubernetes %{code_open}cluster-admin%{code_close} privileges.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+          = link_to _('More information'), help_page_path('user/clusters/management_project.md'), target: '_blank'
+      = field.submit _('Save changes'), class: 'btn btn-success'
 
-    .form-group
-      .form-text.text-muted
-      = project_select_tag('cluster[management_project_id]', class: 'hidden-filter-value', toggle_class: 'js-project-search js-project-filter js-filter-submit', dropdown_class: 'dropdown-menu-selectable dropdown-menu-project js-filter-submit',
-          placeholder: _('Select project'), idAttribute: 'id', data: { order_by: 'last_activity_at', idattribute: 'id', simple_filter: true, allow_clear: true, include_groups: false, include_projects_in_subgroups: true, group_id: group_id, user_id: user_id }, value: @cluster.management_project_id)
-      .text-muted
-        = s_('ClusterIntegration|A cluster management project can be used to run deployment jobs with Kubernetes <code>cluster-admin</code> privileges.').html_safe
-        = link_to _('More information'), help_page_path('user/clusters/management_project.md'), target: '_blank'
-    .form-group
-      = field.submit _('Save changes'), class: 'btn btn-success qa-save-domain'
+  - if @cluster.managed?
+    .sub-section.form-group
+      %h4
+        = s_('ClusterIntegration|Clear cluster cache')
+      %p
+        = s_("ClusterIntegration|Clear the local cache of namespace and service accounts. This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts.")
+      = link_to(s_('ClusterIntegration|Clear cluster cache'), clusterable.clear_cluster_cache_path(@cluster), method: :delete, class: 'btn btn-primary')
 
   .sub-section.form-group
     %h4.text-danger
       = s_('ClusterIntegration|Remove Kubernetes cluster integration')
     %p
       = s_("ClusterIntegration|Remove this Kubernetes cluster's configuration from this project. This will not delete your actual Kubernetes cluster.")
-    = link_to(s_('ClusterIntegration|Remove integration'), clusterable.cluster_path(@cluster), method: :delete, class: 'btn btn-danger', data: { confirm: s_("ClusterIntegration|Are you sure you want to remove this Kubernetes cluster's integration? This will not delete your actual Kubernetes cluster.")})
+
+    #js-cluster-remove-actions{ data: { cluster_path: clusterable.cluster_path(@cluster),
+      cluster_name: @cluster.name,
+      has_management_project: @cluster.management_project_id? } }

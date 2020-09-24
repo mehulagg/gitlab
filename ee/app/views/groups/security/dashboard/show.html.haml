@@ -1,10 +1,4 @@
 - breadcrumb_title _("Security Dashboard")
 - page_title _("Security Dashboard")
 
-#js-group-security-dashboard{ data: { vulnerabilities_endpoint: group_vulnerabilities_endpoint_path(@group),
-  vulnerabilities_summary_endpoint: group_vulnerabilities_summary_endpoint_path(@group),
-  vulnerabilities_history_endpoint: group_vulnerabilities_history_endpoint_path(@group),
-  projects_endpoint: expose_url(api_v4_groups_projects_path(id: @group.id)),
-  vulnerability_feedback_help_path: help_page_path("user/application_security/index", anchor: "interacting-with-the-vulnerabilities"),
-  empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
-  dashboard_documentation: help_page_path('user/application_security/security_dashboard/index') } }
+#js-group-security-dashboard{ data: group_level_security_dashboard_data(@group) }

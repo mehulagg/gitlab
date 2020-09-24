@@ -3,7 +3,7 @@
 require 'mime/types'
 
 module API
-  class Commits < Grape::API
+  class Commits < Grape::API::Instance
     include PaginationParams
 
     before do
@@ -13,7 +13,7 @@ module API
 
     helpers do
       def user_access
-        @user_access ||= Gitlab::UserAccess.new(current_user, project: user_project)
+        @user_access ||= Gitlab::UserAccess.new(current_user, container: user_project)
       end
 
       def authorize_push_to_branch!(branch)
@@ -38,6 +38,7 @@ module API
         optional :all, type: Boolean, desc: 'Every commit will be returned'
         optional :with_stats, type: Boolean, desc: 'Stats about each commit will be added to the response'
         optional :first_parent, type: Boolean, desc: 'Only include the first parent of merges'
+        optional :order, type: String, desc: 'List commits in order', default: 'default', values: %w[default topo]
         use :pagination
       end
       get ':id/repository/commits' do
@@ -49,6 +50,7 @@ module API
         all = params[:all]
         with_stats = params[:with_stats]
         first_parent = params[:first_parent]
+        order = params[:order]
 
         commits = user_project.repository.commits(ref,
                                                   path: path,
@@ -57,7 +59,8 @@ module API
                                                   before: before,
                                                   after: after,
                                                   all: all,
-                                                  first_parent: first_parent)
+                                                  first_parent: first_parent,
+                                                  order: order)
 
         commit_count =
           if all || path || before || after || first_parent
@@ -133,7 +136,10 @@ module API
         if result[:status] == :success
           commit_detail = user_project.repository.commit(result[:result])
 
-          Gitlab::UsageDataCounters::WebIdeCounter.increment_commits_count if find_user_from_warden
+          if find_user_from_warden
+            Gitlab::UsageDataCounters::WebIdeCounter.increment_commits_count
+            Gitlab::UsageDataCounters::EditorUniqueCounter.track_web_ide_edit_action(author: current_user)
+          end
 
           present commit_detail, with: Entities::CommitDetail, stats: params[:stats]
         else
@@ -154,7 +160,7 @@ module API
 
         not_found! 'Commit' unless commit
 
-        present commit, with: Entities::CommitDetail, stats: params[:stats]
+        present commit, with: Entities::CommitDetail, stats: params[:stats], current_user: current_user
       end
 
       desc 'Get the diff for a specific commit of a project' do
@@ -200,6 +206,7 @@ module API
       params do
         requires :sha, type: String, desc: 'A commit sha, or the name of a branch or tag to be cherry picked'
         requires :branch, type: String, desc: 'The name of the branch', allow_blank: false
+        optional :dry_run, type: Boolean, default: false, desc: "Does not commit any changes"
       end
       post ':id/repository/commits/:sha/cherry_pick', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         authorize_push_to_branch!(params[:branch])
@@ -212,7 +219,8 @@ module API
         commit_params = {
           commit: commit,
           start_branch: params[:branch],
-          branch_name: params[:branch]
+          branch_name: params[:branch],
+          dry_run: params[:dry_run]
         }
 
         result = ::Commits::CherryPickService
@@ -220,10 +228,18 @@ module API
           .execute
 
         if result[:status] == :success
-          present user_project.repository.commit(result[:result]),
-            with: Entities::Commit
+          if params[:dry_run]
+            present dry_run: :success
+            status :ok
+          else
+            present user_project.repository.commit(result[:result]),
+              with: Entities::Commit
+          end
         else
-          render_api_error!(result[:message], 400)
+          response = result.slice(:message, :error_code)
+          response[:dry_run] = :error if params[:dry_run]
+
+          error!(response, 400, header)
         end
       end
 
@@ -234,6 +250,7 @@ module API
       params do
         requires :sha, type: String, desc: 'Commit SHA to revert'
         requires :branch, type: String, desc: 'Target branch name', allow_blank: false
+        optional :dry_run, type: Boolean, default: false, desc: "Does not commit any changes"
       end
       post ':id/repository/commits/:sha/revert', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         authorize_push_to_branch!(params[:branch])
@@ -246,7 +263,8 @@ module API
         commit_params = {
           commit: commit,
           start_branch: params[:branch],
-          branch_name: params[:branch]
+          branch_name: params[:branch],
+          dry_run: params[:dry_run]
         }
 
         result = ::Commits::RevertService
@@ -254,10 +272,18 @@ module API
           .execute
 
         if result[:status] == :success
-          present user_project.repository.commit(result[:result]),
-            with: Entities::Commit
+          if params[:dry_run]
+            present dry_run: :success
+            status :ok
+          else
+            present user_project.repository.commit(result[:result]),
+              with: Entities::Commit
+          end
         else
-          render_api_error!(result[:message], 400)
+          response = result.slice(:message, :error_code)
+          response[:dry_run] = :error if params[:dry_run]
+
+          error!(response, 400, header)
         end
       end
 
@@ -353,7 +379,7 @@ module API
         present paginate(commit_merge_requests), with: Entities::MergeRequestBasic
       end
 
-      desc "Get a commit's GPG signature" do
+      desc "Get a commit's signature" do
         success Entities::CommitSignature
       end
       params do
@@ -362,11 +388,9 @@ module API
       get ':id/repository/commits/:sha/signature', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         commit = user_project.commit(params[:sha])
         not_found! 'Commit' unless commit
+        not_found! 'Signature' unless commit.has_signature?
 
-        signature = commit.signature
-        not_found! 'GPG Signature' unless signature
-
-        present signature, with: Entities::CommitSignature
+        present commit, with: Entities::CommitSignature
       end
     end
   end

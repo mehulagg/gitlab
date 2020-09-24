@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ExternalAuthorization::Cache, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::ExternalAuthorization::Cache, :clean_gitlab_redis_cache do
   let(:user) { build_stubbed(:user) }
   let(:cache_key) { "external_authorization:user-#{user.id}:label-dummy_label" }
 
@@ -20,7 +22,7 @@ describe Gitlab::ExternalAuthorization::Cache, :clean_gitlab_redis_cache do
 
   describe '#load' do
     it 'reads stored info from redis' do
-      Timecop.freeze do
+      freeze_time do
         set_in_redis(:access, false)
         set_in_redis(:reason, 'Access denied for now')
         set_in_redis(:refreshed_at, Time.now)
@@ -36,7 +38,7 @@ describe Gitlab::ExternalAuthorization::Cache, :clean_gitlab_redis_cache do
 
   describe '#store' do
     it 'sets the values in redis' do
-      Timecop.freeze do
+      freeze_time do
         cache.store(true, 'the reason', Time.now)
 
         expect(read_from_redis(:access)).to eq('true')

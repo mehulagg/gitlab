@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard shortcuts', :js do
+RSpec.describe 'Dashboard shortcuts', :js do
   context 'logged in' do
     let(:user) { create(:user) }
     let(:project) { create(:project) }
@@ -26,9 +26,17 @@ describe 'Dashboard shortcuts', :js do
 
       check_page_title('To-Do List')
 
+      find('body').send_keys([:shift, 'G'])
+
+      check_page_title('Groups')
+
       find('body').send_keys([:shift, 'P'])
 
       check_page_title('Projects')
+
+      find('body').send_keys([:shift, 'A'])
+
+      check_page_title('Activity')
     end
   end
 
@@ -51,7 +59,7 @@ describe 'Dashboard shortcuts', :js do
       find('body').send_keys([:shift, 'P'])
 
       find('.nothing-here-block')
-      expect(page).to have_content('Explore public groups to find projects to contribute to.')
+      expect(page).to have_content("This user doesn't have any personal projects")
     end
   end
 

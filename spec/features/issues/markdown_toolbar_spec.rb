@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue markdown toolbar', :js do
+RSpec.describe 'Issue markdown toolbar', :js do
   let(:project) { create(:project, :public) }
   let(:issue)   { create(:issue, project: project) }
   let(:user)    { create(:user) }
@@ -36,6 +36,6 @@ describe 'Issue markdown toolbar', :js do
 
     all('.toolbar-btn')[1].click
 
-    expect(find('#note-body')[:value]).to eq("test\n*underline*\n")
+    expect(find('#note-body')[:value]).to eq("test\n_underline_\n")
   end
 end

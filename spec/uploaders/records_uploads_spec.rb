@@ -2,9 +2,11 @@
 
 require 'spec_helper'
 
-describe RecordsUploads do
+RSpec.describe RecordsUploads do
   let!(:uploader) do
-    class RecordsUploadsExampleUploader < GitlabUploader
+    stub_const('RecordsUploadsExampleUploader', Class.new(GitlabUploader))
+
+    RecordsUploadsExampleUploader.class_eval do
       include RecordsUploads::Concern
 
       storage :file

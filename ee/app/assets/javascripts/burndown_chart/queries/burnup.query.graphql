@@ -1,0 +1,13 @@
+query IterationBurnupTimesSeriesData($milestoneId: MilestoneID!) {
+  milestone(id: $milestoneId) {
+    title
+    id
+    burnupTimeSeries {
+      date
+      scopeCount
+      scopeWeight
+      completedCount
+      completedWeight
+    }
+  }
+}

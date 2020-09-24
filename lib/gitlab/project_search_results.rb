@@ -4,41 +4,40 @@ module Gitlab
   class ProjectSearchResults < SearchResults
     attr_reader :project, :repository_ref
 
-    def initialize(current_user, project, query, repository_ref = nil, per_page: 20)
-      @current_user = current_user
+    def initialize(current_user, query, project:, repository_ref: nil, filters: {})
       @project = project
       @repository_ref = repository_ref.presence
-      @query = query
-      @per_page = per_page
+
+      super(current_user, query, [project], filters: filters)
     end
 
-    def objects(scope, page = nil)
+    def objects(scope, page: nil, per_page: DEFAULT_PER_PAGE, preload_method: nil)
       case scope
       when 'notes'
         notes.page(page).per(per_page)
       when 'blobs'
-        paginated_blobs(blobs, page)
+        paginated_blobs(blobs(limit: limit_up_to_page(page, per_page)), page, per_page)
       when 'wiki_blobs'
-        paginated_blobs(wiki_blobs, page)
+        paginated_wiki_blobs(wiki_blobs(limit: limit_up_to_page(page, per_page)), page, per_page)
       when 'commits'
-        Kaminari.paginate_array(commits).page(page).per(per_page)
+        paginated_commits(page, per_page)
       when 'users'
         users.page(page).per(per_page)
       else
-        super(scope, page, false)
+        super(scope, page: page, per_page: per_page, without_count: false)
       end
     end
 
     def formatted_count(scope)
       case scope
       when 'blobs'
-        blobs_count.to_s
+        formatted_limited_count(limited_blobs_count)
       when 'notes'
         formatted_limited_count(limited_notes_count)
       when 'wiki_blobs'
         wiki_blobs_count.to_s
       when 'commits'
-        commits_count.to_s
+        formatted_limited_count(commits_count)
       else
         super
       end
@@ -48,8 +47,8 @@ module Gitlab
       super.where(id: @project.team.members) # rubocop:disable CodeReuse/ActiveRecord
     end
 
-    def blobs_count
-      @blobs_count ||= blobs.count
+    def limited_blobs_count
+      @limited_blobs_count ||= blobs(limit: count_limit).count
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -69,11 +68,11 @@ module Gitlab
     # rubocop: enable CodeReuse/ActiveRecord
 
     def wiki_blobs_count
-      @wiki_blobs_count ||= wiki_blobs.count
+      @wiki_blobs_count ||= wiki_blobs(limit: count_limit).count
     end
 
     def commits_count
-      @commits_count ||= commits.count
+      @commits_count ||= commits(limit: count_limit).count
     end
 
     def single_commit_result?
@@ -81,13 +80,19 @@ module Gitlab
 
       counts = %i(limited_milestones_count limited_notes_count
                   limited_merge_requests_count limited_issues_count
-                  blobs_count wiki_blobs_count)
-      counts.all? { |count_method| public_send(count_method).zero? } # rubocop:disable GitlabSecurity/PublicSend
+                  limited_blobs_count wiki_blobs_count)
+      counts.all? { |count_method| public_send(count_method) == 0 } # rubocop:disable GitlabSecurity/PublicSend
     end
 
     private
 
-    def paginated_blobs(blobs, page)
+    def paginated_commits(page, per_page)
+      results = commits(limit: limit_up_to_page(page, per_page))
+
+      Kaminari.paginate_array(results).page(page).per(per_page)
+    end
+
+    def paginated_blobs(blobs, page, per_page)
       results = Kaminari.paginate_array(blobs).page(page).per(per_page)
 
       Gitlab::Search::FoundBlob.preload_blobs(results)
@@ -95,21 +100,34 @@ module Gitlab
       results
     end
 
-    def blobs
-      return [] unless Ability.allowed?(@current_user, :download_code, @project)
-
-      @blobs ||= Gitlab::FileFinder.new(project, repository_project_ref).find(query)
+    def paginated_wiki_blobs(blobs, page, per_page)
+      blob_array = paginated_blobs(blobs, page, per_page)
+      blob_array.map! do |blob|
+        Gitlab::Search::FoundWikiPage.new(blob)
+      end
     end
 
-    def wiki_blobs
+    def limit_up_to_page(page, per_page)
+      current_page = page&.to_i || 1
+      offset = per_page * (current_page - 1)
+      count_limit + offset
+    end
+
+    def blobs(limit: count_limit)
+      return [] unless Ability.allowed?(@current_user, :download_code, @project)
+
+      @blobs ||= Gitlab::FileFinder.new(project, repository_project_ref).find(query, content_match_cutoff: limit)
+    end
+
+    def wiki_blobs(limit: count_limit)
       return [] unless Ability.allowed?(@current_user, :read_wiki, @project)
 
       @wiki_blobs ||= begin
         if project.wiki_enabled? && query.present?
-          unless project.wiki.empty?
-            Gitlab::WikiFileFinder.new(project, repository_wiki_ref).find(query)
-          else
+          if project.wiki.empty?
             []
+          else
+            Gitlab::WikiFileFinder.new(project, repository_wiki_ref).find(query, content_match_cutoff: limit)
           end
         else
           []
@@ -127,21 +145,21 @@ module Gitlab
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    def commits
-      @commits ||= find_commits(query)
+    def commits(limit:)
+      @commits ||= find_commits(query, limit: limit)
     end
 
-    def find_commits(query)
+    def find_commits(query, limit:)
       return [] unless Ability.allowed?(@current_user, :download_code, @project)
 
-      commits = find_commits_by_message(query)
+      commits = find_commits_by_message(query, limit: limit)
       commit_by_sha = find_commit_by_sha(query)
       commits |= [commit_by_sha] if commit_by_sha
       commits
     end
 
-    def find_commits_by_message(query)
-      project.repository.find_commits_by_message(query)
+    def find_commits_by_message(query, limit:)
+      project.repository.find_commits_by_message(query, repository_project_ref, nil, limit)
     end
 
     def find_commit_by_sha(query)

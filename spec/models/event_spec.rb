@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Event do
+RSpec.describe Event do
   describe "Associations" do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to belong_to(:target) }
@@ -13,6 +13,7 @@ describe Event do
     it { is_expected.to respond_to(:author_email) }
     it { is_expected.to respond_to(:issue_title) }
     it { is_expected.to respond_to(:merge_request_title) }
+    it { is_expected.to respond_to(:design_title) }
   end
 
   describe 'Callbacks' do
@@ -20,7 +21,9 @@ describe Event do
 
     describe 'after_create :reset_project_activity' do
       it 'calls the reset_project_activity method' do
-        expect_any_instance_of(described_class).to receive(:reset_project_activity)
+        expect_next_instance_of(described_class) do |instance|
+          expect(instance).to receive(:reset_project_activity)
+        end
 
         create_push_event(project, project.owner)
       end
@@ -35,7 +38,7 @@ describe Event do
 
           project.reload
 
-          expect(project.last_repository_updated_at).to be_within(1.minute).of(Time.now)
+          expect(project.last_repository_updated_at).to be_within(1.minute).of(Time.current)
         end
       end
 
@@ -65,20 +68,89 @@ describe Event do
       end
     end
 
-    describe 'after_create :track_user_interacted_projects' do
+    describe 'after_create UserInteractedProject.track' do
       let(:event) { build(:push_event, project: project, author: project.owner) }
 
       it 'passes event to UserInteractedProject.track' do
-        expect(UserInteractedProject).to receive(:available?).and_return(true)
         expect(UserInteractedProject).to receive(:track).with(event)
         event.save
       end
+    end
+  end
 
-      it 'does not call UserInteractedProject.track if its not yet available' do
-        expect(UserInteractedProject).to receive(:available?).and_return(false)
-        expect(UserInteractedProject).not_to receive(:track)
-        event.save
+  describe 'validations' do
+    describe 'action' do
+      context 'for a design' do
+        let_it_be(:author) { create(:user) }
+
+        where(:action, :valid) do
+          valid = described_class::DESIGN_ACTIONS.map(&:to_s).to_set
+
+          described_class.actions.keys.map do |action|
+            [action, valid.include?(action)]
+          end
+        end
+
+        with_them do
+          let(:event) { build(:design_event, author: author, action: action) }
+
+          specify { expect(event.valid?).to eq(valid) }
+        end
       end
+    end
+  end
+
+  describe 'scopes' do
+    describe 'created_at' do
+      it 'can find the right event' do
+        time = 1.day.ago
+        event = create(:event, created_at: time)
+        false_positive = create(:event, created_at: 2.days.ago)
+
+        found = described_class.created_at(time)
+
+        expect(found).to include(event)
+        expect(found).not_to include(false_positive)
+      end
+    end
+
+    describe '.for_fingerprint' do
+      let_it_be(:with_fingerprint) { create(:event, fingerprint: 'aaa') }
+
+      before_all do
+        create(:event)
+        create(:event, fingerprint: 'bbb')
+      end
+
+      it 'returns none if there is no fingerprint' do
+        expect(described_class.for_fingerprint(nil)).to be_empty
+        expect(described_class.for_fingerprint('')).to be_empty
+      end
+
+      it 'returns none if there is no match' do
+        expect(described_class.for_fingerprint('not-found')).to be_empty
+      end
+
+      it 'can find a given event' do
+        expect(described_class.for_fingerprint(with_fingerprint.fingerprint))
+          .to contain_exactly(with_fingerprint)
+      end
+    end
+  end
+
+  describe '#fingerprint' do
+    it 'is unique scoped to target' do
+      issue = create(:issue)
+      mr = create(:merge_request)
+
+      expect { create_list(:event, 2, target: issue, fingerprint: '1234') }
+        .to raise_error(include('fingerprint'))
+
+      expect do
+        create(:event, target: mr, fingerprint: 'abcd')
+        create(:event, target: issue, fingerprint: 'abcd')
+        create(:event, target: issue, fingerprint: 'efgh')
+      end.not_to raise_error
     end
   end
 
@@ -94,6 +166,39 @@ describe Event do
       expect(event.tag?).to be_falsey
       expect(event.branch_name).to eq("master")
       expect(event.author).to eq(user)
+    end
+  end
+
+  describe '#target_title' do
+    let_it_be(:project) { create(:project) }
+
+    let(:author) { project.owner }
+    let(:target) { nil }
+
+    let(:event) do
+      described_class.new(project: project,
+                          target: target,
+                          author_id: author.id)
+    end
+
+    context 'for an issue' do
+      let(:title) { generate(:title) }
+      let(:issue) { create(:issue, title: title, project: project) }
+      let(:target) { issue }
+
+      it 'delegates to issue title' do
+        expect(event.target_title).to eq(title)
+      end
+    end
+
+    context 'for a wiki page' do
+      let(:title) { generate(:wiki_page_title) }
+      let(:wiki_page) { create(:wiki_page, title: title, project: project) }
+      let(:event) { create(:wiki_page_event, project: project, wiki_page: wiki_page) }
+
+      it 'delegates to wiki page title' do
+        expect(event.target_title).to eq(wiki_page.title)
+      end
     end
   end
 
@@ -146,51 +251,106 @@ describe Event do
   end
 
   describe '#visible_to_user?' do
-    let(:project) { create(:project, :public) }
-    let(:non_member) { create(:user) }
-    let(:member) { create(:user) }
-    let(:guest) { create(:user) }
-    let(:author) { create(:author) }
-    let(:assignee) { create(:user) }
-    let(:admin) { create(:admin) }
+    let_it_be(:non_member) { create(:user) }
+    let_it_be(:member) { create(:user) }
+    let_it_be(:guest) { create(:user) }
+    let_it_be(:author) { create(:author) }
+    let_it_be(:assignee) { create(:user) }
+    let_it_be(:admin) { create(:admin) }
+    let_it_be(:public_project) { create(:project, :public) }
+    let_it_be(:private_project) { create(:project, :private) }
+
+    let(:project) { public_project }
     let(:issue) { create(:issue, project: project, author: author, assignees: [assignee]) }
     let(:confidential_issue) { create(:issue, :confidential, project: project, author: author, assignees: [assignee]) }
     let(:project_snippet) { create(:project_snippet, :public, project: project, author: author) }
     let(:personal_snippet) { create(:personal_snippet, :public, author: author) }
+    let(:design) { create(:design, issue: issue, project: project) }
     let(:note_on_commit) { create(:note_on_commit, project: project) }
     let(:note_on_issue) { create(:note_on_issue, noteable: issue, project: project) }
     let(:note_on_confidential_issue) { create(:note_on_issue, noteable: confidential_issue, project: project) }
     let(:note_on_project_snippet) { create(:note_on_project_snippet, author: author, noteable: project_snippet, project: project) }
     let(:note_on_personal_snippet) { create(:note_on_personal_snippet, author: author, noteable: personal_snippet, project: nil) }
+    let(:note_on_design) { create(:note_on_design, author: author, noteable: design, project: project) }
     let(:milestone_on_project) { create(:milestone, project: project) }
-    let(:event) { described_class.new(project: project, target: target, author_id: author.id) }
+    let(:event) do
+      described_class.new(project: project,
+                          target: target,
+                          author_id: author.id)
+    end
 
     before do
       project.add_developer(member)
       project.add_guest(guest)
     end
 
+    def visible_to_all
+      {
+        logged_out: true,
+        non_member: true,
+        guest: true,
+        member: true,
+        admin: true
+      }
+    end
+
+    def visible_to_none
+      visible_to_all.transform_values { |_| false }
+    end
+
+    def visible_to_none_except(*roles)
+      visible_to_none.merge(roles.map { |role| [role, true] }.to_h)
+    end
+
+    def visible_to_all_except(*roles)
+      visible_to_all.merge(roles.map { |role| [role, false] }.to_h)
+    end
+
+    shared_examples 'visibility examples' do
+      it 'has the correct visibility' do
+        expect({
+          logged_out: event.visible_to_user?(nil),
+          non_member: event.visible_to_user?(non_member),
+          guest: event.visible_to_user?(guest),
+          member: event.visible_to_user?(member),
+          admin: event.visible_to_user?(admin)
+        }).to match(visibility)
+      end
+    end
+
+    shared_examples 'visible to assignee' do |visible|
+      it { expect(event.visible_to_user?(assignee)).to eq(visible) }
+    end
+
+    shared_examples 'visible to author' do |visible|
+      it { expect(event.visible_to_user?(author)).to eq(visible) }
+    end
+
+    shared_examples 'visible to assignee and author' do |visible|
+      include_examples 'visible to assignee', visible
+      include_examples 'visible to author', visible
+    end
+
     context 'commit note event' do
+      let(:project) { create(:project, :public, :repository) }
       let(:target) { note_on_commit }
 
-      it do
-        aggregate_failures do
-          expect(event.visible_to_user?(non_member)).to eq true
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq true
-          expect(event.visible_to_user?(admin)).to eq true
-        end
+      include_examples 'visibility examples' do
+        let(:visibility) { visible_to_all }
       end
 
       context 'private project' do
-        let(:project) { create(:project, :private) }
+        let(:project) { create(:project, :private, :repository) }
 
-        it do
-          aggregate_failures do
-            expect(event.visible_to_user?(non_member)).to eq false
-            expect(event.visible_to_user?(member)).to eq true
-            expect(event.visible_to_user?(guest)).to eq false
-            expect(event.visible_to_user?(admin)).to eq true
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:member, :admin) }
+          end
+        end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:member) }
           end
         end
       end
@@ -200,27 +360,21 @@ describe Event do
       context 'for non confidential issues' do
         let(:target) { issue }
 
-        it do
-          expect(event.visible_to_user?(non_member)).to eq true
-          expect(event.visible_to_user?(author)).to eq true
-          expect(event.visible_to_user?(assignee)).to eq true
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq true
-          expect(event.visible_to_user?(admin)).to eq true
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_all }
         end
+
+        include_examples 'visible to assignee and author', true
       end
 
       context 'for confidential issues' do
         let(:target) { confidential_issue }
 
-        it do
-          expect(event.visible_to_user?(non_member)).to eq false
-          expect(event.visible_to_user?(author)).to eq true
-          expect(event.visible_to_user?(assignee)).to eq true
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq false
-          expect(event.visible_to_user?(admin)).to eq true
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_none_except(:member, :admin) }
         end
+
+        include_examples 'visible to assignee and author', true
       end
     end
 
@@ -228,105 +382,141 @@ describe Event do
       context 'on non confidential issues' do
         let(:target) { note_on_issue }
 
-        it do
-          expect(event.visible_to_user?(non_member)).to eq true
-          expect(event.visible_to_user?(author)).to eq true
-          expect(event.visible_to_user?(assignee)).to eq true
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq true
-          expect(event.visible_to_user?(admin)).to eq true
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_all }
         end
+
+        include_examples 'visible to assignee and author', true
       end
 
       context 'on confidential issues' do
         let(:target) { note_on_confidential_issue }
 
-        it do
-          expect(event.visible_to_user?(non_member)).to eq false
-          expect(event.visible_to_user?(author)).to eq true
-          expect(event.visible_to_user?(assignee)).to eq true
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq false
-          expect(event.visible_to_user?(admin)).to eq true
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_none_except(:member, :admin) }
         end
+
+        include_examples 'visible to assignee and author', true
       end
 
       context 'private project' do
-        let(:project) { create(:project, :private) }
+        let(:project) { private_project }
         let(:target) { note_on_issue }
 
-        it do
-          expect(event.visible_to_user?(non_member)).to eq false
-          expect(event.visible_to_user?(author)).to eq false
-          expect(event.visible_to_user?(assignee)).to eq false
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq true
-          expect(event.visible_to_user?(admin)).to eq true
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:guest, :member, :admin) }
+          end
         end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:guest, :member) }
+          end
+        end
+
+        include_examples 'visible to assignee and author', false
       end
     end
 
     context 'merge request diff note event' do
-      let(:project) { create(:project, :public) }
       let(:merge_request) { create(:merge_request, source_project: project, author: author, assignees: [assignee]) }
       let(:note_on_merge_request) { create(:legacy_diff_note_on_merge_request, noteable: merge_request, project: project) }
       let(:target) { note_on_merge_request }
 
-      it do
-        expect(event.visible_to_user?(non_member)).to eq true
-        expect(event.visible_to_user?(author)).to eq true
-        expect(event.visible_to_user?(assignee)).to eq true
-        expect(event.visible_to_user?(member)).to eq true
-        expect(event.visible_to_user?(guest)).to eq true
-        expect(event.visible_to_user?(admin)).to eq true
+      context 'public project' do
+        let(:project) { public_project }
+
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_all }
+        end
+
+        include_examples 'visible to assignee', true
       end
 
       context 'private project' do
-        let(:project) { create(:project, :private) }
+        let(:project) { private_project }
 
-        it do
-          expect(event.visible_to_user?(non_member)).to eq false
-          expect(event.visible_to_user?(author)).to eq false
-          expect(event.visible_to_user?(assignee)).to eq false
-          expect(event.visible_to_user?(member)).to eq true
-          expect(event.visible_to_user?(guest)).to eq false
-          expect(event.visible_to_user?(admin)).to eq true
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:member, :admin) }
+          end
         end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:member) }
+          end
+        end
+
+        include_examples 'visible to assignee', false
       end
     end
 
     context 'milestone event' do
       let(:target) { milestone_on_project }
 
-      it do
-        expect(event.visible_to_user?(nil)).to be_truthy
-        expect(event.visible_to_user?(non_member)).to be_truthy
-        expect(event.visible_to_user?(member)).to be_truthy
-        expect(event.visible_to_user?(guest)).to be_truthy
-        expect(event.visible_to_user?(admin)).to be_truthy
+      include_examples 'visibility examples' do
+        let(:visibility) { visible_to_all }
       end
 
       context 'on public project with private issue tracker and merge requests' do
         let(:project) { create(:project, :public, :issues_private, :merge_requests_private) }
 
-        it do
-          expect(event.visible_to_user?(nil)).to be_falsy
-          expect(event.visible_to_user?(non_member)).to be_falsy
-          expect(event.visible_to_user?(member)).to be_truthy
-          expect(event.visible_to_user?(guest)).to be_truthy
-          expect(event.visible_to_user?(admin)).to be_truthy
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_all_except(:logged_out, :non_member) }
+          end
+        end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_all_except(:logged_out, :non_member, :admin) }
+          end
         end
       end
 
       context 'on private project' do
         let(:project) { create(:project, :private) }
 
-        it do
-          expect(event.visible_to_user?(nil)).to be_falsy
-          expect(event.visible_to_user?(non_member)).to be_falsy
-          expect(event.visible_to_user?(member)).to be_truthy
-          expect(event.visible_to_user?(guest)).to be_truthy
-          expect(event.visible_to_user?(admin)).to be_truthy
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_all_except(:logged_out, :non_member) }
+          end
+        end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_all_except(:logged_out, :non_member, :admin) }
+          end
+        end
+      end
+    end
+
+    context 'wiki-page event', :aggregate_failures do
+      let(:event) { create(:wiki_page_event, project: project) }
+
+      context 'on private project', :aggregate_failures do
+        let(:project) { create(:project, :wiki_repo) }
+
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_all_except(:logged_out, :non_member) }
+          end
+        end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_all_except(:logged_out, :non_member, :admin) }
+          end
+        end
+      end
+
+      context 'wiki-page event on public project', :aggregate_failures do
+        let(:project) { create(:project, :public, :wiki_repo) }
+
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_all }
         end
       end
     end
@@ -334,79 +524,262 @@ describe Event do
     context 'project snippet note event' do
       let(:target) { note_on_project_snippet }
 
-      it do
-        expect(event.visible_to_user?(nil)).to be_truthy
-        expect(event.visible_to_user?(non_member)).to be_truthy
-        expect(event.visible_to_user?(author)).to be_truthy
-        expect(event.visible_to_user?(member)).to be_truthy
-        expect(event.visible_to_user?(guest)).to be_truthy
-        expect(event.visible_to_user?(admin)).to be_truthy
+      include_examples 'visibility examples' do
+        let(:visibility) { visible_to_all }
       end
 
       context 'on public project with private snippets' do
         let(:project) { create(:project, :public, :snippets_private) }
 
-        it do
-          expect(event.visible_to_user?(nil)).to be_falsy
-          expect(event.visible_to_user?(non_member)).to be_falsy
-
-          # Normally, we'd expect the author of a comment to be able to view it.
-          # However, this doesn't seem to be the case for comments on snippets.
-          expect(event.visible_to_user?(author)).to be_falsy
-
-          expect(event.visible_to_user?(member)).to be_truthy
-          expect(event.visible_to_user?(guest)).to be_truthy
-          expect(event.visible_to_user?(admin)).to be_truthy
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:guest, :member, :admin) }
+          end
         end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:guest, :member) }
+          end
+        end
+
+        # Normally, we'd expect the author of a comment to be able to view it.
+        # However, this doesn't seem to be the case for comments on snippets.
+
+        include_examples 'visible to author', false
       end
 
       context 'on private project' do
         let(:project) { create(:project, :private) }
 
-        it do
-          expect(event.visible_to_user?(nil)).to be_falsy
-          expect(event.visible_to_user?(non_member)).to be_falsy
-
-          # Normally, we'd expect the author of a comment to be able to view it.
-          # However, this doesn't seem to be the case for comments on snippets.
-          expect(event.visible_to_user?(author)).to be_falsy
-
-          expect(event.visible_to_user?(member)).to be_truthy
-          expect(event.visible_to_user?(guest)).to be_truthy
-          expect(event.visible_to_user?(admin)).to be_truthy
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:guest, :member, :admin) }
+          end
         end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:guest, :member) }
+          end
+        end
+
+        # Normally, we'd expect the author of a comment to be able to view it.
+        # However, this doesn't seem to be the case for comments on snippets.
+
+        include_examples 'visible to author', false
       end
     end
 
     context 'personal snippet note event' do
       let(:target) { note_on_personal_snippet }
 
-      it do
-        expect(event.visible_to_user?(nil)).to be_truthy
-        expect(event.visible_to_user?(non_member)).to be_truthy
-        expect(event.visible_to_user?(author)).to be_truthy
-        expect(event.visible_to_user?(admin)).to be_truthy
+      include_examples 'visibility examples' do
+        let(:visibility) { visible_to_all }
       end
+
+      include_examples 'visible to author', true
 
       context 'on internal snippet' do
         let(:personal_snippet) { create(:personal_snippet, :internal, author: author) }
 
-        it do
-          expect(event.visible_to_user?(nil)).to be_falsy
-          expect(event.visible_to_user?(non_member)).to be_truthy
-          expect(event.visible_to_user?(author)).to be_truthy
-          expect(event.visible_to_user?(admin)).to be_truthy
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_all_except(:logged_out) }
         end
       end
 
       context 'on private snippet' do
         let(:personal_snippet) { create(:personal_snippet, :private, author: author) }
 
-        it do
-          expect(event.visible_to_user?(nil)).to be_falsy
-          expect(event.visible_to_user?(non_member)).to be_falsy
-          expect(event.visible_to_user?(author)).to be_truthy
-          expect(event.visible_to_user?(admin)).to be_truthy
+        context 'when admin mode enabled', :enable_admin_mode do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none_except(:admin) }
+          end
+        end
+
+        context 'when admin mode disabled' do
+          include_examples 'visibility examples' do
+            let(:visibility) { visible_to_none }
+          end
+        end
+
+        include_examples 'visible to author', true
+      end
+    end
+
+    context 'design note event' do
+      include DesignManagementTestHelpers
+
+      let(:target) { note_on_design }
+
+      before do
+        enable_design_management
+      end
+
+      include_examples 'visibility examples' do
+        let(:visibility) { visible_to_all }
+      end
+
+      include_examples 'visible to assignee and author', true
+
+      context 'the event refers to a design on a confidential issue' do
+        let(:design) { create(:design, issue: confidential_issue, project: project) }
+
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_none_except(:member, :admin) }
+        end
+
+        include_examples 'visible to assignee and author', true
+      end
+    end
+
+    context 'design event' do
+      include DesignManagementTestHelpers
+
+      let(:target) { design }
+
+      before do
+        enable_design_management
+      end
+
+      include_examples 'visibility examples' do
+        let(:visibility) { visible_to_all }
+      end
+
+      include_examples 'visible to assignee and author', true
+
+      context 'the event refers to a design on a confidential issue' do
+        let(:design) { create(:design, issue: confidential_issue, project: project) }
+
+        include_examples 'visibility examples' do
+          let(:visibility) { visible_to_none_except(:member, :admin) }
+        end
+
+        include_examples 'visible to assignee and author', true
+      end
+    end
+  end
+
+  describe 'wiki_page predicate scopes' do
+    let_it_be(:events) do
+      [
+        create(:push_event),
+        create(:closed_issue_event),
+        create(:wiki_page_event),
+        create(:closed_issue_event),
+        create(:event, :created),
+        create(:design_event, :destroyed),
+        create(:wiki_page_event),
+        create(:design_event)
+      ]
+    end
+
+    describe '.for_design' do
+      it 'only includes design events' do
+        design_events = events.select(&:design?)
+
+        expect(described_class.for_design)
+          .to be_present
+          .and match_array(design_events)
+      end
+    end
+
+    describe '.for_wiki_page' do
+      it 'only contains the wiki page events' do
+        wiki_events = events.select(&:wiki_page?)
+
+        expect(events).not_to match_array(wiki_events)
+        expect(described_class.for_wiki_page).to match_array(wiki_events)
+      end
+    end
+
+    describe '.for_wiki_meta' do
+      it 'finds events for a given wiki page metadata object' do
+        event = events.select(&:wiki_page?).first
+
+        expect(described_class.for_wiki_meta(event.target)).to contain_exactly(event)
+      end
+    end
+  end
+
+  describe 'categorization' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:all_valid_events) do
+      # mapping from factory name to whether we need to supply the project
+      valid_target_factories = {
+        issue: true,
+        note_on_issue: true,
+        user: false,
+        merge_request: true,
+        note_on_merge_request: true,
+        project_snippet: true,
+        personal_snippet: false,
+        note_on_project_snippet: true,
+        note_on_personal_snippet: false,
+        wiki_page_meta: true,
+        milestone: true,
+        project: false,
+        design: true,
+        note_on_design: true,
+        note_on_commit: true
+      }
+      valid_target_factories.map do |kind, needs_project|
+        extra_data = if kind == :merge_request
+                       { source_project: project }
+                     elsif needs_project
+                       { project: project }
+                     else
+                       {}
+                     end
+
+        target = kind == :project ? nil : build(kind, **extra_data)
+
+        [kind, build(:event, :created, author: project.owner, project: project, target: target)]
+      end.to_h
+    end
+
+    it 'passes a sanity check', :aggregate_failures do
+      expect(all_valid_events.values).to all(be_valid)
+    end
+
+    describe '#wiki_page and #wiki_page?' do
+      context 'for a wiki page event' do
+        let(:wiki_page) do
+          create(:wiki_page, project: project)
+        end
+
+        subject(:event) { create(:wiki_page_event, project: project, wiki_page: wiki_page) }
+
+        it { is_expected.to have_attributes(wiki_page?: be_truthy, wiki_page: wiki_page) }
+      end
+
+      context 'for any other event' do
+        it 'has no wiki_page and is not a wiki_page', :aggregate_failures do
+          all_valid_events.each do |k, event|
+            next if k == :wiki_page_meta
+
+            expect(event).to have_attributes(wiki_page: be_nil, wiki_page?: be_falsy)
+          end
+        end
+      end
+    end
+
+    describe '#design and #design?' do
+      context 'for a design event' do
+        let(:design) { build(:design, project: project) }
+
+        subject(:event) { build(:design_event, target: design, project: project) }
+
+        it { is_expected.to have_attributes(design?: be_truthy, design: design) }
+      end
+
+      context 'for any other event' do
+        it 'has no design and is not a design', :aggregate_failures do
+          all_valid_events.each do |k, event|
+            next if k == :design
+
+            expect(event).to have_attributes(design: be_nil, design?: be_falsy)
+          end
         end
       end
     end
@@ -434,7 +807,7 @@ describe Event do
 
     context 'when a project was updated less than 1 hour ago' do
       it 'does not update the project' do
-        project.update(last_activity_at: Time.now)
+        project.update(last_activity_at: Time.current)
 
         expect(project).not_to receive(:update_column)
           .with(:last_activity_at, a_kind_of(Time))
@@ -451,7 +824,7 @@ describe Event do
 
         project.reload
 
-        expect(project.last_activity_at).to be_within(1.minute).of(Time.now)
+        expect(project.last_activity_at).to be_within(1.minute).of(Time.current)
       end
     end
   end
@@ -531,6 +904,19 @@ describe Event do
       expect(events.first.target.author).to be_an_instance_of(User)
 
       expect(count).to be_zero
+    end
+  end
+
+  describe '#action_name' do
+    it 'handles all valid design events' do
+      created, updated, destroyed, archived = %i[created updated destroyed archived].map do |trait|
+        build(:design_event, trait).action_name
+      end
+
+      expect(created).to eq('uploaded')
+      expect(updated).to eq('revised')
+      expect(destroyed).to eq('deleted')
+      expect(archived).to eq('archived')
     end
   end
 

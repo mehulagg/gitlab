@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::HookData::IssuableBuilder do
-  set(:user) { create(:user) }
+RSpec.describe Gitlab::HookData::IssuableBuilder do
+  let_it_be(:user) { create(:user) }
 
   # This shared example requires a `builder` and `user` variable
   shared_examples 'issuable hook data' do |kind|
@@ -10,6 +12,7 @@ describe Gitlab::HookData::IssuableBuilder do
     include_examples 'project hook data' do
       let(:project) { builder.issuable.project }
     end
+
     include_examples 'deprecated repository hook data'
 
     context "with a #{kind}" do
@@ -53,6 +56,7 @@ describe Gitlab::HookData::IssuableBuilder do
             ]
           }
         end
+
         let(:data) { builder.build(user: user, changes: changes) }
 
         it 'populates the :changes hash' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects (JavaScript fixtures)', type: :controller do
+RSpec.describe 'Projects (JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   runners_token = 'runnerstoken:intabulasreferre'
@@ -20,6 +20,7 @@ describe 'Projects (JavaScript fixtures)', type: :controller do
   end
 
   before do
+    stub_feature_flags(new_variables_ui: false)
     project.add_maintainer(admin)
     sign_in(admin)
     allow(SecureRandom).to receive(:hex).and_return('securerandomhex:thereisnospoon')

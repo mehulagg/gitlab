@@ -46,7 +46,7 @@ module Geo
 
       deleted = relation.delete_with_limit(limit)
 
-      if deleted.positive?
+      if deleted > 0
         log_info('Rows pruned from Geo Event log',
                  relation: relation.name,
                  rows_deleted: deleted,

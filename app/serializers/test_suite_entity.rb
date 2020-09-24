@@ -10,7 +10,10 @@ class TestSuiteEntity < Grape::Entity
   expose :skipped_count
   expose :error_count
 
-  expose :test_cases, using: TestCaseEntity do |test_suite|
-    test_suite.test_cases.values.flat_map(&:values)
+  with_options if: -> (_, opts) { opts[:details] } do |test_suite|
+    expose :suite_error
+    expose :test_cases, using: TestCaseEntity do |test_suite|
+      test_suite.suite_error ? [] : test_suite.sorted.test_cases.values.flat_map(&:values)
+    end
   end
 end

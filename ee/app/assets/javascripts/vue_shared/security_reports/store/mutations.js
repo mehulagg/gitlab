@@ -1,14 +1,6 @@
 import Vue from 'vue';
 import * as types from './mutation_types';
-import {
-  parseDependencyScanningIssues,
-  parseDastIssues,
-  getUnapprovedVulnerabilities,
-  findIssueIndex,
-  parseDiff,
-} from './utils';
-import filterByKey from './utils/filter_by_key';
-import { parseSastContainer } from './utils/container_scanning';
+import { findIssueIndex, parseDiff } from './utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {
@@ -22,6 +14,10 @@ export default {
 
   [types.SET_SOURCE_BRANCH](state, branch) {
     state.sourceBranch = branch;
+  },
+
+  [types.SET_CAN_READ_VULNERABILITY_FEEDBACK](state, value) {
+    state.canReadVulnerabilityFeedback = value;
   },
 
   [types.SET_VULNERABILITY_FEEDBACK_PATH](state, path) {
@@ -48,126 +44,56 @@ export default {
     state.pipelineId = id;
   },
 
-  [types.SET_CAN_CREATE_ISSUE_PERMISSION](state, permission) {
-    state.canCreateIssuePermission = permission;
+  // CONTAINER SCANNING
+  [types.SET_CONTAINER_SCANNING_DIFF_ENDPOINT](state, path) {
+    Vue.set(state.containerScanning.paths, 'diffEndpoint', path);
   },
 
-  [types.SET_CAN_CREATE_FEEDBACK_PERMISSION](state, permission) {
-    state.canCreateFeedbackPermission = permission;
+  [types.REQUEST_CONTAINER_SCANNING_DIFF](state) {
+    Vue.set(state.containerScanning, 'isLoading', true);
   },
 
-  // SAST CONTAINER
-  [types.SET_SAST_CONTAINER_HEAD_PATH](state, path) {
-    Vue.set(state.sastContainer.paths, 'head', path);
-  },
-
-  [types.SET_SAST_CONTAINER_BASE_PATH](state, path) {
-    Vue.set(state.sastContainer.paths, 'base', path);
-  },
-
-  [types.SET_SAST_CONTAINER_DIFF_ENDPOINT](state, path) {
-    Vue.set(state.sastContainer.paths, 'diffEndpoint', path);
-  },
-
-  [types.REQUEST_SAST_CONTAINER_REPORTS](state) {
-    Vue.set(state.sastContainer, 'isLoading', true);
-  },
-
-  /**
-   * For sast container we only render unapproved vulnerabilities.
-   */
-  [types.RECEIVE_SAST_CONTAINER_REPORTS](state, reports) {
-    if (reports.base && reports.head) {
-      const headIssues = getUnapprovedVulnerabilities(
-        parseSastContainer(reports.head.vulnerabilities, reports.enrichData, reports.head.image),
-        reports.head.unapproved,
-      );
-      const baseIssues = getUnapprovedVulnerabilities(
-        parseSastContainer(reports.base.vulnerabilities, reports.enrichData, reports.base.image),
-        reports.base.unapproved,
-      );
-      const filterKey = 'vulnerability';
-
-      const newIssues = filterByKey(headIssues, baseIssues, filterKey);
-      const resolvedIssues = filterByKey(baseIssues, headIssues, filterKey);
-
-      Vue.set(state.sastContainer, 'newIssues', newIssues);
-      Vue.set(state.sastContainer, 'resolvedIssues', resolvedIssues);
-      Vue.set(state.sastContainer, 'isLoading', false);
-    } else if (reports.head && !reports.base) {
-      const newIssues = getUnapprovedVulnerabilities(
-        parseSastContainer(reports.head.vulnerabilities, reports.enrichData, reports.head.image),
-        reports.head.unapproved,
-      );
-
-      Vue.set(state.sastContainer, 'newIssues', newIssues);
-      Vue.set(state.sastContainer, 'isLoading', false);
-    }
-  },
-
-  [types.RECEIVE_SAST_CONTAINER_DIFF_SUCCESS](state, { diff, enrichData }) {
+  [types.RECEIVE_CONTAINER_SCANNING_DIFF_SUCCESS](state, { diff, enrichData }) {
     const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const hasBaseReport = Boolean(diff.base_report_created_at);
 
-    Vue.set(state.sastContainer, 'isLoading', false);
-    Vue.set(state.sastContainer, 'newIssues', added);
-    Vue.set(state.sastContainer, 'resolvedIssues', fixed);
-    Vue.set(state.sastContainer, 'allIssues', existing);
+    Vue.set(state.containerScanning, 'isLoading', false);
+    Vue.set(state.containerScanning, 'newIssues', added);
+    Vue.set(state.containerScanning, 'resolvedIssues', fixed);
+    Vue.set(state.containerScanning, 'allIssues', existing);
+    Vue.set(state.containerScanning, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.containerScanning, 'hasBaseReport', hasBaseReport);
   },
 
-  [types.RECEIVE_SAST_CONTAINER_DIFF_ERROR](state) {
-    Vue.set(state.sastContainer, 'isLoading', false);
-    Vue.set(state.sastContainer, 'hasError', true);
-  },
-
-  [types.RECEIVE_SAST_CONTAINER_ERROR](state) {
-    Vue.set(state.sastContainer, 'isLoading', false);
-    Vue.set(state.sastContainer, 'hasError', true);
+  [types.RECEIVE_CONTAINER_SCANNING_DIFF_ERROR](state) {
+    Vue.set(state.containerScanning, 'isLoading', false);
+    Vue.set(state.containerScanning, 'hasError', true);
   },
 
   // DAST
-
-  [types.SET_DAST_HEAD_PATH](state, path) {
-    Vue.set(state.dast.paths, 'head', path);
-  },
-
-  [types.SET_DAST_BASE_PATH](state, path) {
-    Vue.set(state.dast.paths, 'base', path);
-  },
 
   [types.SET_DAST_DIFF_ENDPOINT](state, path) {
     Vue.set(state.dast.paths, 'diffEndpoint', path);
   },
 
-  [types.REQUEST_DAST_REPORTS](state) {
+  [types.REQUEST_DAST_DIFF](state) {
     Vue.set(state.dast, 'isLoading', true);
-  },
-
-  [types.RECEIVE_DAST_REPORTS](state, reports) {
-    if (reports.head && reports.base) {
-      const headIssues = parseDastIssues(reports.head.site, reports.enrichData);
-      const baseIssues = parseDastIssues(reports.base.site, reports.enrichData);
-      const filterKey = 'pluginid';
-      const newIssues = filterByKey(headIssues, baseIssues, filterKey);
-      const resolvedIssues = filterByKey(baseIssues, headIssues, filterKey);
-
-      Vue.set(state.dast, 'newIssues', newIssues);
-      Vue.set(state.dast, 'resolvedIssues', resolvedIssues);
-      Vue.set(state.dast, 'isLoading', false);
-    } else if (reports.head && reports.head.site && !reports.base) {
-      const newIssues = parseDastIssues(reports.head.site, reports.enrichData);
-
-      Vue.set(state.dast, 'newIssues', newIssues);
-      Vue.set(state.dast, 'isLoading', false);
-    }
   },
 
   [types.RECEIVE_DAST_DIFF_SUCCESS](state, { diff, enrichData }) {
     const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const scans = diff.scans || [];
+    const hasBaseReport = Boolean(diff.base_report_created_at);
 
     Vue.set(state.dast, 'isLoading', false);
     Vue.set(state.dast, 'newIssues', added);
     Vue.set(state.dast, 'resolvedIssues', fixed);
     Vue.set(state.dast, 'allIssues', existing);
+    Vue.set(state.dast, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.dast, 'hasBaseReport', hasBaseReport);
+    Vue.set(state.dast, 'scans', scans);
   },
 
   [types.RECEIVE_DAST_DIFF_ERROR](state) {
@@ -175,86 +101,57 @@ export default {
     Vue.set(state.dast, 'hasError', true);
   },
 
-  [types.RECEIVE_DAST_ERROR](state) {
-    Vue.set(state.dast, 'isLoading', false);
-    Vue.set(state.dast, 'hasError', true);
+  // COVERAGE_FUZZING
+
+  [types.SET_COVERAGE_FUZZING_DIFF_ENDPOINT](state, path) {
+    Vue.set(state.coverageFuzzing.paths, 'diffEndpoint', path);
+  },
+
+  [types.REQUEST_COVERAGE_FUZZING_DIFF](state) {
+    Vue.set(state.coverageFuzzing, 'isLoading', true);
+  },
+
+  [types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS](state, { diff, enrichData }) {
+    const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const scans = diff.scans || [];
+    const hasBaseReport = Boolean(diff.base_report_created_at);
+
+    Vue.set(state.coverageFuzzing, 'isLoading', false);
+    Vue.set(state.coverageFuzzing, 'newIssues', added);
+    Vue.set(state.coverageFuzzing, 'resolvedIssues', fixed);
+    Vue.set(state.coverageFuzzing, 'allIssues', existing);
+    Vue.set(state.coverageFuzzing, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.coverageFuzzing, 'hasBaseReport', hasBaseReport);
+    Vue.set(state.coverageFuzzing, 'scans', scans);
+  },
+
+  [types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR](state) {
+    Vue.set(state.coverageFuzzing, 'isLoading', false);
+    Vue.set(state.coverageFuzzing, 'hasError', true);
   },
 
   // DEPENDECY SCANNING
-
-  [types.SET_DEPENDENCY_SCANNING_HEAD_PATH](state, path) {
-    Vue.set(state.dependencyScanning.paths, 'head', path);
-  },
-
-  [types.SET_DEPENDENCY_SCANNING_BASE_PATH](state, path) {
-    Vue.set(state.dependencyScanning.paths, 'base', path);
-  },
 
   [types.SET_DEPENDENCY_SCANNING_DIFF_ENDPOINT](state, path) {
     Vue.set(state.dependencyScanning.paths, 'diffEndpoint', path);
   },
 
-  [types.REQUEST_DEPENDENCY_SCANNING_REPORTS](state) {
+  [types.REQUEST_DEPENDENCY_SCANNING_DIFF](state) {
     Vue.set(state.dependencyScanning, 'isLoading', true);
-  },
-
-  /**
-   * Compares dependency scanning results and returns the formatted report
-   *
-   * Dependency report has 3 types of issues, newIssues, resolvedIssues and allIssues.
-   *
-   * When we have both base and head:
-   * - newIssues = head - base
-   * - resolvedIssues = base - head
-   * - allIssues = head - newIssues - resolvedIssues
-   *
-   * When we only have head
-   * - newIssues = head
-   * - resolvedIssues = 0
-   * - allIssues = 0
-   */
-  [types.RECEIVE_DEPENDENCY_SCANNING_REPORTS](state, reports) {
-    if (reports.base && reports.head) {
-      const filterKey = 'cve';
-      const parsedHead = parseDependencyScanningIssues(
-        reports.head,
-        reports.enrichData,
-        state.blobPath.head,
-      );
-      const parsedBase = parseDependencyScanningIssues(
-        reports.base,
-        reports.enrichData,
-        state.blobPath.base,
-      );
-
-      const newIssues = filterByKey(parsedHead, parsedBase, filterKey);
-      const resolvedIssues = filterByKey(parsedBase, parsedHead, filterKey);
-      const allIssues = filterByKey(parsedHead, newIssues.concat(resolvedIssues), filterKey);
-
-      Vue.set(state.dependencyScanning, 'newIssues', newIssues);
-      Vue.set(state.dependencyScanning, 'resolvedIssues', resolvedIssues);
-      Vue.set(state.dependencyScanning, 'allIssues', allIssues);
-      Vue.set(state.dependencyScanning, 'isLoading', false);
-    }
-
-    if (reports.head && !reports.base) {
-      const newIssues = parseDependencyScanningIssues(
-        reports.head,
-        reports.enrichData,
-        state.blobPath.head,
-      );
-      Vue.set(state.dependencyScanning, 'newIssues', newIssues);
-      Vue.set(state.dependencyScanning, 'isLoading', false);
-    }
   },
 
   [types.RECEIVE_DEPENDENCY_SCANNING_DIFF_SUCCESS](state, { diff, enrichData }) {
     const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const hasBaseReport = Boolean(diff.base_report_created_at);
 
     Vue.set(state.dependencyScanning, 'isLoading', false);
     Vue.set(state.dependencyScanning, 'newIssues', added);
     Vue.set(state.dependencyScanning, 'resolvedIssues', fixed);
     Vue.set(state.dependencyScanning, 'allIssues', existing);
+    Vue.set(state.dependencyScanning, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.dependencyScanning, 'hasBaseReport', hasBaseReport);
   },
 
   [types.RECEIVE_DEPENDENCY_SCANNING_DIFF_ERROR](state) {
@@ -262,41 +159,37 @@ export default {
     Vue.set(state.dependencyScanning, 'hasError', true);
   },
 
-  [types.RECEIVE_DEPENDENCY_SCANNING_ERROR](state) {
-    Vue.set(state.dependencyScanning, 'isLoading', false);
-    Vue.set(state.dependencyScanning, 'hasError', true);
+  // SECRET SCANNING
+  [types.SET_SECRET_SCANNING_DIFF_ENDPOINT](state, path) {
+    Vue.set(state.secretScanning.paths, 'diffEndpoint', path);
+  },
+
+  [types.REQUEST_SECRET_SCANNING_DIFF](state) {
+    Vue.set(state.secretScanning, 'isLoading', true);
+  },
+
+  [types.RECEIVE_SECRET_SCANNING_DIFF_SUCCESS](state, { diff, enrichData }) {
+    const { added, fixed, existing } = parseDiff(diff, enrichData);
+    const baseReportOutofDate = diff.base_report_out_of_date || false;
+    const hasBaseReport = Boolean(diff.base_report_created_at);
+
+    Vue.set(state.secretScanning, 'isLoading', false);
+    Vue.set(state.secretScanning, 'newIssues', added);
+    Vue.set(state.secretScanning, 'resolvedIssues', fixed);
+    Vue.set(state.secretScanning, 'allIssues', existing);
+    Vue.set(state.secretScanning, 'baseReportOutofDate', baseReportOutofDate);
+    Vue.set(state.secretScanning, 'hasBaseReport', hasBaseReport);
+  },
+
+  [types.RECEIVE_SECRET_SCANNING_DIFF_ERROR](state) {
+    Vue.set(state.secretScanning, 'isLoading', false);
+    Vue.set(state.secretScanning, 'hasError', true);
   },
 
   [types.SET_ISSUE_MODAL_DATA](state, payload) {
     const { issue, status } = payload;
 
     Vue.set(state.modal, 'title', issue.title);
-    Vue.set(state.modal.data.description, 'value', issue.description);
-    Vue.set(state.modal.data.file, 'value', issue.location && issue.location.file);
-    Vue.set(state.modal.data.file, 'url', issue.urlPath);
-    Vue.set(state.modal.data.className, 'value', issue.location && issue.location.class);
-    Vue.set(state.modal.data.methodName, 'value', issue.location && issue.location.method);
-    Vue.set(state.modal.data.image, 'value', issue.location && issue.location.image);
-    Vue.set(state.modal.data.namespace, 'value', issue.location && issue.location.operating_system);
-
-    if (issue.identifiers && issue.identifiers.length > 0) {
-      Vue.set(state.modal.data.identifiers, 'value', issue.identifiers);
-    } else {
-      // Force a null value for identifiers to avoid showing an empty array
-      Vue.set(state.modal.data.identifiers, 'value', null);
-    }
-
-    Vue.set(state.modal.data.severity, 'value', issue.severity);
-    Vue.set(state.modal.data.confidence, 'value', issue.confidence);
-
-    if (issue.links && issue.links.length > 0) {
-      Vue.set(state.modal.data.links, 'value', issue.links);
-    } else {
-      // Force a null value for links to avoid showing an empty array
-      Vue.set(state.modal.data.links, 'value', null);
-    }
-
-    Vue.set(state.modal.data.instances, 'value', issue.instances);
     Vue.set(state.modal, 'vulnerability', issue);
     Vue.set(state.modal, 'isResolved', status === 'success');
 
@@ -305,52 +198,46 @@ export default {
   },
 
   [types.REQUEST_DISMISS_VULNERABILITY](state) {
-    Vue.set(state.modal, 'isDismissingVulnerability', true);
+    state.isDismissingVulnerability = true;
     // reset error in case previous state was error
     Vue.set(state.modal, 'error', null);
   },
 
   [types.RECEIVE_DISMISS_VULNERABILITY_SUCCESS](state) {
-    Vue.set(state.modal, 'isDismissingVulnerability', false);
+    state.isDismissingVulnerability = false;
   },
 
   [types.RECEIVE_DISMISS_VULNERABILITY_ERROR](state, error) {
     Vue.set(state.modal, 'error', error);
-    Vue.set(state.modal, 'isDismissingVulnerability', false);
+    state.isDismissingVulnerability = false;
   },
 
   [types.REQUEST_ADD_DISMISSAL_COMMENT](state) {
     state.isDismissingVulnerability = true;
-    Vue.set(state.modal, 'isDismissingVulnerability', true);
     Vue.set(state.modal, 'error', null);
   },
 
   [types.RECEIVE_ADD_DISMISSAL_COMMENT_SUCCESS](state, payload) {
     state.isDismissingVulnerability = false;
-    Vue.set(state.modal, 'isDismissingVulnerability', false);
     Vue.set(state.modal.vulnerability, 'isDismissed', true);
     Vue.set(state.modal.vulnerability, 'dismissalFeedback', payload.data);
   },
 
   [types.RECEIVE_ADD_DISMISSAL_COMMENT_ERROR](state, error) {
     state.isDismissingVulnerability = false;
-    Vue.set(state.modal, 'isDismissingVulnerability', false);
     Vue.set(state.modal, 'error', error);
   },
   [types.REQUEST_DELETE_DISMISSAL_COMMENT](state) {
     state.isDismissingVulnerability = true;
-    Vue.set(state.modal, 'isDismissingVulnerability', true);
     Vue.set(state.modal, 'error', null);
   },
   [types.RECEIVE_DELETE_DISMISSAL_COMMENT_SUCCESS](state, payload) {
     state.isDismissingVulnerability = false;
-    Vue.set(state.modal, 'isDismissingVulnerability', false);
     Vue.set(state.modal.vulnerability, 'isDismissed', true);
     Vue.set(state.modal.vulnerability, 'dismissalFeedback', payload.data);
   },
   [types.RECEIVE_DELETE_DISMISSAL_COMMENT_ERROR](state, error) {
     state.isDismissingVulnerability = false;
-    Vue.set(state.modal, 'isDismissingVulnerability', false);
     Vue.set(state.modal, 'error', error);
   },
   [types.SHOW_DISMISSAL_DELETE_BUTTONS](state) {
@@ -383,15 +270,15 @@ export default {
   [types.UPDATE_CONTAINER_SCANNING_ISSUE](state, issue) {
     // Find issue in the correct list and update it
 
-    const newIssuesIndex = findIssueIndex(state.sastContainer.newIssues, issue);
+    const newIssuesIndex = findIssueIndex(state.containerScanning.newIssues, issue);
     if (newIssuesIndex !== -1) {
-      state.sastContainer.newIssues.splice(newIssuesIndex, 1, issue);
+      state.containerScanning.newIssues.splice(newIssuesIndex, 1, issue);
       return;
     }
 
-    const resolvedIssuesIndex = findIssueIndex(state.sastContainer.resolvedIssues, issue);
+    const resolvedIssuesIndex = findIssueIndex(state.containerScanning.resolvedIssues, issue);
     if (resolvedIssuesIndex !== -1) {
-      state.sastContainer.resolvedIssues.splice(resolvedIssuesIndex, 1, issue);
+      state.containerScanning.resolvedIssues.splice(resolvedIssuesIndex, 1, issue);
     }
   },
 
@@ -410,24 +297,43 @@ export default {
     }
   },
 
+  [types.UPDATE_SECRET_SCANNING_ISSUE](state, issue) {
+    // Find issue in the correct list and update it
+
+    const newIssuesIndex = findIssueIndex(state.secretScanning.newIssues, issue);
+    if (newIssuesIndex !== -1) {
+      state.secretScanning.newIssues.splice(newIssuesIndex, 1, issue);
+      return;
+    }
+
+    const resolvedIssuesIndex = findIssueIndex(state.secretScanning.resolvedIssues, issue);
+    if (resolvedIssuesIndex !== -1) {
+      state.secretScanning.resolvedIssues.splice(resolvedIssuesIndex, 1, issue);
+    }
+
+    const allIssuesIndex = findIssueIndex(state.secretScanning.allIssues, issue);
+    if (allIssuesIndex !== -1) {
+      state.secretScanning.allIssues.splice(allIssuesIndex, 1, issue);
+    }
+  },
+
   [types.REQUEST_CREATE_ISSUE](state) {
-    Vue.set(state.modal, 'isCreatingNewIssue', true);
+    state.isCreatingIssue = true;
     // reset error in case previous state was error
     Vue.set(state.modal, 'error', null);
   },
 
   [types.RECEIVE_CREATE_ISSUE_SUCCESS](state) {
-    Vue.set(state.modal, 'isCreatingNewIssue', false);
+    state.isCreatingIssue = false;
   },
 
   [types.RECEIVE_CREATE_ISSUE_ERROR](state, error) {
     Vue.set(state.modal, 'error', error);
-    Vue.set(state.modal, 'isCreatingNewIssue', false);
+    state.isCreatingIssue = false;
   },
 
   [types.REQUEST_CREATE_MERGE_REQUEST](state) {
     state.isCreatingMergeRequest = true;
-    Vue.set(state.modal, 'isCreatingMergeRequest', true);
     Vue.set(state.modal, 'error', null);
   },
   [types.RECEIVE_CREATE_MERGE_REQUEST_SUCCESS](state, payload) {
@@ -436,7 +342,6 @@ export default {
   },
   [types.RECEIVE_CREATE_MERGE_REQUEST_ERROR](state, error) {
     state.isCreatingMergeRequest = false;
-    Vue.set(state.modal, 'isCreatingMergeRequest', false);
     Vue.set(state.modal, 'error', error);
   },
   [types.OPEN_DISMISSAL_COMMENT_BOX](state) {

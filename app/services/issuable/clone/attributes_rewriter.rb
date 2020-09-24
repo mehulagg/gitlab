@@ -10,17 +10,23 @@ module Issuable
       end
 
       def execute
-        new_entity.update(milestone: cloneable_milestone, labels: cloneable_labels)
+        update_attributes = { labels: cloneable_labels }
+
+        milestone = matching_milestone(original_entity.milestone&.title)
+        update_attributes[:milestone] = milestone if milestone.present?
+
+        new_entity.update(update_attributes)
+
         copy_resource_label_events
+        copy_resource_weight_events
+        copy_resource_milestone_events
+        copy_resource_state_events
       end
 
       private
 
-      def cloneable_milestone
-        return unless new_entity.supports_milestone?
-
-        title = original_entity.milestone&.title
-        return unless title
+      def matching_milestone(title)
+        return if title.blank? || !new_entity.supports_milestone?
 
         params = { title: title, project_ids: new_entity.project&.id, group_ids: group&.id }
 
@@ -42,20 +48,82 @@ module Issuable
       end
 
       def copy_resource_label_events
-        original_entity.resource_label_events.find_in_batches do |batch|
-          events = batch.map do |event|
-            entity_key = new_entity.is_a?(Issue) ? 'issue_id' : 'epic_id'
-            event.attributes
-              .except('id', 'reference', 'reference_html')
-              .merge(entity_key => new_entity.id, 'action' => ResourceLabelEvent.actions[event.action])
-          end
+        copy_events(ResourceLabelEvent.table_name, original_entity.resource_label_events) do |event|
+          event.attributes
+            .except('id', 'reference', 'reference_html')
+            .merge(entity_key => new_entity.id, 'action' => ResourceLabelEvent.actions[event.action])
+        end
+      end
 
-          Gitlab::Database.bulk_insert(ResourceLabelEvent.table_name, events)
+      def copy_resource_weight_events
+        return unless original_entity.respond_to?(:resource_weight_events)
+
+        copy_events(ResourceWeightEvent.table_name, original_entity.resource_weight_events) do |event|
+          event.attributes
+            .except('id', 'reference', 'reference_html')
+            .merge('issue_id' => new_entity.id)
+        end
+      end
+
+      def copy_resource_milestone_events
+        return unless milestone_events_supported?
+
+        copy_events(ResourceMilestoneEvent.table_name, original_entity.resource_milestone_events) do |event|
+          if event.remove?
+            event_attributes_with_milestone(event, nil)
+          else
+            matching_destination_milestone = matching_milestone(event.milestone_title)
+
+            event_attributes_with_milestone(event, matching_destination_milestone) if matching_destination_milestone.present?
+          end
+        end
+      end
+
+      def copy_resource_state_events
+        return unless state_events_supported?
+
+        copy_events(ResourceStateEvent.table_name, original_entity.resource_state_events) do |event|
+          event.attributes
+            .except('id')
+            .merge(entity_key => new_entity.id,
+                   'state' => ResourceStateEvent.states[event.state])
+        end
+      end
+
+      def event_attributes_with_milestone(event, milestone)
+        event.attributes
+          .except('id')
+          .merge(entity_key => new_entity.id,
+                 'milestone_id' => milestone&.id,
+                 'action' => ResourceMilestoneEvent.actions[event.action],
+                 'state' => ResourceMilestoneEvent.states[event.state])
+      end
+
+      def copy_events(table_name, events_to_copy)
+        events_to_copy.find_in_batches do |batch|
+          events = batch.map do |event|
+            yield(event)
+          end.compact
+
+          Gitlab::Database.bulk_insert(table_name, events) # rubocop:disable Gitlab/BulkInsert
         end
       end
 
       def entity_key
-        new_entity.class.name.parameterize('_').foreign_key
+        new_entity.class.name.underscore.foreign_key
+      end
+
+      def milestone_events_supported?
+        both_respond_to?(:resource_milestone_events)
+      end
+
+      def state_events_supported?
+        both_respond_to?(:resource_state_events)
+      end
+
+      def both_respond_to?(method)
+        original_entity.respond_to?(method) &&
+          new_entity.respond_to?(method)
       end
     end
   end

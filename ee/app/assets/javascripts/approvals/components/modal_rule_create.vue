@@ -14,13 +14,23 @@ export default {
       type: String,
       required: true,
     },
+    isMrEdit: {
+      type: Boolean,
+      default: true,
+      required: false,
+    },
   },
   computed: {
     ...mapState('createModal', {
       rule: 'data',
     }),
     title() {
-      return this.rule ? __('Update approval rule') : __('Add approval rule');
+      return !this.rule || this.defaultRuleName
+        ? __('Add approval rule')
+        : __('Update approval rule');
+    },
+    defaultRuleName() {
+      return this.rule?.defaultRuleName;
     },
   },
   methods: {
@@ -39,8 +49,14 @@ export default {
     :ok-title="title"
     ok-variant="success"
     :cancel-title="__('Cancel')"
+    size="sm"
     @ok.prevent="submit"
   >
-    <rule-form ref="form" :init-rule="rule" />
+    <rule-form
+      ref="form"
+      :init-rule="rule"
+      :is-mr-edit="isMrEdit"
+      :default-rule-name="defaultRuleName"
+    />
   </gl-modal-vuex>
 </template>

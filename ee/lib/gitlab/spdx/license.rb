@@ -2,6 +2,6 @@
 
 module Gitlab
   module SPDX
-    License = Struct.new(:id, :name, keyword_init: true)
+    License = Struct.new(:id, :name, :deprecated, keyword_init: true)
   end
 end

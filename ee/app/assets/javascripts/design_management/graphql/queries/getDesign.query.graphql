@@ -1,7 +1,0 @@
-#import "../fragments/designList.fragment.graphql"
-
-query getDesign($id: String!, $version: String) {
-  design(id: $id, version: $version) @client {
-    ...DesignListItem
-  }
-}

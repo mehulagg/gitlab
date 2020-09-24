@@ -6,20 +6,50 @@ require 'digest'
 
 module ContainerRegistry
   class Client
+    include Gitlab::Utils::StrongMemoize
+
     attr_accessor :uri
 
     DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE = 'application/vnd.docker.distribution.manifest.v2+json'
     OCI_MANIFEST_V1_TYPE = 'application/vnd.oci.image.manifest.v1+json'
     CONTAINER_IMAGE_V1_TYPE = 'application/vnd.docker.container.image.v1+json'
+    REGISTRY_VERSION_HEADER = 'gitlab-container-registry-version'
+    REGISTRY_FEATURES_HEADER = 'gitlab-container-registry-features'
 
     ACCEPTED_TYPES = [DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE, OCI_MANIFEST_V1_TYPE].freeze
 
     # Taken from: FaradayMiddleware::FollowRedirects
     REDIRECT_CODES = Set.new [301, 302, 303, 307]
 
+    def self.supports_tag_delete?
+      registry_config = Gitlab.config.registry
+      return false unless registry_config.enabled && registry_config.api_url.present?
+
+      return true if ::Gitlab.com?
+
+      token = Auth::ContainerRegistryAuthenticationService.access_token([], [])
+      client = new(registry_config.api_url, token: token)
+      client.supports_tag_delete?
+    end
+
     def initialize(base_uri, options = {})
       @base_uri = base_uri
       @options = options
+    end
+
+    def registry_info
+      response = faraday.get("/v2/")
+
+      return {} unless response&.success?
+
+      version = response.headers[REGISTRY_VERSION_HEADER]
+      features = response.headers.fetch(REGISTRY_FEATURES_HEADER, '')
+
+      {
+        version: version,
+        features: features.split(',').map(&:strip),
+        vendor: version ? 'gitlab' : 'other'
+      }
     end
 
     def repository_tags(name)
@@ -35,10 +65,25 @@ module ContainerRegistry
       response.headers['docker-content-digest'] if response.success?
     end
 
-    def delete_repository_tag(name, reference)
-      result = faraday.delete("/v2/#{name}/manifests/#{reference}")
+    def delete_repository_tag_by_digest(name, reference)
+      delete_if_exists("/v2/#{name}/manifests/#{reference}")
+    end
 
-      result.success? || result.status == 404
+    def delete_repository_tag_by_name(name, reference)
+      delete_if_exists("/v2/#{name}/tags/reference/#{reference}")
+    end
+
+    # Check if the registry supports tag deletion. This is only supported by the
+    # GitLab registry fork. The fastest and safest way to check this is to send
+    # an OPTIONS request to /v2/<name>/tags/reference/<tag>, using a random
+    # repository name and tag (the registry won't check if they exist).
+    # Registries that support tag deletion will reply with a 200 OK and include
+    # the DELETE method in the Allow header. Others reply with an 404 Not Found.
+    def supports_tag_delete?
+      strong_memoize(:supports_tag_delete) do
+        response = faraday.run_request(:options, '/v2/name/tags/reference/tag', '', {})
+        response.success? && response.headers['allow']&.include?('DELETE')
+      end
     end
 
     def upload_raw_blob(path, blob)
@@ -66,7 +111,7 @@ module ContainerRegistry
       image = {
         config: {}
       }
-      image, image_digest = upload_raw_blob(path, JSON.pretty_generate(image))
+      image, image_digest = upload_raw_blob(path, Gitlab::Json.pretty_generate(image))
       return unless image
 
       {
@@ -86,15 +131,13 @@ module ContainerRegistry
     end
 
     def delete_blob(name, digest)
-      result = faraday.delete("/v2/#{name}/blobs/#{digest}")
-
-      result.success? || result.status == 404
+      delete_if_exists("/v2/#{name}/blobs/#{digest}")
     end
 
     def put_tag(name, reference, manifest)
       response = faraday.put("/v2/#{name}/manifests/#{reference}") do |req|
         req.headers['Content-Type'] = DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE
-        req.body = JSON.pretty_generate(manifest)
+        req.body = Gitlab::Json.pretty_generate(manifest)
       end
 
       response.headers['docker-content-digest'] if response.success?
@@ -144,13 +187,13 @@ module ContainerRegistry
     end
 
     def faraday
-      @faraday ||= Faraday.new(@base_uri) do |conn|
+      @faraday ||= faraday_base do |conn|
         initialize_connection(conn, @options, &method(:accept_manifest))
       end
     end
 
     def faraday_blob
-      @faraday_blob ||= Faraday.new(@base_uri) do |conn|
+      @faraday_blob ||= faraday_base do |conn|
         initialize_connection(conn, @options)
       end
     end
@@ -158,10 +201,20 @@ module ContainerRegistry
     # Create a new request to make sure the Authorization header is not inserted
     # via the Faraday middleware
     def faraday_redirect
-      @faraday_redirect ||= Faraday.new(@base_uri) do |conn|
+      @faraday_redirect ||= faraday_base do |conn|
         conn.request :json
         conn.adapter :net_http
       end
+    end
+
+    def faraday_base(&block)
+      Faraday.new(@base_uri, headers: { user_agent: "GitLab/#{Gitlab::VERSION}" }, &block)
+    end
+
+    def delete_if_exists(path)
+      result = faraday.delete(path)
+
+      result.success? || result.status == 404
     end
   end
 end

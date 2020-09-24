@@ -3,7 +3,7 @@
 module EE
   module Gitlab
     module Auth
-      module LDAP
+      module Ldap
         # Create a hash map of member DNs to access levels. The highest
         # access level is retained in cases where `set` is called multiple times
         # for the same DN.

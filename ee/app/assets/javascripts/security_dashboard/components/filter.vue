@@ -1,17 +1,15 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import { GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlDeprecatedDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDropdown,
+    GlDeprecatedDropdown,
     GlSearchBoxByType,
-    Icon,
+    GlIcon,
   },
   props: {
-    filterId: {
-      type: String,
+    filter: {
+      type: Object,
       required: true,
     },
   },
@@ -21,15 +19,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('filters', ['getFilter', 'getSelectedOptions', 'getSelectedOptionNames']),
-    filter() {
-      return this.getFilter(this.filterId);
+    filterId() {
+      return this.filter.id;
     },
     selection() {
-      return this.getFilter(this.filterId).selection;
+      return this.filter.selection;
     },
-    selectedOptionText() {
-      return this.getSelectedOptionNames(this.filterId) || '-';
+    firstSelectedOption() {
+      return this.filter.options.find(option => this.selection.has(option.id))?.name || '-';
+    },
+    extraOptionCount() {
+      return this.selection.size - 1;
     },
     filteredOptions() {
       return this.filter.options.filter(option =>
@@ -41,12 +41,8 @@ export default {
     },
   },
   methods: {
-    ...mapActions('filters', ['setFilter']),
     clickFilter(option) {
-      this.setFilter({
-        filterId: this.filterId,
-        optionId: option.id,
-      });
+      this.$emit('setFilter', { filterId: this.filterId, optionId: option.id });
     },
     isSelected(option) {
       return this.selection.has(option.id);
@@ -61,15 +57,19 @@ export default {
 <template>
   <div class="dashboard-filter">
     <strong class="js-name">{{ filter.name }}</strong>
-    <gl-dropdown ref="dropdown" class="d-block mt-1" menu-class="dropdown-extended-height">
+    <gl-deprecated-dropdown
+      ref="dropdown"
+      class="d-block mt-1"
+      menu-class="dropdown-extended-height"
+      toggle-class="d-flex w-100 justify-content-between align-items-center"
+    >
       <template slot="button-content">
         <span class="text-truncate" :data-qa-selector="qaSelector">
-          {{ selectedOptionText.firstOption }}
+          {{ firstSelectedOption }}
         </span>
-        <span v-if="selectedOptionText.extraOptionCount" class="flex-grow-1 ml-1">
-          {{ selectedOptionText.extraOptionCount }}
+        <span v-if="extraOptionCount" class="flex-grow-1 ml-1">
+          {{ n__('+%d more', '+%d more', extraOptionCount) }}
         </span>
-
         <i class="fa fa-chevron-down" aria-hidden="true"></i>
       </template>
 
@@ -82,7 +82,7 @@ export default {
           :aria-label="__('Close')"
           @click="closeDropdown"
         >
-          <icon name="close" aria-hidden="true" class="vertical-align-middle" />
+          <gl-icon name="close" aria-hidden="true" class="vertical-align-middle" />
         </button>
       </div>
 
@@ -90,7 +90,7 @@ export default {
         v-if="filter.options.length >= 20"
         ref="searchBox"
         v-model="filterTerm"
-        class="m-2"
+        class="gl-m-3"
         :placeholder="__('Filter...')"
       />
 
@@ -107,14 +107,14 @@ export default {
           @click="clickFilter(option)"
         >
           <span class="d-flex">
-            <icon
+            <gl-icon
               v-if="isSelected(option)"
               class="flex-shrink-0 js-check"
               name="mobile-issue-close"
             />
-            <span :class="isSelected(option) ? 'prepend-left-4' : 'prepend-left-20'">{{
-              option.name
-            }}</span>
+            <span class="gl-white-space-nowrap gl-ml-2" :class="{ 'gl-pl-5': !isSelected(option) }">
+              {{ option.name }}
+            </span>
           </span>
         </button>
       </div>
@@ -126,15 +126,6 @@ export default {
       >
         {{ __('No matching results') }}
       </button>
-    </gl-dropdown>
+    </gl-deprecated-dropdown>
   </div>
 </template>
-
-<style>
-.dashboard-filter .dropdown-toggle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-</style>

@@ -1,288 +1,101 @@
 import createState from 'ee/vue_shared/security_reports/store/state';
 import createSastState from 'ee/vue_shared/security_reports/store/modules/sast/state';
 import {
-  groupedSastContainerText,
+  groupedContainerScanningText,
   groupedDastText,
   groupedDependencyText,
+  groupedSecretScanningText,
   groupedSummaryText,
   allReportsHaveError,
   noBaseInAllReports,
   areReportsLoading,
-  sastContainerStatusIcon,
+  containerScanningStatusIcon,
   dastStatusIcon,
   dependencyScanningStatusIcon,
   anyReportHasError,
   summaryCounts,
+  isBaseSecurityReportOutOfDate,
+  canCreateIssue,
+  canCreateMergeRequest,
+  canDismissVulnerability,
 } from 'ee/vue_shared/security_reports/store/getters';
+import {
+  CRITICAL,
+  HIGH,
+  MEDIUM,
+  LOW,
+} from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 
-const BASE_PATH = 'fake/base/path.json';
-const HEAD_PATH = 'fake/head/path.json';
+const MOCK_PATH = 'fake/path.json';
+
+const generateVuln = severity => ({ severity });
 
 describe('Security reports getters', () => {
-  function removeBreakLine(data) {
-    return data.replace(/\r?\n|\r/g, '').replace(/\s\s+/g, ' ');
-  }
-
-  let state;
+  let state = {};
 
   beforeEach(() => {
     state = createState();
     state.sast = createSastState();
   });
 
-  describe('groupedSastContainerText', () => {
+  describe.each`
+    name                     | scanner                 | getter
+    ${'Secret scanning'}     | ${'secretScanning'}     | ${groupedSecretScanningText}
+    ${'Dependency scanning'} | ${'dependencyScanning'} | ${groupedDependencyText}
+    ${'Container scanning'}  | ${'containerScanning'}  | ${groupedContainerScanningText}
+    ${'DAST'}                | ${'dast'}               | ${groupedDastText}
+  `('grouped text for $name', ({ name, scanner, getter }) => {
     describe('with no issues', () => {
       it('returns no issues text', () => {
-        state.sastContainer.paths.head = HEAD_PATH;
-        state.sastContainer.paths.base = BASE_PATH;
-
-        expect(groupedSastContainerText(state)).toEqual(
-          'Container scanning detected no vulnerabilities',
-        );
+        expect(getter(state)).toEqual(`${name} detected no vulnerabilities.`);
       });
     });
 
-    describe('with new issues and without base', () => {
-      it('returns unable to compare text', () => {
-        state.sastContainer.paths.head = HEAD_PATH;
-        state.sastContainer.newIssues = [{}];
-
-        expect(groupedSastContainerText(state)).toEqual(
-          'Container scanning detected 1 vulnerability for the source branch only',
-        );
-      });
-    });
-
-    describe('with base and head', () => {
-      describe('with only new issues', () => {
-        it('returns new issues text', () => {
-          state.sastContainer.paths.head = HEAD_PATH;
-          state.sastContainer.paths.base = BASE_PATH;
-          state.sastContainer.newIssues = [{}];
-
-          expect(groupedSastContainerText(state)).toEqual(
-            'Container scanning detected 1 new vulnerability',
-          );
-        });
-      });
-
-      describe('with only dismissed issues', () => {
-        it('returns dismissed issues text', () => {
-          state.sastContainer.paths.head = HEAD_PATH;
-          state.sastContainer.paths.base = BASE_PATH;
-          state.sastContainer.newIssues = [{ isDismissed: true }];
-
-          expect(groupedSastContainerText(state)).toEqual(
-            'Container scanning detected 1 dismissed vulnerability',
-          );
-        });
-      });
-
-      describe('with new and resolved issues', () => {
-        it('returns new and fixed issues text', () => {
-          state.sastContainer.paths.head = HEAD_PATH;
-          state.sastContainer.paths.base = BASE_PATH;
-          state.sastContainer.newIssues = [{}];
-          state.sastContainer.resolvedIssues = [{}];
-
-          expect(removeBreakLine(groupedSastContainerText(state))).toEqual(
-            'Container scanning detected 1 new, and 1 fixed vulnerabilities',
-          );
-        });
-      });
-
-      describe('with only resolved issues', () => {
-        it('returns fixed issues text', () => {
-          state.sastContainer.paths.head = HEAD_PATH;
-          state.sastContainer.paths.base = BASE_PATH;
-          state.sastContainer.resolvedIssues = [{}];
-
-          expect(groupedSastContainerText(state)).toEqual(
-            'Container scanning detected 1 fixed vulnerability',
-          );
-        });
-      });
-    });
-  });
-
-  describe('groupedDastText', () => {
-    describe('with no issues', () => {
-      it('returns no issues text', () => {
-        state.dast.paths.head = HEAD_PATH;
-        state.dast.paths.base = BASE_PATH;
-
-        expect(groupedDastText(state)).toEqual('DAST detected no vulnerabilities');
-      });
-    });
-
-    describe('with new issues and without base', () => {
-      it('returns unable to compare text', () => {
-        state.dast.paths.head = HEAD_PATH;
-        state.dast.newIssues = [{}];
-
-        expect(groupedDastText(state)).toEqual(
-          'DAST detected 1 vulnerability for the source branch only',
-        );
-      });
-    });
-
-    describe('with base and head', () => {
-      describe('with only new issues', () => {
-        it('returns new issues text', () => {
-          state.dast.paths.head = HEAD_PATH;
-          state.dast.paths.base = BASE_PATH;
-          state.dast.newIssues = [{}];
-
-          expect(groupedDastText(state)).toEqual('DAST detected 1 new vulnerability');
-        });
-      });
-
-      describe('with only dismissed issues', () => {
-        it('returns dismissed issues text', () => {
-          state.dast.paths.head = HEAD_PATH;
-          state.dast.paths.base = BASE_PATH;
-          state.dast.newIssues = [{ isDismissed: true }];
-
-          expect(groupedDastText(state)).toEqual('DAST detected 1 dismissed vulnerability');
-        });
-      });
-
-      describe('with new and resolved issues', () => {
-        it('returns new and fixed issues text', () => {
-          state.dast.paths.head = HEAD_PATH;
-          state.dast.paths.base = BASE_PATH;
-          state.dast.newIssues = [{}];
-          state.dast.resolvedIssues = [{}];
-
-          expect(removeBreakLine(groupedDastText(state))).toEqual(
-            'DAST detected 1 new, and 1 fixed vulnerabilities',
-          );
-        });
-      });
-
-      describe('with only resolved issues', () => {
-        it('returns fixed issues text', () => {
-          state.dast.paths.head = HEAD_PATH;
-          state.dast.paths.base = BASE_PATH;
-          state.dast.resolvedIssues = [{}];
-
-          expect(groupedDastText(state)).toEqual('DAST detected 1 fixed vulnerability');
-        });
-      });
-    });
-  });
-
-  describe('groupedDependencyText', () => {
-    describe('with no issues', () => {
-      it('returns no issues text', () => {
-        state.dependencyScanning.paths.head = HEAD_PATH;
-        state.dependencyScanning.paths.base = BASE_PATH;
-
-        expect(groupedDependencyText(state)).toEqual(
-          'Dependency scanning detected no vulnerabilities',
-        );
-      });
-    });
-
-    describe('with new issues and without base', () => {
-      it('returns unable to compare text', () => {
-        state.dependencyScanning.paths.head = HEAD_PATH;
-        state.dependencyScanning.newIssues = [{}];
-
-        expect(groupedDependencyText(state)).toEqual(
-          'Dependency scanning detected 1 vulnerability for the source branch only',
-        );
-      });
-    });
-
-    describe('with base and head', () => {
-      describe('with only new issues', () => {
-        it('returns new issues text', () => {
-          state.dependencyScanning.paths.head = HEAD_PATH;
-          state.dependencyScanning.paths.base = BASE_PATH;
-          state.dependencyScanning.newIssues = [{}];
-
-          expect(groupedDependencyText(state)).toEqual(
-            'Dependency scanning detected 1 new vulnerability',
-          );
-        });
-      });
-
-      describe('with only dismissed issues', () => {
-        it('returns dismissed issues text', () => {
-          state.dependencyScanning.paths.head = HEAD_PATH;
-          state.dependencyScanning.paths.base = BASE_PATH;
-          state.dependencyScanning.newIssues = [{ isDismissed: true }];
-
-          expect(groupedDependencyText(state)).toEqual(
-            'Dependency scanning detected 1 dismissed vulnerability',
-          );
-        });
-      });
-
-      describe('with new and resolved issues', () => {
-        it('returns new and fixed issues text', () => {
-          state.dependencyScanning.paths.head = HEAD_PATH;
-          state.dependencyScanning.paths.base = BASE_PATH;
-          state.dependencyScanning.newIssues = [{}];
-          state.dependencyScanning.resolvedIssues = [{}];
-
-          expect(removeBreakLine(groupedDependencyText(state))).toEqual(
-            'Dependency scanning detected 1 new, and 1 fixed vulnerabilities',
-          );
-        });
-      });
-
-      describe('with only resolved issues', () => {
-        it('returns fixed issues text', () => {
-          state.dependencyScanning.paths.head = HEAD_PATH;
-          state.dependencyScanning.paths.base = BASE_PATH;
-
-          state.dependencyScanning.resolvedIssues = [{}];
-
-          expect(groupedDependencyText(state)).toEqual(
-            'Dependency scanning detected 1 fixed vulnerability',
-          );
-        });
-      });
+    it.each`
+      vulnerabilities                                     | message
+      ${[]}                                               | ${`${name} detected no vulnerabilities.`}
+      ${[generateVuln(CRITICAL), generateVuln(CRITICAL)]} | ${`${name} detected %{criticalStart}2 critical%{criticalEnd} severity vulnerabilities.`}
+      ${[generateVuln(HIGH), generateVuln(HIGH)]}         | ${`${name} detected %{highStart}2 high%{highEnd} severity vulnerabilities.`}
+      ${[generateVuln(LOW), generateVuln(MEDIUM)]}        | ${`${name} detected 2 vulnerabilities.`}
+      ${[generateVuln(CRITICAL), generateVuln(HIGH)]}     | ${`${name} detected %{criticalStart}1 critical%{criticalEnd} and %{highStart}1 high%{highEnd} severity vulnerabilities.`}
+      ${[generateVuln(CRITICAL), generateVuln(LOW)]}      | ${`${name} detected %{criticalStart}1 critical%{criticalEnd} severity vulnerabilities out of 2.`}
+    `('should build the message as "$message"', ({ vulnerabilities, message }) => {
+      state[scanner].newIssues = vulnerabilities;
+      expect(getter(state)).toEqual(message);
     });
   });
 
   describe('summaryCounts', () => {
     it('returns 0 count for empty state', () => {
       expect(summaryCounts(state)).toEqual({
-        added: 0,
-        dismissed: 0,
-        existing: 0,
-        fixed: 0,
+        critical: 0,
+        high: 0,
+        other: 0,
       });
     });
 
     describe('combines all reports', () => {
-      it('of the same type', () => {
-        state.sastContainer.resolvedIssues = [{}];
-        state.dast.resolvedIssues = [{}];
-        state.dependencyScanning.resolvedIssues = [{}];
+      it('of the same severity', () => {
+        state.containerScanning.newIssues = [generateVuln(CRITICAL)];
+        state.dast.newIssues = [generateVuln(CRITICAL)];
+        state.dependencyScanning.newIssues = [generateVuln(CRITICAL)];
 
         expect(summaryCounts(state)).toEqual({
-          added: 0,
-          dismissed: 0,
-          existing: 0,
-          fixed: 3,
+          critical: 3,
+          high: 0,
+          other: 0,
         });
       });
 
-      it('of the different types', () => {
-        state.sastContainer.resolvedIssues = [{}];
-        state.dast.allIssues = [{}];
-        state.dast.newIssues = [{ isDismissed: true }];
-        state.dependencyScanning.newIssues = [{ isDismissed: false }];
+      it('of different severities', () => {
+        state.containerScanning.newIssues = [generateVuln(CRITICAL)];
+        state.dast.newIssues = [generateVuln(CRITICAL), generateVuln(HIGH)];
+        state.dependencyScanning.newIssues = [generateVuln(LOW)];
 
         expect(summaryCounts(state)).toEqual({
-          added: 1,
-          dismissed: 1,
-          existing: 1,
-          fixed: 1,
+          critical: 2,
+          high: 1,
+          other: 1,
         });
       });
     });
@@ -293,128 +106,45 @@ describe('Security reports getters', () => {
       expect(
         groupedSummaryText(state, {
           allReportsHaveError: true,
-          noBaseInAllReports: false,
           areReportsLoading: false,
           summaryCounts: {},
         }),
       ).toEqual('Security scanning failed loading any results');
     });
 
-    it('returns no compare text', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          noBaseInAllReports: true,
-          areReportsLoading: false,
-          summaryCounts: {},
-        }),
-      ).toEqual('Security scanning detected no vulnerabilities for the source branch only');
-    });
-
     it('returns is loading text', () => {
       expect(
         groupedSummaryText(state, {
           allReportsHaveError: false,
-          noBaseInAllReports: false,
           areReportsLoading: true,
           summaryCounts: {},
         }),
       ).toContain('(is loading)');
     });
 
-    it('returns added and fixed text', () => {
+    it('returns vulnerabilities while loading text', () => {
       expect(
         groupedSummaryText(state, {
           allReportsHaveError: false,
-          noBaseInAllReports: false,
-          areReportsLoading: false,
-          summaryCounts: {
-            added: 2,
-            fixed: 4,
-            existing: 5,
-          },
-        }),
-      ).toEqual('Security scanning detected 2 new, and 4 fixed vulnerabilities');
-    });
-
-    it('returns added text', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          noBaseInAllReports: false,
-          areReportsLoading: false,
-          summaryCounts: {
-            added: 2,
-            existing: 5,
-          },
-        }),
-      ).toEqual('Security scanning detected 2 new vulnerabilities');
-    });
-
-    it('returns fixed text', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          noBaseInAllReports: false,
-          areReportsLoading: false,
-          summaryCounts: {
-            fixed: 4,
-            existing: 5,
-          },
-        }),
-      ).toEqual('Security scanning detected 4 fixed vulnerabilities');
-    });
-
-    it('returns dismissed text', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          noBaseInAllReports: false,
-          areReportsLoading: false,
-          summaryCounts: {
-            dismissed: 4,
-          },
-        }),
-      ).toEqual('Security scanning detected 4 dismissed vulnerabilities');
-    });
-
-    it('returns added and fixed while loading text', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          noBaseInAllReports: false,
           areReportsLoading: true,
           summaryCounts: {
-            added: 2,
-            fixed: 4,
-            existing: 5,
+            critical: 2,
+            high: 4,
           },
         }),
-      ).toEqual('Security scanning (is loading) detected 2 new, and 4 fixed vulnerabilities');
+      ).toEqual(
+        'Security scanning (is loading) detected %{criticalStart}2 critical%{criticalEnd} and %{highStart}4 high%{highEnd} severity vulnerabilities.',
+      );
     });
 
     it('returns no new text if there are existing ones', () => {
       expect(
         groupedSummaryText(state, {
           allReportsHaveError: false,
-          noBaseInAllReports: false,
-          areReportsLoading: false,
-          summaryCounts: {
-            existing: 5,
-          },
-        }),
-      ).toEqual('Security scanning detected no new vulnerabilities');
-    });
-
-    it('returns no text if there are existing ones', () => {
-      expect(
-        groupedSummaryText(state, {
-          allReportsHaveError: false,
-          noBaseInAllReports: false,
           areReportsLoading: false,
           summaryCounts: {},
         }),
-      ).toEqual('Security scanning detected no vulnerabilities');
+      ).toEqual('Security scanning detected no vulnerabilities.');
     });
   });
 
@@ -436,21 +166,21 @@ describe('Security reports getters', () => {
     });
   });
 
-  describe('sastContainerStatusIcon', () => {
+  describe('containerScanningStatusIcon', () => {
     it('returns warning with new issues', () => {
-      state.sastContainer.newIssues = [{}];
+      state.containerScanning.newIssues = [{}];
 
-      expect(sastContainerStatusIcon(state)).toEqual('warning');
+      expect(containerScanningStatusIcon(state)).toEqual('warning');
     });
 
     it('returns warning with failed report', () => {
-      state.sastContainer.hasError = true;
+      state.containerScanning.hasError = true;
 
-      expect(sastContainerStatusIcon(state)).toEqual('warning');
+      expect(containerScanningStatusIcon(state)).toEqual('warning');
     });
 
     it('returns success with no new issues or failed report', () => {
-      expect(sastContainerStatusIcon(state)).toEqual('success');
+      expect(containerScanningStatusIcon(state)).toEqual('success');
     });
   });
 
@@ -488,8 +218,9 @@ describe('Security reports getters', () => {
     it('returns true when all reports have error', () => {
       state.sast.hasError = true;
       state.dast.hasError = true;
-      state.sastContainer.hasError = true;
+      state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
+      state.secretScanning.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(true);
     });
@@ -500,8 +231,9 @@ describe('Security reports getters', () => {
 
     it('returns false when one of the reports does not have error', () => {
       state.dast.hasError = false;
-      state.sastContainer.hasError = true;
+      state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
+      state.secretScanning.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(false);
     });
@@ -524,10 +256,57 @@ describe('Security reports getters', () => {
       expect(noBaseInAllReports(state)).toEqual(true);
     });
 
-    it('returns false when any of the reports has base', () => {
-      state.dast.paths.base = BASE_PATH;
+    it('returns false when any of the reports has a base', () => {
+      state.dast.hasBaseReport = true;
 
       expect(noBaseInAllReports(state)).toEqual(false);
+    });
+  });
+
+  describe('isBaseSecurityReportOutOfDate', () => {
+    it('returns false when none reports are out of date', () => {
+      expect(isBaseSecurityReportOutOfDate(state)).toEqual(false);
+    });
+
+    it('returns true when any of the reports is out of date', () => {
+      state.dast.baseReportOutofDate = true;
+      expect(isBaseSecurityReportOutOfDate(state)).toEqual(true);
+    });
+  });
+
+  describe('canCreateIssue', () => {
+    it('returns false if no feedback path is defined', () => {
+      expect(canCreateIssue(state)).toEqual(false);
+    });
+
+    it('returns true if a feedback path is defined', () => {
+      state.createVulnerabilityFeedbackIssuePath = MOCK_PATH;
+
+      expect(canCreateIssue(state)).toEqual(true);
+    });
+  });
+
+  describe('canCreateMergeRequest', () => {
+    it('returns false if no feedback path is defined', () => {
+      expect(canCreateMergeRequest(state)).toEqual(false);
+    });
+
+    it('returns true if a feedback path is defined', () => {
+      state.createVulnerabilityFeedbackMergeRequestPath = MOCK_PATH;
+
+      expect(canCreateMergeRequest(state)).toEqual(true);
+    });
+  });
+
+  describe('canDismissVulnerability', () => {
+    it('returns false if no feedback path is defined', () => {
+      expect(canDismissVulnerability(state)).toEqual(false);
+    });
+
+    it('returns true if a feedback path is defined', () => {
+      state.createVulnerabilityFeedbackDismissalPath = MOCK_PATH;
+
+      expect(canDismissVulnerability(state)).toEqual(true);
     });
   });
 });

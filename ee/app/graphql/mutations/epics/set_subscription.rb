@@ -7,22 +7,9 @@ module Mutations
 
       authorize :read_epic
 
-      argument :group_path, GraphQL::ID_TYPE,
-               required: true,
-               description: 'The group the epic to (un)subscribe is in'
-
-      argument :iid, GraphQL::ID_TYPE,
-               required: true,
-               description: 'The iid of the epic to (un)subscribe'
-
       argument :subscribed_state, GraphQL::BOOLEAN_TYPE,
                required: true,
                description: 'The desired state of the subscription'
-
-      field :epic,
-            Types::EpicType,
-            null: true,
-            description: 'The epic after mutation'
 
       def resolve(args)
         group_path = args.delete(:group_path)

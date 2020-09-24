@@ -25,12 +25,10 @@ export default class EnvironmentsStore extends CeEnvironmentsStore {
     const environments = this.state.environments.slice();
 
     this.state.environments = environments.map(env => {
-      let updated = Object.assign({}, env);
+      let updated = { ...env };
 
       if (env.id === environmentID) {
-        updated = Object.assign({}, updated, {
-          isDeployBoardVisible: !env.isDeployBoardVisible,
-        });
+        updated = { ...updated, isDeployBoardVisible: !env.isDeployBoardVisible };
       }
       return updated;
     });

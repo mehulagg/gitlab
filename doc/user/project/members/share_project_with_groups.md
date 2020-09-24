@@ -13,12 +13,12 @@ members.
 
 The primary mechanism to give a group of users, say 'Engineering', access to a project,
 say 'Project Acme', in GitLab is to make the 'Engineering' group the owner of 'Project
-Acme'.  But what if 'Project Acme' already belongs to another group, say 'Open Source'?
+Acme'. But what if 'Project Acme' already belongs to another group, say 'Open Source'?
 This is where the group sharing feature can be of use.
 
 To share 'Project Acme' with the 'Engineering' group:
 
-1. For 'Project Acme' use the left navigation menu to go to **Settings > Members**
+1. For 'Project Acme' use the left navigation menu to go to **Members**
 
    ![share project with groups](img/share_project_with_groups.png)
 
@@ -54,4 +54,4 @@ It is possible to prevent projects in a group from [sharing
 a project with another group](../members/share_project_with_groups.md).
 This allows for tighter control over project access.
 
-Learn more about [Share with group lock](../../group/index.html#share-with-group-lock).
+Learn more about [Share with group lock](../../group/index.md#share-with-group-lock).

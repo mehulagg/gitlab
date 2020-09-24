@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Resolve an open thread in a merge request by creating an issue', :js do
+RSpec.describe 'Resolve an open thread in a merge request by creating an issue', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, only_allow_merge_if_all_discussions_are_resolved: true) }
   let(:merge_request) { create(:merge_request, source_project: project) }
@@ -11,7 +11,7 @@ describe 'Resolve an open thread in a merge request by creating an issue', :js d
   def resolve_discussion_selector
     title = 'Resolve this thread in a new issue'
     url = new_project_issue_path(project, discussion_to_resolve: discussion.id, merge_request_to_resolve_discussions_of: merge_request.iid)
-    "a[data-original-title=\"#{title}\"][href=\"#{url}\"]"
+    "a[title=\"#{title}\"][href=\"#{url}\"]"
   end
 
   describe 'As a user with access to the project' do

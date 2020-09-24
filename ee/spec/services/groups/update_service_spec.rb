@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::UpdateService, '#execute' do
+RSpec.describe Groups::UpdateService, '#execute' do
   let!(:user) { create(:user) }
   let!(:group) { create(:group, :public) }
 
@@ -21,7 +21,7 @@ describe Groups::UpdateService, '#execute' do
       }
     end
 
-    context '#visibility' do
+    describe '#visibility' do
       before do
         group.add_owner(user)
       end
@@ -30,6 +30,7 @@ describe Groups::UpdateService, '#execute' do
         let(:operation) do
           update_group(group, user, visibility_level: Gitlab::VisibilityLevel::PRIVATE)
         end
+
         let(:fail_condition!) do
           allow(group).to receive(:save).and_return(false)
         end
@@ -132,44 +133,6 @@ describe Groups::UpdateService, '#execute' do
     end
   end
 
-  context 'with project' do
-    let(:project) { create(:project, namespace: group) }
-
-    shared_examples 'transfer not allowed' do
-      before do
-        stub_licensed_features(packages: true)
-        group.add_owner(user)
-      end
-
-      context 'with npm packages' do
-        let!(:package) { create(:npm_package, project: project) }
-
-        it 'does not allow a path update' do
-          expect(update_group(group, user, path: 'updated')).to be false
-          expect(group.errors[:path]).to include('cannot change when group contains projects with NPM packages')
-        end
-      end
-    end
-
-    it_behaves_like 'transfer not allowed'
-
-    context 'located in a subgroup' do
-      let(:subgroup) { create(:group, parent: group) }
-      let!(:project) { create(:project, namespace: subgroup) }
-
-      before do
-        subgroup.add_owner(user)
-      end
-
-      it_behaves_like 'transfer not allowed'
-
-      it 'does allow a path update if there is not a root namespace change' do
-        expect(update_group(subgroup, user, path: 'updated')).to be true
-        expect(subgroup.errors[:path]).to be_empty
-      end
-    end
-  end
-
   context 'repository_size_limit assignment as Bytes' do
     let(:group) { create(:group, :public, repository_size_limit: 0) }
 
@@ -221,7 +184,8 @@ describe Groups::UpdateService, '#execute' do
   end
 
   context 'setting allowed email domain' do
-    let(:group) { create(:group) }
+    let(:group) { create(:group, :private) }
+    let(:user) { create(:user, email: 'admin@gitlab.com') }
 
     subject { update_group(group, user, params) }
 
@@ -232,15 +196,59 @@ describe Groups::UpdateService, '#execute' do
     context 'when allowed_email_domain already exists' do
       let!(:allowed_domain) { create(:allowed_email_domain, group: group, domain: 'gitlab.com') }
 
-      context 'empty allowed_email_domain param' do
-        let(:params) { { allowed_email_domain_attributes: { id: allowed_domain.id, domain: '' } } }
+      context 'allowed_email_domains_list param is not specified' do
+        let(:params) { {} }
 
-        it 'deletes ip restriction' do
-          expect(group.allowed_email_domain.domain).to eql('gitlab.com')
+        it 'does not call EE::AllowedEmailDomains::UpdateService#execute' do
+          expect_any_instance_of(EE::AllowedEmailDomains::UpdateService).not_to receive(:execute)
 
           subject
+        end
+      end
 
-          expect(group.reload.allowed_email_domain).to be_nil
+      context 'allowed_email_domains_list param is blank' do
+        let(:params) { { allowed_email_domains_list: '' } }
+
+        context 'as a group owner' do
+          before do
+            group.add_owner(user)
+          end
+
+          it 'calls EE::AllowedEmailDomains::UpdateService#execute' do
+            expect_any_instance_of(EE::AllowedEmailDomains::UpdateService).to receive(:execute)
+
+            subject
+          end
+
+          it 'update is successful' do
+            expect(subject).to eq(true)
+          end
+
+          it 'deletes existing allowed_email_domain record' do
+            expect { subject }.to change { group.reload.allowed_email_domains.size }.from(1).to(0)
+          end
+        end
+
+        context 'as a normal user' do
+          it 'calls EE::AllowedEmailDomains::UpdateService#execute' do
+            expect_any_instance_of(EE::AllowedEmailDomains::UpdateService).to receive(:execute)
+
+            subject
+          end
+
+          it 'update is not successful' do
+            expect(subject).to eq(false)
+          end
+
+          it 'registers an error' do
+            subject
+
+            expect(group.errors[:allowed_email_domains]).to include('cannot be changed by you')
+          end
+
+          it 'does not delete existing allowed_email_domain record' do
+            expect { subject }.not_to change { group.reload.allowed_email_domains.size }
+          end
         end
       end
     end
@@ -318,6 +326,69 @@ describe Groups::UpdateService, '#execute' do
 
       context 'when user cannot read the project' do
         it_behaves_like 'ignorance of the Insights project ID'
+      end
+    end
+  end
+
+  context 'updating `max_personal_access_token_lifetime` param' do
+    subject { update_group(group, user, attrs) }
+
+    let!(:group) do
+      create(:group_with_managed_accounts, :public, max_personal_access_token_lifetime: 1)
+    end
+
+    let(:limit) { 10 }
+    let(:attrs) { { max_personal_access_token_lifetime: limit } }
+
+    shared_examples_for 'it does not call the update lifetime service' do
+      it 'doesn not call the update lifetime service' do
+        expect(::PersonalAccessTokens::Groups::UpdateLifetimeService).not_to receive(:new)
+
+        subject
+      end
+    end
+
+    it 'updates the attribute' do
+      expect { subject }.to change { group.reload.max_personal_access_token_lifetime }.from(1).to(10)
+    end
+
+    context 'when the group does not enforce managed accounts' do
+      it_behaves_like 'it does not call the update lifetime service'
+    end
+
+    context 'when the group enforces managed accounts' do
+      before do
+        allow(group).to receive(:enforced_group_managed_accounts?).and_return(true)
+      end
+
+      context 'without `personal_access_token_expiration_policy` licensed' do
+        before do
+          stub_licensed_features(personal_access_token_expiration_policy: false)
+        end
+
+        it_behaves_like 'it does not call the update lifetime service'
+      end
+
+      context 'with personal_access_token_expiration_policy licensed' do
+        before do
+          stub_licensed_features(personal_access_token_expiration_policy: true)
+        end
+
+        context 'when `max_personal_access_token_lifetime` is updated to null value' do
+          let(:limit) { nil }
+
+          it_behaves_like 'it does not call the update lifetime service'
+        end
+
+        context 'when `max_personal_access_token_lifetime` is updated to a non-null value' do
+          it 'executes the update lifetime service' do
+            expect_next_instance_of(::PersonalAccessTokens::Groups::UpdateLifetimeService, group) do |service|
+              expect(service).to receive(:execute)
+            end
+
+            subject
+          end
+        end
       end
     end
   end

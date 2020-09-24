@@ -10,7 +10,9 @@ module Gitlab
           :trigger_request, :schedule, :merge_request, :external_pull_request,
           :ignore_skip_ci, :save_incompleted,
           :seeds_block, :variables_attributes, :push_options,
-          :chat_data, :allow_mirror_update
+          :chat_data, :allow_mirror_update, :bridge, :content, :dry_run,
+          # These attributes are set by Chains during processing:
+          :config_content, :yaml_processor_result, :stage_seeds
         ) do
           include Gitlab::Utils::StrongMemoize
 
@@ -20,11 +22,7 @@ module Gitlab
             end
           end
 
-          def uses_unsupported_legacy_trigger?
-            trigger_request.present? &&
-              trigger_request.trigger.legacy? &&
-              !trigger_request.trigger.supports_legacy_tokens?
-          end
+          alias_method :dry_run?, :dry_run
 
           def branch_exists?
             strong_memoize(:is_branch) do
@@ -75,6 +73,28 @@ module Gitlab
             strong_memoize(:ambiguous_ref) do
               project.repository.ambiguous_ref?(origin_ref)
             end
+          end
+
+          def parent_pipeline
+            bridge&.parent_pipeline
+          end
+
+          def metrics
+            @metrics ||= ::Gitlab::Ci::Pipeline::Metrics.new
+          end
+
+          def observe_creation_duration(duration)
+            metrics.pipeline_creation_duration_histogram
+              .observe({}, duration.seconds)
+          end
+
+          def observe_pipeline_size(pipeline)
+            metrics.pipeline_size_histogram
+              .observe({ source: pipeline.source.to_s }, pipeline.total_size)
+          end
+
+          def dangling_build?
+            %i[ondemand_dast_scan webide].include?(source)
           end
         end
       end

@@ -5,10 +5,14 @@
   %li.js-security-tab-link
     = link_to security_project_pipeline_path(project, pipeline), data: { target: '#js-tab-security', action: 'security', toggle: 'tab', qa_selector: 'security_tab' }, class: 'security-tab' do
       = _("Security")
-      %span.badge.badge-pill.js-security-counter.hidden{ 'data-qa-selector': 'security_counter' }
 
 - if pipeline.expose_license_scanning_data?
   %li.js-licenses-tab-link
     = link_to licenses_project_pipeline_path(project, pipeline), data: { target: '#js-tab-licenses', action: 'licenses', toggle: 'tab', qa_selector: 'licenses_tab' }, class: 'licenses-tab' do
       = _("Licenses")
       %span.badge.badge-pill.js-licenses-counter.hidden{ data: { qa_selector: 'licenses_counter' } }
+
+- if pipeline.downloadable_path_for_report_type(:codequality)
+  %li.js-codequality-tab-link
+    = link_to codequality_report_project_pipeline_path(project, pipeline), data: { target: '#js-tab-codequality', action: 'codequality_report', toggle: 'tab', 'track-event': 'click_button', 'track-label': 'get_codequality_report' }, class: 'codequality-tab' do
+      = _('Code Quality')

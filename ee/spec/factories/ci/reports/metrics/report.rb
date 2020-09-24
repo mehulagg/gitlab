@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :ci_reports_metrics_report, class: ::Gitlab::Ci::Reports::Metrics::Report do
+  factory :ci_reports_metrics_report, class: '::Gitlab::Ci::Reports::Metrics::Report' do
     trait :base_metrics do
       after(:build) do |report, _|
         report.add_metric('metric_name', 'metric_value')

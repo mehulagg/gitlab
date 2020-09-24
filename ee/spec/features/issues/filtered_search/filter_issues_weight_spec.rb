@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Filter issues weight', :js do
+RSpec.describe 'Filter issues weight', :js do
   include FilteredSearchHelpers
 
   let!(:project) { create(:project) }
@@ -40,7 +40,7 @@ describe 'Filter issues weight', :js do
 
   describe 'only weight' do
     it 'filter issues by searched weight' do
-      input_filtered_search('weight:1')
+      input_filtered_search('weight:=1')
 
       expect_issues_list_count(1)
     end
@@ -48,7 +48,7 @@ describe 'Filter issues weight', :js do
 
   describe 'weight with other filters' do
     it 'filters issues by searched weight and text' do
-      search = "weight:2 bug"
+      search = "weight:=2 bug"
       input_filtered_search(search)
 
       expect_issues_list_count(1)
@@ -56,7 +56,7 @@ describe 'Filter issues weight', :js do
     end
 
     it 'filters issues by searched weight, author and text' do
-      search = "weight:2 author:@root bug"
+      search = "weight:=2 author:=@root bug"
       input_filtered_search(search)
 
       expect_issues_list_count(1)
@@ -64,7 +64,7 @@ describe 'Filter issues weight', :js do
     end
 
     it 'filters issues by searched weight, author, assignee and text' do
-      search = "weight:2 author:@root assignee:@root bug"
+      search = "weight:=2 author:=@root assignee:=@root bug"
       input_filtered_search(search)
 
       expect_issues_list_count(1)
@@ -72,7 +72,7 @@ describe 'Filter issues weight', :js do
     end
 
     it 'filters issues by searched weight, author, assignee, label and text' do
-      search = "weight:2 author:@root assignee:@root label:~urgent bug"
+      search = "weight:=2 author:=@root assignee:=@root label:=~urgent bug"
       input_filtered_search(search)
 
       expect_issues_list_count(1)
@@ -80,7 +80,7 @@ describe 'Filter issues weight', :js do
     end
 
     it 'filters issues by searched weight, milestone and text' do
-      search = "weight:2 milestone:%version1 bug"
+      search = "weight:=2 milestone:=%version1 bug"
       input_filtered_search(search)
 
       expect_issues_list_count(1)

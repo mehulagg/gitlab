@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe JobEntity do
+RSpec.describe JobEntity do
   let(:user) { create(:user) }
   let(:job) { create(:ci_build) }
   let(:project) { job.project }
@@ -45,7 +45,7 @@ describe JobEntity do
 
   context 'when job is retryable' do
     before do
-      job.update(status: :failed)
+      job.update!(status: :failed)
     end
 
     it 'contains cancel path' do
@@ -55,7 +55,7 @@ describe JobEntity do
 
   context 'when job is cancelable' do
     before do
-      job.update(status: :running)
+      job.update!(status: :running)
     end
 
     it 'contains cancel path' do
@@ -153,11 +153,11 @@ describe JobEntity do
     end
 
     it 'states that it failed' do
-      expect(subject[:status][:label]).to eq('failed')
+      expect(subject[:status][:label]).to eq(s_('CiStatusLabel|failed'))
     end
 
     it 'indicates the failure reason on tooltip' do
-      expect(subject[:status][:tooltip]).to eq('failed - (API failure)')
+      expect(subject[:status][:tooltip]).to eq("#{s_('CiStatusLabel|failed')} - (API failure)")
     end
 
     it 'includes a callout message with a verbose output' do
@@ -181,7 +181,7 @@ describe JobEntity do
     end
 
     it 'indicates the failure reason on tooltip' do
-      expect(subject[:status][:tooltip]).to eq('failed - (API failure) (allowed to fail)')
+      expect(subject[:status][:tooltip]).to eq("#{s_('CiStatusLabel|failed')} - (API failure) (allowed to fail)")
     end
 
     it 'includes a callout message with a verbose output' do
@@ -216,6 +216,18 @@ describe JobEntity do
     it 'does not include callout message or recoverable keys' do
       expect(subject).not_to include('callout_message')
       expect(subject).not_to include('recoverable')
+    end
+  end
+
+  context 'when job is a bridge' do
+    let(:job) { create(:ci_bridge) }
+
+    it 'does not include build path' do
+      expect(subject).not_to include(:build_path)
+    end
+
+    it 'does not include cancel path' do
+      expect(subject).not_to include(:cancel_path)
     end
   end
 end

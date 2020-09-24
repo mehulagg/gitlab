@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'socket'
 require 'json'
 
-describe IrkerService do
+RSpec.describe IrkerService do
   describe 'Associations' do
     it { is_expected.to belong_to :project }
     it { is_expected.to have_one :service_hook }
@@ -64,8 +64,8 @@ describe IrkerService do
       irker.execute(sample_data)
 
       conn = @irker_server.accept
-      conn.readlines.each do |line|
-        msg = JSON.parse(line.chomp("\n"))
+      conn.each_line do |line|
+        msg = Gitlab::Json.parse(line.chomp("\n"))
         expect(msg.keys).to match_array(%w(to privmsg))
         expect(msg['to']).to match_array(["irc://chat.freenode.net/#commits",
                                           "irc://test.net/#test"])

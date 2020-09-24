@@ -1,14 +1,13 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import { STATUS_FAILED, STATUS_NEUTRAL, STATUS_SUCCESS } from '../constants';
 
 export default {
   name: 'IssueStatusIcon',
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
-    // failed || success
     status: {
       type: String,
       required: true,
@@ -27,7 +26,7 @@ export default {
         return 'status_success_borderless';
       }
 
-      return 'status_created_borderless';
+      return 'dash';
     },
     isStatusFailed() {
       return this.status === STATUS_FAILED;
@@ -50,6 +49,6 @@ export default {
     }"
     class="report-block-list-icon"
   >
-    <icon :name="iconName" :size="statusIconSize" :data-qa-selector="`status_${status}_icon`" />
+    <gl-icon :name="iconName" :size="statusIconSize" :data-qa-selector="`status_${status}_icon`" />
   </div>
 </template>

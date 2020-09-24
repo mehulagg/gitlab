@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 class OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  include AuthenticatesWithTwoFactor
+  include AuthenticatesWithTwoFactorForAdminMode
   include Devise::Controllers::Rememberable
   include AuthHelper
+  include InitializesCurrentUserMode
+  include KnownSignIn
+
+  after_action :verify_known_sign_in
 
   protect_from_forgery except: [:kerberos, :saml, :cas3, :failure], with: :exception, prepend: true
 
@@ -22,6 +26,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
       user = User.by_login(params[:username])
 
       user&.increment_failed_attempts!
+      log_failed_login(params[:username], failed_strategy.name)
     end
 
     super
@@ -30,7 +35,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   # Extend the standard message generation to accept our custom exception
   def failure_message
     exception = request.env["omniauth.error"]
-    error   = exception.error_reason if exception.respond_to?(:error_reason)
+    error = exception.error_reason if exception.respond_to?(:error_reason)
     error ||= exception.error        if exception.respond_to?(:error)
     error ||= exception.message      if exception.respond_to?(:message)
     error ||= request.env["omniauth.error.type"].to_s
@@ -42,12 +47,6 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     omniauth_flow(Gitlab::Auth::Saml)
   rescue Gitlab::Auth::Saml::IdentityLinker::UnverifiedRequest
     redirect_unverified_saml_initiation
-  end
-
-  def omniauth_error
-    @provider = params[:provider]
-    @error = params[:error]
-    render 'errors/omniauth_error', layout: "oauth_error", status: 422
   end
 
   def cas3
@@ -83,7 +82,23 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     end
   end
 
+  def atlassian_oauth2
+    omniauth_flow(Gitlab::Auth::Atlassian)
+  end
+
   private
+
+  def log_failed_login(user, provider)
+    # overridden in EE
+  end
+
+  def after_omniauth_failure_path_for(scope)
+    if Feature.enabled?(:user_mode_in_session)
+      return new_admin_session_path if current_user_mode.admin_mode_requested?
+    end
+
+    super
+  end
 
   def omniauth_flow(auth_module, identity_linker: nil)
     if fragment = request.env.dig('omniauth.params', 'redirect_fragment').presence
@@ -94,8 +109,12 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
       return render_403 unless link_provider_allowed?(oauth['provider'])
 
       log_audit_event(current_user, with: oauth['provider'])
-      identity_linker ||= auth_module::IdentityLinker.new(current_user, oauth, session)
 
+      if Feature.enabled?(:user_mode_in_session)
+        return admin_mode_flow(auth_module::User) if current_user_mode.admin_mode_requested?
+      end
+
+      identity_linker ||= auth_module::IdentityLinker.new(current_user, oauth, session)
       link_identity(identity_linker)
 
       if identity_linker.changed?
@@ -172,7 +191,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
       message << _("Create a GitLab account first, and then connect it to your %{label} account.") % { label: label }
     end
 
-    flash[:notice] = message.join(' ')
+    flash[:alert] = message.join(' ')
     redirect_to new_user_session_path
   end
 
@@ -181,9 +200,12 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def fail_login(user)
-    error_message = user.errors.full_messages.to_sentence
+    log_failed_login(user.username, oauth['provider'])
 
-    return redirect_to omniauth_error_path(oauth['provider'], error: error_message)
+    @provider = Gitlab::Auth::OAuth::Provider.label_for(params[:action])
+    @error = user.errors.full_messages.to_sentence
+
+    render 'errors/omniauth_error', layout: "oauth_error", status: :unprocessable_entity
   end
 
   def fail_auth0_login
@@ -238,6 +260,30 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
       uri.fragment = redirect_fragment
       store_location_for(:user, uri.to_s)
     end
+  end
+
+  def admin_mode_flow(auth_user_class)
+    auth_user = build_auth_user(auth_user_class)
+
+    return fail_admin_mode_invalid_credentials unless omniauth_identity_matches_current_user?
+
+    if current_user.two_factor_enabled? && !auth_user.bypass_two_factor?
+      admin_mode_prompt_for_two_factor(current_user)
+    else
+      # Can only reach here if the omniauth identity matches current user
+      # and current_user is an admin that requested admin mode
+      current_user_mode.enable_admin_mode!(skip_password_validation: true)
+
+      redirect_to stored_location_for(:redirect) || admin_root_path, notice: _('Admin mode enabled')
+    end
+  end
+
+  def omniauth_identity_matches_current_user?
+    current_user.matches_identity?(oauth['provider'], oauth['uid'])
+  end
+
+  def fail_admin_mode_invalid_credentials
+    redirect_to new_admin_session_path, alert: _('Invalid login or password')
   end
 end
 

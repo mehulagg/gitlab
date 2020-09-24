@@ -6,18 +6,30 @@ module EE
       def after_execute(member:)
         super
 
-        log_audit_event(member: member)
+        if system_event? && removed_due_to_expiry?(member)
+          log_audit_event(member: member, author: nil, action: :expired)
+        else
+          log_audit_event(member: member, author: current_user, action: :destroy)
+        end
 
         cleanup_group_identity(member)
       end
 
       private
 
-      def log_audit_event(member:)
+      def removed_due_to_expiry?(member)
+        member.expired?
+      end
+
+      def system_event?
+        current_user.blank?
+      end
+
+      def log_audit_event(member:, author:, action:)
         ::AuditEventService.new(
-          current_user,
+          author,
           member.source,
-          action: :destroy
+          action: action
         ).for_member(member).security_event
       end
 

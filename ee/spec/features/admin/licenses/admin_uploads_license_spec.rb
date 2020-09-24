@@ -2,37 +2,73 @@
 
 require "spec_helper"
 
-describe "Admin uploads license" do
-  set(:admin) { create(:admin) }
+RSpec.describe "Admin uploads license", :js do
+  let_it_be(:admin) { create(:admin) }
 
   before do
-    stub_feature_flags(licenses_app: false)
     sign_in(admin)
   end
 
-  context "when license key is provided in the query string" do
-    set(:license) { build(:license, data: build(:gitlab_license, restrictions: { active_user_count: 2000 }).export) }
-
+  context 'default state' do
     before do
-      License.destroy_all # rubocop: disable DestroyAll
-
-      visit(admin_license_path(trial_key: license.data))
+      visit(new_admin_license_path)
     end
 
-    it "installs license" do
+    it 'has unselected EULA checkbox by default' do
+      expect(page).to have_unchecked_field('accept_eula')
+    end
+
+    it 'has disabled button "Upload license" by default' do
+      expect(page).to have_button('Upload License', disabled: true)
+    end
+
+    it 'redirects to current Subscription terms' do
+      expect(page).to have_link('Terms of Service', href: 'https://about.gitlab.com/terms/#subscription')
+    end
+
+    it 'enables button "Upload license" when EULA checkbox is selected' do
+      expect(page).to have_button('Upload License', disabled: true)
+
+      check('accept_eula')
+
+      expect(page).to have_button('Upload License', disabled: false)
+    end
+  end
+
+  context "when license key is provided in the query string" do
+    before do
+      License.destroy_all # rubocop: disable Cop/DestroyAll
+
+      visit(admin_license_path(trial_key: license.data))
+
       page.within("#modal-upload-trial-license") do
         expect(page).to have_content("Your trial license was issued").and have_button("Install license")
       end
 
       click_button("Install license")
+    end
 
-      expect(page).to have_content("The license was successfully uploaded and is now active")
+    context "when license is active immediately" do
+      let_it_be(:license) { build(:license, data: build(:gitlab_license, restrictions: { active_user_count: 2000 }).export) }
+
+      it "installs license" do
+        expect(page).to have_content("The license was successfully uploaded and is now active")
+      end
+    end
+
+    context "when license starts in the future" do
+      let_it_be(:license) { build(:license, data: build(:gitlab_license, restrictions: { active_user_count: 2000 }, starts_at: Date.current + 1.month).export) }
+
+      it "installs license" do
+        expect(page).to have_content("The license was successfully uploaded and will be active from #{license.starts_at}. You can see the details below.")
+        .and have_content("You have a license that activates at a future date. Please see the License History table below.")
+      end
     end
   end
 
   context "when license key is not provided in the query string, as it is a repeat trial" do
     before do
-      License.destroy_all # rubocop: disable DestroyAll
+      License.destroy_all # rubocop: disable Cop/DestroyAll
 
       visit(admin_license_path(trial_key: ""))
     end
@@ -51,20 +87,50 @@ describe "Admin uploads license" do
     end
 
     context "when license is valid" do
-      set(:license) { build(:gitlab_license) }
-      set(:path) { Rails.root.join("tmp/valid_license.gitlab-license") }
+      let_it_be(:path) { Rails.root.join("tmp/valid_license.gitlab-license") }
 
-      it "uploads license" do
-        attach_and_upload(path)
+      context "when license is active immediately" do
+        let_it_be(:license) { build(:gitlab_license) }
 
-        expect(page).to have_content("The license was successfully uploaded and is now active.")
-                   .and have_content(license.licensee.values.first)
+        it "uploads license" do
+          attach_and_upload(path)
+
+          expect(page).to have_content("The license was successfully uploaded and is now active.")
+                    .and have_content(license.licensee.each_value.first)
+        end
+      end
+
+      context "when license starts in the future" do
+        let_it_be(:license) { build(:gitlab_license, starts_at: Date.current + 1.month) }
+
+        context "when a current license exists" do
+          it "uploads license" do
+            attach_and_upload(path)
+
+            expect(page).to have_content("The license was successfully uploaded and will be active from #{license.starts_at}. You can see the details below.")
+                      .and have_content(license.licensee.each_value.first)
+          end
+        end
+
+        context "when no current license exists" do
+          before do
+            allow(License).to receive(:current).and_return(nil)
+          end
+
+          it "uploads license" do
+            attach_and_upload(path)
+
+            expect(page).to have_content("The license was successfully uploaded and will be active from #{license.starts_at}. You can see the details below.")
+                      .and have_content(license.licensee.each_value.first)
+                      .and have_content("You have a license that activates at a future date. Please see the License History table below.")
+          end
+        end
       end
     end
 
     context "when license is invalid" do
-      set(:license) { build(:gitlab_license, expires_at: Date.yesterday) }
-      set(:path) { Rails.root.join("tmp/invalid_license.gitlab-license") }
+      let_it_be(:license) { build(:gitlab_license, expires_at: Date.yesterday) }
+      let_it_be(:path) { Rails.root.join("tmp/invalid_license.gitlab-license") }
 
       it "doesn't upload license" do
         attach_and_upload(path)
@@ -78,6 +144,7 @@ describe "Admin uploads license" do
 
   def attach_and_upload(path)
     attach_file("license_data_file", path)
-    click_button("Upload license")
+    check("accept_eula")
+    click_button("Upload License")
   end
 end

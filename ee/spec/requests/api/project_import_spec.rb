@@ -2,40 +2,42 @@
 
 require 'spec_helper'
 
-describe API::ProjectImport do
+RSpec.describe API::ProjectImport do
   include ExternalAuthorizationServiceHelpers
+  include WorkhorseHelpers
 
-  let(:export_path) { "#{Dir.tmpdir}/project_export_spec" }
   let(:user) { create(:user) }
-  let(:file) { File.join('spec', 'features', 'projects', 'import_export', 'test_project_export.tar.gz') }
   let(:namespace) { create(:group) }
+
+  let(:file) { File.join('spec', 'features', 'projects', 'import_export', 'test_project_export.tar.gz') }
+  let(:file_name) { 'project_export.tar.gz' }
+
+  let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
+  let(:workhorse_headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
+
+  let(:file_upload) { fixture_file_upload(file) }
+
   before do
-    allow_any_instance_of(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
+    enable_external_authorization_service_check
+    stub_licensed_features(external_authorization_service_api_management: true)
 
     namespace.add_owner(user)
   end
 
-  after do
-    FileUtils.rm_rf(export_path, secure: true)
-  end
-
   describe 'POST /projects/import' do
-    let(:override_params) { { 'external_authorization_classification_label' => 'Hello world' } }
-
-    before do
-      enable_external_authorization_service_check
-      stub_licensed_features(external_authorization_service_api_management: true)
+    let(:params) do
+      {
+        path: 'test-import',
+        namespace: namespace.id,
+        override_params: override_params
+      }
     end
+
+    let(:override_params) { { 'external_authorization_classification_label' => 'Hello world' } }
 
     subject do
       Sidekiq::Testing.inline! do
-        post api('/projects/import', user),
-             params: {
-               path: 'test-import',
-               file: fixture_file_upload(file),
-               namespace: namespace.id,
-               override_params: override_params
-             }
+        upload_archive(file_upload, workhorse_headers, params)
       end
     end
 
@@ -58,5 +60,16 @@ describe API::ProjectImport do
         expect(import_project.external_authorization_classification_label).to eq('default_label')
       end
     end
+  end
+
+  def upload_archive(file, headers = {}, params = {})
+    workhorse_finalize(
+      api("/projects/import", user),
+      method: :post,
+      file_key: :file,
+      params: params.merge(file: file_upload),
+      headers: headers,
+      send_rewritten_field: true
+    )
   end
 end

@@ -15,9 +15,7 @@ module EE
             end
 
             def enabled?
-              strong_memoize(:enabled) do
-                @namespace.max_active_jobs > 0
-              end
+              ci_active_jobs_limit > 0
             end
 
             def exceeded?
@@ -36,7 +34,7 @@ module EE
             private
 
             def excessive_jobs_count
-              @excessive ||= jobs_in_alive_pipelines_count - max_active_jobs_count
+              @excessive ||= jobs_in_alive_pipelines_count - ci_active_jobs_limit
             end
 
             # rubocop: disable CodeReuse/ActiveRecord
@@ -45,8 +43,10 @@ module EE
             end
             # rubocop: enable CodeReuse/ActiveRecord
 
-            def max_active_jobs_count
-              @namespace.max_active_jobs
+            def ci_active_jobs_limit
+              strong_memoize(:ci_active_jobs_limit) do
+                @namespace.actual_limits.ci_active_jobs
+              end
             end
           end
         end

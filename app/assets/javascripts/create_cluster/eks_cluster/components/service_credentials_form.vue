@@ -1,15 +1,15 @@
 <script>
-import { GlFormInput } from '@gitlab/ui';
-import { sprintf, s__, __ } from '~/locale';
-import _ from 'underscore';
+/* eslint-disable vue/no-v-html */
+import { GlFormInput, GlButton } from '@gitlab/ui';
+import { escape } from 'lodash';
 import { mapState, mapActions } from 'vuex';
+import { sprintf, s__, __ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 export default {
   components: {
     GlFormInput,
-    LoadingButton,
+    GlButton,
     ClipboardButton,
   },
   props: {
@@ -28,7 +28,7 @@ export default {
   },
   data() {
     return {
-      roleArn: '',
+      roleArn: this.$store.state.roleArn,
     };
   },
   computed: {
@@ -42,7 +42,7 @@ export default {
         : s__('ClusterIntegration|Authenticate with AWS');
     },
     accountAndExternalIdsHelpText() {
-      const escapedUrl = _.escape(this.accountAndExternalIdsHelpPath);
+      const escapedUrl = escape(this.accountAndExternalIdsHelpPath);
 
       return sprintf(
         s__(
@@ -59,7 +59,7 @@ export default {
       );
     },
     provisionRoleArnHelpText() {
-      const escapedUrl = _.escape(this.createRoleArnHelpPath);
+      const escapedUrl = escape(this.createRoleArnHelpPath);
 
       return sprintf(
         s__(
@@ -82,8 +82,8 @@ export default {
 };
 </script>
 <template>
-  <form name="service-credentials-form" @submit.prevent="createRole({ roleArn, externalId })">
-    <h2>{{ s__('ClusterIntegration|Authenticate with Amazon Web Services') }}</h2>
+  <form name="service-credentials-form">
+    <h4>{{ s__('ClusterIntegration|Authenticate with Amazon Web Services') }}</h4>
     <p>
       {{
         s__(
@@ -130,12 +130,15 @@ export default {
       <gl-form-input id="eks-provision-role-arn" v-model="roleArn" />
       <p class="form-text text-muted" v-html="provisionRoleArnHelpText"></p>
     </div>
-    <loading-button
-      class="js-submit-service-credentials"
+    <gl-button
+      variant="success"
+      category="primary"
       type="submit"
       :disabled="submitButtonDisabled"
       :loading="isCreatingRole"
-      :label="submitButtonLabel"
-    />
+      @click.prevent="createRole({ roleArn, externalId })"
+    >
+      {{ submitButtonLabel }}
+    </gl-button>
   </form>
 </template>

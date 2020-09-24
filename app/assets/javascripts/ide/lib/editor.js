@@ -1,46 +1,51 @@
-import _ from 'underscore';
-import { editor as monacoEditor, KeyCode, KeyMod } from 'monaco-editor';
-import store from '../stores';
+import { debounce } from 'lodash';
+import { editor as monacoEditor, KeyCode, KeyMod, Range } from 'monaco-editor';
 import DecorationsController from './decorations/controller';
 import DirtyDiffController from './diff/controller';
 import Disposable from './common/disposable';
 import ModelManager from './common/model_manager';
-import editorOptions, { defaultEditorOptions } from './editor_options';
-import gitlabTheme from './themes/gl_theme';
+import { editorOptions, defaultEditorOptions, defaultDiffEditorOptions } from './editor_options';
+import { themes } from './themes';
+import languages from './languages';
 import keymap from './keymap.json';
+import { clearDomElement } from '~/editor/utils';
+import { registerLanguages } from '../utils';
 
-function setupMonacoTheme() {
-  monacoEditor.defineTheme(gitlabTheme.themeName, gitlabTheme.monacoTheme);
-  monacoEditor.setTheme('gitlab');
+function setupThemes() {
+  themes.forEach(theme => {
+    monacoEditor.defineTheme(theme.name, theme.data);
+  });
 }
 
-export const clearDomElement = el => {
-  if (!el || !el.firstChild) return;
-
-  while (el.firstChild) {
-    el.removeChild(el.firstChild);
-  }
-};
-
 export default class Editor {
-  static create() {
+  static create(...args) {
     if (!this.editorInstance) {
-      this.editorInstance = new Editor();
+      this.editorInstance = new Editor(...args);
     }
     return this.editorInstance;
   }
 
-  constructor() {
+  constructor(store, options = {}) {
     this.currentModel = null;
     this.instance = null;
     this.dirtyDiffController = null;
     this.disposable = new Disposable();
     this.modelManager = new ModelManager();
     this.decorationsController = new DecorationsController(this);
+    this.options = {
+      ...defaultEditorOptions,
+      ...options,
+    };
+    this.diffOptions = {
+      ...defaultDiffEditorOptions,
+      ...options,
+    };
+    this.store = store;
 
-    setupMonacoTheme();
+    setupThemes();
+    registerLanguages(...languages);
 
-    this.debouncedUpdate = _.debounce(() => {
+    this.debouncedUpdate = debounce(() => {
       this.updateDimensions();
     }, 200);
   }
@@ -51,7 +56,7 @@ export default class Editor {
 
       this.disposable.add(
         (this.instance = monacoEditor.create(domElement, {
-          ...defaultEditorOptions,
+          ...this.options,
         })),
         (this.dirtyDiffController = new DirtyDiffController(
           this.modelManager,
@@ -65,19 +70,14 @@ export default class Editor {
     }
   }
 
-  createDiffInstance(domElement, readOnly = true) {
+  createDiffInstance(domElement) {
     if (!this.instance) {
       clearDomElement(domElement);
 
       this.disposable.add(
         (this.instance = monacoEditor.createDiffEditor(domElement, {
-          ...defaultEditorOptions,
-          quickSuggestions: false,
-          occurrencesHighlight: false,
+          ...this.diffOptions,
           renderSideBySide: Editor.renderSideBySide(domElement),
-          readOnly,
-          renderLineHighlight: readOnly ? 'all' : 'none',
-          hideCursorInOverviewRuler: !readOnly,
         })),
       );
 
@@ -186,6 +186,21 @@ export default class Editor {
     });
   }
 
+  replaceSelectedText(text) {
+    let selection = this.instance.getSelection();
+    const range = new Range(
+      selection.startLineNumber,
+      selection.startColumn,
+      selection.endLineNumber,
+      selection.endColumn,
+    );
+
+    this.instance.executeEdits('', [{ range, text }]);
+
+    selection = this.instance.getSelection();
+    this.instance.setPosition({ lineNumber: selection.endLineNumber, column: selection.endColumn });
+  }
+
   get isDiffEditorType() {
     return this.instance.getEditorType() === 'vs.editor.IDiffEditor';
   }
@@ -195,6 +210,7 @@ export default class Editor {
   }
 
   addCommands() {
+    const { store } = this;
     const getKeyCode = key => {
       const monacoKeyMod = key.indexOf('KEY_') === 0;
 

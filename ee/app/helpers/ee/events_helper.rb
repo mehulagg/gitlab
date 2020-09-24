@@ -6,11 +6,9 @@ module EE
 
     override :event_note_target_url
     def event_note_target_url(event)
-      if event.epic_note?
-        group_epic_url(event.group, event.note_target, anchor: dom_id(event.target))
-      else
-        super
-      end
+      return group_epic_url(event.group, event.note_target, anchor: dom_id(event.target)) if event.epic_note?
+
+      super
     end
   end
 end

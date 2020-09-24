@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Git::ProcessRefChangesService do
+RSpec.describe Git::ProcessRefChangesService do
   let(:project) { create(:project, :repository) }
   let(:user) { project.owner }
   let(:params) { { changes: git_changes } }
@@ -55,36 +55,14 @@ describe Git::ProcessRefChangesService do
         stub_application_setting(push_event_hooks_limit: push_event_hooks_limit)
       end
 
-      context 'git_push_execute_all_project_hooks is disabled' do
-        before do
-          stub_feature_flags(git_push_execute_all_project_hooks: false)
-        end
+      it "calls #{push_service_class} with execute_project_hooks set to false" do
+        expect(push_service_class)
+          .to receive(:new)
+          .with(project, project.owner, hash_including(execute_project_hooks: false))
+          .exactly(changes.count).times
+          .and_return(service)
 
-        it "calls #{push_service_class} with execute_project_hooks set to false" do
-          expect(push_service_class)
-            .to receive(:new)
-            .with(project, project.owner, hash_including(execute_project_hooks: false))
-            .exactly(changes.count).times
-            .and_return(service)
-
-          subject.execute
-        end
-      end
-
-      context 'git_push_execute_all_project_hooks is enabled' do
-        before do
-          stub_feature_flags(git_push_execute_all_project_hooks: true)
-        end
-
-        it "calls #{push_service_class} with execute_project_hooks set to true" do
-          expect(push_service_class)
-            .to receive(:new)
-            .with(project, project.owner, hash_including(execute_project_hooks: true))
-            .exactly(changes.count).times
-            .and_return(service)
-
-          subject.execute
-        end
+        subject.execute
       end
     end
 
@@ -182,6 +160,47 @@ describe Git::ProcessRefChangesService do
     let(:ref_prefix) { 'refs/heads' }
 
     it_behaves_like 'service for processing ref changes', Git::BranchPushService
+
+    context 'when there are merge requests associated with branches' do
+      let(:tag_changes) do
+        [
+          { index: 0, oldrev: Gitlab::Git::BLANK_SHA, newrev: '789012', ref: "refs/tags/v10.0.0" }
+        ]
+      end
+
+      let(:branch_changes) do
+        [
+          { index: 0, oldrev: Gitlab::Git::BLANK_SHA, newrev: '789012', ref: "#{ref_prefix}/create1" },
+          { index: 1, oldrev: Gitlab::Git::BLANK_SHA, newrev: '789013', ref: "#{ref_prefix}/create2" },
+          { index: 2, oldrev: Gitlab::Git::BLANK_SHA, newrev: '789014', ref: "#{ref_prefix}/create3" },
+          { index: 3, oldrev: '789015', newrev: '789016', ref: "#{ref_prefix}/changed1" },
+          { index: 4, oldrev: '789017', newrev: '789018', ref: "#{ref_prefix}/changed2" },
+          { index: 5, oldrev: '789019', newrev: Gitlab::Git::BLANK_SHA, ref: "#{ref_prefix}/removed1" },
+          { index: 6, oldrev: '789020', newrev: Gitlab::Git::BLANK_SHA, ref: "#{ref_prefix}/removed2" }
+        ]
+      end
+
+      let(:git_changes) { double(branch_changes: branch_changes, tag_changes: tag_changes) }
+
+      before do
+        allow(MergeRequests::PushedBranchesService).to receive(:new).and_return(
+          double(execute: %w(create1 create2)), double(execute: %w(changed1)), double(execute: %w(removed2))
+        )
+      end
+
+      it 'schedules job for existing merge requests' do
+        expect(UpdateMergeRequestsWorker).to receive(:perform_async)
+          .with(project.id, user.id, Gitlab::Git::BLANK_SHA, '789012', "#{ref_prefix}/create1").ordered
+        expect(UpdateMergeRequestsWorker).to receive(:perform_async)
+          .with(project.id, user.id, Gitlab::Git::BLANK_SHA, '789013', "#{ref_prefix}/create2").ordered
+        expect(UpdateMergeRequestsWorker).to receive(:perform_async)
+          .with(project.id, user.id, '789015', '789016', "#{ref_prefix}/changed1").ordered
+        expect(UpdateMergeRequestsWorker).to receive(:perform_async)
+          .with(project.id, user.id, '789020', Gitlab::Git::BLANK_SHA, "#{ref_prefix}/removed2").ordered
+
+        subject.execute
+      end
+    end
   end
 
   context 'tag changes' do

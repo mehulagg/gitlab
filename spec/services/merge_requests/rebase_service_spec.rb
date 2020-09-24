@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::RebaseService do
+RSpec.describe MergeRequests::RebaseService do
   include ProjectForksHelper
 
   let(:user) { create(:user) }
@@ -13,8 +13,10 @@ describe MergeRequests::RebaseService do
            target_branch: 'master',
            rebase_jid: rebase_jid
   end
+
   let(:project) { merge_request.project }
   let(:repository) { project.repository.raw }
+  let(:skip_ci) { false }
 
   subject(:service) { described_class.new(project, user, {}) }
 
@@ -70,21 +72,16 @@ describe MergeRequests::RebaseService do
 
     it_behaves_like 'sequence of failure and success'
 
-    context 'with deprecated step rebase feature' do
-      before do
-        stub_feature_flags(two_step_rebase: false)
-      end
-
-      it_behaves_like 'sequence of failure and success'
-    end
-
     context 'when unexpected error occurs' do
+      let(:exception) { RuntimeError.new('Something went wrong') }
+      let(:merge_request_ref) { merge_request.to_reference(full: true) }
+
       before do
-        allow(repository).to receive(:gitaly_operation_client).and_raise('Something went wrong')
+        allow(repository).to receive(:gitaly_operation_client).and_raise(exception)
       end
 
       it 'saves a generic error message' do
-        subject.execute(merge_request)
+        service.execute(merge_request)
 
         expect(merge_request.reload.merge_error).to eq(described_class::REBASE_ERROR)
       end
@@ -92,6 +89,18 @@ describe MergeRequests::RebaseService do
       it 'returns an error' do
         expect(service.execute(merge_request)).to match(status: :error,
                                                         message: described_class::REBASE_ERROR)
+      end
+
+      it 'logs the error' do
+        expect(service).to receive(:log_error).with(exception: exception, message: described_class::REBASE_ERROR, save_message_on_model: true).and_call_original
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(exception,
+          class: described_class.to_s,
+          merge_request: merge_request_ref,
+          merge_request_id: merge_request.id,
+          message: described_class::REBASE_ERROR,
+          save_message_on_model: true).and_call_original
+
+        service.execute(merge_request)
       end
     end
 
@@ -115,7 +124,7 @@ describe MergeRequests::RebaseService do
     context 'valid params' do
       shared_examples_for 'a service that can execute a successful rebase' do
         before do
-          service.execute(merge_request)
+          service.execute(merge_request, skip_ci: skip_ci)
         end
 
         it 'rebases source branch' do
@@ -139,18 +148,10 @@ describe MergeRequests::RebaseService do
         end
       end
 
-      context 'when the two_step_rebase feature is enabled' do
-        before do
-          stub_feature_flags(two_step_rebase: true)
-        end
+      it_behaves_like 'a service that can execute a successful rebase'
 
-        it_behaves_like 'a service that can execute a successful rebase'
-      end
-
-      context 'when the two_step_rebase feature is disabled' do
-        before do
-          stub_feature_flags(two_step_rebase: false)
-        end
+      context 'when skip_ci flag is set' do
+        let(:skip_ci) { true }
 
         it_behaves_like 'a service that can execute a successful rebase'
       end

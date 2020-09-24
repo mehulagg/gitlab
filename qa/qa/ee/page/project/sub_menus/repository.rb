@@ -6,8 +6,10 @@ module QA
       module Project
         module SubMenus
           module Repository
-            def self.included(page)
-              page.class_eval do
+            extend QA::Page::PageConcern
+
+            def self.prepended(base)
+              base.class_eval do
                 view 'ee/app/views/projects/sidebar/_repository_locked_files.html.haml' do
                   element :path_locks_link
                 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Constraints::UserUrlConstrainer do
+RSpec.describe Constraints::UserUrlConstrainer do
   let!(:user) { create(:user, username: 'dz') }
 
   describe '#matches?' do
@@ -24,11 +24,13 @@ describe Constraints::UserUrlConstrainer do
 
       context 'and is a GET request' do
         let(:request) { build_request(redirect_route.path) }
+
         it { expect(subject.matches?(request)).to be_truthy }
       end
 
       context 'and is NOT a GET request' do
         let(:request) { build_request(redirect_route.path, 'POST') }
+
         it { expect(subject.matches?(request)).to be_falsey }
       end
     end

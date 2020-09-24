@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuablesHelper do
+RSpec.describe IssuablesHelper do
   let(:label)  { build_stubbed(:label) }
   let(:label2) { build_stubbed(:label) }
 
@@ -40,7 +40,7 @@ describe IssuablesHelper do
     end
 
     it 'returns default label when a group was not found for the provided id' do
-      expect(group_dropdown_label(9999, default)).to eq('default label')
+      expect(group_dropdown_label(non_existing_record_id, default)).to eq('default label')
     end
   end
 
@@ -49,7 +49,7 @@ describe IssuablesHelper do
     let(:label2_entity) { LabelEntity.represent(label2).as_json }
 
     it 'returns label text with no labels' do
-      expect(issuable_labels_tooltip([])).to eq("Labels")
+      expect(issuable_labels_tooltip([])).to eq(_('Labels'))
     end
 
     it 'returns label text with labels within max limit' do
@@ -160,7 +160,7 @@ describe IssuablesHelper do
       end
 
       before do
-        user.destroy
+        user.destroy!
       end
 
       it 'returns "Ghost user" as edited_by' do
@@ -183,8 +183,8 @@ describe IssuablesHelper do
       @project = issue.project
 
       expected_data = {
-        endpoint: "/#{@project.full_path}/issues/#{issue.iid}",
-        updateEndpoint: "/#{@project.full_path}/issues/#{issue.iid}.json",
+        endpoint: "/#{@project.full_path}/-/issues/#{issue.iid}",
+        updateEndpoint: "/#{@project.full_path}/-/issues/#{issue.iid}.json",
         canUpdate: true,
         canDestroy: true,
         issuableRef: "##{issue.iid}",
@@ -197,9 +197,31 @@ describe IssuablesHelper do
         initialTitleText: issue.title,
         initialDescriptionHtml: '<p dir="auto">issue text</p>',
         initialDescriptionText: 'issue text',
-        initialTaskStatus: '0 of 0 tasks completed'
+        initialTaskStatus: '0 of 0 tasks completed',
+        issueType: 'issue',
+        iid: issue.iid.to_s
       }
       expect(helper.issuable_initial_data(issue)).to match(hash_including(expected_data))
+    end
+
+    describe '#sentryIssueIdentifier' do
+      let(:issue) { create(:issue, author: user) }
+
+      before do
+        assign(:project, issue.project)
+      end
+
+      it 'sets sentryIssueIdentifier to nil with no sentry issue ' do
+        expect(helper.issuable_initial_data(issue)[:sentryIssueIdentifier])
+          .to be_nil
+      end
+
+      it 'sets sentryIssueIdentifier to sentry_issue_identifier' do
+        sentry_issue = create(:sentry_issue, issue: issue)
+
+        expect(helper.issuable_initial_data(issue)[:sentryIssueIdentifier])
+          .to eq(sentry_issue.sentry_issue_identifier)
+      end
     end
 
     describe '#zoomMeetingUrl in issue' do
@@ -258,6 +280,7 @@ describe IssuablesHelper do
   describe '#assignee_sidebar_data' do
     let(:user) { create(:user) }
     let(:merge_request) { nil }
+
     subject { helper.assignee_sidebar_data(user, merge_request: merge_request) }
 
     it 'returns hash of assignee data' do
@@ -280,6 +303,38 @@ describe IssuablesHelper do
 
         it { is_expected.to include({ can_merge: can_merge })}
       end
+    end
+  end
+
+  describe '#issuable_squash_option?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_persisted, :squash, :squash_enabled_by_default, :expectation) do
+      true  | true  | true  | true
+      true  | false | true  | false
+      false | false | false | false
+      false | false | true  | true
+      false | true  | false | false
+      false | true  | true  | true
+    end
+
+    with_them do
+      it 'returns the correct value' do
+        project = double(
+          squash_enabled_by_default?: squash_enabled_by_default
+        )
+        issuable = double(persisted?: issuable_persisted, squash: squash)
+
+        expect(helper.issuable_squash_option?(issuable, project)).to eq(expectation)
+      end
+    end
+  end
+
+  describe '#sidebar_milestone_tooltip_label' do
+    it 'escapes HTML in the milestone title' do
+      milestone = build(:milestone, title: '&lt;img onerror=alert(1)&gt;')
+
+      expect(helper.sidebar_milestone_tooltip_label(milestone)).to eq('&lt;img onerror=alert(1)&gt;<br/>Milestone')
     end
   end
 end

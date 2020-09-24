@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::LfsPointerFile do
+RSpec.describe Gitlab::Git::LfsPointerFile do
   let(:data) { "1234\n" }
 
   subject { described_class.new(data) }

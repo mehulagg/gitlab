@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryVerification::Primary::ShardWorker, :clean_gitlab_redis_cache do
+RSpec.describe Geo::RepositoryVerification::Primary::ShardWorker, :clean_gitlab_redis_cache do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
   let!(:primary)   { create(:geo_node, :primary) }
-  let(:shard_name) { Gitlab.config.repositories.storages.keys.first }
+  let(:shard_name) { Gitlab.config.repositories.storages.each_key.first }
   let(:primary_singleworker) { Geo::RepositoryVerification::Primary::SingleWorker }
 
   before do

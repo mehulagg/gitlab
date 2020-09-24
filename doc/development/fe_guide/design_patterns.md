@@ -31,11 +31,11 @@ export default new MyThing();
 
 export default class MyThing {
   constructor() {
-    if (!this.prototype.singleton) {
+    if (!MyThing.prototype.singleton) {
       this.init();
-      this.prototype.singleton = this;
+      MyThing.prototype.singleton = this;
     }
-    return this.prototype.singleton;
+    return MyThing.prototype.singleton;
   }
 
   init() {
@@ -75,6 +75,4 @@ class Foo {
 new Foo({ container: '.my-element' });
 ```
 
-You can find an example of the above in this [class][container-class-example];
-
-[container-class-example]: https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/mini_pipeline_graph_dropdown.js
+You can find an example of the above in this [class](https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/mini_pipeline_graph_dropdown.js);

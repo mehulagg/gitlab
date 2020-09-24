@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'app/views/shared/labels/_create_label_help_text.html.haml' do
+RSpec.describe 'app/views/shared/labels/_create_label_help_text.html.haml' do
   include ApplicationHelper
 
   shared_examples 'scoped labels' do

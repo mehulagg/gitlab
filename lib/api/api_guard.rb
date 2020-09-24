@@ -7,6 +7,7 @@ require 'rack/oauth2'
 module API
   module APIGuard
     extend ActiveSupport::Concern
+    include Gitlab::Utils::StrongMemoize
 
     included do |base|
       # OAuth2 Resource Server Authentication
@@ -43,27 +44,33 @@ module API
 
     # Helper Methods for Grape Endpoint
     module HelperMethods
-      prepend_if_ee('EE::API::APIGuard::HelperMethods') # rubocop: disable Cop/InjectEnterpriseEditionModule
-      include Gitlab::Auth::UserAuthFinders
+      include Gitlab::Auth::AuthFinders
+
+      def access_token
+        super || find_personal_access_token_from_http_basic_auth
+      end
 
       def find_current_user!
         user = find_user_from_sources
         return unless user
 
+        # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
+        Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Feature.enabled?(:user_mode_in_session)
+
         unless api_access_allowed?(user)
           forbidden!(api_access_denied_message(user))
-        end
-
-        # Set admin mode for API requests (if admin)
-        if Feature.enabled?(:user_mode_in_session)
-          Gitlab::Auth::CurrentUserMode.new(user).enable_admin_mode!(skip_password_validation: true)
         end
 
         user
       end
 
       def find_user_from_sources
-        find_user_from_access_token || find_user_from_warden
+        strong_memoize(:find_user_from_sources) do
+          deploy_token_from_request ||
+            find_user_from_bearer_token ||
+            find_user_from_job_token ||
+            user_from_warden
+        end
       end
 
       private
@@ -86,11 +93,34 @@ module API
       end
 
       def api_access_allowed?(user)
-        Gitlab::UserAccess.new(user).allowed? && user.can?(:access_api)
+        user_allowed_or_deploy_token?(user) && user.can?(:access_api)
       end
 
       def api_access_denied_message(user)
         Gitlab::Auth::UserAccessDeniedReason.new(user).rejection_message
+      end
+
+      def user_allowed_or_deploy_token?(user)
+        Gitlab::UserAccess.new(user).allowed? || user.is_a?(DeployToken)
+      end
+
+      def user_from_warden
+        user = find_user_from_warden
+
+        return unless user
+        return if two_factor_required_but_not_setup?(user)
+
+        user
+      end
+
+      def two_factor_required_but_not_setup?(user)
+        verifier = Gitlab::Auth::TwoFactorAuthVerifier.new(user)
+
+        if verifier.two_factor_authentication_required? && verifier.current_user_needs_to_setup_two_factor?
+          verifier.two_factor_grace_period_expired?
+        else
+          false
+        end
       end
     end
 
@@ -144,25 +174,26 @@ module API
                 { scope: e.scopes })
             end
 
-          response.finish
+          status, headers, body = response.finish
+
+          # Grape expects a Rack::Response
+          # (https://github.com/ruby-grape/grape/commit/c117bff7d22971675f4b34367d3a98bc31c8fc02),
+          # so we need to recreate the response again even though
+          # response.finish already does this.
+          # (https://github.com/nov/rack-oauth2/blob/40c9a99fd80486ccb8de0e4869ae384547c0d703/lib/rack/oauth2/server/abstract/error.rb#L26).
+          Rack::Response.new(body, status, headers)
         end
       end
     end
 
     class AdminModeMiddleware < ::Grape::Middleware::Base
-      def initialize(app, **options)
-        super
-      end
+      def after
+        # Use a Grape middleware since the Grape `after` blocks might run
+        # before we are finished rendering the `Grape::Entity` classes
+        Gitlab::Auth::CurrentUserMode.reset_bypass_session! if Feature.enabled?(:user_mode_in_session)
 
-      def call(env)
-        if Feature.enabled?(:user_mode_in_session)
-          session = {}
-          Gitlab::Session.with_session(session) do
-            app.call(env)
-          end
-        else
-          app.call(env)
-        end
+        # Explicit nil is needed or the api call return value will be overwritten
+        nil
       end
     end
   end

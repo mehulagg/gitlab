@@ -3,8 +3,8 @@
     = search_filter_link 'users', _("Users")
 
 .scrolling-tabs-container.inner-page-scroll-tabs.is-smaller
-  .fade-left= icon('angle-left')
-  .fade-right= icon('angle-right')
+  .fade-left= sprite_icon('chevron-lg-left', size: 12)
+  .fade-right= sprite_icon('chevron-lg-right', size: 12)
   %ul.nav-links.search-filter.scrolling-tabs.nav.nav-tabs
     - if @project
       - if project_search_tabs?(:blobs)
@@ -24,10 +24,9 @@
       = users
 
     - elsif @show_snippets
-      = search_filter_link 'snippet_blobs', _("Snippet Contents"), search: { snippets: true, group_id: nil, project_id: nil }
-      = search_filter_link 'snippet_titles', _("Titles and Filenames"), search: { snippets: true, group_id: nil, project_id: nil }
+      = search_filter_link 'snippet_titles', _("Titles and Descriptions"), search: { snippets: true, group_id: nil, project_id: nil }
     - else
-      = search_filter_link 'projects', _("Projects")
+      = search_filter_link 'projects', _("Projects"), data: { qa_selector: 'projects_tab' }
       = search_filter_link 'issues', _("Issues")
       = search_filter_link 'merge_requests', _("Merge requests")
       = search_filter_link 'milestones', _("Milestones")

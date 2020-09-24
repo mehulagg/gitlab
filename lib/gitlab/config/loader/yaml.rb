@@ -5,6 +5,7 @@ module Gitlab
     module Loader
       class Yaml
         DataTooLargeError = Class.new(Loader::FormatError)
+        NotHashError = Class.new(Loader::FormatError)
 
         include Gitlab::Utils::StrongMemoize
 
@@ -21,11 +22,15 @@ module Gitlab
           hash? && !too_big?
         end
 
-        def load!
+        def load_raw!
           raise DataTooLargeError, 'The parsed YAML is too big' if too_big?
-          raise Loader::FormatError, 'Invalid configuration format' unless hash?
+          raise NotHashError, 'Invalid configuration format' unless hash?
 
-          @config.deep_symbolize_keys
+          @config
+        end
+
+        def load!
+          @symbolized_config ||= load_raw!.deep_symbolize_keys
         end
 
         private

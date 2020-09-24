@@ -2,18 +2,35 @@
 
 class ContainerRepository < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
+  include Gitlab::SQL::Pattern
 
   belongs_to :project
 
   validates :name, length: { minimum: 0, allow_nil: false }
   validates :name, uniqueness: { scope: :project_id }
 
+  enum status: { delete_scheduled: 0, delete_failed: 1 }
+
   delegate :client, to: :registry
 
   scope :ordered, -> { order(:name) }
   scope :with_api_entity_associations, -> { preload(project: [:route, { namespace: :route }]) }
   scope :for_group_and_its_subgroups, ->(group) do
-    where(project_id: Project.for_group_and_its_subgroups(group).with_container_registry.select(:id))
+    project_scope = Project
+      .for_group_and_its_subgroups(group)
+      .with_container_registry
+      .select(:id)
+
+    ContainerRepository
+      .joins("INNER JOIN (#{project_scope.to_sql}) projects on projects.id=container_repositories.project_id")
+  end
+  scope :search_by_name, ->(query) { fuzzy_search(query, [:name], use_minimum_char_limit: false) }
+
+  def self.exists_by_path?(path)
+    where(
+      project: path.repository_project,
+      name: path.repository_name
+    ).exists?
   end
 
   # rubocop: disable CodeReuse/ServiceClass
@@ -56,6 +73,12 @@ class ContainerRepository < ApplicationRecord
     end
   end
 
+  def tags_count
+    return 0 unless manifest && manifest['tags']
+
+    manifest['tags'].size
+  end
+
   def blob(config)
     ContainerRegistry::Blob.new(self, config)
   end
@@ -77,7 +100,19 @@ class ContainerRepository < ApplicationRecord
   end
 
   def delete_tag_by_digest(digest)
-    client.delete_repository_tag(self.path, digest)
+    client.delete_repository_tag_by_digest(self.path, digest)
+  end
+
+  def delete_tag_by_name(name)
+    client.delete_repository_tag_by_name(self.path, name)
+  end
+
+  def reset_expiration_policy_started_at!
+    update!(expiration_policy_started_at: nil)
+  end
+
+  def start_expiration_policy!
+    update!(expiration_policy_started_at: Time.zone.now)
   end
 
   def self.build_from_path(path)

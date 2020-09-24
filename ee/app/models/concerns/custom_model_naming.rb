@@ -12,7 +12,7 @@ module CustomModelNaming
   class_methods do
     def model_name
       @_model_name ||= begin
-        namespace = self.parents.detect do |n|
+        namespace = self.module_parents.detect do |n|
           n.respond_to?(:use_relative_model_naming?) && n.use_relative_model_naming?
         end
         Name.new(self, namespace)

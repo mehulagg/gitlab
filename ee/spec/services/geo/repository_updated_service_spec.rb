@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryUpdatedService do
+RSpec.describe Geo::RepositoryUpdatedService do
   include ::EE::GeoHelpers
 
-  set(:project) { create(:project) }
-  set(:primary) { create(:geo_node, :primary) }
-  set(:secondary) { create(:geo_node) }
-  set(:repository_state) { create(:repository_state, :repository_verified, :wiki_verified, project: project) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:primary) { create(:geo_node, :primary) }
+  let_it_be(:secondary) { create(:geo_node) }
+  let_it_be(:repository_state) { create(:repository_state, :repository_verified, :wiki_verified, project: project) }
 
   before do
     stub_current_geo_node(primary)
@@ -37,8 +37,16 @@ describe Geo::RepositoryUpdatedService do
       end
 
       context 'when running on a primary node' do
-        it 'creates a repository updated event' do
+        it 'creates a repository updated event when repository exists' do
+          allow(repository).to receive(:exists?).and_return(true)
+
           expect { subject.execute }.to change(Geo::RepositoryUpdatedEvent, :count).by(1)
+        end
+
+        it 'does not create a repository updated event when repository does not exist' do
+          allow(repository).to receive(:exists?).and_return(false)
+
+          expect { subject.execute }.not_to change(Geo::RepositoryUpdatedEvent, :count)
         end
 
         it 'resets the repository verification checksum' do
@@ -91,12 +99,14 @@ describe Geo::RepositoryUpdatedService do
     context 'when design repository is being updated' do
       let(:repository) { project.design_repository }
 
-      it 'creates a design repository updated event' do
+      it 'creates a design repository updated event when repository exists' do
+        allow(repository).to receive(:exists?).and_return(true)
+
         expect { subject.execute }.to change(Geo::RepositoryUpdatedEvent, :count).by(1)
       end
 
-      it 'does not create a design repository updated event when feature is disabled' do
-        stub_feature_flags(enable_geo_design_sync: false)
+      it 'does not create a repository updated event when repository does not exist' do
+        allow(repository).to receive(:exists?).and_return(false)
 
         expect { subject.execute }.not_to change(Geo::RepositoryUpdatedEvent, :count)
       end

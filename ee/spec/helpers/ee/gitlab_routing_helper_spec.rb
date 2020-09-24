@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe EE::GitlabRoutingHelper do
+RSpec.describe EE::GitlabRoutingHelper do
   include ProjectsHelper
   include ApplicationSettingsHelper
 
-  set(:primary) { create(:geo_node, :primary, url: 'http://localhost:123/relative', clone_url_prefix: 'git@localhost:') }
-  set(:group) { create(:group, path: 'foo') }
-  set(:project) { create(:project, namespace: group, path: 'bar') }
+  let_it_be(:primary, reload: true) { create(:geo_node, :primary, url: 'http://localhost:123/relative', clone_url_prefix: 'git@localhost:') }
+  let_it_be(:group, reload: true) { create(:group, path: 'foo') }
+  let_it_be(:project, reload: true) { create(:project, namespace: group, path: 'bar') }
 
   describe '#geo_primary_web_url' do
     before do
@@ -87,6 +87,14 @@ describe EE::GitlabRoutingHelper do
     end
   end
 
+  describe '#license_management_settings_path' do
+    it 'generates a path to the license compliance page' do
+      result = helper.license_management_settings_path(project)
+
+      expect(result).to eq('/foo/bar/-/licenses#policies')
+    end
+  end
+
   describe '#user_group_saml_omniauth_metadata_path' do
     subject do
       helper.user_group_saml_omniauth_metadata_path(group)
@@ -112,6 +120,26 @@ describe EE::GitlabRoutingHelper do
 
     it 'creates full metadata URL' do
       expect(subject).to start_with 'http://localhost/users/auth/group_saml/metadata?group_path=foo&token='
+    end
+  end
+
+  describe '#upgrade_plan_path' do
+    subject { upgrade_plan_path(group) }
+
+    context 'when the group is present' do
+      let(:group) { build_stubbed(:group) }
+
+      it "returns the group billing path" do
+        expect(subject).to eq(group_billings_path(group))
+      end
+    end
+
+    context 'when the group is blank' do
+      let(:group) { nil }
+
+      it "returns the profile billing path" do
+        expect(subject).to eq(profile_billings_path)
+      end
     end
   end
 end

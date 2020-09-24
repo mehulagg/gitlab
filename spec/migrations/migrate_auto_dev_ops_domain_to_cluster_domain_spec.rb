@@ -3,7 +3,7 @@
 require 'spec_helper'
 require Rails.root.join('db', 'post_migrate', '20190204115450_migrate_auto_dev_ops_domain_to_cluster_domain.rb')
 
-describe MigrateAutoDevOpsDomainToClusterDomain, :migration do
+RSpec.describe MigrateAutoDevOpsDomainToClusterDomain do
   include MigrationHelpers::ClusterHelpers
 
   let(:migration) { described_class.new }
@@ -89,11 +89,11 @@ describe MigrateAutoDevOpsDomainToClusterDomain, :migration do
   end
 
   def find_cluster_project(project_id)
-    cluster_projects_table.where(project_id: project_id).first
+    cluster_projects_table.find_by(project_id: project_id)
   end
 
   def find_cluster(cluster_id)
-    clusters_table.where(id: cluster_id).first
+    clusters_table.find_by(id: cluster_id)
   end
 
   def project_auto_devops_with_domain

@@ -6,34 +6,17 @@ module EE
     SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users].freeze
 
     override :search_filter_input_options
-    def search_filter_input_options(type)
+    def search_filter_input_options(type, placeholder = _('Search or filter results...'))
       options = super
       options[:data][:'multiple-assignees'] = 'true' if search_multiple_assignees?(type)
 
+      if @project&.group
+        options[:data]['epics-endpoint'] = group_epics_path(@project.group)
+      elsif @group.present?
+        options[:data]['epics-endpoint'] = group_epics_path(@group)
+      end
+
       options
-    end
-
-    override :find_project_for_result_blob
-    def find_project_for_result_blob(projects, result)
-      return super if result.is_a?(::Gitlab::Search::FoundBlob)
-
-      super || projects&.find { |project| project.id == blob_project_id(result) }
-    end
-
-    override :blob_projects
-    def blob_projects(results)
-      return super if results.first.is_a?(::Gitlab::Search::FoundBlob)
-
-      project_ids = results.map(&method(:blob_project_id))
-
-      ::ProjectsFinder.new(current_user: current_user, project_ids_relation: project_ids).execute
-    end
-
-    override :parse_search_result
-    def parse_search_result(result)
-      return super if result.is_a?(::Gitlab::Search::FoundBlob)
-
-      ::Gitlab::Elastic::SearchResults.parse_search_result(result)
     end
 
     override :search_blob_title
@@ -43,6 +26,13 @@ module EE
       else
         (project.full_name + ': ' + content_tag(:i, path)).html_safe
       end
+    end
+
+    override :project_autocomplete
+    def project_autocomplete
+      return super unless @project && @project.feature_available?(:repository)
+
+      super + [{ category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }]
     end
 
     # This is a special case for snippet searches in .com.
@@ -56,27 +46,18 @@ module EE
       return super unless gitlab_com_snippet_db_search?
 
       if collection.total_pages > 1
-        s_("SearchResults|Showing %{from} - %{to} of %{count} %{scope} for \"%{term}\" in your personal and project snippets")
+        s_("SearchResults|Showing %{from} - %{to} of %{count} %{scope} for%{term_element} in your personal and project snippets").html_safe
       else
-        s_("SearchResults|Showing %{count} %{scope} for \"%{term}\" in your personal and project snippets")
+        s_("SearchResults|Showing %{count} %{scope} for%{term_element} in your personal and project snippets").html_safe
       end
     end
 
-    def revert_to_basic_search_filter_url
-      search_params = params
-        .permit(::SearchHelper::SEARCH_PERMITTED_PARAMS)
-        .merge(basic_search: true)
+    override :highlight_and_truncate_issue
+    def highlight_and_truncate_issue(issue, search_term, search_highlight)
+      return super unless search_service.use_elasticsearch? && search_highlight[issue.id]&.description.present?
 
-      search_path(search_params)
-    end
-
-    def show_switch_to_basic_search?(search_service)
-      return false unless ::Feature.enabled?(:switch_to_basic_search, default_enabled: false)
-      return false unless search_service.use_elasticsearch?
-
-      return true if @project
-
-      search_service.scope.in?(SWITCH_TO_BASIC_SEARCHABLE_TABS)
+      # We use Elasticsearch highlighting for results from Elasticsearch
+      Truncato.truncate(search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
     end
 
     private
@@ -88,15 +69,10 @@ module EE
         context.feature_available?(:multiple_issue_assignees))
     end
 
-    def blob_project_id(blob_result)
-      blob_result.dig('_source', 'join_field', 'parent')&.split('_')&.last.to_i
-    end
-
     def gitlab_com_snippet_db_search?
       @current_user &&
         @show_snippets &&
         ::Gitlab.com? &&
-        ::Feature.enabled?(:restricted_snippet_scope_search, default_enabled: true) &&
         ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: nil)
     end
   end

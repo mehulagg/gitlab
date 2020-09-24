@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Deployments do
+RSpec.describe API::Deployments do
   let(:user) { create(:user) }
   let!(:project) { create(:project, :repository) }
   let!(:environment) { create(:environment, project: project) }
@@ -36,7 +36,7 @@ describe API::Deployments do
           }
         )
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       it 'creates the deployment when the user is a maintainer' do
@@ -53,7 +53,7 @@ describe API::Deployments do
           }
         )
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
       end
     end
 
@@ -81,7 +81,7 @@ describe API::Deployments do
           }
         )
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       it 'creates the deployment when the user is a developer' do
@@ -98,13 +98,12 @@ describe API::Deployments do
           }
         )
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
       end
     end
   end
 
   describe 'PUT /projects/:id/deployments/:deployment_id' do
-    let(:project) { create(:project) }
     let(:deploy) do
       create(
         :deployment,
@@ -133,7 +132,7 @@ describe API::Deployments do
           params: { status: 'success' }
         )
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       it 'updates the deployment when the user is a maintainer' do
@@ -144,7 +143,7 @@ describe API::Deployments do
           params: { status: 'success' }
         )
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -166,7 +165,7 @@ describe API::Deployments do
           params: { status: 'success' }
         )
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       it 'updates the deployment when the user is a developer' do
@@ -177,7 +176,7 @@ describe API::Deployments do
           params: { status: 'success' }
         )
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end

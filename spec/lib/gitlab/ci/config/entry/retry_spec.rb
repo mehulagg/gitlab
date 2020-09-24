@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::Entry::Retry do
+RSpec.describe Gitlab::Ci::Config::Entry::Retry do
   let(:entry) { described_class.new(config) }
 
   shared_context 'when retry value is a numeric', :numeric do
@@ -94,18 +94,24 @@ describe Gitlab::Ci::Config::Entry::Retry do
         # sure this is catched, check explicitly that all of the documented
         # values are valid. If they are not it means the documentation and this
         # array must be updated.
-        RETRY_WHEN_IN_DOCUMENTATION = %w[
-            always
-            unknown_failure
-            script_failure
-            api_failure
-            stuck_or_timeout_failure
-            runner_system_failure
-            missing_dependency_failure
-            runner_unsupported
+        retry_when_in_documentation = %w[
+          always
+          unknown_failure
+          script_failure
+          api_failure
+          stuck_or_timeout_failure
+          runner_system_failure
+          missing_dependency_failure
+          runner_unsupported
+          stale_schedule
+          job_execution_timeout
+          archived_failure
+          unmet_prerequisites
+          scheduler_failure
+          data_integrity_failure
         ].freeze
 
-        RETRY_WHEN_IN_DOCUMENTATION.each do |reason|
+        retry_when_in_documentation.each do |reason|
           context "with when from documentation `#{reason}`" do
             let(:when) { reason }
 

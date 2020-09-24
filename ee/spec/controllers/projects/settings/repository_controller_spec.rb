@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::Settings::RepositoryController do
+RSpec.describe Projects::Settings::RepositoryController do
   let(:project) { create(:project_empty_repo, :public) }
   let(:user) { create(:user) }
 
@@ -19,6 +19,12 @@ describe Projects::Settings::RepositoryController do
         get :show, params: { namespace_id: project.namespace, project_id: project }
 
         is_expected.to be_persisted
+      end
+
+      it 'is connected to project_settings' do
+        get :show, params: { namespace_id: project.namespace, project_id: project }
+
+        expect(project.project_setting.push_rule).to eq(subject)
       end
 
       context 'unlicensed' do

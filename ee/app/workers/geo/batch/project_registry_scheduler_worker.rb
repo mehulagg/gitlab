@@ -6,7 +6,7 @@ module Geo
     #
     # This class includes an Exclusive Lease guard and only one can be executed at the same time
     # If multiple jobs are scheduled, only one will run and the others will drop forever.
-    class ProjectRegistrySchedulerWorker
+    class ProjectRegistrySchedulerWorker # rubocop:disable Scalability/IdempotentWorker
       include ApplicationWorker
       include GeoQueue
       include ExclusiveLeaseGuard
@@ -18,14 +18,9 @@ module Geo
       OPERATIONS = [:resync_repositories, :reverify_repositories].freeze
       DELAY_INTERVAL = 10.seconds.to_i # base delay for scheduling batch execution
 
-      def perform(operation)
-        # TODO: This is a temporary workaround for backward compatibility
-        # to avoid jobs that have been already scheduled to fail.
-        # See https://gitlab.com/gitlab-org/gitlab/issues/13318
-        if operation.to_sym == :recheck_repositories
-          operation = :reverify_repositories
-        end
+      loggable_arguments 0
 
+      def perform(operation)
         return fail_invalid_operation!(operation) unless OPERATIONS.include?(operation.to_sym)
 
         try_obtain_lease do

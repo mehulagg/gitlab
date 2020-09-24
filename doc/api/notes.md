@@ -7,7 +7,21 @@ Notes are comments on:
 - Merge requests
 - Epics **(ULTIMATE)**
 
-This includes system notes, which are notes about changes to the object (for example, when a milestone changes, there will be a corresponding system note). Label notes are not part of this API, but recorded as separate events in [resource label events](resource_label_events.md).
+This includes system notes, which are notes about changes to the object (for example, when an
+assignee changes, there will be a corresponding system note).
+
+## Resource events
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/38096) in GitLab 13.3 for state, milestone, and weight events.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40850) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.4 for iteration events.
+
+Some system notes are not part of this API, but are recorded as separate events:
+
+- [Resource label events](resource_label_events.md)
+- [Resource state events](resource_state_events.md)
+- [Resource milestone events](resource_milestone_events.md)
+- [Resource weight events](resource_weight_events.md) **(STARTER)**
+- [Resource iteration events](resource_iteration_events.md) **(STARTER)**
 
 ## Notes pagination
 
@@ -22,7 +36,7 @@ Read more on [pagination](README.md#pagination).
 
 Gets a list of all notes for a single issue.
 
-```
+```plaintext
 GET /projects/:id/issues/:issue_iid/notes
 GET /projects/:id/issues/:issue_iid/notes?sort=asc&order_by=updated_at
 ```
@@ -54,7 +68,8 @@ GET /projects/:id/issues/:issue_iid/notes?sort=asc&order_by=updated_at
     "noteable_id": 377,
     "noteable_type": "Issue",
     "noteable_iid": 377,
-    "resolvable": false
+    "resolvable": false,
+    "confidential": false
   },
   {
     "id": 305,
@@ -74,20 +89,21 @@ GET /projects/:id/issues/:issue_iid/notes?sort=asc&order_by=updated_at
     "noteable_id": 121,
     "noteable_type": "Issue",
     "noteable_iid": 121,
-    "resolvable": false
+    "resolvable": false,
+    "confidential": true
   }
 ]
 ```
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes"
 ```
 
 ### Get single issue note
 
 Returns a single note for a specific project issue
 
-```
+```plaintext
 GET /projects/:id/issues/:issue_iid/notes/:note_id
 ```
 
@@ -97,15 +113,15 @@ Parameters:
 - `issue_iid` (required) - The IID of a project issue
 - `note_id` (required) - The ID of an issue note
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes/1"
 ```
 
 ### Create new issue note
 
 Creates a new note to a single project issue.
 
-```
+```plaintext
 POST /projects/:id/issues/:issue_iid/notes
 ```
 
@@ -114,36 +130,38 @@ Parameters:
 - `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding)
 - `issue_iid` (required) - The IID of an issue
 - `body` (required) - The content of a note. Limited to 1,000,000 characters.
+- `confidential` (optional) - The confidential flag of a note. Default is false.
 - `created_at` (optional) - Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights)
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=note
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=note"
 ```
 
 ### Modify existing issue note
 
 Modify existing note of an issue.
 
-```
+```plaintext
 PUT /projects/:id/issues/:issue_iid/notes/:note_id
 ```
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding)
-- `issue_iid` (required) - The IID of an issue
-- `note_id` (required) - The ID of a note
-- `body` (required) - The content of a note. Limited to 1,000,000 characters.
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).
+- `issue_iid` (required) - The IID of an issue.
+- `note_id` (required) - The ID of a note.
+- `body` (optional) - The content of a note. Limited to 1,000,000 characters.
+- `confidential` (optional) - The confidential flag of a note.
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=note
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=note"
 ```
 
 ### Delete an issue note
 
 Deletes an existing note of an issue.
 
-```
+```plaintext
 DELETE /projects/:id/issues/:issue_iid/notes/:note_id
 ```
 
@@ -155,8 +173,8 @@ Parameters:
 | `issue_iid` | integer | yes | The IID of an issue |
 | `note_id` | integer | yes | The ID of a note |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/issues/11/notes/636
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes/636"
 ```
 
 ## Snippets
@@ -165,7 +183,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitl
 
 Gets a list of all notes for a single snippet. Snippet notes are comments users can post to a snippet.
 
-```
+```plaintext
 GET /projects/:id/snippets/:snippet_id/notes
 GET /projects/:id/snippets/:snippet_id/notes?sort=asc&order_by=updated_at
 ```
@@ -177,15 +195,15 @@ GET /projects/:id/snippets/:snippet_id/notes?sort=asc&order_by=updated_at
 | `sort`              | string           | no         | Return snippet notes sorted in `asc` or `desc` order. Default is `desc`
 | `order_by`          | string           | no         | Return snippet notes ordered by `created_at` or `updated_at` fields. Default is `created_at`
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippets/11/notes
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippets/11/notes"
 ```
 
 ### Get single snippet note
 
 Returns a single note for a given snippet.
 
-```
+```plaintext
 GET /projects/:id/snippets/:snippet_id/notes/:note_id
 ```
 
@@ -214,8 +232,8 @@ Parameters:
 }
 ```
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippets/11/notes/11
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippets/11/notes/11"
 ```
 
 ### Create new snippet note
@@ -223,7 +241,7 @@ curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.
 Creates a new note for a single snippet. Snippet notes are comments users can post to a snippet.
 If you create a note where the body only contains an Award Emoji, you'll receive this object back.
 
-```
+```plaintext
 POST /projects/:id/snippets/:snippet_id/notes
 ```
 
@@ -234,15 +252,15 @@ Parameters:
 - `body` (required) - The content of a note. Limited to 1,000,000 characters.
 - `created_at` (optional) - Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippet/11/notes?body=note
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippet/11/notes?body=note"
 ```
 
 ### Modify existing snippet note
 
 Modify existing note of a snippet.
 
-```
+```plaintext
 PUT /projects/:id/snippets/:snippet_id/notes/:note_id
 ```
 
@@ -253,15 +271,15 @@ Parameters:
 - `note_id` (required) - The ID of a note
 - `body` (required) - The content of a note. Limited to 1,000,000 characters.
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippets/11/notes?body=note
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippets/11/notes?body=note"
 ```
 
 ### Delete a snippet note
 
 Deletes an existing note of a snippet.
 
-```
+```plaintext
 DELETE /projects/:id/snippets/:snippet_id/notes/:note_id
 ```
 
@@ -273,8 +291,8 @@ Parameters:
 | `snippet_id` | integer | yes | The ID of a snippet |
 | `note_id` | integer | yes | The ID of a note |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippets/52/notes/1659
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippets/52/notes/1659"
 ```
 
 ## Merge Requests
@@ -283,7 +301,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitl
 
 Gets a list of all notes for a single merge request.
 
-```
+```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/notes
 GET /projects/:id/merge_requests/:merge_request_iid/notes?sort=asc&order_by=updated_at
 ```
@@ -295,15 +313,15 @@ GET /projects/:id/merge_requests/:merge_request_iid/notes?sort=asc&order_by=upda
 | `sort`              | string           | no         | Return merge request notes sorted in `asc` or `desc` order. Default is `desc`
 | `order_by`          | string           | no         | Return merge request notes ordered by `created_at` or `updated_at` fields. Default is `created_at`
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/merge_requests/11/notes
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/merge_requests/11/notes"
 ```
 
 ### Get single merge request note
 
 Returns a single note for a given merge request.
 
-```
+```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/notes/:note_id
 ```
 
@@ -332,12 +350,13 @@ Parameters:
   "noteable_id": 2,
   "noteable_type": "MergeRequest",
   "noteable_iid": 2,
-  "resolvable": false
+  "resolvable": false,
+  "confidential": false
 }
 ```
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/merge_requests/11/notes/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/merge_requests/11/notes/1"
 ```
 
 ### Create new merge request note
@@ -346,7 +365,7 @@ Creates a new note for a single merge request.
 If you create a note where the body only contains an Award Emoji, you'll receive
 this object back.
 
-```
+```plaintext
 POST /projects/:id/merge_requests/:merge_request_iid/notes
 ```
 
@@ -361,7 +380,7 @@ Parameters:
 
 Modify existing note of a merge request.
 
-```
+```plaintext
 PUT /projects/:id/merge_requests/:merge_request_iid/notes/:note_id
 ```
 
@@ -372,15 +391,15 @@ Parameters:
 - `note_id` (required) - The ID of a note
 - `body` (required) - The content of a note. Limited to 1,000,000 characters.
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/merge_requests/11/notes?body=note
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/merge_requests/11/notes?body=note"
 ```
 
 ### Delete a merge request note
 
 Deletes an existing note of a merge request.
 
-```
+```plaintext
 DELETE /projects/:id/merge_requests/:merge_request_iid/notes/:note_id
 ```
 
@@ -392,8 +411,8 @@ Parameters:
 | `merge_request_iid` | integer | yes | The IID of a merge request |
 | `note_id` | integer | yes | The ID of a note |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/merge_requests/7/notes/1602
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/merge_requests/7/notes/1602"
 ```
 
 ## Epics **(ULTIMATE)**
@@ -402,7 +421,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitl
 
 Gets a list of all notes for a single epic. Epic notes are comments users can post to an epic.
 
-```
+```plaintext
 GET /groups/:id/epics/:epic_id/notes
 GET /groups/:id/epics/:epic_id/notes?sort=asc&order_by=updated_at
 ```
@@ -414,15 +433,15 @@ GET /groups/:id/epics/:epic_id/notes?sort=asc&order_by=updated_at
 | `sort`              | string           | no         | Return epic notes sorted in `asc` or `desc` order. Default is `desc` |
 | `order_by`          | string           | no         | Return epic notes ordered by `created_at` or `updated_at` fields. Default is `created_at` |
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/epics/11/notes
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/epics/11/notes"
 ```
 
 ### Get single epic note
 
 Returns a single note for a given epic.
 
-```
+```plaintext
 GET /groups/:id/epics/:epic_id/notes/:note_id
 ```
 
@@ -449,12 +468,13 @@ Parameters:
   },
   "expires_at": null,
   "updated_at": "2013-10-02T07:34:20Z",
-  "created_at": "2013-10-02T07:34:20Z"
+  "created_at": "2013-10-02T07:34:20Z",
+  "confidential": false
 }
 ```
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/epics/11/notes/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/epics/11/notes/1"
 ```
 
 ### Create new epic note
@@ -462,7 +482,7 @@ curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.
 Creates a new note for a single epic. Epic notes are comments users can post to an epic.
 If you create a note where the body only contains an Award Emoji, you'll receive this object back.
 
-```
+```plaintext
 POST /groups/:id/epics/:epic_id/notes
 ```
 
@@ -474,15 +494,15 @@ Parameters:
 | `epic_id` | integer | yes  | The ID of an epic |
 | `body`    | string  | yes  | The content of a note. Limited to 1,000,000 characters. |
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippet/11/notes?body=note
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippet/11/notes?body=note"
 ```
 
 ### Modify existing epic note
 
 Modify existing note of an epic.
 
-```
+```plaintext
 PUT /groups/:id/epics/:epic_id/notes/:note_id
 ```
 
@@ -495,15 +515,15 @@ Parameters:
 | `note_id` | integer | yes  | The ID of a note |
 | `body`    | string  | yes  | The content of a note. Limited to 1,000,000 characters. |
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/snippet/11/notes?body=note
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/snippet/11/notes?body=note"
 ```
 
 ### Delete an epic note
 
 Deletes an existing note of an epic.
 
-```
+```plaintext
 DELETE /groups/:id/epics/:epic_id/notes/:note_id
 ```
 
@@ -515,6 +535,6 @@ Parameters:
 | `epic_id` | integer | yes  | The ID of an epic |
 | `note_id` | integer | yes  | The ID of a note |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/epics/52/notes/1659
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/epics/52/notes/1659"
 ```

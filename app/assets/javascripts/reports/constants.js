@@ -1,7 +1,7 @@
 export const fieldTypes = {
   codeBock: 'codeBlock',
   link: 'link',
-  miliseconds: 'miliseconds',
+  seconds: 'seconds',
   text: 'text',
 };
 
@@ -22,3 +22,6 @@ export const status = {
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS',
 };
+
+export const ACCESSIBILITY_ISSUE_ERROR = 'error';
+export const ACCESSIBILITY_ISSUE_WARNING = 'warning';

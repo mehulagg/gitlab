@@ -9,7 +9,7 @@ fragment IssueNode on EpicIssue {
   dueDate
   weight
   webPath
-  reference
+  reference(full: true)
   relationPath
   relativePosition
   assignees {
@@ -27,4 +27,5 @@ fragment IssueNode on EpicIssue {
     startDate
     dueDate
   }
+  healthStatus
 }

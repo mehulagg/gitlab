@@ -1,14 +1,17 @@
+const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const StatsWriterPlugin = require('webpack-stats-plugin').StatsWriterPlugin;
 const CompressionPlugin = require('compression-webpack-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const MonacoWebpackPlugin = require('./plugins/monaco_webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const vendorDllHash = require('./helpers/vendor_dll_hash');
 
 const ROOT_PATH = path.resolve(__dirname, '..');
+const VENDOR_DLL = process.env.WEBPACK_VENDOR_DLL && process.env.WEBPACK_VENDOR_DLL !== 'false';
 const CACHE_PATH = process.env.WEBPACK_CACHE_PATH || path.join(ROOT_PATH, 'tmp/cache');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const IS_DEV_SERVER = process.env.WEBPACK_DEV_SERVER === 'true';
@@ -16,13 +19,15 @@ const IS_EE = require('./helpers/is_ee_env');
 const DEV_SERVER_HOST = process.env.DEV_SERVER_HOST || 'localhost';
 const DEV_SERVER_PORT = parseInt(process.env.DEV_SERVER_PORT, 10) || 3808;
 const DEV_SERVER_LIVERELOAD = IS_DEV_SERVER && process.env.DEV_SERVER_LIVERELOAD !== 'false';
-const WEBPACK_REPORT = process.env.WEBPACK_REPORT;
-const WEBPACK_MEMORY_TEST = process.env.WEBPACK_MEMORY_TEST;
-const NO_COMPRESSION = process.env.NO_COMPRESSION;
-const NO_SOURCEMAPS = process.env.NO_SOURCEMAPS;
+const WEBPACK_REPORT = process.env.WEBPACK_REPORT && process.env.WEBPACK_REPORT !== 'false';
+const WEBPACK_MEMORY_TEST =
+  process.env.WEBPACK_MEMORY_TEST && process.env.WEBPACK_MEMORY_TEST !== 'false';
+const NO_COMPRESSION = process.env.NO_COMPRESSION && process.env.NO_COMPRESSION !== 'false';
+const NO_SOURCEMAPS = process.env.NO_SOURCEMAPS && process.env.NO_SOURCEMAPS !== 'false';
 
 const VUE_VERSION = require('vue/package.json').version;
 const VUE_LOADER_VERSION = require('vue-loader/package.json').version;
+const WEBPACK_VERSION = require('webpack/package.json').version;
 
 const devtool = IS_PRODUCTION ? 'source-map' : 'cheap-module-eval-source-map';
 
@@ -74,6 +79,8 @@ function generateEntries() {
   const manualEntries = {
     default: defaultEntries,
     sentry: './sentry/index.js',
+    performance_bar: './performance_bar/index.js',
+    chrome_84_icon_fix: './lib/chrome_84_icon_fix.js',
   };
 
   return Object.assign(manualEntries, autoEntries);
@@ -88,6 +95,7 @@ const alias = {
   vendor: path.join(ROOT_PATH, 'vendor/assets/javascripts'),
   vue$: 'vue/dist/vue.esm.js',
   spec: path.join(ROOT_PATH, 'spec/javascripts'),
+  jest: path.join(ROOT_PATH, 'spec/frontend'),
 
   // the following resolves files which are different between CE and EE
   ee_else_ce: path.join(ROOT_PATH, 'app/assets/javascripts'),
@@ -102,12 +110,37 @@ const alias = {
 if (IS_EE) {
   Object.assign(alias, {
     ee: path.join(ROOT_PATH, 'ee/app/assets/javascripts'),
+    ee_component: path.join(ROOT_PATH, 'ee/app/assets/javascripts'),
     ee_empty_states: path.join(ROOT_PATH, 'ee/app/views/shared/empty_states'),
     ee_icons: path.join(ROOT_PATH, 'ee/app/views/shared/icons'),
     ee_images: path.join(ROOT_PATH, 'ee/app/assets/images'),
     ee_spec: path.join(ROOT_PATH, 'ee/spec/javascripts'),
+    ee_jest: path.join(ROOT_PATH, 'ee/spec/frontend'),
     ee_else_ce: path.join(ROOT_PATH, 'ee/app/assets/javascripts'),
   });
+}
+
+if (!IS_PRODUCTION) {
+  const fixtureDir = IS_EE ? 'fixtures-ee' : 'fixtures';
+
+  Object.assign(alias, {
+    test_fixtures: path.join(ROOT_PATH, `tmp/tests/frontend/${fixtureDir}`),
+    test_helpers: path.join(ROOT_PATH, 'spec/frontend_integration/test_helpers'),
+  });
+}
+
+let dll;
+
+if (VENDOR_DLL && !IS_PRODUCTION) {
+  const dllHash = vendorDllHash();
+  const dllCachePath = path.join(ROOT_PATH, `tmp/cache/webpack-dlls/${dllHash}`);
+  dll = {
+    manifestPath: path.join(dllCachePath, 'vendor.dll.manifest.json'),
+    cacheFrom: dllCachePath,
+    cacheTo: path.join(ROOT_PATH, `public/assets/webpack/dll.${dllHash}/`),
+    publicPath: `dll.${dllHash}/vendor.dll.bundle.js`,
+    exists: null,
+  };
 }
 
 module.exports = {
@@ -120,8 +153,8 @@ module.exports = {
   output: {
     path: path.join(ROOT_PATH, 'public/assets/webpack'),
     publicPath: '/assets/webpack/',
-    filename: IS_PRODUCTION ? '[name].[chunkhash:8].bundle.js' : '[name].bundle.js',
-    chunkFilename: IS_PRODUCTION ? '[name].[chunkhash:8].chunk.js' : '[name].chunk.js',
+    filename: IS_PRODUCTION ? '[name].[contenthash:8].bundle.js' : '[name].bundle.js',
+    chunkFilename: IS_PRODUCTION ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
     globalObject: 'this', // allow HMR and web workers to play nice
   },
 
@@ -140,7 +173,9 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        exclude: path => /node_modules|vendor[\\/]assets/.test(path) && !/\.vue\.js/.test(path),
+        exclude: path =>
+          /node_modules\/(?!tributejs)|node_modules|vendor[\\/]assets/.test(path) &&
+          !/\.vue\.js/.test(path),
         loader: 'babel-loader',
         options: {
           cacheDirectory: path.join(CACHE_PATH, 'babel-loader'),
@@ -168,7 +203,7 @@ module.exports = {
         test: /icons\.svg$/,
         loader: 'file-loader',
         options: {
-          name: '[name].[hash:8].[ext]',
+          name: '[name].[contenthash:8].[ext]',
         },
       },
       {
@@ -177,17 +212,17 @@ module.exports = {
         loader: 'raw-loader',
       },
       {
-        test: /\.(gif|png)$/,
+        test: /\.(gif|png|mp4)$/,
         loader: 'url-loader',
         options: { limit: 2048 },
       },
       {
-        test: /\_worker\.js$/,
+        test: /_worker\.js$/,
         use: [
           {
             loader: 'worker-loader',
             options: {
-              name: '[name].[hash:8].worker.js',
+              name: '[name].[contenthash:8].worker.js',
               inline: IS_DEV_SERVER,
             },
           },
@@ -199,7 +234,7 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'file-loader',
         options: {
-          name: '[name].[hash:8].[ext]',
+          name: '[name].[contenthash:8].[ext]',
         },
       },
       {
@@ -209,26 +244,32 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              name: '[name].[hash:8].[ext]',
+              modules: 'global',
+              localIdentName: '[name].[contenthash:8].[ext]',
             },
           },
         ],
       },
       {
         test: /\.(eot|ttf|woff|woff2)$/,
-        include: /node_modules\/katex\/dist\/fonts/,
+        include: /node_modules\/(katex\/dist\/fonts|monaco-editor)/,
         loader: 'file-loader',
         options: {
-          name: '[name].[hash:8].[ext]',
+          name: '[name].[contenthash:8].[ext]',
+          esModule: false,
         },
       },
     ],
   },
 
   optimization: {
+    // Replace 'hashed' with 'deterministic' in webpack 5
+    moduleIds: 'hashed',
     runtimeChunk: 'single',
     splitChunks: {
-      maxInitialRequests: 4,
+      maxInitialRequests: 20,
+      // In order to prevent firewalls tripping up: https://gitlab.com/gitlab-org/gitlab/-/issues/22648
+      automaticNameDelimiter: '-',
       cacheGroups: {
         default: false,
         common: () => ({
@@ -237,6 +278,30 @@ module.exports = {
           chunks: 'initial',
           minChunks: autoEntriesCount * 0.9,
         }),
+        monaco: {
+          priority: 15,
+          name: 'monaco',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/]monaco-editor[\\/]/,
+          minChunks: 2,
+          reuseExistingChunk: true,
+        },
+        echarts: {
+          priority: 14,
+          name: 'echarts',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/](echarts|zrender)[\\/]/,
+          minChunks: 2,
+          reuseExistingChunk: true,
+        },
+        security_reports: {
+          priority: 13,
+          name: 'security_reports',
+          chunks: 'initial',
+          test: /[\\/](vue_shared[\\/](security_reports|license_compliance)|security_dashboard)[\\/]/,
+          minChunks: 2,
+          reuseExistingChunk: true,
+        },
         vendors: {
           priority: 10,
           chunks: 'async',
@@ -263,7 +328,14 @@ module.exports = {
           chunks: false,
           modules: false,
           assets: true,
+          errors: !IS_PRODUCTION,
+          warnings: !IS_PRODUCTION,
         });
+
+        // tell our rails helper where to find the DLL files
+        if (dll) {
+          stats.dllAssets = dll.publicPath;
+        }
         return JSON.stringify(stats, null, 2);
       },
     }),
@@ -274,30 +346,89 @@ module.exports = {
     // automatically configure monaco editor web workers
     new MonacoWebpackPlugin(),
 
-    // prevent pikaday from including moment.js
-    new webpack.IgnorePlugin(/moment/, /pikaday/),
-
     // fix legacy jQuery plugins which depend on globals
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',
     }),
 
-    new webpack.NormalModuleReplacementPlugin(/^ee_component\/(.*)\.vue/, function(resource) {
-      if (Object.keys(module.exports.resolve.alias).indexOf('ee') >= 0) {
-        resource.request = resource.request.replace(/^ee_component/, 'ee');
-      } else {
+    // if DLLs are enabled, detect whether the DLL exists and create it automatically if necessary
+    dll && {
+      apply(compiler) {
+        compiler.hooks.beforeCompile.tapAsync('DllAutoCompilePlugin', (params, callback) => {
+          if (dll.exists) {
+            callback();
+          } else if (fs.existsSync(dll.manifestPath)) {
+            console.log(`Using vendor DLL found at: ${dll.cacheFrom}`);
+            dll.exists = true;
+            callback();
+          } else {
+            console.log(
+              `Warning: No vendor DLL found at: ${dll.cacheFrom}. Compiling DLL automatically.`,
+            );
+
+            const dllConfig = require('./webpack.vendor.config.js');
+            const dllCompiler = webpack(dllConfig);
+
+            dllCompiler.run((err, stats) => {
+              if (err) {
+                return callback(err);
+              }
+
+              const info = stats.toJson();
+
+              if (stats.hasErrors()) {
+                console.error(info.errors.join('\n\n'));
+                return callback('DLL not compiled successfully.');
+              }
+
+              if (stats.hasWarnings()) {
+                console.warn(info.warnings.join('\n\n'));
+                console.warn('DLL compiled with warnings.');
+              } else {
+                console.log('DLL compiled successfully.');
+              }
+
+              dll.exists = true;
+              callback();
+            });
+          }
+        });
+      },
+    },
+
+    // reference our compiled DLL modules
+    dll &&
+      new webpack.DllReferencePlugin({
+        context: ROOT_PATH,
+        manifest: dll.manifestPath,
+      }),
+
+    dll &&
+      new CopyWebpackPlugin([
+        {
+          from: dll.cacheFrom,
+          to: dll.cacheTo,
+        },
+      ]),
+
+    !IS_EE &&
+      new webpack.NormalModuleReplacementPlugin(/^ee_component\/(.*)\.vue/, resource => {
         resource.request = path.join(
           ROOT_PATH,
           'app/assets/javascripts/vue_shared/components/empty_component.js',
         );
-      }
-    }),
+      }),
 
     new CopyWebpackPlugin([
       {
         from: path.join(ROOT_PATH, 'node_modules/pdfjs-dist/cmaps/'),
         to: path.join(ROOT_PATH, 'public/assets/webpack/cmaps/'),
+      },
+      {
+        from: path.join(ROOT_PATH, 'node_modules/@sourcegraph/code-host-integration/'),
+        to: path.join(ROOT_PATH, 'public/assets/webpack/sourcegraph/'),
+        ignore: ['package.json'],
       },
       {
         from: path.join(
@@ -356,6 +487,21 @@ module.exports = {
 
           console.log(`Webpack heap size: ${toMB(memoryUsage)} MB`);
 
+          const webpackStatistics = {
+            memoryUsage,
+            date: Date.now(), // milliseconds
+            commitSHA: process.env.CI_COMMIT_SHA,
+            nodeVersion: process.versions.node,
+            webpackVersion: WEBPACK_VERSION,
+          };
+
+          console.log(webpackStatistics);
+
+          fs.writeFileSync(
+            path.join(ROOT_PATH, 'webpack-dev-server.json'),
+            JSON.stringify(webpackStatistics),
+          );
+
           // exit in case we're running webpack-dev-server
           IS_DEV_SERVER && process.exit();
         });
@@ -384,6 +530,14 @@ module.exports = {
       // This one is used to check against "EE" properly in application code
       IS_EE: IS_EE ? 'window.gon && window.gon.ee' : JSON.stringify(false),
     }),
+
+    /* Pikaday has a optional dependency to moment.
+       We are currently not utilizing moment.
+       Ignoring this import removes warning from our development build.
+       Upstream reference:
+       https://github.com/Pikaday/Pikaday/blob/5c1a7559be/pikaday.js#L14
+    */
+    new webpack.IgnorePlugin(/moment/, /pikaday/),
   ].filter(Boolean),
 
   devServer: {
@@ -394,6 +548,7 @@ module.exports = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*',
     },
+    contentBase: false,
     stats: 'errors-only',
     hot: DEV_SERVER_LIVERELOAD,
     inline: DEV_SERVER_LIVERELOAD,

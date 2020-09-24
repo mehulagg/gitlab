@@ -18,12 +18,9 @@ module Gitlab
 
       attr_reader :root
 
-      def initialize(config, project: nil, sha: nil, user: nil)
-        @context = build_context(project: project, sha: sha, user: user)
-
-        if Feature.enabled?(:ci_limit_yaml_expansion, project, default_enabled: true)
-          @context.set_deadline(TIMEOUT_SECONDS)
-        end
+      def initialize(config, project: nil, sha: nil, user: nil, parent_pipeline: nil)
+        @context = build_context(project: project, sha: sha, user: user, parent_pipeline: parent_pipeline)
+        @context.set_deadline(TIMEOUT_SECONDS)
 
         @config = expand_config(config)
 
@@ -40,6 +37,10 @@ module Gitlab
 
       def errors
         @root.errors
+      end
+
+      def warnings
+        @root.warnings
       end
 
       def to_hash
@@ -61,17 +62,21 @@ module Gitlab
         root.jobs_value
       end
 
+      def normalized_jobs
+        @normalized_jobs ||= Ci::Config::Normalizer.new(jobs).normalize_jobs
+      end
+
       private
 
       def expand_config(config)
         build_config(config)
 
       rescue Gitlab::Config::Loader::Yaml::DataTooLargeError => e
-        track_exception(e)
+        track_and_raise_for_dev_exception(e)
         raise Config::ConfigError, e.message
 
       rescue Gitlab::Ci::Config::External::Context::TimeoutError => e
-        track_exception(e)
+        track_and_raise_for_dev_exception(e)
         raise Config::ConfigError, TIMEOUT_MESSAGE
       end
 
@@ -79,26 +84,24 @@ module Gitlab
         initial_config = Gitlab::Config::Loader::Yaml.new(config).load!
         initial_config = Config::External::Processor.new(initial_config, @context).perform
         initial_config = Config::Extendable.new(initial_config).to_hash
-
-        if Feature.enabled?(:ci_pre_post_pipeline_stages, @context.project, default_enabled: true)
-          initial_config = Config::EdgeStagesInjector.new(initial_config).to_hash
-        end
+        initial_config = Config::EdgeStagesInjector.new(initial_config).to_hash
 
         initial_config
       end
 
-      def build_context(project:, sha:, user:)
+      def build_context(project:, sha:, user:, parent_pipeline:)
         Config::External::Context.new(
           project: project,
           sha: sha || project&.repository&.root_ref_sha,
-          user: user)
+          user: user,
+          parent_pipeline: parent_pipeline)
       end
 
-      def track_exception(error)
-        Gitlab::Sentry.track_exception(error, extra: @context.sentry_payload)
+      def track_and_raise_for_dev_exception(error)
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(error, @context.sentry_payload)
       end
 
-      # Overriden in EE
+      # Overridden in EE
       def rescue_errors
         RESCUE_ERRORS
       end

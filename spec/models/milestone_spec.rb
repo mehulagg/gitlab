@@ -2,57 +2,29 @@
 
 require 'spec_helper'
 
-describe Milestone do
-  describe 'modules' do
-    context 'with a project' do
-      it_behaves_like 'AtomicInternalId' do
-        let(:internal_id_attribute) { :iid }
-        let(:instance) { build(:milestone, project: build(:project), group: nil) }
-        let(:scope) { :project }
-        let(:scope_attrs) { { project: instance.project } }
-        let(:usage) { :milestones }
-      end
-    end
+RSpec.describe Milestone do
+  let(:user) { create(:user) }
+  let(:issue) { create(:issue, project: project) }
+  let(:milestone) { create(:milestone, project: project) }
+  let(:project) { create(:project, :public) }
 
-    context 'with a group' do
-      it_behaves_like 'AtomicInternalId' do
-        let(:internal_id_attribute) { :iid }
-        let(:instance) { build(:milestone, project: nil, group: build(:group)) }
-        let(:scope) { :group }
-        let(:scope_attrs) { { namespace: instance.group } }
-        let(:usage) { :milestones }
-      end
+  it_behaves_like 'a timebox', :milestone
+
+  describe 'MilestoneStruct#serializable_hash' do
+    let(:predefined_milestone) { described_class::TimeboxStruct.new('Test Milestone', '#test', 1) }
+
+    it 'presents the predefined milestone as a hash' do
+      expect(predefined_milestone.serializable_hash).to eq(
+        title: predefined_milestone.title,
+        name: predefined_milestone.name,
+        id: predefined_milestone.id
+      )
     end
   end
 
   describe "Validation" do
     before do
       allow(subject).to receive(:set_iid).and_return(false)
-    end
-
-    describe 'start_date' do
-      it 'adds an error when start_date is greater then due_date' do
-        milestone = build(:milestone, start_date: Date.tomorrow, due_date: Date.yesterday)
-
-        expect(milestone).not_to be_valid
-        expect(milestone.errors[:due_date]).to include("must be greater than start date")
-      end
-
-      it 'adds an error when start_date is greater than 9999-12-31' do
-        milestone = build(:milestone, start_date: Date.new(10000, 1, 1))
-
-        expect(milestone).not_to be_valid
-        expect(milestone.errors[:start_date]).to include("date must not be after 9999-12-31")
-      end
-    end
-
-    describe 'due_date' do
-      it 'adds an error when due_date is greater than 9999-12-31' do
-        milestone = build(:milestone, due_date: Date.new(10000, 1, 1))
-
-        expect(milestone).not_to be_valid
-        expect(milestone.errors[:due_date]).to include("date must not be after 9999-12-31")
-      end
     end
 
     describe 'milestone_releases' do
@@ -76,61 +48,17 @@ describe Milestone do
   end
 
   describe "Associations" do
-    it { is_expected.to belong_to(:project) }
-    it { is_expected.to have_many(:issues) }
     it { is_expected.to have_many(:releases) }
     it { is_expected.to have_many(:milestone_releases) }
   end
 
-  let(:project) { create(:project, :public) }
-  let(:milestone) { create(:milestone, project: project) }
-  let(:issue) { create(:issue, project: project) }
-  let(:user) { create(:user) }
-
-  describe "#title" do
-    let(:milestone) { create(:milestone, title: "<b>foo & bar -> 2.2</b>") }
-
-    it "sanitizes title" do
-      expect(milestone.title).to eq("foo & bar -> 2.2")
-    end
-  end
-
-  describe "unique milestone title" do
-    context "per project" do
-      it "does not accept the same title in a project twice" do
-        new_milestone = described_class.new(project: milestone.project, title: milestone.title)
-        expect(new_milestone).not_to be_valid
-      end
-
-      it "accepts the same title in another project" do
-        project = create(:project)
-        new_milestone = described_class.new(project: project, title: milestone.title)
-
-        expect(new_milestone).to be_valid
-      end
+  describe '.predefined_id?' do
+    it 'returns true for a predefined Milestone ID' do
+      expect(Milestone.predefined_id?(described_class::Upcoming.id)).to be true
     end
 
-    context "per group" do
-      let(:group) { create(:group) }
-      let(:milestone) { create(:milestone, group: group) }
-
-      before do
-        project.update(group: group)
-      end
-
-      it "does not accept the same title in a group twice" do
-        new_milestone = described_class.new(group: group, title: milestone.title)
-
-        expect(new_milestone).not_to be_valid
-      end
-
-      it "does not accept the same title of a child project milestone" do
-        create(:milestone, project: group.projects.first)
-
-        new_milestone = described_class.new(group: group, title: milestone.title)
-
-        expect(new_milestone).not_to be_valid
-      end
+    it 'returns false for a Milestone ID that is not predefined' do
+      expect(Milestone.predefined_id?(milestone.id)).to be false
     end
   end
 
@@ -152,20 +80,29 @@ describe Milestone do
     end
   end
 
+  it_behaves_like 'within_timeframe scope' do
+    let_it_be(:now) { Time.current }
+    let_it_be(:project) { create(:project, :empty_repo) }
+    let_it_be(:resource_1) { create(:milestone, project: project, start_date: now - 1.day, due_date: now + 1.day) }
+    let_it_be(:resource_2) { create(:milestone, project: project, start_date: now + 2.days, due_date: now + 3.days) }
+    let_it_be(:resource_3) { create(:milestone, project: project, due_date: now) }
+    let_it_be(:resource_4) { create(:milestone, project: project, start_date: now) }
+  end
+
   describe "#percent_complete" do
     it "does not count open issues" do
       milestone.issues << issue
-      expect(milestone.percent_complete(user)).to eq(0)
+      expect(milestone.percent_complete).to eq(0)
     end
 
     it "counts closed issues" do
       issue.close
       milestone.issues << issue
-      expect(milestone.percent_complete(user)).to eq(100)
+      expect(milestone.percent_complete).to eq(100)
     end
 
     it "recovers from dividing by zero" do
-      expect(milestone.percent_complete(user)).to eq(0)
+      expect(milestone.percent_complete).to eq(0)
     end
   end
 
@@ -193,7 +130,7 @@ describe Milestone do
 
   describe '#upcoming?' do
     it 'returns true when start_date is in the future' do
-      milestone = build(:milestone, start_date: Time.now + 1.month)
+      milestone = build(:milestone, start_date: Time.current + 1.month)
       expect(milestone.upcoming?).to be_truthy
     end
 
@@ -288,70 +225,88 @@ describe Milestone do
     end
   end
 
-  describe '#for_projects_and_groups' do
-    let(:project) { create(:project) }
-    let(:project_other) { create(:project) }
-    let(:group) { create(:group) }
-    let(:group_other) { create(:group) }
+  shared_examples '#for_projects_and_groups' do
+    describe '#for_projects_and_groups' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:project_other) { create(:project) }
+      let_it_be(:group) { create(:group) }
+      let_it_be(:group_other) { create(:group) }
 
+      before(:all) do
+        create(:milestone, project: project)
+        create(:milestone, project: project_other)
+        create(:milestone, group: group)
+        create(:milestone, group: group_other)
+      end
+
+      subject { described_class.for_projects_and_groups(projects, groups) }
+
+      shared_examples 'filters by projects and groups' do
+        it 'returns milestones filtered by project' do
+          milestones = described_class.for_projects_and_groups(projects, [])
+
+          expect(milestones.count).to eq(1)
+          expect(milestones.first.project_id).to eq(project.id)
+        end
+
+        it 'returns milestones filtered by group' do
+          milestones = described_class.for_projects_and_groups([], groups)
+
+          expect(milestones.count).to eq(1)
+          expect(milestones.first.group_id).to eq(group.id)
+        end
+
+        it 'returns milestones filtered by both project and group' do
+          milestones = described_class.for_projects_and_groups(projects, groups)
+
+          expect(milestones.count).to eq(2)
+          expect(milestones).to contain_exactly(project.milestones.first, group.milestones.first)
+        end
+      end
+
+      context 'ids as params' do
+        let(:projects) { [project.id] }
+        let(:groups) { [group.id] }
+
+        it_behaves_like 'filters by projects and groups'
+      end
+
+      context 'relations as params' do
+        let(:projects) { Project.where(id: project.id).select(:id) }
+        let(:groups) { Group.where(id: group.id).select(:id) }
+
+        it_behaves_like 'filters by projects and groups'
+      end
+
+      context 'objects as params' do
+        let(:projects) { [project] }
+        let(:groups) { [group] }
+
+        it_behaves_like 'filters by projects and groups'
+      end
+
+      it 'returns no records if projects and groups are nil' do
+        milestones = described_class.for_projects_and_groups(nil, nil)
+
+        expect(milestones).to be_empty
+      end
+    end
+  end
+
+  context 'when `optimized_timebox_queries` feature flag is enabled' do
     before do
-      create(:milestone, project: project)
-      create(:milestone, project: project_other)
-      create(:milestone, group: group)
-      create(:milestone, group: group_other)
+      stub_feature_flags(optimized_timebox_queries: true)
     end
 
-    subject { described_class.for_projects_and_groups(projects, groups) }
+    it_behaves_like '#for_projects_and_groups'
+  end
 
-    shared_examples 'filters by projects and groups' do
-      it 'returns milestones filtered by project' do
-        milestones = described_class.for_projects_and_groups(projects, [])
-
-        expect(milestones.count).to eq(1)
-        expect(milestones.first.project_id).to eq(project.id)
-      end
-
-      it 'returns milestones filtered by group' do
-        milestones = described_class.for_projects_and_groups([], groups)
-
-        expect(milestones.count).to eq(1)
-        expect(milestones.first.group_id).to eq(group.id)
-      end
-
-      it 'returns milestones filtered by both project and group' do
-        milestones = described_class.for_projects_and_groups(projects, groups)
-
-        expect(milestones.count).to eq(2)
-        expect(milestones).to contain_exactly(project.milestones.first, group.milestones.first)
-      end
+  context 'when `optimized_timebox_queries` feature flag is disabled' do
+    before do
+      stub_feature_flags(optimized_timebox_queries: false)
     end
 
-    context 'ids as params' do
-      let(:projects) { [project.id] }
-      let(:groups) { [group.id] }
-
-      it_behaves_like 'filters by projects and groups'
-    end
-
-    context 'relations as params' do
-      let(:projects) { Project.where(id: project.id).select(:id) }
-      let(:groups) { Group.where(id: group.id).select(:id) }
-
-      it_behaves_like 'filters by projects and groups'
-    end
-
-    context 'objects as params' do
-      let(:projects) { [project] }
-      let(:groups) { [group] }
-
-      it_behaves_like 'filters by projects and groups'
-    end
-
-    it 'returns no records if projects and groups are nil' do
-      milestones = described_class.for_projects_and_groups(nil, nil)
-
-      expect(milestones).to be_empty
-    end
+    it_behaves_like '#for_projects_and_groups'
   end
 
   describe '.upcoming_ids' do
@@ -360,30 +315,30 @@ describe Milestone do
     let(:group_3) { create(:group) }
     let(:groups) { [group_1, group_2, group_3] }
 
-    let!(:past_milestone_group_1) { create(:milestone, group: group_1, due_date: Time.now - 1.day) }
-    let!(:current_milestone_group_1) { create(:milestone, group: group_1, due_date: Time.now + 1.day) }
-    let!(:future_milestone_group_1) { create(:milestone, group: group_1, due_date: Time.now + 2.days) }
+    let!(:past_milestone_group_1) { create(:milestone, group: group_1, due_date: Time.current - 1.day) }
+    let!(:current_milestone_group_1) { create(:milestone, group: group_1, due_date: Time.current + 1.day) }
+    let!(:future_milestone_group_1) { create(:milestone, group: group_1, due_date: Time.current + 2.days) }
 
-    let!(:past_milestone_group_2) { create(:milestone, group: group_2, due_date: Time.now - 1.day) }
-    let!(:closed_milestone_group_2) { create(:milestone, :closed, group: group_2, due_date: Time.now + 1.day) }
-    let!(:current_milestone_group_2) { create(:milestone, group: group_2, due_date: Time.now + 2.days) }
+    let!(:past_milestone_group_2) { create(:milestone, group: group_2, due_date: Time.current - 1.day) }
+    let!(:closed_milestone_group_2) { create(:milestone, :closed, group: group_2, due_date: Time.current + 1.day) }
+    let!(:current_milestone_group_2) { create(:milestone, group: group_2, due_date: Time.current + 2.days) }
 
-    let!(:past_milestone_group_3) { create(:milestone, group: group_3, due_date: Time.now - 1.day) }
+    let!(:past_milestone_group_3) { create(:milestone, group: group_3, due_date: Time.current - 1.day) }
 
     let(:project_1) { create(:project) }
     let(:project_2) { create(:project) }
     let(:project_3) { create(:project) }
     let(:projects) { [project_1, project_2, project_3] }
 
-    let!(:past_milestone_project_1) { create(:milestone, project: project_1, due_date: Time.now - 1.day) }
-    let!(:current_milestone_project_1) { create(:milestone, project: project_1, due_date: Time.now + 1.day) }
-    let!(:future_milestone_project_1) { create(:milestone, project: project_1, due_date: Time.now + 2.days) }
+    let!(:past_milestone_project_1) { create(:milestone, project: project_1, due_date: Time.current - 1.day) }
+    let!(:current_milestone_project_1) { create(:milestone, project: project_1, due_date: Time.current + 1.day) }
+    let!(:future_milestone_project_1) { create(:milestone, project: project_1, due_date: Time.current + 2.days) }
 
-    let!(:past_milestone_project_2) { create(:milestone, project: project_2, due_date: Time.now - 1.day) }
-    let!(:closed_milestone_project_2) { create(:milestone, :closed, project: project_2, due_date: Time.now + 1.day) }
-    let!(:current_milestone_project_2) { create(:milestone, project: project_2, due_date: Time.now + 2.days) }
+    let!(:past_milestone_project_2) { create(:milestone, project: project_2, due_date: Time.current - 1.day) }
+    let!(:closed_milestone_project_2) { create(:milestone, :closed, project: project_2, due_date: Time.current + 1.day) }
+    let!(:current_milestone_project_2) { create(:milestone, project: project_2, due_date: Time.current + 2.days) }
 
-    let!(:past_milestone_project_3) { create(:milestone, project: project_3, due_date: Time.now - 1.day) }
+    let!(:past_milestone_project_3) { create(:milestone, project: project_3, due_date: Time.current - 1.day) }
 
     let(:milestone_ids) { described_class.upcoming_ids(projects, groups).map(&:id) }
 
@@ -472,9 +427,9 @@ describe Milestone do
   end
 
   describe '.sort_by_attribute' do
-    set(:milestone_1) { create(:milestone, title: 'Foo') }
-    set(:milestone_2) { create(:milestone, title: 'Bar') }
-    set(:milestone_3) { create(:milestone, title: 'Zoo') }
+    let_it_be(:milestone_1) { create(:milestone, title: 'Foo') }
+    let_it_be(:milestone_2) { create(:milestone, title: 'Bar') }
+    let_it_be(:milestone_3) { create(:milestone, title: 'Zoo') }
 
     context 'ordering by name ascending' do
       it 'sorts by title ascending' do
@@ -510,7 +465,7 @@ describe Milestone do
       end
 
       it 'returns the quantity of milestones in each possible state' do
-        expected_count = { opened: 5, closed: 6, all: 11 }
+        expected_count = { opened: 2, closed: 6, all: 8 }
 
         count = described_class.states_count(Project.all, Group.all)
         expect(count).to eq(expected_count)
@@ -542,5 +497,42 @@ describe Milestone do
     it { is_expected.to match("#{Gitlab.config.gitlab.url}/gitlab-org/gitlab-foss/-/milestones/123") }
     it { is_expected.not_to match("#{Gitlab.config.gitlab.url}/gitlab-org/gitlab-foss/issues/123") }
     it { is_expected.not_to match("gitlab-org/gitlab-ce/milestones/123") }
+  end
+
+  describe '#parent' do
+    context 'with group' do
+      it 'returns the expected parent' do
+        group = create(:group)
+
+        expect(build(:milestone, group: group).parent).to eq(group)
+      end
+    end
+
+    context 'with project' do
+      it 'returns the expected parent' do
+        project = create(:project)
+
+        expect(build(:milestone, project: project).parent).to eq(project)
+      end
+    end
+  end
+
+  describe '#subgroup_milestone' do
+    context 'parent is subgroup' do
+      it 'returns true' do
+        group = create(:group)
+        subgroup = create(:group, :private, parent: group)
+
+        expect(build(:milestone, group: subgroup).subgroup_milestone?).to eq(true)
+      end
+    end
+
+    context 'parent is not subgroup' do
+      it 'returns false' do
+        group = create(:group)
+
+        expect(build(:milestone, group: group).subgroup_milestone?).to eq(false)
+      end
+    end
   end
 end

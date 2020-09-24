@@ -7,21 +7,32 @@ module API
 
       delegate :wiki?, to: :repo_type
 
+      def actor
+        @actor ||= Support::GitAccessActor.from_params(params)
+      end
+
+      # rubocop:disable Gitlab/ModuleWithInstanceVariables
       def repo_type
-        set_project unless defined?(@repo_type) # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        @repo_type # rubocop:disable Gitlab/ModuleWithInstanceVariables
+        parse_repo_path unless defined?(@repo_type)
+        @repo_type
       end
 
       def project
-        set_project unless defined?(@project) # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        @project # rubocop:disable Gitlab/ModuleWithInstanceVariables
+        parse_repo_path unless defined?(@project)
+        @project
       end
 
+      def container
+        parse_repo_path unless defined?(@container)
+        @container
+      end
+      # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
       def access_checker_for(actor, protocol)
-        access_checker_klass.new(actor.key_or_user, project, protocol,
+        access_checker_klass.new(actor.key_or_user, container, protocol,
           authentication_abilities: ssh_authentication_abilities,
           namespace_path: namespace_path,
-          project_path: project_path,
+          repository_path: project_path,
           redirected_path: redirected_path)
       end
 
@@ -40,7 +51,7 @@ module API
       def parse_env
         return {} if params[:env].blank?
 
-        JSON.parse(params[:env])
+        Gitlab::Json.parse(params[:env])
       rescue JSON::ParserError
         {}
       end
@@ -48,31 +59,7 @@ module API
       def log_user_activity(actor)
         commands = Gitlab::GitAccess::DOWNLOAD_COMMANDS
 
-        ::Users::ActivityService.new(actor, 'Git SSH').execute if commands.include?(params[:action])
-      end
-
-      def merge_request_urls
-        ::MergeRequests::GetUrlsService.new(project).execute(params[:changes])
-      end
-
-      def process_mr_push_options(push_options, project, user, changes)
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/61359')
-
-        service = ::MergeRequests::PushOptionsHandlerService.new(
-          project,
-          user,
-          changes,
-          push_options
-        ).execute
-
-        if service.errors.present?
-          push_options_warning(service.errors.join("\n\n"))
-        end
-      end
-
-      def push_options_warning(warning)
-        options = Array.wrap(params[:push_options]).map { |p| "'#{p}'" }.join(' ')
-        "WARNINGS:\nError encountered with push options #{options}: #{warning}"
+        ::Users::ActivityService.new(actor).execute if commands.include?(params[:action])
       end
 
       def redis_ping
@@ -80,7 +67,7 @@ module API
 
         result == 'PONG'
       rescue => e
-        Rails.logger.warn("GitLab: An unexpected error occurred in pinging to Redis: #{e}") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.warn("GitLab: An unexpected error occurred in pinging to Redis: #{e}")
         false
       end
 
@@ -99,38 +86,30 @@ module API
       end
 
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
-      def set_project
-        if params[:gl_repository]
-          @project, @repo_type = Gitlab::GlRepository.parse(params[:gl_repository])
-          @redirected_path = nil
-        else
-          @project, @repo_type, @redirected_path = Gitlab::RepoPath.parse(params[:project])
-        end
+      def parse_repo_path
+        @container, @project, @repo_type, @redirected_path =
+          if params[:gl_repository]
+            Gitlab::GlRepository.parse(params[:gl_repository])
+          elsif params[:project]
+            Gitlab::RepoPath.parse(params[:project])
+          end
       end
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
       # Project id to pass between components that don't share/don't have
       # access to the same filesystem mounts
       def gl_repository
-        repo_type.identifier_for_subject(project)
+        repo_type.identifier_for_container(container)
       end
 
-      def gl_project_path
-        if wiki?
-          project.wiki.full_path
-        else
-          project.full_path
-        end
+      def gl_repository_path
+        repository.full_path
       end
 
       # Return the repository depending on whether we want the wiki or the
       # regular repository
       def repository
-        if repo_type.wiki?
-          project.wiki.repository
-        else
-          project.repository
-        end
+        @repository ||= repo_type.repository_for(container)
       end
 
       # Return the Gitaly Address if it is enabled
@@ -138,9 +117,9 @@ module API
         return unless %w[git-receive-pack git-upload-pack git-upload-archive].include?(action)
 
         {
-          repository: repository.gitaly_repository,
-          address: Gitlab::GitalyClient.address(project.repository_storage),
-          token: Gitlab::GitalyClient.token(project.repository_storage),
+          repository: repository.gitaly_repository.to_h,
+          address: Gitlab::GitalyClient.address(repository.shard),
+          token: Gitlab::GitalyClient.token(repository.shard),
           features: Feature::Gitaly.server_feature_flags
         }
       end

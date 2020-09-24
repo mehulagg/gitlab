@@ -1,9 +1,8 @@
-/* eslint-disable func-names, no-var, consistent-return, one-var, no-else-return, no-param-reassign */
+/* eslint-disable func-names, consistent-return, no-param-reassign */
 
 import $ from 'jquery';
-import _ from 'underscore';
 import Cookies from 'js-cookie';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import axios from './lib/utils/axios_utils';
 import { sprintf, s__, __ } from './locale';
 
@@ -34,8 +33,6 @@ Sidebar.prototype.addEventListeners = function() {
 
   this.sidebar.on('click', '.sidebar-collapsed-icon', this, this.sidebarCollapseClicked);
   this.sidebar.on('hidden.gl.dropdown', this, this.onSidebarDropdownHidden);
-  $('.dropdown').on('loading.gl.dropdown', this.sidebarDropdownLoading);
-  $('.dropdown').on('loaded.gl.dropdown', this.sidebarDropdownLoaded);
 
   $document.on('click', '.js-sidebar-toggle', this.sidebarToggleClicked);
   return $(document)
@@ -44,12 +41,11 @@ Sidebar.prototype.addEventListeners = function() {
 };
 
 Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
-  var $allGutterToggleIcons, $this, isExpanded, tooltipLabel;
+  const $this = $(this);
+  const isExpanded = $this.find('i').hasClass('fa-angle-double-right');
+  const tooltipLabel = isExpanded ? __('Expand sidebar') : __('Collapse sidebar');
+  const $allGutterToggleIcons = $('.js-sidebar-toggle i');
   e.preventDefault();
-  $this = $(this);
-  isExpanded = $this.find('i').hasClass('fa-angle-double-right');
-  tooltipLabel = isExpanded ? __('Expand sidebar') : __('Collapse sidebar');
-  $allGutterToggleIcons = $('.js-sidebar-toggle i');
 
   if (isExpanded) {
     $allGutterToggleIcons.removeClass('fa-angle-double-right').addClass('fa-angle-double-left');
@@ -77,15 +73,9 @@ Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
 };
 
 Sidebar.prototype.toggleTodo = function(e) {
-  var $this, ajaxType, url;
-  $this = $(e.currentTarget);
-  ajaxType = $this.data('deletePath') ? 'delete' : 'post';
-
-  if ($this.data('deletePath')) {
-    url = String($this.data('deletePath'));
-  } else {
-    url = String($this.data('createPath'));
-  }
+  const $this = $(e.currentTarget);
+  const ajaxType = $this.data('deletePath') ? 'delete' : 'post';
+  const url = String($this.data('deletePath') || $this.data('createPath'));
 
   $this.tooltip('hide');
 
@@ -140,52 +130,18 @@ Sidebar.prototype.todoUpdateDone = function(data) {
   });
 };
 
-Sidebar.prototype.sidebarDropdownLoading = function() {
-  var $loading, $sidebarCollapsedIcon, i, img;
-  $sidebarCollapsedIcon = $(this)
-    .closest('.block')
-    .find('.sidebar-collapsed-icon');
-  img = $sidebarCollapsedIcon.find('img');
-  i = $sidebarCollapsedIcon.find('i');
-  $loading = $('<i class="fa fa-spinner fa-spin"></i>');
-  if (img.length) {
-    img.before($loading);
-    return img.hide();
-  } else if (i.length) {
-    i.before($loading);
-    return i.hide();
-  }
-};
-
-Sidebar.prototype.sidebarDropdownLoaded = function() {
-  var $sidebarCollapsedIcon, i, img;
-  $sidebarCollapsedIcon = $(this)
-    .closest('.block')
-    .find('.sidebar-collapsed-icon');
-  img = $sidebarCollapsedIcon.find('img');
-  $sidebarCollapsedIcon.find('i.fa-spin').remove();
-  i = $sidebarCollapsedIcon.find('i');
-  if (img.length) {
-    return img.show();
-  } else {
-    return i.show();
-  }
-};
-
 Sidebar.prototype.sidebarCollapseClicked = function(e) {
-  var $block, sidebar;
   if ($(e.currentTarget).hasClass('dont-change-state')) {
     return;
   }
-  sidebar = e.data;
+  const sidebar = e.data;
   e.preventDefault();
-  $block = $(this).closest('.block');
+  const $block = $(this).closest('.block');
   return sidebar.openDropdown($block);
 };
 
 Sidebar.prototype.openDropdown = function(blockOrName) {
-  var $block;
-  $block = _.isString(blockOrName) ? this.getBlock(blockOrName) : blockOrName;
+  const $block = typeof blockOrName === 'string' ? this.getBlock(blockOrName) : blockOrName;
   if (!this.isOpen()) {
     this.setCollapseAfterUpdate($block);
     this.toggleSidebar('open');
@@ -204,10 +160,9 @@ Sidebar.prototype.setCollapseAfterUpdate = function($block) {
 };
 
 Sidebar.prototype.onSidebarDropdownHidden = function(e) {
-  var $block, sidebar;
-  sidebar = e.data;
+  const sidebar = e.data;
   e.preventDefault();
-  $block = $(e.target).closest('.block');
+  const $block = $(e.target).closest('.block');
   return sidebar.sidebarDropdownHidden($block);
 };
 

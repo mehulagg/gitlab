@@ -41,25 +41,33 @@ module EE
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAddedToBoard,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAssociatedWithMilestone,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit,
-              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelRemoved
             ],
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAddedToBoard => [
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueClosed,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAssociatedWithMilestone,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit,
-              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelRemoved
             ],
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAssociatedWithMilestone => [
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueClosed,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAddedToBoard,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit,
-              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelRemoved
             ],
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstMentionedInCommit => [
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueClosed,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAssociatedWithMilestone,
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueFirstAddedToBoard,
-              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelAdded,
+              ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLabelRemoved
             ],
             ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueClosed => [
               ::Gitlab::Analytics::CycleAnalytics::StageEvents::IssueLastEdited,
@@ -125,7 +133,7 @@ module EE
             override :events
             def events
               strong_memoize(:events) do
-                super + EE_EVENTS
+                (super + EE_EVENTS).uniq
               end
             end
 

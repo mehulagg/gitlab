@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe InvitedGroupEntity do
+RSpec.describe InvitedGroupEntity do
   describe '#as_json' do
     let(:group) { build(:group, id: 1) }
 

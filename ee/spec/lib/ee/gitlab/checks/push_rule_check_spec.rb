@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Checks::PushRuleCheck do
+RSpec.describe EE::Gitlab::Checks::PushRuleCheck do
   include_context 'push rules checks context'
 
   let(:push_rule) { create(:push_rule, :commit_message) }

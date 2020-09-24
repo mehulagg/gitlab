@@ -2,14 +2,13 @@
 
 require 'spec_helper'
 
-describe Projects::BranchesController do
+RSpec.describe Projects::BranchesController do
   let(:project)   { create(:project, :repository) }
   let(:user)      { create(:user) }
   let(:developer) { create(:user) }
 
   before do
-    project.add_maintainer(user)
-    project.add_developer(user)
+    project.add_developer(developer)
 
     allow(project).to receive(:branches).and_return(['master', 'foo/bar/baz'])
     allow(project).to receive(:tags).and_return(['v1.0.0', 'v2.0.0'])
@@ -21,7 +20,7 @@ describe Projects::BranchesController do
 
     context "on creation of a new branch" do
       before do
-        sign_in(user)
+        sign_in(developer)
 
         post :create,
              params: {
@@ -35,36 +34,41 @@ describe Projects::BranchesController do
       context "valid branch name, valid source" do
         let(:branch) { "merge_branch" }
         let(:ref) { "master" }
+
         it 'redirects' do
           expect(subject)
-            .to redirect_to("/#{project.full_path}/tree/merge_branch")
+            .to redirect_to("/#{project.full_path}/-/tree/merge_branch")
         end
       end
 
       context "invalid branch name, valid ref" do
         let(:branch) { "<script>alert('merge');</script>" }
         let(:ref) { "master" }
+
         it 'redirects' do
           expect(subject)
-            .to redirect_to("/#{project.full_path}/tree/alert('merge');")
+            .to redirect_to("/#{project.full_path}/-/tree/alert('merge');")
         end
       end
 
       context "valid branch name, invalid ref" do
         let(:branch) { "merge_branch" }
         let(:ref) { "<script>alert('ref');</script>" }
+
         it { is_expected.to render_template('new') }
       end
 
       context "invalid branch name, invalid ref" do
         let(:branch) { "<script>alert('merge');</script>" }
         let(:ref) { "<script>alert('ref');</script>" }
+
         it { is_expected.to render_template('new') }
       end
 
       context "valid branch name with encoded slashes" do
         let(:branch) { "feature%2Ftest" }
         let(:ref) { "<script>alert('ref');</script>" }
+
         it { is_expected.to render_template('new') }
         it { project.repository.branch_exists?('feature/test') }
       end
@@ -75,7 +79,7 @@ describe Projects::BranchesController do
       let(:issue) { create(:issue, project: project) }
 
       before do
-        sign_in(user)
+        sign_in(developer)
       end
 
       it 'redirects' do
@@ -88,11 +92,11 @@ describe Projects::BranchesController do
              }
 
         expect(subject)
-          .to redirect_to("/#{project.full_path}/tree/1-feature-branch")
+          .to redirect_to("/#{project.full_path}/-/tree/1-feature-branch")
       end
 
       it 'posts a system note' do
-        expect(SystemNoteService).to receive(:new_issue_branch).with(issue, project, user, "1-feature-branch", branch_project: project)
+        expect(SystemNoteService).to receive(:new_issue_branch).with(issue, project, developer, "1-feature-branch", branch_project: project)
 
         post :create,
              params: {
@@ -119,55 +123,37 @@ describe Projects::BranchesController do
           )
         end
 
-        context 'create_confidential_merge_request feature is enabled' do
+        context 'user cannot update issue' do
+          let(:issue) { create(:issue, project: confidential_issue_project) }
+
+          it 'does not post a system note' do
+            expect(SystemNoteService).not_to receive(:new_issue_branch)
+
+            create_branch_with_confidential_issue_project
+          end
+        end
+
+        context 'user can update issue' do
           before do
-            stub_feature_flags(create_confidential_merge_request: true)
+            confidential_issue_project.add_reporter(developer)
           end
 
-          context 'user cannot update issue' do
+          context 'issue is under the specified project' do
             let(:issue) { create(:issue, project: confidential_issue_project) }
 
-            it 'does not post a system note' do
-              expect(SystemNoteService).not_to receive(:new_issue_branch)
+            it 'posts a system note' do
+              expect(SystemNoteService).to receive(:new_issue_branch).with(issue, confidential_issue_project, developer, "1-feature-branch", branch_project: project)
 
               create_branch_with_confidential_issue_project
             end
           end
 
-          context 'user can update issue' do
-            before do
-              confidential_issue_project.add_reporter(user)
+          context 'issue is not under the specified project' do
+            it 'does not post a system note' do
+              expect(SystemNoteService).not_to receive(:new_issue_branch)
+
+              create_branch_with_confidential_issue_project
             end
-
-            context 'issue is under the specified project' do
-              let(:issue) { create(:issue, project: confidential_issue_project) }
-
-              it 'posts a system note' do
-                expect(SystemNoteService).to receive(:new_issue_branch).with(issue, confidential_issue_project, user, "1-feature-branch", branch_project: project)
-
-                create_branch_with_confidential_issue_project
-              end
-            end
-
-            context 'issue is not under the specified project' do
-              it 'does not post a system note' do
-                expect(SystemNoteService).not_to receive(:new_issue_branch)
-
-                create_branch_with_confidential_issue_project
-              end
-            end
-          end
-        end
-
-        context 'create_confidential_merge_request feature is disabled' do
-          before do
-            stub_feature_flags(create_confidential_merge_request: false)
-          end
-
-          it 'posts a system note on project' do
-            expect(SystemNoteService).to receive(:new_issue_branch).with(issue, project, user, "1-feature-branch", branch_project: project)
-
-            create_branch_with_confidential_issue_project
           end
         end
       end
@@ -178,7 +164,7 @@ describe Projects::BranchesController do
         it 'redirects to newly created branch' do
           result = { status: :success, branch: double(name: branch) }
 
-          expect_any_instance_of(CreateBranchService).to receive(:execute).and_return(result)
+          expect_any_instance_of(::Branches::CreateService).to receive(:execute).and_return(result)
           expect(SystemNoteService).to receive(:new_issue_branch).and_return(true)
 
           post :create,
@@ -200,7 +186,7 @@ describe Projects::BranchesController do
           it 'redirects to autodeploy setup page' do
             result = { status: :success, branch: double(name: branch) }
 
-            expect_any_instance_of(CreateBranchService).to receive(:execute).and_return(result)
+            expect_any_instance_of(::Branches::CreateService).to receive(:execute).and_return(result)
             expect(SystemNoteService).to receive(:new_issue_branch).and_return(true)
 
             post :create,
@@ -212,7 +198,7 @@ describe Projects::BranchesController do
                  }
 
             expect(response.location).to include(project_new_blob_path(project, branch))
-            expect(response).to have_gitlab_http_status(302)
+            expect(response).to have_gitlab_http_status(:found)
           end
         end
 
@@ -221,7 +207,7 @@ describe Projects::BranchesController do
 
           create(:cluster, :provided_by_gcp, projects: [project])
 
-          expect_any_instance_of(CreateBranchService).to receive(:execute).and_return(result)
+          expect_any_instance_of(::Branches::CreateService).to receive(:execute).and_return(result)
           expect(SystemNoteService).to receive(:new_issue_branch).and_return(true)
 
           post :create,
@@ -233,7 +219,7 @@ describe Projects::BranchesController do
                }
 
           expect(response.location).to include(project_new_blob_path(project, branch))
-          expect(response).to have_gitlab_http_status(302)
+          expect(response).to have_gitlab_http_status(:found)
         end
       end
 
@@ -277,14 +263,14 @@ describe Projects::BranchesController do
 
   describe 'POST create with JSON format' do
     before do
-      sign_in(user)
+      sign_in(developer)
     end
 
     context 'with valid params' do
       it 'returns a successful 200 response' do
         create_branch name: 'my-branch', ref: 'master'
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'returns the created branch' do
@@ -298,7 +284,7 @@ describe Projects::BranchesController do
       it 'returns an unprocessable entity 422 response' do
         create_branch name: "<script>alert('merge');</script>", ref: "<script>alert('ref');</script>"
 
-        expect(response).to have_gitlab_http_status(422)
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end
 
@@ -318,7 +304,7 @@ describe Projects::BranchesController do
     render_views
 
     before do
-      sign_in(user)
+      sign_in(developer)
     end
 
     it 'returns 303' do
@@ -330,7 +316,7 @@ describe Projects::BranchesController do
              project_id: project
            }
 
-      expect(response).to have_gitlab_http_status(303)
+      expect(response).to have_gitlab_http_status(:see_other)
     end
   end
 
@@ -338,7 +324,7 @@ describe Projects::BranchesController do
     render_views
 
     before do
-      sign_in(user)
+      sign_in(developer)
 
       post :destroy,
            format: format,
@@ -356,28 +342,28 @@ describe Projects::BranchesController do
       context "valid branch name, valid source" do
         let(:branch) { "feature" }
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
         it { expect(response.body).to be_blank }
       end
 
       context "valid branch name with unencoded slashes" do
         let(:branch) { "improve/awesome" }
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
         it { expect(response.body).to be_blank }
       end
 
       context "valid branch name with encoded slashes" do
         let(:branch) { "improve%2Fawesome" }
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
         it { expect(response.body).to be_blank }
       end
 
       context "invalid branch name, valid ref" do
         let(:branch) { "no-branch" }
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
         it { expect(response.body).to be_blank }
       end
     end
@@ -393,7 +379,7 @@ describe Projects::BranchesController do
           expect(json_response).to eql("message" => 'Branch was deleted')
         end
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
       end
 
       context 'valid branch name with unencoded slashes' do
@@ -403,7 +389,7 @@ describe Projects::BranchesController do
           expect(json_response).to eql('message' => 'Branch was deleted')
         end
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
       end
 
       context "valid branch name with encoded slashes" do
@@ -413,7 +399,7 @@ describe Projects::BranchesController do
           expect(json_response).to eql('message' => 'Branch was deleted')
         end
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
       end
 
       context 'invalid branch name, valid ref' do
@@ -423,7 +409,7 @@ describe Projects::BranchesController do
           expect(json_response).to eql('message' => 'No such branch')
         end
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
       end
     end
 
@@ -449,7 +435,7 @@ describe Projects::BranchesController do
 
     context 'when user is allowed to push' do
       before do
-        sign_in(user)
+        sign_in(developer)
       end
 
       it 'redirects to branches' do
@@ -459,7 +445,7 @@ describe Projects::BranchesController do
       end
 
       it 'starts worker to delete merged branches' do
-        expect_any_instance_of(DeleteMergedBranchesService).to receive(:async_execute)
+        expect_any_instance_of(::Branches::DeleteMergedService).to receive(:async_execute)
 
         destroy_all_merged
       end
@@ -467,13 +453,13 @@ describe Projects::BranchesController do
 
     context 'when user is not allowed to push' do
       before do
-        sign_in(developer)
+        sign_in(user)
       end
 
       it 'responds with status 404' do
         destroy_all_merged
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -482,7 +468,7 @@ describe Projects::BranchesController do
     render_views
 
     before do
-      sign_in(user)
+      sign_in(developer)
     end
 
     context 'when rendering a JSON format' do
@@ -500,6 +486,82 @@ describe Projects::BranchesController do
       end
     end
 
+    context 'when a branch has multiple pipelines' do
+      it 'chooses the latest to determine status' do
+        sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: 'master')
+        create(:ci_pipeline,
+          project: project,
+          user: developer,
+          ref: "master",
+          sha: sha,
+          status: :running,
+          created_at: 6.months.ago)
+        create(:ci_pipeline,
+          project: project,
+          user: developer,
+          ref: "master",
+          sha: sha,
+          status: :success,
+          created_at: 2.months.ago)
+
+        get :index,
+            format: :html,
+            params: {
+              namespace_id: project.namespace,
+              project_id: project,
+              state: 'all'
+            }
+
+        expect(controller.instance_variable_get(:@branch_pipeline_statuses)["master"].group).to eq("success")
+      end
+    end
+
+    context 'when multiple branches exist' do
+      it 'all relevant commit statuses are received' do
+        master_sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: 'master')
+        create(:ci_pipeline,
+          project: project,
+          user: developer,
+          ref: "master",
+          sha: master_sha,
+          status: :running,
+          created_at: 6.months.ago)
+        test_sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: 'test')
+        create(:ci_pipeline,
+          project: project,
+          user: developer,
+          ref: "test",
+          sha: test_sha,
+          status: :success,
+          created_at: 2.months.ago)
+
+        get :index,
+            format: :html,
+            params: {
+              namespace_id: project.namespace,
+              project_id: project,
+              state: 'all'
+            }
+
+        expect(controller.instance_variable_get(:@branch_pipeline_statuses)["master"].group).to eq("running")
+        expect(controller.instance_variable_get(:@branch_pipeline_statuses)["test"].group).to eq("success")
+      end
+    end
+
+    context 'when a branch contains no pipelines' do
+      it 'no commit statuses are received' do
+        get :index,
+            format: :html,
+            params: {
+              namespace_id: project.namespace,
+              project_id: project,
+              state: 'all'
+            }
+
+        expect(controller.instance_variable_get(:@branch_pipeline_statuses)).to be_blank
+      end
+    end
+
     # We need :request_store because Gitaly only counts the queries whenever
     # `RequestStore.active?` in GitalyClient.enforce_gitaly_request_limits
     # And the main goal of this test is making sure TooManyInvocationsError
@@ -514,7 +576,7 @@ describe Projects::BranchesController do
               state: 'all'
             }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -532,7 +594,7 @@ describe Projects::BranchesController do
               state: 'all'
             }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -577,7 +639,7 @@ describe Projects::BranchesController do
 
   describe 'GET diverging_commit_counts' do
     before do
-      sign_in(user)
+      sign_in(developer)
     end
 
     it 'returns the commit counts behind and ahead of default branch' do
@@ -586,10 +648,10 @@ describe Projects::BranchesController do
           params: {
             namespace_id: project.namespace,
             project_id: project,
-            names: ['fix', 'add-pdf-file', 'branch-merged']
+            names: %w[fix add-pdf-file branch-merged]
           }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response).to eq(
         "fix" => { "behind" => 29, "ahead" => 2 },
         "branch-merged" => { "behind" => 1, "ahead" => 0 },
@@ -607,7 +669,7 @@ describe Projects::BranchesController do
             project_id: project
           }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(json_response.count).to be > 1
     end
 
@@ -624,7 +686,7 @@ describe Projects::BranchesController do
               project_id: project
             }
 
-        expect(response).to have_gitlab_http_status(422)
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response['error']).to eq("Specify at least one and at most #{Kaminari.config.default_per_page} branch names")
       end
 
@@ -634,10 +696,10 @@ describe Projects::BranchesController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              names: ['fix', 'add-pdf-file', 'branch-merged']
+              names: %w[fix add-pdf-file branch-merged]
             }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.count).to be > 1
       end
     end

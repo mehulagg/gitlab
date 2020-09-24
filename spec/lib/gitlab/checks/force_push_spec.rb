@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::ForcePush do
-  set(:project) { create(:project, :repository) }
+RSpec.describe Gitlab::Checks::ForcePush do
+  let_it_be(:project) { create(:project, :repository) }
 
   describe '.force_push?' do
     it 'returns false if the repo is empty' do

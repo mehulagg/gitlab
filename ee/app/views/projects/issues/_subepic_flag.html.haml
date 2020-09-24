@@ -1,0 +1,4 @@
+- return unless issue_in_subepic?(issue, params[:epic_id])
+
+%span.gl-display-inline-block.gl-ml-2{ title: _('This issue is in a child epic of the filtered epic'), data: { toggle: 'tooltip', container: 'body' } }
+  = sprite_icon('information-o', css_class: 'gl-text-blue-500 gl-hover-text-blue-800')

@@ -1,7 +1,6 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlButton, GlDropdown, GlDropdownItem, GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
 import { SORT_FIELDS, SORT_ORDER } from '../store/modules/list/constants';
 
@@ -11,7 +10,7 @@ export default {
     GlButton,
     GlDropdown,
     GlDropdownItem,
-    Icon,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -70,8 +69,8 @@ export default {
       <gl-dropdown :text="sortFieldName" class="flex-grow-1 text-center" right>
         <gl-dropdown-item v-for="(name, id) in sortFields" :key="id" @click="setSortField(id)">
           <span class="d-flex">
-            <icon
-              class="flex-shrink-0 append-right-4"
+            <gl-icon
+              class="flex-shrink-0 gl-mr-2"
               :class="{ invisible: !isCurrentSortField(id) }"
               name="mobile-issue-close"
             />
@@ -85,7 +84,7 @@ export default {
         class="flex-grow-0 js-sort-order"
         @click="toggleSortOrder"
       >
-        <icon :name="sortOrderIcon" />
+        <gl-icon :name="sortOrderIcon" />
       </gl-button>
     </div>
     <gl-button
@@ -94,8 +93,9 @@ export default {
       download="dependencies.json"
       :title="s__('Dependencies|Export as JSON')"
       class="js-download"
+      icon="export"
     >
-      <icon name="download" />
+      {{ __('Export') }}
     </gl-button>
   </div>
 </template>

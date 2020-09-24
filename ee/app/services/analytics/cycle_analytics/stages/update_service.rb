@@ -56,6 +56,9 @@ module Analytics
         # rubocop: enable CodeReuse/ActiveRecord
 
         def handle_position_change
+          # make sure that unpositioned items have relative_position
+          @stage.class.move_nulls_to_end(parent.cycle_analytics_stages.ordered)
+
           move_before_id = params.delete(:move_before_id)
           move_after_id = params.delete(:move_after_id)
 

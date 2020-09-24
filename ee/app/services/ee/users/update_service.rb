@@ -4,8 +4,8 @@ module EE
   module Users
     module UpdateService
       extend ::Gitlab::Utils::Override
-      include EE::Audit::Changes # rubocop: disable Cop/InjectEnterpriseEditionModule
       include ::Gitlab::Utils::StrongMemoize
+      include ::Audit::Changes
 
       attr_reader :group_id_for_saml
 
@@ -23,12 +23,28 @@ module EE
 
         audit_changes(:email, as: 'email address')
         audit_changes(:encrypted_password, as: 'password', skip_changes: true)
+        audit_changes(:username, as: 'username')
 
         success
       end
 
       def model
         @user
+      end
+
+      override :discard_read_only_attributes
+      def discard_read_only_attributes
+        super
+
+        discard_name unless name_updatable?
+      end
+
+      def discard_name
+        params.delete(:name)
+      end
+
+      def name_updatable?
+        can?(current_user, :update_name, model)
       end
 
       override :identity_params

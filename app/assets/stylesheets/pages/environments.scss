@@ -7,7 +7,6 @@
 
 .environments-folder-name {
   font-weight: $gl-font-weight-normal;
-  padding-top: 20px;
 }
 
 .environments-container {
@@ -84,7 +83,7 @@
 
 .x-axis path,
 .y-axis path {
-  stroke: $gl-gray-350;
+  stroke: $gray-300;
 }
 
 .label-x-axis-line,
@@ -94,7 +93,7 @@
 
 .y-axis {
   line {
-    stroke: $gl-gray-350;
+    stroke: $gray-300;
     stroke-width: 1;
   }
 }
@@ -103,15 +102,14 @@
   opacity: 0.25;
 }
 
-
 .rect-text-metric {
-  fill: $white-light;
+  fill: $white;
   stroke-width: 1;
   stroke: $gray-darkest;
 }
 
 .rect-axis-text {
-  fill: $white-light;
+  fill: $white;
 }
 
 .text-metric {
@@ -119,7 +117,7 @@
 }
 
 .selected-metric-line {
-  stroke: $gl-gray-dark;
+  stroke: $gray-900;
   stroke-width: 1;
 }
 

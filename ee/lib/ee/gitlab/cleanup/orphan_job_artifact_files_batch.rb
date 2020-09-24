@@ -29,7 +29,7 @@ module EE
         end
 
         def lost_and_found_geo_registries
-          @lost_and_found_geo_registries ||= ::Geo::JobArtifactRegistry.artifact_id_in(lost_and_found_ids)
+          @lost_and_found_geo_registries ||= ::Geo::JobArtifactRegistry.model_id_in(lost_and_found_ids)
         end
       end
     end

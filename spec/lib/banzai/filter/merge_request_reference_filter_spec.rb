@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::MergeRequestReferenceFilter do
+RSpec.describe Banzai::Filter::MergeRequestReferenceFilter do
   include FilterSpecHelper
 
   let(:project) { create(:project, :public) }
@@ -220,6 +220,7 @@ describe Banzai::Filter::MergeRequestReferenceFilter do
     let(:reference) do
       urls.project_merge_request_url(mr.project, mr) + "/diffs?commit_id=#{mr.diff_head_sha}"
     end
+
     let(:commit) { mr.commits.find { |commit| commit.sha == mr.diff_head_sha } }
 
     it 'links to a valid reference' do

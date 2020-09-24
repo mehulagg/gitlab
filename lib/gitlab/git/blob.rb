@@ -13,13 +13,36 @@ module Gitlab
       # use load_all_data!.
       MAX_DATA_DISPLAY_SIZE = 10.megabytes
 
+      # The number of blobs loaded in a single Gitaly call
+      # When a large number of blobs requested, we'd want to fetch them in
+      # multiple Gitaly calls
+      BATCH_SIZE = 250
+
       # These limits are used as a heuristic to ignore files which can't be LFS
       # pointers. The format of these is described in
       # https://github.com/git-lfs/git-lfs/blob/master/docs/spec.md#the-pointer
       LFS_POINTER_MIN_SIZE = 120.bytes
       LFS_POINTER_MAX_SIZE = 200.bytes
 
-      attr_accessor :name, :path, :size, :data, :mode, :id, :commit_id, :loaded_size, :binary
+      attr_accessor :size, :mode, :id, :commit_id, :loaded_size, :binary
+      attr_writer :name, :path, :data
+
+      def self.gitlab_blob_truncated_true
+        @gitlab_blob_truncated_true ||= ::Gitlab::Metrics.counter(:gitlab_blob_truncated_true, 'blob.truncated? == true')
+      end
+
+      def self.gitlab_blob_truncated_false
+        @gitlab_blob_truncated_false ||= ::Gitlab::Metrics.counter(:gitlab_blob_truncated_false, 'blob.truncated? == false')
+      end
+
+      def self.gitlab_blob_size
+        @gitlab_blob_size ||= ::Gitlab::Metrics.histogram(
+          :gitlab_blob_size,
+          'Gitlab::Git::Blob size',
+          {},
+          [1_000, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000]
+        )
+      end
 
       class << self
         def find(repository, sha, path, limit: MAX_DATA_DISPLAY_SIZE)
@@ -67,7 +90,9 @@ module Gitlab
         # to the caller to limit the number of blobs and blob_size_limit.
         #
         def batch(repository, blob_references, blob_size_limit: MAX_DATA_DISPLAY_SIZE)
-          repository.gitaly_blob_client.get_blobs(blob_references, blob_size_limit).to_a
+          blob_references.each_slice(BATCH_SIZE).flat_map do |refs|
+            repository.gitaly_blob_client.get_blobs(refs, blob_size_limit).to_a
+          end
         end
 
         # Returns an array of Blob instances just with the metadata, that means
@@ -102,6 +127,9 @@ module Gitlab
         # Retain the actual size before it is encoded
         @loaded_size = @data.bytesize if @data
         @loaded_all_data = @loaded_size == size
+
+        record_metric_blob_size
+        record_metric_truncated(truncated?)
       end
 
       def binary_in_repo?
@@ -117,7 +145,7 @@ module Gitlab
       def load_all_data!(repository)
         return if @data == '' # don't mess with submodule blobs
 
-        # Even if we return early, recalculate wether this blob is binary in
+        # Even if we return early, recalculate whether this blob is binary in
         # case a blob was initialized as text but the full data isn't
         @binary = nil
 
@@ -137,7 +165,9 @@ module Gitlab
       end
 
       def truncated?
-        size && (size > loaded_size)
+        return false unless size && loaded_size
+
+        size > loaded_size
       end
 
       # Valid LFS object pointer is a text file consisting of
@@ -176,6 +206,20 @@ module Gitlab
       alias_method :external_size, :lfs_size
 
       private
+
+      def record_metric_blob_size
+        return unless size
+
+        self.class.gitlab_blob_size.observe({}, size)
+      end
+
+      def record_metric_truncated(bool)
+        if bool
+          self.class.gitlab_blob_truncated_true.increment
+        else
+          self.class.gitlab_blob_truncated_false.increment
+        end
+      end
 
       def has_lfs_version_key?
         !empty? && text_in_repo? && data.start_with?("version https://git-lfs.github.com/spec")

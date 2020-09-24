@@ -10,6 +10,7 @@ const getAllProjects = (url, page = '1', projects = []) =>
       page,
       include_subgroups: true,
       with_security_reports: true,
+      with_shared: false,
       order_by: 'path',
       sort: 'asc',
     },
@@ -53,7 +54,3 @@ export const receiveProjectsSuccess = ({ commit }, { projects }) => {
 export const receiveProjectsError = ({ commit }) => {
   commit(types.RECEIVE_PROJECTS_ERROR);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-// This is no longer needed after gitlab-foss#52179 is merged
-export default () => {};

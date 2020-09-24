@@ -3,6 +3,8 @@
 require "discordrb/webhooks"
 
 class DiscordService < ChatNotificationService
+  ATTACHMENT_REGEX = /: (?<entry>.*?)\n - (?<name>.*)\n*/.freeze
+
   def title
     s_("DiscordService|Discord Notifications")
   end
@@ -42,7 +44,7 @@ class DiscordService < ChatNotificationService
     [
       { type: "text", name: "webhook", placeholder: "e.g. https://discordapp.com/api/webhooks/…" },
       { type: "checkbox", name: "notify_only_broken_pipelines" },
-      { type: 'select', name: 'branches_to_be_notified', choices: BRANCH_CHOICES }
+      { type: 'select', name: 'branches_to_be_notified', choices: branch_choices }
     ]
   end
 
@@ -52,7 +54,10 @@ class DiscordService < ChatNotificationService
     client = Discordrb::Webhooks::Client.new(url: webhook)
 
     client.execute do |builder|
-      builder.content = message.pretext
+      builder.add_embed do |embed|
+        embed.author = Discordrb::Webhooks::EmbedAuthor.new(name: message.user_name, icon_url: message.user_avatar)
+        embed.description = (message.pretext + "\n" + Array.wrap(message.attachments).join("\n")).gsub(ATTACHMENT_REGEX, " \\k<entry> - \\k<name>\n")
+      end
     end
   end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Global elastic search', :elastic do
+RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, :wiki_repo, namespace: user.namespace) }
 
@@ -15,21 +15,27 @@ describe 'Global elastic search', :elastic do
 
   shared_examples 'an efficient database result' do
     it 'avoids N+1 database queries' do
-      create(object, creation_args)
-      Gitlab::Elastic::Helper.refresh_index
+      create(object, *creation_traits, creation_args)
+
+      ensure_elasticsearch_index!
 
       control_count = ActiveRecord::QueryRecorder.new { visit path }.count
+      expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
 
-      create_list(object, 10, creation_args)
-      Gitlab::Elastic::Helper.refresh_index
+      create_list(object, 10, *creation_traits, creation_args)
+
+      ensure_elasticsearch_index!
 
       control_count = control_count + (10 * query_count_multiplier) + 1
 
       expect { visit path }.not_to exceed_query_limit(control_count)
+      expect(page).to have_css('.search-results') # Confirm there are search results to prevent false positives
     end
   end
 
   describe 'I do not overload the database' do
+    let(:creation_traits) { [] }
+
     context 'searching issues' do
       let(:object) { :issue }
       let(:creation_args) { { project: project, title: 'initial' } }
@@ -43,18 +49,19 @@ describe 'Global elastic search', :elastic do
       let(:object) { :project }
       let(:creation_args) { { namespace: user.namespace } }
       let(:path) { search_path(search: 'project*', scope: 'projects') }
-      # Each Project requires 5 extra queries: one for each "count" (forks,
-      # open MRs, open Issues) and twice for access level. This should be fixed
-      # per https://gitlab.com/gitlab-org/gitlab/issues/34457
-      let(:query_count_multiplier) { 5 }
+      # Each Project requires 4 extra queries: one for each "count" (forks,
+      # open MRs, open Issues and access levels). This should be fixed per
+      # https://gitlab.com/gitlab-org/gitlab/issues/34457
+      let(:query_count_multiplier) { 4 }
 
       it_behaves_like 'an efficient database result'
     end
 
     context 'searching merge requests' do
       let(:object) { :merge_request }
-      let(:creation_args) { { title: 'initial' } }
-      let(:path) { search_path(search: 'initial*', scope: 'merge_requests') }
+      let(:creation_traits) { [:sequence_source_branch] }
+      let(:creation_args) { { source_project: project, title: 'initial' } }
+      let(:path) { search_path(search: '*', scope: 'merge_requests') }
       let(:query_count_multiplier) { 0 }
 
       it_behaves_like 'an efficient database result'
@@ -63,7 +70,7 @@ describe 'Global elastic search', :elastic do
     context 'searching milestones' do
       let(:object) { :milestone }
       let(:creation_args) { { project: project } }
-      let(:path) { search_path(search: 'milestone*', scope: 'milestones') }
+      let(:path) { search_path(search: '*', scope: 'milestones') }
       let(:query_count_multiplier) { 0 }
 
       it_behaves_like 'an efficient database result'
@@ -74,10 +81,10 @@ describe 'Global elastic search', :elastic do
     before do
       create_list(:issue, 21, project: project, title: 'initial')
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
-    it "has a pagination", :sidekiq_might_not_need_inline do
+    it "has a pagination" do
       visit dashboard_projects_path
 
       submit_search('initial')
@@ -92,10 +99,10 @@ describe 'Global elastic search', :elastic do
       issue = create(:issue, project: project, title: 'initial')
       create_list(:note, 21, noteable: issue, project: project, note: 'foo')
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
-    it "has a pagination", :sidekiq_might_not_need_inline do
+    it "has a pagination" do
       visit dashboard_projects_path
 
       submit_search('foo')
@@ -111,10 +118,10 @@ describe 'Global elastic search', :elastic do
     before do
       project.repository.index_commits_and_blobs
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
-    it "finds files", :sidekiq_might_not_need_inline do
+    it "finds files" do
       visit dashboard_projects_path
 
       submit_search('application.js')
@@ -136,8 +143,10 @@ describe 'Global elastic search', :elastic do
         branch_name: 'master')
 
       project_2.repository.index_commits_and_blobs
-      Gitlab::Elastic::Helper.refresh_index
-      project_2.destroy
+
+      ensure_elasticsearch_index!
+
+      project_2.destroy!
 
       visit dashboard_projects_path
 
@@ -152,10 +161,10 @@ describe 'Global elastic search', :elastic do
       project.wiki.create_page('test.md', '# term')
       project.wiki.index_wiki_blobs
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
-    it "finds files", :sidekiq_might_not_need_inline do
+    it "finds files" do
       visit dashboard_projects_path
 
       submit_search('term')
@@ -170,10 +179,10 @@ describe 'Global elastic search', :elastic do
   describe 'I search through the commits' do
     before do
       project.repository.index_commits_and_blobs
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
-    it "finds commits", :sidekiq_might_not_need_inline do
+    it "finds commits" do
       visit dashboard_projects_path
 
       submit_search('add')
@@ -183,7 +192,7 @@ describe 'Global elastic search', :elastic do
       expect(page).to have_selector('.project-namespace')
     end
 
-    it 'shows proper page 2 results', :sidekiq_might_not_need_inline do
+    it 'shows proper page 2 results' do
       visit dashboard_projects_path
 
       submit_search('add')
@@ -202,14 +211,14 @@ describe 'Global elastic search', :elastic do
   describe 'I search globally', :js do
     before do
       create(:issue, project: project, title: 'project issue')
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
 
       visit dashboard_projects_path
 
       submit_search('project')
     end
 
-    it 'displays result counts for all categories', :sidekiq_might_not_need_inline do
+    it 'displays result counts for all categories' do
       expect(page).to have_content('Projects 1')
       expect(page).to have_content('Issues 1')
       expect(page).to have_content('Merge requests 0')
@@ -221,33 +230,22 @@ describe 'Global elastic search', :elastic do
       expect(page).to have_content('Users 0')
     end
   end
+end
 
-  context 'when no results are returned' do
-    it 'allows basic search without Elasticsearch' do
-      visit dashboard_projects_path
-
-      submit_search('project')
-
-      # Project won't be found since ES index is not up to date
-      expect(page).not_to have_content('Projects 1')
-
-      # Since there are no results you have the option to instead use basic
-      # search
-      click_link 'basic search'
-
-      # Project is found now that we are using basic search
-      expect(page).to have_content('Projects 1')
+RSpec.describe 'Global elastic search redactions', :elastic do
+  context 'when block_anonymous_global_searches is disabled' do
+    before do
+      stub_feature_flags(block_anonymous_global_searches: false)
     end
 
-    context 'when performing Commits search' do
-      it 'does not allow basic search' do
-        visit dashboard_projects_path
+    it_behaves_like 'a redacted search results page' do
+      let(:search_path) { explore_root_path }
+    end
+  end
 
-        submit_search('project')
-        select_search_scope('Commits')
-
-        expect(page).not_to have_link('basic search')
-      end
+  context 'when block_anonymous_global_searches is enabled' do
+    it_behaves_like 'a redacted search results page', include_anonymous: false do
+      let(:search_path) { explore_root_path }
     end
   end
 end

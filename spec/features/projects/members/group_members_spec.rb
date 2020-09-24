@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects members' do
+RSpec.describe 'Projects members' do
   let(:user) { create(:user) }
   let(:developer) { create(:user) }
   let(:group) { create(:group, :public) }
@@ -21,7 +21,7 @@ describe 'Projects members' do
   context 'with a group invitee' do
     before do
       group_invitee
-      visit project_settings_members_path(project)
+      visit project_project_members_path(project)
     end
 
     it 'does not appear in the project members page' do
@@ -31,11 +31,46 @@ describe 'Projects members' do
     end
   end
 
+  context 'with a group' do
+    it 'shows group and project members by default' do
+      visit project_project_members_path(project)
+
+      page.within first('.content-list') do
+        expect(page).to have_content(developer.name)
+
+        expect(page).to have_content(user.name)
+        expect(page).to have_content(group.name)
+      end
+    end
+
+    it 'shows project members only if requested' do
+      visit project_project_members_path(project, with_inherited_permissions: 'exclude')
+
+      page.within first('.content-list') do
+        expect(page).to have_content(developer.name)
+
+        expect(page).not_to have_content(user.name)
+        expect(page).not_to have_content(group.name)
+      end
+    end
+
+    it 'shows group members only if requested' do
+      visit project_project_members_path(project, with_inherited_permissions: 'only')
+
+      page.within first('.content-list') do
+        expect(page).not_to have_content(developer.name)
+
+        expect(page).to have_content(user.name)
+        expect(page).to have_content(group.name)
+      end
+    end
+  end
+
   context 'with a group and a project invitee' do
     before do
       group_invitee
       project_invitee
-      visit project_settings_members_path(project)
+      visit project_project_members_path(project)
     end
 
     it 'shows the project invitee, the project developer, and the group owner' do
@@ -56,7 +91,7 @@ describe 'Projects members' do
   context 'with a group requester' do
     before do
       group.request_access(group_requester)
-      visit project_settings_members_path(project)
+      visit project_project_members_path(project)
     end
 
     it 'does not appear in the project members page' do
@@ -70,7 +105,7 @@ describe 'Projects members' do
     before do
       group.request_access(group_requester)
       project.request_access(project_requester)
-      visit project_settings_members_path(project)
+      visit project_project_members_path(project)
     end
 
     it 'shows the project requester, the project developer, and the group owner' do
@@ -94,7 +129,7 @@ describe 'Projects members' do
     it_behaves_like 'showing user status' do
       let(:user_with_status) { developer }
 
-      subject { visit project_settings_members_path(project) }
+      subject { visit project_project_members_path(project) }
     end
   end
 end

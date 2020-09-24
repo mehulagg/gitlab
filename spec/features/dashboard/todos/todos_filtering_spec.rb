@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Dashboard > User filters todos', :js do
+RSpec.describe 'Dashboard > User filters todos', :js do
   let(:user_1)    { create(:user, username: 'user_1', name: 'user_1') }
   let(:user_2)    { create(:user, username: 'user_2', name: 'user_2') }
 
@@ -130,12 +130,19 @@ describe 'Dashboard > User filters todos', :js do
     before do
       create(:todo, :build_failed, user: user_1, author: user_2, project: project_1)
       create(:todo, :marked, user: user_1, author: user_2, project: project_1, target: issue1)
+      create(:todo, :review_requested, user: user_1, author: user_2, project: project_1, target: issue1)
     end
 
     it 'filters by Assigned' do
       filter_action('Assigned')
 
       expect_to_see_action(:assigned)
+    end
+
+    it 'filters by Review Requested' do
+      filter_action('Review requested')
+
+      expect_to_see_action(:review_requested)
     end
 
     it 'filters by Mentioned' do
@@ -168,6 +175,7 @@ describe 'Dashboard > User filters todos', :js do
     def expect_to_see_action(action_name)
       action_names = {
         assigned: ' assigned you ',
+        review_requested: ' requested a review of ',
         mentioned: ' mentioned ',
         marked: ' added a todo for ',
         build_failed: ' build failed for '

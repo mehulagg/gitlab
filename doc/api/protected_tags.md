@@ -1,12 +1,19 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Protected tags API
 
->**Note:** This feature was introduced in GitLab 11.3
+> Introduced in GitLab 11.3.
 
 **Valid access levels**
 
 Currently, these levels are recognized:
 
-```
+```plaintext
 0  => No access
 30 => Developer access
 40 => Maintainer access
@@ -17,7 +24,7 @@ Currently, these levels are recognized:
 Gets a list of protected tags from a project.
 This function takes pagination parameters `page` and `per_page` to restrict the list of protected tags.
 
-```
+```plaintext
 GET /projects/:id/protected_tags
 ```
 
@@ -25,8 +32,8 @@ GET /projects/:id/protected_tags
 | --------- | ---- | -------- | ----------- |
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_tags'
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_tags"
 ```
 
 Example response:
@@ -51,7 +58,7 @@ Example response:
 Gets a single protected tag or wildcard protected tag.
 The pagination parameters `page` and `per_page` can be used to restrict the list of protected tags.
 
-```
+```plaintext
 GET /projects/:id/protected_tags/:name
 ```
 
@@ -60,8 +67,8 @@ GET /projects/:id/protected_tags/:name
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `name` | string | yes | The name of the tag or wildcard |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_tags/release-1-0'
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_tags/release-1-0"
 ```
 
 Example response:
@@ -83,12 +90,12 @@ Example response:
 Protects a single repository tag or several project repository
 tags using a wildcard protected tag.
 
-```
+```plaintext
 POST /projects/:id/protected_tags
 ```
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_tags?name=*-stable&create_access_level=30'
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_tags?name=*-stable&create_access_level=30"
 ```
 
 | Attribute | Type | Required | Description |
@@ -115,12 +122,12 @@ Example response:
 
 Unprotects the given protected tag or wildcard protected tag.
 
-```
+```plaintext
 DELETE /projects/:id/protected_tags/:name
 ```
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" 'https://gitlab.example.com/api/v4/projects/5/protected_tags/*-stable'
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/protected_tags/*-stable"
 ```
 
 | Attribute | Type | Required | Description |

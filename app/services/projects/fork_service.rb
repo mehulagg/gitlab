@@ -3,38 +3,49 @@
 module Projects
   class ForkService < BaseService
     def execute(fork_to_project = nil)
-      if fork_to_project
-        link_existing_project(fork_to_project)
-      else
-        fork_new_project
-      end
+      forked_project = fork_to_project ? link_existing_project(fork_to_project) : fork_new_project
+
+      refresh_forks_count if forked_project&.saved?
+
+      forked_project
+    end
+
+    def valid_fork_targets(options = {})
+      @valid_fork_targets ||= ForkTargetsFinder.new(@project, current_user).execute(options)
+    end
+
+    def valid_fork_target?(namespace = target_namespace)
+      return true if current_user.admin?
+
+      valid_fork_targets.include?(namespace)
     end
 
     private
-
-    def allowed_fork?
-      current_user.can?(:fork_project, @project)
-    end
 
     def link_existing_project(fork_to_project)
       return if fork_to_project.forked?
 
       build_fork_network_member(fork_to_project)
 
-      if link_fork_network(fork_to_project)
-        # A forked project stores its LFS objects in the `forked_from_project`.
-        # So the LFS objects become inaccessible, and therefore delete them from
-        # the database so they'll get cleaned up.
-        #
-        # TODO: refactor this to get the correct lfs objects when implementing
-        #       https://gitlab.com/gitlab-org/gitlab-foss/issues/39769
-        fork_to_project.lfs_objects_projects.delete_all
-
-        fork_to_project
-      end
+      fork_to_project if link_fork_network(fork_to_project)
     end
 
     def fork_new_project
+      new_project = CreateService.new(current_user, new_fork_params).execute
+      return new_project unless new_project.persisted?
+
+      # Set the forked_from_project relation after saving to avoid having to
+      # reload the project to reset the association information and cause an
+      # extra query.
+      new_project.forked_from_project = @project
+
+      builds_access_level = @project.project_feature.builds_access_level
+      new_project.project_feature.update(builds_access_level: builds_access_level)
+
+      new_project
+    end
+
+    def new_fork_params
       new_params = {
         visibility_level:          allowed_visibility_level,
         description:               @project.description,
@@ -62,18 +73,11 @@ module Projects
 
       new_params.merge!(@project.object_pool_params)
 
-      new_project = CreateService.new(current_user, new_params).execute
-      return new_project unless new_project.persisted?
+      new_params
+    end
 
-      # Set the forked_from_project relation after saving to avoid having to
-      # reload the project to reset the association information and cause an
-      # extra query.
-      new_project.forked_from_project = @project
-
-      builds_access_level = @project.project_feature.builds_access_level
-      new_project.project_feature.update(builds_access_level: builds_access_level)
-
-      new_project
+    def allowed_fork?
+      current_user.can?(:fork_project, @project)
     end
 
     def fork_network
@@ -92,8 +96,7 @@ module Projects
     def link_fork_network(fork_to_project)
       return if fork_to_project.errors.any?
 
-      fork_to_project.fork_network_member.save &&
-        refresh_forks_count
+      fork_to_project.fork_network_member.save
     end
 
     def refresh_forks_count

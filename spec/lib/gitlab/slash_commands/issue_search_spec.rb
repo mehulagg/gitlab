@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::SlashCommands::IssueSearch do
+RSpec.describe Gitlab::SlashCommands::IssueSearch do
   describe '#execute' do
     let!(:issue) { create(:issue, project: project, title: 'find me') }
     let!(:confidential) { create(:issue, :confidential, project: project, title: 'mepmep find') }
@@ -42,6 +42,7 @@ describe Gitlab::SlashCommands::IssueSearch do
 
   describe 'self.match' do
     let(:query) { "my search keywords" }
+
     it 'matches the query' do
       match = described_class.match("issue search #{query}")
 

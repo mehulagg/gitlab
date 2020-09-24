@@ -2,13 +2,13 @@
 
 require "spec_helper"
 
-describe Gitlab::Git::DiffStatsCollection do
+RSpec.describe Gitlab::Git::DiffStatsCollection do
   let(:stats_a) do
-    double(Gitaly::DiffStats, additions: 10, deletions: 15, path: 'foo')
+    Gitaly::DiffStats.new(additions: 10, deletions: 15, path: 'foo')
   end
 
   let(:stats_b) do
-    double(Gitaly::DiffStats, additions: 5, deletions: 1, path: 'bar')
+    Gitaly::DiffStats.new(additions: 5, deletions: 1, path: 'bar')
   end
 
   let(:diff_stats) { [stats_a, stats_b] }
@@ -27,6 +27,18 @@ describe Gitlab::Git::DiffStatsCollection do
   describe '#paths' do
     it 'returns only modified paths' do
       expect(collection.paths).to eq %w[foo bar]
+    end
+  end
+
+  describe '#real_size' do
+    it 'returns the number of modified files' do
+      expect(collection.real_size).to eq('2')
+    end
+
+    it 'returns capped number when it is bigger than max_files' do
+      allow(::Commit).to receive(:max_diff_options).and_return(max_files: 1)
+
+      expect(collection.real_size).to eq('1+')
     end
   end
 end

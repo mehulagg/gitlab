@@ -5,18 +5,20 @@ module EE
     extend ::Gitlab::Utils::Override
     include ::Gitlab::Utils::StrongMemoize
 
-    attr_reader :label_ids_ordered_by_selection
-
     private
+
+    attr_reader :label_ids_ordered_by_selection
 
     override :filter_params
     def filter_params(issuable)
-      # This security check is repeated here to avoid multiple backports,
-      # this should be refactored to be reused from the base class.
-      ability_name = :"admin_#{issuable.to_ability_name}"
+      can_admin_issuable = can_admin_issuable?(issuable)
 
-      unless issuable.supports_weight? && can?(current_user, ability_name, issuable)
+      unless can_admin_issuable && issuable.weight_available?
         params.delete(:weight)
+      end
+
+      unless can_admin_issuable && issuable.supports_health_status?
+        params.delete(:health_status)
       end
 
       super
@@ -24,9 +26,9 @@ module EE
 
     override :filter_labels
     def filter_labels
-      @label_ids_ordered_by_selection = params[:add_label_ids].to_a + params[:label_ids].to_a # rubocop:disable Gitlab/ModuleWithInstanceVariables
-
       super
+
+      @label_ids_ordered_by_selection = params[:add_label_ids].to_a + params[:label_ids].to_a # rubocop:disable Gitlab/ModuleWithInstanceVariables
     end
 
     def update_task_event?

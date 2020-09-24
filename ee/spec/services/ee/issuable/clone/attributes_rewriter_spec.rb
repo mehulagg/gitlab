@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issuable::Clone::AttributesRewriter do
+RSpec.describe Issuable::Clone::AttributesRewriter do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
@@ -30,11 +30,11 @@ describe Issuable::Clone::AttributesRewriter do
       end
 
       context 'setting milestones' do
-        it 'sets milestone attribute as nil' do
+        it 'ignores milestone attribute' do
           milestone = create(:milestone, title: 'milestone', group: group)
           original_issue.update(milestone: milestone)
 
-          expect(new_epic).to receive(:update).with(labels: [], milestone: nil)
+          expect(new_epic).to receive(:update).with(labels: [])
 
           subject.execute
         end

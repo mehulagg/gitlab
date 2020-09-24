@@ -66,11 +66,18 @@ export const setMetricType = ({ commit, dispatch }, { chartKey, metricType }) =>
   dispatch('fetchChartData', chartKey);
 };
 
-export const updateSelectedItems = (
-  { commit, dispatch },
-  { chartKey, item, skipReload = false },
-) => {
+export const updateSelectedItems = ({ commit, dispatch }, { chartKey, item }) => {
   commit(types.UPDATE_SELECTED_CHART_ITEMS, { chartKey, item });
+
+  // update secondary charts
+  dispatch('fetchSecondaryChartData');
+
+  // let's reset the page on the MR table and fetch data
+  dispatch('table/setPage', 0, { root: true });
+};
+
+export const resetMainChartSelection = ({ commit, dispatch }, skipReload = false) => {
+  commit(types.UPDATE_SELECTED_CHART_ITEMS, { chartKey: chartKeys.main, item: null });
 
   if (!skipReload) {
     // update secondary charts
@@ -83,6 +90,3 @@ export const updateSelectedItems = (
 
 export const setChartEnabled = ({ commit }, { chartKey, isEnabled }) =>
   commit(types.SET_CHART_ENABLED, { chartKey, isEnabled });
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

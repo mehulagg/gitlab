@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Projects::AfterRenameService do
+RSpec.describe Projects::AfterRenameService do
   include EE::GeoHelpers
 
   describe '#execute' do
     context 'when running on a primary node' do
-      set(:primary) { create(:geo_node, :primary) }
-      set(:secondary) { create(:geo_node) }
+      let_it_be(:primary) { create(:geo_node, :primary) }
+      let_it_be(:secondary) { create(:geo_node) }
       let(:project) { create(:project, :repository, :legacy_storage) }
       let!(:path_before_rename) { project.path }
       let!(:full_path_before_rename) { project.full_path }
@@ -41,7 +41,7 @@ describe Projects::AfterRenameService do
   def service_execute
     # AfterRenameService is called by UpdateService after a successful model.update
     # the initialization will include before and after paths values
-    project.update(path: path_after_rename)
+    project.update!(path: path_after_rename)
 
     described_class.new(project, path_before: path_before_rename, full_path_before: full_path_before_rename).execute
   end

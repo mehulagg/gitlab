@@ -20,7 +20,7 @@ module Epics
           strategy.new(relation).execute
         end
 
-        if parent_ids.any? && Feature.enabled?(:epics_update_dates_upstream, default_enabled: true)
+        if parent_ids.any?
           Epics::UpdateEpicsDatesWorker.perform_async(parent_ids)
         end
       end

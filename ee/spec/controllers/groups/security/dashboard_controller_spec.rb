@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::Security::DashboardController do
+RSpec.describe Groups::Security::DashboardController do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
 
@@ -23,17 +23,17 @@ describe Groups::Security::DashboardController do
           group.add_developer(user)
         end
 
-        it { is_expected.to have_gitlab_http_status(200) }
+        it { is_expected.to have_gitlab_http_status(:ok) }
       end
 
       context 'when user is not allowed to access group security dashboard' do
-        it { is_expected.to have_gitlab_http_status(200) }
+        it { is_expected.to have_gitlab_http_status(:ok) }
         it { is_expected.to render_template(:unavailable) }
       end
     end
 
     context 'when security dashboard feature is disabled' do
-      it { is_expected.to have_gitlab_http_status(200) }
+      it { is_expected.to have_gitlab_http_status(:ok) }
       it { is_expected.to render_template(:unavailable) }
     end
   end

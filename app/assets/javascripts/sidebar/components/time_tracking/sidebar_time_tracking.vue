@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import _ from 'underscore';
+import { intersection } from 'lodash';
 
 import '~/smart_interval';
 
@@ -26,11 +26,14 @@ export default {
   methods: {
     listenForQuickActions() {
       $(document).on('ajax:success', '.gfm-form', this.quickActionListened);
+
       eventHub.$on('timeTrackingUpdated', data => {
-        this.quickActionListened(null, data);
+        this.quickActionListened({ detail: [data] });
       });
     },
-    quickActionListened(e, data) {
+    quickActionListened(e) {
+      const data = e.detail[0];
+
       const subscribedCommands = ['spend_time', 'time_estimate'];
       let changedCommands;
       if (data !== undefined) {
@@ -38,7 +41,7 @@ export default {
       } else {
         changedCommands = [];
       }
-      if (changedCommands && _.intersection(subscribedCommands, changedCommands).length) {
+      if (changedCommands && intersection(subscribedCommands, changedCommands).length) {
         this.mediator.fetch();
       }
     },

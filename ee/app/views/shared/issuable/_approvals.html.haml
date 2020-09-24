@@ -16,6 +16,7 @@
       'allow_multi_rule': @target_project.multiple_approval_rules_available?.to_s,
       'mr_id': issuable.iid,
       'mr_settings_path': presenter.api_approval_settings_path,
+      'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),
       'project_settings_path': presenter.api_project_approval_settings_path } }
       = sprite_icon('spinner', size: 24, css_class: 'gl-spinner')
     - if can_update_approvers

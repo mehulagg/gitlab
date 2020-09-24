@@ -3,14 +3,14 @@
 namespace :geo do
   namespace :verification do
     namespace :repository do
-      desc "GitLab | Verification | Repository | Reset | Resync repositories where verification has failed"
+      desc "GitLab | Verification | Repository | Resync repositories where verification has failed"
       task reset: :gitlab_environment do
         flag_for_resync(:repository)
       end
     end
 
     namespace :wiki do
-      desc "GitLab | Verification | Wiki | Reset | Resync wiki repositories where verification has failed"
+      desc "GitLab | Verification | Wiki | Resync wiki repositories where verification has failed"
       task reset: :gitlab_environment do
         flag_for_resync(:wiki)
       end

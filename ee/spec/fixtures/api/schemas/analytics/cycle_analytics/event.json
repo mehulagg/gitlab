@@ -6,11 +6,11 @@
       "type": "string" 
     },
     "identifier": { 
-      "type": "string" 
+      "type": "string"
     },
     "type": { 
-      "type": "string" ,
-      "enum": ["simple"]
+      "type": "string",
+      "enum": ["simple", "label"]
     },
     "can_be_start_event": {
       "type": "boolean"

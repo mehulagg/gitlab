@@ -1,17 +1,19 @@
-import _ from 'underscore';
+import { escape } from 'lodash';
+import { USER_TOKEN_TYPES } from 'ee_else_ce/filtered_search/constants';
 import FilteredSearchContainer from '~/filtered_search/container';
 import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import DropdownUtils from '~/filtered_search/dropdown_utils';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import UsersCache from '~/lib/utils/users_cache';
 import { __ } from '~/locale';
-import { USER_TOKEN_TYPES } from 'ee_else_ce/filtered_search/constants';
+import * as Emoji from '~/emoji';
 
 export default class VisualTokenValue {
-  constructor(tokenValue, tokenType) {
+  constructor(tokenValue, tokenType, tokenOperator) {
     this.tokenValue = tokenValue;
     this.tokenType = tokenType;
+    this.tokenOperator = tokenOperator;
   }
 
   render(tokenValueContainer, tokenValueElement) {
@@ -27,6 +29,8 @@ export default class VisualTokenValue {
       this.updateUserTokenAppearance(tokenValueContainer, tokenValueElement);
     } else if (tokenType === 'my-reaction') {
       this.updateEmojiTokenAppearance(tokenValueContainer, tokenValueElement);
+    } else if (tokenType === 'epic') {
+      this.updateEpicLabel(tokenValueContainer, tokenValueElement);
     }
   }
 
@@ -45,7 +49,7 @@ export default class VisualTokenValue {
           tokenValueContainer.dataset.originalValue = tokenValue;
           tokenValueElement.innerHTML = `
           <img class="avatar s20" src="${user.avatar_url}" alt="">
-          ${_.escape(user.name)}
+          ${escape(user.name)}
         `;
           /* eslint-enable no-param-reassign */
         })
@@ -82,6 +86,39 @@ export default class VisualTokenValue {
       .catch(() => new Flash(__('An error occurred while fetching label colors.')));
   }
 
+  updateEpicLabel(tokenValueContainer) {
+    const tokenValue = this.tokenValue.replace(/^&/, '');
+    const filteredSearchInput = FilteredSearchContainer.container.querySelector('.filtered-search');
+    const { epicsEndpoint } = filteredSearchInput.dataset;
+    const epicsEndpointWithParams = FilteredSearchVisualTokens.getEndpointWithQueryParams(
+      `${epicsEndpoint}.json`,
+      filteredSearchInput.dataset.endpointQueryParams,
+    );
+
+    return AjaxCache.retrieve(epicsEndpointWithParams)
+      .then(epics => {
+        const matchingEpic = (epics || []).find(epic => epic.id === Number(tokenValue));
+
+        if (!matchingEpic) {
+          return;
+        }
+
+        VisualTokenValue.replaceEpicTitle(tokenValueContainer, matchingEpic.title, matchingEpic.id);
+      })
+      .catch(() => new Flash(__('An error occurred while adding formatted title for epic')));
+  }
+
+  static replaceEpicTitle(tokenValueContainer, epicTitle, epicId) {
+    const tokenContainer = tokenValueContainer;
+
+    const valueContainer = tokenContainer.querySelector('.value');
+
+    if (valueContainer) {
+      tokenContainer.dataset.originalValue = valueContainer.innerText;
+      valueContainer.innerText = `"${epicTitle}"::&${epicId}`;
+    }
+  }
+
   static setTokenStyle(tokenValueContainer, backgroundColor, textColor) {
     const token = tokenValueContainer;
 
@@ -101,18 +138,13 @@ export default class VisualTokenValue {
     const element = tokenValueElement;
     const value = this.tokenValue;
 
-    return (
-      import(/* webpackChunkName: 'emoji' */ '../emoji')
-        .then(Emoji => {
-          if (!Emoji.isEmojiNameValid(value)) {
-            return;
-          }
+    return Emoji.initEmojiMap().then(() => {
+      if (!Emoji.isEmojiNameValid(value)) {
+        return;
+      }
 
-          container.dataset.originalValue = value;
-          element.innerHTML = Emoji.glEmojiTag(value);
-        })
-        // ignore error and leave emoji name in the search bar
-        .catch(() => {})
-    );
+      container.dataset.originalValue = value;
+      element.innerHTML = Emoji.glEmojiTag(value);
+    });
   }
 }

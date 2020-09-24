@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::TrackingBase do
+RSpec.describe Geo::TrackingBase do
   it 'raises when Geo database is not configured' do
     allow(Gitlab::Geo).to receive(:geo_database_configured?).and_return(false)
 

@@ -1,10 +1,9 @@
 import { mount } from '@vue/test-utils';
-import $ from 'jquery';
-import 'bootstrap';
-import '~/gl_dropdown';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
-import Api from '~/api';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { LAST_ACTIVITY_AT } from 'ee/analytics/shared/constants';
 import { TEST_HOST } from 'helpers/test_constants';
+import Api from '~/api';
 
 jest.mock('~/api', () => ({
   groupProjects: jest.fn(),
@@ -33,7 +32,6 @@ describe('ProjectsDropdownFilter component', () => {
 
   const createComponent = (props = {}) => {
     wrapper = mount(ProjectsDropdownFilter, {
-      sync: false,
       propsData: {
         groupId: 1,
         ...props,
@@ -46,20 +44,27 @@ describe('ProjectsDropdownFilter component', () => {
   });
 
   beforeEach(() => {
-    jest.spyOn($.fn, 'glDropdown');
     Api.groupProjects.mockImplementation((groupId, term, options, callback) => {
       callback(projects);
     });
   });
 
-  const findDropdown = () => wrapper.find('.dropdown');
-  const openDropdown = () => {
-    $(findDropdown().element)
-      .parent()
-      .trigger('shown.bs.dropdown');
-  };
-  const findDropdownItems = () => findDropdown().findAll('a');
-  const findDropdownButton = () => findDropdown().find('button');
+  const findDropdown = () => wrapper.find(GlDropdown);
+
+  const findDropdownItems = () =>
+    findDropdown()
+      .findAll(GlDropdownItem)
+      .filter(w => w.text() !== 'No matching results');
+
+  const findDropdownAtIndex = index => findDropdownItems().at(index);
+
+  const findDropdownButton = () => findDropdown().find('.dropdown-toggle');
+  const findDropdownButtonAvatar = () => findDropdown().find('.gl-avatar');
+
+  const selectDropdownItemAtIndex = index =>
+    findDropdownAtIndex(index)
+      .find('button')
+      .trigger('click');
 
   describe('queryParams are applied when fetching data', () => {
     beforeEach(() => {
@@ -67,22 +72,38 @@ describe('ProjectsDropdownFilter component', () => {
         queryParams: {
           per_page: 50,
           with_shared: false,
-          order_by: 'last_activity_at',
+          order_by: LAST_ACTIVITY_AT,
         },
       });
-
-      openDropdown();
-
-      return wrapper.vm.$nextTick();
     });
 
     it('applies the correct queryParams when making an api call', () => {
       expect(Api.groupProjects).toHaveBeenCalledWith(
         expect.any(Number),
         expect.any(String),
-        expect.objectContaining({ per_page: 50, with_shared: false, order_by: 'last_activity_at' }),
+        expect.objectContaining({ per_page: 50, with_shared: false, order_by: LAST_ACTIVITY_AT }),
         expect.any(Function),
       );
+    });
+  });
+
+  describe('when passed a an array of defaultProject as prop', () => {
+    beforeEach(() => {
+      createComponent({
+        defaultProjects: [projects[0]],
+      });
+    });
+
+    it("displays the defaultProject's name", () => {
+      expect(findDropdownButton().text()).toContain(projects[0].name);
+    });
+
+    it("renders the defaultProject's avatar", () => {
+      expect(findDropdownButtonAvatar().exists()).toBe(true);
+    });
+
+    it('marks the defaultProject as selected', () => {
+      expect(findDropdownAtIndex(0).props('isChecked')).toBe(true);
     });
   });
 
@@ -91,119 +112,88 @@ describe('ProjectsDropdownFilter component', () => {
       createComponent({ multiSelect: false });
     });
 
-    it('calls glDropdown', () => {
-      expect($.fn.glDropdown).toHaveBeenCalled();
-    });
-
     describe('displays the correct information', () => {
-      beforeEach(() => {
-        openDropdown();
-
-        return wrapper.vm.$nextTick();
-      });
-
       it('contains 3 items', () => {
-        expect(findDropdownItems().length).toEqual(3);
+        expect(findDropdownItems()).toHaveLength(3);
       });
 
       it('renders an avatar when the project has an avatar_url', () => {
         expect(
-          findDropdownItems()
-            .at(0)
-            .contains('img.avatar'),
+          findDropdownAtIndex(0)
+            .find('img.gl-avatar')
+            .exists(),
         ).toBe(true);
         expect(
-          findDropdownItems()
-            .at(0)
-            .contains('div.identicon'),
+          findDropdownAtIndex(0)
+            .find('div.gl-avatar-identicon')
+            .exists(),
         ).toBe(false);
       });
-
       it("renders an identicon when the project doesn't have an avatar_url", () => {
         expect(
-          findDropdownItems()
-            .at(1)
-            .contains('img.avatar'),
+          findDropdownAtIndex(1)
+            .find('img.gl-avatar')
+            .exists(),
         ).toBe(false);
         expect(
-          findDropdownItems()
-            .at(1)
-            .contains('div.identicon'),
+          findDropdownAtIndex(1)
+            .find('div.gl-avatar-identicon')
+            .exists(),
         ).toBe(true);
       });
     });
 
     describe('on project click', () => {
-      beforeEach(() => {
-        openDropdown();
-
-        return wrapper.vm.$nextTick();
-      });
-
       it('should emit the "selected" event with the selected project', () => {
-        findDropdownItems()
-          .at(0)
-          .trigger('click');
+        selectDropdownItemAtIndex(0);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]]]);
       });
 
       it('should change selection when new project is clicked', () => {
-        findDropdownItems()
-          .at(1)
-          .trigger('click');
+        selectDropdownItemAtIndex(1);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[1]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[1]]]]);
       });
 
       it('selection should be emptied when a project is deselected', () => {
-        const project = findDropdownItems().at(0);
-        project.trigger('click');
-        project.trigger('click');
+        selectDropdownItemAtIndex(0); // Select the item
+        selectDropdownItemAtIndex(0); // deselect it
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]], [[]]]);
       });
 
-      it('renders an avatar in the dropdown button when the project has an avatar_url', done => {
-        findDropdownItems()
-          .at(0)
-          .trigger('click');
+      it('renders an avatar in the dropdown button when the project has an avatar_url', () => {
+        selectDropdownItemAtIndex(0);
 
-        wrapper.vm.$nextTick(() => {
-          expect(findDropdownButton().contains('img.gl-avatar')).toBe(true);
-          expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(false);
-          done();
+        return wrapper.vm.$nextTick().then(() => {
+          expect(
+            findDropdownButton()
+              .find('img.gl-avatar')
+              .exists(),
+          ).toBe(true);
+          expect(
+            findDropdownButton()
+              .find('.gl-avatar-identicon')
+              .exists(),
+          ).toBe(false);
         });
       });
 
-      it("renders an identicon in the dropdown button when the project doesn't have an avatar_url", done => {
-        findDropdownItems()
-          .at(1)
-          .trigger('click');
+      it("renders an identicon in the dropdown button when the project doesn't have an avatar_url", () => {
+        selectDropdownItemAtIndex(1);
 
-        wrapper.vm.$nextTick(() => {
-          expect(findDropdownButton().contains('img.gl-avatar')).toBe(false);
-          expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(true);
-          done();
+        return wrapper.vm.$nextTick().then(() => {
+          expect(
+            findDropdownButton()
+              .find('img.gl-avatar')
+              .exists(),
+          ).toBe(false);
+          expect(
+            findDropdownButton()
+              .find('.gl-avatar-identicon')
+              .exists(),
+          ).toBe(true);
         });
       });
     });
@@ -215,101 +205,58 @@ describe('ProjectsDropdownFilter component', () => {
     });
 
     describe('displays the correct information', () => {
-      beforeEach(() => {
-        openDropdown();
-
-        return wrapper.vm.$nextTick();
-      });
-
       it('contains 3 items', () => {
-        expect(findDropdownItems().length).toEqual(3);
+        expect(findDropdownItems()).toHaveLength(3);
       });
 
       it('renders an avatar when the project has an avatar_url', () => {
         expect(
-          findDropdownItems()
-            .at(0)
-            .contains('img.avatar'),
+          findDropdownAtIndex(0)
+            .find('img.gl-avatar')
+            .exists(),
         ).toBe(true);
         expect(
-          findDropdownItems()
-            .at(0)
-            .contains('div.identicon'),
+          findDropdownAtIndex(0)
+            .find('div.gl-avatar-identicon')
+            .exists(),
         ).toBe(false);
       });
 
       it("renders an identicon when the project doesn't have an avatar_url", () => {
         expect(
-          findDropdownItems()
-            .at(1)
-            .contains('img.avatar'),
+          findDropdownAtIndex(1)
+            .find('img.gl-avatar')
+            .exists(),
         ).toBe(false);
         expect(
-          findDropdownItems()
-            .at(1)
-            .contains('div.identicon'),
+          findDropdownAtIndex(1)
+            .find('div.gl-avatar-identicon')
+            .exists(),
         ).toBe(true);
       });
     });
 
     describe('on project click', () => {
-      beforeEach(() => {
-        openDropdown();
-
-        return wrapper.vm.$nextTick();
-      });
-
       it('should add to selection when new project is clicked', () => {
-        findDropdownItems()
-          .at(0)
-          .trigger('click');
+        selectDropdownItemAtIndex(0);
+        selectDropdownItemAtIndex(1);
 
-        findDropdownItems()
-          .at(1)
-          .trigger('click');
-
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[projects[0], projects[1]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]], [[projects[0], projects[1]]]]);
       });
 
       it('should remove from selection when clicked again', () => {
-        const item = findDropdownItems().at(0);
+        selectDropdownItemAtIndex(0);
+        selectDropdownItemAtIndex(0);
 
-        item.trigger('click');
-        item.trigger('click');
-
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]], [[]]]);
       });
 
-      it('renders the correct placeholder text when multiple projects are selected', done => {
-        findDropdownItems()
-          .at(0)
-          .trigger('click');
+      it('renders the correct placeholder text when multiple projects are selected', () => {
+        selectDropdownItemAtIndex(0);
+        selectDropdownItemAtIndex(1);
 
-        findDropdownItems()
-          .at(1)
-          .trigger('click');
-
-        wrapper.vm.$nextTick(() => {
+        return wrapper.vm.$nextTick().then(() => {
           expect(findDropdownButton().text()).toBe('2 projects selected');
-          done();
         });
       });
     });

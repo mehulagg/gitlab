@@ -1,10 +1,12 @@
 import $ from 'jquery';
 import Dropzone from 'dropzone';
-import _ from 'underscore';
+import { escape } from 'lodash';
 import './behaviors/preview_markdown';
+import PasteMarkdownTable from './behaviors/markdown/paste_markdown_table';
 import csrf from './lib/utils/csrf';
 import axios from './lib/utils/axios_utils';
 import { n__, __ } from '~/locale';
+import { getFilename } from '~/lib/utils/file_upload';
 
 Dropzone.autoDiscover = false;
 
@@ -14,14 +16,14 @@ Dropzone.autoDiscover = false;
  * @param {String|Object} res
  */
 function getErrorMessage(res) {
-  if (!res || _.isString(res)) {
+  if (!res || typeof res === 'string') {
     return res;
   }
 
   return res.message;
 }
 
-export default function dropzoneInput(form) {
+export default function dropzoneInput(form, config = { parallelUploads: 2 }) {
   const divHover = '<div class="div-dropzone-hover"></div>';
   const iconPaperclip = '<i class="fa fa-paperclip div-dropzone-icon"></i>';
   const $attachButton = form.find('.button-attach-file');
@@ -40,7 +42,6 @@ export default function dropzoneInput(form) {
   let addFileToForm;
   let updateAttachingMessage;
   let isImage;
-  let getFilename;
   let uploadFile;
 
   formTextarea.wrap('<div class="div-dropzone"></div>');
@@ -68,7 +69,7 @@ export default function dropzoneInput(form) {
     uploadMultiple: false,
     headers: csrf.headers,
     previewContainer: false,
-    processing: () => $('.div-dropzone-alert').alert('close'),
+    ...config,
     dragover: () => {
       $mdArea.addClass('is-dropzone-hover');
       form.find('.div-dropzone-hover').css('opacity', 0.7);
@@ -173,14 +174,25 @@ export default function dropzoneInput(form) {
   // eslint-disable-next-line consistent-return
   handlePaste = event => {
     const pasteEvent = event.originalEvent;
-    if (pasteEvent.clipboardData && pasteEvent.clipboardData.items) {
-      const image = isImage(pasteEvent);
-      if (image) {
+    const { clipboardData } = pasteEvent;
+    if (clipboardData && clipboardData.items) {
+      const converter = new PasteMarkdownTable(clipboardData);
+      // Apple Numbers copies a table as an image, HTML, and text, so
+      // we need to check for the presence of a table first.
+      if (converter.isTable()) {
         event.preventDefault();
-        const filename = getFilename(pasteEvent) || 'image.png';
-        const text = `{{${filename}}}`;
+        const text = converter.convertToTableMarkdown();
         pasteText(text);
-        return uploadFile(image.getAsFile(), filename);
+      } else {
+        const image = isImage(pasteEvent);
+
+        if (image) {
+          event.preventDefault();
+          const filename = getFilename(pasteEvent) || 'image.png';
+          const text = `{{${filename}}}`;
+          pasteText(text);
+          return uploadFile(image.getAsFile(), filename);
+        }
       }
     }
   };
@@ -220,18 +232,7 @@ export default function dropzoneInput(form) {
   };
 
   addFileToForm = path => {
-    $(form).append(`<input type="hidden" name="files[]" value="${_.escape(path)}">`);
-  };
-
-  getFilename = e => {
-    let value;
-    if (window.clipboardData && window.clipboardData.getData) {
-      value = window.clipboardData.getData('Text');
-    } else if (e.clipboardData && e.clipboardData.getData) {
-      value = e.clipboardData.getData('text/plain');
-    }
-    value = value.split('\r');
-    return value[0];
+    $(form).append(`<input type="hidden" name="files[]" value="${escape(path)}">`);
   };
 
   const showSpinner = () => $uploadingProgressContainer.removeClass('hide');
@@ -243,12 +244,17 @@ export default function dropzoneInput(form) {
     $uploadingErrorMessage.html(message);
   };
 
-  const closeAlertMessage = () => form.find('.div-dropzone-alert').alert('close');
-
   const insertToTextArea = (filename, url) => {
     const $child = $(child);
-    $child.val((index, val) => val.replace(`{{${filename}}}`, url));
-
+    const textarea = $child.get(0);
+    const caretStart = textarea.selectionStart;
+    const caretEnd = textarea.selectionEnd;
+    const formattedText = `{{${filename}}}`;
+    $child.val((index, val) => val.replace(formattedText, url));
+    textarea.setSelectionRange(
+      caretStart - formattedText.length + url.length,
+      caretEnd - formattedText.length + url.length,
+    );
     $child.trigger('change');
   };
 
@@ -257,7 +263,6 @@ export default function dropzoneInput(form) {
     formData.append('file', item, filename);
 
     showSpinner();
-    closeAlertMessage();
 
     axios
       .post(uploadsPath, formData)
@@ -290,5 +295,5 @@ export default function dropzoneInput(form) {
     formTextarea.focus();
   });
 
-  return Dropzone.forElement($formDropzone.get(0));
+  return $formDropzone.get(0) ? Dropzone.forElement($formDropzone.get(0)) : null;
 }

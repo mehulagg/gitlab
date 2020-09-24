@@ -2,19 +2,13 @@
 
 require 'spec_helper'
 
-describe 'User views services' do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
-
-  before do
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit(project_settings_integrations_path(project))
-  end
+RSpec.describe 'User views services' do
+  include_context 'project service activation'
 
   it 'shows the list of available services' do
-    expect(page).to have_content('Project services')
+    visit_project_integrations
+
+    expect(page).to have_content('Integrations')
     expect(page).to have_content('Campfire')
     expect(page).to have_content('HipChat')
     expect(page).to have_content('Assembla')

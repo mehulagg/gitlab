@@ -1,8 +1,8 @@
-@import "framework/variables";
+@import 'framework/variables';
 
 .gitlab-embed-snippets {
-  @import "highlight/embedded";
-  @import "framework/images";
+  @import 'highlight/embedded';
+  @import 'framework/images';
 
   $border-style: 1px solid $border-color;
 
@@ -11,10 +11,11 @@
   line-height: $code-line-height;
   color: $gl-text-color;
   margin: 20px;
-  font-weight: 200;
+  font-weight: $gl-font-weight-normal;
 
   .gl-snippet-icon {
     display: inline-block;
+    /* stylelint-disable-next-line function-url-quotes */
     background: url(asset_path('ext_snippet_icons/ext_snippet_icons.png')) no-repeat;
     overflow: hidden;
     text-align: left;
@@ -28,35 +29,39 @@
   }
 
   .blob-viewer {
-    background-color: $white-light;
+    background-color: $white;
     text-align: left;
   }
 
   .file-content.code {
     border: $border-style;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 $border-radius-default $border-radius-default;
     display: flex;
     box-shadow: none;
     margin: 0;
     padding: 0;
     table-layout: fixed;
+    overflow-x: auto;
 
     .blob-content {
-      overflow-x: auto;
-
       pre {
+        height: 100%;
         padding: 10px;
         border: 0;
         border-radius: 0;
-        font-family: $monospace-font;
-        font-size: $code-font-size;
-        line-height: $code-line-height;
         margin: 0;
         overflow: auto;
         overflow-y: hidden;
         white-space: pre;
         word-wrap: normal;
         border-left: $border-style;
+      }
+
+      code {
+        font-family: $monospace-font;
+        font-size: $code-font-size;
+        line-height: $code-line-height;
+        display: inline-block;
       }
     }
 
@@ -69,7 +74,7 @@
         font-family: $monospace-font;
         display: block;
         font-size: $code-font-size;
-        min-height: $code-line-height;
+        line-height: $code-line-height;
         white-space: nowrap;
         color: $black-transparent;
         min-width: 30px;
@@ -107,17 +112,13 @@
         }
       }
 
-      .gitlab-logo {
-        display: inline-block;
-        padding-left: 5px;
-        text-decoration: none;
-        color: $gl-text-color-secondary;
+      .gitlab-logo-wrapper {
+        padding-left: $gl-padding-8;
+        position: relative;
+        top: 2px;
 
-        .logo-text {
-          background: image_url('ext_snippet_icons/logo.png') no-repeat left center;
-          background-size: 18px;
-          font-weight: $gl-font-weight-normal;
-          padding-left: 24px;
+        .gitlab-logo {
+          height: 18px;
         }
       }
     }
@@ -125,15 +126,15 @@
     img,
     .gl-snippet-icon {
       display: inline-block;
-      vertical-align: middle;
+      vertical-align: text-bottom;
     }
   }
 
   .btn-group {
     a.btn {
-      background-color: $white-light;
+      background-color: $white;
       text-decoration: none;
-      padding: 7px 9px;
+      padding: 8px 9px;
       border: $border-style;
       border-right: 0;
 
@@ -144,11 +145,11 @@
       }
 
       &:first-child {
-        border-radius: 3px 0 0 3px;
+        border-radius: $border-radius-default 0 0 $border-radius-default;
       }
 
       &:last-child {
-        border-radius: 0 3px 3px 0;
+        border-radius: 0 $border-radius-default $border-radius-default 0;
         border-right: $border-style;
       }
     }

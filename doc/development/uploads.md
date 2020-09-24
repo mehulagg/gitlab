@@ -1,7 +1,7 @@
 # Uploads development documentation
 
 [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) has special rules for handling uploads.
-To prevent occupying a ruby process on I/O operations, we process the upload in workhorse, where is cheaper.
+To prevent occupying a Ruby process on I/O operations, we process the upload in workhorse, where is cheaper.
 This process can also directly upload to object storage.
 
 ## The problem description
@@ -11,7 +11,7 @@ The following graph explains machine boundaries in a scalable GitLab installatio
 ```mermaid
 graph TB
     subgraph "load balancers"
-      LB(HA Proxy)
+      LB(Proxy)
     end
 
     subgraph "Shared storage"
@@ -40,9 +40,9 @@ We have three challenges here: performance, availability, and scalability.
 
 ### Performance
 
-Rails process are expensive in terms of both CPU and memory. Ruby [global interpreter lock](https://en.wikipedia.org/wiki/Global_interpreter_lock) adds to cost too because the ruby process will spend time on I/O operations on step 3 causing incoming requests to pile up.
+Rails process are expensive in terms of both CPU and memory. Ruby [global interpreter lock](https://en.wikipedia.org/wiki/Global_interpreter_lock) adds to cost too because the Ruby process will spend time on I/O operations on step 3 causing incoming requests to pile up.
 
-In order to improve this, [workhorse disk acceleration](#workhorse-disk-acceleration) was implemented. With this, Rails no longer deals with writing uploaded files to disk.
+In order to improve this, [disk buffered upload](#disk-buffered-upload) was implemented. With this, Rails no longer deals with writing uploaded files to disk.
 
 ```mermaid
 graph TB
@@ -76,13 +76,13 @@ graph TB
 
 There's also an availability problem in this setup, NFS is a [single point of failure](https://en.wikipedia.org/wiki/Single_point_of_failure).
 
-To address this problem an HA object storage can be used and it's supported by [workhorse object storage acceleration](#workhorse-object-storage-acceleration)
+To address this problem an HA object storage can be used and it's supported by [direct upload](#direct-upload)
 
 ### Scalability
 
 Scaling NFS is outside of our support scope, and NFS is not a part of cloud native installations.
 
-All features that require Sidekiq and do not use object storage acceleration won't work without NFS. In Kubernetes, machine boundaries translate to PODs, and in this case the uploaded file will be written into the POD private disk. Since Sidekiq POD cannot reach into other pods, the operation will fail to read it.
+All features that require Sidekiq and do not use direct upload won't work without NFS. In Kubernetes, machine boundaries translate to PODs, and in this case the uploaded file will be written into the POD private disk. Since Sidekiq POD cannot reach into other pods, the operation will fail to read it.
 
 ## How to select the proper level of acceleration?
 
@@ -90,9 +90,9 @@ Selecting the proper acceleration is a tradeoff between speed of development and
 
 We can identify three major use-cases for an upload:
 
-1. **storage:** if we are uploading for storing a file (i.e. artifacts, packages, discussion attachments). In this case [object storage acceleration](#workhorse-object-storage-acceleration) is the proper level as it's the less resource-intensive operation. Additional information can be found on [File Storage in GitLab](file_storage.md).
-1. **in-controller/synchronous processing:** if we allow processing **small files** synchronously, using [disk acceleration](#workhorse-disk-acceleration) may speed up development.
-1. **Sidekiq/asynchronous processing:** Async processing must implement [object storage acceleration](#workhorse-object-storage-acceleration), the reason being that it's the only way to support Cloud Native deployments without a shared NFS.
+1. **storage:** if we are uploading for storing a file (i.e. artifacts, packages, discussion attachments). In this case [direct upload](#direct-upload) is the proper level as it's the less resource-intensive operation. Additional information can be found on [File Storage in GitLab](file_storage.md).
+1. **in-controller/synchronous processing:** if we allow processing **small files** synchronously, using [disk buffered upload](#disk-buffered-upload) may speed up development.
+1. **Sidekiq/asynchronous processing:** Asynchronous processing must implement [direct upload](#direct-upload), the reason being that it's the only way to support Cloud Native deployments without a shared NFS.
 
 For more details about currently broken feature see [epic &1802](https://gitlab.com/groups/gitlab-org/-/epics/1802).
 
@@ -114,7 +114,7 @@ We have three kinds of file encoding in our uploads:
 
 1. <i class="fa fa-check-circle"></i> **multipart**: `multipart/form-data` is the most common, a file is encoded as a part of a multipart encoded request.
 1. <i class="fa fa-check-circle"></i> **body**: some APIs uploads files as the whole request body.
-1. <i class="fa fa-times-circle"></i> **JSON**: some JSON API uploads files as base64 encoded strings. This will require a change to GitLab Workhorse, which [is planned](https://gitlab.com/gitlab-org/gitlab-workhorse/issues/226).
+1. <i class="fa fa-times-circle"></i> **JSON**: some JSON API uploads files as base64 encoded strings. This will require a change to GitLab Workhorse, which [is planned](https://gitlab.com/gitlab-org/gitlab-workhorse/-/issues/226).
 
 ## Uploading technologies
 
@@ -122,13 +122,13 @@ By uploading technologies we mean how all the involved services interact with ea
 
 GitLab supports 3 kinds of uploading technologies, here follows a brief description with a sequence diagram for each one. Diagrams are not meant to be exhaustive.
 
-### Regular rails upload
+### Rack Multipart upload
 
 This is the default kind of upload, and it's most expensive in terms of resources.
 
 In this case, workhorse is unaware of files being uploaded and acts as a regular proxy.
 
-When a multipart request reaches the rails application, `Rack::Multipart` leaves behind tempfiles in `/tmp` and uses valuable Ruby process time to copy files around.
+When a multipart request reaches the rails application, `Rack::Multipart` leaves behind temporary files in `/tmp` and uses valuable Ruby process time to copy files around.
 
 ```mermaid
 sequenceDiagram
@@ -148,7 +148,7 @@ sequenceDiagram
     deactivate w
 ```
 
-### Workhorse disk acceleration
+### Disk buffered upload
 
 This kind of upload avoids wasting resources caused by handling upload writes to `/tmp` in rails.
 
@@ -174,14 +174,14 @@ sequenceDiagram
     c ->>+w: POST /some/url/upload
 
     w->>+s: save the incoming file on a temporary location
-    s-->>-w:  
+    s-->>-w: request result
 
     w->>+r:  POST /some/url/upload
     Note over w,r: file was replaced with its location<br>and other metadata
 
     opt requires async processing
       r->>+redis: schedule a job
-      redis-->>-r:  
+      redis-->>-r: job is scheduled
     end
 
     r-->>-c: request result
@@ -202,19 +202,21 @@ sequenceDiagram
     end
 ```
 
-### Workhorse object storage acceleration
+### Direct upload
 
 This is the more advanced acceleration technique we have in place.
 
 Workhorse asks rails for temporary pre-signed object storage URLs and directly uploads to object storage.
 
-In this setup an extra rails route needs to be implemented in order to handle authorization,
-you can see an example of this in [`Projects::LfsStorageController`](https://gitlab.com/gitlab-org/gitlab/blob/cc723071ad337573e0360a879cbf99bc4fb7adb9/app/controllers/projects/lfs_storage_controller.rb)
-and [its routes](https://gitlab.com/gitlab-org/gitlab/blob/cc723071ad337573e0360a879cbf99bc4fb7adb9/config/routes/git_http.rb#L31-32).
+In this setup, an extra Rails route must be implemented in order to handle authorization. Examples of this can be found in:
 
-NOTE: **Note:**
-This will fall back to _Workhorse disk acceleration_ when object storage is not enabled
-in the GitLab instance. The answer to the `/authorize` call will only contain a file system path.
+- [`Projects::LfsStorageController`](https://gitlab.com/gitlab-org/gitlab/blob/cc723071ad337573e0360a879cbf99bc4fb7adb9/app/controllers/projects/lfs_storage_controller.rb)
+  and [its routes](https://gitlab.com/gitlab-org/gitlab/blob/cc723071ad337573e0360a879cbf99bc4fb7adb9/config/routes/git_http.rb#L31-32).
+- [API endpoints for uploading packages](packages.md#file-uploads).
+
+Note: **Note:**
+This will fallback to _disk buffered upload_ when `direct_upload` is disabled inside the [object storage setting](../administration/uploads.md#object-storage-settings).
+The answer to the `/authorize` call will only contain a file system path.
 
 ```mermaid
 sequenceDiagram
@@ -232,17 +234,17 @@ sequenceDiagram
 
     w->>+os: PUT file
     Note over w,os: file is stored on a temporary location. Rails select the destination
-    os-->>-w:  
+    os-->>-w: request result
 
     w->>+r:  POST /some/url/upload
     Note over w,r: file was replaced with its location<br>and other metadata
 
     r->>+os: move object to final destination
-    os-->>-r:  
+    os-->>-r: request result
 
     opt requires async processing
       r->>+redis: schedule a job
-      redis-->>-r:  
+      redis-->>-r: job is scheduled
     end
 
     r-->>-c: request result
@@ -263,10 +265,76 @@ sequenceDiagram
     end
 ```
 
-## What does the `direct_upload` setting mean?
+## How to add a new upload route
 
-[Object storage setting](../administration/uploads.md#object-storage-settings) allows instance administators to enable `direct_upload`, this in an option that only affects the behavior of [workhorse object storage acceleration](#workhorse-object-storage-acceleration).
+In this section, we'll describe how to add a new upload route [accelerated](#uploading-technologies) by Workhorse for [body and multipart](#upload-encodings) encoded uploads.
 
-This option affect the response to the `/authorize` call. When not enabled, the API response will not contain presigned URLs and workhorse will write the file the shared disk, on the path is provided by rails, acting like object storage was disabled.
+Uploads routes belong to one of these categories:
 
-Once the request reachs rails, it will schedule an object storage upload as a Sidekiq job.
+1. Rails controllers: uploads handled by Rails controllers.
+1. Grape API: uploads handled by a Grape API endpoint.
+1. GraphQL API: uploads handled by a GraphQL resolve function. In these cases, there is nothing else
+   to do apart from implementing the actual upload.
+
+### Update Workhorse for the new route
+
+For both the Rails controller and Grape API uploads, Workhorse has to be updated in order to get the
+support for the new upload route.
+
+1. Open an new issue in the [Workhorse tracker](https://gitlab.com/gitlab-org/gitlab-workhorse/-/issues/new) describing precisely the new upload route:
+   - The route's URL.
+   - The [upload encoding](#upload-encodings).
+   - If possible, provide a dump of the upload request.
+1. Implement and get the MR merged for this issue above.
+1. Ask the Maintainers of [Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) to create a new release. You can do that in the MR
+   directly during the maintainer review or ask for it in the `#workhorse` Slack channel.
+1. Bump the [Workhorse version file](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_WORKHORSE_VERSION)
+   to the version you have from the previous points, or bump it in the same merge request that contains
+   the Rails changes (see [Implementing the new route with a Rails controller](#implementing-the-new-route-with-a-rails-controller) or [Implementing the new route with a Grape API endpoint](#implementing-the-new-route-with-a-grape-api-endpoint) below).
+
+### Implementing the new route with a Rails controller
+
+For a Rails controller upload, we usually have a [multipart](#upload-encodings) upload and there are a
+few things to do:
+
+1. The upload is available under the parameter name you're using. For example, it could be an `artifact`
+   or a nested parameter such as `user[avatar]`. Let's say that we have the upload under the
+   `file` parameter, reading `params[:file]` should get you an [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb) instance.
+1. Generally speaking, it's a good idea to check if the instance is from the [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb) class. For example, see how we checked
+[that the parameter is indeed an `UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/commit/ea30fe8a71bf16ba07f1050ab4820607b5658719#51c0cc7a17b7f12c32bc41cfab3649ff2739b0eb_79_77).
+
+CAUTION: **Caution:**
+**Do not** call `UploadedFile#from_params` directly! Do not build an [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb)
+instance using `UploadedFile#from_params`! This method can be unsafe to use depending on the `params`
+passed. Instead, use the [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb)
+instance that [`multipart.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/middleware/multipart.rb)
+builds automatically for you.
+
+### Implementing the new route with a Grape API endpoint
+
+For a Grape API upload, we can have [body or a multipart](#upload-encodings) upload. Things are slightly more complicated: two endpoints are needed. One for the
+Workhorse pre-upload authorization and one for accepting the upload metadata from Workhorse:
+
+1. Implement an endpoint with the URL + `/authorize` suffix that will:
+   - Check that the request is coming from Workhorse with the `require_gitlab_workhorse!` from the [API helpers](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/api/helpers.rb).
+   - Check user permissions.
+   - Set the status to `200` with `status 200`.
+   - Set the content type with `content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE`.
+   - Use your dedicated `Uploader` class (let's say that it's `FileUploader`) to build the response with `FileUploader.workhorse_authorize(params)`.
+1. Implement the endpoint for the upload request that will:
+   - Require all the `UploadedFile` objects as parameters.
+      - For example, if we expect a single parameter `file` to be an [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb) instance,
+use `requires :file, type: ::API::Validations::Types::WorkhorseFile`.
+      - Body upload requests have their upload available under the parameter `file`.
+   - Check that the request is coming from Workhorse with the `require_gitlab_workhorse!` from the
+[API helpers](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/api/helpers.rb).
+   - Check the user permissions.
+   - The remaining code of the processing. This is where the code must be reading the parameter (for
+our example, it would be `params[:file]`).
+
+CAUTION: **Caution:**
+**Do not** call `UploadedFile#from_params` directly! Do not build an [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb)
+object using `UploadedFile#from_params`! This method can be unsafe to use depending on the `params`
+passed. Instead, use the [`UploadedFile`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/uploaded_file.rb)
+object that [`multipart.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/middleware/multipart.rb)
+builds automatically for you.

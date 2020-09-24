@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DashboardOperationsProjectEntity do
+RSpec.describe DashboardOperationsProjectEntity do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:resource) { Dashboard::Operations::ListService::DashboardProject.new(project, nil, 0, nil) }

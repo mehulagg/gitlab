@@ -2,16 +2,17 @@
 
 require 'spec_helper'
 
-describe Users::CreateService do
+RSpec.describe Users::CreateService do
   describe '#execute' do
     let(:admin_user) { create(:admin) }
 
     context 'with an admin user' do
       let(:service) { described_class.new(admin_user, params) }
+      let(:email) { 'jd@example.com' }
 
       context 'when required parameters are provided' do
         let(:params) do
-          { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass' }
+          { name: 'John Doe', username: 'jduser', email: email, password: 'mydummypass' }
         end
 
         it 'returns a persisted user' do
@@ -153,6 +154,7 @@ describe Users::CreateService do
       let(:params) do
         { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass', skip_confirmation: true }
       end
+
       let(:service) { described_class.new(nil, params) }
 
       it 'persists the given attributes' do

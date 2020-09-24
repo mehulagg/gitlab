@@ -8,17 +8,19 @@ ENV["IN_MEMORY_APPLICATION_SETTINGS"] = 'true'
 ENV["RSPEC_ALLOW_INVALID_URLS"] = 'true'
 
 require File.expand_path('../config/environment', __dir__)
+
+require 'rspec/mocks'
 require 'rspec/rails'
-require 'shoulda/matchers'
 require 'rspec/retry'
 require 'rspec-parameterized'
+require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
+require 'test_prof/factory_default'
 
 rspec_profiling_is_configured =
   ENV['RSPEC_PROFILING_POSTGRES_URL'].present? ||
   ENV['RSPEC_PROFILING']
 branch_can_be_profiled =
-  ENV['GITLAB_DATABASE'] == 'postgresql' &&
   (ENV['CI_COMMIT_REF_NAME'] == 'master' ||
     ENV['CI_COMMIT_REF_NAME'] =~ /rspec-profile/)
 
@@ -45,10 +47,10 @@ require_relative('../ee/spec/spec_helper') if Gitlab.ee?
 require Rails.root.join("spec/support/helpers/git_helpers.rb")
 
 # Then the rest
-Dir[Rails.root.join("spec/support/helpers/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/shared_examples/*.rb")].each { |f| require f }
-Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+Dir[Rails.root.join("spec/support/helpers/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/shared_contexts/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/shared_examples/*.rb")].sort.each { |f| require f }
+Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
 quality_level = Quality::TestLevel.new
 
@@ -64,7 +66,16 @@ RSpec.configure do |config|
   config.display_try_failure_messages = true
 
   config.infer_spec_type_from_file_location!
-  config.full_backtrace = !!ENV['CI']
+
+  # Add :full_backtrace tag to an example if full_backtrace output is desired
+  config.before(:each, full_backtrace: true) do |example|
+    config.full_backtrace = true
+  end
+
+  unless ENV['CI']
+    # Re-run failures locally with `--only-failures`
+    config.example_status_persistence_file_path = './spec/examples.txt'
+  end
 
   config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_spec\.rb\z}) do |metadata|
     location = metadata[:location]
@@ -72,25 +83,44 @@ RSpec.configure do |config|
     metadata[:level] = quality_level.level_for(location)
     metadata[:api] = true if location =~ %r{/spec/requests/api/}
 
-    # do not overwrite type if it's already set
-    next if metadata.key?(:type)
+    # Do not overwrite migration if it's already set
+    unless metadata.key?(:migration)
+      metadata[:migration] = true if metadata[:level] == :migration
+    end
 
-    match = location.match(%r{/spec/([^/]+)/})
-    metadata[:type] = match[1].singularize.to_sym if match
+    # Do not overwrite schema if it's already set
+    unless metadata.key?(:schema)
+      metadata[:schema] = :latest if quality_level.background_migration?(location)
+    end
+
+    # Do not overwrite type if it's already set
+    unless metadata.key?(:type)
+      match = location.match(%r{/spec/([^/]+)/})
+      metadata[:type] = match[1].singularize.to_sym if match
+    end
+
+    # Admin controller specs get auto admin mode enabled since they are
+    # protected by the 'EnforcesAdminAuthentication' concern
+    metadata[:enable_admin_mode] = true if location =~ %r{(ee)?/spec/controllers/admin/}
+  end
+
+  config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_docs\.rb\z}) do |metadata|
+    metadata[:type] = :feature
   end
 
   config.include LicenseHelpers
   config.include ActiveJob::TestHelper
   config.include ActiveSupport::Testing::TimeHelpers
   config.include CycleAnalyticsHelpers
-  config.include ExpectOffense
   config.include FactoryBot::Syntax::Methods
   config.include FixtureHelpers
+  config.include NonExistingRecordsHelpers
   config.include GitlabRoutingHelper
-  config.include StubFeatureFlags
   config.include StubExperiments
   config.include StubGitlabCalls
   config.include StubGitlabData
+  config.include SnowplowHelpers
+  config.include NextFoundInstanceOf
   config.include NextInstanceOf
   config.include TestEnv
   config.include Devise::Test::ControllerHelpers, type: :controller
@@ -98,6 +128,7 @@ RSpec.configure do |config|
   config.include LoginHelpers, type: :feature
   config.include SearchHelpers, type: :feature
   config.include WaitHelpers, type: :feature
+  config.include WaitForRequests, type: :feature
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
   config.include Gitlab::Routing, type: :routing
@@ -107,7 +138,6 @@ RSpec.configure do |config|
   config.include InputHelper, :js
   config.include SelectionHelper, :js
   config.include InspectRequests, :js
-  config.include WaitForRequests, :js
   config.include LiveDebugger, :js
   config.include MigrationsHelpers, :migration
   config.include RedisHelpers
@@ -115,11 +145,19 @@ RSpec.configure do |config|
   config.include PolicyHelpers, type: :policy
   config.include MemoryUsageHelper
   config.include ExpectRequestWithStatus, type: :request
+  config.include IdempotentWorkerHelper, type: :worker
   config.include RailsHelpers
+  config.include SidekiqMiddleware
+  config.include StubActionCableConnection, type: :channel
 
-  if ENV['CI']
+  include StubFeatureFlags
+
+  if ENV['CI'] || ENV['RETRIES']
     # This includes the first try, i.e. tests will be run 4 times before failing.
-    config.default_retry_count = 4
+    config.default_retry_count = ENV.fetch('RETRIES', 3).to_i + 1
+  end
+
+  if ENV['FLAKY_RSPEC_GENERATE_REPORT']
     config.reporter.register_listener(
       RspecFlaky::Listener.new,
       :example_passed,
@@ -129,67 +167,145 @@ RSpec.configure do |config|
   config.before(:suite) do
     Timecop.safe_mode = true
     TestEnv.init
+
+    # Reload all feature flags definitions
+    Feature.register_definitions
+
+    # Enable all features by default for testing
+    # Reset any changes in after hook.
+    stub_all_feature_flags
   end
 
   config.after(:all) do
     TestEnv.clean_test_path
   end
 
+  # We can't use an `around` hook here because the wrapping transaction
+  # is not yet opened at the time that is triggered
+  config.prepend_before do
+    Gitlab::Database.set_open_transactions_baseline
+  end
+
+  config.append_after do
+    Gitlab::Database.reset_open_transactions_baseline
+  end
+
   config.before do |example|
-    # Enable all features by default for testing
-    allow(Feature).to receive(:enabled?) { true }
+    if example.metadata.fetch(:stub_feature_flags, true)
+      # The following can be removed when we remove the staged rollout strategy
+      # and we can just enable it using instance wide settings
+      # (ie. ApplicationSetting#auto_devops_enabled)
+      stub_feature_flags(force_autodevops_on_by_default: false)
 
-    enabled = example.metadata[:enable_rugged].present?
+      # The following can be removed once Vue Issuable Sidebar
+      # is feature-complete and can be made default in place
+      # of older sidebar.
+      # See https://gitlab.com/groups/gitlab-org/-/epics/1863
+      stub_feature_flags(vue_issuable_sidebar: false)
+      stub_feature_flags(vue_issuable_epic_sidebar: false)
 
-    # Disable Rugged features by default
-    Gitlab::Git::RuggedImpl::Repository::FEATURE_FLAGS.each do |flag|
-      allow(Feature).to receive(:enabled?).with(flag).and_return(enabled)
+      # The following can be removed once we are confident the
+      # unified diff lines works as expected
+      stub_feature_flags(unified_diff_lines: false)
+
+      # Merge request widget GraphQL requests are disabled in the tests
+      # for now whilst we migrate as much as we can over the GraphQL
+      stub_feature_flags(merge_request_widget_graphql: false)
+
+      enable_rugged = example.metadata[:enable_rugged].present?
+
+      # Disable Rugged features by default
+      Gitlab::Git::RuggedImpl::Repository::FEATURE_FLAGS.each do |flag|
+        stub_feature_flags(flag => enable_rugged)
+      end
+
+      # Disable the usage of file_identifier_hash by default until it is ready
+      # See https://gitlab.com/gitlab-org/gitlab/-/issues/33867
+      stub_feature_flags(file_identifier_hash: false)
+
+      allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enable_rugged)
+    else
+      unstub_all_feature_flags
     end
 
-    allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(enabled)
-
-    # The following can be removed when we remove the staged rollout strategy
-    # and we can just enable it using instance wide settings
-    # (ie. ApplicationSetting#auto_devops_enabled)
-    allow(Feature).to receive(:enabled?)
-      .with(:force_autodevops_on_by_default, anything)
-      .and_return(false)
-
-    # The following can be removed once Vue Issuable Sidebar
-    # is feature-complete and can be made default in place
-    # of older sidebar.
-    # See https://gitlab.com/groups/gitlab-org/-/epics/1863
-    allow(Feature).to receive(:enabled?)
-      .with(:vue_issuable_sidebar, anything)
-      .and_return(false)
-    allow(Feature).to receive(:enabled?)
-      .with(:vue_issuable_epic_sidebar, anything)
-      .and_return(false)
+    # Enable Marginalia feature for all specs in the test suite.
+    allow(Gitlab::Marginalia).to receive(:cached_feature_enabled?).and_return(true)
 
     # Stub these calls due to being expensive operations
     # It can be reenabled for specific tests via:
     #
-    # allow(DetectRepositoryLanguagesWorker).to receive(:perform_async).and_call_original
-    # allow(Gitlab::Git::KeepAround).to receive(:execute).and_call_original
-    allow(DetectRepositoryLanguagesWorker).to receive(:perform_async).and_return(true)
+    # expect(Gitlab::Git::KeepAround).to receive(:execute).and_call_original
     allow(Gitlab::Git::KeepAround).to receive(:execute)
 
-    Gitlab::ThreadMemoryCache.cache_backend.clear
+    # Stub these calls due to being expensive operations
+    # It can be reenabled for specific tests via:
+    #
+    # expect(Gitlab::JobWaiter).to receive(:wait).and_call_original
+    allow_any_instance_of(Gitlab::JobWaiter).to receive(:wait)
+
+    Gitlab::ProcessMemoryCache.cache_backend.clear
+
+    Sidekiq::Worker.clear_all
 
     # Temporary patch to force admin mode to be active by default in tests when
     # using the feature flag :user_mode_in_session, since this will require
     # modifying a significant number of specs to test both states for admin
     # mode enabled / disabled.
     #
-    # See https://gitlab.com/gitlab-org/gitlab/issues/31511
-    # See gitlab/spec/support/helpers/admin_mode_helpers.rb
+    # This will only be applied to specs below dirs in `admin_mode_mock_dirs`
     #
-    # If it is required to have the real behaviour that an admin is signed in
+    # See ongoing migration: https://gitlab.com/gitlab-org/gitlab/-/issues/31511
+    #
+    # Until the migration is finished, if it is required to have the real
+    # behaviour in any of the mocked dirs specs that an admin is signed in
     # with normal user mode and needs to switch to admin mode, it is possible to
     # mark such tests with the `do_not_mock_admin_mode` metadata tag, e.g:
     #
-    # context 'some test with normal user mode', :do_not_mock_admin_mode do ... end
-    unless example.metadata[:do_not_mock_admin_mode]
+    # context 'some test in mocked dir', :do_not_mock_admin_mode do ... end
+    admin_mode_mock_dirs = %w(
+      ./ee/spec/elastic_integration
+      ./ee/spec/features
+      ./ee/spec/finders
+      ./ee/spec/lib
+      ./ee/spec/requests/admin
+      ./ee/spec/serializers
+      ./ee/spec/services
+      ./ee/spec/support/protected_tags
+      ./ee/spec/support/shared_examples/features
+      ./ee/spec/support/shared_examples/finders/geo
+      ./ee/spec/support/shared_examples/graphql/geo
+      ./ee/spec/support/shared_examples/services
+      ./spec/features
+      ./spec/finders
+      ./spec/frontend
+      ./spec/helpers
+      ./spec/lib
+      ./spec/requests
+      ./spec/serializers
+      ./spec/services
+      ./spec/support/protected_tags
+      ./spec/support/shared_examples/features
+      ./spec/support/shared_examples/requests
+      ./spec/support/shared_examples/lib/gitlab
+      ./spec/views
+      ./spec/workers
+    )
+
+    if !example.metadata[:do_not_mock_admin_mode] && example.metadata[:file_path].start_with?(*admin_mode_mock_dirs)
+      allow_any_instance_of(Gitlab::Auth::CurrentUserMode).to receive(:admin_mode?) do |current_user_mode|
+        current_user_mode.send(:user)&.admin?
+      end
+    end
+
+    # Administrators have to re-authenticate in order to access administrative
+    # functionality when feature flag :user_mode_in_session is active. Any spec
+    # that requires administrative access can use the tag :enable_admin_mode
+    # to avoid the second auth step (provided the user is already an admin):
+    #
+    # context 'some test that requires admin mode', :enable_admin_mode do ... end
+    #
+    # See also spec/support/helpers/admin_mode_helpers.rb
+    if example.metadata[:enable_admin_mode] && !example.metadata[:do_not_mock_admin_mode]
       allow_any_instance_of(Gitlab::Auth::CurrentUserMode).to receive(:admin_mode?) do |current_user_mode|
         current_user_mode.send(:user)&.admin?
       end
@@ -201,21 +317,36 @@ RSpec.configure do |config|
     example.run if config.inclusion_filter[:quarantine]
   end
 
-  config.before(:example, :request_store) do
-    RequestStore.begin!
+  config.around(:example, :request_store) do |example|
+    Gitlab::WithRequestStore.with_request_store { example.run }
   end
 
-  config.after(:example, :request_store) do
-    RequestStore.end!
-    RequestStore.clear!
+  config.around do |example|
+    # Wrap each example in it's own context to make sure the contexts don't
+    # leak
+    Labkit::Context.with_context { example.run }
+  end
+
+  config.around do |example|
+    with_sidekiq_server_middleware do |chain|
+      Gitlab::SidekiqMiddleware.server_configurator(
+        metrics: false, # The metrics don't go anywhere in tests
+        arguments_logger: false, # We're not logging the regular messages for inline jobs
+        memory_killer: false # This is not a thing we want to do inline in tests
+      ).call(chain)
+      chain.add DisableQueryLimit
+      chain.insert_after ::Gitlab::SidekiqMiddleware::RequestStoreMiddleware, IsolatedRequestStore
+
+      example.run
+    end
   end
 
   config.after do
     Fog.unmock! if Fog.mock?
-  end
-
-  config.after do
     Gitlab::CurrentSettings.clear_in_memory_application_settings!
+
+    # Reset all feature flag stubs to default for testing
+    stub_all_feature_flags
   end
 
   config.before(:example, :mailer) do
@@ -229,84 +360,6 @@ RSpec.configure do |config|
     Gitlab::Metrics.reset_registry!
   end
 
-  config.around(:each, :use_clean_rails_memory_store_caching) do |example|
-    caching_store = Rails.cache
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
-
-    example.run
-
-    Rails.cache = caching_store
-  end
-
-  config.around(:each, :clean_gitlab_redis_cache) do |example|
-    redis_cache_cleanup!
-
-    example.run
-
-    redis_cache_cleanup!
-  end
-
-  config.around(:each, :clean_gitlab_redis_shared_state) do |example|
-    redis_shared_state_cleanup!
-
-    example.run
-
-    redis_shared_state_cleanup!
-  end
-
-  config.around(:each, :clean_gitlab_redis_queues) do |example|
-    redis_queues_cleanup!
-
-    example.run
-
-    redis_queues_cleanup!
-  end
-
-  config.around(:each, :use_clean_rails_memory_store_fragment_caching) do |example|
-    caching_store = ActionController::Base.cache_store
-    ActionController::Base.cache_store = ActiveSupport::Cache::MemoryStore.new
-    ActionController::Base.perform_caching = true
-
-    example.run
-
-    ActionController::Base.perform_caching = false
-    ActionController::Base.cache_store = caching_store
-  end
-
-  config.around(:each, :use_sql_query_cache) do |example|
-    ActiveRecord::Base.cache do
-      example.run
-    end
-  end
-
-  # The :each scope runs "inside" the example, so this hook ensures the DB is in the
-  # correct state before any examples' before hooks are called. This prevents a
-  # problem where `ScheduleIssuesClosedAtTypeChange` (or any migration that depends
-  # on background migrations being run inline during test setup) can be broken by
-  # altering Sidekiq behavior in an unrelated spec like so:
-  #
-  # around do |example|
-  #   Sidekiq::Testing.fake! do
-  #     example.run
-  #   end
-  # end
-  config.before(:context, :migration) do
-    schema_migrate_down!
-  end
-
-  # Each example may call `migrate!`, so we must ensure we are migrated down every time
-  config.before(:each, :migration) do
-    use_fake_application_settings
-
-    schema_migrate_down!
-  end
-
-  config.after(:context, :migration) do
-    schema_migrate_up!
-
-    Gitlab::CurrentSettings.clear_in_memory_application_settings!
-  end
-
   # This makes sure the `ApplicationController#can?` method is stubbed with the
   # original implementation for all view specs.
   config.before(:each, type: :view) do
@@ -315,58 +368,8 @@ RSpec.configure do |config|
     end
   end
 
-  config.before(:each, :http_pages_enabled) do |_|
-    allow(Gitlab.config.pages).to receive(:external_http).and_return(['1.1.1.1:80'])
-  end
-
-  config.before(:each, :https_pages_enabled) do |_|
-    allow(Gitlab.config.pages).to receive(:external_https).and_return(['1.1.1.1:443'])
-  end
-
-  config.before(:each, :http_pages_disabled) do |_|
-    allow(Gitlab.config.pages).to receive(:external_http).and_return(false)
-  end
-
-  config.before(:each, :https_pages_disabled) do |_|
-    allow(Gitlab.config.pages).to receive(:external_https).and_return(false)
-  end
-
-  # We can't use an `around` hook here because the wrapping transaction
-  # is not yet opened at the time that is triggered
-  config.prepend_before do
-    Gitlab::Database.set_open_transactions_baseline
-  end
-
-  config.append_after do
-    Gitlab::Database.reset_open_transactions_baseline
-  end
+  config.disable_monkey_patching!
 end
-
-# add simpler way to match asset paths containing digest strings
-RSpec::Matchers.define :match_asset_path do |expected|
-  match do |actual|
-    path = Regexp.escape(expected)
-    extname = Regexp.escape(File.extname(expected))
-    digest_regex = Regexp.new(path.sub(extname, "(?:-\\h+)?#{extname}") << '$')
-    digest_regex =~ actual
-  end
-
-  failure_message do |actual|
-    "expected that #{actual} would include an asset path for #{expected}"
-  end
-
-  failure_message_when_negated do |actual|
-    "expected that #{actual} would not include an asset path for  #{expected}"
-  end
-end
-
-FactoryBot::SyntaxRunner.class_eval do
-  include RSpec::Mocks::ExampleMethods
-end
-
-# Use FactoryBot 4.x behavior:
-# https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#associations
-FactoryBot.use_parent_strategy = false
 
 ActiveRecord::Migration.maintain_test_schema!
 
@@ -382,3 +385,6 @@ Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
 
 # Disable timestamp checks for invisible_captcha
 InvisibleCaptcha.timestamp_enabled = false
+
+# Initialize FactoryDefault to use create_default helper
+TestProf::FactoryDefault.init

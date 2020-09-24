@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::External::Processor do
+RSpec.describe Gitlab::Ci::Config::External::Processor do
   include StubRequests
 
-  set(:project) { create(:project, :repository) }
-  set(:another_project) { create(:project, :repository) }
-  set(:user) { create(:user) }
-
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:another_project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:sha) { '12345' }
   let(:context_params) { { project: project, sha: sha, user: user } }
   let(:context) { Gitlab::Ci::Config::External::Context.new(**context_params) }
@@ -25,7 +24,7 @@ describe Gitlab::Ci::Config::External::Processor do
     subject { processor.perform }
 
     context 'when no external files defined' do
-      let(:values) { { image: 'ruby:2.2' } }
+      let(:values) { { image: 'ruby:2.7' } }
 
       it 'returns the same values' do
         expect(processor.perform).to eq(values)
@@ -33,7 +32,7 @@ describe Gitlab::Ci::Config::External::Processor do
     end
 
     context 'when an invalid local file is defined' do
-      let(:values) { { include: '/lib/gitlab/ci/templates/non-existent-file.yml', image: 'ruby:2.2' } }
+      let(:values) { { include: '/lib/gitlab/ci/templates/non-existent-file.yml', image: 'ruby:2.7' } }
 
       it 'raises an error' do
         expect { processor.perform }.to raise_error(
@@ -45,7 +44,7 @@ describe Gitlab::Ci::Config::External::Processor do
 
     context 'when an invalid remote file is defined' do
       let(:remote_file) { 'http://doesntexist.com/.gitlab-ci-1.yml' }
-      let(:values) { { include: remote_file, image: 'ruby:2.2' } }
+      let(:values) { { include: remote_file, image: 'ruby:2.7' } }
 
       before do
         stub_full_request(remote_file).and_raise(SocketError.new('Some HTTP error'))
@@ -61,7 +60,7 @@ describe Gitlab::Ci::Config::External::Processor do
 
     context 'with a valid remote external file is defined' do
       let(:remote_file) { 'https://gitlab.com/gitlab-org/gitlab-foss/blob/1234/.gitlab-ci-1.yml' }
-      let(:values) { { include: remote_file, image: 'ruby:2.2' } }
+      let(:values) { { include: remote_file, image: 'ruby:2.7' } }
       let(:external_file_content) do
         <<-HEREDOC
         before_script:
@@ -95,7 +94,7 @@ describe Gitlab::Ci::Config::External::Processor do
     end
 
     context 'with a valid local external file is defined' do
-      let(:values) { { include: '/lib/gitlab/ci/templates/template.yml', image: 'ruby:2.2' } }
+      let(:values) { { include: '/lib/gitlab/ci/templates/template.yml', image: 'ruby:2.7' } }
       let(:local_file_content) do
         <<-HEREDOC
         before_script:
@@ -129,10 +128,11 @@ describe Gitlab::Ci::Config::External::Processor do
           remote_file
         ]
       end
+
       let(:values) do
         {
           include: external_files,
-          image: 'ruby:2.2'
+          image: 'ruby:2.7'
         }
       end
 
@@ -164,7 +164,7 @@ describe Gitlab::Ci::Config::External::Processor do
     end
 
     context 'when external files are defined but not valid' do
-      let(:values) { { include: '/lib/gitlab/ci/templates/template.yml', image: 'ruby:2.2' } }
+      let(:values) { { include: '/lib/gitlab/ci/templates/template.yml', image: 'ruby:2.7' } }
 
       let(:local_file_content) { 'invalid content file ////' }
 
@@ -186,7 +186,7 @@ describe Gitlab::Ci::Config::External::Processor do
       let(:values) do
         {
           include: remote_file,
-          image: 'ruby:2.2'
+          image: 'ruby:2.7'
         }
       end
 
@@ -199,7 +199,7 @@ describe Gitlab::Ci::Config::External::Processor do
       it 'takes precedence' do
         stub_full_request(remote_file).to_return(body: remote_file_content)
 
-        expect(processor.perform[:image]).to eq('ruby:2.2')
+        expect(processor.perform[:image]).to eq('ruby:2.7')
       end
     end
 
@@ -209,7 +209,7 @@ describe Gitlab::Ci::Config::External::Processor do
           include: [
             { local: '/local/file.yml' }
           ],
-          image: 'ruby:2.2'
+          image: 'ruby:2.7'
         }
       end
 

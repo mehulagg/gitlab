@@ -2,16 +2,20 @@
 
 require 'spec_helper'
 
-describe 'Projects > Snippets > User comments on a snippet', :js do
-  let(:project) { create(:project) }
-  let!(:snippet) { create(:project_snippet, project: project, author: user) }
-  let(:user) { create(:user) }
+RSpec.describe 'Projects > Snippets > User comments on a snippet', :js do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:snippet) { create(:project_snippet, :repository, project: project, author: user) }
 
   before do
+    stub_feature_flags(snippets_vue: false)
     project.add_maintainer(user)
     sign_in(user)
 
     visit(project_snippet_path(project, snippet))
+
+    # Snippet's content is loaded async, we wait for it before we try to click anything
+    wait_for_requests
   end
 
   it 'leaves a comment on a snippet' do
@@ -33,7 +37,8 @@ describe 'Projects > Snippets > User comments on a snippet', :js do
   end
 
   it 'has zen mode' do
-    find('.js-zen-enter').click
+    click_button 'Go full screen'
+
     expect(page).to have_selector('.fullscreen')
   end
 end

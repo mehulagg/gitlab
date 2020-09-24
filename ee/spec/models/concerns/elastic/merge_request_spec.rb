@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequest, :elastic do
+RSpec.describe MergeRequest, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -10,8 +10,8 @@ describe MergeRequest, :elastic do
   let(:admin) { create(:user, :admin) }
 
   it_behaves_like 'limited indexing is enabled' do
-    set(:object) { create :merge_request, source_project: project }
-    set(:group) { create(:group) }
+    let_it_be(:object) { create :merge_request, source_project: project }
+    let_it_be(:group) { create(:group) }
     let(:group_object) do
       project = create :project, name: 'test1', group: group
       create :merge_request, source_project: project
@@ -29,7 +29,7 @@ describe MergeRequest, :elastic do
       # The merge request you have no access to except as an administrator
       create :merge_request, title: 'also with term3', source_project: create(:project, :private)
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     options = { project_ids: [project.id] }
@@ -51,7 +51,7 @@ describe MergeRequest, :elastic do
       # Issue with the same iid should not be found in MergeRequest search
       create :issue, project: project, iid: merge_request.iid
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     options = { project_ids: [project.id] }
@@ -79,6 +79,7 @@ describe MergeRequest, :elastic do
       'target_project_id',
       'author_id'
     ).merge({
+      'state' => merge_request.state,
       'type' => merge_request.es_type,
       'join_field' => {
         'name' => merge_request.es_type,

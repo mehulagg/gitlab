@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NamespaceFileUploader do
+RSpec.describe NamespaceFileUploader do
   let(:group) { build_stubbed(:group) }
   let(:uploader) { described_class.new(group) }
   let(:upload) { create(:upload, :namespace_upload, model: group) }
@@ -37,7 +37,7 @@ describe NamespaceFileUploader do
     end
   end
 
-  context '.base_dir' do
+  describe '.base_dir' do
     it 'returns local storage base_dir without store param' do
       expect(described_class.base_dir(group)).to eq("uploads/-/system/namespace/#{group.id}")
     end

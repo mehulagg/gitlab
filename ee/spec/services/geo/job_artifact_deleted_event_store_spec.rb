@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Geo::JobArtifactDeletedEventStore do
+RSpec.describe Geo::JobArtifactDeletedEventStore do
   include EE::GeoHelpers
 
-  set(:secondary_node) { create(:geo_node) }
+  let_it_be(:secondary_node) { create(:geo_node) }
 
   let(:job_artifact) { create(:ci_job_artifact, :archive) }
 
@@ -32,12 +32,16 @@ describe Geo::JobArtifactDeletedEventStore do
 
       it 'logs an error message when event creation fail' do
         invalid_job_artifact = create(:ci_job_artifact)
+        project = invalid_job_artifact.project
         subject = described_class.new(invalid_job_artifact)
 
         expected_message = {
           class: "Geo::JobArtifactDeletedEventStore",
+          host: "localhost",
           job_artifact_id: invalid_job_artifact.id,
-          file_path: nil,
+          project_id: project.id,
+          project_path: project.full_path,
+          storage_version: project.storage_version,
           message: "Job artifact deleted event could not be created",
           error: "Validation failed: File path can't be blank"
         }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Trace::SectionParser do
+RSpec.describe Gitlab::Ci::Trace::SectionParser do
   def lines_with_pos(text)
     pos = 0
     StringIO.new(text).each_line do |line|
@@ -21,6 +21,7 @@ describe Gitlab::Ci::Trace::SectionParser do
   end
 
   let(:lines) { build_lines('') }
+
   subject { described_class.new(lines) }
 
   describe '#sections' do
@@ -73,7 +74,7 @@ describe Gitlab::Ci::Trace::SectionParser do
       let(:lines) { build_lines(trace) }
 
       it 'must handle correctly byte positioning' do
-        expect(subject).to receive(:find_next_marker).exactly(2).times.and_call_original
+        expect(subject).to receive(:find_next_marker).twice.and_call_original
 
         subject.parse!
 

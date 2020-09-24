@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe ApprovalRules::UpdateService do
+RSpec.describe ApprovalRules::UpdateService do
   let(:project) { create(:project) }
   let(:user) { project.creator }
+  let(:approval_rule) { target.approval_rules.create(name: 'foo', approvals_required: 2) }
 
   shared_examples 'editable' do
-    let(:approval_rule) { target.approval_rules.create(name: 'foo') }
     let(:new_approvers) { create_list(:user, 2) }
     let(:new_groups) { create_list(:group, 2, :private) }
 
@@ -138,6 +138,162 @@ describe ApprovalRules::UpdateService do
     let(:target) { project }
 
     it_behaves_like "editable"
+
+    context 'when protected_branch_ids param is present' do
+      let(:protected_branch) { create(:protected_branch, project: target) }
+
+      subject do
+        described_class.new(
+          approval_rule,
+          user,
+          protected_branch_ids: [protected_branch.id]
+        ).execute
+      end
+
+      context 'and multiple approval rules is enabled' do
+        before do
+          stub_licensed_features(multiple_approval_rules: true)
+        end
+
+        it 'associates the approval rule to the protected branch' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:rule].protected_branches).to eq([protected_branch])
+        end
+
+        context 'but user cannot administer project' do
+          before do
+            allow(Ability).to receive(:allowed?).and_call_original
+            allow(Ability).to receive(:allowed?).with(user, :admin_project, target).and_return(false)
+          end
+
+          it 'does not associate the approval rule to the protected branch' do
+            expect(subject[:status]).to eq(:success)
+            expect(subject[:rule].protected_branches).to be_empty
+          end
+        end
+
+        context 'but protected branch is for another project' do
+          let(:another_project) { create(:project) }
+          let(:protected_branch) { create(:protected_branch, project: another_project) }
+
+          it 'does not associate the approval rule to the protected branch' do
+            expect(subject[:status]).to eq(:success)
+            expect(subject[:rule].protected_branches).to be_empty
+          end
+        end
+      end
+
+      context 'and multiple approval rules is disabled' do
+        it 'does not associate the approval rule to the protected branch' do
+          expect(subject[:status]).to eq(:success)
+          expect(subject[:rule].protected_branches).to be_empty
+        end
+      end
+    end
+
+    describe 'audit events' do
+      let_it_be(:approver) { create(:user, name: 'Batman') }
+      let_it_be(:group) { create(:group, name: 'Justice League') }
+      let_it_be(:new_approver) { create(:user, name: 'Spiderman') }
+      let_it_be(:new_group) { create(:group, name: 'Avengers') }
+
+      let(:approval_rule) do
+        create(:approval_project_rule,
+          name: 'Gotham',
+          project: target,
+          approvals_required: 2,
+          users: [approver],
+          groups: [group]
+        )
+      end
+
+      before do
+        project.add_reporter approver
+        project.add_reporter new_approver
+      end
+
+      context 'when licensed' do
+        before do
+          stub_licensed_features(audit_events: true)
+        end
+
+        context 'when rule update operation succeeds', :request_store do
+          it 'logs an audit event' do
+            expect do
+              described_class.new(approval_rule, user, approvals_required: 1).execute
+            end.to change { AuditEvent.count }.by(1)
+          end
+
+          it 'audits the number of required approvals change' do
+            described_class.new(approval_rule, user, approvals_required: 1).execute
+
+            expect(AuditEvent.last).to have_attributes(
+              details: hash_including(change: 'number of required approvals', from: 2, to: 1)
+            )
+          end
+
+          it 'audits the group addition to approval group' do
+            described_class.new(approval_rule, user, group_ids: [group.id, new_group.id]).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Added Group Avengers to approval group on Gotham rule"
+            )
+          end
+
+          it 'audits the group removal from approval group' do
+            described_class.new(approval_rule, user, group_ids: []).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Removed Group Justice League from approval group on Gotham rule"
+            )
+          end
+
+          it 'audits the user addition to approval group' do
+            described_class.new(approval_rule, user, user_ids: [approver.id, new_approver.id]).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Added User Spiderman to approval group on Gotham rule"
+            )
+          end
+
+          it 'audits the user removal from approval group' do
+            described_class.new(approval_rule, user, user_ids: []).execute
+
+            expect(AuditEvent.last.details[:custom_message]).to eq(
+              "Removed User Batman from approval group on Gotham rule"
+            )
+          end
+        end
+
+        context 'when rule update operation fails' do
+          before do
+            allow(approval_rule).to receive(:update).and_return(false)
+          end
+
+          it 'does not log any audit event' do
+            expect do
+              described_class.new(approval_rule, user, approvals_required: 1).execute
+            end.not_to change { AuditEvent.count }
+          end
+        end
+      end
+
+      context 'when not licensed' do
+        before do
+          stub_licensed_features(
+            admin_audit_log: false,
+            audit_events: false,
+            extended_audit_events: false
+          )
+        end
+
+        it 'does not log any audit event' do
+          expect do
+            described_class.new(approval_rule, user, approvals_required: 1).execute
+          end.not_to change { AuditEvent.count }
+        end
+      end
+    end
   end
 
   context 'when target is merge request' do

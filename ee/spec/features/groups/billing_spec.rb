@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups > Billing', :js do
+RSpec.describe 'Groups > Billing', :js do
   include StubRequests
 
   let!(:user)        { create(:user) }
@@ -18,9 +18,10 @@ describe 'Groups > Billing', :js do
   end
 
   before do
-    stub_full_request("https://customers.gitlab.com/gitlab_plans?plan=#{plan}")
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}")
       .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
 
+    allow(Gitlab).to receive(:com?).and_return(true)
     stub_application_setting(check_namespace_plan: true)
 
     group.add_owner(user)

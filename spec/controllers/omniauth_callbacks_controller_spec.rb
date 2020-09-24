@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe OmniauthCallbacksController, type: :controller do
+RSpec.describe OmniauthCallbacksController, type: :controller do
   include LoginHelpers
 
   describe 'omniauth' do
@@ -37,6 +37,22 @@ describe OmniauthCallbacksController, type: :controller do
 
       it 'shows reactivation flash message after logging in' do
         expect(flash[:notice]).to eq('Welcome back! Your account had been deactivated due to inactivity but is now reactivated.')
+      end
+    end
+
+    context 'when sign in is not valid' do
+      let(:provider) { :github }
+      let(:extern_uid) { 'my-uid' }
+
+      it 'renders omniauth error page' do
+        allow_next_instance_of(Gitlab::Auth::OAuth::User) do |instance|
+          allow(instance).to receive(:valid_sign_in?).and_return(false)
+        end
+
+        post provider
+
+        expect(response).to render_template("errors/omniauth_error")
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end
 
@@ -144,10 +160,19 @@ describe OmniauthCallbacksController, type: :controller do
         let(:extern_uid) { 'my-uid' }
         let(:provider) { :github }
 
+        it_behaves_like 'known sign in' do
+          let(:post_action) { post provider }
+        end
+
         it 'allows sign in' do
           post provider
 
           expect(request.env['warden']).to be_authenticated
+        end
+
+        it 'creates an authentication event record' do
+          expect { post provider }.to change { AuthenticationEvent.count }.by(1)
+          expect(AuthenticationEvent.last.provider).to eq(provider.to_s)
         end
 
         context 'when user has no linked provider' do
@@ -172,8 +197,25 @@ describe OmniauthCallbacksController, type: :controller do
             it 'returns 403' do
               post provider
 
-              expect(response).to have_gitlab_http_status(403)
+              expect(response).to have_gitlab_http_status(:forbidden)
             end
+          end
+        end
+
+        context 'when user with 2FA is unconfirmed' do
+          render_views
+
+          let(:user) { create(:omniauth_user, :two_factor, extern_uid: 'my-uid', provider: provider) }
+
+          before do
+            user.update_column(:confirmed_at, nil)
+          end
+
+          it 'redirects to login page' do
+            post provider
+
+            expect(response).to redirect_to(new_user_session_path)
+            expect(flash[:alert]).to match(/You have to confirm your email address before continuing./)
           end
         end
 
@@ -208,7 +250,7 @@ describe OmniauthCallbacksController, type: :controller do
           end
 
           it 'allows linking the disabled provider' do
-            user.identities.destroy_all # rubocop: disable DestroyAll
+            user.identities.destroy_all # rubocop: disable Cop/DestroyAll
             sign_in(user)
 
             expect { post provider }.to change { user.reload.identities.count }.by(1)
@@ -234,8 +276,53 @@ describe OmniauthCallbacksController, type: :controller do
           post 'auth0'
 
           expect(request.env['warden']).not_to be_authenticated
-          expect(response.status).to eq(302)
+          expect(response).to have_gitlab_http_status(:found)
           expect(controller).to set_flash[:alert].to('Wrong extern UID provided. Make sure Auth0 is configured correctly.')
+        end
+      end
+
+      context 'atlassian_oauth2' do
+        let(:provider) { :atlassian_oauth2 }
+        let(:extern_uid) { 'my-uid' }
+
+        context 'when the user and identity already exist' do
+          let(:user) { create(:atlassian_user, extern_uid: extern_uid) }
+
+          it 'allows sign-in' do
+            post :atlassian_oauth2
+
+            expect(request.env['warden']).to be_authenticated
+          end
+        end
+
+        context 'for a new user' do
+          before do
+            stub_omniauth_setting(enabled: true, auto_link_user: true, allow_single_sign_on: ['atlassian_oauth2'])
+
+            user.destroy
+          end
+
+          it 'denies sign-in if sign-up is enabled, but block_auto_created_users is set' do
+            post :atlassian_oauth2
+
+            expect(flash[:alert]).to start_with 'Your account has been blocked.'
+          end
+
+          it 'accepts sign-in if sign-up is enabled' do
+            stub_omniauth_setting(block_auto_created_users: false)
+
+            post :atlassian_oauth2
+
+            expect(request.env['warden']).to be_authenticated
+          end
+
+          it 'denies sign-in if sign-up is not enabled' do
+            stub_omniauth_setting(allow_single_sign_on: false, block_auto_created_users: false)
+
+            post :atlassian_oauth2
+
+            expect(flash[:alert]).to start_with 'Signing in using your Atlassian account without a pre-existing GitLab account is not allowed.'
+          end
         end
       end
 
@@ -249,7 +336,7 @@ describe OmniauthCallbacksController, type: :controller do
             post 'salesforce'
 
             expect(request.env['warden']).not_to be_authenticated
-            expect(response.status).to eq(302)
+            expect(response).to have_gitlab_http_status(:found)
             expect(controller).to set_flash[:alert].to('Email not verified. Please verify your email in Salesforce.')
           end
         end
@@ -285,6 +372,39 @@ describe OmniauthCallbacksController, type: :controller do
       mock_auth_hash_with_saml_xml('saml', +'my-uid', user.email, mock_saml_response)
       request.env['devise.mapping'] = Devise.mappings[:user]
       request.env['omniauth.auth'] = Rails.application.env_config['omniauth.auth']
+    end
+
+    it_behaves_like 'known sign in' do
+      let(:user) { create(:omniauth_user, extern_uid: 'my-uid', provider: 'saml') }
+      let(:post_action) { post :saml, params: { SAMLResponse: mock_saml_response } }
+    end
+
+    context 'sign up' do
+      before do
+        user.destroy
+      end
+
+      it 'denies login if sign up is enabled, but block_auto_created_users is set' do
+        post :saml, params: { SAMLResponse: mock_saml_response }
+
+        expect(flash[:alert]).to start_with 'Your account has been blocked.'
+      end
+
+      it 'accepts login if sign up is enabled' do
+        stub_omniauth_setting(block_auto_created_users: false)
+
+        post :saml, params: { SAMLResponse: mock_saml_response }
+
+        expect(request.env['warden']).to be_authenticated
+      end
+
+      it 'denies login if sign up is not enabled' do
+        stub_omniauth_setting(allow_single_sign_on: false, block_auto_created_users: false)
+
+        post :saml, params: { SAMLResponse: mock_saml_response }
+
+        expect(flash[:alert]).to start_with 'Signing in using your saml account without a pre-existing GitLab account is not allowed.'
+      end
     end
 
     context 'with GitLab initiated request' do
@@ -333,6 +453,111 @@ describe OmniauthCallbacksController, type: :controller do
 
       it 'doesn\'t link a new identity to the user' do
         expect { post :saml, params: { SAMLResponse: mock_saml_response } }.not_to change { user.identities.count }
+      end
+    end
+  end
+
+  describe 'enable admin mode' do
+    include_context 'custom session'
+
+    let(:provider) { :auth0 }
+    let(:extern_uid) { 'my-uid' }
+    let(:user) { create(:omniauth_user, extern_uid: extern_uid, provider: provider) }
+
+    def reauthenticate_and_check_admin_mode(expected_admin_mode:)
+      # Initially admin mode disabled
+      expect(subject.current_user_mode.admin_mode?).to be(false)
+
+      # Trigger OmniAuth admin mode flow and expect admin mode status
+      post provider
+
+      expect(request.env['warden']).to be_authenticated
+      expect(subject.current_user_mode.admin_mode?).to be(expected_admin_mode)
+    end
+
+    context 'user and admin mode requested by the same user' do
+      before do
+        sign_in user
+
+        mock_auth_hash(provider.to_s, extern_uid, user.email, additional_info: {})
+        stub_omniauth_provider(provider, context: request)
+      end
+
+      context 'with a regular user' do
+        it 'cannot be enabled' do
+          reauthenticate_and_check_admin_mode(expected_admin_mode: false)
+
+          expect(response).to redirect_to(root_path)
+        end
+      end
+
+      context 'with an admin user' do
+        let(:user) { create(:omniauth_user, extern_uid: extern_uid, provider: provider, access_level: :admin) }
+
+        context 'when requested first' do
+          before do
+            subject.current_user_mode.request_admin_mode!
+          end
+
+          it 'can be enabled' do
+            reauthenticate_and_check_admin_mode(expected_admin_mode: true)
+
+            expect(response).to redirect_to(admin_root_path)
+          end
+        end
+
+        context 'when not requested first' do
+          it 'cannot be enabled' do
+            reauthenticate_and_check_admin_mode(expected_admin_mode: false)
+
+            expect(response).to redirect_to(root_path)
+          end
+        end
+      end
+    end
+
+    context 'user and admin mode requested by different users' do
+      let(:reauth_extern_uid) { 'another_uid' }
+      let(:reauth_user) { create(:omniauth_user, extern_uid: reauth_extern_uid, provider: provider) }
+
+      before do
+        sign_in user
+
+        mock_auth_hash(provider.to_s, reauth_extern_uid, reauth_user.email, additional_info: {})
+        stub_omniauth_provider(provider, context: request)
+      end
+
+      context 'with a regular user' do
+        it 'cannot be enabled' do
+          reauthenticate_and_check_admin_mode(expected_admin_mode: false)
+
+          expect(response).to redirect_to(profile_account_path)
+        end
+      end
+
+      context 'with an admin user' do
+        let(:user) { create(:omniauth_user, extern_uid: extern_uid, provider: provider, access_level: :admin) }
+        let(:reauth_user) { create(:omniauth_user, extern_uid: reauth_extern_uid, provider: provider, access_level: :admin) }
+
+        context 'when requested first' do
+          before do
+            subject.current_user_mode.request_admin_mode!
+          end
+
+          it 'cannot be enabled' do
+            reauthenticate_and_check_admin_mode(expected_admin_mode: false)
+
+            expect(response).to redirect_to(new_admin_session_path)
+          end
+        end
+
+        context 'when not requested first' do
+          it 'cannot be enabled' do
+            reauthenticate_and_check_admin_mode(expected_admin_mode: false)
+
+            expect(response).to redirect_to(profile_account_path)
+          end
+        end
       end
     end
   end

@@ -1,11 +1,12 @@
 <script>
 import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import Autosize from 'autosize';
+import { GlAlert, GlIntersperse, GlLink, GlSprintf, GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
-import Flash from '../../flash';
+import { deprecatedCreateFlash as Flash } from '../../flash';
 import Autosave from '../../autosave';
 import {
   capitalizeFirstCharacter,
@@ -16,10 +17,9 @@ import {
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
-import issueWarning from '../../vue_shared/components/issue/issue_warning.vue';
+import NoteableWarning from '../../vue_shared/components/notes/noteable_warning.vue';
 import markdownField from '../../vue_shared/components/markdown/field.vue';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
-import loadingButton from '../../vue_shared/components/loading_button.vue';
 import noteSignedOutWidget from './note_signed_out_widget.vue';
 import discussionLockedWidget from './discussion_locked_widget.vue';
 import issuableStateMixin from '../mixins/issuable_state';
@@ -27,13 +27,17 @@ import issuableStateMixin from '../mixins/issuable_state';
 export default {
   name: 'CommentForm',
   components: {
-    issueWarning,
+    NoteableWarning,
     noteSignedOutWidget,
     discussionLockedWidget,
     markdownField,
     userAvatarLink,
-    loadingButton,
+    GlButton,
     TimelineEntryItem,
+    GlAlert,
+    GlIntersperse,
+    GlLink,
+    GlSprintf,
   },
   mixins: [issuableStateMixin],
   props: {
@@ -55,10 +59,12 @@ export default {
       'getCurrentUserLastNote',
       'getUserData',
       'getNoteableData',
+      'getNoteableDataByProp',
       'getNotesData',
       'openState',
+      'getBlockedByIssues',
     ]),
-    ...mapState(['isToggleStateButtonLoading']),
+    ...mapState(['isToggleStateButtonLoading', 'isToggleBlockedIssueWarning']),
     noteableDisplayName() {
       return splitCamelCase(this.noteableType).toLowerCase();
     },
@@ -95,6 +101,9 @@ export default {
         noteable: this.noteableDisplayName,
       });
     },
+    buttonVariant() {
+      return this.isOpen ? 'warning' : 'default';
+    },
     actionButtonClassNames() {
       return {
         'btn-reopen': !this.isOpen,
@@ -118,8 +127,12 @@ export default {
     canToggleIssueState() {
       return (
         this.getNoteableData.current_user.can_update &&
-        this.getNoteableData.state !== constants.MERGED
+        this.getNoteableData.state !== constants.MERGED &&
+        !this.closedAndLocked
       );
+    },
+    closedAndLocked() {
+      return !this.isOpen && this.isLocked(this.getNoteableData);
     },
     endpoint() {
       return this.getNoteableData.create_note_path;
@@ -128,6 +141,9 @@ export default {
       return this.noteableType === constants.MERGE_REQUEST_NOTEABLE_TYPE
         ? __('merge request')
         : __('issue');
+    },
+    isIssueType() {
+      return this.noteableDisplayName === constants.ISSUE_NOTEABLE_TYPE;
     },
     trackingLabel() {
       return slugifyWithUnderscore(`${this.commentButtonTitle} button`);
@@ -159,9 +175,10 @@ export default {
       'reopenIssue',
       'toggleIssueLocalState',
       'toggleStateButtonLoading',
+      'toggleBlockedIssueWarning',
     ]),
     setIsSubmitButtonDisabled(note, isSubmitting) {
-      if (!_.isEmpty(note) && !isSubmitting) {
+      if (!isEmpty(note) && !isSubmitting) {
         this.isSubmitButtonDisabled = false;
       } else {
         this.isSubmitButtonDisabled = true;
@@ -193,23 +210,10 @@ export default {
         this.stopPolling();
 
         this.saveNote(noteData)
-          .then(res => {
+          .then(() => {
             this.enableButton();
             this.restartPolling();
-
-            if (res.errors) {
-              if (res.errors.commands_only) {
-                this.discard();
-              } else {
-                Flash(
-                  __('Something went wrong while adding your comment. Please try again.'),
-                  'alert',
-                  this.$refs.commentForm,
-                );
-              }
-            } else {
-              this.discard();
-            }
+            this.discard();
 
             if (withIssueAction) {
               this.toggleIssueState();
@@ -233,22 +237,17 @@ export default {
       this.isSubmitting = false;
     },
     toggleIssueState() {
+      if (
+        this.noteableType.toLowerCase() === constants.ISSUE_NOTEABLE_TYPE &&
+        this.isOpen &&
+        this.getBlockedByIssues &&
+        this.getBlockedByIssues.length > 0
+      ) {
+        this.toggleBlockedIssueWarning(true);
+        return;
+      }
       if (this.isOpen) {
-        this.closeIssue()
-          .then(() => {
-            this.enableButton();
-            refreshUserMergeRequestCounts();
-          })
-          .catch(() => {
-            this.enableButton();
-            this.toggleStateButtonLoading(false);
-            Flash(
-              sprintf(
-                __('Something went wrong while closing the %{issuable}. Please try again later'),
-                { issuable: this.noteableDisplayName },
-              ),
-            );
-          });
+        this.forceCloseIssue();
       } else {
         this.reopenIssue()
           .then(() => {
@@ -270,6 +269,23 @@ export default {
             Flash(errorMessage);
           });
       }
+    },
+    forceCloseIssue() {
+      this.closeIssue()
+        .then(() => {
+          this.enableButton();
+          refreshUserMergeRequestCounts();
+        })
+        .catch(() => {
+          this.enableButton();
+          this.toggleStateButtonLoading(false);
+          Flash(
+            sprintf(
+              __('Something went wrong while closing the %{issuable}. Please try again later'),
+              { issuable: this.noteableDisplayName },
+            ),
+          );
+        });
     },
     discard(shouldClear = true) {
       // `blur` is needed to clear slash commands autocomplete cache if event fired.
@@ -339,20 +355,23 @@ export default {
           <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
             <div class="error-alert"></div>
 
-            <issue-warning
+            <noteable-warning
               v-if="hasWarning(getNoteableData)"
               :is-locked="isLocked(getNoteableData)"
               :is-confidential="isConfidential(getNoteableData)"
-              :locked-issue-docs-path="lockedIssueDocsPath"
-              :confidential-issue-docs-path="confidentialIssueDocsPath"
+              :noteable-type="noteableType"
+              :locked-noteable-docs-path="lockedIssueDocsPath"
+              :confidential-noteable-docs-path="confidentialIssueDocsPath"
             />
 
             <markdown-field
               ref="markdownField"
+              :is-submitting="isSubmitting"
               :markdown-preview-path="markdownPreviewPath"
               :markdown-docs-path="markdownDocsPath"
               :quick-actions-docs-path="quickActionsDocsPath"
               :add-spacing-classes="false"
+              :textarea-value="note"
             >
               <textarea
                 id="note-body"
@@ -362,44 +381,74 @@ export default {
                 dir="auto"
                 :disabled="isSubmitting"
                 name="note[note]"
-                class="note-textarea js-vue-comment-form js-note-text
-js-gfm-input js-autosize markdown-area js-vue-textarea qa-comment-input"
+                class="note-textarea js-vue-comment-form js-note-text js-gfm-input js-autosize markdown-area"
+                data-qa-selector="comment_field"
                 data-supports-quick-actions="true"
                 :aria-label="__('Description')"
                 :placeholder="__('Write a comment or drag your files here…')"
                 @keydown.up="editCurrentUserLastNote()"
                 @keydown.meta.enter="handleSave()"
                 @keydown.ctrl.enter="handleSave()"
-              >
-              </textarea>
+              ></textarea>
             </markdown-field>
+            <gl-alert
+              v-if="isToggleBlockedIssueWarning"
+              class="gl-mt-5"
+              :title="__('Are you sure you want to close this blocked issue?')"
+              :primary-button-text="__('Yes, close issue')"
+              :secondary-button-text="__('Cancel')"
+              variant="warning"
+              :dismissible="false"
+              @primaryAction="toggleBlockedIssueWarning(false) && forceCloseIssue()"
+              @secondaryAction="toggleBlockedIssueWarning(false) && enableButton()"
+            >
+              <p>
+                <gl-sprintf
+                  :message="
+                    __('This issue is currently blocked by the following issues: %{issues}.')
+                  "
+                >
+                  <template #issues>
+                    <gl-intersperse>
+                      <gl-link
+                        v-for="blockingIssue in getBlockedByIssues"
+                        :key="blockingIssue.web_url"
+                        :href="blockingIssue.web_url"
+                        >#{{ blockingIssue.iid }}</gl-link
+                      >
+                    </gl-intersperse>
+                  </template>
+                </gl-sprintf>
+              </p>
+            </gl-alert>
             <div class="note-form-actions">
               <div
-                class="float-left btn-group
-append-right-10 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
+                class="btn-group gl-mr-3 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
               >
-                <button
+                <gl-button
                   :disabled="isSubmitButtonDisabled"
-                  class="btn btn-success js-comment-button js-comment-submit-button
-                    qa-comment-button"
+                  class="js-comment-button js-comment-submit-button"
+                  data-qa-selector="comment_button"
                   type="submit"
+                  category="primary"
+                  variant="success"
                   :data-track-label="trackingLabel"
                   data-track-event="click_button"
                   @click.prevent="handleSave()"
+                  >{{ commentButtonTitle }}</gl-button
                 >
-                  {{ commentButtonTitle }}
-                </button>
-                <button
+                <gl-button
                   :disabled="isSubmitButtonDisabled"
                   name="button"
-                  type="button"
-                  class="btn btn-success note-type-toggle js-note-new-discussion dropdown-toggle qa-note-dropdown"
+                  category="primary"
+                  variant="success"
+                  class="note-type-toggle js-note-new-discussion dropdown-toggle"
+                  data-qa-selector="note_dropdown"
                   data-display="static"
                   data-toggle="dropdown"
+                  icon="chevron-down"
                   :aria-label="__('Open comment type dropdown')"
-                >
-                  <i aria-hidden="true" class="fa fa-caret-down toggle-icon"> </i>
-                </button>
+                />
 
                 <ul class="note-type-dropdown dropdown-open-top dropdown-menu">
                   <li :class="{ 'droplab-item-selected': noteType === 'comment' }">
@@ -408,7 +457,7 @@ append-right-10 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
                       class="btn btn-transparent"
                       @click.prevent="setNoteType('comment')"
                     >
-                      <i aria-hidden="true" class="fa fa-check icon"> </i>
+                      <i aria-hidden="true" class="fa fa-check icon"></i>
                       <div class="description">
                         <strong>{{ __('Comment') }}</strong>
                         <p>
@@ -424,11 +473,10 @@ append-right-10 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
                   <li class="divider droplab-item-ignore"></li>
                   <li :class="{ 'droplab-item-selected': noteType === 'discussion' }">
                     <button
-                      type="button"
-                      class="btn btn-transparent qa-discussion-option"
+                      data-qa-selector="discussion_menu_item"
                       @click.prevent="setNoteType('discussion')"
                     >
-                      <i aria-hidden="true" class="fa fa-check icon"> </i>
+                      <i aria-hidden="true" class="fa fa-check icon"></i>
                       <div class="description">
                         <strong>{{ __('Start thread') }}</strong>
                         <p>{{ startDiscussionDescription }}</p>
@@ -438,17 +486,19 @@ append-right-10 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
                 </ul>
               </div>
 
-              <loading-button
-                v-if="canToggleIssueState"
+              <gl-button
+                v-if="canToggleIssueState && !isToggleBlockedIssueWarning"
                 :loading="isToggleStateButtonLoading"
-                :container-class="[
+                category="secondary"
+                :variant="buttonVariant"
+                :class="[
                   actionButtonClassNames,
-                  'btn btn-comment btn-comment-and-close js-action-button',
+                  'btn-comment btn-comment-and-close js-action-button',
                 ]"
                 :disabled="isToggleStateButtonLoading || isSubmitting"
-                :label="issueActionButtonTitle"
                 @click="handleSave(true)"
-              />
+                >{{ issueActionButtonTitle }}</gl-button
+              >
             </div>
           </form>
         </div>

@@ -1,18 +1,24 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Group and project access requests API
 
- >**Note:** This feature was introduced in GitLab 8.11
+> Introduced in GitLab 8.11.
 
- **Valid access levels**
+## Valid access levels
 
  The access levels are defined in the `Gitlab::Access` module. Currently, these levels are recognized:
 
-```plaintext
-10 => Guest access
-20 => Reporter access
-30 => Developer access
-40 => Maintainer access
-50 => Owner access # Only valid for groups
-```
+- No access (`0`)
+- Guest (`10`)
+- Reporter (`20`)
+- Developer (`30`)
+- Maintainer (`40`)
+- Owner (`50`) - Only valid to set for groups
 
 ## List access requests for a group or project
 
@@ -29,9 +35,9 @@ GET /projects/:id/access_requests
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/:id/access_requests
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/access_requests
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/access_requests"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/access_requests"
 ```
 
 Example response:
@@ -72,9 +78,9 @@ POST /projects/:id/access_requests
 
 Example request:
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/:id/access_requests
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/access_requests
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/access_requests"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/access_requests"
 ```
 
 Example response:
@@ -107,9 +113,9 @@ PUT /projects/:id/access_requests/:user_id/approve
 
 Example request:
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/:id/access_requests/:user_id/approve?access_level=20
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/access_requests/:user_id/approve?access_level=20
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/access_requests/:user_id/approve?access_level=20"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/access_requests/:user_id/approve?access_level=20"
 ```
 
 Example response:
@@ -141,7 +147,7 @@ DELETE /projects/:id/access_requests/:user_id
 
 Example request:
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/:id/access_requests/:user_id
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/:id/access_requests/:user_id
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/access_requests/:user_id"
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/access_requests/:user_id"
 ```

@@ -1,5 +1,5 @@
 ---
-redirect_to: '../../instance_statistics/convdev.md'
+redirect_to: '../analytics/dev_ops_report.md'
 ---
 
-This document was moved to [another location](../../instance_statistics/convdev.md).
+Conversational Development Index was renamed to [DevOps Report](../analytics/dev_ops_report.md) in GitLab 12.6.

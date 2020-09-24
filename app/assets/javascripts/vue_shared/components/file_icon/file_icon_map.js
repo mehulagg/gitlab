@@ -202,7 +202,7 @@ const fileExtensionIcons = {
   flv: 'movie',
   vob: 'movie',
   ogv: 'movie',
-  ogg: 'movie',
+  ogg: 'music',
   gifv: 'movie',
   avi: 'movie',
   mov: 'movie',
@@ -493,6 +493,7 @@ const fileNameIcons = {
   '.npmignore': 'npm',
   '.npmrc': 'npm',
   '.yarnrc': 'yarn',
+  '.yarnrc.yml': 'yarn',
   'yarn.lock': 'yarn',
   '.yarnclean': 'yarn',
   '.yarn-integrity': 'yarn',
@@ -575,6 +576,7 @@ const fileNameIcons = {
   '.prettierrc.json': 'prettier',
   '.prettierrc.yaml': 'prettier',
   '.prettierrc.yml': 'prettier',
+  '.prettierignore': 'prettier',
   'nodemon.json': 'nodemon',
   '.sonarrc': 'sonar',
   browserslist: 'browserlist',
@@ -584,5 +586,16 @@ const fileNameIcons = {
 };
 
 export default function getIconForFile(name) {
-  return fileNameIcons[name] || fileExtensionIcons[name ? name.split('.').pop() : ''] || '';
+  return (
+    fileNameIcons[name] ||
+    fileExtensionIcons[
+      name
+        ? name
+            .split('.')
+            .pop()
+            .toLowerCase()
+        : ''
+    ] ||
+    ''
+  );
 }

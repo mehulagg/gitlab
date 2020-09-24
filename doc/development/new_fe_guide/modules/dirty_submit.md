@@ -1,6 +1,6 @@
 # Dirty Submit
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/21115) in GitLab 11.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/21115) in GitLab 11.3.
 
 ## Summary
 
@@ -13,7 +13,7 @@ within the GitLab project.
 
 ## Usage
 
-```js
+```javascript
 import dirtySubmitFactory from './dirty_submit/dirty_submit_form';
 
 new DirtySubmitForm(document.querySelector('form'));

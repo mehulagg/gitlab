@@ -2,7 +2,15 @@
 
 require 'spec_helper'
 
-describe SamlProvider do
+RSpec.describe SamlProvider do
+  let(:group) { create(:group) }
+
+  subject(:saml_provider) { create(:saml_provider, group: group) }
+
+  before do
+    stub_licensed_features(group_saml: true)
+  end
+
   describe "Associations" do
     it { is_expected.to belong_to :group }
     it { is_expected.to have_many :identities }
@@ -12,6 +20,8 @@ describe SamlProvider do
     it { is_expected.to validate_presence_of(:group) }
     it { is_expected.to validate_presence_of(:sso_url) }
     it { is_expected.to validate_presence_of(:certificate_fingerprint) }
+    it { is_expected.to validate_presence_of(:default_membership_role) }
+    it { is_expected.to validate_inclusion_of(:default_membership_role).in_array([10, 20, 30, 40]) }
 
     it 'expects sso_url to be an https URL' do
       expect(subject).to allow_value('https://example.com').for(:sso_url)
@@ -55,8 +65,6 @@ describe SamlProvider do
   end
 
   describe 'Default values' do
-    subject(:saml_provider) { described_class.new }
-
     it 'defaults enabled to true' do
       expect(subject).to be_enabled
     end
@@ -65,8 +73,6 @@ describe SamlProvider do
   describe '#settings' do
     let(:group) { create(:group, path: 'foo-group') }
     let(:settings) { subject.settings }
-
-    subject(:saml_provider) { create(:saml_provider, group: group) }
 
     before do
       stub_default_url_options(protocol: "https")
@@ -106,16 +112,11 @@ describe SamlProvider do
         expect(subject).not_to be_enforced_sso
       end
 
-      context 'and feature flag is disabled' do
-        before do
-          stub_feature_flags(enforced_sso: false)
-        end
+      it 'does not enforce SSO when the feature is unavailable' do
+        stub_licensed_features(group_saml: false)
+        subject.enforced_sso = true
 
-        it 'is false' do
-          subject.enforced_sso = true
-
-          expect(subject).not_to be_enforced_sso
-        end
+        expect(subject).not_to be_enforced_sso
       end
     end
 
@@ -175,6 +176,84 @@ describe SamlProvider do
         expect(subject).not_to be_enforced_group_managed_accounts
         subject.enforced_group_managed_accounts = false
         expect(subject).not_to be_enforced_group_managed_accounts
+      end
+    end
+  end
+
+  describe '#prohibited_outer_forks?' do
+    context 'without enforced GMA' do
+      it 'is false when prohibited_outer_forks flag value is true' do
+        subject.prohibited_outer_forks = true
+
+        expect(subject.prohibited_outer_forks?).to be_falsey
+      end
+
+      it 'is false when prohibited_outer_forks flag value is false' do
+        subject.prohibited_outer_forks = false
+
+        expect(subject.prohibited_outer_forks?).to be_falsey
+      end
+    end
+
+    context 'when enforced GMA is enabled' do
+      before do
+        subject.enabled = true
+        subject.enforced_sso = true
+        subject.enforced_group_managed_accounts = true
+      end
+
+      it 'is true when prohibited_outer_forks flag value is true' do
+        subject.prohibited_outer_forks = true
+
+        expect(subject.prohibited_outer_forks?).to be_truthy
+      end
+
+      it 'is false when prohibited_outer_forks flag value is false' do
+        subject.prohibited_outer_forks = false
+
+        expect(subject.prohibited_outer_forks?).to be_falsey
+      end
+    end
+  end
+
+  describe '#last_linked_owner?' do
+    let_it_be(:user) { create(:user) }
+
+    context 'for a non-owner' do
+      it { is_expected.not_to be_last_linked_owner(user) }
+    end
+
+    context 'for a group owner' do
+      before do
+        group.add_owner(user)
+      end
+
+      context 'with saml linked' do
+        before do
+          create(:group_saml_identity, user: user, saml_provider: subject)
+        end
+
+        it { is_expected.to be_last_linked_owner(user) }
+
+        context 'another owner has SSO linked' do
+          before do
+            create(:group_saml_identity, :group_owner, saml_provider: subject)
+          end
+
+          it { is_expected.not_to be_last_linked_owner(user) }
+        end
+      end
+
+      context 'without saml linked' do
+        it { is_expected.not_to be_last_linked_owner(user) }
+
+        context 'another owner has SSO linked' do
+          before do
+            create(:group_saml_identity, :group_owner, saml_provider: subject)
+          end
+
+          it { is_expected.not_to be_last_linked_owner(user) }
+        end
       end
     end
   end

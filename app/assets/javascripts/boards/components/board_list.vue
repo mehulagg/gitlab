@@ -1,13 +1,13 @@
 <script>
 import { Sortable, MultiDrag } from 'sortablejs';
 import { GlLoadingIcon } from '@gitlab/ui';
-import _ from 'underscore';
 import boardNewIssue from './board_new_issue.vue';
 import boardCard from './board_card.vue';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 import { sprintf, __ } from '~/locale';
-import createFlash from '~/flash';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   getBoardSortableDefaultOptions,
   sortableStart,
@@ -25,12 +25,8 @@ export default {
     boardNewIssue,
     GlLoadingIcon,
   },
+  mixins: [glFeatureFlagMixin()],
   props: {
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     disabled: {
       type: Boolean,
       required: true,
@@ -45,14 +41,6 @@ export default {
     },
     loading: {
       type: Boolean,
-      required: true,
-    },
-    issueLinkBase: {
-      type: String,
-      required: true,
-    },
-    rootPath: {
-      type: String,
       required: true,
     },
   },
@@ -71,6 +59,9 @@ export default {
         total: this.list.issuesSize,
       });
     },
+    issuesSizeExceedsMax() {
+      return this.list.maxIssueCount > 0 && this.list.issuesSize > this.list.maxIssueCount;
+    },
   },
   watch: {
     filters: {
@@ -81,6 +72,7 @@ export default {
       deep: true,
     },
     issues() {
+      if (this.glFeatures.graphqlBoardLists) return;
       this.$nextTick(() => {
         if (
           this.scrollHeight() <= this.listHeight() &&
@@ -102,7 +94,7 @@ export default {
     },
   },
   created() {
-    eventHub.$on(`hide-issue-form-${this.list.id}`, this.toggleForm);
+    eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
     eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
   },
   mounted() {
@@ -177,6 +169,8 @@ export default {
         const issue = list.findIssue(Number(e.item.dataset.issueId));
 
         boardsStore.startMoving(list, issue);
+
+        this.$root.$emit('bv::hide::tooltip');
 
         sortableStart();
       },
@@ -253,7 +247,7 @@ export default {
         let toList;
         if (to) {
           const containerEl = to.closest('.js-board-list');
-          toList = boardsStore.findList('id', Number(containerEl.dataset.board));
+          toList = boardsStore.findList('id', Number(containerEl.dataset.board), '');
         }
 
         /**
@@ -261,11 +255,12 @@ export default {
          * same list or the other list. Don't remove items if it's same list.
          */
         const isSameList = toList && toList.id === this.list.id;
-
         if (toList && !isSameList && boardsStore.shouldRemoveIssue(this.list, toList)) {
           const issues = items.map(item => this.list.findIssue(Number(item.dataset.issueId)));
-
-          if (_.compact(issues).length && !boardsStore.issuesAreContiguous(this.list, issues)) {
+          if (
+            issues.filter(Boolean).length &&
+            !boardsStore.issuesAreContiguous(this.list, issues)
+          ) {
             const indexes = [];
             const ids = this.list.issues.map(i => i.id);
             issues.forEach(issue => {
@@ -376,7 +371,7 @@ export default {
     this.$refs.list.addEventListener('scroll', this.onScroll);
   },
   beforeDestroy() {
-    eventHub.$off(`hide-issue-form-${this.list.id}`, this.toggleForm);
+    eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
     eventHub.$off(`scroll-board-list-${this.list.id}`, this.scrollToTop);
     this.$refs.list.removeEventListener('scroll', this.onScroll);
   },
@@ -408,6 +403,8 @@ export default {
       this.showIssueForm = !this.showIssueForm;
     },
     onScroll() {
+      if (this.glFeatures.graphqlBoardLists) return;
+
       if (!this.list.loadingMore && this.scrollTop() > this.scrollHeight() - this.scrollOffset) {
         this.loadNextPage();
       }
@@ -425,17 +422,13 @@ export default {
     <div v-if="loading" class="board-list-loading text-center" :aria-label="__('Loading issues')">
       <gl-loading-icon />
     </div>
-    <board-new-issue
-      v-if="list.type !== 'closed' && showIssueForm"
-      :group-id="groupId"
-      :list="list"
-    />
+    <board-new-issue v-if="list.type !== 'closed' && showIssueForm" :list="list" />
     <ul
       v-show="!loading"
       ref="list"
       :data-board="list.id"
       :data-board-type="list.type"
-      :class="{ 'is-smaller': showIssueForm }"
+      :class="{ 'is-smaller': showIssueForm, 'bg-danger-100': issuesSizeExceedsMax }"
       class="board-list w-100 h-100 list-unstyled mb-0 p-1 js-board-list"
     >
       <board-card
@@ -445,9 +438,6 @@ export default {
         :index="index"
         :list="list"
         :issue="issue"
-        :issue-link-base="issueLinkBase"
-        :group-id="groupId"
-        :root-path="rootPath"
         :disabled="disabled"
       />
       <li v-if="showCount" class="board-list-count text-center" data-issue-id="-1">

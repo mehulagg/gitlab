@@ -8,12 +8,31 @@ class BuildkiteService < CiService
   ENDPOINT = "https://buildkite.com"
 
   prop_accessor :project_url, :token
-  boolean_accessor :enable_ssl_verification
 
   validates :project_url, presence: true, public_url: true, if: :activated?
   validates :token, presence: true, if: :activated?
 
   after_save :compose_service_hook, if: :activated?
+
+  def self.supported_events
+    %w(push merge_request tag_push)
+  end
+
+  # This is a stub method to work with deprecated API response
+  # TODO: remove enable_ssl_verification after 14.0
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/222808
+  def enable_ssl_verification
+    true
+  end
+
+  # Since SSL verification will always be enabled for Buildkite,
+  # we no longer needs to store the boolean.
+  # This is a stub method to work with deprecated API param.
+  # TODO: remove enable_ssl_verification after 14.0
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/222808
+  def enable_ssl_verification=(_value)
+    self.properties.delete('enable_ssl_verification') # Remove unused key
+  end
 
   def webhook_url
     "#{buildkite_endpoint('webhook')}/deliver/#{webhook_token}"
@@ -22,7 +41,7 @@ class BuildkiteService < CiService
   def compose_service_hook
     hook = service_hook || build_service_hook
     hook.url = webhook_url
-    hook.enable_ssl_verification = !!enable_ssl_verification
+    hook.enable_ssl_verification = true
     hook.save
   end
 
@@ -49,7 +68,7 @@ class BuildkiteService < CiService
   end
 
   def description
-    'Continuous integration and deployments'
+    'Buildkite is a platform for running fast, secure, and scalable continuous integration pipelines on your own infrastructure'
   end
 
   def self.to_param
@@ -60,23 +79,23 @@ class BuildkiteService < CiService
     [
       { type: 'text',
         name: 'token',
-        placeholder: 'Buildkite project GitLab token', required: true },
+        title: 'Integration Token',
+        help: 'This token will be provided when you create a Buildkite pipeline with a GitLab repository',
+        required: true },
 
       { type: 'text',
         name: 'project_url',
-        placeholder: "#{ENDPOINT}/example/project", required: true },
-
-      { type: 'checkbox',
-        name: 'enable_ssl_verification',
-        title: "Enable SSL verification" }
+        title: 'Pipeline URL',
+        placeholder: "#{ENDPOINT}/acme-inc/test-pipeline",
+        required: true }
     ]
   end
 
   def calculate_reactive_cache(sha, ref)
-    response = Gitlab::HTTP.get(commit_status_path(sha), verify: false)
+    response = Gitlab::HTTP.try_get(commit_status_path(sha), request_options)
 
     status =
-      if response.code == 200 && response['status']
+      if response&.code == 200 && response['status']
         response['status']
       else
         :error
@@ -116,5 +135,9 @@ class BuildkiteService < CiService
     else
       ENDPOINT
     end
+  end
+
+  def request_options
+    { verify: false, extra_log_info: { project_id: project_id } }
   end
 end

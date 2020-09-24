@@ -1,7 +1,7 @@
 /* eslint-disable no-new */
-import _ from 'underscore';
+import { debounce } from 'lodash';
 import axios from './lib/utils/axios_utils';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import DropLab from './droplab/drop_lab';
 import ISetter from './droplab/plugins/input_setter';
 import { __, sprintf } from './locale';
@@ -13,7 +13,7 @@ import {
 import confidentialMergeRequestState from './confidential_merge_request/state';
 
 // Todo: Remove this when fixing issue in input_setter plugin
-const InputSetter = Object.assign({}, ISetter);
+const InputSetter = { ...ISetter };
 
 const CREATE_MERGE_REQUEST = 'create-mr';
 const CREATE_BRANCH = 'create-branch';
@@ -42,7 +42,7 @@ export default class CreateMergeRequestDropdown {
     this.refInput = this.wrapperEl.querySelector('.js-ref');
     this.refMessage = this.wrapperEl.querySelector('.js-ref-message');
     this.unavailableButton = this.wrapperEl.querySelector('.unavailable');
-    this.unavailableButtonArrow = this.unavailableButton.querySelector('.fa');
+    this.unavailableButtonSpinner = this.unavailableButton.querySelector('.spinner');
     this.unavailableButtonText = this.unavailableButton.querySelector('.text');
 
     this.branchCreated = false;
@@ -55,7 +55,7 @@ export default class CreateMergeRequestDropdown {
     this.isCreatingMergeRequest = false;
     this.isGettingRef = false;
     this.mergeRequestCreated = false;
-    this.refDebounce = _.debounce((value, target) => this.getRef(value, target), 500);
+    this.refDebounce = debounce((value, target) => this.getRef(value, target), 500);
     this.refIsValid = true;
     this.refsPath = this.wrapperEl.dataset.refsPath;
     this.suggestedRef = this.refInput.value;
@@ -311,6 +311,7 @@ export default class CreateMergeRequestDropdown {
   }
 
   onChangeInput(event) {
+    this.disable();
     let target;
     let value;
 
@@ -416,14 +417,10 @@ export default class CreateMergeRequestDropdown {
 
   setUnavailableButtonState(isLoading = true) {
     if (isLoading) {
-      this.unavailableButtonArrow.classList.add('fa-spin');
-      this.unavailableButtonArrow.classList.add('fa-spinner');
-      this.unavailableButtonArrow.classList.remove('fa-exclamation-triangle');
+      this.unavailableButtonSpinner.classList.remove('hide');
       this.unavailableButtonText.textContent = __('Checking branch availability...');
     } else {
-      this.unavailableButtonArrow.classList.remove('fa-spin');
-      this.unavailableButtonArrow.classList.remove('fa-spinner');
-      this.unavailableButtonArrow.classList.add('fa-exclamation-triangle');
+      this.unavailableButtonSpinner.classList.add('hide');
       this.unavailableButtonText.textContent = __('New branch unavailable');
     }
   }

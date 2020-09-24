@@ -2,24 +2,23 @@
 
 require 'spec_helper'
 
-describe Projects::BlobController do
+RSpec.describe Projects::BlobController do
   include ProjectForksHelper
 
   let(:project) { create(:project, :public, :repository) }
 
   describe "GET show" do
+    def request
+      get(:show, params: { namespace_id: project.namespace, project_id: project, id: id })
+    end
+
     render_views
 
     context 'with file path' do
       before do
         expect(::Gitlab::GitalyClient).to receive(:allow_ref_name_caching).and_call_original
 
-        get(:show,
-            params: {
-              namespace_id: project.namespace,
-              project_id: project,
-              id: id
-            })
+        request
       end
 
       context "valid branch, valid file" do
@@ -33,7 +32,7 @@ describe Projects::BlobController do
 
         it 'redirects' do
           expect(subject)
-              .to redirect_to("/#{project.full_path}/tree/master")
+              .to redirect_to("/#{project.full_path}/-/tree/master")
         end
       end
 
@@ -115,7 +114,7 @@ describe Projects::BlobController do
 
         it 'redirects' do
           expect(subject)
-            .to redirect_to("/#{project.full_path}/tree/markdown/doc")
+            .to redirect_to("/#{project.full_path}/-/tree/markdown/doc")
         end
       end
     end
@@ -232,7 +231,7 @@ describe Projects::BlobController do
       end
 
       it 'redirects to blob show' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -246,7 +245,7 @@ describe Projects::BlobController do
       end
 
       it 'redirects to blob show' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end
@@ -348,6 +347,13 @@ describe Projects::BlobController do
         end
       end
     end
+
+    it_behaves_like 'tracking unique hll events', :track_editor_edit_actions do
+      subject { put :update, params: default_params, format: format }
+
+      let(:target_id) { 'g_edit_by_sfe' }
+      let(:expected_type) { instance_of(Integer) }
+    end
   end
 
   describe 'DELETE destroy' do
@@ -378,6 +384,22 @@ describe Projects::BlobController do
         delete :destroy, params: default_params
 
         expect(response).to redirect_to(after_delete_path)
+      end
+
+      context 'when a validation failure occurs' do
+        let(:failure_path) { project_blob_path(project, default_params[:id]) }
+
+        render_views
+
+        it 'redirects to a valid page' do
+          expect_next_instance_of(Files::DeleteService) do |instance|
+            expect(instance).to receive(:validate!).and_raise(Commits::CreateService::ValidationError, "validation error")
+          end
+
+          delete :destroy, params: default_params
+
+          expect(response).to redirect_to(failure_path)
+        end
       end
     end
 
@@ -419,6 +441,34 @@ describe Projects::BlobController do
           expect(response).to redirect_to(after_delete_path)
         end
       end
+    end
+  end
+
+  describe 'POST create' do
+    let(:user) { create(:user) }
+    let(:default_params) do
+      {
+        namespace_id: project.namespace,
+        project_id: project,
+        id: 'master',
+        branch_name: 'master',
+        file_name: 'docs/EXAMPLE_FILE',
+        content: 'Added changes',
+        commit_message: 'Create CHANGELOG'
+      }
+    end
+
+    before do
+      project.add_developer(user)
+
+      sign_in(user)
+    end
+
+    it_behaves_like 'tracking unique hll events', :track_editor_edit_actions do
+      subject { post :create, params: default_params, format: format }
+
+      let(:target_id) { 'g_edit_by_sfe' }
+      let(:expected_type) { instance_of(Integer) }
     end
   end
 end

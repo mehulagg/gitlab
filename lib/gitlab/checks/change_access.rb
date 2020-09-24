@@ -3,8 +3,6 @@
 module Gitlab
   module Checks
     class ChangeAccess
-      prepend_if_ee('EE::Gitlab::Checks::ChangeAccess') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
       ATTRIBUTES = %i[user_access project skip_authorization
                       skip_lfs_integrity_check protocol oldrev newrev ref
                       branch_name tag_name logger commits].freeze
@@ -27,7 +25,7 @@ module Gitlab
         @logger.append_message("Running checks for ref: #{@branch_name || @tag_name}")
       end
 
-      def exec
+      def validate!
         ref_level_checks
         # Check of commits should happen as the last step
         # given they're expensive in terms of performance
@@ -55,3 +53,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Checks::ChangeAccess.prepend_if_ee('EE::Gitlab::Checks::ChangeAccess')

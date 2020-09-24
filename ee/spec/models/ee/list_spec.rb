@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe List do
+RSpec.describe List do
   let(:board) { create(:board) }
 
   describe 'relationships' do
@@ -12,6 +12,8 @@ describe List do
 
   describe 'validations' do
     it { is_expected.to validate_numericality_of(:max_issue_count).only_integer.is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:max_issue_weight).only_integer.is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_inclusion_of(:limit_metric).in_array([nil, *EE::List::LIMIT_METRIC_TYPES]) }
   end
 
   context 'when it is an assignee type' do
@@ -33,8 +35,22 @@ describe List do
     end
   end
 
+  describe '.without_types' do
+    it 'exclude lists of given types' do
+      board = create(:list, list_type: :label).board
+      # closed list is created by default
+      backlog_list = create(:list, list_type: :backlog, board: board)
+
+      exclude_type = [described_class.list_types[:label], described_class.list_types[:closed]]
+
+      lists = described_class.without_types(exclude_type)
+      expect(lists.where(board: board)).to match_array([backlog_list])
+    end
+  end
+
   context 'when it is a milestone type' do
     let(:milestone) { build(:milestone, title: 'awesome-release') }
+
     subject { described_class.new(list_type: :milestone, milestone: milestone, board: board) }
 
     it { is_expected.to be_destroyable }
@@ -55,6 +71,35 @@ describe List do
     describe '#title' do
       it 'returns the milestone title' do
         expect(subject.title).to eq('awesome-release')
+      end
+    end
+  end
+
+  describe '#wip_limits_available?' do
+    let!(:project) { create(:project) }
+    let!(:group) { create(:group) }
+
+    let!(:board1) { create(:board, resource_parent: project, name: 'b') }
+    let!(:board2) { create(:board, resource_parent: group, name: 'a') }
+
+    let!(:list1) { create(:list, board: board1) }
+    let!(:list2) { create(:list, board: board2) }
+
+    context 'with enabled wip_limits' do
+      it 'returns the expected values' do
+        expect(list1.wip_limits_available?).to be_truthy
+        expect(list2.wip_limits_available?).to be_truthy
+      end
+    end
+
+    context 'with disabled wip_limits' do
+      before do
+        stub_feature_flags(wip_limits: false)
+      end
+
+      it 'returns the expected values' do
+        expect(list1.wip_limits_available?).to be_falsy
+        expect(list2.wip_limits_available?).to be_falsy
       end
     end
   end

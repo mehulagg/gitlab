@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees deleted target branch', :js do
+RSpec.describe 'Merge request > User sees deleted target branch', :js do
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.project }
   let(:user) { project.creator }
 
   before do
     project.add_maintainer(user)
-    DeleteBranchService.new(project, user).execute('feature')
+    ::Branches::DeleteService.new(project, user).execute('feature')
     sign_in(user)
     visit project_merge_request_path(project, merge_request)
   end

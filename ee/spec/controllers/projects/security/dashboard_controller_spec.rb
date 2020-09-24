@@ -2,69 +2,55 @@
 
 require 'spec_helper'
 
-describe Projects::Security::DashboardController do
-  set(:group)   { create(:group) }
-  set(:project) { create(:project, :repository, :public, namespace: group) }
-  set(:user)    { create(:user) }
+RSpec.describe Projects::Security::DashboardController do
+  let_it_be(:group)   { create(:group) }
+  let_it_be(:project) { create(:project, :repository, :public, namespace: group) }
+  let_it_be(:user)    { create(:user) }
 
   it_behaves_like SecurityDashboardsPermissions do
     let(:vulnerable) { project }
 
     let(:security_dashboard_action) do
-      get :show, params: { namespace_id: project.namespace, project_id: project }
+      get :index, params: { namespace_id: project.namespace, project_id: project }
     end
   end
 
   before do
     group.add_developer(user)
+    stub_licensed_features(security_dashboard: true)
   end
 
-  describe 'GET #show' do
-    let(:pipeline) { create(:ci_pipeline_without_jobs, sha: project.commit.id, project: project, user: user) }
+  describe 'GET #index' do
+    let(:pipeline) { create(:ci_pipeline, sha: project.commit.id, project: project, user: user) }
 
     render_views
 
     def show_security_dashboard(current_user = user)
-      stub_licensed_features(security_dashboard: true)
       sign_in(current_user)
-      get :show, params: { namespace_id: project.namespace, project_id: project }
+      get :index, params: { namespace_id: project.namespace, project_id: project }
     end
 
-    context 'when uses legacy reports syntax' do
-      before do
-        create(:ci_build, :artifacts, pipeline: pipeline, name: 'sast')
-      end
-
-      it 'returns the latest pipeline with security reports for project' do
-        show_security_dashboard
-
-        expect(response).to have_gitlab_http_status(200)
-        expect(response).to render_template(:show)
-        expect(response.body).to have_css("div#js-security-report-app[data-has-pipeline-data=true]")
-      end
-    end
-
-    context 'when uses new reports syntax' do
-      before do
-        create(:ee_ci_build, :sast, pipeline: pipeline)
-      end
-
-      it 'returns the latest pipeline with security reports for project' do
-        show_security_dashboard
-
-        expect(response).to have_gitlab_http_status(200)
-        expect(response).to render_template(:show)
-        expect(response.body).to have_css("div#js-security-report-app[data-has-pipeline-data=true]")
-      end
-    end
-
-    context 'when there is no matching pipeline' do
+    context 'when project has no vulnerabilities' do
       it 'renders empty state' do
         show_security_dashboard
 
-        expect(response).to have_gitlab_http_status(200)
-        expect(response).to render_template(:show)
-        expect(response.body).to have_css("div#js-security-report-app[data-has-pipeline-data=false]")
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:index)
+        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="false"]')
+      end
+    end
+
+    context 'when project has vulnerabilities' do
+      before do
+        create(:vulnerability, project: project)
+      end
+
+      it 'renders dashboard with vulnerability metadata' do
+        show_security_dashboard
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to render_template(:index)
+        expect(response.body).to have_css('div#js-security-report-app[data-has-vulnerabilities="true"]')
       end
     end
   end

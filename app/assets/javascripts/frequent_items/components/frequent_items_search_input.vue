@@ -1,13 +1,13 @@
 <script>
-import _ from 'underscore';
+import { debounce } from 'lodash';
 import { mapActions } from 'vuex';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import eventHub from '../event_hub';
 import frequentItemsMixin from './frequent_items_mixin';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   mixins: [frequentItemsMixin],
   data() {
@@ -21,7 +21,7 @@ export default {
     },
   },
   watch: {
-    searchQuery: _.debounce(function debounceSearchQuery() {
+    searchQuery: debounce(function debounceSearchQuery() {
       this.setSearchQuery(this.searchQuery);
     }, 500),
   },
@@ -49,6 +49,6 @@ export default {
       type="search"
       class="form-control"
     />
-    <icon v-if="!searchQuery" name="search" class="search-icon" />
+    <gl-icon v-if="!searchQuery" name="search" class="search-icon" />
   </div>
 </template>

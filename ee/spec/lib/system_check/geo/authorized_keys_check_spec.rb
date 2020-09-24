@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'rake_helper'
 
-describe SystemCheck::Geo::AuthorizedKeysCheck do
+RSpec.describe SystemCheck::Geo::AuthorizedKeysCheck do
   describe '#multi_check' do
     subject { described_class.new }
 
@@ -111,6 +111,12 @@ describe SystemCheck::Geo::AuthorizedKeysCheck do
       expect(subject.extract_authorized_keys_command).to eq('/opt/gitlab/embedded/service/gitlab-shell/bin/gitlab-shell-authorized-keys-check git %u %k')
     end
 
+    it 'returns correct (leading whitespace) command' do
+      override_sshd_config('system_check/sshd_config_leading_whitespace')
+
+      expect(subject.extract_authorized_keys_command).to eq('/opt/gitlab/embedded/service/gitlab-shell/bin/gitlab-shell-authorized-keys-check git %u %k')
+    end
+
     it 'returns command without comments and without quotes' do
       override_sshd_config('system_check/sshd_config_invalid_command')
 
@@ -127,6 +133,12 @@ describe SystemCheck::Geo::AuthorizedKeysCheck do
 
     it 'returns correct (uncommented) command' do
       override_sshd_config('system_check/sshd_config')
+
+      expect(subject.extract_authorized_keys_command_user).to eq('git')
+    end
+
+    it 'returns correct (leading whitespace) command' do
+      override_sshd_config('system_check/sshd_config_leading_whitespace')
 
       expect(subject.extract_authorized_keys_command_user).to eq('git')
     end

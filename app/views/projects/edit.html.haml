@@ -17,11 +17,13 @@
     %p= _('Choose visibility level, enable/disable project features (issues, repository, wiki, snippets) and set permissions.')
 
   .settings-content
-    = form_for [@project.namespace.becomes(Namespace), @project], remote: true, html: { multipart: true, class: "sharing-permissions-form" }, authenticity_token: true do |f|
+    = form_for @project, remote: true, html: { multipart: true, class: "sharing-permissions-form" }, authenticity_token: true do |f|
       %input{ name: 'update_section', type: 'hidden', value: 'js-shared-permissions' }
       %template.js-project-permissions-form-data{ type: "application/json" }= project_permissions_panel_data_json(@project)
       .js-project-permissions-form
-      = f.submit _('Save changes'), class: "btn btn-success", data: { qa_selector: 'visibility_features_permissions_save_button' }
+      - if show_visibility_confirm_modal?(@project)
+        = render "visibility_modal"
+      = f.submit _('Save changes'), class: "btn btn-success #{('js-confirm-danger' if show_visibility_confirm_modal?(@project))}", data: { qa_selector: 'visibility_features_permissions_save_button', check_field_name: ("project[visibility_level]" if show_visibility_confirm_modal?(@project)), check_compare_value: @project.visibility_level }
 
 %section.qa-merge-request-settings.rspec-merge-request-settings.settings.merge-requests-feature.no-animate#js-merge-request-settings{ class: [('expanded' if expanded), ('hidden' if @project.project_feature.send(:merge_requests_access_level) == 0)] }
   .settings-header
@@ -32,10 +34,10 @@
   .settings-content
     = render_if_exists 'shared/promotions/promote_mr_features'
 
-    = form_for [@project.namespace.becomes(Namespace), @project], remote: true, html: { multipart: true, class: "merge-request-settings-form js-mr-settings-form" }, authenticity_token: true do |f|
+    = form_for @project, remote: true, html: { multipart: true, class: "merge-request-settings-form js-mr-settings-form" }, authenticity_token: true do |f|
       %input{ name: 'update_section', type: 'hidden', value: 'js-merge-request-settings' }
       = render 'projects/merge_request_settings', form: f
-      = f.submit _('Save changes'), class: "btn btn-success qa-save-merge-request-changes rspec-save-merge-request-changes"
+      = f.submit _('Save changes'), class: "btn btn-succes qa-save-merge-request-changes rspec-save-merge-request-changes"
 
 = render_if_exists 'projects/merge_request_approvals_settings', expanded: expanded
 
@@ -54,7 +56,7 @@
 
 = render_if_exists 'projects/settings/default_issue_template'
 
-= render_if_exists 'projects/service_desk_settings'
+= render 'projects/service_desk_settings'
 
 %section.qa-advanced-settings.settings.advanced-settings.no-animate#js-project-advanced-settings{ class: ('expanded' if expanded) }
   .settings-header
@@ -71,27 +73,11 @@
 
     = render 'export', project: @project
 
-    - if can? current_user, :archive_project, @project
-      .sub-section
-        %h4.warning-title
-          - if @project.archived?
-            = _('Unarchive project')
-          - else
-            = _('Archive project')
-        - if @project.archived?
-          %p= _("Unarchiving the project will restore people's ability to make changes to it. The repository can be committed to, and issues, comments and other entities can be created. <strong>Once active this project shows up in the search and on the dashboard.</strong>").html_safe
-          = link_to _('Unarchive project'), unarchive_project_path(@project),
-              data: { confirm: _("Are you sure that you want to unarchive this project?"), qa_selector: 'unarchive_project_link' },
-              method: :post, class: "btn btn-success"
-        - else
-          %p= _("Archiving the project will make it entirely read-only. It is hidden from the dashboard and doesn't show up in searches. <strong>The repository cannot be committed to, and no issues, comments or other entities can be created.</strong>").html_safe
-          = link_to _('Archive project'), archive_project_path(@project),
-              data: { confirm: _("Are you sure that you want to archive this project?"), qa_selector: 'archive_project_link' },
-              method: :post, class: "btn btn-warning"
+    = render_if_exists 'projects/settings/archive'
     .sub-section.rename-repository
       %h4.warning-title= _('Change path')
       = render 'projects/errors'
-      = form_for([@project.namespace.becomes(Namespace), @project]) do |f|
+      = form_for @project do |f|
         .form-group
           = f.label :path, _('Path'), class: 'label-bold'
           .form-group
@@ -110,7 +96,7 @@
     - if can?(current_user, :change_namespace, @project)
       .sub-section
         %h4.danger-title= _('Transfer project')
-        = form_for([@project.namespace.becomes(Namespace), @project], url: transfer_project_path(@project), method: :put, remote: true, html: { class: 'js-project-transfer-form' } ) do |f|
+        = form_for @project, url: transfer_project_path(@project), method: :put, remote: true, html: { class: 'js-project-transfer-form' } do |f|
           .form-group
             = label_tag :new_namespace_id, nil, class: 'label-bold' do
               %span= _('Select a new namespace')
@@ -126,31 +112,19 @@
     - if @project.forked? && can?(current_user, :remove_fork_project, @project)
       .sub-section
         %h4.danger-title= _('Remove fork relationship')
-        %p
-          = _('This will remove the fork relationship to source project')
-          = succeed "." do
-            - if @project.fork_source
-              = link_to(fork_source_name(@project), project_path(@project.fork_source))
-            - else
-              = fork_source_name(@project)
-        = form_for([@project.namespace.becomes(Namespace), @project], url: remove_fork_project_path(@project), method: :delete, remote: true, html: { class: 'transfer-project' }) do |f|
+        %p= remove_fork_project_description_message(@project)
+
+        = form_for @project, url: remove_fork_project_path(@project), method: :delete, remote: true, html: { class: 'transfer-project' } do |f|
           %p
             %strong= _('Once removed, the fork relationship cannot be restored and you will no longer be able to send merge requests to the source.')
-          = button_to _('Remove fork relationship'), '#', class: "btn btn-remove js-confirm-danger", data: { "confirm-danger-message" => remove_fork_project_message(@project) }
+          = button_to _('Remove fork relationship'), '#', class: "btn btn-remove js-confirm-danger", data: { "confirm-danger-message" => remove_fork_project_warning_message(@project) }
 
-    - if can?(current_user, :remove_project, @project)
-      .sub-section
-        %h4.danger-title= _('Remove project')
-        %p= _('Removing the project will delete its repository and all related resources including issues, merge requests etc.')
-        = form_tag(project_path(@project), method: :delete) do
-          %p
-            %strong= _('Removed projects cannot be restored!')
-          = button_to _('Remove project'), '#', class: "btn btn-remove js-confirm-danger", data: { "confirm-danger-message" => remove_project_message(@project) }
+    = render 'remove', project: @project
 
 .save-project-loader.hide
   .center
     %h2
-      %i.fa.fa-spinner.fa-spin
+      .spinner.spinner-md.align-text-bottom
       = _('Saving project.')
     %p= _('Please wait a moment, this page will automatically refresh when ready.')
 

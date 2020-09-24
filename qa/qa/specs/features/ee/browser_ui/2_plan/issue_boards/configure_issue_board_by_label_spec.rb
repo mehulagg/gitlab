@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Configure issue board by label' do
       let(:label_board_list) do
         EE::Resource::Board::BoardList::Project::LabelBoardList.fabricate_via_api!
@@ -14,8 +14,7 @@ module QA
       let(:issue_2) { 'Issue 2' }
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         fabricate_issue_with_label(label_board_list.project, issue_1, doing)
         fabricate_issue_with_label(label_board_list.project, issue_2, ready_for_dev)
@@ -24,8 +23,8 @@ module QA
         Page::Project::Menu.perform(&:go_to_boards)
       end
 
-      it 'shows only issues that match the configured label' do
-        EE::Page::Component::IssueBoard::Show.perform do |show|
+      it 'shows only issues that match the configured label', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/646' do
+        Page::Component::IssueBoard::Show.perform do |show|
           show.configure_by_label(doing)
 
           expect(show).not_to have_content(issue_2)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DiscussionOnDiff do
+RSpec.describe DiscussionOnDiff do
   subject { create(:diff_note_on_merge_request, line_number: 18).to_discussion }
 
   describe "#truncated_diff_lines" do
@@ -53,6 +53,18 @@ describe DiscussionOnDiff do
 
     context "when the diff line does not exist on a legacy diff note" do
       subject { create(:legacy_diff_note_on_merge_request).to_discussion }
+
+      it "returns an empty array" do
+        expect(truncated_lines).to eq([])
+      end
+    end
+
+    context "when the diff line does not exist on a corrupt diff note" do
+      subject { create(:diff_note_on_merge_request, line_number: 18).to_discussion }
+
+      before do
+        allow(subject).to receive(:diff_line) { nil }
+      end
 
       it "returns an empty array" do
         expect(truncated_lines).to eq([])

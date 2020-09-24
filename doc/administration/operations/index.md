@@ -11,7 +11,8 @@ Keep your GitLab instance up and running smoothly.
   by GitLab to another file system or another server.
 - [Sidekiq MemoryKiller](sidekiq_memory_killer.md): Configure Sidekiq MemoryKiller
   to restart Sidekiq.
-- [Extra Sidekiq operations](extra_sidekiq_processes.md): Configure an extra set of Sidekiq processes to ensure certain queues always have dedicated workers, no matter the amount of jobs that need to be processed. **(STARTER ONLY)**
+- [Multiple Sidekiq processes](extra_sidekiq_processes.md): Configure multiple Sidekiq processes to ensure certain queues always have dedicated workers, no matter the number of jobs that need to be processed. **(CORE ONLY)**
+- [Puma](puma.md): Understand Puma and puma-worker-killer.
 - [Unicorn](unicorn.md): Understand Unicorn and unicorn-worker-killer.
 - Speed up SSH operations by [Authorizing SSH users via a fast,
   indexed lookup to the GitLab database](fast_ssh_key_lookup.md), and/or
@@ -21,3 +22,6 @@ Keep your GitLab instance up and running smoothly.
   performance can have a big impact on GitLab performance, especially for actions
   that read or write Git repositories. This information will help benchmark
   filesystem performance against known good and bad real-world systems.
+- [ChatOps Scripts](https://gitlab.com/gitlab-com/chatops): The GitLab.com Infrastructure team uses this repository to house
+  common ChatOps scripts they use to troubleshoot and maintain the production instance of GitLab.com.
+  These scripts are likely useful to administrators of GitLab instances of all sizes.

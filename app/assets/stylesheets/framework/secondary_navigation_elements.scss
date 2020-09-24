@@ -97,13 +97,8 @@
     }
 
     /* Small devices (phones, tablets, 768px and lower) */
-    @include media-breakpoint-down(xs) {
+    @include media-breakpoint-down(sm) {
       width: 100%;
-
-      &.mobile-separator {
-        border-bottom: 1px solid $border-color;
-        margin-bottom: $gl-padding-8;
-      }
     }
   }
 
@@ -121,6 +116,7 @@
     }
 
     > .btn,
+    > .btn-group,
     > .btn-container,
     > .dropdown,
     > input,
@@ -145,11 +141,13 @@
       display: inline-block;
       position: relative;
 
-      /* Medium devices (desktops, 992px and up) */
-      @include media-breakpoint-up(md) { width: 200px; }
+      &:not[type='checkbox'] {
+        /* Medium devices (desktops, 992px and up) */
+        @include media-breakpoint-up(md) { width: 200px; }
 
-      /* Large devices (large desktops, 1200px and up) */
-      @include media-breakpoint-up(lg) { width: 250px; }
+        /* Large devices (large desktops, 1200px and up) */
+        @include media-breakpoint-up(lg) { width: 250px; }
+      }
     }
 
     @include media-breakpoint-down(sm) {
@@ -161,7 +159,8 @@
       .dropdown,
       .dropdown-toggle,
       .dropdown-menu-toggle,
-      .form-control {
+      .form-control,
+      > .btn-group {
         margin: 0 0 $gl-padding-8;
         display: block;
         width: 100%;
@@ -305,21 +304,21 @@
 
 .inner-page-scroll-tabs {
   .fade-right {
-    @include fade(left, $white-light);
+    @include fade(left, $white);
     right: 0;
     text-align: right;
 
-    .fa {
+    svg {
       right: 5px;
     }
   }
 
   .fade-left {
-    @include fade(right, $white-light);
+    @include fade(right, $white);
     left: 0;
     text-align: left;
 
-    .fa {
+    svg {
       left: 5px;
     }
   }
@@ -345,7 +344,7 @@
     @include scrolling-links();
 
     .fade-right {
-      @include fade(left, $white-light);
+      @include fade(left, $white);
       right: -5px;
 
       .fa {
@@ -354,7 +353,7 @@
     }
 
     .fade-left {
-      @include fade(right, $white-light);
+      @include fade(right, $white);
       left: -5px;
 
       .fa {
@@ -410,8 +409,4 @@
       max-width: 250px;
     }
   }
-}
-
-.new-project-item-select-button .fa-caret-down {
-  margin-left: 2px;
 }

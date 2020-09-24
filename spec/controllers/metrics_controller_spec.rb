@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MetricsController do
+RSpec.describe MetricsController, :request_store do
   include StubENV
 
   let(:metrics_multiproc_dir) { @metrics_multiproc_dir }
@@ -33,7 +33,7 @@ describe MetricsController do
       it 'returns prometheus metrics' do
         get :index
 
-        expect(response.status).to eq(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response.body).to match(/^prometheus_counter 1$/)
       end
 
@@ -45,7 +45,7 @@ describe MetricsController do
         it 'returns proper response' do
           get :index
 
-          expect(response.status).to eq(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.body).to eq("# Metrics are disabled, see: http://test.host/help/administration/monitoring/prometheus/gitlab_metrics#gitlab-prometheus-metrics\n")
         end
       end
@@ -53,7 +53,7 @@ describe MetricsController do
 
     context 'accessed from whitelisted ip' do
       before do
-        allow(Gitlab::RequestContext).to receive(:client_ip).and_return(whitelisted_ip)
+        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(whitelisted_ip)
       end
 
       it_behaves_like 'endpoint providing metrics'
@@ -61,7 +61,7 @@ describe MetricsController do
 
     context 'accessed from ip in whitelisted range' do
       before do
-        allow(Gitlab::RequestContext).to receive(:client_ip).and_return(ip_in_whitelisted_range)
+        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(ip_in_whitelisted_range)
       end
 
       it_behaves_like 'endpoint providing metrics'
@@ -69,13 +69,13 @@ describe MetricsController do
 
     context 'accessed from not whitelisted ip' do
       before do
-        allow(Gitlab::RequestContext).to receive(:client_ip).and_return(not_whitelisted_ip)
+        allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(not_whitelisted_ip)
       end
 
       it 'returns the expected error response' do
         get :index
 
-        expect(response.status).to eq(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

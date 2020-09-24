@@ -1,25 +1,30 @@
 <script>
+import { GlResizeObserverDirective } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
-import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { chartHeight } from '../../constants';
 import { makeDataSeries } from '~/helpers/monitor_helper';
 import { graphDataValidatorForValues } from '../../utils';
+import { getTimeAxisOptions, getYAxisOptions, getChartGrid } from './options';
+import { timezones } from '../../format_date';
 
 export default {
   components: {
     GlColumnChart,
   },
-  inheritAttrs: false,
+  directives: {
+    GlResizeObserverDirective,
+  },
   props: {
     graphData: {
       type: Object,
       required: true,
       validator: graphDataValidatorForValues.bind(null, false),
     },
-    containerWidth: {
-      type: Number,
-      required: true,
+    timezone: {
+      type: String,
+      required: false,
+      default: timezones.LOCAL,
     },
   },
   data() {
@@ -27,13 +32,12 @@ export default {
       width: 0,
       height: chartHeight,
       svgs: {},
-      debouncedResizeCallback: {},
     };
   },
   computed: {
     chartData() {
-      const queryData = this.graphData.queries.reduce((acc, query) => {
-        const series = makeDataSeries(query.result, {
+      const queryData = this.graphData.metrics.reduce((acc, query) => {
+        const series = makeDataSeries(query.result || [], {
           name: this.formatLegendLabel(query),
         });
 
@@ -44,15 +48,28 @@ export default {
         values: queryData[0].data,
       };
     },
+    chartOptions() {
+      const xAxis = getTimeAxisOptions({ timezone: this.timezone });
+
+      const yAxis = {
+        ...getYAxisOptions(this.graphData.yAxis),
+        scale: false,
+      };
+
+      return {
+        grid: getChartGrid(),
+        xAxis,
+        yAxis,
+        dataZoom: [this.dataZoomConfig],
+      };
+    },
     xAxisTitle() {
-      return this.graphData.queries[0].result[0].x_label !== undefined
-        ? this.graphData.queries[0].result[0].x_label
+      return this.graphData.metrics[0].result[0].x_label !== undefined
+        ? this.graphData.metrics[0].result[0].x_label
         : '';
     },
     yAxisTitle() {
-      return this.graphData.queries[0].result[0].y_label !== undefined
-        ? this.graphData.queries[0].result[0].y_label
-        : '';
+      return this.chartOptions.yAxis.name;
     },
     xAxisType() {
       return this.graphData.x_type !== undefined ? this.graphData.x_type : 'category';
@@ -62,28 +79,16 @@ export default {
 
       return handleIcon ? { handleIcon } : {};
     },
-    chartOptions() {
-      return {
-        dataZoom: this.dataZoomConfig,
-      };
-    },
-  },
-  watch: {
-    containerWidth: 'onResize',
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.debouncedResizeCallback);
   },
   created() {
-    this.debouncedResizeCallback = debounceByAnimationFrame(this.onResize);
-    window.addEventListener('resize', this.debouncedResizeCallback);
     this.setSvg('scroll-handle');
   },
   methods: {
     formatLegendLabel(query) {
-      return `${query.label}`;
+      return query.label;
     },
     onResize() {
+      if (!this.$refs.columnChart) return;
       const { width } = this.$refs.columnChart.$el.getBoundingClientRect();
       this.width = width;
     },
@@ -100,11 +105,7 @@ export default {
 };
 </script>
 <template>
-  <div class="prometheus-graph">
-    <div class="prometheus-graph-header">
-      <h5 ref="graphTitle" class="prometheus-graph-title">{{ graphData.title }}</h5>
-      <div ref="graphWidgets" class="prometheus-graph-widgets"><slot></slot></div>
-    </div>
+  <div v-gl-resize-observer-directive="onResize">
     <gl-column-chart
       ref="columnChart"
       v-bind="$attrs"

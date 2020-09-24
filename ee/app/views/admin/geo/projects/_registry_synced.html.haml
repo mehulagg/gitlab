@@ -1,11 +1,11 @@
 .card-body
-  .container.project-container
+  .container.m-0.p-0
     .row
-      .col-sm.project-status-container
+      .col-sm
         .project-status-title.text-muted
           = s_('Geo|Status')
         = geo_registry_status(project_registry)
-      .col-sm.project-status-container
+      .col-sm.mt-3.mt-sm-0
         .project-status-title.text-muted
           = s_('Geo|Last successful sync')
         .project-status-content
@@ -13,7 +13,7 @@
             = time_ago_with_tooltip(project_registry.last_repository_successful_sync_at, placement: 'bottom')
           - else
             = s_('Geo|Never')
-      .col-sm.project-status-container
+      .col-sm.mt-3.mt-sm-0
         .project-status-title.text-muted
           = s_('Geo|Last time verified')
         .project-status-content
@@ -21,7 +21,7 @@
             = time_ago_with_tooltip(project_registry.last_repository_verification_ran_at, placement: 'bottom')
           - else
             = s_('Geo|Never')
-      .col-sm.project-status-container
+      .col-sm.mt-3.mt-sm-0
         .project-status-title.text-muted
           = s_('Geo|Last repository check run')
         .project-status-content

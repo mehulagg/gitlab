@@ -4,7 +4,10 @@ module Types
   class IssueType < BaseObject
     graphql_name 'Issue'
 
+    connection_type_class(Types::CountableConnectionType)
+
     implements(Types::Notes::NoteableType)
+    implements(Types::CurrentUserTodos)
 
     authorize :read_issue
 
@@ -12,6 +15,8 @@ module Types
 
     present_using IssuePresenter
 
+    field :id, GraphQL::ID_TYPE, null: false,
+          description: "ID of the issue"
     field :iid, GraphQL::ID_TYPE, null: false,
           description: "Internal ID of the issue"
     field :title, GraphQL::STRING_TYPE, null: false,
@@ -34,12 +39,10 @@ module Types
           description: 'User that created the issue',
           resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(User, obj.author_id).find }
 
-    # Remove complexity when BatchLoader is used
-    field :assignees, Types::UserType.connection_type, null: true, complexity: 5,
+    field :assignees, Types::UserType.connection_type, null: true,
           description: 'Assignees of the issue'
 
-    # Remove complexity when BatchLoader is used
-    field :labels, Types::LabelType.connection_type, null: true, complexity: 5,
+    field :labels, Types::LabelType.connection_type, null: true,
           description: 'Labels of the issue'
     field :milestone, Types::MilestoneType, null: true,
           description: 'Milestone of the issue',
@@ -68,6 +71,8 @@ module Types
 
     field :participants, Types::UserType.connection_type, null: true, complexity: 5,
           description: 'List of participants in the issue'
+    field :subscribed, GraphQL::BOOLEAN_TYPE, method: :subscribed?, null: false, complexity: 5,
+          description: 'Indicates the currently logged in user is subscribed to the issue'
     field :time_estimate, GraphQL::INT_TYPE, null: false,
           description: 'Time estimate of the issue'
     field :total_time_spent, GraphQL::INT_TYPE, null: false,
@@ -83,6 +88,26 @@ module Types
 
     field :task_completion_status, Types::TaskCompletionStatus, null: false,
           description: 'Task completion status of the issue'
+
+    field :designs, Types::DesignManagement::DesignCollectionType, null: true,
+          method: :design_collection,
+          deprecated: { reason: 'Use `designCollection`', milestone: '12.2' },
+          description: 'The designs associated with this issue'
+
+    field :design_collection, Types::DesignManagement::DesignCollectionType, null: true,
+          description: 'Collection of design images associated with this issue'
+
+    field :type, Types::IssueTypeEnum, null: true,
+          method: :issue_type,
+          description: 'Type of the issue'
+
+    field :alert_management_alert,
+          Types::AlertManagement::AlertType,
+          null: true,
+          description: 'Alert associated to this issue'
+
+    field :severity, Types::IssuableSeverityEnum, null: true,
+          description: 'Severity level of the incident'
   end
 end
 

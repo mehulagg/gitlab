@@ -4,4 +4,7 @@ export default () => ({
   rules: [],
   fallbackApprovalsRequired: 0,
   minFallbackApprovalsRequired: 0,
+  initialRules: [],
+  oldRules: [],
+  resetToDefault: false,
 });

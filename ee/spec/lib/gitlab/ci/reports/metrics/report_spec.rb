@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::Metrics::Report do
+RSpec.describe Gitlab::Ci::Reports::Metrics::Report do
   let(:report) { described_class.new }
 
   describe '#add_metric' do

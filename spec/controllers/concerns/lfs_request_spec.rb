@@ -2,16 +2,14 @@
 
 require 'spec_helper'
 
-describe LfsRequest do
+RSpec.describe LfsRequest do
   include ProjectForksHelper
 
-  controller(Projects::GitHttpClientController) do
+  controller(Repositories::GitHttpClientController) do
     # `described_class` is not available in this context
-    include LfsRequest # rubocop:disable RSpec/DescribedClass
+    include LfsRequest
 
     def show
-      storage_project
-
       head :ok
     end
 
@@ -38,22 +36,6 @@ describe LfsRequest do
     stub_lfs_setting(enabled: true)
   end
 
-  describe '#storage_project' do
-    it 'assigns the project as storage project' do
-      get :show, params: { id: project.id }
-
-      expect(assigns(:storage_project)).to eq(project)
-    end
-
-    it 'assigns the source of a forked project' do
-      forked_project = fork_project(project)
-
-      get :show, params: { id: forked_project.id }
-
-      expect(assigns(:storage_project)).to eq(project)
-    end
-  end
-
   context 'user is authenticated without access to lfs' do
     before do
       allow(controller).to receive(:authenticate_user)
@@ -66,7 +48,7 @@ describe LfsRequest do
       it 'returns 403' do
         get :show, params: { id: project.id }
 
-        expect(response.status).to eq(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -75,7 +57,7 @@ describe LfsRequest do
         it 'returns 404' do
           get :show, params: { id: 'does not exist' }
 
-          expect(response.status).to eq(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -85,7 +67,7 @@ describe LfsRequest do
         it 'returns 404' do
           get :show, params: { id: project.id }
 
-          expect(response.status).to eq(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end

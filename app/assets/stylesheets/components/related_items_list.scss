@@ -1,9 +1,11 @@
 $item-path-max-width: 160px;
 $item-milestone-max-width: 120px;
 $item-weight-max-width: 48px;
+$item-remove-button-space: 42px;
 
 .related-items-list {
   padding: $gl-padding-4;
+  padding-right: $gl-padding-6;
 
   &,
   .list-item:last-child {
@@ -11,21 +13,26 @@ $item-weight-max-width: 48px;
   }
 }
 
-.sortable-link {
-  max-width: 85%;
+.related-items-tree {
+  .card-header {
+    .gl-label {
+      line-height: $gl-line-height;
+    }
+  }
+
+  .sortable-link {
+    white-space: normal;
+  }
+
+  .item-assignees .avatar {
+    height: $gl-padding;
+    width: $gl-padding;
+  }
 }
 
 .item-body {
   position: relative;
   line-height: $gl-line-height;
-
-  .issue-token-state-icon-open {
-    color: $green-500;
-  }
-
-  .issue-token-state-icon-closed {
-    color: $blue-500;
-  }
 
   .merge-request-status.closed {
     color: $red-500;
@@ -40,26 +47,20 @@ $item-weight-max-width: 48px;
     cursor: help;
   }
 
-  .issue-token-state-icon-open,
-  .issue-token-state-icon-closed {
-    margin-right: $gl-padding-4;
+  .confidential-icon {
+    color: $orange-500;
   }
 
-  .confidential-icon {
-    color: $orange-600;
+  .item-title-wrapper {
+    max-width: calc(100% - #{$item-remove-button-space});
   }
 
   .item-title {
     flex-basis: 100%;
     font-size: $gl-font-size-small;
 
-    &.mr-title {
-      font-weight: $gl-font-weight-bold;
-    }
-
-    .issue-token-state-icon-open,
-    .issue-token-state-icon-closed {
-      display: none;
+    .sortable-link {
+      color: $gray-900;
     }
   }
 
@@ -74,22 +75,39 @@ $item-weight-max-width: 48px;
   }
 }
 
+.item-body,
+.card-header {
+  .health-label-short {
+    max-width: 0;
+  }
+
+  .bullet-separator {
+    font-size: 9px;
+    color: $gray-200;
+  }
+}
+
+.card-header {
+  .health-label-short {
+    display: initial;
+  }
+}
+
 .item-meta {
   flex-basis: 100%;
-  font-size: $gl-font-size-small;
+  font-size: $gl-font-size;
   color: $gl-text-color-secondary;
 
-  .item-meta-child {
-    flex-basis: 100%;
+  .item-due-date,
+  .board-card-weight {
+    &.board-card-info {
+      margin-right: 0;
+    }
   }
 
   .item-attributes-area {
     > * {
       margin-left: 8px;
-    }
-
-    .board-card-info {
-      margin-right: 0;
     }
 
     @include media-breakpoint-down(sm) {
@@ -105,11 +123,6 @@ $item-weight-max-width: 48px;
   .item-milestone {
     text-decoration: none;
     max-width: $item-milestone-max-width;
-
-    .ic-clock {
-      color: $gl-text-color-tertiary;
-      margin-right: $gl-padding-4;
-    }
   }
 
   .item-weight {
@@ -159,31 +172,41 @@ $item-weight-max-width: 48px;
     font-weight: $gl-font-weight-bold;
     max-width: $item-path-max-width;
   }
-
-  .issue-token-state-icon-open,
-  .issue-token-state-icon-closed {
-    display: block;
-  }
 }
 
 .btn-item-remove {
   position: absolute;
-  right: 0;
   top: $gl-padding-4 / 2;
+  right: 0;
   padding: $gl-padding-4;
   margin-right: $gl-padding-4 / 2;
   line-height: 0;
   border-color: transparent;
+  background-color: transparent;
   color: $gl-text-color-secondary;
+
+  .related-items-tree & {
+    position: relative;
+    top: initial;
+    padding: $btn-sm-side-margin;
+    margin-right: initial;
+  }
 
   &:hover {
     color: $gl-text-color;
+    border-color: $border-color;
   }
 }
 
 .mr-status-wrapper,
 .mr-ci-status {
   line-height: 0;
+}
+
+@include media-breakpoint-down(xs) {
+  .btn-sm.dropdown-toggle-split {
+    max-width: 40px;
+  }
 }
 
 @include media-breakpoint-up(sm) {
@@ -194,10 +217,21 @@ $item-weight-max-width: 48px;
   .sortable-link {
     max-width: 90%;
   }
+
+  .card-header {
+    .health-label-short {
+      max-width: 30px;
+    }
+  }
 }
 
 /* Small devices (landscape phones, 768px and up) */
 @include media-breakpoint-up(md) {
+  .related-items-tree .item-contents,
+  .item-body .item-title {
+    max-width: 100%;
+  }
+
   .sortable-link {
     text-overflow: ellipsis;
     overflow: hidden;
@@ -209,27 +243,11 @@ $item-weight-max-width: 48px;
     .item-contents {
       min-width: 0;
     }
-
-    .item-title {
-      flex-basis: unset;
-      // 95% because we compensate
-      // for remove button which is
-      // positioned absolutely
-      width: 95%;
-    }
-
-    .btn-item-remove {
-      order: 1;
-    }
   }
 
-  .item-meta {
-    .item-meta-child {
-      flex-basis: unset;
-
-      ~ .item-assignees {
-        margin-left: $gl-padding-4;
-      }
+  .card-header {
+    .health-label-short {
+      max-width: 60px;
     }
   }
 }
@@ -245,36 +263,27 @@ $item-weight-max-width: 48px;
       font-size: inherit; // Base size given to `item-meta` is `$gl-font-size-small`
     }
   }
+
+  .card-header {
+    .health-label-short {
+      max-width: 100px;
+    }
+  }
 }
 
 /* Large devices (large desktops, 1200px and up) */
 @include media-breakpoint-up(xl) {
   .item-body {
     .item-title {
-      min-width: 0;
       width: auto;
       flex-basis: auto;
       flex-shrink: 1;
       font-weight: $gl-font-weight-normal;
-
-      .issue-token-state-icon-open,
-      .issue-token-state-icon-closed {
-        display: block;
-        margin-right: $gl-padding-8;
-      }
-    }
-
-    .item-info-area {
-      flex-basis: auto;
     }
   }
 
   .item-contents {
     overflow: hidden;
-  }
-
-  .item-meta {
-    flex: 1;
   }
 
   .item-assignees {
@@ -294,15 +303,27 @@ $item-weight-max-width: 48px;
   .btn-item-remove {
     position: relative;
     top: initial;
-    right: 0;
     padding: $btn-sm-side-margin;
-
-    &:hover {
-      border-color: $border-color;
-    }
+    margin-right: $gl-padding-4 / 2;
   }
 
   .sortable-link {
     line-height: 1.3;
+  }
+
+  .item-info-area {
+    flex-basis: auto;
+  }
+}
+
+@media only screen and (min-width: 1500px) {
+  .card-header {
+    .health-label-short {
+      display: none;
+    }
+
+    .health-label-long {
+      display: block;
+    }
   }
 }

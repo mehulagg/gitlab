@@ -1,0 +1,12 @@
+include:
+  template: License-Scanning.gitlab-ci.yml
+
+license_scanning:
+  tags:
+    - qa
+    - test
+  script:
+    - echo "Skipped"
+  artifacts:
+    reports:
+      license_scanning: gl-license-scanning-report.json

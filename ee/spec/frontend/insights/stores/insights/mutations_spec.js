@@ -1,17 +1,22 @@
 import createState from 'ee/insights/stores/modules/insights/state';
 import mutations from 'ee/insights/stores/modules/insights/mutations';
 import * as types from 'ee/insights/stores/modules/insights/mutation_types';
-import { configData } from '../../../../javascripts/insights/mock_data';
+import { CHART_TYPES } from 'ee/insights/constants';
+
+import { configData } from 'ee_jest/insights/mock_data';
 
 describe('Insights mutations', () => {
   let state;
   const chart = {
     title: 'Bugs Per Team',
-    type: 'stacked-bar',
+    type: CHART_TYPES.STACKED_BAR,
+    description: 'Chart Description',
     query: {
       name: 'filter_issues_by_label_category',
       filter_label: 'bug',
       category_labels: ['Plan', 'Create', 'Manage'],
+      group_by: 'month',
+      issuable_type: 'issue',
     },
   };
 
@@ -43,7 +48,7 @@ describe('Insights mutations', () => {
     it('sets configData state to incoming data on success', () => {
       mutations[types.RECEIVE_CONFIG_SUCCESS](state, configData);
 
-      const expected = Object.assign({}, configData);
+      const expected = { ...configData };
       delete expected.invalid;
 
       expect(state.configData).toEqual(expected);
@@ -83,8 +88,8 @@ describe('Insights mutations', () => {
   });
 
   describe(types.RECEIVE_CHART_SUCCESS, () => {
-    const data = {
-      labels: ['January'],
+    const incomingData = {
+      labels: ['January', 'February'],
       datasets: [
         {
           label: 'Dataset 1',
@@ -101,28 +106,48 @@ describe('Insights mutations', () => {
       ],
     };
 
+    const transformedData = {
+      datasets: [[1], [2]],
+      labels: ['January', 'February'],
+      xAxisTitle: 'Months',
+      yAxisTitle: 'Issues',
+      seriesNames: ['Dataset 1', 'Dataset 2'],
+    };
+
+    beforeEach(() => {
+      mutations[types.INIT_CHART_DATA](state, [chart.title]);
+    });
+
     it('sets charts loaded state to true on success', () => {
-      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data });
+      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data: incomingData });
 
       const { chartData } = state;
 
       expect(chartData[chart.title].loaded).toBe(true);
     });
 
-    it('sets charts data to incoming data on success', () => {
-      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data });
+    it('sets charts data to transformed data on success', () => {
+      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data: incomingData });
 
       const { chartData } = state;
 
-      expect(chartData[chart.title].data).toBe(data);
+      expect(chartData[chart.title].data).toStrictEqual(transformedData);
     });
 
     it('sets charts type to incoming type on success', () => {
-      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data });
+      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data: incomingData });
 
       const { chartData } = state;
 
       expect(chartData[chart.title].type).toBe(chart.type);
+    });
+
+    it('sets charts description to incoming type on success', () => {
+      mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data: incomingData });
+
+      const { chartData } = state;
+
+      expect(chartData[chart.title].description).toBe(chart.description);
     });
   });
 
@@ -137,12 +162,12 @@ describe('Insights mutations', () => {
       expect(chartData[chart.title].loaded).toBe(false);
     });
 
-    it('sets charts data state to null on error', () => {
+    it('sets charts data state to an empty object on error', () => {
       mutations[types.RECEIVE_CHART_ERROR](state, { chart, error });
 
       const { chartData } = state;
 
-      expect(chartData[chart.title].data).toBe(null);
+      expect(Object.keys(chartData[chart.title].data)).toHaveLength(0);
     });
 
     it('sets charts type to incoming type on error', () => {
@@ -169,16 +194,6 @@ describe('Insights mutations', () => {
       mutations[types.INIT_CHART_DATA](state, keys);
 
       expect(state.chartData).toEqual({ a: {}, b: {} });
-    });
-  });
-
-  describe(types.SET_PAGE_LOADING, () => {
-    const pageLoading = true;
-
-    it('sets pageLoading state', () => {
-      mutations[types.SET_PAGE_LOADING](state, pageLoading);
-
-      expect(state.pageLoading).toBe(pageLoading);
     });
   });
 });

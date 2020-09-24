@@ -5,7 +5,7 @@ class GithubService
     def initialize(access_token, repo_path, api_endpoint: nil)
       @access_token = access_token
       @repo_path = repo_path
-      @api_endpoint = api_endpoint.presence
+      @api_endpoint = api_endpoint.presence || ::Octokit::Default.api_endpoint
     end
 
     def notify(ref, state, params = {})

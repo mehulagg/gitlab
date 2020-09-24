@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe 'merge requests discussions' do
+RSpec.describe 'merge requests discussions' do
   # Further tests can be found at merge_requests_controller_spec.rb
-  describe 'GET /:namespace/:project/merge_requests/:iid/discussions' do
+  describe 'GET /:namespace/:project/-/merge_requests/:iid/discussions' do
     let(:project) { create(:project, :repository) }
     let(:user) { project.owner }
     let(:merge_request) { create(:merge_request_with_diffs, target_project: project, source_project: project) }
@@ -21,7 +21,7 @@ describe 'merge requests discussions' do
     it 'returns 200' do
       send_request
 
-      expect(response.status).to eq(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     # https://docs.gitlab.com/ee/development/query_recorder.html#use-request-specs-instead-of-controller-specs

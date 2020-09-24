@@ -1,104 +1,154 @@
 # frozen_string_literal: true
 
 module QA
-  # https://gitlab.com/gitlab-org/gitlab/issues/34978
-  context 'Create', :quarantine do
+  context 'Create' do
     context 'Push Rules' do
       describe 'using non signed commits' do
-        file_name_limitation = 'denied_file'
-        file_size_limitation = 1
-        authors_email_limitation = '(admin@example.com|root@gitlab.com)'
-        branch_name_limitation = 'master'
-        needed_phrase_limitation = 'allowed commit'
-        deny_message_phrase_limitation = 'denied commit'
-
-        before :context do
+        before(:context) do
           prepare
+
+          @file_name_limitation = 'denied_file'
+          @file_size_limitation = 1
+          @authors_email_limitation = %{(#{Regexp.escape(@creator.email)}|#{@root.email})}
+          @branch_name_limitation = 'master'
+          @needed_phrase_limitation = 'allowed commit'
+          @deny_message_phrase_limitation = 'denied commit'
 
           Page::Project::Settings::Repository.perform do |repository|
             repository.expand_push_rules do |push_rules|
-              push_rules.fill_file_name file_name_limitation
-              push_rules.fill_file_size file_size_limitation
-              push_rules.fill_author_email authors_email_limitation
-              push_rules.fill_branch_name branch_name_limitation
-              push_rules.fill_commit_message_rule needed_phrase_limitation
-              push_rules.fill_deny_commit_message_rule deny_message_phrase_limitation
+              push_rules.fill_file_name(@file_name_limitation)
+              push_rules.fill_file_size(@file_size_limitation)
+              push_rules.fill_author_email(@authors_email_limitation)
+              push_rules.fill_branch_name(@branch_name_limitation)
+              push_rules.fill_commit_message_rule(@needed_phrase_limitation)
+              push_rules.fill_deny_commit_message_rule(@deny_message_phrase_limitation)
               push_rules.check_prevent_secrets
-              push_rules.check_restrict_author
               push_rules.check_deny_delete_tag
               push_rules.click_submit
             end
           end
         end
 
-        it 'restricts files by name and size' do
+        it 'allows an unrestricted push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/760' do
+          expect_no_error_on_push(file: standard_file)
+        end
+
+        it 'restricts files by name and size', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/653' do
+          # Note: The file size limits in this test should be lower than the limits in
+          # browser_ui/3_create/repository/push_over_http_file_size_spec to prevent
+          # the limit set in that test from triggering in this test (which can happen
+          # on Staging where the tests are run in parallel).
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/218620#note_361634705
+
           large_file = [{
             name: 'file',
             content: SecureRandom.hex(1000000)
           }]
           wrongly_named_file = [{
-            name: file_name_limitation,
+            name: @file_name_limitation,
             content: SecureRandom.hex(100)
           }]
 
-          expect_no_error_on_push file: standard_file
-          expect_error_on_push file: large_file
-          expect_error_on_push file: wrongly_named_file
+          expect_error_on_push(file: large_file,
+            error: 'File "file" is larger than the allowed size of 1 MB')
+          expect_error_on_push(file: wrongly_named_file,
+            error: Regexp.escape("File name #{@file_name_limitation} was blacklisted by the pattern #{@file_name_limitation}"))
         end
 
-        it 'restricts users by email format' do
-          gitlab_user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
+        it 'restricts users by email format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/652' do
+          gitlab_user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_2, Runtime::Env.gitlab_qa_password_2)
+          @project.add_member(gitlab_user, Resource::Members::AccessLevel::MAINTAINER)
 
-          expect_no_error_on_push file: standard_file
-          expect_error_on_push file: standard_file, user: gitlab_user
+          expect_error_on_push(file: standard_file, user: gitlab_user,
+            error: Regexp.escape("Committer's email '#{gitlab_user.email}' does not follow the pattern '#{@authors_email_limitation}'"))
         end
 
-        it 'restricts branches by branch name' do
-          expect_no_error_on_push file: standard_file
-          expect_error_on_push file: standard_file, branch: 'forbidden_branch'
+        it 'restricts branches by branch name', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/649' do
+          expect_error_on_push(file: standard_file, branch: 'forbidden_branch',
+            error: Regexp.escape("Branch name does not follow the pattern '#{@branch_name_limitation}'"))
         end
 
-        it 'restricts commit by message format' do
-          expect_no_error_on_push file: standard_file, commit_message: needed_phrase_limitation
-          expect_error_on_push file: standard_file, commit_message: 'forbidden message'
-          expect_error_on_push file: standard_file, commit_message: "#{needed_phrase_limitation} - #{deny_message_phrase_limitation}"
+        it 'restricts commit by message format', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/648' do
+          expect_no_error_on_push(file: standard_file, commit_message: @needed_phrase_limitation)
+          expect_error_on_push(file: standard_file, commit_message: 'forbidden message',
+            error: Regexp.escape("Commit message does not follow the pattern '#{@needed_phrase_limitation}'"))
+          expect_error_on_push(file: standard_file, commit_message: "#{@needed_phrase_limitation} - #{@deny_message_phrase_limitation}",
+            error: Regexp.escape("Commit message contains the forbidden pattern '#{@deny_message_phrase_limitation}'"))
         end
 
-        it 'restricts committing files with secrets' do
+        it 'restricts committing files with secrets', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/647' do
           secret_file = [{
             name: 'id_rsa',
             content: SecureRandom.hex(100)
           }]
 
-          expect_no_error_on_push file: standard_file
-          expect_error_on_push file: secret_file
+          expect_error_on_push(file: secret_file,
+            error: Regexp.escape('File name id_rsa was blacklisted by the pattern id_rsa$'))
         end
 
-        it 'restricts commits by user' do
-          expect_no_error_on_push file: standard_file
-          expect_error_on_push file: standard_file, user: root_user
-        end
-
-        it 'restricts removal of tag' do
+        it 'restricts removal of tag', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/650' do
           tag = Resource::Tag.fabricate_via_api! do |tag|
             tag.project = @project
             tag.ref = 'master'
             tag.name = 'test_tag'
           end
 
-          expect_no_error_on_push file: standard_file
-          expect_error_on_push file: standard_file, tag: tag.name
+          expect_error_on_push(file: standard_file, tag: tag.name,
+            error: 'You cannot delete a tag')
+        end
+      end
+
+      describe 'with commits restricted by author email to existing GitLab users' do
+        before do
+          prepare
+
+          Page::Project::Settings::Repository.perform do |repository|
+            repository.expand_push_rules do |push_rules|
+              push_rules.check_restrict_author
+              push_rules.click_submit
+            end
+          end
+        end
+
+        it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/879', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
+          non_member_user = Resource::User.new.tap do |user|
+            user.username = ''
+            user.password = ''
+            user.name = 'non_member_user'
+            user.email = 'non_member_user@non_member_user.com'
+          end
+
+          expect_error_on_push(file: standard_file, user: non_member_user,
+            error: Regexp.escape("Author '#{non_member_user.email}' is not a member of team"))
+        end
+      end
+
+      describe 'with commits restricted to verified emails' do
+        before do
+          prepare
+
+          Page::Project::Settings::Repository.perform do |repository|
+            repository.expand_push_rules do |push_rules|
+              push_rules.check_committer_restriction
+              push_rules.click_submit
+            end
+          end
+        end
+
+        it 'rejects unverified emails', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/761' do
+          expect_no_error_on_push(file: standard_file)
+          expect_error_on_push(file: standard_file, user: @root,
+            error: 'You can only push commits that were committed with one of your own verified emails')
         end
       end
 
       describe 'using signed commits' do
-        before :context do
+        before do
           prepare
 
           Page::Project::Settings::Repository.perform do |repository|
             repository.expand_push_rules do |push_rules|
               push_rules.check_reject_unsigned_commits
-              push_rules.check_committer_restriction
               push_rules.click_submit
             end
           end
@@ -106,16 +156,9 @@ module QA
           @gpg = Resource::UserGPG.fabricate_via_api!
         end
 
-        it 'restricts to signed commits' do
-          expect_no_error_on_push file: standard_file, gpg: @gpg
-          expect_error_on_push file: standard_file
-        end
-
-        it 'restricts commits to current authenticated user' do
-          gitlab_user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
-
-          expect_no_error_on_push file: standard_file, gpg: @gpg
-          expect_error_on_push file: standard_file, gpg: @gpg, user: gitlab_user
+        it 'restricts to signed commits', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/655' do
+          expect_no_error_on_push(file: standard_file, gpg: @gpg)
+          expect_error_on_push(file: standard_file, error: 'Commit must be signed with a GPG key')
         end
       end
 
@@ -126,43 +169,45 @@ module QA
          }]
       end
 
-      def root_user
-        Resource::User.new.tap do |user|
-          user.username = 'root'
-          user.name = 'GitLab QA'
-          user.email = 'root@gitlab.com'
-          user.password = nil
-        end
-      end
-
       def push(commit_message:, branch:, file:, user:, tag:, gpg:)
         Resource::Repository::ProjectPush.fabricate! do |push|
           push.project = @project
           push.commit_message = commit_message
           push.new_branch = branch != 'master'
           push.branch_name = branch
-          push.user = user
+          push.user = user if user != @root
           push.files = file if tag.nil?
           push.tag_name = tag unless tag.nil?
           push.gpg_key_id = gpg.key_id unless gpg.nil?
         end
       end
 
-      def expect_no_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: Runtime::User, tag: nil, gpg: nil)
+      def expect_no_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: @creator, tag: nil, gpg: nil)
         expect do
           push commit_message: commit_message, branch: branch, file: file, user: user, tag: tag, gpg: gpg
         end.not_to raise_error
       end
 
-      def expect_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: Runtime::User, tag: nil, gpg: nil)
+      def expect_error_on_push(commit_message: 'allowed commit', branch: 'master', file:, user: @creator, tag: nil, gpg: nil, error: nil)
         expect do
           push commit_message: commit_message, branch: branch, file: file, user: user, tag: tag, gpg: gpg
-        end.to raise_error(QA::Git::Repository::RepositoryCommandError)
+        end.to raise_error(QA::Git::Repository::RepositoryCommandError, /#{error}/)
       end
 
       def prepare
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
+
+        @creator = Resource::User.fabricate_via_api! do |user|
+          user.username = Runtime::User.username
+          user.password = Runtime::User.password
+        end
+
+        @root = Resource::User.new.tap do |user|
+          user.username = 'root'
+          user.name = 'GitLab QA'
+          user.email = 'root@gitlab.com'
+          user.password = nil
+        end
 
         @project = Resource::Project.fabricate_via_api! do |project|
           project.name = 'push_rules'

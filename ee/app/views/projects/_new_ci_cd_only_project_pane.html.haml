@@ -23,8 +23,9 @@
                   = icon('github', text: 'GitHub')
             %div
               - if git_import_enabled?
-                %button.btn.js-toggle-button.js-import-git-toggle-button{ type: "button", data: { toggle_open_class: 'active', track_label: "#{track_label}", track_property: 'repo_url', track_event: "click_button", track_value: "" } }
-                  = icon('git', text: _('Repo by URL'))
+                %button.btn.btn-svg.js-toggle-button.js-import-git-toggle-button{ type: "button", data: { toggle_open_class: 'active', track_label: "#{track_label}", track_property: 'repo_url', track_event: "click_button", track_value: "" } }
+                  = sprite_icon('link', css_class: 'gl-icon')
+                  = _('Repo by URL')
       .col-lg-12
         .js-toggle-content.toggle-import-form{ class: ('hide' if active_tab != 'ci_cd_only') }
           %hr

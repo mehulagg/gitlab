@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Geo::ProjectHousekeepingService do
+RSpec.describe Geo::ProjectHousekeepingService do
   include ExclusiveLeaseHelpers
   include ::EE::GeoHelpers
 
   subject(:service) { described_class.new(project) }
 
-  set(:project) { create(:project, :repository) }
+  let_it_be(:project) { create(:project, :repository) }
   let(:registry) { service.registry }
 
   before do
@@ -53,7 +53,7 @@ describe Geo::ProjectHousekeepingService do
 
         # At fetch 200
         expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :gc, :the_lease_key, :the_uuid)
-          .exactly(1).times
+          .once
         # At fetch 50, 100, 150
         expect(GitGarbageCollectWorker).to receive(:perform_async).with(project.id, :full_repack, :the_lease_key, :the_uuid)
           .exactly(3).times

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SlackIntegration do
+RSpec.describe SlackIntegration do
   describe "Associations" do
     it { is_expected.to belong_to(:service) }
   end

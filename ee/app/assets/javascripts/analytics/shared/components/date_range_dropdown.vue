@@ -1,11 +1,11 @@
 <script>
+import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDropdown,
-    GlDropdownItem,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
   },
   props: {
     availableDaysInPast: {
@@ -43,17 +43,17 @@ export default {
 };
 </script>
 <template>
-  <gl-dropdown
+  <gl-deprecated-dropdown
     toggle-class="dropdown-menu-toggle w-100"
     menu-class="w-100 mw-100"
     :text="dropdownText"
   >
-    <gl-dropdown-item
+    <gl-deprecated-dropdown-item
       v-for="d in availableDaysInPast"
       :key="d"
       class="w-100"
       @click="onSelect(d)"
-      >{{ getLabel(d) }}</gl-dropdown-item
+      >{{ getLabel(d) }}</gl-deprecated-dropdown-item
     >
-  </gl-dropdown>
+  </gl-deprecated-dropdown>
 </template>

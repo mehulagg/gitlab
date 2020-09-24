@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::Cleanup::OrphanJobArtifactFiles do
+RSpec.describe Gitlab::Cleanup::OrphanJobArtifactFiles do
   let(:null_logger) { Logger.new('/dev/null') }
+
   subject(:cleanup) { described_class.new(logger: null_logger) }
 
   before do
@@ -21,10 +22,15 @@ describe Gitlab::Cleanup::OrphanJobArtifactFiles do
   end
 
   it 'errors when invalid niceness is given' do
+    allow(Gitlab::Utils).to receive(:which).with('ionice').and_return('/fake/ionice')
     cleanup = described_class.new(logger: null_logger, niceness: 'FooBar')
 
-    expect(null_logger).to receive(:error).with(/FooBar/)
+    expect { cleanup.run! }.to raise_error('Invalid niceness')
+  end
 
+  it 'passes correct arguments to ionice' do
+    allow(Gitlab::Utils).to receive(:which).with('ionice').and_return('/fake/ionice')
+    expect(Open3).to receive(:popen3).with('/fake/ionice', '-c', any_args)
     cleanup.run!
   end
 
@@ -63,6 +69,8 @@ describe Gitlab::Cleanup::OrphanJobArtifactFiles do
   def mock_artifacts_found(cleanup, *files)
     mock = allow(cleanup).to receive(:find_artifacts)
 
-    files.each { |file| mock.and_yield(file) }
+    # Because we shell out to run `find -L ...`, each file actually
+    # contains a trailing newline
+    files.each { |file| mock.and_yield("#{file}\n") }
   end
 end

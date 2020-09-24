@@ -27,18 +27,13 @@ export default {
       type: Object,
       required: true,
     },
-    milestonePath: {
-      type: String,
-      required: true,
-    },
     labelsPath: {
       type: String,
       required: true,
     },
-    scopedLabelsDocumentationLink: {
+    labelsWebUrl: {
       type: String,
-      required: false,
-      default: '#',
+      required: true,
     },
     enableScopedLabels: {
       type: Boolean,
@@ -83,7 +78,7 @@ export default {
           new ListLabel({
             id: label.id,
             title: label.title,
-            color: label.color[0],
+            color: label.color,
             textColor: label.text_color,
           }),
         );
@@ -99,33 +94,35 @@ export default {
 
 <template>
   <div data-qa-selector="board_scope_modal">
-    <div v-if="canAdminBoard" class="media append-bottom-10">
+    <div v-if="canAdminBoard" class="media gl-mb-3">
       <label class="form-section-title label-bold media-body">{{ __('Board scope') }}</label>
       <button v-if="collapseScope" type="button" class="btn" @click="expanded = !expanded">
         {{ expandButtonText }}
       </button>
     </div>
-    <p class="text-secondary append-bottom-10">
+    <p class="text-secondary gl-mb-3">
       {{ __('Board scope affects which issues are displayed for anyone who visits this board') }}
     </p>
     <div v-if="!collapseScope || expanded">
       <board-milestone-select
         :board="board"
-        :milestone-path="milestonePath"
+        :group-id="groupId"
+        :project-id="projectId"
         :can-edit="canAdminBoard"
       />
 
       <board-labels-select
         :context="board"
         :labels-path="labelsPath"
+        :labels-web-url="labelsWebUrl"
         :can-edit="canAdminBoard"
-        :scoped-labels-documentation-link="scopedLabelsDocumentationLink"
+        :show-create="canAdminBoard"
         :enable-scoped-labels="enableScopedLabels"
+        variant="standalone"
         ability-name="issue"
         @onLabelClick="handleLabelClick"
+        >{{ __('Any label') }}</board-labels-select
       >
-        {{ __('Any Label') }}
-      </board-labels-select>
 
       <assignee-select
         :board="board"

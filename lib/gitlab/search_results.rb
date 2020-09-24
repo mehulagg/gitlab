@@ -4,8 +4,10 @@ module Gitlab
   class SearchResults
     COUNT_LIMIT = 100
     COUNT_LIMIT_MESSAGE = "#{COUNT_LIMIT - 1}+"
+    DEFAULT_PAGE = 1
+    DEFAULT_PER_PAGE = 20
 
-    attr_reader :current_user, :query, :per_page
+    attr_reader :current_user, :query, :filters
 
     # Limit search results by passed projects
     # It allows us to search only for projects user has access to
@@ -17,15 +19,16 @@ module Gitlab
     # query
     attr_reader :default_project_filter
 
-    def initialize(current_user, limit_projects, query, default_project_filter: false, per_page: 20)
+    def initialize(current_user, query, limit_projects = nil, default_project_filter: false, filters: {})
       @current_user = current_user
-      @limit_projects = limit_projects || Project.all
       @query = query
+      @limit_projects = limit_projects || Project.all
       @default_project_filter = default_project_filter
-      @per_page = per_page
+      @filters = filters
     end
 
-    def objects(scope, page = nil, without_count = true)
+    def objects(scope, page: nil, per_page: DEFAULT_PER_PAGE, without_count: true, preload_method: nil)
+      should_preload = preload_method.present?
       collection = case scope
                    when 'projects'
                      projects
@@ -38,8 +41,12 @@ module Gitlab
                    when 'users'
                      users
                    else
+                     should_preload = false
                      Kaminari.paginate_array([])
-                   end.page(page).per(per_page)
+                   end
+
+      collection = collection.public_send(preload_method) if should_preload # rubocop:disable GitlabSecurity/PublicSend
+      collection = collection.page(page).per(per_page)
 
       without_count ? collection.without_count : collection
     end
@@ -180,10 +187,12 @@ module Gitlab
         params[:sort] = 'updated_desc'
 
         if query =~ /#(\d+)\z/
-          params[:iids] = $1
+          params[:iids] = Regexp.last_match(1)
         else
           params[:search] = query
         end
+
+        params[:state] = filters[:state] if filters.key?(:state)
       end
     end
 
@@ -194,3 +203,5 @@ module Gitlab
     # rubocop: enable CodeReuse/ActiveRecord
   end
 end
+
+Gitlab::SearchResults.prepend_if_ee('EE::Gitlab::SearchResults')

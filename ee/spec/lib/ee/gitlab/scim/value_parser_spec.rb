@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Scim::ValueParser do
+RSpec.describe EE::Gitlab::Scim::ValueParser do
   using RSpec::Parameterized::TableSyntax
 
   describe '#type_cast' do

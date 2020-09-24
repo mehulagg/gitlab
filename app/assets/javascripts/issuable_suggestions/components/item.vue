@@ -1,9 +1,8 @@
 <script>
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
-import _ from 'underscore';
-import { GlLink, GlTooltip, GlTooltipDirective } from '@gitlab/ui';
+/* eslint-disable @gitlab/vue-require-i18n-strings */
+import { uniqueId } from 'lodash';
+import { GlLink, GlTooltip, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeago from '~/vue_shared/mixins/timeago';
@@ -12,7 +11,7 @@ export default {
   components: {
     GlTooltip,
     GlLink,
-    Icon,
+    GlIcon,
     UserAvatarImage,
     TimeagoTooltip,
   },
@@ -36,13 +35,13 @@ export default {
     counts() {
       return [
         {
-          id: _.uniqueId(),
+          id: uniqueId(),
           icon: 'thumb-up',
           tooltipTitle: __('Upvotes'),
           count: this.suggestion.upvotes,
         },
         {
-          id: _.uniqueId(),
+          id: uniqueId(),
           icon: 'comment',
           tooltipTitle: __('Comments'),
           count: this.suggestion.userNotesCount,
@@ -68,19 +67,23 @@ export default {
 <template>
   <div class="suggestion-item">
     <div class="d-flex align-items-center">
-      <icon
+      <gl-icon
         v-if="suggestion.confidential"
         v-gl-tooltip.bottom
         :title="__('Confidential')"
         name="eye-slash"
         class="suggestion-help-hover mr-1 suggestion-confidential"
       />
-      <gl-link :href="suggestion.webUrl" target="_blank" class="suggestion bold str-truncated-100">
+      <gl-link
+        :href="suggestion.webUrl"
+        target="_blank"
+        class="suggestion bold str-truncated-100 gl-text-gray-900!"
+      >
         {{ suggestion.title }}
       </gl-link>
     </div>
     <div class="text-secondary suggestion-footer">
-      <icon
+      <gl-icon
         ref="state"
         :name="stateIcon"
         :class="{
@@ -91,7 +94,7 @@ export default {
       />
       <gl-tooltip :target="() => $refs.state" placement="bottom">
         <span class="d-block">
-          <span class="bold"> {{ stateTitle }} </span> {{ timeFormated(closedOrCreatedDate) }}
+          <span class="bold"> {{ stateTitle }} </span> {{ timeFormatted(closedOrCreatedDate) }}
         </span>
         <span class="text-tertiary">{{ tooltipTitle(closedOrCreatedDate) }}</span>
       </gl-tooltip>
@@ -128,9 +131,9 @@ export default {
           :key="id"
           v-gl-tooltip.bottom
           :title="tooltipTitle"
-          class="suggestion-help-hover prepend-left-8 text-tertiary"
+          class="suggestion-help-hover gl-ml-3 text-tertiary"
         >
-          <icon :name="icon" /> {{ count }}
+          <gl-icon :name="icon" /> {{ count }}
         </span>
       </span>
     </div>

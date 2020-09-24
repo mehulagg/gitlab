@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::ConfigMap do
+RSpec.describe Gitlab::Kubernetes::ConfigMap do
   let(:kubeclient) { double('kubernetes client') }
   let(:application) { create(:clusters_applications_prometheus) }
   let(:config_map) { described_class.new(application.name, application.files) }
@@ -16,6 +18,7 @@ describe Gitlab::Kubernetes::ConfigMap do
 
   describe '#generate' do
     let(:resource) { ::Kubeclient::Resource.new(metadata: metadata, data: application.files) }
+
     subject { config_map.generate }
 
     it 'builds a Kubeclient Resource' do

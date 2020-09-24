@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AutocompleteController do
+RSpec.describe AutocompleteController do
   let(:project) { create(:project) }
   let(:user) { project.owner }
 
@@ -57,7 +57,7 @@ describe AutocompleteController do
     end
   end
 
-  context "groups" do
+  context 'groups' do
     let(:matching_group) { create(:group) }
     let(:non_matching_group) { create(:group) }
     let(:user2) { create(:user) }
@@ -95,6 +95,135 @@ describe AutocompleteController do
       end
 
       it { expect(response).to be_not_found }
+    end
+  end
+
+  shared_examples 'has expected results' do
+    it 'returns the matching routes', :aggregate_failures do
+      expect(json_response).to be_kind_of(Array)
+      expect(json_response.size).to eq(expected_results.length)
+
+      json_response.each do |result|
+        expect(expected_results).to include(result.values_at('source_id', 'source_type'))
+      end
+    end
+  end
+
+  context 'GET project_routes' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:projects) { create_list(:project, 3, group: group) }
+
+    before do
+      sign_in(user)
+      get(:project_routes, params: { search: search })
+    end
+
+    context 'as admin' do
+      let(:user) { create(:admin) }
+
+      describe "while searching for a project by namespace" do
+        let(:search) { group.path }
+        let!(:expected_results) { group.projects.map { |p| [p.id, 'Project'] }}
+
+        include_examples 'has expected results'
+      end
+
+      describe "while searching for a project by path" do
+        let(:search) { projects.first.path }
+        let!(:expected_results) { [[projects.first.id, 'Project']] }
+
+        include_examples 'has expected results'
+      end
+    end
+
+    context 'as project owner' do
+      let(:user) { project.owner }
+      let!(:expected_results) { [[project.id, 'Project']] }
+
+      context "while searching for a project by namespace" do
+        let(:search) { user.namespace.path }
+
+        include_examples 'has expected results'
+      end
+
+      context "while searching for a project by path" do
+        let(:search) { project.path }
+
+        include_examples 'has expected results'
+      end
+    end
+
+    context 'while searching for nothing' do
+      let(:search) { nil }
+      let(:expected_results) { [] }
+
+      include_examples 'has expected results'
+    end
+  end
+
+  context 'GET namespace_routes' do
+    let_it_be(:groups) { create_list(:group, 3, :private) }
+    let_it_be(:users) { create_list(:user, 3) }
+
+    before do
+      sign_in(user)
+      get(:namespace_routes, params: { search: search })
+    end
+
+    context 'as admin' do
+      let(:user) { create(:admin) }
+
+      describe "while searching for a namespace by group path" do
+        let(:search) { 'group' }
+        let!(:expected_results) do
+          Group.all.map { |g| [g.id, 'Namespace'] }
+        end
+
+        include_examples 'has expected results'
+      end
+
+      describe "while searching for a namespace by user path" do
+        let(:search) { 'user' }
+        let!(:expected_results) do
+          User.all.map { |u| [u.namespace.id, 'Namespace'] }
+        end
+
+        include_examples 'has expected results'
+      end
+    end
+
+    context 'as a user' do
+      let(:search) { user.namespace.path }
+
+      context "while searching for a namespace by path" do
+        let!(:expected_results) { [[user.namespace.id, 'Namespace']] }
+
+        include_examples 'has expected results'
+      end
+    end
+
+    context 'as group member' do
+      let_it_be(:group_developer) do
+        groups.first.add_developer(users.first)
+
+        users.first
+      end
+
+      let(:search) { groups.first.path }
+      let(:user) { group_developer }
+
+      context "while searching for a namespace by path" do
+        let!(:expected_results) { [[groups.first.id, 'Namespace']] }
+
+        include_examples 'has expected results'
+      end
+    end
+
+    context 'while searching for nothing' do
+      let(:search) { nil }
+      let(:expected_results) { [] }
+
+      include_examples 'has expected results'
     end
   end
 end

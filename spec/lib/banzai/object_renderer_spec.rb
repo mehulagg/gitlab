@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::ObjectRenderer do
+RSpec.describe Banzai::ObjectRenderer do
   let(:project) { create(:project, :repository) }
   let(:user) { project.owner }
   let(:renderer) do
@@ -25,7 +25,9 @@ describe Banzai::ObjectRenderer do
       end
 
       it 'calls Banzai::ReferenceRedactor to perform redaction' do
-        expect_any_instance_of(Banzai::ReferenceRedactor).to receive(:redact).and_call_original
+        expect_next_instance_of(Banzai::ReferenceRedactor) do |instance|
+          expect(instance).to receive(:redact).and_call_original
+        end
 
         renderer.render([object], :note)
       end
@@ -71,6 +73,7 @@ describe Banzai::ObjectRenderer do
           end
         end
       end
+
       let(:cacheless_thing) do
         cacheless_class.new.tap do |thing|
           thing.title = "Merge branch 'branch-merged' into 'master'"
@@ -85,7 +88,9 @@ describe Banzai::ObjectRenderer do
       end
 
       it 'calls Banzai::ReferenceRedactor to perform redaction' do
-        expect_any_instance_of(Banzai::ReferenceRedactor).to receive(:redact).and_call_original
+        expect_next_instance_of(Banzai::ReferenceRedactor) do |instance|
+          expect(instance).to receive(:redact).and_call_original
+        end
 
         renderer.render([cacheless_thing], :title)
       end

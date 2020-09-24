@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-class UpdateExternalPullRequestsWorker
+class UpdateExternalPullRequestsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :source_code_management
+  weight 3
+  loggable_arguments 2
 
   def perform(project_id, user_id, ref)
     project = Project.find_by_id(project_id)
@@ -20,7 +22,7 @@ class UpdateExternalPullRequestsWorker
       .by_source_branch(branch)
 
     external_pull_requests.find_each do |pull_request|
-      ExternalPullRequests::CreatePipelineService.new(project, user)
+      Ci::ExternalPullRequests::CreatePipelineService.new(project, user)
         .execute(pull_request)
     end
   end

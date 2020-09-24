@@ -1,43 +1,207 @@
-# Best practices when writing end-to-end tests
+# End-to-end testing Best Practices
 
-## Avoid using a GUI when it's not required
+NOTE: **Note:**
+This is a tailored extension of the Best Practices [found in the testing guide](../best_practices.md).
 
-The majority of the end-to-end tests require some state to be built in the application for the tests to happen.
+## Link a test to its test-case issue
 
-A good example is a user being logged in as a pre-condition for testing the feature.
+Every test should have a corresponding issue in the [Quality Testcases project](https://gitlab.com/gitlab-org/quality/testcases/).
+It's recommended that you reuse the issue created to plan the test. If one does not already exist you
+can create the issue yourself. Alternatively, you can run the test in a pipeline that has reporting
+enabled and the test-case issue reporter will automatically create a new issue.
 
-But if the login feature is already covered with end-to-end tests through the GUI, there is no reason to perform such an expensive task to test the functionality of creating a project, or importing a repo, even if these features depend on a user being logged in. Let's see an example to make things clear.
+Whether you create a new test-case issue or one is created automatically, you will need to manually add
+a `testcase` RSpec metadata tag. In most cases, a single test will be associated with a single test-case
+issue ([see below for exceptions](#exceptions)).
 
-Let's say that, on average, the process to perform a successful login through the GUI takes 2 seconds.
+For example:
 
-Now, realize that almost all tests need the user to be logged in, and that we need every test to run in isolation, meaning that tests cannot interfere with each other. This would  mean that for every test the user needs to log in, and "waste 2 seconds".
+```ruby
+RSpec.describe 'Stage' do
+  describe 'General description of the feature under test' do
+    it 'test name', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/:issue_id' do
+      ...
+    end
 
-Now, multiply the number of tests per 2 seconds, and as your test suite grows, the time to run it grows with it, and this is not sustainable.
+    it 'another test', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/:another_issue_id' do
+      ...
+    end
+  end
+end
+```
 
-An alternative to perform a login in a cheaper way would be having an endpoint (available only for testing) where we could pass the user's credentials as encrypted values as query strings, and then we would be redirected to the logged in home page if the credentials are valid. Let's say that, on average, this process takes only 200 miliseconds.
+### Exceptions
 
-You see the point right?
+Most tests are defined by a single line of a `spec` file, which is why those tests can be linked to a
+single test-case issue via the `testcase` tag.
 
-Performing a login through the GUI for every test would cost a lot in terms of tests' execution.
+However, some tests don't have a one-to-one relationship between a line of a `spec` file and a test-case
+issue. This is because some tests are defined in a way that means a single line is associated with
+multiple tests, including:
 
-And there is another reason.
+- Parallelized tests.
+- Templated tests.
+- Tests in shared examples that include more than one example.
 
-Let's say that you don't follow the above suggestion, and depend on the GUI for the creation of every application state in order to test a specific feature. In this case we could be talking about the **Issues** feature, that depends on a project to exist, and the user to be logged in.
+In those and similar cases we can't assign a single `testcase` tag and so we rely on the test-case
+reporter to programmatically determine the correct test-case issue based on the name and description of
+the test. In such cases, the test-case reporter will automatically create a test-case issue the first time
+the test runs, if no issue exists already.
 
-What would happen if there was a bug in the project creation page, where the 'Create' button is disabled, not allowing for the creation of a project through the GUI, but the API logic is still working?
+In such a case, if you create the issue yourself or want to reuse an existing issue,
+you must use this [end-to-end test issue template](https://gitlab.com/gitlab-org/quality/testcases/-/blob/master/.gitlab/issue_templates/End-to-end%20Test.md)
+to format the issue description.
 
-In this case, instead of having only the project creation test failing, we would have many tests that depend on a project to be failing too.
+To illustrate, there are two tests in the shared examples in [`qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/47b17db82c38ab704a23b5ba5d296ea0c6a732c8/qa/qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb):
 
-But, if we were following the best practices, only one test would be failing, and tests for other features that depend on a project to exist would continue to pass, since they could be creating the project behind the scenes interacting directly with the public APIs, ensuring a more reliable metric of test failure rate.
+```ruby
+shared_examples 'only user with access pushes and merges' do
+  it 'unselected maintainer user fails to push' do
+    ...
+  end
 
-Finally, interacting with the application only by its GUI generates a higher rate of test flakiness, and we want to avoid that at max.
+  it 'selected developer user pushes and merges' do
+    ...
+  end
+end
+```
 
-**The takeaways here are:**
+Consider the following test that includes the shared examples:
 
-- Building state through the GUI is time consuming and it's not sustainable as the test suite grows.
-- When depending only on the GUI to create the application's state and tests fail due to front-end issues, we can't rely on the test failures rate, and we generate a higher rate of test flakiness.
+```ruby
+RSpec.describe 'Create' do
+  describe 'Restricted protected branch push and merge' do
+    context 'when only one user is allowed to merge and push to a protected branch' do
+      ...
+      it_behaves_like 'only user with access pushes and merges'
+    end
+  end
+end
+```
 
-Now that we are aware of all of it, [let's go create some tests](quick_start_guide.md).
+There would be two associated test-case issues, one for each shared example, with the following content:
+
+[Test 1](https://gitlab.com/gitlab-org/quality/testcases/-/issues/600):
+
+````markdown
+```markdown
+Title: browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb | Create Restricted
+protected branch push and merge when only one user is allowed to merge and push to a protected
+branch behaves like only user with access pushes and merges selecte...
+
+Description:
+### Full description
+
+Create Restricted protected branch push and merge when only one user is allowed to merge and push
+to a protected branch behaves like only user with access pushes and merges selected developer user
+pushes and merges
+
+### File path
+
+./qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb
+
+```
+````
+
+[Test 2](https://gitlab.com/gitlab-org/quality/testcases/-/issues/602):
+
+````markdown
+```markdown
+Title: browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb | Create Restricted
+protected branch push and merge when only one user is allowed to merge and push to a protected
+branch behaves like only user with access pushes and merges unselec...
+
+Description:
+### Full description
+
+Create Restricted protected branch push and merge when only one user is allowed to merge and push
+to a protected branch behaves like only user with access pushes and merges unselected maintainer
+user fails to push
+
+### File path
+
+./qa/specs/features/ee/browser_ui/3_create/repository/restrict_push_protected_branch_spec.rb
+```
+````
+
+## Prefer API over UI
+
+The end-to-end testing framework has the ability to fabricate its resources on a case-by-case basis.
+Resources should be fabricated via the API wherever possible.
+
+We can save both time and money by fabricating resources that our test will need via the API.
+
+[Learn more](resources.md) about resources.
+
+## Avoid superfluous expectations
+
+To keep tests lean, it is important that we only test what we need to test.
+
+Ensure that you do not add any `expect()` statements that are unrelated to what needs to be tested.
+
+For example:
+
+```ruby
+#=> Good
+Flow::Login.sign_in
+Page::Main::Menu.perform do |menu|
+  expect(menu).to be_signed_in
+end
+
+#=> Bad
+Flow::Login.sign_in(as: user)
+Page::Main::Menu.perform do |menu|
+  expect(menu).to be_signed_in
+  expect(page).to have_content(user.name) #=>  we already validated being signed in. redundant.
+  expect(menu).to have_element(:nav_bar) #=> likely unnecessary. already validated in lower-level. test doesn't call for validating this.
+end
+
+#=> Good
+issue = Resource::Issue.fabricate_via_api! do |issue|
+  issue.name = 'issue-name'
+end
+
+Project::Issues::Index.perform do |index|
+  expect(index).to have_issue(issue)
+end
+
+#=> Bad
+issue = Resource::Issue.fabricate_via_api! do |issue|
+  issue.name = 'issue-name'
+end
+
+Project::Issues::Index.perform do |index|
+  expect(index).to have_issue(issue)
+  expect(page).to have_content(issue.name) #=> page content check is redundant as the issue was already validated in the line above.
+end
+```
+
+## Prefer `aggregate_failures` when there are back-to-back expectations
+
+In cases where there must be multiple (back-to-back) expectations within a test case, it is preferable to use `aggregate_failures`.
+
+This allows you to group a set of expectations and see all the failures altogether, rather than having the test being aborted on the first failure.
+
+For example:
+
+```ruby
+#=> Good
+Page::Search::Results.perform do |search|
+  search.switch_to_code
+
+  aggregate_failures 'testing search results' do
+    expect(search).to have_file_in_project(template[:file_name], project.name)
+    expect(search).to have_file_with_content(template[:file_name], content[0..33])
+  end
+end
+
+#=> Bad
+Page::Search::Results.perform do |search|
+  search.switch_to_code
+  expect(search).to have_file_in_project(template[:file_name], project.name)
+  expect(search).to have_file_with_content(template[:file_name], content[0..33])
+end
+```
 
 ## Prefer to split tests across multiple files
 
@@ -54,27 +218,30 @@ In summary:
 - **Do**: Split tests across separate files, unless the tests share expensive setup.
 - **Don't**: Put new tests in an existing file without considering the impact on parallelization.
 
-## Limit the use of `before(:all)` hook
+## Limit the use of the UI in `before(:context)` and `after` hooks
 
-Limit the use of `before(:all)` to perform setup tasks with only API calls, non UI operations
-or basic UI operations such as login.
+Limit the use of `before(:context)` hooks to perform setup tasks with only API calls,
+non-UI operations, or basic UI operations such as login.
 
-We use [`capybara-screenshot`](https://github.com/mattheworiordan/capybara-screenshot) library to automatically save screenshots on failures.
-This library [saves the screenshots in the RSpec's `after` hook](https://github.com/mattheworiordan/capybara-screenshot/blob/master/lib/capybara-screenshot/rspec.rb#L97).
-[If there is a failure in `before(:all)`, the `after` hook is not called](https://github.com/rspec/rspec-core/pull/2652/files#diff-5e04af96d5156e787f28d519a8c99615R148) and so the screenshots are not saved.
+We use [`capybara-screenshot`](https://github.com/mattheworiordan/capybara-screenshot) library to automatically save a screenshot on
+failure.
 
-Given this fact, we should limit the use of `before(:all)` to only those operations where a screenshot is not
-necessary in case of failure and QA logs would be enough for debugging.
+`capybara-screenshot` [saves the screenshot in the RSpec's `after` hook](https://github.com/mattheworiordan/capybara-screenshot/blob/master/lib/capybara-screenshot/rspec.rb#L97).
+[If there is a failure in `before(:context)`, the `after` hook is not called](https://github.com/rspec/rspec-core/pull/2652/files#diff-5e04af96d5156e787f28d519a8c99615R148) and so the screenshot is not saved.
+
+Given this fact, we should limit the use of `before(:context)` to only those operations where a screenshot is not needed.
+
+Similarly, the `after` hook should only be used for non-UI operations. Any UI operations in `after` hook in a test file
+would execute before the `after` hook that takes the screenshot. This would result in moving the UI status away from the
+point of failure and so the screenshot would not be captured at the right moment.
 
 ## Ensure tests do not leave the browser logged in
 
-All QA tests expect to be able to log in at the start of the test.
+All tests expect to be able to log in at the start of the test.
 
-That's not possible if a test leaves the browser logged in when it finishes. Normally this isn't a problem because [Capybara resets the session after each test](https://github.com/teamcapybara/capybara/blob/9ebc5033282d40c73b0286e60217515fd1bb0b5d/lib/capybara/rspec.rb#L18). But Capybara does that in an `after` block, so when a test logs in in an `after(:context)` block, the browser returns to a logged in state *after* Capybara had logged it out. And so the next test will fail.
+For an example see: <https://gitlab.com/gitlab-org/gitlab/-/issues/34736>
 
-For an example see: <https://gitlab.com/gitlab-org/gitlab/issues/34736>
-
-Ideally, any actions peformed in an `after(:context)` (or [`before(:context)`](#limit-the-use-of-beforeall-hook)) block would be performed via the API. But if it's necessary to do so via the UI (e.g., if API functionality doesn't exist), make sure to log out at the end of the block.
+Ideally, any actions performed in an `after(:context)` (or [`before(:context)`](#limit-the-use-of-the-ui-in-beforecontext-and-after-hooks)) block would be performed via the API. But if it's necessary to do so via the UI (e.g., if API functionality doesn't exist), make sure to log out at the end of the block.
 
 ```ruby
 after(:all) do
@@ -84,4 +251,62 @@ after(:all) do
 
   Page::Main::Menu.perform(&:sign_out)
 end
+```
+
+## Tag tests that require Administrator access
+
+We don't run tests that require Administrator access against our Production environments.
+
+When you add a new test that requires Administrator access, apply the RSpec metadata `:requires_admin` so that the test will not be included in the test suites executed against Production and other environments on which we don't want to run those tests.
+
+Note: When running tests locally or configuring a pipeline, the environment variable `QA_CAN_TEST_ADMIN_FEATURES` can be set to `false` to skip tests that have the `:requires_admin` tag.
+
+## Prefer `Commit` resource over `ProjectPush`
+
+In line with [using the API](#prefer-api-over-ui), use a `Commit` resource whenever possible.
+
+`ProjectPush` uses raw shell commands via the Git Command Line Interface (CLI) whereas the `Commit` resource makes an HTTP request.
+
+```ruby
+# Using a commit resource
+Resource::Commit.fabricate_via_api! do |commit|
+  commit.commit_message = 'Initial commit'
+  commit.add_files([
+    {file_path: 'README.md', content: 'Hello, GitLab'}
+  ])
+end
+
+# Using a ProjectPush
+Resource::Repository::ProjectPush.fabricate! do |push|
+  push.commit_message = 'Initial commit'
+  push.file_name = 'README.md'
+  push.file_content = 'Hello, GitLab'
+end
+```
+
+NOTE: **Note:**
+A few exceptions for using a `ProjectPush` would be when your test calls for testing SSH integration or
+using the Git CLI.
+
+## Preferred method to blur elements
+
+To blur an element, the preferred method is to click another element that does not alter the test state.
+If there's a mask that blocks the page elements, such as may occur with some dropdowns,
+use WebDriver's native mouse events to simulate a click event on the coordinates of an element. Use the following method: `click_element_coordinates`.
+
+Avoid clicking the `body` for blurring elements such as inputs and dropdowns because it clicks the center of the viewport.
+This action can also unintentionally click other elements, altering the test state and causing it to fail.
+
+```ruby
+# Clicking another element to blur an input
+def add_issue_to_epic(issue_url)
+  find_element(:issue_actions_split_button).find('button', text: 'Add an issue').click
+  fill_element :add_issue_input, issue_url
+  # Clicking the title blurs the input
+  click_element :title
+  click_element :add_issue_button
+end
+
+# Using native mouse click events in the case of a mask/overlay
+click_element_coordinates(:title)
 ```

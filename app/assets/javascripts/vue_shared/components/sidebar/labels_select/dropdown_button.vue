@@ -1,7 +1,11 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 
 export default {
+  components: {
+    GlIcon,
+  },
   props: {
     abilityName: {
       type: String,
@@ -33,13 +37,8 @@ export default {
     },
     enableScopedLabels: {
       type: Boolean,
-      require: false,
+      required: false,
       default: false,
-    },
-    scopedLabelsDocumentationLink: {
-      type: String,
-      require: false,
-      default: '#',
     },
   },
   computed: {
@@ -72,12 +71,15 @@ export default {
     :data-namespace-path="namespace"
     :data-show-any="showExtraOptions"
     :data-scoped-labels="enableScopedLabels"
-    :data-scoped-labels-documentation-link="scopedLabelsDocumentationLink"
     type="button"
     class="dropdown-menu-toggle wide js-label-select js-multiselect js-context-config-modal"
     data-toggle="dropdown"
   >
     <span class="dropdown-toggle-text"> {{ dropdownToggleText }} </span>
-    <i aria-hidden="true" class="fa fa-chevron-down" data-hidden="true"> </i>
+    <gl-icon
+      name="chevron-down"
+      class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+      :size="16"
+    />
   </button>
 </template>

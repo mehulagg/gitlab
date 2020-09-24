@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Create, list, and delete branches via web' do
       master_branch = 'master'
       second_branch = 'second-branch'
@@ -16,10 +16,9 @@ module QA
       commit_message_of_third_branch = "Add #{file_third_branch}"
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
-        project = Resource::Project.fabricate! do |proj|
+        project = Resource::Project.fabricate_via_api! do |proj|
           proj.name = 'project-qa-test'
           proj.description = 'project for qa test'
         end
@@ -56,7 +55,7 @@ module QA
         project.visit!
       end
 
-      it 'lists branches correctly after CRUD operations' do
+      it 'lists branches correctly after CRUD operations', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/413' do
         Page::Project::Menu.perform(&:go_to_repository_branches)
 
         expect(page).to have_content(master_branch)
@@ -66,24 +65,22 @@ module QA
         expect(page).to have_content(commit_message_of_second_branch)
         expect(page).to have_content(commit_message_of_third_branch)
 
-        Page::Project::Branches::Show.perform do |branches|
-          expect(branches).to have_branch_with_badge(second_branch, 'merged')
-        end
+        Page::Project::Branches::Show.perform do |branches_page|
+          expect(branches_page).to have_branch_with_badge(second_branch, 'merged')
 
-        Page::Project::Branches::Show.perform do |branches_view|
-          branches_view.delete_branch(third_branch)
-          expect(branches_view).to have_no_branch(third_branch)
-        end
+          branches_page.delete_branch(third_branch)
 
-        Page::Project::Branches::Show.perform(&:delete_merged_branches)
+          expect(branches_page).to have_no_branch(third_branch)
 
-        expect(page).to have_content(
-          'Merged branches are being deleted. This can take some time depending on the number of branches. Please refresh the page to see changes.'
-        )
+          branches_page.delete_merged_branches
 
-        page.refresh
-        Page::Project::Branches::Show.perform do |branches_view|
-          expect(branches_view).to have_no_branch(second_branch, reload: true)
+          expect(branches_page).to have_content(
+            'Merged branches are being deleted. This can take some time depending on the number of branches. Please refresh the page to see changes.'
+          )
+
+          branches_page.refresh
+
+          expect(branches_page).to have_no_branch(second_branch, reload: true)
         end
       end
     end

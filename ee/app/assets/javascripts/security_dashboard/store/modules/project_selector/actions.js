@@ -1,10 +1,14 @@
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
+import addPageInfo from './utils/add_page_info';
 import * as types from './mutation_types';
 
 const API_MINIMUM_QUERY_LENGTH = 3;
+
+const searchProjects = (searchQuery, searchOptions) =>
+  Api.projects(searchQuery, searchOptions).then(addPageInfo);
 
 export const toggleSelectedProject = ({ commit, state }, project) => {
   const isProject = ({ id }) => id === project.id;
@@ -61,19 +65,19 @@ export const receiveAddProjectsSuccess = ({ commit, dispatch, state }, data) => 
     let invalidProjects;
     if (rest.length > 0) {
       invalidProjects = sprintf(
-        s__('SecurityDashboard|%{firstProject}, %{secondProject}, and %{rest}'),
+        s__('SecurityReports|%{firstProject}, %{secondProject}, and %{rest}'),
         translationValues,
       );
     } else if (secondProject) {
       invalidProjects = sprintf(
-        s__('SecurityDashboard|%{firstProject} and %{secondProject}'),
+        s__('SecurityReports|%{firstProject} and %{secondProject}'),
         translationValues,
       );
     } else {
       invalidProjects = firstProject;
     }
     createFlash(
-      sprintf(s__('SecurityDashboard|Unable to add %{invalidProjects}'), {
+      sprintf(s__('SecurityReports|Unable to add %{invalidProjects}'), {
         invalidProjects,
       }),
     );
@@ -138,10 +142,10 @@ export const receiveRemoveProjectSuccess = ({ commit, dispatch }) => {
 export const receiveRemoveProjectError = ({ commit }) => {
   commit(types.RECEIVE_REMOVE_PROJECT_ERROR);
 
-  createFlash(__('Something went wrong, unable to remove project'));
+  createFlash(__('Something went wrong, unable to delete project'));
 };
 
-export const fetchSearchResults = ({ state, dispatch }) => {
+export const fetchSearchResults = ({ state, dispatch, commit }) => {
   const { searchQuery } = state;
   dispatch('requestSearchResults');
 
@@ -149,17 +153,13 @@ export const fetchSearchResults = ({ state, dispatch }) => {
     return dispatch('setMinimumQueryMessage');
   }
 
-  return Api.projects(searchQuery, {})
-    .then(results => dispatch('receiveSearchResultsSuccess', results))
+  return searchProjects(searchQuery)
+    .then(payload => commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, payload))
     .catch(() => dispatch('receiveSearchResultsError'));
 };
 
 export const requestSearchResults = ({ commit }) => {
   commit(types.REQUEST_SEARCH_RESULTS);
-};
-
-export const receiveSearchResultsSuccess = ({ commit }, results) => {
-  commit(types.RECEIVE_SEARCH_RESULTS_SUCCESS, results);
 };
 
 export const receiveSearchResultsError = ({ commit }) => {
@@ -169,6 +169,3 @@ export const receiveSearchResultsError = ({ commit }) => {
 export const setMinimumQueryMessage = ({ commit }) => {
   commit(types.SET_MINIMUM_QUERY_MESSAGE);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

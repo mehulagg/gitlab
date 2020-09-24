@@ -2,21 +2,16 @@
 
 require 'spec_helper'
 
-describe 'shared/billings/_trial_status.html.haml' do
+RSpec.describe 'shared/billings/_trial_status.html.haml' do
   include ApplicationHelper
 
-  let(:group) { create(:group) }
-  let(:gitlab_subscription) { create(:gitlab_subscription, namespace: group) }
+  let_it_be(:group) { create(:group) }
   let(:plan) { nil }
   let(:trial_ends_on) { nil }
   let(:trial) { false }
 
   before do
-    gitlab_subscription.update(
-      hosted_plan: plan,
-      trial_ends_on: trial_ends_on,
-      trial: trial
-    )
+    create(:gitlab_subscription, namespace: group, hosted_plan: plan, trial_ends_on: trial_ends_on, trial: trial)
   end
 
   context 'when not eligible for trial' do
@@ -27,13 +22,27 @@ describe 'shared/billings/_trial_status.html.haml' do
   end
 
   context 'when trial active' do
-    let(:plan) { create(:bronze_plan) }
     let(:trial_ends_on) { Date.tomorrow }
     let(:trial) { true }
 
-    it 'displays expiry date' do
-      render 'shared/billings/trial_status', namespace: group
-      expect(rendered).to have_content("Your GitLab.com Gold trial will expire after #{trial_ends_on}")
+    context 'with a gold trial' do
+      let(:plan) { create(:gold_plan, title: 'Gold') }
+
+      it 'displays expiry date and Gold' do
+        render 'shared/billings/trial_status', namespace: group
+
+        expect(rendered).to have_content("Your GitLab.com Gold trial will expire after #{trial_ends_on}. You can retain access to the Gold features by upgrading below.")
+      end
+    end
+
+    context 'with a silver trial' do
+      let(:plan) { create(:gold_plan, title: 'Silver') }
+
+      it 'displays expiry date and Silver' do
+        render 'shared/billings/trial_status', namespace: group
+
+        expect(rendered).to have_content("Your GitLab.com Silver trial will expire after #{trial_ends_on}. You can retain access to the Silver features by upgrading below.")
+      end
     end
   end
 
@@ -43,7 +52,8 @@ describe 'shared/billings/_trial_status.html.haml' do
 
     it 'displays the date is expired' do
       render 'shared/billings/trial_status', namespace: group
-      expect(rendered).to have_content("Your GitLab.com Gold trial expired on #{trial_ends_on}")
+
+      expect(rendered).to have_content("Your GitLab.com trial expired on #{trial_ends_on}")
     end
   end
 
@@ -54,6 +64,7 @@ describe 'shared/billings/_trial_status.html.haml' do
 
     it 'offers a trial' do
       render 'shared/billings/trial_status', namespace: group
+
       expect(rendered).to have_content("start a free 30-day trial of GitLab.com Gold")
     end
   end

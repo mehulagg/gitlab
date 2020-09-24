@@ -1,5 +1,5 @@
-import functionRowComponent from '~/serverless/components/function_row.vue';
 import { shallowMount } from '@vue/test-utils';
+import functionRowComponent from '~/serverless/components/function_row.vue';
 import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
 
 import { mockServerlessFunction } from '../mock_data';
@@ -8,7 +8,9 @@ describe('functionRowComponent', () => {
   let wrapper;
 
   const createComponent = func => {
-    wrapper = shallowMount(functionRowComponent, { propsData: { func }, sync: false });
+    wrapper = shallowMount(functionRowComponent, {
+      propsData: { func },
+    });
   };
 
   afterEach(() => {

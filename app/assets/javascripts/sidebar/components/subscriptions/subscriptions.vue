@@ -1,7 +1,7 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
-import icon from '~/vue_shared/components/icon.vue';
 import toggleButton from '~/vue_shared/components/toggle_button.vue';
 import tooltip from '~/vue_shared/directives/tooltip';
 import eventHub from '../../event_hub';
@@ -16,7 +16,7 @@ export default {
     tooltip,
   },
   components: {
-    icon,
+    GlIcon,
     toggleButton,
   },
   mixins: [Tracking.mixin({ label: 'right_sidebar' })],
@@ -25,6 +25,16 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    projectEmailsDisabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    subscribeDisabledDescription: {
+      type: String,
+      required: false,
+      default: '',
     },
     subscribed: {
       type: Boolean,
@@ -38,14 +48,32 @@ export default {
     },
   },
   computed: {
+    tracking() {
+      return {
+        // eslint-disable-next-line no-underscore-dangle
+        category: this.$options._componentTag,
+      };
+    },
     showLoadingState() {
       return this.subscribed === null;
     },
     notificationIcon() {
+      if (this.projectEmailsDisabled) {
+        return ICON_OFF;
+      }
       return this.subscribed ? ICON_ON : ICON_OFF;
     },
     notificationTooltip() {
+      if (this.projectEmailsDisabled) {
+        return this.subscribeDisabledDescription;
+      }
       return this.subscribed ? LABEL_ON : LABEL_OFF;
+    },
+    notificationText() {
+      if (this.projectEmailsDisabled) {
+        return this.subscribeDisabledDescription;
+      }
+      return __('Notifications');
     },
   },
   methods: {
@@ -81,6 +109,7 @@ export default {
 <template>
   <div>
     <span
+      ref="tooltip"
       v-tooltip
       class="sidebar-collapsed-icon"
       :title="notificationTooltip"
@@ -89,15 +118,16 @@ export default {
       data-boundary="viewport"
       @click="onClickCollapsedIcon"
     >
-      <icon
+      <gl-icon
         :name="notificationIcon"
         :size="16"
         aria-hidden="true"
         class="sidebar-item-icon is-active"
       />
     </span>
-    <span class="issuable-header-text hide-collapsed float-left"> {{ __('Notifications') }} </span>
+    <span class="issuable-header-text hide-collapsed float-left"> {{ notificationText }} </span>
     <toggle-button
+      v-if="!projectEmailsDisabled"
       ref="toggleButton"
       :is-loading="showLoadingState"
       :value="subscribed"

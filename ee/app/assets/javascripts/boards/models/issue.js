@@ -1,9 +1,10 @@
 import ListIssue from '~/boards/models/issue';
 import IssueProject from '~/boards/models/project';
+import boardsStore from '~/boards/stores/boards_store';
 
 class ListIssueEE extends ListIssue {
-  constructor(obj, defaultAvatar) {
-    super(obj, defaultAvatar, {
+  constructor(obj) {
+    super(obj, {
       IssueProject,
     });
 
@@ -12,6 +13,10 @@ class ListIssueEE extends ListIssue {
     if (obj.project) {
       this.project = new IssueProject(obj.project);
     }
+  }
+
+  updateEpic(newEpic) {
+    boardsStore.updateIssueEpic(this, newEpic);
   }
 }
 

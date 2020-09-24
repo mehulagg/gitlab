@@ -30,7 +30,7 @@ module MergeRequests
     attr_reader :merge_request, :previous_diff
 
     def create_rule(entry)
-      ApprovalMergeRequestRule.find_or_create_code_owner_rule(merge_request, entry.pattern)
+      ApprovalMergeRequestRule.find_or_create_code_owner_rule(merge_request, entry)
     end
 
     def delete_outdated_code_owner_rules

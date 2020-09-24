@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe 'Groups > Usage Quotas' do
-  let(:user) { create(:user) }
+RSpec.describe 'Groups > Usage Quotas' do
+  let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }
   let!(:project) { create(:project, namespace: group, shared_runners_enabled: true) }
   let(:gitlab_dot_com) { true }
@@ -54,7 +54,7 @@ describe 'Groups > Usage Quotas' do
       it 'renders a 404' do
         visit_pipeline_quota_page
 
-        expect(page).to have_http_status(:not_found)
+        expect(page).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -126,10 +126,10 @@ describe 'Groups > Usage Quotas' do
       end
     end
 
-    it 'shows correct group quota and projects info' do
+    it 'has correct tracking setup and shows correct group quota and projects info' do
       visit_pipeline_quota_page
 
-      expect(page).to have_content('Buy additional minutes')
+      expect(page).to have_link('Buy additional minutes', href: EE::SUBSCRIPTIONS_MORE_MINUTES_URL)
 
       page.within('.pipeline-quota') do
         expect(page).to have_content("1000 / 500 minutes")
@@ -141,6 +141,12 @@ describe 'Groups > Usage Quotas' do
         expect(page).to have_content(project.full_name)
         expect(page).not_to have_content(other_project.full_name)
       end
+
+      link = page.find('a', text: 'Buy additional minutes')
+
+      expect(link['data-track-event']).to eq('click_buy_ci_minutes')
+      expect(link['data-track-label']).to eq(group.actual_plan_name)
+      expect(link['data-track-property']).to eq('pipeline_quota_page')
     end
   end
 
@@ -151,7 +157,7 @@ describe 'Groups > Usage Quotas' do
     it 'does not show subproject' do
       visit_pipeline_quota_page
 
-      expect(page).to have_http_status(:not_found)
+      expect(page).to have_gitlab_http_status(:not_found)
     end
   end
 

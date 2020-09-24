@@ -6,8 +6,6 @@ module Gitlab
   module Auth
     module OAuth
       class AuthHash
-        prepend_if_ee('::EE::Gitlab::Auth::OAuth::AuthHash') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
         attr_reader :auth_hash
         def initialize(auth_hash)
           @auth_hash = auth_hash
@@ -34,7 +32,7 @@ module Gitlab
         end
 
         def password
-          @password ||= Gitlab::Utils.force_utf8(Devise.friendly_token[0, 8].downcase)
+          @password ||= Gitlab::Utils.force_utf8(::User.random_password.downcase)
         end
 
         def location
@@ -93,3 +91,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Auth::OAuth::AuthHash.prepend_if_ee('::EE::Gitlab::Auth::OAuth::AuthHash')

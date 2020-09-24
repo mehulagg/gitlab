@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe LfsObjectsProject do
-  set(:project) { create(:project) }
+RSpec.describe LfsObjectsProject do
+  let_it_be(:project) { create(:project) }
 
   subject do
     create(:lfs_objects_project, project: project)

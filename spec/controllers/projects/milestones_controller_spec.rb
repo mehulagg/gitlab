@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MilestonesController do
+RSpec.describe Projects::MilestonesController do
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
   let(:milestone) { create(:milestone, project: project) }
@@ -17,7 +17,9 @@ describe Projects::MilestonesController do
     controller.instance_variable_set(:@project, project)
   end
 
-  it_behaves_like 'milestone tabs'
+  it_behaves_like 'milestone tabs' do
+    let(:request_params) { { namespace_id: project.namespace, project_id: project, id: milestone.iid } }
+  end
 
   describe "#show" do
     render_views
@@ -30,14 +32,14 @@ describe Projects::MilestonesController do
     it 'shows milestone page' do
       view_milestone
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response.content_type).to eq 'text/html'
     end
 
     it 'returns milestone json' do
       view_milestone format: :json
 
-      expect(response).to have_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
       expect(response.content_type).to eq 'application/json'
     end
   end
@@ -141,7 +143,7 @@ describe Projects::MilestonesController do
       delete :destroy, params: { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid }, format: :js
       expect(response).to be_successful
 
-      expect(Event.recent.first.action).to eq(Event::DESTROYED)
+      expect(Event.recent.first).to be_destroyed_action
 
       expect { Milestone.find(milestone.id) }.to raise_exception(ActiveRecord::RecordNotFound)
       issue.reload
@@ -149,10 +151,6 @@ describe Projects::MilestonesController do
 
       merge_request.reload
       expect(merge_request.milestone_id).to eq(nil)
-
-      # Check system note left for milestone removal
-      last_note = project.issues.find(issue.id).notes[-1].note
-      expect(last_note).to eq('removed milestone')
     end
   end
 
@@ -171,7 +169,7 @@ describe Projects::MilestonesController do
       it 'renders 404' do
         post :promote, params: { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -190,7 +188,7 @@ describe Projects::MilestonesController do
 
           get :labels, params: { namespace_id: group.id, project_id: project.id, id: milestone.iid }, format: :json
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.content_type).to eq 'application/json'
 
           expect(json_response['html']).not_to include(label.title)
@@ -201,7 +199,7 @@ describe Projects::MilestonesController do
 
           get :labels, params: { namespace_id: group.id, project_id: project.id, id: milestone.iid }, format: :json
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.content_type).to eq 'application/json'
 
           expect(json_response['html']).to include(label.title)
@@ -240,12 +238,12 @@ describe Projects::MilestonesController do
 
         post :promote, params: { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
 
-  context '#participants' do
+  describe '#participants' do
     render_views
 
     context "when guest user" do
@@ -263,7 +261,7 @@ describe Projects::MilestonesController do
           params = { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid, format: :json }
           get :participants, params: params
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.content_type).to eq 'application/json'
           expect(json_response['html']).to include(issue_assignee.name)
         end
@@ -278,7 +276,7 @@ describe Projects::MilestonesController do
           params = { namespace_id: project.namespace.id, project_id: project.id, id: milestone.iid, format: :json }
           get :participants, params: params
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.content_type).to eq 'application/json'
           expect(json_response['html']).not_to include(issue_assignee.name)
         end

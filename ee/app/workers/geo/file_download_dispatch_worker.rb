@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 module Geo
-  class FileDownloadDispatchWorker < Geo::Scheduler::Secondary::SchedulerWorker
+  class FileDownloadDispatchWorker < Geo::Scheduler::Secondary::SchedulerWorker # rubocop:disable Scalability/IdempotentWorker
+    # rubocop:disable Scalability/CronWorkerContext
+    # This worker does not perform work scoped to a context
     include CronjobQueue
+    # rubocop:enable Scalability/CronWorkerContext
 
     private
 
@@ -30,22 +33,23 @@ module Geo
     #
     # @return [Array] resources to be transferred
     def load_pending_resources
-      resources = find_unsynced_jobs(batch_size: db_retrieve_batch_size)
+      resources = find_jobs_never_attempted_sync(batch_size: db_retrieve_batch_size)
       remaining_capacity = db_retrieve_batch_size - resources.count
 
-      if remaining_capacity.zero?
+      if remaining_capacity == 0
         resources
       else
         resources + find_low_priority_jobs(batch_size: remaining_capacity)
       end
     end
 
-    # Get a batch of unsynced resources, taking equal parts from each resource.
+    # Get a batch of resources that never have an attempt to sync, taking
+    # equal parts from each resource.
     #
-    # @return [Array] job arguments of unsynced resources
-    def find_unsynced_jobs(batch_size:)
+    # @return [Array] job arguments of resources that never have an attempt to sync
+    def find_jobs_never_attempted_sync(batch_size:)
       jobs = job_finders.reduce([]) do |jobs, job_finder|
-        jobs << job_finder.find_unsynced_jobs(batch_size: batch_size)
+        jobs << job_finder.find_jobs_never_attempted_sync(batch_size: batch_size)
       end
 
       take_batch(*jobs, batch_size: batch_size)
@@ -57,15 +61,15 @@ module Geo
     # @return [Array] job arguments of low priority resources
     def find_low_priority_jobs(batch_size:)
       jobs = job_finders.reduce([]) do |jobs, job_finder|
-        jobs << job_finder.find_failed_jobs(batch_size: batch_size)
-        jobs << job_finder.find_synced_missing_on_primary_jobs(batch_size: batch_size)
+        jobs << job_finder.find_jobs_needs_sync_again(batch_size: batch_size)
+        jobs << job_finder.find_jobs_synced_missing_on_primary(batch_size: batch_size)
       end
 
       take_batch(*jobs, batch_size: batch_size)
     end
 
     def job_finders
-      @job_finders ||= [
+      [
         Geo::FileDownloadDispatchWorker::AttachmentJobFinder.new(scheduled_file_ids(Gitlab::Geo::Replication::USER_UPLOADS_OBJECT_TYPES)),
         Geo::FileDownloadDispatchWorker::LfsObjectJobFinder.new(scheduled_file_ids(:lfs)),
         Geo::FileDownloadDispatchWorker::JobArtifactJobFinder.new(scheduled_file_ids(:job_artifact))

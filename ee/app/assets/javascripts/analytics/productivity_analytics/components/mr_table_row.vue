@@ -1,6 +1,6 @@
 <script>
-import { sprintf, __, n__ } from '~/locale';
 import { GlLink, GlAvatar } from '@gitlab/ui';
+import { sprintf, __, n__ } from '~/locale';
 import MetricColumn from './metric_column.vue';
 
 export default {

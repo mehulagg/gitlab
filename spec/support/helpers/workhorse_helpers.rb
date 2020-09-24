@@ -3,6 +3,8 @@
 module WorkhorseHelpers
   extend self
 
+  UPLOAD_PARAM_NAMES = %w[name size path remote_id sha256 type].freeze
+
   def workhorse_send_data
     @_workhorse_send_data ||= begin
       header = response.headers[Gitlab::Workhorse::SEND_DATA_HEADER]
@@ -11,7 +13,7 @@ module WorkhorseHelpers
       header = split_header.join(':')
       [
         type,
-        JSON.parse(Base64.urlsafe_decode64(header))
+        Gitlab::Json.parse(Base64.urlsafe_decode64(header))
       ]
     end
   end
@@ -32,23 +34,38 @@ module WorkhorseHelpers
 
   # workhorse_finalize will transform file_key inside params as if it was the finalize call of an inline object storage upload.
   # note that based on the content of the params it can simulate a disc acceleration or an object storage upload
-  def workhorse_finalize(url, method: :post, file_key:, params:, headers: {})
-    workhorse_request_with_file(method, url,
-                                file_key: file_key,
-                                params: params,
-                                extra_headers: headers,
-                                send_rewritten_field: false
+  def workhorse_finalize(url, method: :post, file_key:, params:, headers: {}, send_rewritten_field: false)
+    workhorse_finalize_with_multiple_files(url, method: method, file_keys: file_key, params: params, headers: headers, send_rewritten_field: send_rewritten_field)
+  end
+
+  def workhorse_finalize_with_multiple_files(url, method: :post, file_keys:, params:, headers: {}, send_rewritten_field: false)
+    workhorse_request_with_multiple_files(method, url,
+                                          file_keys: file_keys,
+                                          params: params,
+                                          extra_headers: headers,
+                                          send_rewritten_field: send_rewritten_field
     )
   end
 
   def workhorse_request_with_file(method, url, file_key:, params:, env: {}, extra_headers: {}, send_rewritten_field:)
-    workhorse_params = params.dup
-    file = workhorse_params.delete(file_key)
+    workhorse_request_with_multiple_files(method, url, file_keys: file_key, params: params, env: env, extra_headers: extra_headers, send_rewritten_field: send_rewritten_field)
+  end
 
-    workhorse_params = workhorse_disk_accelerated_file_params(file_key, file).merge(workhorse_params)
+  def workhorse_request_with_multiple_files(method, url, file_keys:, params:, env: {}, extra_headers: {}, send_rewritten_field:)
+    workhorse_params = params.dup
+
+    file_keys = Array(file_keys)
+    rewritten_fields = {}
+
+    file_keys.each do |key|
+      file = workhorse_params.delete(key)
+      rewritten_fields[key] = file.path if file
+      workhorse_params = workhorse_disk_accelerated_file_params(key, file).merge(workhorse_params)
+      workhorse_params = workhorse_params.merge(jwt_file_upload_param(key: key, params: workhorse_params))
+    end
 
     headers = if send_rewritten_field
-                workhorse_rewritten_fields_header(file_key => file.path)
+                workhorse_rewritten_fields_header(rewritten_fields)
               else
                 {}
               end
@@ -60,8 +77,19 @@ module WorkhorseHelpers
 
   private
 
-  def jwt_token(data = {})
-    JWT.encode({ 'iss' => 'gitlab-workhorse' }.merge(data), Gitlab::Workhorse.secret, 'HS256')
+  def jwt_file_upload_param(key:, params:)
+    upload_params = UPLOAD_PARAM_NAMES.map do |file_upload_param|
+      [file_upload_param, params["#{key}.#{file_upload_param}"]]
+    end
+    upload_params = upload_params.to_h.compact
+
+    return {} if upload_params.empty?
+
+    { "#{key}.gitlab-workhorse-upload" => jwt_token('upload' => upload_params) }
+  end
+
+  def jwt_token(data = {}, issuer: 'gitlab-workhorse', secret: Gitlab::Workhorse.secret, algorithm: 'HS256')
+    JWT.encode({ 'iss' => issuer }.merge(data), secret, algorithm)
   end
 
   def workhorse_rewritten_fields_header(fields)
@@ -75,8 +103,12 @@ module WorkhorseHelpers
       "#{key}.name" => file.original_filename,
       "#{key}.size" => file.size
     }.tap do |params|
-      params["#{key}.path"] = file.path if file.path
-      params["#{key}.remote_id"] = file.remote_id if file.respond_to?(:remote_id) && file.remote_id
+      if file.path
+        params["#{key}.path"] = file.path
+        params["#{key}.sha256"] = Digest::SHA256.file(file.path).hexdigest
+      end
+
+      params["#{key}.remote_id"] = file.remote_id if file.respond_to?(:remote_id) && file.remote_id.present?
     end
   end
 

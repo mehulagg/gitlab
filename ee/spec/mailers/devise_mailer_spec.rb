@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'email_spec'
 
-describe DeviseMailer do
+RSpec.describe DeviseMailer do
   describe "#confirmation_instructions" do
     let(:unsaved_user) { create(:user, name: 'Jane Doe', email: 'jdoe@example.com') }
     let(:custom_text) { 'this is some additional custom text' }

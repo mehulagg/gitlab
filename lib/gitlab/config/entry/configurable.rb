@@ -5,7 +5,7 @@ module Gitlab
     module Entry
       ##
       # This mixin is responsible for adding DSL, which purpose is to
-      # simplifly process of adding child nodes.
+      # simplify the process of adding child nodes.
       #
       # This can be used only if parent node is a configuration entry that
       # holds a hash as a configuration value, for example:
@@ -25,7 +25,6 @@ module Gitlab
           end
         end
 
-        # rubocop: disable CodeReuse/ActiveRecord
         def compose!(deps = nil)
           return unless valid?
 
@@ -35,11 +34,7 @@ module Gitlab
               # we can end with different config types like String
               next unless config.is_a?(Hash)
 
-              factory
-                .value(config[key])
-                .with(key: key, parent: self)
-
-              entries[key] = factory.create!
+              entry_create!(key, config[key])
             end
 
             yield if block_given?
@@ -49,6 +44,16 @@ module Gitlab
             end
           end
         end
+
+        # rubocop: disable CodeReuse/ActiveRecord
+        def entry_create!(key, value)
+          factory = self.class
+            .nodes[key]
+            .value(value)
+            .with(key: key, parent: self)
+
+          entries[key] = factory.create!
+        end
         # rubocop: enable CodeReuse/ActiveRecord
 
         def skip_config_hash_validation?
@@ -57,7 +62,9 @@ module Gitlab
 
         class_methods do
           def nodes
-            Hash[(@nodes || {}).map { |key, factory| [key, factory.dup] }]
+            return {} unless @nodes
+
+            @nodes.transform_values(&:dup)
           end
 
           def reserved_node_names
@@ -70,6 +77,9 @@ module Gitlab
 
           # rubocop: disable CodeReuse/ActiveRecord
           def entry(key, entry, description: nil, default: nil, inherit: nil, reserved: nil, metadata: {})
+            entry_name = key.to_sym
+            raise ArgumentError, "Entry '#{key}' already defined in '#{name}'" if @nodes.to_h[entry_name]
+
             factory = ::Gitlab::Config::Entry::Factory.new(entry)
               .with(description: description)
               .with(default: default)
@@ -77,20 +87,38 @@ module Gitlab
               .with(reserved: reserved)
               .metadata(metadata)
 
-            (@nodes ||= {}).merge!(key.to_sym => factory)
+            @nodes ||= {}
+            @nodes[entry_name] = factory
+
+            helpers(entry_name)
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
-          def helpers(*nodes)
+          def dynamic_helpers(*nodes)
+            helpers(*nodes, dynamic: true)
+          end
+
+          def helpers(*nodes, dynamic: false)
             nodes.each do |symbol|
+              if method_defined?("#{symbol}_defined?") || method_defined?("#{symbol}_entry") || method_defined?("#{symbol}_value")
+                raise ArgumentError, "Method '#{symbol}_defined?', '#{symbol}_entry' or '#{symbol}_value' already defined in '#{name}'"
+              end
+
+              unless @nodes.to_h[symbol]
+                raise ArgumentError, "Entry for #{symbol} is undefined" unless dynamic
+              end
+
               define_method("#{symbol}_defined?") do
                 entries[symbol]&.specified?
               end
 
-              define_method("#{symbol}_value") do
-                return unless entries[symbol] && entries[symbol].valid?
+              define_method("#{symbol}_entry") do
+                entries[symbol]
+              end
 
-                entries[symbol].value
+              define_method("#{symbol}_value") do
+                entry = entries[symbol]
+                entry.value if entry&.valid?
               end
             end
           end

@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe 'admin/groups/_form' do
-  set(:admin) { create(:admin) }
+RSpec.describe 'admin/groups/_form' do
+  let_it_be(:admin) { create(:admin) }
 
   before do
     assign(:group, group)

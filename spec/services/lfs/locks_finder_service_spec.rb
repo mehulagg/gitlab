@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Lfs::LocksFinderService do
+RSpec.describe Lfs::LocksFinderService do
   let(:project) { create(:project) }
   let(:user)    { create(:user) }
   let(:params)  { {} }
@@ -91,7 +91,9 @@ describe Lfs::LocksFinderService do
 
     context 'when an error is raised' do
       it "doesn't succeed" do
-        allow_any_instance_of(described_class).to receive(:find_locks).and_raise(StandardError)
+        allow_next_instance_of(described_class) do |instance|
+          allow(instance).to receive(:find_locks).and_raise(StandardError)
+        end
 
         result = subject.execute
 

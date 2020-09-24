@@ -6,19 +6,22 @@ module QA
       extend self
 
       def extend_autoloads!
+        require 'qa/ce/strategy'
         require 'qa/ee'
       end
 
       def perform_before_hooks
-        # The login page could take some time to load the first time it is visited.
-        # We visit the login page and wait for it to properly load only once before the tests.
-        QA::Support::Retrier.retry_on_exception do
-          QA::Runtime::Browser.visit(:gitlab, QA::Page::Main::Login)
+        # Without a license, perform the CE before hooks only.
+        unless ENV['EE_LICENSE']
+          QA::CE::Strategy.perform_before_hooks
+          return
         end
 
-        return unless ENV['EE_LICENSE']
-
-        EE::Resource::License.fabricate!(ENV['EE_LICENSE'])
+        QA::Support::Retrier.retry_on_exception do
+          QA::Runtime::Browser.visit(:gitlab, QA::Page::Main::Login) do
+            EE::Resource::License.fabricate!(ENV['EE_LICENSE'])
+          end
+        end
       end
     end
   end

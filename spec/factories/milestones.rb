@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :milestone do
+  factory :milestone, traits: [:has_internal_id] do
     title
 
     transient do
@@ -25,6 +25,14 @@ FactoryBot.define do
       due_date { Date.new(2000, 1, 30) }
     end
 
+    trait :on_project do
+      project
+    end
+
+    trait :on_group do
+      group
+    end
+
     after(:build, :stub) do |milestone, evaluator|
       if evaluator.group
         milestone.group = evaluator.group
@@ -44,5 +52,7 @@ FactoryBot.define do
 
     factory :active_milestone, traits: [:active]
     factory :closed_milestone, traits: [:closed]
+    factory :project_milestone, traits: [:on_project]
+    factory :group_milestone, traits: [:on_group]
   end
 end

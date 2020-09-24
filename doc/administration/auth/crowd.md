@@ -1,5 +1,8 @@
 ---
 type: reference
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Atlassian Crowd OmniAuth Provider
@@ -20,13 +23,13 @@ Authenticate to GitLab using the Atlassian Crowd OmniAuth provider.
 
    **Omnibus:**
 
-   ```sh
+   ```shell
      sudo editor /etc/gitlab/gitlab.rb
    ```
 
    **Source:**
 
-   ```sh
+   ```shell
      cd /home/git/gitlab
 
      sudo -u git -H editor config/gitlab.yml
@@ -54,7 +57,7 @@ Authenticate to GitLab using the Atlassian Crowd OmniAuth provider.
 
    **Source:**
 
-   ```
+   ```yaml
       - { name: 'crowd',
           args: {
             crowd_server_url: 'CROWD_SERVER_URL',
@@ -66,19 +69,16 @@ Authenticate to GitLab using the Atlassian Crowd OmniAuth provider.
 1. Change `YOUR_APP_NAME` to the application name from Crowd applications page.
 1. Change `YOUR_APP_PASSWORD` to the application password you've set.
 1. Save the configuration file.
-1. [Reconfigure][] or [restart][] for the changes to take effect if you
+1. [Reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart](../restart_gitlab.md#installations-from-source) for the changes to take effect if you
    installed GitLab via Omnibus or from source respectively.
 
 On the sign in page there should now be a Crowd tab in the sign in form.
-
-[reconfigure]: ../restart_gitlab.md#omnibus-gitlab-reconfigure
-[restart]: ../restart_gitlab.md#installations-from-source
 
 ## Troubleshooting
 
 If you see an error message like the one below when you sign in after Crowd authentication is configured, you may want to consult the Crowd administrator for the Crowd log file to know the exact cause:
 
-```
+```plaintext
 could not authorize you from Crowd because invalid credentials
 ```
 

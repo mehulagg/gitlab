@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Projects::ServicesController do
+RSpec.describe Projects::ServicesController do
+  include JiraServiceHelper
+
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
   let(:service) { create(:jira_service, project: project) }
@@ -54,8 +56,7 @@ describe Projects::ServicesController do
         end
 
         it 'returns success' do
-          stub_request(:get, 'http://example.com/rest/api/2/serverInfo')
-            .to_return(status: 200, body: '{}')
+          stub_jira_service_test
 
           expect(Gitlab::HTTP).to receive(:get).with('/rest/api/2/serverInfo', any_args).and_call_original
 
@@ -66,8 +67,7 @@ describe Projects::ServicesController do
       end
 
       it 'returns success' do
-        stub_request(:get, 'http://example.com/rest/api/2/serverInfo')
-          .to_return(status: 200, body: '{}')
+        stub_jira_service_test
 
         expect(Gitlab::HTTP).to receive(:get).with('/rest/api/2/serverInfo', any_args).and_call_original
 
@@ -82,7 +82,7 @@ describe Projects::ServicesController do
             'active' => '1',
             'push_events' => '1',
             'token' => 'token',
-            'project_url' => 'http://test.com'
+            'project_url' => 'https://buildkite.com/organization/pipeline'
           }
         end
 
@@ -123,7 +123,7 @@ describe Projects::ServicesController do
         expect(response).to be_successful
         expect(json_response).to eq(
           'error' => true,
-          'message' => 'Test failed.',
+          'message' => 'Connection failed. Please check your settings.',
           'service_response' => '',
           'test_failed' => true
         )
@@ -134,39 +134,73 @@ describe Projects::ServicesController do
   describe 'PUT #update' do
     describe 'as HTML' do
       let(:service_params) { { active: true } }
+      let(:params)         { project_params(service: service_params) }
+
+      let(:message) { 'Jira settings saved and active.' }
+      let(:redirect_url) { edit_project_service_path(project, service) }
 
       before do
-        put :update, params: project_params(service: service_params)
+        put :update, params: params
+      end
+
+      shared_examples 'service update' do
+        it 'redirects to the correct url with a flash message' do
+          expect(response).to redirect_to(redirect_url)
+          expect(flash[:notice]).to eq(message)
+        end
       end
 
       context 'when param `active` is set to true' do
-        it 'activates the service and redirects to integrations paths' do
-          expect(response).to redirect_to(project_settings_integrations_path(project))
-          expect(flash[:notice]).to eq 'Jira activated.'
+        let(:params) { project_params(service: service_params, redirect_to: redirect) }
+
+        context 'when redirect_to param is present' do
+          let(:redirect)     { '/redirect_here' }
+          let(:redirect_url) { redirect }
+
+          it_behaves_like 'service update'
+        end
+
+        context 'when redirect_to is an external domain' do
+          let(:redirect) { 'http://examle.com' }
+
+          it_behaves_like 'service update'
+        end
+
+        context 'when redirect_to param is an empty string' do
+          let(:redirect) { '' }
+
+          it_behaves_like 'service update'
         end
       end
 
       context 'when param `active` is set to false' do
         let(:service_params) { { active: false } }
+        let(:message)        { 'Jira settings saved, but not active.' }
 
-        it 'does not activate the service but saves the settings' do
-          expect(flash[:notice]).to eq 'Jira settings saved, but not activated.'
+        it_behaves_like 'service update'
+      end
+
+      context 'wehn param `inherit_from_id` is set to empty string' do
+        let(:service_params) { { inherit_from_id: '' } }
+
+        it 'sets inherit_from_id to nil' do
+          expect(service.reload.inherit_from_id).to eq(nil)
         end
       end
 
-      context 'when activating Jira service from a template' do
-        let(:service) do
-          create(:jira_service, project: project, template: true)
-        end
+      context 'wehn param `inherit_from_id` is set to some value' do
+        let(:instance_service) { create(:jira_service, :instance) }
+        let(:service_params) { { inherit_from_id: instance_service.id } }
 
-        it 'activate Jira service from template' do
-          expect(flash[:notice]).to eq 'Jira activated.'
+        it 'sets inherit_from_id to value' do
+          expect(service.reload.inherit_from_id).to eq(instance_service.id)
         end
       end
     end
 
     describe 'as JSON' do
       before do
+        stub_jira_service_test
         put :update, params: project_params(service: service_params, format: :json)
       end
 
@@ -191,16 +225,81 @@ describe Projects::ServicesController do
         end
       end
     end
+
+    context 'Prometheus service' do
+      let!(:service) { create(:prometheus_service, project: project) }
+      let(:service_params) { { manual_configuration: '1', api_url: 'http://example.com' } }
+
+      context 'feature flag :settings_operations_prometheus_service is enabled' do
+        before do
+          stub_feature_flags(settings_operations_prometheus_service: true)
+        end
+
+        it 'redirects user back to edit page with alert' do
+          put :update, params: project_params.merge(service: service_params)
+
+          expect(response).to redirect_to(edit_project_service_path(project, service))
+          expected_alert = "You can now manage your Prometheus settings on the <a href=\"#{project_settings_operations_path(project)}\">Operations</a> page. Fields on this page has been deprecated."
+
+          expect(response).to set_flash.now[:alert].to(expected_alert)
+        end
+
+        it 'does not modify service' do
+          expect { put :update, params: project_params.merge(service: service_params) }.not_to change { project.prometheus_service.reload.attributes }
+        end
+      end
+
+      context 'feature flag :settings_operations_prometheus_service is disabled' do
+        before do
+          stub_feature_flags(settings_operations_prometheus_service: false)
+        end
+
+        it 'modifies service' do
+          expect { put :update, params: project_params.merge(service: service_params) }.to change { project.prometheus_service.reload.attributes }
+        end
+      end
+    end
   end
 
   describe 'GET #edit' do
-    before do
-      get :edit, params: project_params(id: 'jira')
+    context 'Jira service' do
+      let(:service_param) { 'jira' }
+
+      before do
+        get :edit, params: project_params(id: service_param)
+      end
+
+      context 'with approved services' do
+        it 'renders edit page' do
+          expect(response).to be_successful
+        end
+      end
     end
 
-    context 'with approved services' do
-      it 'renders edit page' do
-        expect(response).to be_successful
+    context 'Prometheus service' do
+      let(:service_param) { 'prometheus' }
+
+      context 'feature flag :settings_operations_prometheus_service is enabled' do
+        before do
+          stub_feature_flags(settings_operations_prometheus_service: true)
+          get :edit, params: project_params(id: service_param)
+        end
+
+        it 'renders deprecation warning notice' do
+          expected_alert = "You can now manage your Prometheus settings on the <a href=\"#{project_settings_operations_path(project)}\">Operations</a> page. Fields on this page has been deprecated."
+          expect(response).to set_flash.now[:alert].to(expected_alert)
+        end
+      end
+
+      context 'feature flag :settings_operations_prometheus_service is disabled' do
+        before do
+          stub_feature_flags(settings_operations_prometheus_service: false)
+          get :edit, params: project_params(id: service_param)
+        end
+
+        it 'does not render deprecation warning notice' do
+          expect(response).not_to set_flash.now[:alert]
+        end
       end
     end
   end

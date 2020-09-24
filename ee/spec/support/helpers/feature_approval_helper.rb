@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module FeatureApprovalHelper
-  def open_modal
+  def open_modal(text: 'Edit')
     page.execute_script "document.querySelector('#{config_selector}').scrollIntoView()"
     within(config_selector) do
-      click_on('Edit')
+      click_on(text)
     end
   end
 

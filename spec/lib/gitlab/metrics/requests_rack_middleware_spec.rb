@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::Metrics::RequestsRackMiddleware do
+RSpec.describe Gitlab::Metrics::RequestsRackMiddleware do
   let(:app) { double('app') }
+
   subject { described_class.new(app) }
 
   describe '#call' do
@@ -31,9 +32,77 @@ describe Gitlab::Metrics::RequestsRackMiddleware do
       end
 
       it 'measures execution time' do
-        expect(described_class).to receive_message_chain(:http_request_duration_seconds, :observe).with({ status: 200, method: 'get' }, a_positive_execution_time)
+        expect(described_class).to receive_message_chain(:http_request_duration_seconds, :observe).with({ status: '200', method: 'get' }, a_positive_execution_time)
 
         Timecop.scale(3600) { subject.call(env) }
+      end
+
+      context 'request is a health check endpoint' do
+        it 'increments health endpoint counter' do
+          env['PATH_INFO'] = '/-/liveness'
+
+          expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get')
+
+          subject.call(env)
+        end
+
+        context 'with trailing slash' do
+          before do
+            env['PATH_INFO'] = '/-/liveness/'
+          end
+
+          it 'increments health endpoint counter' do
+            expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get')
+
+            subject.call(env)
+          end
+        end
+
+        context 'with percent encoded values' do
+          before do
+            env['PATH_INFO'] = '/-/%6D%65%74%72%69%63%73' # /-/metrics
+          end
+
+          it 'increments health endpoint counter' do
+            expect(described_class).to receive_message_chain(:http_health_requests_total, :increment).with(method: 'get')
+
+            subject.call(env)
+          end
+        end
+      end
+
+      context 'request is not a health check endpoint' do
+        it 'does not increment health endpoint counter' do
+          env['PATH_INFO'] = '/-/ordinary-requests'
+
+          expect(described_class).not_to receive(:http_health_requests_total)
+
+          subject.call(env)
+        end
+
+        context 'path info is a root path' do
+          before do
+            env['PATH_INFO'] = '/-/'
+          end
+
+          it 'does not increment health endpoint counter' do
+            expect(described_class).not_to receive(:http_health_requests_total)
+
+            subject.call(env)
+          end
+        end
+
+        context 'path info is a subpath' do
+          before do
+            env['PATH_INFO'] = '/-/health/subpath'
+          end
+
+          it 'does not increment health endpoint counter' do
+            expect(described_class).not_to receive(:http_health_requests_total)
+
+            subject.call(env)
+          end
+        end
       end
     end
 
@@ -69,7 +138,7 @@ describe Gitlab::Metrics::RequestsRackMiddleware do
         expected_labels = []
         described_class::HTTP_METHODS.each do |method, statuses|
           statuses.each do |status|
-            expected_labels << { method: method, status: status.to_i }
+            expected_labels << { method: method, status: status.to_s }
           end
         end
 

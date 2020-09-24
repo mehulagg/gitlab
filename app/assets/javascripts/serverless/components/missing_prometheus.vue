@@ -1,27 +1,21 @@
 <script>
-import { GlButton, GlLink } from '@gitlab/ui';
+import { GlDeprecatedButton, GlLink } from '@gitlab/ui';
+import { mapState } from 'vuex';
 import { s__ } from '../../locale';
 
 export default {
   components: {
-    GlButton,
+    GlDeprecatedButton,
     GlLink,
   },
   props: {
-    clustersPath: {
-      type: String,
-      required: true,
-    },
-    helpPath: {
-      type: String,
-      required: true,
-    },
     missingData: {
       type: Boolean,
       required: true,
     },
   },
   computed: {
+    ...mapState(['clustersPath', 'helpPath']),
     missingStateClass() {
       return this.missingData ? 'missing-prometheus-state' : 'empty-prometheus-state';
     },
@@ -53,9 +47,9 @@ export default {
         </p>
 
         <div v-if="!missingData" class="text-left">
-          <gl-button :href="clustersPath" variant="success">
+          <gl-deprecated-button :href="clustersPath" variant="success">
             {{ s__('ServerlessDetails|Install Prometheus') }}
-          </gl-button>
+          </gl-deprecated-button>
         </div>
       </div>
     </div>

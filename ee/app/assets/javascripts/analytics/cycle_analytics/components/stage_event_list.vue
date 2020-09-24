@@ -40,13 +40,13 @@ export default {
       <limit-warning :count="events.length" />
     </div>
     <stage-build-item
-      v-if="isCurrentStage(stage.slug, STAGE_NAME_TEST)"
+      v-if="isCurrentStage(stage.title, STAGE_NAME_TEST)"
       :stage="stage"
       :events="events"
       :with-build-status="true"
     />
     <stage-build-item
-      v-else-if="isCurrentStage(stage.slug, STAGE_NAME_STAGING)"
+      v-else-if="isCurrentStage(stage.title, STAGE_NAME_STAGING)"
       :stage="stage"
       :events="events"
     />

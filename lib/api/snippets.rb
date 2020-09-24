@@ -2,19 +2,20 @@
 
 module API
   # Snippets API
-  class Snippets < Grape::API
+  class Snippets < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! }
 
     resource :snippets do
+      helpers Helpers::SnippetsHelpers
       helpers do
         def snippets_for_current_user
           SnippetsFinder.new(current_user, author: current_user).execute
         end
 
         def public_snippets
-          SnippetsFinder.new(current_user, scope: :are_public).execute
+          Snippet.only_personal_snippets.are_public.fresh
         end
 
         def snippets
@@ -24,16 +25,16 @@ module API
 
       desc 'Get a snippets list for authenticated user' do
         detail 'This feature was introduced in GitLab 8.15.'
-        success Entities::PersonalSnippet
+        success Entities::Snippet
       end
       params do
         use :pagination
       end
       get do
-        present paginate(snippets_for_current_user), with: Entities::PersonalSnippet
+        present paginate(snippets_for_current_user), with: Entities::Snippet, current_user: current_user
       end
 
-      desc 'List all public snippets current_user has access to' do
+      desc 'List all public personal snippets current_user has access to' do
         detail 'This feature was introduced in GitLab 8.15.'
         success Entities::PersonalSnippet
       end
@@ -41,7 +42,7 @@ module API
         use :pagination
       end
       get 'public' do
-        present paginate(public_snippets), with: Entities::PersonalSnippet
+        present paginate(public_snippets), with: Entities::PersonalSnippet, current_user: current_user
       end
 
       desc 'Get a single snippet' do
@@ -56,7 +57,7 @@ module API
 
         break not_found!('Snippet') unless snippet
 
-        present snippet, with: Entities::PersonalSnippet
+        present snippet, with: Entities::PersonalSnippet, current_user: current_user
       end
 
       desc 'Create new snippet' do
@@ -64,25 +65,28 @@ module API
         success Entities::PersonalSnippet
       end
       params do
-        requires :title, type: String, desc: 'The title of a snippet'
-        requires :file_name, type: String, desc: 'The name of a snippet file'
-        requires :content, type: String, desc: 'The content of a snippet'
+        requires :title, type: String, allow_blank: false, desc: 'The title of a snippet'
         optional :description, type: String, desc: 'The description of a snippet'
         optional :visibility, type: String,
                               values: Gitlab::VisibilityLevel.string_values,
                               default: 'internal',
                               desc: 'The visibility of the snippet'
+        use :create_file_params
       end
       post do
-        attrs = declared_params(include_missing: false).merge(request: request, api: true)
-        snippet = CreateSnippetService.new(nil, current_user, attrs).execute
+        authorize! :create_snippet
 
-        render_spam_error! if snippet.spam?
+        attrs = process_create_params(declared_params(include_missing: false))
 
-        if snippet.persisted?
-          present snippet, with: Entities::PersonalSnippet
+        service_response = ::Snippets::CreateService.new(nil, current_user, attrs).execute
+        snippet = service_response.payload[:snippet]
+
+        if service_response.success?
+          present snippet, with: Entities::PersonalSnippet, current_user: current_user
         else
-          render_validation_error!(snippet)
+          render_spam_error! if snippet.spam?
+
+          render_api_error!({ error: service_response.message }, service_response.http_status)
         end
       end
 
@@ -90,33 +94,40 @@ module API
         detail 'This feature was introduced in GitLab 8.15.'
         success Entities::PersonalSnippet
       end
+
       params do
         requires :id, type: Integer, desc: 'The ID of a snippet'
-        optional :title, type: String, desc: 'The title of a snippet'
-        optional :file_name, type: String, desc: 'The name of a snippet file'
-        optional :content, type: String, desc: 'The content of a snippet'
+        optional :content, type: String, allow_blank: false, desc: 'The content of a snippet'
         optional :description, type: String, desc: 'The description of a snippet'
+        optional :file_name, type: String, desc: 'The name of a snippet file'
+        optional :title, type: String, allow_blank: false, desc: 'The title of a snippet'
         optional :visibility, type: String,
                               values: Gitlab::VisibilityLevel.string_values,
                               desc: 'The visibility of the snippet'
-        at_least_one_of :title, :file_name, :content, :visibility
+
+        use :update_file_params
+        use :minimum_update_params
       end
       put ':id' do
         snippet = snippets_for_current_user.find_by_id(params.delete(:id))
         break not_found!('Snippet') unless snippet
 
-        authorize! :update_personal_snippet, snippet
+        authorize! :update_snippet, snippet
 
-        attrs = declared_params(include_missing: false).merge(request: request, api: true)
+        validate_params_for_multiple_files(snippet)
 
-        UpdateSnippetService.new(nil, current_user, snippet, attrs).execute
+        attrs = process_update_params(declared_params(include_missing: false))
 
-        render_spam_error! if snippet.spam?
+        service_response = ::Snippets::UpdateService.new(nil, current_user, attrs).execute(snippet)
 
-        if snippet.persisted?
-          present snippet, with: Entities::PersonalSnippet
+        snippet = service_response.payload[:snippet]
+
+        if service_response.success?
+          present snippet, with: Entities::PersonalSnippet, current_user: current_user
         else
-          render_validation_error!(snippet)
+          render_spam_error! if snippet.spam?
+
+          render_api_error!({ error: service_response.message }, service_response.http_status)
         end
       end
 
@@ -131,9 +142,16 @@ module API
         snippet = snippets_for_current_user.find_by_id(params.delete(:id))
         break not_found!('Snippet') unless snippet
 
-        authorize! :destroy_personal_snippet, snippet
+        authorize! :admin_snippet, snippet
 
-        destroy_conditionally!(snippet)
+        destroy_conditionally!(snippet) do |snippet|
+          service = ::Snippets::DestroyService.new(current_user, snippet)
+          response = service.execute
+
+          if response.error?
+            render_api_error!({ error: response.message }, response.http_status)
+          end
+        end
       end
 
       desc 'Get a raw snippet' do
@@ -144,12 +162,20 @@ module API
       end
       get ":id/raw" do
         snippet = snippets.find_by_id(params.delete(:id))
-        break not_found!('Snippet') unless snippet
+        not_found!('Snippet') unless snippet
 
-        env['api.format'] = :txt
-        content_type 'text/plain'
-        header['Content-Disposition'] = 'attachment'
-        present snippet.content
+        present content_for(snippet)
+      end
+
+      desc 'Get raw snippet file contents from the repository'
+      params do
+        use :raw_file_params
+      end
+      get ":id/files/:ref/:file_path/raw", requirements: { file_path: API::NO_SLASH_URL_PART_REGEX } do
+        snippet = snippets.find_by_id(params.delete(:id))
+        not_found!('Snippet') unless snippet&.repo_exists?
+
+        present file_content_for(snippet)
       end
 
       desc 'Get the user agent details for a snippet' do

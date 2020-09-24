@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe 'Adding an image DiffNote' do
+RSpec.describe 'Adding an image DiffNote' do
   include GraphqlHelpers
 
-  set(:current_user) { create(:user) }
+  let_it_be(:current_user) { create(:user) }
   let(:noteable) { create(:merge_request, source_project: project, target_project: project) }
   let(:project) { create(:project, :repository) }
   let(:diff_refs) { noteable.diff_refs }
@@ -47,7 +47,7 @@ describe 'Adding an image DiffNote' do
     it_behaves_like 'a Note mutation when there are active record validation errors', model: DiffNote
 
     context do
-      let(:diff_refs) { build(:merge_request).diff_refs } # Allow fake diff refs so arguments are valid
+      let(:diff_refs) { build(:commit).diff_refs } # Allow fake diff refs so arguments are valid
 
       it_behaves_like 'a Note mutation when the given resource id is not for a Noteable'
     end

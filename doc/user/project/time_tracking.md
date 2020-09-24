@@ -1,6 +1,9 @@
 ---
 type: reference
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/time_tracking.html'
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Time Tracking
@@ -80,7 +83,7 @@ Default conversion rates are 1mo = 4w, 1w = 5d and 1d = 8h.
 
 ### Limit displayed units to hours **(CORE ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/29469/) in GitLab 12.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29469/) in GitLab 12.1.
 
 In GitLab self-managed instances, the display of time units can be limited to
 hours through the option in **Admin Area > Settings > Preferences** under **Localization**.

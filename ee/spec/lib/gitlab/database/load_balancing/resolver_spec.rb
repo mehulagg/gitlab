@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::Resolver do
+RSpec.describe Gitlab::Database::LoadBalancing::Resolver do
   describe '#resolve' do
     let(:ip_addr) { IPAddr.new('127.0.0.2') }
 
@@ -18,9 +18,9 @@ describe Gitlab::Database::LoadBalancing::Resolver do
       subject { described_class.new('localhost').resolve }
 
       it 'looks the nameserver up in the hosts file' do
-        allow_any_instance_of(Resolv::Hosts).to receive(:getaddress)
-          .with('localhost')
-          .and_return('127.0.0.2')
+        allow_next_instance_of(Resolv::Hosts) do |instance|
+          allow(instance).to receive(:getaddress).with('localhost').and_return('127.0.0.2')
+        end
 
         expect(subject).to eq(ip_addr)
       end
@@ -30,9 +30,9 @@ describe Gitlab::Database::LoadBalancing::Resolver do
           resource = double(:resource, address: ip_addr)
           packet = double(:packet, answer: [resource])
 
-          allow_any_instance_of(Resolv::Hosts).to receive(:getaddress)
-            .with('localhost')
-            .and_raise(Resolv::ResolvError)
+          allow_next_instance_of(Resolv::Hosts) do |instance|
+            allow(instance).to receive(:getaddress).with('localhost').and_raise(Resolv::ResolvError)
+          end
 
           allow(Net::DNS::Resolver).to receive(:start)
             .with('localhost', Net::DNS::A)
@@ -43,9 +43,9 @@ describe Gitlab::Database::LoadBalancing::Resolver do
 
         context 'when nameserver is not in DNS' do
           it 'raises an exception' do
-            allow_any_instance_of(Resolv::Hosts).to receive(:getaddress)
-              .with('localhost')
-              .and_raise(Resolv::ResolvError)
+            allow_next_instance_of(Resolv::Hosts) do |instance|
+              allow(instance).to receive(:getaddress).with('localhost').and_raise(Resolv::ResolvError)
+            end
 
             allow(Net::DNS::Resolver).to receive(:start)
               .with('localhost', Net::DNS::A)

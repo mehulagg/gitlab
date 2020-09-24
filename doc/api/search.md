@@ -1,6 +1,13 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Search API
 
-[Introduced][ce-41763] in GitLab 10.5
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41763) in GitLab 10.5.
 
 Every API call to search must be authenticated.
 
@@ -8,7 +15,7 @@ Every API call to search must be authenticated.
 
 Search globally across the GitLab instance.
 
-```
+```plaintext
 GET /search
 ```
 
@@ -16,17 +23,18 @@ GET /search
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `scope`       | string   | yes        | The scope to search in                |
 | `search`      | string   | yes        | The search query  |
+| `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
 
-Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, snippet_titles, snippet_blobs, users.
+Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, snippet_titles, users.
 
-If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs and commits. Find more about [the feature](../integration/elasticsearch.md). **(STARTER)**
+If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs, notes, and commits. Find more about [the feature](../integration/elasticsearch.md). **(STARTER)**
 
 The response depends on the requested scope.
 
 ### Scope: projects
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=projects&search=flight
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=projects&search=flight"
 ```
 
 Example response:
@@ -56,8 +64,8 @@ Example response:
 
 ### Scope: issues
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=issues&search=file
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=issues&search=file"
 ```
 
 Example response:
@@ -121,8 +129,8 @@ Example response:
 
 ### Scope: merge_requests
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=merge_requests&search=file
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=merge_requests&search=file"
 ```
 
 Example response:
@@ -199,8 +207,8 @@ Example response:
 
 ### Scope: milestones
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=milestones&search=release
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=milestones&search=release"
 ```
 
 Example response:
@@ -224,39 +232,8 @@ Example response:
 
 ### Scope: snippet_titles
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=snippet_titles&search=sample
-```
-
-Example response:
-
-```json
-[
-  {
-    "id": 50,
-    "title": "Sample file",
-    "file_name": "file.rb",
-    "description": "Simple ruby file",
-    "author": {
-      "id": 1,
-      "name": "Administrator",
-      "username": "root",
-      "state": "active",
-      "avatar_url": "https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
-      "web_url": "http://localhost:3000/root"
-    },
-    "updated_at": "2018-02-06T12:49:29.104Z",
-    "created_at": "2017-11-28T08:20:18.071Z",
-    "project_id": 9,
-    "web_url": "http://localhost:3000/root/jira-test/snippets/50"
-  }
-]
-```
-
-### Scope: snippet_blobs
-
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=snippet_blobs&search=test
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=snippet_titles&search=sample"
 ```
 
 Example response:
@@ -288,8 +265,8 @@ Example response:
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=wiki_blobs&search=bye
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=wiki_blobs&search=bye"
 ```
 
 Example response:
@@ -310,14 +287,15 @@ Example response:
 ]
 ```
 
-**Note:** `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path (see [this issue][gitlab-34521]).
+NOTE: **Note:**
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: commits **(STARTER)**
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=commits&search=bye"
 ```
 
 Example response:
@@ -359,8 +337,8 @@ to use a filter simply include it in your query like so: `a query filename:some_
 
 You may use wildcards (`*`) to use glob matching.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=blobs&search=installation
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=blobs&search=installation"
 ```
 
 Example response:
@@ -381,12 +359,47 @@ Example response:
 ]
 ```
 
-**Note:** `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path (see [this issue][gitlab-34521]).
+NOTE: **Note:**
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+
+### Scope: notes **(STARTER)**
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 191,
+    "body": "Harum maxime consequuntur et et deleniti assumenda facilis.",
+    "attachment": null,
+    "author": {
+      "id": 23,
+      "name": "User 1",
+      "username": "user1",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/111d68d06e2d317b5a59c2c6c5bad808?s=80&d=identicon",
+      "web_url": "http://localhost:3000/user1"
+    },
+    "created_at": "2017-09-05T08:01:32.068Z",
+    "updated_at": "2017-09-05T08:01:32.068Z",
+    "system": false,
+    "noteable_id": 22,
+    "noteable_type": "Issue",
+    "noteable_iid": 2
+  }
+]
+```
 
 ### Scope: users
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=users&search=doe
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/search?scope=users&search=doe"
 ```
 
 Example response:
@@ -410,7 +423,7 @@ Search within the specified group.
 
 If a user is not a member of a group and the group is private, a `GET` request on that group will result to a `404` status code.
 
-```
+```plaintext
 GET /groups/:id/search
 ```
 
@@ -419,17 +432,18 @@ GET /groups/:id/search
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user                |
 | `scope`       | string   | yes        | The scope to search in                |
 | `search`      | string   | yes        | The search query  |
+| `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
 
 Search the expression within the specified scope. Currently these scopes are supported: projects, issues, merge_requests, milestones, users.
 
-If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs and commits. Find more about [the feature](../integration/elasticsearch.md). **(STARTER)**
+If Elasticsearch is enabled additional scopes available are blobs, wiki_blobs, notes, and commits. Find more about [the feature](../integration/elasticsearch.md). **(STARTER)**
 
 The response depends on the requested scope.
 
 ### Scope: projects
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=projects&search=flight
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/3/search?scope=projects&search=flight"
 ```
 
 Example response:
@@ -459,8 +473,8 @@ Example response:
 
 ### Scope: issues
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file"
 ```
 
 Example response:
@@ -524,8 +538,8 @@ Example response:
 
 ### Scope: merge_requests
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=merge_requests&search=file
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/3/search?scope=merge_requests&search=file"
 ```
 
 Example response:
@@ -602,8 +616,8 @@ Example response:
 
 ### Scope: milestones
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=milestones&search=release
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/3/search?scope=milestones&search=release"
 ```
 
 Example response:
@@ -629,8 +643,8 @@ Example response:
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/6/search?scope=wiki_blobs&search=bye
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/6/search?scope=wiki_blobs&search=bye"
 ```
 
 Example response:
@@ -651,14 +665,15 @@ Example response:
 ]
 ```
 
-**Note:** `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path (see [this issue][gitlab-34521]).
+NOTE **Note:**
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: commits **(STARTER)**
 
 This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/6/search?scope=commits&search=bye
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/6/search?scope=commits&search=bye"
 ```
 
 Example response:
@@ -700,8 +715,8 @@ to use a filter simply include it in your query like so: `a query filename:some_
 
 You may use wildcards (`*`) to use glob matching.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/6/search?scope=blobs&search=installation
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/6/search?scope=blobs&search=installation"
 ```
 
 Example response:
@@ -722,12 +737,47 @@ Example response:
 ]
 ```
 
-**Note:** `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path (see [this issue][gitlab-34521]).
+NOTE **Note:**
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
+
+### Scope: notes **(STARTER)**
+
+This scope is available only if [Elasticsearch](../integration/elasticsearch.md) is enabled.
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 191,
+    "body": "Harum maxime consequuntur et et deleniti assumenda facilis.",
+    "attachment": null,
+    "author": {
+      "id": 23,
+      "name": "User 1",
+      "username": "user1",
+      "state": "active",
+      "avatar_url": "https://www.gravatar.com/avatar/111d68d06e2d317b5a59c2c6c5bad808?s=80&d=identicon",
+      "web_url": "http://localhost:3000/user1"
+    },
+    "created_at": "2017-09-05T08:01:32.068Z",
+    "updated_at": "2017-09-05T08:01:32.068Z",
+    "system": false,
+    "noteable_id": 22,
+    "noteable_type": "Issue",
+    "noteable_iid": 2
+  }
+]
+```
 
 ### Scope: users
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=users&search=doe
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/3/search?scope=users&search=doe"
 ```
 
 Example response:
@@ -751,7 +801,7 @@ Search within the specified project.
 
 If a user is not a member of a project and the project is private, a `GET` request on that project will result to a `404` status code.
 
-```
+```plaintext
 GET /projects/:id/search
 ```
 
@@ -760,6 +810,8 @@ GET /projects/:id/search
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user                |
 | `scope`       | string   | yes        | The scope to search in                |
 | `search`      | string   | yes        | The search query  |
+| `ref`         | string   | no         | The name of a repository branch or tag to search on. The project's default branch is used by default. This is only applicable for scopes: commits, blobs, and wiki_blobs.  |
+| `state`       | string   | no        | Filter by state. Issues and merge requests are supported; it is ignored for other scopes. |
 
 Search the expression within the specified scope. Currently these scopes are supported: issues, merge_requests, milestones, notes, wiki_blobs, commits, blobs, users.
 
@@ -767,8 +819,8 @@ The response depends on the requested scope.
 
 ### Scope: issues
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/12/search?scope=issues&search=file
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/12/search?scope=issues&search=file"
 ```
 
 Example response:
@@ -832,8 +884,8 @@ Example response:
 
 ### Scope: merge_requests
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/6/search?scope=merge_requests&search=file
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=merge_requests&search=file"
 ```
 
 Example response:
@@ -910,8 +962,8 @@ Example response:
 
 ### Scope: milestones
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/12/search?scope=milestones&search=release
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/12/search?scope=milestones&search=release"
 ```
 
 Example response:
@@ -935,8 +987,8 @@ Example response:
 
 ### Scope: notes
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=notes&search=maxime"
 ```
 
 Example response:
@@ -984,8 +1036,8 @@ results:
   might be found in both the filename and content, or might appear multiple
   times in the content.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/6/search?scope=wiki_blobs&search=bye
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=wiki_blobs&search=bye"
 ```
 
 Example response:
@@ -1006,12 +1058,13 @@ Example response:
 ]
 ```
 
-**Note:** `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path (see [this issue][gitlab-34521]).
+NOTE: **Note:**
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: commits
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/6/search?scope=commits&search=bye
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=commits&search=bye"
 ```
 
 Example response:
@@ -1057,8 +1110,8 @@ Blobs searches are performed on both filenames and contents. Search results:
   might be found in both the filename and content, or might appear multiple
   times in the content.
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/6/search?scope=blobs&search=installation
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=blobs&search=installation&ref=feature"
 ```
 
 Example response:
@@ -1072,19 +1125,20 @@ Example response:
     "path": "README.md",
     "filename": "README.md",
     "id": null,
-    "ref": "master",
+    "ref": "feature",
     "startline": 46,
     "project_id": 6
   }
 ]
 ```
 
-**Note:** `filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path (see [this issue][gitlab-34521]).
+NOTE: **Note:**
+`filename` is deprecated in favor of `path`. Both return the full path of the file inside the repository, but in the future `filename` will be only the file name and not the full path. For details, see [issue 34521](https://gitlab.com/gitlab-org/gitlab/-/issues/34521).
 
 ### Scope: users
 
-```bash
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/6/search?scope=users&search=doe
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/6/search?scope=users&search=doe"
 ```
 
 Example response:
@@ -1101,6 +1155,3 @@ Example response:
   }
 ]
 ```
-
-[ce-41763]: https://gitlab.com/gitlab-org/gitlab-foss/issues/41763
-[gitlab-34521]: https://gitlab.com/gitlab-org/gitlab/issues/34521

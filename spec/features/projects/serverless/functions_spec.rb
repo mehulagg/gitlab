@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Functions', :js do
+RSpec.describe 'Functions', :js do
   include KubernetesHelpers
   include ReactiveCachingHelpers
 
-  let(:project) { create(:project) }
+  let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
   before do
@@ -16,7 +16,12 @@ describe 'Functions', :js do
 
   shared_examples "it's missing knative installation" do
     before do
+      functions_finder = Projects::Serverless::FunctionsFinder.new(project)
       visit project_serverless_functions_path(project)
+      allow(Projects::Serverless::FunctionsFinder)
+        .to receive(:new)
+        .and_return(functions_finder)
+      synchronous_reactive_cache(functions_finder)
     end
 
     it 'sees an empty state require Knative installation' do
@@ -35,10 +40,9 @@ describe 'Functions', :js do
     it_behaves_like "it's missing knative installation"
   end
 
-  context 'when the user has a cluster and knative installed and visits the serverless page' do
-    let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
+  context 'when the user has a cluster and knative installed and visits the serverless page', :kubeclient do
+    let(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
     let(:service) { cluster.platform_kubernetes }
-    let(:project) { cluster.project }
     let(:environment) { create(:environment, project: project) }
     let!(:deployment) { create(:deployment, :success, cluster: cluster, environment: environment) }
     let(:knative_services_finder) { environment.knative_services_finder }

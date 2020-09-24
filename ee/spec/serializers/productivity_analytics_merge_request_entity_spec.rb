@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProductivityAnalyticsMergeRequestEntity do
+RSpec.describe ProductivityAnalyticsMergeRequestEntity do
   subject { described_class.represent(merge_request).as_json.with_indifferent_access }
 
   let(:merge_request) { create(:merge_request) }

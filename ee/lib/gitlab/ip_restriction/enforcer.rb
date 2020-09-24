@@ -7,6 +7,10 @@ module Gitlab
         @group = group
       end
 
+      def logger
+        @logger ||= Gitlab::AuthLogger.build
+      end
+
       def allows_current_ip?
         return true unless group&.feature_available?(:group_ip_restriction)
 
@@ -26,7 +30,11 @@ module Gitlab
 
         return true unless root_ancestor_ip_restrictions.present?
 
-        root_ancestor_ip_restrictions.any? { |ip_restriction| ip_restriction.allows_address?(address) }
+        allowed = root_ancestor_ip_restrictions.any? { |ip_restriction| ip_restriction.allows_address?(address) }
+
+        logger.info(message: 'Attempting to access IP restricted group', group_full_path: group.full_path, ip_address: address, allowed: allowed)
+
+        allowed
       end
     end
   end

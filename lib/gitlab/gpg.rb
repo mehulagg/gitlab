@@ -5,8 +5,8 @@ module Gitlab
     extend self
 
     CleanupError = Class.new(StandardError)
-    BG_CLEANUP_RUNTIME_S = 2
-    FG_CLEANUP_RUNTIME_S = 0.5
+    BG_CLEANUP_RUNTIME_S = 10
+    FG_CLEANUP_RUNTIME_S = 1
 
     MUTEX = Mutex.new
 
@@ -107,19 +107,18 @@ module Gitlab
       begin
         cleanup_tmp_dir(tmp_dir)
       rescue CleanupError => e
+        folder_contents = Dir.children(tmp_dir)
         # This means we left a GPG-agent process hanging. Logging the problem in
         # sentry will make this more visible.
-        Gitlab::Sentry.track_exception(e,
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e,
                                        issue_url: 'https://gitlab.com/gitlab-org/gitlab/issues/20918',
-                                       extra: { tmp_dir: tmp_dir })
+                                       tmp_dir: tmp_dir, contents: folder_contents)
       end
 
       tmp_keychains_removed.increment unless File.exist?(tmp_dir)
     end
 
     def cleanup_tmp_dir(tmp_dir)
-      return FileUtils.remove_entry(tmp_dir, true) if Feature.disabled?(:gpg_cleanup_retries)
-
       # Retry when removing the tmp directory failed, as we may run into a
       # race condition:
       # The `gpg-agent` agent process may clean up some files as well while
@@ -128,7 +127,10 @@ module Gitlab
       # error.
       # Failing to remove the tmp directory could leave the `gpg-agent` process
       # running forever.
-      Retriable.retriable(max_elapsed_time: cleanup_time, base_interval: 0.1) do
+      #
+      # 15 tries will never complete within the maximum time with exponential
+      # backoff. So our limit is the runtime, not the number of tries.
+      Retriable.retriable(max_elapsed_time: cleanup_time, base_interval: 0.1, tries: 15) do
         FileUtils.remove_entry(tmp_dir) if File.exist?(tmp_dir)
       end
     rescue => e
@@ -136,7 +138,7 @@ module Gitlab
     end
 
     def cleanup_time
-      Sidekiq.server? ? BG_CLEANUP_RUNTIME_S : FG_CLEANUP_RUNTIME_S
+      Gitlab::Runtime.sidekiq? ? BG_CLEANUP_RUNTIME_S : FG_CLEANUP_RUNTIME_S
     end
 
     def tmp_keychains_created

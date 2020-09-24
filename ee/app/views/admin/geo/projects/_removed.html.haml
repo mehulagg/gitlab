@@ -1,4 +1,3 @@
-%strong.header-text-primary.flex-fill
+%strong.text-truncate.flex-fill
   = s_('Geo|Project (ID: %{project_id}) no longer exists on the primary. It is safe to remove this entry, as this will not remove any data on disk.') % { project_id: project_registry.project_id }
-= link_to(admin_geo_project_path(project_registry), data: { confirm: s_('Geo|Tracking entry will be removed. Are you sure?')}, method: :delete, class: 'btn btn-inverted btn-remove btn-sm') do
-  = s_('Geo|Remove')
+= button_tag s_('Geo|Remove'), type: "button", class: 'btn btn-danger btn-inverted js-confirm-modal-button', data: remove_tracking_entry_modal_data(admin_geo_project_path(project_registry))

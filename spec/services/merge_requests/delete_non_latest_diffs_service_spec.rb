@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_state do
+RSpec.describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_state do
   let(:merge_request) { create(:merge_request) }
 
   let!(:subject) { described_class.new(merge_request) }
@@ -19,7 +19,7 @@ describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_
 
       expect(diffs.count).to eq(4)
 
-      Timecop.freeze do
+      freeze_time do
         expect(DeleteDiffFilesWorker)
           .to receive(:bulk_perform_in)
           .with(5.minutes, [[diffs.first.id], [diffs.second.id]])
@@ -48,12 +48,12 @@ describe MergeRequests::DeleteNonLatestDiffsService, :clean_gitlab_redis_shared_
     end
 
     it 'schedules no removal if there is no non-latest diffs' do
-      # rubocop: disable DestroyAll
+      # rubocop: disable Cop/DestroyAll
       merge_request
         .merge_request_diffs
         .where.not(id: merge_request.latest_merge_request_diff_id)
         .destroy_all
-      # rubocop: enable DestroyAll
+      # rubocop: enable Cop/DestroyAll
 
       expect(DeleteDiffFilesWorker).not_to receive(:bulk_perform_in)
 

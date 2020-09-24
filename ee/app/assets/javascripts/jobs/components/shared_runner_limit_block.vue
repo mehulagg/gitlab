@@ -58,6 +58,7 @@ export default {
     <gl-button
       v-if="subscriptionsMoreMinutesUrl"
       variant="danger"
+      category="primary"
       :href="subscriptionsMoreMinutesUrl"
       class="btn-inverted"
     >

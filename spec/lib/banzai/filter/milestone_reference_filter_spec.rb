@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::MilestoneReferenceFilter do
+RSpec.describe Banzai::Filter::MilestoneReferenceFilter do
   include FilterSpecHelper
 
   let(:parent_group) { create(:group, :public) }
@@ -214,7 +214,9 @@ describe Banzai::Filter::MilestoneReferenceFilter do
     end
 
     it 'escapes the name attribute' do
-      allow_any_instance_of(Milestone).to receive(:title).and_return(%{"></a>whatever<a title="})
+      allow_next_instance_of(Milestone) do |instance|
+        allow(instance).to receive(:title).and_return(%{"></a>whatever<a title="})
+      end
 
       doc = reference_filter("See #{reference}")
 
@@ -251,7 +253,9 @@ describe Banzai::Filter::MilestoneReferenceFilter do
     end
 
     it 'escapes the name attribute' do
-      allow_any_instance_of(Milestone).to receive(:title).and_return(%{"></a>whatever<a title="})
+      allow_next_instance_of(Milestone) do |instance|
+        allow(instance).to receive(:title).and_return(%{"></a>whatever<a title="})
+      end
 
       doc = reference_filter("See #{reference}")
 
@@ -288,7 +292,9 @@ describe Banzai::Filter::MilestoneReferenceFilter do
     end
 
     it 'escapes the name attribute' do
-      allow_any_instance_of(Milestone).to receive(:title).and_return(%{"></a>whatever<a title="})
+      allow_next_instance_of(Milestone) do |instance|
+        allow(instance).to receive(:title).and_return(%{"></a>whatever<a title="})
+      end
 
       doc = reference_filter("See #{reference}")
 
@@ -361,15 +367,17 @@ describe Banzai::Filter::MilestoneReferenceFilter do
       expect(doc.css('a').first.text).to eq(urls.milestone_url(milestone))
     end
 
-    it 'does not support cross-project references' do
+    it 'does not support cross-project references', :aggregate_failures do
       another_group = create(:group)
       another_project = create(:project, :public, group: group)
-      project_reference = another_project.to_reference(project)
+      project_reference = another_project.to_reference_base(project)
+      input_text = "See #{project_reference}#{reference}"
 
       milestone.update!(group: another_group)
 
-      doc = reference_filter("See #{project_reference}#{reference}")
+      doc = reference_filter(input_text)
 
+      expect(input_text).to match(Milestone.reference_pattern)
       expect(doc.css('a')).to be_empty
     end
 

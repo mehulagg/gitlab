@@ -1,36 +1,30 @@
 <script>
-import { __, s__ } from '~/locale';
 import { GlTooltipDirective, GlLoadingIcon, GlEmptyState } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-import StageNavItem from './stage_nav_item.vue';
+import { __, s__ } from '~/locale';
 import StageEventList from './stage_event_list.vue';
 import StageTableHeader from './stage_table_header.vue';
-import AddStageButton from './add_stage_button.vue';
-import CustomStageForm from './custom_stage_form.vue';
+
+const MIN_TABLE_HEIGHT = 420;
+const NOT_ENOUGH_DATA_ERROR = s__(
+  "ValueStreamAnalyticsStage|We don't have enough data to show this stage.",
+);
 
 export default {
   name: 'StageTable',
   components: {
-    Icon,
     GlLoadingIcon,
     GlEmptyState,
     StageEventList,
-    StageNavItem,
     StageTableHeader,
-    AddStageButton,
-    CustomStageForm,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   props: {
-    stages: {
-      type: Array,
-      required: true,
-    },
     currentStage: {
       type: Object,
-      required: true,
+      required: false,
+      default: () => {},
     },
     isLoading: {
       type: Boolean,
@@ -40,7 +34,11 @@ export default {
       type: Boolean,
       required: true,
     },
-    isAddingCustomStage: {
+    isLoadingStage: {
+      type: Boolean,
+      required: true,
+    },
+    customStageFormActive: {
       type: Boolean,
       required: true,
     },
@@ -48,30 +46,27 @@ export default {
       type: Array,
       required: true,
     },
-    customStageFormEvents: {
-      type: Array,
-      required: true,
-    },
-    labels: {
-      type: Array,
-      required: true,
-    },
     noDataSvgPath: {
       type: String,
       required: true,
     },
-    noAccessSvgPath: {
+    emptyStateMessage: {
       type: String,
-      required: true,
-    },
-    canEditStages: {
-      type: Boolean,
-      required: true,
+      required: false,
+      default: '',
     },
   },
+  data() {
+    return {
+      stageNavHeight: MIN_TABLE_HEIGHT,
+    };
+  },
   computed: {
+    stageEventsHeight() {
+      return `${this.stageNavHeight}px`;
+    },
     stageName() {
-      return this.currentStage ? this.currentStage.title : __('Related Issues');
+      return this.currentStage?.title || __('Related Issues');
     },
     shouldDisplayStage() {
       const { currentStageEvents = [], isLoading, isEmptyStage } = this;
@@ -95,33 +90,44 @@ export default {
           title: this.stageName,
           description: __('The collection of events added to the data gathered for that stage.'),
           classes: 'event-header pl-3',
+          displayHeader: !this.customStageFormActive,
         },
         {
-          title: __('Total Time'),
+          title: __('Time'),
           description: __('The time taken by each data entry gathered by that stage.'),
           classes: 'total-time-header pr-5 text-right',
+          displayHeader: !this.customStageFormActive,
         },
       ];
     },
+    emptyStateTitle() {
+      const { emptyStateMessage } = this;
+      return emptyStateMessage.length ? emptyStateMessage : NOT_ENOUGH_DATA_ERROR;
+    },
   },
-  methods: {
-    selectStage(stage) {
-      this.$emit('selectStage', stage);
-    },
-    showAddStageForm() {
-      this.$emit('showAddStageForm');
-    },
+  updated() {
+    if (!this.isLoading && this.$refs.stageNav) {
+      this.$set(this, 'stageNavHeight', this.$refs.stageNav.clientHeight);
+    }
   },
 };
 </script>
 <template>
-  <div class="stage-panel-container">
-    <div class="card stage-panel">
-      <div class="card-header border-bottom-0">
+  <div class="stage-panel-container" data-testid="vsa-stage-table">
+    <div
+      v-if="isLoading"
+      class="gl-display-flex gl-justify-content-center gl-align-items-center gl-w-full"
+      :style="{ height: stageEventsHeight }"
+    >
+      <gl-loading-icon size="lg" />
+    </div>
+    <div v-else class="card stage-panel">
+      <div class="card-header gl-border-b-0">
         <nav class="col-headers">
           <ul>
             <stage-table-header
-              v-for="({ title, description, classes }, i) in stageHeaders"
+              v-for="({ title, description, classes, displayHeader = true }, i) in stageHeaders"
+              v-show="displayHeader"
               :key="`stage-header-${i}`"
               :header-classes="classes"
               :title="title"
@@ -131,44 +137,26 @@ export default {
         </nav>
       </div>
       <div class="stage-panel-body">
-        <nav class="stage-nav">
-          <ul>
-            <stage-nav-item
-              v-for="stage in stages"
-              :key="`ca-stage-title-${stage.title}`"
-              :title="stage.title"
-              :value="stage.value"
-              :is-active="!isAddingCustomStage && stage.id === currentStage.id"
-              :is-default-stage="!stage.custom"
-              @select="selectStage(stage)"
-            />
-            <add-stage-button
-              v-if="canEditStages"
-              :active="isAddingCustomStage"
-              @showform="showAddStageForm"
-            />
-          </ul>
+        <nav ref="stageNav" class="stage-nav gl-pl-2">
+          <slot name="nav"></slot>
         </nav>
-        <div class="section stage-events">
-          <gl-loading-icon v-if="isLoading" class="mt-4" size="md" />
-          <custom-stage-form
-            v-else-if="isAddingCustomStage"
-            :events="customStageFormEvents"
-            :labels="labels"
-          />
-          <template v-else>
-            <stage-event-list
-              v-if="shouldDisplayStage"
-              :stage="currentStage"
-              :events="currentStageEvents"
-            />
-            <gl-empty-state
-              v-if="isEmptyStage"
-              :title="__('We don\'t have enough data to show this stage.')"
-              :description="currentStage.emptyStageText"
-              :svg-path="noDataSvgPath"
-            />
-          </template>
+        <div class="section stage-events overflow-auto" :style="{ height: stageEventsHeight }">
+          <slot name="content">
+            <gl-loading-icon v-if="isLoadingStage" class="gl-mt-4" size="md" />
+            <template v-else>
+              <stage-event-list
+                v-if="shouldDisplayStage"
+                :stage="currentStage"
+                :events="currentStageEvents"
+              />
+              <gl-empty-state
+                v-if="isEmptyStage"
+                :title="emptyStateTitle"
+                :description="currentStage.emptyStageText"
+                :svg-path="noDataSvgPath"
+              />
+            </template>
+          </slot>
         </div>
       </div>
     </div>

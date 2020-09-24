@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::ImportService do
+RSpec.describe Projects::ImportService do
   let!(:project) { create(:project) }
   let(:user) { project.creator }
 
@@ -122,9 +122,14 @@ describe Projects::ImportService do
         end
 
         it 'succeeds if repository import is successful' do
-          expect_any_instance_of(Gitlab::Shell).to receive(:import_repository).and_return(true)
-          expect_any_instance_of(Gitlab::BitbucketImport::Importer).to receive(:execute).and_return(true)
-          expect_any_instance_of(Projects::LfsPointers::LfsImportService).to receive(:execute).and_return(status: :success)
+          expect(project.repository).to receive(:import_repository).and_return(true)
+          expect_next_instance_of(Gitlab::BitbucketImport::Importer) do |importer|
+            expect(importer).to receive(:execute).and_return(true)
+          end
+
+          expect_next_instance_of(Projects::LfsPointers::LfsImportService) do |service|
+            expect(service).to receive(:execute).and_return(status: :success)
+          end
 
           result = subject.execute
 
@@ -132,7 +137,9 @@ describe Projects::ImportService do
         end
 
         it 'fails if repository import fails' do
-          expect_any_instance_of(Gitlab::Shell).to receive(:import_repository).and_raise(Gitlab::Shell::Error.new('Failed to import the repository /a/b/c'))
+          expect(project.repository)
+            .to receive(:import_repository)
+            .and_raise(Gitlab::Git::CommandError, 'Failed to import the repository /a/b/c')
 
           result = subject.execute
 
@@ -144,9 +151,16 @@ describe Projects::ImportService do
           it 'logs the error' do
             error_message = 'error message'
 
-            expect_any_instance_of(Gitlab::Shell).to receive(:import_repository).and_return(true)
-            expect_any_instance_of(Gitlab::BitbucketImport::Importer).to receive(:execute).and_return(true)
-            expect_any_instance_of(Projects::LfsPointers::LfsImportService).to receive(:execute).and_return(status: :error, message: error_message)
+            expect(project.repository).to receive(:import_repository).and_return(true)
+
+            expect_next_instance_of(Gitlab::BitbucketImport::Importer) do |importer|
+              expect(importer).to receive(:execute).and_return(true)
+            end
+
+            expect_next_instance_of(Projects::LfsPointers::LfsImportService) do |service|
+              expect(service).to receive(:execute).and_return(status: :error, message: error_message)
+            end
+
             expect(Gitlab::AppLogger).to receive(:error).with("The Lfs import process failed. #{error_message}")
 
             subject.execute
@@ -155,7 +169,7 @@ describe Projects::ImportService do
 
         context 'when repository import scheduled' do
           before do
-            allow_any_instance_of(Gitlab::Shell).to receive(:import_repository).and_return(true)
+            expect(project.repository).to receive(:import_repository).and_return(true)
             allow(subject).to receive(:import_data)
           end
 
@@ -250,10 +264,30 @@ describe Projects::ImportService do
       it 'fails with port 25' do
         project.import_url = "https://github.com:25/vim/vim.git"
 
-        result = described_class.new(project, user).execute
+        result = subject.execute
 
         expect(result[:status]).to eq :error
         expect(result[:message]).to include('Only allowed ports are 80, 443')
+      end
+    end
+
+    it_behaves_like 'measurable service' do
+      let(:base_log_data) do
+        {
+          class: described_class.name,
+          current_user: user.name,
+          project_full_path: project.full_path,
+          import_type: project.import_type,
+          file_path: project.import_source
+        }
+      end
+
+      before do
+        project.import_type = 'github'
+      end
+
+      after do
+        subject.execute
       end
     end
 

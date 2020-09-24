@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'User explores projects' do
-  set(:archived_project) { create(:project, :archived) }
-  set(:internal_project) { create(:project, :internal) }
-  set(:private_project) { create(:project, :private) }
-  set(:public_project) { create(:project, :public) }
+RSpec.describe 'User explores projects' do
+  let_it_be(:archived_project) { create(:project, :archived) }
+  let_it_be(:internal_project) { create(:project, :internal) }
+  let_it_be(:private_project) { create(:project, :private) }
+  let_it_be(:public_project) { create(:project, :public) }
 
   context 'when not signed in' do
     context 'when viewing public projects' do
@@ -16,10 +16,21 @@ describe 'User explores projects' do
 
       include_examples 'shows public projects'
     end
+
+    context 'when visibility is restricted to public' do
+      before do
+        stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC])
+        visit(explore_projects_path)
+      end
+
+      it 'redirects to login page' do
+        expect(page).to have_current_path(new_user_session_path)
+      end
+    end
   end
 
   context 'when signed in' do
-    set(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
 
     before do
       sign_in(user)

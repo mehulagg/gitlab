@@ -11,14 +11,20 @@ class IssuableBaseService < BaseService
     @skip_milestone_email = @params.delete(:skip_milestone_email)
   end
 
-  def filter_params(issuable)
+  def can_admin_issuable?(issuable)
     ability_name = :"admin_#{issuable.to_ability_name}"
 
-    unless can?(current_user, ability_name, issuable)
+    can?(current_user, ability_name, issuable)
+  end
+
+  def filter_params(issuable)
+    unless can_admin_issuable?(issuable)
       params.delete(:milestone_id)
       params.delete(:labels)
       params.delete(:add_label_ids)
+      params.delete(:add_labels)
       params.delete(:remove_label_ids)
+      params.delete(:remove_labels)
       params.delete(:label_ids)
       params.delete(:assignee_ids)
       params.delete(:assignee_id)
@@ -40,9 +46,9 @@ class IssuableBaseService < BaseService
       params[:assignee_ids] = params[:assignee_ids].first(1)
     end
 
-    assignee_ids = params[:assignee_ids].select { |assignee_id| assignee_can_read?(issuable, assignee_id) }
+    assignee_ids = params[:assignee_ids].select { |assignee_id| user_can_read?(issuable, assignee_id) }
 
-    if params[:assignee_ids].map(&:to_s) == [IssuableFinder::NONE]
+    if params[:assignee_ids].map(&:to_s) == [IssuableFinder::Params::NONE]
       params[:assignee_ids] = []
     elsif assignee_ids.any?
       params[:assignee_ids] = assignee_ids
@@ -51,22 +57,22 @@ class IssuableBaseService < BaseService
     end
   end
 
-  def assignee_can_read?(issuable, assignee_id)
-    new_assignee = User.find_by_id(assignee_id)
+  def user_can_read?(issuable, user_id)
+    user = User.find_by_id(user_id)
 
-    return false unless new_assignee
+    return false unless user
 
     ability_name = :"read_#{issuable.to_ability_name}"
     resource     = issuable.persisted? ? issuable : project
 
-    can?(new_assignee, ability_name, resource)
+    can?(user, ability_name, resource)
   end
 
   def filter_milestone
     milestone_id = params[:milestone_id]
     return unless milestone_id
 
-    params[:milestone_id] = '' if milestone_id == IssuableFinder::NONE
+    params[:milestone_id] = '' if milestone_id == IssuableFinder::Params::NONE
     groups = project.group&.self_and_ancestors&.select(:id)
 
     milestone =
@@ -87,29 +93,8 @@ class IssuableBaseService < BaseService
     elsif params[label_key]
       params[label_id_key] = labels_service.find_or_create_by_titles(label_key, find_only: find_only).map(&:id)
     end
-  end
 
-  def filter_labels_in_param(key)
-    return if params[key].to_a.empty?
-
-    params[key] = available_labels.id_in(params[key]).pluck_primary_key
-  end
-
-  def find_or_create_label_ids
-    labels = params.delete(:labels)
-
-    return unless labels
-
-    params[:label_ids] = labels.map do |label_name|
-      label = Labels::FindOrCreateService.new(
-        current_user,
-        parent,
-        title: label_name.strip,
-        available_labels: available_labels
-      ).execute
-
-      label.try(:id)
-    end.compact
+    params.delete(label_key) if params[label_key].nil?
   end
 
   def labels_service
@@ -121,20 +106,16 @@ class IssuableBaseService < BaseService
     add_label_ids = attributes.delete(:add_label_ids)
     remove_label_ids = attributes.delete(:remove_label_ids)
 
-    new_label_ids = existing_label_ids || label_ids || []
+    new_label_ids = label_ids || existing_label_ids || []
     new_label_ids |= extra_label_ids
 
-    if add_label_ids.blank? && remove_label_ids.blank?
-      new_label_ids = label_ids if label_ids
-    else
-      new_label_ids |= add_label_ids if add_label_ids
-      new_label_ids -= remove_label_ids if remove_label_ids
-    end
+    new_label_ids |= add_label_ids if add_label_ids
+    new_label_ids -= remove_label_ids if remove_label_ids
 
     new_label_ids.uniq
   end
 
-  def handle_quick_actions_on_create(issuable)
+  def handle_quick_actions(issuable)
     merge_quick_actions_into_params!(issuable)
   end
 
@@ -142,17 +123,21 @@ class IssuableBaseService < BaseService
     original_description = params.fetch(:description, issuable.description)
 
     description, command_params =
-      QuickActions::InterpretService.new(project, current_user)
+      QuickActions::InterpretService.new(project, current_user, quick_action_options)
         .execute(original_description, issuable, only: only)
 
     # Avoid a description already set on an issuable to be overwritten by a nil
-    params[:description] = description if description
+    params[:description] = description if description && description != original_description
 
     params.merge!(command_params)
   end
 
-  def create(issuable)
-    handle_quick_actions_on_create(issuable)
+  def quick_action_options
+    {}
+  end
+
+  def create(issuable, skip_system_notes: false)
+    handle_quick_actions(issuable)
     filter_params(issuable)
 
     params.delete(:state_event)
@@ -163,10 +148,12 @@ class IssuableBaseService < BaseService
 
     before_create(issuable)
 
-    if issuable.save
-      ActiveRecord::Base.no_touching do
-        Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, is_update: false)
-      end
+    issuable_saved = issuable.with_transaction_returning_status do
+      issuable.save
+    end
+
+    if issuable_saved
+      create_system_notes(issuable, is_update: false) unless skip_system_notes
 
       after_create(issuable)
       execute_hooks(issuable)
@@ -194,11 +181,10 @@ class IssuableBaseService < BaseService
   end
 
   def update(issuable)
-    change_state(issuable)
-    change_subscription(issuable)
-    change_todo(issuable)
-    toggle_award(issuable)
+    handle_quick_actions(issuable)
     filter_params(issuable)
+
+    change_additional_attributes(issuable)
     old_associations = associations_before_update(issuable)
 
     label_ids = process_label_ids(params, existing_label_ids: issuable.label_ids)
@@ -211,7 +197,7 @@ class IssuableBaseService < BaseService
       issuable.assign_attributes(params)
 
       if has_title_or_description_changed?(issuable)
-        issuable.assign_attributes(last_edited_at: Time.now, last_edited_by: current_user)
+        issuable.assign_attributes(last_edited_at: Time.current, last_edited_by: current_user)
       end
 
       before_update(issuable)
@@ -226,11 +212,14 @@ class IssuableBaseService < BaseService
       update_project_counters = issuable.project && update_project_counter_caches?(issuable)
       ensure_milestone_available(issuable)
 
-      if issuable.with_transaction_returning_status { issuable.save(touch: should_touch) }
-        # We do not touch as it will affect a update on updated_at field
-        ActiveRecord::Base.no_touching do
-          Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, old_labels: old_associations[:labels])
-        end
+      issuable_saved = issuable.with_transaction_returning_status do
+        issuable.save(touch: should_touch)
+      end
+
+      if issuable_saved
+        create_system_notes(
+          issuable, old_labels: old_associations[:labels], old_milestone: old_associations[:milestone]
+        )
 
         handle_changes(issuable, old_associations: old_associations)
 
@@ -258,16 +247,13 @@ class IssuableBaseService < BaseService
 
     if issuable.changed? || params.present?
       issuable.assign_attributes(params.merge(updated_by: current_user,
-                                              last_edited_at: Time.now,
+                                              last_edited_at: Time.current,
                                               last_edited_by: current_user))
 
       before_update(issuable, skip_spam_check: true)
 
       if issuable.with_transaction_returning_status { issuable.save }
-        # We do not touch as it will affect a update on updated_at field
-        ActiveRecord::Base.no_touching do
-          Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, old_labels: nil)
-        end
+        create_system_notes(issuable, old_labels: nil)
 
         handle_task_changes(issuable)
         invalidate_cache_counts(issuable, users: issuable.assignees.to_a)
@@ -316,12 +302,26 @@ class IssuableBaseService < BaseService
     issuable.title_changed? || issuable.description_changed?
   end
 
+  def change_additional_attributes(issuable)
+    change_state(issuable)
+    change_severity(issuable)
+    change_subscription(issuable)
+    change_todo(issuable)
+    toggle_award(issuable)
+  end
+
   def change_state(issuable)
     case params.delete(:state_event)
     when 'reopen'
       reopen_service.new(project, current_user, {}).execute(issuable)
     when 'close'
       close_service.new(project, current_user, {}).execute(issuable)
+    end
+  end
+
+  def change_severity(issuable)
+    if severity = params.delete(:severity)
+      ::IncidentManagement::Incidents::UpdateSeverityService.new(issuable, current_user, severity).execute
     end
   end
 
@@ -341,7 +341,7 @@ class IssuableBaseService < BaseService
       todo_service.mark_todo(issuable, current_user)
     when 'done'
       todo = TodosFinder.new(current_user).find_by(target: issuable)
-      todo_service.mark_todos_as_done_by_ids(todo, current_user) if todo
+      todo_service.resolve_todo(todo, current_user) if todo
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord
@@ -351,21 +351,27 @@ class IssuableBaseService < BaseService
     AwardEmojis::ToggleService.new(issuable, award, current_user).execute if award
   end
 
+  def create_system_notes(issuable, **options)
+    Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, **options)
+  end
+
   def associations_before_update(issuable)
     associations =
       {
         labels: issuable.labels.to_a,
         mentioned_users: issuable.mentioned_users(current_user).to_a,
-        assignees: issuable.assignees.to_a
+        assignees: issuable.assignees.to_a,
+        milestone: issuable.try(:milestone)
       }
     associations[:total_time_spent] = issuable.total_time_spent if issuable.respond_to?(:total_time_spent)
     associations[:description] = issuable.description
+    associations[:reviewers] = issuable.reviewers.to_a if issuable.allows_reviewers?
 
     associations
   end
 
-  def has_changes?(issuable, old_labels: [], old_assignees: [])
-    valid_attrs = [:title, :description, :assignee_ids, :milestone_id, :target_branch]
+  def has_changes?(issuable, old_labels: [], old_assignees: [], old_reviewers: [])
+    valid_attrs = [:title, :description, :assignee_ids, :reviewer_ids, :milestone_id, :target_branch]
 
     attrs_changed = valid_attrs.any? do |attr|
       issuable.previous_changes.include?(attr.to_s)
@@ -375,7 +381,9 @@ class IssuableBaseService < BaseService
 
     assignees_changed = issuable.assignees != old_assignees
 
-    attrs_changed || labels_changed || assignees_changed
+    reviewers_changed = issuable.reviewers != old_reviewers if issuable.allows_reviewers?
+
+    attrs_changed || labels_changed || assignees_changed || reviewers_changed
   end
 
   def invalidate_cache_counts(issuable, users: [])
@@ -397,7 +405,7 @@ class IssuableBaseService < BaseService
   end
 
   def update_project_counter_caches?(issuable)
-    issuable.state_changed?
+    issuable.state_id_changed?
   end
 
   def parent

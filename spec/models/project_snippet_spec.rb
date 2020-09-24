@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe ProjectSnippet do
+RSpec.describe ProjectSnippet do
   describe "Associations" do
     it { is_expected.to belong_to(:project) }
   end
 
   describe "Validation" do
     it { is_expected.to validate_presence_of(:project) }
+    it { is_expected.to validate_inclusion_of(:secret).in_array([false]) }
   end
 
   describe '#embeddable?' do
@@ -30,5 +31,13 @@ describe ProjectSnippet do
         expect(snippet.embeddable?).to eq(combination[:embeddable])
       end
     end
+  end
+
+  it_behaves_like 'model with repository' do
+    let_it_be(:container) { create(:project_snippet, :repository) }
+    let(:stubbed_container) { build_stubbed(:project_snippet) }
+    let(:expected_full_path) { "#{container.project.full_path}/@snippets/#{container.id}" }
+    let(:expected_web_url_path) { "#{container.project.full_path}/-/snippets/#{container.id}" }
+    let(:expected_repo_url_path) { "#{container.project.full_path}/snippets/#{container.id}" }
   end
 end

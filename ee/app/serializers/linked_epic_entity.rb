@@ -30,6 +30,6 @@ class LinkedEpicEntity < Grape::Entity
   end
 
   expose :can_admin do |epic|
-    can?(request.current_user, :admin_epic, epic)
+    can?(request.current_user, :admin_epic_link, epic)
   end
 end

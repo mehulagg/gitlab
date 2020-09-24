@@ -1,5 +1,13 @@
 import { sprintf, s__ } from '~/locale';
 
+// Securely open external links in a new tab.
+function getLinkStartTag(url) {
+  return `<a href="${url}" target="_blank" rel="noopener noreferrer">`;
+}
+
+// Add in the external link icon at the end of every link.
+const linkEndTag = '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
+
 export default {
   computed: {
     sastPopover() {
@@ -10,14 +18,14 @@ export default {
         content: sprintf(
           s__('ciReport|%{linkStartTag}Learn more about SAST %{linkEndTag}'),
           {
-            linkStartTag: `<a href="${this.sastHelpPath}">`,
-            linkEndTag: '</a>',
+            linkStartTag: getLinkStartTag(this.sastHelpPath),
+            linkEndTag,
           },
           false,
         ),
       };
     },
-    sastContainerPopover() {
+    containerScanningPopover() {
       return {
         title: s__(
           'ciReport|Container scanning detects known vulnerabilities in your docker images.',
@@ -25,8 +33,8 @@ export default {
         content: sprintf(
           s__('ciReport|%{linkStartTag}Learn more about Container Scanning %{linkEndTag}'),
           {
-            linkStartTag: `<a href="${this.sastContainerHelpPath}">`,
-            linkEndTag: '</a>',
+            linkStartTag: getLinkStartTag(this.containerScanningHelpPath),
+            linkEndTag,
           },
           false,
         ),
@@ -40,8 +48,8 @@ export default {
         content: sprintf(
           s__('ciReport|%{linkStartTag}Learn more about DAST %{linkEndTag}'),
           {
-            linkStartTag: `<a href="${this.dastHelpPath}">`,
-            linkEndTag: '</a>',
+            linkStartTag: getLinkStartTag(this.dastHelpPath),
+            linkEndTag,
           },
           false,
         ),
@@ -55,8 +63,36 @@ export default {
         content: sprintf(
           s__('ciReport|%{linkStartTag}Learn more about Dependency Scanning %{linkEndTag}'),
           {
-            linkStartTag: `<a href="${this.dependencyScanningHelpPath}">`,
-            linkEndTag: '</a>',
+            linkStartTag: getLinkStartTag(this.dependencyScanningHelpPath),
+            linkEndTag,
+          },
+          false,
+        ),
+      };
+    },
+    secretScanningPopover() {
+      return {
+        title: s__(
+          'ciReport|Secret scanning detects secrets and credentials vulnerabilities in your source code.',
+        ),
+        content: sprintf(
+          s__('ciReport|%{linkStartTag}Learn more about Secret Detection %{linkEndTag}'),
+          {
+            linkStartTag: getLinkStartTag(this.secretScanningHelpPath),
+            linkEndTag,
+          },
+          false,
+        ),
+      };
+    },
+    coverageFuzzingPopover() {
+      return {
+        title: s__('ciReport|Coverage Fuzzing Title'),
+        content: sprintf(
+          s__('ciReport|%{linkStartTag}Learn more about Coverage Fuzzing %{linkEndTag}'),
+          {
+            linkStartTag: getLinkStartTag(this.coverageFuzzingHelpPath),
+            linkEndTag,
           },
           false,
         ),

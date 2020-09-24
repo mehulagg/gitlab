@@ -100,7 +100,7 @@ module Gitlab
 
         includes
           .map(&method(:serialize_include_definition))
-          .compact
+          .tap { |entries| entries.compact! }
           .to_h
       end
 
@@ -136,12 +136,13 @@ module Gitlab
         data = []
 
         record.in_batches(of: @batch_size) do |batch| # rubocop:disable Cop/InBatches
-          if Feature.enabled?(:export_fast_serialize_with_raw_json, default_enabled: true)
-            data.append(JSONBatchRelation.new(batch, options, preloads[key]).tap(&:raw_json))
-          else
-            batch = batch.preload(preloads[key]) if preloads&.key?(key)
-            data += batch.as_json(options)
-          end
+          # order each batch by it's primary key to ensure
+          # consistent and predictable ordering of each exported relation
+          # as additional `WHERE` clauses can impact the order in which data is being
+          # returned by database when no `ORDER` is specified
+          batch = batch.reorder(batch.klass.primary_key)
+
+          data.append(JSONBatchRelation.new(batch, options, preloads[key]).tap(&:raw_json))
         end
 
         data

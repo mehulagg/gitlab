@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::ShaAttribute do
+RSpec.describe Gitlab::Database::ShaAttribute do
   let(:sha) do
     '9a573a369a5bfbb9a4a36e98852c21af8a44ea8b'
   end
@@ -25,7 +25,7 @@ describe Gitlab::Database::ShaAttribute do
 
   describe '#serialize' do
     it 'converts a SHA String to binary data' do
-      expect(attribute.serialize(sha).to_s).to eq(binary_sha)
+      expect(described_class.serialize(sha).to_s).to eq(binary_sha)
     end
   end
 end

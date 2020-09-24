@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
-describe Gitlab::Git::Branch, :seed_helper do
+RSpec.describe Gitlab::Git::Branch, :seed_helper do
   let(:repository) { Gitlab::Git::Repository.new('default', TEST_REPO_PATH, '', 'group/project') }
   let(:rugged) do
     Rugged::Repository.new(File.join(TestEnv.repos_path, repository.relative_path))
@@ -69,21 +71,20 @@ describe Gitlab::Git::Branch, :seed_helper do
     end
 
     let(:user) { create(:user) }
-    let(:committer) do
-      Gitlab::Git.committer_hash(email: user.email, name: user.name)
-    end
+    let(:committer) { { email: user.email, name: user.name } }
     let(:params) do
       parents = [rugged.head.target]
       tree = parents.first.tree
 
       {
-        message: 'commit message',
+        message: +'commit message',
         author: committer,
         committer: committer,
         tree: tree,
         parents: parents
       }
     end
+
     let(:stale_sha) { Timecop.freeze(Gitlab::Git::Branch::STALE_BRANCH_THRESHOLD.ago - 5.days) { create_commit } }
     let(:active_sha) { Timecop.freeze(Gitlab::Git::Branch::STALE_BRANCH_THRESHOLD.ago + 5.days) { create_commit } }
     let(:future_sha) { Timecop.freeze(100.days.since) { create_commit } }
@@ -126,7 +127,7 @@ describe Gitlab::Git::Branch, :seed_helper do
   it { expect(repository.branches.size).to eq(SeedRepo::Repo::BRANCHES.size) }
 
   def create_commit
-    params[:message].delete!("\r")
+    params[:message].delete!(+"\r")
     Rugged::Commit.create(rugged, params.merge(committer: committer.merge(time: Time.now)))
   end
 end

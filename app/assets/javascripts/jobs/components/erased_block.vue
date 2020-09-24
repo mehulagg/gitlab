@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { GlLink } from '@gitlab/ui';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -21,13 +21,13 @@ export default {
   },
   computed: {
     isErasedByUser() {
-      return !_.isEmpty(this.user);
+      return !isEmpty(this.user);
     },
   },
 };
 </script>
 <template>
-  <div class="prepend-top-default js-build-erased">
+  <div class="gl-mt-3 js-build-erased">
     <div class="erased alert alert-warning">
       <template v-if="isErasedByUser">
         {{ s__('Job|Job has been erased by') }}

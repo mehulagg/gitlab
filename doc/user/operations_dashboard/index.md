@@ -1,6 +1,6 @@
 # Operations Dashboard **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/5781) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.5. [Moved](https://gitlab.com/gitlab-org/gitlab/issues/9218) to [GitLab Premium](https://about.gitlab.com/pricing/) in 11.10.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5781) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.5. [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/9218) to [GitLab Premium](https://about.gitlab.com/pricing/) in 11.10.
 
 The Operations Dashboard provides a summary of each project's operational health,
 including pipeline and alert status.
@@ -22,6 +22,8 @@ To add a project to the dashboard:
 
 Once added, the dashboard will display the project's number of active alerts,
 last commit, pipeline status, and when it was last deployed.
+
+The Operations and [Environments](../../ci/environments/environments_dashboard.md) dashboards share the same list of projects. Adding or removing a project from one adds or removes the project from the other.
 
 ![Operations Dashboard with projects](img/index_operations_dashboard_with_projects.png)
 

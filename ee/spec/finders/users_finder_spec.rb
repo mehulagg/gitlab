@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsersFinder do
+RSpec.describe UsersFinder do
   describe '#execute' do
     include_context 'UsersFinder#execute filter by project context'
 
@@ -13,13 +13,13 @@ describe UsersFinder do
         it 'returns ldap users by default' do
           users = described_class.new(normal_user).execute
 
-          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, ldap_user)
+          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, ldap_user, internal_user)
         end
 
         it 'returns only non-ldap users with skip_ldap: true' do
           users = described_class.new(normal_user, skip_ldap: true).execute
 
-          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user)
+          expect(users).to contain_exactly(normal_user, blocked_user, omniauth_user, internal_user)
         end
       end
     end

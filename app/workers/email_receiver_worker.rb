@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-class EmailReceiverWorker
+class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :issue_tracking
-  latency_sensitive_worker!
+  urgency :high
+  weight 2
 
   def perform(raw)
     return unless Gitlab::IncomingEmail.enabled?
@@ -19,7 +20,7 @@ class EmailReceiverWorker
   private
 
   def handle_failure(raw, error)
-    Rails.logger.warn("Email can not be processed: #{error}\n\n#{raw}") # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.warn("Email can not be processed: #{error}\n\n#{raw}")
 
     return unless raw.present?
 

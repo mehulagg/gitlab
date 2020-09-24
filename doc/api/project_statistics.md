@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Project statistics API
 
 Every API call to [project](../user/project/index.md) statistics must be authenticated.
@@ -8,7 +15,7 @@ Retrieving the statistics requires write access to the repository.
 Currently only HTTP fetches statistics are returned.
 Fetches statistics includes both clones and pulls count and are HTTP only, SSH fetches are not included.
 
-```
+```plaintext
 GET /projects/:id/statistics
 ```
 

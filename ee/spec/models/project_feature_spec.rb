@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectFeature do
+RSpec.describe ProjectFeature do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 

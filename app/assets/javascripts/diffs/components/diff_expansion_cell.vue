@@ -1,9 +1,10 @@
 <script>
-import createFlash from '~/flash';
-import { s__ } from '~/locale';
 import { mapState, mapActions } from 'vuex';
-import Icon from '~/vue_shared/components/icon.vue';
-import { UNFOLD_COUNT } from '../constants';
+import { GlIcon } from '@gitlab/ui';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { s__, sprintf } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { UNFOLD_COUNT, INLINE_DIFF_VIEW_TYPE, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
 import * as utils from '../store/utils';
 import tooltip from '../../vue_shared/directives/tooltip';
 
@@ -11,13 +12,29 @@ const EXPAND_ALL = 0;
 const EXPAND_UP = 1;
 const EXPAND_DOWN = 2;
 
+const lineNumberByViewType = (viewType, diffLine) => {
+  const numberGetters = {
+    [INLINE_DIFF_VIEW_TYPE]: line => line?.new_line,
+    [PARALLEL_DIFF_VIEW_TYPE]: line => (line?.right || line?.left)?.new_line,
+  };
+  const numberGetter = numberGetters[viewType];
+  return numberGetter && numberGetter(diffLine);
+};
+
+const i18n = {
+  showMore: sprintf(s__('Diffs|Show %{unfoldCount} lines'), { unfoldCount: UNFOLD_COUNT }),
+  showAll: s__('Diffs|Show all unchanged lines'),
+};
+
 export default {
+  i18n,
   directives: {
     tooltip,
   },
   components: {
-    Icon,
+    GlIcon,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     fileHash: {
       type: String,
@@ -44,12 +61,14 @@ export default {
     colspan: {
       type: Number,
       required: false,
-      default: 3,
+      default: 4,
     },
   },
   computed: {
     ...mapState({
-      diffViewType: state => state.diffs.diffViewType,
+      diffViewType(state) {
+        return this.glFeatures.unifiedDiffLines ? INLINE_DIFF_VIEW_TYPE : state.diffs.diffViewType;
+      },
       diffFiles: state => state.diffs.diffFiles,
     }),
     canExpandUp() {
@@ -67,12 +86,16 @@ export default {
     ...mapActions('diffs', ['loadMoreLines']),
     getPrevLineNumber(oldLineNumber, newLineNumber) {
       const diffFile = utils.findDiffFile(this.diffFiles, this.fileHash);
-      const indexForInline = utils.findIndexInInlineLines(diffFile.highlighted_diff_lines, {
+      const lines = {
+        [INLINE_DIFF_VIEW_TYPE]: diffFile.highlighted_diff_lines,
+        [PARALLEL_DIFF_VIEW_TYPE]: diffFile.parallel_diff_lines,
+      };
+      const index = utils.getPreviousLineIndex(this.diffViewType, diffFile, {
         oldLineNumber,
         newLineNumber,
       });
-      const prevLine = diffFile.highlighted_diff_lines[indexForInline - 2];
-      return (prevLine && prevLine.new_line) || 0;
+
+      return lineNumberByViewType(this.diffViewType, lines[this.diffViewType][index - 2]) || 0;
     },
     callLoadMoreLines(
       endpoint,
@@ -114,7 +137,7 @@ export default {
         this.handleExpandAllLines(expandOptions);
       }
     },
-    handleExpandUpLines(expandOptions = EXPAND_ALL) {
+    handleExpandUpLines(expandOptions) {
       const { endpoint, fileHash, view, oldLineNumber, newLineNumber, offset } = expandOptions;
 
       const bottom = this.isBottom;
@@ -212,32 +235,27 @@ export default {
 </script>
 
 <template>
-  <td :colspan="colspan" class="text-center">
+  <td :colspan="colspan" class="text-center gl-font-regular">
     <div class="content js-line-expansion-content">
       <a
-        v-if="canExpandUp"
-        v-tooltip
-        class="cursor-pointer js-unfold unfold-icon d-inline-block pt-2 pb-2"
-        data-placement="top"
-        data-container="body"
-        :title="__('Expand up')"
-        @click="handleExpandLines(EXPAND_UP)"
-      >
-        <icon :size="12" name="expand-up" aria-hidden="true" />
-      </a>
-      <a class="mx-2 cursor-pointer js-unfold-all" @click="handleExpandLines()">
-        <span>{{ s__('Diffs|Show all lines') }}</span>
-      </a>
-      <a
         v-if="canExpandDown"
-        v-tooltip
-        class="cursor-pointer js-unfold-down has-tooltip unfold-icon d-inline-block pt-2 pb-2"
-        data-placement="top"
-        data-container="body"
-        :title="__('Expand down')"
+        class="gl-mx-2 gl-cursor-pointer js-unfold-down gl-display-inline-block gl-py-4"
         @click="handleExpandLines(EXPAND_DOWN)"
       >
-        <icon :size="12" name="expand-down" aria-hidden="true" />
+        <gl-icon :size="12" name="expand-down" aria-hidden="true" />
+        <span>{{ $options.i18n.showMore }}</span>
+      </a>
+      <a class="gl-mx-2 cursor-pointer js-unfold-all" @click="handleExpandLines()">
+        <gl-icon :size="12" name="expand" aria-hidden="true" />
+        <span>{{ $options.i18n.showAll }}</span>
+      </a>
+      <a
+        v-if="canExpandUp"
+        class="gl-mx-2 gl-cursor-pointer js-unfold gl-display-inline-block gl-py-4"
+        @click="handleExpandLines(EXPAND_UP)"
+      >
+        <gl-icon :size="12" name="expand-up" aria-hidden="true" />
+        <span>{{ $options.i18n.showMore }}</span>
       </a>
     </div>
   </td>

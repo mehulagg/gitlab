@@ -16,7 +16,7 @@ module Gitlab
           #
           class Entry
             attr_reader :entries
-            attr_accessor :name
+            attr_writer :name
 
             def initialize(path, entries)
               @entries = entries
@@ -50,7 +50,7 @@ module Gitlab
             end
 
             def basename
-              (directory? && !blank_node?) ? name + '/' : name
+              directory? && !blank_node? ? name + '/' : name
             end
 
             def name

@@ -2,12 +2,15 @@
 
 require 'spec_helper'
 
-describe 'Updating an Epic' do
+RSpec.describe Mutations::Epics::Update do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let(:epic) { create(:epic, group: group, title: 'original title') }
+  let(:label_1) { create(:group_label, group: group) }
+  let(:label_2) { create(:group_label, group: group) }
+  let(:label_3) { create(:group_label, group: group) }
+  let(:epic) { create(:epic, group: group, title: 'original title', labels: [label_2]) }
 
   let(:attributes) do
     {
@@ -16,7 +19,8 @@ describe 'Updating an Epic' do
       start_date_fixed: '2019-09-17',
       due_date_fixed: '2019-09-18',
       start_date_is_fixed: true,
-      due_date_is_fixed: true
+      due_date_is_fixed: true,
+      confidential: true
     }
   end
 
@@ -35,9 +39,7 @@ describe 'Updating an Epic' do
       stub_licensed_features(epics: true)
     end
 
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not update the epic' do
       post_graphql_mutation(mutation, current_user: current_user)
@@ -76,6 +78,7 @@ describe 'Updating an Epic' do
         expect(epic_hash['startDateIsFixed']).to eq(true)
         expect(epic_hash['dueDateFixed']).to eq('2019-09-18')
         expect(epic_hash['dueDateIsFixed']).to eq(true)
+        expect(epic_hash['confidential']).to eq(true)
       end
 
       context 'when closing the epic' do
@@ -97,6 +100,16 @@ describe 'Updating an Epic' do
           post_graphql_mutation(mutation, current_user: current_user)
 
           expect(epic.reload).to be_open
+        end
+      end
+
+      context 'when changing labels of the epic' do
+        let(:attributes) { { add_label_ids: [label_1.id, label_3.id], remove_label_ids: label_2.id } }
+
+        it 'adds and removes labels correctly' do
+          post_graphql_mutation(mutation, current_user: current_user)
+
+          expect(epic.reload.labels).to match_array([label_1, label_3])
         end
       end
 

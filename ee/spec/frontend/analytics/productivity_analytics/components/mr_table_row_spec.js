@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import MergeRequestTableRow from 'ee/analytics/productivity_analytics/components/mr_table_row.vue';
 import MetricColumn from 'ee/analytics/productivity_analytics/components/metric_column.vue';
 import { GlAvatar } from '@gitlab/ui';
@@ -14,11 +14,7 @@ describe('MergeRequestTableRow component', () => {
   };
 
   const factory = (props = defaultProps) => {
-    const localVue = createLocalVue();
-
-    wrapper = shallowMount(localVue.extend(MergeRequestTableRow), {
-      localVue,
-      sync: false,
+    wrapper = shallowMount(MergeRequestTableRow, {
       propsData: { ...props },
     });
   };
@@ -82,7 +78,7 @@ describe('MergeRequestTableRow component', () => {
 
     describe('metric columns', () => {
       it('renders two metric columns', () => {
-        expect(findMetricColumns().length).toBe(2);
+        expect(findMetricColumns()).toHaveLength(2);
       });
 
       it('renders the "Time to merge" metric column with the "days_to_merge" metric', () => {

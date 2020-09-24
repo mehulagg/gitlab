@@ -1,9 +1,9 @@
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export const ChildType = {
-  // eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings
+  // eslint-disable-next-line @gitlab/require-i18n-strings
   Epic: 'Epic',
-  // eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings
+  // eslint-disable-next-line @gitlab/require-i18n-strings
   Issue: 'Issue',
 };
 
@@ -39,4 +39,20 @@ export const RemoveItemModalProps = {
 
 export const OVERFLOW_AFTER = 5;
 
+export const SEARCH_DEBOUNCE = 500;
+
 export const itemRemoveModalId = 'item-remove-confirmation';
+
+export const treeItemChevronBtnClassName = 'btn-tree-item-chevron';
+
+export const issueHealthStatus = {
+  atRisk: __('At risk'),
+  onTrack: __('On track'),
+  needsAttention: __('Needs attention'),
+};
+
+export const issueHealthStatusCSSMapping = {
+  atRisk: 'status-at-risk',
+  onTrack: 'status-on-track',
+  needsAttention: 'status-needs-attention',
+};

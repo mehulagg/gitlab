@@ -7,9 +7,7 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          include SafeMirrorParams
-
-          before_action :push_rule, only: [:show]
+          before_action :push_rule, only: [:show, :create_deploy_token]
         end
 
         private
@@ -17,7 +15,11 @@ module EE
         def push_rule
           return unless project.feature_available?(:push_rules)
 
-          project.create_push_rule unless project.push_rule
+          unless project.push_rule
+            push_rule = project.create_push_rule
+            project.project_setting.update(push_rule_id: push_rule.id)
+          end
+
           @push_rule = project.push_rule # rubocop:disable Gitlab/ModuleWithInstanceVariables
         end
 
@@ -31,23 +33,10 @@ module EE
         end
         # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-        def load_gon_index
-          super
-
-          gon.push(current_project_id: project.id) if project
-        end
-
-        # rubocop:disable Gitlab/ModuleWithInstanceVariables
         def render_show
-          @deploy_keys = ::Projects::Settings::DeployKeysPresenter.new(@project, current_user: current_user)
-          @deploy_tokens = @project.deploy_tokens.active
-
-          define_deploy_token
-          define_protected_refs
           push_rule
-          remote_mirror
 
-          render 'show'
+          super
         end
       end
     end

@@ -1,10 +1,17 @@
+---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference
+---
+
 # New CI job permissions model
 
 > Introduced in GitLab 8.12.
 
-GitLab 8.12 has a completely redesigned [job permissions] system. You can find
+GitLab 8.12 has a completely redesigned [job permissions](../permissions.md#job-permissions) system. You can find
 all discussion and all our concerns when choosing the current approach in issue
-[#18994](https://gitlab.com/gitlab-org/gitlab-foss/issues/18994).
+[#18994](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/18994).
 
 Jobs permissions should be tightly integrated with the permissions of a user
 who is triggering a job.
@@ -32,7 +39,7 @@ as created by the pusher (local push or via the UI) and any job created in this
 pipeline will have the read permissions of the pusher but not write permissions.
 
 This allows us to make it really easy to evaluate the access for all projects
-that have [Git submodules][gitsub] or are using container images that the pusher
+that have [Git submodules](../../ci/git_submodules.md) or are using container images that the pusher
 would have access too. **The permission is granted only for the time that the job
 is running. The access is revoked after the job is finished.**
 
@@ -47,8 +54,8 @@ It is important to note that we have a few types of users:
   Administrator will have to be a member of it in order to have access to it
   via another project's job.
 
-- **External users**: CI jobs created by [external users](../permissions.md#external-users-core-only) will have
-  access only to projects to which user has at least reporter access. This
+- **External users**: CI jobs created by [external users](../permissions.md#external-users) will have
+  access only to projects to which the user has at least Reporter access. This
   rules out accessing all internal projects by default.
 
 This allows us to make the CI and permission system more trustworthy.
@@ -58,7 +65,7 @@ Let's consider the following scenario:
    hosted in private repositories and you have multiple CI jobs that make use
    of these repositories.
 
-1. You invite a new [external user](../permissions.md#external-users-core-only). CI jobs created by that user do not
+1. You invite a new [external user](../permissions.md#external-users). CI jobs created by that user do not
    have access to internal repositories, because the user also doesn't have the
    access from within GitLab. You as an employee have to grant explicit access
    for this user. This allows us to prevent from accidental data leakage.
@@ -68,7 +75,7 @@ Let's consider the following scenario:
 A unique job token is generated for each job and provides the user read
 access all projects that would be normally accessible to the user creating that
 job. The unique job token does not have any write permissions, but there
-is a [proposal to add support](https://gitlab.com/gitlab-org/gitlab-foss/issues/18106).
+is a [proposal to add support](https://gitlab.com/gitlab-org/gitlab/-/issues/35067).
 
 We try to make sure that this token doesn't leak by:
 
@@ -76,9 +83,9 @@ We try to make sure that this token doesn't leak by:
 1. Masking the job token from job logs.
 1. Granting permissions to the job token **only** when the job is running.
 
-However, this brings a question about the Runners security. To make sure that
+However, this brings up a question about the runner's security. To make sure that
 this token doesn't leak, you should also make sure that you configure
-your Runners in the most possible secure way, by avoiding the following:
+your runners in the most possible secure way, by avoiding the following:
 
 1. Any usage of Docker's `privileged` mode is risky if the machines are re-used.
 1. Using the `shell` executor since jobs run on the same machine.
@@ -88,35 +95,35 @@ to steal the tokens of other jobs.
 
 ## Before GitLab 8.12
 
-In versions before GitLab 8.12, all CI jobs would use the CI Runner's token
+In versions before GitLab 8.12, all CI jobs would use the runner's token
 to checkout project sources.
 
-The project's Runner's token was a token that you could find under the
+The project's runner token was a token that you could find under the
 project's **Settings > Pipelines** and was limited to access only that
 project.
-It could be used for registering new specific Runners assigned to the project
+It could be used for registering new specific runners assigned to the project
 and to checkout project sources.
 It could also be used with the GitLab Container Registry for that project,
 allowing pulling and pushing Docker images from within the CI job.
 
 GitLab would create a special checkout URL like:
 
-```
+```plaintext
 https://gitlab-ci-token:<project-runners-token>/gitlab.com/gitlab-org/gitlab-foss.git
 ```
 
 And then the users could also use it in their CI jobs all Docker related
 commands to interact with GitLab Container Registry. For example:
 
-```
+```shell
 docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
 ```
 
 Using single token had multiple security implications:
 
-- The token would be readable to anyone who had developer access to a project
+- The token would be readable to anyone who had Developer access to a project
   that could run CI jobs, allowing the developer to register any specific
-  Runner for that project.
+  runner for that project.
 - The token would allow to access only the project's sources, forbidding from
   accessing any other projects.
 - The token was not expiring and was multi-purpose: used for checking out sources,
@@ -132,7 +139,7 @@ With the new job permissions model, there is now an easy way to access all
 dependent source code in a project. That way, we can:
 
 1. Access a project's dependent repositories
-1. Access a project's [Git submodules][gitsub]
+1. Access a project's [Git submodules](../../ci/git_submodules.md)
 1. Access private container images
 1. Access project's and submodule LFS objects
 
@@ -151,15 +158,15 @@ In short here's what you need to do should you encounter any issues.
 
 As an administrator:
 
-- **500 errors**: You will need to update [GitLab Workhorse][workhorse] to at
+- **500 errors**: You will need to update [GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) to at
   least 0.8.2. This is done automatically for Omnibus installations, you need to
-  [check manually][update-docs] for installations from source.
+  [check manually](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/doc/update) for installations from source.
 - **500 errors**: Check if you have another web proxy sitting in front of NGINX (HAProxy,
   Apache, etc.). It might be a good idea to let GitLab use the internal NGINX
-  web server and not disable it completely. See [this comment][comment] for an
+  web server and not disable it completely. See [this comment](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/22484#note_16648302) for an
   example.
 - **403 errors**: You need to make sure that your installation has [HTTP(S)
-  cloning enabled][https]. HTTP(S) support is now a **requirement** by GitLab CI
+  cloning enabled](../admin_area/settings/visibility_and_access_controls.md#enabled-git-access-protocols). HTTP(S) support is now a **requirement** by GitLab CI
   to clone all sources.
 
 As a user:
@@ -170,24 +177,24 @@ As a user:
 
 ### Dependent repositories
 
-The [Job environment variable][jobenv] `CI_JOB_TOKEN` can be used to
+The [Job environment variable](../../ci/variables/README.md#predefined-environment-variables) `CI_JOB_TOKEN` can be used to
 authenticate any clones of dependent repositories. For example:
 
-```
+```shell
 git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/<user>/<mydependentrepo>.git
 ```
 
 It can also be used for system-wide authentication
-(only do this in a docker container, it will overwrite ~/.netrc):
+(only do this in a Docker container, it will overwrite ~/.netrc):
 
-```
+```shell
 echo -e "machine gitlab.com\nlogin gitlab-ci-token\npassword ${CI_JOB_TOKEN}" > ~/.netrc
 ```
 
 ### Git submodules
 
-To properly configure submodules with GitLab CI, read the
-[Git submodules documentation][gitsub].
+To properly configure submodules with GitLab CI/CD, read the
+[Git submodules documentation](../../ci/git_submodules.md).
 
 ### Container Registry
 
@@ -198,13 +205,13 @@ Container Registries for private projects.
 >
 > - GitLab Runner versions prior to 1.8 don't incorporate the introduced changes
 >   for permissions. This makes the `image:` directive not work with private
->   projects automatically and it needs to be configured manually on Runner's host
+>   projects automatically and it needs to be configured manually on the GitLab Runner host
 >   with a predefined account (for example administrator's personal account with
 >   access token created explicitly for this purpose). This issue is resolved with
 >   latest changes in GitLab Runner 1.8 which receives GitLab credentials with
 >   build data.
-> - Starting from GitLab 8.12, if you have [2FA] enabled in your account, you need
->   to pass a [personal access token][pat] instead of your password in order to
+> - Starting from GitLab 8.12, if you have [2FA](../profile/account/two_factor_authentication.md) enabled in your account, you need
+>   to pass a [personal access token](../profile/personal_access_tokens.md) instead of your password in order to
 >   login to GitLab's Container Registry.
 
 Your jobs can access all container images that you would normally have access
@@ -213,7 +220,7 @@ project for which the job is triggered.
 
 This is how an example usage can look like:
 
-```
+```yaml
 test:
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
@@ -223,22 +230,11 @@ test:
 
 ### Pipeline triggers
 
-Since 9.0 [pipeline triggers][triggers] do support the new permission model.
+Since 9.0 [pipeline triggers](../../ci/triggers/README.md#ci-job-token) do support the new permission model.
 The new triggers do impersonate their associated user including their access
 to projects and their project permissions.
 
 ### API
 
-GitLab API cannot be used via `CI_JOB_TOKEN` but there is a [proposal](https://gitlab.com/gitlab-org/gitlab-foss/issues/29566)
+GitLab API cannot be used via `CI_JOB_TOKEN` but there is a [proposal](https://gitlab.com/gitlab-org/gitlab/-/issues/35067)
 to support it.
-
-[job permissions]: ../permissions.md#job-permissions
-[comment]: https://gitlab.com/gitlab-org/gitlab-foss/issues/22484#note_16648302
-[gitsub]: ../../ci/git_submodules.md
-[https]: ../admin_area/settings/visibility_and_access_controls.md#enabled-git-access-protocols
-[triggers]: ../../ci/triggers/README.md#ci-job-token
-[update-docs]: https://gitlab.com/gitlab-org/gitlab-foss/tree/master/doc/update
-[workhorse]: https://gitlab.com/gitlab-org/gitlab-workhorse
-[jobenv]: ../../ci/variables/README.md#predefined-environment-variables
-[2fa]: ../profile/account/two_factor_authentication.md
-[pat]: ../profile/personal_access_tokens.md

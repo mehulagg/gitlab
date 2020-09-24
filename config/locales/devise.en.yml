@@ -15,7 +15,7 @@ en:
       not_found_in_database: "Invalid %{authentication_keys} or password."
       timeout: "Your session expired. Please sign in again to continue."
       unauthenticated: "You need to sign in or sign up before continuing."
-      unconfirmed: "You have to confirm your email address before continuing."
+      unconfirmed: "You have to confirm your email address before continuing. Please check your email for the link we sent you, or click 'Resend confirmation email'."
     mailer:
       confirmation_instructions:
         subject: "Confirmation instructions"
@@ -25,6 +25,8 @@ en:
         subject: "Unlock instructions"
       password_change:
         subject: "Password Changed"
+      password_change_by_admin:
+        subject: "Password changed by administrator"
     omniauth_callbacks:
       failure: "Could not authenticate you from %{kind} because \"%{reason}\"."
       success: "Successfully authenticated from %{kind} account."
@@ -53,7 +55,7 @@ en:
   errors:
     messages:
       already_confirmed: "was already confirmed, please try signing in"
-      confirmation_period_expired: "needs to be confirmed within %{period}, please request a new one"
+      confirmation_period_expired: "needs to be confirmed within %{period}, please request a new one below"
       expired: "has expired, please request a new one"
       not_found: "not found"
       not_locked: "was not locked"

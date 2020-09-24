@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards add issue modal', :js do
+RSpec.describe 'Issue Boards add issue modal', :js do
   let(:project) { create(:project, :public) }
   let(:board) { create(:board, project: project) }
   let(:user) { create(:user) }
@@ -25,6 +25,6 @@ describe 'Issue Boards add issue modal', :js do
     wait_for_requests
     find('.add-issues-modal .filtered-search').click
 
-    expect(page.find('.filter-dropdown')).to have_content 'weight'
+    expect(page.find('.filter-dropdown')).to have_content 'Weight'
   end
 end

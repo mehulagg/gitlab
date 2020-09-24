@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Templates do
+RSpec.describe API::Templates do
   files = {
     'Dockerfile/custom.dockerfile' => 'Custom dockerfiles',
     'gitignore/custom.gitignore'   => 'Custom gitignores',
@@ -10,7 +10,7 @@ describe API::Templates do
     'LICENSE/custom.txt'           => 'Custom licenses'
   }
 
-  set(:project) { create(:project, :custom_repo, files: files) }
+  let_it_be(:project) { create(:project, :custom_repo, files: files) }
 
   before do
     stub_ee_application_setting(file_template_project: project)
@@ -27,7 +27,7 @@ describe API::Templates do
         stub_licensed_features(custom_file_templates: true)
         get api("/templates/#{type}")
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to satisfy_one { |template| template['name'] == 'custom' }
       end
 
@@ -35,7 +35,7 @@ describe API::Templates do
         stub_licensed_features(custom_file_templates: false)
         get api("/templates/#{type}")
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to satisfy_none { |template| template['name'] == 'custom' }
       end
     end
@@ -45,7 +45,7 @@ describe API::Templates do
         stub_licensed_features(custom_file_templates: true)
         get api("/templates/#{type}/custom")
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['name']).to eq('custom')
         expect(json_response['content']).to eq("Custom #{type}")
       end
@@ -54,7 +54,7 @@ describe API::Templates do
         stub_licensed_features(custom_file_templates: false)
         get api("/templates/#{type}/custom")
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

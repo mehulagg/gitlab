@@ -1,15 +1,27 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 include ImportExport::CommonUtil
 
-describe Gitlab::ImportExport::VersionChecker do
+RSpec.describe Gitlab::ImportExport::VersionChecker do
   let!(:shared) { Gitlab::ImportExport::Shared.new(nil) }
 
   describe 'bundle a project Git repo' do
     let(:version) { Gitlab::ImportExport.version }
+    let(:version_file) { Tempfile.new('VERSION') }
 
     before do
       allow_any_instance_of(Gitlab::ImportExport::Shared).to receive(:relative_archive_path).and_return('')
-      allow(File).to receive(:open).and_return(version)
+
+      version_file.write(version)
+      version_file.rewind
+
+      allow_any_instance_of(described_class).to receive(:version_file).and_return(version_file.path)
+    end
+
+    after do
+      version_file.close
+      version_file.unlink
     end
 
     it 'returns true if Import/Export have the same version' do

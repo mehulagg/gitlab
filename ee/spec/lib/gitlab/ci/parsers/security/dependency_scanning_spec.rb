@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Parsers::Security::DependencyScanning do
+RSpec.describe Gitlab::Ci::Parsers::Security::DependencyScanning do
   using RSpec::Parameterized::TableSyntax
 
   describe '#parse!' do
     let(:project) { artifact.project }
     let(:pipeline) { artifact.job.pipeline }
     let(:artifact) { create(:ee_ci_job_artifact, :dependency_scanning) }
-    let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline.sha) }
+    let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
     let(:parser) { described_class.new }
 
     where(:report_format, :occurrence_count, :identifier_count, :scanner_count, :file_path, :package_name, :package_version, :version) do
@@ -27,14 +27,14 @@ describe Gitlab::Ci::Parsers::Security::DependencyScanning do
         end
       end
 
-      it "parses all identifiers and occurrences" do
-        expect(report.occurrences.length).to eq(occurrence_count)
+      it "parses all identifiers and findings" do
+        expect(report.findings.length).to eq(occurrence_count)
         expect(report.identifiers.length).to eq(identifier_count)
         expect(report.scanners.length).to eq(scanner_count)
       end
 
       it 'generates expected location' do
-        location = report.occurrences.first.location
+        location = report.findings.first.location
 
         expect(location).to be_a(::Gitlab::Ci::Reports::Security::Locations::DependencyScanning)
         expect(location).to have_attributes(
@@ -45,12 +45,12 @@ describe Gitlab::Ci::Parsers::Security::DependencyScanning do
       end
 
       it "generates expected metadata_version" do
-        expect(report.occurrences.first.metadata_version).to eq(version)
+        expect(report.findings.first.metadata_version).to eq(version)
       end
     end
 
     context "when parsing a vulnerability with a missing location" do
-      let(:report_hash) { JSON.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
+      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
 
       before do
         report_hash[:vulnerabilities][0][:location] = nil
@@ -60,7 +60,7 @@ describe Gitlab::Ci::Parsers::Security::DependencyScanning do
     end
 
     context "when parsing a vulnerability with a missing cve" do
-      let(:report_hash) { JSON.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
+      let(:report_hash) { Gitlab::Json.parse(fixture_file('security_reports/master/gl-sast-report.json', dir: 'ee'), symbolize_names: true) }
 
       before do
         report_hash[:vulnerabilities][0][:cve] = nil
@@ -79,8 +79,8 @@ describe Gitlab::Ci::Parsers::Security::DependencyScanning do
       end
 
       it "generates occurrence with expected remediation" do
-        occurrence = report.occurrences.last
-        raw_metadata = JSON.parse!(occurrence.raw_metadata)
+        occurrence = report.findings.last
+        raw_metadata = Gitlab::Json.parse!(occurrence.raw_metadata)
 
         expect(occurrence.name).to eq("Authentication bypass via incorrect DOM traversal and canonicalization in saml2-js")
         expect(raw_metadata["remediations"].first["summary"]).to eq("Upgrade saml2-js")

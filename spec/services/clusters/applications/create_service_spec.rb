@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::CreateService do
+RSpec.describe Clusters::Applications::CreateService do
   include TestRequestHelpers
 
   let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
@@ -45,6 +45,33 @@ describe Clusters::Applications::CreateService do
     context 'known applications' do
       before do
         create(:clusters_applications_helm, :installed, cluster: cluster)
+      end
+
+      context 'ingress application' do
+        let(:params) do
+          {
+            application: 'ingress',
+            modsecurity_enabled: true
+          }
+        end
+
+        before do
+          expect_any_instance_of(Clusters::Applications::Ingress)
+            .to receive(:make_scheduled!)
+            .and_call_original
+        end
+
+        it 'creates the application' do
+          expect do
+            subject
+
+            cluster.reload
+          end.to change(cluster, :application_ingress)
+        end
+
+        it 'sets modsecurity_enabled' do
+          expect(subject.modsecurity_enabled).to eq(true)
+        end
       end
 
       context 'cert manager application' do
@@ -110,9 +137,13 @@ describe Clusters::Applications::CreateService do
         let(:params) do
           {
             application: 'knative',
-            hostname: 'example.com'
+            hostname: 'example.com',
+            pages_domain_id: domain.id
           }
         end
+
+        let(:domain) { create(:pages_domain, :instance_serverless) }
+        let(:associate_domain_service) { double('AssociateDomainService') }
 
         before do
           expect_any_instance_of(Clusters::Applications::Knative)
@@ -131,13 +162,26 @@ describe Clusters::Applications::CreateService do
         it 'sets the hostname' do
           expect(subject.hostname).to eq('example.com')
         end
+
+        it 'executes AssociateDomainService' do
+          expect(Serverless::AssociateDomainService).to receive(:new) do |knative, args|
+            expect(knative).to be_a(Clusters::Applications::Knative)
+            expect(args[:pages_domain_id]).to eq(params[:pages_domain_id])
+            expect(args[:creator]).to eq(user)
+
+            associate_domain_service
+          end
+
+          expect(associate_domain_service).to receive(:execute)
+
+          subject
+        end
       end
 
       context 'elastic stack application' do
         let(:params) do
           {
-            application: 'elastic_stack',
-            kibana_hostname: 'example.com'
+            application: 'elastic_stack'
           }
         end
 
@@ -154,10 +198,6 @@ describe Clusters::Applications::CreateService do
 
             cluster.reload
           end.to change(cluster, :application_elastic_stack)
-        end
-
-        it 'sets the kibana_hostname' do
-          expect(subject.kibana_hostname).to eq('example.com')
         end
       end
     end

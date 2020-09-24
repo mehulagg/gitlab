@@ -1,8 +1,15 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Geo Frequently Asked Questions **(PREMIUM ONLY)**
 
 ## What are the minimum requirements to run Geo?
 
-The requirements are listed [on the index page](index.md#requirements-for-running-geo)
+The requirements are listed [on the index page](../index.md#requirements-for-running-geo)
 
 ## How does Geo know which projects to sync?
 
@@ -45,7 +52,7 @@ query.
 
 ## Can I `git push` to a **secondary** node?
 
-Yes!  Pushing directly to a **secondary** node (for both HTTP and SSH, including Git LFS) was [introduced](https://about.gitlab.com/blog/2018/09/22/gitlab-11-3-released/) in [GitLab Premium](https://about.gitlab.com/pricing/#self-managed) 11.3.
+Yes! Pushing directly to a **secondary** node (for both HTTP and SSH, including Git LFS) was [introduced](https://about.gitlab.com/releases/2018/09/22/gitlab-11-3-released/) in [GitLab Premium](https://about.gitlab.com/pricing/#self-managed) 11.3.
 
 ## How long does it take to have a commit replicated to a **secondary** node?
 

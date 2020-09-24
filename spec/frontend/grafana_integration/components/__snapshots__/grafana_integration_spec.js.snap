@@ -8,19 +8,24 @@ exports[`grafana integration component default state to match the default snapsh
   <div
     class="settings-header"
   >
-    <h4
-      class="js-section-header"
+    <h3
+      class="js-section-header h4"
     >
       
-      Grafana Authentication
+      Grafana authentication
     
-    </h4>
+    </h3>
      
-    <glbutton-stub
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
       class="js-settings-toggle"
+      icon=""
+      size="medium"
+      variant="default"
     >
       Expand
-    </glbutton-stub>
+    </gl-button-stub>
      
     <p
       class="js-section-sub-header"
@@ -35,32 +40,32 @@ exports[`grafana integration component default state to match the default snapsh
     class="settings-content"
   >
     <form>
-      <glformcheckbox-stub
+      <gl-form-checkbox-stub
         class="mb-4"
         id="grafana-integration-enabled"
       >
         
         Active
       
-      </glformcheckbox-stub>
+      </gl-form-checkbox-stub>
        
-      <glformgroup-stub
+      <gl-form-group-stub
         description="Enter the base URL of the Grafana instance."
         label="Grafana URL"
         label-for="grafana-url"
       >
-        <glforminput-stub
+        <gl-form-input-stub
           id="grafana-url"
           placeholder="https://my-url.grafana.net/"
           value="http://test.host"
         />
-      </glformgroup-stub>
+      </gl-form-group-stub>
        
-      <glformgroup-stub
+      <gl-form-group-stub
         label="API Token"
         label-for="grafana-token"
       >
-        <glforminput-stub
+        <gl-form-input-stub
           id="grafana-token"
           value="someToken"
         />
@@ -79,22 +84,26 @@ exports[`grafana integration component default state to match the default snapsh
             
             More information
             
-            <icon-stub
+            <gl-icon-stub
               class="vertical-align-middle"
               name="external-link"
               size="16"
             />
           </a>
         </p>
-      </glformgroup-stub>
+      </gl-form-group-stub>
        
-      <glbutton-stub
+      <gl-button-stub
+        buttontextclasses=""
+        category="primary"
+        icon=""
+        size="medium"
         variant="success"
       >
         
         Save Changes
       
-      </glbutton-stub>
+      </gl-button-stub>
     </form>
   </div>
 </section>

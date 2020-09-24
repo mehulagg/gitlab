@@ -10,6 +10,7 @@ module QuickActions
     include Gitlab::QuickActions::MergeRequestActions
     include Gitlab::QuickActions::CommitActions
     include Gitlab::QuickActions::CommonActions
+    include Gitlab::QuickActions::RelateActions
 
     attr_reader :quick_action_target
 
@@ -68,7 +69,7 @@ module QuickActions
     def extract_users(params)
       return [] if params.nil?
 
-      users = extract_references(params, :user)
+      users = extract_references(params, :mentioned_user)
 
       if users.empty?
         users =
@@ -84,7 +85,9 @@ module QuickActions
     # rubocop: enable CodeReuse/ActiveRecord
 
     def find_milestones(project, params = {})
-      MilestonesFinder.new(params.merge(project_ids: [project.id], group_ids: [project.group&.id])).execute
+      group_ids = project.group.self_and_ancestors.select(:id) if project.group
+
+      MilestonesFinder.new(params.merge(project_ids: [project.id], group_ids: group_ids)).execute
     end
 
     def parent

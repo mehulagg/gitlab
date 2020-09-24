@@ -65,14 +65,14 @@
   padding: 0 $grid-size;
   line-height: 16px;
   border-radius: $label-border-radius;
-  color: $white-light;
+  color: $white;
 }
 
 .dropdown-labels-error {
   padding: 5px 10px;
   margin-bottom: 10px;
   background-color: $red-500;
-  color: $white-light;
+  color: $white;
 }
 
 .manage-labels-list {
@@ -80,13 +80,13 @@
   margin-bottom: 0;
 
   > li:not(.empty-message):not(.no-border) {
-    background-color: $white-light;
+    background-color: $white;
     margin-bottom: 5px;
     display: flex;
     justify-content: space-between;
     padding: $gl-padding;
     border-radius: $border-radius-default;
-    border: 1px solid $gray-100;
+    border: 1px solid $gray-50;
 
     &:last-child {
       margin-bottom: 0;
@@ -127,6 +127,16 @@
   .color-label {
     padding: $gl-padding-4 $grid-size;
   }
+
+  .prepend-description-left {
+    vertical-align: top;
+    line-height: 24px;
+  }
+}
+
+.label-description-wrapper {
+  margin-right: 8px;
+  margin-left: 8px;
 }
 
 .prioritized-labels {
@@ -271,7 +281,7 @@
 }
 
 .label-badge-gray {
-  background-color: $gray-100;
+  background-color: $gray-50;
 }
 
 .label-links {
@@ -302,13 +312,11 @@
   }
 
   .label-name {
-    width: 150px;
+    width: 200px;
     flex-shrink: 0;
 
-    .badge {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+    .gl-label {
+      line-height: $gl-line-height;
     }
   }
 
@@ -328,11 +336,11 @@
   }
 
   .label-action {
-    color: $gray-800;
+    color: $gray-700;
     cursor: pointer;
 
     svg {
-      fill: $gray-800;
+      fill: $gray-700;
     }
 
     &:hover {
@@ -382,7 +390,7 @@
       order: 3;
       width: 100%;
 
-      > .append-right-default.prepend-left-default {
+      > .label-description-wrapper {
         margin-left: 0;
         margin-right: 0;
       }
@@ -411,62 +419,10 @@
   color: $indigo-300;
 }
 
-.scoped-label-wrapper {
-  max-width: 100%;
-  vertical-align: top;
+.gl-label-scoped {
+  box-shadow: 0 0 0 2px currentColor inset;
 
-  .badge {
-    text-overflow: ellipsis;
-    overflow-x: hidden;
-  }
-
-  &.label-link .color-label a {
-    color: inherit;
-  }
-
-  .color-label {
-    padding-right: $gl-padding-24;
-    max-width: 100%;
-  }
-
-  .scoped-label {
-    position: absolute;
-    top: 4px;
-    right: 8px;
-    padding: 0;
-    margin: 0;
-    line-height: $gl-line-height;
-  }
-
-  &.board-label {
-    .scoped-label {
-      top: 1px;
-    }
-  }
-}
-
-// Label inside title of Delete Label Modal
-.modal-header .page-title {
-  .scoped-label-wrapper {
-    .scoped-label {
-      line-height: 20px;
-    }
-
-    span.color-label {
-      padding-right: $gl-padding-24;
-    }
-  }
-}
-
-// Don't hide the overflow in system messages
-.system-note-message,
-.issuable-details,
-.md-preview-holder,
-.referenced-commands,
-.note-body {
-  .scoped-label-wrapper {
-    .badge {
-      overflow: initial;
-    }
+  &.gl-label-sm {
+    box-shadow: 0 0 0 1px inset;
   }
 }

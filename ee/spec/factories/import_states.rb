@@ -26,6 +26,7 @@ FactoryBot.modify do
         timestamp = Time.now
         import_state.last_update_at = timestamp
         import_state.last_update_started_at = timestamp
+        import_state.last_successful_update_at = timestamp
       when :failed
         import_state.last_update_at = Time.now
       end

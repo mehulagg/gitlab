@@ -1,8 +1,15 @@
+---
+stage: Verify
+group: Runner
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference
+---
+
 # Job logs
 
-> [Renamed from job traces to job logs](https://gitlab.com/gitlab-org/gitlab/issues/29121) in GitLab 12.5.
+> [Renamed from job traces to job logs](https://gitlab.com/gitlab-org/gitlab/-/issues/29121) in GitLab 12.5.
 
-Job logs are sent by GitLab Runner while it's processing a job. You can see
+Job logs are sent by a runner while it's processing a job. You can see
 logs in job pages, pipelines, email notifications, etc.
 
 ## Data flow
@@ -12,8 +19,8 @@ In the following table you can see the phases a log goes through:
 
 | Phase          | State        | Condition               | Data flow                                | Stored path |
 | -------------- | ------------ | ----------------------- | -----------------------------------------| ----------- |
-| 1: patching    | log          | When a job is running   | GitLab Runner => Unicorn => file storage | `#{ROOT_PATH}/gitlab-ci/builds/#{YYYY_mm}/#{project_id}/#{job_id}.log` |
-| 2: overwriting | log          | When a job is finished  | GitLab Runner => Unicorn => file storage | `#{ROOT_PATH}/gitlab-ci/builds/#{YYYY_mm}/#{project_id}/#{job_id}.log` |
+| 1: patching    | log          | When a job is running   | Runner => Puma => file storage | `#{ROOT_PATH}/gitlab-ci/builds/#{YYYY_mm}/#{project_id}/#{job_id}.log` |
+| 2: overwriting | log          | When a job is finished  | Runner => Puma => file storage | `#{ROOT_PATH}/gitlab-ci/builds/#{YYYY_mm}/#{project_id}/#{job_id}.log` |
 | 3: archiving   | archived log | After a job is finished | Sidekiq moves log to artifacts folder    | `#{ROOT_PATH}/gitlab-rails/shared/artifacts/#{disk_hash}/#{YYYY_mm_dd}/#{job_id}/#{job_artifact_id}/job.log` |
 | 4: uploading   | archived log | After a log is archived | Sidekiq moves archived log to [object storage](#uploading-logs-to-object-storage) (if configured) | `#{bucket_name}/#{disk_hash}/#{YYYY_mm_dd}/#{job_id}/#{job_artifact_id}/job.log` |
 
@@ -64,13 +71,21 @@ There isn't a way to automatically expire old job logs, but it's safe to remove
 them if they're taking up too much space. If you remove the logs manually, the
 job output in the UI will be empty.
 
+For example, to delete all job logs older than 60 days, run the following from a shell in your GitLab instance:
+
+DANGER: **Danger:**
+This command will permanently delete the log files and is irreversible.
+
+```shell
+find /var/opt/gitlab/gitlab-rails/shared/artifacts -name "job.log" -mtime +60 -delete
+```
+
 ## New incremental logging architecture
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/18169) in GitLab 10.4.
-> - [Announced as generally available](https://gitlab.com/gitlab-org/gitlab-foss/issues/46097) in GitLab 11.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18169) in GitLab 10.4.
 
 NOTE: **Note:**
-This feature is off by default. See below for how to [enable or disable](#enabling-incremental-logging) it.
+This beta feature is off by default. See below for how to [enable or disable](#enabling-incremental-logging) it.
 
 By combining the process with object storage settings, we can completely bypass
 the local file storage. This is a useful option if GitLab is installed as
@@ -81,14 +96,14 @@ with one change: _the stored path of the first two phases is different_. This in
 log architecture stores chunks of logs in Redis and a persistent store (object storage or database) instead of
 file storage. Redis is used as first-class storage, and it stores up-to 128KB
 of data. Once the full chunk is sent, it is flushed to a persistent store, either object storage (temporary directory) or database.
-After a while, the data in Redis and a persitent store will be archived to [object storage](#uploading-logs-to-object-storage).
+After a while, the data in Redis and a persistent store will be archived to [object storage](#uploading-logs-to-object-storage).
 
 The data are stored in the following Redis namespace: `Gitlab::Redis::SharedState`.
 
 Here is the detailed data flow:
 
-1. GitLab Runner picks a job from GitLab
-1. GitLab Runner sends a piece of log to GitLab
+1. The runner picks a job from GitLab
+1. The runner sends a piece of log to GitLab
 1. GitLab appends the data to Redis
 1. Once the data in Redis reach 128KB, the data is flushed to a persistent store (object storage or the database).
 1. The above steps are repeated until the job is finished.
@@ -100,25 +115,25 @@ Here is the detailed data flow:
 
 The following commands are to be issued in a Rails console:
 
-```sh
+```shell
 # Omnibus GitLab
 gitlab-rails console
 
 # Installation from source
 cd /home/git/gitlab
-sudo -u git -H bin/rails console RAILS_ENV=production
+sudo -u git -H bin/rails console -e production
 ```
 
 **To check if incremental logging (trace) is enabled:**
 
 ```ruby
-Feature.enabled?('ci_enable_live_trace')
+Feature.enabled?(:ci_enable_live_trace)
 ```
 
 **To enable incremental logging (trace):**
 
 ```ruby
-Feature.enable('ci_enable_live_trace')
+Feature.enable(:ci_enable_live_trace)
 ```
 
 NOTE: **Note:**
@@ -145,7 +160,7 @@ In some cases, having data stored on Redis could incur data loss:
 
 1. **Case 1: When all data in Redis are accidentally flushed**
    - On going incremental logs could be recovered by re-sending logs (this is
-     supported by all versions of the GitLab Runner).
+     supported by all versions of GitLab Runner).
    - Finished jobs which have not archived incremental logs will lose the last part
      (~128KB) of log data.
 

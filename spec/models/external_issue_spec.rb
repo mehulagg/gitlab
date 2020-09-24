@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ExternalIssue do
+RSpec.describe ExternalIssue do
   let(:project) { double('project', id: 1, to_reference: 'namespace1/project1') }
   let(:issue)   { described_class.new('EXT-1234', project) }
 
@@ -33,6 +33,7 @@ describe ExternalIssue do
 
     context 'if issue id is a number' do
       let(:issue) { described_class.new('1234', project) }
+
       it 'returns the issue ID prefixed by #' do
         expect(issue.reference_link_text).to eq '#1234'
       end

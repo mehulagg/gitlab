@@ -1,4 +1,5 @@
 import * as filtersMutationTypes from '../modules/filters/mutation_types';
+import * as vulnerabilitiesMutationTypes from '../modules/vulnerabilities/mutation_types';
 
 export default store => {
   const refreshVulnerabilities = payload => {
@@ -7,7 +8,7 @@ export default store => {
     store.dispatch('vulnerabilities/fetchVulnerabilitiesHistory', payload);
   };
 
-  store.subscribe(({ type, payload }) => {
+  store.subscribe(({ type, payload = {} }) => {
     switch (type) {
       // SET_ALL_FILTERS mutations are triggered by navigation events, in such case we
       // want to preserve the page number that was set in the sync_with_router plugin
@@ -17,8 +18,9 @@ export default store => {
           page: store.state.vulnerabilities.pageInfo.page,
         });
         break;
-      // SET_FILTER and SET_TOGGLE_VALUE mutations happen when users interact with the UI,
+      // These mutations happen when users interact with the UI,
       // in that case we want to reset the page number
+      case `vulnerabilities/${vulnerabilitiesMutationTypes.RECEIVE_DISMISS_SELECTED_VULNERABILITIES_SUCCESS}`:
       case `filters/${filtersMutationTypes.SET_FILTER}`:
       case `filters/${filtersMutationTypes.SET_TOGGLE_VALUE}`: {
         if (!payload.lazy) {

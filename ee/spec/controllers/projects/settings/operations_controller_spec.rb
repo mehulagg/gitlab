@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Projects::Settings::OperationsController do
-  set(:user) { create(:user) }
+RSpec.describe Projects::Settings::OperationsController do
+  let_it_be(:user) { create(:user) }
 
   before do
     sign_in(user)
@@ -34,7 +34,7 @@ describe Projects::Settings::OperationsController do
       it 'renders ok' do
         get :show, params: project_params(project)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:show)
       end
     end
@@ -96,14 +96,6 @@ describe Projects::Settings::OperationsController do
     let(:private_project) { create(:project, :private) }
     let(:internal_project) { create(:project, :internal) }
 
-    let(:incident_management_settings) do
-      {
-        create_issue: true,
-        send_email: true,
-        issue_template_key: 'some-key'
-      }
-    end
-
     before do
       public_project.add_maintainer(user)
       private_project.add_maintainer(user)
@@ -126,45 +118,13 @@ describe Projects::Settings::OperationsController do
         expect(project.tracing_setting).to be_nil
       end
 
-      it 'does not create incident_management_setting' do
+      it 'does not create status_page_setting' do
         update_project(
           project,
-          incident_management_params: incident_management_settings
+          status_page_params: attributes_for(:status_page_setting)
         )
 
-        expect(project.incident_management_setting).to be_nil
-      end
-
-      context 'with existing incident_management_setting' do
-        let(:new_incident_management_settings) do
-          {
-            create_issue: false,
-            send_email: false,
-            issue_template_key: 'some-other-template'
-          }
-        end
-
-        let!(:incident_management_setting) do
-          create(:project_incident_management_setting,
-            project: project,
-            **incident_management_settings)
-        end
-
-        it 'does not update incident_management_setting' do
-          update_project(project,
-            incident_management_params: new_incident_management_settings)
-
-          setting = project.incident_management_setting
-          expect(setting.create_issue).to(
-            eq(incident_management_settings[:create_issue])
-          )
-          expect(setting.send_email).to(
-            eq(incident_management_settings[:send_email])
-          )
-          expect(setting.issue_template_key).to(
-            eq(incident_management_settings[:issue_template_key])
-          )
-        end
+        expect(project.status_page_setting).to be_nil
       end
     end
 
@@ -207,7 +167,7 @@ describe Projects::Settings::OperationsController do
 
     context 'with a license' do
       before do
-        stub_licensed_features(tracing: true, incident_management: true)
+        stub_licensed_features(tracing: true, incident_management: true, status_page: true)
       end
 
       shared_examples 'user with write access' do |project_visibility|
@@ -225,42 +185,6 @@ describe Projects::Settings::OperationsController do
           )
 
           expect(project.tracing_setting.external_url).to eq(tracing_url)
-        end
-
-        it 'creates incident management settings' do
-          update_project(
-            project,
-            incident_management_params: incident_management_settings
-          )
-
-          expect(project.incident_management_setting.create_issue).to(
-            eq(incident_management_settings.dig(:create_issue))
-          )
-          expect(project.incident_management_setting.send_email).to(
-            eq(incident_management_settings.dig(:send_email))
-          )
-          expect(project.incident_management_setting.issue_template_key).to(
-            eq(incident_management_settings.dig(:issue_template_key))
-          )
-        end
-
-        it 'creates tracing and incident management settings' do
-          update_project(
-            project,
-            tracing_params: { external_url: tracing_url },
-            incident_management_params: incident_management_settings
-          )
-
-          expect(project.tracing_setting.external_url).to eq(tracing_url)
-          expect(project.incident_management_setting.create_issue).to(
-            eq(incident_management_settings.dig(:create_issue))
-          )
-          expect(project.incident_management_setting.send_email).to(
-            eq(incident_management_settings.dig(:send_email))
-          )
-          expect(project.incident_management_setting.issue_template_key).to(
-            eq(incident_management_settings.dig(:issue_template_key))
-          )
         end
       end
 
@@ -343,76 +267,76 @@ describe Projects::Settings::OperationsController do
         end
       end
 
-      context 'with existing incident management setting' do
+      context 'updating tracing settings' do
         let(:project) { create(:project) }
-
-        let(:new_incident_management_settings) do
-          {
-            create_issue: false,
-            send_email: false,
-            issue_template_key: 'some-other-template'
-          }
-        end
-
-        let!(:incident_management_setting) do
-          create(:project_incident_management_setting,
-            project: project,
-            **incident_management_settings)
-        end
+        let(:new_tracing_settings) { {} }
 
         before do
           project.add_maintainer(user)
         end
 
-        it 'updates incident management setting' do
-          update_project(project,
-            incident_management_params: new_incident_management_settings)
-
-          setting = project.incident_management_setting
-          expect(setting.create_issue).to(
-            eq(new_incident_management_settings[:create_issue])
-          )
-          expect(setting.send_email).to(
-            eq(new_incident_management_settings[:send_email])
-          )
-          expect(setting.issue_template_key).to(
-            eq(new_incident_management_settings[:issue_template_key])
-          )
+        it 'creates a gitlab tracking event' do
+          expect(Gitlab::Tracking).to receive(:event).with('project:operations:tracing', 'external_url_populated')
+          update_project(project, tracing_params: { external_url: "http://example.com" } )
         end
       end
 
-      context 'updating each incident management setting' do
+      context 'without existing status page setting' do
         let(:project) { create(:project) }
-        let(:new_incident_management_settings) { {} }
 
         before do
           project.add_maintainer(user)
         end
 
-        shared_examples 'a gitlab tracking event' do |params, event_key|
-          it "creates a gitlab tracking event #{event_key}" do
-            new_incident_management_settings = params
+        subject(:status_page_setting) do
+          valid_attributes = attributes_for(:status_page_setting).except(:enabled)
+          update_project(project, status_page_params: valid_attributes )
 
-            expect(Gitlab::Tracking).to receive(:event)
-              .with('IncidentManagement::Settings', event_key, kind_of(Hash))
-
-            update_project(project,
-              incident_management_params: new_incident_management_settings)
-          end
+          project.status_page_setting
         end
 
-        it_behaves_like 'a gitlab tracking event', { create_issue: '1' }, 'enabled_issue_auto_creation_on_alerts'
-        it_behaves_like 'a gitlab tracking event', { create_issue: '0' }, 'disabled_issue_auto_creation_on_alerts'
-        it_behaves_like 'a gitlab tracking event', { issue_template_key: 'template' }, 'enabled_issue_template_on_alerts'
-        it_behaves_like 'a gitlab tracking event', { issue_template_key: nil }, 'disabled_issue_template_on_alerts'
-        it_behaves_like 'a gitlab tracking event', { send_email: '1' }, 'enabled_sending_emails'
-        it_behaves_like 'a gitlab tracking event', { send_email: '0' }, 'disabled_sending_emails'
+        it { is_expected.to be_a(StatusPage::ProjectSetting) }
+      end
+
+      context 'with existing status page setting' do
+        let(:project) { create(:project) }
+        let(:status_page_attributes) { attributes_for(:status_page_setting) }
+
+        before do
+          project.add_maintainer(user)
+          project.create_status_page_setting!(status_page_attributes)
+        end
+
+        it 'updates the fields' do
+          update_project(project, status_page_params: status_page_attributes.merge(aws_s3_bucket_name: 'test'))
+
+          expect(project.status_page_setting.aws_s3_bucket_name).to eq('test')
+        end
+
+        it 'respects the model validations' do
+          old_name = project.status_page_setting.aws_s3_bucket_name
+
+          update_project(project, status_page_params: status_page_attributes.merge(aws_s3_bucket_name: ''))
+          expect(project.status_page_setting.aws_s3_bucket_name).to eq(old_name)
+        end
+
+        it 'deletes the setting if keys removed' do
+          update_project(
+            project,
+            status_page_params: status_page_attributes.merge(aws_access_key: '',
+                                                              aws_secret_key: '',
+                                                              aws_s3_bucket_name: '',
+                                                              aws_region: '',
+                                                              status_page_url: '')
+          )
+          expect(project.status_page_setting).to be_nil
+        end
       end
     end
 
     context 'without a license' do
       before do
-        stub_licensed_features(tracing: false, incident_management: false)
+        stub_licensed_features(tracing: false, incident_management: false, status_page: false)
       end
 
       it_behaves_like 'user without write access', :public, :maintainer
@@ -422,127 +346,28 @@ describe Projects::Settings::OperationsController do
 
     private
 
-    def update_project(project, tracing_params: nil, incident_management_params: nil)
+    def update_project(project, tracing_params: nil, incident_management_params: nil, status_page_params: nil)
       patch :update, params: project_params(
         project,
         tracing_params: tracing_params,
-        incident_management_params: incident_management_params
+        incident_management_params: incident_management_params,
+        status_page_params: status_page_params
       )
 
       project.reload
     end
   end
 
-  describe 'POST reset_alerting_token' do
-    let(:project) { create(:project) }
-
-    before do
-      stub_licensed_features(prometheus_alerts: true)
-      project.add_maintainer(user)
-    end
-
-    context 'with existing alerting setting' do
-      let!(:alerting_setting) do
-        create(:project_alerting_setting, project: project)
-      end
-
-      let!(:old_token) { alerting_setting.token }
-
-      it 'returns newly reset token' do
-        reset_alerting_token
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['token']).to eq(alerting_setting.reload.token)
-        expect(old_token).not_to eq(alerting_setting.token)
-      end
-    end
-
-    context 'without existing alerting setting' do
-      it 'creates a token' do
-        reset_alerting_token
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(project.alerting_setting).not_to be_nil
-        expect(json_response['token']).to eq(project.alerting_setting.token)
-      end
-    end
-
-    context 'when update fails' do
-      let(:operations_update_service) { spy(:operations_update_service) }
-      let(:alerting_params) do
-        { alerting_setting_attributes: { regenerate_token: true } }
-      end
-
-      before do
-        expect(::Projects::Operations::UpdateService)
-          .to receive(:new).with(project, user, alerting_params)
-          .and_return(operations_update_service)
-        expect(operations_update_service).to receive(:execute)
-          .and_return(status: :error)
-      end
-
-      it 'returns unprocessable_entity' do
-        reset_alerting_token
-
-        expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(json_response).to be_empty
-      end
-    end
-
-    context 'with insufficient permissions' do
-      before do
-        project.add_reporter(user)
-      end
-
-      it 'returns 404' do
-        reset_alerting_token
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context 'as an anonymous user' do
-      before do
-        sign_out(user)
-      end
-
-      it 'returns a redirect' do
-        reset_alerting_token
-
-        expect(response).to have_gitlab_http_status(:redirect)
-      end
-    end
-
-    context 'without a license' do
-      before do
-        stub_licensed_features(prometheus_alerts: false)
-      end
-
-      it 'returns 404' do
-        reset_alerting_token
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    private
-
-    def reset_alerting_token
-      post :reset_alerting_token,
-        params: project_params(project),
-        format: :json
-    end
-  end
-
   private
 
-  def project_params(project, tracing_params: nil, incident_management_params: nil)
+  def project_params(project, tracing_params: nil, incident_management_params: nil, status_page_params: nil)
     {
       namespace_id: project.namespace,
       project_id: project,
       project: {
         tracing_setting_attributes: tracing_params,
-        incident_management_setting_attributes: incident_management_params
+        incident_management_setting_attributes: incident_management_params,
+        status_page_setting_attributes: status_page_params
       }
     }
   end

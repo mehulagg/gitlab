@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CompareService do
+RSpec.describe CompareService do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:service) { described_class.new(project, 'feature') }
@@ -28,6 +28,7 @@ describe CompareService do
 
     context 'compare with source branch that does not exist' do
       let(:service) { described_class.new(project, 'non-existent-branch') }
+
       subject { service.execute(project, 'non-existent-ref') }
 
       it { expect(subject).to be_nil }

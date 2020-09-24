@@ -1,22 +1,22 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
+RSpec.describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
   include ::EE::GeoHelpers
 
-  set(:secondary) { create(:geo_node) }
+  let_it_be(:secondary) { create(:geo_node) }
 
-  set(:synced_registry) { create(:geo_project_registry, :synced) }
-  set(:synced_and_verified_registry) { create(:geo_project_registry, :synced, :repository_verified) }
-  set(:sync_pending_registry) { create(:geo_project_registry, :synced, :repository_dirty) }
-  set(:sync_failed_registry) { create(:geo_project_registry, :existing_repository_sync_failed) }
+  let_it_be(:synced_registry) { create(:geo_project_registry, :synced) }
+  let_it_be(:synced_and_verified_registry) { create(:geo_project_registry, :synced, :repository_verified) }
+  let_it_be(:sync_pending_registry) { create(:geo_project_registry, :synced, :repository_dirty) }
+  let_it_be(:sync_failed_registry) { create(:geo_project_registry, :existing_repository_sync_failed) }
 
-  set(:verify_outdated_registry) { create(:geo_project_registry, :synced, :repository_verification_outdated) }
-  set(:verify_failed_registry) { create(:geo_project_registry, :synced, :repository_verification_failed) }
-  set(:verify_checksum_mismatch_registry) { create(:geo_project_registry, :synced, :repository_checksum_mismatch) }
+  let_it_be(:verify_outdated_registry) { create(:geo_project_registry, :synced, :repository_verification_outdated) }
+  let_it_be(:verify_failed_registry) { create(:geo_project_registry, :synced, :repository_verification_failed) }
+  let_it_be(:verify_checksum_mismatch_registry) { create(:geo_project_registry, :synced, :repository_checksum_mismatch) }
 
-  set(:never_synced_registry) { create(:geo_project_registry) }
-  set(:never_synced_registry_with_failure) { create(:geo_project_registry, :repository_sync_failed) }
+  let_it_be(:never_synced_registry) { create(:geo_project_registry) }
+  let_it_be(:never_synced_registry_with_failure) { create(:geo_project_registry, :repository_sync_failed) }
 
   before do
     stub_current_geo_node(secondary)
@@ -62,17 +62,6 @@ describe Geo::ProjectRegistryStatusFinder, :geo, :geo_tracking_db do
         never_synced_registry_with_failure,
         verify_failed_registry,
         verify_checksum_mismatch_registry
-      )
-    end
-  end
-
-  describe '#never_synced_projects' do
-    it 'returns only never fully synced registries' do
-      result = subject.never_synced_projects
-
-      expect(result).to contain_exactly(
-        never_synced_registry,
-        never_synced_registry_with_failure
       )
     end
   end

@@ -1,22 +1,26 @@
 # frozen_string_literal: true
 
 module Milestoneish
-  def total_issues_count(user)
-    count_issues_by_state(user).values.sum
+  DISPLAY_ISSUES_LIMIT = 3000
+
+  def total_issues_count
+    @total_issues_count ||= Milestones::IssuesCountService.new(self).count
   end
 
-  def closed_issues_count(user)
-    closed_state_id = Issue.available_states[:closed]
-
-    count_issues_by_state(user)[closed_state_id].to_i
+  def closed_issues_count
+    @close_issues_count ||= Milestones::ClosedIssuesCountService.new(self).count
   end
 
-  def complete?(user)
-    total_issues_count(user) > 0 && total_issues_count(user) == closed_issues_count(user)
+  def opened_issues_count
+    total_issues_count - closed_issues_count
   end
 
-  def percent_complete(user)
-    closed_issues_count(user) * 100 / total_issues_count(user)
+  def complete?
+    total_issues_count > 0 && total_issues_count == closed_issues_count
+  end
+
+  def percent_complete
+    closed_issues_count * 100 / total_issues_count
   rescue ZeroDivisionError
     0
   end
@@ -53,7 +57,15 @@ module Milestoneish
   end
 
   def sorted_issues(user)
-    issues_visible_to_user(user).preload_associations.sort_by_attribute('label_priority')
+    # This method is used on milestone view to filter opened assigned, opened unassigned and closed issues columns.
+    # We want a limit of DISPLAY_ISSUES_LIMIT for total issues present on all columns.
+    limited_ids =
+      issues_visible_to_user(user).sort_by_attribute('label_priority').limit(DISPLAY_ISSUES_LIMIT)
+
+    Issue
+      .where(id: Issue.select(:id).from(limited_ids))
+      .preload_associated_models
+      .sort_by_attribute('label_priority')
   end
 
   def sorted_merge_requests(user)
@@ -85,46 +97,20 @@ module Milestoneish
     due_date && due_date.past?
   end
 
-  def group_milestone?
-    false
+  def total_time_spent
+    @total_time_spent ||= issues.joins(:timelogs).sum(:time_spent) + merge_requests.joins(:timelogs).sum(:time_spent)
   end
 
-  def project_milestone?
-    false
+  def human_total_time_spent
+    Gitlab::TimeTrackingFormatter.output(total_time_spent)
   end
 
-  def legacy_group_milestone?
-    false
+  def total_time_estimate
+    @total_time_estimate ||= issues.sum(:time_estimate) + merge_requests.sum(:time_estimate)
   end
 
-  def dashboard_milestone?
-    false
-  end
-
-  def global_milestone?
-    false
-  end
-
-  def total_issue_time_spent
-    @total_issue_time_spent ||= issues.joins(:timelogs).sum(:time_spent)
-  end
-
-  def human_total_issue_time_spent
-    Gitlab::TimeTrackingFormatter.output(total_issue_time_spent)
-  end
-
-  def total_issue_time_estimate
-    @total_issue_time_estimate ||= issues.sum(:time_estimate)
-  end
-
-  def human_total_issue_time_estimate
-    Gitlab::TimeTrackingFormatter.output(total_issue_time_estimate)
-  end
-
-  def count_issues_by_state(user)
-    memoize_per_user(user, :count_issues_by_state) do
-      issues_visible_to_user(user).reorder(nil).group(:state_id).count
-    end
+  def human_total_time_estimate
+    Gitlab::TimeTrackingFormatter.output(total_time_estimate)
   end
 
   private

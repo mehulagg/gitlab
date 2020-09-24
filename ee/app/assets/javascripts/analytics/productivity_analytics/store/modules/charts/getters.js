@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { s__ } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
 import {
@@ -14,6 +14,8 @@ import {
 import { getScatterPlotData, getMedianLineData } from '../../../utils';
 
 export const chartLoading = state => chartKey => state.charts[chartKey].isLoading;
+
+export const chartErrorCode = state => chartKey => state.charts[chartKey].errorCode;
 
 /**
  * Creates a series object for the column chart with the given chartKey.
@@ -52,7 +54,7 @@ export const getColumnChartData = state => chartKey => {
   return dataWithSelected;
 };
 
-export const chartHasData = state => chartKey => !_.isEmpty(state.charts[chartKey].data);
+export const chartHasData = state => chartKey => !isEmpty(state.charts[chartKey].data);
 
 export const getScatterPlotMainData = (state, getters, rootState) =>
   getScatterPlotData(
@@ -153,5 +155,4 @@ export const hasNoAccessError = state =>
 
 export const isChartEnabled = state => chartKey => state.charts[chartKey].enabled;
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const isFilteringByDaysToMerge = state => state.charts[chartKeys.main].selected.length > 0;

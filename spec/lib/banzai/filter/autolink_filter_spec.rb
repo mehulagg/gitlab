@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::AutolinkFilter do
+RSpec.describe Banzai::Filter::AutolinkFilter do
   include FilterSpecHelper
 
   let(:link) { 'http://about.gitlab.com/' }
@@ -190,11 +190,6 @@ describe Banzai::Filter::AutolinkFilter do
 
       expect(doc.at_css('a')['href']).to eq link
       expect(doc.text).to eq "See <<<#{link}>>>"
-    end
-
-    it 'accepts link_attr options' do
-      doc = filter("See #{link}", link_attr: { class: 'custom' })
-      expect(doc.at_css('a')['class']).to eq 'custom'
     end
 
     it 'escapes RTLO and other characters' do

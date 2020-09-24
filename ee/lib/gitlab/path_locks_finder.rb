@@ -35,6 +35,22 @@ class Gitlab::PathLocksFinder
     end
   end
 
+  def preload_for_paths(paths)
+    paths.each do |path|
+      tokenize(path).each do |token|
+        lazy_find_by_token(token)
+      end
+    end
+  end
+
+  def find_by_path(path)
+    tokenize(path).find do |token|
+      if lock = lazy_find_by_token(token)&.itself
+        break lock
+      end
+    end
+  end
+
   private
 
   # This returns hierarchy tokens for path
@@ -66,6 +82,14 @@ class Gitlab::PathLocksFinder
     lock
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def lazy_find_by_token(token)
+    BatchLoader.for(token).batch do |tokens, loader|
+      @project.path_locks.for_paths(tokens).each do |path_lock|
+        loader.call(path_lock.path, path_lock)
+      end
+    end
+  end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def find_downstream(path)

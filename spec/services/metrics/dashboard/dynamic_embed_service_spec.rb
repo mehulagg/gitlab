@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Metrics::Dashboard::DynamicEmbedService, :use_clean_rails_memory_store_caching do
+RSpec.describe Metrics::Dashboard::DynamicEmbedService, :use_clean_rails_memory_store_caching do
   include MetricsDashboardHelpers
 
-  set(:project) { build(:project) }
-  set(:user) { create(:user) }
-  set(:environment) { create(:environment, project: project) }
+  let_it_be(:project) { build(:project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:environment) { create(:environment, project: project) }
 
   before do
     project.add_maintainer(user)
@@ -35,8 +35,14 @@ describe Metrics::Dashboard::DynamicEmbedService, :use_clean_rails_memory_store_
 
     it { is_expected.to be_truthy }
 
-    context 'not embedded' do
+    context 'missing embedded' do
       let(:params) { valid_params.except(:embedded) }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'not embedded' do
+      let(:params) { valid_params.merge(embedded: 'false') }
 
       it { is_expected.to be_falsey }
     end
@@ -126,7 +132,7 @@ describe Metrics::Dashboard::DynamicEmbedService, :use_clean_rails_memory_store_
     end
 
     shared_examples 'uses system dashboard' do
-      it 'uses the default dashboard' do
+      it 'uses the overview dashboard' do
         expect(Gitlab::Metrics::Dashboard::Finder)
         .to receive(:find_raw)
         .with(project, dashboard_path: system_dashboard_path)

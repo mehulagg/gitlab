@@ -1,10 +1,10 @@
-- page_title "Dependency Proxy"
+- page_title _("Dependency Proxy")
 
 .settings-header
   %h4= _('Dependency proxy')
 
   %p
-    - link_start = '<a href="%{url}">'.html_safe % { url: help_page_path('PLACEHOLDER') }
+    - link_start = '<a href="%{url}">'.html_safe % { url: help_page_path('user/packages/dependency_proxy/index') }
     = _('Create a local proxy for storing frequently used upstream images. %{link_start}Learn more%{link_end} about dependency proxies.').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
 
 - if @group.public?
@@ -13,13 +13,8 @@
       .form-group
         %h5.prepend-top-20= _('Enable proxy')
         .js-dependency-proxy-toggle-area
-          %button{ type: 'button',
-            class: "js-project-feature-toggle project-feature-toggle #{'is-checked' if @dependency_proxy.enabled?}",
-            "aria-label": s_("DependencyProxy|Toggle Dependency Proxy") }
+          = render "shared/buttons/project_feature_toggle", is_checked: @dependency_proxy.enabled?, label: s_("DependencyProxy|Toggle Dependency Proxy") do
             = f.hidden_field :enabled, { class: 'js-project-feature-toggle-input'}
-            %span.toggle-icon
-              = sprite_icon('status_success_borderless', size: 16, css_class: 'toggle-icon-svg toggle-status-checked')
-              = sprite_icon('status_failed_borderless', size: 16, css_class: 'toggle-icon-svg toggle-status-unchecked')
 
       - if @dependency_proxy.enabled
         = render 'groups/dependency_proxies/url'
@@ -28,5 +23,6 @@
     - if @dependency_proxy.enabled
       = render 'groups/dependency_proxies/url'
 - else
-  .alert.alert-info
+  .gl-alert.gl-alert-info
+    = sprite_icon('information-o', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
     = _('Dependency proxy feature is limited to public groups for now.')

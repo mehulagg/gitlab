@@ -1,0 +1,11 @@
+- page_title _('Survey Response')
+
+!!! 5
+%html{ lang: I18n.locale }
+  = render 'layouts/head'
+  %body.ui-indigo.d-flex.vh-100
+    = render 'layouts/header/logo_with_title'
+    .container.pt-6.mw-100.text-center
+      .mt-9.mb-4= image_tag 'illustrations/subscription-success.svg'
+      %h2.font-weight-bold= _('Thank you for your feedback!')
+      %p.pt-1= _('Your response has been recorded.')

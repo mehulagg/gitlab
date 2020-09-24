@@ -2,20 +2,40 @@
 
 require 'spec_helper'
 
-describe API::VisualReviewDiscussions do
-  let(:user)     { create(:user) }
-  let!(:project) { create(:project, :public, :repository, namespace: user.namespace) }
-
-  context 'when sending merge request feedback from a visual review app without authentication' do
-    let!(:merge_request) do
-      create(:merge_request_with_diffs, source_project: project, target_project: project, author: user)
+RSpec.describe API::VisualReviewDiscussions do
+  shared_examples_for 'accepting request without authentication' do
+    let(:request) do
+      post api("/projects/#{project_id}/merge_requests/#{merge_request.iid}/visual_review_discussions"), params: note_params
     end
+
+    it_behaves_like 'handling merge request feedback'
+  end
+
+  shared_examples_for 'accepting request with authentication' do
+    let(:token) { create(:personal_access_token) }
+    let(:user) { token.user }
 
     let(:request) do
-      post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/visual_review_discussions"), params: note_params
+      post api("/projects/#{project_id}/merge_requests/#{merge_request.iid}/visual_review_discussions"), params: note_params, headers: { 'Private-Token' => token.token }
     end
 
-    let(:note_params)   { { body: 'hi!' } }
+    before do
+      create(:project_member,
+             user: user,
+             project: project,
+             access_level: ProjectMember::DEVELOPER)
+    end
+
+    it_behaves_like 'handling merge request feedback', :with_auth
+  end
+
+  shared_examples_for 'handling merge request feedback' do |with_auth|
+    let!(:merge_request) do
+      create(:merge_request_with_diffs, source_project: project, target_project: project)
+    end
+
+    let(:project_id) { project.id }
+    let(:note_params) { { body: 'hi!', created_at: 2.weeks.ago } }
     let(:response_note) { json_response['notes'].first }
 
     it 'creates a new note' do
@@ -50,11 +70,17 @@ describe API::VisualReviewDiscussions do
       end
 
       it 'responds with a status 201 Created' do
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
       end
 
-      it 'returns the persisted note body' do
-        expect(response_note['body']).to eq('hi!')
+      if with_auth
+        it 'returns the persisted note body including user details' do
+          expect(response_note['body']).to eq("**Feedback from @#{user.username} (#{user.email})**\n\nhi!")
+        end
+      else
+        it 'returns the persisted note body' do
+          expect(response_note['body']).to eq('hi!')
+        end
       end
 
       it 'returns the name of the Visual Review Bot assigned as the author' do
@@ -64,6 +90,10 @@ describe API::VisualReviewDiscussions do
       it 'returns the id of the merge request as the parent noteable_id' do
         expect(response_note['noteable_id']).to eq(merge_request.id)
       end
+
+      it 'returns a current time stamp instead of the provided one' do
+        expect(Time.parse(response_note['created_at']) > 1.day.ago).to eq(true)
+      end
     end
 
     context 'with no message body' do
@@ -72,14 +102,14 @@ describe API::VisualReviewDiscussions do
       it 'returns a 400 bad request error if body not given' do
         expect { request }.not_to change(merge_request.notes, :count)
 
-        expect(response).to have_gitlab_http_status(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
       end
     end
 
-    context 'with an invalid merge request IID' do
-      let(:merge_request) { double(iid: 546574823564) }
+    context 'with an invalid project ID' do
+      let(:project_id) { project.id + 1 }
 
-      it 'creates a new note' do
+      it 'does not create a new note' do
         expect { request }.not_to change(Note, :count)
       end
 
@@ -87,7 +117,23 @@ describe API::VisualReviewDiscussions do
         it 'responds with a status 404' do
           request
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    context 'with an invalid merge request IID' do
+      let(:merge_request) { double(iid: 546574823564) }
+
+      it 'does not create a new note' do
+        expect { request }.not_to change(Note, :count)
+      end
+
+      describe 'the API response' do
+        it 'responds with a status 404' do
+          request
+
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -107,7 +153,7 @@ describe API::VisualReviewDiscussions do
         end
 
         it 'responds 403' do
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
 
         it 'returns error messaging specifying that the feature is disabled' do
@@ -115,43 +161,77 @@ describe API::VisualReviewDiscussions do
         end
       end
     end
+  end
 
-    context 'when an admin or owner makes an authenticated request' do
-      let(:request) do
-        post api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/visual_review_discussions", project.owner), params: note_params
+  shared_examples_for 'rejecting request without authentication' do
+    let!(:merge_request) do
+      create(:merge_request_with_diffs, source_project: project, target_project: project)
+    end
+
+    let(:project_id) { project.id }
+    let(:note_params) { { body: 'hi!', created_at: 2.weeks.ago } }
+
+    let(:request) do
+      post api("/projects/#{project_id}/merge_requests/#{merge_request.iid}/visual_review_discussions"), params: note_params
+    end
+
+    it 'returns a 404 project not found' do
+      expect { request }.not_to change(merge_request.notes, :count)
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+  end
+
+  context 'when project is public' do
+    let!(:project) { create(:project, :public, :repository) }
+
+    it_behaves_like 'accepting request without authentication'
+    it_behaves_like 'accepting request with authentication'
+  end
+
+  context 'when project is private' do
+    let!(:project) { create(:project, :private, :repository) }
+
+    it_behaves_like 'accepting request with authentication'
+    it_behaves_like 'rejecting request without authentication'
+
+    context 'and authenticated user has no project access' do
+      let!(:merge_request) do
+        create(:merge_request_with_diffs, source_project: project, target_project: project)
       end
 
+      let(:token) { create(:personal_access_token) }
+      let(:user) { token.user }
+      let(:project_id) { project.id }
       let(:note_params) { { body: 'hi!', created_at: 2.weeks.ago } }
 
-      it 'creates a new note' do
-        expect { request }.to change(merge_request.notes, :count).by(1)
+      let(:request) do
+        post api("/projects/#{project_id}/merge_requests/#{merge_request.iid}/visual_review_discussions"), params: note_params, headers: { 'Private-Token' => token.token }
       end
 
-      describe 'the API response' do
-        before do
-          request
-        end
+      it 'returns a 404 project not found' do
+        expect { request }.not_to change(merge_request.notes, :count)
 
-        it 'responds with a status 201 Created' do
-          expect(response).to have_gitlab_http_status(201)
-        end
-
-        it 'returns the persisted note body' do
-          expect(response_note['body']).to eq('hi!')
-        end
-
-        it 'returns the name of the Visual Review Bot assigned as the author' do
-          expect(response_note['author']['username']).to eq(User.visual_review_bot.username)
-        end
-
-        it 'returns the id of the merge request as the parent noteable_id' do
-          expect(response_note['noteable_id']).to eq(merge_request.id)
-        end
-
-        it 'returns a current time stamp instead of the provided one' do
-          expect(Time.parse(response_note['created_at']) > 1.day.ago).to eq(true)
-        end
+        expect(response).to have_gitlab_http_status(:not_found)
       end
+    end
+  end
+
+  context 'when project is internal' do
+    let!(:project) { create(:project, :internal, :repository) }
+
+    it_behaves_like 'accepting request with authentication'
+    it_behaves_like 'rejecting request without authentication'
+
+    context 'and authenticated user has no project access' do
+      let(:token) { create(:personal_access_token) }
+      let(:user) { token.user }
+
+      let(:request) do
+        post api("/projects/#{project_id}/merge_requests/#{merge_request.iid}/visual_review_discussions"), params: note_params, headers: { 'Private-Token' => token.token }
+      end
+
+      it_behaves_like 'handling merge request feedback', :with_auth
     end
   end
 end

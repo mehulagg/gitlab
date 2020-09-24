@@ -1,31 +1,28 @@
 # frozen_string_literal: true
 
-require 'set'
-
 class Feature
   class Gitaly
-    # Server feature flags should use '_' to separate words.
-    SERVER_FEATURE_FLAGS =
-      %w[
-        inforef_uploadpack_cache
-        get_all_lfs_pointers_go
-      ].freeze
-
-    DEFAULT_ON_FLAGS = Set.new([]).freeze
+    PREFIX = "gitaly_"
 
     class << self
       def enabled?(feature_flag)
         return false unless Feature::FlipperFeature.table_exists?
 
-        default_on = DEFAULT_ON_FLAGS.include?(feature_flag)
-        Feature.enabled?("gitaly_#{feature_flag}", default_enabled: default_on)
+        Feature.enabled?("#{PREFIX}#{feature_flag}")
       rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad
         false
       end
 
       def server_feature_flags
-        SERVER_FEATURE_FLAGS.map do |f|
-          ["gitaly-feature-#{f.tr('_', '-')}", enabled?(f).to_s]
+        # We need to check that both the DB connection and table exists
+        return {} unless ::Gitlab::Database.cached_table_exists?(FlipperFeature.table_name)
+
+        Feature.persisted_names
+          .select { |f| f.start_with?(PREFIX) }
+          .map do |f|
+          flag = f.delete_prefix(PREFIX)
+
+          ["gitaly-feature-#{flag.tr('_', '-')}", enabled?(flag).to_s]
         end.to_h
       end
     end

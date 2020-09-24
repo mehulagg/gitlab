@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AuditEventPresenter do
+RSpec.describe AuditEventPresenter do
   include Gitlab::Routing.url_helpers
 
   let(:details) do
@@ -16,16 +16,22 @@ describe AuditEventPresenter do
     }
   end
 
-  let(:audit_event) { create(:audit_event, details: details) }
+  let(:audit_event) do
+    create(:audit_event, ip_address: '10.2.1.1', details: details)
+  end
 
   subject(:presenter) do
     described_class.new(audit_event)
   end
 
   context 'exposes the author' do
+    it 'gets the event author name' do
+      expect(presenter.author_name).to eq(audit_event.user.name)
+    end
+
     context 'event authored by a user that exists' do
-      it 'shows a link' do
-        expect(presenter.author_name).to eq("<a href=\"#{user_path(audit_event.user)}\">#{audit_event.user.name}</a>")
+      it 'returns a url' do
+        expect(presenter.author_url).to eq(url_for(user_path(audit_event.user)))
       end
     end
 
@@ -50,14 +56,18 @@ describe AuditEventPresenter do
           }
         end
 
-        it 'shows a blank author name' do
-          expect(presenter.author_name).to be_blank
+        it 'does not return a url' do
+          expect(presenter.author_url).to be_blank
         end
       end
 
-      context 'when `author_name` is included in the details' do
+      context 'when `author_name` is included in the details and not in the author_name column' do
+        before do
+          audit_event.update!(author_name: nil)
+        end
+
         it 'shows the author name as provided in the details' do
-          expect(presenter.author_name).to eq('author')
+          expect(presenter.author_name).to eq(details[:author_name])
         end
       end
     end
@@ -67,7 +77,11 @@ describe AuditEventPresenter do
         audit_event.author_id = -1
       end
 
-      context 'when `author_name` is not included in details' do
+      context 'when `author_name` is not included in details and not in the author_name column' do
+        before do
+          audit_event.update!(author_name: nil)
+        end
+
         let(:details) do
           {
             author_name: nil,
@@ -84,7 +98,11 @@ describe AuditEventPresenter do
         end
       end
 
-      context 'when `author_name` is included in details' do
+      context 'when `author_name` is included in details and not in the author_name column' do
+        before do
+          audit_event.update!(author_name: nil)
+        end
+
         it 'shows the author name as provided in the details' do
           expect(presenter.author_name).to eq('author')
         end
@@ -92,23 +110,41 @@ describe AuditEventPresenter do
     end
   end
 
-  it 'exposes the target' do
-    expect(presenter.target).to eq(details[:target_details])
+  describe '#target' do
+    it 'delegates to the model object' do
+      expect(presenter.target).to equal(audit_event.target_details)
+    end
   end
 
-  it 'exposes the ip address' do
-    expect(presenter.ip_address).to eq(details[:ip_address])
+  context 'exposes the ip address' do
+    it 'exposes the database value by default' do
+      expect(presenter.ip_address).to eq('10.2.1.1')
+    end
+
+    it 'survives a round trip from JSON' do
+      expect(Gitlab::Json.parse(presenter.ip_address.to_json)).to eq(presenter.ip_address)
+    end
   end
 
   context 'exposes the object' do
-    it 'link if it exists' do
-      expect(presenter.object).to eq("<a href=\"#{url_for(audit_event.entity)}\">#{details[:entity_path]}</a>")
+    it 'returns the object path if it exists' do
+      expect(presenter.object).to eq(audit_event.entity_path)
     end
 
-    it 'stored name if it has been deleted' do
+    it 'returns the stored name if it has been deleted' do
       audit_event.entity_id = nil
 
       expect(presenter.object).to be_blank
+    end
+
+    it 'returns the object url if it exists' do
+      expect(presenter.object_url).to eq(url_for(audit_event.entity))
+    end
+
+    it 'returns no object url if it has been deleted' do
+      audit_event.entity_id = nil
+
+      expect(presenter.object_url).to be_blank
     end
   end
 

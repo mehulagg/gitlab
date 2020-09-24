@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe EE::API::Helpers do
+RSpec.describe EE::API::Helpers do
   include Rack::Test::Methods
 
   let(:helper) do
-    Class.new(Grape::API) do
+    Class.new(Grape::API::Instance) do
       helpers EE::API::Helpers
       helpers API::APIGuard::HelperMethods
       helpers API::Helpers
@@ -41,7 +41,7 @@ describe EE::API::Helpers do
 
       get 'user'
 
-      expect(JSON.parse(last_response.body)).to eq({ 'id' => user.id })
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'id' => user.id })
     end
 
     it 'does not handle sticking if no user could be found' do
@@ -52,7 +52,7 @@ describe EE::API::Helpers do
 
       get 'user'
 
-      expect(JSON.parse(last_response.body)).to eq({ 'found' => false })
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'found' => false })
     end
 
     it 'returns the user if one could be found' do
@@ -60,27 +60,29 @@ describe EE::API::Helpers do
 
       get 'user'
 
-      expect(JSON.parse(last_response.body)).to eq({ 'id' => user.id })
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'id' => user.id })
     end
   end
 
   describe '#authenticate_by_gitlab_geo_node_token!' do
+    let(:invalid_geo_auth_header) { "#{::Gitlab::Geo::BaseRequest::GITLAB_GEO_AUTH_TOKEN_TYPE}...Test" }
+
     it 'rescues from ::Gitlab::Geo::InvalidDecryptionKeyError' do
       expect_any_instance_of(::Gitlab::Geo::JwtRequestDecoder).to receive(:decode) { raise ::Gitlab::Geo::InvalidDecryptionKeyError }
 
-      header 'Authorization', 'test'
+      header 'Authorization', invalid_geo_auth_header
       get 'protected', params: { current_user: 'test' }
 
-      expect(JSON.parse(last_response.body)).to eq({ 'message' => 'Gitlab::Geo::InvalidDecryptionKeyError' })
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'message' => 'Gitlab::Geo::InvalidDecryptionKeyError' })
     end
 
     it 'rescues from ::Gitlab::Geo::InvalidSignatureTimeError' do
       allow_any_instance_of(::Gitlab::Geo::JwtRequestDecoder).to receive(:decode) { raise ::Gitlab::Geo::InvalidSignatureTimeError }
 
-      header 'Authorization', 'test'
+      header 'Authorization', invalid_geo_auth_header
       get 'protected', params: { current_user: 'test' }
 
-      expect(JSON.parse(last_response.body)).to eq({ 'message' => 'Gitlab::Geo::InvalidSignatureTimeError' })
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'message' => 'Gitlab::Geo::InvalidSignatureTimeError' })
     end
 
     it 'returns unauthorized response when scope is not valid' do
@@ -89,7 +91,7 @@ describe EE::API::Helpers do
       header 'Authorization', 'test'
       get 'protected', params: { current_user: 'test' }
 
-      expect(JSON.parse(last_response.body)).to eq({ 'message' => '401 Unauthorized' })
+      expect(Gitlab::Json.parse(last_response.body)).to eq({ 'message' => '401 Unauthorized' })
     end
   end
 

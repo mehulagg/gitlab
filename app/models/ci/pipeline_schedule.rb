@@ -5,6 +5,11 @@ module Ci
     extend Gitlab::Ci::Model
     include Importable
     include StripAttribute
+    include Schedulable
+    include Limitable
+
+    self.limit_name = 'ci_pipeline_schedules'
+    self.limit_scope = :project
 
     belongs_to :project
     belongs_to :owner, class_name: 'User'
@@ -18,14 +23,11 @@ module Ci
     validates :description, presence: true
     validates :variables, variable_duplicates: true
 
-    before_save :set_next_run_at
-
     strip_attributes :cron
 
     scope :active, -> { where(active: true) }
     scope :inactive, -> { where(active: false) }
-    scope :runnable_schedules, -> { active.where("next_run_at < ?", Time.now) }
-    scope :preloaded, -> { preload(:owner, :project) }
+    scope :preloaded, -> { preload(:owner, project: [:route]) }
 
     accepts_nested_attributes_for :variables, allow_destroy: true
 
@@ -60,12 +62,6 @@ module Ci
                          else
                            cron_worker_next_run_from(ideal_next_run)
                          end
-    end
-
-    def schedule_next_run!
-      save! # with set_next_run_at
-    rescue ActiveRecord::RecordInvalid
-      update_column(:next_run_at, nil) # update without validation
     end
 
     def job_variables

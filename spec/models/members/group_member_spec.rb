@@ -2,22 +2,20 @@
 
 require 'spec_helper'
 
-describe GroupMember do
+RSpec.describe GroupMember do
   context 'scopes' do
-    describe '.count_users_by_group_id' do
-      it 'counts users by group ID' do
-        user_1 = create(:user)
-        user_2 = create(:user)
-        group_1 = create(:group)
-        group_2 = create(:group)
+    it 'counts users by group ID' do
+      user_1 = create(:user)
+      user_2 = create(:user)
+      group_1 = create(:group)
+      group_2 = create(:group)
 
-        group_1.add_owner(user_1)
-        group_1.add_owner(user_2)
-        group_2.add_owner(user_1)
+      group_1.add_owner(user_1)
+      group_1.add_owner(user_2)
+      group_2.add_owner(user_1)
 
-        expect(described_class.count_users_by_group_id).to eq(group_1.id => 2,
-                                                              group_2.id => 1)
-      end
+      expect(described_class.count_users_by_group_id).to eq(group_1.id => 2,
+                                                            group_2.id => 1)
     end
 
     describe '.of_ldap_type' do
@@ -65,10 +63,10 @@ describe GroupMember do
   end
 
   describe '#update_two_factor_requirement' do
-    let(:user) { build :user }
-    let(:group_member) { build :group_member, user: user }
-
     it 'is called after creation and deletion' do
+      user = build :user
+      group_member = build :group_member, user: user
+
       expect(user).to receive(:update_two_factor_requirement)
 
       group_member.save
@@ -76,6 +74,21 @@ describe GroupMember do
       expect(user).to receive(:update_two_factor_requirement)
 
       group_member.destroy
+    end
+  end
+
+  describe '#after_accept_invite' do
+    it 'calls #update_two_factor_requirement' do
+      email = 'foo@email.com'
+      user = build(:user, email: email)
+      group = create(:group, require_two_factor_authentication: true)
+      group_member = create(:group_member, group: group, invite_token: '1234', invite_email: email)
+
+      expect(user).to receive(:require_two_factor_authentication_from_group).and_call_original
+
+      group_member.accept_invite!(user)
+
+      expect(user.require_two_factor_authentication_from_group).to be_truthy
     end
   end
 

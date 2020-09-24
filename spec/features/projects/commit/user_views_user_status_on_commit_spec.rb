@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Project > Commit > View user status' do
+RSpec.describe 'Project > Commit > View user status' do
   include RepoHelpers
 
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:commit_author) { create(:user, email: sample_commit.author_email) }
 
   before do
@@ -30,7 +30,7 @@ describe 'Project > Commit > View user status' do
     end
   end
 
-  describe 'status for a diff note on the commit' do
+  describe 'status for a diff note on the commit', :js do
     let(:note) { create(:diff_note_on_commit, project: project) }
 
     it_behaves_like 'showing user status' do

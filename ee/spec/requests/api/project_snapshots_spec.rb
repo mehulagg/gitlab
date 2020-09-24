@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectSnapshots do
+RSpec.describe API::ProjectSnapshots do
   include ::EE::GeoHelpers
 
   let(:project) { create(:project) }
@@ -21,7 +21,7 @@ describe API::ProjectSnapshots do
 
       get api("/projects/#{project.id}/snapshot", nil), params: {}, headers: req.headers
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 end

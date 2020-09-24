@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module Geo
-  class RepositoryCleanupWorker
+  class RepositoryCleanupWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include GeoQueue
     include ::Gitlab::Geo::LogHelpers
     include ::Gitlab::Utils::StrongMemoize
+
+    loggable_arguments 1, 2, 3
 
     def perform(project_id, name, disk_path, storage_name)
       return unless current_node.secondary?

@@ -12,6 +12,8 @@ module EE
       belongs_to :milestone
 
       has_many :board_labels
+      has_many :user_preferences, class_name: 'BoardUserPreference', inverse_of: :board
+      has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :board
 
       # These can safely be changed to has_many when we support
       # multiple assignees on the board configuration.

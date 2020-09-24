@@ -9,13 +9,17 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
     Gitlab::Highlight.highlight(
       blob.path,
       limited_blob_data(to: to),
-      language: blob.language_from_gitattributes,
+      language: language,
       plain: plain
     )
   end
 
   def web_url
     Gitlab::Routing.url_helpers.project_blob_url(blob.repository.project, File.join(blob.commit_id, blob.path))
+  end
+
+  def web_path
+    Gitlab::Routing.url_helpers.project_blob_path(blob.repository.project, File.join(blob.commit_id, blob.path))
   end
 
   private
@@ -36,5 +40,9 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
 
   def all_lines
     @all_lines ||= blob.data.lines
+  end
+
+  def language
+    blob.language_from_gitattributes
   end
 end
