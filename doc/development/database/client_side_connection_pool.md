@@ -27,7 +27,7 @@ saturation
 dashboard](https://dashboards.gitlab.net/d/alerts-sat_rails_db_connection_pool/alerts-rails_db_connection_pool-saturation-detail?orgId=1).
 
 If the connection-pool is too small, this would manifest in
-`ActiveRecord::TimeoutError`s from the application. Because we alert
+`ActiveRecord::ConnectionTimeoutError`s from the application. Because we alert
 when almost all connections are used, we should know this before
 timeouts occur. If this happens we can remediate by setting the
 `DB_POOL_HEADROOM` environment variable to something bigger than the
