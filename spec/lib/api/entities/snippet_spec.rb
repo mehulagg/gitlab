@@ -21,16 +21,6 @@ RSpec.describe ::API::Entities::Snippet do
     it { expect(subject[:visibility]).to eq snippet.visibility }
     it { expect(subject).to include(:author) }
 
-    context 'with snippet_multiple_files feature disabled' do
-      before do
-        stub_feature_flags(snippet_multiple_files: false)
-      end
-
-      it 'does not return files' do
-        expect(subject).not_to include(:files)
-      end
-    end
-
     describe 'file_name' do
       it 'returns attribute from repository' do
         expect(subject[:file_name]).to eq snippet.blobs.first.path

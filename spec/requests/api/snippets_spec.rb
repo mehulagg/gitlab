@@ -219,10 +219,6 @@ RSpec.describe API::Snippets do
         expect(response).to have_gitlab_http_status(:ok)
       end
     end
-
-    it_behaves_like 'snippet_multiple_files feature disabled' do
-      let(:user) { author }
-    end
   end
 
   describe 'POST /snippets/' do
@@ -304,10 +300,6 @@ RSpec.describe API::Snippets do
     end
 
     it_behaves_like 'snippet creation'
-
-    it_behaves_like 'snippet_multiple_files feature disabled' do
-      let(:snippet) { Snippet.find(json_response["id"]) }
-    end
 
     context 'with an external user' do
       let(:user) { create(:user, :external) }
