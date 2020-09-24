@@ -32,13 +32,28 @@ module Mutations
                 required: false,
                 description: 'The maximum number of seconds allowed for the site under test to respond to a request.'
 
+      argument :active_scan, GraphQL::BOOLEAN_TYPE,
+                required: false,
+                description: 'Indicates if an Active Scan will run. ' \
+                'True to run an Active Scan in addtion to an Passive Scan, and false to run only a Passive Scan.'
+
+      argument :ajax_spider, GraphQL::BOOLEAN_TYPE,
+                required: false,
+                description: 'Indicates if the AJAX spider should be used to crawl the target site. ' \
+                'True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.'
+
+      argument :show_debug_messages, GraphQL::BOOLEAN_TYPE,
+                required: false,
+                description: 'Indicates if debug messages should be included in DAST console output. ' \
+                'True to include the debug messages.'
+
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, profile_name:, spider_timeout: nil, target_timeout: nil)
+      def resolve(full_path:, profile_name:, spider_timeout: nil, target_timeout: nil, active_scan: false, ajax_spider: false, show_debug_messages: false)
         project = authorized_find_project!(full_path: full_path)
 
         service = ::DastScannerProfiles::CreateService.new(project, current_user)
-        result = service.execute(name: profile_name, spider_timeout: spider_timeout, target_timeout: target_timeout)
+        result = service.execute(name: profile_name, spider_timeout: spider_timeout, target_timeout: target_timeout, active_scan: active_scan, ajax_spider: ajax_spider, show_debug_messages: show_debug_messages)
 
         if result.success?
           { id: result.payload.to_global_id, global_id: result.payload.to_global_id, errors: [] }
