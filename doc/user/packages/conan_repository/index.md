@@ -263,6 +263,12 @@ Install a Conan package from the Package Registry so you can use it as a depende
 
 Conan packages are often installed as dependencies by using the `conanfile.txt` file.
 
+Prerequisites:
+
+To install a Conan package, you need:
+
+- The Package Registry [set as a remote](#add-the-package-registry-as-a-conan-remote).
+
 1. In the project where you want to install the package as a dependency, open `conanfile.txt`.
    Or, in the root of your project, create a file called `conanfile.txt`.
 
