@@ -1019,8 +1019,10 @@ RSpec.describe Issues::UpdateService, :mailer do
 
           if should_broadcast
             expect(IssuesChannel).to receive(:broadcast_to).with(issue, event: 'updated')
+            expect(GraphqlTriggers).to receive(:issue_updated).with(issue)
           else
             expect(IssuesChannel).not_to receive(:broadcast_to)
+            expect(GraphqlTriggers).not_to receive(:issue_updated)
           end
 
           update_issue(update_params)

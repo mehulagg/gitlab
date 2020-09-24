@@ -283,8 +283,8 @@
     :when: 2019-09-11 13:08:28.431132000 Z
 - - :permit
   - "(MIT OR CC0-1.0)"
-  - :who: 
-    :why: 
+  - :who:
+    :why:
     :versions: []
     :when: 2019-11-08 10:03:31.787226000 Z
 - - :permit
@@ -331,3 +331,17 @@
     :why: https://github.com/xijo/reverse_markdown/blob/master/LICENSE
     :versions: []
     :when: 2021-02-03 08:47:28.792907000 Z
+- - :license
+  - json-schema
+  - New BSD
+  - :who: Heinrich Lee Yu
+    :why: https://github.com/kriszyp/json-schema/blob/master/LICENSE
+    :versions: []
+    :when: 2020-09-25 08:51:04.004062288 Z
+- - :license
+  - base64-js
+  - MIT
+  - :who: Heinrich Lee Yu
+    :why: https://github.com/beatgammit/base64-js/blob/master/LICENSE
+    :versions: []
+    :when: 2020-09-25 08:56:25.221444162 Z

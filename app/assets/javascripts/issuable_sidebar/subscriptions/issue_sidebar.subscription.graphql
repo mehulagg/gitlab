@@ -1,0 +1,13 @@
+#import "~/graphql_shared/fragments/author.fragment.graphql"
+
+subscription issueUpdated($iid: String!, $projectPath: ID!) {
+  issueUpdated(projectPath: $projectPath, iid: $iid) {
+    assignees {
+      nodes {
+        ...Author
+        id
+        state
+      }
+    }
+  }
+}
