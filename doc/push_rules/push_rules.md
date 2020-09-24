@@ -204,7 +204,7 @@ Example: prevent a specific configuration file in a known directory from being p
 ^directory-name\/config\.yml$
 ```
 
-Example: prevent the specific file named `install.exe` from being pushed to any location in the repository. Note that the parenthesized expression `(^|\/)` will match either a file following a directory separator or a file in the repository root.
+Example: prevent the specific file named `install.exe` from being pushed to any location in the repository. Note that the parenthesized expression `(^|\/)` will match either a file following a directory separator or a file in the root directory of the repository:
 
 ```plaintext
 (^|\/)install\.exe$
