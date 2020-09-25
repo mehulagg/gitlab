@@ -297,7 +297,7 @@ describe('Batch comments store actions', () => {
 
       actions.scrollToDraft({ dispatch, rootGetters }, draft);
 
-      expect(dispatch.mock.calls[1]).toEqual([
+      expect(dispatch.mock.calls[0]).toEqual([
         'expandDiscussion',
         { discussionId: '1' },
         { root: true },

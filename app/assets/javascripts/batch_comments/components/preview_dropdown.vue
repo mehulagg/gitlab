@@ -23,7 +23,11 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :header-text="n__('%d pending comment', '%d pending comments', draftsCount)" dropup>
+  <gl-dropdown
+    :header-text="n__('%d pending comment', '%d pending comments', draftsCount)"
+    dropup
+    toggle-class="qa-review-preview-toggle"
+  >
     <template #button-content>
       {{ __('Pending comments') }}
       <gl-icon class="dropdown-chevron" name="chevron-up" />
