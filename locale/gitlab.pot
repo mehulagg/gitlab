@@ -805,6 +805,9 @@ msgstr ""
 msgid "%{timebox_type} must have a start and due date"
 msgstr ""
 
+msgid "%{time} by %{user}"
+msgstr ""
+
 msgid "%{title} %{operator} %{threshold}"
 msgstr ""
 
@@ -8947,6 +8950,9 @@ msgstr ""
 msgid "Diffs|Something went wrong while fetching diff lines."
 msgstr ""
 
+msgid "Direct member"
+msgstr ""
+
 msgid "Direction"
 msgstr ""
 
@@ -13630,6 +13636,9 @@ msgstr ""
 msgid "Information about additional Pages templates and how to install them can be found in our %{pages_getting_started_guide}."
 msgstr ""
 
+msgid "Inherited"
+msgstr ""
+
 msgid "Inherited:"
 msgstr ""
 
@@ -17207,6 +17216,9 @@ msgid "No errors to display."
 msgstr ""
 
 msgid "No estimate or time spent"
+msgstr ""
+
+msgid "No expiration set"
 msgstr ""
 
 msgid "No file chosen"
@@ -30294,6 +30306,9 @@ msgid "import flow"
 msgstr ""
 
 msgid "importing"
+msgstr ""
+
+msgid "in %{time}"
 msgstr ""
 
 msgid "in group %{link_to_group}"

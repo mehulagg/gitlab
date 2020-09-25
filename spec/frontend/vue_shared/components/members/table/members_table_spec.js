@@ -5,7 +5,12 @@ import {
   getByTestId as getByTestIdHelper,
 } from '@testing-library/dom';
 import MembersTable from '~/vue_shared/components/members/table/members_table.vue';
+import MemberAvatar from '~/vue_shared/components/members/table/member_avatar.vue';
+import MemberSource from '~/vue_shared/components/members/table/member_source.vue';
+import ExpiresAt from '~/vue_shared/components/members/table/expires_at.vue';
+import CreatedAt from '~/vue_shared/components/members/table/created_at.vue';
 import * as initUserPopovers from '~/user_popovers';
+import { member as memberMock, invite, accessRequest } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -27,7 +32,7 @@ describe('MemberList', () => {
     wrapper = mount(MembersTable, {
       localVue,
       store: createStore(state),
-      stubs: ['member-avatar'],
+      stubs: ['member-avatar', 'member-source', 'expires-at', 'created-at'],
     });
   };
 
@@ -44,20 +49,31 @@ describe('MemberList', () => {
 
   describe('fields', () => {
     it.each`
-      field           | label
-      ${'source'}     | ${'Source'}
-      ${'granted'}    | ${'Access granted'}
-      ${'invited'}    | ${'Invited'}
-      ${'requested'}  | ${'Requested'}
-      ${'expires'}    | ${'Access expires'}
-      ${'maxRole'}    | ${'Max role'}
-      ${'expiration'} | ${'Expiration'}
-    `('renders the $label field', ({ field, label }) => {
+      field           | label               | member           | expectedComponent
+      ${'account'}    | ${'Account'}        | ${memberMock}    | ${MemberAvatar}
+      ${'source'}     | ${'Source'}         | ${memberMock}    | ${MemberSource}
+      ${'granted'}    | ${'Access granted'} | ${memberMock}    | ${CreatedAt}
+      ${'invited'}    | ${'Invited'}        | ${invite}        | ${CreatedAt}
+      ${'requested'}  | ${'Requested'}      | ${accessRequest} | ${CreatedAt}
+      ${'expires'}    | ${'Access expires'} | ${memberMock}    | ${ExpiresAt}
+      ${'maxRole'}    | ${'Max role'}       | ${memberMock}    | ${null}
+      ${'expiration'} | ${'Expiration'}     | ${memberMock}    | ${null}
+    `('renders the $label field', ({ field, label, member, expectedComponent }) => {
       createComponent({
+        members: [member],
         tableFields: [field],
       });
 
       expect(getByText(label, { selector: '[role="columnheader"]' }).exists()).toBe(true);
+
+      if (expectedComponent) {
+        expect(
+          wrapper
+            .find(`[data-label="${label}"][role="cell"]`)
+            .find(expectedComponent)
+            .exists(),
+        ).toBe(true);
+      }
     });
 
     it('renders "Actions" field for screen readers', () => {
