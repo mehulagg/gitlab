@@ -1308,6 +1308,7 @@ the documentation site, but will be displayed on GitLab's `/help`.
   do it with the button on code blocks.
 - HTTP methods (`HTTP POST`) and HTTP status codes, both full (`404 File Not Found`)
   and abbreviated (`404`), should be wrapped in inline code blocks when used in sentences.
+  For example: Send a `DELETE` request to delete the runner. Send a `POST` request to create one.
 - Add a blank line above and below code blocks.
 - When providing a shell command and its output, prefix the shell command with `$`
   and leave a blank line between the command and the output.
