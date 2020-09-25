@@ -23,8 +23,8 @@ const logUserTimingMetrics = () => {
     entries.forEach(entry => {
       const { name, entryType, startTime, duration } = entry;
       const typeMapper = {
-        PERFORMANCE_MARK: String.fromCodePoint(0x1f3af),
-        PERFORMANCE_MEASURE: String.fromCodePoint(0x1f4d0),
+        [PERFORMANCE_TYPE_MARK]: String.fromCodePoint(0x1f3af),
+        [PERFORMANCE_TYPE_MEASURE]: String.fromCodePoint(0x1f4d0),
       };
       console.group(`${typeMapper[entryType]} ${name}`);
       if (entryType === PERFORMANCE_TYPE_MARK) {
@@ -42,7 +42,7 @@ const logUserTimingMetrics = () => {
 
 const initPerformanceBarLog = () => {
   console.log(
-    `%c ${String.fromCodePoint(0x1f98a)} GitLab performance bar`,
+    `%c ${String.fromCodePoint(0x1f98a)} GitLab performance co -bar`,
     'width:100%;background-color: #292961; color: #FFFFFF; font-size:24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto; padding: 10px;display:block;padding-right: 100px;',
   );
 
