@@ -382,8 +382,8 @@ Identifiers are also used to [merge duplicate vulnerabilities](#tracking-and-mer
 reported for the same commit, except for `CWE` and `WASC`.
 
 NOTE: **Note:**
-Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, the
-primary identifier `primary_identifier` is most stable and should be used to track vulnerabilities.
+Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, a
++CVE isn't a stable identifier and should not be assumed when tracking vulnerabilities.
 
 ### Location
 
