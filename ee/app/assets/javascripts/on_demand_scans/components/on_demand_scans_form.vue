@@ -20,6 +20,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
+import DismissibleFeedbackAlert from '~/vue_shared/components/dismissible_feedback_alert.vue';
 
 const ERROR_RUN_SCAN = 'ERROR_RUN_SCAN';
 const ERROR_FETCH_SCANNER_PROFILES = 'ERROR_FETCH_SCANNER_PROFILES';
@@ -54,6 +55,7 @@ export default {
     GlDropdownItem,
     GlSkeletonLoader,
     GlSprintf,
+    DismissibleFeedbackAlert,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -238,6 +240,15 @@ export default {
 
 <template>
   <gl-form @submit.prevent="onSubmit">
+    <!--
+      This is a temporary change to solicit feedback from users
+      and shall be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/255889
+    -->
+    <dismissible-feedback-alert
+      feature-name="on-demand DAST scans"
+      feedback-link="https://gitlab.com/gitlab-org/gitlab/-/issues/249684"
+    />
+
     <header class="gl-mb-6">
       <h2>{{ s__('OnDemandScans|New on-demand DAST scan') }}</h2>
       <p>

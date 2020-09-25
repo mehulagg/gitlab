@@ -48,7 +48,7 @@ export default {
       <gl-sprintf
         :message="
           __(
-            'We’ve been making changes to %{featureName} and we’d love your feedback %{linkStart}in this issue%{linkEnd} to help us improve the experience.',
+            'Please share your feedback about %{featureName} %{linkStart}in this issue%{linkEnd} to help us improve the experience.',
           )
         "
       >
