@@ -784,7 +784,7 @@ module Gitlab
 
       def issue_maximum_project_id
         strong_memoize(:issue_maximum_project_id) do
-          ::Issue.minimum(:project_id)
+          ::Issue.maximum(:project_id)
         end
       end
 
@@ -819,6 +819,8 @@ module Gitlab
       def clear_memoized
         clear_memoization(:issue_minimum_id)
         clear_memoization(:issue_maximum_id)
+        clear_memoization(:issue_minimum_project_id)
+        clear_memoization(:issue_maximum_project_id)
         clear_memoization(:user_minimum_id)
         clear_memoization(:user_maximum_id)
         clear_memoization(:unique_visit_service)

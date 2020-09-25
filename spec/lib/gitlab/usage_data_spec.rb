@@ -25,6 +25,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       it 'clears memoized values' do
         values = %i(issue_minimum_id issue_maximum_id
+                    issue_minimum_project_id issue_maximum_project_id
                     project_minimum_id project_maximum_id
                     user_minimum_id user_maximum_id unique_visit_service
                     deployment_minimum_id deployment_maximum_id
@@ -1248,6 +1249,26 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       it 'returns an empty hash' do
         expect(described_class.snowplow_event_counts).to eq({})
       end
+    end
+  end
+
+  describe '.issue_minimum_project_id' do
+    subject { described_class.send(:issue_minimum_project_id) }
+
+    it 'finds the minimum project_id' do
+      expect(::Issue).to receive(:minimum).with(:project_id)
+
+      subject
+    end
+  end
+
+  describe '.issue_maximum_project_id' do
+    subject { described_class.send(:issue_maximum_project_id) }
+
+    it 'finds the maximum project_id' do
+      expect(::Issue).to receive(:maximum).with(:project_id)
+
+      subject
     end
   end
 end
