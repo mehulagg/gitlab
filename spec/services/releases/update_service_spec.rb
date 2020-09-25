@@ -116,5 +116,15 @@ RSpec.describe Releases::UpdateService do
         expect(result[:milestones_updated]).to be_truthy
       end
     end
+    
+    context 'group milestones' do
+      let(:group) { create(:group) }
+      let(:project) { create :project, :repository, group: group }
+      let(:service) { described_class.new(project, user, params_with_milestones) }
+
+      context 'when a group milestone is passed' do
+        let(:milestone) { create(:milestone, project: project, title: 'v1.0') }
+      end
+    end
   end
 end

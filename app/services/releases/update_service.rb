@@ -14,6 +14,7 @@ module Releases
       if param_for_milestone_titles_provided?
         previous_milestones = release.milestones.map(&:title)
         params[:milestones] = milestones
+        #byebug
       end
 
       if release.update(params)
