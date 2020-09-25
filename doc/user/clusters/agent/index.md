@@ -9,6 +9,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
 > - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834)
 
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
 The [GitLab Kubernetes Agent](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent)
 is an active in-cluster component for solving GitLab and Kubernetes integration
 tasks in a secure and cloud-native way. It enables:
@@ -71,11 +74,7 @@ have GitLab installed via Helm, please refer to our
 [installation documentation](https://docs.gitlab.com/charts/installation/).
 
 NOTE: **Note:**
-GitLab plans to [include the Agent](https://gitlab.com/gitlab-org/gitlab/-/issues/223060)
-in the official Linux Package.
-
-NOTE: **Note:**
-GitLab is working towards adding the Agent server to GitLab.com.
+GitLab plans to include the Agent in the [official Linux Package](https://gitlab.com/gitlab-org/gitlab/-/issues/223060) and on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834)
 
 When installing or upgrading the GitLab Helm chart, consider the following Helm 2 example.
 (If you're using Helm 3, you must modify this example.) You must set `global.kas.enabled=true`
