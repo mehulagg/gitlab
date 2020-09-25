@@ -1,0 +1,5 @@
+---
+title: Add support for `artifacts:archives` in gitlab-ci.yml
+merge_request: 43351
+author:
+type: added

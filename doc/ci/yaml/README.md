@@ -107,7 +107,7 @@ The following table lists available parameters for jobs:
 | [`script`](#script)                                | Shell script that is executed by a runner.                                                                                                                                           |
 | [`after_script`](#before_script-and-after_script)  | Override a set of commands that are executed after job.                                                                                                                             |
 | [`allow_failure`](#allow_failure)                  | Allow job to fail. Failed job does not contribute to commit status.                                                                                                                 |
-| [`artifacts`](#artifacts)                          | List of files and directories to attach to a job on success. Also available: `artifacts:paths`, `artifacts:exclude`, `artifacts:expose_as`, `artifacts:name`, `artifacts:untracked`, `artifacts:when`, `artifacts:expire_in`, `artifacts:reports`. |
+| [`artifacts`](#artifacts)                          | List of files and directories to attach to a job on success. Also available: `artifacts:paths`, `artifacts:exclude`, `artifacts:expose_as`, `artifacts:name`, `artifacts:untracked`, `artifacts:when`, `artifacts:expire_in`, `artifacts:archives`, `artifacts:reports`. |
 | [`before_script`](#before_script-and-after_script) | Override a set of commands that are executed before job.                                                                                                                            |
 | [`cache`](#cache)                                  | List of files that should be cached between subsequent runs. Also available: `cache:paths`, `cache:key`, `cache:untracked`, and `cache:policy`.                                     |
 | [`coverage`](#coverage)                            | Code coverage settings for a given job.                                                                                                                                             |
@@ -3305,6 +3305,35 @@ The latest artifacts for refs are locked against deletion, and kept regardless o
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
 in GitLab 13.4.
+
+#### `artifacts:archives`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18744) in GitLab 13.5 and GitLab Runner v13.5.0.
+
+`artifacts:archives` is used to create multiple artifact archives per job. All of the documented `artifacts:`
+syntax is supported under `artifacts:archives` except that the archive's name should be a key under `artifacts:archives` without using `artifacts:archives:name`.
+
+For example, to create an archive named `coverage` with files `/coverage/path-1.txt`
+and `/coverage/path-2.txt` and a archive named `failures` that uploads only on failure, 
+use the following syntax:
+
+```yaml
+artifacts:
+  archives:
+    coverage:
+      untracked: true
+      paths: 
+        - /coverage/file-1.txt
+        - /coverage/file-2.txt
+      expose_as: test_coverage
+    failures:
+      paths: 
+        - /failure/file-1.txt
+      when: on_failure
+  reports:
+    junit: rspec.xml
+    terraform: tfplan.json
+```
 
 #### `artifacts:reports`
 
