@@ -245,6 +245,11 @@ type AlertManagementAlert implements Noteable {
   endedAt: Time
 
   """
+  Environment for the alert
+  """
+  environmentUrl: String
+
+  """
   Number of events of this alert
   """
   eventCount: Int

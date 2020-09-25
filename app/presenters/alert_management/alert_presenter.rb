@@ -39,6 +39,10 @@ module AlertManagement
       Gitlab::Utils::InlineHash.merge_keys(payload)
     end
 
+    def environment_url
+      project_environment_url(project, environment)
+    end
+
     def show_incident_issues_link?
       project.incident_management_setting&.create_issue?
     end

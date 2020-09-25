@@ -667,6 +667,20 @@
               "deprecationReason": null
             },
             {
+              "name": "environmentUrl",
+              "description": "Environment for the alert",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "eventCount",
               "description": "Number of events of this alert",
               "args": [

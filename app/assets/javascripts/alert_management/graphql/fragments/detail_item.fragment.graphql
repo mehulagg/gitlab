@@ -12,6 +12,7 @@ fragment AlertDetailItem on AlertManagementAlert {
   endedAt
   details
   runbook
+  environmentUrl
   todos {
     nodes {
       id
