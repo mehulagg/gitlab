@@ -336,6 +336,8 @@ class Project < ApplicationRecord
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
 
+  has_many :terraform_states, class_name: 'Terraform::State', inverse_of: :project
+
   # GitLab Pages
   has_many :pages_domains
   has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
