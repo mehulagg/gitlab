@@ -10,6 +10,7 @@ module ResourceAccessTokens
       @current_user = current_user
       @access_token = access_token
       @bot_user = access_token.user
+      @access_token_name = access_token.name
       @resource = resource
     end
 
@@ -22,9 +23,11 @@ module ResourceAccessTokens
         raise RevokeAccessTokenError, "Failed to remove #{bot_user.name} member from: #{resource.name}" unless remove_member
 
         raise RevokeAccessTokenError, "Migration to ghost user failed" unless migrate_to_ghost_user
+
+        raise RevokeAccessTokenError, "Deletion of bot user failed" unless delete_bot
       end
 
-      success("Revoked access token: #{access_token.name}")
+      success("Revoked access token: #{@access_token_name}")
     rescue ActiveRecord::ActiveRecordError, RevokeAccessTokenError => error
       log_error("Failed to revoke access token for #{bot_user.name}: #{error.message}")
       error(error.message)
@@ -40,6 +43,10 @@ module ResourceAccessTokens
 
     def migrate_to_ghost_user
       ::Users::MigrateToGhostUserService.new(bot_user).execute
+    end
+
+    def delete_bot
+      bot_user.destroy
     end
 
     def find_member
