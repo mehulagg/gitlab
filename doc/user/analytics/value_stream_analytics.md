@@ -12,38 +12,38 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Value Stream Analytics measures the time spent to go from an
 [idea to production](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#from-idea-to-production-with-gitlab)
-(also known as cycle time) for each of your projects. Value Stream Analytics displays the median time
+(also known as cycle time) for each of your projects or groups. Value Stream Analytics displays the median time
 spent in each stage defined in the process.
-
-For information on how to contribute to the development of Value Stream Analytics, see our [contributor documentation](../../development/value_stream_analytics.md).
 
 Value Stream Analytics is useful in order to quickly determine the velocity of a given
 project. It points to bottlenecks in the development process, enabling management
 to uncover, triage, and identify the root cause of slowdowns in the software development life cycle.
 
-Value Stream Analytics is tightly coupled with the [GitLab flow](../../topics/gitlab_flow.md) and
-calculates a separate median for each stage.
+For information on how to contribute to the development of Value Stream Analytics, see our [contributor documentation](../../development/value_stream_analytics.md).
 
-## Overview
+## Project Level Value Stream Analytics **CORE**
 
-Value Stream Analytics is available:
+Project Level Value Stream Analytics is available via **Project > Analytics > Value Stream**.
 
-- From GitLab 12.9, at the group level via **Group > Analytics > Value Stream**. **(PREMIUM)**
-- At the project level via **Project > Analytics > Value Stream**.
+## Group Level Value Stream Analytics **PREMIUM**
 
-There are seven stages that are tracked as part of the Value Stream Analytics calculations.
+From GitLab 12.9, group level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
 
-- **Issue** (Tracker)
+## Default stages
+
+By default, there are 7 stages that are tracked by Value Stream Analytics. These represent the [GitLab flow](../../topics/gitlab_flow.md). These stages can be customized in Group Level Value Stream Analytics.
+
+1. **Issue** (Tracker)
   - Time to schedule an issue (by milestone or by adding it to an issue board)
-- **Plan** (Board)
+1. **Plan** (Board)
   - Time to first commit
-- **Code** (IDE)
+1. **Code** (IDE)
   - Time to create a merge request
-- **Test** (CI)
+1. **Test** (CI)
   - Time it takes GitLab CI/CD to test your code
-- **Review** (Merge Request/MR)
+1. **Review** (Merge Request/MR)
   - Time spent on code review
-- **Staging** (Continuous Deployment)
+1. **Staging** (Continuous Deployment)
   - Time between merging and deploying to production
 
 ## Filter the analytics data
