@@ -9,6 +9,7 @@ import {
   getPathParents,
   getPathParent,
   readFileAsDataURL,
+  addNumericSuffix,
 } from '~/ide/utils';
 
 describe('WebIDE utils', () => {
@@ -289,6 +290,30 @@ describe('WebIDE utils', () => {
       return readFileAsDataURL(file).then(contents => {
         expect(contents).toBe('data:image/png;base64,Zm9v');
       });
+    });
+  });
+
+  /*
+   *  hello-2425 -> hello-2425
+   *  hello.md -> hello-1.md
+   *  hello_2.md -> hello_3.md
+   *  hello_ -> hello_1
+   *  master-patch-22432 -> master-patch-22433
+   *  patch_332 -> patch_333
+   */
+
+  describe('addNumericSuffix', () => {
+    it.each`
+      input                   | output
+      ${'hello'}              | ${'hello-1'}
+      ${'hello2'}             | ${'hello-3'}
+      ${'hello.md'}           | ${'hello-1.md'}
+      ${'hello_2.md'}         | ${'hello_3.md'}
+      ${'hello_'}             | ${'hello_1'}
+      ${'master-patch-22432'} | ${'master-patch-22433'}
+      ${'patch_332'}          | ${'patch_333'}
+    `('adds a numeric suffix to a given filename/branch name: $input', ({ input, output }) => {
+      expect(addNumericSuffix(input)).toBe(output);
     });
   });
 });

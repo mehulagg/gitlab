@@ -2,6 +2,7 @@ import {
   createUnexpectedCommitError,
   createCodeownersCommitError,
   createBranchChangedCommitError,
+  branchAlreadyExistsCommitError,
   parseCommitError,
 } from '~/ide/lib/errors';
 
@@ -39,17 +40,17 @@ describe('~/ide/lib/errors', () => {
     });
   });
 
-  describe('createBranchChangedCommitError', () => {
+  describe('createBranchChangedCommitError, branchAlreadyExistsCommitError', () => {
+    const MESSAGE_SUFFIX = `<br/><br/>Would you like to create a new branch?`;
+
     it.each`
-      message         | expectedMessage
-      ${TEST_MESSAGE} | ${`${TEST_MESSAGE}<br/><br/>Would you like to create a new branch?`}
-      ${TEST_SPECIAL} | ${`${TEST_SPECIAL_ESCAPED}<br/><br/>Would you like to create a new branch?`}
-    `('uses given message="$message"', ({ message, expectedMessage }) => {
-      expect(createBranchChangedCommitError(message)).toEqual({
-        title: 'Branch changed',
-        messageHTML: expectedMessage,
-        canCreateBranch: true,
-      });
+      fn                                | title                      | message         | messageHTML
+      ${branchAlreadyExistsCommitError} | ${'Branch already exists'} | ${TEST_MESSAGE} | ${`${TEST_MESSAGE}${MESSAGE_SUFFIX}`}
+      ${branchAlreadyExistsCommitError} | ${'Branch already exists'} | ${TEST_SPECIAL} | ${`${TEST_SPECIAL_ESCAPED}${MESSAGE_SUFFIX}`}
+      ${createBranchChangedCommitError} | ${'Branch changed'}        | ${TEST_MESSAGE} | ${`${TEST_MESSAGE}${MESSAGE_SUFFIX}`}
+      ${createBranchChangedCommitError} | ${'Branch changed'}        | ${TEST_SPECIAL} | ${`${TEST_SPECIAL_ESCAPED}${MESSAGE_SUFFIX}`}
+    `('uses given message="$message"', ({ fn, title, message, messageHTML }) => {
+      expect(fn(message)).toEqual({ title, messageHTML, canCreateBranch: true });
     });
   });
 
@@ -60,7 +61,7 @@ describe('~/ide/lib/errors', () => {
       ${{}}                                      | ${createUnexpectedCommitError()}
       ${{ response: {} }}                        | ${createUnexpectedCommitError()}
       ${{ response: { data: {} } }}              | ${createUnexpectedCommitError()}
-      ${createResponseError('test')}             | ${createUnexpectedCommitError()}
+      ${createResponseError(TEST_MESSAGE)}       | ${createUnexpectedCommitError(TEST_MESSAGE)}
       ${createResponseError(CODEOWNERS_MESSAGE)} | ${createCodeownersCommitError(CODEOWNERS_MESSAGE)}
       ${createResponseError(CHANGED_MESSAGE)}    | ${createBranchChangedCommitError(CHANGED_MESSAGE)}
     `('parses message into error object with "$message"', ({ message, expectation }) => {

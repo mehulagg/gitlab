@@ -28,8 +28,8 @@ export const toggleShouldCreateMR = ({ commit }) => {
   commit(types.TOGGLE_SHOULD_CREATE_MR);
 };
 
-export const updateBranchName = ({ commit }, branchName) => {
-  commit(types.UPDATE_NEW_BRANCH_NAME, branchName);
+export const updateBranchName = ({ commit }, { branchName, addSuffix = false }) => {
+  commit(types.UPDATE_NEW_BRANCH_NAME, { branchName, addSuffix });
 };
 
 export const setLastCommitMessage = ({ commit, rootGetters }, data) => {

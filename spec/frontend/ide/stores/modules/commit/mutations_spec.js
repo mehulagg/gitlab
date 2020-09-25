@@ -27,9 +27,36 @@ describe('IDE commit module mutations', () => {
 
   describe('UPDATE_NEW_BRANCH_NAME', () => {
     it('updates newBranchName', () => {
-      mutations.UPDATE_NEW_BRANCH_NAME(state, 'testing');
+      mutations.UPDATE_NEW_BRANCH_NAME(state, { branchName: 'testing' });
 
       expect(state.newBranchName).toBe('testing');
+    });
+
+    it('adds numeric suffix to branch name if addSuffix=true', () => {
+      mutations.UPDATE_NEW_BRANCH_NAME(state, { branchName: 'testing', addSuffix: true });
+
+      expect(state.newBranchName).toBe('testing-1');
+    });
+
+    it('picks the branch name from state if branchName is not passed', () => {
+      state.newBranchName = 'master';
+      mutations.UPDATE_NEW_BRANCH_NAME(state, { addSuffix: true });
+
+      expect(state.newBranchName).toBe('master-1');
+    });
+
+    it('picks placeholder branch name if branch name is not passed and does not exist in state', () => {
+      state.placeholderBranchName = 'root-master-patch-25322';
+
+      expect(state.newBranchName).toBe('');
+
+      mutations.UPDATE_NEW_BRANCH_NAME(state, {});
+
+      expect(state.newBranchName).toBe('root-master-patch-25322');
+
+      mutations.UPDATE_NEW_BRANCH_NAME(state, { addSuffix: true });
+
+      expect(state.newBranchName).toBe('root-master-patch-25323');
     });
   });
 

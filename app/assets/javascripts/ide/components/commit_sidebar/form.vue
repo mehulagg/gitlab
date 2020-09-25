@@ -70,6 +70,7 @@ export default {
   methods: {
     ...mapActions(['updateActivityBarView']),
     ...mapActions('commit', [
+      'updateBranchName',
       'updateCommitMessage',
       'discardDraft',
       'commitChanges',
@@ -79,6 +80,7 @@ export default {
       return this.commitChanges();
     },
     forceCreateNewBranch() {
+      this.updateBranchName({ addSuffix: true });
       return this.updateCommitAction(consts.COMMIT_TO_NEW_BRANCH).then(() => this.commit());
     },
     handleCompactState() {

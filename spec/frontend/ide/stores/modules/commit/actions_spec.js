@@ -121,14 +121,19 @@ describe('IDE commit module actions', () => {
   });
 
   describe('updateBranchName', () => {
-    it('updates store with new branch name', done => {
-      store
-        .dispatch('commit/updateBranchName', 'branch-name')
-        .then(() => {
-          expect(store.state.commit.newBranchName).toBe('branch-name');
-        })
-        .then(done)
-        .catch(done.fail);
+    it('updates store with new branch name', async () => {
+      await store.dispatch('commit/updateBranchName', { branchName: 'branch-name' });
+
+      expect(store.state.commit.newBranchName).toBe('branch-name');
+    });
+
+    it('adds suffix to branchName if addSuffix=true', async () => {
+      await store.dispatch('commit/updateBranchName', {
+        branchName: 'branch-name',
+        addSuffix: true,
+      });
+
+      expect(store.state.commit.newBranchName).toBe('branch-name-1');
     });
   });
 

@@ -1,4 +1,5 @@
 import * as types from './mutation_types';
+import { addNumericSuffix } from '~/ide/utils';
 
 export default {
   [types.UPDATE_COMMIT_MESSAGE](state, commitMessage) {
@@ -9,10 +10,11 @@ export default {
   [types.UPDATE_COMMIT_ACTION](state, { commitAction }) {
     Object.assign(state, { commitAction });
   },
-  [types.UPDATE_NEW_BRANCH_NAME](state, newBranchName) {
-    Object.assign(state, {
-      newBranchName,
-    });
+  [types.UPDATE_NEW_BRANCH_NAME](state, { branchName, addSuffix = false }) {
+    let newBranchName = branchName || state.newBranchName || state.placeholderBranchName;
+    if (addSuffix) newBranchName = addNumericSuffix(newBranchName);
+
+    Object.assign(state, { newBranchName });
   },
   [types.UPDATE_LOADING](state, submitCommitLoading) {
     Object.assign(state, {

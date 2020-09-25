@@ -3,10 +3,11 @@ import { __ } from '~/locale';
 
 const CODEOWNERS_REGEX = /Push.*protected branches.*CODEOWNERS/;
 const BRANCH_CHANGED_REGEX = /changed.*since.*start.*edit/;
+const BRANCH_ALREADY_EXISTS = /branch.*already.*exists/;
 
-export const createUnexpectedCommitError = () => ({
+export const createUnexpectedCommitError = message => ({
   title: __('Unexpected error'),
-  messageHTML: __('Could not commit. An unexpected error occurred.'),
+  messageHTML: escape(message) || __('Could not commit. An unexpected error occurred.'),
   canCreateBranch: false,
 });
 
@@ -22,6 +23,12 @@ export const createBranchChangedCommitError = message => ({
   canCreateBranch: true,
 });
 
+export const branchAlreadyExistsCommitError = message => ({
+  title: __('Branch already exists'),
+  messageHTML: `${escape(message)}<br/><br/>${__('Would you like to create a new branch?')}`,
+  canCreateBranch: true,
+});
+
 export const parseCommitError = e => {
   const { message } = e?.response?.data || {};
 
@@ -33,7 +40,9 @@ export const parseCommitError = e => {
     return createCodeownersCommitError(message);
   } else if (BRANCH_CHANGED_REGEX.test(message)) {
     return createBranchChangedCommitError(message);
+  } else if (BRANCH_ALREADY_EXISTS.test(message)) {
+    return branchAlreadyExistsCommitError(message);
   }
 
-  return createUnexpectedCommitError();
+  return createUnexpectedCommitError(message);
 };

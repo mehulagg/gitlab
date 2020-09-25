@@ -290,7 +290,7 @@ describe('IDE commit form', () => {
         jest.spyOn(vm.$store, 'dispatch').mockReturnValue(Promise.resolve());
       });
 
-      it('updates commit action and commits', async () => {
+      it('increments branch number, updates commit action and commits', async () => {
         store.state.commit.commitError = createCodeownersCommitError('test message');
 
         await vm.$nextTick();
@@ -300,6 +300,7 @@ describe('IDE commit form', () => {
         await waitForPromises();
 
         expect(vm.$store.dispatch.mock.calls).toEqual([
+          ['commit/updateBranchName', { addSuffix: true }],
           ['commit/updateCommitAction', consts.COMMIT_TO_NEW_BRANCH],
           ['commit/commitChanges', undefined],
         ]);

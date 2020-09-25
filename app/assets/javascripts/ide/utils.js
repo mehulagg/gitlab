@@ -137,3 +137,25 @@ export function readFileAsDataURL(file) {
 export function getFileEOL(content = '') {
   return content.includes('\r\n') ? 'CRLF' : 'LF';
 }
+
+/**
+ * Adds or increments the numeric suffix to a filename/branch name.
+ * Retains underscore or dash before the numeric suffix if it already exists.
+ *
+ * Examples:
+ *  hello -> hello-1
+ *  hello-2425 -> hello-2425
+ *  hello.md -> hello-1.md
+ *  hello_2.md -> hello_3.md
+ *  hello_ -> hello_1
+ *  master-patch-22432 -> master-patch-22433
+ *  patch_332 -> patch_333
+ *
+ * @param {string} filename File name or branch name
+ */
+export function addNumericSuffix(filename) {
+  return filename.replace(
+    /([ _-]?)(\d*)(\..+?$|$)/,
+    (_, before, number, after) => `${before || '-'}${Number(number) + 1}${after}`,
+  );
+}

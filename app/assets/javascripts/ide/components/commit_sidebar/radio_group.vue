@@ -76,7 +76,7 @@ export default {
         :value="newBranchName"
         type="text"
         class="form-control monospace"
-        @input="updateBranchName($event.target.value)"
+        @input="updateBranchName({ branchName: $event.target.value })"
       />
     </div>
   </fieldset>
