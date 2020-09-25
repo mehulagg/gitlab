@@ -1,11 +1,9 @@
 <!--
-
 * Use this issue template for creating requests to track snowplow events
 * Snowplow events can be both Frontend (javascript) or Backend (Ruby)
 * Snowplow is currently not used for self-hosted instances of GitLab - Self-hosted still rely on usage ping for product analytics - Snowplow is used for GitLab SaaS
 * You do not need to create an issue to track generic front-end events, such as All page views, sessions, link clicks, some button clicks, etc. 
 * What you should capture are specific events with defined business logic. For example, when a user creates an incident by escalating an existing alert, or when a user creates and pushes up a new Node package to the NPM registry. 
-
  -->
 
 <!-- 
