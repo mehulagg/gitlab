@@ -1,0 +1,5 @@
+---
+title: Fix discussion lock to initialize correctly on merge request pages
+merge_request: 255907
+author:
+type: fixed
