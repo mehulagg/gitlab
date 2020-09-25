@@ -24,13 +24,13 @@ module API
           desc 'Get a list of features (deprecated, v2 client support)'
           get 'features' do
             present :version, 1
-            present :features, feature_flags, with: ::EE::API::Entities::UnleashFeature
+            present :features, feature_flags, with: ::API::Entities::UnleashFeature
           end
 
           desc 'Get a list of features'
           get 'client/features' do
             present :version, 1
-            present :features, feature_flags, with: ::EE::API::Entities::UnleashFeature
+            present :features, feature_flags, with: ::API::Entities::UnleashFeature
           end
 
           post 'client/register' do

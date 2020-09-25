@@ -11,9 +11,9 @@ module FeatureFlagsHelper
     project.feature_flags_client_token
   end
 
-  def feature_flag_issues_links_endpoint(project, feature_flag, user)
-    return '' unless can?(user, :admin_feature_flags_issue_links, project)
-
-    project_feature_flag_issues_path(project, feature_flag)
+  def feature_flag_issues_links_endpoint(_project, _feature_flag, _user)
+    ''
   end
 end
+
+FeatureFlagsHelper.prepend_if_ee('::EE::FeatureFlagsHelper')

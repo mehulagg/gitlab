@@ -2505,6 +2505,11 @@ class Project < ApplicationRecord
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
   end
 
+  def feature_flags_client_token
+    instance = operations_feature_flags_client || create_operations_feature_flags_client!
+    instance.token
+  end
+
   private
 
   def find_service(services, name)
