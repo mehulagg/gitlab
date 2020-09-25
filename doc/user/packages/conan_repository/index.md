@@ -268,6 +268,7 @@ Prerequisites:
 To install a Conan package, you need:
 
 - The Package Registry [set as a remote](#add-the-package-registry-as-a-conan-remote).
+- [Authentication](#authenticate-to-the-package-registry) set up with the Package Registry.
 
 1. In the project where you want to install the package as a dependency, open `conanfile.txt`.
    Or, in the root of your project, create a file called `conanfile.txt`.
@@ -325,13 +326,13 @@ To search by full or partial package name, or by exact recipe, run the `conan se
 - To search for all packages with a specific package name:
 
   ```shell
-  conan search Hello --all --remote=gitlab
+  conan search Hello --remote=gitlab
   ```
 
 - To search for a partial name, like all packages starting with `He`:
 
   ```shell
-  conan search He* --all --remote=gitlab
+  conan search He* --remote=gitlab
   ```
 
 The scope of your search includes all projects you have permission to access. This includes your private projects as well as all public projects.
