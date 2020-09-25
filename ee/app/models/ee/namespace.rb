@@ -190,6 +190,25 @@ module EE
         RootStorageSize.new(root_ancestor).above_size_limit?
     end
 
+    def total_repository_size_excess
+      strong_memoize(:total_repository_size_excess) do
+        namespace_limit = actual_size_limit
+
+        select_string = 'SUM(GREATEST(project_statistics.repository_size - COALESCE(projects.repository_size_limit, :namespace_limit), 0)) AS total_excess'
+        select_sql = self.class.sanitize_sql_array([select_string, namespace_limit: namespace_limit])
+
+        condition = 'projects.repository_size_limit != 0' # Excludes projects with unlimited project-level limit
+        # Includes projects with undefined project-level limit as it is set by namespace-level limit
+        condition += ' OR projects.repository_size_limit IS NULL' if namespace_limit && namespace_limit > 0
+
+        all_projects
+          .joins(:statistics)
+          .where(condition)
+          .pluck(Arel.sql(select_sql))
+          .first || 0
+      end
+    end
+
     def actual_size_limit
       ::Gitlab::CurrentSettings.repository_size_limit
     end

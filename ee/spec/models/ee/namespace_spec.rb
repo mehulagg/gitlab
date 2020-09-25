@@ -1407,6 +1407,80 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#total_repository_size_excess' do
+    let_it_be(:namespace) { create(:namespace) }
+
+    def create_project(repository_size:, repository_size_limit:)
+      create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
+        create(:project_statistics, project: project, repository_size: repository_size)
+      end
+    end
+
+    before do
+      namespace.clear_memoization(:total_repository_size_excess)
+    end
+
+    context 'projects with a variety of repository sizes and limits' do
+      before_all do
+        create_project(repository_size: 100, repository_size_limit: nil)
+        create_project(repository_size: 150, repository_size_limit: nil)
+        create_project(repository_size: 200, repository_size_limit: nil)
+
+        create_project(repository_size: 100, repository_size_limit: 0)
+        create_project(repository_size: 150, repository_size_limit: 0)
+        create_project(repository_size: 200, repository_size_limit: 0)
+
+        create_project(repository_size: 300, repository_size_limit: 400)
+        create_project(repository_size: 400, repository_size_limit: 400)
+        create_project(repository_size: 500, repository_size_limit: 300)
+      end
+
+      context 'when namespace-level repository_size_limit is not set' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(nil)
+        end
+
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          expect(namespace.total_repository_size_excess).to eq(200)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is 0 (unlimited)' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(0)
+        end
+
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          expect(namespace.total_repository_size_excess).to eq(200)
+        end
+      end
+
+      context 'when namespace-level repository_size_limit is a positive number' do
+        before do
+          allow(namespace).to receive(:actual_size_limit).and_return(150)
+        end
+
+        it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          expect(namespace.total_repository_size_excess).to eq(250)
+        end
+      end
+    end
+
+    context 'when all projects have repository_size_limit of 0 (unlimited)' do
+      before do
+        create_project(repository_size: 100, repository_size_limit: 0)
+        create_project(repository_size: 150, repository_size_limit: 0)
+        create_project(repository_size: 200, repository_size_limit: 0)
+
+        allow(namespace).to receive(:actual_size_limit).and_return(150)
+      end
+
+      it 'returns zero regardless of the namespace or instance-level repository_size_limit' do
+        expect(namespace.total_repository_size_excess).to eq(0)
+      end
+    end
+  end
+
   describe '#actual_size_limit' do
     let(:namespace) { build(:namespace) }
 
