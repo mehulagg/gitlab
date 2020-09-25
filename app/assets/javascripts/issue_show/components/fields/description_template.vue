@@ -56,14 +56,12 @@ export default {
       :data-namespace-path="projectNamespace"
       :data-project-path="projectPath"
       :data-data="issuableTemplatesJson"
-      class="dropdown-menu-toggle js-issuable-selector"
       type="button"
       data-field-name="issuable_template"
       data-selected="null"
       header-text="Choose a template"
-    >
-      <i aria-hidden="true" class="fa fa-chevron-down"> </i>
-    </gl-dropdown>
+      text="Choose a template"
+    />
     <div class="dropdown-menu dropdown-select">
       <div class="dropdown-title gl-display-flex gl-justify-content-center">
         <span class="gl-ml-auto">Choose a template</span>
