@@ -9,7 +9,11 @@
  -->
 
 <!-- 
-We generally recommend events be tracked using a [structured event](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/#structured-events) which has 5 custom properties you can use
+We generally recommend events be tracked using a [structured event](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/#structured-events) which has 5 properties you can use. There may be instances where structured events are not sufficient. You may want to track an event where the property changes frequently or is general something very unique. In those cases, use a [self-decribing event](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/#self-describing-events)
+
+-->
+
+## Structured Snowplow events to track
 
 * Category: The name for the group of objects you want to track. They can just be the GitLab category, or a specific workflow within a category.
 * Action: A string that is used to define the user in action for the category of object.
@@ -17,16 +21,13 @@ We generally recommend events be tracked using a [structured event](https://docs
 * Property: An optional string describing the object or the action performed on it. 
 * Value: An optional numeric data to quantify or further describe the user action. 
 
--->
-
-## Structured Events
 | Category | Action | Label | Property | Feature Issue | Additional Information | 
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | cell | cell | cell | cell | cell | cell |
 | cell | cell | cell | cell | cell | cell |
 
 <!--
-There may be instances where structured events are not sufficient. You may want to track an event where the property changes frequently or is something very unique. In those cases, use a [self-decribing event](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/#self-describing-events)
+
 >
 
 <!-- 
@@ -34,6 +35,8 @@ There may be instances where structured events are not sufficient. You may want 
 
   Use this checklist to ensure all steps are completed
 -->
+
+## Snowplow event tracking checklist
 * [ ] Engineering complete work and deploy changes to GitLab SaaS
 * [ ] Verify the new Snowplow events are listed in the [Snowplow Event Exploration](https://app.periscopedata.com/app/gitlab/539181/Snowplow-Event-Exploration---last-30-days) dashboard
 * [ ] Create chart(s) to track your event(s) in the relevant dashboard 
