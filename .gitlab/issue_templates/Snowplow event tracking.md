@@ -9,23 +9,37 @@
  -->
 
 <!-- 
-There are three primary fields for any event you want to track. 
+We generally recommend events be tracked using a [structured event](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/#structured-events) which has 5 custom properties you can use
 
-1. Category is a way to group related actions together. They can also just be the GitLab category.
+* Category: The name for the group of objects you want to track. They can just be the GitLab category, or a specific workflow within a category.
+* Action: A string that is used to define the user in action for the category of object.
+* Label: An optional string which identifies the specific object being actioned.
+* Property: An optional string describing the object or the action performed on it. 
+* Value: An optional numeric data to quantify or further describe the user action. 
+
 -->
-| Category | Action | Label(s) | Feature Issue | Description | 
-| ------ | ------ | ------ | ------ |
-| cell | cell | cell | cell | cell |
-| cell | cell | cell | cell | cell |
 
-<!-- Inst -->
-* [ ] Add front-end changes for tracking new Snowplow events
-* [ ] Deploy changes to GitLab SaaS
+## Structured Events
+| Category | Action | Label | Property | Feature Issue | Additional Information | 
+| ------ | ------ | ------ | ------ | ------ | ------ |
+| cell | cell | cell | cell | cell | cell |
+| cell | cell | cell | cell | cell | cell |
+
+<!--
+There may be instances where structured events are not sufficient. You may want to track an event where the property changes frequently or is something very unique. In those cases, use a [self-decribing event](https://docs.snowplowanalytics.com/docs/understanding-tracking-design/out-of-the-box-vs-custom-events-and-entities/#self-describing-events)
+>
+
+<!-- 
+  Snowplow event tracking starts with instrumentation and completed after a chart is created in Sisense.
+
+  Use this checklist to ensure all steps are completed
+-->
+* [ ] Engineering complete work and deploy changes to GitLab SaaS
 * [ ] Verify the new Snowplow events are listed in the [Snowplow Event Exploration](https://app.periscopedata.com/app/gitlab/539181/Snowplow-Event-Exploration---last-30-days) dashboard
 * [ ] Create chart(s) to track your event(s) in the relevant dashboard 
-  * Use
+  * [ ] Use
 
 <!--  Label reminders - you should have one of each of the following labels if you can figure out the correct ones -->
 /label ~devops:: ~group: ~Category:
 
-/label ~instrumentation ~"snowplow tracking events"
+/label ~"snowplow tracking events"
