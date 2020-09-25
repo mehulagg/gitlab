@@ -2681,12 +2681,6 @@ msgstr ""
 msgid "An error occurred when toggling the notification subscription"
 msgstr ""
 
-msgid "An error occurred when trying to resolve a comment. Please try again."
-msgstr ""
-
-msgid "An error occurred when trying to resolve a discussion. Please try again."
-msgstr ""
-
 msgid "An error occurred when updating the issue weight"
 msgstr ""
 
@@ -14454,9 +14448,6 @@ msgstr ""
 msgid "July"
 msgstr ""
 
-msgid "Jump to first unresolved thread"
-msgstr ""
-
 msgid "Jump to next unresolved thread"
 msgstr ""
 
@@ -21763,9 +21754,6 @@ msgstr ""
 msgid "Resolved by %{name}"
 msgstr ""
 
-msgid "Resolved by %{resolvedByName}"
-msgstr ""
-
 msgid "Resolves IP addresses once and uses them to submit requests"
 msgstr ""
 
@@ -27249,9 +27237,6 @@ msgid "Unable to load the diff. %{button_try_again}"
 msgstr ""
 
 msgid "Unable to load the merge request widget. Try reloading the page."
-msgstr ""
-
-msgid "Unable to resolve"
 msgstr ""
 
 msgid "Unable to save iteration. Please try again"
