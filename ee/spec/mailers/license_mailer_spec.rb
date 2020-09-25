@@ -28,7 +28,7 @@ RSpec.describe LicenseMailer do
       it { is_expected.to have_body_text "the user limit of #{license.restricted_user_count}" }
     end
 
-    context 'when license is not presented' do
+    context 'when license is not present' do
       it 'does not send email' do
         expect { subject }.not_to change(ActionMailer::Base.deliveries, :count)
       end
