@@ -4818,7 +4818,8 @@ RSpec.describe User do
             { state: 'blocked' },
             { user_type: :ghost },
             { user_type: :alert_bot },
-            { user_type: :support_bot }
+            { user_type: :support_bot },
+            { user_type: :security_bot }
           ]
         end
 
@@ -4873,6 +4874,7 @@ RSpec.describe User do
         'human'             | true
         'alert_bot'         | false
         'support_bot'       | false
+        'security_bot'       | false
       end
 
       with_them do
@@ -4976,9 +4978,11 @@ RSpec.describe User do
     it_behaves_like 'bot users', :alert_bot
     it_behaves_like 'bot users', :support_bot
     it_behaves_like 'bot users', :migration_bot
+    it_behaves_like 'bot users', :security_bot
     it_behaves_like 'bot users', :ghost
 
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
+    it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
   end
 end
