@@ -399,17 +399,21 @@ In order to prevent Path Traversal vulnerabilities, user-controlled filenames or
 ## OS command injection
 
 ### Description
+
 Command injection is an issue in which an attacker is able to execute arbitrary commands on the host operating system through a vulnerable application.
 
 Command injection attacks do not always provide a user feedback, but simple commands like curl can be used by the attacker to obtain an answer.
 
 ### Impact
+
 The impact of a command injection greatly depends on the user context running the commands, how data is validated and sanitized. It can vary from a low impact because the user running the injected commands has very limited rights to a critical impact if it’s running with the root user.
 
 ### When to consider?
+
 When working with user-controlled data that are used to run OS commands.
 
 ### Mitigations
+
 In order to prevent OS command injections, user supplied data should not be used within os commands. In cases where this cannot be avoided:
 
 - Validate user supplied data against an allowlist
@@ -418,6 +422,7 @@ In order to prevent OS command injections, user supplied data should not be used
 - Always use `--` to separate options from arguments
 
 ### Ruby
+
 Consider using `system(“command”,”arg0”, “arg1”, ...)` whenever you can, this prevents an attacker from concatenating commands.
 
 For more examples on how to use shell commands securely, you can consult our page [Guidelines for shells commands in the GitLab codebase](shell_commands.md) which contains various examples on how to securely call OS commands.
