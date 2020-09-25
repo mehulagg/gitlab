@@ -1481,6 +1481,32 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#contains_locked_projects?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:namespace) { create(:namespace) }
+
+    before_all do
+      create(:namespace_limit, namespace: namespace, additional_purchased_storage_size: 10)
+    end
+
+    where(:total_excess, :result) do
+      5.megabytes  | false
+      10.megabytes | false
+      15.megabytes | true
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:total_repository_size_excess).and_return(total_excess)
+      end
+
+      it 'returns a boolean indicating whether the root namespace contains locked projects' do
+        expect(namespace.contains_locked_projects?).to be result
+      end
+    end
+  end
+
   describe '#actual_size_limit' do
     let(:namespace) { build(:namespace) }
 

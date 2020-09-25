@@ -209,6 +209,10 @@ module EE
       end
     end
 
+    def contains_locked_projects?
+      total_repository_size_excess > additional_purchased_storage_size.megabytes
+    end
+
     def actual_size_limit
       ::Gitlab::CurrentSettings.repository_size_limit
     end
