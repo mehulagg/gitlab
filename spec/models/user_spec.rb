@@ -4874,7 +4874,7 @@ RSpec.describe User do
         'human'             | true
         'alert_bot'         | false
         'support_bot'       | false
-        'security_bot'       | false
+        'security_bot'      | false
       end
 
       with_them do
