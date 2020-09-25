@@ -157,6 +157,13 @@ module EE
 
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
 
+      scope :with_repository_limit_set, -> (namespace_limit) do
+        relation = where.not(repository_size_limit: 0) # Excludes projects with unlimited project-level limit
+        # Includes projects with undefined project-level limit as it is set by namespace-level limit
+        relation = relation.or(where(repository_size_limit: nil)) if namespace_limit && namespace_limit > 0
+        relation
+      end
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 

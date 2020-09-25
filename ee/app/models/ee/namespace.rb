@@ -194,17 +194,37 @@ module EE
       strong_memoize(:total_repository_size_excess) do
         namespace_limit = actual_size_limit
 
-        select_string = 'SUM(GREATEST(project_statistics.repository_size - COALESCE(projects.repository_size_limit, :namespace_limit), 0)) AS total_excess'
+        select_string = 'SUM(GREATEST(project_statistics.repository_size - COALESCE(projects.repository_size_limit, :namespace_limit), 0))'
         select_sql = self.class.sanitize_sql_array([select_string, namespace_limit: namespace_limit])
-
-        condition = 'projects.repository_size_limit != 0' # Excludes projects with unlimited project-level limit
-        # Includes projects with undefined project-level limit as it is set by namespace-level limit
-        condition += ' OR projects.repository_size_limit IS NULL' if namespace_limit && namespace_limit > 0
 
         all_projects
           .joins(:statistics)
-          .where(condition)
+          .with_repository_limit_set(namespace_limit)
           .pluck(Arel.sql(select_sql))
+          .first || 0
+      end
+    end
+
+    def locked_project_count
+      strong_memoize(:locked_project_count) do
+        namespace_limit = actual_size_limit
+
+        all_projects
+          .joins(:statistics)
+          .where(
+            'GREATEST(project_statistics.repository_size - COALESCE(projects.repository_size_limit, :namespace_limit), 0) > 0',
+            namespace_limit: namespace_limit
+          )
+          .with_repository_limit_set(namespace_limit)
+          .count
+      end
+    end
+
+    def total_repository_size
+      strong_memoize(:total_repository_size) do
+        all_projects
+          .joins(:statistics)
+          .pluck('SUM(project_statistics.repository_size)')
           .first || 0
       end
     end
