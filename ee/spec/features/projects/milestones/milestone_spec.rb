@@ -42,47 +42,6 @@ RSpec.describe 'Milestones on EE' do
         end
       end
 
-      context 'when a closed issue do not have closed events' do
-        it 'shows warning' do
-          close_issue(create(:issue, issue_params))
-          close_issue(create(:issue, issue_params))
-
-          # Legacy issue: No closed events being created
-          create(:closed_issue, issue_params)
-
-          visit_milestone
-
-          expect(page).to have_selector('#data-warning', count: 1)
-          expect(page.find('#data-warning').text).to include("Some issues can’t be shown in the burndown chart")
-          expect(page).to have_selector('.burndown-chart')
-        end
-      end
-
-      context 'when all closed issues do not have closed events' do
-        it 'shows warning and hides burndown' do
-          create(:closed_issue, issue_params)
-          create(:closed_issue, issue_params)
-
-          visit_milestone
-
-          expect(page).to have_selector('#data-warning', count: 1)
-          expect(page.find('#data-warning').text).to include("The burndown chart can’t be shown")
-          expect(page).not_to have_selector('.burndown-chart')
-        end
-      end
-
-      context 'data is accurate' do
-        it 'does not show warning' do
-          create(:issue, issue_params)
-          close_issue(create(:issue, issue_params))
-
-          visit_milestone
-
-          expect(page).not_to have_selector('#data-warning')
-          expect(page).to have_selector('.burndown-chart')
-        end
-      end
-
       context 'with due & start date not set' do
         let(:milestone_without_dates) { create(:milestone, project: project) }
 
