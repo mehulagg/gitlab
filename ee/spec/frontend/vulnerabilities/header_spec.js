@@ -74,10 +74,12 @@ describe('Vulnerability Header', () => {
   const findStatusDescription = () => wrapper.find(StatusDescription);
 
   const createWrapper = (vulnerability = {}) => {
+    const mutate = jest.fn(() => new Promise(resolve => resolve()));
     wrapper = shallowMount(Header, {
       propsData: {
         initialVulnerability: { ...defaultVulnerability, ...vulnerability },
       },
+      mocks: { $apollo: { mutate } },
     });
   };
 
@@ -99,7 +101,7 @@ describe('Vulnerability Header', () => {
       const dropdown = wrapper.find(VulnerabilityStateDropdown);
       mockAxios.onPost().reply(201);
 
-      dropdown.vm.$emit('change');
+      dropdown.vm.$emit('change', { action: null });
 
       return waitForPromises().then(() => {
         expect(mockAxios.history.post).toHaveLength(1); // Check that a POST request was made.
@@ -113,7 +115,7 @@ describe('Vulnerability Header', () => {
 
       const dropdown = wrapper.find(VulnerabilityStateDropdown);
 
-      dropdown.vm.$emit('change');
+      dropdown.vm.$emit('change', { action: newState });
 
       return waitForPromises().then(() => {
         expect(findBadge().text()).toBe(newState);
@@ -127,7 +129,7 @@ describe('Vulnerability Header', () => {
 
       const dropdown = wrapper.find(VulnerabilityStateDropdown);
 
-      dropdown.vm.$emit('change');
+      dropdown.vm.$emit('change', { action: newState });
 
       return waitForPromises().then(() => {
         expect(wrapper.emitted()['vulnerability-state-change']).toBeTruthy();
