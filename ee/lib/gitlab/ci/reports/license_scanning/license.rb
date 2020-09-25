@@ -54,8 +54,8 @@ module Gitlab
             canonical_id.hash
           end
 
-          def add_dependency(name, path = nil)
-            @dependencies.add(::Gitlab::Ci::Reports::LicenseScanning::Dependency.new(name, path: path))
+          def add_dependency(attributes = {})
+            @dependencies.add(::Gitlab::Ci::Reports::LicenseScanning::Dependency.new(attributes))
           end
 
           def dependencies

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Security::LicensePolicyEntity do
-  let(:license) { build(:license_scanning_license, :mit).tap { |x| x.add_dependency('rails') } }
+  let(:license) { build(:license_scanning_license, :mit).tap { |x| x.add_dependency(name: 'rails') } }
   let(:policy) { build(:software_license_policy, :allowed) }
   let(:entity) { described_class.new(SCA::LicensePolicy.new(license, policy)) }
 

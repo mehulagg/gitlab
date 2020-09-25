@@ -12,7 +12,7 @@ RSpec.describe LicenseEntity do
     let(:path) { 'some_path' }
 
     before do
-      license.add_dependency('rails')
+      license.add_dependency(name: 'rails')
       allow(license.dependencies.first).to receive(:path).and_return(path)
     end
 
