@@ -100,10 +100,8 @@ module Gitlab
         def override_due_date_attributes
           return unless self.class::DUE_DATE_MODELS.include?(@relation_name) && sample_data_template?
 
-          relation_class.attribute_names.select { |name| name.include?('due_date') }.each do |due_date|
-            if @relation_hash[due_date] && @relation_hash[due_date] < Time.current
-              @relation_hash[due_date] = Time.current + 7.days
-            end
+          if !@relation_hash.dig('due_date').nil? && @relation_hash['due_date'] < Time.current
+            @relation_hash['due_date'] = Time.current + 7.days
           end
         end
 
