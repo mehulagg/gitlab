@@ -109,6 +109,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :iterations do
           resources :inherited, only: [:show], constraints: { id: /\d+/ }
         end
+
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
       end
       # End of the /-/ scope.
 
