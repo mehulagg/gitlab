@@ -476,7 +476,7 @@ RSpec.describe API::Releases do
 
     it 'sets the released_at to the current time if the released_at parameter is not provided' do
       now = Time.zone.parse('2015-08-25 06:00:00Z')
-      Timecop.freeze(now) do
+      travel_to(now) do
         post api("/projects/#{project.id}/releases", maintainer), params: params
 
         expect(project.releases.last.released_at).to eq(now)
