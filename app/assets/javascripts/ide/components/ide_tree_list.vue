@@ -2,6 +2,9 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import FileTree from '~/vue_shared/components/file_tree.vue';
+import { WEBIDE_MARK_TREE_START } from '~/performance_constants';
+import { performanceMark } from '~/performance_utils';
+import eventHub from '../eventhub';
 import IdeFileRow from './ide_file_row.vue';
 import NavDropdown from './nav_dropdown.vue';
 
@@ -31,6 +34,16 @@ export default {
   },
   mounted() {
     this.updateViewer(this.viewerType);
+  },
+  created() {
+    performanceMark(WEBIDE_MARK_TREE_START);
+  },
+  updated() {
+    if (this.currentTree?.tree?.length) {
+      this.$nextTick(() => {
+        eventHub.$emit('webide-tree-rendered');
+      });
+    }
   },
   methods: {
     ...mapActions(['updateViewer', 'toggleTreeOpen']),

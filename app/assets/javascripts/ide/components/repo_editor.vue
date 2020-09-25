@@ -4,6 +4,9 @@ import { viewerInformationForPath } from '~/vue_shared/components/content_viewer
 import { deprecatedCreateFlash as flash } from '~/flash';
 import ContentViewer from '~/vue_shared/components/content_viewer/content_viewer.vue';
 import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
+import { WEBIDE_MARK_FILE_START } from '~/performance_constants';
+import { performanceMark } from '~/performance_utils';
+import eventHub from '../eventhub';
 import {
   leftSidebarViews,
   viewerTypes,
@@ -164,6 +167,9 @@ export default {
       }
     },
   },
+  created() {
+    performanceMark(WEBIDE_MARK_FILE_START);
+  },
   beforeDestroy() {
     this.editor.dispose();
   },
@@ -289,6 +295,9 @@ export default {
       });
 
       this.$emit('editorSetup');
+      this.$nextTick(() => {
+        eventHub.$emit('webide-file-rendered');
+      });
     },
     refreshEditorDimensions() {
       if (this.showEditor) {
