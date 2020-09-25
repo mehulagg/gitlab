@@ -53,6 +53,9 @@ export default {
       :stages="stages"
       @selected="onDurationStageSelect"
     />
+    <p>
+      Each of these dots represents the total cycle time from the given day. Essentially, this represents the value added across all stages of your value stream on each day.
+    </p>
     <scatterplot
       v-if="hasData"
       :x-axis-title="s__('CycleAnalytics|Date')"
