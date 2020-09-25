@@ -4,6 +4,7 @@ class BulkImport < ApplicationRecord
   belongs_to :user, optional: false
 
   has_one :configuration, class_name: 'ImportConfiguration'
+  has_many :entities, class_name: 'ImportEntity'
 
   validates :source_type, presence: true
 

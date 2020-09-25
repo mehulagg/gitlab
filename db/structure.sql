@@ -12637,6 +12637,32 @@ CREATE SEQUENCE import_configurations_id_seq
 
 ALTER SEQUENCE import_configurations_id_seq OWNED BY import_configurations.id;
 
+CREATE TABLE import_entities (
+    id bigint NOT NULL,
+    bulk_import_id bigint NOT NULL,
+    parent_id bigint,
+    namespace_id bigint,
+    project_id bigint,
+    type smallint NOT NULL,
+    source_full_path text NOT NULL,
+    destination_name text NOT NULL,
+    destination_full_path text NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_30593cdc79 CHECK ((char_length(destination_full_path) <= 255)),
+    CONSTRAINT check_c2c0fa0e79 CHECK ((char_length(destination_name) <= 255)),
+    CONSTRAINT check_e4831dc86c CHECK ((char_length(source_full_path) <= 255))
+);
+
+CREATE SEQUENCE import_entities_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE import_entities_id_seq OWNED BY import_entities.id;
+
 CREATE TABLE import_export_uploads (
     id integer NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -17567,6 +17593,8 @@ ALTER TABLE ONLY identities ALTER COLUMN id SET DEFAULT nextval('identities_id_s
 
 ALTER TABLE ONLY import_configurations ALTER COLUMN id SET DEFAULT nextval('import_configurations_id_seq'::regclass);
 
+ALTER TABLE ONLY import_entities ALTER COLUMN id SET DEFAULT nextval('import_entities_id_seq'::regclass);
+
 ALTER TABLE ONLY import_export_uploads ALTER COLUMN id SET DEFAULT nextval('import_export_uploads_id_seq'::regclass);
 
 ALTER TABLE ONLY import_failures ALTER COLUMN id SET DEFAULT nextval('import_failures_id_seq'::regclass);
@@ -18690,6 +18718,9 @@ ALTER TABLE ONLY identities
 
 ALTER TABLE ONLY import_configurations
     ADD CONSTRAINT import_configurations_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY import_entities
+    ADD CONSTRAINT import_entities_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY import_export_uploads
     ADD CONSTRAINT import_export_uploads_pkey PRIMARY KEY (id);
@@ -20475,6 +20506,14 @@ CREATE INDEX index_identities_on_saml_provider_id ON identities USING btree (sam
 CREATE INDEX index_identities_on_user_id ON identities USING btree (user_id);
 
 CREATE INDEX index_import_configurations_on_bulk_import_id ON import_configurations USING btree (bulk_import_id);
+
+CREATE INDEX index_import_entities_on_bulk_import_id ON import_entities USING btree (bulk_import_id);
+
+CREATE INDEX index_import_entities_on_namespace_id ON import_entities USING btree (namespace_id);
+
+CREATE INDEX index_import_entities_on_parent_id ON import_entities USING btree (parent_id);
+
+CREATE INDEX index_import_entities_on_project_id ON import_entities USING btree (project_id);
 
 CREATE UNIQUE INDEX index_import_export_uploads_on_group_id ON import_export_uploads USING btree (group_id) WHERE (group_id IS NOT NULL);
 
@@ -22911,6 +22950,9 @@ ALTER TABLE ONLY service_desk_settings
 ALTER TABLE ONLY group_custom_attributes
     ADD CONSTRAINT fk_rails_246e0db83a FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY import_entities
+    ADD CONSTRAINT fk_rails_25426ba56f FOREIGN KEY (parent_id) REFERENCES import_entities(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY cluster_agents
     ADD CONSTRAINT fk_rails_25e9fc2d5d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -23168,6 +23210,9 @@ ALTER TABLE ONLY experiment_users
 
 ALTER TABLE ONLY issue_user_mentions
     ADD CONSTRAINT fk_rails_57581fda73 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY import_entities
+    ADD CONSTRAINT fk_rails_57906ca302 FOREIGN KEY (namespace_id) REFERENCES namespaces(id);
 
 ALTER TABLE ONLY merge_request_assignees
     ADD CONSTRAINT fk_rails_579d375628 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -23583,6 +23628,9 @@ ALTER TABLE ONLY repository_languages
 ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_a788026e85 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY import_entities
+    ADD CONSTRAINT fk_rails_a78c0202ea FOREIGN KEY (bulk_import_id) REFERENCES bulk_imports(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY term_agreements
     ADD CONSTRAINT fk_rails_a88721bcdf FOREIGN KEY (term_id) REFERENCES application_setting_terms(id);
 
@@ -23945,6 +23993,9 @@ ALTER TABLE ONLY design_user_mentions
 
 ALTER TABLE ONLY internal_ids
     ADD CONSTRAINT fk_rails_f7d46b66c6 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY import_entities
+    ADD CONSTRAINT fk_rails_f7dab270d9 FOREIGN KEY (project_id) REFERENCES projects(id);
 
 ALTER TABLE ONLY issues_self_managed_prometheus_alert_events
     ADD CONSTRAINT fk_rails_f7db2d72eb FOREIGN KEY (self_managed_prometheus_alert_event_id) REFERENCES self_managed_prometheus_alert_events(id) ON DELETE CASCADE;
