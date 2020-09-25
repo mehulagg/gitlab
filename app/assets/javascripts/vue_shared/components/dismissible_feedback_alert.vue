@@ -22,7 +22,7 @@ export default {
   },
   data() {
     return {
-      isDismissed: 'false',
+      isDismissed: false,
     };
   },
   computed: {
@@ -30,12 +30,12 @@ export default {
       return `${slugifyWithUnderscore(this.featureName)}_feedback_dismissed`;
     },
     showAlert() {
-      return this.isDismissed === 'false';
+      return !this.isDismissed;
     },
   },
   methods: {
     dismissFeedbackAlert() {
-      this.isDismissed = 'true';
+      this.isDismissed = true;
     },
   },
 };
@@ -43,11 +43,7 @@ export default {
 
 <template>
   <div v-show="showAlert">
-    <local-storage-sync
-      :value="isDismissed"
-      :storage-key="storageKey"
-      @input="dismissFeedbackAlert"
-    />
+    <local-storage-sync v-model="isDismissed" :storage-key="storageKey" as-json />
     <gl-alert v-if="showAlert" class="gl-mt-5" @dismiss="dismissFeedbackAlert">
       <gl-sprintf
         :message="
