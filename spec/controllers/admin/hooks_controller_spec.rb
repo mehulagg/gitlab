@@ -29,4 +29,15 @@ RSpec.describe Admin::HooksController do
       expect(SystemHook.first).to have_attributes(hook_params)
     end
   end
+
+  describe 'DELETE #destroy' do
+    let!(:hook) { create(:system_hook) }
+    let!(:log) { create(:web_hook_log, web_hook: hook) }
+
+    it 'deletes the hook and logs' do
+      expect { delete :destroy, params: { id: hook } }
+        .to change { SystemHook.count }.from(1).to(0)
+        .and change { WebHookLog.count }.from(1).to(0)
+    end
+  end
 end

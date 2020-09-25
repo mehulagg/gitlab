@@ -48,6 +48,17 @@ RSpec.describe Projects::HooksController do
     end
   end
 
+  describe '#destroy' do
+    let!(:hook) { create(:project_hook, project: project) }
+    let!(:log) { create(:web_hook_log, web_hook: hook) }
+
+    it 'deletes the hook and logs' do
+      expect { delete :destroy, params: { namespace_id: project.namespace, project_id: project, id: hook } }
+        .to change { WebHookLog.count }.from(1).to(0)
+        .and change { WebHook.count }.from(1).to(0)
+    end
+  end
+
   describe '#test' do
     let(:hook) { create(:project_hook, project: project) }
 

@@ -34,7 +34,7 @@ class Admin::HooksController < Admin::ApplicationController
   end
 
   def destroy
-    hook.destroy
+    WebHooks::DestroyService.new(current_user).execute(hook)
 
     redirect_to admin_hooks_path, status: :found
   end

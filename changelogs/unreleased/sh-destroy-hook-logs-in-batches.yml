@@ -1,0 +1,5 @@
+---
+title: Delete project and system hook logs in batches
+merge_request: 43464
+author:
+type: fixed

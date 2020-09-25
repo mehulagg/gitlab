@@ -50,7 +50,7 @@ class Projects::HooksController < Projects::ApplicationController
   end
 
   def destroy
-    hook.destroy
+    WebHooks::DestroyService.new(current_user).execute(hook)
 
     redirect_to action: :index, status: :found
   end
