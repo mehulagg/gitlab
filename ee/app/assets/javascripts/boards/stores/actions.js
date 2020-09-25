@@ -11,6 +11,7 @@ import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import { fullEpicId } from '../boards_util';
 import { formatListIssues, fullBoardId } from '~/boards/boards_util';
+import eventHub from '~/boards/eventhub';
 
 import createDefaultClient from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
@@ -220,6 +221,9 @@ export default {
           }
         })
         .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
+    } else if (!gon.features.graphqlBoardLists) {
+      boardsStore.create();
+      eventHub.$emit('initialBoardLoad');
     }
   },
 };
