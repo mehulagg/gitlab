@@ -43,11 +43,7 @@ query(
           additions
           deletions
         }
-        labels {
-          nodes {
-            title
-          }
-        }
+        labelsCount
         pipelines {
           nodes {
             detailedStatus {

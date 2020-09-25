@@ -151,6 +151,8 @@ module Types
           description: 'Indicates if the merge request has conflicts'
     field :auto_merge_enabled, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if auto merge is enabled for the merge request'
+    field :labels_count, GraphQL::INT_TYPE, null: false,
+          description: 'Number of labels of the merge request'
 
     def diff_stats(path: nil)
       stats = Array.wrap(object.diff_stats&.to_a)
@@ -173,6 +175,10 @@ module Types
 
     def commit_count
       object&.metrics&.commits_count
+    end
+
+    def labels_count
+      object.labels.count
     end
 
     def approvers

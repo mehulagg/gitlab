@@ -227,10 +227,10 @@ export default {
             </li>
             <li
               class="gl-mr-3 gl-display-flex gl-align-items-center"
-              :class="{ 'gl-opacity-5': !item.labels.nodes.length }"
+              :class="{ 'gl-opacity-5': !item.labelsCount }"
               :data-testid="$options.testIds.LABEL_DETAILS"
             >
-              <gl-icon name="label" class="gl-mr-1" /><span>{{ item.labels.nodes.length }}</span>
+              <gl-icon name="label" class="gl-mr-1" /><span>{{ item.labelsCount }}</span>
             </li>
             <li
               class="gl-mr-3 gl-display-flex gl-align-items-center"
