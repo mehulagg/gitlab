@@ -19,27 +19,25 @@ RSpec.describe 'getting notes for a merge request' do
       }
     QRY
   end
-  let(:noteable_data) { graphql_data['project']['mergeRequest'] }
+  let(:noteable_data) { graphql_data.dig('project', 'mergeRequest') }
 
   it_behaves_like "exposing regular notes on a noteable in GraphQL"
 
   context 'diff notes on a merge request' do
     let(:project) { noteable.project }
     let!(:note) { create(:diff_note_on_merge_request, noteable: noteable, project: project) }
+    let!(:other_note) { create(:note, noteable: noteable, project: project, note: 'Yo', position: 'here') }
     let(:user) { note.author }
+    let(:notes_data) { noteable_data.dig('notes', 'nodes') }
 
     let(:query) do
-      noteable_query(
-        <<~NOTES
+      noteable_query(<<~NOTES)
         notes {
-          edges {
-            node {
-              #{all_graphql_fields_for('Note')}
-            }
+          nodes {
+            #{all_graphql_fields_for('Note')}
           }
         }
       NOTES
-      )
     end
 
     it_behaves_like 'a working graphql query' do
@@ -48,18 +46,19 @@ RSpec.describe 'getting notes for a merge request' do
       end
     end
 
-    it 'includes the note' do
+    it 'includes the note bodies' do
       post_graphql(query, current_user: user)
 
-      expect(graphql_data['project']['mergeRequest']['notes']['edges'].last['node']['body'])
-        .to eq(note.note)
+      bodies = notes_data.map { |n| n['body'] }
+
+      expect(bodies).to contain_exactly(note.note, other_note.note)
     end
 
     context 'the position of the diffnote' do
+      let(:note_data) { notes_data.last }
+
       it 'includes a correct position' do
         post_graphql(query, current_user: user)
-
-        note_data = noteable_data['notes']['edges'].last['node']
 
         expect(note_data['position']['positionType']).to eq('text')
         expect(note_data['position']['newLine']).to be_present
@@ -74,8 +73,6 @@ RSpec.describe 'getting notes for a merge request' do
 
         it 'includes a correct position' do
           post_graphql(query, current_user: user)
-
-          note_data = noteable_data['notes']['edges'].last['node']
 
           expect(note_data['position']['positionType']).to eq('image')
           expect(note_data['position']['x']).to be_present
