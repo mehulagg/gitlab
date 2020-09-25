@@ -1,13 +1,15 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
 import $ from 'jquery';
-import { GlIcon, GlDropdown } from '@gitlab/ui';
+import { GlIcon, GlDropdown, GlSearchBoxByType, GlDropdownItem, } from '@gitlab/ui';
 import IssuableTemplateSelectors from '../../../templates/issuable_template_selectors';
 
 export default {
   components: {
     GlIcon,
-    GlDropdown
+    GlDropdown,
+    GlSearchBoxByType,
+    GlDropdownItem,
   },
   props: {
     formState: {
@@ -52,42 +54,23 @@ export default {
 <template>
   <div class="dropdown js-issuable-selector-wrap" data-issuable-type="issue">
     <gl-dropdown
-      ref="toggle"
       :data-namespace-path="projectNamespace"
       :data-project-path="projectPath"
       :data-data="issuableTemplatesJson"
-      type="button"
       data-field-name="issuable_template"
       data-selected="null"
       header-text="Choose a template"
       text="Choose a template"
-    />
-    <div class="dropdown-menu dropdown-select">
-      <div class="dropdown-title gl-display-flex gl-justify-content-center">
-        <span class="gl-ml-auto">Choose a template</span>
-        <button
-          class="dropdown-title-button dropdown-menu-close gl-ml-auto"
-          :aria-label="__('Close')"
-          type="button"
-        >
-          <gl-icon name="close" class="dropdown-menu-close-icon" :aria-hidden="true" />
-        </button>
-      </div>
-      <div class="dropdown-input">
-        <input
-          type="search"
-          class="dropdown-input-field"
-          :placeholder="__('Filter')"
-          autocomplete="off"
-        />
-        <i aria-hidden="true" class="fa fa-search dropdown-input-search"> </i>
-        <gl-icon
-          name="close"
-          class="dropdown-input-clear js-dropdown-input-clear"
-          :aria-label="__('Clear templates search input')"
-        />
-      </div>
-      <div class="dropdown-content"></div>
+      class="js-issuable-selector"
+      ref="toggle"
+    >
+      <gl-search-box-by-type class="m-2 " :placeholder="__('Filter')" />
+      <gl-dropdown-item
+        v-for="template in issuableTemplates"
+        :key="template.name"
+      >
+        {{ template.name }}
+      </gl-dropdown-item>
       <div class="dropdown-footer">
         <ul class="dropdown-footer-list">
           <li>
@@ -98,6 +81,6 @@ export default {
           </li>
         </ul>
       </div>
-    </div>
+    </gl-dropdown>
   </div>
 </template>
