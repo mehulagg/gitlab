@@ -9059,10 +9059,10 @@ msgstr ""
 msgid "Dismiss Merge Request promotion"
 msgstr ""
 
-msgid "Dismiss Selected"
+msgid "Dismiss Value Stream Analytics introduction box"
 msgstr ""
 
-msgid "Dismiss Value Stream Analytics introduction box"
+msgid "Dismiss selected"
 msgstr ""
 
 msgid "Dismiss trial promotion"

@@ -67,7 +67,7 @@ export default {
         variant="warning"
         :disabled="!canDismissVulnerability"
       >
-        {{ __('Dismiss Selected') }}
+        {{ __('Dismiss selected') }}
       </gl-button>
     </form>
   </div>
