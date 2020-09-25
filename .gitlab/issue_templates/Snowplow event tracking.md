@@ -16,7 +16,7 @@ We generally recommend events be tracked using a [structured event](https://docs
 ## Structured Snowplow events to track
 
 * Category: The name for the group of objects you want to track. They can just be the GitLab category, or a specific workflow within a category.
-* Action: A string that is used to define the user in action for the category of object.
+* Action: A string that is used to define the user action.
 * Label: An optional string which identifies the specific object being actioned.
 * Property: An optional string describing the object or the action performed on it. 
 * Value: An optional numeric data to quantify or further describe the user action. 
@@ -25,10 +25,6 @@ We generally recommend events be tracked using a [structured event](https://docs
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | cell | cell | cell | cell | cell | cell |
 | cell | cell | cell | cell | cell | cell |
-
-<!--
-
->
 
 <!-- 
   Snowplow event tracking starts with instrumentation and completed after a chart is created in Sisense.
