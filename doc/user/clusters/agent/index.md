@@ -174,9 +174,15 @@ Kubernetes resources required for the Agent to be installed. You can modify this
 example [`resources.yml` file](#example-resourcesyml-file) in the following ways:
 
 - You can replace `gitlab-agent` with `<YOUR-DESIRED-NAMESPACE>`.
-- For the `kas-address` (Kubernetes Agent Server), you can replace
-  `grpc://host.docker.internal:5005` with the address of the `kas` agent initialized
-  in your Helm install.
+- For the `kas-address` (Kubernetes Agent Server), the agent can use the WebSockets or gRPC protocols
+to connect to the Agent Server. Depending on your cluster configuration and GitLab architecture,
+you may need to use one or the other. For the `gitlab-kas` helm chart, an ingress is created for
+the Agent Server using the `/-/kubernetes-agent` endpoint. This can be used for the WebSockets
+protocol connection.
+  - Specify the `grpc` scheme (e.g. `grpc://gitlab-kas:5005`) to use gRPC directly. The connection is not encrypted.
+  - Encrypted gRPC is not supported yet. Follow the [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7) for progress updates.
+  - Specify the `ws` scheme (e.g. `ws://gitlab-kas-ingress:80/-/kubernetes-agent`) to use a WebSockets connection. The connection is not encrypted.
+  - Specify the `wss` scheme (e.g. `wss://gitlab-kas-ingress:443/-/kubernetes-agent`) to use an encrypted WebSockets connection. This is the recommended option if installing the Agent into a separate cluster from your Agent Server.
 - If you defined your own secret name, replace `gitlab-agent-token` with your secret name.
 
 To apply this file, run the following command:
