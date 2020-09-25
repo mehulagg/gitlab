@@ -274,6 +274,8 @@ module Gitlab
           def validate_each(record, attribute, value)
             if options[:array_values]
               validate_key_array_values(record, attribute, value)
+            elsif options[:hash_values]
+              validate_key_hash_values(record, attribute, value)
             else
               validate_key_values(record, attribute, value)
             end
@@ -288,6 +290,12 @@ module Gitlab
           def validate_key_array_values(record, attribute, value)
             unless validate_array_value_variables(value)
               record.errors.add(attribute, 'should be a hash of key value pairs, value can be an array')
+            end
+          end
+
+          def validate_key_hash_values(record, attribute, value)
+            unless validate_string_or_hash_value_variables(value)
+              record.errors.add(attribute, 'should be a hash of key value pairs, value can be a hash')
             end
           end
         end

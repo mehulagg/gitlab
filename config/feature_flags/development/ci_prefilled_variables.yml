@@ -1,0 +1,7 @@
+---
+name: ci_prefilled_variables
+introduced_by_url: # TODO: fill here
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/255611
+type: development
+group: group::continuous integration
+default_enabled: false

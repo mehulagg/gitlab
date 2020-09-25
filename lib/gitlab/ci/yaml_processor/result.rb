@@ -95,11 +95,11 @@ module Gitlab
             }.compact }.compact
         end
 
-        private
-
         def variables
           @variables ||= @ci_config.variables
         end
+
+        private
 
         def hash_config
           @hash_config ||= @ci_config.to_hash
@@ -110,6 +110,24 @@ module Gitlab
         end
 
         def transform_to_yaml_variables(variables)
+          if ::Feature.enabled?(:ci_prefilled_variables)
+            new_transform_to_yaml_variables(variables)
+          else
+            legacy_transform_to_yaml_variables(variables)
+          end
+        end
+
+        def new_transform_to_yaml_variables(variables)
+          variables.to_h.map do |key, value|
+            if value.is_a?(Hash)
+              { key: key.to_s, value: value['value'], public: true }
+            else
+              { key: key.to_s, value: value, public: true }
+            end
+          end
+        end
+
+        def legacy_transform_to_yaml_variables(variables)
           variables.to_h.map do |key, value|
             { key: key.to_s, value: value, public: true }
           end

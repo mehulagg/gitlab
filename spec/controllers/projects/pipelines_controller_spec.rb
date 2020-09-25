@@ -1148,4 +1148,68 @@ RSpec.describe Projects::PipelinesController do
                        }
     end
   end
+
+  describe 'GET new_variables.json' do
+    before do
+      stub_gitlab_ci_yml_for_sha
+    end
+
+    context 'when sending a valid sha' do
+      let(:sha) { 'master' }
+      let(:ci_config) do
+        {
+          variables: {
+            KEY1: { value: 'val 1', description: 'description 1' },
+            KEY2: { value: 'val 2', description: '' },
+            KEY3: { value: 'val 3' },
+            KEY4: 'val 4'
+          },
+          test: {
+            stage: 'test',
+            script: 'echo'
+          }
+        }
+      end
+
+      let(:result) { YAML.dump(ci_config) }
+
+      it 'returns variable list' do
+        get_new_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['KEY1']).to eq({ 'value' => 'val 1', 'description' => 'description 1' })
+        expect(json_response['KEY2']).to eq({ 'value' => 'val 2', 'description' => '' })
+        expect(json_response['KEY3']).to eq({ 'value' => 'val 3', 'description' => '' })
+        expect(json_response['KEY4']).to eq({ 'value' => 'val 4', 'description' => '' })
+      end
+    end
+
+    context 'when sending an invalid sha' do
+      let(:sha) { 'invalid-sha' }
+      let(:result) { nil }
+
+      it 'returns empty json' do
+        get_new_variables
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to eq({})
+      end
+    end
+
+    private
+
+    def stub_gitlab_ci_yml_for_sha
+      allow_any_instance_of(Repository)
+          .to receive(:gitlab_ci_yml_for)
+          .with(sha, '.gitlab-ci.yml')
+          .and_return(result)
+    end
+
+    def get_new_variables
+      get :new_variables, params: { namespace_id: project.namespace,
+                                    project_id: project,
+                                    sha: sha },
+                          format: :json
+    end
+  end
 end
