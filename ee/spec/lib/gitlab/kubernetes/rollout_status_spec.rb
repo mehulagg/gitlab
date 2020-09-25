@@ -44,7 +44,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
         ]
       end
 
-      it { is_expected.to be_has_legacy_app_label }
+      it { is_expected.not_to be_has_legacy_app_label }
     end
   end
 

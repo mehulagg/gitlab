@@ -62,8 +62,8 @@ RSpec.describe Clusters::Platforms::Kubernetes do
           expect(rollout_status.deployments).to eq([])
         end
 
-        it 'has the has_legacy_app_label flag' do
-          expect(rollout_status).to be_has_legacy_app_label
+        it 'does not the has_legacy_app_label flag' do
+          expect(rollout_status).not_to be_has_legacy_app_label
         end
       end
 
@@ -90,8 +90,8 @@ RSpec.describe Clusters::Platforms::Kubernetes do
           expect(rollout_status.deployments.map(&:name)).to contain_exactly('matched-deployment')
         end
 
-        it 'does have the has_legacy_app_label flag' do
-          expect(rollout_status).to be_has_legacy_app_label
+        it 'does not have the has_legacy_app_label flag' do
+          expect(rollout_status).not_to be_has_legacy_app_label
         end
       end
 
