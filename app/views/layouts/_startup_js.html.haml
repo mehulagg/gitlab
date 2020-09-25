@@ -1,5 +1,4 @@
 - return unless page_startup_api_calls.present? || page_startup_graphql_calls.present?
-- root_url = root_url()
 
 = javascript_tag nonce: true do
   :plain
@@ -18,7 +17,7 @@
       });
     }
     if (gl.startup_graphql_calls && window.fetch) {
-      const url = `#{root_url}/api/graphql`
+      const url = `#{api_graphql_url}`
 
       const opts = {
         method: "POST",
