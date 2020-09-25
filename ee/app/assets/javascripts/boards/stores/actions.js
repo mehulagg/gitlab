@@ -16,6 +16,7 @@ import eventHub from '~/boards/eventhub';
 import createDefaultClient from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
 import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
+import updateBoardEpicUserPreferencesMutation from '../queries/updateBoardEpicUserPreferences.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -117,6 +118,23 @@ export default {
         };
       })
       .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));
+  },
+
+  updateBoardEpicUserPreferences({ state }, { epicId, collapsed }) {
+    const {
+      endpoints: { boardId },
+    } = state;
+
+    const variables = {
+      boardId: fullBoardId(boardId),
+      epicId,
+      collapsed,
+    };
+
+    return gqlClient.mutate({
+      mutation: updateBoardEpicUserPreferencesMutation,
+      variables,
+    });
   },
 
   setShowLabels({ commit }, val) {
