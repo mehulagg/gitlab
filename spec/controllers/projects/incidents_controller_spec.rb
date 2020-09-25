@@ -22,7 +22,7 @@ RSpec.describe Projects::IncidentsController do
       sign_in(developer)
       make_request
 
-      expect(response).to have_gitlab_http_status(:ok)p
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response).to render_template(:index)
     end
 
