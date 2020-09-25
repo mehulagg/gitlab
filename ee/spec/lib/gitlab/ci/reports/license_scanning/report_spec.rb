@@ -169,14 +169,15 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
   end
 
   describe '#diff_with' do
+    subject { base_report.diff_with(head_report) }
+
     def names_from(licenses)
       licenses.map(&:name)
     end
 
     context 'when the other report is not available' do
-      subject { base_report.diff_with(nil) }
-
       let(:base_report) { build(:license_scan_report, :version_2) }
+      let(:head_report) { nil }
 
       before do
         base_report
@@ -184,16 +185,16 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
           .add_dependency('rails')
       end
 
-      specify { expect(names_from(subject[:removed])).to contain_exactly('MIT License') }
-      specify { expect(subject[:added]).to be_empty }
-      specify { expect(subject[:unchanged]).to be_empty }
+      specify do
+        expect(names_from(subject[:removed])).to contain_exactly('MIT License')
+        expect(subject[:added]).to be_empty
+        expect(subject[:unchanged]).to be_empty
+      end
     end
 
     context 'when diffing two v1 reports' do
       let(:base_report) { build(:license_scan_report, :version_1) }
       let(:head_report) { build(:license_scan_report, :version_1) }
-
-      subject { base_report.diff_with(head_report) }
 
       before do
         base_report.add_license(id: nil, name: 'MIT').add_dependency('Library1')
@@ -214,8 +215,6 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       let(:base_report) { build(:license_scan_report, :version_2) }
       let(:head_report) { build(:license_scan_report, :version_2) }
 
-      subject { base_report.diff_with(head_report) }
-
       before do
         base_report.add_license(id: 'MIT', name: 'MIT').add_dependency('Library1')
         base_report.add_license(id: 'BSD-3-Clause', name: 'BSD').add_dependency('Library1')
@@ -235,8 +234,6 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       let(:base_report) { build(:license_scan_report, :version_1) }
       let(:head_report) { build(:license_scan_report, :version_2) }
 
-      subject { base_report.diff_with(head_report) }
-
       before do
         base_report.add_license(id: nil, name: 'MIT').add_dependency('Library1')
         base_report.add_license(id: nil, name: 'BSD').add_dependency('Library1')
@@ -255,8 +252,6 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
     context 'when diffing a v2 report with a v1 report' do
       let(:base_report) { build(:license_scan_report, :version_2) }
       let(:head_report) { build(:license_scan_report, :version_1) }
-
-      subject { base_report.diff_with(head_report) }
 
       before do
         base_report.add_license(id: 'MIT', name: 'MIT').add_dependency('Library1')
