@@ -51,7 +51,7 @@ can be any public or private repository.
    git push origin v1.0.0
    ```
 
-The package is now in your GitLab repository.
+The package is now in your GitLab Package Registry.
 
 ## Publish a Composer package by using the API
 
