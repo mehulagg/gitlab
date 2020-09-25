@@ -3,6 +3,7 @@ import { GlToast } from '@gitlab/ui';
 import Translate from '~/vue_shared/translate';
 import store from './store';
 import RegistrySettingsApp from './components/registry_settings_app.vue';
+import { apolloProvider } from './graphql/index';
 
 Vue.use(GlToast);
 Vue.use(Translate);
@@ -16,8 +17,15 @@ export default () => {
   return new Vue({
     el,
     store,
+    apolloProvider,
     components: {
       RegistrySettingsApp,
+    },
+    provide: {
+      projectPath: el.dataset.projectPath,
+      isAdmin: el.dataset.isAdmin,
+      adminSettingsPath: el.dataset.adminSettingsPath,
+      enableHistoricEntries: el.dataset.enableHistoricEntries,
     },
     render(createElement) {
       return createElement('registry-settings-app', {});
