@@ -270,6 +270,11 @@ msgid_plural "%d projects"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d project selected"
+msgid_plural "%d projects selected"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d request with warnings"
 msgid_plural "%d requests with warnings"
 msgstr[0] ""
@@ -2508,6 +2513,9 @@ msgid "All paths are relative to the GitLab URL. Do not include %{relative_url_l
 msgstr ""
 
 msgid "All projects"
+msgstr ""
+
+msgid "All projects selected"
 msgstr ""
 
 msgid "All security scans are enabled because %{linkStart}Auto DevOps%{linkEnd} is enabled on this project"
