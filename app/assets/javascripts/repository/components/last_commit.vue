@@ -126,7 +126,7 @@ export default {
             v-if="commit.descriptionHtml"
             :class="{ open: showDescription }"
             :aria-label="__('Show commit description')"
-            class="text-expander"
+            class="text-expander gl-vertical-align-bottom!"
             icon="ellipsis_h"
             @click="toggleShowDescription"
           />
