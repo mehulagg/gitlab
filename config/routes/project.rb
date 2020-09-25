@@ -310,6 +310,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resources :incidents, only: [:index]
 
+        get '/issues/incident/:id' => 'incidents#show', as: :show # rubocop:todo Cop/PutProjectRoutesUnderScope
+
         namespace :error_tracking do
           resources :projects, only: :index
         end
@@ -550,7 +552,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       Gitlab::Routing.redirect_legacy_paths(self, :mirror, :tags,
                                             :cycle_analytics, :mattermost, :variables, :triggers,
                                             :environments, :protected_environments, :error_tracking, :alert_management,
-                                            :serverless, :clusters, :audit_events, :wikis, :merge_requests,
+                                            :incidents, :serverless, :clusters, :audit_events, :wikis, :merge_requests,
                                             :vulnerability_feedback, :security, :dependencies, :issues)
     end
 

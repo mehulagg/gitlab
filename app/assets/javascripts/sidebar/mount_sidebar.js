@@ -13,7 +13,8 @@ import sidebarSubscriptions from './components/subscriptions/sidebar_subscriptio
 import SidebarSeverity from './components/severity/sidebar_severity.vue';
 import Translate from '../vue_shared/translate';
 import createDefaultClient from '~/lib/graphql';
-import { isInIssuePage, parseBoolean } from '~/lib/utils/common_utils';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import { parseIssuableData } from '~/issue_show/utils/parse_data';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
@@ -21,6 +22,9 @@ import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vu
 Vue.use(Translate);
 Vue.use(VueApollo);
 Vue.use(Vuex);
+
+const { issueType } = parseIssuableData();
+const isInIssuePage = () => issueType === 'issue' || 'incident';
 
 function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-options')) {
   return JSON.parse(sidebarOptEl.innerHTML);

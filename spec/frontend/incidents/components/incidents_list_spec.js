@@ -186,7 +186,9 @@ describe('Incidents List', () => {
         findTableRows()
           .at(0)
           .trigger('click');
-        expect(visitUrl).toHaveBeenCalledWith(joinPaths(`/project/isssues/`, mockIncidents[0].iid));
+        expect(visitUrl).toHaveBeenCalledWith(
+          joinPaths(`/project/isssues/incident/`, mockIncidents[0].iid),
+        );
       });
 
       it('renders a closed icon for closed incidents', () => {

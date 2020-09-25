@@ -40,6 +40,7 @@ import {
   TH_CREATED_AT_TEST_ID,
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
+  INCIDENT_DETAILS_PATH,
 } from '../constants';
 
 const tdClass =
@@ -332,7 +333,7 @@ export default {
       return Boolean(assignees.nodes?.length);
     },
     navigateToIncidentDetails({ iid }) {
-      return visitUrl(joinPaths(this.issuePath, iid));
+      return visitUrl(joinPaths(this.issuePath, INCIDENT_DETAILS_PATH, iid));
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.incidents.pageInfo;
