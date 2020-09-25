@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import {
   GlLink,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlFriendlyWrap,
 } from '@gitlab/ui';
 import LicenseComponentLinks from 'ee/license_compliance/components/license_component_links.vue';

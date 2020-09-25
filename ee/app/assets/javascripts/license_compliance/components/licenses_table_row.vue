@@ -2,7 +2,7 @@
 import {
   GlLink,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
-  GlDeprecatedBadge as GlBadge,
+  GlBadge,
   GlIcon,
   GlFriendlyWrap,
 } from '@gitlab/ui';
@@ -82,8 +82,8 @@ export default {
           <license-component-links :components="license.components" :title="license.name" />
           <div v-if="isDenied" class="d-inline-block">
             <!-- This badge usage will be simplified in https://gitlab.com/gitlab-org/gitlab/-/issues/213789 -->
-            <gl-badge variant="warning" class="gl-alert-warning d-flex align-items-center">
-              <gl-icon name="warning" :size="16" class="pr-1" />
+            <gl-badge variant="warning">
+              <gl-icon name="warning" class="mr-1" />
               <span>{{ s__('Licenses|Policy violation: denied') }}</span>
             </gl-badge>
           </div>
