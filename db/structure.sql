@@ -12613,6 +12613,30 @@ CREATE SEQUENCE identities_id_seq
 
 ALTER SEQUENCE identities_id_seq OWNED BY identities.id;
 
+CREATE TABLE import_configurations (
+    id bigint NOT NULL,
+    bulk_import_id integer NOT NULL,
+    encrypted_url text,
+    encrypted_url_iv text,
+    encrypted_access_token text,
+    encrypted_access_token_iv text,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_751828c747 CHECK ((char_length(encrypted_url) <= 255)),
+    CONSTRAINT check_c7749c91db CHECK ((char_length(encrypted_access_token_iv) <= 255)),
+    CONSTRAINT check_ddd4352e9f CHECK ((char_length(encrypted_url_iv) <= 255)),
+    CONSTRAINT check_f983b5bc87 CHECK ((char_length(encrypted_access_token) <= 255))
+);
+
+CREATE SEQUENCE import_configurations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE import_configurations_id_seq OWNED BY import_configurations.id;
+
 CREATE TABLE import_export_uploads (
     id integer NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -17541,6 +17565,8 @@ ALTER TABLE ONLY historical_data ALTER COLUMN id SET DEFAULT nextval('historical
 
 ALTER TABLE ONLY identities ALTER COLUMN id SET DEFAULT nextval('identities_id_seq'::regclass);
 
+ALTER TABLE ONLY import_configurations ALTER COLUMN id SET DEFAULT nextval('import_configurations_id_seq'::regclass);
+
 ALTER TABLE ONLY import_export_uploads ALTER COLUMN id SET DEFAULT nextval('import_export_uploads_id_seq'::regclass);
 
 ALTER TABLE ONLY import_failures ALTER COLUMN id SET DEFAULT nextval('import_failures_id_seq'::regclass);
@@ -18661,6 +18687,9 @@ ALTER TABLE ONLY historical_data
 
 ALTER TABLE ONLY identities
     ADD CONSTRAINT identities_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY import_configurations
+    ADD CONSTRAINT import_configurations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY import_export_uploads
     ADD CONSTRAINT import_export_uploads_pkey PRIMARY KEY (id);
@@ -20444,6 +20473,8 @@ CREATE UNIQUE INDEX index_http_integrations_on_active_and_project_and_endpoint O
 CREATE INDEX index_identities_on_saml_provider_id ON identities USING btree (saml_provider_id) WHERE (saml_provider_id IS NOT NULL);
 
 CREATE INDEX index_identities_on_user_id ON identities USING btree (user_id);
+
+CREATE INDEX index_import_configurations_on_bulk_import_id ON import_configurations USING btree (bulk_import_id);
 
 CREATE UNIQUE INDEX index_import_export_uploads_on_group_id ON import_export_uploads USING btree (group_id) WHERE (group_id IS NOT NULL);
 
@@ -22750,6 +22781,9 @@ ALTER TABLE ONLY ci_build_pending_states
 
 ALTER TABLE ONLY operations_user_lists
     ADD CONSTRAINT fk_rails_0c716e079b FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY import_configurations
+    ADD CONSTRAINT fk_rails_0d05513ed1 FOREIGN KEY (bulk_import_id) REFERENCES bulk_imports(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY geo_node_statuses
     ADD CONSTRAINT fk_rails_0ecc699c2a FOREIGN KEY (geo_node_id) REFERENCES geo_nodes(id) ON DELETE CASCADE;
