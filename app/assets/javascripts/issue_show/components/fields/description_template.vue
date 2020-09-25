@@ -60,8 +60,8 @@ export default {
       type="button"
       data-field-name="issuable_template"
       data-selected="null"
+      header-text="Choose a template"
     >
-      <span class="dropdown-toggle-text">{{ __('Choose a template') }}</span>
       <i aria-hidden="true" class="fa fa-chevron-down"> </i>
     </gl-dropdown>
     <div class="dropdown-menu dropdown-select">
