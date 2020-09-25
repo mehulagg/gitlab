@@ -33,7 +33,6 @@ describe('IdeTree', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders list of files', () => {

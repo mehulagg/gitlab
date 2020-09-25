@@ -34,7 +34,6 @@ describe('IDE review mode', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   it('renders list of files', () => {
@@ -91,20 +90,20 @@ describe('IDE review mode', () => {
       expect(wrapper.find(EditorModeDropdown).exists()).toBe(true);
     });
 
-    it('renders merge request link & IID', () => {
+    it('renders merge request link & IID', async () => {
       store.state.viewer = 'mrdiff';
 
-      return wrapper.vm.$nextTick(() => {
-        expect(trimText(wrapper.text())).toContain('Merge request (!123)');
-      });
+      await wrapper.vm.$nextTick();
+
+      expect(trimText(wrapper.text())).toContain('Merge request (!123)');
     });
 
-    it('changes text to latest changes when viewer is not mrdiff', () => {
+    it('changes text to latest changes when viewer is not mrdiff', async () => {
       store.state.viewer = 'diff';
 
-      return wrapper.vm.$nextTick(() => {
-        expect(wrapper.text()).toContain('Latest changes');
-      });
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.text()).toContain('Latest changes');
     });
   });
 });

@@ -12,6 +12,10 @@ describe('keepAlive', () => {
     wrapper = mount(keepAlive(component));
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
   it('converts a component to a keep-alive component', async () => {
     const { element } = wrapper.find(component);
 
