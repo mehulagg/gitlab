@@ -119,68 +119,30 @@ RSpec.describe Issues::UpdateService do
         group.add_maintainer(user)
       end
 
-      context 'when track_iteration_change_events is disabled' do
-        before do
-          stub_feature_flags(track_iteration_change_events: false)
+      RSpec.shared_examples 'creates iteration resource event' do
+        it 'creates a system note' do
+          expect do
+            update_issue(iteration: iteration)
+          end.not_to change { Note.system.count }
         end
 
-        RSpec.shared_examples 'creates iteration system note' do
-          it 'creates a system note' do
-            expect do
-              update_issue(iteration: iteration)
-            end.to change { Note.system.count }.by(1)
-          end
-
-          it 'does not create a iteration change event' do
-            expect do
-              update_issue(iteration: iteration)
-            end.not_to change { ResourceIterationEvent.count }
-          end
-        end
-
-        context 'group iterations' do
-          let(:iteration) { create(:iteration, group: group) }
-
-          it_behaves_like 'creates iteration system note'
-        end
-
-        context 'project iterations' do
-          let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
-
-          it_behaves_like 'creates iteration system note'
+        it 'does not create a iteration change event' do
+          expect do
+            update_issue(iteration: iteration)
+          end.to change { ResourceIterationEvent.count }.by(1)
         end
       end
 
-      context 'when track_iteration_change_events is enabled' do
-        before do
-          stub_feature_flags(track_iteration_change_events: true)
-        end
+      context 'group iterations' do
+        let(:iteration) { create(:iteration, group: group) }
 
-        RSpec.shared_examples 'creates iteration resource event' do
-          it 'creates a system note' do
-            expect do
-              update_issue(iteration: iteration)
-            end.not_to change { Note.system.count }
-          end
+        it_behaves_like 'creates iteration resource event'
+      end
 
-          it 'does not create a iteration change event' do
-            expect do
-              update_issue(iteration: iteration)
-            end.to change { ResourceIterationEvent.count }.by(1)
-          end
-        end
+      context 'project iterations' do
+        let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
 
-        context 'group iterations' do
-          let(:iteration) { create(:iteration, group: group) }
-
-          it_behaves_like 'creates iteration resource event'
-        end
-
-        context 'project iterations' do
-          let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
-
-          it_behaves_like 'creates iteration resource event'
-        end
+        it_behaves_like 'creates iteration resource event'
       end
     end
 
