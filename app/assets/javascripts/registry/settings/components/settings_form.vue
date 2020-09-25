@@ -1,15 +1,15 @@
 <script>
-import { get } from 'lodash';
-import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlCard, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import Tracking from '~/tracking';
-import { mapComputed } from '~/vuex_shared/bindings';
 import {
   UPDATE_SETTINGS_ERROR_MESSAGE,
   UPDATE_SETTINGS_SUCCESS_MESSAGE,
 } from '../../shared/constants';
 import ExpirationPolicyFields from '../../shared/components/expiration_policy_fields.vue';
 import { SET_CLEANUP_POLICY_BUTTON, CLEANUP_POLICY_CARD_HEADER } from '../constants';
+import { formOptionsGenerator } from '~/registry/shared/utils';
+import updateContainerExpirationPolicyMutation from '../graphql/mutations/update_container_expiration_policy.graphql';
+import { updateContainerExpirationPolicy } from '../graphql/utils/cache_update';
 
 export default {
   components: {
@@ -19,10 +19,28 @@ export default {
     ExpirationPolicyFields,
   },
   mixins: [Tracking.mixin()],
+  inject: ['projectPath'],
+  props: {
+    value: {
+      type: Object,
+      required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
+    isEdited: {
+      type: Boolean,
+      default: false,
+      required: false,
+    },
+  },
   labelsConfig: {
     cols: 3,
     align: 'right',
   },
+  formOptions: formOptionsGenerator(),
   i18n: {
     CLEANUP_POLICY_CARD_HEADER,
     SET_CLEANUP_POLICY_BUTTON,
@@ -37,46 +55,62 @@ export default {
     };
   },
   computed: {
-    ...mapState(['formOptions', 'isLoading']),
-    ...mapGetters({ isEdited: 'getIsEdited' }),
-    ...mapComputed([{ key: 'settings', getter: 'getSettings' }], 'updateSettings'),
     isSubmitButtonDisabled() {
       return !this.fieldsAreValid || this.isLoading;
     },
     isCancelButtonDisabled() {
       return !this.isEdited || this.isLoading;
     },
+    mutationVariables() {
+      return {
+        projectPath: this.projectPath,
+        enabled: this.value.enabled,
+        cadence: this.value.cadence,
+        olderThan: this.value.olderThan,
+        keepN: this.value.keepN,
+        nameRegex: this.value.nameRegex,
+        nameRegexKeep: this.value.nameRegexKeep,
+      };
+    },
   },
   methods: {
-    ...mapActions(['resetSettings', 'saveSettings']),
     reset() {
       this.track('reset_form');
       this.apiErrors = null;
-      this.resetSettings();
+      this.$emit('reset');
     },
     setApiErrors(response) {
-      const messages = get(response, 'data.message', []);
-
-      this.apiErrors = Object.keys(messages).reduce((acc, curr) => {
-        if (curr.startsWith('container_expiration_policy.')) {
-          const key = curr.replace('container_expiration_policy.', '');
-          acc[key] = get(messages, [curr, 0], '');
-        }
+      this.apiErrors = response.graphQLErrors.reduce((acc, curr) => {
+        curr.extensions.problems.forEach(item => {
+          acc[item.path[0]] = item.message;
+        });
         return acc;
       }, {});
     },
     submit() {
       this.track('submit_form');
       this.apiErrors = null;
-      this.saveSettings()
-        .then(() => this.$toast.show(UPDATE_SETTINGS_SUCCESS_MESSAGE, { type: 'success' }))
-        .catch(({ response }) => {
-          this.setApiErrors(response);
+      return this.$apollo
+        .mutate({
+          mutation: updateContainerExpirationPolicyMutation,
+          variables: {
+            input: this.mutationVariables,
+          },
+          update: updateContainerExpirationPolicy(this.projectPath),
+        })
+        .then(data => {
+          if (data?.errors?.length > 0) {
+            this.setApiErrors(data.errors);
+          }
+          this.$toast.show(UPDATE_SETTINGS_SUCCESS_MESSAGE, { type: 'success' });
+        })
+        .catch(error => {
+          this.setApiErrors(error);
           this.$toast.show(UPDATE_SETTINGS_ERROR_MESSAGE, { type: 'error' });
         });
     },
     onModelChange(changePayload) {
-      this.settings = changePayload.newValue;
+      this.$emit('input', changePayload.newValue);
       if (this.apiErrors) {
         this.apiErrors[changePayload.modified] = undefined;
       }
@@ -93,8 +127,8 @@ export default {
       </template>
       <template #default>
         <expiration-policy-fields
-          :value="settings"
-          :form-options="formOptions"
+          :value="value"
+          :form-options="$options.formOptions"
           :is-loading="isLoading"
           :api-errors="apiErrors"
           @validated="fieldsAreValid = true"
