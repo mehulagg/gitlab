@@ -52,17 +52,17 @@ module EE
                resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
 
         field :requirement, ::Types::RequirementsManagement::RequirementType, null: true,
-              description: 'Find a single requirement. Available only when feature flag `requirements_management` is enabled.',
+              description: 'Find a single requirement',
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver.single
 
         field :requirements, ::Types::RequirementsManagement::RequirementType.connection_type, null: true,
-              description: 'Find requirements. Available only when feature flag `requirements_management` is enabled.',
+              description: 'Find requirements',
               resolver: ::Resolvers::RequirementsManagement::RequirementsResolver
 
         field :requirement_states_count, ::Types::RequirementsManagement::RequirementStatesCountType, null: true,
               description: 'Number of requirements for the project by their state',
               resolve: -> (project, args, ctx) do
-                return unless requirements_available?(project, ctx[:current_user])
+                return unless Ability.allowed?(ctx[:current_user], :read_requirement, project)
 
                 Hash.new(0).merge(project.requirements.counts_by_state)
               end
@@ -111,10 +111,6 @@ module EE
               null: true,
               description: 'Cluster agents associated with the project',
               resolver: ::Resolvers::Clusters::AgentsResolver
-
-        def self.requirements_available?(project, user)
-          ::Feature.enabled?(:requirements_management, project, default_enabled: true) && Ability.allowed?(user, :read_requirement, project)
-        end
 
         def self.sast_ci_configuration(project)
           ::Security::CiConfiguration::SastParserService.new(project).configuration

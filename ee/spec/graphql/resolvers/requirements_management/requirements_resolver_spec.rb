@@ -58,16 +58,6 @@ RSpec.describe Resolvers::RequirementsManagement::RequirementsResolver do
       end
     end
 
-    context 'when `requirements_management` flag is disabled' do
-      before do
-        stub_feature_flags(requirements_management: false)
-      end
-
-      it 'returns an empty list' do
-        expect(resolve_requirements).to be_empty
-      end
-    end
-
     context 'with search' do
       it 'filters requirements by title' do
         requirements = resolve_requirements(search: 'kubernetes')

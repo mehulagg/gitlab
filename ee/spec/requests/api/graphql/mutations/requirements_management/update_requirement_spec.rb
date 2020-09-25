@@ -83,14 +83,6 @@ RSpec.describe 'Updating a Requirement' do
         it_behaves_like 'a mutation that returns top-level errors',
           errors: ['title, state or last_test_report_state argument is required']
       end
-
-      context 'when requirements_management flag is disabled' do
-        before do
-          stub_feature_flags(requirements_management: false)
-        end
-
-        it_behaves_like 'requirement update fails'
-      end
     end
   end
 end

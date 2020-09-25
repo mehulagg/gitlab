@@ -46,14 +46,6 @@ RSpec.describe Mutations::RequirementsManagement::UpdateRequirement do
           )
           expect(subject[:errors]).to be_empty
         end
-
-        context 'when requirements_management flag is disabled' do
-          before do
-            stub_feature_flags(requirements_management: false)
-          end
-
-          it_behaves_like 'requirements not available'
-        end
       end
 
       context 'when requirements feature is disabled' do
