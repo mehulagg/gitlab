@@ -22,15 +22,11 @@ module Gitlab
         @status == :not_found
       end
 
-      def has_legacy_app_label?
-        false
-      end
-
       def found?
         @status == :found
       end
 
-      def self.from_deployments(*deployments, pods: {}, legacy_deployments: [])
+      def self.from_deployments(*deployments, pods: {})
         return new([], status: :not_found) if deployments.empty?
 
         deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods) }
@@ -42,7 +38,7 @@ module Gitlab
         new([], status: :loading)
       end
 
-      def initialize(deployments, status: :found, legacy_deployments: [])
+      def initialize(deployments, status: :found)
         @status       = status
         @deployments  = deployments
         @instances    = deployments.flat_map(&:instances)

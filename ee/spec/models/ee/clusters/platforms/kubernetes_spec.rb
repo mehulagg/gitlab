@@ -61,10 +61,6 @@ RSpec.describe Clusters::Platforms::Kubernetes do
 
           expect(rollout_status.deployments).to eq([])
         end
-
-        it 'does not the has_legacy_app_label flag' do
-          expect(rollout_status).not_to be_has_legacy_app_label
-        end
       end
 
       context 'deployment with no pods' do
@@ -88,35 +84,6 @@ RSpec.describe Clusters::Platforms::Kubernetes do
           expect(rollout_status).to be_kind_of(::Gitlab::Kubernetes::RolloutStatus)
 
           expect(rollout_status.deployments.map(&:name)).to contain_exactly('matched-deployment')
-        end
-
-        it 'does not have the has_legacy_app_label flag' do
-          expect(rollout_status).not_to be_has_legacy_app_label
-        end
-      end
-
-      context 'deployment with app label not matching the environment' do
-        let(:other_deployment) do
-          kube_deployment(name: 'other-deployment').tap do |deployment|
-            deployment['metadata']['annotations'].delete('app.gitlab.com/env')
-            deployment['metadata']['annotations'].delete('app.gitlab.com/app')
-            deployment['metadata']['labels']['app'] = 'helm-app-label'
-          end
-        end
-
-        let(:other_pod) do
-          kube_pod(name: 'other-pod').tap do |pod|
-            pod['metadata']['annotations'].delete('app.gitlab.com/env')
-            pod['metadata']['annotations'].delete('app.gitlab.com/app')
-            pod['metadata']['labels']['app'] = environment.slug
-          end
-        end
-
-        let(:deployments) { [other_deployment] }
-        let(:pods) { [other_pod] }
-
-        it 'does not have the has_legacy_app_label flag' do
-          expect(rollout_status).not_to be_has_legacy_app_label
         end
       end
     end

@@ -7,7 +7,6 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
 
   let(:track) { nil }
   let(:specs) { specs_all_finished }
-  let(:legacy_deployments) { [] }
 
   let(:pods) do
     create_pods(name: "one", count: 3, track: 'stable') + create_pods(name: "two", count: 3, track: "canary")
@@ -27,26 +26,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     ]
   end
 
-  subject(:rollout_status) { described_class.from_deployments(*specs, pods: pods, legacy_deployments: legacy_deployments) }
-
-  describe '#has_legacy_app_label?' do
-    let(:specs) { [] }
-    let(:pods)  { [] }
-
-    context 'no legacy deployments' do
-      it { is_expected.not_to be_has_legacy_app_label }
-    end
-
-    context 'with legacy deployment' do
-      let(:legacy_deployments) do
-        [
-          kube_deployment(name: 'legacy')
-        ]
-      end
-
-      it { is_expected.not_to be_has_legacy_app_label }
-    end
-  end
+  subject(:rollout_status) { described_class.from_deployments(*specs, pods: pods) }
 
   describe '#deployments' do
     it 'stores the deployments' do
