@@ -156,7 +156,7 @@ module Gitlab
         # Make hungry traintainers have 4x the chance to be picked as a reviewer
         # Make traintainers have 3x the chance to be picked as a reviewer
         # Make hungry reviewers have 2x the chance to be picked as a reviewer
-        weighted_reviewers = reviewers + hungry_reviewers + traintainers + traintainers
+        weighted_reviewers = reviewers + hungry_reviewers + traintainers + traintainers + traintainers
         reviewer = spin_for_person(weighted_reviewers, random: random, timezone_experiment: timezone_experiment)
         maintainer = spin_for_person(maintainers, random: random, timezone_experiment: timezone_experiment)
 
