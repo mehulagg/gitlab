@@ -74,6 +74,44 @@ test:
       cobertura: coverage/cobertura-coverage.xml
 ```
 
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java uses [Maven](http://maven.apache.org/)
+to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
+generate the coverage artifact.  
+The sourcecode of the docker image and the scripts can be found [here](https://gitlab.com/haynes/jacoco2cobertura)  
+Because gitlab expects the artifact in the cobertura format, we need to execute a few scripts before we upload it:
+
+```yaml
+stages:
+  - build
+  - test
+  - visualize
+  - deploy
+
+test-jdk11:
+  stage: test
+  image: maven:3.6.3-jdk-11
+  script:
+    - 'mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report'
+  artifacts:
+    paths:
+      - target/site/jacoco/jacoco.xml
+
+coverage-jdk11:
+  stage: visualize
+  image: haynes/jacoco2cobertura:1.0.3
+  script:
+    # convert report from jacoco to cobertura
+    - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/coverage.xml'
+    # read the <source></source> tag and prepend the path to every filename attribute
+    - 'python /opt/source2filename.py target/site/coverage.xml'
+  needs: ["test-jdk11"]
+  dependencies:
+    - test-jdk11
+  artifacts:
+    reports:
+      cobertura: target/site/coverage.xml
+```
+
 ## Enable or disable code coverage visualization
 
 This feature comes with the `:coverage_report_view` feature flag enabled by
