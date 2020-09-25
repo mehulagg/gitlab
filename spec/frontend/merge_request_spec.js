@@ -167,7 +167,7 @@ describe('MergeRequest', () => {
 
         expect(closeItem).toHaveClass('hidden');
         expect(smallCloseItem).toHaveClass('hidden');
-        expect(reportItem).toHaveClass('droplab-item-selected');
+        expect(reportItem).not.toHaveClass('droplab-item-selected');
         expect(reportItem).not.toHaveClass('hidden');
       });
     });
