@@ -12,13 +12,15 @@ module SystemCheck
       end
 
       def self.check_pass
-        if Gitlab::Geo.enabled?
-          return "License only required on a primary site" unless Gitlab::Geo.primary?
+        if Gitlab::Geo.license_allows?
+          unless Gitlab::Geo.enabled?
+            return "License supports Geo, but Geo is not enabled" if Gitlab::Geo.primary?
+          end
         else
-          if Gitlab::Geo.license_allows?
-            return "License supports Geo, but Geo is not enabled"
+          if Gitlab::Geo.enabled?
+            return "License only required on a primary site" unless Gitlab::Geo.primary?
           else
-            return "License does not support Geo, and Geo is not enabled"
+            return "License does not support Geo, and Geo is not enabled" if Gitlab::Geo.primary?
           end
         end
 
