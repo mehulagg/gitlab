@@ -374,17 +374,17 @@ RSpec.describe Issue do
 
           expect(issue.check_for_spam?).to eq(check_for_spam?)
         end
-
-        it 'does not check for spam when milestone is updated', :focus => true do
-          project = reusable_project
-          project.update(visibility_level: visibility_level)
-          issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
-
-          issue.assign_attributes(new_attributes)
-
-          expect(issue.check_for_spam?).to eq(check_for_spam?)
-        end
       end
+    end
+
+    it 'does not check for spam when only weight is updated', :focus => true do
+      project = reusable_project
+      project.update(visibility_level:  Gitlab::VisibilityLevel::PRIVATE)
+      issue = create(:issue, project: project, weight: 3, author: author)
+
+      issue.assign_attributes({ weight: 2 })
+
+      expect(issue.check_for_spam?).to eq(false)
     end
   end
 
