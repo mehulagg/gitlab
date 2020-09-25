@@ -1,0 +1,14 @@
+query issueParticipants($id: IssueID!) {
+  issue(id: $id) {
+    participants {
+      edges {
+        node {
+          username
+          name
+          webUrl
+          avatarUrl
+        }
+      }
+    }
+  }
+}
