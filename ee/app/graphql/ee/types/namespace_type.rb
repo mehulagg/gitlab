@@ -6,6 +6,22 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
+        field :additional_purchased_storage_size,
+              GraphQL::FLOAT_TYPE,
+              null: true,
+              description: 'Additional storage purchased for the root namespace in bytes'
+
+        field :total_repository_size_excess,
+              GraphQL::FLOAT_TYPE,
+              null: true,
+              description: 'Total excess repository size of all projects in the root namespace in bytes'
+
+        field :contains_locked_projects,
+              GraphQL::BOOLEAN_TYPE,
+              null: false,
+              description: 'Includes at least one project where the repository size exceeds the limit',
+              resolve: -> (obj, _args, _ctx) { obj.contains_locked_projects? }
+
         field :storage_size_limit,
               GraphQL::FLOAT_TYPE,
               null: true,

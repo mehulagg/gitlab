@@ -2,6 +2,9 @@ query getStorageCounter($fullPath: ID!) {
   namespace(fullPath: $fullPath) {
     id
     storageSizeLimit
+    additionalPurchasedStorageSize
+    totalRepositorySizeExcess
+    containsLockedProjects
     rootStorageStatistics {
       storageSize
       repositorySize
@@ -20,6 +23,7 @@ query getStorageCounter($fullPath: ID!) {
           avatarUrl
           webUrl
           name
+          repositorySizeExcess
           statistics {
             commitCount
             storageSize
