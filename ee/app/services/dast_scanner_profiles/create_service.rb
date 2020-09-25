@@ -2,7 +2,7 @@
 
 module DastScannerProfiles
   class CreateService < BaseService
-    def execute(name:, target_timeout:, spider_timeout:, active_scan:, ajax_spider:, show_debug_messages:)
+    def execute(name:, target_timeout:, spider_timeout:, scan_type:, ajax_spider:, show_debug_messages:)
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
       dast_scanner_profile = DastScannerProfile.create(
@@ -10,7 +10,7 @@ module DastScannerProfiles
         name: name,
         target_timeout: target_timeout,
         spider_timeout: spider_timeout,
-        active_scan: active_scan,
+        scan_type: scan_type,
         ajax_spider: ajax_spider,
         show_debug_messages: show_debug_messages
       )

@@ -25,9 +25,9 @@ module Types
     field :target_timeout, GraphQL::INT_TYPE, null: true,
           description: 'The maximum number of seconds allowed for the site under test to respond to a request'
 
-    field :active_scan, GraphQL::BOOLEAN_TYPE, null: false,
-          description: 'Indicates if an Active Scan will run. ' \
-          'True to run an Active Scan in addtion to an Passive Scan, and false to run only a Passive Scan.'
+    field :scan_type, Types::DastScanTypeEnum, null: false,
+          description: 'Indicates the type of DAST scan that will run. ' \
+          'Either a Passive Scan or an Active Scan.'
 
     field :ajax_spider, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if the AJAX spider should be used to crawl the target site. ' \

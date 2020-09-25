@@ -31,6 +31,21 @@ module Mutations
                 required: true,
                 description: 'The maximum number of seconds allowed for the site under test to respond to a request.'
 
+      argument :scan_type, Types::DastScanTypeEnum,
+                required: false,
+                description: 'Indicates the type of DAST scan that will run. ' \
+                'Either a Passive Scan or an Active Scan.'
+
+      argument :ajax_spider, GraphQL::BOOLEAN_TYPE,
+                required: true,
+                description: 'Indicates if the AJAX spider should be used to crawl the target site. ' \
+                'True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.'
+
+      argument :show_debug_messages, GraphQL::BOOLEAN_TYPE,
+                required: true,
+                description: 'Indicates if debug messages should be included in DAST console output. ' \
+                'True to include the debug messages.'
+
       authorize :create_on_demand_dast_scan
 
       def resolve(full_path:, **service_args)

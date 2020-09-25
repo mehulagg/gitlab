@@ -8,7 +8,7 @@ RSpec.describe DastScannerProfiles::CreateService do
   let(:name) { FFaker::Company.catch_phrase }
   let(:target_timeout) { 60 }
   let(:spider_timeout) { 600 }
-  let(:active_scan) { true }
+  let(:scan_type) { 1 }
   let(:ajax_spider) { true }
   let(:show_debug_messages) { true }
 
@@ -22,7 +22,7 @@ RSpec.describe DastScannerProfiles::CreateService do
         name: name,
         target_timeout: target_timeout,
         spider_timeout: spider_timeout,
-        active_scan: active_scan,
+        scan_type: scan_type,
         ajax_spider: ajax_spider,
         show_debug_messages: show_debug_messages
       )
@@ -77,7 +77,7 @@ RSpec.describe DastScannerProfiles::CreateService do
         expect(payload.spider_timeout).to eq(spider_timeout)
         expect(payload.target_timeout).to eq(target_timeout)
         expect(payload.name).to eq(name)
-        expect(payload.active_scan).to eq(active_scan)
+        expect(DastScannerProfile.scan_types[payload.scan_type]).to eq(scan_type)
         expect(payload.ajax_spider).to eq(ajax_spider)
         expect(payload.show_debug_messages).to eq(show_debug_messages)
       end
