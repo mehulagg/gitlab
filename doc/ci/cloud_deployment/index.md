@@ -200,3 +200,13 @@ deploy:
   script:
     - aws ecs register-task-definition ...
 ```
+
+### Provision and deploy to your AWS Elastic Compute Cloud (EC2)
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/201742) in GitLab 13.5.
+
+By using the `AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml` template, you can
+now create your own infrastucture using a [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template and deploy
+to your EC2 instance.
+
+
