@@ -176,7 +176,7 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
 - You can replace `gitlab-agent` with `<YOUR-DESIRED-NAMESPACE>`.
 - For the `kas-address` (Kubernetes Agent Server), the agent can use the WebSockets or gRPC protocols
 to connect to the Agent Server. Depending on your cluster configuration and GitLab architecture,
-you may need to use one or the other. For the `gitlab-kas` helm chart, an ingress is created for
+you may need to use one or the other. For the `gitlab-kas` Helm chart, an Ingress is created for
 the Agent Server using the `/-/kubernetes-agent` endpoint. This can be used for the WebSockets
 protocol connection.
   - Specify the `grpc` scheme (e.g. `grpc://gitlab-kas:5005`) to use gRPC directly. The connection is not encrypted.
