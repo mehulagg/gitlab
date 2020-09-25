@@ -581,10 +581,6 @@ export default class Notes {
     form.find('#note_type').val('');
     form.find('#note_project_id').remove();
     form.find('#in_reply_to_discussion_id').remove();
-    form
-      .find('.js-comment-resolve-button')
-      .closest('comment-and-resolve-btn')
-      .remove();
     this.parentTimeline = form.parents('.timeline');
 
     if (form.length) {
