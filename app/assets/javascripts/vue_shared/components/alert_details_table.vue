@@ -23,6 +23,9 @@ const allowedFields = [
   'details',
 ];
 
+const filterAllowedFields = ([fieldName]) => allowedFields.includes(fieldName);
+const arrayToObject = ([fieldName, value]) => ({ fieldName, value });
+
 export default {
   components: {
     GlLoadingIcon,
@@ -60,11 +63,8 @@ export default {
         return [];
       }
       return Object.entries(this.alert)
-        .filter(([fieldName]) => allowedFields.includes(fieldName))
-        .map(([fieldName, value]) => ({
-          fieldName,
-          value,
-        }));
+        .filter(filterAllowedFields)
+        .map(arrayToObject);
     },
   },
 };
