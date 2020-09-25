@@ -2188,6 +2188,25 @@ RSpec.describe Project do
     end
   end
 
+  describe '#actual_size_limit' do
+    context 'when repository_size_limit is set on the project' do
+      it 'returns the repository_size_limit' do
+        project = build(:project, repository_size_limit: 10)
+
+        expect(project.actual_size_limit).to eq(10)
+      end
+    end
+
+    context 'when repository_size_limit is not set on the project' do
+      it 'returns the actual_size_limit of the namespace' do
+        group = build(:group, repository_size_limit: 20)
+        project = build(:project, namespace: group, repository_size_limit: nil)
+
+        expect(project.actual_size_limit).to eq(20)
+      end
+    end
+  end
+
   describe '#repository_size_checker' do
     let(:project) { build(:project) }
     let(:checker) { project.repository_size_checker }
@@ -2254,6 +2273,32 @@ RSpec.describe Project do
           end
         end
       end
+    end
+  end
+
+  describe '#repository_size_excess' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { project.repository_size_excess }
+
+    let_it_be(:statistics) { build(:project_statistics) }
+    let_it_be(:project) { statistics.project }
+
+    where(:repository_size, :size_limit, :result) do
+      50 | nil | 0
+      50 | 0   | 0
+      50 | 60  | 0
+      50 | 50  | 0
+      50 | 10  | 40
+    end
+
+    with_them do
+      before do
+        allow(project).to receive(:actual_size_limit).and_return(size_limit)
+        allow(statistics).to receive(:repository_size).and_return(repository_size)
+      end
+
+      it { is_expected.to eq(result) }
     end
   end
 

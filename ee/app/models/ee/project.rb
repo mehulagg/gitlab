@@ -30,7 +30,7 @@ module EE
       after_update :remove_mirror_repository_reference,
         if: ->(project) { project.mirror? && project.import_url_updated? }
 
-      belongs_to :mirror_user, foreign_key: 'mirror_user_id', class_name: 'User'
+      belongs_to :mirror_user, class_name: 'User'
       belongs_to :deleting_user, foreign_key: 'marked_for_deletion_by_user_id', class_name: 'User'
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
@@ -154,6 +154,17 @@ module EE
       scope :with_vulnerability_statistics, -> { includes(:vulnerability_statistic) }
 
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
+
+      scope :with_repository_size_greater_than_limit, -> do
+        joins(:statistics)
+          .where.not(repository_size_limit: 0)
+          .where('project_statistics.repository_size > projects.repository_size_limit')
+      end
+      scope :with_repository_limit_set, -> (namespace_limit) do
+        joins(:statistics)
+          .where(repository_size_limit: nil)
+          .where('project_statistics.repository_size > ?', namespace_limit)
+      end
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
@@ -507,14 +518,26 @@ module EE
       ::Gitlab::UrlSanitizer.new(bare_url, credentials: { user: import_data&.user }).full_url
     end
 
+    def actual_size_limit
+      strong_memoize(:actual_size_limit) do
+        repository_size_limit || namespace.actual_size_limit
+      end
+    end
+
     def repository_size_checker
       strong_memoize(:repository_size_checker) do
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
-          limit: (repository_size_limit || namespace.actual_size_limit),
+          limit: actual_size_limit,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end
+    end
+
+    def repository_size_excess
+      return 0 unless actual_size_limit.to_i > 0
+
+      [statistics.repository_size - actual_size_limit, 0].max
     end
 
     def username_only_import_url=(value)
