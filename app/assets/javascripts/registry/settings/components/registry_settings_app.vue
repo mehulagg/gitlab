@@ -1,7 +1,7 @@
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
 import { GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
-
+import { isEqual } from 'lodash';
+import expirationPolicyQuery from '../graphql/queries/get_expiration_policy.graphql';
 import { FETCH_SETTINGS_ERROR_MESSAGE } from '../../shared/constants';
 
 import SettingsForm from './settings_form.vue';
@@ -19,21 +19,40 @@ export default {
     GlSprintf,
     GlLink,
   },
+  inject: ['projectPath', 'isAdmin', 'adminSettingsPath', 'enableHistoricEntries'],
+  expirationPolicyQuery,
   i18n: {
     UNAVAILABLE_FEATURE_TITLE,
     UNAVAILABLE_FEATURE_INTRO_TEXT,
     FETCH_SETTINGS_ERROR_MESSAGE,
   },
+  apollo: {
+    containerExpirationPolicy: {
+      query: expirationPolicyQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update: data => data?.project?.containerExpirationPolicy,
+      result({ data }) {
+        this.workingCopy = { ...data?.project?.containerExpirationPolicy };
+      },
+      error(e) {
+        this.fetchSettingsError = e;
+      },
+    },
+  },
   data() {
     return {
       fetchSettingsError: false,
+      containerExpirationPolicy: null,
+      workingCopy: {},
     };
   },
   computed: {
-    ...mapState(['isAdmin', 'adminSettingsPath']),
-    ...mapGetters({ isDisabled: 'getIsDisabled' }),
-    showSettingForm() {
-      return !this.isDisabled && !this.fetchSettingsError;
+    isDisabled() {
+      return !(this.containerExpirationPolicy || this.enableHistoricEntries);
     },
     showDisabledFormMessage() {
       return this.isDisabled && !this.fetchSettingsError;
@@ -41,22 +60,28 @@ export default {
     unavailableFeatureMessage() {
       return this.isAdmin ? UNAVAILABLE_ADMIN_FEATURE_TEXT : UNAVAILABLE_USER_FEATURE_TEXT;
     },
-  },
-  mounted() {
-    this.fetchSettings().catch(() => {
-      this.fetchSettingsError = true;
-    });
+    isEdited() {
+      return !isEqual(this.containerExpirationPolicy, this.workingCopy);
+    },
   },
   methods: {
-    ...mapActions(['fetchSettings']),
+    restoreOriginal() {
+      this.workingCopy = { ...this.containerExpirationPolicy };
+    },
   },
 };
 </script>
 
 <template>
   <div>
-    <settings-form v-if="showSettingForm" />
-    <template v-else>
+    <settings-form
+      v-if="containerExpirationPolicy"
+      v-model="workingCopy"
+      :is-loading="$apollo.loading"
+      :is-edited="isEdited"
+      @reset="restoreOriginal"
+    />
+    <template>
       <gl-alert
         v-if="showDisabledFormMessage"
         :dismissible="false"
