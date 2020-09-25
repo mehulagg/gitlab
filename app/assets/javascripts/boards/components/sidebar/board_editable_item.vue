@@ -26,6 +26,7 @@ export default {
   },
   methods: {
     collapseWhenOffClick({ target }) {
+      // Should this trigger the save
       if (!this.$el.contains(target)) {
         this.collapse();
       }

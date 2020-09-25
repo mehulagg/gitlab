@@ -76,6 +76,7 @@ export default {
     <!-- use d-flex so that slot can be appropriately styled -->
     <span class="d-flex">
       <assignee-avatar :user="user" :img-size="32" :issuable-type="issuableType" />
+      <!-- If we have to pass user as a prop it makes no sense to scope it.....rm -->
       <slot :user="user"></slot>
     </span>
   </gl-link>
