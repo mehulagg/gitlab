@@ -200,7 +200,7 @@ With Visual Reviews, members of any team (Product, Design, Quality, and so on) c
 After Visual Reviews has been [configured](#configure-review-apps-for-visual-reviews) for the
 Review App, the Visual Reviews feedback form is overlaid on the right side of every page.
 
-![Visual review feedback form](img/toolbar_feedback_form.png)
+![Visual review feedback form](img/toolbar_feedback_form_v13_5.png)
 
 To use the feedback form to make a comment in the merge request:
 
