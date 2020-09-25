@@ -96,12 +96,12 @@ export default {
 <template>
   <gl-drawer :open="drawerOpen" :header-height="getDrawerHeaderHeight()" @close="$emit('cancel')">
     <template #header>
-      <h4 class="m-0">{{ fieldLabel }}</h4>
+      <h4 class="gl-m-0">{{ fieldLabel }}</h4>
     </template>
     <template>
       <div class="requirement-form">
         <span v-if="!isCreate" class="text-muted">{{ reference }}</span>
-        <div class="requirement-form-container" :class="{ 'flex-grow-1 mt-1': !isCreate }">
+        <div class="requirement-form-container" :class="{ 'gl-flex-grow-1 gl-mt-2': !isCreate }">
           <gl-form-group
             :label="__('Title')"
             :invalid-feedback="$options.titleInvalidMessage"
@@ -122,13 +122,13 @@ export default {
               @keyup.escape.exact="$emit('cancel')"
             />
           </gl-form-group>
-          <div class="d-flex requirement-form-actions">
+          <div class="gl-display-flex requirement-form-actions">
             <gl-button
               :disabled="disableSaveButton"
               :loading="requirementRequestActive"
               variant="success"
               category="primary"
-              class="mr-auto js-requirement-save"
+              class="gl-mr-auto js-requirement-save"
               @click="handleSave"
             >
               {{ saveButtonLabel }}
