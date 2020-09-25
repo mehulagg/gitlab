@@ -2565,7 +2565,7 @@ msgstr ""
 msgid "Allowed to fail"
 msgstr ""
 
-msgid "Allows projects or subgroups that belong to this group to override the global setting and use Shared Runners on an opt-in basis."
+msgid "Allows projects or subgroups that belong to this group to override the global setting and use shared runners on an opt-in basis."
 msgstr ""
 
 msgid "Allows you to add and manage Kubernetes clusters."
@@ -8876,7 +8876,7 @@ msgstr ""
 msgid "Disable public access to Pages sites"
 msgstr ""
 
-msgid "Disable shared Runners"
+msgid "Disable shared runners"
 msgstr ""
 
 msgid "Disable two-factor authentication"
@@ -9433,9 +9433,6 @@ msgstr ""
 msgid "Enable Seat Link"
 msgstr ""
 
-msgid "Enable Shared Runners for this group"
-msgstr ""
-
 msgid "Enable Spam Check via external API endpoint"
 msgstr ""
 
@@ -9505,7 +9502,10 @@ msgstr ""
 msgid "Enable reCAPTCHA or Akismet and set IP limits. For reCAPTCHA, we currently only support %{recaptcha_v2_link_start}v2%{recaptcha_v2_link_end}"
 msgstr ""
 
-msgid "Enable shared Runners"
+msgid "Enable shared runners"
+msgstr ""
+
+msgid "Enable shared runners for this group"
 msgstr ""
 
 msgid "Enable snowplow tracking"
@@ -9544,7 +9544,7 @@ msgstr ""
 msgid "Enabled sources for code import during project creation. OmniAuth must be configured for GitHub"
 msgstr ""
 
-msgid "Enables Shared Runners for existing and new projects/subgroups that belong to this group."
+msgid "Enables shared runners for existing and new projects/subgroups that belong to this group."
 msgstr ""
 
 msgid "Enabling this will only make licensed EE features available to projects if the project namespace's plan includes the feature or if the project is public."
@@ -11811,9 +11811,6 @@ msgstr ""
 msgid "GitLab Service Desk is a simple way to allow people to create issues in your GitLab instance without needing their own user account. It provides a unique email address for end users to create issues in a project, and replies can be sent either through the GitLab interface or by email. End users will only see the thread through email."
 msgstr ""
 
-msgid "GitLab Shared Runners execute code of different projects on the same Runner unless you configure GitLab Runner Autoscale with MaxBuilds 1 (which it is on GitLab.com)."
-msgstr ""
-
 msgid "GitLab Shell"
 msgstr ""
 
@@ -11860,6 +11857,12 @@ msgid "GitLab project export"
 msgstr ""
 
 msgid "GitLab restart is required to apply changes."
+msgstr ""
+
+msgid "GitLab shared Runners execute code of different projects on the same Runner unless you configure GitLab Runner Autoscale with MaxBuilds 1 (which it is on GitLab.com)."
+msgstr ""
+
+msgid "GitLab shared runners execute code of different projects on the same runner unless you configure GitLab runner autoscale with MaxBuilds 1 (which it is on GitLab.com)."
 msgstr ""
 
 msgid "GitLab single sign-on URL"
@@ -23025,9 +23028,6 @@ msgstr ""
 msgid "Set up Jira Integration"
 msgstr ""
 
-msgid "Set up Shared Runner availability"
-msgstr ""
-
 msgid "Set up a %{type} Runner automatically"
 msgstr ""
 
@@ -23044,6 +23044,9 @@ msgid "Set up new password"
 msgstr ""
 
 msgid "Set up pipeline subscriptions for this project."
+msgstr ""
+
+msgid "Set up shared runner availability"
 msgstr ""
 
 msgid "Set up your project to automatically push and/or pull changes to/from another repository. Branches, tags, and commits will be synced automatically."
@@ -23148,10 +23151,13 @@ msgstr ""
 msgid "Shared Runners"
 msgstr ""
 
-msgid "Shared Runners disabled on group level"
+msgid "Shared projects"
 msgstr ""
 
-msgid "Shared projects"
+msgid "Shared runners"
+msgstr ""
+
+msgid "Shared runners disabled on group level"
 msgstr ""
 
 msgid "Shared runners help link"

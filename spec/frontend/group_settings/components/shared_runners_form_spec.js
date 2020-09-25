@@ -1,12 +1,15 @@
 import { shallowMount } from '@vue/test-utils';
-import SharedRunnersForm from '~/group_settings/components/shared_runners_form.vue';
-import { GlLoadingIcon, GlToggle } from '@gitlab/ui';
+import { GlLoadingIcon } from '@gitlab/ui';
 import MockAxiosAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import SharedRunnersForm from '~/group_settings/components/shared_runners_form.vue';
+import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 
 const TEST_UPDATE_PATH = '/test/update';
+const DISABLED_PAYLOAD = { shared_runners_setting: 'disabled_and_unoverridable' };
+const ENABLED_PAYLOAD = { shared_runners_setting: 'enabled' };
+const OVERRIDE_PAYLOAD = { shared_runners_setting: 'disabled_with_override' };
 
 jest.mock('~/flash');
 
@@ -27,11 +30,8 @@ describe('group_settings/components/shared_runners_form', () => {
   };
 
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findToggle = label =>
-    wrapper.findAll(GlToggle).wrappers.find(x => x.props('label') === label);
-  const findEnabledToggle = () => findToggle('Enable Shared Runners for this group');
-  const findOverrideToggle = () =>
-    findToggle('Allow projects/subgroups to override the group setting');
+  const findEnabledToggle = () => wrapper.find('[data-testid="enable-runners-toggle"]');
+  const findOverrideToggle = () => wrapper.find('[data-testid="override-runners-toggle"]');
   const changeToggle = toggle => toggle.vm.$emit('change', !toggle.props('value'));
   const getRequestPayload = () => JSON.parse(mock.history.post[0].data);
   const isLoadingIconVisible = () => findLoadingIcon().element.style.display !== 'none';
@@ -63,48 +63,55 @@ describe('group_settings/components/shared_runners_form', () => {
     });
 
     it('override toggle does not exist', () => {
-      expect(findOverrideToggle()).toBeUndefined();
+      expect(findOverrideToggle().exists()).toBe(false);
     });
   });
 
-  describe.each`
-    props                     | toggleButtonFn        | hasOverrideToggle | expectedPayload
-    ${{}}                     | ${findEnabledToggle}  | ${true}           | ${{ shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: true }}
-    ${{ initEnabled: false }} | ${findEnabledToggle}  | ${false}          | ${{ shared_runners_enabled: true }}
-    ${{ initEnabled: false }} | ${findOverrideToggle} | ${false}          | ${{ shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: false }}
-  `(
-    'with $toggleButtonFn toggle change $props',
-    ({ props, toggleButtonFn, hasOverrideToggle, expectedPayload }) => {
-      beforeEach(() => {
-        mock.onPost(TEST_UPDATE_PATH).reply(() => new Promise(() => {}));
+  describe('enable toggle', () => {
+    beforeEach(() => {
+      createComponent();
+    });
 
-        createComponent(props);
-        changeToggle(toggleButtonFn());
-      });
+    it('enabling the toggle sends correct payload', async () => {
+      findEnabledToggle().vm.$emit('change', true);
 
-      if (hasOverrideToggle) {
-        it('override toggle does exist', () => {
-          expect(findOverrideToggle().exists()).toBe(true);
-        });
-      }
+      await waitForPromises();
 
-      it('calls endpoint with correct payload', () => {
-        expect(getRequestPayload()).toEqual(expectedPayload);
-      });
+      expect(getRequestPayload()).toEqual(ENABLED_PAYLOAD);
+      expect(findOverrideToggle().exists()).toBe(false);
+    });
 
-      it('toggles are disabled', () => {
-        expect(findEnabledToggle().props('disabled')).toBe(true);
+    it('disabling the toggle sends correct payload', async () => {
+      findEnabledToggle().vm.$emit('change', false);
 
-        if (hasOverrideToggle) {
-          expect(findOverrideToggle().props('disabled')).toBe(true);
-        }
-      });
+      await waitForPromises();
 
-      it('shows loading icon', () => {
-        expect(isLoadingIconVisible()).toBe(true);
-      });
-    },
-  );
+      expect(getRequestPayload()).toEqual(DISABLED_PAYLOAD);
+      expect(findOverrideToggle().exists()).toBe(true);
+    });
+  });
+
+  describe('override toggle', () => {
+    beforeEach(() => {
+      createComponent({ initEnabled: false });
+    });
+
+    it('enabling the override toggle sends correct payload', async () => {
+      findOverrideToggle().vm.$emit('change', true);
+
+      await waitForPromises();
+
+      expect(getRequestPayload()).toEqual(OVERRIDE_PAYLOAD);
+    });
+
+    it('disabling the override toggle sends correct payload', async () => {
+      findOverrideToggle().vm.$emit('change', false);
+
+      await waitForPromises();
+
+      expect(getRequestPayload()).toEqual(DISABLED_PAYLOAD);
+    });
+  });
 
   describe('with response', () => {
     beforeEach(async () => {
