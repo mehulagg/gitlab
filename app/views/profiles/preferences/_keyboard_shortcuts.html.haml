@@ -1,0 +1,15 @@
+.col-sm-12
+  %hr
+
+.col-lg-4.profile-settings-sidebar#keyboard-shortcuts
+  %h4.gl-mt-0
+    = s_('Preferences|Keyboard Shortcuts')
+  %p
+    = s_('Preferences|Enable or disable keyboard shortcuts.')
+    = succeed '.' do
+      = link_to _('Learn more'), help_page_path('user/shortcuts.md'), target: '_blank'
+
+.col-lg-8
+  %label Raw JSON object:
+  %pre
+    = f.text_area :keyboard_shortcuts, class: 'form-control'

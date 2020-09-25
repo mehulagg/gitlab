@@ -16358,7 +16358,8 @@ CREATE TABLE user_preferences (
     feature_filter_type bigint,
     experience_level smallint,
     view_diffs_file_by_file boolean DEFAULT false NOT NULL,
-    gitpod_enabled boolean DEFAULT false NOT NULL
+    gitpod_enabled boolean DEFAULT false NOT NULL,
+    keyboard_shortcuts json
 );
 
 CREATE SEQUENCE user_preferences_id_seq
@@ -19264,7 +19265,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 

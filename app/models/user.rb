@@ -281,6 +281,7 @@ class User < ApplicationRecord
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
+            :keyboard_shortcuts, :keyboard_shortcuts=,
             to: :user_preference
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
