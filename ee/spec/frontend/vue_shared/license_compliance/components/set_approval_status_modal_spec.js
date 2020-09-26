@@ -18,7 +18,7 @@ describe('SetApprovalModal', () => {
 
   beforeEach(() => {
     actions = {
-      resetLicenseInModal: jest.fn()
+      resetLicenseInModal: jest.fn(),
     };
 
     store = new Vuex.Store({

@@ -13,7 +13,7 @@ export default {
     ...mapState(LICENSE_MANAGEMENT, ['currentLicenseInModal', 'canManageLicenses']),
     headerTitleText() {
       return s__('LicenseCompliance|License details');
-    }
+    },
   },
   methods: {
     ...mapActions(LICENSE_MANAGEMENT, ['resetLicenseInModal', 'allowLicense', 'denyLicense']),
