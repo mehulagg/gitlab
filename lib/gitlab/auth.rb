@@ -50,7 +50,7 @@ module Gitlab
           build_access_token_check(login, password) ||
           lfs_token_check(login, password, project) ||
           oauth_access_token_check(login, password) ||
-          personal_access_token_check(password, project) ||
+          personal_access_token_check(login, password, project) ||
           deploy_token_check(login, password, project) ||
           user_with_password_for_git(login, password) ||
           Gitlab::Auth::Result.new
@@ -189,20 +189,48 @@ module Gitlab
         end
       end
 
-      def personal_access_token_check(password, project)
+      def personal_access_token_check(login, password, project)
+        token = find_personal_access_token_from_password(login, password)
+
+        return unless valid_personal_access_token?(token, project)
+
+        Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
+      end
+
+      def find_personal_access_token_from_password(login, password)
         return unless password.present?
 
-        token = PersonalAccessTokensFinder.new(state: 'active').find_by_token(password)
+        user = User.by_login(login)
+        if user&.otp_required_for_login?
+          password, otp_token = password[0..-7], password[-6..-1]
 
-        return unless token
+          token = PersonalAccessTokensFinder.new(state: 'active').find_by_token(password)
 
-        return if project && token.user.project_bot? && !project.bots.include?(token.user)
-
-        return unless valid_scoped_token?(token, all_available_scopes)
-
-        if token.user.project_bot? || token.user.can?(:log_in)
-          Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
+          # raise Gitlab::Auth::MissingPersonalAccessTokenError if user.two_factor_enabled?
+          return token if user.validate_and_consume_otp!(otp_token)
+        else
+          PersonalAccessTokensFinder.new(state: 'active').find_by_token(password)
         end
+      end
+
+      def valid_personal_access_token?(token, project)
+        return unless token
+        return unless valid_project_bot_for_project_access_token?(token, project)
+        return unless valid_scoped_token?(token, all_available_scopes)
+        return unless valid_user_for_project_access_token?(token)
+
+        true
+      end
+
+      def valid_project_bot_for_project_access_token?(token, project)
+        return true unless project
+        return true unless token.user.project_bot?
+
+        project.bots.include?(token.user)
+      end
+
+      def valid_user_for_project_access_token?(token)
+        token.user.project_bot? || token.user.can?(:log_in)
       end
 
       def valid_oauth_token?(token)
