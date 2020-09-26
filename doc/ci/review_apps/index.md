@@ -213,8 +213,6 @@ To use the feedback form to make a comment in the merge request:
    - Otherwise, enter your name, and optionally your email.
 1. Click **Send feedback**.
 
-![Merge Request Comment from Visual Review toolbar](img/merge_request_toolbar_comment.png)
-
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 To see Visual reviews in action, see the [Visual Reviews Walk through](https://youtu.be/1_tvWTlPfM4).
 
