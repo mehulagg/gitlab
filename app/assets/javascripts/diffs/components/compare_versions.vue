@@ -108,7 +108,7 @@ export default {
           />
         </template>
       </gl-sprintf>
-      <div v-else-if="commit">
+      <div v-if="commit">
         {{ __('Viewing commit') }}
         <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
       </div>
