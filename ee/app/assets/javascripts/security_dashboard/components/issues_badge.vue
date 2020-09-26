@@ -23,6 +23,9 @@ export default {
     popoverTitle() {
       return n__('1 Issue', '%d Issues', this.numberOfIssues);
     },
+    issueBadgeEl() {
+      return () => this.$refs.issueBadge?.$el;
+    },
   },
 };
 </script>
@@ -33,7 +36,7 @@ export default {
       <gl-icon name="issues" class="gl-mr-2" />
       {{ numberOfIssues }}
     </gl-badge>
-    <gl-popover ref="popover" :target="() => $refs.issueBadge.$el" triggers="hover" placement="top">
+    <gl-popover ref="popover" :target="issueBadgeEl" triggers="hover" placement="top">
       <template #title>
         {{ popoverTitle }}
       </template>

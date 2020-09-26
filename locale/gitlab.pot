@@ -22721,6 +22721,11 @@ msgstr ""
 msgid "SecurityReports|There was an error deleting the comment."
 msgstr ""
 
+msgid "SecurityReports|There was an error dismissing %d vulnerability. Please try again later."
+msgid_plural "SecurityReports|There was an error dismissing %d vulnerabilities. Please try again later."
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "SecurityReports|There was an error dismissing the vulnerabilities."
 msgstr ""
 

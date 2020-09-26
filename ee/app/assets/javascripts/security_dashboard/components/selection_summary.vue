@@ -49,30 +49,43 @@ export default {
     },
     dismissSelectedVulnerabilities() {
       const promises = this.selectedVulnerabilities.map(vulnerability =>
-        this.$apollo.mutate({
-          mutation: vulnerabilityDismiss,
-          variables: { id: vulnerability.id, comment: this.dismissalReason },
-        }),
+        this.$apollo
+          .mutate({
+            mutation: vulnerabilityDismiss,
+            variables: { id: vulnerability.id, comment: this.dismissalReason },
+          })
+          .then(() => {
+            this.$emit('vulnerability-dismissed', vulnerability.id);
+          }),
       );
 
-      Promise.all(promises)
-        .then(() => {
-          toast(
-            n__(
-              '%d vulnerability dismissed',
-              '%d vulnerabilities dismissed',
-              this.selectedVulnerabilities.length,
-            ),
-          );
+      return Promise.allSettled(promises).then(statuses => {
+        let fulfilled = 0;
+        let rejected = 0;
 
-          this.$emit('deselect-all-vulnerabilities');
-        })
-        .catch(() => {
+        statuses.forEach(promise => {
+          if (promise.status === 'fulfilled') {
+            fulfilled += 1;
+          } else {
+            rejected += 1;
+          }
+        });
+
+        if (fulfilled > 0) {
+          toast(n__('%d vulnerability dismissed', '%d vulnerabilities dismissed', fulfilled));
+        }
+
+        if (rejected > 0) {
           createFlash(
-            s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
+            n__(
+              'SecurityReports|There was an error dismissing %d vulnerability. Please try again later.',
+              'SecurityReports|There was an error dismissing %d vulnerabilities. Please try again later.',
+              rejected,
+            ),
             'alert',
           );
-        });
+        }
+      });
     },
   },
   dismissalReasons: [
