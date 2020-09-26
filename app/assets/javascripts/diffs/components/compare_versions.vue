@@ -75,10 +75,7 @@ export default {
 </script>
 
 <template>
-  <div
-    v-if="showControls"
-    class="mr-version-controls border-top"
-  >
+  <div v-if="showControls" class="mr-version-controls border-top">
     <div
       class="mr-version-menus-container content-block"
       :class="{
