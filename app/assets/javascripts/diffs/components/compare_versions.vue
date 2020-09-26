@@ -50,7 +50,7 @@ export default {
       'addedLines',
       'removedLines',
     ]),
-    showDropdowns() {
+    showControls() {
       return !this.commit && this.mergeRequestDiffs.length;
     },
     toggleFileBrowserTitle() {
@@ -75,7 +75,10 @@ export default {
 </script>
 
 <template>
-  <div class="mr-version-controls border-top">
+  <div
+    v-if="showControls"
+    class="mr-version-controls border-top"
+  >
     <div
       class="mr-version-menus-container content-block"
       :class="{
@@ -92,7 +95,6 @@ export default {
         @click="toggleShowTreeList"
       />
       <gl-sprintf
-        v-if="showDropdowns"
         class="d-flex align-items-center compare-versions-container"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
