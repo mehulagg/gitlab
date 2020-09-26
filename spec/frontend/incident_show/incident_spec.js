@@ -18,7 +18,7 @@ const setupHTML = initialData => {
   document.getElementById('js-issuable-app').dataset.initial = JSON.stringify(initialData);
 };
 
-describe('Issue show index', () => {
+describe('Incident show index', () => {
   describe('initIssueableApp', () => {
     it('should initialize app with no potential XSS attack', async () => {
       const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});

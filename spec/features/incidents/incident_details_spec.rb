@@ -12,7 +12,7 @@ RSpec.describe 'Incident details', :js do
       project.add_developer(developer)
       sign_in(developer)
 
-      visit "#{project_issues_path(project)}/incident/#{incident.id}"
+      visit project_issue_path(project, incident)
       wait_for_requests
     end
 
@@ -33,7 +33,7 @@ RSpec.describe 'Incident details', :js do
       incident.update!(description: '![xss" onload=alert(1);//](a)')
 
       sign_in(developer)
-      visit "#{project_issues_path(project)}/incident/#{incident.id}"
+      visit project_issue_path(project, incident)
     end
 
     it 'encodes the description to prevent xss incident', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/incident/207951' do
