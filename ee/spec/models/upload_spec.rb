@@ -37,7 +37,7 @@ RSpec.describe Upload do
     end
 
     with_them do
-      subject(:upload_included) { described_class.replicables_for_geo_node.include?(upload) }
+      subject(:upload_included) { described_class.replicables_for_geo_node(upload).exists? }
 
       let(:model) { create(*model_factory) }
       let(:node) do

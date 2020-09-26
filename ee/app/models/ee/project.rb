@@ -198,8 +198,10 @@ module EE
     class_methods do
       extend ::Gitlab::Utils::Override
 
-      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-        node.projects
+      # @param [Integer, String, Range, Array] arg to pass to primary_key_in scope
+      # @return [ActiveRecord::Relation<Project>] everything that should be synced to this node, restricted by primary key
+      def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+        node.projects.primary_key_in(primary_key_in)
       end
 
       def search_by_visibility(level)

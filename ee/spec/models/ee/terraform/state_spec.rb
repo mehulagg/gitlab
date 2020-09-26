@@ -61,7 +61,7 @@ RSpec.describe Terraform::State do
       end
 
       it 'returns the proper number of terraform states' do
-        expect(Terraform::State.replicables_for_geo_node.count).to eq(synced_states)
+        expect(described_class.replicables_for_geo_node(1..described_class.last.id).count).to eq(synced_states)
       end
     end
 
@@ -76,7 +76,7 @@ RSpec.describe Terraform::State do
       end
 
       it 'excludes versioned states' do
-        expect(Terraform::State.replicables_for_geo_node.count).to be_zero
+        expect(described_class.replicables_for_geo_node(1..described_class.last.id).count).to be_zero
       end
     end
   end

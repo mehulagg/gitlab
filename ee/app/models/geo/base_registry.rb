@@ -53,8 +53,7 @@ class Geo::BaseRegistry < Geo::TrackingBase
     model_primary_key = self::MODEL_CLASS.primary_key.to_sym
 
     source_ids = self::MODEL_CLASS
-                  .replicables_for_geo_node
-                  .primary_key_in(range)
+                  .replicables_for_geo_node(range)
                   .pluck(self::MODEL_CLASS.arel_table[model_primary_key])
 
     tracked_ids = self.pluck_model_ids_in_range(range)

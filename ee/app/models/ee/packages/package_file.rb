@@ -11,9 +11,12 @@ module EE
       end
 
       class_methods do
+        # @param [Integer, String, Range, Array] arg to pass to primary_key_in scope
         # @return [ActiveRecord::Relation<Packages::PackageFile>] scope of everything that should be synced
-        def replicables_for_geo_node
-          selective_sync_scope.merge(object_storage_scope)
+        def replicables_for_geo_node(primary_key_in)
+          primary_key_in(primary_key_in)
+            .merge(selective_sync_scope)
+            .merge(object_storage_scope)
         end
 
         private

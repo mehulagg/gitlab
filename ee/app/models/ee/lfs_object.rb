@@ -17,9 +17,13 @@ module EE
     end
 
     class_methods do
-      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-        local_storage_only = !node&.sync_object_storage
-        local_storage_only ? node.lfs_objects.with_files_stored_locally : node.lfs_objects
+      # @param [Integer, String, Range, Array] arg to pass to primary_key_in scope
+      def replicables_for_geo_node(primary_key_in, node = ::Gitlab::Geo.current_node)
+        local_storage_only = !node.sync_object_storage
+
+        scope = node.lfs_objects.primary_key_in(primary_key_in)
+        scope = scope.with_files_stored_locally if local_storage_only
+        scope
       end
     end
 
