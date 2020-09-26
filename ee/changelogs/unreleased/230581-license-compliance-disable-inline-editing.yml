@@ -1,5 +1,5 @@
 ---
-title: m 43470 Removes ability to change license status through MR and Pipeline pages
-merge_request:
+title: Removes ability to change license status through MR and Pipeline pages
+merge_request: 43470
 author:
 type: changed
