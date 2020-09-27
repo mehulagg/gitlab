@@ -16,7 +16,7 @@ module Gitlab
           {
             branch: ref,
             path: path,
-            commit_id: commit_id,
+            commit_id: commit_id, # NOTE: commit_id will be returned as nil if the ref does not exist.
             project_id: project.id,
             project: project.path,
             namespace: project.namespace.full_path,
@@ -38,7 +38,7 @@ module Gitlab
         end
 
         def commit_id
-          repository.commit(ref)&.id if ref
+          repository.commit(ref)&.id
         end
 
         def supported_content?
