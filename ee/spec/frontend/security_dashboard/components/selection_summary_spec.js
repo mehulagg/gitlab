@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 import SelectionSummary from 'ee/security_dashboard/components/selection_summary.vue';
+import { REFETCH_QUERIES } from 'ee/security_dashboard/store/constants';
 import { GlFormSelect, GlButton } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
@@ -103,6 +104,11 @@ describe('Selection Summary component', () => {
     it('should make an API request for each vulnerability', () => {
       dismissButton().trigger('submit');
       expect(spyMutate).toHaveBeenCalledTimes(5);
+      expect(spyMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refetchQueries: REFETCH_QUERIES,
+        }),
+      );
     });
 
     it('should show toast with the right message for the successful calls', async () => {
@@ -110,7 +116,6 @@ describe('Selection Summary component', () => {
       await waitForPromises();
 
       expect(toast).toHaveBeenCalledWith('2 vulnerabilities dismissed');
-      expect(wrapper.emitted('vulnerability-dismissed').flatMap(x => x)).toEqual([2, 4]);
     });
 
     it('should show flash with the right message for the failed calls', async () => {

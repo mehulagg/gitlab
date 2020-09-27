@@ -4,6 +4,7 @@ import { s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import vulnerabilityDismiss from '../graphql/vulnerability_dismiss.mutation.graphql';
+import { REFETCH_QUERIES } from '../store/constants';
 
 const REASON_NONE = s__('SecurityReports|[No reason]');
 const REASON_WONT_FIX = s__("SecurityReports|Won't fix / Accept risk");
@@ -48,33 +49,25 @@ export default {
       this.dismissSelectedVulnerabilities();
     },
     dismissSelectedVulnerabilities() {
+      let fulfilled = 0;
+      let rejected = 0;
+
       const promises = this.selectedVulnerabilities.map(vulnerability =>
         this.$apollo
           .mutate({
             mutation: vulnerabilityDismiss,
             variables: { id: vulnerability.id, comment: this.dismissalReason },
+            refetchQueries: REFETCH_QUERIES,
           })
           .then(() => {
-            this.$emit('vulnerability-dismissed', vulnerability.id);
-            return 'fulfilled';
+            fulfilled += 1;
           })
           .catch(() => {
-            return 'rejected';
+            rejected += 1;
           }),
       );
 
-      return Promise.all(promises).then(statuses => {
-        let fulfilled = 0;
-        let rejected = 0;
-
-        statuses.forEach(promise => {
-          if (promise === 'fulfilled') {
-            fulfilled += 1;
-          } else {
-            rejected += 1;
-          }
-        });
-
+      return Promise.all(promises).then(() => {
         if (fulfilled > 0) {
           toast(n__('%d vulnerability dismissed', '%d vulnerabilities dismissed', fulfilled));
         }
