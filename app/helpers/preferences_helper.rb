@@ -106,6 +106,16 @@ module PreferencesHelper
   def default_first_day_of_week
     first_day_of_week_choices.rassoc(Gitlab::CurrentSettings.first_day_of_week).first
   end
+
+  def data_for_keyboard_shortcut_customization
+    {
+      learn_more_path: help_page_path('user/shortcuts.md'),
+
+      # The "name" attribute that the frontend should use in the form
+      # Looks like "user[keyboard_shortcut_customizations]"
+      form_field_name: ActionView::Helpers::Tags::TextField.new(ActiveModel::Naming.param_key(current_user), :keyboard_shortcut_customizations, {}).send(:tag_name)
+    }
+  end
 end
 
 PreferencesHelper.prepend_if_ee('EE::PreferencesHelper')

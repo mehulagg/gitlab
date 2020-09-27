@@ -9,10 +9,11 @@ import axios from '../../lib/utils/axios_utils';
 import { refreshCurrentPage, visitUrl } from '../../lib/utils/url_utility';
 import findAndFollowLink from '../../lib/utils/navigation_utility';
 import { parseBoolean, getCspNonceValue } from '~/lib/utils/common_utils';
+import { keysFor, TOGGLE_MARKDOWN_PREVIEW, TOGGLE_PERFORMANCE_BAR } from './keybindings';
 
 const defaultStopCallback = Mousetrap.prototype.stopCallback;
 Mousetrap.prototype.stopCallback = function customStopCallback(e, element, combo) {
-  if (['ctrl+shift+p', 'command+shift+p'].indexOf(combo) !== -1) {
+  if (keysFor(TOGGLE_MARKDOWN_PREVIEW).indexOf(combo) !== -1) {
     return false;
   }
 
@@ -70,7 +71,7 @@ export default class Shortcuts {
     Mousetrap.bind('s', Shortcuts.focusSearch);
     Mousetrap.bind('/', Shortcuts.focusSearch);
     Mousetrap.bind('f', this.focusFilter.bind(this));
-    Mousetrap.bind('p b', Shortcuts.onTogglePerfBar);
+    Mousetrap.bind(keysFor(TOGGLE_PERFORMANCE_BAR), Shortcuts.onTogglePerfBar);
 
     const findFileURL = document.body.dataset.findFile;
 
@@ -83,7 +84,7 @@ export default class Shortcuts {
     Mousetrap.bind('shift+l', () => findAndFollowLink('.dashboard-shortcuts-milestones'));
     Mousetrap.bind('shift+s', () => findAndFollowLink('.dashboard-shortcuts-snippets'));
 
-    Mousetrap.bind(['ctrl+shift+p', 'command+shift+p'], Shortcuts.toggleMarkdownPreview);
+    Mousetrap.bind(keysFor(TOGGLE_MARKDOWN_PREVIEW), Shortcuts.toggleMarkdownPreview);
 
     if (typeof findFileURL !== 'undefined' && findFileURL !== null) {
       Mousetrap.bind('t', () => {

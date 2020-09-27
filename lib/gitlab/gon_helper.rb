@@ -39,6 +39,7 @@ module Gitlab
         gon.current_username = current_user.username
         gon.current_user_fullname = current_user.name
         gon.current_user_avatar_url = current_user.avatar_url
+        gon.keyboard_shortcut_customizations = current_user.keyboard_shortcut_customizations
       end
 
       # Initialize gon.features with any flags that should be
