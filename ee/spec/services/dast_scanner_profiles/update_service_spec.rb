@@ -10,7 +10,7 @@ RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
-  let_it_be(:new_scan_type) { !dast_scanner_profile.scan_type }
+  let_it_be(:new_scan_type) { 'PASSIVE' }
   let_it_be(:new_ajax_spider) { !dast_scanner_profile.ajax_spider }
   let_it_be(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
