@@ -58,7 +58,7 @@ module StaticSiteEditor
 
     def load_generated_config
       Gitlab::StaticSiteEditor::Config::GeneratedConfig.new(
-        project.repository,
+        repository,
         ref,
         params.fetch(:path),
         params[:return_url]
@@ -77,7 +77,7 @@ module StaticSiteEditor
     def yaml_from_repo
       # TODO: This may duplicate potentially expensive GRPC calls from GeneratedConfig, and could be
       #       DRYed up and/or memoized.
-      project.repository.blob_data_at(ref, static_site_editor_config_file)
+      repository.blob_data_at(ref, static_site_editor_config_file)
     rescue GRPC::NotFound
       # Return nil in the case of a GRPC::NotFound exception, so the default config will be used.
       # Allow any other unexpected exception will be tracked and re-raised.
