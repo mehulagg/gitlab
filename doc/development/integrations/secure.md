@@ -381,9 +381,8 @@ The primary identifier is particularly important, because it is used to
 Identifiers are also used to [merge duplicate vulnerabilities](#tracking-and-merging-vulnerabilities)
 reported for the same commit, except for `CWE` and `WASC`.
 
-NOTE: **Note:**
-Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, a
-+CVE isn't a stable identifier and should not be assumed when tracking vulnerabilities.
+Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, a CVE
+isn't a stable identifier and you shouldn't assume it as such when tracking vulnerabilities.
 
 ### Location
 
