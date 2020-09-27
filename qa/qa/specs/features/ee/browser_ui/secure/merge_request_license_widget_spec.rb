@@ -48,62 +48,45 @@ module QA
           mr.file_content =
             <<~FILE_UPDATE
             {
+              "version": "2.1",
               "licenses": [
                 {
-                  "count": 1,
-                  "name": "WTFPL"
+                  "id": "WTFPL",
+                  "name": "Do What The F*ck You Want To Public License",
+                  "url": "http://www.wtfpl.net/about/"
                 },
                 {
-                  "count": 1,
-                  "name": "MIT"
+                  "id": "MIT",
+                  "name": "MIT License",
+                  "url": "https://opensource.org/licenses/MIT"
                 },
                 {
-                  "count": 1,
-                  "name": "Zlib"
+                  "id": "Zlib",
+                  "name": "zlib License",
+                  "url": "https://opensource.org/licenses/Zlib"
                 }
               ],
               "dependencies": [
                 {
-                  "license": {
-                      "name": "MIT",
-                      "url": "http://opensource.org/licenses/mit-license"
-                  },
-                  "dependency": {
-                      "name": "actioncable",
-                      "url": "http://rubyonrails.org",
-                      "description": "WebSocket framework for Rails.",
-                      "paths": [
-                          "."
-                      ]
-                  }
+                  "name": "actioncable",
+                  "version": "6.0.3.3",
+                  "package_manager": "bundler",
+                  "path": "Gemfile.lock",
+                  "licenses": ["MIT"]
                 },
                 {
-                  "license": {
-                      "name": "WTFPL",
-                      "url": "http://www.wtfpl.net/"
-                  },
-                  "dependency": {
-                      "name": "wtfpl_init",
-                      "url": "https://rubygems.org/gems/wtfpl_init",
-                      "description": "Download WTFPL license file and rename to LICENSE.md or something",
-                      "paths": [
-                          "."
-                      ]
-                  }
+                  "name": "wtfpl_init",
+                  "version": "0.1.0",
+                  "package_manager": "bundler",
+                  "path": "Gemfile.lock",
+                  "licenses": ["WTFPL"]
                 },
                 {
-                  "license": {
-                      "name": "Zlib",
-                      "url": "https://www.zlib.net/"
-                  },
-                  "dependency": {
-                      "name": "zlib",
-                      "url": "https://www.zlib.net/",
-                      "description": "Ruby interface for the zlib compression/decompression library",
-                      "paths": [
-                          "."
-                      ]
-                  }
+                  "name": "Zlib",
+                  "version": "1.2.11",
+                  "package_manager": "bundler",
+                  "path": "Gemfile.lock",
+                  "licenses": ["Zlib"]
                 }
               ]
             }
