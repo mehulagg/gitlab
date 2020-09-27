@@ -5,8 +5,8 @@ require 'pathname'
 module QA
   RSpec.describe 'Secure', :runner do
     describe 'License merge request widget' do
-      let(:approved_license_name) { "MIT" }
-      let(:denied_license_name) { "Zlib" }
+      let(:approved_license_name) { "MIT License" }
+      let(:denied_license_name) { "zlib License" }
       let(:executor) {"qa-runner-#{Time.now.to_i}"}
 
       after do
@@ -51,9 +51,9 @@ module QA
               "version": "2.1",
               "licenses": [
                 {
-                  "id": "WTFPL",
-                  "name": "Do What The F*ck You Want To Public License",
-                  "url": "http://www.wtfpl.net/about/"
+                  "id": "Apache-2.0",
+                  "name": "Apache License 2.0",
+                  "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
                 },
                 {
                   "id": "MIT",
@@ -75,14 +75,14 @@ module QA
                   "licenses": ["MIT"]
                 },
                 {
-                  "name": "wtfpl_init",
+                  "name": "test_package",
                   "version": "0.1.0",
                   "package_manager": "bundler",
                   "path": "Gemfile.lock",
-                  "licenses": ["WTFPL"]
+                  "licenses": ["Apache-2.0"]
                 },
                 {
-                  "name": "Zlib",
+                  "name": "zlib",
                   "version": "1.2.11",
                   "package_manager": "bundler",
                   "path": "Gemfile.lock",
