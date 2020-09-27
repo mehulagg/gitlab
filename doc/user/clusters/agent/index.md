@@ -336,6 +336,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: gitlab-agent
 spec:
   selector:
     matchLabels:
