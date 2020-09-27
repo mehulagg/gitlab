@@ -537,12 +537,12 @@ Represents a DAST scanner profile.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `activeScan` | Boolean! | Indicates if an Active Scan will run. True to run an Active Scan in addtion to an Passive Scan, and false to run only a Passive Scan. |
 | `ajaxSpider` | Boolean! | Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider. |
 | `editPath` | String | Relative web path to the edit page of a scanner profile |
 | `globalId` | DastScannerProfileID! | ID of the DAST scanner profile |
 | `id` **{warning-solid}** | ID! | **Deprecated:** Use `global_id`. Deprecated in 13.4 |
 | `profileName` | String | Name of the DAST scanner profile |
+| `scanType` | DastScanTypeEnum! | Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan. |
 | `showDebugMessages` | Boolean! | Indicates if debug messages should be included in DAST console output. True to include the debug messages. |
 | `spiderTimeout` | Int | The maximum number of minutes allowed for the spider to traverse the site |
 | `targetTimeout` | Int | The maximum number of seconds allowed for the site under test to respond to a request |
@@ -3020,6 +3020,7 @@ Mode of a commit action.
 
 | Value | Description |
 | ----- | ----------- |
+| `ACTIVE` | Active DAST scan. This scan will make active attacks against the target site. |
 | `PASSIVE` | Passive DAST scan. This scan will not make active attacks against the target site. |
 
 ### DastSiteProfileValidationStatusEnum
