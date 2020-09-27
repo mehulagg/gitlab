@@ -286,5 +286,5 @@ downstream projects. This [application limit](../administration/instance_limits.
 When triggering a pipeline in a downstream private project, the name of the project
 and the status of the pipeline will be visible from the upstream project's pipelines page.
 
-Make sure that this does note pose any confidentiality problem before triggering a 
-downstream pipeline in a private project from a public project.
+If you have a public project that can trigger downstream pipelines in a private
+project, make sure to check that there are no confidentiality problems.
