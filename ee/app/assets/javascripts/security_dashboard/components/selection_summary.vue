@@ -56,15 +56,19 @@ export default {
           })
           .then(() => {
             this.$emit('vulnerability-dismissed', vulnerability.id);
+            return 'fulfilled';
+          })
+          .catch(() => {
+            return 'rejected';
           }),
       );
 
-      return Promise.allSettled(promises).then(statuses => {
+      return Promise.all(promises).then(statuses => {
         let fulfilled = 0;
         let rejected = 0;
 
         statuses.forEach(promise => {
-          if (promise.status === 'fulfilled') {
+          if (promise === 'fulfilled') {
             fulfilled += 1;
           } else {
             rejected += 1;
