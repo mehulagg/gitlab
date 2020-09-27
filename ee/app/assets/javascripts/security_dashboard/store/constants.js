@@ -35,5 +35,3 @@ export const UNSCANNED_PROJECTS_DATE_RANGES = [
 ];
 
 export const PRIMARY_IDENTIFIER_TYPE = 'cve';
-
-export const REFETCH_QUERIES = ['group', 'instance', 'project'];
