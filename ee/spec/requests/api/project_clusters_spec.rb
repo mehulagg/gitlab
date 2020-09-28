@@ -17,11 +17,9 @@ RSpec.describe API::ProjectClusters do
 
       stub_kubeclient_get_secret(
         api_url,
-        {
-          metadata_name: "#{namespace}-token",
-          token: Base64.encode64('sample-token'),
-          namespace: namespace
-        }
+        metadata_name: "#{namespace}-token",
+        token: Base64.encode64('sample-token'),
+        namespace: namespace
       )
 
       stub_kubeclient_put_secret(api_url, "#{namespace}-token", namespace: namespace)

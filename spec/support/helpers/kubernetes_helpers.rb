@@ -167,7 +167,7 @@ module KubernetesHelpers
     options[:namespace] ||= "default"
 
     WebMock.stub_request(:get, api_url + "/api/v1/namespaces/#{options[:namespace]}/secrets/#{options[:metadata_name]}")
-      .to_return(kube_response(kube_v1_secret_body(options)))
+      .to_return(kube_response(kube_v1_secret_body(**options)))
   end
 
   def stub_kubeclient_get_secret_error(api_url, name, namespace: 'default', status: 404)
