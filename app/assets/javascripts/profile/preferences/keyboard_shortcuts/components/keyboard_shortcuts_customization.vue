@@ -6,10 +6,11 @@ import {
   enableShortcuts,
   disableShortcuts,
 } from '~/behaviors/shortcuts/shortcuts_toggle';
+import KeyboardShortcutGroup from './keyboard_shortcut_group.vue';
 
 export default {
   name: 'KeyboardShortcutsCustomization',
-  components: { GlLink, GlFormGroup, GlFormInput, GlToggle },
+  components: { GlLink, GlFormGroup, GlFormInput, GlToggle, KeyboardShortcutGroup },
   data() {
     return {
       shortcutsEnabled: !shouldDisableShortcuts(),
@@ -21,9 +22,6 @@ export default {
   },
   methods: {
     ...mapActions(['updateKeybinding']),
-    getBindingKeys(binding) {
-      return JSON.stringify(binding.customKeys || binding.defaultKeys);
-    },
     onGlobalShortcutToggleChanged(enabled) {
       // TODO: Right now this is just toggling the flag in `localStorage`
       // that we use currently; this configuration should instead be saved in the
@@ -65,9 +63,13 @@ export default {
 
         <hr />
 
-        <div v-for="group in keybindings" :key="group.grouopId">
-          <h5 class="h4 mt-0 mb-3">{{ group.name }}</h5>
-          <gl-form-group
+        <keyboard-shortcut-group
+          :group="group"
+          v-for="group in keybindings"
+          :key="group.grouopId"
+        />
+
+        <!-- <gl-form-group
             v-for="binding in group.keybindings"
             :key="binding.command"
             :label="binding.description"
@@ -76,10 +78,7 @@ export default {
               :value="getBindingKeys(binding)"
               @change="updateKeybinding({ command: binding.command, newKeys: JSON.parse($event) })"
             />
-          </gl-form-group>
-        </div>
-
-        <hr />
+          </gl-form-group> -->
 
         <p class="gl-font-style-italic">Some info for debugging:</p>
 
