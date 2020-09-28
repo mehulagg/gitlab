@@ -128,7 +128,7 @@ The following metadata should be added when a page is moved to another location:
 
 - `redirect_to`: The relative path and filename (with an `.md` extension) of the
   location to which visitors should be redirected for a moved page.
-  [Learn more](#changing-document-location).
+  [Learn more](#move-or-rename-a-document).
 - `disqus_identifier`: Identifier for Disqus commenting system. Used to keep
   comments with a page that's been moved to a new URL.
   [Learn more](#redirections-for-pages-with-disqus-comments).
@@ -156,9 +156,10 @@ Nanoc layout), which will be displayed at the top of the page if defined:
   [algorithm](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/lib/helpers/reading_time.rb)
   to calculate the reading time based on the number of words.
 
-## Changing document location
+## Move or rename a document
 
-Changing a document's location requires specific steps to ensure that
+When you move or rename a document, you're effectively changing the location of that document.
+The process requires specific steps to ensure that
 users can seamlessly access the new doc page, whether they are accessing content
 on a GitLab instance domain at `/help` or at <https://docs.gitlab.com>. Be sure to assign a
 technical writer if you have any questions during the process (such as
