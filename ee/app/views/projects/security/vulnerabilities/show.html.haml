@@ -2,7 +2,7 @@
 - add_to_breadcrumbs _("Security Dashboard"), project_security_dashboard_index_path(@project)
 - breadcrumb_title @vulnerability.id
 - page_title @vulnerability.title
-- page_description @vulnerability.description_html
+- page_description @vulnerability.description
 - vulnerability_init_details = { vulnerability: vulnerability_details_json(@vulnerability, @pipeline)}
 
 #js-vulnerability-main{ data: vulnerability_init_details }

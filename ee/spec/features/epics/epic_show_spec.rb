@@ -14,7 +14,7 @@ RSpec.describe 'Epic show', :js do
 
   let_it_be(:markdown) do
     <<-MARKDOWN.strip_heredoc
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    **Lorem** _ipsum_ dolor sit [amet](https://example.com), consectetur adipiscing elit.
     Nos commodius agimus.
     Ex rebus enim timiditas, non ex vocabulis nascitur.
     Ita prorsus, inquam; Duo Reges: constructio interrete.
@@ -116,6 +116,8 @@ RSpec.describe 'Epic show', :js do
   end
 
   describe 'Epic metadata' do
+    it_behaves_like 'page meta description', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos commodius agimus. Ex rebus enim timiditas, non ex vocabulis nascitur. Ita prorsus, inquam; Duo...'
+
     it 'shows epic status, date and author in header' do
       page.within('.epic-page-container .detail-page-header-body') do
         expect(find('.issuable-status-box > span')).to have_content('Open')
@@ -127,7 +129,7 @@ RSpec.describe 'Epic show', :js do
     it 'shows epic title and description' do
       page.within('.epic-page-container .detail-page-description') do
         expect(find('.title-container .title')).to have_content(epic_title)
-        expect(find('.description .md')).to have_content(markdown.squish)
+        expect(find('.description .md')).to have_content('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nos commodius agimus. Ex rebus enim timiditas, non ex vocabulis nascitur. Ita prorsus, inquam; Duo Reges: constructio interrete.')
       end
     end
 

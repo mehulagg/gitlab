@@ -149,4 +149,17 @@ RSpec.describe 'projects/issues/show' do
       expect(rendered).not_to have_selector('#js-sentry-error-stack-trace')
     end
   end
+
+  context 'page_description' do
+    let(:issue) { create(:issue, project: project, author: user, description: "**lorem** _ipsum_ dolor sit [amet](https://example.com)") }
+
+    it "renders the sanitized description as the page's og:description" do
+      issue.description = "**lorem** _ipsum_ dolor sit [amet](https://example.com)"
+      description_sanitized = 'Lorem ipsum dolor sit amet'
+
+      render
+
+      expect(rendered).to have_selector("meta[property='og:description'][content='#{description_sanitized}']")
+    end
+  end
 end
