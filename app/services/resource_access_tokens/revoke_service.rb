@@ -24,7 +24,7 @@ module ResourceAccessTokens
         raise RevokeAccessTokenError, "Migration to ghost user failed" unless migrate_to_ghost_user
       end
 
-      success("Revoked access token: #{@access_token.name}")
+      success("Revoked access token: #{access_token.name}")
     rescue ActiveRecord::ActiveRecordError, RevokeAccessTokenError => error
       log_error("Failed to revoke access token for #{bot_user.name}: #{error.message}")
       error(error.message)
