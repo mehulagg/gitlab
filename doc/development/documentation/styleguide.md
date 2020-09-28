@@ -1947,7 +1947,7 @@ guidance on developing GitLab with feature flags, see [Feature flags in developm
 
 ## GraphQL API
 
-GraphQL APIs are different from [RESTful APIs](restful-api-styleguide.md). Reference
+GraphQL APIs are different from [RESTful APIs](restful_api_styleguide.md). Reference
 information is generated in our [GraphQL reference](../../api/graphql/reference/index.md).
 
 However, it's helpful to include examples on how to use GraphQL for different
