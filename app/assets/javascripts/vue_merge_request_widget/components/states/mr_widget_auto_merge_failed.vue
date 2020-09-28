@@ -34,7 +34,7 @@ export default {
 <template>
   <div class="mr-widget-body media">
     <status-icon status="warning" />
-    <div class="media-body space-children">
+    <div class="media-body space-children d-flex flex-wrap align-items-center">
       <span class="bold">
         <template v-if="mr.mergeError">{{ mr.mergeError }}</template>
         {{ s__('mrWidget|This merge request failed to be merged automatically') }}
