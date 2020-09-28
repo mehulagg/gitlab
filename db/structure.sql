@@ -69,9 +69,9 @@ COMMENT ON FUNCTION table_sync_function_2be879775d() IS 'Partitioning migration:
 CREATE TABLE audit_events_part_5fc467ac26 (
     id bigint NOT NULL,
     author_id integer NOT NULL,
-    type character varying,
+    type text,
     entity_id integer NOT NULL,
-    entity_type character varying NOT NULL,
+    entity_type text NOT NULL,
     details text,
     ip_address inet,
     author_name text,
@@ -8960,11 +8960,11 @@ CREATE TABLE analytics_language_trend_repository_languages (
 
 CREATE TABLE appearances (
     id integer NOT NULL,
-    title character varying NOT NULL,
+    title text NOT NULL,
     description text NOT NULL,
-    logo character varying,
+    logo text,
     updated_by integer,
-    header_logo character varying,
+    header_logo text,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     description_html text,
@@ -9017,7 +9017,7 @@ CREATE TABLE application_settings (
     sign_in_text text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    home_page_url character varying,
+    home_page_url text,
     default_branch_protection integer DEFAULT 2,
     help_text text,
     restricted_visibility_levels text,
@@ -9027,7 +9027,7 @@ CREATE TABLE application_settings (
     default_snippet_visibility integer DEFAULT 0 NOT NULL,
     domain_whitelist text,
     user_oauth_applications boolean DEFAULT true,
-    after_sign_out_path character varying,
+    after_sign_out_path text,
     session_expire_delay integer DEFAULT 10080 NOT NULL,
     import_sources text,
     help_page_text text,
@@ -9462,7 +9462,7 @@ ALTER SEQUENCE approver_groups_id_seq OWNED BY approver_groups.id;
 CREATE TABLE approvers (
     id integer NOT NULL,
     target_id integer NOT NULL,
-    target_type character varying,
+    target_type text,
     user_id integer NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
@@ -9513,9 +9513,9 @@ ALTER SEQUENCE atlassian_identities_user_id_seq OWNED BY atlassian_identities.us
 CREATE TABLE audit_events (
     id integer NOT NULL,
     author_id integer NOT NULL,
-    type character varying,
+    type text,
     entity_id integer NOT NULL,
-    entity_type character varying NOT NULL,
+    entity_type text NOT NULL,
     details text,
     created_at timestamp without time zone,
     ip_address inet,
@@ -9608,8 +9608,8 @@ ALTER SEQUENCE background_migration_jobs_id_seq OWNED BY background_migration_jo
 
 CREATE TABLE backup_labels (
     id integer NOT NULL,
-    title character varying,
-    color character varying,
+    title text,
+    color text,
     project_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
@@ -9774,8 +9774,8 @@ CREATE TABLE broadcast_messages (
     ends_at timestamp without time zone NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    color character varying,
-    font character varying,
+    color text,
+    font text,
     message_html text NOT NULL,
     cached_markdown_version integer,
     target_path character varying(255),
@@ -9927,7 +9927,7 @@ CREATE TABLE ci_build_trace_sections (
 
 CREATE TABLE ci_builds (
     id integer NOT NULL,
-    status character varying,
+    status text,
     finished_at timestamp without time zone,
     trace text,
     created_at timestamp without time zone,
@@ -9937,18 +9937,18 @@ CREATE TABLE ci_builds (
     coverage double precision,
     commit_id integer,
     commands text,
-    name character varying,
+    name text,
     options text,
     allow_failure boolean DEFAULT false NOT NULL,
-    stage character varying,
+    stage text,
     trigger_request_id integer,
     stage_idx integer,
     tag boolean,
-    ref character varying,
+    ref text,
     user_id integer,
-    type character varying,
-    target_url character varying,
-    description character varying,
+    type text,
+    target_url text,
+    description text,
     artifacts_file text,
     project_id integer,
     artifacts_metadata text,
@@ -10284,9 +10284,9 @@ ALTER SEQUENCE ci_pipeline_variables_id_seq OWNED BY ci_pipeline_variables.id;
 
 CREATE TABLE ci_pipelines (
     id integer NOT NULL,
-    ref character varying,
-    sha character varying,
-    before_sha character varying,
+    ref text,
+    sha text,
+    before_sha text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     tag boolean DEFAULT false,
@@ -10441,18 +10441,18 @@ ALTER SEQUENCE ci_runner_projects_id_seq OWNED BY ci_runner_projects.id;
 
 CREATE TABLE ci_runners (
     id integer NOT NULL,
-    token character varying,
+    token text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    description character varying,
+    description text,
     contacted_at timestamp without time zone,
     active boolean DEFAULT true NOT NULL,
     is_shared boolean DEFAULT false,
-    name character varying,
-    version character varying,
-    revision character varying,
-    platform character varying,
-    architecture character varying,
+    name text,
+    version text,
+    revision text,
+    platform text,
+    architecture text,
     run_untagged boolean DEFAULT true NOT NULL,
     locked boolean DEFAULT false NOT NULL,
     access_level integer DEFAULT 0 NOT NULL,
@@ -10563,7 +10563,7 @@ ALTER SEQUENCE ci_trigger_requests_id_seq OWNED BY ci_trigger_requests.id;
 
 CREATE TABLE ci_triggers (
     id integer NOT NULL,
-    token character varying,
+    token text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     project_id integer,
@@ -10586,8 +10586,8 @@ CREATE TABLE ci_variables (
     key character varying NOT NULL,
     value text,
     encrypted_value text,
-    encrypted_value_salt character varying,
-    encrypted_value_iv character varying,
+    encrypted_value_salt text,
+    encrypted_value_iv text,
     project_id integer NOT NULL,
     protected boolean DEFAULT false NOT NULL,
     environment_scope character varying DEFAULT '*'::character varying NOT NULL,
@@ -11564,7 +11564,7 @@ CREATE TABLE elasticsearch_indexed_projects (
 CREATE TABLE emails (
     id integer NOT NULL,
     user_id integer NOT NULL,
-    email character varying NOT NULL,
+    email text NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     confirmation_token character varying,
@@ -12528,8 +12528,8 @@ ALTER SEQUENCE historical_data_id_seq OWNED BY historical_data.id;
 
 CREATE TABLE identities (
     id integer NOT NULL,
-    extern_uid character varying,
-    provider character varying,
+    extern_uid text,
+    provider text,
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
@@ -12754,7 +12754,7 @@ ALTER SEQUENCE issue_user_mentions_id_seq OWNED BY issue_user_mentions.id;
 
 CREATE TABLE issues (
     id integer NOT NULL,
-    title character varying,
+    title text,
     author_id integer,
     project_id integer,
     created_at timestamp without time zone,
@@ -12912,9 +12912,9 @@ CREATE TABLE keys (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     key text,
-    title character varying,
-    type character varying,
-    fingerprint character varying,
+    title text,
+    type text,
+    fingerprint text,
     public boolean DEFAULT false NOT NULL,
     last_used_at timestamp without time zone,
     fingerprint_sha256 bytea,
@@ -12934,7 +12934,7 @@ CREATE TABLE label_links (
     id integer NOT NULL,
     label_id integer,
     target_id integer,
-    target_type character varying,
+    target_type text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
 );
@@ -12968,8 +12968,8 @@ ALTER SEQUENCE label_priorities_id_seq OWNED BY label_priorities.id;
 
 CREATE TABLE labels (
     id integer NOT NULL,
-    title character varying,
-    color character varying,
+    title text,
+    color text,
     project_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
@@ -12992,12 +12992,12 @@ ALTER SEQUENCE labels_id_seq OWNED BY labels.id;
 
 CREATE TABLE ldap_group_links (
     id integer NOT NULL,
-    cn character varying,
+    cn text,
     group_access integer NOT NULL,
     group_id integer NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    provider character varying,
+    provider text,
     filter character varying
 );
 
@@ -13029,11 +13029,11 @@ ALTER SEQUENCE lfs_file_locks_id_seq OWNED BY lfs_file_locks.id;
 
 CREATE TABLE lfs_objects (
     id integer NOT NULL,
-    oid character varying NOT NULL,
+    oid text NOT NULL,
     size bigint NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    file character varying,
+    file text,
     file_store integer DEFAULT 1,
     CONSTRAINT check_eecfc5717d CHECK ((file_store IS NOT NULL))
 );
@@ -13127,15 +13127,15 @@ CREATE TABLE members (
     id integer NOT NULL,
     access_level integer NOT NULL,
     source_id integer NOT NULL,
-    source_type character varying NOT NULL,
+    source_type text NOT NULL,
     user_id integer,
     notification_level integer NOT NULL,
-    type character varying,
+    type text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     created_by_id integer,
-    invite_email character varying,
-    invite_token character varying,
+    invite_email text,
+    invite_token text,
     invite_accepted_at timestamp without time zone,
     requested_at timestamp without time zone,
     expires_at date,
@@ -13275,7 +13275,7 @@ CREATE TABLE merge_request_diff_files (
 
 CREATE TABLE merge_request_diffs (
     id integer NOT NULL,
-    state character varying,
+    state text,
     merge_request_id integer NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
@@ -13372,16 +13372,16 @@ ALTER SEQUENCE merge_request_user_mentions_id_seq OWNED BY merge_request_user_me
 
 CREATE TABLE merge_requests (
     id integer NOT NULL,
-    target_branch character varying NOT NULL,
-    source_branch character varying NOT NULL,
+    target_branch text NOT NULL,
+    source_branch text NOT NULL,
     source_project_id integer,
     author_id integer,
     assignee_id integer,
-    title character varying,
+    title text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     milestone_id integer,
-    merge_status character varying DEFAULT 'unchecked'::character varying NOT NULL,
+    merge_status text DEFAULT 'unchecked'::text NOT NULL,
     target_project_id integer NOT NULL,
     iid integer,
     description text,
@@ -13510,13 +13510,13 @@ CREATE TABLE milestone_releases (
 
 CREATE TABLE milestones (
     id integer NOT NULL,
-    title character varying NOT NULL,
+    title text NOT NULL,
     project_id integer,
     description text,
     due_date date,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    state character varying,
+    state text,
     iid integer,
     title_html text,
     description_html text,
@@ -13583,14 +13583,14 @@ ALTER SEQUENCE namespace_statistics_id_seq OWNED BY namespace_statistics.id;
 
 CREATE TABLE namespaces (
     id integer NOT NULL,
-    name character varying NOT NULL,
-    path character varying NOT NULL,
+    name text NOT NULL,
+    path text NOT NULL,
     owner_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    type character varying,
-    description character varying DEFAULT ''::character varying NOT NULL,
-    avatar character varying,
+    type text,
+    description text DEFAULT ''::text NOT NULL,
+    avatar text,
     membership_lock boolean DEFAULT false,
     share_with_group_lock boolean DEFAULT false,
     visibility_level integer DEFAULT 20 NOT NULL,
@@ -13667,14 +13667,14 @@ ALTER SEQUENCE note_diff_files_id_seq OWNED BY note_diff_files.id;
 CREATE TABLE notes (
     id integer NOT NULL,
     note text,
-    noteable_type character varying,
+    noteable_type text,
     author_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     project_id integer,
-    attachment character varying,
-    line_code character varying,
-    commit_id character varying,
+    attachment text,
+    line_code text,
+    commit_id text,
     noteable_id integer,
     system boolean DEFAULT false NOT NULL,
     st_diff text,
@@ -13745,12 +13745,12 @@ CREATE TABLE oauth_access_grants (
     id integer NOT NULL,
     resource_owner_id integer NOT NULL,
     application_id integer NOT NULL,
-    token character varying NOT NULL,
+    token text NOT NULL,
     expires_in integer NOT NULL,
     redirect_uri text NOT NULL,
     created_at timestamp without time zone NOT NULL,
     revoked_at timestamp without time zone,
-    scopes character varying
+    scopes text DEFAULT ''::text
 );
 
 CREATE SEQUENCE oauth_access_grants_id_seq
@@ -13766,12 +13766,12 @@ CREATE TABLE oauth_access_tokens (
     id integer NOT NULL,
     resource_owner_id integer,
     application_id integer,
-    token character varying NOT NULL,
-    refresh_token character varying,
+    token text NOT NULL,
+    refresh_token text,
     expires_in integer,
     revoked_at timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
-    scopes character varying
+    scopes text
 );
 
 CREATE SEQUENCE oauth_access_tokens_id_seq
@@ -13785,15 +13785,15 @@ ALTER SEQUENCE oauth_access_tokens_id_seq OWNED BY oauth_access_tokens.id;
 
 CREATE TABLE oauth_applications (
     id integer NOT NULL,
-    name character varying NOT NULL,
-    uid character varying NOT NULL,
-    secret character varying NOT NULL,
+    name text NOT NULL,
+    uid text NOT NULL,
+    secret text NOT NULL,
     redirect_uri text NOT NULL,
-    scopes character varying DEFAULT ''::character varying NOT NULL,
+    scopes text DEFAULT ''::text NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     owner_id integer,
-    owner_type character varying,
+    owner_type text,
     trusted boolean DEFAULT false NOT NULL,
     confidential boolean DEFAULT true NOT NULL
 );
@@ -14911,23 +14911,23 @@ ALTER SEQUENCE project_tracing_settings_id_seq OWNED BY project_tracing_settings
 
 CREATE TABLE projects (
     id integer NOT NULL,
-    name character varying,
-    path character varying,
+    name text,
+    path text,
     description text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     creator_id integer,
     namespace_id integer NOT NULL,
     last_activity_at timestamp without time zone,
-    import_url character varying,
+    import_url text,
     visibility_level integer DEFAULT 0 NOT NULL,
     archived boolean DEFAULT false NOT NULL,
-    avatar character varying,
+    avatar text,
     merge_requests_template text,
     star_count integer DEFAULT 0 NOT NULL,
     merge_requests_rebase_enabled boolean DEFAULT false,
-    import_type character varying,
-    import_source character varying,
+    import_type text,
+    import_source text,
     approvals_before_merge integer DEFAULT 0 NOT NULL,
     reset_approvals_on_push boolean DEFAULT true,
     merge_requests_ff_only_enabled boolean DEFAULT false,
@@ -15129,7 +15129,7 @@ ALTER SEQUENCE protected_branch_unprotect_access_levels_id_seq OWNED BY protecte
 CREATE TABLE protected_branches (
     id integer NOT NULL,
     project_id integer NOT NULL,
-    name character varying NOT NULL,
+    name text NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     code_owner_approval_required boolean DEFAULT false NOT NULL
@@ -15230,16 +15230,16 @@ CREATE TABLE push_event_payloads (
 
 CREATE TABLE push_rules (
     id integer NOT NULL,
-    force_push_regex character varying,
-    delete_branch_regex character varying,
-    commit_message_regex character varying,
+    force_push_regex text,
+    delete_branch_regex text,
+    commit_message_regex text,
     deny_delete_tag boolean,
     project_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    author_email_regex character varying,
+    author_email_regex text,
     member_check boolean DEFAULT false NOT NULL,
-    file_name_regex character varying,
+    file_name_regex text,
     is_sample boolean DEFAULT false,
     max_file_size integer DEFAULT 0 NOT NULL,
     prevent_secrets boolean DEFAULT false NOT NULL,
@@ -15317,7 +15317,7 @@ ALTER SEQUENCE release_links_id_seq OWNED BY release_links.id;
 
 CREATE TABLE releases (
     id integer NOT NULL,
-    tag character varying,
+    tag text,
     description text,
     project_id integer,
     created_at timestamp without time zone NOT NULL,
@@ -15580,7 +15580,7 @@ CREATE SEQUENCE saml_providers_id_seq
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
 
 CREATE TABLE schema_migrations (
-    version character varying NOT NULL
+    version text NOT NULL
 );
 
 CREATE TABLE scim_identities (
@@ -15682,11 +15682,11 @@ CREATE TABLE sent_notifications (
     id integer NOT NULL,
     project_id integer,
     noteable_id integer,
-    noteable_type character varying,
+    noteable_type text,
     recipient_id integer,
-    commit_id character varying,
-    reply_key character varying NOT NULL,
-    line_code character varying,
+    commit_id text,
+    reply_key text NOT NULL,
+    line_code text,
     note_type character varying,
     "position" text,
     in_reply_to_discussion_id character varying
@@ -15737,7 +15737,7 @@ CREATE TABLE service_desk_settings (
 
 CREATE TABLE services (
     id integer NOT NULL,
-    type character varying,
+    type text,
     project_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
@@ -15863,14 +15863,14 @@ ALTER SEQUENCE snippet_user_mentions_id_seq OWNED BY snippet_user_mentions.id;
 
 CREATE TABLE snippets (
     id integer NOT NULL,
-    title character varying,
+    title text,
     content text,
     author_id integer NOT NULL,
     project_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    file_name character varying,
-    type character varying,
+    file_name text,
+    type text,
     visibility_level integer DEFAULT 0 NOT NULL,
     title_html text,
     content_html text,
@@ -16019,7 +16019,7 @@ CREATE TABLE subscriptions (
     id integer NOT NULL,
     user_id integer,
     subscribable_id integer,
-    subscribable_type character varying,
+    subscribable_type text,
     subscribed boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
@@ -16080,10 +16080,10 @@ CREATE TABLE taggings (
     id integer NOT NULL,
     tag_id integer,
     taggable_id integer,
-    taggable_type character varying,
+    taggable_type text,
     tagger_id integer,
-    tagger_type character varying,
-    context character varying,
+    tagger_type text,
+    context text,
     created_at timestamp without time zone
 );
 
@@ -16098,7 +16098,7 @@ ALTER SEQUENCE taggings_id_seq OWNED BY taggings.id;
 
 CREATE TABLE tags (
     id integer NOT NULL,
-    name character varying,
+    name text,
     taggings_count integer DEFAULT 0
 );
 
@@ -16468,52 +16468,52 @@ ALTER SEQUENCE user_synced_attributes_metadata_id_seq OWNED BY user_synced_attri
 
 CREATE TABLE users (
     id integer NOT NULL,
-    email character varying DEFAULT ''::character varying NOT NULL,
-    encrypted_password character varying DEFAULT ''::character varying NOT NULL,
-    reset_password_token character varying,
+    email text DEFAULT ''::text NOT NULL,
+    encrypted_password text DEFAULT ''::text NOT NULL,
+    reset_password_token text,
     reset_password_sent_at timestamp without time zone,
     remember_created_at timestamp without time zone,
     sign_in_count integer DEFAULT 0,
     current_sign_in_at timestamp without time zone,
     last_sign_in_at timestamp without time zone,
-    current_sign_in_ip character varying,
-    last_sign_in_ip character varying,
+    current_sign_in_ip text,
+    last_sign_in_ip text,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    name character varying,
+    name text,
     admin boolean DEFAULT false NOT NULL,
     projects_limit integer NOT NULL,
-    skype character varying DEFAULT ''::character varying NOT NULL,
-    linkedin character varying DEFAULT ''::character varying NOT NULL,
-    twitter character varying DEFAULT ''::character varying NOT NULL,
+    skype text DEFAULT ''::text NOT NULL,
+    linkedin text DEFAULT ''::text NOT NULL,
+    twitter text DEFAULT ''::text NOT NULL,
     failed_attempts integer DEFAULT 0,
     locked_at timestamp without time zone,
-    username character varying,
+    username text,
     can_create_group boolean DEFAULT true NOT NULL,
     can_create_team boolean DEFAULT true NOT NULL,
-    state character varying,
+    state text,
     color_scheme_id integer DEFAULT 1 NOT NULL,
     password_expires_at timestamp without time zone,
     created_by_id integer,
     last_credential_check_at timestamp without time zone,
-    avatar character varying,
-    confirmation_token character varying,
+    avatar text,
+    confirmation_token text,
     confirmed_at timestamp without time zone,
     confirmation_sent_at timestamp without time zone,
-    unconfirmed_email character varying,
+    unconfirmed_email text,
     hide_no_ssh_key boolean DEFAULT false,
-    website_url character varying DEFAULT ''::character varying NOT NULL,
+    website_url text DEFAULT ''::text NOT NULL,
     admin_email_unsubscribed_at timestamp without time zone,
-    notification_email character varying,
+    notification_email text,
     hide_no_password boolean DEFAULT false,
     password_automatically_set boolean DEFAULT false,
-    location character varying,
-    encrypted_otp_secret character varying,
-    encrypted_otp_secret_iv character varying,
-    encrypted_otp_secret_salt character varying,
+    location text,
+    encrypted_otp_secret text,
+    encrypted_otp_secret_iv text,
+    encrypted_otp_secret_salt text,
     otp_required_for_login boolean DEFAULT false NOT NULL,
     otp_backup_codes text,
-    public_email character varying DEFAULT ''::character varying NOT NULL,
+    public_email text DEFAULT ''::text NOT NULL,
     dashboard integer DEFAULT 0,
     project_view integer DEFAULT 0,
     consumed_timestep integer,
@@ -16933,7 +16933,7 @@ CREATE TABLE web_hooks (
     project_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    type character varying DEFAULT 'ProjectHook'::character varying,
+    type text DEFAULT 'ProjectHook'::text,
     service_id integer,
     push_events boolean DEFAULT true NOT NULL,
     issues_events boolean DEFAULT false NOT NULL,
@@ -19343,7 +19343,7 @@ CREATE INDEX backup_labels_title_idx ON backup_labels USING btree (title);
 
 CREATE INDEX backup_labels_type_project_id_idx ON backup_labels USING btree (type, project_id);
 
-CREATE INDEX ci_builds_gitlab_monitor_metrics ON ci_builds USING btree (status, created_at, project_id) WHERE ((type)::text = 'Ci::Build'::text);
+CREATE INDEX ci_builds_gitlab_monitor_metrics ON ci_builds USING btree (status, created_at, project_id) WHERE (type = 'Ci::Build'::text);
 
 CREATE INDEX code_owner_approval_required ON protected_branches USING btree (project_id, code_owner_approval_required) WHERE (code_owner_approval_required = true);
 
@@ -19391,7 +19391,7 @@ CREATE INDEX idx_merge_requests_on_id_and_merge_jid ON merge_requests USING btre
 
 CREATE INDEX idx_merge_requests_on_source_project_and_branch_state_opened ON merge_requests USING btree (source_project_id, source_branch) WHERE (state_id = 1);
 
-CREATE INDEX idx_merge_requests_on_state_id_and_merge_status ON merge_requests USING btree (state_id, merge_status) WHERE ((state_id = 1) AND ((merge_status)::text = 'can_be_merged'::text));
+CREATE INDEX idx_merge_requests_on_state_id_and_merge_status ON merge_requests USING btree (state_id, merge_status) WHERE ((state_id = 1) AND (merge_status = 'can_be_merged'::text));
 
 CREATE INDEX idx_merge_requests_on_target_project_id_and_iid_opened ON merge_requests USING btree (target_project_id, iid) WHERE (state_id = 1);
 
@@ -19667,13 +19667,13 @@ CREATE INDEX index_ci_builds_on_commit_id_and_type_and_name_and_ref ON ci_builds
 
 CREATE INDEX index_ci_builds_on_commit_id_and_type_and_ref ON ci_builds USING btree (commit_id, type, ref);
 
-CREATE INDEX index_ci_builds_on_commit_id_artifacts_expired_at_and_id ON ci_builds USING btree (commit_id, artifacts_expire_at, id) WHERE (((type)::text = 'Ci::Build'::text) AND ((retried = false) OR (retried IS NULL)) AND ((name)::text = ANY (ARRAY[('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('dependency_scanning'::character varying)::text, ('container_scanning'::character varying)::text, ('dast'::character varying)::text])));
+CREATE INDEX index_ci_builds_on_commit_id_artifacts_expired_at_and_id ON ci_builds USING btree (commit_id, artifacts_expire_at, id) WHERE ((type = 'Ci::Build'::text) AND ((retried = false) OR (retried IS NULL)) AND (name = ANY (ARRAY[('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('dependency_scanning'::character varying)::text, ('container_scanning'::character varying)::text, ('dast'::character varying)::text])));
 
 CREATE INDEX index_ci_builds_on_project_id_and_id ON ci_builds USING btree (project_id, id);
 
-CREATE INDEX index_ci_builds_on_project_id_and_name_and_ref ON ci_builds USING btree (project_id, name, ref) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = 'success'::text) AND ((retried = false) OR (retried IS NULL)));
+CREATE INDEX index_ci_builds_on_project_id_and_name_and_ref ON ci_builds USING btree (project_id, name, ref) WHERE ((type = 'Ci::Build'::text) AND (status = 'success'::text) AND ((retried = false) OR (retried IS NULL)));
 
-CREATE INDEX index_ci_builds_on_project_id_for_successfull_pages_deploy ON ci_builds USING btree (project_id) WHERE (((type)::text = 'GenericCommitStatus'::text) AND ((stage)::text = 'deploy'::text) AND ((name)::text = 'pages:deploy'::text) AND ((status)::text = 'success'::text));
+CREATE INDEX index_ci_builds_on_project_id_for_successfull_pages_deploy ON ci_builds USING btree (project_id) WHERE ((type = 'GenericCommitStatus'::text) AND (stage = 'deploy'::text) AND (name = 'pages:deploy'::text) AND (status = 'success'::text));
 
 CREATE INDEX index_ci_builds_on_protected ON ci_builds USING btree (protected);
 
@@ -19695,9 +19695,9 @@ CREATE INDEX index_ci_builds_on_upstream_pipeline_id ON ci_builds USING btree (u
 
 CREATE INDEX index_ci_builds_on_user_id ON ci_builds USING btree (user_id);
 
-CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON ci_builds USING btree (user_id, created_at) WHERE ((type)::text = 'Ci::Build'::text);
+CREATE INDEX index_ci_builds_on_user_id_and_created_at_and_type_eq_ci_build ON ci_builds USING btree (user_id, created_at) WHERE (type = 'Ci::Build'::text);
 
-CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON ci_builds USING btree (project_id, status) WHERE (((type)::text = 'Ci::Build'::text) AND ((status)::text = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
+CREATE INDEX index_ci_builds_project_id_and_status_for_live_jobs_partial2 ON ci_builds USING btree (project_id, status) WHERE ((type = 'Ci::Build'::text) AND (status = ANY (ARRAY[('running'::character varying)::text, ('pending'::character varying)::text, ('created'::character varying)::text])));
 
 CREATE UNIQUE INDEX index_ci_builds_runner_session_on_build_id ON ci_builds_runner_session USING btree (build_id);
 
@@ -20415,7 +20415,7 @@ CREATE UNIQUE INDEX index_keys_on_fingerprint ON keys USING btree (fingerprint);
 
 CREATE INDEX index_keys_on_fingerprint_sha256 ON keys USING btree (fingerprint_sha256);
 
-CREATE INDEX index_keys_on_id_and_ldap_key_type ON keys USING btree (id) WHERE ((type)::text = 'LDAPKey'::text);
+CREATE INDEX index_keys_on_id_and_ldap_key_type ON keys USING btree (id) WHERE (type = 'LDAPKey'::text);
 
 CREATE INDEX index_keys_on_last_used_at ON keys USING btree (last_used_at DESC NULLS LAST);
 
@@ -20489,7 +20489,7 @@ CREATE INDEX index_members_on_source_id_and_source_type ON members USING btree (
 
 CREATE INDEX index_members_on_user_id ON members USING btree (user_id);
 
-CREATE INDEX index_members_on_user_id_created_at ON members USING btree (user_id, created_at) WHERE ((ldap = true) AND ((type)::text = 'GroupMember'::text) AND ((source_type)::text = 'Namespace'::text));
+CREATE INDEX index_members_on_user_id_created_at ON members USING btree (user_id, created_at) WHERE ((ldap = true) AND (type = 'GroupMember'::text) AND (source_type = 'Namespace'::text));
 
 CREATE INDEX index_merge_request_assignees_on_merge_request_id ON merge_request_assignees USING btree (merge_request_id);
 
@@ -20657,7 +20657,7 @@ CREATE INDEX index_namespaces_on_shared_and_extra_runners_minutes_limit ON names
 
 CREATE INDEX index_namespaces_on_type_and_id_partial ON namespaces USING btree (type, id) WHERE (type IS NOT NULL);
 
-CREATE INDEX index_non_requested_project_members_on_source_id_and_type ON members USING btree (source_id, source_type) WHERE ((requested_at IS NULL) AND ((type)::text = 'ProjectMember'::text));
+CREATE INDEX index_non_requested_project_members_on_source_id_and_type ON members USING btree (source_id, source_type) WHERE ((requested_at IS NULL) AND (type = 'ProjectMember'::text));
 
 CREATE UNIQUE INDEX index_note_diff_files_on_diff_note_id ON note_diff_files USING btree (diff_note_id);
 
@@ -20707,13 +20707,13 @@ CREATE UNIQUE INDEX index_on_deploy_keys_id_and_type_and_public ON keys USING bt
 
 CREATE INDEX index_on_id_partial_with_legacy_storage ON projects USING btree (id) WHERE ((storage_version < 2) OR (storage_version IS NULL));
 
-CREATE INDEX index_on_identities_lower_extern_uid_and_provider ON identities USING btree (lower((extern_uid)::text), provider);
+CREATE INDEX index_on_identities_lower_extern_uid_and_provider ON identities USING btree (lower(extern_uid), provider);
 
 CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON analytics_instance_statistics_measurements USING btree (identifier, recorded_at);
 
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
 
-CREATE INDEX index_on_users_name_lower ON users USING btree (lower((name)::text));
+CREATE INDEX index_on_users_name_lower ON users USING btree (lower(name));
 
 CREATE INDEX index_open_project_tracker_data_on_service_id ON open_project_tracker_data USING btree (service_id);
 
@@ -20815,7 +20815,7 @@ CREATE INDEX index_pages_domains_on_wildcard ON pages_domains USING btree (wildc
 
 CREATE UNIQUE INDEX index_partial_am_alerts_on_project_id_and_fingerprint ON alert_management_alerts USING btree (project_id, fingerprint) WHERE (status <> 2);
 
-CREATE INDEX index_partial_ci_builds_on_user_id_name_parser_features ON ci_builds USING btree (user_id, name) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
+CREATE INDEX index_partial_ci_builds_on_user_id_name_parser_features ON ci_builds USING btree (user_id, name) WHERE ((type = 'Ci::Build'::text) AND (name = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
 
 CREATE UNIQUE INDEX index_partitioned_foreign_keys_unique_index ON partitioned_foreign_keys USING btree (to_table, from_table, from_column);
 
@@ -20983,7 +20983,7 @@ CREATE INDEX index_projects_on_last_repository_check_failed ON projects USING bt
 
 CREATE INDEX index_projects_on_last_repository_updated_at ON projects USING btree (last_repository_updated_at);
 
-CREATE INDEX index_projects_on_lower_name ON projects USING btree (lower((name)::text));
+CREATE INDEX index_projects_on_lower_name ON projects USING btree (lower(name));
 
 CREATE INDEX index_projects_on_marked_for_deletion_by_user_id ON projects USING btree (marked_for_deletion_by_user_id) WHERE (marked_for_deletion_by_user_id IS NOT NULL);
 
@@ -21199,9 +21199,9 @@ CREATE UNIQUE INDEX index_scim_identities_on_user_id_and_group_id ON scim_identi
 
 CREATE UNIQUE INDEX index_scim_oauth_access_tokens_on_group_id_and_token_encrypted ON scim_oauth_access_tokens USING btree (group_id, token_encrypted);
 
-CREATE INDEX index_secure_ci_builds_on_user_id_created_at_parser_features ON ci_builds USING btree (user_id, created_at) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
+CREATE INDEX index_secure_ci_builds_on_user_id_created_at_parser_features ON ci_builds USING btree (user_id, created_at) WHERE ((type = 'Ci::Build'::text) AND (name = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
 
-CREATE INDEX index_security_ci_builds_on_name_and_id_parser_features ON ci_builds USING btree (name, id) WHERE (((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('license_scanning'::character varying)::text])) AND ((type)::text = 'Ci::Build'::text));
+CREATE INDEX index_security_ci_builds_on_name_and_id_parser_features ON ci_builds USING btree (name, id) WHERE ((name = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('sast'::character varying)::text, ('secret_detection'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('license_scanning'::character varying)::text])) AND (type = 'Ci::Build'::text));
 
 CREATE INDEX index_security_findings_on_confidence ON security_findings USING btree (confidence);
 
@@ -21215,7 +21215,7 @@ CREATE INDEX index_security_findings_on_severity ON security_findings USING btre
 
 CREATE INDEX index_self_managed_prometheus_alert_events_on_environment_id ON self_managed_prometheus_alert_events USING btree (environment_id);
 
-CREATE INDEX index_sent_notifications_on_noteable_type_noteable_id ON sent_notifications USING btree (noteable_id) WHERE ((noteable_type)::text = 'Issue'::text);
+CREATE INDEX index_sent_notifications_on_noteable_type_noteable_id ON sent_notifications USING btree (noteable_id) WHERE (noteable_type = 'Issue'::text);
 
 CREATE UNIQUE INDEX index_sent_notifications_on_reply_key ON sent_notifications USING btree (reply_key);
 
@@ -21449,7 +21449,7 @@ CREATE INDEX index_users_on_name ON users USING btree (name);
 
 CREATE INDEX index_users_on_name_trigram ON users USING gin (name gin_trgm_ops);
 
-CREATE INDEX index_users_on_public_email ON users USING btree (public_email) WHERE ((public_email)::text <> ''::text);
+CREATE INDEX index_users_on_public_email ON users USING btree (public_email) WHERE (public_email <> ''::text);
 
 CREATE UNIQUE INDEX index_users_on_reset_password_token ON users USING btree (reset_password_token);
 
@@ -21565,7 +21565,7 @@ CREATE INDEX index_web_hook_logs_on_created_at_and_web_hook_id ON web_hook_logs 
 
 CREATE INDEX index_web_hook_logs_on_web_hook_id ON web_hook_logs USING btree (web_hook_id);
 
-CREATE INDEX index_web_hooks_on_group_id ON web_hooks USING btree (group_id) WHERE ((type)::text = 'GroupHook'::text);
+CREATE INDEX index_web_hooks_on_group_id ON web_hooks USING btree (group_id) WHERE (type = 'GroupHook'::text);
 
 CREATE INDEX index_web_hooks_on_project_id ON web_hooks USING btree (project_id);
 
@@ -21615,7 +21615,7 @@ CREATE UNIQUE INDEX issue_user_mentions_on_issue_id_index ON issue_user_mentions
 
 CREATE UNIQUE INDEX kubernetes_namespaces_cluster_and_namespace ON clusters_kubernetes_namespaces USING btree (cluster_id, namespace);
 
-CREATE INDEX merge_request_mentions_temp_index ON merge_requests USING btree (id) WHERE ((description ~~ '%@%'::text) OR ((title)::text ~~ '%@%'::text));
+CREATE INDEX merge_request_mentions_temp_index ON merge_requests USING btree (id) WHERE ((description ~~ '%@%'::text) OR (title ~~ '%@%'::text));
 
 CREATE UNIQUE INDEX merge_request_user_mentions_on_mr_id_and_note_id_index ON merge_request_user_mentions USING btree (merge_request_id, note_id);
 
@@ -21631,7 +21631,7 @@ CREATE INDEX packages_packages_verification_checksum_partial ON packages_package
 
 CREATE INDEX packages_packages_verification_failure_partial ON packages_package_files USING btree (verification_failure) WHERE (verification_failure IS NOT NULL);
 
-CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_builds USING btree (scheduled_at) WHERE ((scheduled_at IS NOT NULL) AND ((type)::text = 'Ci::Build'::text) AND ((status)::text = 'scheduled'::text));
+CREATE INDEX partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs ON ci_builds USING btree (scheduled_at) WHERE ((scheduled_at IS NOT NULL) AND (type = 'Ci::Build'::text) AND (status = 'scheduled'::text));
 
 CREATE INDEX partial_index_deployments_for_legacy_successful_deployments ON deployments USING btree (id) WHERE ((finished_at IS NULL) AND (status = 2));
 
