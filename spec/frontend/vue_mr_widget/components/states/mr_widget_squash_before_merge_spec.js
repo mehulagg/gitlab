@@ -85,7 +85,7 @@ describe('Squash before merge component', () => {
   });
 
   describe('tooltip', () => {
-    const tooltipTitle = () => findLabel().element.dataset.title;
+    const tooltipTitle = () => findLabel().attributes('title');
 
     it('does not render when isDisabled is false', () => {
       createComponent({

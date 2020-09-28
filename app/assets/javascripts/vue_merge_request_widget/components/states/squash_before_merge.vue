@@ -31,7 +31,7 @@ export default {
     },
     tooltipFocusable() {
       return this.isDisabled ? '0' : null;
-    }
+    },
   },
 };
 </script>
