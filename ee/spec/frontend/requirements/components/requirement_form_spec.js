@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 
 import { GlDrawer, GlFormGroup, GlFormTextarea } from '@gitlab/ui';
 import RequirementForm from 'ee/requirements/components/requirement_form.vue';
-import { MAX_TITLE_LENGTH } from 'ee/requirements/constants';
+import { TestReportStatus, MAX_TITLE_LENGTH } from 'ee/requirements/constants';
 
 import { mockRequirementsOpen } from '../mock_data';
 
@@ -94,31 +94,48 @@ describe('RequirementForm', () => {
 
   describe('watchers', () => {
     describe('requirement', () => {
-      it('sets `title` to the value of `requirement.title` when requirement is not null', async () => {
-        wrapper.setProps({
-          requirement: mockRequirementsOpen[0],
+      describe('when requirement is not null', () => {
+        beforeEach(() => {
+          wrapper.setProps({
+            requirement: mockRequirementsOpen[0],
+          });
         });
 
-        await wrapper.vm.$nextTick();
+        it.each`
+          propName
+          ${'title'}
+          ${'satisfied'}
+        `('sets `$propName` to the value of `requirement.$propName`', async ({ propName }) => {
+          await wrapper.vm.$nextTick();
 
-        expect(wrapper.vm.title).toBe(mockRequirementsOpen[0].title);
+          expect(wrapper.vm[propName]).toBe(mockRequirementsOpen[0][propName]);
+        });
       });
 
-      it('sets `title` to empty string when requirement is null', async () => {
-        wrapperWithRequirement.setProps({
-          requirement: null,
+      describe('when requirement is null', () => {
+        beforeEach(() => {
+          wrapperWithRequirement.setProps({
+            requirement: null,
+          });
         });
 
-        await wrapperWithRequirement.vm.$nextTick();
+        it.each`
+          propName       | defaultValue | humanReadableDefaultValue
+          ${'title'}     | ${''}        | ${'empty string'}
+          ${'satisfied'} | ${false}     | ${'false'}
+        `('sets `$propName` to $humanReadableDefaultValue', async ({ propName, defaultValue }) => {
+          await wrapperWithRequirement.vm.$nextTick();
 
-        expect(wrapperWithRequirement.vm.title).toBe('');
+          expect(wrapperWithRequirement.vm[propName]).toBe(defaultValue);
+        });
       });
     });
 
     describe('drawerOpen', () => {
-      it('clears `title` value when `drawerOpen` prop is changed to false', async () => {
+      it('resets `title` and `satisfied` to default values when `drawerOpen` prop is changed to false', async () => {
         wrapper.setData({
           title: 'Foo',
+          satisfied: true,
         });
 
         wrapper.setProps({
@@ -128,11 +145,47 @@ describe('RequirementForm', () => {
         await wrapper.vm.$nextTick();
 
         expect(wrapper.vm.title).toBe('');
+        expect(wrapper.vm.satisfied).toBe(false);
       });
     });
   });
 
   describe('methods', () => {
+    describe('newLastTestReportState', () => {
+      describe('when `lastTestReportState` is `TestReportState.Passed`', () => {
+        it("returns null when `satisfied` hasn't changed", () => {
+          expect(wrapperWithRequirement.vm.newLastTestReportState()).toBe(null);
+        });
+
+        it('returns `TestReportStatus.Failed` when `satisfied` has changed', () => {
+          wrapperWithRequirement.setData({
+            satisfied: !wrapperWithRequirement.vm.requirement.satisfied,
+          });
+          expect(wrapperWithRequirement.vm.newLastTestReportState()).toBe(TestReportStatus.Failed);
+        });
+      });
+
+      describe('when `lastTestReportState` is `null`', () => {
+        beforeEach(() => {
+          wrapperWithRequirement = createComponent({
+            requirement: mockRequirementsOpen[1],
+          });
+        });
+
+        it('returns `TestReportStatus.Passed` when `satisfied` is toggled', () => {
+          wrapperWithRequirement.setData({
+            satisfied: !wrapperWithRequirement.vm.requirement.satisfied,
+          });
+
+          expect(wrapperWithRequirement.vm.newLastTestReportState()).toBe(TestReportStatus.Passed);
+        });
+
+        it('returns `null` when `satisfied` stays the same', () => {
+          expect(wrapperWithRequirement.vm.newLastTestReportState()).toBe(null);
+        });
+      });
+    });
+
     describe('handleSave', () => {
       it('emits `save` event on component with `title` as param when form is in create mode', () => {
         wrapper.setData({
@@ -147,7 +200,7 @@ describe('RequirementForm', () => {
         });
       });
 
-      it('emits `save` event on component with object as param containing `iid` & `title` when form is in update mode', () => {
+      it('emits `save` event on component with object as param containing `iid` & `title` & `lastTestReportState` when form is in update mode', () => {
         wrapperWithRequirement.vm.handleSave();
 
         return wrapperWithRequirement.vm.$nextTick(() => {
@@ -156,6 +209,7 @@ describe('RequirementForm', () => {
             {
               iid: mockRequirementsOpen[0].iid,
               title: mockRequirementsOpen[0].title,
+              lastTestReportState: wrapperWithRequirement.vm.newLastTestReportState(),
             },
           ]);
         });

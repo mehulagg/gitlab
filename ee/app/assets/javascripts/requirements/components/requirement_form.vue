@@ -1,9 +1,9 @@
 <script>
-import { GlDrawer, GlFormGroup, GlFormTextarea, GlButton } from '@gitlab/ui';
+import { GlDrawer, GlFormGroup, GlFormTextarea, GlFormCheckbox, GlButton } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { __, sprintf } from '~/locale';
 
-import { MAX_TITLE_LENGTH } from '../constants';
+import { MAX_TITLE_LENGTH, TestReportStatus } from '../constants';
 
 export default {
   titleInvalidMessage: sprintf(__('Requirement title cannot have more than %{limit} characters.'), {
@@ -13,6 +13,7 @@ export default {
     GlDrawer,
     GlFormGroup,
     GlFormTextarea,
+    GlFormCheckbox,
     GlButton,
   },
   props: {
@@ -33,6 +34,7 @@ export default {
   data() {
     return {
       title: this.requirement?.title || '',
+      satisfied: this.requirement?.satisfied || false,
     };
   },
   computed: {
@@ -59,6 +61,7 @@ export default {
     requirement: {
       handler(value) {
         this.title = value?.title || '';
+        this.satisfied = value?.satisfied || false;
       },
       deep: true,
     },
@@ -66,6 +69,7 @@ export default {
       // Clear `title` value on drawer close.
       if (!value) {
         this.title = '';
+        this.satisfied = false;
       }
     },
   },
@@ -79,6 +83,24 @@ export default {
 
       return '';
     },
+    newLastTestReportState() {
+      // lastTestReportState determines whether a requirement is satisfied or not.
+      // So marking/unmarking a requirement actually creates a new test report.
+
+      // We should avoid creating a new test report when
+      // 1) lastTestReportState was null (never set) and requirement is unsatisfied.
+      const updateCondition1 = this.requirement.lastTestReportState === null && this.satisfied;
+      // 2) and the satisfied status didn't change.
+      const updateCondition2 =
+        this.requirement.lastTestReportState !== null &&
+        this.satisfied !== this.requirement.satisfied;
+
+      if (updateCondition1 || updateCondition2) {
+        return this.satisfied ? TestReportStatus.Passed : TestReportStatus.Failed;
+      }
+
+      return null;
+    },
     handleSave() {
       if (this.isCreate) {
         this.$emit('save', this.title);
@@ -86,6 +108,7 @@ export default {
         this.$emit('save', {
           iid: this.requirement.iid,
           title: this.title,
+          lastTestReportState: this.newLastTestReportState(),
         });
       }
     },
@@ -121,8 +144,11 @@ export default {
               :class="{ 'gl-field-error-outline': titleInvalid }"
               @keyup.escape.exact="$emit('cancel')"
             />
+            <gl-form-checkbox v-if="!isCreate" v-model="satisfied" class="gl-mt-6">{{
+              __('Satisfied')
+            }}</gl-form-checkbox>
           </gl-form-group>
-          <div class="gl-display-flex requirement-form-actions">
+          <div class="gl-display-flex requirement-form-actions gl-mt-6">
             <gl-button
               :disabled="disableSaveButton"
               :loading="requirementRequestActive"

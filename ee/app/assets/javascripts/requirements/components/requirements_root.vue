@@ -22,7 +22,12 @@ import projectRequirementsCount from '../queries/projectRequirementsCount.query.
 import createRequirement from '../queries/createRequirement.mutation.graphql';
 import updateRequirement from '../queries/updateRequirement.mutation.graphql';
 
-import { FilterState, AvailableSortOptions, DEFAULT_PAGE_SIZE } from '../constants';
+import {
+  FilterState,
+  AvailableSortOptions,
+  TestReportStatus,
+  DEFAULT_PAGE_SIZE,
+} from '../constants';
 
 export default {
   DEFAULT_PAGE_SIZE,
@@ -136,8 +141,15 @@ export default {
       update(data) {
         const requirementsRoot = data.project?.requirements;
 
+        const list = requirementsRoot?.nodes.map(node => {
+          return {
+            ...node,
+            satisfied: node.lastTestReportState === TestReportStatus.Passed,
+          };
+        });
+
         return {
-          list: requirementsRoot?.nodes || [],
+          list: list || [],
           pageInfo: requirementsRoot?.pageInfo || {},
         };
       },
@@ -325,7 +337,7 @@ export default {
         replace: true,
       });
     },
-    updateRequirement({ iid, title, state, errorFlashMessage }) {
+    updateRequirement({ iid, title, state, lastTestReportState, errorFlashMessage }) {
       const updateRequirementInput = {
         projectPath: this.projectPath,
         iid,
@@ -336,6 +348,9 @@ export default {
       }
       if (state) {
         updateRequirementInput.state = state;
+      }
+      if (lastTestReportState) {
+        updateRequirementInput.lastTestReportState = lastTestReportState;
       }
 
       return this.$apollo

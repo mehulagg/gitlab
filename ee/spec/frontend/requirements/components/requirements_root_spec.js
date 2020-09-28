@@ -351,6 +351,51 @@ describe('RequirementsRoot', () => {
         );
       });
 
+      describe('when `lastTestReportState` is included in object param', () => {
+        beforeEach(() => {
+          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockResolvedValue(mockUpdateMutationResult);
+        });
+
+        it('calls `$apollo.mutate` with `lastTestReportState` when it is not null', () => {
+          wrapper.vm.updateRequirement({
+            iid: '1',
+            lastTestReportState: 'PASSED',
+          });
+
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mutation: updateRequirement,
+              variables: {
+                updateRequirementInput: {
+                  projectPath: 'gitlab-org/gitlab-shell',
+                  iid: '1',
+                  lastTestReportState: 'PASSED',
+                },
+              },
+            }),
+          );
+        });
+
+        it('calls `$apollo.mutate` without `lastTestReportState` when it is null', () => {
+          wrapper.vm.updateRequirement({
+            iid: '1',
+            lastTestReportState: null,
+          });
+
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              mutation: updateRequirement,
+              variables: {
+                updateRequirementInput: {
+                  projectPath: 'gitlab-org/gitlab-shell',
+                  iid: '1',
+                },
+              },
+            }),
+          );
+        });
+      });
+
       it('calls `createFlash` with provided `errorFlashMessage` param and `Sentry.captureException` when request fails', () => {
         jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue(new Error());
         jest.spyOn(Sentry, 'captureException').mockImplementation();

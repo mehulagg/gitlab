@@ -39,6 +39,8 @@ export const requirement1 = {
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: 'PASSED',
+  satisfied: true,
   testReports: {
     nodes: [mockTestReport],
   },
@@ -52,6 +54,8 @@ export const requirement2 = {
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: null,
+  satisfied: false,
   testReports: {
     nodes: [mockTestReport],
   },
@@ -65,6 +69,8 @@ export const requirement3 = {
   state: 'OPENED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: null,
+  satisfied: false,
   testReports: {
     nodes: [mockTestReport],
   },
@@ -78,6 +84,8 @@ export const requirementArchived = {
   state: 'ARCHIVED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
+  lastTestReportState: null,
+  satisfied: false,
   testReports: {
     nodes: [mockTestReport],
   },
