@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-22 19:32+0200\n"
-"PO-Revision-Date: 2020-09-22 19:32+0200\n"
+"POT-Creation-Date: 2020-09-28 15:31-0400\n"
+"PO-Revision-Date: 2020-09-28 15:31-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -30348,6 +30348,9 @@ msgstr ""
 msgid "is blocked by"
 msgstr ""
 
+msgid "is disabled since a %{ref_start_tag}ref is specified%{ref_end_tag};"
+msgstr ""
+
 msgid "is enabled."
 msgstr ""
 
@@ -31006,6 +31009,9 @@ msgid "revised"
 msgstr ""
 
 msgid "satisfied"
+msgstr ""
+
+msgid "search on %{default_branch_start_tag}%{default_branch}%{default_branch_end_tag} instead."
 msgstr ""
 
 msgid "security Reports|There was an error creating the merge request"

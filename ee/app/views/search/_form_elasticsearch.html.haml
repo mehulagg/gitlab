@@ -1,4 +1,9 @@
+- ref = params[:repository_ref]
 - if search_service.use_elasticsearch?
   .form-text.text-muted{ **local_assigns.fetch(:attrs, {}) }
     = link_to _('Advanced search functionality'), help_page_path('user/search/advanced_search_syntax.md'), target: '_blank'
-    = _('is enabled.')
+    - if ref.present? && @project.present?
+      = (_('is disabled since a %{ref_start_tag}ref is specified%{ref_end_tag};') % { ref_start_tag: "<span class='has-tooltip' data-title='#{ref}'>", ref_end_tag: "</span>" }).html_safe
+      = link_to (_("search on %{default_branch_start_tag}%{default_branch}%{default_branch_end_tag} instead.") % { default_branch_start_tag: "<code>", default_branch: @project.default_branch, default_branch_end_tag: "</code>" }).html_safe, search_path(safe_params.except(:repository_ref)), data: { testid: 'es-ref-disabled' }
+    - else
+      = _('is enabled.')

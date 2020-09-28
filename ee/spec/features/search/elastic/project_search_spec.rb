@@ -8,14 +8,16 @@ RSpec.describe 'Project elastic search', :js, :elastic do
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit project_path(project)
   end
 
   describe 'searching' do
+    before do
+      project.add_maintainer(user)
+      sign_in(user)
+
+      visit project_path(project)
+    end
+
     it 'finds issues', :sidekiq_inline do
       create(:issue, project: project, title: 'Test searching for an issue')
       ensure_elasticsearch_index!
@@ -82,6 +84,22 @@ RSpec.describe 'Project elastic search', :js, :elastic do
       select_search_scope('Code')
 
       expect(page).to have_selector('.results', text: 'def username_regex')
+    end
+  end
+
+  context 'when `repository_ref` is set' do
+    before do
+      sign_in(user)
+
+      visit search_path(project_id: project.id, repository_ref: Gitlab::Git::BLANK_SHA)
+    end
+
+    it 'displays that advanced search is disabled' do
+      default_branch_link = page.find('a[data-testid="es-ref-disabled"]')
+      params = CGI.parse(URI.parse(default_branch_link[:href]).query)
+
+      expect(default_branch_link).to have_content(project.default_branch)
+      expect(params).not_to include(:repository_ref)
     end
   end
 end
