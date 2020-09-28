@@ -17,7 +17,7 @@ We generally recommend events be tracked using a [structured event](https://docs
 * Action: A string that is used to define the user action.
 * Label: An optional string which identifies the specific object being actioned.
 * Property: An optional string describing the object or the action performed on it.
-* Value: An optional numeric data to quantify or further describe the user action.
+* Value: Optional, numeric. Describes a numeric value or something directly related to the event. This could be the value of an input (e.g. `10` when clicking `internal` visibility)
 
 | Category | Action | Label | Property | Feature Issue | Additional Information |
 | ------ | ------ | ------ | ------ | ------ | ------ |
