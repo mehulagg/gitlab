@@ -10,7 +10,7 @@ RSpec.describe Metrics::Dashboard::PruneOldAnnotationsWorker do
 
   describe '#perform' do
     it 'removes all annotations older than cut off', :aggregate_failures do
-      travel_to(now) do
+      Timecop.freeze(now) do
         described_class.new.perform
 
         expect(Metrics::Dashboard::Annotation.all).to match_array([one_day_old_annotation, two_weeks_old_annotation])
@@ -26,7 +26,7 @@ RSpec.describe Metrics::Dashboard::PruneOldAnnotationsWorker do
 
     context 'batch to be deleted is bigger than upper limit' do
       it 'schedules second job to clear remaining records' do
-        travel_to(now) do
+        Timecop.freeze(now) do
           create(:metrics_dashboard_annotation, starting_at: 1.month.ago)
           stub_const("#{described_class}::DELETE_LIMIT", 1)
 
