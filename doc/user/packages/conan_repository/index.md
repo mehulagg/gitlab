@@ -292,7 +292,7 @@ To install a Conan package, you need:
 1. Install the dependencies listed in `conanfile.txt`:
 
    ```shell
-   conan install ..
+   conan install <options>
    ```
 
 NOTE: **Note:**
