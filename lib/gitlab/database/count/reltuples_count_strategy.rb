@@ -76,6 +76,7 @@ module Gitlab
 
           query = PgClass.joins("LEFT JOIN pg_stat_user_tables USING (relname)")
             .where(relname: table_names)
+            .where('schemaname = current_schema()')
             .select('pg_class.relname AS table_name, reltuples::bigint AS estimate')
 
           if check_statistics
