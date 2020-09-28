@@ -68,7 +68,7 @@ as shown in the following table:
 ## Configuration
 
 NOTE: **Note:**
-With GitLab 13.1 Secret Detection was split into its own CI/CD template.
+From GitLab 13.1, Secret Detection was split from the [SAST configuration](../sast#configuration) into its own CI/CD template. If you already have SAST enabled for your app configured before GitLab 13.1, you don't need to manually configure Secret Detection.
 
 Secret Detection is performed by a [specific analyzer](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Secret-Detection.gitlab-ci.yml)
 during the `secret-detection` job. It runs regardless of the programming
@@ -102,30 +102,6 @@ The results are saved as a
 [Secret Detection report artifact](../../../ci/pipelines/job_artifacts.md#artifactsreportssecret_detection)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest Secret Detection artifact available.
-
-### Using the SAST Template
-
-Prior to GitLab 13.1, Secret Detection was part of [SAST configuration](../sast#configuration).
-If you already have SAST enabled for your app configured before GitLab 13.1,
-you don't need to manually configure it.
-
-CAUTION: **Planned Deprecation:**
-In a future GitLab release, configuring Secret Detection with the SAST template will be deprecated. Please begin using `Secret-Detection.gitlab-ci.yml`
-to prevent future issues. We have made a
-[video to guide you through the process of transitioning](https://www.youtube.com/watch?v=W2tjcQreDwQ)
-to this new template.
-
-<div class="video-fallback">
-  See the video: <a href="https://www.youtube.com/watch?v=W2tjcQreDwQ">Walkthrough of historical secret scan</a>.
-</div>
-<figure class="video-container">
-  <iframe src="https://www.youtube.com/embed/W2tjcQreDwQ" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-
-When using the SAST template, Secret Detection is performed by a [specific analyzer](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml#L180)
-during the `sast` job. It runs regardless of the programming
-language of your app, and you don't need to change your
-CI/CD configuration file to enable it. Results are available in the SAST report.
 
 ### Customizing settings
 
