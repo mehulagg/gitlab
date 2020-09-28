@@ -6,6 +6,8 @@ import { TEST_HOST } from 'helpers/test_constants';
 import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profiles/components/dast_scanner_profile_form.vue';
 import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
+import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
+import { scannerProfiles } from 'ee_jest/on_demand_scans/mock_data';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -14,9 +16,16 @@ jest.mock('~/lib/utils/url_utility', () => ({
 
 const projectFullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_profiles`;
-const profileName = 'My DAST scanner profile';
-const spiderTimeout = 12;
-const targetTimeout = 20;
+const defaultProfile = scannerProfiles[0];
+
+const {
+  profileName,
+  spiderTimeout,
+  targetTimeout,
+  scanType,
+  ajaxSpider,
+  showDebugMessages,
+} = defaultProfile;
 
 const defaultProps = {
   profilesLibraryPath,
@@ -27,18 +36,19 @@ describe('DAST Scanner Profile', () => {
   let wrapper;
 
   const withinComponent = () => within(wrapper.element);
+  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"`);
 
   const findForm = () => wrapper.find(GlForm);
-  const findProfileNameInput = () => wrapper.find('[data-testid="profile-name-input"]');
-  const findSpiderTimeoutInput = () => wrapper.find('[data-testid="spider-timeout-input"]');
-  const findTargetTimeoutInput = () => wrapper.find('[data-testid="target-timeout-input"]');
-  const findSubmitButton = () =>
-    wrapper.find('[data-testid="dast-scanner-profile-form-submit-button"]');
-  const findCancelButton = () =>
-    wrapper.find('[data-testid="dast-scanner-profile-form-cancel-button"]');
+  const findProfileNameInput = () => findByTestId('profile-name-input');
+  const findSpiderTimeoutInput = () => findByTestId('spider-timeout-input');
+  const findTargetTimeoutInput = () => findByTestId('target-timeout-input');
+  const findSubmitButton = () => findByTestId('dast-scanner-profile-form-submit-button');
+  const findCancelButton = () => findByTestId('dast-scanner-profile-form-cancel-button');
+  const findScanType = () => findByTestId('scan-type-option');
+
   const findCancelModal = () => wrapper.find(GlModal);
-  const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
   const findAlert = () => wrapper.find(GlAlert);
+  const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
   const componentFactory = (mountFn = shallowMount) => options => {
     wrapper = mountFn(
@@ -136,9 +146,9 @@ describe('DAST Scanner Profile', () => {
   });
 
   describe.each`
-    title                     | profile                                                        | mutation                            | mutationVars | mutationKind
-    ${'New scanner profile'}  | ${{}}                                                          | ${dastScannerProfileCreateMutation} | ${{}}        | ${'dastScannerProfileCreate'}
-    ${'Edit scanner profile'} | ${{ id: 1, name: 'foo', spiderTimeout: 2, targetTimeout: 12 }} | ${dastScannerProfileUpdateMutation} | ${{ id: 1 }} | ${'dastScannerProfileUpdate'}
+    title                     | profile           | mutation                            | mutationVars                 | mutationKind
+    ${'New scanner profile'}  | ${{}}             | ${dastScannerProfileCreateMutation} | ${{}}                        | ${'dastScannerProfileCreate'}
+    ${'Edit scanner profile'} | ${defaultProfile} | ${dastScannerProfileUpdateMutation} | ${{ id: defaultProfile.id }} | ${'dastScannerProfileUpdate'}
   `('$title', ({ profile, title, mutation, mutationVars, mutationKind }) => {
     beforeEach(() => {
       createFullComponent({
@@ -152,8 +162,9 @@ describe('DAST Scanner Profile', () => {
       expect(withinComponent().getByRole('heading', { name: title })).not.toBeNull();
     });
 
-    it('populates the fields with the data passed in via the profile prop', () => {
+    it('populates the fields with the data passed in via the profile prop or default values', () => {
       expect(findProfileNameInput().element.value).toBe(profile?.name ?? '');
+      expect(findScanType().vm.$attrs.checked).toBe(profile?.scanType ?? SCAN_TYPE.PASSIVE);
     });
 
     describe('submission', () => {
@@ -182,6 +193,9 @@ describe('DAST Scanner Profile', () => {
               spiderTimeout,
               targetTimeout,
               projectFullPath,
+              scanType,
+              ajaxSpider,
+              showDebugMessages,
               ...mutationVars,
             },
           });

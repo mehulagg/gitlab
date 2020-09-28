@@ -3,6 +3,9 @@ mutation dastScannerProfileCreate(
   $profileName: String!
   $spiderTimeout: Int!
   $targetTimeout: Int!
+  $scanType: DastScanTypeEnum!
+  $ajaxSpider: Boolean!
+  $showDebugMessages: Boolean!
 ) {
   dastScannerProfileCreate(
     input: {
@@ -10,6 +13,9 @@ mutation dastScannerProfileCreate(
       profileName: $profileName
       spiderTimeout: $spiderTimeout
       targetTimeout: $targetTimeout
+      scanType: $scanType
+      ajaxSpider: $ajaxSpider
+      showDebugMessages: $showDebugMessages
     }
   ) {
     errors

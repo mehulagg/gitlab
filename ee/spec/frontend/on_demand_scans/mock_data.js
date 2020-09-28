@@ -4,12 +4,18 @@ export const scannerProfiles = [
     profileName: 'Scanner profile #1',
     spiderTimeout: 5,
     targetTimeout: 10,
+    scanType: 'PASSIVE',
+    ajaxSpider: false,
+    showDebugMessages: false,
   },
   {
     id: 'gid://gitlab/DastScannerProfile/2',
     profileName: 'Scanner profile #2',
     spiderTimeout: 20,
     targetTimeout: 150,
+    scanType: 'ACTIVE',
+    ajaxSpider: true,
+    showDebugMessages: true,
   },
 ];
 
