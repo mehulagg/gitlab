@@ -25,7 +25,7 @@ module Types
     field :target_timeout, GraphQL::INT_TYPE, null: true,
           description: 'The maximum number of seconds allowed for the site under test to respond to a request'
 
-    field :scan_type, Types::DastScanTypeEnum, null: false,
+    field :scan_type, Types::DastScanTypeEnum, null: true,
           description: 'Indicates the type of DAST scan that will run. ' \
           'Either a Passive Scan or an Active Scan.'
 

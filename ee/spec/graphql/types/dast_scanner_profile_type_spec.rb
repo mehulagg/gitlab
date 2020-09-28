@@ -47,7 +47,7 @@ RSpec.describe GitlabSchema.types['DastScannerProfile'] do
                 profileName
                 targetTimeout
                 spiderTimeout
-                activeScan
+                scanType
                 ajaxSpider
                 showDebugMessages
               }
