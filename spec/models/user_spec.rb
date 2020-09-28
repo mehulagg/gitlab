@@ -4347,7 +4347,7 @@ RSpec.describe User do
         expect(subject).to be_truthy
       end
 
-       it "is accepted by the user" do
+      it "is accepted by the user" do
         accept_terms(user)
 
         expect(subject).to be_falsey
