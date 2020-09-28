@@ -93,7 +93,6 @@ export default {
       hasValidationError: false,
       validationMethod: DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
       validationPath: '',
-      validationPathInputTouched: false,
     };
   },
   computed: {
@@ -124,16 +123,18 @@ export default {
     targetUrl() {
       this.hasValidationError = false;
     },
-    token: {
-      immediate: true,
-      handler() {
-        if (!this.validationPathInputTouched) {
-          this.validationPath = joinPaths(stripPathTail(this.path), this.textFileName);
-        }
-      },
-    },
+  },
+  created() {
+    this.updateValidationPath();
+    this.unsubscribe = this.$watch(() => this.token, this.updateValidationPath);
   },
   methods: {
+    updateValidationPath() {
+      this.validationPath = joinPaths(stripPathTail(this.path), this.textFileName);
+    },
+    onValidationPathInput() {
+      this.unsubscribe();
+    },
     downloadTextFile() {
       download({ fileName: this.textFileName, fileData: btoa(this.token) });
     },
@@ -219,7 +220,7 @@ export default {
           v-model="validationPath"
           class="gl-bg-white!"
           data-testid="dast-site-validation-path-input"
-          @input="validationPathInputTouched = true"
+          @input="onValidationPathInput()"
         />
       </gl-form-input-group>
     </gl-form-group>
