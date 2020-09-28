@@ -18,7 +18,6 @@ describe('Ci variable modal', () => {
     store = createStore();
     wrapper = method(CiVariableModal, {
       attachToDocument: true,
-      provide: { glFeatures: { ciKeyAutocomplete: true } },
       stubs: {
         GlModal: ModalStub,
       },
@@ -43,23 +42,11 @@ describe('Ci variable modal', () => {
   });
 
   describe('Feature flag', () => {
-    describe('when off', () => {
-      beforeEach(() => {
-        createComponent(shallowMount, { provide: { glFeatures: { ciKeyAutocomplete: false } } });
-      });
-
-      it('does not render the autocomplete dropdown', () => {
-        expect(wrapper.find(GlFormCombobox).exists()).toBe(false);
-      });
+    beforeEach(() => {
+      createComponent(shallowMount);
     });
-
-    describe('when on', () => {
-      beforeEach(() => {
-        createComponent(shallowMount);
-      });
-      it('renders the autocomplete dropdown', () => {
-        expect(wrapper.find(GlFormCombobox).exists()).toBe(true);
-      });
+    it('renders the autocomplete dropdown', () => {
+      expect(wrapper.find(GlFormCombobox).exists()).toBe(true);
     });
   });
 
