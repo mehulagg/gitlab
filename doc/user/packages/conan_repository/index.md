@@ -60,7 +60,7 @@ The CMake version is printed in the output.
 
 ### Create a project
 
-To test the Package Registry, if you don't have your own C++ project, clone the
+To test the Package Registry, you need a C++ project. If you don't already have one, you can clone the
 Conan [hello world starter project](https://github.com/conan-io/hello).
 
 ### Build a package
