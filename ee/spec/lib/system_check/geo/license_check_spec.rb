@@ -5,8 +5,6 @@ require 'rake_helper'
 
 RSpec.describe SystemCheck::Geo::LicenseCheck do
   describe '#check?' do
-    subject { described_class.new }
-
     using RSpec::Parameterized::TableSyntax
 
     where(:primary, :geo_enabled, :license_allows, :check_result, :pass_message) do
