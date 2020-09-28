@@ -10,8 +10,10 @@ FactoryBot.define do
     entity_id   { target_user.id }
     entity_path { target_user.full_path }
     target_details { target_user.name }
+    target_type { target_user.class.name }
+    target_id { target_user.id }
     ip_address { IPAddr.new '127.0.0.1' }
-    author_name { 'Jane Doe' }
+    author_name { user.name }
     details do
       {
         change: 'email address',
@@ -19,7 +21,7 @@ FactoryBot.define do
         to: 'maintainer@gitlab.com',
         author_name: user.name,
         target_id: target_user.id,
-        target_type: 'User',
+        target_type: target_user.class.name,
         target_details: target_user.name,
         ip_address: '127.0.0.1',
         entity_path: target_user.full_path
@@ -33,7 +35,8 @@ FactoryBot.define do
       entity_id   { target_project.id }
       entity_path { target_project.full_path }
       target_details { target_project.name }
-      ip_address { IPAddr.new '127.0.0.1' }
+      target_type { target_project.class.name }
+      target_id { target_project.id }
       details do
         {
           change: 'packages_enabled',
@@ -41,7 +44,7 @@ FactoryBot.define do
           to: false,
           author_name: user.name,
           target_id: target_project.id,
-          target_type: 'Project',
+          target_type: target_project.class.name,
           target_details: target_project.name,
           ip_address: '127.0.0.1',
           entity_path: target_project.full_path
@@ -56,7 +59,8 @@ FactoryBot.define do
       entity_id   { target_group.id }
       entity_path { target_group.full_path }
       target_details { target_group.name }
-      ip_address { IPAddr.new '127.0.0.1' }
+      target_type { target_group.class.name }
+      target_id { target_group.id }
       details do
         {
           change: 'project_creation_level',
@@ -64,7 +68,7 @@ FactoryBot.define do
           to: 'Developers + Maintainers',
           author_name: user.name,
           target_id: target_group.id,
-          target_type: 'Group',
+          target_type: target_group.class.name,
           target_details: target_group.name,
           ip_address: '127.0.0.1',
           entity_path: target_group.full_path
