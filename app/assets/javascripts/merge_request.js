@@ -66,29 +66,36 @@ MergeRequest.prototype.showAllCommits = function() {
 
 MergeRequest.prototype.initMRBtnListeners = function() {
   const _this = this;
-  const draftToggle = document.querySelector('.js-draft-toggle-button');
+  const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
 
-  if (draftToggle) {
-    draftToggle.addEventListener('click', e => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
+  if (draftToggles.length) {
+    draftToggles.forEach(draftToggle => {
+      draftToggle.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
 
-      const url = draftToggle.href;
-      const wipEvent = getParameterValues('merge_request[wip_event]', url)[0];
+        const url = draftToggle.href;
+        const wipEvent = getParameterValues('merge_request[wip_event]', url)[0];
+        const mobileDropdown = draftToggle.closest('.dropdown.show');
 
-      draftToggle.setAttribute('disabled', 'disabled');
+        if (mobileDropdown) {
+          $(mobileDropdown.firstElementChild).dropdown('toggle');
+        }
 
-      axios
-        .put(draftToggle.href, null, { params: { format: 'json' } })
-        .then(({ data }) => {
-          draftToggle.removeAttribute('disabled');
-          eventHub.$emit('MRWidgetUpdateRequested');
-          MergeRequest.toggleDraftStatus(data.title, wipEvent === 'unwip');
-        })
-        .catch(() => {
-          draftToggle.removeAttribute('disabled');
-          createFlash(__('Something went wrong. Please try again.'));
-        });
+        draftToggle.setAttribute('disabled', 'disabled');
+
+        axios
+          .put(draftToggle.href, null, { params: { format: 'json' } })
+          .then(({ data }) => {
+            draftToggle.removeAttribute('disabled');
+            eventHub.$emit('MRWidgetUpdateRequested');
+            MergeRequest.toggleDraftStatus(data.title, wipEvent === 'unwip');
+          })
+          .catch(() => {
+            draftToggle.removeAttribute('disabled');
+            createFlash(__('Something went wrong. Please try again.'));
+          });
+      });
     });
   }
 
@@ -182,16 +189,19 @@ MergeRequest.toggleDraftStatus = function(title, isReady) {
 
   document.querySelector('.merge-request .detail-page-description .title').textContent = title;
 
-  const draftToggle = document.querySelector('.js-draft-toggle-button');
+  const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
 
-  if (draftToggle) {
-    const url = setUrlParams(
-      { 'merge_request[wip_event]': isReady ? 'wip' : 'unwip' },
-      draftToggle.href,
-    );
+  if (draftToggles.length) {
+    draftToggles.forEach(el => {
+      const draftToggle = el;
+      const url = setUrlParams(
+        { 'merge_request[wip_event]': isReady ? 'wip' : 'unwip' },
+        draftToggle.href,
+      );
 
-    draftToggle.setAttribute('href', url);
-    draftToggle.textContent = isReady ? __('Mark as draft') : __('Mark as ready');
+      draftToggle.setAttribute('href', url);
+      draftToggle.textContent = isReady ? __('Mark as draft') : __('Mark as ready');
+    });
   }
 };
 
