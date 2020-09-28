@@ -14942,9 +14942,6 @@ msgstr ""
 msgid "LicenseCompliance|License name"
 msgstr ""
 
-msgid "LicenseCompliance|License review"
-msgstr ""
-
 msgid "LicenseCompliance|Packages"
 msgstr ""
 
