@@ -174,7 +174,7 @@ The following table depicts the various user permission levels in a project.
 
 \* Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
 
-1. Internal guest users are able to perform this action on public and internal projects, but not private projects.
+1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](./project/protected_branches.md).
