@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 PRODUCT_ANALYTICS_CHANGED_FILES_MESSAGE = <<~MSG
 For the following files, a review from the [Data team and Product Analytics team](https://gitlab.com/groups/gitlab-org/growth/telemetry/engineers/-/group_members?with_inherited_permissions=exclude) is recommended
-Please check the ~product analytics(telemetry) [guide](https://docs.gitlab.com/ee/development/telemetry/usage_ping.html) and reach out to @gitlab-org/growth/telemetry/engineers group for a review.
+Please check the ~"product analytics(telemetry)" [guide](https://docs.gitlab.com/ee/development/telemetry/usage_ping.html) and reach out to @gitlab-org/growth/telemetry/engineers group for a review.
 
 %<changed_files>s
 
