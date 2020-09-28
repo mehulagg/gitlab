@@ -420,6 +420,10 @@ module ProjectsHelper
       nav_tabs << :operations
     end
 
+    if can_view_infrastructure_tab?(current_user, project)
+      nav_tabs << :infrastructure
+    end
+
     if can_view_product_analytics?(current_user, project)
       nav_tabs << :product_analytics
     end
@@ -480,6 +484,10 @@ module ProjectsHelper
     [:read_environment, :read_cluster, :metrics_dashboard].any? do |ability|
       can?(current_user, ability, project)
     end
+  end
+
+  def can_view_infrastructure_tab?(current_user, project)
+    can?(current_user, :read_cluster, project)
   end
 
   def can_view_product_analytics?(current_user, project)
@@ -737,8 +745,6 @@ module ProjectsHelper
   def sidebar_operations_paths
     %w[
       environments
-      clusters
-      functions
       error_tracking
       alert_management
       incidents
@@ -749,6 +755,10 @@ module ProjectsHelper
       product_analytics
       metrics_dashboard
     ]
+  end
+
+  def sidebar_infrastructure_paths
+    %w[clusters functions]
   end
 
   def user_can_see_auto_devops_implicitly_enabled_banner?(project, user)

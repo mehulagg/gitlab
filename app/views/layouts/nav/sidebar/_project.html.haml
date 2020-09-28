@@ -267,8 +267,8 @@
                   %span
                     = _('Logs')
 
-      - if project_nav_tab? :clusters
-        = nav_link(controller: [:clusters, :user, :gcp]) do
+      - if project_nav_tab? :infrastructure
+        = nav_link(controller: sidebar_infrastructure_paths) do
           = link_to project_clusters_path(@project) do
             .nav-icon-container
               = sprite_icon('cloud-gear')
