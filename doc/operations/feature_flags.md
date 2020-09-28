@@ -105,7 +105,7 @@ ID for the feature to be enabled. See the [Ruby example](#ruby-application-examp
 
 ### Flexible Percent Rollout
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43340) in GitLab 13.5, API only.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43340) in GitLab 13.5.
 
 Enables the feature for a percentage of page views based on a chosen stickiness configuration. It uses the
 [`flexibleRollout`](https://unleash.github.io/docs/activation_strategy#flexiblerollout)
