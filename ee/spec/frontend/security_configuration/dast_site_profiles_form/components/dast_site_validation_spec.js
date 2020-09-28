@@ -125,12 +125,10 @@ describe('DastSiteValidation', () => {
   });
 
   describe('text file validation', () => {
-    beforeEach(() => {
-      createComponent();
-    });
-
     it('clicking on the download button triggers a download of a text file containing the token', () => {
+      createComponent();
       findDownloadButton().vm.$emit('click');
+
       expect(download).toHaveBeenCalledWith({
         fileName: `GitLab-DAST-Site-Validation-${token}.txt`,
         fileData: btoa(token),
@@ -165,6 +163,16 @@ describe('DastSiteValidation', () => {
 
         it(`input value defaults to ${expectedValue}`, () => {
           expect(findValidationPathInput().element.value).toBe(expectedValue);
+        });
+
+        it("input value isn't automatically updated if it has been changed manually", async () => {
+          const customValidationPath = 'custom/validation/path.txt';
+          findValidationPathInput().setValue(customValidationPath);
+          await wrapper.setProps({
+            token: 'a-completely-new-token',
+          });
+
+          expect(findValidationPathInput().element.value).toBe(customValidationPath);
         });
       },
     );
