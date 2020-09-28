@@ -4335,7 +4335,7 @@ RSpec.describe User do
     subject { user.required_terms_not_accepted? }
 
     context "when terms are not enforced" do
-      it { is_expected.to be_falsy }
+      it { is_expected.to be_falsey }
     end
 
     context "when terms are enforced" do
@@ -4344,17 +4344,17 @@ RSpec.describe User do
       end
 
       it "is not accepted by the user" do
-        it { is_expected.to be_truthy }
+        expect(subject).to be_truthy
       end
 
-      it "is accepted by the user" do
+       it "is accepted by the user" do
         accept_terms(user)
 
-        it { is_expected.to be_falsy }
+        expect(subject).to be_falsey
       end
 
       it "auto accepts the term for project bots" do
-        expect(project_bot.required_terms_not_accepted?).to be_falsy
+        expect(project_bot.required_terms_not_accepted?).to be_falsey
       end
     end
   end
