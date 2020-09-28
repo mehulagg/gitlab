@@ -1625,14 +1625,14 @@ heading level.
 
 ### Text for documentation requiring version text
 
-When a feature is new or updated, you can add version information
-as a bulleted item in the **Version history**, or inline with related text.
+When a feature is new or updated, you can add version information as a bulleted
+item in the **Version history**, or as an inline reference with related text.
 
 #### Version text in the **Version History**
 
-If all the content under a heading is related, add version text 
-in a bulleted list below the heading. To render correctly, it must be
-on its own line and surrounded by blank lines.
+If all content in a section is related, add version text in a bulleted list
+following the heading for the section. To render correctly, it must be on its
+own line and surrounded by blank lines.
 
 - For features that need to declare the GitLab version that the feature was
   introduced. Text similar to the following should be added immediately below
@@ -1685,12 +1685,11 @@ on its own line and surrounded by blank lines.
 
 #### Inline version text
 
-If you're adding to an existing topic, you can add version information inline
-with the existing text.
+If you're adding something to an existing topic that relates to a specific
+version, you can add version information inline with the existing text.
 
-In this case, add `([introduced/deprecated in GitLab X.X]<link-to-issue>)`.
-The link isn't required, but should be added if it's available. For
-example:
+In this case, add `([introduced/deprecated in GitLab X.X]<link-to-issue>)`. The
+link isn't required, but should be added if it's available. For example:
 
 ```markdown
 The voting strategy (introduced in GitLab 13.4) requires
