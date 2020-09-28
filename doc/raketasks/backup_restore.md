@@ -711,7 +711,7 @@ For Omnibus GitLab packages:
    0 2 * * * /opt/gitlab/bin/gitlab-backup create CRON=1
    ```
 
-   GitLab 12.1 and earlier uses should use the following command, instead: `gitlab-rake gitlab:backup:create`
+   Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 For installations from source:
 
