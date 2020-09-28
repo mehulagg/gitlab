@@ -1,5 +1,6 @@
 ---
 description: Learn how to contribute to GitLab Documentation.
+info: The TW group is responsible for this page. To determine the technical writer assigned to this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # GitLab Documentation guidelines
