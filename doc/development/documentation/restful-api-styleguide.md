@@ -93,7 +93,7 @@ Rendered example:
 
 | Methods                                         | Description                                           |
 |:-------------------------------------------     |:------------------------------------------------------|
-| `--header "PRIVATE-TOKEN: <your_access_token>"` | Use this method as is, whenever authentication needed |
+| `--header "PRIVATE-TOKEN: <your_access_token>"` | Use this method as is, whenever authentication needed. |
 | `--request POST`                                | Use this method when creating new objects             |
 | `--request PUT`                                 | Use this method when updating existing objects        |
 | `--request DELETE`                              | Use this method when removing existing objects        |
