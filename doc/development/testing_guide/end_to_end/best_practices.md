@@ -335,6 +335,7 @@ until it disappears:
 Page::Project::Pipeline::Show.perform do |pipeline|
   expect(pipeline).to have_no_job("a_job")
 end
+```
 
 ### Problematic alternatives
 
