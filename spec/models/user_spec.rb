@@ -4330,6 +4330,7 @@ RSpec.describe User do
 
   describe '#required_terms_not_accepted?' do
     let(:user) { build(:user) }
+    let(:project_bot) { create(:user, :project_bot) }
 
     subject { user.required_terms_not_accepted? }
 
@@ -4337,21 +4338,24 @@ RSpec.describe User do
       it { is_expected.to be_falsy }
     end
 
-    context "when terms are enforced and accepted by the user" do
+    context "when terms are enforced" do
       before do
         enforce_terms
+      end
+
+      it "is accepted by the user" do
         accept_terms(user)
+
+        it { is_expected.to be_falsy }
       end
 
-      it { is_expected.to be_falsy }
-    end
-
-    context "when terms are enforced but the user has not accepted" do
-      before do
-        enforce_terms
+      it "is not accepted by the user" do
+        it { is_expected.to be_truthy }
       end
 
-      it { is_expected.to be_truthy }
+      it "auto accepts the term for project bots" do
+        expect(project_bot.required_terms_not_accepted?).to be_falsy
+      end
     end
   end
 

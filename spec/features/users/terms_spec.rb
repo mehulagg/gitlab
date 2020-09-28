@@ -35,6 +35,7 @@ RSpec.describe 'Users > Terms' do
 
     it 'auto accepts the terms' do
       visit terms_path
+
       expect(page).not_to have_content('Accept terms')
       expect(project_bot.terms_accepted?).to be(true)
     end
