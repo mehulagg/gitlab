@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Navigate to the Alert details view by visiting the
 [Alert list](./alerts.md) and selecting an alert from the
-list. You need least Developer [permissions](../../user/permissions.md) to access
+list. You need at least Developer [permissions](../../user/permissions.md) to access
 alerts.
 
 TIP: **Tip:**
