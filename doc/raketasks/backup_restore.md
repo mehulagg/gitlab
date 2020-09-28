@@ -870,7 +870,7 @@ Restoring repositories:
 Deleting tmp directories...[DONE]
 ```
 
-Next, restore `/home/git/gitlab/.secret` if necessary as previously mentioned.
+Next, restore `/home/git/gitlab/.secret` if necessary, as previously mentioned.
 
 Restart GitLab:
 
