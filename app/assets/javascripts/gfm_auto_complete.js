@@ -525,7 +525,7 @@ class GfmAutoComplete {
   }
 
   getDefaultCallbacks() {
-    const fetchData = this.fetchData.bind(this);
+    const self = this;
 
     return {
       sorter(query, items, searchKey) {
@@ -538,14 +538,15 @@ class GfmAutoComplete {
       },
       filter(query, data, searchKey) {
         if (GfmAutoComplete.isLoading(data)) {
-          fetchData(this.$inputor, this.at);
+          self.fetchData(this.$inputor, this.at);
           return data;
-        } else if (
+        }
+        if (
           GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[this.at]) &&
-          this.previousQuery !== query
+          self.previousQuery !== query
         ) {
-          fetchData(this.$inputor, this.at, query);
-          this.previousQuery = query;
+          self.fetchData(this.$inputor, this.at, query);
+          self.previousQuery = query;
           return data;
         }
         return $.fn.atwho.default.callbacks.filter(query, data, searchKey);
