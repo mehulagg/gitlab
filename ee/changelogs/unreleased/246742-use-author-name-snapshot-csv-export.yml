@@ -1,0 +1,5 @@
+---
+title: Use author name snapshot on audit log CSV export
+merge_request: 43557
+author:
+type: performance

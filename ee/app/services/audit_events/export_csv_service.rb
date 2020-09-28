@@ -19,8 +19,7 @@ module AuditEvents
     end
 
     def data
-      events = AuditLogFinder.new(finder_params).execute
-      Gitlab::Audit::Events::Preloader.preload!(events)
+      AuditLogFinder.new(**finder_params).execute
     end
 
     def finder_params
@@ -34,7 +33,7 @@ module AuditEvents
       {
         'ID' => 'id',
         'Author ID' => 'author_id',
-        'Author Name' => 'author_name',
+        'Author Name' => 'author_name_snapshot',
         'Entity ID' => 'entity_id',
         'Entity Type' => 'entity_type',
         'Entity Path' => 'entity_path',

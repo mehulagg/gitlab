@@ -3,18 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe AuditEvents::ExportCsvService do
-  let_it_be(:author) { create(:user, name: "Ru'by McRüb\"Face") }
   let_it_be(:audit_event) do
     create(:project_audit_event,
       entity_id: 678,
       entity_type: 'Project',
       entity_path: 'gitlab-org/awesome-rails',
       target_details: "special package ¯\\_(ツ)_/¯",
-      author_id: author.id,
+      author_id: 456,
       ip_address: IPAddr.new('192.168.0.1'),
       details: {
         custom_message: "Removed package ,./;'[]\-=",
-        target_id: 3, target_type: 'Package'
+        target_id: 3, target_type: 'Package',
+        author_name: "Ru'by McRüb\"Face"
       },
       created_at: Time.zone.parse('2020-02-20T12:00:00Z'))
   end
@@ -25,7 +25,7 @@ RSpec.describe AuditEvents::ExportCsvService do
       entity_id: 678,
       created_before: '2020-03-01',
       created_after: '2020-01-01',
-      author_id: author.id
+      author_id: 456
     }
   end
 
@@ -55,7 +55,7 @@ RSpec.describe AuditEvents::ExportCsvService do
     end
 
     specify 'Author ID' do
-      expect(csv[0]['Author ID']).to eq(author.id.to_s)
+      expect(csv[0]['Author ID']).to eq('456')
     end
 
     specify 'Author Name' do
