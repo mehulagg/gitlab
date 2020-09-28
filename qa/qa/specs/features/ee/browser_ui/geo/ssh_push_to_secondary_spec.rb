@@ -6,6 +6,10 @@ module QA
       let(:file_content_primary) { 'This is a Geo project! Commit from primary.' }
       let(:file_content_secondary) { 'This is a Geo project! Commit from secondary.' }
 
+      after do
+        key.remove_via_api!
+      end
+
       context 'regular git commit' do
         it 'is proxied to the primary and ultimately replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/698' do
           file_name = 'README.md'

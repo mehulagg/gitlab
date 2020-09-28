@@ -5,6 +5,10 @@ module QA
     describe 'GitLab SSH push' do
       let(:file_name) { 'README.md' }
 
+      after do
+        key.remove_via_api!
+      end
+
       context 'regular git commit' do
         it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/686' do
           key_title = "Geo SSH #{Time.now.to_f}"

@@ -83,6 +83,10 @@ module QA
             end
           end
 
+          after do
+            key.remove_via_api!
+          end
+
           it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/860' do
             expect { push_a_project_with_ssh_key(key) }.to raise_error(QA::Git::Repository::RepositoryCommandError, /fatal: Could not read from remote repository/)
           end
@@ -124,6 +128,10 @@ module QA
               ssh_key.api_client = @api_client
               ssh_key.title = "ssh key for allowed ip restricted access #{Time.now.to_f}"
             end
+          end
+
+          after do
+            key.remove_via_api!
           end
 
           it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/863' do
