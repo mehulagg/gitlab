@@ -12,14 +12,29 @@ import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
 import initRelatedMergeRequestsApp from '~/related_merge_requests';
 import initVueIssuableSidebarApp from '~/issuable_sidebar/sidebar_bundle';
 import { parseIssuableData } from '~/issue_show/utils/parse_data';
+import { IssuableType } from '~/issuable_show/constants';
 
 export default function() {
   const { issueType, ...issuableData } = parseIssuableData();
 
-  if (issueType === 'incident') {
-    initIncidentApp(issuableData);
-  } else if (issueType === 'issue') {
-    initIssueApp(issuableData);
+  switch (issueType) {
+    case IssuableType.Incident:
+      initIncidentApp(issuableData);
+      break;
+    case IssuableType.TestCase:
+      import('ee/test_case_show/test_case_show_bundle')
+        .then(({ initTestCaseShow }) => {
+          initTestCaseShow({
+            mountPointSelector: '#js-issuable-app',
+          });
+        })
+        .catch(() => {});
+      break;
+    case IssuableType.Issue:
+      initIssueApp(issuableData);
+      break;
+    default:
+      break;
   }
 
   initIssuableHeaderWarning(store);

@@ -5,5 +5,6 @@
 - page_title           "#{@issue.title} (#{@issue.to_reference})", _('Test Cases')
 - page_description     @issue.description
 
--# haml-lint:disable InlineJavaScript
-%script#js-issuable-app-initial-data{ type: "application/json" }= issuable_initial_data(@issue).to_json
+#js-issuable-app{ data: { initial: issuable_initial_data(@issue).to_json,
+  project_path: @project.full_path,
+  test_case_id: @issue.iid } }
