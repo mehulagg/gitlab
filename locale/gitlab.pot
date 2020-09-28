@@ -28710,6 +28710,9 @@ msgstr ""
 msgid "What describes you best?"
 msgstr ""
 
+msgid "What is squashing?"
+msgstr ""
+
 msgid "What's new at GitLab"
 msgstr ""
 

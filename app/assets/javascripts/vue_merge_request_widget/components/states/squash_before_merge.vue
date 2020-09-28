@@ -1,6 +1,5 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
@@ -8,7 +7,7 @@ export default {
     GlIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     value: {
@@ -28,8 +27,11 @@ export default {
   },
   computed: {
     tooltipTitle() {
-      return this.isDisabled ? __('Required in this project.') : false;
+      return this.isDisabled ? __('Required in this project.') : null;
     },
+    tooltipFocusable() {
+      return this.isDisabled ? '0' : null;
+    }
   },
 };
 </script>
@@ -37,10 +39,11 @@ export default {
 <template>
   <div class="inline">
     <label
-      v-tooltip
+      v-gl-tooltip
       :class="{ 'gl-text-gray-400': isDisabled }"
+      :tabindex="tooltipFocusable"
       data-testid="squashLabel"
-      :data-title="tooltipTitle"
+      :title="tooltipTitle"
     >
       <input
         :checked="value"
@@ -54,15 +57,16 @@ export default {
     </label>
     <a
       v-if="helpPath"
-      v-tooltip
+      v-gl-tooltip
       :href="helpPath"
-      data-title="About this feature"
-      data-placement="bottom"
+      :title="__('What is squashing?')"
       target="_blank"
       rel="noopener noreferrer nofollow"
-      data-container="body"
     >
       <gl-icon name="question" />
+      <span class="sr-only">
+        {{ __('What is squashing?') }}
+      </span>
     </a>
   </div>
 </template>
