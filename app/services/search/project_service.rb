@@ -19,8 +19,7 @@ module Search
 
     def scope
       @scope ||= begin
-        allowed_scopes = %w[notes issues merge_requests milestones wiki_blobs commits]
-        allowed_scopes << 'users' if Feature.enabled?(:users_search, default_enabled: true)
+        allowed_scopes = %w[notes issues merge_requests milestones wiki_blobs commits users]
 
         allowed_scopes.delete(params[:scope]) { 'blobs' }
       end
