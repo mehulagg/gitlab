@@ -53,6 +53,7 @@ export default {
       :aria-label="leaveBtnTitle"
       data-container="body"
       data-placement="bottom"
+      data-testid="leaveGroupBtn"
       class="leave-group btn btn-xs no-expand gl-text-gray-500 gl-ml-5"
       @click.prevent="onLeaveGroup"
     >
@@ -66,6 +67,7 @@ export default {
       :aria-label="editBtnTitle"
       data-container="body"
       data-placement="bottom"
+      data-testid="editGroupBtn"
       class="edit-group btn btn-xs no-expand gl-text-gray-500 gl-ml-5"
     >
       <gl-icon name="settings" class="position-top-0 align-middle" />
