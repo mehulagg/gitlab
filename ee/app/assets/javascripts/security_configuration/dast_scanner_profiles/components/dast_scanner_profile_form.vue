@@ -276,25 +276,25 @@ export default {
     </gl-form-group>
 
     <hr />
-    <div class="row">
-      <gl-form-group>
-        <template #label>
-          {{ s__('DastProfiles|Scan mode') }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="information-o"
-            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="i18n.tooltips.scanMode"
-          />
-        </template>
 
-        <gl-form-radio-group
-          ref="scanType"
-          v-model="form.scanType.value"
-          :options="$options.scanTypeOptions"
+    <gl-form-group>
+      <template #label>
+        {{ s__('DastProfiles|Scan mode') }}
+        <gl-icon
+          v-gl-tooltip.hover
+          name="information-o"
+          class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
+          :title="i18n.tooltips.scanMode"
         />
-      </gl-form-group>
-    </div>
+      </template>
+
+      <gl-form-radio-group
+        ref="scanType"
+        v-model="form.scanType.value"
+        :options="$options.scanTypeOptions"
+      />
+    </gl-form-group>
+
     <div class="row">
       <gl-form-group
         class="col-md-6"
