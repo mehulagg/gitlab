@@ -212,7 +212,7 @@
         = nav_link(controller: sidebar_operations_paths) do
           = link_to sidebar_operations_link_path, class: 'shortcuts-operations', data: { qa_selector: 'operations_link' } do
             .nav-icon-container
-              = sprite_icon('cloud-gear')
+              = sprite_icon('monitor')
             %span.nav-item-name
               = _('Operations')
 
@@ -261,24 +261,27 @@
                   %span
                     = _('Product Analytics')
 
-            - if project_nav_tab? :serverless
-              = nav_link(controller: :functions) do
-                = link_to project_serverless_functions_path(@project), title: _('Serverless') do
-                  %span
-                    = _('Serverless')
-
             - if project_nav_tab?(:environments) && can?(current_user, :read_pod_logs, @project)
               = nav_link(controller: :logs, action: [:index]) do
                 = link_to project_logs_path(@project), title: _('Logs') do
                   %span
                     = _('Logs')
 
+      - if project_nav_tab? :clusters
+        = nav_link(controller: [:clusters, :user, :gcp]) do
+          = link_to project_clusters_path(@project) do
+            .nav-icon-container
+              = sprite_icon('cloud-gear')
+            %span.nav-item-name
+              = _('Infrastructure')
+
+          %ul.sidebar-sub-level-items
             - if project_nav_tab? :clusters
               - show_cluster_hint = show_gke_cluster_integration_callout?(@project)
               = nav_link(controller: [:clusters, :user, :gcp]) do
-                = link_to project_clusters_path(@project), title: _('Kubernetes'), class: 'shortcuts-kubernetes' do
+                = link_to project_clusters_path(@project), title: _('Kubernetes clusters'), class: 'shortcuts-kubernetes' do
                   %span
-                    = _('Kubernetes')
+                    = _('Kubernetes clusters')
                   - if show_cluster_hint
                     .feature-highlight.js-feature-highlight{ disabled: true,
                       data: { trigger: 'manual',
@@ -302,7 +305,11 @@
                         %span= _("Got it!")
                         = sprite_icon('thumb-up')
 
-            = render_if_exists 'layouts/nav/sidebar/project_feature_flags_link'
+            - if project_nav_tab? :serverless
+              = nav_link(controller: :functions) do
+                = link_to project_serverless_functions_path(@project), title: _('Serverless') do
+                  %span
+                    = _('Serverless platform')
 
       = render_if_exists 'layouts/nav/sidebar/project_packages_link'
 
