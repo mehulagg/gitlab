@@ -4,6 +4,9 @@ mutation dastScannerProfileUpdate(
   $profileName: String!
   $spiderTimeout: Int!
   $targetTimeout: Int!
+  $scanType: DastScanTypeEnum!
+  $ajaxSpider: Boolean!
+  $showDebugMessages: Boolean!
 ) {
   dastScannerProfileUpdate(
     input: {
@@ -12,6 +15,9 @@ mutation dastScannerProfileUpdate(
       profileName: $profileName
       spiderTimeout: $spiderTimeout
       targetTimeout: $targetTimeout
+      scanType: $scanType
+      ajaxSpider: $ajaxSpider
+      showDebugMessages: $showDebugMessages
     }
   ) {
     id
