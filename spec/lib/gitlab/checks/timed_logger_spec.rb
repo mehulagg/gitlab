@@ -19,7 +19,7 @@ RSpec.describe Gitlab::Checks::TimedLogger do
 
   describe '#log_timed' do
     it 'logs message' do
-      travel_to(start + 30.seconds) do
+      Timecop.freeze(start + 30.seconds) do
         logger.log_timed(log_messages[:foo], start) { bar_check }
       end
 
@@ -28,7 +28,7 @@ RSpec.describe Gitlab::Checks::TimedLogger do
 
     context 'when time limit was reached' do
       it 'cancels action' do
-        travel_to(start + 50.seconds) do
+        Timecop.freeze(start + 50.seconds) do
           expect do
             logger.log_timed(log_messages[:foo], start) do
               bar_check
@@ -40,7 +40,7 @@ RSpec.describe Gitlab::Checks::TimedLogger do
       end
 
       it 'cancels action with time elapsed if work was performed' do
-        travel_to(start + 30.seconds) do
+        Timecop.freeze(start + 30.seconds) do
           expect do
             logger.log_timed(log_messages[:foo], start) do
               grpc_check
