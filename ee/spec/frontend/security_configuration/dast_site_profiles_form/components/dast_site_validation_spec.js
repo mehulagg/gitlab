@@ -164,18 +164,19 @@ describe('DastSiteValidation', () => {
         it(`input value defaults to ${expectedValue}`, () => {
           expect(findValidationPathInput().element.value).toBe(expectedValue);
         });
-
-        it("input value isn't automatically updated if it has been changed manually", async () => {
-          const customValidationPath = 'custom/validation/path.txt';
-          findValidationPathInput().setValue(customValidationPath);
-          await wrapper.setProps({
-            token: 'a-completely-new-token',
-          });
-
-          expect(findValidationPathInput().element.value).toBe(customValidationPath);
-        });
       },
     );
+
+    it("input value isn't automatically updated if it has been changed manually", async () => {
+      createFullComponent();
+      const customValidationPath = 'custom/validation/path.txt';
+      findValidationPathInput().setValue(customValidationPath);
+      await wrapper.setProps({
+        token: 'a-completely-new-token',
+      });
+
+      expect(findValidationPathInput().element.value).toBe(customValidationPath);
+    });
   });
 
   describe('validation', () => {
