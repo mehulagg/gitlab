@@ -16,7 +16,8 @@ export default {
 <template>
   <tooltip-on-truncate :title="jobName" truncate-target="child" placement="top">
     <div
-      class="gl-bg-white gl-text-center gl-text-truncate gl-rounded-pill gl-inset-border-1-green-600 gl-mb-3 gl-px-5 gl-py-2 pipeline-job-pill "
+      class="gl-bg-white gl-text-center gl-text-truncate gl-rounded-pill gl-inset-border-1-green-600 gl-mb-3 gl-px-5 gl-py-2 gl-relative gl-z-index-1 pipeline-job-pill "
+      :data-testid="jobName"
     >
       {{ jobName }}
     </div>

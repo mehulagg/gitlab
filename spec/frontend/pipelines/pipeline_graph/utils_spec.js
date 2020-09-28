@@ -29,7 +29,7 @@ describe('preparePipelineGraphData', () => {
         stages: [
           {
             name: job1[jobName1].stage,
-            groups: [
+            nodes: [
               {
                 name: jobName1,
                 jobs: [{ script: job1[jobName1].script, stage: job1[jobName1].stage }],
@@ -54,11 +54,11 @@ describe('preparePipelineGraphData', () => {
         stages: [
           {
             name: userDefinedStage,
-            groups: [],
+            nodes: [],
           },
           {
             name: userDefinedStage2,
-            groups: [],
+            nodes: [],
           },
         ],
       };
@@ -76,11 +76,11 @@ describe('preparePipelineGraphData', () => {
         stages: [
           {
             name: userDefinedStage,
-            groups: [],
+            nodes: [],
           },
           {
             name: job4[jobName4].stage,
-            groups: [
+            nodes: [
               {
                 name: jobName4,
                 jobs: [{ script: job4[jobName4].script, stage: job4[jobName4].stage }],
@@ -89,7 +89,7 @@ describe('preparePipelineGraphData', () => {
           },
           {
             name: job1[jobName1].stage,
-            groups: [
+            nodes: [
               {
                 name: jobName1,
                 jobs: [{ script: job1[jobName1].script, stage: job1[jobName1].stage }],
@@ -102,7 +102,7 @@ describe('preparePipelineGraphData', () => {
           },
           {
             name: job3[jobName3].stage,
-            groups: [
+            nodes: [
               {
                 name: jobName3,
                 jobs: [{ script: job3[jobName3].script, stage: job3[jobName3].stage }],
@@ -128,7 +128,7 @@ describe('preparePipelineGraphData', () => {
         stages: [
           {
             name: job1[jobName1].stage,
-            groups: [
+            nodes: [
               {
                 name: jobName1,
                 jobs: [{ script: job1[jobName1].script, stage: job1[jobName1].stage }],
