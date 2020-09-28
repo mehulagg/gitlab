@@ -38,14 +38,6 @@ RSpec.describe Mutations::RequirementsManagement::CreateRequirement do
           expect(subject[:requirement][:title]).to eq('foo')
           expect(subject[:errors]).to be_empty
         end
-
-        context 'when requirements_management flag is disabled' do
-          before do
-            stub_feature_flags(requirements_management: false)
-          end
-
-          it_behaves_like 'requirements not available'
-        end
       end
 
       context 'when requirements feature is disabled' do

@@ -8,6 +8,7 @@ import {
   GlButton,
   GlTooltipDirective,
   GlIcon,
+  GlAlert,
 } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
@@ -29,6 +30,7 @@ export default {
     GlColumnChart,
     GlButton,
     GlIcon,
+    GlAlert,
     MetricChart,
     Scatterplot,
     MergeRequestTable,
@@ -344,9 +346,9 @@ export default {
             @columnMetricChange="setColumnMetric"
             @pageChange="setPage"
           />
-          <div v-if="showMergeRequestTableNoData" class="js-no-data bs-callout bs-callout-info">
+          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissable="false">
             {{ __('There is no data available. Please change your selection.') }}
-          </div>
+          </gl-alert>
         </div>
       </template>
     </template>

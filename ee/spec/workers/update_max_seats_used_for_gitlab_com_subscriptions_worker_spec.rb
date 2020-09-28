@@ -120,4 +120,16 @@ RSpec.describe UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker do
       end
     end
   end
+
+  describe '.last_enqueue_time' do
+    it 'returns last_enqueue_time from the cron job instance' do
+      time = Time.current
+      job = double(Sidekiq::Cron::Job, last_enqueue_time: time)
+      allow(Sidekiq::Cron::Job).to receive(:find)
+        .with('update_max_seats_used_for_gitlab_com_subscriptions_worker')
+        .and_return(job)
+
+      expect(described_class.last_enqueue_time).to eq(time)
+    end
+  end
 end

@@ -23,6 +23,7 @@ module Gitlab
       ::Geo::MergeRequestDiffReplicator,
       ::Geo::PackageFileReplicator,
       ::Geo::TerraformStateReplicator,
+      ::Geo::TerraformStateVersionReplicator,
       ::Geo::SnippetRepositoryReplicator
     ].freeze
 

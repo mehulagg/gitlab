@@ -66,7 +66,11 @@ RSpec.configure do |config|
   config.display_try_failure_messages = true
 
   config.infer_spec_type_from_file_location!
-  config.full_backtrace = !!ENV['CI']
+
+  # Add :full_backtrace tag to an example if full_backtrace output is desired
+  config.before(:each, full_backtrace: true) do |example|
+    config.full_backtrace = true
+  end
 
   unless ENV['CI']
     # Re-run failures locally with `--only-failures`
@@ -232,6 +236,12 @@ RSpec.configure do |config|
     #
     # expect(Gitlab::Git::KeepAround).to receive(:execute).and_call_original
     allow(Gitlab::Git::KeepAround).to receive(:execute)
+
+    # Stub these calls due to being expensive operations
+    # It can be reenabled for specific tests via:
+    #
+    # expect(Gitlab::JobWaiter).to receive(:wait).and_call_original
+    allow_any_instance_of(Gitlab::JobWaiter).to receive(:wait)
 
     Gitlab::ProcessMemoryCache.cache_backend.clear
 

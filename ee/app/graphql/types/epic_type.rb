@@ -30,8 +30,7 @@ module Types
           description: 'Indicates if the epic is confidential'
 
     field :group, GroupType, null: false,
-          description: 'Group to which the epic belongs',
-          resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Group, obj.group_id).find }
+          description: 'Group to which the epic belongs'
     field :parent, EpicType, null: true,
           description: 'Parent epic of the epic',
           resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Epic, obj.parent_id).find }
@@ -69,11 +68,11 @@ module Types
           description: 'Number of downvotes the epic has received'
 
     field :closed_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's closure"
+          description: 'Timestamp of when the epic was closed'
     field :created_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's creation"
+          description: 'Timestamp of when the epic was created'
     field :updated_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's last activity"
+          description: 'Timestamp of when the epic was updated'
 
     field :children, ::Types::EpicType.connection_type, null: true,
           description: 'Children (sub-epics) of the epic',

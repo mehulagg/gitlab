@@ -1,5 +1,0 @@
----
-title: Fix SAST Config GraphQL mutation
-merge_request: 42003
-author:
-type: fixed

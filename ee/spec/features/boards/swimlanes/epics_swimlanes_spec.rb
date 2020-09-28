@@ -77,12 +77,14 @@ RSpec.describe 'epics swimlanes', :js do
         find('.issue-count-badge-add-button').click
       end
 
+      wait_for_all_requests
+
       page.within(first('.board-new-issue-form')) do
         find('.form-control').set('bug')
         click_button 'Submit issue'
       end
 
-      wait_for_requests
+      wait_for_all_requests
 
       page.within(first('.board .issue-count-badge-count')) do
         expect(page).to have_content('3')
@@ -90,7 +92,7 @@ RSpec.describe 'epics swimlanes', :js do
 
       page.within("[data-testid='board-lane-unassigned-issues']") do
         page.within(first('.board-card')) do
-          issue = project.issues.find_by_title('bug')
+          issue = project.issues.find_by!(title: 'bug')
 
           expect(page).to have_content(issue.to_reference)
         end

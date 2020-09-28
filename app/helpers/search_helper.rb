@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :state].freeze
+  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :state, :confidential].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
@@ -292,6 +292,11 @@ module SearchHelper
 
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
+  end
+
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
   end
 
   def show_user_search_tab?

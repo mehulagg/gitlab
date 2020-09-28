@@ -10,16 +10,45 @@ import { EpicFilterType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import { fullEpicId } from '../boards_util';
+import { formatListIssues, fullBoardId } from '~/boards/boards_util';
 
 import createDefaultClient from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
+import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
   throw new Error('Not implemented!');
 };
 
-const gqlClient = createDefaultClient();
+export const gqlClient = createDefaultClient();
+
+const fetchAndFormatListIssues = (state, extraVariables) => {
+  const { endpoints, boardType, filterParams } = state;
+  const { fullPath, boardId } = endpoints;
+
+  const variables = {
+    ...extraVariables,
+    fullPath,
+    boardId: fullBoardId(boardId),
+    filters: { ...filterParams },
+    isGroup: boardType === BoardType.group,
+    isProject: boardType === BoardType.project,
+  };
+
+  return gqlClient
+    .query({
+      query: listsIssuesQuery,
+      context: {
+        isSingleRequest: true,
+      },
+      variables,
+    })
+    .then(({ data }) => {
+      const { lists } = data[boardType]?.board;
+      return formatListIssues(lists);
+    });
+};
 
 export default {
   ...actionsCE,
@@ -137,6 +166,39 @@ export default {
 
   togglePromotionState: () => {
     notImplemented();
+  },
+
+  fetchIssuesForList: ({ state, commit }, listId, noEpicIssues = false) => {
+    const { filterParams } = state;
+
+    const variables = {
+      id: listId,
+      filters: noEpicIssues
+        ? { ...filterParams, epicWildcardId: EpicFilterType.none }
+        : filterParams,
+    };
+
+    return fetchAndFormatListIssues(state, variables)
+      .then(listIssues => {
+        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, { listIssues, listId });
+      })
+      .catch(() => commit(types.RECEIVE_ISSUES_FOR_LIST_FAILURE, listId));
+  },
+
+  fetchIssuesForEpic: ({ state, commit }, epicId) => {
+    commit(types.REQUEST_ISSUES_FOR_EPIC, epicId);
+
+    const { filterParams } = state;
+
+    const variables = {
+      filters: { ...filterParams, epicId },
+    };
+
+    return fetchAndFormatListIssues(state, variables)
+      .then(listIssues => {
+        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listIssues, epicId });
+      })
+      .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
   },
 
   toggleEpicSwimlanes: ({ state, commit, dispatch }) => {

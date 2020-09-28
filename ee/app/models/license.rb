@@ -108,6 +108,7 @@ class License < ApplicationRecord
     required_ci_templates
     scoped_labels
     smartcard_auth
+    swimlanes
     group_timelogs
     type_of_work_analytics
     minimal_access_role
@@ -285,7 +286,8 @@ class License < ApplicationRecord
     end
 
     def history
-      all.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
+      decryptable_licenses = all.select { |license| license.license.present? }
+      decryptable_licenses.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
     end
 
     private

@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-09-22 19:32+0200\n"
+"PO-Revision-Date: 2020-09-22 19:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -76,6 +78,11 @@ msgstr ""
 
 msgid "\"el\" parameter is required for createInstance()"
 msgstr ""
+
+msgid "%d Approval"
+msgid_plural "%d Approvals"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "%d Scanned URL"
 msgid_plural "%d Scanned URLs"
@@ -857,9 +864,6 @@ msgstr ""
 msgid "&lt; 1 hour"
 msgstr ""
 
-msgid "&lt;no name set&gt;"
-msgstr ""
-
 msgid "&lt;no scopes selected&gt;"
 msgstr ""
 
@@ -1012,6 +1016,11 @@ msgid_plural "%d Days"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "1 Issue"
+msgid_plural "%d Issues"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "1 closed issue"
 msgid_plural "%{issues} closed issues"
 msgstr[0] ""
@@ -1024,6 +1033,11 @@ msgstr[1] ""
 
 msgid "1 day"
 msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "1 deploy key"
+msgid_plural "%d deploy keys"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -1315,7 +1329,13 @@ msgstr ""
 msgid "Access expiration date"
 msgstr ""
 
+msgid "Access expires"
+msgstr ""
+
 msgid "Access forbidden. Check your access level."
+msgstr ""
+
+msgid "Access granted"
 msgstr ""
 
 msgid "Access requests"
@@ -1325,6 +1345,9 @@ msgid "Access to '%{classification_label}' not allowed"
 msgstr ""
 
 msgid "Access to Pages websites are controlled based on the user's membership to a given project. By checking this box, users will be required to be logged in to have access to all Pages websites in your instance."
+msgstr ""
+
+msgid "AccessDropdown|Deploy Keys"
 msgstr ""
 
 msgid "AccessDropdown|Groups"
@@ -1442,12 +1465,6 @@ msgid "Active %{type} (%{token_length})"
 msgstr ""
 
 msgid "Active Sessions"
-msgstr ""
-
-msgid "Active Users:"
-msgstr ""
-
-msgid "Active users"
 msgstr ""
 
 msgid "Activity"
@@ -2219,6 +2236,9 @@ msgstr ""
 msgid "AlertManagement|Edit"
 msgstr ""
 
+msgid "AlertManagement|Environment"
+msgstr ""
+
 msgid "AlertManagement|Events"
 msgstr ""
 
@@ -2660,12 +2680,6 @@ msgstr ""
 msgid "An error occurred when toggling the notification subscription"
 msgstr ""
 
-msgid "An error occurred when trying to resolve a comment. Please try again."
-msgstr ""
-
-msgid "An error occurred when trying to resolve a discussion. Please try again."
-msgstr ""
-
 msgid "An error occurred when updating the issue weight"
 msgstr ""
 
@@ -2679,12 +2693,6 @@ msgid "An error occurred while adding formatted title for epic"
 msgstr ""
 
 msgid "An error occurred while checking group path. Please refresh and try again."
-msgstr ""
-
-msgid "An error occurred while creating the issue. Please try again."
-msgstr ""
-
-msgid "An error occurred while creating the list. Please try again."
 msgstr ""
 
 msgid "An error occurred while decoding the file."
@@ -2759,16 +2767,10 @@ msgstr ""
 msgid "An error occurred while fetching the Service Desk address."
 msgstr ""
 
-msgid "An error occurred while fetching the board issues. Please reload the page."
-msgstr ""
-
 msgid "An error occurred while fetching the board lists. Please reload the page."
 msgstr ""
 
 msgid "An error occurred while fetching the board lists. Please try again."
-msgstr ""
-
-msgid "An error occurred while fetching the board swimlanes. Please reload the page."
 msgstr ""
 
 msgid "An error occurred while fetching the builds."
@@ -2882,9 +2884,6 @@ msgstr ""
 msgid "An error occurred while moving the issue."
 msgstr ""
 
-msgid "An error occurred while moving the issue. Please try again."
-msgstr ""
-
 msgid "An error occurred while parsing recent searches"
 msgstr ""
 
@@ -2954,9 +2953,6 @@ msgstr ""
 msgid "An error occurred while updating the comment"
 msgstr ""
 
-msgid "An error occurred while updating the list. Please try again."
-msgstr ""
-
 msgid "An error occurred while validating group path"
 msgstr ""
 
@@ -3008,6 +3004,9 @@ msgstr ""
 msgid "An unknown error occurred while loading this graph."
 msgstr ""
 
+msgid "An unknown error occurred."
+msgstr ""
+
 msgid "Analytics"
 msgstr ""
 
@@ -3041,10 +3040,10 @@ msgstr ""
 msgid "Any"
 msgstr ""
 
-msgid "Any Author"
+msgid "Any %{header}"
 msgstr ""
 
-msgid "Any Status"
+msgid "Any Author"
 msgstr ""
 
 msgid "Any branch"
@@ -3976,6 +3975,9 @@ msgstr ""
 msgid "Bi-weekly code coverage"
 msgstr ""
 
+msgid "Billable Users:"
+msgstr ""
+
 msgid "Billing"
 msgstr ""
 
@@ -3985,7 +3987,7 @@ msgstr ""
 msgid "BillingPlans|@%{user_name} you are currently using the %{plan_name} plan."
 msgstr ""
 
-msgid "BillingPlans|Congratulations, your new trial is activated"
+msgid "BillingPlans|Congratulations, your free trial is activated."
 msgstr ""
 
 msgid "BillingPlans|If you would like to downgrade your plan please contact %{support_link_start}Customer Support%{support_link_end}."
@@ -4091,6 +4093,27 @@ msgid "Boards"
 msgstr ""
 
 msgid "Boards and Board Lists"
+msgstr ""
+
+msgid "Boards|An error occurred while creating the issue. Please try again."
+msgstr ""
+
+msgid "Boards|An error occurred while creating the list. Please try again."
+msgstr ""
+
+msgid "Boards|An error occurred while fetching issues. Please reload the page."
+msgstr ""
+
+msgid "Boards|An error occurred while fetching the board issues. Please reload the page."
+msgstr ""
+
+msgid "Boards|An error occurred while fetching the board swimlanes. Please reload the page."
+msgstr ""
+
+msgid "Boards|An error occurred while moving the issue. Please try again."
+msgstr ""
+
+msgid "Boards|An error occurred while updating the list. Please try again."
 msgstr ""
 
 msgid "Boards|Collapse"
@@ -4456,9 +4479,6 @@ msgstr ""
 msgid "Can't create snippet: %{err}"
 msgstr ""
 
-msgid "Can't edit as source branch was deleted"
-msgstr ""
-
 msgid "Can't fetch content for the blob: %{err}"
 msgstr ""
 
@@ -4619,6 +4639,15 @@ msgid "Change your password"
 msgstr ""
 
 msgid "Change your password or recover your current one"
+msgstr ""
+
+msgid "ChangeReviewer|Reviewer changed from %{old} to %{new}"
+msgstr ""
+
+msgid "ChangeReviewer|Reviewer changed to %{new}"
+msgstr ""
+
+msgid "ChangeReviewer|Unassigned"
 msgstr ""
 
 msgid "ChangeTypeActionLabel|Pick into branch"
@@ -6344,6 +6373,9 @@ msgid "Cohorts|User cohorts are shown for the last %{months_included} months. On
 msgstr ""
 
 msgid "Collapse"
+msgstr ""
+
+msgid "Collapse all threads"
 msgstr ""
 
 msgid "Collapse approvers"
@@ -8836,6 +8868,9 @@ msgstr ""
 msgid "DesignManagement|The maximum number of designs allowed to be uploaded is %{upload_limit}. Please try again."
 msgstr ""
 
+msgid "DesignManagement|There was an error moving your designs. Please upload your designs below."
+msgstr ""
+
 msgid "DesignManagement|To upload designs, you'll need to enable LFS and have admin enable hashed storage. %{requirements_link_start}More information%{requirements_link_end}"
 msgstr ""
 
@@ -8846,6 +8881,9 @@ msgid "DesignManagement|Upload designs"
 msgstr ""
 
 msgid "DesignManagement|Upload skipped."
+msgstr ""
+
+msgid "DesignManagement|Your designs are being copied and are on their way… Please refresh to update."
 msgstr ""
 
 msgid "DesignManagement|and %{moreCount} more."
@@ -9024,10 +9062,10 @@ msgstr ""
 msgid "Dismiss Merge Request promotion"
 msgstr ""
 
-msgid "Dismiss Selected"
+msgid "Dismiss Value Stream Analytics introduction box"
 msgstr ""
 
-msgid "Dismiss Value Stream Analytics introduction box"
+msgid "Dismiss selected"
 msgstr ""
 
 msgid "Dismiss trial promotion"
@@ -9274,9 +9312,6 @@ msgid "Edit description"
 msgstr ""
 
 msgid "Edit environment"
-msgstr ""
-
-msgid "Edit file in..."
 msgstr ""
 
 msgid "Edit files in the editor and commit changes here"
@@ -10416,10 +10451,10 @@ msgstr ""
 msgid "Expand all files"
 msgstr ""
 
-msgid "Expand approvers"
+msgid "Expand all threads"
 msgstr ""
 
-msgid "Expand file"
+msgid "Expand approvers"
 msgstr ""
 
 msgid "Expand milestones"
@@ -10635,6 +10670,9 @@ msgstr ""
 msgid "Failed to load branches. Please try again."
 msgstr ""
 
+msgid "Failed to load deploy keys."
+msgstr ""
+
 msgid "Failed to load emoji list."
 msgstr ""
 
@@ -10650,6 +10688,9 @@ msgstr ""
 msgid "Failed to load groups & users."
 msgstr ""
 
+msgid "Failed to load groups, users and deploy keys."
+msgstr ""
+
 msgid "Failed to load labels. Please try again."
 msgstr ""
 
@@ -10657,6 +10698,12 @@ msgid "Failed to load milestones. Please try again."
 msgstr ""
 
 msgid "Failed to load related branches"
+msgstr ""
+
+msgid "Failed to load sidebar confidential toggle"
+msgstr ""
+
+msgid "Failed to load sidebar lock status"
 msgstr ""
 
 msgid "Failed to load stacktrace."
@@ -10919,6 +10966,9 @@ msgstr ""
 msgid "FeatureFlags|Loading feature flags"
 msgstr ""
 
+msgid "FeatureFlags|Loading user lists"
+msgstr ""
+
 msgid "FeatureFlags|More information"
 msgstr ""
 
@@ -10937,7 +10987,7 @@ msgstr ""
 msgid "FeatureFlags|New feature flag"
 msgstr ""
 
-msgid "FeatureFlags|New list"
+msgid "FeatureFlags|New user list"
 msgstr ""
 
 msgid "FeatureFlags|Percent of users"
@@ -10976,6 +11026,9 @@ msgstr ""
 msgid "FeatureFlags|There was an error fetching the feature flags."
 msgstr ""
 
+msgid "FeatureFlags|There was an error fetching the user lists."
+msgstr ""
+
 msgid "FeatureFlags|There was an error retrieving user lists"
 msgstr ""
 
@@ -10989,6 +11042,9 @@ msgid "FeatureFlags|User IDs"
 msgstr ""
 
 msgid "FeatureFlags|User List"
+msgstr ""
+
+msgid "FeatureFlags|User Lists"
 msgstr ""
 
 msgid "FeatureFlag|List"
@@ -11132,6 +11188,9 @@ msgstr ""
 msgid "Filter by user"
 msgstr ""
 
+msgid "Filter parameters are not valid. Make sure that the end date is after the start date."
+msgstr ""
+
 msgid "Filter pipelines"
 msgstr ""
 
@@ -11156,7 +11215,7 @@ msgstr ""
 msgid "Find File"
 msgstr ""
 
-msgid "Find bugs in your code with coverage-guided fuzzing"
+msgid "Find bugs in your code with coverage-guided fuzzing."
 msgstr ""
 
 msgid "Find by path"
@@ -12925,6 +12984,9 @@ msgid_plural "Hide charts"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Hide comments on this file"
+msgstr ""
+
 msgid "Hide details"
 msgstr ""
 
@@ -13704,6 +13766,15 @@ msgstr ""
 msgid "Integrations|Includes commit title and branch"
 msgstr ""
 
+msgid "Integrations|Projects using custom settings will not be impacted unless the project owner chooses to use instance-level defaults."
+msgstr ""
+
+msgid "Integrations|Save settings?"
+msgstr ""
+
+msgid "Integrations|Saving will update the default settings for all projects that are not using custom settings."
+msgstr ""
+
 msgid "Integrations|Standard"
 msgstr ""
 
@@ -13885,6 +13956,42 @@ msgid "InviteMembersBanner|Invite your colleagues"
 msgstr ""
 
 msgid "InviteMembersBanner|We noticed that you haven't invited anyone to this group. Invite your colleagues so you can discuss issues, collaborate on merge requests, and share your knowledge."
+msgstr ""
+
+msgid "InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions"
+msgstr ""
+
+msgid "InviteMembersModal|Access expiration date (optional)"
+msgstr ""
+
+msgid "InviteMembersModal|Cancel"
+msgstr ""
+
+msgid "InviteMembersModal|Choose a role permission"
+msgstr ""
+
+msgid "InviteMembersModal|GitLab member or Email address"
+msgstr ""
+
+msgid "InviteMembersModal|Invite"
+msgstr ""
+
+msgid "InviteMembersModal|Invite team members"
+msgstr ""
+
+msgid "InviteMembersModal|Search for members to invite"
+msgstr ""
+
+msgid "InviteMembersModal|User not invited. Feature coming soon!"
+msgstr ""
+
+msgid "InviteMembersModal|Users were succesfully added"
+msgstr ""
+
+msgid "InviteMembersModal|You're inviting members to the %{group_name} group"
+msgstr ""
+
+msgid "InviteMembers|Invite team members"
 msgstr ""
 
 msgid "Invited"
@@ -14385,9 +14492,6 @@ msgstr ""
 msgid "July"
 msgstr ""
 
-msgid "Jump to first unresolved thread"
-msgstr ""
-
 msgid "Jump to next unresolved thread"
 msgstr ""
 
@@ -14560,9 +14664,6 @@ msgid "Last %d day"
 msgid_plural "Last %d days"
 msgstr[0] ""
 msgstr[1] ""
-
-msgid "Last %{days} days"
-msgstr ""
 
 msgid "Last 2 weeks"
 msgstr ""
@@ -15064,9 +15165,6 @@ msgstr ""
 msgid "List your Bitbucket Server repositories"
 msgstr ""
 
-msgid "Lists"
-msgstr ""
-
 msgid "Live preview"
 msgstr ""
 
@@ -15436,6 +15534,9 @@ msgstr ""
 msgid "Max access level"
 msgstr ""
 
+msgid "Max role"
+msgstr ""
+
 msgid "Max size 15 MB"
 msgstr ""
 
@@ -15767,9 +15868,6 @@ msgid "MergeRequests|Thread will be resolved"
 msgstr ""
 
 msgid "MergeRequests|Thread will be unresolved"
-msgstr ""
-
-msgid "MergeRequests|Toggle comments for this file"
 msgstr ""
 
 msgid "MergeRequests|View file @ %{commitId}"
@@ -16733,6 +16831,9 @@ msgstr ""
 msgid "NetworkPolicies|Name"
 msgstr ""
 
+msgid "NetworkPolicies|Namespace"
+msgstr ""
+
 msgid "NetworkPolicies|Network Policy"
 msgstr ""
 
@@ -16797,6 +16898,9 @@ msgid "NetworkPolicies|Status"
 msgstr ""
 
 msgid "NetworkPolicies|Traffic that does not match any rule will be blocked."
+msgstr ""
+
+msgid "NetworkPolicies|Unable to parse policy"
 msgstr ""
 
 msgid "NetworkPolicies|YAML editor"
@@ -17194,6 +17298,9 @@ msgstr ""
 msgid "No matching results for \"%{query}\""
 msgstr ""
 
+msgid "No members found"
+msgstr ""
+
 msgid "No merge requests found"
 msgstr ""
 
@@ -17408,6 +17515,9 @@ msgid "Notification setting - %{notification_title}"
 msgstr ""
 
 msgid "Notification settings saved"
+msgstr ""
+
+msgid "NotificationEvent|Change reviewer merge request"
 msgstr ""
 
 msgid "NotificationEvent|Close issue"
@@ -17626,6 +17736,9 @@ msgstr ""
 msgid "OnDemandScans|Scan mode"
 msgstr ""
 
+msgid "OnDemandScans|Scanner profile"
+msgstr ""
+
 msgid "OnDemandScans|Scanner settings"
 msgstr ""
 
@@ -17633,6 +17746,9 @@ msgid "OnDemandScans|Schedule or run scans immediately against target sites. Cur
 msgstr ""
 
 msgid "OnDemandScans|Select one of the existing profiles"
+msgstr ""
+
+msgid "OnDemandScans|Site profile"
 msgstr ""
 
 msgid "OnDemandScans|Site profiles"
@@ -17847,6 +17963,9 @@ msgstr ""
 msgid "Origin"
 msgstr ""
 
+msgid "Orphaned member"
+msgstr ""
+
 msgid "Other Labels"
 msgstr ""
 
@@ -17889,6 +18008,9 @@ msgstr ""
 msgid "Overwrite diverged branches"
 msgstr ""
 
+msgid "Owned by %{image_tag}"
+msgstr ""
+
 msgid "Owned by anyone"
 msgstr ""
 
@@ -17926,9 +18048,6 @@ msgid "Package type must be NuGet"
 msgstr ""
 
 msgid "Package type must be PyPi"
-msgstr ""
-
-msgid "Package was removed"
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was created %{datetime}"
@@ -18321,7 +18440,7 @@ msgstr ""
 msgid "Paste issue link"
 msgstr ""
 
-msgid "Paste your public SSH key, which is usually contained in the file '~/.ssh/id_ed25519.pub' or '~/.ssh/id_rsa.pub' and begins with 'ssh-ed25519' or 'ssh-rsa'. Don't use your private SSH key."
+msgid "Paste your public SSH key, which is usually contained in the file '~/.ssh/id_ed25519.pub' or '~/.ssh/id_rsa.pub' and begins with 'ssh-ed25519' or 'ssh-rsa'. Do not paste your private SSH key, as that can compromise your identity."
 msgstr ""
 
 msgid "Patch to apply"
@@ -19302,7 +19421,7 @@ msgstr ""
 msgid "Profiles|Full name"
 msgstr ""
 
-msgid "Profiles|Give your individual key a title. This will be publically visible."
+msgid "Profiles|Give your individual key a title."
 msgstr ""
 
 msgid "Profiles|Include private contributions on my profile"
@@ -19392,7 +19511,7 @@ msgstr ""
 msgid "Profiles|The maximum file size allowed is 200KB."
 msgstr ""
 
-msgid "Profiles|This doesn't look like a public SSH key, are you sure you want to add it?"
+msgid "Profiles|This doesn't look like a public SSH key, are you sure you want to add it? It will be publicly visible."
 msgstr ""
 
 msgid "Profiles|This email will be displayed on your public profile"
@@ -20664,6 +20783,9 @@ msgstr ""
 msgid "Publish to status page"
 msgstr ""
 
+msgid "Published"
+msgstr ""
+
 msgid "Published on status page"
 msgstr ""
 
@@ -21041,9 +21163,6 @@ msgid "Release|Something went wrong while getting the release details"
 msgstr ""
 
 msgid "Release|Something went wrong while saving the release details"
-msgstr ""
-
-msgid "Remediated: needs review"
 msgstr ""
 
 msgid "Remediations"
@@ -21444,6 +21563,9 @@ msgstr ""
 msgid "RepositoriesAnalytics|Test Code Coverage"
 msgstr ""
 
+msgid "RepositoriesAnalytics|There was an error fetching the projects."
+msgstr ""
+
 msgid "Repository"
 msgstr ""
 
@@ -21523,6 +21645,9 @@ msgid "Request parameter %{param} is missing."
 msgstr ""
 
 msgid "Request to link SAML account must be authorized"
+msgstr ""
+
+msgid "Requested"
 msgstr ""
 
 msgid "Requested %{time_ago}"
@@ -21668,9 +21793,6 @@ msgid "Resolved by"
 msgstr ""
 
 msgid "Resolved by %{name}"
-msgstr ""
-
-msgid "Resolved by %{resolvedByName}"
 msgstr ""
 
 msgid "Resolves IP addresses once and uses them to submit requests"
@@ -22236,12 +22358,6 @@ msgstr ""
 msgid "Search requirements"
 msgstr ""
 
-msgid "Search results…"
-msgstr ""
-
-msgid "Search test cases"
-msgstr ""
-
 msgid "Search users"
 msgstr ""
 
@@ -22358,6 +22474,12 @@ msgstr ""
 msgid "Seat Link is disabled, and cannot be configured through this form."
 msgstr ""
 
+msgid "Seats usage data as of %{last_enqueue_time}"
+msgstr ""
+
+msgid "Seats usage data is updated every day at 12:00pm UTC"
+msgstr ""
+
 msgid "Secondary"
 msgstr ""
 
@@ -22409,6 +22531,9 @@ msgstr ""
 msgid "SecurityConfiguration|Available for on-demand DAST"
 msgstr ""
 
+msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
+msgstr ""
+
 msgid "SecurityConfiguration|Configure"
 msgstr ""
 
@@ -22439,16 +22564,19 @@ msgstr ""
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
+msgid "SecurityConfiguration|More information"
+msgstr ""
+
 msgid "SecurityConfiguration|Not enabled"
+msgstr ""
+
+msgid "SecurityConfiguration|SAST Analyzers"
 msgstr ""
 
 msgid "SecurityConfiguration|SAST Configuration"
 msgstr ""
 
 msgid "SecurityConfiguration|Security Control"
-msgstr ""
-
-msgid "SecurityConfiguration|See documentation"
 msgstr ""
 
 msgid "SecurityConfiguration|Status"
@@ -22539,9 +22667,6 @@ msgid "SecurityReports|Issues created from a vulnerability cannot be removed."
 msgstr ""
 
 msgid "SecurityReports|Learn more about setting up your dashboard"
-msgstr ""
-
-msgid "SecurityReports|Load more vulnerabilities"
 msgstr ""
 
 msgid "SecurityReports|Monitor vulnerabilities in your code"
@@ -22839,9 +22964,6 @@ msgid "Select the custom project template source group."
 msgstr ""
 
 msgid "Select the environment scope for this feature flag."
-msgstr ""
-
-msgid "Select timeframe"
 msgstr ""
 
 msgid "Select timezone"
@@ -23330,6 +23452,9 @@ msgstr ""
 msgid "Show comments"
 msgstr ""
 
+msgid "Show comments on this file"
+msgstr ""
+
 msgid "Show comments only"
 msgstr ""
 
@@ -23700,9 +23825,6 @@ msgstr ""
 msgid "Something went wrong while creating a requirement."
 msgstr ""
 
-msgid "Something went wrong while creating a test case."
-msgstr ""
-
 msgid "Something went wrong while deleting description changes. Please try again."
 msgstr ""
 
@@ -23727,9 +23849,6 @@ msgstr ""
 msgid "Something went wrong while fetching comments. Please try again."
 msgstr ""
 
-msgid "Something went wrong while fetching count of test cases."
-msgstr ""
-
 msgid "Something went wrong while fetching description changes. Please try again."
 msgstr ""
 
@@ -23752,9 +23871,6 @@ msgid "Something went wrong while fetching requirements count."
 msgstr ""
 
 msgid "Something went wrong while fetching requirements list."
-msgstr ""
-
-msgid "Something went wrong while fetching test cases list."
 msgstr ""
 
 msgid "Something went wrong while fetching the environments for this merge request. Please try again."
@@ -24180,9 +24296,6 @@ msgstr ""
 msgid "Start and due date"
 msgstr ""
 
-msgid "Start by choosing a group to see how your team is spending time. You can then drill down to the project level."
-msgstr ""
-
 msgid "Start by choosing a group to start exploring the merge requests in that group. You can then proceed to filter by projects, labels, milestones and authors."
 msgstr ""
 
@@ -24445,9 +24558,6 @@ msgid "Submit review"
 msgstr ""
 
 msgid "Submit search"
-msgstr ""
-
-msgid "Submit test case"
 msgstr ""
 
 msgid "Submit the current review."
@@ -24991,6 +25101,27 @@ msgstr[0] ""
 msgstr[1] ""
 
 msgid "Test settings"
+msgstr ""
+
+msgid "TestCases|New Test Case"
+msgstr ""
+
+msgid "TestCases|New test case"
+msgstr ""
+
+msgid "TestCases|Search test cases"
+msgstr ""
+
+msgid "TestCases|Something went wrong while creating a test case."
+msgstr ""
+
+msgid "TestCases|Something went wrong while fetching count of test cases."
+msgstr ""
+
+msgid "TestCases|Something went wrong while fetching test cases list."
+msgstr ""
+
+msgid "TestCases|Submit test case"
 msgstr ""
 
 msgid "TestHooks|Ensure one of your projects has merge requests."
@@ -25924,9 +26055,6 @@ msgstr ""
 msgid "This field is required."
 msgstr ""
 
-msgid "This file is collapsed."
-msgstr ""
-
 msgid "This group"
 msgstr ""
 
@@ -26203,7 +26331,7 @@ msgstr ""
 msgid "This user has previously committed to the %{name} project."
 msgstr ""
 
-msgid "This user is a %{access} of the %{name} project."
+msgid "This user has the %{access} role in the %{name} project."
 msgstr ""
 
 msgid "This user is the author of this %{noteable}."
@@ -26269,9 +26397,6 @@ msgstr ""
 msgid "ThreatMonitoring|Operations Per Second"
 msgstr ""
 
-msgid "ThreatMonitoring|Overview"
-msgstr ""
-
 msgid "ThreatMonitoring|Packet Activity"
 msgstr ""
 
@@ -26288,6 +26413,9 @@ msgid "ThreatMonitoring|Something went wrong, unable to fetch environments"
 msgstr ""
 
 msgid "ThreatMonitoring|Something went wrong, unable to fetch statistics"
+msgstr ""
+
+msgid "ThreatMonitoring|Statistics"
 msgstr ""
 
 msgid "ThreatMonitoring|The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
@@ -26717,9 +26845,6 @@ msgstr ""
 msgid "Toggle Sidebar"
 msgstr ""
 
-msgid "Toggle all threads"
-msgstr ""
-
 msgid "Toggle backtrace"
 msgstr ""
 
@@ -26805,6 +26930,9 @@ msgid "Total artifacts size: %{total_size}"
 msgstr ""
 
 msgid "Total cores (CPUs)"
+msgstr ""
+
+msgid "Total days to completion"
 msgstr ""
 
 msgid "Total issues"
@@ -27144,9 +27272,6 @@ msgid "Unable to load the diff. %{button_try_again}"
 msgstr ""
 
 msgid "Unable to load the merge request widget. Try reloading the page."
-msgstr ""
-
-msgid "Unable to resolve"
 msgstr ""
 
 msgid "Unable to save iteration. Please try again"
@@ -27878,6 +28003,9 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
+msgid "Users in License"
+msgstr ""
+
 msgid "Users in License:"
 msgstr ""
 
@@ -28266,6 +28394,12 @@ msgstr ""
 msgid "VulnerabilityManagement|Could not process %{issueReference}: %{errorMessage}."
 msgstr ""
 
+msgid "VulnerabilityManagement|Detected"
+msgstr ""
+
+msgid "VulnerabilityManagement|Needs triage"
+msgstr ""
+
 msgid "VulnerabilityManagement|Something went wrong while trying to delete the comment. Please try again later."
 msgstr ""
 
@@ -28312,6 +28446,9 @@ msgid "VulnerabilityStatusTypes|Resolved"
 msgstr ""
 
 msgid "Vulnerability|%{scannerName} (version %{scannerVersion})"
+msgstr ""
+
+msgid "Vulnerability|Activity"
 msgstr ""
 
 msgid "Vulnerability|Class"
@@ -28390,6 +28527,9 @@ msgid "Warning:"
 msgstr ""
 
 msgid "Warning: Displaying this diagram might cause performance issues on this page."
+msgstr ""
+
+msgid "We are currently unable to fetch data for the pipeline header."
 msgstr ""
 
 msgid "We are currently unable to fetch data for this graph."
@@ -28883,6 +29023,9 @@ msgstr ""
 msgid "Wrong extern UID provided. Make sure Auth0 is configured correctly."
 msgstr ""
 
+msgid "YYYY-MM-DD"
+msgstr ""
+
 msgid "Yes"
 msgstr ""
 
@@ -29091,9 +29234,6 @@ msgid "You can specify notification level per group or per project."
 msgstr ""
 
 msgid "You can test your .gitlab-ci.yml in %{linkStart}CI Lint%{linkEnd}."
-msgstr ""
-
-msgid "You can try again using %{begin_link}basic search%{end_link}"
 msgstr ""
 
 msgid "You cannot access the raw file. Please wait a minute."
@@ -30106,6 +30246,9 @@ msgstr ""
 msgid "failed to dismiss associated finding(id=%{finding_id}): %{message}"
 msgstr ""
 
+msgid "failed to revert associated finding(id=%{finding_id}) to detected"
+msgstr ""
+
 msgid "file"
 msgid_plural "files"
 msgstr[0] ""
@@ -30648,6 +30791,9 @@ msgstr ""
 msgid "must be a root namespace"
 msgstr ""
 
+msgid "must be a valid IPv4 or IPv6 address"
+msgstr ""
+
 msgid "must be greater than start date"
 msgstr ""
 
@@ -30682,6 +30828,9 @@ msgid "no contributions"
 msgstr ""
 
 msgid "no expiration"
+msgstr ""
+
+msgid "no name set"
 msgstr ""
 
 msgid "no one can merge"

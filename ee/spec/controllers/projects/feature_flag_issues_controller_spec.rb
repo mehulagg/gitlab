@@ -162,16 +162,6 @@ RSpec.describe Projects::FeatureFlagIssuesController do
       expect(json_response.map { |issue| issue['id'] }).to eq([issue_b.id])
     end
 
-    it 'returns not found when the feature is off' do
-      stub_feature_flags(feature_flags_issue_links: false)
-      feature_flag, _, _ = setup
-      sign_in(developer)
-
-      get_request(project, feature_flag)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
     context 'when feature flag related issues feature is unlicensed' do
       before do
         stub_licensed_features(feature_flags_related_issues: false)

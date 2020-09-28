@@ -1,5 +1,5 @@
 #import "ee_else_ce/boards/queries/board_list.fragment.graphql"
-#import "~/graphql_shared/fragments/epic.fragment.graphql"
+#import "./board_epic.fragment.graphql"
 
 query BoardEE(
   $fullPath: ID!
@@ -18,7 +18,7 @@ query BoardEE(
       }
       epics(issueFilters: $issueFilters) {
         nodes {
-          ...EpicNode
+          ...BoardEpicNode
         }
       }
     }
@@ -32,7 +32,7 @@ query BoardEE(
       }
       epics(issueFilters: $issueFilters) {
         nodes {
-          ...EpicNode
+          ...BoardEpicNode
         }
       }
     }

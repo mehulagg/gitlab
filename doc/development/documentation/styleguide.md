@@ -369,7 +369,7 @@ create an issue or an MR to propose a change to the user interface text.
   - milestones
   - reorder issues
   - runner, runners, shared runners
-  - a to-do, to-dos
+  - a to-do item, to dos
 - *Some features are capitalized*, typically nouns naming GitLab-specific
   capabilities or tools. For example:
   - GitLab CI/CD
@@ -410,7 +410,7 @@ Use forms of *sign in*, instead of *log in* or *login*. For example:
 Exceptions to this rule include the concept of *single sign-on* and
 references to user interface elements. For example:
 
-- To sign in to product X, enter your credentials, and then click **Log in**.
+- To sign in to product X, enter your credentials, and then select **Log in**.
 
 ### Inclusive language
 
@@ -418,8 +418,11 @@ We strive to create documentation that is inclusive. This section includes
 guidance and examples in the following categories:
 
 - [Gender-specific wording](#avoid-gender-specific-wording).
+  (Tested in [`InclusionGender.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionGender.yml).)
 - [Ableist language](#avoid-ableist-language).
+  (Tested in [`InclusionAbleism.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionAbleism.yml).)
 - [Cultural sensitivity](#culturally-sensitive-language).
+  (Tested in [`InclusionCultural.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionCultural.yml).)
 
 We write our developer documentation with inclusivity and diversity in mind. This
 page is not an exhaustive reference, but describes some general guidelines and
@@ -433,11 +436,13 @@ a gender-neutral pronoun.
 
 Avoid the use of gender-specific pronouns, unless referring to a specific person.
 
+<!-- vale gitlab.InclusionGender = NO -->
 | Use                               | Avoid                           |
 |-----------------------------------|---------------------------------|
 | People, humanity                  | Mankind                         |
 | GitLab Team Members               | Manpower                        |
 | You can install; They can install | He can install; She can install |
+<!-- vale gitlab.InclusionGender = YES -->
 
 If you need to set up [Fake user information](#fake-user-information), use
 diverse or non-gendered names with common surnames.
@@ -446,6 +451,7 @@ diverse or non-gendered names with common surnames.
 
 Avoid terms that are also used in negative stereotypes for different groups.
 
+<!-- vale gitlab.InclusionAbleism = NO -->
 | Use                    | Avoid                |
 |------------------------|----------------------|
 | Check for completeness | Sanity check         |
@@ -454,6 +460,7 @@ Avoid terms that are also used in negative stereotypes for different groups.
 | Placeholder variable   | Dummy variable       |
 | Active/Inactive        | Enabled/Disabled     |
 | On/Off                 | Enabled/Disabled     |
+<!-- vale gitlab.InclusionAbleism = YES -->
 
 Credit: [Avoid ableist language](https://developers.google.com/style/inclusive-documentation#ableist-language)
 in the Google Developer Style Guide.
@@ -464,10 +471,12 @@ Avoid terms that reflect negative cultural stereotypes and history. In most
 cases, you can replace terms such as `master` and `slave` with terms that are
 more precise and functional, such as `primary` and `secondary`.
 
+<!-- vale gitlab.InclusionCultural = NO -->
 | Use                  | Avoid                 |
 |----------------------|-----------------------|
 | Primary / secondary  | Master / slave        |
 | Allowlist / denylist | Blacklist / whitelist |
+<!-- vale gitlab.InclusionCultural = YES -->
 
 For more information see the following [Internet Draft specification](https://tools.ietf.org/html/draft-knodel-terminology-02).
 
@@ -832,8 +841,10 @@ When creating tables of lists of features (such as whether or not features are
 available to certain roles on the [Permissions](../../user/permissions.md#project-members-permissions)
 page), use the following phrases (based on the SVG icons):
 
-- *No*: **{dotted-circle}** No
-- *Yes*: **{check-circle}** Yes
+| Option | Markdown                 | Displayed result       |
+|--------|--------------------------|------------------------|
+| No     | `**{dotted-circle}** No` | **{dotted-circle}** No |
+| Yes    | `**{check-circle}** Yes` | **{check-circle}** Yes |
 
 ## Quotes
 
@@ -1095,14 +1106,26 @@ document to ensure it links to the most recent version of the file.
 
 ## Navigation
 
-To indicate the steps of navigation through the user interface:
+When documenting navigation through the user interface:
 
-- Use the exact word as shown in the UI, including any capital letters as-is.
+- Use the exact wording as shown in the UI, including any capital letters as-is.
 - Use bold text for navigation items and the char "greater than" (`>`) as a
-  separator (for example, `Navigate to your project's **Settings > CI/CD**` ).
+  separator. For example: `Navigate to your project's **Settings > CI/CD**`.
 - If there are any expandable menus, make sure to mention that the user needs to
-  expand the tab to find the settings you're referring to (for example,
-  `Navigate to your project's **Settings > CI/CD** and expand **General pipelines**`).
+  expand the tab to find the settings you're referring to. For example:
+  `Navigate to your project's **Settings > CI/CD** and expand **General pipelines**`.
+
+### Navigational elements
+
+Use the following terms when referring to the main GitLab user interface
+elements:
+
+- **Top menu**: This is the top menu that spans the width of the user interface.
+  It includes the GitLab logo, search field, counters, and the user's avatar.
+- **Left sidebar**: This is the navigation sidebar on the left of the user
+  interface, specific to the project or group.
+- **Right sidebar**: This is the navigation sidebar on the right of the user
+  interface, specific to the open issue, merge request, or epic.
 
 ## Images
 
@@ -1249,7 +1272,7 @@ reviewed and approved by a technical writer.
 1. In YouTube, visit the video URL you want to display. Copy the regular URL
    from your browser (`https://www.youtube.com/watch?v=VIDEO-ID`) and replace
    the video title and link in the line under `<div class="video-fallback">`.
-1. In YouTube, click **Share**, and then click **Embed**.
+1. In YouTube, select **Share**, and then select **Embed**.
 1. Copy the `<iframe>` source (`src`) **URL only**
    (`https://www.youtube.com/embed/VIDEO-ID`),
    and paste it, replacing the content of the `src` field in the
@@ -1416,8 +1439,8 @@ interface:
 Use an icon when you find yourself having to describe an interface element. For
 example:
 
-- Do: Click the Admin Area icon ( **{admin}** ).
-- Don't: Click the Admin Area icon (the wrench icon).
+- Do: Select the Admin Area icon ( **{admin}** ).
+- Don't: Select the Admin Area icon (the wrench icon).
 
 ## Alert boxes
 
@@ -1444,23 +1467,21 @@ guidelines, but for consistency you should try to use these values:
 
 ### Note
 
-Notes catch the eye of most readers, and therefore should be used very sparingly.
-In most cases, content considered for a note should be included:
+Notes indicate information that is of special use to the reader, and are most
+effective when used _sparingly_.
 
-- As just another sentence in the previous paragraph or the most-relevant
+The goal for notes is to not use them at all. If, however, a note is truly
+required, do not use more than _two_ notes per documentation page.
+
+Instead of a note, try one of these alternatives:
+
+- Re-write the sentence as part of the most-relevant
   paragraph.
-- As its own standalone paragraph.
-- As content under a new subheading that introduces the topic, making it more
-  visible or findable.
+- Put the information into its own standalone paragraph.
+- Put the content under a new subheading that introduces the topic. This makes it more
+  visible.
 
-#### When to use
-
-Use a note when there is a reason that most or all readers who browse the
-section should see the content. That is, if missed, it’s likely to cause major
-trouble for a minority of users or significant trouble for a majority of users.
-
-Weigh the costs of distracting users to whom the content is not relevant against
-the cost of users missing the content if it were not expressed as a note.
+If you must use a note, use the following formatting:
 
 ```markdown
 NOTE: **Note:**
@@ -1582,12 +1603,11 @@ application:
 The following are recommended verbs for specific uses with user interface
 elements:
 
-| Recommended         | Used for                   | Replaces                   |
-|:--------------------|:---------------------------|:---------------------------|
-| *click*             | buttons, links, menu items | "hit", "press", "select"   |
-| *select* or *clear* | checkboxes                 | "enable", "click", "press" |
-| *select*            | dropdowns                  | "pick"                     |
-| *expand*            | expandable sections        | "open"                     |
+| Recommended         | Used for                              | Replaces                   |
+|:--------------------|:--------------------------------------|:---------------------------|
+| *select*            | buttons, links, menu items, dropdowns | "click, "press," "hit"     |
+| *select* or *clear* | checkboxes                            | "enable", "click", "press" |
+| *expand*            | expandable sections                   | "open"                     |
 
 ### Other Verbs
 
@@ -2158,7 +2178,7 @@ Set up the section with the following:
   ```markdown
   1. Open the GraphiQL explorer tool in the following URL: `https://gitlab.com/-/graphql-explorer`.
   1. Paste the `query` listed above into the left window of your GraphiQL explorer tool.
-  1. Click Play to get the result shown here:
+  1. Select Play to get the result shown here:
   ```
 
 - Include a screenshot of the result in the GraphiQL explorer. Follow the naming

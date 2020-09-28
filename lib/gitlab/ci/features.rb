@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.job_heartbeats_runner?(project)
-        ::Feature.enabled?(:ci_job_heartbeats_runner, project, default_enabled: true)
-      end
-
       def self.instance_variables_ui_enabled?
         ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
       end
@@ -72,7 +68,7 @@ module Gitlab
       end
 
       def self.new_artifact_file_reader_enabled?(project)
-        ::Feature.enabled?(:ci_new_artifact_file_reader, project, default_enabled: false)
+        ::Feature.enabled?(:ci_new_artifact_file_reader, project, default_enabled: true)
       end
     end
   end

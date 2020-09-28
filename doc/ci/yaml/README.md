@@ -1754,7 +1754,7 @@ the pipeline if the following is true:
 
 In the example below, the `test` job will `only` be created when **all** of the following are true:
 
-- The pipeline has been [scheduled](../../user/project/pipelines/schedules.md) **or** runs for `master`.
+- The pipeline has been [scheduled](../pipelines/schedules.md) **or** runs for `master`.
 - The `variables` keyword matches.
 - The `kubernetes` service is active on the project.
 
@@ -4056,7 +4056,9 @@ release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33014) in GitLab 13.4.
 
 `secrets` indicates the [CI Secrets](../secrets/index.md) this job needs. It should be a hash,
-and the keys should be the names of the environment variables the job needs to access the secrets.
+and the keys should be the names of the environment variables that are made available to the job.
+The value of each secret is saved in a temporary file. This file's path is stored in these
+environment variables.
 
 #### `secrets:vault` **(PREMIUM)**
 

@@ -30,6 +30,19 @@ RSpec.describe Resolvers::IssuesResolver do
             expect(resolve_issues(sort: :weight_desc)).to eq [weight_issue1, weight_issue3, weight_issue4, weight_issue2]
           end
         end
+
+        context 'when sorting by published' do
+          let_it_be(:not_published) { create(:issue, project: project) }
+          let_it_be(:published) { create(:issue, :published, project: project) }
+
+          it 'sorts issues ascending' do
+            expect(resolve_issues(sort: :published_asc)).to eq [not_published, published]
+          end
+
+          it 'sorts issues descending' do
+            expect(resolve_issues(sort: :published_desc)).to eq [published, not_published]
+          end
+        end
       end
 
       describe 'filtering by iteration' do

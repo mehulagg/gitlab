@@ -1,5 +1,0 @@
----
-title: Remove v-html from environments/components/deploy_board_component.vue
-merge_request: 41521
-author: Takuya Noguchi
-type: security

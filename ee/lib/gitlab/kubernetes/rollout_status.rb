@@ -30,10 +30,10 @@ module Gitlab
         @status == :found
       end
 
-      def self.from_deployments(*deployments, pods: {}, legacy_deployments: [])
+      def self.from_deployments(*deployments, pods_attrs: [], legacy_deployments: [])
         return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments.empty?
 
-        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods) }
+        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods_attrs) }
         deployments.sort_by!(&:order)
         new(deployments, legacy_deployments: legacy_deployments)
       end

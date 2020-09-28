@@ -3,7 +3,7 @@
 module Mutations
   module Vulnerabilities
     class Dismiss < BaseMutation
-      graphql_name 'DismissVulnerability'
+      graphql_name 'VulnerabilityDismiss'
 
       authorize :admin_vulnerability
 

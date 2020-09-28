@@ -156,6 +156,37 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
     end
   end
 
+  describe '.mark_primary_write_location' do
+    context 'when load balancing is disabled' do
+      before do
+        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+          .and_return(false)
+      end
+
+      it 'does not attempt to write' do
+        expect(described_class).not_to receive(:set_write_location_for)
+
+        described_class.mark_primary_write_location(:user, 42)
+      end
+    end
+
+    context 'when load balancing is enabled' do
+      it 'updates the write location' do
+        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+          .and_return(true)
+
+        lb = double(:lb, primary_write_location: 'foo')
+
+        allow(described_class).to receive(:load_balancer).and_return(lb)
+
+        expect(described_class).to receive(:set_write_location_for)
+          .with(:user, 42, 'foo')
+
+        described_class.mark_primary_write_location(:user, 42)
+      end
+    end
+  end
+
   describe '.unstick' do
     it 'removes the sticking data from Redis' do
       described_class.set_write_location_for(:user, 4, 'foo')

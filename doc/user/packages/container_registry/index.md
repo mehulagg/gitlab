@@ -131,7 +131,7 @@ You can then create workflows and automate any processes that involve testing,
 building, and eventually deploying your project from the Docker image you
 created.
 
-Before diving into the details, some things you should be aware of:
+Before diving into details, some things you should be aware of:
 
 - You must [authenticate to the container registry](#authenticating-to-the-container-registry-with-gitlab-cicd)
   before running any commands. You can do this in the `before_script` if multiple
@@ -342,7 +342,7 @@ the deleted images.
 
 To delete images from within GitLab:
 
-1. Navigate to your project's or group's **{package}** **Packages & Registries > Container Registry**.
+1. Navigate to your project's or group's **Packages & Registries > Container Registry**.
 1. From the **Container Registry** page, you can select what you want to delete,
    by either:
 
@@ -587,7 +587,7 @@ you can use the Container Registry to store Helm Charts. However, due to the way
 and stored by Docker, it is not possible for GitLab to parse this data and meet performance standards.
 [This epic](https://gitlab.com/groups/gitlab-org/-/epics/2313) updates the architecture of the Container Registry to support Helm Charts.
 
-You can read more about the above challenges [here](https://gitlab.com/gitlab-org/gitlab/-/issues/38047#note_298842890).
+[Read more about the above challenges](https://gitlab.com/gitlab-org/gitlab/-/issues/38047#note_298842890).
 
 ## Limitations
 

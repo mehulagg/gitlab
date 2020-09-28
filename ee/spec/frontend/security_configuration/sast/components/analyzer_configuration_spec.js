@@ -1,16 +1,11 @@
 import { mount } from '@vue/test-utils';
 import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';
 import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
+import { makeAnalyzerEntities, makeEntities, makeSastCiConfiguration } from './helpers';
 
 describe('AnalyzerConfiguration component', () => {
   let wrapper;
-
-  const entity = {
-    name: 'name',
-    label: 'label',
-    description: 'description',
-    enabled: false,
-  };
+  let entity;
 
   const createComponent = ({ props = {} } = {}) => {
     wrapper = mount(AnalyzerConfiguration, {
@@ -22,6 +17,10 @@ describe('AnalyzerConfiguration component', () => {
 
   const findInputElement = () => wrapper.find('input[type="checkbox"]');
   const findDynamicFields = () => wrapper.find(DynamicFields);
+
+  beforeEach(() => {
+    [entity] = makeAnalyzerEntities(1);
+  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -69,8 +68,8 @@ describe('AnalyzerConfiguration component', () => {
     });
   });
 
-  describe('configuration form', () => {
-    describe('when there are no SastCiConfigurationEntity', () => {
+  describe('child variables', () => {
+    describe('when there are no SastCiConfigurationEntity child variables', () => {
       beforeEach(() => {
         createComponent({
           props: { entity },
@@ -82,45 +81,36 @@ describe('AnalyzerConfiguration component', () => {
       });
     });
 
-    describe('when there are one or more SastCiConfigurationEntity', () => {
-      const analyzerEntity = {
-        ...entity,
-        enabled: false,
-        configuration: [
-          {
-            defaultValue: 'defaultVal',
-            description: 'desc',
-            field: 'field',
-            type: 'string',
-            value: 'val',
-            label: 'label',
-          },
-        ],
-      };
+    describe('when there are one or more SastCiConfigurationEntity child variables', () => {
+      let newEntities;
 
       beforeEach(() => {
+        [entity] = makeSastCiConfiguration().analyzers.nodes;
+
         createComponent({
-          props: { entity: analyzerEntity },
+          props: { entity },
         });
       });
 
-      it('it renders the nested dynamic forms', () => {
+      it('it renders the nested DynamicFields component', () => {
         expect(findDynamicFields().exists()).toBe(true);
       });
 
-      it('it emits an input event when dynamic form fields emits an input event', () => {
-        findDynamicFields().vm.$emit('input', analyzerEntity.configuration);
+      it('it emits an input event when DynamicFields emits an input event', () => {
+        newEntities = makeEntities(1, { field: 'new field' });
+        findDynamicFields().vm.$emit('input', newEntities);
 
-        const [[payload]] = wrapper.emitted('input');
-        expect(payload).toEqual(analyzerEntity);
+        expect(wrapper.emitted('input')).toEqual([
+          [{ ...entity, variables: { nodes: newEntities } }],
+        ]);
       });
 
-      it('passes the disabled prop to dynamic fields component', () => {
-        expect(findDynamicFields().props('disabled')).toBe(!analyzerEntity.enabled);
+      it('passes the disabled prop to DynamicFields component', () => {
+        expect(findDynamicFields().props('disabled')).toBe(!entity.enabled);
       });
 
-      it('passes the entities prop to the dynamic fields component', () => {
-        expect(findDynamicFields().props('entities')).toBe(analyzerEntity.configuration);
+      it('passes the entities prop to the DynamicFields component', () => {
+        expect(findDynamicFields().props('entities')).toBe(entity.variables.nodes);
       });
     });
   });

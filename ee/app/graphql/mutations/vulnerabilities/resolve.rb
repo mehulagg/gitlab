@@ -14,7 +14,7 @@ module Mutations
       argument :id,
                ::Types::GlobalIDType[::Vulnerability],
                required: true,
-               description: 'ID of the vulnerability to be resolveed'
+               description: 'ID of the vulnerability to be resolved'
 
       def resolve(id:)
         vulnerability = authorized_find!(id: id)

@@ -9,10 +9,10 @@ import { redirectTo } from '~/lib/utils/url_utility';
 const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-scans`;
 const projectPath = 'group/project';
 const defaultBranch = 'master';
-const scannerProfilesLibraryPath = '/on_demand_scans/profiles#scanner-profiles';
-const siteProfilesLibraryPath = '/on_demand_scans/profiles#site-profiles';
-const newScannerProfilePath = '/on_demand_scans/profiles/dast_scanner_profile/new';
-const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
+const scannerProfilesLibraryPath = '/security/configuration/dast_profiles#scanner-profiles';
+const siteProfilesLibraryPath = '/security/configuration/dast_profiles#site-profiles';
+const newScannerProfilePath = '/security/configuration/dast_profiles/dast_scanner_profile/new';
+const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_profiles`;
 
 const defaultProps = {
   helpPagePath,

@@ -15,6 +15,11 @@ module EE
         false
       end
 
+      override :elastic_projects
+      def elastic_projects
+        @elastic_projects ||= projects.pluck_primary_key
+      end
+
       override :execute
       def execute
         return super unless use_elasticsearch?
@@ -22,10 +27,10 @@ module EE
         ::Gitlab::Elastic::GroupSearchResults.new(
           current_user,
           params[:search],
-          projects,
+          elastic_projects,
           group: group,
           public_and_internal_projects: elastic_global,
-          filters: { state: params[:state] }
+          filters: { confidential: params[:confidential], state: params[:state] }
         )
       end
     end

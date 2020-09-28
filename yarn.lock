@@ -843,15 +843,15 @@
     eslint-plugin-vue "^6.2.1"
     vue-eslint-parser "^7.0.0"
 
-"@gitlab/svgs@1.164.0":
-  version "1.164.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.164.0.tgz#6cefad871c45f945ef92b99015d0f510b1d2de4a"
-  integrity sha512-a9e/cYUc1QQk7azjH4x/m6/p3icavwGEi5F9ipNlDqiJtUor5tqojxvMxPOhuVbN/mTwnC6lGsSZg4tqTsdJAQ==
+"@gitlab/svgs@1.168.0":
+  version "1.168.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.168.0.tgz#ad13671756601ee46f690068fd1ee4145f384e38"
+  integrity sha512-PO2QrnFKlgKn7Xm4Iuepr1HZfkDiwkbzRjyGGd5ugDVHXMiLB3mHStp1QW1NAowlcP8kQ2f2wkLsV+EDkUPiDg==
 
-"@gitlab/ui@21.4.2":
-  version "21.4.2"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-21.4.2.tgz#c3d36167ab4df49ce978e20bdd3790e716f5a2d1"
-  integrity sha512-p8ujeGvCG06Opn0eQlrwZyi9v9RK3T2V4TUcljTAUYDdm0p23qJjjIlFjfGHlQsNg0wRgnkbKFXfkZ/Oy8GyiQ==
+"@gitlab/ui@21.8.3":
+  version "21.8.3"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-21.8.3.tgz#6b8e7a31c7855a2c413d8dddaf0d87fe684d3291"
+  integrity sha512-wka8mUkJEViImMY/aIusLhERl+utwiDTU5FIP2rv9lQX89LivNSHHzWf3X0WTnBKUzrf6OO/lcHz6kzQwSp0Qg==
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
@@ -1075,6 +1075,11 @@
   version "6.0.3-1"
   resolved "https://registry.yarnpkg.com/@rails/actioncable/-/actioncable-6.0.3-1.tgz#9b9eb8858a6507162911007d355d9a206e1c5caa"
   integrity sha512-szFhWD+V5TAxVNVIG16klgq+ypqA5k5AecLarTTrXgOG8cawVbQdOAwLbCmzkwiQ60rGSxAFoC1u2LrzxSK2Aw==
+
+"@rails/ujs@^6.0.3-2":
+  version "6.0.3-2"
+  resolved "https://registry.yarnpkg.com/@rails/ujs/-/ujs-6.0.3-2.tgz#e14c1f29086858215ce7ccd9ad6d8888c458b4a3"
+  integrity sha512-WcpIEftNCfGDEgk6KerOugiet75Mir5q/HT1yt3dDhpBI91BaZ15lfSQIsZwMw2nyeDz9A9QBz8dAFAd4gXIzg==
 
 "@sentry/browser@^5.22.3":
   version "5.22.3"
@@ -7068,13 +7073,6 @@ jmespath@0.15.0:
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.15.0.tgz#a3f222a9aae9f966f5d27c796510e28091764217"
   integrity sha1-o/Iiqarp+Wb10nx5ZRDigJF2Qhc=
 
-jquery-ujs@1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/jquery-ujs/-/jquery-ujs-1.2.2.tgz#6a8ef1020e6b6dda385b90a4bddc128c21c56397"
-  integrity sha1-ao7xAg5rbdo4W5CkvdwSjCHFY5c=
-  dependencies:
-    jquery ">=1.8.0"
-
 jquery.caret@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/jquery.caret/-/jquery.caret-0.3.1.tgz#9c093318faf327eff322e826ca9f3241368bc7b8"
@@ -7085,7 +7083,7 @@ jquery.waitforimages@^2.2.0:
   resolved "https://registry.yarnpkg.com/jquery.waitforimages/-/jquery.waitforimages-2.2.0.tgz#63f23131055a1b060dc913e6d874bcc9b9e6b16b"
   integrity sha1-Y/IxMQVaGwYNyRPm2HS8ybnmsWs=
 
-"jquery@>= 1.9.1", jquery@>=1.8.0, jquery@^3.5.0:
+"jquery@>= 1.9.1", jquery@^3.5.0:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.5.1.tgz#d7b4d08e1bfdb86ad2f1a3d039ea17304717abb5"
   integrity sha512-XwIBPqcMn57FxfT+Go5pzySnm4KWkT1Tv7gjrpT1srtf8Weynl6R273VJ5GjkRb51IzMp5nbaPjJXMWeju2MKg==
@@ -12304,10 +12302,10 @@ vue-jest@4.0.0-beta.2:
     source-map "^0.5.6"
     ts-jest "^23.10.5"
 
-vue-loader@^15.9.0:
-  version "15.9.0"
-  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.9.0.tgz#5d4b0378a4606188fc83e587ed23c94bc3a10998"
-  integrity sha512-FeDHvTSpwyLeF7LIV1PYkvqUQgTJ8UmOxhSlCyRSxaXCKk+M6NF4tDQsLsPPNeDPyR7TfRQ8MLg6v+8PsDV9xQ==
+vue-loader@^15.9.3:
+  version "15.9.3"
+  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.9.3.tgz#0de35d9e555d3ed53969516cac5ce25531299dda"
+  integrity sha512-Y67VnGGgVLH5Voostx8JBZgPQTlDQeOVBLOEsjc2cXbCYBKexSKEpOA56x0YZofoDOTszrLnIShyOX1p9uCEHA==
   dependencies:
     "@vue/component-compiler-utils" "^3.1.0"
     hash-sum "^1.0.2"
@@ -12333,10 +12331,10 @@ vue-style-loader@^4.1.0:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
-vue-template-compiler@^2.5.20, vue-template-compiler@^2.6.10:
-  version "2.6.10"
-  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.10.tgz#323b4f3495f04faa3503337a82f5d6507799c9cc"
-  integrity sha512-jVZkw4/I/HT5ZMvRnhv78okGusqe0+qH2A0Em0Cp8aq78+NK9TII263CDVz2QXZsIT+yyV/gZc/j/vlwa+Epyg==
+vue-template-compiler@^2.5.20, vue-template-compiler@^2.6.12:
+  version "2.6.12"
+  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.12.tgz#947ed7196744c8a5285ebe1233fe960437fcc57e"
+  integrity sha512-OzzZ52zS41YUbkCBfdXShQTe69j1gQDZ9HIX8miuC9C3rBCk9wIRjLiZZLrmX9V+Ftq/YEyv1JaVr5Y/hNtByg==
   dependencies:
     de-indent "^1.0.2"
     he "^1.1.0"
@@ -12351,10 +12349,10 @@ vue-virtual-scroll-list@^1.4.4:
   resolved "https://registry.yarnpkg.com/vue-virtual-scroll-list/-/vue-virtual-scroll-list-1.4.4.tgz#5fca7a13f785899bbfb70471ec4fe222437d8495"
   integrity sha512-wU7FDpd9Xy4f62pf8SBg/ak21jMI/pdx4s4JPah+z/zuhmeAafQgp8BjtZvvt+b0BZOsOS1FJuCfUH7azTkivQ==
 
-vue@^2.6.10:
-  version "2.6.10"
-  resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.10.tgz#a72b1a42a4d82a721ea438d1b6bf55e66195c637"
-  integrity sha512-ImThpeNU9HbdZL3utgMCq0oiMzAkt1mcgy3/E6zWC/G6AaQoeuFdsl9nDhTDU3X1R6FK7nsIUuRACVcjI+A2GQ==
+vue@^2.6.12:
+  version "2.6.12"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.12.tgz#f5ebd4fa6bd2869403e29a896aed4904456c9123"
+  integrity sha512-uhmLFETqPPNyuLLbsKz6ioJ4q7AZHzD8ZVFNATNyICSZouqP2Sz0rotWQC8UNBF6VGSCs5abnKJoStA6JbCbfg==
 
 vuedraggable@^2.23.0:
   version "2.23.0"

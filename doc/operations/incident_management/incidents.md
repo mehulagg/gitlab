@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 While no configuration is required to use the [manual features](#create-an-incident-manually)
 of incident management, some simple [configuration](#configure-incidents) is needed to automate incident creation.
 
-For users with at least Developer [permissions](../../user/permissions.md), the
+For users with at least Reporter [permissions](../../user/permissions.md), the
 Incident Management list is available at **Operations > Incidents**
 in your project's sidebar. The list contains the following metrics:
 
@@ -28,7 +28,8 @@ in your project's sidebar. The list contains the following metrics:
   - **{severity-unknown}** **Unknown**
 
   NOTE: **Note:**
-  Editing incident severity on the incident details page was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229402) in GitLab 13.4.
+  Editing incident severity on the incident details page was
+  [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229402) in GitLab 13.4.
 
 - **Incident** - The description of the incident, which attempts to capture the
   most meaningful data.
@@ -84,7 +85,7 @@ when you receive notification that the alert is resolved.
 
 ## Create an incident manually
 
-If you have at least Developer [permissions](../../user/permissions.md), to create an Incident, you have two options.
+If you have at least Guest [permissions](../../user/permissions.md), to create an Incident, you have two options.
 
 ### From the Incidents List
 

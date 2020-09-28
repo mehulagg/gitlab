@@ -1,18 +1,9 @@
-#import "./sast_ci_configuration_entity.fragment.graphql"
+#import "./sast_ci_configuration.fragment.graphql"
 
 query sastCiConfiguration($fullPath: ID!) {
   project(fullPath: $fullPath) {
     sastCiConfiguration {
-      global {
-        nodes {
-          ...SastCiConfigurationEntityFragment
-        }
-      }
-      pipeline {
-        nodes {
-          ...SastCiConfigurationEntityFragment
-        }
-      }
+      ...SastCiConfigurationFragment
     }
   }
 }

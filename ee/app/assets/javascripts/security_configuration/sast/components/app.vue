@@ -1,7 +1,9 @@
 <script>
 import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import sastCiConfigurationQuery from '../graphql/sast_ci_configuration.query.graphql';
+import sastCiConfigurationWithAnalyzersQuery from '../graphql/sast_ci_configuration_with_analyzers.query.graphql';
 import ConfigurationForm from './configuration_form.vue';
 
 export default {
@@ -12,6 +14,7 @@ export default {
     GlLoadingIcon,
     GlSprintf,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     sastDocumentationPath: {
       from: 'sastDocumentationPath',
@@ -24,7 +27,11 @@ export default {
   },
   apollo: {
     sastCiConfiguration: {
-      query: sastCiConfigurationQuery,
+      query() {
+        return this.glFeatures.sastConfigurationUiAnalyzers
+          ? sastCiConfigurationWithAnalyzersQuery
+          : sastCiConfigurationQuery;
+      },
       variables() {
         return {
           fullPath: this.projectPath,

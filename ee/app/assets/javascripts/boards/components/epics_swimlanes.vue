@@ -35,7 +35,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['epics', 'isLoadingIssues']),
+    ...mapState(['epics']),
     ...mapGetters(['getUnassignedIssues']),
     unassignedIssues() {
       return listId => this.getUnassignedIssues(listId);
@@ -66,11 +66,8 @@ export default {
       return this.canAdminList ? options : {};
     },
   },
-  mounted() {
-    this.fetchIssuesForAllLists();
-  },
   methods: {
-    ...mapActions(['fetchIssuesForAllLists', 'moveList']),
+    ...mapActions(['moveList']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item } = params;
       const { listId } = item.dataset;
@@ -122,7 +119,6 @@ export default {
         :key="epic.id"
         :epic="epic"
         :lists="lists"
-        :is-loading-issues="isLoadingIssues"
         :disabled="disabled"
         :can-admin-list="canAdminList"
       />
@@ -153,7 +149,6 @@ export default {
           :list="list"
           :issues="unassignedIssues(list.id)"
           :is-unassigned-issues-lane="true"
-          :is-loading="isLoadingIssues"
           :disabled="disabled"
           :can-admin-list="canAdminList"
         />

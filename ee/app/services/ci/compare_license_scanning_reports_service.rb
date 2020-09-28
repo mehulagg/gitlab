@@ -11,7 +11,7 @@ module Ci
     end
 
     def get_report(pipeline)
-      pipeline&.license_scanning_report
+      ::SCA::LicenseCompliance.new(pipeline&.project, pipeline)
     end
 
     private

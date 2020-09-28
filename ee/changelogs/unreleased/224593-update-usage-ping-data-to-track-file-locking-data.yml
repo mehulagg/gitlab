@@ -1,5 +1,0 @@
----
-title: Adding counts of users using default branch locks and users using multi-branch LFS locks
-merge_request: 40419
-author:
-type: added

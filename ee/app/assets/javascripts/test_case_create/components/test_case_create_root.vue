@@ -1,6 +1,6 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { s__ } from '~/locale';
 import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 
@@ -50,7 +50,7 @@ export default {
         })
         .catch(error => {
           createFlash({
-            message: __('Something went wrong while creating a test case.'),
+            message: s__('TestCases|Something went wrong while creating a test case.'),
             captureError: true,
             error,
           });
@@ -71,7 +71,7 @@ export default {
     :labels-manage-path="labelsManagePath"
   >
     <template #title>
-      <h3 class="page-title">{{ __('New Test Case') }}</h3>
+      <h3 class="page-title">{{ s__('TestCases|New Test Case') }}</h3>
     </template>
     <template #actions="issuableMeta">
       <div class="gl-flex-grow-1">
@@ -82,7 +82,7 @@ export default {
           :loading="createTestCaseRequestActive"
           :disabled="!issuableMeta.issuableTitle.length"
           @click="handleTestCaseSubmitClick(issuableMeta)"
-          >{{ __('Submit test case') }}</gl-button
+          >{{ s__('TestCases|Submit test case') }}</gl-button
         >
       </div>
       <gl-button

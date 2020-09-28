@@ -62,7 +62,6 @@ describe('Cycle analytics mutations', () => {
   it.each`
     mutation                                   | payload                                  | expectedState
     ${types.SET_FEATURE_FLAGS}                 | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_GROUP}                | ${{ fullPath: 'cool-beans' }}            | ${{ selectedGroup: { fullPath: 'cool-beans' }, selectedProjects: [] }}
     ${types.SET_SELECTED_PROJECTS}             | ${selectedProjects}                      | ${{ selectedProjects }}
     ${types.SET_DATE_RANGE}                    | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
     ${types.SET_SELECTED_STAGE}                | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
@@ -176,7 +175,6 @@ describe('Cycle analytics mutations', () => {
     it.each`
       stateKey              | expectedState
       ${'isLoading'}        | ${true}
-      ${'selectedGroup'}    | ${initialData.group}
       ${'selectedProjects'} | ${initialData.selectedProjects}
       ${'startDate'}        | ${initialData.createdAfter}
       ${'endDate'}          | ${initialData.createdBefore}

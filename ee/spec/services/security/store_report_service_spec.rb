@@ -62,7 +62,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
       let(:report) { pipeline.security_reports.get_report('container_scanning', artifact) }
 
       it 'saves with new location' do
-        new_locations = report.findings.map(&:location).map(&:new_fingerprint)
+        new_locations = report.findings.map(&:location).map(&:fingerprint)
         expect(subject).to eq({ status: :success })
         saved_locations = Vulnerabilities::Finding.all.map(&:location_fingerprint)
         expect(new_locations).to match_array(saved_locations)
@@ -73,7 +73,7 @@ RSpec.describe Security::StoreReportService, '#execute' do
         expect(subject).to eq({ status: :success })
 
         old_fingerprint = report.findings.first.location.fingerprint
-        new_fingerprint = report.findings.first.location.new_fingerprint
+        new_fingerprint = report.findings.first.location.fingerprint
         Vulnerabilities::Finding.first.update_column(:location_fingerprint, old_fingerprint)
 
         described_class.new(pipeline, report).execute

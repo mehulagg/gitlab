@@ -11,7 +11,7 @@ export const hasNoAccessError = state => state.errorCode === httpStatus.FORBIDDE
 export const currentValueStreamId = ({ selectedValueStream }) =>
   selectedValueStream?.id || DEFAULT_VALUE_STREAM_ID;
 
-export const currentGroupPath = ({ selectedGroup }) => selectedGroup?.fullPath || null;
+export const currentGroupPath = ({ currentGroup }) => currentGroup?.fullPath || null;
 
 export const selectedProjectIds = ({ selectedProjects }) =>
   selectedProjects?.map(({ id }) => id) || [];

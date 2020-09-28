@@ -849,6 +849,15 @@ RSpec.describe License do
       described_class.delete_all
     end
 
+    it 'does not include the undecryptable license' do
+      undecryptable_license = create(:license)
+      allow(undecryptable_license).to receive(:license).and_return(nil)
+
+      allow(License).to receive(:all).and_return([undecryptable_license])
+
+      expect(described_class.history.map(&:id)).to be_empty
+    end
+
     it 'returns the licenses sorted by created_at, starts_at and expires_at descending' do
       today = Date.current
       now = Time.current

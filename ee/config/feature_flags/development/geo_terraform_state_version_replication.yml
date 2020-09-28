@@ -1,0 +1,7 @@
+---
+name: geo_terraform_state_version_replication
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42529
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254622
+group: group::geo
+type: development
+default_enabled: true

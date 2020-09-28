@@ -150,8 +150,6 @@ module EE
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
 
-      return elasticsearch_limited_project_exists?(project) unless ::Feature.enabled?(:elasticsearch_indexes_project_cache, default_enabled: true)
-
       ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:project, project.id) do
         elasticsearch_limited_project_exists?(project)
       end
@@ -160,8 +158,6 @@ module EE
     def elasticsearch_indexes_namespace?(namespace)
       return false unless elasticsearch_indexing?
       return true unless elasticsearch_limit_indexing?
-
-      elasticsearch_limited_namespaces.exists?(namespace.id) unless ::Feature.enabled?(:elasticsearch_indexes_namespace_cache, default_enabled: true)
 
       ::Gitlab::Elastic::ElasticsearchEnabledCache.fetch(:namespace, namespace.id) do
         elasticsearch_limited_namespaces.exists?(namespace.id)

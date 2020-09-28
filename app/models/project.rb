@@ -2292,6 +2292,10 @@ class Project < ApplicationRecord
     []
   end
 
+  def mark_primary_write_location
+    # Overriden in EE
+  end
+
   def toggle_ci_cd_settings!(settings_attribute)
     ci_cd_settings.toggle!(settings_attribute)
   end
@@ -2509,10 +2513,10 @@ class Project < ApplicationRecord
 
   def build_from_instance_or_template(name)
     instance = find_service(services_instances, name)
-    return Service.build_from_integration(id, instance) if instance
+    return Service.build_from_integration(instance, project_id: id) if instance
 
     template = find_service(services_templates, name)
-    return Service.build_from_integration(id, template) if template
+    return Service.build_from_integration(template, project_id: id) if template
   end
 
   def services_templates

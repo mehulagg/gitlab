@@ -71,11 +71,14 @@ export default {
       selectedDesigns: [],
       isDraggingDesign: false,
       reorderedDesigns: null,
+      isReorderingInProgress: false,
     };
   },
   computed: {
     isLoading() {
-      return this.$apollo.queries.designs.loading || this.$apollo.queries.permissions.loading;
+      return (
+        this.$apollo.queries.designCollection.loading || this.$apollo.queries.permissions.loading
+      );
     },
     isSaving() {
       return this.filesToBeSaved.length > 0;
@@ -108,6 +111,11 @@ export default {
     },
     isDesignListEmpty() {
       return !this.isSaving && !this.hasDesigns;
+    },
+    isDesignCollectionCopying() {
+      return (
+        this.designCollection && ['PENDING', 'COPYING'].includes(this.designCollection.copyState)
+      );
     },
     designDropzoneWrapperClass() {
       return this.isDesignListEmpty
@@ -277,6 +285,7 @@ export default {
       return variables;
     },
     reorderDesigns({ moved: { newIndex, element } }) {
+      this.isReorderingInProgress = true;
       this.$apollo
         .mutate({
           mutation: moveDesignMutation,
@@ -287,6 +296,9 @@ export default {
         })
         .catch(() => {
           createFlash(MOVE_DESIGN_ERROR);
+        })
+        .finally(() => {
+          this.isReorderingInProgress = false;
         });
     },
     onDesignMove(designs) {
@@ -339,6 +351,7 @@ export default {
               button-category="secondary"
               button-class="gl-mr-3"
               button-size="small"
+              data-qa-selector="archive_button"
               :loading="loading"
               :has-selected-designs="hasSelectedDesigns"
               @deleteSelectedDesigns="mutate()"
@@ -355,10 +368,25 @@ export default {
       <gl-alert v-else-if="error" variant="danger" :dismissible="false">
         {{ __('An error occurred while loading designs. Please try again.') }}
       </gl-alert>
+      <header
+        v-else-if="isDesignCollectionCopying"
+        class="card gl-p-3"
+        data-testid="design-collection-is-copying"
+      >
+        <div class="card-header design-card-header border-bottom-0">
+          <div class="card-title gl-my-0 gl-h-7">
+            {{
+              s__(
+                'DesignManagement|Your designs are being copied and are on their way… Please refresh to update.',
+              )
+            }}
+          </div>
+        </div>
+      </header>
       <vue-draggable
         v-else
         :value="designs"
-        :disabled="!isLatestVersion"
+        :disabled="!isLatestVersion || isReorderingInProgress"
         v-bind="$options.dragOptions"
         tag="ol"
         draggable=".js-design-tile"
@@ -390,6 +418,8 @@ export default {
             :checked="isDesignSelected(design.filename)"
             type="checkbox"
             class="design-checkbox"
+            data-qa-selector="design_checkbox"
+            :data-qa-design="design.filename"
             @change="changeSelectedDesigns(design.filename)"
           />
         </li>
@@ -399,6 +429,7 @@ export default {
               :is-dragging-design="isDraggingDesign"
               :class="{ 'design-list-item design-list-item-new': !isDesignListEmpty }"
               :has-designs="hasDesigns"
+              data-qa-selector="design_dropzone_content"
               @change="onUploadDesign"
             />
           </li>

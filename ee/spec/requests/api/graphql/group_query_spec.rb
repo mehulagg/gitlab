@@ -196,5 +196,42 @@ RSpec.describe 'getting group information' do
         expect(graphql_errors).to eq([nil, nil])
       end
     end
+
+    context 'when loading multiple epics' do
+      let_it_be(:group) { create(:group) }
+
+      before do
+        stub_licensed_features(epics: true)
+        query_epics(1)
+      end
+
+      it 'can lookahead to eliminate N+1 queries', :use_clean_rails_memory_store_caching do
+        create_list(:epic, 10, group: group)
+        group.reload
+
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+          query_epics(1)
+        end.count
+
+        expect { query_epics(10) }.not_to exceed_all_query_limit(control_count)
+      end
+    end
+
+    def query_epics(number)
+      epics_field = <<~NODE
+        epics(first: #{number}) {
+          edges {
+            node {
+              title
+            }
+          }
+        }
+      NODE
+
+      post_graphql(
+        graphql_query_for('group', { 'fullPath' => group.full_path }, epics_field),
+        current_user: user
+      )
+    end
   end
 end

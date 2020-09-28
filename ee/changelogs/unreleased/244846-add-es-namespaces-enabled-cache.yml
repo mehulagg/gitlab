@@ -1,5 +1,0 @@
----
-title: Add cache for elasticsearch_indexes_namespace check
-merge_request: 41274
-author:
-type: performance

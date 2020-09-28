@@ -23,7 +23,7 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRulesCheckP
 
       described_class.new.perform
 
-      expect(Feature.enabled?(:approval_rule)).to eq(true)
+      expect(Feature.enabled?(:approval_rule, default_enabled: true)).to eq(true)
     end
   end
 end

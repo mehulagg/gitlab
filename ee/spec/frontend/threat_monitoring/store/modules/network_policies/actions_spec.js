@@ -107,11 +107,7 @@ describe('Network Policy actions', () => {
             actions.fetchPolicies,
             environmentId,
             state,
-            [
-              { type: types.REQUEST_POLICIES },
-              { type: types.RECEIVE_POLICIES_SUCCESS, payload: [] },
-              { type: types.RECEIVE_POLICIES_ERROR, payload: 'foo' },
-            ],
+            [{ type: types.REQUEST_POLICIES }, { type: types.RECEIVE_POLICIES_ERROR, payload: [] }],
             [],
           ).then(() => {
             expect(createFlash).toHaveBeenCalled();
@@ -132,8 +128,7 @@ describe('Network Policy actions', () => {
             state,
             [
               { type: types.REQUEST_POLICIES },
-              { type: types.RECEIVE_POLICIES_SUCCESS, payload: [policy] },
-              { type: types.RECEIVE_POLICIES_ERROR, payload: 'foo' },
+              { type: types.RECEIVE_POLICIES_ERROR, payload: [policy] },
             ],
             [],
           ).then(() => {
@@ -155,7 +150,7 @@ describe('Network Policy actions', () => {
           [
             {
               type: types.RECEIVE_POLICIES_ERROR,
-              payload: s__('NetworkPolicies|Something went wrong, unable to fetch policies'),
+              payload: [],
             },
           ],
           [],

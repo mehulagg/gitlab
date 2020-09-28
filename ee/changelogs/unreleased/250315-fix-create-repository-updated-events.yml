@@ -1,5 +1,0 @@
----
-title: Geo - Create repository updated events only if the repository exists
-merge_request: 42519
-author:
-type: fixed

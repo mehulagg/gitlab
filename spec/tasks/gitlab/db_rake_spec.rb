@@ -165,24 +165,33 @@ RSpec.describe 'gitlab:db namespace rake task' do
   end
 
   describe 'reindex' do
+    let(:reindex) { double('reindex') }
+    let(:indexes) { double('indexes') }
+
     context 'when no index_name is given' do
-      it 'raises an error' do
-        expect do
-          run_rake_task('gitlab:db:reindex', '')
-        end.to raise_error(ArgumentError, /must give the index name/)
+      it 'rebuilds a random number of large indexes' do
+        expect(Gitlab::Database::PostgresIndex).to receive_message_chain('regular.random_few').and_return(indexes)
+        expect(Gitlab::Database::Reindexing).to receive(:perform).with(indexes)
+
+        run_rake_task('gitlab:db:reindex')
       end
     end
 
-    it 'calls the index rebuilder with the proper arguments' do
-      reindex = double('rebuilder')
+    context 'with index name given' do
+      let(:index) { double('index') }
 
-      expect(Gitlab::Database::ConcurrentReindex).to receive(:new)
-        .with('some_index_name', logger: instance_of(Logger))
-        .and_return(reindex)
+      it 'calls the index rebuilder with the proper arguments' do
+        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.foo_idx').and_return(index)
+        expect(Gitlab::Database::Reindexing).to receive(:perform).with(index)
 
-      expect(reindex).to receive(:execute)
+        run_rake_task('gitlab:db:reindex', '[public.foo_idx]')
+      end
 
-      run_rake_task('gitlab:db:reindex', '[some_index_name]')
+      it 'raises an error if the index does not exist' do
+        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.absent_index').and_raise(ActiveRecord::RecordNotFound)
+
+        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
   end
 

@@ -6,7 +6,7 @@ module EE
       extend ::Gitlab::Utils::Override
 
       override :incidents_data
-      def incidents_data(project)
+      def incidents_data(project, params)
         super.merge(
           incidents_data_published_available(project)
         )

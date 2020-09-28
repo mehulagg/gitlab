@@ -114,9 +114,6 @@ Designs with the same filename as an existing uploaded design will create a new 
 of the design, and will replace the previous version. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34353) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9, dropping a design on an existing uploaded design will also create a new version,
 provided the filenames are the same.
 
-Designs cannot be added if the issue has been moved, or its
-[discussion is locked](../../discussions/#lock-discussions).
-
 ### Skipped designs
 
 Designs with the same filename as an existing uploaded design _and_ whose content has not changed will be skipped.
@@ -185,9 +182,7 @@ viewed by browsing previous versions.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34382) in GitLab 13.3.
 
-You can change the order of designs by dragging them to a new position:
-
-![Reorder designs](img/designs_reordering_v13_3.gif)
+You can change the order of designs by dragging them to a new position.
 
 ## Starting discussions on designs
 

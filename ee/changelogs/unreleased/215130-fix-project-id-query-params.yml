@@ -1,5 +1,0 @@
----
-title: Fix project_ids query param for downloading coverage CSV report
-merge_request: 42497
-author:
-type: fixed

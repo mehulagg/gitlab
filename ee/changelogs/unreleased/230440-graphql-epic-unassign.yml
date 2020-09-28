@@ -1,5 +1,0 @@
----
-title: Add epic_id param to issue update graphQL mutation
-merge_request: 38678
-author:
-type: added

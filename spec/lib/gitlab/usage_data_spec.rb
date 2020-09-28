@@ -255,6 +255,20 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       )
     end
 
+    it 'includes group imports usage data' do
+      for_defined_days_back do
+        user = create(:user)
+        group = create(:group)
+        group.add_owner(user)
+        create(:group_import_state, group: group, user: user)
+      end
+
+      expect(described_class.usage_activity_by_stage_manage({}))
+        .to include(groups_imported: 2)
+      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period))
+        .to include(groups_imported: 1)
+    end
+
     def omniauth_providers
       [
         OpenStruct.new(name: 'google_oauth2'),
@@ -485,6 +499,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(count_data[:projects_with_packages]).to eq(2)
       expect(count_data[:packages]).to eq(4)
+      expect(count_data[:user_preferences_user_gitpod_enabled]).to eq(1)
     end
 
     it 'gathers object store usage correctly' do
@@ -1005,7 +1020,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
   end
 
-  def for_defined_days_back(days: [29, 2])
+  def for_defined_days_back(days: [31, 3])
     days.each do |n|
       Timecop.travel(n.days.ago) do
         yield
@@ -1172,11 +1187,13 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       categories.each do |category|
         keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
 
+        metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+
         if ineligible_total_categories.exclude?(category)
-          keys.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+          metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
         end
 
-        expect(subject[:redis_hll_counters][category].keys).to match_array(keys)
+        expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
       end
     end
   end
