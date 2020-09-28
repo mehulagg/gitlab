@@ -65,6 +65,21 @@ export default {
     isLoading() {
       return this.$apollo.queries.usersCount.loading;
     },
+    range() {
+      return { min: this.usersCount[0][0], max: this.usersCount[this.usersCount.length - 1][0] };
+    },
+    options() {
+      return {
+        xAxis: {
+          // ...this.range,
+          name: 'Date',
+          type: 'category',
+        },
+        yAxis: {
+          name: 'Users',
+        },
+      };
+    },
   },
 };
 </script>
@@ -73,6 +88,8 @@ export default {
   <chart-skeleton-loader v-if="isLoading" />
   <gl-line-chart
     v-else
+    :option="options"
+    :include-legend-avg-max="false"
     :data="[
       {
         name: 'Users',
