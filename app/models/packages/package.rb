@@ -120,6 +120,10 @@ class Packages::Package < ApplicationRecord
       .where(packages_package_files: { file_name: file_name, file_sha256: sha256 }).last!
   end
 
+  def self.by_name_and_version!(name, version)
+    find_by!(name: name, version: version)
+  end
+
   def self.pluck_names
     pluck(:name)
   end
