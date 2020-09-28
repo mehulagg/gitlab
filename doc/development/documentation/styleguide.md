@@ -1683,15 +1683,18 @@ on its own line and surrounded by blank lines.
    and replaced by [Feature name](link-to-feature-documentation).
    ```
 
-If needed, you can also add version information in-line. For example, a new
-feature is added to a function, but there's no need for a new section or other
-high-level call-out. In this case, add `([introduced/deprecated in GitLab X.X]<link-to-issue>)`.
-The link to an issue isn't required, but should be added if it's available. For
+#### Inline version text
+
+If you're adding to an existing topic, you can add version information inline
+with the existing text.
+
+In this case, add `([introduced/deprecated in GitLab X.X]<link-to-issue>)`.
+The link isn't required, but should be added if it's available. For
 example:
 
 ```markdown
-The strong consistency voting strategy (introduced in GitLab 13.4) requires
-only the primary and half of the secondaries need to agree. 
+The voting strategy (introduced in GitLab 13.4) requires
+the primary and secondary voters to agree. 
 ```
 
 ### Versions in the past or future
