@@ -11,7 +11,7 @@ info:
     The feature uses the current [GitLab session cookie](https://docs.gitlab.com/ee/api/README.html#session-cookie),
     so each request is made using your account.
 
-    Read more at <https://docs.gitlab.com/ee/development/documentation/restful-api-styleguide.html>.
+    Read more at <https://docs.gitlab.com/ee/development/documentation/restful_api_styleguide.html>.
   version: "v4"
   title: "GitLab API"
   termsOfService: "https://about.gitlab.com/terms/"
