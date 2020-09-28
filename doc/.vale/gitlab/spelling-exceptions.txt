@@ -166,6 +166,7 @@ Gitleaks
 Gitter
 globals
 Gmail
+Gollum
 Google
 Gosec
 Gradle
