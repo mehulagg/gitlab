@@ -1625,9 +1625,14 @@ heading level.
 
 ### Text for documentation requiring version text
 
-Whenever you add version text to a section, to render correctly it must both be
-on its own line and surrounded by blank lines. The following items relate to
-adding version text to sections:
+When a feature is new or updated, you can add version information
+as a bulleted item in the **Version history**, or inline with related text.
+
+#### Version text in the **Version History**
+
+If all the content under a heading is related, add version text 
+in a bulleted list below the heading. To render correctly, it must be
+on its own line and surrounded by blank lines.
 
 - For features that need to declare the GitLab version that the feature was
   introduced. Text similar to the following should be added immediately below
