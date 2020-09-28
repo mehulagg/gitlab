@@ -737,9 +737,9 @@ CAUTION: **Warning:**
 The process described in this section will not work if you used a [custom filename](#backup-filename)
 for your backups.
 
-You may want to set a limited lifetime for backups to prevent regular backups
-using all your disk space. The next time the backup task is run, backups older
-than the `backup_keep_time` will be pruned.
+To prevent regular backups from using all your disk space, you may want to set a limited lifetime
+for backups. The next time the backup task runs, backups older than the `backup_keep_time` are
+pruned.
 
 This configuration option manages only local files. GitLab doesn't prune old
 files stored in a third-party [object storage](#uploading-backups-to-a-remote-cloud-storage)
