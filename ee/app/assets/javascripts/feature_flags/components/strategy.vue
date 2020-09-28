@@ -75,7 +75,7 @@ export default {
     allEnvironments: __('All environments'),
     environmentsLabel: __('Environments'),
     environmentsSelectDescription: __('Select the environment scope for this feature flag.'),
-    rolloutPercentageDescription: __('Enter a whole number between 0 and 100'),
+    rolloutPercentageDescription: __('Enter a whole number between 0 and 100.'),
     rolloutPercentageInvalid: s__(
       'FeatureFlags|Percent rollout must be a whole number between 0 and 100',
     ),
@@ -235,16 +235,16 @@ export default {
         <gl-form-group
           v-if="isPercentRollout"
           :label="$options.i18n.rolloutPercentageLabel"
-          :description="$options.i18n.rolloutPercentageDescription"
           :label-for="strategyPercentageId"
           :invalid-feedback="$options.i18n.rolloutPercentageInvalid"
         >
+          <p class="gl-display-inline-block ">{{ $options.i18n.rolloutPercentageDescription }}</p>
           <div class="gl-display-flex gl-align-items-center">
             <gl-form-input
               :id="strategyPercentageId"
               v-model="formPercentage"
-              class="rollout-percentage gl-text-right gl-w-9"
               type="number"
+              class="rollout-percentage gl-text-right gl-w-10"
               @input="onStrategyChange"
             />
             <span class="gl-ml-2">%</span>

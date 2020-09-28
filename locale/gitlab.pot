@@ -9662,7 +9662,7 @@ msgstr ""
 msgid "Enter a number"
 msgstr ""
 
-msgid "Enter a whole number between 0 and 100"
+msgid "Enter a whole number between 0 and 100."
 msgstr ""
 
 msgid "Enter at least three characters to search"
