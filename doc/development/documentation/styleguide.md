@@ -1685,7 +1685,8 @@ own line and surrounded by blank lines.
 
 #### Inline version text
 
-If you're adding content to an existing topic, you can add version information inline with the existing text.
+If you're adding content to an existing topic, you can add version information
+inline with the existing text.
 
 In this case, add `([introduced/deprecated in GitLab X.X]<link-to-issue>)`. The
 link isn't required, but should be added if it's available. For example:
