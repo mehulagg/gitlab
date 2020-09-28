@@ -96,9 +96,9 @@ the host, based on your installed version of GitLab:
   ```
 
 If you're using the [GitLab Helm chart](https://gitlab.com/gitlab-org/charts/gitlab)
-on a Kubernetes cluster, you can run the backup task using `backup-utility`
-script on the GitLab task runner pod by using `kubectl`. For more details,
-refer to [backing up a GitLab installation](https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/backup-restore/backup.md#backing-up-a-gitlab-installation).
+on a Kubernetes cluster, you can run the backup task by using `kubectl` to run the `backup-utility`
+script on the GitLab task runner pod. For more details, see
+[backing up a GitLab installation](https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/backup-restore/backup.md#backing-up-a-gitlab-installation).
 
 ```shell
 kubectl exec -it <gitlab task-runner pod> backup-utility
