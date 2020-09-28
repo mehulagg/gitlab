@@ -914,7 +914,7 @@ restore:
 sudo gitlab-backup restore BACKUP=11493107454_2018_04_25_10.6.4-ce
 ```
 
-GitLab 12.1 and earlier uses should use the following command, instead: `gitlab-rake gitlab:backup:create`
+Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 CAUTION: **Warning:**
 `gitlab-rake gitlab:backup:restore` does not set the correct file system
