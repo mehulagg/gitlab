@@ -15,7 +15,7 @@ module Gitlab
     end
 
     def read
-      if !key.nil? && content_path.exist?
+      if !key.nil? && content_path&.exist?
         decrypt content_path.binread
       else
         ""
@@ -44,8 +44,6 @@ module Gitlab
       updated_contents = yield contents
 
       write(updated_contents) if updated_contents != contents
-    ensure
-      FileUtils.rm(tmp_path) if tmp_path&.exist?
     end
 
     def encrypt(contents)
