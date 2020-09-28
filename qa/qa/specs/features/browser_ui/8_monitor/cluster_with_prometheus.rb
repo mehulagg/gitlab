@@ -10,6 +10,12 @@ module QA
         project.template_name = 'express'
       end
 
+      @runner = Resource::Runner.fabricate! do |runner|
+        runner.name = "monitor"
+        runner.executor = :docker
+        runner.tags = ['kubernetes', 'cluster']
+      end
+
       deploy_project_with_prometheus
     end
 
@@ -32,7 +38,7 @@ module QA
       Resource::KubernetesCluster::ProjectCluster.fabricate! do |cluster_settings|
         cluster_settings.project = @project
         cluster_settings.cluster = @cluster
-        cluster_settings.install_runner = true
+        cluster_settings.install_runner = false
         cluster_settings.install_ingress = true
         cluster_settings.install_prometheus = true
       end
@@ -62,6 +68,7 @@ module QA
 
     after :all do
       @cluster&.remove!
+      @runner.remove_via_api!
     end
   end
 end
