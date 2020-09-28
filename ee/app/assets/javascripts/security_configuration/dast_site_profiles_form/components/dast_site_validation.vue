@@ -125,8 +125,9 @@ export default {
     },
   },
   created() {
-    this.updateValidationPath();
-    this.unsubscribe = this.$watch(() => this.token, this.updateValidationPath);
+    this.unsubscribe = this.$watch(() => this.token, this.updateValidationPath, {
+      immediate: true,
+    });
   },
   methods: {
     updateValidationPath() {
