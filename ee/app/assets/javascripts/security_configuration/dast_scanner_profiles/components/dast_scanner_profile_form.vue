@@ -12,6 +12,7 @@ import {
   GlIcon,
   GlTooltipDirective,
   GlInputGroupText,
+  GlFormCheckbox,
 } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -19,7 +20,7 @@ import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
 import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
 
-const initField = (value, isRequired = false) => ({
+const initField = (value, isRequired = true) => ({
   value,
   required: isRequired,
   state: null,
@@ -30,6 +31,11 @@ const SPIDER_TIMEOUT_MIN = 0;
 const SPIDER_TIMEOUT_MAX = 2880;
 const TARGET_TIMEOUT_MIN = 1;
 const TARGET_TIMEOUT_MAX = 3600;
+
+const SCAN_TYPE = {
+  ACTIVE: 'ACTIVE',
+  PASSIVE: 'PASSIVE',
+};
 
 export default {
   name: 'DastScannerProfileForm',
@@ -43,6 +49,7 @@ export default {
     GlModal,
     GlIcon,
     GlInputGroupText,
+    GlFormCheckbox,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -63,12 +70,22 @@ export default {
     },
   },
   data() {
-    const { name = '', spiderTimeout = '', targetTimeout = '' } = this.profile;
+    const {
+      name = '',
+      spiderTimeout = '',
+      targetTimeout = '',
+      scanType = SCAN_TYPE.PASSIVE,
+      ajaxSpider = false,
+      showDebugMessages = false,
+    } = this.profile;
 
     const form = {
-      profileName: initField(name, true),
-      spiderTimeout: initField(spiderTimeout, true),
-      targetTimeout: initField(targetTimeout, true),
+      profileName: initField(name),
+      spiderTimeout: initField(spiderTimeout),
+      targetTimeout: initField(targetTimeout),
+      scanType: initField(scanType),
+      ajaxSpider: initField(ajaxSpider),
+      showDebugMessages: initField(showDebugMessages),
     };
 
     return {
@@ -113,6 +130,10 @@ export default {
           targetTimeout: s__(
             'DastProfiles|The maximum number of seconds allowed for the site under test to respond to a request.',
           ),
+          ajaxSpider: s__(
+            'Enable it to run the AJAX spider (in addition to the traditional spider) to crawl the target site',
+          ),
+          debugMessage: s__('Enable it to include the debug messages in DAST console output'),
         },
       };
     },
@@ -302,6 +323,40 @@ export default {
         <div class="gl-text-gray-400 gl-my-2">
           {{ s__('DastProfiles|Minimum = 1 second, Maximum = 3600 seconds') }}
         </div>
+      </gl-form-group>
+    </div>
+
+    <hr />
+
+    <div class="row">
+      <gl-form-group class="col-md-6 mb-0">
+        <template #label>
+          {{ s__('DastProfiles|AJAX spider') }}
+          <gl-icon
+            v-gl-tooltip.hover
+            name="information-o"
+            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
+            :title="i18n.tooltips.ajaxSpider"
+          />
+        </template>
+        <gl-form-checkbox v-model="form.ajaxSpider.value">{{
+          s__('DastProfiles|Turn on AJAX spider')
+        }}</gl-form-checkbox>
+      </gl-form-group>
+
+      <gl-form-group class="col-md-6 mb-0">
+        <template #label>
+          {{ s__('DastProfiles|Debug messages') }}
+          <gl-icon
+            v-gl-tooltip.hover
+            name="information-o"
+            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
+            :title="i18n.tooltips.debugMessage"
+          />
+        </template>
+        <gl-form-checkbox v-model="form.showDebugMessages.value">{{
+          s__('DastProfiles|Show debug message')
+        }}</gl-form-checkbox>
       </gl-form-group>
     </div>
 
