@@ -144,7 +144,7 @@ export default {
     </div>
     <div class="ci-table" role="grid">
       <div
-        class="gl-responsive-table-row table-row-header gl-pl-3 border-top gl-mt-5 gl-line-height-normal gl-text-black-normal gl-font-base"
+        class="gl-responsive-table-row table-row-header gl-pl-3 gl-border-t-solid gl-border-t-1 gl-border-gray-100 gl-mt-5 gl-line-height-normal gl-text-black-normal gl-font-base"
         role="row"
       >
         <div class="table-section section-70 gl-font-weight-bold" role="columnheader">
