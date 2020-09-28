@@ -75,15 +75,13 @@ CREATE TABLE audit_events_part_5fc467ac26 (
     details text,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     created_at timestamp without time zone NOT NULL,
     target_type text,
     target_id bigint,
-    CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
     CONSTRAINT check_83ff8406e2 CHECK ((char_length(author_name) <= 255)),
-    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255)),
-    CONSTRAINT check_d493ec90b5 CHECK ((char_length(target_details) <= 5500))
+    CONSTRAINT check_97a8c868e7 CHECK ((char_length(target_type) <= 255))
 )
 PARTITION BY RANGE (created_at);
 
@@ -8830,6 +8828,31 @@ CREATE SEQUENCE alert_management_alerts_id_seq
 
 ALTER SEQUENCE alert_management_alerts_id_seq OWNED BY alert_management_alerts.id;
 
+CREATE TABLE alert_management_http_integrations (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    project_id bigint NOT NULL,
+    active boolean DEFAULT false NOT NULL,
+    encrypted_token text,
+    encrypted_token_iv text,
+    endpoint_identifier text,
+    name text,
+    CONSTRAINT check_286943b636 CHECK ((char_length(encrypted_token_iv) <= 255)),
+    CONSTRAINT check_392143ccf4 CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_e270820180 CHECK ((char_length(endpoint_identifier) <= 255)),
+    CONSTRAINT check_f68577c4af CHECK ((char_length(encrypted_token) <= 255))
+);
+
+CREATE SEQUENCE alert_management_http_integrations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE alert_management_http_integrations_id_seq OWNED BY alert_management_http_integrations.id;
+
 CREATE TABLE alerts_service_data (
     id bigint NOT NULL,
     service_id integer NOT NULL,
@@ -9519,8 +9542,8 @@ CREATE TABLE audit_events (
     created_at timestamp without time zone,
     ip_address inet,
     author_name text,
-    entity_path text,
     target_details text,
+    entity_path text,
     target_type text,
     target_id bigint,
     CONSTRAINT check_492aaa021d CHECK ((char_length(entity_path) <= 5500)),
@@ -17064,6 +17087,8 @@ ALTER TABLE ONLY alert_management_alert_user_mentions ALTER COLUMN id SET DEFAUL
 
 ALTER TABLE ONLY alert_management_alerts ALTER COLUMN id SET DEFAULT nextval('alert_management_alerts_id_seq'::regclass);
 
+ALTER TABLE ONLY alert_management_http_integrations ALTER COLUMN id SET DEFAULT nextval('alert_management_http_integrations_id_seq'::regclass);
+
 ALTER TABLE ONLY alerts_service_data ALTER COLUMN id SET DEFAULT nextval('alerts_service_data_id_seq'::regclass);
 
 ALTER TABLE ONLY allowed_email_domains ALTER COLUMN id SET DEFAULT nextval('allowed_email_domains_id_seq'::regclass);
@@ -17976,6 +18001,9 @@ ALTER TABLE ONLY alert_management_alert_user_mentions
 
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT alert_management_alerts_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY alert_management_http_integrations
+    ADD CONSTRAINT alert_management_http_integrations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY alerts_service_data
     ADD CONSTRAINT alerts_service_data_pkey PRIMARY KEY (id);
@@ -19282,7 +19310,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
@@ -19299,6 +19327,8 @@ CREATE INDEX commit_id_and_note_id_index ON commit_user_mentions USING btree (co
 CREATE UNIQUE INDEX design_management_designs_versions_uniqueness ON design_management_designs_versions USING btree (design_id, version_id);
 
 CREATE INDEX design_user_mentions_on_design_id_and_note_id_index ON design_user_mentions USING btree (design_id, note_id);
+
+CREATE INDEX dev_index_route_on_path_trigram ON routes USING gin (path gin_trgm_ops);
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user_mentions USING btree (epic_id, note_id);
 
@@ -19399,6 +19429,10 @@ CREATE INDEX index_alert_management_alerts_on_issue_id ON alert_management_alert
 CREATE UNIQUE INDEX index_alert_management_alerts_on_project_id_and_iid ON alert_management_alerts USING btree (project_id, iid);
 
 CREATE INDEX index_alert_management_alerts_on_prometheus_alert_id ON alert_management_alerts USING btree (prometheus_alert_id) WHERE (prometheus_alert_id IS NOT NULL);
+
+CREATE INDEX index_alert_management_http_integrations_on_active ON alert_management_http_integrations USING btree (active);
+
+CREATE INDEX index_alert_management_http_integrations_on_project_id ON alert_management_http_integrations USING btree (project_id);
 
 CREATE UNIQUE INDEX index_alert_user_mentions_on_alert_id ON alert_management_alert_user_mentions USING btree (alert_management_alert_id) WHERE (note_id IS NULL);
 
