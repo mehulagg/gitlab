@@ -25,8 +25,9 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
       expect(container).to have_content("Report #{human_model_name.pluralize} that are abusive, inappropriate or spam.")
 
       if issuable.is_a?(MergeRequest)
-        expect(container).to have_selector('.close-item')
-        expect(container).to have_selector('.draft-item')
+        page.within('.js-issuable-close-dropdown') do
+          expect(page).to have_link('Close merge request')
+        end
       else
         expect(container).to have_selector('.close-item.droplab-item-selected')
       end

@@ -1,11 +1,9 @@
 - display_issuable_type = issuable_display_type(issuable)
 - button_action_class = issuable.closed? ? 'default' : 'warning btn-warning-secondary'
-- responsive_class = 'd-none d-sm-none d-md-block'
 - button_class = "btn gl-button js-draft-toggle-button"
 - toggle_class = "btn gl-button dropdown-toggle"
-- button_action_url = toggle_draft_issuable_path(issuable)
 
-.float-left.btn-group.gl-ml-3.issuable-close-dropdown.d-none.d-md-inline-flex
+.float-left.btn-group.gl-ml-3.issuable-close-dropdown.d-none.d-md-inline-flex.js-issuable-close-dropdown
   = link_to toggle_draft_issuable_path(issuable), method: :put, class: "#{button_class} #{button_action_class}", data: { testid: 'close-issue-button', qa_selector: 'close_issue_button' } do
     = issuable.work_in_progress? ? _('Mark as ready') : _('Mark as draft')
 
@@ -33,8 +31,8 @@
     - unless issuable_author_is_current_user(issuable)
       %li.divider.droplab-item-ignore
 
-      %li
-        %a{ href:  new_abuse_report_path(user_id: issuable.author.id, ref_url: issuable_url(issuable)) }
+      %li.report-item
+        %a.report-abuse-link{ href: new_abuse_report_path(user_id: issuable.author.id, ref_url: issuable_url(issuable)) }
           .description
             %strong.title= _('Report abuse')
             %p.text
