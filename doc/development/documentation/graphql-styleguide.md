@@ -84,6 +84,8 @@ following line:
 ```
 
 Be aware that CI tests for that second MR will fail with a bad link until the
-main MR that adds the new GraphQL page is merged.
+main MR that adds the new GraphQL page is merged. Therefore, only merge the MR against the
+[`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) repository after the content has
+been merged and live on `docs.gitlab.com`.
 
 And that's all you need!
