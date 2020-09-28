@@ -11859,9 +11859,6 @@ msgstr ""
 msgid "GitLab restart is required to apply changes."
 msgstr ""
 
-msgid "GitLab shared Runners execute code of different projects on the same Runner unless you configure GitLab Runner Autoscale with MaxBuilds 1 (which it is on GitLab.com)."
-msgstr ""
-
 msgid "GitLab shared runners execute code of different projects on the same runner unless you configure GitLab runner autoscale with MaxBuilds 1 (which it is on GitLab.com)."
 msgstr ""
 

@@ -5,7 +5,7 @@
   - if Gitlab::CurrentSettings.shared_runners_text.present?
     = markdown_field(Gitlab::CurrentSettings.current_application_settings, :shared_runners_text)
   - else
-    = _('GitLab shared Runners execute code of different projects on the same Runner unless you configure GitLab Runner Autoscale with MaxBuilds 1 (which it is on GitLab.com).')
+    = _('GitLab shared runners execute code of different projects on the same runner unless you configure GitLab runner autoscale with MaxBuilds 1 (which it is on GitLab.com).')
   %hr
   - if @project.group&.shared_runners_allowed? == false
     %h5.text-danger
