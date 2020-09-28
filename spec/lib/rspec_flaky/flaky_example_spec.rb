@@ -80,14 +80,14 @@ RSpec.describe RspecFlaky::FlakyExample, :aggregate_failures do
       it 'updates the first_flaky_at' do
         now = Time.now
         expected_first_flaky_at = flaky_example.first_flaky_at || now
-        travel_to(now) { flaky_example.update_flakiness! }
+        Timecop.freeze(now) { flaky_example.update_flakiness! }
 
         expect(flaky_example.first_flaky_at).to eq(expected_first_flaky_at)
       end
 
       it 'updates the last_flaky_at' do
         now = Time.now
-        travel_to(now) { flaky_example.update_flakiness! }
+        Timecop.freeze(now) { flaky_example.update_flakiness! }
 
         expect(flaky_example.last_flaky_at).to eq(now)
       end
