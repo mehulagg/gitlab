@@ -1,0 +1,8 @@
+query getUsersCount {
+  users: instanceStatisticsMeasurements(identifier: USERS, first: 365) {
+    nodes {
+      count
+      recordedAt
+    }
+  }
+}
