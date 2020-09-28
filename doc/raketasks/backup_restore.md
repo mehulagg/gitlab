@@ -209,7 +209,7 @@ To use the `copy` strategy instead of the default streaming strategy, specify
 sudo gitlab-backup create STRATEGY=copy
 ```
 
-GitLab 12.1 and earlier uses should use the following command, instead: `gitlab-rake gitlab:backup:create`
+Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 #### Backup filename
 
