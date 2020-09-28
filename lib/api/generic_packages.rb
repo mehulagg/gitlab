@@ -69,6 +69,25 @@ module API
 
             forbidden!
           end
+
+          params do
+            requires :package_name, type: String, desc: 'Package name'
+            requires :package_version, type: String, desc: 'Package version', regexp: Gitlab::Regex.generic_package_version_regex
+            requires :file_name, type: String, desc: 'Package file name', regexp: Gitlab::Regex.generic_package_file_name_regex, file_path: true
+          end
+
+          route_setting :authentication, job_token_allowed: true
+
+          get do
+            authorize_read_package!(project)
+
+            package = ::Packages::Generic::PackageFinder.new(project).execute!(params[:package_name], params[:package_version])
+            package_file = ::Packages::PackageFileFinder.new(package, params[:file_name]).execute!
+
+            track_event('pull_package')
+
+            present_carrierwave_file!(package_file.file)
+          end
         end
       end
     end

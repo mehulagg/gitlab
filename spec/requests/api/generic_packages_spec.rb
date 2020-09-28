@@ -33,7 +33,7 @@ RSpec.describe API::GenericPackages do
     { Gitlab::Auth::AuthFinders::JOB_TOKEN_HEADER => value || ci_build.token }
   end
 
-  describe 'PUT /api/v4/projects/:id/packages/generic/mypackage/0.0.1/myfile.tar.gz/authorize' do
+  describe 'PUT /api/v4/projects/:id/packages/generic/:package_name/:package_version/:file_name/authorize' do
     context 'with valid project' do
       using RSpec::Parameterized::TableSyntax
 
@@ -107,7 +107,7 @@ RSpec.describe API::GenericPackages do
     end
   end
 
-  describe 'PUT /api/v4/projects/:id/packages/generic/mypackage/0.0.1/myfile.tar.gz' do
+  describe 'PUT /api/v4/projects/:id/packages/generic/:package_name/:package_version/:file_name' do
     include WorkhorseHelpers
 
     let(:file_upload) { fixture_file_upload('spec/fixtures/packages/generic/myfile.tar.gz') }
@@ -266,6 +266,99 @@ RSpec.describe API::GenericPackages do
         headers: request_headers,
         send_rewritten_field: send_rewritten_field
       )
+    end
+  end
+
+  describe 'GET /api/v4/projects/:id/packages/generic/:package_name/:package_version/:file_name' do
+    using RSpec::Parameterized::TableSyntax
+
+    let_it_be(:package) { create(:generic_package, project: project) }
+    let_it_be(:package_file) { create(:package_file, :generic, package: package) }
+
+    context 'authentication' do
+      where(:project_visibility, :user_role, :member?, :authenticate_with, :expected_status) do
+        'PUBLIC'  | :developer | true  | :personal_access_token         | :success
+        'PUBLIC'  | :guest     | true  | :personal_access_token         | :success
+        'PUBLIC'  | :developer | true  | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :developer | false | :personal_access_token         | :success
+        'PUBLIC'  | :guest     | false | :personal_access_token         | :success
+        'PUBLIC'  | :developer | false | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PUBLIC'  | :anonymous | false | :none                          | :unauthorized
+        'PRIVATE' | :developer | true  | :personal_access_token         | :success
+        'PRIVATE' | :guest     | true  | :personal_access_token         | :forbidden
+        'PRIVATE' | :developer | true  | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :guest     | true  | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :developer | false | :personal_access_token         | :not_found
+        'PRIVATE' | :guest     | false | :personal_access_token         | :not_found
+        'PRIVATE' | :developer | false | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :guest     | false | :invalid_personal_access_token | :unauthorized
+        'PRIVATE' | :anonymous | false | :none                          | :unauthorized
+        'PUBLIC'  | :developer | true  | :job_token                     | :success
+        'PUBLIC'  | :developer | true  | :invalid_job_token             | :unauthorized
+        'PUBLIC'  | :developer | false | :job_token                     | :success
+        'PUBLIC'  | :developer | false | :invalid_job_token             | :unauthorized
+        'PRIVATE' | :developer | true  | :job_token                     | :success
+        'PRIVATE' | :developer | true  | :invalid_job_token             | :unauthorized
+        'PRIVATE' | :developer | false | :job_token                     | :not_found
+        'PRIVATE' | :developer | false | :invalid_job_token             | :unauthorized
+      end
+
+      with_them do
+        before do
+          project.update!(visibility_level: Gitlab::VisibilityLevel.const_get(project_visibility, false))
+          project.send("add_#{user_role}", user) if member? && user_role != :anonymous
+        end
+
+        it "responds with #{params[:expected_status]}" do
+          download_file(auth_header)
+
+          expect(response).to have_gitlab_http_status(expected_status)
+        end
+      end
+    end
+
+    context 'event tracking' do
+      before do
+        project.add_developer(user)
+      end
+
+      subject { download_file(personal_access_token_header) }
+
+      it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+    end
+
+    it 'rejects a malicious request' do
+      project.add_developer(user)
+
+      download_file(personal_access_token_header, file_name: '%2e%2e%2f.ssh%2fauthorized_keys')
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    it 'responds with 404 Not Found for non existing package' do
+      project.add_developer(user)
+
+      download_file(personal_access_token_header, package_name: 'no-such-package')
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    it 'responds with 404 Not Found for non existing package file' do
+      project.add_developer(user)
+
+      download_file(personal_access_token_header, file_name: 'no-such-file')
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    def download_file(request_headers, package_name: nil, file_name: nil)
+      package_name ||= package.name
+      file_name ||= package_file.file_name
+      url = "/projects/#{project.id}/packages/generic/#{package_name}/#{package.version}/#{file_name}"
+
+      get api(url), headers: request_headers
     end
   end
 end
