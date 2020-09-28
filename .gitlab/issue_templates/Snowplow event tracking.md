@@ -16,7 +16,7 @@ We generally recommend events be tracked using a [structured event](https://docs
 * Category: The name for the group of objects you want to track. They can just be the GitLab category, or a specific workflow within a category.
 * Action: A string that is used to define the user action.
 * Label: An optional string which identifies the specific object being actioned.
-* Property: An optional string describing the object or the action performed on it.
+* Property: Optional. Any additional property of the element, or object being acted on.
 * Value: Optional, numeric. Describes a numeric value or something directly related to the event. This could be the value of an input (e.g. `10` when clicking `internal` visibility)
 
 | Category | Action | Label | Property | Feature Issue | Additional Information |
