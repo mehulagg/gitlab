@@ -22,7 +22,6 @@ module Gitlab
         end
       end
 
-      # Test change
       def uncached_data
         clear_memoized
 
