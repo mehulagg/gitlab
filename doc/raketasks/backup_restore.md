@@ -226,7 +226,7 @@ environment variable. For example:
 sudo gitlab-backup create BACKUP=dump
 ```
 
-GitLab 12.1 and earlier uses should use the following command, instead: `gitlab-rake gitlab:backup:create`
+Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 The resulting file will then be `dump_gitlab_backup.tar`. This is useful for
 systems that make use of rsync and incremental backups, and will result in
