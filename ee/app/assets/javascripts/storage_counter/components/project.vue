@@ -55,7 +55,7 @@ export default {
   },
   methods: {
     toggleProject(e) {
-      const NO_EXPAND_CLS = 'no-expand';
+      const NO_EXPAND_CLS = 'js-project-link';
       const targetClasses = e.target.classList;
 
       if (targetClasses.contains(NO_EXPAND_CLS)) {
@@ -110,9 +110,11 @@ export default {
           <div>
             <project-avatar :project="projectAvatar" :size="32" />
           </div>
-          <gl-link :href="project.webUrl" class="no-expand gl-font-weight-bold gl-text-gray-900!">{{
-            name
-          }}</gl-link>
+          <gl-link
+            :href="project.webUrl"
+            class="js-project-link gl-font-weight-bold gl-text-gray-900!"
+            >{{ name }}</gl-link
+          >
         </div>
       </div>
       <div
