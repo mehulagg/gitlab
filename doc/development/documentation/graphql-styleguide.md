@@ -62,7 +62,7 @@ Set up the section with the following:
   ```markdown
   1. Open the GraphiQL explorer tool in the following URL: `https://gitlab.com/-/graphql-explorer`.
   1. Paste the `query` listed above into the left window of your GraphiQL explorer tool.
-  1. Select Play to get the result shown here:
+  1. Select **Play** to get the result shown here:
   ```
 
 - Include a screenshot of the result in the GraphiQL explorer. Follow the naming
