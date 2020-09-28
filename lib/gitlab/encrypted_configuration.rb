@@ -73,7 +73,7 @@ module Gitlab
     end
 
     def deserialize(contents)
-      YAML.safe_load(contents, [Symbol]).presence || {}
+      YAML.safe_load(contents, permitted_classes: [Symbol]).presence || {}
     end
   end
 end
