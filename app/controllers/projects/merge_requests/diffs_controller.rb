@@ -34,7 +34,15 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       pagination_data: diffs.pagination_data
     }
 
-    render json: PaginatedDiffSerializer.new(current_user: current_user).represent(diffs, options)
+    results = PaginatedDiffSerializer.new(current_user: current_user).represent(diffs, options)
+
+    if params[:file_path]
+      results[:diff_files] = results[:diff_files].find do |diff_file|
+        diff_file[:file_path] == params[:file_path]
+      end
+    end
+
+    render json: results
   end
 
   def diffs_metadata
