@@ -22,4 +22,4 @@ export const getStoreConfig = () => ({
   },
 });
 
-export default () => new Vuex.Store(getStoreConfig());
+export default new Vuex.Store(getStoreConfig());
