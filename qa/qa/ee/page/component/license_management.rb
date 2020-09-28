@@ -29,13 +29,12 @@ module QA
             end
           end
 
-           def click_license(name)
+          def click_license(name)
             within_element(:license_report_widget) do
               click_on name
             end
             wait_for_animated_element(:license_management_modal)
           end
-
         end
       end
     end
