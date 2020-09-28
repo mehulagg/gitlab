@@ -13,6 +13,7 @@ import {
   GlTooltipDirective,
   GlInputGroupText,
   GlFormCheckbox,
+  GlFormRadioGroup,
 } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -37,6 +38,17 @@ const SCAN_TYPE = {
   PASSIVE: 'PASSIVE',
 };
 
+const scanTypeOptions = [
+  {
+    value: SCAN_TYPE.ACTIVE,
+    text: s__('DastProfiles|Active'),
+  },
+  {
+    value: SCAN_TYPE.PASSIVE,
+    text: s__('DastProfiles|Passive'),
+  },
+];
+
 export default {
   name: 'DastScannerProfileForm',
   components: {
@@ -50,6 +62,7 @@ export default {
     GlIcon,
     GlInputGroupText,
     GlFormCheckbox,
+    GlFormRadioGroup,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -103,6 +116,7 @@ export default {
     min: TARGET_TIMEOUT_MIN,
     max: TARGET_TIMEOUT_MAX,
   },
+  scanTypeOptions,
   computed: {
     isEdit() {
       return Boolean(this.profile.id);
@@ -129,6 +143,9 @@ export default {
           ),
           targetTimeout: s__(
             'DastProfiles|The maximum number of seconds allowed for the site under test to respond to a request.',
+          ),
+          scanMode: s__(
+            'Active scan will make active attacks against the target site while Passive scan will not',
           ),
           ajaxSpider: s__(
             'Enable it to run the AJAX spider (in addition to the traditional spider) to crawl the target site',
@@ -259,7 +276,25 @@ export default {
     </gl-form-group>
 
     <hr />
+    <div class="row">
+      <gl-form-group>
+        <template #label>
+          {{ s__('DastProfiles|Scan mode') }}
+          <gl-icon
+            v-gl-tooltip.hover
+            name="information-o"
+            class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
+            :title="i18n.tooltips.scanMode"
+          />
+        </template>
 
+        <gl-form-radio-group
+          ref="scanType"
+          v-model="form.scanType.value"
+          :options="$options.scanTypeOptions"
+        />
+      </gl-form-group>
+    </div>
     <div class="row">
       <gl-form-group
         class="col-md-6"
