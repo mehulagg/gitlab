@@ -246,7 +246,7 @@ on all distributions. To verify that it's available in your distribution, run
 sudo gitlab-backup create BACKUP=dump GZIP_RSYNCABLE=yes
 ```
 
-GitLab 12.1 and earlier uses should use the following command, instead: `gitlab-rake gitlab:backup:create`
+Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 #### Excluding specific directories from the backup
 
