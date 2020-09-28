@@ -172,7 +172,7 @@ RSpec.describe ActiveSession, :clean_gitlab_redis_shared_state do
     end
 
     it 'adds timestamps and information from the request' do
-      travel_to(Time.zone.parse('2018-03-12 09:06')) do
+      Timecop.freeze(Time.zone.parse('2018-03-12 09:06')) do
         ActiveSession.set(user, request)
 
         session = ActiveSession.list(user)
@@ -193,10 +193,10 @@ RSpec.describe ActiveSession, :clean_gitlab_redis_shared_state do
     it 'keeps the created_at from the login on consecutive requests' do
       now = Time.zone.parse('2018-03-12 09:06')
 
-      travel_to(now) do
+      Timecop.freeze(now) do
         ActiveSession.set(user, request)
 
-        travel_to(now + 1.minute) do
+        Timecop.freeze(now + 1.minute) do
           ActiveSession.set(user, request)
 
           session = ActiveSession.list(user)
