@@ -600,7 +600,7 @@ sudo gitlab-backup create DIRECTORY=daily
 sudo gitlab-backup create DIRECTORY=weekly
 ```
 
-GitLab 12.1 and earlier uses should use the following command, instead: `gitlab-rake gitlab:backup:create`
+Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 #### Uploading to locally mounted shares
 
