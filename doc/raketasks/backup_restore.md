@@ -410,7 +410,7 @@ doesn't support encryption, remove or comment the line that contains
 ##### Other S3 Providers
 
 Not all S3 providers are fully compatible with the Fog library. For example,
-if you see a `411 Length Required` error messages after attempting to upload,
+if you see a `411 Length Required` error message after attempting to upload,
 you may need to downgrade the `aws_signature_version` value from the default
 value, to `2` [due to this issue](https://github.com/fog/fog-aws/issues/428).
 
