@@ -690,7 +690,7 @@ class User < ApplicationRecord
 
       unique_internal(where(user_type: :security_bot), 'security-bot', email_pattern) do |u|
         u.bio = 'System bot that monitors detected vulnerabilities for solutions and creates merge requests with the fixes.'
-        u.name = 'GitLab Security bot'
+        u.name = 'GitLab Security Bot'
         u.website_url = 'https://docs.gitlab.com/ee/user/application_security/secuirty_bot/'
         u.avatar = bot_avatar(image: 'security-bot.png')
       end
