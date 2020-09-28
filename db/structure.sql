@@ -15335,6 +15335,22 @@ CREATE TABLE repository_languages (
     share double precision NOT NULL
 );
 
+CREATE TABLE required_code_owners_sections (
+    id bigint NOT NULL,
+    protected_branch_id bigint NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_e58d53741e CHECK ((char_length(name) <= 1024))
+);
+
+CREATE SEQUENCE required_code_owners_sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE required_code_owners_sections_id_seq OWNED BY required_code_owners_sections.id;
+
 CREATE TABLE requirements (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -17620,6 +17636,8 @@ ALTER TABLE ONLY releases ALTER COLUMN id SET DEFAULT nextval('releases_id_seq':
 
 ALTER TABLE ONLY remote_mirrors ALTER COLUMN id SET DEFAULT nextval('remote_mirrors_id_seq'::regclass);
 
+ALTER TABLE ONLY required_code_owners_sections ALTER COLUMN id SET DEFAULT nextval('required_code_owners_sections_id_seq'::regclass);
+
 ALTER TABLE ONLY requirements ALTER COLUMN id SET DEFAULT nextval('requirements_id_seq'::regclass);
 
 ALTER TABLE ONLY requirements_management_test_reports ALTER COLUMN id SET DEFAULT nextval('requirements_management_test_reports_id_seq'::regclass);
@@ -18888,6 +18906,9 @@ ALTER TABLE ONLY releases
 
 ALTER TABLE ONLY remote_mirrors
     ADD CONSTRAINT remote_mirrors_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY required_code_owners_sections
+    ADD CONSTRAINT required_code_owners_sections_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT requirements_management_test_reports_pkey PRIMARY KEY (id);
@@ -21042,6 +21063,8 @@ CREATE INDEX index_remote_mirrors_on_project_id ON remote_mirrors USING btree (p
 
 CREATE UNIQUE INDEX index_repository_languages_on_project_and_languages_id ON repository_languages USING btree (project_id, programming_language_id);
 
+CREATE INDEX index_required_code_owners_sections_on_protected_branch_id ON required_code_owners_sections USING btree (protected_branch_id);
+
 CREATE INDEX index_requirements_management_test_reports_on_author_id ON requirements_management_test_reports USING btree (author_id);
 
 CREATE INDEX index_requirements_management_test_reports_on_build_id ON requirements_management_test_reports USING btree (build_id);
@@ -23139,6 +23162,9 @@ ALTER TABLE ONLY clusters_kubernetes_namespaces
 
 ALTER TABLE ONLY approval_merge_request_rules_users
     ADD CONSTRAINT fk_rails_80e6801803 FOREIGN KEY (approval_merge_request_rule_id) REFERENCES approval_merge_request_rules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY required_code_owners_sections
+    ADD CONSTRAINT fk_rails_817708cf2d FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dast_site_profiles
     ADD CONSTRAINT fk_rails_83e309d69e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
