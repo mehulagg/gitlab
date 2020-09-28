@@ -178,6 +178,7 @@ RSpec.describe Projects::Settings::AccessTokensController do
   end
 
   def enable_feature
+    allow(Gitlab).to receive(:com?).and_return(false)
     stub_feature_flags(resource_access_token: true)
   end
 end
