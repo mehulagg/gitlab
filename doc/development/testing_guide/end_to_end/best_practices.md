@@ -321,10 +321,24 @@ Page::Project::Pipeline::Show.perform do |pipeline|
 end
 ```
 
+### Ensure `expect` checks for negation efficiently
+
 However, sometimes we want to check that something is _not_ as we _don't_ want it to be. In other
 words, we want to make sure something is absent. In such a case we should use an appropriate
 predicate method that returns quickly, rather than waiting for a state that won't appear.
-For example, if we want to check that a job doesn't exist it might be tempting to use `not_to`:
+
+It's most efficient to use a predicate method that returns immediately when there is no job, or waits
+until it disappears:
+
+```ruby
+# Good
+Page::Project::Pipeline::Show.perform do |pipeline|
+  expect(pipeline).to have_no_job("a_job")
+end
+
+### Problematic alternatives
+
+Alternatively, if we want to check that a job doesn't exist it might be tempting to use `not_to`:
 
 ```ruby
 # Bad
@@ -337,7 +351,7 @@ For this statement to pass, `have_job("a_job")` has to return `false` so that `n
 The problem is that `have_job("a_job")` waits up to ten seconds for `"a job"` to appear before
 returning `false`. Under the expected condition this test will take ten seconds longer than it needs to.
 
-Alternatively, we could force no wait:
+Instead, we could force no wait:
 
 ```ruby
 # Not as bad but potentially flaky
@@ -349,12 +363,3 @@ end
 The problem is that if `"a_job"` is present and we're waiting for it to disappear, this statement
 will fail.
 
-Instead, we use a predicate method that will return immediately when there is no job, or wait until
-it disappears:
-
-```ruby
-# Good
-Page::Project::Pipeline::Show.perform do |pipeline|
-  expect(pipeline).to have_no_job("a_job")
-end
-```
