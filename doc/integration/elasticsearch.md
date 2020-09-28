@@ -304,7 +304,7 @@ initial setup will help for later:
 
 ```shell
 # You can find this value under Admin Area > Settings > General > Elasticsearch > URL
-export CLUSTER_URL="http://localhost:9200"
+export CLUSTER_URL="http://host1:9200"
 export PRIMARY_INDEX="gitlab-production"
 export SECONDARY_INDEX="gitlab-production-$(date +%s)"
 ```

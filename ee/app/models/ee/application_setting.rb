@@ -116,7 +116,7 @@ module EE
           elasticsearch_max_bulk_size_bytes: 10.megabytes,
           elasticsearch_replicas: 1,
           elasticsearch_shards: 5,
-          elasticsearch_url: ENV['ELASTIC_URL'] || 'http://localhost:9200',
+          elasticsearch_url: ENV['ELASTIC_URL'],
           elasticsearch_client_request_timeout: 0,
           email_additional_text: nil,
           enforce_namespace_storage_limit: false,

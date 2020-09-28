@@ -49,9 +49,9 @@
 
           .form-group
             = f.label :elasticsearch_url, 'URL', class: 'label-bold'
-            = f.text_field :elasticsearch_url, value: @application_setting.elasticsearch_url.join(', '), class: 'form-control', placeholder: 'http://localhost:9200', data: { qa_selector: 'url_field' }
+            = f.text_field :elasticsearch_url, value: @application_setting.elasticsearch_url.join(', '), class: 'form-control', placeholder: 'http://host1:9200', data: { qa_selector: 'url_field' }
             .form-text.text-muted
-              = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://localhost:9200, http://localhost:9201").')
+              = _('The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., "http://host1:9200, http://host2:9200").')
 
           .form-group
             = f.label :elasticsearch_shards, _('Number of Elasticsearch shards'), class: 'label-bold'

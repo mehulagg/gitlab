@@ -220,7 +220,7 @@ end
 Gitlab.ee do
   Settings['elasticsearch'] ||= Settingslogic.new({})
   Settings.elasticsearch['enabled'] = false if Settings.elasticsearch['enabled'].nil?
-  Settings.elasticsearch['url'] = ENV['ELASTIC_URL'] || "http://localhost:9200"
+  Settings.elasticsearch['url'] = ENV['ELASTIC_URL']
   Settings.elasticsearch['indexer_path'] ||= Gitlab::Utils.which('gitlab-elasticsearch-indexer')
 end
 
