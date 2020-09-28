@@ -3,40 +3,39 @@ import { mount } from '@vue/test-utils';
 import tooltip from '~/vue_shared/directives/tooltip';
 
 describe('Tooltip directive', () => {
-  let vm;
+  let wrapper;
+
+  function createTooltipContainer(
+    template = '<div v-tooltip :title="tooltip"></div>',
+    isHtml = false,
+  ) {
+    wrapper = mount(
+      {
+        directives: { tooltip },
+        data: () => ({ tooltip: 'some text' }),
+        template: isHtml ? template.replace('v-tooltip', 'v-tooltip data-html=true') : template,
+      },
+      { attachToDocument: true },
+    );
+  }
 
   afterEach(() => {
-    if (vm) {
-      vm.$destroy();
-    }
+    wrapper.destroy();
+    wrapper = null;
   });
 
   describe('with a single tooltip', () => {
-    beforeEach(() => {
-      const wrapper = mount(
-        {
-          directives: {
-            tooltip,
-          },
-          data() {
-            return {
-              tooltip: 'some text',
-            };
-          },
-          template: '<div v-tooltip :title="tooltip"></div>',
-        },
-        { attachToDocument: true },
-      );
-
-      vm = wrapper.vm;
-    });
-
     it('should have tooltip plugin applied', () => {
-      expect($(vm.$el).data('bs.tooltip')).toBeDefined();
+      createTooltipContainer();
+
+      expect($(wrapper.vm.$el).data('bs.tooltip')).toBeDefined();
     });
 
     it('displays the title as tooltip', () => {
-      $(vm.$el).tooltip('show');
+      createTooltipContainer();
+
+      $(wrapper.vm.$el).tooltip('show');
+
       jest.runOnlyPendingTimers();
 
       const tooltipElement = document.querySelector('.tooltip-inner');
@@ -44,52 +43,54 @@ describe('Tooltip directive', () => {
       expect(tooltipElement.textContent).toContain('some text');
     });
 
-    it('updates a visible tooltip', () => {
-      $(vm.$el).tooltip('show');
+    it.each`
+      condition                      | isHtml   | sanitize
+      ${'does not contain any html'} | ${false} | ${false}
+      ${'contains html'}             | ${true}  | ${true}
+    `('passes sanitize=$sanitize if the tooltip $condition', ({ isHtml, sanitize }) => {
+      createTooltipContainer(undefined, isHtml);
+
+      expect($(wrapper.vm.$el).data('bs.tooltip').config.sanitize).toEqual(sanitize);
+    });
+
+    it('updates a visible tooltip', async () => {
+      createTooltipContainer();
+
+      $(wrapper.vm.$el).tooltip('show');
       jest.runOnlyPendingTimers();
 
       const tooltipElement = document.querySelector('.tooltip-inner');
 
-      vm.tooltip = 'other text';
+      wrapper.vm.tooltip = 'other text';
 
       jest.runOnlyPendingTimers();
 
-      return vm.$nextTick().then(() => {
-        expect(tooltipElement.textContent).toContain('other text');
-      });
+      await wrapper.vm.$nextTick();
+
+      expect(tooltipElement.textContent).toContain('other text');
     });
   });
 
   describe('with multiple tooltips', () => {
     beforeEach(() => {
-      const wrapper = mount(
-        {
-          directives: {
-            tooltip,
-          },
-          template: `
-            <div>
-              <div
-                v-tooltip
-                class="js-look-for-tooltip"
-                title="foo">
-              </div>
-              <div
-                v-tooltip
-                title="bar">
-              </div>
-            </div>
-          `,
-        },
-        { attachToDocument: true },
-      );
-
-      vm = wrapper.vm;
+      createTooltipContainer(`
+        <div>
+          <div
+            v-tooltip
+            class="js-look-for-tooltip"
+            title="foo">
+          </div>
+          <div
+            v-tooltip
+            title="bar">
+          </div>
+        </div>
+      `);
     });
 
     it('should have tooltip plugin applied to all instances', () => {
       expect(
-        $(vm.$el)
+        $(wrapper.vm.$el)
           .find('.js-look-for-tooltip')
           .data('bs.tooltip'),
       ).toBeDefined();

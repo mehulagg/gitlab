@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import '~/commons/bootstrap';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default {
   bind(el) {
@@ -9,6 +10,7 @@ export default {
     $(el).tooltip({
       trigger: 'hover',
       delay,
+      sanitize: parseBoolean(el.dataset.html),
     });
   },
 
