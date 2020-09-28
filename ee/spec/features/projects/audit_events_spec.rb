@@ -166,7 +166,7 @@ RSpec.describe 'Projects > Audit Events', :js do
   describe 'filter by date' do
     let!(:audit_event_1) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 5.days.ago) }
     let!(:audit_event_2) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 1.day.ago) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: Date.today) }
     let!(:events_path) { :project_audit_events_path }
     let!(:entity) { project }
 
