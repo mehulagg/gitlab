@@ -75,7 +75,7 @@ Set up the section with the following:
 
 You'll need to open a second MR, against the [GitLab documentation repository](https://gitlab.com/gitlab-org/gitlab-docs/).
 
-We store our Table of Contents in the `default-nav.yaml` file, in the
+We store our global nav in the [`default-nav.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/default-nav.yaml) file, in the
 `content/_data` subdirectory. You can find the GraphQL section under the
 following line:
 
