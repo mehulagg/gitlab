@@ -3,15 +3,17 @@
 module Overcommit::Hook::CommitMsg
   class EnsureCommitBodyIsPresent < Base
     def run
-      min_changed_files = config['min_changed_files'] || 3
-      min_changed_lines = config['min_changed_lines'] || 30
+      max_changed_lines_in_commit = config['min_changed_files'] || 3
+      max_changed_files_in_commit = config['min_changed_lines'] || 30
+      failure_message = "Commits that change #{max_changed_lines_in_commit} or more lines across " \
+        "at least #{max_changed_files_in_commit} files must describe these changes in the commit body".freeze
 
-      return :pass if modified_files.count < min_changed_files
+      return :pass if modified_files.count < max_changed_files_in_commit
 
-      if calculate_changed_lines >= min_changed_lines
+      if calculate_changed_lines >= max_changed_lines_in_commit
         case commit_body_length
         when 0
-          [:fail, "Commit body must be present when changing more than #{min_changed_lines} lines across more than #{min_changed_files} files"]
+          [:fail, failure_message]
         else
           :pass
         end
