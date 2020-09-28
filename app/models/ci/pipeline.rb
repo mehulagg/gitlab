@@ -440,6 +440,10 @@ module Ci
       end
     end
 
+    def failed_builds_with_preloads
+      failed_builds.preload(project: [:namespace])
+    end
+
     def triggered_pipelines_with_preloads
       triggered_pipelines.preload(:source_job)
     end
