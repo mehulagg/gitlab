@@ -4343,14 +4343,14 @@ RSpec.describe User do
         enforce_terms
       end
 
+      it "is not accepted by the user" do
+        it { is_expected.to be_truthy }
+      end
+
       it "is accepted by the user" do
         accept_terms(user)
 
         it { is_expected.to be_falsy }
-      end
-
-      it "is not accepted by the user" do
-        it { is_expected.to be_truthy }
       end
 
       it "auto accepts the term for project bots" do
