@@ -500,7 +500,7 @@ with the name of your bucket:
 
 ##### Using Google Cloud Storage
 
-To use Google Cloud Storage to save backups, you'll first have to create an
+To use Google Cloud Storage to save backups, you must first create an
 access key from the Google console:
 
 1. Go to the [Google storage settings page](https://console.cloud.google.com/storage/settings).
