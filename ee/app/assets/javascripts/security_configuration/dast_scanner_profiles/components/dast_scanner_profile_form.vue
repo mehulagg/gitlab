@@ -289,9 +289,9 @@ export default {
       </template>
 
       <gl-form-radio-group
-        ref="scanType"
         v-model="form.scanType.value"
         :options="$options.scanTypeOptions"
+        data-testid="scan-type-option"
       />
     </gl-form-group>
 

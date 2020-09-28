@@ -15,8 +15,21 @@ jest.mock('~/lib/utils/url_utility', () => ({
 const projectFullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_profiles`;
 const profileName = 'My DAST scanner profile';
+const scanType = 'PASSIVE';
 const spiderTimeout = 12;
 const targetTimeout = 20;
+const ajaxSpider = false;
+const showDebugMessages = false;
+
+const profile = {
+  id: 1,
+  name,
+  spiderTimeout,
+  targetTimeout,
+  scanType,
+  ajaxSpider,
+  showDebugMessages,
+};
 
 const defaultProps = {
   profilesLibraryPath,
@@ -39,6 +52,7 @@ describe('DAST Scanner Profile', () => {
   const findCancelModal = () => wrapper.find(GlModal);
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
   const findAlert = () => wrapper.find(GlAlert);
+  const findScanType = () => wrapper.find('[data-testid="scan-type-option"]');
 
   const componentFactory = (mountFn = shallowMount) => options => {
     wrapper = mountFn(
@@ -67,6 +81,11 @@ describe('DAST Scanner Profile', () => {
   it('form renders properly', () => {
     createComponent();
     expect(findForm().exists()).toBe(true);
+  });
+
+  describe('default values', () => {
+    createComponent();
+    expect(findScanType().attributes('checked')).toBe('PASSIVE');
   });
 
   describe('submit button', () => {
@@ -136,9 +155,9 @@ describe('DAST Scanner Profile', () => {
   });
 
   describe.each`
-    title                     | profile                                                        | mutation                            | mutationVars | mutationKind
-    ${'New scanner profile'}  | ${{}}                                                          | ${dastScannerProfileCreateMutation} | ${{}}        | ${'dastScannerProfileCreate'}
-    ${'Edit scanner profile'} | ${{ id: 1, name: 'foo', spiderTimeout: 2, targetTimeout: 12 }} | ${dastScannerProfileUpdateMutation} | ${{ id: 1 }} | ${'dastScannerProfileUpdate'}
+    title                     | profile    | mutation                            | mutationVars | mutationKind
+    ${'New scanner profile'}  | ${{}}      | ${dastScannerProfileCreateMutation} | ${{}}        | ${'dastScannerProfileCreate'}
+    ${'Edit scanner profile'} | ${profile} | ${dastScannerProfileUpdateMutation} | ${{ id: 1 }} | ${'dastScannerProfileUpdate'}
   `('$title', ({ profile, title, mutation, mutationVars, mutationKind }) => {
     beforeEach(() => {
       createFullComponent({
@@ -182,6 +201,9 @@ describe('DAST Scanner Profile', () => {
               spiderTimeout,
               targetTimeout,
               projectFullPath,
+              scanType,
+              ajaxSpider,
+              showDebugMessages,
               ...mutationVars,
             },
           });
