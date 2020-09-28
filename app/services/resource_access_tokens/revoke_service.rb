@@ -46,7 +46,10 @@ module ResourceAccessTokens
     end
 
     def delete_bot
-      bot_user.destroy
+      bot_user_data = bot_user.destroy
+      bot_user.namespace.destroy
+
+      bot_user_data
     end
 
     def find_member
