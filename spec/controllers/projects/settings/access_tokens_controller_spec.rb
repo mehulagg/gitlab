@@ -169,7 +169,7 @@ RSpec.describe Projects::Settings::AccessTokensController do
         expect(issue.reload.author.ghost?).to be true
       end
 
-      it 'destroys project bot user' do
+      it 'deletes project bot user' do
         subject
 
         expect(User.exists?(bot_user.id)).to be_falsy
