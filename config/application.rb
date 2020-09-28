@@ -315,8 +315,7 @@ module Gitlab
     #
     # For reference: https://github.com/rails/sprockets-rails/blob/v3.2.1/lib/sprockets/railtie.rb#L84-L87
     initializer :correct_precompile_targets, after: :set_default_precompile do |app|
-      # Remove the original LOOSE_APP_ASSETS
-      app.config.assets.precompile = app.config.assets.precompile.reject { |entry| entry.instance_of? Proc }
+      app.config.assets.precompile.reject! { |entry| entry == Sprockets::Railtie::LOOSE_APP_ASSETS }
 
       asset_roots = [config.root.join("app/assets").to_s]
 
