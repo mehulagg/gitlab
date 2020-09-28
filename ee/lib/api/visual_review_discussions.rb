@@ -41,7 +41,7 @@ module API
         note = ::Notes::CreateVisualReviewService.new(
           merge_request,
           current_user,
-          {
+          **{
             body: params[:body],
             position: params[:position]
           }
