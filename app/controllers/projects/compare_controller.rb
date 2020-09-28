@@ -31,7 +31,34 @@ class Projects::CompareController < Projects::ApplicationController
   def diff_for_path
     return render_404 unless compare
 
-    render_diff_for_path(compare.diffs(diff_options))
+    render_diffs
+    # render_diff_for_path(compare.diffs(diff_options))
+  end
+
+  # Just testing copying this directly from
+  #   app/controllers/projects/merge_requests/diffs_controller.rb
+  #
+  def render_diffs
+    diffs = compare.diffs(diff_options)
+    # binding.pry
+    @environment = merge_request.environments_for(current_user, latest: true).last
+
+    diffs.unfold_diff_files(note_positions.unfoldable)
+    diffs.write_cache
+
+    request = {
+      current_user: current_user,
+      project: merge_request.project,
+      render: ->(partial, locals) { view_to_html_string(partial, locals) }
+    }
+
+    options = additional_attributes.merge(diff_view: Feature.enabled?(:unified_diff_lines, merge_request.project) ? "inline" : diff_view)
+
+    if merge_request.project.context_commits_enabled?
+      options[:context_commits] = merge_request.recent_context_commits
+    end
+
+    render json: DiffsSerializer.new(request).represent(diffs, options)
   end
 
   def create
