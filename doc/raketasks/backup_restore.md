@@ -781,7 +781,7 @@ The [restore prerequisites section](#restore-prerequisites) includes crucial
 information. Be sure to read and test the complete restore process at least
 once before attempting to perform it in a production environment.
 
-You can restore a backup only to _exactly the same version and type (CE/EE)_ of
+You can restore a backup only to _the exact same version and type (CE/EE)_ of
 GitLab that you created it on (for example CE 9.1.0).
 
 If your backup is a different version than the current installation, you'll
