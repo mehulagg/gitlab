@@ -96,7 +96,7 @@ export default {
       profileName: initField(name),
       spiderTimeout: initField(spiderTimeout),
       targetTimeout: initField(targetTimeout),
-      scanType: initField(scanType),
+      scanType: initField(scanType || SCAN_TYPE.PASSIVE),
       ajaxSpider: initField(ajaxSpider),
       showDebugMessages: initField(showDebugMessages),
     };
