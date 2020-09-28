@@ -917,7 +917,7 @@ sudo gitlab-backup restore BACKUP=11493107454_2018_04_25_10.6.4-ce
 Users of GitLab 12.1 and earlier should use the command `gitlab-rake gitlab:backup:create` instead.
 
 CAUTION: **Warning:**
-`gitlab-rake gitlab:backup:restore` does not set the correct file system
+`gitlab-rake gitlab:backup:restore` doesn't set the correct file system
 permissions on your Registry directory. This is a [known issue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/62759).
 On GitLab 12.2 or later, you can use `gitlab-backup restore` to avoid this
 issue.
