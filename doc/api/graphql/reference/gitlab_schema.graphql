@@ -3177,7 +3177,7 @@ type DastScannerProfile {
   """
   Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
   """
-  scanType: DastScanTypeEnum!
+  scanType: DastScanTypeEnum
 
   """
   Indicates if debug messages should be included in DAST console output. True to include the debug messages.

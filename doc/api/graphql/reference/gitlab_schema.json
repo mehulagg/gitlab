@@ -8641,13 +8641,9 @@
 
               ],
               "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "ENUM",
-                  "name": "DastScanTypeEnum",
-                  "ofType": null
-                }
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
