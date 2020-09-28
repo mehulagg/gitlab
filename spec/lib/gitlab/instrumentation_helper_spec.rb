@@ -121,7 +121,7 @@ RSpec.describe Gitlab::InstrumentationHelper do
       let(:job) { { 'enqueued_at' => enqueued_at, 'created_at' => created_at } }
 
       it "returns the correct duration" do
-        travel_to(Time.iso8601(time_now)) do
+        Timecop.freeze(Time.iso8601(time_now)) do
           expect(described_class.queue_duration_for_job(job)).to eq(expected_duration)
         end
       end
