@@ -1,0 +1,5 @@
+---
+title: Avoid localhost as Elasticsearch default
+merge_request: 42367
+author:
+type: fixed
