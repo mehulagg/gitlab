@@ -822,10 +822,9 @@ more of the following options:
   enabling the "Write to authorized_keys file" setting, and updating LDAP
   providers.
 
-If you're restoring into directories that are mount points, you will need to
-ensure these directories are empty before attempting a restore. Otherwise
-GitLab will attempt to move these directories before restoring the new data,
-which will cause an error.
+If you're restoring into directories that are mount points, you must ensure these directories are
+empty before attempting a restore. Otherwise, GitLab attempts to move these directories before
+restoring the new data, which causes an error.
 
 Read more about [configuring NFS mounts](../administration/nfs.md)
 
