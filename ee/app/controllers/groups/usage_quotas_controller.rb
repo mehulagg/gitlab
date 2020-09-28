@@ -3,6 +3,9 @@
 class Groups::UsageQuotasController < Groups::ApplicationController
   before_action :authorize_admin_group!
   before_action :verify_usage_quotas_enabled!
+  before_action do
+    push_frontend_feature_flag(:additional_repo_storage_by_namespace)
+  end
 
   layout 'group_settings'
 
