@@ -18,8 +18,8 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
 
     context 'when from date is given' do
       before do
-        travel_to(5.days.ago) { create(:issue, project: project) }
-        travel_to(5.days.from_now) { create(:issue, project: project) }
+        Timecop.freeze(5.days.ago) { create(:issue, project: project) }
+        Timecop.freeze(5.days.from_now) { create(:issue, project: project) }
       end
 
       it "finds the number of issues created after the 'from date'" do
@@ -34,15 +34,15 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
     end
 
     it "doesn't find issues from other projects" do
-      travel_to(5.days.from_now) { create(:issue, project: create(:project)) }
+      Timecop.freeze(5.days.from_now) { create(:issue, project: create(:project)) }
 
       expect(subject[:value]).to eq('-')
     end
 
     context 'when `to` parameter is given' do
       before do
-        travel_to(5.days.ago) { create(:issue, project: project) }
-        travel_to(5.days.from_now) { create(:issue, project: project) }
+        Timecop.freeze(5.days.ago) { create(:issue, project: project) }
+        Timecop.freeze(5.days.from_now) { create(:issue, project: project) }
       end
 
       it "doesn't find any record" do
@@ -81,21 +81,21 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
     end
 
     it "doesn't find commits from other projects" do
-      travel_to(5.days.from_now) { create_commit("Test message", create(:project, :repository), user, 'master') }
+      Timecop.freeze(5.days.from_now) { create_commit("Test message", create(:project, :repository), user, 'master') }
 
       expect(subject[:value]).to eq('-')
     end
 
     it "finds a large (> 100) number of commits if present" do
-      travel_to(5.days.from_now) { create_commit("Test message", project, user, 'master', count: 100) }
+      Timecop.freeze(5.days.from_now) { create_commit("Test message", project, user, 'master', count: 100) }
 
       expect(subject[:value]).to eq('100')
     end
 
     context 'when `to` parameter is given' do
       before do
-        travel_to(5.days.ago) { create_commit("Test message", project, user, 'master') }
-        travel_to(5.days.from_now) { create_commit("Test message", project, user, 'master') }
+        Timecop.freeze(5.days.ago) { create_commit("Test message", project, user, 'master') }
+        Timecop.freeze(5.days.from_now) { create_commit("Test message", project, user, 'master') }
       end
 
       it "doesn't find any record" do
@@ -136,8 +136,8 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
 
     context 'when from date is given' do
       before do
-        travel_to(5.days.ago) { create(:deployment, :success, project: project) }
-        travel_to(5.days.from_now) { create(:deployment, :success, project: project) }
+        Timecop.freeze(5.days.ago) { create(:deployment, :success, project: project) }
+        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project) }
       end
 
       it "finds the number of deploys made created after the 'from date'" do
@@ -152,7 +152,7 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
     end
 
     it "doesn't find commits from other projects" do
-      travel_to(5.days.from_now) do
+      Timecop.freeze(5.days.from_now) do
         create(:deployment, :success, project: create(:project, :repository))
       end
 
@@ -161,8 +161,8 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
 
     context 'when `to` parameter is given' do
       before do
-        travel_to(5.days.ago) { create(:deployment, :success, project: project) }
-        travel_to(5.days.from_now) { create(:deployment, :success, project: project) }
+        Timecop.freeze(5.days.ago) { create(:deployment, :success, project: project) }
+        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project) }
       end
 
       it "doesn't find any record" do
@@ -188,7 +188,7 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
     end
 
     before do
-      travel_to(5.days.ago) { create(:deployment, :success, project: project) }
+      Timecop.freeze(5.days.ago) { create(:deployment, :success, project: project) }
     end
 
     it 'returns 0.0 when there were deploys but the frequency was too low' do
@@ -218,7 +218,7 @@ RSpec.describe Gitlab::CycleAnalytics::StageSummary do
 
     context 'when `to` is given' do
       before do
-        travel_to(5.days.from_now) { create(:deployment, :success, project: project) }
+        Timecop.freeze(5.days.from_now) { create(:deployment, :success, project: project) }
       end
 
       it 'finds records created between `from` and `to` range' do
