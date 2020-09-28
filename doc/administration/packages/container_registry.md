@@ -105,8 +105,7 @@ There are two ways you can configure the Registry's external domain. Either:
 - [Use a completely separate domain](#configure-container-registry-under-its-own-domain) with a new TLS certificate
   for that domain.
 
-Because the container Registry requires a TLS certificate, in the end it all boils
-down to how easy or pricey it is to get a new one.
+Because the Container Registry requires a TLS certificate, cost may be a factor.
 
 Take this into consideration before configuring the Container Registry
 for the first time.
