@@ -78,4 +78,5 @@ For information about GitLab and incident management, see:
 - [Alerts](alerts.md)
 - [Alert details](alert_details.md)
 - [Incidents](incidents.md)
+- [Incident details](incident_details.md)
 - [Status page](status_page.md)
