@@ -15,6 +15,7 @@ RSpec.describe 'Merge requests > User lists merge requests' do
                   source_project: project,
                   source_branch: 'fix',
                   assignees: [user],
+                  reviewers: [user],
                   milestone: create(:milestone, project: project, due_date: '2013-12-11'),
                   created_at: 1.minute.ago,
                   updated_at: 1.minute.ago)
@@ -23,6 +24,7 @@ RSpec.describe 'Merge requests > User lists merge requests' do
            source_project: project,
            source_branch: 'markdown',
            assignees: [user],
+           reviewers: [user],
            milestone: create(:milestone, project: project, due_date: '2013-12-12'),
            created_at: 2.minutes.ago,
            updated_at: 2.minutes.ago)
@@ -32,6 +34,24 @@ RSpec.describe 'Merge requests > User lists merge requests' do
            source_branch: 'merge-test',
            created_at: 3.minutes.ago,
            updated_at: 10.seconds.ago)
+  end
+
+  context 'when merge_request_reviewers is turned on' do
+    it 'has reviewers in MR list' do
+      stub_feature_flags(merge_request_reviewers: true)
+      visit_merge_requests(project, reviewer_id: user.id)
+
+      expect(page).to have_css('.issuable-reviewers')
+    end
+  end
+
+  context 'when merge_request_reviewers is turned false' do
+    it 'has reviewers in MR list' do
+      stub_feature_flags(merge_request_reviewers: false)
+      visit_merge_requests(project, reviewer_id: user.id)
+
+      expect(page).not_to have_css('.issuable-reviewers')
+    end
   end
 
   it 'filters on no assignee' do
