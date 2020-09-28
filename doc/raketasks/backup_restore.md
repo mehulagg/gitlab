@@ -792,7 +792,7 @@ before restoring the backup.
 
 You need to have a working GitLab installation before you can perform a
 restore. This is because the system user performing the restore actions (`git`)
-is usually not allowed to create or delete the SQL database it needs to import
+is usually not allowed to create or delete the SQL database needed to import
 data into (`gitlabhq_production`). All existing data will be either erased
 (SQL) or moved to a separate directory (such as repositories and uploads).
 
