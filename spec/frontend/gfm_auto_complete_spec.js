@@ -15,9 +15,7 @@ const labelsFixture = getJSONFixture('autocomplete_sources/labels.json');
 
 describe('GfmAutoComplete', () => {
   const fetchDataMock = { fetchData: jest.fn() };
-  const gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call(
-    fetchDataMock,
-  );
+  let gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call(fetchDataMock);
 
   let atwhoInstance;
   let sorterValue;
@@ -60,12 +58,16 @@ describe('GfmAutoComplete', () => {
 
     describe('backend filtering', () => {
       beforeEach(() => {
-        atwhoInstance = { setting: {}, $inputor: 'inputor', at: '+', previousQuery: 'oldquery' };
+        atwhoInstance = { setting: {}, $inputor: 'inputor', at: '+' };
         items = [];
       });
 
       describe('when previous query is different from current one', () => {
         beforeEach(() => {
+          gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
+            previousQuery: 'oldquery',
+            ...fetchDataMock,
+          });
           filterValue = gfmAutoCompleteCallbacks.filter.call(atwhoInstance, 'newquery', items);
         });
 
@@ -80,20 +82,24 @@ describe('GfmAutoComplete', () => {
         it('should return the passed unfiltered items', () => {
           expect(filterValue).toEqual(items);
         });
-
-        it('should update the previousQuery value', () => {
-          expect(atwhoInstance.previousQuery).toEqual('newquery');
-        });
       });
 
       describe('when previous query is not different from current one', () => {
         beforeEach(() => {
+          gfmAutoCompleteCallbacks = GfmAutoComplete.prototype.getDefaultCallbacks.call({
+            previousQuery: 'oldquery',
+            ...fetchDataMock,
+          });
           filterValue = gfmAutoCompleteCallbacks.filter.call(
             atwhoInstance,
             'oldquery',
             items,
             'searchKey',
           );
+        });
+
+        it('should not call the fetchData function', () => {
+          expect(fetchDataMock.fetchData).not.toHaveBeenCalled();
         });
 
         it('should call the default atwho filter', () => {
