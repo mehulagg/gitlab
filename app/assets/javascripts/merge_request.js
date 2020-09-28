@@ -3,11 +3,12 @@
 import $ from 'jquery';
 import axios from './lib/utils/axios_utils';
 import { __ } from '~/locale';
+import eventHub from '~/vue_merge_request_widget/event_hub';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import TaskList from './task_list';
 import MergeRequestTabs from './merge_request_tabs';
-import IssuablesHelper from './helpers/issuables_helper';
 import { addDelimiter } from './lib/utils/text_utility';
+import { getParameterValues, setUrlParams } from './lib/utils/url_utility';
 
 function MergeRequest(opts) {
   // Initialize MergeRequest behavior
@@ -23,7 +24,6 @@ function MergeRequest(opts) {
   this.initTabs();
   this.initMRBtnListeners();
   this.initCommitMessageListeners();
-  this.closeReopenReportToggle = IssuablesHelper.initCloseReopenReport();
 
   if ($('.description.js-task-list-container').length) {
     this.taskList = new TaskList({
@@ -66,13 +66,31 @@ MergeRequest.prototype.showAllCommits = function() {
 
 MergeRequest.prototype.initMRBtnListeners = function() {
   const _this = this;
+  const draftToggle = document.querySelector('.js-draft-toggle-button');
 
-  $('.report-abuse-link').on('click', e => {
-    // this is needed because of the implementation of
-    // the dropdown toggle and Report Abuse needing to be
-    // linked to another page.
-    e.stopPropagation();
-  });
+  if (draftToggle) {
+    draftToggle.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const url = draftToggle.href;
+      const wipEvent = getParameterValues('merge_request[wip_event]', url)[0];
+
+      draftToggle.setAttribute('disabled', 'disabled');
+
+      axios
+        .put(draftToggle.href, null, { params: { format: 'json' } })
+        .then(({ data }) => {
+          draftToggle.removeAttribute('disabled');
+          eventHub.$emit('MRWidgetUpdateRequested');
+          MergeRequest.toggleDraftStatus(data.title, wipEvent === 'unwip');
+        })
+        .catch(() => {
+          draftToggle.removeAttribute('disabled');
+          createFlash(__('Something went wrong. Please try again.'));
+        });
+    });
+  }
 
   return $('.btn-close, .btn-reopen').on('click', function(e) {
     const $this = $(this);
@@ -88,8 +106,6 @@ MergeRequest.prototype.initMRBtnListeners = function() {
     if (shouldSubmit && $this.data('submitted')) {
       return;
     }
-
-    if (this.closeReopenReportToggle) this.closeReopenReportToggle.setDisable();
 
     if (shouldSubmit) {
       if ($this.hasClass('btn-comment-and-close') || $this.hasClass('btn-comment-and-reopen')) {
@@ -157,6 +173,26 @@ MergeRequest.hideCloseButton = function() {
   }
   // Dropdown for mobile screen
   el.querySelector('li.js-close-item').classList.add('hidden');
+};
+
+MergeRequest.toggleDraftStatus = function(title, isReady) {
+  if (isReady) {
+    createFlash(__('The merge request can now be merged.'), 'notice');
+  }
+
+  document.querySelector('.merge-request .detail-page-description .title').textContent = title;
+
+  const draftToggle = document.querySelector('.js-draft-toggle-button');
+
+  if (draftToggle) {
+    const url = setUrlParams(
+      { 'merge_request[wip_event]': isReady ? 'wip' : 'unwip' },
+      draftToggle.href,
+    );
+
+    draftToggle.setAttribute('href', url);
+    draftToggle.textContent = isReady ? __('Mark as draft') : __('Mark as ready');
+  }
 };
 
 export default MergeRequest;

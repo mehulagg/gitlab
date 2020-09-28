@@ -1,4 +1,3 @@
-- is_merge_request = issuable.is_a?(MergeRequest)
 - display_issuable_type = issuable_display_type(issuable)
 - button_action = issuable.closed? ? 'reopen' : 'close'
 - display_button_action = button_action.capitalize
@@ -6,32 +5,19 @@
 - button_class = "#{button_responsive_class} btn btn-grouped js-issuable-close-button js-btn-issue-action issuable-close-button"
 - toggle_class = "#{button_responsive_class} btn btn-nr dropdown-toggle js-issuable-close-toggle"
 - add_blocked_class = false
-- button_action_url = is_merge_request ? toggle_draft_issuable_path(issuable) : close_reopen_issuable_path(issuable)
-- mr_draft_text = is_merge_request && issuable.work_in_progress? ? _('Mark as ready') : _('Mark as draft')
 - if defined? warn_before_close
   - add_blocked_class = !issuable.closed? && warn_before_close
 
 .float-left.btn-group.gl-ml-3.issuable-close-dropdown.droplab-dropdown.js-issuable-close-dropdown
-  %button{ class: "#{button_class} btn-#{button_action} #{(add_blocked_class ? 'btn-issue-blocked' : '')}", data: { testid: 'close-issue-button', qa_selector: 'close_issue_button', endpoint: button_action_url } }
-    - if is_merge_request
-      = mr_draft_text
-    - else
-      #{display_button_action} #{display_issuable_type}
+  %button{ class: "#{button_class} btn-#{button_action} #{(add_blocked_class ? 'btn-issue-blocked' : '')}", data: { testid: 'close-issue-button', qa_selector: 'close_issue_button', endpoint: close_reopen_issuable_path(issuable) } }
+    #{display_button_action} #{display_issuable_type}
 
   = button_tag type: 'button', class: "#{toggle_class} btn-#{button_action}-color",
                data: { 'dropdown-trigger' => '#issuable-close-menu' }, 'aria-label' => _('Toggle dropdown') do
     = icon('caret-down', class: 'toggle-icon icon')
 
   %ul#issuable-close-menu.js-issuable-close-menu.dropdown-menu{ data: { dropdown: true } }
-    - if is_merge_request
-      %li.draft-item.droplab-item-selected{ data: { text: mr_draft_text, url: toggle_draft_issuable_path(issuable), button_class: "#{button_class} btn-close", toggle_class: "#{toggle_class} btn-close-color" } }
-        %button.btn.btn-transparent
-          = icon('check', class: 'icon')
-          .description
-            %strong.title
-              = mr_draft_text
-      %li.divider.droplab-item-ignore
-    %li.close-item{ class: "#{issuable_button_visibility(issuable, true) || !is_merge_request && 'droplab-item-selected'}",
+    %li.close-item{ class: "#{issuable_button_visibility(issuable, true) || 'droplab-item-selected'}",
                     data: { text: _("Close %{display_issuable_type}") % { display_issuable_type: display_issuable_type }, url: close_issuable_path(issuable),
                     button_class: "#{button_class} btn-close", toggle_class: "#{toggle_class} btn-close-color" } }
       %button.btn.btn-transparent
@@ -41,7 +27,7 @@
             = _('Close')
             = display_issuable_type
 
-    %li.reopen-item{ class: "#{issuable_button_visibility(issuable, false) || !is_merge_request && 'droplab-item-selected'}",
+    %li.reopen-item{ class: "#{issuable_button_visibility(issuable, false) || 'droplab-item-selected'}",
                      data: { text: _("Reopen %{display_issuable_type}") % { display_issuable_type: display_issuable_type }, url: reopen_issuable_path(issuable),
                      button_class: "#{button_class} btn-reopen", toggle_class: "#{toggle_class} btn-reopen-color" } }
       %button.btn.btn-transparent
