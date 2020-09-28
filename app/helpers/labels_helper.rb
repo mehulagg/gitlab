@@ -40,7 +40,7 @@ module LabelsHelper
     link = label.filter_path(type: type)
 
     if block_given?
-      link_to link, &block
+      link_to link, class: 'gl-text-blue-600!', &block
     else
       render_label(label, link: link, tooltip: tooltip, small: small)
     end
