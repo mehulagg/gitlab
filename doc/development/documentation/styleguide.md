@@ -474,7 +474,7 @@ For more information see the following [Internet Draft specification](https://to
 ### Fake user information
 
 You may need to include user information in entries such as a REST call or user profile.
-Don't use real user information or email addresses in GitLab documentation. For email
+**Do not** use real user information or email addresses in GitLab documentation. For email
 addresses and names, do use:
 
 - **Email addresses**: Use an email address ending in `example.com`.
