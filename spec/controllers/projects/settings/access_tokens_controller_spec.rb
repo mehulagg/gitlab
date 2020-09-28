@@ -155,22 +155,10 @@ RSpec.describe Projects::Settings::AccessTokensController do
         enable_feature
       end
 
-      it 'revokes token access' do
-        subject
-
-        expect(project_access_token.reload.revoked?).to be true
-      end
-
       it 'removed membership of bot user' do
         subject
 
         expect(project.reload.bots).not_to include(bot_user)
-      end
-
-      it 'blocks project bot user' do
-        subject
-
-        expect(bot_user.reload.blocked?).to be true
       end
 
       it 'converts issuables of the bot user to ghost user' do
@@ -180,11 +168,16 @@ RSpec.describe Projects::Settings::AccessTokensController do
 
         expect(issue.reload.author.ghost?).to be true
       end
+
+      it 'destroys project bot user' do
+        subject
+
+        expect(User.exists?(bot_user.id)).to be_falsy
+      end
     end
   end
 
   def enable_feature
-    allow(Gitlab).to receive(:com?).and_return(false)
     stub_feature_flags(resource_access_token: true)
   end
 end
