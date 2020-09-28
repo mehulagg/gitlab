@@ -23,8 +23,6 @@ module ResourceAccessTokens
         raise RevokeAccessTokenError, "Failed to remove #{bot_user.name} member from: #{resource.name}" unless remove_member
 
         raise RevokeAccessTokenError, "Migration to ghost user failed" unless migrate_to_ghost_user
-
-        raise RevokeAccessTokenError, "Deletion of bot user failed" unless delete_bot
       end
 
       success("Revoked access token: #{@access_token_name}")
@@ -43,13 +41,6 @@ module ResourceAccessTokens
 
     def migrate_to_ghost_user
       ::Users::MigrateToGhostUserService.new(bot_user).execute
-    end
-
-    def delete_bot
-      bot_user_data = bot_user.destroy
-      bot_user.namespace.destroy
-
-      bot_user_data
     end
 
     def find_member

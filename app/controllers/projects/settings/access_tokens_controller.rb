@@ -30,6 +30,8 @@ module Projects
         revoked_response = ResourceAccessTokens::RevokeService.new(current_user, @project, @project_access_token).execute
 
         if revoked_response.success?
+          @project_access_token.user.destroy
+
           flash[:notice] = _("Revoked project access token %{project_access_token_name}!") % { project_access_token_name: @project_access_token.name }
         else
           flash[:alert] = _("Could not revoke project access token %{project_access_token_name}.") % { project_access_token_name: @project_access_token.name }
