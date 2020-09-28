@@ -69,6 +69,11 @@ export default class AvailableDropdownMappings {
         gl: DropdownUser,
         element: this.container.querySelector('#js-dropdown-assignee'),
       },
+      reviewer: {
+        reference: null,
+        gl: DropdownUser,
+        element: this.container.querySelector('#js-dropdown-reviewer'),
+      },
       milestone: {
         reference: null,
         gl: DropdownNonUser,
