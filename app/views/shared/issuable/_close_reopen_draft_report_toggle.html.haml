@@ -30,11 +30,12 @@
               = _('Reopen')
               = display_issuable_type
 
-    %li.divider.droplab-item-ignore
+    - unless issuable_author_is_current_user(issuable)
+      %li.divider.droplab-item-ignore
 
-    %li
-      %a{ href:  new_abuse_report_path(user_id: issuable.author.id, ref_url: issuable_url(issuable)) }
-        .description
-          %strong.title= _('Report abuse')
-          %p.text
-            = _('Report %{display_issuable_type} that are abusive, inappropriate or spam.') % { display_issuable_type: display_issuable_type.pluralize }
+      %li
+        %a{ href:  new_abuse_report_path(user_id: issuable.author.id, ref_url: issuable_url(issuable)) }
+          .description
+            %strong.title= _('Report abuse')
+            %p.text
+              = _('Report %{display_issuable_type} that are abusive, inappropriate or spam.') % { display_issuable_type: display_issuable_type.pluralize }
