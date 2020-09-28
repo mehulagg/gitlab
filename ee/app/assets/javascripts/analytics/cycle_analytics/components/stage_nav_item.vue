@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective, GlDropdown } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
 import StageCardListItem from './stage_card_list_item.vue';
@@ -18,6 +18,7 @@ export default {
   components: {
     StageCardListItem,
     GlButton,
+    GlDropdown,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -130,17 +131,14 @@ export default {
           <span v-else v-gl-tooltip="{ title: errorMessage }" class="stage-empty">{{ error }}</span>
         </div>
         <div v-show="isHover" ref="dropdown" :class="[openMenuClasses]" class="dropdown w-25">
-          <gl-button
+          <gl-dropdown
             v-gl-tooltip
             category="tertiary"
             icon="ellipsis_v"
             :title="__('More actions')"
-            class="more-actions-toggle btn btn-transparent p-0"
-            data-toggle="dropdown"
-          />
-          <ul class="more-actions-dropdown dropdown-menu dropdown-open-left">
+            >
             <template v-if="isDefaultStage">
-              <li>
+              <gl-dropdown-item>
                 <gl-button
                   category="tertiary"
                   data-testid="hide-btn"
@@ -148,10 +146,10 @@ export default {
                 >
                   {{ __('Hide stage') }}
                 </gl-button>
-              </li>
+              </gl-dropdown-item>
             </template>
             <template v-else>
-              <li>
+              <gl-dropdown-item>
                 <gl-button
                   category="tertiary"
                   data-testid="edit-btn"
@@ -159,8 +157,8 @@ export default {
                 >
                   {{ __('Edit stage') }}
                 </gl-button>
-              </li>
-              <li>
+              </gl-dropdown-item>
+              <gl-dropdown-item>
                 <gl-button
                   category="tertiary"
                   data-testid="remove-btn"
@@ -168,9 +166,9 @@ export default {
                 >
                   {{ __('Remove stage') }}
                 </gl-button>
-              </li>
+              </gl-dropdown-item>
             </template>
-          </ul>
+          </gl-dropdown>
         </div>
       </div>
     </stage-card-list-item>
