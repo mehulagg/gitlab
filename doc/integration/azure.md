@@ -54,9 +54,12 @@ As you go through the Microsoft procedure, keep the following in mind:
 
    ```yaml
    - { name: 'azure_oauth2',
-     args: { client_id: "CLIENT ID",
-     client_secret: "CLIENT SECRET",
-     tenant_id: "TENANT ID" } }
+       args: {
+             client_id: "CLIENT ID",
+             client_secret: "CLIENT SECRET",
+             tenant_id: "TENANT ID"
+       }
+   }
    ```
 
    The `base_azure_url` is optional and can be added for different locales;

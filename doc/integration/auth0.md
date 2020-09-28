@@ -72,7 +72,7 @@ application.
          client_secret: 'YOUR_AUTH0_CLIENT_SECRET',
          domain: 'YOUR_AUTH0_DOMAIN',
          scope: 'openid profile email' }
-     }
+   }
    ```
 
 1. Change `YOUR_AUTH0_CLIENT_ID` to the client ID from the Auth0 Console page
