@@ -18,7 +18,6 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
-    group_wikis
     issuable_default_templates
     issue_weights
     iterations
@@ -85,6 +84,7 @@ class License < ApplicationRecord
     group_project_templates
     group_repository_analytics
     group_saml
+    group_wikis
     ide_schema_config
     issues_analytics
     jira_issues_integration

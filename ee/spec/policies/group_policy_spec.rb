@@ -1065,10 +1065,16 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    include WikiHelpers
-
-    let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
+    let_it_be(:container) { create(:group_with_plan, plan: :silver_plan) }
     let_it_be(:user) { owner }
+
+    before_all do
+      create(:license, plan: License::PREMIUM_PLAN)
+    end
+
+    before do
+      stub_application_setting(check_namespace_plan: true)
+    end
 
     # We don't have feature toggles on groups yet, so we currently simulate
     # this by toggling the feature flag instead.
@@ -1094,9 +1100,7 @@ RSpec.describe GroupPolicy do
     end
 
     context 'when the feature is not licensed on this group' do
-      before do
-        allow(container).to receive(:feature_available?).with(:group_wikis).and_return(false)
-      end
+      let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
 
       it 'does not include the wiki permissions' do
         expect_disallowed(*wiki_permissions[:all])
