@@ -190,6 +190,10 @@ class Environment < ApplicationRecord
     ref.to_s == last_deployment.try(:ref)
   end
 
+  def path
+    Gitlab::Routing.url_helpers.project_environment_path(project, self)
+  end
+
   def nullify_external_url
     self.external_url = nil if self.external_url.blank?
   end

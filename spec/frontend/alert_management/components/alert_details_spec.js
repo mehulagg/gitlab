@@ -1,18 +1,18 @@
-import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import AlertDetails from '~/alert_management/components/alert_details.vue';
 import AlertSummaryRow from '~/alert_management/components/alert_summary_row.vue';
+import {
+  ALERTS_SEVERITY_LABELS,
+  trackAlertsDetailsViewsOptions,
+} from '~/alert_management/constants';
 import createIssueMutation from '~/alert_management/graphql/mutations/create_issue_from_alert.mutation.graphql';
 import { joinPaths } from '~/lib/utils/url_utility';
-import {
-  trackAlertsDetailsViewsOptions,
-  ALERTS_SEVERITY_LABELS,
-} from '~/alert_management/constants';
 import Tracking from '~/tracking';
+import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from '../mocks/alerts.json';
 
 const mockAlert = mockAlerts[0];
@@ -72,7 +72,7 @@ describe('AlertDetails', () => {
   const findCreateIncidentBtn = () => wrapper.findByTestId('createIncidentBtn');
   const findViewIncidentBtn = () => wrapper.findByTestId('viewIncidentBtn');
   const findIncidentCreationAlert = () => wrapper.findByTestId('incidentCreationError');
-  const findEnvironmentLink = () => wrapper.findByTestId('environmentUrl');
+  const findEnvironmentPath = () => wrapper.findByTestId('environmentPath');
   const findDetailsTable = () => wrapper.find(AlertDetailsTable);
 
   describe('Alert details', () => {
@@ -121,7 +121,6 @@ describe('AlertDetails', () => {
         ${'eventCount'}     | ${1}            | ${true}
         ${'eventCount'}     | ${undefined}    | ${false}
         ${'environment'}    | ${undefined}    | ${false}
-        ${'environment'}    | ${'Production'} | ${true}
         ${'monitoringTool'} | ${'New Relic'}  | ${true}
         ${'monitoringTool'} | ${undefined}    | ${false}
         ${'service'}        | ${'Prometheus'} | ${true}
@@ -144,16 +143,36 @@ describe('AlertDetails', () => {
       });
     });
 
-    describe('environment URL fields', () => {
-      it('should show the environment URL when available', () => {
-        const environment = 'Production';
-        const environmentUrl = 'fake/url';
-        mountComponent({
-          data: { alert: { ...mockAlert, environment, environmentUrl } },
+    describe('environment fields', () => {
+      describe('when feature flag is not active', () => {
+        beforeEach(mountComponent);
+
+        it('should not show the environment', () => {
+          expect(findEnvironmentPath().exists()).toBe(false);
+        });
+      });
+
+      describe('when feature flag is active', () => {
+        const environmentName = 'Production';
+        const environmentPath = '/fake/path';
+        beforeEach(() => {
+          mountComponent({
+            data: {
+              alert: {
+                ...mockAlert,
+                environment: {
+                  name: environmentName,
+                  path: environmentPath,
+                },
+              },
+            },
+          });
         });
 
-        expect(findEnvironmentLink().text()).toBe(environment);
-        expect(findEnvironmentLink().attributes('href')).toBe(environmentUrl);
+        it('should show the environment', () => {
+          expect(findEnvironmentPath().text()).toBe(environmentName);
+          expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
+        });
       });
     });
 

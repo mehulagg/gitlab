@@ -37,6 +37,12 @@ describe('AlertDetails', () => {
 
   const findTableComponent = () => wrapper.find(GlTable);
   const findTableKeys = () => findTableComponent().findAll('tbody td:first-child');
+  const findTableFieldValueByKey = fieldKey =>
+    findTableComponent()
+      .findAll('tbody tr')
+      .filter(row => row.text().includes(fieldKey))
+      .at(0)
+      .find('td:nth-child(2)');
   const findTableField = (fields, fieldName) => fields.filter(row => row.text() === fieldName);
 
   describe('Alert details', () => {
@@ -61,10 +67,10 @@ describe('AlertDetails', () => {
     });
 
     describe('with table data', () => {
-      const environment = 'myEnvironment';
-      const environmentUrl = 'fake/url';
+      const environment = { path: '/fake/path', name: 'myEnvironment' };
+
       beforeEach(() => {
-        mountComponent({ alert: { ...mockAlert, environment, environmentUrl } });
+        mountComponent({ alert: { ...mockAlert, environment } });
       });
 
       it('renders a table', () => {
@@ -93,6 +99,16 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Notes').exists()).toBe(false);
         expect(findTableField(fields, 'Assignees').exists()).toBe(false);
         expect(findTableField(fields, 'EnvironmentUrl').exists()).toBe(false);
+      });
+
+      it('should apply a formatting strategy when defined', () => {
+        expect(findTableFieldValueByKey('Iid').text()).toBe('1527542');
+        expect(findTableFieldValueByKey('Environment').text()).toBe(environment.name);
+      });
+
+      it('should not display any value when the environment is null', () => {
+        mountComponent({ alert: { ...mockAlert, environment: null } });
+        expect(findTableFieldValueByKey('Environment').text()).toBeFalsy();
       });
     });
   });

@@ -1,0 +1,7 @@
+---
+name: graphql_expose_environment_path
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43414
+rollout_issue_url:
+type: development
+group: group::progressive-delivery
+default_enabled: false

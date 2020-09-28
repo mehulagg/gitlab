@@ -10,6 +10,10 @@ fragment AlertDetailItem on AlertManagementAlert {
   description
   updatedAt
   endedAt
+  environment @include(if: $fetchEnvironment) {
+    name
+    path
+  }
   details
   runbook
   todos {

@@ -1,6 +1,6 @@
 #import "../fragments/detail_item.fragment.graphql"
 
-mutation alertTodoCreate($projectPath: ID!, $iid: String!) {
+mutation alertTodoCreate($projectPath: ID!, $iid: String!, $fetchEnvironment: Boolean = false) {
   alertTodoCreate(input: { iid: $iid, projectPath: $projectPath }) {
     errors
     alert {

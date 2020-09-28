@@ -1,6 +1,6 @@
 #import "../fragments/detail_item.fragment.graphql"
 
-query alertDetails($fullPath: ID!, $alertId: String) {
+query alertDetails($fullPath: ID!, $alertId: String, $fetchEnvironment: Boolean = false) {
   project(fullPath: $fullPath) {
     alertManagementAlerts(iid: $alertId) {
       nodes {

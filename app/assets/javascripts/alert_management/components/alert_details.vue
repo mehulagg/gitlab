@@ -89,6 +89,10 @@ export default {
     projectIssuesPath: {
       default: '',
     },
+    shouldDisplayEnvironment: {
+      type: Boolean,
+      default: false,
+    },
   },
   apollo: {
     alert: {
@@ -98,6 +102,7 @@ export default {
         return {
           fullPath: this.projectPath,
           alertId: this.alertId,
+          fetchEnvironment: this.shouldDisplayEnvironment,
         };
       },
       update(data) {
@@ -146,6 +151,12 @@ export default {
         const tabId = this.$options.tabsConfig[tabIdx].id;
         this.$router.replace({ name: 'tab', params: { tabId } });
       },
+    },
+    environmentName() {
+      return this.alert?.environment?.name;
+    },
+    environmentPath() {
+      return this.alert?.environment?.path;
     },
   },
   mounted() {
@@ -299,19 +310,19 @@ export default {
             </span>
           </alert-summary-row>
           <alert-summary-row
-            v-if="alert.environment"
+            v-if="environmentName"
             :label="`${s__('AlertManagement|Environment')}:`"
           >
             <gl-link
-              v-if="alert.environmentUrl"
+              v-if="environmentPath"
               class="gl-display-inline-block"
-              data-testid="environmentUrl"
-              :href="alert.environmentUrl"
+              data-testid="environmentPath"
+              :href="environmentPath"
               target="_blank"
             >
-              {{ alert.environment }}
+              {{ environmentName }}
             </gl-link>
-            <span v-else data-testid="environment">{{ alert.environment }}</span>
+            <span v-else data-testid="environment">{{ environmentName }}</span>
           </alert-summary-row>
           <alert-summary-row
             v-if="alert.startedAt"

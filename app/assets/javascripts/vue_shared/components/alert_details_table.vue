@@ -1,6 +1,6 @@
 <script>
 import { GlLoadingIcon, GlTable } from '@gitlab/ui';
-import { reduce } from 'lodash';
+import { identity, reduce } from 'lodash';
 import { s__ } from '~/locale';
 import {
   capitalizeFirstCharacter,
@@ -24,8 +24,12 @@ const allowedFields = [
   'details',
   'environment',
 ];
+const formatStrategies = {
+  environment: env => env?.name,
+};
 
 const isAllowed = fieldName => allowedFields.includes(fieldName);
+const getFormatStrategy = field => formatStrategies[field] || identity;
 
 export default {
   components: {
@@ -65,9 +69,10 @@ export default {
       }
       return reduce(
         this.alert,
-        (allowedItems, value, fieldName) => {
+        (allowedItems, rawValue, fieldName) => {
           if (isAllowed(fieldName)) {
-            return [...allowedItems, { fieldName, value }];
+            const formatValue = getFormatStrategy(fieldName);
+            return [...allowedItems, { fieldName, value: formatValue(rawValue) }];
           }
           return allowedItems;
         },

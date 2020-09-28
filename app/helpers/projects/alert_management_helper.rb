@@ -18,7 +18,8 @@ module Projects::AlertManagementHelper
       'alert-id' => alert_id,
       'project-path' => project.full_path,
       'project-id' => project.id,
-      'project-issues-path' => project_issues_path(project)
+      'project-issues-path' => project_issues_path(project),
+      'should-display-environment' => Feature.enabled?(:graphql_expose_environment_path).to_s
     }
   end
 

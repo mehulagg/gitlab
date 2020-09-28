@@ -1,17 +1,24 @@
+import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import produce from 'immer';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import produce from 'immer';
-import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
 import createDefaultClient from '~/lib/graphql';
-import createRouter from './router';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import AlertDetails from './components/alert_details.vue';
 import sidebarStatusQuery from './graphql/queries/sidebar_status.query.graphql';
+import createRouter from './router';
 
 Vue.use(VueApollo);
 
 export default selector => {
   const domEl = document.querySelector(selector);
-  const { alertId, projectPath, projectIssuesPath, projectId } = domEl.dataset;
+  const {
+    alertId,
+    projectPath,
+    projectIssuesPath,
+    projectId,
+    shouldDisplayEnvironment,
+  } = domEl.dataset;
   const router = createRouter();
 
   const resolvers = {
@@ -56,6 +63,7 @@ export default selector => {
       alertId,
       projectIssuesPath,
       projectId,
+      shouldDisplayEnvironment: parseBoolean(shouldDisplayEnvironment),
     },
     apolloProvider,
     components: {

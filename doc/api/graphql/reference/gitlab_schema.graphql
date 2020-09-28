@@ -245,6 +245,11 @@ type AlertManagementAlert implements Noteable {
   endedAt: Time
 
   """
+  Environment for the alert
+  """
+  environment: Environment
+
+  """
   Number of events of this alert
   """
   eventCount: Int
@@ -5602,7 +5607,7 @@ type Environment {
   id: ID!
 
   """
-  The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned.
+  The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned
   """
   latestOpenedMostSevereAlert: AlertManagementAlert
 
@@ -5620,6 +5625,11 @@ type Environment {
   Human-readable name of the environment
   """
   name: String!
+
+  """
+  The path to the environment. Will always return null if `graphql_expose_environment_path` feature flag is disabled
+  """
+  path: String
 
   """
   State of the environment, for example: available/stopped
