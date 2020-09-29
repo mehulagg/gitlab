@@ -6,6 +6,8 @@ module Gitlab
       UNTAR_MASK = 'u+rwX,go+rX,go-w'
       DEFAULT_DIR_MODE = 0700
 
+      InvalidImportUpload = Class.new(StandardError)
+
       def tar_czf(archive:, dir:)
         tar_with_options(archive: archive, dir: dir, options: 'czf')
       end
@@ -22,6 +24,8 @@ module Gitlab
       private
 
       def download_or_copy_upload(uploader, upload_path)
+        raise InvalidImportUpload if uploader.upload.blank?
+
         if uploader.upload.local?
           copy_files(uploader.path, upload_path)
         else
