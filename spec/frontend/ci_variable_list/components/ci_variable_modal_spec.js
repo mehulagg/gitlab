@@ -41,15 +41,6 @@ describe('Ci variable modal', () => {
     wrapper.destroy();
   });
 
-  describe('Feature flag', () => {
-    beforeEach(() => {
-      createComponent(shallowMount);
-    });
-    it('renders the autocomplete dropdown', () => {
-      expect(wrapper.find(GlFormCombobox).exists()).toBe(true);
-    });
-  });
-
   describe('Basic interactions', () => {
     beforeEach(() => {
       createComponent(shallowMount);
