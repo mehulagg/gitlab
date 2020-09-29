@@ -77,7 +77,7 @@ test:
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java uses [Maven](http://maven.apache.org/)
 to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
 generate the coverage artifact.  
-The sourcecode of the docker image and the scripts can be found [here](https://gitlab.com/haynes/jacoco2cobertura)  
+You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
 Because gitlab expects the artifact in the cobertura format, we need to execute a few scripts before we upload it:
 
 ```yaml
