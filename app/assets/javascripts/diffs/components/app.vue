@@ -216,6 +216,9 @@ export default {
 
       return visible;
     },
+    showControls() {
+      return !this.commit && this.mergeRequestDiffs.length;
+    },
   },
   watch: {
     commit(newCommit, oldCommit) {
@@ -472,7 +475,7 @@ export default {
         class="files d-flex gl-mt-2"
       >
         <div
-          v-if="showTreeList"
+          v-if="showTreeList && showControls"
           :style="{ width: `${treeWidth}px` }"
           class="diff-tree-list js-diff-tree-list px-3 pr-md-0"
         >
