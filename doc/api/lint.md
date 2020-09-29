@@ -129,6 +129,7 @@ jq -r '.merged_yaml | fromjson' <your_input_here>
 ```
 
 Example:
+
 ```json
 {"status":"valid","errors":[],"merged_yaml":"---\n:.api_test:\n  :rules:\n  - :if: $CI_PIPELINE_SOURCE==\"merge_request_event\"\n    :changes:\n    - src/api/*\n:deploy:\n  :rules:\n  - :when: manual\n    :allow_failure: true\n  :extends:\n  - \".api_test\"\n  :script:\n  - echo \"hello world\"\n"}
 ```
