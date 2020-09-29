@@ -61,7 +61,8 @@ Example responses:
 
 ### YAML expansion
 
-The expansion only works for CI configurations that don't have local [includes](../ci/yaml/README.md#include).
+The expansion only works for CI configurations that don't have local [includes](../ci/yaml/README.md#include). 
+`extends:` is also not yet merged in the result.
 
 Example contents of a `.gitlab-ci.yml` passed to the CI Lint API with
 `include_merged_yaml` set as true:
@@ -93,4 +94,59 @@ Example response:
   "errors": [],
   "merged_config": "---\n:another_test:\n  :stage: test\n  :script: echo 2\n:test:\n  :stage: test\n  :script: echo 1\n"
 }
+```
+
+### Using jq to create and process YAML & JSON Payloads
+
+In order to `POST` a YAML configuration to the CI Lint endpoint, it must be appropriately escaped and JSON-encoded.
+Here are some handy examples of how to use `jq` and `curl` to easily escape and upload YAML to the GitLab API:
+
+**JSON-Escape a YAML file**
+To escape quotes and encode your YAML in a format suitable for embedding within
+a JSON payload, `jq` can be used as follows (in this example, for a file named `.gitlab-ci.yml`):
+
+```shell
+jq --raw-input --slurp < .gitlab-ci.yaml
+```
+
+**`POST` a JSON-wrapped YAML file to the CI Lint endpoint**
+The following example will escape and encode an input
+YAML file (`.gitlab-ci.yml`), and `POST` it to the GitLab API using `curl` and `jq`:
+
+```shell
+jq -n --arg yaml "$(<.gitlab-ci.yaml)" '.content=$yaml' \
+| curl 'https://gitlab.example.com/api/v4/ci/lint?include_merged_yaml=true' \
+--header 'Content-Type: application/json' \
+--data @-
+```
+
+**Use `jq` to parse `merged_yaml` response**
+To easily reformat the CI Linter's response, you can again use `jq` (you can pipe in the input from the above example,
+or store the API response as a text file and provide it as an argument):
+
+```shell
+jq -r '.merged_yaml | fromjson' <your_input_here>
+```
+
+Example:
+```json
+{"status":"valid","errors":[],"merged_yaml":"---\n:.api_test:\n  :rules:\n  - :if: $CI_PIPELINE_SOURCE==\"merge_request_event\"\n    :changes:\n    - src/api/*\n:deploy:\n  :rules:\n  - :when: manual\n    :allow_failure: true\n  :extends:\n  - \".api_test\"\n  :script:\n  - echo \"hello world\"\n"}
+```
+
+Becomes:
+
+```yaml
+:.api_test:
+  :rules:
+  - :if: $CI_PIPELINE_SOURCE=="merge_request_event"
+    :changes:
+    - src/api/*
+:deploy:
+  :rules:
+  - :when: manual
+    :allow_failure: true
+  :extends:
+  - ".api_test"
+  :script:
+  - echo "hello world"
 ```
