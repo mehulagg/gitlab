@@ -1,5 +1,7 @@
 import { __, s__ } from '~/locale';
 
+console.log(gon.features);
+
 /* Integration tabs constants */
 export const INTEGRATION_TABS_CONFIG = [
   {
@@ -20,7 +22,7 @@ export const INTEGRATION_TABS_CONFIG = [
   {
     title: s__('IncidentSettings|Incident Settings'),
     component: 'IncidentSettingsForm',
-    active: true,
+    active: gon.features.incidentSla,
   },
 ];
 
