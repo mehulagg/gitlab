@@ -57,6 +57,8 @@ module QA
               example.metadata[:stdout] = %{[[ATTACHMENT|#{screenshot}]]}
             end
           end
+
+          config.disable_monkey_patching!
         end
 
         Capybara.server_port = 9887 + ENV['TEST_ENV_NUMBER'].to_i
