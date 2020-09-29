@@ -13,7 +13,7 @@ should be eventually harmonized with this guide. If there are any per-project
 deviations from this guide, they should be described in the
 `README.md` or `PROCESS.md` file for such a project.
 
-### Avoid using shell scripts
+## Avoid using shell scripts
 
 CAUTION: **Caution:**
 This is a must-read section.
