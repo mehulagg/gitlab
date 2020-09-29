@@ -166,8 +166,7 @@ module Gitlab
             user_preferences_usage,
             ingress_modsecurity_usage,
             container_expiration_policies_usage,
-            service_desk_counts,
-            snowplow_event_counts
+            service_desk_counts
           ).tap do |data|
             data[:snippets] = data[:personal_snippets] + data[:project_snippets]
           end
