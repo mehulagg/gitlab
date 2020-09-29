@@ -15,12 +15,6 @@ RSpec.describe ResourceAccessTokens::RevokeService do
 
       it { expect(subject.message).to eq("Revoked access token: #{access_token.name}") }
 
-      it 'revokes token access' do
-        subject
-
-        expect(access_token.reload.revoked?).to be true
-      end
-
       it 'removes membership of bot user' do
         subject
 
@@ -33,6 +27,12 @@ RSpec.describe ResourceAccessTokens::RevokeService do
         subject
 
         expect(issue.reload.author.ghost?).to be true
+      end
+
+      it 'destroys project bot user' do
+        subject
+
+        expect(User.exists?(resource_bot.id)).to be_falsy
       end
     end
 
@@ -56,13 +56,19 @@ RSpec.describe ResourceAccessTokens::RevokeService do
 
         expect(issue.reload.author.ghost?).to be false
       end
+
+      it 'does not destroy project bot user' do
+        subject
+
+        expect(User.exists?(resource_bot.id)).to be_truthy
+      end
     end
 
     context 'when resource is a project' do
       let_it_be(:resource) { create(:project, :private) }
-      let_it_be(:resource_bot) { create(:user, :project_bot) }
+      let(:resource_bot) { create(:user, :project_bot) }
 
-      before_all do
+      before do
         resource.add_maintainer(user)
         resource.add_maintainer(resource_bot)
       end
@@ -70,13 +76,13 @@ RSpec.describe ResourceAccessTokens::RevokeService do
       it_behaves_like 'revokes access token'
 
       context 'when revoke fails' do
-        context 'invalid resource type' do
-          subject { described_class.new(user, resource, access_token).execute }
+        let_it_be(:outside_user) { create(:user) }
+        let_it_be(:outside_access_token) { create(:personal_access_token, user: outside_user) }
 
-          let_it_be(:resource) { double }
-          let_it_be(:resource_bot) { create(:user, :project_bot) }
+        context 'when bot is not in project' do
+          subject { described_class.new(user, resource, outside_access_token).execute }
 
-          it 'returns error response' do
+          it 'does not find the bot' do
             response = subject
 
             expect(response.success?).to be false
@@ -84,6 +90,15 @@ RSpec.describe ResourceAccessTokens::RevokeService do
           end
 
           it { expect { subject }.not_to change(access_token.reload, :revoked) }
+        end
+
+        context 'when outside user tries to delete project bot' do
+          subject { described_class.new(outside_user, resource, access_token).execute }
+
+          it 'returns access denied error' do
+            expect { subject }.to raise_error(Gitlab::Access::AccessDeniedError)
+            expect(access_token.reload.revoked?).to be false
+          end
         end
 
         context 'when migration to ghost user fails' do
@@ -96,9 +111,9 @@ RSpec.describe ResourceAccessTokens::RevokeService do
           it_behaves_like 'rollback revoke steps'
         end
 
-        context 'when migration to ghost user fails' do
+        context 'when bot deletion fails' do
           before do
-            allow_next_instance_of(::Users::MigrateToGhostUserService) do |service|
+            allow_next_instance_of(::Users::DestroyService) do |service|
               allow(service).to receive(:execute).and_return(false)
             end
           end
