@@ -1,18 +1,11 @@
 import Vue from 'vue';
-import VueApollo from 'vue-apollo';
 import { GlToast } from '@gitlab/ui';
 import CycleAnalytics from './components/base.vue';
 import createStore from './store';
-import createDefaultClient from '~/lib/graphql';
 import { buildCycleAnalyticsInitialData } from '../shared/utils';
 import { urlQueryToFilter } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 
 Vue.use(GlToast);
-Vue.use(VueApollo);
-
-const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
-});
 
 export default () => {
   const el = document.querySelector('#js-cycle-analytics-app');
@@ -50,7 +43,6 @@ export default () => {
   return new Vue({
     el,
     name: 'CycleAnalyticsApp',
-    apolloProvider,
     store,
     render: createElement =>
       createElement(CycleAnalytics, {
