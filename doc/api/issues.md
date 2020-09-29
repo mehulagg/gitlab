@@ -16,7 +16,7 @@ are paginated.
 
 Read more on [pagination](README.md#pagination).
 
-CAUTION: **Deprecation:**
+DANGER: **Deprecated:**
 The `reference` attribute in responses is deprecated in favor of `references`.
 Introduced in [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354).
 
@@ -194,7 +194,7 @@ the `health_status` parameter:
 ]
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform
 to the GitLab EE API.
 
@@ -372,7 +372,7 @@ the `health_status` parameter:
 ]
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 NOTE: **Note:**
@@ -555,7 +555,7 @@ the `health_status` parameter:
 ]
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 NOTE: **Note:**
@@ -712,18 +712,18 @@ the `epic` property:
 }
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform
 to the GitLab EE API.
+
+DANGER: **Deprecated:**
+The `epic_iid` attribute is deprecated, and [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
 
 NOTE: **Note:**
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042).
 This value is only present for issues closed after GitLab 10.6 and if the user account
 that closed the issue still exists.
-
-NOTE: **Note:**
-The `epic_iid` attribute is deprecated, and [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
-Please use `iid` of the `epic` attribute instead.
 
 ## Single project issue
 
@@ -874,16 +874,16 @@ property:
 ]
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
+
+DANGER: **Deprecated:**
+The `epic_iid` attribute is deprecated and [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
+Please use `iid` of the `epic` attribute instead.
 
 NOTE: **Note:**
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
-
-NOTE: **Note:**
-The `epic_iid` attribute is deprecated and [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157).
-Please use `iid` of the `epic` attribute instead.
 
 ## New issue
 
@@ -1002,7 +1002,7 @@ the `health_status` parameter:
 ]
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 NOTE: **Note:**
@@ -1018,6 +1018,20 @@ See [Issues rate limits](../user/admin_area/settings/rate_limit_on_issues_creati
 
 Updates an existing project issue. This call is also used to mark an issue as
 closed.
+
+At least one of the following parameters is required for the request to be successful:
+
+- `:assignee_id`
+- `:assignee_ids`
+- `:confidential`
+- `:created_at`
+- `:description`
+- `:discussion_locked`
+- `:due_date`
+- `:labels`
+- `:milestone_id`
+- `:state_event`
+- `:title`
 
 ```plaintext
 PUT /projects/:id/issues/:issue_iid
@@ -1142,14 +1156,11 @@ the `health_status` parameter:
 ```
 
 NOTE: **Note:**
-At least one of following parameters is required to be passed for the request to be successful: `:assignee_id`, `:assignee_ids`, `:confidential`, `:created_at`, `:description`, `:discussion_locked`, `:due_date`, `:labels`, `:milestone_id`, `:state_event`, or `:title`.
-
-NOTE: **Note:**
-`assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
-
-NOTE: **Note:**
 The `closed_by` attribute was [introduced in GitLab 10.6](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17042). This value is only present for issues closed after GitLab 10.6 and if the user account that closed
 the issue still exists.
+
+DANGER: **Deprecated:**
+`assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 ## Delete an issue
 
@@ -1309,7 +1320,7 @@ the `health_status` parameter:
 ]
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 NOTE: **Note:**
@@ -1418,7 +1429,7 @@ the `weight` parameter:
 }
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 NOTE: **Note:**
@@ -1608,7 +1619,7 @@ Example response:
 }
 ```
 
-NOTE: **Note:**
+DANGER: **Deprecated:**
 The `assignee` column is deprecated. We now show it as a single-sized array `assignees` to conform to the GitLab EE API.
 
 NOTE: **Note:**
