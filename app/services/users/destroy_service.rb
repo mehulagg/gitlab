@@ -25,6 +25,7 @@ module Users
     # `delete_solo_owned_groups: false, hard_delete: true` in +options+.
     def execute(user, options = {})
       delete_solo_owned_groups = options.fetch(:delete_solo_owned_groups, options[:hard_delete])
+
       if(options.has_key?(:skip_authorization))
         skip_auth = options.fetch(:skip_authorization)
       end
