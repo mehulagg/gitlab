@@ -96,6 +96,20 @@ sequenceDiagram
     Snowflake DW->>Sisense Dashboards: Data available for querying
 ```
 
+## Structured event taxonomy
+
+When adding new click events, we should add them in a way that's internally consistent. If we don't, it'll be very painful to perform analysis across features since each feature will be capturing events differently.
+
+The current method provides 5 attributes that are sent on each click event. Please try to follow these guidelines when specifying events to capture:
+
+| attribute | type    | required | description |
+| --------- | ------- | -------- | ----------- |
+| category  | text    | true     | The page or backend area of the application. Unless infeasible, please use the Rails page attribute by default in the frontend, and namespace + classname on the backend. |
+| action    | text    | true     | The action the user is taking, or aspect that's being instrumented. The first word should always describe the action or aspect: clicks should be `click`, activations should be `activate`, creations should be `create`, etc. Use underscores to describe what was acted on; for example, activating a form field would be `activate_form_input`. An interface action like clicking on a dropdown would be `click_dropdown`, while a behavior like creating a project record from the backend would be `create_project` |
+| label     | text    | false    | The specific element, or object that's being acted on. This is either the label of the element (e.g. a tab labeled 'Create from template' may be `create_from_template`) or a unique identifier if no text is available (e.g. closing the Groups dropdown in the top navbar might be `groups_dropdown_close`), or it could be the name or title attribute of a record being created. |
+| property  | text    | false    | Any additional property of the element, or object being acted on. |
+| value     | decimal | false    | Describes a numeric value or something directly related to the event. This could be the value of an input (e.g. `10` when clicking `internal` visibility). |
+
 ## Implementing Snowplow JS (Frontend) tracking
 
 GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to utilize tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Feature instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy).
