@@ -84,12 +84,6 @@ scripts before uploading it. The `test-jdk11` job tests the code and generates a
 XML artifact. The `coverage-jdk-11` job converts the artifact into a Cobertura report:
 
 ```yaml
-stages:
-  - build
-  - test
-  - visualize
-  - deploy
-
 test-jdk11:
   stage: test
   image: maven:3.6.3-jdk-11
@@ -100,19 +94,19 @@ test-jdk11:
       - target/site/jacoco/jacoco.xml
 
 coverage-jdk11:
-  stage: visualize
+  stage: visualize # Must be in a stage later than test-jdk11's stage. The visualize stage does not exist by default, please define it first.
   image: haynes/jacoco2cobertura:1.0.3
   script:
     # convert report from jacoco to cobertura
-    - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/coverage.xml'
+    - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/cobertura.xml'
     # read the <source></source> tag and prepend the path to every filename attribute
-    - 'python /opt/source2filename.py target/site/coverage.xml'
+    - 'python /opt/source2filename.py target/site/cobertura.xml'
   needs: ["test-jdk11"]
   dependencies:
     - test-jdk11
   artifacts:
     reports:
-      cobertura: target/site/coverage.xml
+      cobertura: target/site/cobertura.xml
 ```
 
 ## Enable or disable code coverage visualization
