@@ -1,0 +1,23 @@
+image: docker:stable
+
+# the registry is marked as insecure. documentation: https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/registry.md#using-an-insecure-registry-from-gitlab-ci
+variables:
+  DOCKER_DAEMON_OPTIONS: "--insecure-registry=${CI_REGISTRY}"
+
+services:
+  - name: docker:stable-dind
+    entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
+
+stages:
+  - build
+
+build:
+  stage: build
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    # login only required if `auth_enabled: true`
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA || true
+    - docker build -t $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA

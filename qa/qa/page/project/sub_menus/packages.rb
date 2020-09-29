@@ -13,6 +13,7 @@ module QA
             base.class_eval do
               view 'app/views/layouts/nav/sidebar/_project_packages_link.html.haml' do
                 element :packages_link
+                element :container_registry_link
               end
             end
           end
@@ -20,6 +21,13 @@ module QA
           def click_packages_link
             within_sidebar do
               click_element :packages_link
+            end
+          end
+
+          def click_container_registry_link
+            within_sidebar do
+              click_element :packages_link
+              click_element :container_registry_link
             end
           end
         end
