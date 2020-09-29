@@ -13,7 +13,7 @@ class AuditEvent < ApplicationRecord
     :target_id
   ].freeze
 
-  ignore_column :type, remove_with: '13.6', remove_after: '2020-11-22'
+  ignore_column :type, remove_with: '13.6', remove_after: '2020-10-22'
 
   serialize :details, Hash # rubocop:disable Cop/ActiveRecordSerialize
 

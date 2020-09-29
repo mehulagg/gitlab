@@ -19,7 +19,6 @@ IF (TG_OP = 'DELETE') THEN
 ELSIF (TG_OP = 'UPDATE') THEN
   UPDATE audit_events_part_5fc467ac26
   SET author_id = NEW.author_id,
-    type = NEW.type,
     entity_id = NEW.entity_id,
     entity_type = NEW.entity_type,
     details = NEW.details,
@@ -34,7 +33,6 @@ ELSIF (TG_OP = 'UPDATE') THEN
 ELSIF (TG_OP = 'INSERT') THEN
   INSERT INTO audit_events_part_5fc467ac26 (id,
     author_id,
-    type,
     entity_id,
     entity_type,
     details,
@@ -47,7 +45,6 @@ ELSIF (TG_OP = 'INSERT') THEN
     created_at)
   VALUES (NEW.id,
     NEW.author_id,
-    NEW.type,
     NEW.entity_id,
     NEW.entity_type,
     NEW.details,
@@ -69,7 +66,6 @@ COMMENT ON FUNCTION table_sync_function_2be879775d() IS 'Partitioning migration:
 CREATE TABLE audit_events_part_5fc467ac26 (
     id bigint NOT NULL,
     author_id integer NOT NULL,
-    type character varying,
     entity_id integer NOT NULL,
     entity_type character varying NOT NULL,
     details text,
@@ -9512,7 +9508,6 @@ ALTER SEQUENCE atlassian_identities_user_id_seq OWNED BY atlassian_identities.us
 CREATE TABLE audit_events (
     id integer NOT NULL,
     author_id integer NOT NULL,
-    type character varying,
     entity_id integer NOT NULL,
     entity_type character varying NOT NULL,
     details text,
