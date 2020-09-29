@@ -58,8 +58,6 @@ export default () => {
   if (group) {
     project = buildProjectFromDataset(container.dataset);
 
-    console.log('project :: ', project);
-
     initialData = {
       ...initialData,
       groupNamespace: group.full_path,
@@ -104,7 +102,6 @@ export default () => {
         this.initFilteredSearch({ groupNamespace, groupId });
       },
       onProjectSelected({ groupNamespace, groupId, projectNamespace, projectId }) {
-        console.log('onProjectSelected :: ', groupNamespace, groupId, projectNamespace, projectId);
         this.initFilteredSearch({ groupNamespace, groupId, projectNamespace, projectId });
       },
       initFilteredSearch({ groupNamespace, groupId, projectNamespace = '', projectId = null }) {
