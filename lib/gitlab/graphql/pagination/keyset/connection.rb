@@ -103,6 +103,7 @@ module Gitlab
           private
 
           # Apply `first` and `last` to `sliced_nodes`
+          # rubocop: disable CodeReuse/ActiveRecord
           def limited_nodes
             strong_memoize(:limited_nodes) do
               if first && last
@@ -110,12 +111,11 @@ module Gitlab
               end
 
               if last
-                # grab one more than we need
-                paginated_nodes = sliced_nodes.last(limit_value + 1)
+                paginated_nodes = LastItems.take_items(sliced_nodes, limit_value + 1)
 
                 # there is an extra node, so there is a previous page
                 @has_previous_page = paginated_nodes.count > limit_value
-                @has_previous_page ? paginated_nodes.last(limit_value) : paginated_nodes
+                @has_previous_page ? LastItems.take_items(paginated_nodes, limit_value) : paginated_nodes
               elsif loaded?(sliced_nodes)
                 sliced_nodes.take(limit_value) # rubocop: disable CodeReuse/ActiveRecord
               else
@@ -123,6 +123,7 @@ module Gitlab
               end
             end
           end
+          # rubocop: enable CodeReuse/ActiveRecord
 
           # rubocop: disable CodeReuse/ActiveRecord
           def slice_nodes(sliced, encoded_cursor, before_or_after)

@@ -248,8 +248,38 @@ RSpec.describe 'getting merge request listings nested in a project' do
         end
 
         before do
+          merge_request_c.update_column(:state_id, MergeRequest.available_states[:merged])
           merge_request_c.metrics.update!(merged_at: 5.days.ago)
+
+          merge_request_b.update_column(:state_id, MergeRequest.available_states[:merged])
           merge_request_b.metrics.update!(merged_at: 1.day.ago)
+        end
+
+        context 'when paginating backwards' do
+          let(:params) { 'first: 2' }
+          let(:page_info) { 'pageInfo { startCursor endCursor }' }
+
+          before do
+            post_graphql(pagination_query(params, page_info), current_user: current_user)
+          end
+
+          it 'paginates backwards correctly' do
+            # first page
+            first_page_response_data = graphql_dig_at(Gitlab::Json.parse(response.body), :data, *data_path, :edges)
+            end_cursor = graphql_dig_at(Gitlab::Json.parse(response.body), :data, :project, :mergeRequests, :pageInfo, :endCursor)
+
+            # second page
+            params = "first: 2, after: \"#{end_cursor}\""
+            post_graphql(pagination_query(params, page_info), current_user: current_user)
+            start_cursor = graphql_dig_at(Gitlab::Json.parse(response.body), :data, :project, :mergeRequests, :pageInfo, :start_cursor)
+
+            # going back to the first page
+
+            params = "last: 2, before: \"#{start_cursor}\""
+            post_graphql(pagination_query(params, page_info), current_user: current_user)
+            backward_paginated_response_data = graphql_dig_at(Gitlab::Json.parse(response.body), :data, *data_path, :edges)
+            expect(first_page_response_data).to eq(backward_paginated_response_data)
+          end
         end
       end
     end
