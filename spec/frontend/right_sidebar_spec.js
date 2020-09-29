@@ -16,10 +16,10 @@ const assertSidebarState = state => {
   const shouldBeCollapsed = state === 'collapsed';
   expect($aside.hasClass('right-sidebar-expanded')).toBe(shouldBeExpanded);
   expect($page.hasClass('right-sidebar-expanded')).toBe(shouldBeExpanded);
-  expect($collapseIcon.hasClass('hidden')).toBe(shouldBeExpanded);
+  expect($expandIcon.hasClass('hidden')).toBe(shouldBeExpanded);
   expect($aside.hasClass('right-sidebar-collapsed')).toBe(shouldBeCollapsed);
   expect($page.hasClass('right-sidebar-collapsed')).toBe(shouldBeCollapsed);
-  expect($expandIcon.hasClass('hidden')).toBe(shouldBeCollapsed);
+  expect($collapseIcon.hasClass('hidden')).toBe(shouldBeCollapsed);
 };
 
 describe('RightSidebar', () => {

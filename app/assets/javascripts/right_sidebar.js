@@ -42,8 +42,8 @@ Sidebar.prototype.addEventListeners = function() {
 
 Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
   const $this = $(this);
-  const $collapseIcon = $this.find('.js-sidebar-collapse');
-  const $expandIcon = $this.find('.js-sidebar-expand');
+  const $collapseIcon = $('.js-sidebar-collapse');
+  const $expandIcon = $('.js-sidebar-expand');
   const isExpanded = $expandIcon.hasClass('hidden');
   const tooltipLabel = isExpanded ? __('Expand sidebar') : __('Collapse sidebar');
   e.preventDefault();
