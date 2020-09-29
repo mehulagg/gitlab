@@ -3,18 +3,16 @@
 module QA
   module Resource
     class Design < Base
+      attr_reader :id
+      attr_accessor :filename
+      attr_writer :update
+
       attribute :issue do
         Issue.fabricate_via_api!
       end
 
-      attribute :filepath do
-        ::File.absolute_path(::File.join('spec', 'fixtures', @filename))
-      end
-
-      attribute :id
-      attribute :filename
-
       def initialize
+        @update = false
         @filename = 'banana_sample.gif'
       end
 
@@ -25,6 +23,18 @@ module QA
         Page::Project::Issue::Show.perform do |issue|
           issue.add_design(filepath)
         end
+      end
+
+      private
+
+      def filepath
+        relative_path = if @update
+          ::File.join('spec', 'fixtures', 'update', @filename)
+        else
+          ::File.join('spec', 'fixtures', @filename)
+        end
+
+        ::File.absolute_path(relative_path)
       end
     end
   end
