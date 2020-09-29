@@ -1,5 +1,7 @@
+@import 'mixins_and_variables_and_functions';
+
 .split-report-section {
-  border-bottom: 1px solid $gray-darker;
+  border-bottom: 1px solid var(--gray-50, $gray-50);
 
   .report-block-container {
     max-height: 500px;
@@ -69,15 +71,15 @@
   display: flex;
 
   &.failed svg {
-    color: $red-500;
+    color: var(--red-500, $red-500);
   }
 
   &.success svg {
-    color: $green-500;
+    color: var(--green-500, $green-500);
   }
 
   &.neutral svg {
-    color: $gray-500;
+    color: var(--gray-500, $gray-500);
   }
 
   .ci-status-icon {
