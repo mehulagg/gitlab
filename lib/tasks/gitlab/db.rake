@@ -40,6 +40,11 @@ namespace :gitlab do
       # Add `IF EXISTS` because cascade could have already deleted a table.
       tables.each { |t| connection.execute("DROP TABLE IF EXISTS #{connection.quote_table_name(t)} CASCADE") }
 
+      # Also drop any views
+      connection.views.each do |view|
+        connection.execute("DROP VIEW IF EXISTS #{connection.quote_table_name(view)} CASCADE")
+      end
+
       # Drop all extra schema objects GitLab owns
       Gitlab::Database::EXTRA_SCHEMAS.each do |schema|
         connection.execute("DROP SCHEMA IF EXISTS #{connection.quote_table_name(schema)}")

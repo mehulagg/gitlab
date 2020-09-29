@@ -164,7 +164,7 @@ RSpec.describe 'gitlab:db namespace rake task' do
     end
   end
 
-  describe 'drop_tables', :focus do
+  describe 'drop_tables' do
     subject { run_rake_task('gitlab:db:drop_tables') }
 
     let(:tables) { %w(one two) }
@@ -181,6 +181,13 @@ RSpec.describe 'gitlab:db namespace rake task' do
     it 'drops all tables, except schema_migrations' do
       expect(connection).to receive(:execute).with('DROP TABLE IF EXISTS "one" CASCADE')
       expect(connection).to receive(:execute).with('DROP TABLE IF EXISTS "two" CASCADE')
+
+      subject
+    end
+
+    it 'drops all views' do
+      expect(connection).to receive(:execute).with('DROP VIEW IF EXISTS "three" CASCADE')
+      expect(connection).to receive(:execute).with('DROP VIEW IF EXISTS "four" CASCADE')
 
       subject
     end
