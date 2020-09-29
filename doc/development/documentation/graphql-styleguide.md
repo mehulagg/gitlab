@@ -3,7 +3,7 @@ type: reference, dev
 stage: none
 group: Development
 info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
-description: 'Writing styles, markup, formatting, and other standards for GitLab Documentation.'
+description: "Writing styles, markup, formatting, and other standards for GraphQL API's GitLab Documentation."
 ---
 
 # GraphQL API
