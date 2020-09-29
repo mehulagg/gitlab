@@ -19,7 +19,8 @@ For getting started, we provide an example project that uses GitLab's Prometheus
 
 Clone our [example repository](https://gitlab.com/gitlab-examples/kubecost-cost-model/). This repository contains minor modifications to the upstream kubecost `cost-model`. Namely, 
 
-- it configure your Prometheus endpoint to the GitLab Managed Prometheus, you might need to change this if you use a non-managed Prometheus; See the next section for details. 
+- it configures your Prometheus endpoint to the GitLab Managed Prometheus, you might need to change this if you use a non-managed Prometheus; See the next section for details. 
+- adds the necessary annotations to the deployment manifest to be scraped by GitLab Managed Prometheus
 - it changes the Google Pricing API access key to GitLab's access key.
 - it contains definitions for a custom GitLab Metrics dashboard to show the cost insights.
 
