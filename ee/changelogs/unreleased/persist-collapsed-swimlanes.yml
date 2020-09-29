@@ -1,0 +1,5 @@
+---
+title: Persist collapsed state to DB
+merge_request: 43681
+author:
+type: added
