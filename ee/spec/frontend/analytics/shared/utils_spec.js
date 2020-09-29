@@ -22,6 +22,7 @@ const subGroupDataset = {
 
 const projectDataset = {
   projectId: '1',
+  projectGid: 'gid://gitlab/Project/1',
   projectName: 'My Project',
   projectPathWithNamespace: 'my-group/my-project',
 };
@@ -67,6 +68,7 @@ describe('buildProjectFromDataset', () => {
   it('returns a project object when the projectId is given', () => {
     expect(buildProjectFromDataset(projectDataset)).toEqual({
       id: 1,
+      gid: 'gid://gitlab/Project/1',
       name: 'My Project',
       path_with_namespace: 'my-group/my-project',
       avatar_url: undefined,
