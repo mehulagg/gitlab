@@ -129,7 +129,7 @@ The following metadata should be added when a page is moved to another location:
 
 - `redirect_to`: The relative path and filename (with an `.md` extension) of the
   location to which visitors should be redirected for a moved page.
-  [Learn more](#move-or-rename-a-document).
+  [Learn more](#move-or-rename-a-page).
 - `disqus_identifier`: Identifier for Disqus commenting system. Used to keep
   comments with a page that's been moved to a new URL.
   [Learn more](#redirections-for-pages-with-disqus-comments).
