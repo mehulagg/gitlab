@@ -58,7 +58,7 @@ NOTE: **Note:**
 The Cobertura XML parser currently does not support the `sources` element and ignores it. It is assumed that
 the `filename` of a `class` element contains the full path relative to the project root.
 
-## Example test coverage configuration
+## Example test coverage configurations
 
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example uses [Mocha](https://mochajs.org/)
 JavaScript testing and [NYC](https://github.com/istanbuljs/nyc) coverage-tooling to
