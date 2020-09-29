@@ -897,10 +897,10 @@ POST /projects/:id/issues
 |-------------------------------------------|----------------|----------|--------------|
 | `assignee_ids`                            | integer array  | no       | The ID of the user(s) to assign the issue to. |
 | `confidential`                            | boolean        | no       | Set an issue to be confidential. Default is `false`.  |
-| `created_at`                              | string         | no       | Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` (requires administrator or project/group owner rights) |
+| `created_at`                              | string         | no       | When the issue was created. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 | `description`                             | string         | no       | The description of an issue. Limited to 1,048,576 characters. |
 | `discussion_to_resolve`                   | string         | no       | The ID of a discussion to resolve. This fills out the issue with a default description and mark the discussion as resolved. Use in combination with `merge_request_to_resolve_discussions_of`. |
-| `due_date`                                | string         | no       | Date time string in the format YEAR-MONTH-DAY, for example `2016-03-11` |
+| `due_date`                                | string         | no       | The due date. Date time string in the format YEAR-MONTH-DAY, for example `2016-03-11` |
 | `epic_id` **(PREMIUM)** | integer | no | ID of the epic to add the issue to. Valid values are greater than or equal to 0. |
 | `epic_iid` **(PREMIUM)** | integer | no | IID of the epic to add the issue to. Valid values are greater than or equal to 0. (deprecated, [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157)) |
 | `id`                                      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
@@ -1044,7 +1044,7 @@ PUT /projects/:id/issues/:issue_iid
 | `confidential` | boolean | no       | Updates an issue to be confidential                                                                        |
 | `description`  | string  | no       | The description of an issue. Limited to 1,048,576 characters.        |
 | `discussion_locked` | boolean | no  | Flag indicating if the issue's discussion is locked. If the discussion is locked only project members can add or edit comments. |
-| `due_date`     | string  | no       | Date time string in the format YEAR-MONTH-DAY, for example `2016-03-11`                                           |
+| `due_date`     | string  | no       | The due date. Date time string in the format YEAR-MONTH-DAY, for example `2016-03-11`                                           |
 | `epic_id` **(PREMIUM)** | integer | no | ID of the epic to add the issue to. Valid values are greater than or equal to 0. |
 | `epic_iid` **(PREMIUM)** | integer | no | IID of the epic to add the issue to. Valid values are greater than or equal to 0. (deprecated, [will be removed in version 5](https://gitlab.com/gitlab-org/gitlab/-/issues/35157)) |
 | `id`           | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
@@ -1054,7 +1054,7 @@ PUT /projects/:id/issues/:issue_iid
 | `remove_labels`| string  | no       | Comma-separated label names to remove from an issue.                                                       |
 | `state_event`  | string  | no       | The state event of an issue. Set `close` to close the issue and `reopen` to reopen it                      |
 | `title`        | string  | no       | The title of an issue                                                                                      |
-| `updated_at`   | string  | no       | Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` (requires administrator or project owner rights). Empty string or null values are not accepted.|
+| `updated_at`   | string  | no       | When the issue was updated. Date time string, ISO 8601 formatted, for example `2016-03-11T03:45:40Z` (requires administrator or project owner rights). Empty string or null values are not accepted.|
 | `weight` **(STARTER)** | integer | no | The weight of the issue. Valid values are greater than or equal to 0. 0                                                                    |
 
 ```shell
