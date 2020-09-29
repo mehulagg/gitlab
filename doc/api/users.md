@@ -980,7 +980,7 @@ Example response:
 
 ## Get a specific GPG key for a given user
 
-Get a specific GPG key for a given user. Available only for admins.
+Get a specific GPG key for a given user. This endpoint can be accessed without authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys/:key_id
