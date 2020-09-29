@@ -8,7 +8,6 @@ import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
  * @sentrify
  */
 export default () => {
-  const $sidebarGutterToggle = $('.js-sidebar-toggle');
   let bootstrapBreakpoint = bp.getBreakpointSize();
 
   $(window).on('resize.app', () => {
@@ -19,8 +18,10 @@ export default () => {
       const breakpointSizes = ['md', 'sm', 'xs'];
 
       if (breakpointSizes.includes(bootstrapBreakpoint)) {
-        const $expandIcon = $sidebarGutterToggle.find('.js-sidebar-expand');
+        const $expandIcon = $('.js-sidebar-expand');
         if ($expandIcon.hasClass('hidden')) {
+          const $sidebarGutterToggle = $expandIcon.closest('.js-sidebar-toggle');
+
           $sidebarGutterToggle.trigger('click');
         }
 
