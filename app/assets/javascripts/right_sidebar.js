@@ -42,13 +42,15 @@ Sidebar.prototype.addEventListeners = function() {
 
 Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
   const $this = $(this);
-  const isExpanded = $this.find('i').hasClass('fa-angle-double-right');
+  const $collapseIcon = $this.find('.js-sidebar-collapse');
+  const $expandIcon = $this.find('.js-sidebar-expand');
+  const isExpanded = $expandIcon.hasClass('hidden');
   const tooltipLabel = isExpanded ? __('Expand sidebar') : __('Collapse sidebar');
-  const $allGutterToggleIcons = $('.js-sidebar-toggle i');
   e.preventDefault();
 
   if (isExpanded) {
-    $allGutterToggleIcons.removeClass('fa-angle-double-right').addClass('fa-angle-double-left');
+    $collapseIcon.addClass('hidden');
+    $expandIcon.removeClass('hidden');
     $('aside.right-sidebar')
       .removeClass('right-sidebar-expanded')
       .addClass('right-sidebar-collapsed');
@@ -56,7 +58,8 @@ Sidebar.prototype.sidebarToggleClicked = function(e, triggered) {
       .removeClass('right-sidebar-expanded')
       .addClass('right-sidebar-collapsed');
   } else {
-    $allGutterToggleIcons.removeClass('fa-angle-double-left').addClass('fa-angle-double-right');
+    $expandIcon.addClass('hidden');
+    $collapseIcon.removeClass('hidden');
     $('aside.right-sidebar')
       .removeClass('right-sidebar-collapsed')
       .addClass('right-sidebar-expanded');

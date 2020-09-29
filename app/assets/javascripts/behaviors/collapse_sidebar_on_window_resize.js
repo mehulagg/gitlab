@@ -19,8 +19,8 @@ export default () => {
       const breakpointSizes = ['md', 'sm', 'xs'];
 
       if (breakpointSizes.includes(bootstrapBreakpoint)) {
-        const $gutterIcon = $sidebarGutterToggle.find('i');
-        if ($gutterIcon.hasClass('fa-angle-double-right')) {
+        const $expandIcon = $sidebarGutterToggle.find('.js-sidebar-expand');
+        if ($expandIcon.hasClass('hidden')) {
           $sidebarGutterToggle.trigger('click');
         }
 
