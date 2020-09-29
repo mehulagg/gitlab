@@ -17,13 +17,14 @@ RSpec.describe "Every controller" do
         .compact
         .select { |route| route[:controller].present? && route[:action].present? }
         .map { |route| [constantize_controller(route[:controller]), route[:action]] }
-        .reject { |route| route.first.nil? || !route.first.include?(ControllerWithFeatureCategory) }
+        .select { |(controller, action)| controller&.include?(ControllerWithFeatureCategory) }
+        .reject { |(controller, action)| controller == Devise::UnlocksController }
     end
 
     let_it_be(:routes_without_category) do
       controller_actions.map do |controller, action|
         next if controller.feature_category_for_action(action)
-        next unless controller.to_s.start_with?('B', 'C')
+        next unless controller.to_s.start_with?('B', 'C', 'D')
 
         "#{controller}##{action}"
       end.compact
