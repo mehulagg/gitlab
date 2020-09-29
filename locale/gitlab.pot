@@ -1158,6 +1158,9 @@ msgstr ""
 msgid "A GitBook site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
 msgstr ""
 
+msgid "A Gitpod configured Webapplication in Spring and Java"
+msgstr ""
+
 msgid "A Hexo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features."
 msgstr ""
 
@@ -20172,6 +20175,9 @@ msgid "ProjectTemplates|Android"
 msgstr ""
 
 msgid "ProjectTemplates|GitLab Cluster Management"
+msgstr ""
+
+msgid "ProjectTemplates|Gitpod/Spring Petclinic"
 msgstr ""
 
 msgid "ProjectTemplates|Go Micro"
