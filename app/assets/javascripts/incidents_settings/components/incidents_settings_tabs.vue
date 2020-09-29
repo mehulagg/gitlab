@@ -2,6 +2,7 @@
 import { GlButton, GlTabs, GlTab } from '@gitlab/ui';
 import AlertsSettingsForm from './alerts_form.vue';
 import PagerDutySettingsForm from './pagerduty_form.vue';
+import IncidentSettingsForm from './incident_settings_form.vue';
 import { INTEGRATION_TABS_CONFIG, I18N_INTEGRATION_TABS } from '../constants';
 
 export default {
@@ -11,6 +12,7 @@ export default {
     GlTab,
     AlertsSettingsForm,
     PagerDutySettingsForm,
+    IncidentSettingsForm,
   },
   tabs: INTEGRATION_TABS_CONFIG,
   i18n: I18N_INTEGRATION_TABS,

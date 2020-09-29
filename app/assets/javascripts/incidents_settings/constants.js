@@ -17,6 +17,11 @@ export const INTEGRATION_TABS_CONFIG = [
     component: '',
     active: false,
   },
+  {
+    title: s__('IncidentSettings|Incident Settings'),
+    component: 'IncidentSettingsForm',
+    active: true,
+  },
 ];
 
 export const I18N_INTEGRATION_TABS = {
