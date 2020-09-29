@@ -72,7 +72,8 @@ The idempotent part is important that way we do not store the version in the Git
 
 ## Reasons
 
-These are reason why these changes are needed:
+These are reason why these changes are needed
+
 - Ensure the smooth deployment of the GitLab Container Registry
 - Reduce the total time to remediation for any future registry incidents.
 - Ensure there is a smooth migration from registry 2.x to 3.0.
