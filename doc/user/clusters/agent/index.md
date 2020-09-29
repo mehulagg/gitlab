@@ -81,6 +81,8 @@ When installing or upgrading the GitLab Helm chart, consider the following Helm 
 for the Agent to be properly installed and configured:
 
 ```shell
+helm repo update
+
 helm upgrade --force --install gitlab gitlab/gitlab \
   --timeout 600 \
   --set global.hosts.domain=<YOUR_DOMAIN> \
