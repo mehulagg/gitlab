@@ -5,7 +5,7 @@ import {
   GlSprintf,
   GlLink,
   GlToggle,
-  GlDeprecatedButton,
+  GlButton,
   GlDeprecatedDropdown,
   GlDeprecatedDropdownItem,
   GlIcon,
@@ -25,7 +25,7 @@ export default {
     GlSprintf,
     GlLink,
     GlToggle,
-    GlDeprecatedButton,
+    GlButton,
     GlDeprecatedDropdown,
     GlDeprecatedDropdownItem,
     GlIcon,
@@ -233,17 +233,17 @@ export default {
             </div>
           </div>
           <div v-if="showButtons" class="mt-3">
-            <gl-deprecated-button
+            <gl-button
               class="btn-success inline mr-1"
               :loading="saving"
               :disabled="saveButtonDisabled"
               @click="updateApplication"
             >
               {{ saveButtonLabel }}
-            </gl-deprecated-button>
-            <gl-deprecated-button :disabled="saveButtonDisabled" @click="resetStatus">
+            </gl-button>
+            <gl-button :disabled="saveButtonDisabled" @click="resetStatus">
               {{ __('Cancel') }}
-            </gl-deprecated-button>
+            </gl-button>
           </div>
         </div>
       </div>
