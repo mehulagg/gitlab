@@ -323,6 +323,7 @@ The following table shows the possible return codes for API requests.
 | `409 Conflict` | A conflicting resource already exists, e.g., creating a project with a name that already exists. |
 | `412` | Indicates the request was denied. May happen if the `If-Unmodified-Since` header is provided when trying to delete a resource, which was modified in between. |
 | `422 Unprocessable` | The entity could not be processed. |
+| `429 Too Many Requests` | The user has exceeded the [application rate limits](../administration/instance_limits.md#rate-limits). |
 | `500 Server Error` | While handling the request something went wrong server-side. |
 
 ## Pagination
