@@ -234,7 +234,8 @@ export default {
           </div>
           <div v-if="showButtons" class="mt-3">
             <gl-button
-              class="btn-success inline mr-1"
+              variant="success"
+              category="primary"
               :loading="saving"
               :disabled="saveButtonDisabled"
               @click="updateApplication"
