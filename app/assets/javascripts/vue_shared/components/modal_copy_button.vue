@@ -1,12 +1,12 @@
 <script>
 import $ from 'jquery';
-import { GlDeprecatedButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import Clipboard from 'clipboard';
 import { __ } from '~/locale';
 
 export default {
   components: {
-    GlDeprecatedButton,
+    GlButton,
     GlIcon,
   },
 
@@ -112,7 +112,7 @@ export default {
 };
 </script>
 <template>
-  <gl-deprecated-button
+  <gl-button
     v-gl-tooltip="{ placement: tooltipPlacement, container: tooltipContainer }"
     :class="cssClasses"
     :data-clipboard-target="target"
@@ -122,5 +122,5 @@ export default {
     <slot>
       <gl-icon name="copy-to-clipboard" />
     </slot>
-  </gl-deprecated-button>
+  </gl-button>
 </template>
