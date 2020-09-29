@@ -14,6 +14,8 @@ module ResourceAccessTokens
     end
 
     def execute
+      return error("#{current_user.name} cannot delete #{bot_user.name}") unless can_destroy_bot_member?
+
       return error("Failed to find bot user") unless find_member
 
       PersonalAccessToken.transaction do
@@ -21,7 +23,7 @@ module ResourceAccessTokens
 
         raise RevokeAccessTokenError, "Failed to remove #{bot_user.name} member from: #{resource.name}" unless remove_member
 
-        raise RevokeAccessTokenError, "Deletion of bot user failed" unless destroy_bot
+        raise RevokeAccessTokenError, "Deletion of bot user failed" unless destroy_service
       end
 
       success("Revoked access token: #{access_token.name}")
@@ -38,8 +40,12 @@ module ResourceAccessTokens
       ::Members::DestroyService.new(current_user).execute(find_member, destroy_bot: true)
     end
 
-    def destroy_bot
+    def destroy_service
       ::Users::DestroyService.new(current_user).execute(bot_user, skip_authorization: true)
+    end
+
+    def can_destroy_bot_member?
+      can?(current_user, :admin_project_member, @resource)
     end
 
     def find_member
