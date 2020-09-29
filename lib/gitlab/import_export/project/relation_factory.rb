@@ -35,8 +35,6 @@ module Gitlab
 
         BUILD_MODELS = %i[Ci::Build commit_status].freeze
 
-        DUE_DATE_MODELS = %i[issues milestones].freeze
-
         GROUP_REFERENCES = %w[group_id].freeze
 
         PROJECT_REFERENCES = %w[project_id source_project_id target_project_id].freeze
@@ -95,18 +93,6 @@ module Gitlab
           else
             super
           end
-        end
-
-        def override_due_date_attributes
-          return unless self.class::DUE_DATE_MODELS.include?(@relation_name) && sample_data_template?
-
-          if !@relation_hash.dig('due_date').nil? && @relation_hash['due_date'] < Time.current
-            @relation_hash['due_date'] = Time.current + 7.days
-          end
-        end
-
-        def sample_data_template?
-          @importable&.import_data&.data&.dig('sample_data')
         end
 
         def update_project_references
