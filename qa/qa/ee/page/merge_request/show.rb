@@ -114,16 +114,6 @@ module QA
             end
           end
 
-          def approve_license_with_mr(name)
-            expand_license_report unless license_report_expanded?
-            approve_license(name)
-          end
-
-          def deny_license_with_mr(name)
-            expand_license_report unless license_report_expanded?
-            deny_license(name)
-          end
-
           def expand_vulnerability_report
             within_element :vulnerability_report_grouped do
               click_element :expand_report_button unless has_content? 'Collapse'

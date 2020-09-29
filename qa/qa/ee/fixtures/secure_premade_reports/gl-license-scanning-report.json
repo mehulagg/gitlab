@@ -1,39 +1,53 @@
 {
-    "version": "2.0",
-    "licenses": [{
-      "id": "WTFPL",
-      "name": "WTFPL",
-      "url": "http://www.wtfpl.net/",
+  "version": "2.0",
+  "licenses": [
+    {
+      "id": "BSD-3-Clause",
+      "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+      "url": "http://spdx.org/licenses/BSD-3-Clause.json",
+      "count": 2
+    },
+    {
+      "id": "MIT",
+      "name": "MIT License",
+      "url": "http://spdx.org/licenses/MIT.json",
+      "count": 2
+    },
+    {
+      "id": "unknown",
+      "name": "unknown",
+      "url": "",
       "count": 1
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "a",
+      "url": "https://example.org/a",
+      "description": "Dependency A.",
+      "paths": ["."],
+      "licenses": ["MIT"]
     },
-      {
-        "id": "MIT",
-        "name": "MIT License",
-        "url": "https://opensource.org/licenses/MIT",
-        "count": 1
-      }
-    ],
-    "dependencies": [{
-      "name": "wtfpl_init",
-      "licenses": [
-        "WTFPL"
-      ],
-      "url": "https://rubygems.org/gems/wtfpl_init",
-      "description": "Download WTFPL license file and rename to LICENSE.md or something",
-      "paths": [
-        "."
-      ]
+    {
+      "name": "b",
+      "url": "https://example.com/b",
+      "description": "Dependency B.",
+      "paths": [ "." ],
+      "licenses": [ "BSD-3-Clause" ]
     },
-      {
-        "name": "actioncable",
-        "licenses": [
-          "MIT"
-        ],
-        "url": "http://rubyonrails.org",
-        "description": "WebSocket framework for Rails.",
-        "paths": [
-          "."
-        ]
-      }
-    ]
-  }
+    {
+      "name": "c",
+      "url": "https://example.org/c",
+      "description": "Dependency C.",
+      "paths": [ "." ],
+      "licenses": [ "MIT", "BSD-3-Clause" ]
+    },
+    {
+      "name": "d",
+      "url": "https://example.org/d",
+      "description": "Dependency D.",
+      "paths": [ "." ],
+      "licenses": [ "unknown" ]
+    }
+  ]
+}

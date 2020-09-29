@@ -28,7 +28,7 @@ module QA
             def approve_license(license)
               click_element :license_add_button
               expand_select_list
-              search_and_select license
+              search_and_select_exact license
               click_element :approved_license_radio
               click_element :add_license_submit_button
 
@@ -44,7 +44,7 @@ module QA
             def deny_license(license)
               click_element :license_add_button
               expand_select_list
-              search_and_select license
+              search_and_select_exact license
               click_element :blacklisted_license_radio
               click_element :add_license_submit_button
 

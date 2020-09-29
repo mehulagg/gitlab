@@ -185,6 +185,7 @@ export default {
           :class="{ 'gl-mr-3': fullReportPath }"
           :href="licenseManagementSettingsPath"
           class="btn btn-default btn-sm js-manage-licenses"
+          data-qa-selector="manage_licenses_button"
         >
           {{ s__('ciReport|Manage licenses') }}
         </a>
