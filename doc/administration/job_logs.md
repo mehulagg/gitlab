@@ -65,7 +65,7 @@ job logs are automatically migrated to it along with the other job artifacts.
 
 See "Phase 4: uploading" in [Data flow](#data-flow) to learn about the process.
 
-## Eliminating local disk usage
+## Prevent local disk usage
 
 If you want to avoid any local disk usage for job logs,
 you can do so using one of the following options:

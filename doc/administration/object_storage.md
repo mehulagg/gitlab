@@ -526,7 +526,7 @@ See the following additional guides and
 1. Make sure the [`git` user home directory](https://docs.gitlab.com/omnibus/settings/configuration.html#moving-the-home-directory-for-a-user) is on local disk.
 1. Configure [database lookup of SSH keys](operations/fast_ssh_key_lookup.md)
    to eliminate the need for a shared `authorized_keys` file.
-1. [Eliminating local disk usage for job logs](job_logs.md#eliminating-local-disk-usage).
+1. [Prevent local disk usage for job logs](job_logs.md#prevent-local-disk-usage).
 
 ## Warnings, limitations, and known issues
 
