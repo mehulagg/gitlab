@@ -2,13 +2,12 @@ import $ from 'jquery';
 import { mount } from '@vue/test-utils';
 import tooltip from '~/vue_shared/directives/tooltip';
 
+const DEFAULT_TOOLTIP_TEMPLATE = '<div v-tooltip :title="tooltip"></div>';
+
 describe('Tooltip directive', () => {
   let wrapper;
 
-  function createTooltipContainer(
-    template = '<div v-tooltip :title="tooltip"></div>',
-    isHtml = false,
-  ) {
+  function createTooltipContainer({ template = DEFAULT_TOOLTIP_TEMPLATE, isHtml = false } = {}) {
     wrapper = mount(
       {
         directives: { tooltip },
@@ -48,7 +47,7 @@ describe('Tooltip directive', () => {
       ${'does not contain any html'} | ${false} | ${false}
       ${'contains html'}             | ${true}  | ${true}
     `('passes sanitize=$sanitize if the tooltip $condition', ({ isHtml, sanitize }) => {
-      createTooltipContainer(undefined, isHtml);
+      createTooltipContainer({ isHtml });
 
       expect($(wrapper.vm.$el).data('bs.tooltip').config.sanitize).toEqual(sanitize);
     });
@@ -73,19 +72,21 @@ describe('Tooltip directive', () => {
 
   describe('with multiple tooltips', () => {
     beforeEach(() => {
-      createTooltipContainer(`
-        <div>
-          <div
-            v-tooltip
-            class="js-look-for-tooltip"
-            title="foo">
+      createTooltipContainer({
+        template: `
+          <div>
+            <div
+              v-tooltip
+              class="js-look-for-tooltip"
+              title="foo">
+            </div>
+            <div
+              v-tooltip
+              title="bar">
+            </div>
           </div>
-          <div
-            v-tooltip
-            title="bar">
-          </div>
-        </div>
-      `);
+        `,
+      });
     });
 
     it('should have tooltip plugin applied to all instances', () => {
