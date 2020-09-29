@@ -434,5 +434,8 @@ npm dist-tag rm @scope/package@version my-tag  # Delete a tag from the package
 npm install @scope/package@my-tag              # Install a specific tag
 ```
 
+NOTE: **Note:**
+Currently you cannot use your `CI_JOB_TOKEN` or Deploy token with the `npm dist-tag` commands. [gitlab-#258835](https://gitlab.com/gitlab-org/gitlab/-/issues/258835) will address this. 
+
 CAUTION: **Warning:**
 Due to a bug in NPM 6.9.0, deleting dist tags fails. Make sure your NPM version is greater than 6.9.1.
