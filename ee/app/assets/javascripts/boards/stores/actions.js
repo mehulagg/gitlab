@@ -75,7 +75,7 @@ export default {
     commit(types.SET_FILTERS, filterParams);
   },
 
-  fetchEpicsSwimlanes({ state, commit }, withLists = true) {
+  fetchEpicsSwimlanes({ state, commit }, { withLists = true, fetchNext = false }) {
     const { endpoints, boardType, filterParams } = state;
     const { fullPath, boardId } = endpoints;
 
@@ -86,6 +86,7 @@ export default {
       withLists,
       isGroup: boardType === BoardType.group,
       isProject: boardType === BoardType.project,
+      after: fetchNext ? state.epicsPageInfo.endCursor : undefined,
     };
 
     return gqlClient
@@ -95,9 +96,9 @@ export default {
       })
       .then(({ data }) => {
         const { epics, lists } = data[boardType]?.board;
-        const epicsFormatted = epics.nodes.map(e => ({
-          ...e,
-          issues: (e?.issues?.nodes || []).map(i => ({
+        const epicsFormatted = epics.edges.map(e => ({
+          ...e.node,
+          issues: (e?.node?.issues?.nodes || []).map(i => ({
             ...i,
             labels: i.labels?.nodes || [],
             assignees: i.assignees?.nodes || [],
@@ -105,11 +106,15 @@ export default {
         }));
 
         if (!withLists) {
-          commit(types.RECEIVE_EPICS_SUCCESS, epicsFormatted);
+          commit(types.RECEIVE_EPICS_SUCCESS, {
+            epics: epicsFormatted,
+            epicsPageInfo: epics.pageInfo,
+          });
         }
 
         return {
           epics: epicsFormatted,
+          epicsPageInfo: epics.pageInfo,
           lists: lists?.nodes,
         };
       });
@@ -206,8 +211,8 @@ export default {
     commit(types.TOGGLE_EPICS_SWIMLANES);
 
     if (state.isShowingEpicsSwimlanes) {
-      dispatch('fetchEpicsSwimlanes')
-        .then(({ lists, epics }) => {
+      dispatch('fetchEpicsSwimlanes', {})
+        .then(({ lists, epics, epicsPageInfo }) => {
           if (lists) {
             let boardLists = lists.map(list =>
               boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
@@ -217,7 +222,8 @@ export default {
           }
 
           if (epics) {
-            commit(types.RECEIVE_EPICS_SUCCESS, epics);
+            commit(types.RECEIVE_EPICS_SUCCESS, { epics, epicsPageInfo });
+            dispatch('fetchEpicsSwimlanes', { withLists: false, fetchNext: true });
           }
         })
         .catch(() => commit(types.RECEIVE_SWIMLANES_FAILURE));

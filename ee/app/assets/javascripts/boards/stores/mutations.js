@@ -102,7 +102,9 @@ export default {
     state.epicsSwimlanesFetchInProgress = false;
   },
 
-  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    state.epics = epics;
+  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, epicsPageInfo }) => {
+    // state.epics = epics;
+    Vue.set(state, 'epics', union(state.epics || [], epics));
+    state.epicsPageInfo = epicsPageInfo;
   },
 };
