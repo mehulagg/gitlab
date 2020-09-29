@@ -25,6 +25,7 @@ module HasUserType
     scope :non_internal, -> { humans.or(where(user_type: NON_INTERNAL_USER_TYPES)) }
     scope :without_ghosts, -> { humans.or(where.not(user_type: :ghost)) }
     scope :without_project_bot, -> { humans.or(where.not(user_type: :project_bot)) }
+    scope :without_bots, -> { humans.or(where.not(user_type: BOT_USER_TYPES)) }
 
     enum user_type: USER_TYPES
 
