@@ -72,11 +72,13 @@ Set up the section with the following:
   example is something that readers can do on their own deployments.
 - Include a link to the [GraphQL API resources](../../api/graphql/reference/index.md).
 
-## Add the GraphQL example to the Table of Contents
+## Add the GraphQL example to the global navigation
 
-You'll need to open a second MR, against the [GitLab documentation repository](https://gitlab.com/gitlab-org/gitlab-docs/).
+You should include a link for your new document in the global navigation (the list on the
+left side of the documentation website). To do so, open a second MR, against the
+[GitLab documentation repository](https://gitlab.com/gitlab-org/gitlab-docs/).
 
-We store our global nav in the [`default-nav.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/default-nav.yaml) file, in the
+We store our global navgation in the [`default-nav.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/default-nav.yaml) file, in the
 `content/_data` subdirectory. You can find the GraphQL section under the
 following line:
 
