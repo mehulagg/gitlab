@@ -184,6 +184,15 @@ The message `Successfully connected` indicates a successful TLS handshake.
 If there are problems, the Java TLS library generates errors that you can
 look up for more detail.
 
+##### When connecting Jira via DVCS following the setup documentation it shows an error regarding scope:
+
+```plaintext
+The requested scope is invalid, unknown, or malformed.
+```
+Potential resolutions:
+- Verify the URL includes `scope=api` on the end of the URL
+
+
 ##### Jira error adding account and no repositories listed
 
 ```plaintext
