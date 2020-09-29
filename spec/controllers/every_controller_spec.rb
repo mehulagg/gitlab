@@ -22,15 +22,15 @@ RSpec.describe "Every controller" do
 
     let_it_be(:routes_without_category) do
       controller_actions.map do |controller, action|
-        "#{controller}##{action}" unless controller.feature_category_for_action(action)
+        next if controller.feature_category_for_action(action)
+        next unless controller.to_s.start_with?('B')
+
+        "#{controller}##{action}"
       end.compact
     end
 
     it "has feature categories" do
-      pending("We'll work on defining categories for all controllers: "\
-              "https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/463")
-
-      expect(routes_without_category).to be_empty, "#{routes_without_category.first(10)} did not have a category"
+      expect(routes_without_category).to be_empty, "#{routes_without_category} did not have a category"
     end
 
     it "completed controllers don't get new routes without categories" do

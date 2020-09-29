@@ -5,6 +5,7 @@ module Boards
     include BoardsResponses
 
     before_action :authorize_read_milestone, only: [:index]
+    feature_category :kanban_boards, only: [:index]
 
     def index
       milestones_finder = Boards::MilestonesFinder.new(board, current_user)
