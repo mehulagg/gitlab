@@ -78,7 +78,10 @@ The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java use
 to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
 generate the coverage artifact.  
 You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
-Because gitlab expects the artifact in the cobertura format, we need to execute a few scripts before we upload it:
+
+GitLab expects the artifact in the Cobertura format, so you have to execute a few
+scripts before uploading it. The `test-jdk11` job tests the code and generates an
+XML artifact. The `coverage-jdk-11` job converts the artifact into a Cobertura report:
 
 ```yaml
 stages:
