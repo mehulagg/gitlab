@@ -1436,31 +1436,25 @@ RSpec.describe Namespace do
       end
 
       context 'when namespace-level repository_size_limit is not set' do
-        before do
-          allow(namespace).to receive(:actual_size_limit).and_return(nil)
-        end
-
         it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(nil)
+
           expect(namespace.total_repository_size_excess).to eq(200)
         end
       end
 
       context 'when namespace-level repository_size_limit is 0 (unlimited)' do
-        before do
-          allow(namespace).to receive(:actual_size_limit).and_return(0)
-        end
-
         it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(0)
+
           expect(namespace.total_repository_size_excess).to eq(200)
         end
       end
 
       context 'when namespace-level repository_size_limit is a positive number' do
-        before do
-          allow(namespace).to receive(:actual_size_limit).and_return(150)
-        end
-
         it 'returns the total excess size of projects with repositories that exceed the size limit' do
+          allow(namespace).to receive(:actual_size_limit).and_return(150)
+
           expect(namespace.total_repository_size_excess).to eq(250)
         end
       end
