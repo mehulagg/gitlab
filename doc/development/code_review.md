@@ -260,6 +260,11 @@ first time.
   of your shiny new branch, read through the entire diff. Does it make sense?
   Did you include something unrelated to the overall purpose of the changes? Did
   you forget to remove any debugging code?
+- Ideally, wait for the latest pipeline to complete successfully before assigning
+  a reviewer. This will enable the ability for the reviewer to review/approve in the
+  one async session. Otherwise, a reviewer may async respond to the reviewer
+  assignment before a pipeline has finished and have to visit the MR more
+  than once and could cause delays in receiving feedback.
 - Be grateful for the reviewer's suggestions. ("Good call. I'll make that
   change.")
 - Don't take it personally. The review is of the code, not of you.
