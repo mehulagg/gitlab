@@ -36,12 +36,6 @@ describe('EE - DastProfiles', () => {
       },
     };
 
-    const defaultProvide = {
-      glFeatures: {
-        securityOnDemandScansScannerProfiles: true,
-      },
-    };
-
     wrapper = mountFn(
       DastProfiles,
       merge(
@@ -49,7 +43,6 @@ describe('EE - DastProfiles', () => {
         {
           propsData: defaultProps,
           mocks: defaultMocks,
-          provide: defaultProvide,
         },
         options,
       ),
@@ -58,24 +51,6 @@ describe('EE - DastProfiles', () => {
 
   const createComponent = createComponentFactory();
   const createFullComponent = createComponentFactory(mount);
-
-  const withFeatureFlag = (featureFlagName, { enabled, disabled }) => {
-    it.each([true, false])(`with ${featureFlagName} enabled: "%s"`, featureFlagStatus => {
-      createComponent({
-        provide: {
-          glFeatures: {
-            [featureFlagName]: featureFlagStatus,
-          },
-        },
-      });
-
-      if (featureFlagStatus) {
-        enabled();
-      } else {
-        disabled();
-      }
-    });
-  };
 
   const withinComponent = () => within(wrapper.element);
   const getProfilesComponent = profileType => wrapper.find(`[data-testid="${profileType}List"]`);
@@ -116,17 +91,10 @@ describe('EE - DastProfiles', () => {
       );
     });
 
-    describe(`shows a "Scanner Profile" dropdown item that links to ${TEST_NEW_DAST_SCANNER_PROFILE_PATH}`, () => {
-      withFeatureFlag('securityOnDemandScansScannerProfiles', {
-        enabled: () => {
-          expect(getSiteProfilesDropdownItem('Scanner Profile').getAttribute('href')).toBe(
-            TEST_NEW_DAST_SCANNER_PROFILE_PATH,
-          );
-        },
-        disabled: () => {
-          expect(getSiteProfilesDropdownItem('Scanner Profile')).toBe(null);
-        },
-      });
+    it(`shows a "Scanner Profile" dropdown item that links to ${TEST_NEW_DAST_SCANNER_PROFILE_PATH}`, () => {
+      expect(getSiteProfilesDropdownItem('Scanner Profile').getAttribute('href')).toBe(
+        TEST_NEW_DAST_SCANNER_PROFILE_PATH,
+      );
     });
   });
 

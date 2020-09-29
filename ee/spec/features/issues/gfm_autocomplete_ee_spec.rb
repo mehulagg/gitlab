@@ -30,7 +30,7 @@ RSpec.describe 'GFM autocomplete EE', :js do
         wait_for_requests
       end
 
-      it 'lists users who are currently not assigned to the issue when using /reassign' do
+      it 'excludes groups when using /reassign' do
         note = find('#note-body')
         page.within '.timeline-content-form' do
           note.native.send_keys('/reas')
@@ -41,8 +41,8 @@ RSpec.describe 'GFM autocomplete EE', :js do
 
         wait_for_requests
 
-        expect(find('#at-view-users .atwho-view-ul')).not_to have_content(user.username)
         expect(find('#at-view-users .atwho-view-ul')).not_to have_content(group.name)
+        expect(find('#at-view-users .atwho-view-ul')).to have_content(user.username)
         expect(find('#at-view-users .atwho-view-ul')).to have_content(another_user.username)
       end
 
@@ -73,7 +73,7 @@ RSpec.describe 'GFM autocomplete EE', :js do
         wait_for_requests
       end
 
-      it 'lists users who are currently not assigned to the issue when using /reassign' do
+      it 'excludes groups when using /reassign' do
         note = find('#note-body')
         page.within '.timeline-content-form' do
           note.native.send_keys('/reas')
@@ -85,8 +85,8 @@ RSpec.describe 'GFM autocomplete EE', :js do
 
         wait_for_requests
 
-        expect(find('.tribute-container ul', visible: true)).not_to have_content(user.username)
         expect(find('.tribute-container ul', visible: true)).not_to have_content(group.name)
+        expect(find('.tribute-container ul', visible: true)).to have_content(user.username)
         expect(find('.tribute-container ul', visible: true)).to have_content(another_user.username)
       end
 

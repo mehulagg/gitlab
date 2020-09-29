@@ -53,23 +53,6 @@ module EE
       delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
       delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
 
-      scope :without_approvals, -> { left_outer_joins(:approvals).where(approvals: { id: nil }) }
-      scope :with_approvals, -> { joins(:approvals) }
-      scope :approved_by_users_with_ids, -> (*user_ids) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { id: user_ids })
-          .group(:id)
-          .having("COUNT(users.id) = ?", user_ids.size)
-      end
-      scope :approved_by_users_with_usernames, -> (*usernames) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { username: usernames })
-          .group(:id)
-          .having("COUNT(users.id) = ?", usernames.size)
-      end
-
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
       scope :order_review_time_desc, -> do
@@ -89,10 +72,6 @@ module EE
     end
 
     class_methods do
-      def select_from_union(relations)
-        where(id: from_union(relations))
-      end
-
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
         super.preload(:blocking_merge_requests)

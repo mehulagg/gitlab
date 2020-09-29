@@ -67,7 +67,6 @@ describe('OnDemandScansApp', () => {
             },
           },
           provide: {
-            glFeatures: { securityOnDemandScansScannerProfiles: true },
             scannerProfilesLibraryPath,
             siteProfilesLibraryPath,
             newScannerProfilePath,
@@ -200,41 +199,6 @@ describe('OnDemandScansApp', () => {
           expect(wrapper.vm.isSubmitDisabled).toBe(expected);
         },
       );
-    });
-  });
-
-  describe('scanner profiles with feature flag disabled', () => {
-    beforeEach(() => {
-      createComponent({
-        provide: {
-          glFeatures: { securityOnDemandScansScannerProfiles: false },
-        },
-      });
-    });
-
-    it('shows static scanner settings and no scanner profiles component', () => {
-      expect(findScannerProfilesDropdown().exists()).toBe(false);
-      expect(findManageScannerProfilesButton().exists()).toBe(false);
-      expect(findCreateNewScannerProfileLink().exists()).toBe(false);
-      expect(wrapper.text()).toContain('Passive');
-      expect(wrapper.text()).toContain('master');
-    });
-
-    it('when submitting the form, GraphQL query does not include scanner data', async () => {
-      wrapper.vm.siteProfiles = siteProfiles;
-      await wrapper.vm.$nextTick();
-      jest
-        .spyOn(wrapper.vm.$apollo, 'mutate')
-        .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
-      findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
-      submitForm();
-      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-        mutation: dastOnDemandScanCreate,
-        variables: {
-          dastSiteProfileId: siteProfiles[0],
-          fullPath: projectPath,
-        },
-      });
     });
   });
 

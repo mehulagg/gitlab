@@ -120,7 +120,7 @@ RSpec.describe Issue do
       describe '.any_epic' do
         it 'returns only issues with an epic assigned' do
           expect(described_class.count).to eq 3
-          expect(described_class.any_epic).to eq [epic_issue1.issue, epic_issue2.issue]
+          expect(described_class.any_epic).to contain_exactly(epic_issue1.issue, epic_issue2.issue)
         end
       end
 

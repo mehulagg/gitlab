@@ -13,6 +13,10 @@ RSpec.describe Gitlab::GitAccessWiki do
 
   let(:access) { described_class.new(user, project, 'web', authentication_abilities: authentication_abilities, redirected_path: redirected_path) }
 
+  before do
+    stub_group_wikis(true)
+  end
+
   describe 'group wiki access' do
     let_it_be(:group, reload: true) { create(:group, :private, :wiki_repo) }
 

@@ -13,6 +13,7 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import download from '~/lib/utils/downloader';
+import { cleanLeadingSeparator, joinPaths, stripPathTail } from '~/lib/utils/url_utility';
 import {
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
   DAST_SITE_VALIDATION_METHODS,
@@ -91,9 +92,23 @@ export default {
       isValidating: false,
       hasValidationError: false,
       validationMethod: DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
+      validationPath: '',
     };
   },
   computed: {
+    urlObject() {
+      try {
+        return new URL(this.targetUrl);
+      } catch {
+        return {};
+      }
+    },
+    origin() {
+      return this.urlObject.origin ? `${this.urlObject.origin}/` : '';
+    },
+    path() {
+      return cleanLeadingSeparator(this.urlObject.pathname || '');
+    },
     isTextFileValidation() {
       return this.validationMethod === DAST_SITE_VALIDATION_METHOD_TEXT_FILE;
     },
@@ -109,7 +124,18 @@ export default {
       this.hasValidationError = false;
     },
   },
+  created() {
+    this.unsubscribe = this.$watch(() => this.token, this.updateValidationPath, {
+      immediate: true,
+    });
+  },
   methods: {
+    updateValidationPath() {
+      this.validationPath = joinPaths(stripPathTail(this.path), this.textFileName);
+    },
+    onValidationPathInput() {
+      this.unsubscribe();
+    },
     downloadTextFile() {
       download({ fileName: this.textFileName, fileData: btoa(this.token) });
     },
@@ -127,6 +153,7 @@ export default {
           variables: {
             projectFullPath: this.fullPath,
             dastSiteTokenId: this.tokenId,
+            validationPath: this.validationPath,
             strategy: this.validationMethod,
           },
         });
@@ -186,9 +213,16 @@ export default {
     <gl-form-group :label="locationStepLabel" class="mw-460">
       <gl-form-input-group>
         <template #prepend>
-          <gl-input-group-text>{{ targetUrl }}</gl-input-group-text>
+          <gl-input-group-text data-testid="dast-site-validation-path-prefix">{{
+            origin
+          }}</gl-input-group-text>
         </template>
-        <gl-form-input class="gl-bg-white!" />
+        <gl-form-input
+          v-model="validationPath"
+          class="gl-bg-white!"
+          data-testid="dast-site-validation-path-input"
+          @input="onValidationPathInput()"
+        />
       </gl-form-input-group>
     </gl-form-group>
 

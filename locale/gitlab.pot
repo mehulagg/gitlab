@@ -4068,9 +4068,6 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
-msgid "Board name"
-msgstr ""
-
 msgid "Board scope"
 msgstr ""
 
@@ -5472,9 +5469,6 @@ msgstr ""
 msgid "ClusterIntegration|Clear the local cache of namespace and service accounts. This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
 msgstr ""
 
-msgid "ClusterIntegration|Cluster being created"
-msgstr ""
-
 msgid "ClusterIntegration|Cluster management project (alpha)"
 msgstr ""
 
@@ -5482,9 +5476,6 @@ msgid "ClusterIntegration|Cluster name is required."
 msgstr ""
 
 msgid "ClusterIntegration|Cluster_applications artifact too big. Maximum allowable size: %{human_size}"
-msgstr ""
-
-msgid "ClusterIntegration|Clusters are utilized by selecting the nearest ancestor with a matching environment scope. For example, project clusters will override group clusters."
 msgstr ""
 
 msgid "ClusterIntegration|Clusters are utilized by selecting the nearest ancestor with a matching environment scope. For example, project clusters will override group clusters. %{linkStart}More information%{linkEnd}"
@@ -5749,9 +5740,6 @@ msgid "ClusterIntegration|Knative domain name was updated successfully."
 msgstr ""
 
 msgid "ClusterIntegration|Knative extends Kubernetes to provide a set of middleware components that are essential to build modern, source-centric, and container-based applications that can run anywhere: on premises, in the cloud, or even in a third-party data center."
-msgstr ""
-
-msgid "ClusterIntegration|Kubernetes cluster"
 msgstr ""
 
 msgid "ClusterIntegration|Kubernetes cluster is being created..."
@@ -6690,6 +6678,9 @@ msgid "Configure the %{link} integration."
 msgstr ""
 
 msgid "Configure the way a user creates a new account."
+msgstr ""
+
+msgid "Configure which lists are shown for anyone who visits this board"
 msgstr ""
 
 msgid "Confirm"
@@ -8943,6 +8934,9 @@ msgstr ""
 msgid "Diffs|Something went wrong while fetching diff lines."
 msgstr ""
 
+msgid "Direct member"
+msgstr ""
+
 msgid "Direction"
 msgstr ""
 
@@ -9494,7 +9488,7 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-msgid "Enable %{gitpod_link} integration to launch a development environment in your browser directly from GitLab."
+msgid "Enable %{link_start}Gitpod%{link_end} integration to launch a development environment in your browser directly from GitLab."
 msgstr ""
 
 msgid "Enable Auto DevOps"
@@ -13623,6 +13617,9 @@ msgstr ""
 msgid "Information about additional Pages templates and how to install them can be found in our %{pages_getting_started_guide}."
 msgstr ""
 
+msgid "Inherited"
+msgstr ""
+
 msgid "Inherited:"
 msgstr ""
 
@@ -15151,6 +15148,9 @@ msgid "List available repositories"
 msgstr ""
 
 msgid "List of all merge commits"
+msgstr ""
+
+msgid "List options"
 msgstr ""
 
 msgid "List settings"
@@ -17682,12 +17682,6 @@ msgstr ""
 msgid "On track"
 msgstr ""
 
-msgid "OnDemandScans|Attached branch"
-msgstr ""
-
-msgid "OnDemandScans|Attached branch is where the scan job runs."
-msgstr ""
-
 msgid "OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later."
 msgstr ""
 
@@ -17724,16 +17718,7 @@ msgstr ""
 msgid "OnDemandScans|On-demand scans run outside the DevOps cycle and find vulnerabilities in your projects. %{learnMoreLinkStart}Learn more%{learnMoreLinkEnd}"
 msgstr ""
 
-msgid "OnDemandScans|Only a passive scan can be performed on demand."
-msgstr ""
-
-msgid "OnDemandScans|Passive"
-msgstr ""
-
 msgid "OnDemandScans|Run scan"
-msgstr ""
-
-msgid "OnDemandScans|Scan mode"
 msgstr ""
 
 msgid "OnDemandScans|Scanner profile"
@@ -17853,9 +17838,6 @@ msgid "Open"
 msgstr ""
 
 msgid "Open Selection"
-msgstr ""
-
-msgid "Open Web IDE"
 msgstr ""
 
 msgid "Open comment type dropdown"
@@ -18665,6 +18647,9 @@ msgstr ""
 msgid "Pipelines|Build with confidence"
 msgstr ""
 
+msgid "Pipelines|By revoking a trigger you will break any processes making use of it. Are you sure?"
+msgstr ""
+
 msgid "Pipelines|CI Lint"
 msgstr ""
 
@@ -18675,6 +18660,15 @@ msgid "Pipelines|Clear Runner Caches"
 msgstr ""
 
 msgid "Pipelines|Continuous Integration can help catch bugs by running your tests automatically, while Continuous Deployment can help you deliver code to your product environment."
+msgstr ""
+
+msgid "Pipelines|Copy trigger token"
+msgstr ""
+
+msgid "Pipelines|Description"
+msgstr ""
+
+msgid "Pipelines|Edit"
 msgstr ""
 
 msgid "Pipelines|Get started with Pipelines"
@@ -18692,13 +18686,25 @@ msgstr ""
 msgid "Pipelines|It is recommended the code is reviewed thoroughly before running this pipeline with the parent project's CI resource."
 msgstr ""
 
+msgid "Pipelines|Last Used"
+msgstr ""
+
 msgid "Pipelines|Loading Pipelines"
 msgstr ""
 
 msgid "Pipelines|More Information"
 msgstr ""
 
+msgid "Pipelines|No triggers have been created yet. Add one using the form above."
+msgstr ""
+
+msgid "Pipelines|Owner"
+msgstr ""
+
 msgid "Pipelines|Project cache successfully reset."
+msgstr ""
+
+msgid "Pipelines|Revoke"
 msgstr ""
 
 msgid "Pipelines|Run Pipeline"
@@ -18723,6 +18729,15 @@ msgid "Pipelines|This pipeline will run code originating from a forked project m
 msgstr ""
 
 msgid "Pipelines|This project is not currently set up to run pipelines."
+msgstr ""
+
+msgid "Pipelines|Token"
+msgstr ""
+
+msgid "Pipelines|Trigger user has insufficient permissions to project"
+msgstr ""
+
+msgid "Pipelines|invalid"
 msgstr ""
 
 msgid "Pipelines|parent"
@@ -21644,6 +21659,9 @@ msgstr ""
 msgid "Request parameter %{param} is missing."
 msgstr ""
 
+msgid "Request review from"
+msgstr ""
+
 msgid "Request to link SAML account must be authorized"
 msgstr ""
 
@@ -21912,6 +21930,9 @@ msgid "Review time is defined as the time it takes from first comment until merg
 msgstr ""
 
 msgid "ReviewApp|Enable Review App"
+msgstr ""
+
+msgid "Reviewer"
 msgstr ""
 
 msgid "Reviewing"
@@ -23498,6 +23519,12 @@ msgid "Show parent pages"
 msgstr ""
 
 msgid "Show parent subgroups"
+msgstr ""
+
+msgid "Show the Closed list"
+msgstr ""
+
+msgid "Show the Open list"
 msgstr ""
 
 msgid "Show whitespace changes"
@@ -25244,9 +25271,6 @@ msgid "The URL defined on the primary node that secondary nodes should use to co
 msgstr ""
 
 msgid "The URL to use for connecting to Elasticsearch. Use a comma-separated list to support clustering (e.g., \"http://localhost:9200, http://localhost:9201\")."
-msgstr ""
-
-msgid "The Web IDE offers advanced syntax highlighting capabilities and more."
 msgstr ""
 
 msgid "The X509 Certificate to use when mutual TLS is required to communicate with the external authorization service. If left blank, the server certificate is still validated when accessing over HTTPS."
