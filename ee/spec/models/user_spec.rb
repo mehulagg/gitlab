@@ -109,6 +109,86 @@ RSpec.describe User do
     end
   end
 
+  describe '.using_license_seat' do
+    before do
+      project.add_reporter(project_reporter_user)
+      project.add_developer(project_developer_user)
+      group.add_guest(group_guest_user)
+
+      create(:user_highest_role, :reporter, user: project_reporter_user)
+      create(:user_highest_role, :developer, user: project_developer_user)
+      create(:user_highest_role, :guest, user: group_guest_user)
+
+      allow(License).to receive(:current).and_return(license)
+    end
+
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:project_reporter_user) { create(:user) }
+    let_it_be(:project_developer_user) { create(:user) }
+    let_it_be(:group_guest_user) { create(:user) }
+    let_it_be(:inactive_user) { create(:user, state: 'blocked') }
+    let_it_be(:bot_user) { create(:user, :bot) }
+    let_it_be(:project_bot_user) { create(:user, :project_bot) }
+    let_it_be(:ghost_user) { create(:user, :ghost) }
+
+    shared_examples 'default scope' do
+      it 'excludes inactive users' do
+        expect(described_class.using_license_seat).not_to include(inactive_user)
+      end
+
+      it 'excludes bot users' do
+        expect(described_class.using_license_seat).not_to include(bot_user)
+      end
+
+      it 'excludes project bot users' do
+        expect(described_class.using_license_seat).not_to include(project_bot_user)
+      end
+
+      it 'excludes ghost users' do
+        expect(described_class.using_license_seat).not_to include(ghost_user)
+      end
+    end
+
+    context 'when no license is found' do
+      let(:license) { nil }
+
+      it 'returns an empty array' do
+        expect(described_class.using_license_seat).to eq([])
+      end
+    end
+
+    context 'when license is ultimate' do
+      let(:license) { build(:license, plan: 'ultimate') }
+
+      it 'excludes guest users' do
+        expect(described_class.using_license_seat).not_to include(group_guest_user)
+      end
+
+      include_examples 'default scope'
+    end
+
+    context 'when license is premium' do
+      let(:license) { build(:license, plan: 'premium') }
+
+      it 'counts guest users' do
+        expect(described_class.using_license_seat).to include(project_reporter_user, project_developer_user, group_guest_user)
+      end
+
+      include_examples 'default scope'
+    end
+
+    context 'when license is starter' do
+      let(:license) { build(:license, plan: 'starter') }
+
+      it 'counts guest users' do
+        expect(described_class.using_license_seat).to include(project_reporter_user, project_developer_user, group_guest_user)
+      end
+
+      include_examples 'default scope'
+    end
+  end
+
   describe 'the GitLab_Auditor_User add-on' do
     context 'creating an auditor user' do
       it "does not allow creating an auditor user if the addon isn't enabled" do

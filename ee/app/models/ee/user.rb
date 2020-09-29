@@ -137,6 +137,18 @@ module EE
           all
         end
       end
+
+      def using_license_seat
+        return [] unless License.current.present?
+
+        users = active.non_internal.without_project_bot
+
+        if License.current.exclude_guests_from_active_count?
+          users = users.joins(:user_highest_role).where("highest_access_level > ?", ::Gitlab::Access::GUEST)
+        end
+
+        users
+      end
     end
 
     def cannot_be_admin_and_auditor
