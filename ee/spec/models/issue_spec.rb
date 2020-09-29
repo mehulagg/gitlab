@@ -350,7 +350,6 @@ RSpec.describe Issue do
     using RSpec::Parameterized::TableSyntax
     let_it_be(:reusable_project) { create(:project) }
     let_it_be(:author) { ::User.support_bot }
-    let(:planning) { create(:project_label, project: reusable_project, name: 'Planning') }
 
     where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
       Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
@@ -361,11 +360,12 @@ RSpec.describe Issue do
       Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | true
       Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'woo' } | true
       Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
     end
 
     with_them do
       context 'when author is a bot' do
-        it 'checks for spam on all issues' do
+        it 'only checks for spam when description, title, or confidential status is updated' do
           project = reusable_project
           project.update(visibility_level: visibility_level)
           issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
@@ -375,16 +375,6 @@ RSpec.describe Issue do
           expect(issue.check_for_spam?).to eq(check_for_spam?)
         end
       end
-    end
-
-    it 'does not check for spam when only weight is updated' do
-      project = reusable_project
-      project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-      issue = create(:issue, project: project, weight: 3, author: author)
-
-      issue.assign_attributes({ weight: 2 })
-
-      expect(issue.check_for_spam?).to eq(false)
     end
   end
 
