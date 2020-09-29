@@ -6,6 +6,7 @@
   artifacts:
     expire_in: 31d
     paths:
+      - deprecations/
       - knapsack/
       - rspec_flaky/
       - rspec_profiling/

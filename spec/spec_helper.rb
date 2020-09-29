@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'deprecation_toolkit'
+require 'deprecation_toolkit/rspec'
+DeprecationToolkit::Configuration.test_runner = :rspec
+
 require './spec/simplecov_env'
 SimpleCovEnv.start!
 

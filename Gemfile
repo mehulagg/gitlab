@@ -324,6 +324,9 @@ gem 'peek', '~> 1.1'
 # Snowplow events tracking
 gem 'snowplow-tracker', '~> 0.6.1'
 
+# Deprecation management
+gem 'deprecation_toolkit', '~> 1.5.1'
+
 # Metrics
 group :metrics do
   gem 'method_source', '~> 1.0', require: false
