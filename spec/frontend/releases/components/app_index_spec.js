@@ -2,16 +2,12 @@ import { range as rge } from 'lodash';
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import { getJSONFixture } from 'helpers/fixtures';
 import ReleasesApp from '~/releases/components/app_index.vue';
 import createStore from '~/releases/stores';
 import createListModule from '~/releases/stores/modules/list';
 import api from '~/api';
-import {
-  pageInfoHeadersWithoutPagination,
-  pageInfoHeadersWithPagination,
-  release2 as release,
-  releases,
-} from '../mock_data';
+import { pageInfoHeadersWithoutPagination, pageInfoHeadersWithPagination } from '../mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import ReleasesPagination from '~/releases/components/releases_pagination.vue';
 
@@ -24,6 +20,8 @@ jest.mock('~/lib/utils/common_utils', () => ({
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
+
+const release = getJSONFixture('api/releases/release.json');
 
 describe('Releases App ', () => {
   let wrapper;
@@ -72,7 +70,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
+        .mockResolvedValue({ data: [release], headers: pageInfoHeadersWithoutPagination });
 
       createComponent();
     });
@@ -110,7 +108,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
+        .mockResolvedValue({ data: [release], headers: pageInfoHeadersWithoutPagination });
 
       createComponent();
     });
@@ -190,7 +188,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
+        .mockResolvedValue({ data: [release], headers: pageInfoHeadersWithoutPagination });
 
       createComponent();
 
