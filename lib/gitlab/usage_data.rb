@@ -183,7 +183,8 @@ module Gitlab
             self_monitoring_project
               .product_analytics_events
               .by_category_and_action('epics', 'promote')
-              .where(time_period)
+              .where(time_period),
+            :collector_tstamp
           )
         }
       end
