@@ -190,6 +190,7 @@ look up for more detail.
 The requested scope is invalid, unknown, or malformed.
 ```
 Potential resolutions:
+
 - Verify the URL includes `scope=api` on the end of the URL
 
 ##### Jira error adding account and no repositories listed
