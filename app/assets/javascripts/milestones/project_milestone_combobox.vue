@@ -7,6 +7,7 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
   GlIcon,
+  GlBadge,
 } from '@gitlab/ui';
 import { intersection, debounce } from 'lodash';
 import { __, sprintf } from '~/locale';
@@ -24,6 +25,7 @@ export default {
     GlLoadingIcon,
     GlSearchBoxByType,
     GlIcon,
+    GlBadge,
   },
   model: {
     prop: 'preselectedMilestones',
@@ -230,6 +232,12 @@ export default {
       <gl-dropdown-divider />
     </template>
     <template v-else-if="dropdownItems.length">
+      <gl-dropdown-section-header>
+        <div class="gl-display-flex align-items-center pl-4" data-testid="section-header">
+          <span class="gl-mr-2 gl-mb-1">Project milestones</span>
+          <gl-badge variant="neutral">{{ dropdownItems.length }}</gl-badge>
+        </div>
+      </gl-dropdown-section-header>
       <gl-dropdown-item
         v-for="item in dropdownItems"
         :key="item"
