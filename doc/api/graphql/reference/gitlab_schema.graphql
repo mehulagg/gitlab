@@ -527,22 +527,22 @@ enum AlertManagementAlertSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 }
 
 """
@@ -9337,22 +9337,22 @@ enum IssueSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 }
 
 """
@@ -11198,22 +11198,22 @@ enum MergeRequestSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 }
 
 """
@@ -17502,22 +17502,22 @@ enum Sort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use uppercase versions of enums. Deprecated in 13.5")
 }
 
 type Submodule implements Entry {
