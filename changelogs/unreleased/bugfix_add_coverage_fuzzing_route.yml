@@ -1,0 +1,5 @@
+---
+title: 'Bugfix: add route to coverage_fuzzing_reports'
+merge_request: 43664
+author:
+type: fixed

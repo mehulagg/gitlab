@@ -30,7 +30,7 @@ RSpec.describe "Every controller" do
       pending("We'll work on defining categories for all controllers: "\
               "https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/463")
 
-      expect(routes_without_category).to be_empty, "#{routes_without_category.first(10)} did not have a category"
+      expect(routes_without_category).to be_empty, "#{routes_without_category.first(11)} did not have a category"
     end
 
     it "completed controllers don't get new routes without categories" do
@@ -52,7 +52,7 @@ RSpec.describe "Every controller" do
         ["#{controller}##{action}", used_category] unless feature_categories.include?(used_category)
       end.compact
 
-      expect(routes_unknown_category).to be_empty, "#{routes_unknown_category.first(10)} had an unknown category"
+      expect(routes_unknown_category).to be_empty, "#{routes_unknown_category.first(11)} had an unknown category"
     end
 
     it "doesn't define or exclude categories on removed actions", :aggregate_failures do
