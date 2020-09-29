@@ -32,5 +32,11 @@ module EE
         _("Weight %{weight}") % { weight: weight }
       end
     end
+
+    def legacy_milestone?(milestone)
+      first_resource_state_event = ResourceStateEvent.first
+
+      first_resource_state_event && milestone.created_at < first_resource_state_event.created_at
+    end
   end
 end
