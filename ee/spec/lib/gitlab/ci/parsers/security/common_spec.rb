@@ -57,5 +57,15 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         end
       end
     end
+
+    context 'parsing scan' do
+      it 'returns scan object for each finding' do
+        scans = report.findings.map(&:scan)
+
+        expect(scans).to all( be(report.scan) )
+        expect(scans.size).to eq(3)
+        expect(scans.first).to be_a(::Gitlab::Ci::Reports::Security::Scan)
+      end
+    end
   end
 end
