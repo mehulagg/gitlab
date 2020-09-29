@@ -13,6 +13,7 @@ import { n__, s__, __ } from '~/locale';
 import Api from '~/api';
 import { DATA_REFETCH_DELAY } from '../constants';
 import { filterBySearchTerm } from '../utils';
+import getProjects from '../graphql/projects.query.graphql';
 
 export default {
   name: 'ProjectsDropdownFilter',
@@ -28,6 +29,10 @@ export default {
   props: {
     groupId: {
       type: Number,
+      required: true,
+    },
+    groupNamespace: {
+      type: String,
       required: true,
     },
     multiSelect: {
@@ -49,6 +54,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    useGraphql: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -117,17 +127,55 @@ export default {
     },
     onClick({ project, isSelected }) {
       this.setSelectedProjects(project, !isSelected);
+      console.log('onClick :: ', this.selectedProjects);
       this.$emit('selected', this.selectedProjects);
     },
     fetchData() {
       this.loading = true;
-      return Api.groupProjects(this.groupId, this.searchTerm, this.queryParams, projects => {
-        this.projects = projects;
-        this.loading = false;
-      });
+
+      if (this.useGraphql) {
+        return this.$apollo
+          .query({
+            query: getProjects,
+            variables: {
+              groupFullPath: this.groupNamespace,
+              search: this.searchTerm,
+              ...this.queryParams,
+            },
+          })
+          .then(response => {
+            const {
+              data: {
+                group: {
+                  projects: { nodes },
+                },
+              },
+            } = response;
+
+            console.log('response :: ', response, nodes);
+
+            this.loading = false;
+
+            this.projects = nodes.map(node => ({
+              ...node,
+              entityId: this.getEntityId(node),
+            }));
+          });
+      } else {
+        return Api.groupProjects(this.groupId, this.searchTerm, this.queryParams, projects => {
+          this.projects = projects;
+          this.loading = false;
+        });
+      }
     },
     isProjectSelected(id) {
       return this.selectedProjects ? this.selectedProjectIds.includes(id) : false;
+    },
+    getEntityId(project) {
+      const parts = project.id?.split('/') || [];
+      const id = parts.length ? Number(parts.pop()) : 0;
+      console.log('getEntityId :: ', project, parts, id);
+      return id;
     },
   },
 };
@@ -143,8 +191,8 @@ export default {
       <div class="gl-display-flex gl-flex-fill-1">
         <gl-avatar
           v-if="isOnlyOneProjectSelected"
-          :src="selectedProjects[0].avatar_url"
-          :entity-id="selectedProjects[0].id"
+          :src="useGraphql ? selectedProjects[0].avatarUrl : selectedProjects[0].avatar_url"
+          :entity-id="useGraphql ? selectedProjects[0].entityId : selectedProjects[0].id"
           :entity-name="selectedProjects[0].name"
           :size="16"
           shape="rect"
@@ -170,9 +218,9 @@ export default {
           class="gl-mr-2 vertical-align-middle"
           :alt="project.name"
           :size="16"
-          :entity-id="project.id"
+          :entity-id="useGraphql ? project.entityId : project.id"
           :entity-name="project.name"
-          :src="project.avatar_url"
+          :src="useGraphql ? project.avatarUrl : project.avatar_url"
           shape="rect"
         />
         {{ project.name }}

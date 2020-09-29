@@ -210,6 +210,7 @@ export default {
             :key="currentGroup.id"
             class="js-projects-dropdown-filter project-select"
             :group-id="currentGroup.id"
+            :group-namespace="currentGroupPath"
             :query-params="projectsQueryParams"
             :multi-select="$options.multiProjectSelect"
             :default-projects="selectedProjects"

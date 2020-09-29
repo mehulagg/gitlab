@@ -1,13 +1,21 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import { mapState, mapActions } from 'vuex';
 import store from './store';
 import FilterDropdowns from './components/filter_dropdowns.vue';
 import DateRange from '../shared/components/daterange.vue';
 import ProductivityAnalyticsApp from './components/app.vue';
 import FilteredSearchProductivityAnalytics from './filtered_search_productivity_analytics';
+import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { getLabelsEndpoint, getMilestonesEndpoint } from './utils';
 import { buildGroupFromDataset, buildProjectFromDataset } from '../shared/utils';
+
+Vue.use(VueApollo);
+
+const apolloProvider = new VueApollo({
+  defaultClient: createDefaultClient(),
+});
 
 export default () => {
   const container = document.getElementById('js-productivity-analytics');
@@ -50,6 +58,8 @@ export default () => {
   if (group) {
     project = buildProjectFromDataset(container.dataset);
 
+    console.log('project :: ', project);
+
     initialData = {
       ...initialData,
       groupNamespace: group.full_path,
@@ -65,6 +75,7 @@ export default () => {
   // eslint-disable-next-line no-new
   new Vue({
     el: groupProjectSelectContainer,
+    apolloProvider,
     store,
     created() {
       // let's not fetch any data by default since we might not have a valid group yet
@@ -93,6 +104,7 @@ export default () => {
         this.initFilteredSearch({ groupNamespace, groupId });
       },
       onProjectSelected({ groupNamespace, groupId, projectNamespace, projectId }) {
+        console.log('onProjectSelected :: ', groupNamespace, groupId, projectNamespace, projectId);
         this.initFilteredSearch({ groupNamespace, groupId, projectNamespace, projectId });
       },
       initFilteredSearch({ groupNamespace, groupId, projectNamespace = '', projectId = null }) {

@@ -43,11 +43,19 @@ export default {
       return this.project && Object.keys(this.project).length ? [this.project] : null;
     },
     projectsQueryParams() {
+      /*
       return {
         per_page: projectsPerPage,
         with_shared: false, // exclude forks
         order_by: this.glFeatures.analyticsSimilaritySearch ? SIMILARITY_ORDER : LAST_ACTIVITY_AT,
         include_subgroups: true,
+      };
+      */
+
+      return {
+        first: projectsPerPage,
+        // with_shared: false, // exclude forks
+        includeSubgroups: true,
       };
     },
   },
@@ -63,8 +71,8 @@ export default {
       let projectId = null;
 
       if (selectedProjects.length) {
-        projectNamespace = selectedProjects[0].path_with_namespace;
-        projectId = selectedProjects[0].id;
+        projectNamespace = selectedProjects[0].fullPath;
+        projectId = selectedProjects[0].entityId;
       }
 
       this.setProjectPath(projectNamespace);
@@ -98,6 +106,8 @@ export default {
       :default-projects="projects"
       :query-params="projectsQueryParams"
       :group-id="groupId"
+      :group-namespace="groupNamespace"
+      :use-graphql="true"
       @selected="onProjectsSelected"
     />
   </div>
