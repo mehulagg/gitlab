@@ -204,7 +204,7 @@ module EE
         all_projects
           .joins(:statistics)
           .where(condition)
-          .pluck(Arel.sql(select_sql))
+          .pluck(Arel.sql(select_sql)) # rubocop:disable Rails/Pick
           .first || 0
       end
     end
