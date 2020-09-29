@@ -314,7 +314,8 @@ module EE
       feature_available?(:dependency_scanning) ||
       feature_available?(:container_scanning) ||
       feature_available?(:dast) ||
-      feature_available?(:coverage_fuzzing)
+      feature_available?(:coverage_fuzzing) ||
+      feature_available?(:api_fuzzing)
     end
 
     def free_plan?

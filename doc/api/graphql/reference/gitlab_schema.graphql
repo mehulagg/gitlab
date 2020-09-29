@@ -16423,6 +16423,11 @@ Represents summary of a security report
 """
 type SecurityReportSummary {
   """
+  Aggregated counts for the api_fuzzing scan
+  """
+  apiFuzzing: SecurityReportSummarySection
+
+  """
   Aggregated counts for the container_scanning scan
   """
   containerScanning: SecurityReportSummarySection
@@ -16502,6 +16507,7 @@ type SecurityReportSummarySection {
 The type of the security scanner
 """
 enum SecurityScannerType {
+  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -19847,7 +19853,7 @@ type Vulnerability implements Noteable {
   """
   Type of the security report that found the vulnerability (SAST,
   DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION,
-  COVERAGE_FUZZING)
+  COVERAGE_FUZZING, API_FUZZING)
   """
   reportType: VulnerabilityReportType
 
@@ -20109,7 +20115,32 @@ enum VulnerabilityIssueLinkType {
 """
 Represents a vulnerability location. The fields with data will depend on the vulnerability report type
 """
-union VulnerabilityLocation = VulnerabilityLocationContainerScanning | VulnerabilityLocationCoverageFuzzing | VulnerabilityLocationDast | VulnerabilityLocationDependencyScanning | VulnerabilityLocationSast | VulnerabilityLocationSecretDetection
+union VulnerabilityLocation = VulnerabilityLocationApiFuzzing | VulnerabilityLocationContainerScanning | VulnerabilityLocationCoverageFuzzing | VulnerabilityLocationDast | VulnerabilityLocationDependencyScanning | VulnerabilityLocationSast | VulnerabilityLocationSecretDetection
+
+"""
+Represents the location of a vulnerability found by a DAST scan
+"""
+type VulnerabilityLocationApiFuzzing {
+  """
+  Domain name of the vulnerable request
+  """
+  hostname: String
+
+  """
+  Query parameter for the URL on which the vulnerability occurred
+  """
+  param: String
+
+  """
+  URL path and query string of the vulnerable request
+  """
+  path: String
+
+  """
+  HTTP method of the vulnerable request
+  """
+  requestMethod: String
+}
 
 """
 Represents the location of a vulnerability found by a container security scan
@@ -20310,6 +20341,7 @@ type VulnerabilityPermissions {
 The type of the security scan that found the vulnerability
 """
 enum VulnerabilityReportType {
+  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST

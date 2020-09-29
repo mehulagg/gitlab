@@ -47569,6 +47569,20 @@
           "description": "Represents summary of a security report",
           "fields": [
             {
+              "name": "apiFuzzing",
+              "description": "Aggregated counts for the api_fuzzing scan",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "SecurityReportSummarySection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "containerScanning",
               "description": "Aggregated counts for the container_scanning scan",
               "args": [

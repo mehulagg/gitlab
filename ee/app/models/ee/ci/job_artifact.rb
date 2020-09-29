@@ -11,7 +11,7 @@ module EE
     prepended do
       after_destroy :log_geo_deleted_event
 
-      SECURITY_REPORT_FILE_TYPES = %w[sast secret_detection dependency_scanning container_scanning dast coverage_fuzzing].freeze
+      SECURITY_REPORT_FILE_TYPES = %w[sast secret_detection dependency_scanning container_scanning dast coverage_fuzzing api_fuzzing].freeze
       LICENSE_SCANNING_REPORT_FILE_TYPES = %w[license_management license_scanning].freeze
       DEPENDENCY_LIST_REPORT_FILE_TYPES = %w[dependency_scanning].freeze
       METRICS_REPORT_FILE_TYPES = %w[metrics].freeze
@@ -21,6 +21,7 @@ module EE
       DAST_REPORT_TYPES = %w[dast].freeze
       REQUIREMENTS_REPORT_FILE_TYPES = %w[requirements].freeze
       COVERAGE_FUZZING_REPORT_TYPES = %w[coverage_fuzzing].freeze
+      API_FUZZING_REPORT_TYPES = %w[api_fuzzing].freeze
       BROWSER_PERFORMANCE_REPORT_FILE_TYPES = %w[browser_performance performance].freeze
 
       scope :project_id_in, ->(ids) { where(project_id: ids) }
@@ -62,6 +63,10 @@ module EE
 
       scope :coverage_fuzzing_reports, -> do
         with_file_types(COVERAGE_FUZZING_REPORT_TYPES)
+      end
+
+      scope :api_fuzzing_reports, -> do
+        with_file_types(API_FUZZING_REPORT_TYPES)
       end
     end
 
