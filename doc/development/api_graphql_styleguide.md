@@ -1361,4 +1361,4 @@ For information on generating GraphQL documentation and schema files, see
 [updating the schema documentation](rake_tasks.md#update-graphql-documentation-and-schema-definitions).
 
 To help our readers, you should also add a new page to our [GraphQL API](../api/graphql/index.md) documentation.
-For guidance, see the [GraphQL API](documentation/graphql-styleguide.md) page.
+For guidance, see the [GraphQL API](documentation/graphql_styleguide.md) page.
