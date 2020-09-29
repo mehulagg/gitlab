@@ -157,7 +157,7 @@ Nanoc layout), which will be displayed at the top of the page if defined:
   [algorithm](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/lib/helpers/reading_time.rb)
   to calculate the reading time based on the number of words.
 
-## Move or rename a document
+## Move or rename a page
 
 When you move or rename a document, you're effectively changing the location of that document.
 The process requires specific steps to ensure that
