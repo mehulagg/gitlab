@@ -13,7 +13,7 @@ We generally recommend events be tracked using a [structured event](https://docs
 
 ## Structured Snowplow events to track
 
-* Category: The name for the group of objects you want to track. They can just be the GitLab category, or a specific workflow within a category.
+* Category: The page or backend area of the application. Unless infeasible, please use the Rails page attribute by default in the frontend, and namespace + classname on the backend. If you're not sure what it is, work with your engineering manager to figure it out.
 * Action: A string that is used to define the user action. The first word should always describe the action or aspect: clicks should be `click`, activations should be `activate`, creations should be `create`, etc. Use underscores to describe what was acted on; for example, activating a form field would be `activate_form_input`. An interface action like clicking on a dropdown would be `click_dropdown`, while a behavior like creating a project record from the backend would be `create_project`
 * Label: Optional. The specific element, or object that's being acted on. This is either the label of the element (e.g. a tab labeled 'Create from template' may be `create_from_template`) or a unique identifier if no text is available (e.g. closing the Groups dropdown in the top navbar might be `groups_dropdown_close`), or it could be the name or title attribute of a record being created.
 * Property: Optional. Any additional property of the element, or object being acted on.
