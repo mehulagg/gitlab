@@ -1,8 +1,14 @@
-query getUsersCount {
-  users: instanceStatisticsMeasurements(identifier: USERS, first: 365) {
+query getUsersCount($first: Int, $after: String) {
+  users: instanceStatisticsMeasurements(identifier: USERS, first: $first, after: $after) {
     nodes {
       count
       recordedAt
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
     }
   }
 }
