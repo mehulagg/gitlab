@@ -27,6 +27,28 @@ RSpec.describe RemoveExpiredMembersWorker do
       end
     end
 
+    context 'project access token bot members' do
+      let!(:expired_project_bot) { create(:user, :project_bot, expires_at: 1.hour.ago, access_level: ProjectMember::DEVELOPER) }
+      let!(:project_bot_expiring_in_future) { create(:user, :project_bot, expires_at: 10.days.from_now, access_level: ProjectMember::DEVELOPER) }
+      let!(:non_expiring_project_bot) { create(:user, :project_bot, expires_at: nil, access_level: ProjectMember::DEVELOPER) }
+
+      it 'removes expired project bots' do
+        expect { worker.perform }.to change { Member.count }.by(-1)
+        expect(Member.find_by(id: expired_project_bot.id)).to be_nil
+      end
+
+      it 'leaves members that expire in the future' do
+        worker.perform
+        expect(project_bot_expiring_in_future.reload).to be_present
+      end
+
+      it 'leaves members that do not expire at all' do
+        worker.perform
+        expect(non_expiring_project_bot.reload).to be_present
+      end
+
+    end
+
     context 'group members' do
       let!(:expired_group_member) { create(:group_member, expires_at: 1.hour.ago, access_level: GroupMember::DEVELOPER) }
       let!(:group_member_expiring_in_future) { create(:group_member, expires_at: 10.days.from_now, access_level: GroupMember::DEVELOPER) }
