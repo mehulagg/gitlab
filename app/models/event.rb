@@ -324,10 +324,22 @@ class Event < ApplicationRecord
   end
 
   def note_target_type
-    if target.noteable_type.present?
+    if design_note?
+      'Design'
+    elsif target.noteable_type.present?
       target.noteable_type.titleize
     else
       "Wall"
+    end.downcase
+  end
+
+  def target_type_human
+    if design?
+      'Design'
+    elsif target_type.present?
+      target_type.titleize
+    else
+      "Project"
     end.downcase
   end
 
