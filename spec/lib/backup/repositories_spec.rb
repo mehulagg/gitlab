@@ -220,7 +220,8 @@ RSpec.describe Backup::Repositories do
     end
 
     it 'cleans existing repositories' do
-      expect(Repository).to receive(:new).twice.and_wrap_original do |method, *original_args|
+      # 4 times = project repo + wiki repo + project_snippet repo + personal_snippet repo
+      expect(Repository).to receive(:new).exactly(4).times.and_wrap_original do |method, *original_args|
         repository = method.call(*original_args)
 
         expect(repository).to receive(:remove)
