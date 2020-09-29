@@ -60,7 +60,7 @@ the `filename` of a `class` element contains the full path relative to the proje
 
 ## Example test coverage configurations
 
-### Javascript example
+### JavaScript example
 
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example uses [Mocha](https://mochajs.org/)
 JavaScript testing and [NYC](https://github.com/istanbuljs/nyc) coverage-tooling to
@@ -151,7 +151,6 @@ coverage-jdk11:
     reports:
       cobertura: build/cobertura.xml
 ```
-
 
 ## Enable or disable code coverage visualization
 
