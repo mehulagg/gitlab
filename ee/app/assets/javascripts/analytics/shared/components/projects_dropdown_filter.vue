@@ -157,12 +157,12 @@ export default {
               entityId: this.getEntityId(node),
             }));
           });
-      } else {
-        return Api.groupProjects(this.groupId, this.searchTerm, this.queryParams, projects => {
-          this.projects = projects;
-          this.loading = false;
-        });
       }
+
+      return Api.groupProjects(this.groupId, this.searchTerm, this.queryParams, projects => {
+        this.projects = projects;
+        this.loading = false;
+      });
     },
     isProjectSelected(id) {
       return this.selectedProjects ? this.selectedProjectIds.includes(id) : false;
