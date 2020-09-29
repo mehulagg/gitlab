@@ -6,13 +6,21 @@ module EE
 
     override :execute
     def execute
-      by_non_ldap(super)
+      users = by_non_ldap(super)
+
+      by_using_license_seat(users)
     end
 
     def by_non_ldap(users)
       return users unless params[:skip_ldap]
 
       users.non_ldap
+    end
+
+    def by_using_license_seat(users)
+      return users unless params[:using_license_seat]
+
+      users.using_license_seat
     end
   end
 end
