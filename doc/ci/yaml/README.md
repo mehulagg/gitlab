@@ -1470,6 +1470,12 @@ In this example:
 To implement a rule similar to [`except: changes`](#onlychangesexceptchanges),
 use `when: never`.
 
+CAUTION: **Caution:**
+When any `rules:changes` clause is evaluated in the context of a pipeline with no PushEvent,
+it will evaluate to true by default in the absense of a calculable diff. Only pipelines with
+a source `push`, `merge_request`, and `external_merge_request` have PushEvents. `rules:changes`
+on any other pipeline will **always** return true.
+
 #### `rules:exists`
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24021) in GitLab 12.4.
