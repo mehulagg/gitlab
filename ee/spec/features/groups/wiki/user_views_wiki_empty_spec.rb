@@ -3,9 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe 'Group > User views empty wiki' do
+  include WikiHelpers
+
   let_it_be(:user) { create(:user) }
 
   let(:wiki) { create(:group_wiki, group: group) }
+
+  before do
+    stub_group_wikis(true)
+  end
 
   it_behaves_like 'User views empty wiki' do
     context 'when group is public' do
