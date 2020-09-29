@@ -75,11 +75,12 @@ RSpec.describe ResourceAccessTokens::RevokeService do
 
       it_behaves_like 'revokes access token'
 
-      context 'when revoke fails' do
+      context 'revoke fails' do
         let_it_be(:outside_user) { create(:user) }
         let_it_be(:outside_access_token) { create(:personal_access_token, user: outside_user) }
+        let_it_be(:developer) { create(:user) }
 
-        context 'when bot is not in project' do
+        context 'when access token does not belong to this project' do
           subject { described_class.new(user, resource, outside_access_token).execute }
 
           it 'does not find the bot' do
@@ -87,17 +88,37 @@ RSpec.describe ResourceAccessTokens::RevokeService do
 
             expect(response.success?).to be false
             expect(response.message).to eq("Failed to find bot user")
+            expect(access_token.reload.revoked?).to be false
           end
-
-          it { expect { subject }.not_to change(access_token.reload, :revoked) }
         end
 
-        context 'when outside user tries to delete project bot' do
-          subject { described_class.new(outside_user, resource, access_token).execute }
+        context 'when user does not have permission to destroy bot' do
+          context 'when non-project member tries to delete project bot' do
+            subject { described_class.new(outside_user, resource, access_token).execute }
 
-          it 'returns access denied error' do
-            expect { subject }.to raise_error(Gitlab::Access::AccessDeniedError)
-            expect(access_token.reload.revoked?).to be false
+            it 'does not allow outside user to delete bot' do
+              response = subject
+
+              expect(response.success?).to be false
+              expect(response.message).to eq("#{outside_user.name} cannot delete #{access_token.user.name}")
+              expect(access_token.reload.revoked?).to be false
+            end
+          end
+
+          context 'when non-maintainer project member tries to delete project bot' do
+            subject { described_class.new(developer, resource, access_token).execute }
+
+            before do
+              resource.add_developer(developer)
+            end
+
+            it 'does not allow developer to delete bot' do
+              response = subject
+
+              expect(response.success?).to be false
+              expect(response.message).to eq("#{developer.name} cannot delete #{access_token.user.name}")
+              expect(access_token.reload.revoked?).to be false
+            end
           end
         end
 
