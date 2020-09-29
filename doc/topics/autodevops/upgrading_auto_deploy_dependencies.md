@@ -10,7 +10,7 @@ type: reference
 [Auto Deploy](stages.md#auto-deploy) is a feature that deploys your application to a Kubernetes cluster.
 It consists of several dependencies:
 
-- [Auto Deploy template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml)is a set of pipeline jobs and scripts that makes use of `auto-deploy-image`.
+- [Auto Deploy template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml) is a set of pipeline jobs and scripts that makes use of `auto-deploy-image`.
 - [`auto-deploy-image`](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image) is the executable image that communicates with the Kubernetes cluster.
 - [`auto-deploy-app chart`](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app) is the Helm chart for deploying your application.
 
@@ -41,7 +41,7 @@ are using. First verify which template is in use:
 
 If you know what template is being used:
 
-- The `auto-deploy-image` version is in the template (for example: `auto-deploy-image:v1.0.3`)
+- The `auto-deploy-image` version is in the template (for example `auto-deploy-image:v1.0.3`).
 - The `auto-deploy-app` chart version is [in the auto-deploy-image repository](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/blob/v1.0.3/assets/auto-deploy-app/Chart.yaml)
   (for example `version: 1.0.3`).
 
@@ -52,7 +52,7 @@ The following table explains the version compatibility between GitLab and Auto D
 | GitLab version   | `auto-deploy-image` version | Notes |
 |------------------|-----------------------------|-------|
 | v10.0 to v14.0   | v0.1.0 to v2.0.0            | v0 and v1 auto-deploy-image are backwards compatible. |
-| v13.4 and higher | v2.0.0 and higher           | v2 auto-deploy-image contains breaking changes, as explained in the [upgrade guide](#upgrade-deployments-for-v2-auto-deploy-image). |
+| v13.4 and higher | v2.0.0 and higher           | v2 auto-deploy-image contains breaking changes, as explained in the [upgrade guide](#upgrade-deployments-to-the-v2-auto-deploy-image). |
 
 You can find the current stable version of auto-deploy-image in the [Auto Deploy stable template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
@@ -127,11 +127,11 @@ If your Auto DevOps project has active `canary` or `rollout` track releases in t
 `production` environment deployed with the v1 `auto-deploy-image`, use the following
 steps to upgrade to v2:
 
-1. Verify your project is [using the v1 `auto-deploy-image`](#verify-dependency-versions)
+1. Verify your project is [using the v1 `auto-deploy-image`](#verify-dependency-versions).
    If not, [specify the version](#use-a-specific-version-of-auto-deploy-dependencies).
 1. If you're in the process of deploying `canary` or `rollout` deployments, promote
    them to `production` first to delete the unstable tracks.
-1. Verify your project is [using the v2 `auto-deploy-image`](#verify-dependency-versions)
+1. Verify your project is [using the v2 `auto-deploy-image`](#verify-dependency-versions).
    If not, [specify the version](#use-a-specific-version-of-auto-deploy-dependencies).
 1. Add an `AUTO_DEVOPS_FORCE_DEPLOY_V2` environment variable with a value of `true`
    in the GitLab CI/CD settings.
@@ -259,4 +259,4 @@ you might encounter the following error:
 - `Error: rendered manifests contain a resource that already exists. Unable to continue with install: Secret "production-postgresql" in namespace "<project-name>-production" exists and cannot be imported into the current release: invalid ownership metadata; label validation error: missing key "app.kubernetes.io/managed-by": must be set to "Helm"; annotation validation error: missing key "meta.helm.sh/release-name": must be set to "production-postgresql"; annotation validation error: missing key "meta.helm.sh/release-namespace": must be set to "<project-name>-production"`
 
 This is because the previous deployment was deployed with Helm2, which is not compatible with Helm3.
-To resolve the problem, please follow the [upgrade guide](#upgrade-deployments-for-v2-auto-deploy-image).
+To resolve the problem, please follow the [upgrade guide](#upgrade-deployments-to-the-v2-auto-deploy-image).
