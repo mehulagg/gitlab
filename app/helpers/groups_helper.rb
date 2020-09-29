@@ -176,10 +176,9 @@ module GroupsHelper
 
   def group_shared_runners_settings_data(group)
     {
-      update_path: update_shared_runners_group_runners_path(group),
-      enabled: group.shared_runners_enabled,
-      allow_override: group.allow_descendants_override_disabled_shared_runners,
-      parent_allow_override: group.parent_allows_shared_runners?
+      update_path: update_group_path(group),
+      setting: group.shared_runners_setting,
+      parent_setting: group.parent&.shared_runners_setting
     }
   end
 

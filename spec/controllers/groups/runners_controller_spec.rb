@@ -328,45 +328,4 @@ RSpec.describe Groups::RunnersController do
       end
     end
   end
-
-  describe '#update_shared_runners' do
-    context '::Groups::UpdateSharedRunnersService results in error' do
-      let(:params) { { group_id: group } }
-      let(:error_message) { 'example_error_message' }
-
-      before do
-        group.add_owner(user)
-
-        allow_any_instance_of(::Groups::UpdateSharedRunnersService)
-          .to receive(:execute)
-          .and_return({ status: :error, message: error_message })
-      end
-
-      it 'responds with an error and sends message' do
-        post :update_shared_runners, params: params
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['error']).to eq(error_message)
-      end
-    end
-
-    context '::Groups::UpdateSharedRunnersService is successfull' do
-      let(:params) { { group_id: group, shared_runners_enabled: false } }
-
-      before do
-        group.update(shared_runners_enabled: true)
-
-        group.add_owner(user)
-      end
-
-      it 'change shared_runners_enabled and responds with success' do
-        expect do
-          post :update_shared_runners, params: params
-        end.to change { group.reload.shared_runners_enabled }.from(true).to(false)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['success']).to eq(true)
-      end
-    end
-  end
 end

@@ -73,30 +73,4 @@ RSpec.describe Projects::RunnersController do
       expect(runner.active).to eq(false)
     end
   end
-
-  describe '#toggle_shared_runners' do
-    describe 'allowed to toggle' do
-      it 'change shared_runners_enabled value' do
-        expect do
-          post :toggle_shared_runners, params: params
-        end.to change { project.reload.shared_runners_enabled }
-
-        expect(response).to have_gitlab_http_status(:found)
-      end
-    end
-
-    describe 'not allowed to toggle' do
-      let(:group) { create(:group, :shared_runners_disabled) }
-      let(:project) { create(:project, group: group, shared_runners_enabled: false) }
-
-      it 'does not change shared_runners_enabled value and has correct alert' do
-        expect do
-          post :toggle_shared_runners, params: params
-        end.not_to change { project.reload.shared_runners_enabled }
-
-        expect(response).to have_gitlab_http_status(:found)
-        expect(flash[:alert]).to eq("Can't update due to restriction on group level")
-      end
-    end
-  end
 end

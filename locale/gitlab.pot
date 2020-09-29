@@ -4472,9 +4472,6 @@ msgstr ""
 msgid "Can't scan the code?"
 msgstr ""
 
-msgid "Can't update due to restriction on group level"
-msgstr ""
-
 msgid "Can't update snippet: %{err}"
 msgstr ""
 

@@ -101,10 +101,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         post :resume
         post :pause
       end
-
-      collection do
-        post :update_shared_runners
-      end
     end
 
     resources :container_registries, only: [:index, :show], controller: 'registry/repositories'

@@ -48,19 +48,6 @@ class Groups::RunnersController < Groups::ApplicationController
     end
   end
 
-  def update_shared_runners
-    result = ::Groups::UpdateSharedRunnersService.new(@group, current_user, params).execute
-    if result[:status] == :success
-      render json: {
-        success: true
-      }
-    else
-      render json: {
-        error: result[:message]
-      }, status: :bad_request
-    end
-  end
-
   private
 
   def runner

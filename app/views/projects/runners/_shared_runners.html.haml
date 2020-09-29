@@ -7,7 +7,7 @@
   - else
     = _('GitLab shared runners execute code of different projects on the same runner unless you configure GitLab runner autoscale with MaxBuilds 1 (which it is on GitLab.com).')
   %hr
-  - if @project.group&.shared_runners_allowed? == false
+  - if @project.group&.shared_runner_setting == 'disabled_and_unoverridable'
     %h5.text-danger
       = _('Shared runners disabled on group level')
   - else
