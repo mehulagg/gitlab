@@ -41,3 +41,7 @@ kubectl apply -f kubernetes/ --namespace cost-model
 ## Accessing cost insights
 
 Navigate to Operations / Metrics and select the "default_costs.yml" dashboard.
+
+### Customizing the Cost Dashboard
+
+The cost dashboard can be customized by editing the `.gitlab/dashboards/default_costs.yml` file or creating similar dashboard configuration files. You can read more on [customizing dashboards in our documentation](/ee/operations/metrics/dashboards/).
