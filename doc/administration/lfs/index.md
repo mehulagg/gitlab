@@ -42,7 +42,7 @@ gitlab_rails['lfs_enabled'] = false
 gitlab_rails['lfs_storage_path'] = "/mnt/storage/lfs-objects"
 ```
 
-After updating any settings in `/etc/gitlab/gitlab.rb` make sure to run [Omnibus GitLab reconfigure](https://docs.gitlab.com/ee/administration/restart_gitlab.html#omnibus-gitlab-reconfigure.)
+After you update settings in `/etc/gitlab/gitlab.rb`, make sure to run [Omnibus GitLab reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 ### Configuration for installations from source
 
