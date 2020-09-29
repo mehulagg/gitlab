@@ -29,13 +29,15 @@ There are some additional challenges worth noting as well:
 The priority is to be able to ship for GitLab.com on a regular basis with minimal manual intervention and delay.
 
 ## Proposal
+
 1. Upon a tag in `gitlab-org/container-registry`, trigger a deploy to `k8s-workloads/gitlab-com`
 1. This triggered pipeline will need to receive some information, minimally, the version desired, though we'll need more to ensure the correct pipeline is built.
 1. The pipeline will perform its deploy, which closes this issue, and sets a precedent for delivery#552
 
 To get here, I propose the following:
+
 - Modify `k8s-workloads/gitlab-com` to accept information on the registry version and build an appropriate deployment pipeline
-- Modify `k8s-workloads/gitlab-com` such that it can apply the Container Registry in an idempotent manner, similar to what we did with auto-deploy and sidekiq
+- Modify `k8s-workloads/gitlab-com` such that it can apply the Container Registry in an idempotent manner, similar to what we did with auto-deploy and Sidekiq
 - Make some form of locking mechanism, such that registry deployments, auto-deploy deployments, etc, do not stomp on top of each other
   - This is already a hindrance at times...
 - Build out notification capabilities as already described here:
@@ -44,20 +46,22 @@ To get here, I propose the following:
 - Add safety checks to validate it is safe to proceed with a deployment at each stage
   - This would use metric `gitlab_deployment_health:service`
   - Currently this does not monitor the registry component so it will need to be added.
-- And finally, something added to gitlab-org/container-registry where upon a tag, it'll send a trigger
+- And finally, something added to `gitlab-org/container-registry` where upon a tag, it'll send a trigger
 
-The idempotent part is important that way we do not store the version in the git repo. Instead this is maintained as a tag at `gitlab-org/container-registry` with pipeline pointers serving as an audit/compliance mechanism. Idempotency will also help in the case of a failure; we don't need to worry about trying to figure out or build some mechanism to roll back the desired version which is currently stored in Git.
+The idempotent part is important that way we do not store the version in the Git repo. Instead this is maintained as a tag at `gitlab-org/container-registry` with pipeline pointers serving as an audit/compliance mechanism. Idempotency will also help in the case of a failure; we don't need to worry about trying to figure out or build some mechanism to roll back the desired version which is currently stored in Git.
 
 ### Questions
 
 #### A few open questions
+
 - Our pipelines deploy to Production manually. Should we leave that manual action in place?
-- Currently the permissions model is very tight on the ops instance, preventing persons outside of Infrastructure from seeing the status or output of pipelines. How can we revise our permissions model such that users minimally have read access to k8s-workloads/gitlab-com on the ops instance?
+- Currently the permissions model is very tight on the ops instance, preventing persons outside of Infrastructure from seeing the status or output of pipelines. How can we revise our permissions model such that users minimally have read access to `k8s-workloads/gitlab-com` on the ops instance?
 
 #### A few answered questions
+
 - We run QA for non-auto-deploy pipelines. Has QA improved the testing on the Container Registry?
-  - Based on gitlab-org/quality/testcases#14, the answer is no; we can attempt to utilize the metric gitlab_deployment_health:service for creating a check allowing a production deploy. This metric monitors apdex and error ratio. The goal for this would be to validate we've not exceeded thresholds for canary providing us with confidence that we can move forward with a production deploy.
-- Is there any sort of tight version dependency between gitlab-rails and the Container Registry?
+  - Based on `gitlab-org/quality/testcases#14`, the answer is no; we can attempt to utilize the metric `gitlab_deployment_health:service` for creating a check allowing a production deploy. This metric monitors apdex and error ratio. The goal for this would be to validate we've not exceeded thresholds for canary providing us with confidence that we can move forward with a production deploy.
+- Is there any sort of tight version dependency between `gitlab-rails` and the Container Registry?
   - The Container Registry is fully independent of the rails app. On the other way around, the rails app does depend on specific versions of the Container Registry to enable some features, but that's expected.
 - What protections do we have in place such that if there's a scenario that prevented the Container Registry from being properly updated, so it's stuck on version X, but GitLab Rails is updated and might require version Y of the Container Registry?
   - There is no automated protection mechanism for this.
