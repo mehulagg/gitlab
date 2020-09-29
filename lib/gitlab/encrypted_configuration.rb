@@ -26,8 +26,11 @@ module Gitlab
       # ensure contents are valid to deserialize before write
       deserialize(contents)
 
-      IO.binwrite "#{content_path}.tmp", encrypt(contents)
-      FileUtils.mv "#{content_path}.tmp", content_path
+      temp_file = Tempfile.new(File.basename(content_path), File.dirname(content_path))
+      File.open(temp_file.path, 'wb') do |file|
+        file.write(encrypt(contents))
+      end
+      FileUtils.mv temp_file.path, content_path
     end
 
     def config
