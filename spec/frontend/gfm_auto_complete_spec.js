@@ -7,6 +7,8 @@ import GfmAutoComplete, { membersBeforeSave } from 'ee_else_ce/gfm_auto_complete
 import { TEST_HOST } from 'helpers/test_constants';
 import { getJSONFixture } from 'helpers/fixtures';
 
+import waitForPromises from 'jest/helpers/wait_for_promises';
+
 import MockAdapter from 'axios-mock-adapter';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import axios from '~/lib/utils/axios_utils';
@@ -145,19 +147,34 @@ describe('GfmAutoComplete', () => {
 
     describe('backend filtering', () => {
       describe('data is not in cache', () => {
+        let context;
+
         beforeEach(() => {
-          const context = {
+          context = {
             isLoadingData: { '+': false },
             dataSources: { vulnerabilities: 'vulnerabilities_autocomplete_url' },
             cachedData: {},
           };
-          fetchData.call(context, {}, '+', 'query');
         });
 
         it('should call axios with query', () => {
+          fetchData.call(context, {}, '+', 'query');
+
           expect(axios.get).toHaveBeenCalledWith('vulnerabilities_autocomplete_url', {
             params: { search: 'query' },
           });
+        });
+
+        it.each([200, 500])('should set the loading state', async responseStatus => {
+          mock.onGet('vulnerabilities_autocomplete_url').replyOnce(responseStatus);
+
+          fetchData.call(context, {}, '+', 'query');
+
+          expect(context.isLoadingData['+']).toBe(true);
+
+          await waitForPromises();
+
+          expect(context.isLoadingData['+']).toBe(false);
         });
       });
 
