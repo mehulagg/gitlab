@@ -73,6 +73,25 @@ RSpec.describe Gitlab::Diff::HighlightCache, :clean_gitlab_redis_cache do
 
       expect(rich_texts).to all(be_html_safe)
     end
+
+    context "when diff_file is uncached due to default_max_patch_bytes change" do
+      before do
+        expect(cache).to receive(:read_file).at_least(:once).and_return([])
+        expect(cache).to receive(:recache_due_to_size?).with(diff_file).and_return(true)
+      end
+
+      it "manually writes highlighted lines to the cache" do
+        expect(cache).to receive(:write_to_redis_hash).and_call_original
+
+        cache.decorate(diff_file)
+      end
+
+      it "assigns highlighted diff lines to the DiffFile" do
+        expect(diff_file.highlighted_diff_lines.size).to be > 5
+
+        cache.decorate(diff_file)
+      end
+    end
   end
 
   shared_examples 'caches missing entries' do
