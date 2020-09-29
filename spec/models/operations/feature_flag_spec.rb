@@ -31,8 +31,8 @@ RSpec.describe Operations::FeatureFlag do
         project = create(:project)
         feature_flag = described_class.new({ name: 'test', project: project, version: 1,
                                  strategies_attributes: [{ name: 'default', parameters: {} }] })
-        feature_flag.save # rubocop:disable Rails/SaveBang
 
+        expect(feature_flag.valid?).to eq(false)
         expect(feature_flag.errors.messages).to eq({
           version_associations: ["version 1 feature flags may not have strategies"]
         })
@@ -44,8 +44,8 @@ RSpec.describe Operations::FeatureFlag do
         project = create(:project)
         feature_flag = described_class.new({ name: 'test', project: project, version: 2,
                                  scopes_attributes: [{ environment_scope: '*', active: false }] })
-        feature_flag.save # rubocop:disable Rails/SaveBang
 
+        expect(feature_flag.valid?).to eq(false)
         expect(feature_flag.errors.messages).to eq({
           version_associations: ["version 2 feature flags may not have scopes"]
         })
