@@ -445,7 +445,6 @@ export function stripPathTail(path = '') {
   return path.replace(/[^/]+$/, '');
 }
 
-
 export function getURLOrigin(url) {
   if (!url) {
     return window.location.origin;

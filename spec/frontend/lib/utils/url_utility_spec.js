@@ -815,7 +815,6 @@ describe('URL utility', () => {
     });
   });
 
-
   describe('getURLOrigin', () => {
     it('when no url passed, returns correct origin from window location', () => {
       const origin = 'https://foo.bar';
