@@ -1,5 +1,5 @@
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import DiffDiscussions from './diff_discussions.vue';
 import DiffLineNoteForm from './diff_line_note_form.vue';
 import DiffDiscussionReply from './diff_discussion_reply.vue';
@@ -31,13 +31,17 @@ export default {
     },
   },
   computed: {
+    ...mapGetters('diffs', ['getDiscussionByIds']),
+    discussions() {
+      return this.getDiscussionByIds(this.line.discussionIds);
+    },
     className() {
-      return this.line.discussions.length ? '' : 'js-temp-notes-holder';
+      return this.discussions.length ? '' : 'js-temp-notes-holder';
     },
     shouldRender() {
       if (this.line.hasForm) return true;
 
-      if (!this.line.discussions || !this.line.discussions.length) {
+      if (!this.discussions || !this.discussions.length) {
         return false;
       }
       return this.line.discussionsExpanded;
@@ -54,15 +58,15 @@ export default {
     <td class="notes-content" colspan="4">
       <div class="content">
         <diff-discussions
-          v-if="line.discussions.length"
+          v-if="discussions.length"
           :line="line"
-          :discussions="line.discussions"
+          :discussions="discussions"
           :help-page-path="helpPagePath"
         />
         <diff-discussion-reply
           v-if="!hasDraft"
           :has-form="line.hasForm"
-          :render-reply-placeholder="Boolean(line.discussions.length)"
+          :render-reply-placeholder="Boolean(discussions.length)"
           @showNewDiscussionForm="
             showCommentForm({ lineCode: line.line_code, fileHash: diffFileHash })
           "

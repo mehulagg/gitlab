@@ -164,3 +164,7 @@ export const diffLines = state => file => {
 
   return parallelizeDiffLines(file.highlighted_diff_lines || []);
 };
+
+export const getDiscussionByIds = (state, getters, rootState, rootGetters) => ids => {
+  return ids?.map(id => rootGetters.getDiscussion(id));
+};

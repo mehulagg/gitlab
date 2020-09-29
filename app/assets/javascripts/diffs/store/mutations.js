@@ -195,6 +195,12 @@ export default {
       );
     const mapDiscussions = (line, extraCheck = () => true) => ({
       ...line,
+      discussionIds: extraCheck()
+        ? line.discussionIds &&
+          line.discussionIds
+            .filter(() => !line.discussionIds.some(id => discussion.id === id))
+            .concat(lineCheck(line) ? discussion.id : line.discussionIds)
+        : [],
       discussions: extraCheck()
         ? line.discussions &&
           line.discussions

@@ -372,6 +372,7 @@ function prepareLine(line, file) {
       rich_text: cleanRichText(line.rich_text),
       discussionsExpanded: true,
       discussions: [],
+      discussionIds: [],
       hasForm: false,
       text: undefined,
       alreadyPrepared: true,
