@@ -1,6 +1,6 @@
 ---
 name: buy_storage_link
-introduced_by_url:
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35360
 rollout_issue_url:
 group: group::fulfillment
 type: development
