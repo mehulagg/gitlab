@@ -4,7 +4,6 @@ import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { accessLevelReporter, projectsPerPage } from '../constants';
-import { SIMILARITY_ORDER, LAST_ACTIVITY_AT } from '../../shared/constants';
 
 export default {
   components: {
@@ -43,18 +42,8 @@ export default {
       return this.project && Object.keys(this.project).length ? [this.project] : null;
     },
     projectsQueryParams() {
-      /*
-      return {
-        per_page: projectsPerPage,
-        with_shared: false, // exclude forks
-        order_by: this.glFeatures.analyticsSimilaritySearch ? SIMILARITY_ORDER : LAST_ACTIVITY_AT,
-        include_subgroups: true,
-      };
-      */
-
       return {
         first: projectsPerPage,
-        // with_shared: false, // exclude forks
         includeSubgroups: true,
       };
     },

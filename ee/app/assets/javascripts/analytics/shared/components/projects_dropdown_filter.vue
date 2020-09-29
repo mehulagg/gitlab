@@ -127,7 +127,6 @@ export default {
     },
     onClick({ project, isSelected }) {
       this.setSelectedProjects(project, !isSelected);
-      console.log('onClick :: ', this.selectedProjects);
       this.$emit('selected', this.selectedProjects);
     },
     fetchData() {
@@ -152,10 +151,7 @@ export default {
               },
             } = response;
 
-            console.log('response :: ', response, nodes);
-
             this.loading = false;
-
             this.projects = nodes.map(node => ({
               ...node,
               entityId: this.getEntityId(node),
@@ -173,9 +169,7 @@ export default {
     },
     getEntityId(project) {
       const parts = project.id?.split('/') || [];
-      const id = parts.length ? Number(parts.pop()) : 0;
-      console.log('getEntityId :: ', project, parts, id);
-      return id;
+      return parts.length ? Number(parts.pop()) : 0;
     },
   },
 };
