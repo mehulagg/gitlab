@@ -45,7 +45,13 @@ module ResourceAccessTokens
     end
 
     def can_destroy_bot_member?
-      can?(current_user, :admin_project_member, @resource)
+      if resource.is_a?(Project)
+        can?(current_user, :admin_project_member, @resource)
+      elsif resource.is_a?(Group)
+        can?(current_user, :admin_group_member, @resource)
+      else
+        false
+      end
     end
 
     def find_member
