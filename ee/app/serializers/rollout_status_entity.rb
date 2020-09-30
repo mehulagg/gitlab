@@ -13,4 +13,6 @@ class RolloutStatusEntity < Grape::Entity
   expose :instances, if: -> (rollout_status, _) { rollout_status.found? }
   expose :completion, if: -> (rollout_status, _) { rollout_status.found? }
   expose :complete?, as: :is_completed, if: -> (rollout_status, _) { rollout_status.found? }
+  expose :canary_ingress, using: RolloutStatuses::CanaryIngress, expose_nil: false,
+         if: -> (rollout_status, _) { rollout_status.found? && rollout_status.canary_ingress_exists? }
 end

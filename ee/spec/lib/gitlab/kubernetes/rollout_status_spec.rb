@@ -12,6 +12,8 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     create_pods(name: "one", count: 3, track: 'stable') + create_pods(name: "two", count: 3, track: "canary")
   end
 
+  let(:ingresses) { [] }
+
   let(:specs_all_finished) do
     [
       kube_deployment(name: 'one'),
@@ -26,7 +28,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     ]
   end
 
-  subject(:rollout_status) { described_class.from_deployments(*specs, pods_attrs: pods) }
+  subject(:rollout_status) { described_class.from_deployments(*specs, pods_attrs: pods, ingresses: ingresses) }
 
   shared_examples 'rollout status' do
     describe '#deployments' do
@@ -221,6 +223,24 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
         let(:specs) { [] }
 
         it { is_expected.to be_not_found }
+      end
+    end
+
+    describe '#canary_ingress_exists?' do
+      context 'when canary ingress exists' do
+        let(:ingresses) { [kube_ingress(track: :canary)] }
+  
+        it 'returns true' do
+          expect(rollout_status.canary_ingress_exists?).to eq(true)
+        end
+      end
+  
+      context 'when canary ingress does not exist' do
+        let(:ingresses) { [kube_ingress(track: :stable)] }
+  
+        it 'returns false' do
+          expect(rollout_status.canary_ingress_exists?).to eq(false)
+        end
       end
     end
   end
