@@ -42,6 +42,7 @@ export const THROUGHPUT_TABLE_TEST_IDS = {
   ASSIGNEES: 'assigneesCol',
   COMMITS: 'commitsCol',
   COMMENT_COUNT: 'commentCount',
+  APPROVED: 'approvedStatus',
 };
 
 export const PIPELINE_STATUS_ICON_CLASSES = {

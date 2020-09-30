@@ -196,6 +196,8 @@ module API
       mount ::API::ComposerPackages
       mount ::API::ConanProjectPackages
       mount ::API::ConanInstancePackages
+      mount ::API::DebianGroupPackages
+      mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
       mount ::API::NpmPackages
       mount ::API::GenericPackages
@@ -237,6 +239,7 @@ module API
       mount ::API::Templates
       mount ::API::Todos
       mount ::API::Triggers
+      mount ::API::Unleash
       mount ::API::UsageData
       mount ::API::UserCounts
       mount ::API::Users

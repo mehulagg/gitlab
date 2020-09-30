@@ -1,9 +1,7 @@
 ---
 name: geo_package_file_replication
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37112
+rollout_issue_url:
+group: geo
 type: development
-# it appears that in some places
-# `false` is specified vs `true` in other
-default_enabled: [false, true]
+default_enabled: true

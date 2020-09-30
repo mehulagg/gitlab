@@ -16,7 +16,7 @@ module Geo
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, Wiki::CouldNotCreateWikiError => e
       # In some cases repository does not exist, the only way to know about this is to parse the error text.
       # If it does not exist we should consider it as successfully downloaded.
-      if e.message.include? Gitlab::GitAccess::ERROR_MESSAGES[:no_repo] # rubocop:disable Cop/LineBreakAroundConditionalBlock
+      if e.message.include? Gitlab::GitAccessWiki::ERROR_MESSAGES[:no_repo] # rubocop:disable Cop/LineBreakAroundConditionalBlock
         if repository_presumably_exists_on_primary?
           log_info('Wiki is not found, but it seems to exist on the primary')
           fail_registry_sync!('Wiki is not found', e)

@@ -16,10 +16,6 @@ module Gitlab
         limited_snippet_titles_count
       end
 
-      def highlight_map(scope)
-        snippet_titles.to_h { |x| [x[:_source][:id], x[:highlight]] }
-      end
-
       private
 
       def snippet_titles

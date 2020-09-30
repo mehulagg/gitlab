@@ -133,7 +133,7 @@ RSpec.describe 'Epic show', :js do
 
     it 'shows epic thread filter dropdown' do
       page.within('.js-noteable-awards') do
-        expect(find('.js-discussion-filter-container #discussion-filter-dropdown')).to have_content('Show all activity')
+        expect(find('#discussion-filter-dropdown')).to have_content('Show all activity')
       end
     end
 
@@ -142,9 +142,7 @@ RSpec.describe 'Epic show', :js do
 
       context 'when sorted by `Oldest first`' do
         it 'shows comments in the correct order' do
-          page.within('[data-testid="sort-discussion-filter"]') do
-            expect(find('.js-dropdown-text')).to have_content('Oldest first')
-          end
+          expect(find('.js-dropdown-text')).to have_content('Oldest first')
 
           items = all('.timeline-entry .timeline-discussion-body .note-text')
           expect(items[0]).to have_content(notes[0].note)
@@ -155,7 +153,7 @@ RSpec.describe 'Epic show', :js do
       context 'when sorted by `Newest first`' do
         before do
           page.within('[data-testid="sort-discussion-filter"]') do
-            find('button').click
+            find('.js-dropdown-text').click
             find('.js-newest-first').click
             wait_for_requests
           end
@@ -163,7 +161,7 @@ RSpec.describe 'Epic show', :js do
 
         it 'shows comments in the correct order', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225637' do
           page.within('[data-testid="sort-discussion-filter"]') do
-            expect(find('.js-dropdown-text')).to have_content('Newest first')
+            expect(find('.js-newest-first')).to have_content('Newest first')
           end
 
           items = all('.timeline-entry .timeline-discussion-body .note-text')

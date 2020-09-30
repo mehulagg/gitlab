@@ -7,7 +7,7 @@ class HistoricalDataWorker # rubocop:disable Scalability/IdempotentWorker
   include CronjobQueue
   # rubocop:enable Scalability/CronWorkerContext
 
-  feature_category :billing
+  feature_category :provision
 
   def perform
     return if License.current.nil? || License.current&.trial?

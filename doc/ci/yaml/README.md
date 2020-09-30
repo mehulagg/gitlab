@@ -1547,7 +1547,7 @@ docker build:
         - Dockerfile
         - docker/scripts/*
       when: manual
-    # - when: never would be redundant here, this is implied any time rules are listed.
+      # - when: never would be redundant here, this is implied any time rules are listed.
 ```
 
 Keywords such as `branches` or `refs` that are currently available for
@@ -1754,7 +1754,7 @@ the pipeline if the following is true:
 
 In the example below, the `test` job will `only` be created when **all** of the following are true:
 
-- The pipeline has been [scheduled](../../user/project/pipelines/schedules.md) **or** runs for `master`.
+- The pipeline has been [scheduled](../pipelines/schedules.md) **or** runs for `master`.
 - The `variables` keyword matches.
 - The `kubernetes` service is active on the project.
 
@@ -4056,7 +4056,9 @@ release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33014) in GitLab 13.4.
 
 `secrets` indicates the [CI Secrets](../secrets/index.md) this job needs. It should be a hash,
-and the keys should be the names of the environment variables the job needs to access the secrets.
+and the keys should be the names of the environment variables that are made available to the job.
+The value of each secret is saved in a temporary file. This file's path is stored in these
+environment variables.
 
 #### `secrets:vault` **(PREMIUM)**
 
@@ -4072,7 +4074,7 @@ field to fetch the value for:
 job:
   secrets:
     DATABASE_PASSWORD:
-      vault: production/db/password # translates to secret `kv-v2/data/production/db`, field `password`
+      vault: production/db/password  # translates to secret `kv-v2/data/production/db`, field `password`
 ```
 
 You can specify a custom secrets engine path by adding a suffix starting with `@`:
@@ -4081,7 +4083,7 @@ You can specify a custom secrets engine path by adding a suffix starting with `@
 job:
   secrets:
     DATABASE_PASSWORD:
-      vault: production/db/password@ops # translates to secret `ops/data/production/db`, field `password`
+      vault: production/db/password@ops  # translates to secret `ops/data/production/db`, field `password`
 ```
 
 In the detailed form of the syntax, you can specify all details explicitly:

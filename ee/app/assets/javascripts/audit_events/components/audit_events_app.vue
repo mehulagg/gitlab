@@ -29,16 +29,6 @@ export default {
       type: Array,
       required: true,
     },
-    filterQaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    tableQaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
     exportUrl: {
       type: String,
       required: false,
@@ -73,7 +63,6 @@ export default {
         <div class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8">
           <audit-events-filter
             :filter-token-options="filterTokenOptions"
-            :qa-selector="filterQaSelector"
             :value="filterValue"
             @selected="setFilterValue"
             @submit="searchForAuditEvents"
@@ -93,10 +82,6 @@ export default {
         </div>
       </div>
     </div>
-    <audit-events-table
-      :events="events"
-      :is-last-page="isLastPage"
-      :qa-selector="tableQaSelector"
-    />
+    <audit-events-table :events="events" :is-last-page="isLastPage" />
   </div>
 </template>

@@ -157,7 +157,6 @@ RSpec.describe GroupsHelper do
 
   describe '#show_group_activity_analytics?' do
     before do
-      stub_feature_flags(group_activity_analytics: feature_available)
       stub_licensed_features(group_activity_analytics: feature_available)
 
       allow(helper).to receive(:current_user) { current_user }

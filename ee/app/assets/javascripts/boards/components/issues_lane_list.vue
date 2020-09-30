@@ -140,7 +140,7 @@ export default {
 
 <template>
   <div
-    class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex gl-flex-shrink-0"
+    class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex! gl-flex-shrink-0"
     :class="{ 'is-collapsed': !list.isExpanded }"
   >
     <div class="board-inner gl-rounded-base gl-relative gl-w-full">

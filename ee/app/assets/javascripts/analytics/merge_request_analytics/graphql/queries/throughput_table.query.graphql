@@ -57,6 +57,11 @@ query(
         }
         commitCount
         userNotesCount
+        approvedBy {
+          nodes {
+            id
+          }
+        }
       }
     }
   }

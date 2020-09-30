@@ -58,25 +58,6 @@ RSpec.describe Gitlab::SearchResults do
       end
     end
 
-    describe '#highlight_map' do
-      using RSpec::Parameterized::TableSyntax
-
-      where(:scope, :expected) do
-        'projects'       | {}
-        'issues'         | {}
-        'merge_requests' | {}
-        'milestones'     | {}
-        'users'          | {}
-        'unknown'        | {}
-      end
-
-      with_them do
-        it 'returns the expected highlight_map' do
-          expect(results.highlight_map(scope)).to eq(expected)
-        end
-      end
-    end
-
     describe '#formatted_limited_count' do
       using RSpec::Parameterized::TableSyntax
 
@@ -200,8 +181,10 @@ RSpec.describe Gitlab::SearchResults do
 
         let_it_be(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
         let_it_be(:opened_result) { create(:issue, :opened, project: project, title: 'foo open') }
+        let_it_be(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
 
         include_examples 'search results filtered by state'
+        include_examples 'search results filtered by confidential'
       end
     end
 

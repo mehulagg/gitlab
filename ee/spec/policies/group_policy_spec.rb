@@ -176,7 +176,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: true)
       stub_licensed_features(group_activity_analytics: true)
     end
 
@@ -187,7 +186,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: false)
       stub_licensed_features(group_activity_analytics: false)
     end
 
@@ -1065,10 +1063,16 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    include WikiHelpers
-
-    let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
+    let_it_be(:container) { create(:group_with_plan, plan: :silver_plan) }
     let_it_be(:user) { owner }
+
+    before_all do
+      create(:license, plan: License::PREMIUM_PLAN)
+    end
+
+    before do
+      stub_application_setting(check_namespace_plan: true)
+    end
 
     # We don't have feature toggles on groups yet, so we currently simulate
     # this by toggling the feature flag instead.
@@ -1094,9 +1098,7 @@ RSpec.describe GroupPolicy do
     end
 
     context 'when the feature is not licensed on this group' do
-      before do
-        allow(container).to receive(:feature_available?).with(:group_wikis).and_return(false)
-      end
+      let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
 
       it 'does not include the wiki permissions' do
         expect_disallowed(*wiki_permissions[:all])
@@ -1107,4 +1109,36 @@ RSpec.describe GroupPolicy do
   it_behaves_like 'update namespace limit policy'
 
   include_examples 'analytics report embedding'
+
+  context 'group access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with owner' do
+        let(:current_user) { owner }
+
+        before do
+          group.add_owner(owner)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          group.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
 end

@@ -39,7 +39,7 @@ FactoryBot.define do
     end
 
     initialize_with do
-      ::Gitlab::Ci::Reports::Security::Finding.new(attributes)
+      ::Gitlab::Ci::Reports::Security::Finding.new(**attributes)
     end
   end
 end

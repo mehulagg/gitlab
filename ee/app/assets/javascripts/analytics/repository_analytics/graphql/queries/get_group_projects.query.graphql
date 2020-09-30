@@ -1,9 +1,14 @@
-query getGroupProjects($groupFullPath: ID!) {
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query getGroupProjects($groupFullPath: ID!, $after: String) {
   group(fullPath: $groupFullPath) {
-    projects {
+    projects(after: $after, first: 100) {
       nodes {
         name
         id
+      }
+      pageInfo {
+        ...PageInfo
       }
     }
   }

@@ -1,7 +1,7 @@
 ---
 name: trial_form_phone_optional
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24449
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/224606
+group: group::conversion
 type: development
 default_enabled: false

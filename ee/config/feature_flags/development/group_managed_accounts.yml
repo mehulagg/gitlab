@@ -1,7 +1,7 @@
 ---
 name: group_managed_accounts
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9625
+rollout_issue_url:
+group: manage::access
 type: development
 default_enabled: false

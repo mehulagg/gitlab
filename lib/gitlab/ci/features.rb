@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.job_heartbeats_runner?(project)
-        ::Feature.enabled?(:ci_job_heartbeats_runner, project, default_enabled: true)
-      end
-
       def self.instance_variables_ui_enabled?
         ::Feature.enabled?(:ci_instance_variables_ui, default_enabled: true)
       end
@@ -33,10 +29,6 @@ module Gitlab
 
       def self.raise_job_rules_without_workflow_rules_warning?
         ::Feature.enabled?(:ci_raise_job_rules_without_workflow_rules_warning, default_enabled: true)
-      end
-
-      def self.bulk_insert_on_create?(project)
-        ::Feature.enabled?(:ci_bulk_insert_on_create, project, default_enabled: true)
       end
 
       # NOTE: The feature flag `disallow_to_create_merge_request_pipelines_in_target_project`

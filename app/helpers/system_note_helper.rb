@@ -2,6 +2,8 @@
 
 module SystemNoteHelper
   ICON_NAMES_BY_ACTION = {
+    'approved' => 'approval',
+    'unapproved' => 'unapproval',
     'cherry_pick' => 'cherry-pick-commit',
     'commit' => 'commit',
     'description' => 'pencil-square',
@@ -11,6 +13,7 @@ module SystemNoteHelper
     'closed' => 'issue-close',
     'time_tracking' => 'timer',
     'assignee' => 'user',
+    'reviewer' => 'user',
     'title' => 'pencil-square',
     'task' => 'task-done',
     'label' => 'label',

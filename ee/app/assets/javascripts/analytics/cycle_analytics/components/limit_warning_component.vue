@@ -1,8 +1,12 @@
 <script>
-import { GlTooltipDirective } from '@gitlab/ui';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { n__ } from '~/locale';
 import { EVENTS_LIST_ITEM_LIMIT } from '../constants';
 
 export default {
+  components: {
+    GlIcon,
+  },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -12,27 +16,18 @@ export default {
       required: true,
     },
   },
-  data() {
-    return { EVENTS_LIST_ITEM_LIMIT };
-  },
+  eventsListItemLimit: EVENTS_LIST_ITEM_LIMIT,
+  tooltipTitle: n__(
+    'Limited to showing %d event at most',
+    'Limited to showing %d events at most',
+    EVENTS_LIST_ITEM_LIMIT,
+  ),
 };
 </script>
 <template>
   <!-- TODO: im not sure why this is rendered only for exactly 50 items, why not >= 50? -->
-  <span v-if="count >= EVENTS_LIST_ITEM_LIMIT" class="events-info float-right">
-    <i
-      v-gl-tooltip
-      :title="
-        n__(
-          'Limited to showing %d event at most',
-          'Limited to showing %d events at most',
-          EVENTS_LIST_ITEM_LIMIT,
-        )
-      "
-      class="fa fa-warning"
-      aria-hidden="true"
-    >
-    </i>
-    {{ n__('Showing %d event', 'Showing %d events', EVENTS_LIST_ITEM_LIMIT) }}
+  <span v-if="count >= $options.eventsListItemLimit" class="events-info float-right">
+    <gl-icon v-gl-tooltip="{ title: $options.tooltipTitle }" name="warning" aria-hidden="true" />
+    {{ n__('Showing %d event', 'Showing %d events', $options.eventsListItemLimit) }}
   </span>
 </template>

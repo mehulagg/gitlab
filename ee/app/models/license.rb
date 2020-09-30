@@ -18,7 +18,6 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
-    group_wikis
     issuable_default_templates
     issue_weights
     iterations
@@ -35,6 +34,7 @@ class License < ApplicationRecord
     push_rules
     repository_mirrors
     repository_size_limit
+    resource_access_token
     seat_link
     send_emails_from_admin_area
     scoped_issue_board
@@ -85,6 +85,7 @@ class License < ApplicationRecord
     group_project_templates
     group_repository_analytics
     group_saml
+    group_wikis
     ide_schema_config
     issues_analytics
     jira_issues_integration
@@ -286,7 +287,8 @@ class License < ApplicationRecord
     end
 
     def history
-      all.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
+      decryptable_licenses = all.select { |license| license.license.present? }
+      decryptable_licenses.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
     end
 
     private

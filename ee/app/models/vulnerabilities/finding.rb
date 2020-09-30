@@ -280,8 +280,16 @@ module Vulnerabilities
       metadata.dig('message')
     end
 
-    def cve
-      metadata.dig('cve')
+    def cve_value
+      identifiers.find(&:cve?)&.name
+    end
+
+    def cwe_value
+      identifiers.find(&:cwe?)&.name
+    end
+
+    def other_identifier_values
+      identifiers.select(&:other?).map(&:name)
     end
 
     alias_method :==, :eql? # eql? is necessary in some cases like array intersection

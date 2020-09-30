@@ -70,15 +70,6 @@ RSpec.describe 'Creating a Requirement' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(RequirementsManagement::Requirement, :count)
         end
       end
-
-      context 'when requirements_management flag is dissabled' do
-        before do
-          stub_feature_flags(requirements_management: false)
-        end
-
-        it_behaves_like 'a mutation that returns top-level errors',
-          errors: ['requirements_management flag is not enabled on this project']
-      end
     end
   end
 end

@@ -102,12 +102,27 @@ module EE
           }
         end
 
+        # rubocop:disable CodeReuse/ActiveRecord, UsageData/LargeTable
         def approval_rules_counts
+          approval_project_rules_with_users =
+            ApprovalProjectRule
+              .regular
+              .joins('INNER JOIN approval_project_rules_users ON approval_project_rules_users.approval_project_rule_id = approval_project_rules.id')
+              .group(:id)
+
           {
             approval_project_rules: count(ApprovalProjectRule),
-            approval_project_rules_with_target_branch: count(ApprovalProjectRulesProtectedBranch, :approval_project_rule_id)
+            approval_project_rules_with_target_branch: count(ApprovalProjectRulesProtectedBranch, :approval_project_rule_id),
+            approval_project_rules_with_more_approvers_than_required: count_approval_rules_with_users(approval_project_rules_with_users.having('COUNT(approval_project_rules_users) > approvals_required')),
+            approval_project_rules_with_less_approvers_than_required: count_approval_rules_with_users(approval_project_rules_with_users.having('COUNT(approval_project_rules_users) < approvals_required')),
+            approval_project_rules_with_exact_required_approvers: count_approval_rules_with_users(approval_project_rules_with_users.having('COUNT(approval_project_rules_users) = approvals_required'))
           }
         end
+
+        def count_approval_rules_with_users(relation)
+          count(relation, batch_size: 10_000, start: ApprovalProjectRule.regular.minimum(:id), finish: ApprovalProjectRule.regular.maximum(:id)).size
+        end
+        # rubocop:enable CodeReuse/ActiveRecord, UsageData/LargeTable
 
         def security_products_usage
           results = SECURE_PRODUCT_TYPES.each_with_object({}) do |(secure_type, attribs), response|

@@ -17,8 +17,8 @@ RSpec.describe Terraform::State do
       expect(described_class.with_files_stored_locally).to have_attributes(count: 5)
     end
 
-    it 'excludes states with local storage' do
-      stub_terraform_state_object_storage(Terraform::StateUploader)
+    it 'excludes states without local storage' do
+      stub_terraform_state_object_storage
 
       create_list(:terraform_state, 5, :with_file)
 
@@ -54,7 +54,7 @@ RSpec.describe Terraform::State do
 
       before do
         stub_current_geo_node(secondary)
-        stub_terraform_state_object_storage(Terraform::StateUploader) if terraform_object_storage_enabled
+        stub_terraform_state_object_storage if terraform_object_storage_enabled
 
         create_list(:terraform_state, 5, :with_file, project: project)
         create_list(:terraform_state, 5, :with_file, project: create(:project))
@@ -70,7 +70,7 @@ RSpec.describe Terraform::State do
 
       before do
         stub_current_geo_node(secondary)
-        stub_terraform_state_object_storage(Terraform::StateUploader)
+        stub_terraform_state_object_storage
 
         create_list(:terraform_state, 5, project: project)
       end

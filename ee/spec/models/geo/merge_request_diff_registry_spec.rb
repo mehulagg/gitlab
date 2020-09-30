@@ -3,9 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Geo::MergeRequestDiffRegistry, :geo, type: :model do
-  let_it_be(:merge_request) { create(:merge_request) }
-  let_it_be(:merge_request_diff) { create(:merge_request_diff, merge_request: merge_request) }
-  let_it_be(:registry) { create(:geo_merge_request_diff_registry, merge_request_diff: merge_request_diff) }
+  let_it_be(:registry) { create(:geo_merge_request_diff_registry) }
 
   specify 'factory is valid' do
     expect(registry).to be_valid

@@ -103,6 +103,10 @@ export default {
   },
 
   [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    state.epics = epics;
+    Vue.set(state, 'epics', union(state.epics || [], epics));
+  },
+
+  [mutationTypes.RESET_EPICS]: state => {
+    Vue.set(state, 'epics', []);
   },
 };

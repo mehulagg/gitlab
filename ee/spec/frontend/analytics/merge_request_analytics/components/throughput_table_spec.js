@@ -228,7 +228,7 @@ describe('ThroughputTable', () => {
           expect(icon.props('name')).toBe('comments');
         });
 
-        it('includes a pipeline icon and when available', async () => {
+        it('includes a pipeline icon when available', async () => {
           const iconName = 'status_canceled';
 
           additionalData({
@@ -247,6 +247,61 @@ describe('ThroughputTable', () => {
 
           expect(icon.find(GlIcon).exists()).toBe(true);
           expect(icon.props('name')).toBe(iconName);
+        });
+
+        describe('approval details', () => {
+          const iconName = 'approval';
+
+          it('does not display by default', async () => {
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+
+            expect(approved.exists()).toBe(false);
+          });
+
+          it('displays the singular when there is a single approval', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('1 Approval');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
+
+          it('displays the plural when there are multiple approvals', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                  {
+                    id: 2,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('2 Approvals');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
         });
       });
 

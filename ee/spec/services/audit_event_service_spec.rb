@@ -122,12 +122,23 @@ RSpec.describe AuditEventService do
           expect(event.ip_address).to eq(user.current_sign_in_ip)
           expect(event.details[:ip_address]).to eq(user.current_sign_in_ip)
         end
+
+        it 'tracks exceptions when the event cannot be created' do
+          allow(user).to receive_messages(current_sign_in_ip: 'invalid IP')
+
+          expect(Gitlab::ErrorTracking).to(
+            receive(:track_exception)
+              .with(ActiveRecord::RecordInvalid, audit_event_type: 'AuditEvent').and_call_original
+          )
+
+          service.security_event
+        end
       end
 
       context 'for an impersonated user' do
         let(:details) { {} }
         let(:impersonator) { build(:user, name: 'Donald Duck', current_sign_in_ip: '192.168.88.88') }
-        let(:user) { build(:user, impersonator: impersonator) }
+        let(:user) { create(:user, impersonator: impersonator) }
 
         it 'has the impersonator IP address' do
           event = service.security_event
@@ -302,10 +313,14 @@ RSpec.describe AuditEventService do
   describe '#for_user' do
     let(:author_name) { 'Administrator' }
     let(:current_user) { User.new(name: author_name) }
-    let(:target_user_full_path) { 'ejohn' }
-    let(:user) { instance_spy(User, full_path: target_user_full_path) }
+    let(:user) { create(:user) }
     let(:custom_message) { 'Some strange event has occurred' }
     let(:options) { { action: action, custom_message: custom_message } }
+    let(:event) { service.security_event }
+
+    before do
+      stub_licensed_features(extended_audit_events: true, admin_audit_log: true)
+    end
 
     subject(:service) { described_class.new(current_user, user, options).for_user }
 
@@ -316,10 +331,14 @@ RSpec.describe AuditEventService do
         expect(service.instance_variable_get(:@details)).to eq(
           remove: 'user',
           author_name: author_name,
-          target_id: target_user_full_path,
+          target_id: user.id,
           target_type: 'User',
-          target_details: target_user_full_path
+          target_details: user.username
         )
+      end
+
+      it 'sets the target_id column' do
+        expect(event.target_id).to eq(user.id)
       end
     end
 
@@ -330,10 +349,14 @@ RSpec.describe AuditEventService do
         expect(service.instance_variable_get(:@details)).to eq(
           add: 'user',
           author_name: author_name,
-          target_id: target_user_full_path,
+          target_id: user.id,
           target_type: 'User',
-          target_details: target_user_full_path
+          target_details: user.full_path
         )
+      end
+
+      it 'sets the target_id column' do
+        expect(event.target_id).to eq(user.id)
       end
     end
 
@@ -344,10 +367,64 @@ RSpec.describe AuditEventService do
         expect(service.instance_variable_get(:@details)).to eq(
           custom_message: custom_message,
           author_name: author_name,
-          target_id: target_user_full_path,
+          target_id: user.id,
           target_type: 'User',
-          target_details: target_user_full_path
+          target_details: user.full_path
         )
+      end
+
+      it 'sets the target_id column' do
+        expect(event.target_id).to eq(user.id)
+      end
+    end
+  end
+
+  describe '#for_project' do
+    let(:current_user) { create(:user) }
+    let(:project) { create(:project) }
+    let(:options) { { action: action } }
+
+    before do
+      stub_licensed_features(extended_audit_events: true, admin_audit_log: true)
+    end
+
+    let(:event) { service.security_event }
+
+    subject(:service) { described_class.new(current_user, project, options).for_project }
+
+    context 'with destroy action' do
+      let(:action) { :destroy }
+
+      it 'sets the details attribute' do
+        expect(service.instance_variable_get(:@details)).to eq(
+          remove: 'project',
+          author_name: current_user.name,
+          target_id: project.id,
+          target_type: 'Project',
+          target_details: project.full_path
+        )
+      end
+
+      it 'sets the target_id column' do
+        expect(event.target_id).to eq(project.id)
+      end
+    end
+
+    context 'with create action' do
+      let(:action) { :create }
+
+      it 'sets the details attribute' do
+        expect(service.instance_variable_get(:@details)).to eq(
+          add: 'project',
+          author_name: current_user.name,
+          target_id: project.id,
+          target_type: 'Project',
+          target_details: project.full_path
+        )
+      end
+
+      it 'sets the target_id column' do
+        expect(event.target_id).to eq(project.id)
       end
     end
   end
@@ -385,7 +462,7 @@ RSpec.describe AuditEventService do
       expect(event.details).to eq(
         remove: 'project',
         author_name: 'Test User',
-        target_id: project.full_path,
+        target_id: project.id,
         target_type: 'Project',
         target_details: project.full_path
       )
@@ -409,7 +486,7 @@ RSpec.describe AuditEventService do
       expect(event.details).to eq(
         remove: 'group',
         author_name: 'Test User',
-        target_id: group.full_path,
+        target_id: group.id,
         target_type: 'Group',
         target_details: group.full_path
       )
