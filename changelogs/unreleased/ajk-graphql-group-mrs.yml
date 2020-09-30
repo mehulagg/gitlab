@@ -1,0 +1,5 @@
+---
+title: Add Group.mergeRequests field to GraphQL
+merge_request: 43863
+author:
+type: added
