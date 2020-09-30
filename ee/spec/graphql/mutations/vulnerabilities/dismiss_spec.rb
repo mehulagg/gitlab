@@ -7,11 +7,12 @@ RSpec.describe Mutations::Vulnerabilities::Dismiss do
   describe '#resolve' do
     let_it_be(:vulnerability) { create(:vulnerability, :with_findings) }
     let_it_be(:user) { create(:user) }
+    let_it_be(:vulnerability_id) { GitlabSchema.id_from_object(vulnerability).to_s }
 
     let(:comment) { 'Dismissal Feedbacl' }
     let(:mutated_vulnerability) { subject[:vulnerability] }
 
-    subject { mutation.resolve(id: GitlabSchema.id_from_object(vulnerability).to_s, comment: comment) }
+    subject { mutation.resolve(id: vulnerability_id, comment: comment) }
 
     context 'when the user can dismiss the vulnerability' do
       before do
@@ -21,6 +22,15 @@ RSpec.describe Mutations::Vulnerabilities::Dismiss do
       context 'when user doe not have access to the project' do
         it 'raises an error' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
+        end
+      end
+
+      context 'with invalid params' do
+        let(:vulnerability_id) { GitlabSchema.id_from_object(user).to_s }
+
+        it 'raises an error' do
+          expect { subject }
+            .to raise_error(Gitlab::Graphql::Errors::ArgumentError, "#{vulnerability_id} is not a valid ID for Vulnerability.")
         end
       end
 
