@@ -35,25 +35,27 @@ RSpec.describe ApplicationSettings::UpdateService do
     end
 
     context 'index dependent' do
-      using RSpec::Parameterized::TableSyntax
+      let(:opts) { { elasticsearch_indexing: true } }
 
-      where(:index_exists, :indexing_enabled, :input_value, :result) do
-        false  | false | true | false
-        false  | true  | true | true
-        true   | false | true | true
-        true   | true  | true | true
-      end
-
-      with_them do
+      context 'when index exists' do
         before do
-          allow(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(index_exists)
-          allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(indexing_enabled)
+          expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
+          expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
         end
 
-        let(:opts) { { elasticsearch_indexing: input_value } }
+        it 'returns correct result' do
+          expect(service.execute).to be(true)
+        end
+      end
+
+      context 'when index does not exist' do
+        before do
+          expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
+          expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
+        end
 
         it 'returns correct result' do
-          expect(service.execute).to be(result)
+          expect(service.execute).to be(true)
         end
       end
     end
