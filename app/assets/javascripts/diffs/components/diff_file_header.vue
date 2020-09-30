@@ -286,7 +286,7 @@ export default {
           icon="external-link"
         />
         <gl-dropdown
-          v-gl-tooltip.hover.focus="__('More actions')"
+          v-gl-tooltip.hover.focus="__('Options')"
           right
           toggle-class="btn-icon js-diff-more-actions"
           class="gl-pt-0!"
@@ -295,11 +295,8 @@ export default {
         >
           <template #button-content>
             <gl-icon name="ellipsis_v" class="mr-0" />
-            <span class="sr-only">{{ __('More actions') }}</span>
+            <span class="sr-only">{{ __('Options') }}</span>
           </template>
-          <gl-dropdown-section-header>
-            {{ __('More actions') }}
-          </gl-dropdown-section-header>
           <gl-dropdown-item
             v-if="diffFile.replaced_view_path"
             ref="replacedFileButton"
