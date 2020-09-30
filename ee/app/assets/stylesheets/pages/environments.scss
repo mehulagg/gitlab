@@ -123,14 +123,8 @@
 }
 
 .alert-form {
-  .btn-group,
-  .action-group {
+  .btn-group {
     display: flex;
-
-    .btn {
-      flex: 1 auto;
-      box-shadow: none;
-    }
   }
 }
 
