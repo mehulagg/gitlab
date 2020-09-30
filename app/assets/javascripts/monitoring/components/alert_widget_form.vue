@@ -270,7 +270,6 @@ export default {
         <gl-button
           :class="{ active: operator === operators.greaterThan }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.greaterThan"
         >
           {{ operators.greaterThan }}
@@ -278,7 +277,6 @@ export default {
         <gl-button
           :class="{ active: operator === operators.equalTo }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.equalTo"
         >
           {{ operators.equalTo }}
@@ -286,7 +284,6 @@ export default {
         <gl-button
           :class="{ active: operator === operators.lessThan }"
           :disabled="formDisabled"
-          type="button"
           @click="operator = operators.lessThan"
         >
           {{ operators.lessThan }}
