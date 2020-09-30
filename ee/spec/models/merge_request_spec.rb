@@ -127,7 +127,7 @@ RSpec.describe MergeRequest do
       expect(merge_request.allows_multiple_reviewers?).to be(false)
     end
 
-    it 'returns false when licensed' do
+    it 'returns true when licensed' do
       stub_licensed_features(multiple_merge_request_reviewers: true)
 
       merge_request = build(:merge_request)
