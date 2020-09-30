@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import Vue from 'vue';
+import { GlIcon } from '@gitlab/ui';
 import collapseIcon from './icons/fullscreen_collapse.svg';
 import expandIcon from './icons/fullscreen_expand.svg';
 
@@ -12,6 +13,9 @@ export default (ModalStore, boardsStore) => {
       modal: ModalStore.store,
       store: boardsStore.state,
       isFullscreen: false,
+    },
+    components: {
+      GlIcon,
     },
     methods: {
       toggleFocusMode() {
@@ -32,12 +36,7 @@ export default (ModalStore, boardsStore) => {
           title="Toggle focus mode"
           ref="toggleFocusModeButton"
           @click="toggleFocusMode">
-          <span v-show="isFullscreen">
-            ${collapseIcon}
-          </span>
-          <span v-show="!isFullscreen">
-            ${expandIcon}
-          </span>
+          <gl-icon :name="isFullscreen ? 'minimize' : 'maximize'" />
         </a>
       </div>
     `,
