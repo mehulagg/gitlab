@@ -17,13 +17,24 @@ const mockAlert = {
   __typename: 'AlertManagementAlert',
 };
 
+const environmentName = 'Production';
+const environmentPath = '/fake/path';
+const environmentData = { name: environmentName, path: environmentPath };
+
 describe('AlertDetails', () => {
+  let glFeatures = { graphqlExposeEnvironmentPath: false };
   let wrapper;
 
   function mountComponent(propsData = {}) {
     wrapper = mount(AlertDetailsTable, {
+      provide: {
+        glFeatures,
+      },
       propsData: {
-        alert: mockAlert,
+        alert: {
+          ...mockAlert,
+          environment: environmentData,
+        },
         loading: false,
         ...propsData,
       },
@@ -67,10 +78,9 @@ describe('AlertDetails', () => {
     });
 
     describe('with table data', () => {
-      const environment = { path: '/fake/path', name: 'myEnvironment' };
-
       beforeEach(() => {
-        mountComponent({ alert: { ...mockAlert, environment } });
+        glFeatures = { graphqlExposeEnvironmentPath: true };
+        mountComponent();
       });
 
       it('renders a table', () => {
@@ -98,17 +108,36 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Todos').exists()).toBe(false);
         expect(findTableField(fields, 'Notes').exists()).toBe(false);
         expect(findTableField(fields, 'Assignees').exists()).toBe(false);
-        expect(findTableField(fields, 'EnvironmentUrl').exists()).toBe(false);
       });
 
       it('should apply a formatting strategy when defined', () => {
         expect(findTableFieldValueByKey('Iid').text()).toBe('1527542');
-        expect(findTableFieldValueByKey('Environment').text()).toBe(environment.name);
+        expect(findTableFieldValueByKey('Environment').text()).toBe(environmentName);
       });
 
       it('should not display any value when the environment is null', () => {
-        mountComponent({ alert: { ...mockAlert, environment: null } });
+        mountComponent({
+          alert: {
+            ...mockAlert,
+            environment: { name: null, path: null },
+          },
+        });
+
         expect(findTableFieldValueByKey('Environment').text()).toBeFalsy();
+      });
+    });
+
+    describe('whent graphqlExposeEnvironmentPath is disabled', () => {
+      beforeEach(() => {
+        glFeatures = { graphqlExposeEnvironmentPath: false };
+        mountComponent();
+      });
+
+      it('should not show flaggedAllowed alert fields', () => {
+        const fields = findTableKeys();
+
+        expect(findTableField(fields, 'Iid').exists()).toBe(true);
+        expect(findTableField(fields, 'Environment').exists()).toBe(false);
       });
     });
   });

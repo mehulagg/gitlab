@@ -8,5 +8,6 @@ class Projects::AlertManagementController < Projects::ApplicationController
 
   def details
     @alert_id = params[:id]
+    push_frontend_feature_flag(:graphql_expose_environment_path, @project)
   end
 end

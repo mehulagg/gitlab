@@ -16,10 +16,17 @@ import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import mockAlerts from '../mocks/alerts.json';
 
 const mockAlert = mockAlerts[0];
+const environmentName = 'Production';
+const environmentPath = '/fake/path';
 
 describe('AlertDetails', () => {
-  let wrapper;
+  let environmentData = {
+    name: environmentName,
+    path: environmentPath,
+  };
+  let glFeatures = { graphqlExposeEnvironmentPath: false };
   let mock;
+  let wrapper;
   const projectPath = 'root/alerts';
   const projectIssuesPath = 'root/alerts/-/issues';
   const projectId = '1';
@@ -33,9 +40,17 @@ describe('AlertDetails', () => {
           projectPath,
           projectIssuesPath,
           projectId,
+          glFeatures,
         },
         data() {
-          return { alert: { ...mockAlert }, sidebarStatus: false, ...data };
+          return {
+            alert: {
+              ...mockAlert,
+              environment: environmentData,
+            },
+            sidebarStatus: false,
+            ...data,
+          };
         },
         mocks: {
           $apollo: {
@@ -144,7 +159,7 @@ describe('AlertDetails', () => {
     });
 
     describe('environment fields', () => {
-      describe('when feature flag is not active', () => {
+      describe('whent graphqlExposeEnvironmentPath is disabled', () => {
         beforeEach(mountComponent);
 
         it('should not show the environment', () => {
@@ -152,26 +167,22 @@ describe('AlertDetails', () => {
         });
       });
 
-      describe('when feature flag is active', () => {
-        const environmentName = 'Production';
-        const environmentPath = '/fake/path';
+      describe('whent graphqlExposeEnvironmentPath is enabled', () => {
         beforeEach(() => {
-          mountComponent({
-            data: {
-              alert: {
-                ...mockAlert,
-                environment: {
-                  name: environmentName,
-                  path: environmentPath,
-                },
-              },
-            },
-          });
+          glFeatures = { graphqlExposeEnvironmentPath: true };
+          mountComponent();
         });
 
-        it('should show the environment', () => {
+        it('should show the environment and link to path', () => {
           expect(findEnvironmentPath().text()).toBe(environmentName);
           expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
+        });
+
+        it('should pnly show the environment name if the path is not provided', () => {
+          environmentData = { name: environmentName, path: null };
+          mountComponent();
+          expect(findEnvironmentPath().exists()).toBe(false);
+          expect(wrapper.findByTestId('environment').text()).toBe(environmentName);
         });
       });
     });

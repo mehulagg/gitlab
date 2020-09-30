@@ -89,9 +89,8 @@ export default {
     projectIssuesPath: {
       default: '',
     },
-    shouldDisplayEnvironment: {
-      type: Boolean,
-      default: false,
+    glFeatures: {
+      default: {},
     },
   },
   apollo: {
@@ -102,7 +101,6 @@ export default {
         return {
           fullPath: this.projectPath,
           alertId: this.alertId,
-          fetchEnvironment: this.shouldDisplayEnvironment,
         };
       },
       update(data) {
@@ -153,10 +151,13 @@ export default {
       },
     },
     environmentName() {
-      return this.alert?.environment?.name;
+      return this.shouldDisplayEnvironment && this.alert?.environment?.name;
     },
     environmentPath() {
-      return this.alert?.environment?.path;
+      return this.shouldDisplayEnvironment && this.alert?.environment?.path;
+    },
+    shouldDisplayEnvironment() {
+      return this.glFeatures.graphqlExposeEnvironmentPath;
     },
   },
   mounted() {
@@ -318,7 +319,6 @@ export default {
               class="gl-display-inline-block"
               data-testid="environmentPath"
               :href="environmentPath"
-              target="_blank"
             >
               {{ environmentName }}
             </gl-link>

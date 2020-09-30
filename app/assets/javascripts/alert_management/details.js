@@ -4,6 +4,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
+import GlFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AlertDetails from './components/alert_details.vue';
 import sidebarStatusQuery from './graphql/queries/sidebar_status.query.graphql';
 import createRouter from './router';
@@ -69,6 +70,7 @@ export default selector => {
     components: {
       AlertDetails,
     },
+    mixins: [GlFeatureFlagsMixin()],
     router,
     render(createElement) {
       return createElement('alert-details', {});

@@ -10,6 +10,9 @@ import {
 
 const thClass = 'gl-bg-transparent! gl-border-1! gl-border-b-solid! gl-border-gray-200!';
 const tdClass = 'gl-border-gray-100! gl-p-5!';
+const formatStrategies = {
+  environment: env => env?.name,
+};
 const allowedFields = [
   'iid',
   'title',
@@ -22,19 +25,22 @@ const allowedFields = [
   'description',
   'endedAt',
   'details',
-  'environment',
 ];
-const formatStrategies = {
-  environment: env => env?.name,
-};
 
-const isAllowed = fieldName => allowedFields.includes(fieldName);
-const getFormatStrategy = field => formatStrategies[field] || identity;
+const formatValueByField = (fieldName, value) => {
+  const valueFormatter = formatStrategies[fieldName] || identity;
+  return valueFormatter(value);
+};
 
 export default {
   components: {
     GlLoadingIcon,
     GlTable,
+  },
+  inject: {
+    glFeatures: {
+      default: {},
+    },
   },
   props: {
     alert: {
@@ -63,6 +69,9 @@ export default {
     },
   ],
   computed: {
+    flaggedAllowedFields() {
+      return this.shouldDisplayEnvironment ? [...allowedFields, 'environment'] : allowedFields;
+    },
     items() {
       if (!this.alert) {
         return [];
@@ -70,14 +79,22 @@ export default {
       return reduce(
         this.alert,
         (allowedItems, rawValue, fieldName) => {
-          if (isAllowed(fieldName)) {
-            const formatValue = getFormatStrategy(fieldName);
-            return [...allowedItems, { fieldName, value: formatValue(rawValue) }];
+          if (this.isAllowed(fieldName)) {
+            const value = formatValueByField(fieldName, rawValue);
+            return [...allowedItems, { fieldName, value }];
           }
           return allowedItems;
         },
         [],
       );
+    },
+    shouldDisplayEnvironment() {
+      return this.glFeatures.graphqlExposeEnvironmentPath;
+    },
+  },
+  methods: {
+    isAllowed(fieldName) {
+      return this.flaggedAllowedFields.includes(fieldName);
     },
   },
 };

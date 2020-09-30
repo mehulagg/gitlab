@@ -38,6 +38,12 @@ RSpec.describe Projects::AlertManagementController do
       expect(response).to have_gitlab_http_status(:ok)
     end
 
+    it 'pushes disabled feature flag to the frontend' do
+      visit projects_alert_magement_details_path(group)
+
+      expect(page).to have_pushed_frontend_feature_flags(authorize_read_alert_management_alert: false)
+    end
+
     context 'when user is unauthorized' do
       let(:role) { :reporter }
 
