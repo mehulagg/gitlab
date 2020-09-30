@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  RSpec.describe 'Plan', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/259054', type: :stale } do
     describe 'Configurable issue board' do
       let(:label_board_list) do
         EE::Resource::Board::BoardList::Project::LabelBoardList.fabricate_via_api!

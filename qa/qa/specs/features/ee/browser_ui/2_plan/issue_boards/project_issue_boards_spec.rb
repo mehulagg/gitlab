@@ -9,7 +9,7 @@ module QA
 
       let(:issue_title) { 'Issue to test board list' }
 
-      context 'Label issue board' do
+      context 'Label issue board', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/259054', type: :stale } do
         let(:label) { 'Doing' }
 
         let(:label_board_list) do
