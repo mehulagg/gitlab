@@ -631,6 +631,7 @@ a Docker Engine version earlier than 17.12. Later versions of Docker Engine use
 
 The images in your GitLab Container Registry must also use the Docker v2 API.
 For information on how to update your images, see the [Docker help](https://docs.docker.com/registry/spec/deprecated-schema-v1).
+
 ### Troubleshoot as a GitLab server admin
 
 Troubleshooting the GitLab Container Registry, most of the times, requires
