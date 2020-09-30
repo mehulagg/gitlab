@@ -618,6 +618,21 @@ RSpec.describe ApplicationSetting do
           end
         end
       end
+
+      describe '#ci_jwt_signing_key' do
+        xit { is_expected.not_to allow_value('').for(:ci_jwt_signing_key) }
+        xit { is_expected.not_to allow_value('invalid RSA key').for(:ci_jwt_signing_key) }
+
+        it 'is encrypted' do
+          subject.ci_jwt_signing_key = OpenSSL::PKey::RSA.new(2048).to_pem
+
+          aggregate_failures do
+            expect(subject.encrypted_ci_jwt_signing_key).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key_iv).to be_present
+            expect(subject.encrypted_ci_jwt_signing_key).not_to eq(subject.ci_jwt_signing_key)
+          end
+        end
+      end
     end
 
     context 'static objects external storage' do
