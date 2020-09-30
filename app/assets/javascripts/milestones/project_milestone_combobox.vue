@@ -13,6 +13,7 @@ import { intersection, debounce } from 'lodash';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import MilestoneResultsSection from './milestone_results_section.vue';
 
 const SEARCH_DEBOUNCE_MS = 250;
 
@@ -26,6 +27,7 @@ export default {
     GlSearchBoxByType,
     GlIcon,
     GlBadge,
+    MilestoneResultsSection,
   },
   model: {
     prop: 'preselectedMilestones',
@@ -62,6 +64,7 @@ export default {
     noMilestone: __('No milestone'),
     noResultsLabel: __('No matching results'),
     searchMilestones: __('Search Milestones'),
+    projectMilestones: __('Project milestones'),
   },
   computed: {
     selectedMilestonesLabel() {
@@ -232,25 +235,15 @@ export default {
       <gl-dropdown-divider />
     </template>
     <template v-else-if="dropdownItems.length">
-      <gl-dropdown-section-header>
-        <div class="gl-display-flex align-items-center pl-4" data-testid="section-header">
-          <span class="gl-mr-2 gl-mb-1">Project milestones</span>
-          <gl-badge variant="neutral">{{ dropdownItems.length }}</gl-badge>
-        </div>
-      </gl-dropdown-section-header>
-      <gl-dropdown-item
-        v-for="item in dropdownItems"
-        :key="item"
-        role="milestone option"
-        @click="onMilestoneClicked(item)"
-      >
-        <span :class="{ 'pl-4': true, 'selected-item': isSelectedMilestone(item) }">
-          {{ item }}
-        </span>
-      </gl-dropdown-item>
-      <gl-dropdown-divider />
+      <milestone-results-section
+        :section-title="$options.translations.projectMilestones"
+        :total-count="dropdownItems.length"
+        :items="dropdownItems"
+        :selected-milestone="milestoneTitles"
+        data-testid="branches-section"
+        @selected="onMilestoneClicked($event)"
+      />
     </template>
-
     <gl-dropdown-item v-for="(item, idx) in extraLinks" :key="idx" :href="item.url">
       <span class="pl-4">{{ item.text }}</span>
     </gl-dropdown-item>
