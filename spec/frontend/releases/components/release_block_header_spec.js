@@ -51,7 +51,7 @@ describe('Release block header', () => {
     });
 
     it('renders the title as text', () => {
-      expect(findHeader().text()).toEqual(expect.stringContaining(release.name));
+      expect(findHeader().text()).toContain(release.name);
       expect(findHeaderLink().exists()).toBe(false);
     });
   });

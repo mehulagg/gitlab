@@ -24,6 +24,7 @@ import allReleasesQuery from '~/releases/queries/all_releases.query.graphql';
 import { PAGE_SIZE } from '~/releases/constants';
 
 const originalRelease = getJSONFixture('api/releases/release.json');
+const originalReleases = [originalRelease];
 
 describe('Releases State actions', () => {
   let mockedState;
@@ -44,7 +45,7 @@ describe('Releases State actions', () => {
       }),
     };
 
-    releases = [convertObjectPropsToCamelCase(originalRelease, { deep: true })];
+    releases = convertObjectPropsToCamelCase(originalReleases, { deep: true });
     graphqlReleasesResponse = cloneDeep(originalGraphqlReleasesResponse);
   });
 

@@ -22,6 +22,7 @@ const localVue = createLocalVue();
 localVue.use(Vuex);
 
 const release = getJSONFixture('api/releases/release.json');
+const releases = [release];
 
 describe('Releases App ', () => {
   let wrapper;
@@ -70,7 +71,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: [release], headers: pageInfoHeadersWithoutPagination });
+        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
 
       createComponent();
     });
@@ -108,7 +109,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: [release], headers: pageInfoHeadersWithoutPagination });
+        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
 
       createComponent();
     });
@@ -188,7 +189,7 @@ describe('Releases App ', () => {
     beforeEach(() => {
       jest
         .spyOn(api, 'releases')
-        .mockResolvedValue({ data: [release], headers: pageInfoHeadersWithoutPagination });
+        .mockResolvedValue({ data: releases, headers: pageInfoHeadersWithoutPagination });
 
       createComponent();
 

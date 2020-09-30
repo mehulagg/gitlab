@@ -7,6 +7,7 @@ import { pageInfoHeadersWithoutPagination, graphqlReleasesResponse } from '../..
 import { convertGraphQLResponse } from '~/releases/util';
 
 const originalRelease = getJSONFixture('api/releases/release.json');
+const originalReleases = [originalRelease];
 
 describe('Releases Store Mutations', () => {
   let stateCopy;
@@ -18,7 +19,7 @@ describe('Releases Store Mutations', () => {
     stateCopy = createState({});
     restPageInfo = parseIntPagination(pageInfoHeadersWithoutPagination);
     graphQlPageInfo = convertGraphQLResponse(graphqlReleasesResponse).paginationInfo;
-    releases = [convertObjectPropsToCamelCase(originalRelease, { deep: true })];
+    releases = convertObjectPropsToCamelCase(originalReleases, { deep: true });
   });
 
   describe('REQUEST_RELEASES', () => {
