@@ -13000,6 +13000,9 @@ msgstr ""
 msgid "Hi %{username}!"
 msgstr ""
 
+msgid "Hide"
+msgstr ""
+
 msgid "Hide archived projects"
 msgstr ""
 
@@ -26187,6 +26190,9 @@ msgid "This is a list of devices that have logged into your account. Revoke any 
 msgstr ""
 
 msgid "This is a security log of important events involving your account."
+msgstr ""
+
+msgid "This is mounted from nested HAML"
 msgstr ""
 
 msgid "This is the highest peak of users on your installation since the license started."
