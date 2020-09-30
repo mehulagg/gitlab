@@ -11,5 +11,7 @@ class PagesDeployment < ApplicationRecord
   validates :file_store, presence: true, inclusion: { in: ObjectStorage::SUPPORTED_STORES }
   validates :size, presence: true, numericality: { greater_than: 0, only_integer: true }
 
+  default_value_for(:file_store) { ::Pages::DeploymentUploader.default_store }
+
   mount_file_store_uploader ::Pages::DeploymentUploader
 end

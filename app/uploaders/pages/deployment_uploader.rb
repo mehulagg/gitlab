@@ -19,5 +19,19 @@ module Pages
     def base_dir
       "@hashed"
     end
+
+    class << self
+      def direct_upload_enabled?
+        false
+      end
+
+      def background_upload_enabled?
+        false
+      end
+
+      def default_store
+        object_store_enabled? ? ObjectStorage::Store::REMOTE : ObjectStorage::Store::LOCAL
+      end
+    end
   end
 end

@@ -18,8 +18,6 @@ RSpec.describe Pages::DeploymentUploader do
       stub_pages_object_storage
     end
 
-    include_context 'with storage', described_class::Store::REMOTE
-
     it_behaves_like 'builds correct paths', store_dir: %r[\A\h{2}/\h{2}/\h{64}/pages_deployments/\d+\z]
   end
 
@@ -35,5 +33,17 @@ RSpec.describe Pages::DeploymentUploader do
     subject { uploader.file.path }
 
     it { is_expected.to match(%r[#{uploader.root}/@hashed/\h{2}/\h{2}/\h{64}/pages_deployments/#{pages_deployment.id}/pages.zip]) }
+  end
+
+  describe '.default_store' do
+    it 'returns local store when object storage is not enabled' do
+      expect(described_class.default_store).to eq(ObjectStorage::Store::LOCAL)
+    end
+
+    it 'returns remote store when object storage is enabled' do
+      stub_pages_object_storage
+
+      expect(described_class.default_store).to eq(ObjectStorage::Store::REMOTE)
+    end
   end
 end
