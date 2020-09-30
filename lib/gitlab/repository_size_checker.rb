@@ -3,12 +3,14 @@
 module Gitlab
   # Centralized class for repository size related calculations.
   class RepositorySizeChecker
-    attr_reader :limit
+    attr_reader :limit, :total_repository_size_excess, :additional_purchased_storage
 
     # @param current_size_proc [Proc] returns repository size in bytes
-    def initialize(current_size_proc:, limit:, enabled: true)
+    def initialize(current_size_proc:, limit:, total_repository_size_excess:, additional_purchased_storage:, enabled: true)
       @current_size_proc = current_size_proc
       @limit = limit
+      @total_repository_size_excess = total_repository_size_excess
+      @additional_purchased_storage = additional_purchased_storage
       @enabled = enabled && limit != 0
     end
 
@@ -24,7 +26,11 @@ module Gitlab
     def above_size_limit?
       return false unless enabled?
 
-      current_size > limit
+      if Feature.enabled?(:additional_repo_storage_by_namespace)
+        total_repository_size_excess > additional_purchased_storage && current_size > limit
+      else
+        current_size > limit
+      end
     end
 
     # @param change_size [int] in bytes
@@ -36,7 +42,13 @@ module Gitlab
 
     # @param change_size [int] in bytes
     def exceeded_size(change_size = 0)
-      current_size + change_size - limit
+      exceeded_size = current_size + change_size - limit
+
+      if Feature.enabled?(:additional_repo_storage_by_namespace)
+        exceeded_size += total_repository_size_excess - additional_purchased_storage
+      end
+
+      exceeded_size
     end
 
     def error_message

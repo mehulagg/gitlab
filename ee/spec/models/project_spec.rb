@@ -2216,6 +2216,22 @@ RSpec.describe Project do
       end
     end
 
+    describe '#total_repository_size_excess' do
+      it 'returns the total repository size excess of the namespace' do
+        allow(project.namespace).to receive(:total_repository_size_excess).and_return(50)
+
+        expect(checker.total_repository_size_excess).to eq(50)
+      end
+    end
+
+    describe '#additional_purchased_storage' do
+      it 'returns the additional purchased storage size of the namespace' do
+        allow(project.namespace).to receive(:additional_purchased_storage_size).and_return(100)
+
+        expect(checker.additional_purchased_storage).to eq(100.megabytes)
+      end
+    end
+
     describe '#enabled?' do
       it 'returns true when not equal to zero' do
         project.repository_size_limit = 1
