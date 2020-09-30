@@ -183,8 +183,11 @@ MergeRequest.toggleDraftStatus = function(title, isReady) {
   if (isReady) {
     createFlash(__('The merge request can now be merged.'), 'notice');
   }
+  const titleEl = document.querySelector('.merge-request .detail-page-description .title');
 
-  document.querySelector('.merge-request .detail-page-description .title').textContent = title;
+  if (titleEl) {
+    titleEl.textContent = title;
+  }
 
   const draftToggles = document.querySelectorAll('.js-draft-toggle-button');
 
