@@ -551,3 +551,7 @@ affected. Read more in
 ### Getting warning message `gl-sast-report.json: no matching files`
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
+
+### Limitation when using rules:exists
+
+The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml) uses the `rules:exists` syntax. This directive is limited to 10000 checks and always returns `true` after reaching this number. Because of this, and depending on the number of files in your repository, a SAST job might be triggered even if the scanner doesn’t support your project.
