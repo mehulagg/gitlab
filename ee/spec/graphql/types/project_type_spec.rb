@@ -17,7 +17,7 @@ RSpec.describe GitlabSchema.types['Project'] do
     expected_fields = %w[
       vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
-      security_dashboard_path iterations cluster_agents repository_size_excess
+      security_dashboard_path iterations cluster_agents
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
