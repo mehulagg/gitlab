@@ -1149,7 +1149,7 @@ RSpec.describe Projects::PipelinesController do
     end
   end
 
-  describe 'GET new_variables.json' do
+  describe 'GET config_variables.json' do
     before do
       stub_gitlab_ci_yml_for_sha
     end
@@ -1174,7 +1174,7 @@ RSpec.describe Projects::PipelinesController do
       let(:result) { YAML.dump(ci_config) }
 
       it 'returns variable list' do
-        get_new_variables
+        get_config_variables
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['KEY1']).to eq({ 'value' => 'val 1', 'description' => 'description 1' })
@@ -1189,7 +1189,7 @@ RSpec.describe Projects::PipelinesController do
       let(:result) { nil }
 
       it 'returns empty json' do
-        get_new_variables
+        get_config_variables
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq({})
@@ -1205,11 +1205,11 @@ RSpec.describe Projects::PipelinesController do
           .and_return(result)
     end
 
-    def get_new_variables
-      get :new_variables, params: { namespace_id: project.namespace,
-                                    project_id: project,
-                                    sha: sha },
-                          format: :json
+    def get_config_variables
+      get :config_variables, params: { namespace_id: project.namespace,
+                                       project_id: project,
+                                       sha: sha },
+                             format: :json
     end
   end
 end

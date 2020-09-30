@@ -88,4 +88,12 @@ RSpec.describe Gitlab::Ci::Config::Entry::Variables do
 
     it_behaves_like 'invalid config'
   end
+
+  context 'when entry config value has key-value-description with empty description' do
+    let(:config) do
+      { 'VARIABLE_1' => { value: 'value 1', description: nil } }
+    end
+
+    it_behaves_like 'invalid config'
+  end
 end
