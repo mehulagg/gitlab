@@ -41,10 +41,8 @@ export default {
       receiveEpicsSuccess: RECEIVE_EPICS_SUCCESS,
     }),
     ...mapActions(['setActiveIssueEpic']),
-    handleEdit(isEditing) {
-      if (isEditing) {
-        this.$refs.epicSelect.handleEditClick();
-      }
+    openEpicsDropdown() {
+      this.$refs.epicSelect.handleEditClick();
     },
     async setEpic(selectedEpic) {
       this.loading = true;
@@ -80,7 +78,7 @@ export default {
     ref="sidebarItem"
     :title="__('Epic')"
     :loading="loading"
-    @changed="handleEdit"
+    @open="openEpicsDropdown"
   >
     <template v-if="storedEpic.title" #collapsed>
       <a class="gl-text-gray-900! gl-font-weight-bold" href="#">

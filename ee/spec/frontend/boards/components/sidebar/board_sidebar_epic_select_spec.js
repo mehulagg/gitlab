@@ -40,11 +40,19 @@ describe('ee/boards/components/sidebar/board_sidebar_epic_select.vue', () => {
   };
 
   const findEpicSelect = () => wrapper.find({ ref: 'epicSelect' });
+  const findItemWrapper = () => wrapper.find({ ref: 'sidebarItem' });
   const findCollapsed = () => wrapper.find('[data-testid="collapsed-content"]');
 
   it('renders "None" when no epic is selected', () => {
     createWrapper();
     expect(findCollapsed().text()).toBe('None');
+  });
+
+  it('expands the dropdown when editing', () => {
+    createWrapper();
+    wrapper.setMethods({ openEpicsDropdown: jest.fn() });
+    findItemWrapper().vm.$emit('open');
+    expect(wrapper.vm.openEpicsDropdown).toHaveBeenCalled();
   });
 
   describe('when epic is selected', () => {
