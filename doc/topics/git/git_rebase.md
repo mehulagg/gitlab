@@ -8,7 +8,7 @@ description: "Introduction to Git rebase, force-push, and resolving merge confli
 
 # Git rebase
 
-Before diving into this document, make sure you are familiar with [using Git through the command line](../gitlab-basics/start-using-git.md).
+Before diving into this document, make sure you are familiar with [using Git through the command line](../../gitlab-basics/start-using-git.md).
 
 [Rebasing](https://git-scm.com/docs/git-rebase) is a very common operation in
 Git. You have mainly two rebase options:
@@ -62,7 +62,7 @@ branch to keep it clean.
 TIP: **Tip:**
 If you want to keep the default branch commit history clean, you don't need to
 do squash all your commits before merging manually for every merge request;
-you can enable [Squash and Merge](../user/project/merge_requests/squash_and_merge.md)
+you can enable [Squash and Merge](../../user/project/merge_requests/squash_and_merge.md)
 and GitLab will do it for you automatically.
 
 When you want to change anything in recent commits, you can use interactive
@@ -122,7 +122,7 @@ branch if more commits were added to the remote branch by someone else:
 git push --force-with-lease origin my-feature-branch
 ```
 
-Note that, if the branch you want to force-push is [protected](../user/project/protected_branches.md),
+Note that, if the branch you want to force-push is [protected](../../user/project/protected_branches.md),
 you will not be able to do so unless you unprotect it beforehand. Then you can
 force-push and re-protect it again.
 
@@ -133,7 +133,7 @@ whenever a line changed in your branch coincides with the same line changed in
 the target branch, Git will identify these changes as a merge conflict. This
 means you need to choose which version of that line you want to keep.
 
-Most of conflicts can be [resolved through the GitLab UI](../user/project/merge_requests/resolve_conflicts.md).
+Most of conflicts can be [resolved through the GitLab UI](../../user/project/merge_requests/resolve_conflicts.md).
 For more complex cases, there are various methods for resolving them and
 also Git CLI apps very handy to do so, but you can also fix them locally:
 
