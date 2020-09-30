@@ -23,9 +23,26 @@ RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
       end
     end
 
-    context 'user belongs to project' do
+    context 'user is developer to the project' do
       before do
         project.add_developer(user)
+      end
+
+      it 'returns an error status' do
+        expect(result[:status]).to eq(:error)
+        expect(result[:success_path]).to be_nil
+      end
+
+      it 'does not track a snowplow event' do
+        subject
+
+        expect_no_snowplow_event
+      end
+    end
+
+    context 'user is maintainer to the project' do
+      before do
+        project.add_maintainer(user)
       end
 
       it 'does track the snowplow event' do

@@ -11,6 +11,10 @@ module Security
       end
 
       def execute
+        unless allowed_to_create_protected_branch?
+          return { status: :error, errors: _('Only maintainers are allowed to create protected branch') }
+        end
+
         attributes_for_commit = attributes
         result = ::Files::MultiService.new(@project, @current_user, attributes_for_commit).execute
 
@@ -25,6 +29,10 @@ module Security
       end
 
       private
+
+      def allowed_to_create_protected_branch?
+        @project.team.maintainer?(@current_user)
+      end
 
       def attributes
         actions = Security::CiConfiguration::SastBuildActions.new(@project.auto_devops_enabled?, @params, existing_gitlab_ci_content).generate
