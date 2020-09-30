@@ -41,6 +41,7 @@ describe('FilterDropdowns component', () => {
         ...modules,
       },
     });
+
     wrapper = shallowMount(FilterDropdowns, {
       localVue,
       store: mockStore,
@@ -71,6 +72,7 @@ describe('FilterDropdowns component', () => {
     describe('with a group selected', () => {
       beforeEach(() => {
         wrapper.vm.groupId = groupId;
+        mockStore.state.filters.groupNamespace = groupNamespace;
       });
 
       it('renders the projects dropdown', () => {
@@ -107,7 +109,7 @@ describe('FilterDropdowns component', () => {
       describe('when the list of selected projects is not empty', () => {
         beforeEach(() => {
           mockStore.state.filters.groupNamespace = groupNamespace;
-          wrapper.vm.onProjectsSelected([{ id: projectId, path_with_namespace: `${projectPath}` }]);
+          wrapper.vm.onProjectsSelected([{ entityId: projectId, fullPath: `${projectPath}` }]);
         });
 
         it('invokes setProjectPath action', () => {
