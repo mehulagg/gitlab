@@ -48,10 +48,10 @@ module Gitlab
       def db_replication_lag_seconds_query
         <<-SQL.squish
           SELECT CASE
-            WHEN #{Gitlab::Database.pg_last_wal_receive_lsn}() = #{Gitlab::Database.pg_last_wal_replay_lsn}()
+            WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()
               THEN 0
             ELSE
-              EXTRACT (EPOCH FROM now() - #{Gitlab::Database.pg_last_xact_replay_timestamp}())::INTEGER
+              EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())::INTEGER
             END
             AS replication_lag
         SQL
@@ -108,7 +108,7 @@ module Gitlab
 
       def streaming_replication_enabled?
         !ActiveRecord::Base.connection
-          .execute("SELECT * FROM #{Gitlab::Database.pg_last_wal_receive_lsn}() as result")
+          .execute("SELECT * FROM pg_last_wal_receive_lsn() as result")
           .first['result']
           .nil?
       end
@@ -116,7 +116,7 @@ module Gitlab
       def some_replication_active?
         # Is some sort of replication active?
         !ActiveRecord::Base.connection
-          .execute("SELECT * FROM #{Gitlab::Database.pg_last_xact_replay_timestamp}() as result")
+          .execute("SELECT * FROM pg_last_xact_replay_timestamp() as result")
           .first['result']
           .nil?
       end

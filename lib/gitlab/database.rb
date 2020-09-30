@@ -123,26 +123,6 @@ module Gitlab
       # ignore - happens when Rake tasks yet have to create a database, e.g. for testing
     end
 
-    def self.pg_wal_lsn_diff
-      'pg_wal_lsn_diff'
-    end
-
-    def self.pg_current_wal_insert_lsn
-      'pg_current_wal_insert_lsn'
-    end
-
-    def self.pg_last_wal_receive_lsn
-      'pg_last_wal_receive_lsn'
-    end
-
-    def self.pg_last_wal_replay_lsn
-      'pg_last_wal_replay_lsn'
-    end
-
-    def self.pg_last_xact_replay_timestamp
-      'pg_last_xact_replay_timestamp'
-    end
-
     def self.nulls_last_order(field, direction = 'ASC')
       Arel.sql("#{field} #{direction} NULLS LAST")
     end

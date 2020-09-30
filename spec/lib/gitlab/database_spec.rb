@@ -131,36 +131,6 @@ RSpec.describe Gitlab::Database do
     end
   end
 
-  describe '.pg_wal_lsn_diff' do
-    it 'returns pg_wal_lsn_diff' do
-      expect(described_class.pg_wal_lsn_diff).to eq('pg_wal_lsn_diff')
-    end
-  end
-
-  describe '.pg_current_wal_insert_lsn' do
-    it 'returns pg_current_wal_insert_lsn' do
-      expect(described_class.pg_current_wal_insert_lsn).to eq('pg_current_wal_insert_lsn')
-    end
-  end
-
-  describe '.pg_last_wal_receive_lsn' do
-    it 'returns pg_last_wal_receive_lsn' do
-      expect(described_class.pg_last_wal_receive_lsn).to eq('pg_last_wal_receive_lsn')
-    end
-  end
-
-  describe '.pg_last_wal_replay_lsn' do
-    it 'returns pg_last_wal_replay_lsn' do
-      expect(described_class.pg_last_wal_replay_lsn).to eq('pg_last_wal_replay_lsn')
-    end
-  end
-
-  describe '.pg_last_xact_replay_timestamp' do
-    it 'returns pg_last_xact_replay_timestamp' do
-      expect(described_class.pg_last_xact_replay_timestamp).to eq('pg_last_xact_replay_timestamp')
-    end
-  end
-
   describe '.nulls_last_order' do
     it { expect(described_class.nulls_last_order('column', 'ASC')).to eq 'column ASC NULLS LAST'}
     it { expect(described_class.nulls_last_order('column', 'DESC')).to eq 'column DESC NULLS LAST'}
