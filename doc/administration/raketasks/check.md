@@ -160,6 +160,7 @@ Projects::HousekeepingService.new(p, :gc).execute
 `gitlab-rake gitlab:uploads:check VERBOSE=1` detects remote object does not exist because it was deleted externally but the reference still exist in GitLab database. 
 
 Example output with error message:  
+
 ```shell
 $ sudo gitlab-rake gitlab:uploads:check VERBOSE=1
 Checking integrity of Uploads
@@ -168,8 +169,10 @@ Checking integrity of Uploads
 - Upload: 101: Remote object does not exist
 Done!
 ```
+
 To delete references to remote uploads that were deleted externally, run the follow Ruby code snippet via the
 [Rails Console](../troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session):
+
 ```ruby
 uploads_deleted=0
 Upload.find_each do |upload|
