@@ -1,5 +1,6 @@
 <script>
 import { mapActions, mapState } from 'vuex';
+import { getDateInPast } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
@@ -16,14 +17,23 @@ import {
   processFilters,
   filterToQueryObject,
 } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import DateRange from '../../shared/components/daterange.vue';
+import { DEFAULT_NUMBER_OF_DAYS } from '../constants';
 
 export default {
   name: 'FilterBar',
   components: {
+    DateRange,
     FilteredSearchBar,
     UrlSync,
   },
   inject: ['fullPath', 'type'],
+  data() {
+    return {
+      startDate: getDateInPast(new Date(), DEFAULT_NUMBER_OF_DAYS),
+      endDate: new Date(),
+    };
+  },
   computed: {
     ...mapState('filters', {
       selectedSourceBranch: state => state.branches.source.selected,
@@ -115,6 +125,8 @@ export default {
         label_name: this.selectedLabelList,
         author_username: this.selectedAuthor,
         assignee_username: this.selectedAssignee,
+        start_date: this.startDate,
+        end_date: this.endDate,
       });
     },
     initialFilterValue() {
@@ -156,12 +168,13 @@ export default {
         selectedLabelList: labels || [],
       });
     },
+    setDateRange() {},
   },
 };
 </script>
 
 <template>
-  <div>
+  <div class="gl-display-flex">
     <filtered-search-bar
       class="gl-flex-grow-1"
       :namespace="fullPath"
@@ -170,6 +183,14 @@ export default {
       :tokens="tokens"
       :initial-filter-value="initialFilterValue"
       @onFilter="handleFilter"
+    />
+    <date-range
+      class="js-daterange-picker gl-ml-3"
+      :start-date="startDate"
+      :end-date="endDate"
+      :max-date-range="$options.maxDateRange"
+      :include-selected-date="true"
+      @change="setDateRange"
     />
     <url-sync :query="query" />
   </div>
