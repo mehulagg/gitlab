@@ -1,12 +1,12 @@
 <script>
-import statusIcon from '../mr_widget_status_icon.vue';
 import { GlButton } from '@gitlab/ui';
+import statusIcon from '../mr_widget_status_icon.vue';
 
 export default {
   name: 'MRWidgetArchived',
   components: {
-    statusIcon,
     GlButton,
+    statusIcon,
   },
 };
 </script>
