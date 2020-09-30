@@ -6,7 +6,12 @@ mutation issueSetAssignees($iid: String!, $assigneeUsernames: [String!]!, $proje
       assignees {
         edges {
           node {
+            name
             username
+            id
+            name
+            webUrl
+            avatarUrl
           }
         }
       }
