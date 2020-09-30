@@ -33,6 +33,18 @@ RSpec.describe API::GenericPackages do
     { Gitlab::Auth::AuthFinders::JOB_TOKEN_HEADER => value || ci_build.token }
   end
 
+  shared_examples 'secure endpoint' do
+    before do
+      project.add_developer(user)
+    end
+
+    it 'rejects malicious request' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+  end
+
   describe 'PUT /api/v4/projects/:id/packages/generic/:package_name/:package_version/:file_name/authorize' do
     context 'with valid project' do
       using RSpec::Parameterized::TableSyntax
@@ -73,37 +85,45 @@ RSpec.describe API::GenericPackages do
         end
 
         it "responds with #{params[:expected_status]}" do
-          headers = workhorse_header.merge(auth_header)
-          url = "/projects/#{project.id}/packages/generic/mypackage/0.0.1/myfile.tar.gz/authorize"
-
-          put api(url), headers: headers
+          authorize_upload_file(workhorse_header.merge(auth_header))
 
           expect(response).to have_gitlab_http_status(expected_status)
         end
       end
     end
 
-    it 'rejects a malicious request' do
-      project.add_developer(user)
-      headers = workhorse_header.merge(personal_access_token_header)
-      url = "/projects/#{project.id}/packages/generic/mypackage/0.0.1/%2e%2e%2f.ssh%2fauthorized_keys/authorize"
+    context 'application security' do
+      using RSpec::Parameterized::TableSyntax
 
-      put api(url), headers: headers
+      where(:param_name, :param_value) do
+        :package_name | 'my-package/../'
+        :package_name | 'my-package%2f%2e%2e%2f'
+        :file_name    | '../.ssh%2fauthorized_keys'
+        :file_name    | '%2e%2e%2f.ssh%2fauthorized_keys'
+      end
 
-      expect(response).to have_gitlab_http_status(:bad_request)
+      with_them do
+        subject { authorize_upload_file(workhorse_header.merge(personal_access_token_header), param_name => param_value) }
+
+        it_behaves_like 'secure endpoint'
+      end
     end
 
     context 'generic_packages feature flag is disabled' do
       it 'responds with 404 Not Found' do
         stub_feature_flags(generic_packages: false)
         project.add_developer(user)
-        headers = workhorse_header.merge(personal_access_token_header)
-        url = "/projects/#{project.id}/packages/generic/mypackage/0.0.1/myfile.tar.gz/authorize"
 
-        put api(url), headers: headers
+        authorize_upload_file(workhorse_header.merge(personal_access_token_header))
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
+    end
+
+    def authorize_upload_file(request_headers, package_name: 'mypackage', file_name: 'myfile.tar.gz')
+      url = "/projects/#{project.id}/packages/generic/#{package_name}/0.0.1/#{file_name}/authorize"
+
+      put api(url), headers: request_headers
     end
   end
 
@@ -246,17 +266,27 @@ RSpec.describe API::GenericPackages do
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
+    end
 
-      it 'rejects a malicious request' do
-        headers = workhorse_header.merge(personal_access_token_header)
-        upload_file(params, headers, file_name: '%2e%2e%2f.ssh%2fauthorized_keys')
+    context 'application security' do
+      using RSpec::Parameterized::TableSyntax
 
-        expect(response).to have_gitlab_http_status(:bad_request)
+      where(:param_name, :param_value) do
+        :package_name | 'my-package/../'
+        :package_name | 'my-package%2f%2e%2e%2f'
+        :file_name    | '../.ssh%2fauthorized_keys'
+        :file_name    | '%2e%2e%2f.ssh%2fauthorized_keys'
+      end
+
+      with_them do
+        subject { upload_file(params, workhorse_header.merge(personal_access_token_header), param_name => param_value) }
+
+        it_behaves_like 'secure endpoint'
       end
     end
 
-    def upload_file(params, request_headers, send_rewritten_field: true, file_name: 'myfile.tar.gz')
-      url = "/projects/#{project.id}/packages/generic/mypackage/0.0.1/#{file_name}"
+    def upload_file(params, request_headers, send_rewritten_field: true, package_name: 'mypackage', file_name: 'myfile.tar.gz')
+      url = "/projects/#{project.id}/packages/generic/#{package_name}/0.0.1/#{file_name}"
 
       workhorse_finalize(
         api(url),
@@ -329,12 +359,53 @@ RSpec.describe API::GenericPackages do
       it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
     end
 
-    it 'rejects a malicious request' do
+    it 'rejects a malicious file name request' do
+      project.add_developer(user)
+
+      download_file(personal_access_token_header, file_name: '../.ssh%2fauthorized_keys')
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    it 'rejects a malicious file name request' do
       project.add_developer(user)
 
       download_file(personal_access_token_header, file_name: '%2e%2e%2f.ssh%2fauthorized_keys')
 
       expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    it 'rejects a malicious package name request' do
+      project.add_developer(user)
+
+      download_file(personal_access_token_header, package_name: 'my-package/../')
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    it 'rejects a malicious package name request' do
+      project.add_developer(user)
+
+      download_file(personal_access_token_header, package_name: 'my-package%2f%2e%2e%2f')
+
+      expect(response).to have_gitlab_http_status(:bad_request)
+    end
+
+    context 'application security' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:param_name, :param_value) do
+        :package_name | 'my-package/../'
+        :package_name | 'my-package%2f%2e%2e%2f'
+        :file_name    | '../.ssh%2fauthorized_keys'
+        :file_name    | '%2e%2e%2f.ssh%2fauthorized_keys'
+      end
+
+      with_them do
+        subject { download_file(personal_access_token_header, param_name => param_value) }
+
+        it_behaves_like 'secure endpoint'
+      end
     end
 
     it 'responds with 404 Not Found for non existing package' do
