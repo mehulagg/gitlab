@@ -61,24 +61,6 @@ RSpec.describe MergeRequest do
             context 'and there are no associated protected branches to source rule' do
               it_behaves_like 'with applicable rules to specified branch'
             end
-
-            context 'and there are associated protected branches to source rule' do
-              before do
-                source_rule.update!(protected_branches: protected_branches)
-              end
-
-              context 'and branch matches' do
-                let(:protected_branches) { [create(:protected_branch, name: branch)] }
-
-                it_behaves_like 'with applicable rules to specified branch'
-              end
-
-              context 'and branch does not match anything' do
-                let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
-
-                it { is_expected.to be_empty }
-              end
-            end
           end
 
           context 'and rule is overridden' do

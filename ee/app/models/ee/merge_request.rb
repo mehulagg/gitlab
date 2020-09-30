@@ -30,7 +30,7 @@ module EE
             next true unless rule.approval_project_rule.present?
             next true if rule.overridden?
 
-            rule.approval_project_rule.applies_to_branch?(branch)
+            rule.approval_project_rule
           end
         end
       end
