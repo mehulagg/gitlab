@@ -37,12 +37,6 @@ export default () => {
         BurnCharts,
       },
       mixins: [glFeatureFlagsMixin()],
-      data() {
-        return {
-          openIssuesCount: [],
-          openIssuesWeight: [],
-        };
-      },
       apolloProvider,
       render(createElement) {
         return createElement('burn-charts', {
@@ -50,8 +44,6 @@ export default () => {
             burndownEventsPath,
             startDate,
             dueDate,
-            openIssuesCount: this.openIssuesCount,
-            openIssuesWeight: this.openIssuesCount,
             milestoneId,
           },
         });

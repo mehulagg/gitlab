@@ -29,16 +29,6 @@ export default {
       type: String,
       required: true,
     },
-    openIssuesCount: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    openIssuesWeight: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
     milestoneId: {
       type: String,
       required: false,
@@ -73,6 +63,8 @@ export default {
   },
   data() {
     return {
+      openIssuesCount: [],
+      openIssuesWeight: [],
       issuesSelected: true,
       burnupData: [],
       useLegacyBurndown: !this.glFeatures.burnupCharts,
