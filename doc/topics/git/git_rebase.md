@@ -55,7 +55,7 @@ similar effect without compromising the work of your contributors.
 ## Interactive rebase
 
 You can use interactive rebase to amend a commit message, squash commits
-(join multiple commits into one), edit, and delete commits. It is handy for
+(join multiple commits into one), edit, delete commits, among other actions. It is handy for
 changing past commits messages and organizing the commit history of your
 branch to keep it clean.
 
