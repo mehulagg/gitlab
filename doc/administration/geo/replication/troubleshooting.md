@@ -492,7 +492,7 @@ to start again from scratch, there are a few steps that can help you:
    gitlab-ctl start geo-postgresql
    ```
 
-   Reconfigure in order to recreate the folders and make sure permissions and ownership
+   Reconfigure to recreate the folders and make sure permissions and ownership
    are correctly
 
    ```shell
