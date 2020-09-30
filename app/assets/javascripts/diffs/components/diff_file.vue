@@ -10,6 +10,8 @@ import eventHub from '../../notes/event_hub';
 import DiffFileHeader from './diff_file_header.vue';
 import DiffContent from './diff_content.vue';
 import { diffViewerErrors } from '~/ide/constants';
+import { collapsedType, isCollapsed } from '../diff_file';
+import { DIFF_FILE_AUTOMATIC_COLLAPSE, DIFF_FILE_MANUAL_COLLAPSE } from '../constants';
 
 export default {
   components: {
@@ -44,7 +46,7 @@ export default {
     return {
       isLoadingCollapsedDiff: false,
       forkMessageVisible: false,
-      isCollapsed: this.file.viewer.automaticallyCollapsed || false,
+      isCollapsed: isCollapsed(this.file),
     };
   },
   computed: {
@@ -85,30 +87,30 @@ export default {
         false,
       );
     },
+    automaticallyCollapsed() {
+      return this.isCollapsed && collapsedType(this.file) === DIFF_FILE_AUTOMATIC_COLLAPSE;
+    },
+    manuallyCollapsed() {
+      return this.isCollapsed && collapsedType(this.file) === DIFF_FILE_MANUAL_COLLAPSE;
+    },
   },
   watch: {
     isCollapsed: function fileCollapsedWatch(newVal, oldVal) {
       if (!newVal && oldVal && !this.hasDiff) {
         this.handleLoadCollapsedDiff();
       }
-
-      this.setFileCollapsed({ filePath: this.file.file_path, collapsed: newVal });
     },
     'file.file_hash': {
-      handler: function watchFileHash() {
-        if (this.viewDiffsFileByFile && this.file.viewer.automaticallyCollapsed) {
-          this.isCollapsed = false;
-          this.handleLoadCollapsedDiff();
-        } else {
-          this.isCollapsed = this.file.viewer.automaticallyCollapsed || false;
-        }
+      handler: function hashUpdateCollapsed() {
+        this.updateCollapsedStatus();
       },
       immediate: true,
     },
-    'file.viewer.automaticallyCollapsed': function setIsCollapsed(newVal) {
-      if (!this.viewDiffsFileByFile) {
-        this.isCollapsed = newVal;
-      }
+    'file.viewer.automaticallyCollapsed': function autoUpdateCollapsed() {
+      this.updateCollapsedStatus();
+    },
+    'file.viewer.manuallyCollapsed': function manualUpdateCollapsed() {
+      this.updateCollapsedStatus();
     },
   },
   created() {
@@ -119,15 +121,16 @@ export default {
       'loadCollapsedDiff',
       'assignDiscussionsToDiff',
       'setRenderIt',
-      'setFileCollapsed',
+      'setFileCollapsedByUser',
     ]),
+    updateCollapsedStatus() {
+      this.isCollapsed = isCollapsed(this.file);
+    },
     handleToggle() {
-      if (!this.hasDiff) {
-        this.handleLoadCollapsedDiff();
-      } else {
-        this.isCollapsed = !this.isCollapsed;
-        this.setRenderIt(this.file);
-      }
+      this.setFileCollapsedByUser({
+        filePath: this.file.file_path,
+        collapsed: !this.isCollapsed,
+      });
     },
     handleLoadCollapsedDiff() {
       this.isLoadingCollapsedDiff = true;
@@ -205,7 +208,7 @@ export default {
           <div v-safe-html="errorMessage" class="nothing-here-block"></div>
         </div>
         <template v-else>
-          <div v-show="isCollapsed" class="nothing-here-block diff-collapsed">
+          <div v-show="automaticallyCollapsed" class="nothing-here-block diff-collapsed">
             {{ __('This diff is collapsed.') }}
             <a class="click-to-expand js-click-to-expand" href="#" @click.prevent="handleToggle">{{
               __('Click to expand it.')

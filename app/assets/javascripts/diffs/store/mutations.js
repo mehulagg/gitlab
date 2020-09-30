@@ -16,6 +16,12 @@ function updateDiffFilesInState(state, files) {
   return Object.assign(state, { diffFiles: files });
 }
 
+function renderFile(file) {
+  return Object.assign(file, {
+    renderIt: true,
+  });
+}
+
 export default {
   [types.SET_BASE_CONFIG](state, options) {
     const {
@@ -81,9 +87,7 @@ export default {
   },
 
   [types.RENDER_FILE](state, file) {
-    Object.assign(file, {
-      renderIt: true,
-    });
+    renderFile(file);
   },
 
   [types.SET_MERGE_REQUEST_DIFFS](state, mergeRequestDiffs) {
@@ -173,6 +177,7 @@ export default {
       Object.assign(file, {
         viewer: Object.assign(file.viewer, {
           automaticallyCollapsed: false,
+          manuallyCollapsed: false,
         }),
       });
     });
@@ -351,11 +356,21 @@ export default {
     file.isShowingFullFile = true;
     file.isLoadingFullFile = false;
   },
-  [types.SET_FILE_COLLAPSED](state, { filePath, collapsed }) {
+  [types.SET_FILE_COLLAPSED](state, { filePath, collapsed, trigger = 'automatic' }) {
     const file = state.diffFiles.find(f => f.file_path === filePath);
 
     if (file && file.viewer) {
-      file.viewer.automaticallyCollapsed = collapsed;
+      if (trigger === 'manual') {
+        file.viewer.automaticallyCollapsed = false;
+        file.viewer.manuallyCollapsed = collapsed;
+      } else if (trigger === 'automatic') {
+        file.viewer.automaticallyCollapsed = collapsed;
+        file.viewer.manuallyCollapsed = null;
+      }
+    }
+
+    if (file && !collapsed) {
+      renderFile(file);
     }
   },
   [types.SET_HIDDEN_VIEW_DIFF_FILE_LINES](state, { filePath, lines }) {

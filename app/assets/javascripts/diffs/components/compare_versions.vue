@@ -128,7 +128,7 @@ export default {
           {{ __('Show latest version') }}
         </gl-button>
         <gl-button
-          v-show="hasCollapsedFile"
+          v-show="hasCollapsedFile.any"
           variant="default"
           class="gl-mr-3"
           @click="expandAllFiles"

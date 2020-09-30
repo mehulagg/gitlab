@@ -8,8 +8,32 @@ export const isParallelView = state => state.diffViewType === PARALLEL_DIFF_VIEW
 
 export const isInlineView = state => state.diffViewType === INLINE_DIFF_VIEW_TYPE;
 
-export const hasCollapsedFile = state =>
-  state.diffFiles.some(file => file.viewer && file.viewer.automaticallyCollapsed);
+export const hasCollapsedFile = state => {
+  const automatic = state.diffFiles.some(file => file.viewer?.automaticallyCollapsed);
+  const manual = state.diffFiles.some(file => file.viewer?.manuallyCollapsed);
+
+  return {
+    any: automatic || manual,
+    automatic,
+    manual,
+  };
+};
+export const collapsedFilesCount = state => {
+  const counts = {
+    automatic: 0,
+    manual: 0,
+  };
+
+  state.diffFiles.forEach(file => {
+    if (file.viewer?.manuallyCollapsed) {
+      counts.manual += 1;
+    } else if (file.viewer?.automaticallyCollapsed) {
+      counts.automatic += 1;
+    }
+  });
+
+  return counts;
+};
 
 export const commitId = state => (state.commit && state.commit.id ? state.commit.id : null);
 
