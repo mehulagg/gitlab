@@ -66,18 +66,4 @@ RSpec.describe 'Projects > Snippets > User updates a snippet', :js do
       let(:snippet_blob_content_selector) { '.file-content' }
     end
   end
-
-  context 'non-Vue application' do
-    before do
-      stub_feature_flags(snippets_vue: false)
-      stub_feature_flags(snippets_edit_vue: false)
-
-      bootstrap_snippet
-    end
-
-    it_behaves_like 'snippet update' do
-      let(:snippet_blob_path_field) { 'project_snippet_file_name' }
-      let(:snippet_blob_content_selector) { '.file-content' }
-    end
-  end
 end

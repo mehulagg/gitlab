@@ -128,29 +128,6 @@ RSpec.describe 'User creates snippet', :js do
       snippet_fill_in_form(title: title, content: file_content)
       expect(page).to have_button('Create snippet')
     end
-  end
-
-  context 'non-Vue application' do
-    let(:snippet_description_field) { 'personal_snippet_description' }
-    let(:snippet_description_view_selector) { '.snippet-header .description' }
-
-    before do
-      stub_feature_flags(snippets_vue: false)
-      stub_feature_flags(snippets_edit_vue: false)
-
-      sign_in(user)
-
-      visit new_snippet_path
-    end
-
-    it_behaves_like 'snippet creation'
-
-    it 'validation fails for the first time' do
-      fill_in snippet_title_field, with: title
-      click_button('Create snippet')
-
-      expect(page).to have_selector('#error_explanation')
-    end
 
     it 'previews a snippet with file' do
       # Click placeholder first to expand full description field

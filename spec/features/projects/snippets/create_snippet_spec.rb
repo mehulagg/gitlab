@@ -104,28 +104,4 @@ RSpec.describe 'Projects > Snippets > Create Snippet', :js do
       expect(page).to have_button('Create snippet')
     end
   end
-
-  context 'non-Vue application' do
-    let(:snippet_description_field) { 'project_snippet_description' }
-    let(:snippet_description_view_selector) { '.snippet-header .description' }
-
-    before do
-      stub_feature_flags(snippets_vue: false)
-      stub_feature_flags(snippets_edit_vue: false)
-
-      sign_in(user)
-
-      visit new_project_snippet_path(project)
-    end
-
-    it_behaves_like 'snippet creation'
-
-    it 'displays validation errors' do
-      fill_in snippet_title_field, with: title
-      click_button('Create snippet')
-      wait_for_requests
-
-      expect(page).to have_selector('#error_explanation')
-    end
-  end
 end

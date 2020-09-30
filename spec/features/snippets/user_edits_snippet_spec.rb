@@ -96,22 +96,4 @@ RSpec.describe 'User edits snippet', :js do
       end
     end
   end
-
-  context 'non-Vue application' do
-    it_behaves_like 'snippet editing' do
-      let(:snippet_blob_path_field) { 'personal_snippet_file_name' }
-      let(:snippet_blob_content_selector) { '.file-content' }
-      let(:snippet_description_field) { 'personal_snippet_description' }
-
-      before do
-        stub_feature_flags(snippets_vue: false)
-        stub_feature_flags(snippets_edit_vue: false)
-
-        sign_in(user)
-
-        visit edit_snippet_path(snippet)
-        wait_for_all_requests
-      end
-    end
-  end
 end
