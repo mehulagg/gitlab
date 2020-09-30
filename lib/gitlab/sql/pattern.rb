@@ -10,11 +10,18 @@ module Gitlab
 
       class_methods do
         def fuzzy_search(query, columns, use_minimum_char_limit: true)
-          matches = columns.map do |col|
-            fuzzy_arel_match(col, query, use_minimum_char_limit: use_minimum_char_limit)
-          end.compact.reduce(:or)
+          arel_columns = columns.map { |column| arel_table[column] }
 
-          where(matches)
+          # Using OR to search multiple text columns performs badly for some
+          # reason. Using concatenation to avoid needing the OR is a significant
+          # performance win.
+          target = if arel_columns.size > 1
+            Arel::Nodes::NamedFunction.new('CONCAT', arel_columns),
+          else
+            arel_columns.first
+          end
+
+          where(fuzzy_arel_match(target, query, use_minimum_char_limit: use_minimum_char_limit))
         end
 
         def to_pattern(query, use_minimum_char_limit: true)
@@ -35,29 +42,29 @@ module Gitlab
           query.length >= min_chars_for_partial_matching
         end
 
-        # column - The column name / Arel column to search in.
+        # target - The column name / Arel column / expression to search in.
         # query - The text to search for.
         # lower_exact_match - When set to `true` we'll fall back to using
         #                     `LOWER(column) = query` instead of using `ILIKE`.
-        def fuzzy_arel_match(column, query, lower_exact_match: false, use_minimum_char_limit: true)
+        def fuzzy_arel_match(target, query, lower_exact_match: false, use_minimum_char_limit: true)
           query = query.squish
           return unless query.present?
 
-          arel_column = column.is_a?(Arel::Attributes::Attribute) ? column : arel_table[column]
+          target = arel_table[target] if target.is_a?(Symbol) || target.is_a?(String)
 
           words = select_fuzzy_words(query, use_minimum_char_limit: use_minimum_char_limit)
 
           if words.any?
-            words.map { |word| arel_column.matches(to_pattern(word, use_minimum_char_limit: use_minimum_char_limit)) }.reduce(:and)
+            words.map { |word| target.matches(to_pattern(word, use_minimum_char_limit: use_minimum_char_limit)) }.reduce(:and)
           else
             # No words of at least 3 chars, but we can search for an exact
             # case insensitive match with the query as a whole
             if lower_exact_match
               Arel::Nodes::NamedFunction
-                .new('LOWER', [arel_column])
+                .new('LOWER', [target])
                 .eq(query)
             else
-              arel_column.matches(sanitize_sql_like(query))
+              target.matches(sanitize_sql_like(query))
             end
           end
         end
