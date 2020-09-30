@@ -83,7 +83,6 @@
     background-color: $white;
     margin-bottom: 5px;
     display: flex;
-    justify-content: space-between;
     padding: $gl-padding;
     border-radius: $border-radius-default;
     border: 1px solid $gray-50;
@@ -274,7 +273,7 @@
   }
 
   .label-name {
-    width: 200px;
+    flex: 0 0 200px;
 
     .gl-label {
       line-height: $gl-line-height;
@@ -323,20 +322,20 @@
     }
 
     .label-name {
-      order: 1;
-      flex-grow: 1;
-      width: auto;
-      max-width: 100%;
+      //order: 1;
+      //flex-grow: 1;
+      //width: auto;
+      //max-width: 100%;
     }
 
     .label-actions-list {
-      order: 2;
-      flex-shrink: 1;
-      text-align: left;
+      //order: 2;
+      //flex-shrink: 1;
+      //text-align: left;
     }
 
     .label-description {
-      order: 3;
+      //order: 3;
     }
   }
 }
