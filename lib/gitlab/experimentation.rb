@@ -65,6 +65,9 @@ module Gitlab
       },
       invitation_reminders: {
         tracking_category: 'Growth::Acquisition::Experiment::InvitationReminders'
+      },
+      group_only_trials: {
+        tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials'
       }
     }.freeze
 
