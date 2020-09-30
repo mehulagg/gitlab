@@ -2365,15 +2365,21 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
     end
 
     describe 'POST /users/:id/deactivate' do
+      subject { post api("/users/#{user.id}/deactivate", api_user) }
+
       context 'performed by a non-admin user' do
+        let(:api_user) { user }
+
         it 'is not authorized to perform the action' do
-          post api("/users/#{user.id}/deactivate", user)
+          subject
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
       context 'performed by an admin user' do
+        let(:api_user) { admin }
+
         context 'for an active user' do
           let(:activity) { {} }
           let(:user) { create(:user, **activity) }
@@ -2381,11 +2387,9 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           context 'with no recent activity' do
             let(:activity) { { last_activity_on: ::User::MINIMUM_INACTIVE_DAYS.next.days.ago } }
 
-            before do
-              post api("/users/#{user.id}/deactivate", admin)
-            end
-
             it 'deactivates an active user' do
+              subject
+
               expect(response).to have_gitlab_http_status(:created)
               expect(user.reload.state).to eq('deactivated')
             end
@@ -2394,11 +2398,9 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           context 'with recent activity' do
             let(:activity) { { last_activity_on: ::User::MINIMUM_INACTIVE_DAYS.pred.days.ago } }
 
-            before do
-              post api("/users/#{user.id}/deactivate", admin)
-            end
-
             it 'does not deactivate an active user' do
+              subject
+
               expect(response).to have_gitlab_http_status(:forbidden)
               expect(json_response['message']).to eq("403 Forbidden  - The user you are trying to deactivate has been active in the past #{::User::MINIMUM_INACTIVE_DAYS} days and cannot be deactivated")
               expect(user.reload.state).to eq('active')
@@ -2409,11 +2411,11 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
         context 'for a deactivated user' do
           before do
             user.deactivate
-
-            post api("/users/#{user.id}/deactivate", admin)
           end
 
           it 'returns 201' do
+            subject
+
             expect(response).to have_gitlab_http_status(:created)
             expect(user.reload.state).to eq('deactivated')
           end
@@ -2422,11 +2424,11 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
         context 'for a blocked user' do
           before do
             user.block
-
-            post api("/users/#{user.id}/deactivate", admin)
           end
 
           it 'returns 403' do
+            subject
+
             expect(response).to have_gitlab_http_status(:forbidden)
             expect(json_response['message']).to eq('403 Forbidden  - A blocked user cannot be deactivated by the API')
             expect(user.reload.state).to eq('blocked')
@@ -2436,11 +2438,11 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
         context 'for a ldap blocked user' do
           before do
             user.ldap_block
-
-            post api("/users/#{user.id}/deactivate", admin)
           end
 
           it 'returns 403' do
+            subject
+
             expect(response).to have_gitlab_http_status(:forbidden)
             expect(json_response['message']).to eq('403 Forbidden  - A blocked user cannot be deactivated by the API')
             expect(user.reload.state).to eq('ldap_blocked')
