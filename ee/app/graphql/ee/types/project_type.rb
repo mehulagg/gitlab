@@ -112,6 +112,11 @@ module EE
               description: 'Cluster agents associated with the project',
               resolver: ::Resolvers::Clusters::AgentsResolver
 
+        field :repository_size_excess,
+              GraphQL::FLOAT_TYPE,
+              null: true,
+              description: 'Size of repository that exceeds the limit in bytes'
+
         def self.requirements_available?(project, user)
           ::Feature.enabled?(:requirements_management, project, default_enabled: true) && Ability.allowed?(user, :read_requirement, project)
         end
