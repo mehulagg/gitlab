@@ -3,5 +3,7 @@
 - api_paths = @group.present? ? { milestones_path: group_milestones_path(@group), labels_path: group_labels_path(@group) } : {}
 - image_paths = { empty_state_svg_path: image_path("illustrations/analytics/cycle-analytics-empty-chart.svg"), no_data_svg_path: image_path("illustrations/analytics/cycle-analytics-empty-chart.svg"), no_access_svg_path: image_path("illustrations/analytics/no-access.svg")}
 - data_attributes.merge!(api_paths, image_paths)
+- content_for :page_specific_javascripts do
+  = stylesheet_link_tag 'page_bundles/cycle_analytics'
 
 #js-cycle-analytics-app{ data: data_attributes }
