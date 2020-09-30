@@ -3,7 +3,7 @@ module EE
   module SearchHelper
     extend ::Gitlab::Utils::Override
 
-    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users].freeze
+    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users epics].freeze
 
     override :search_filter_input_options
     def search_filter_input_options(type, placeholder = _('Search or filter results...'))
@@ -33,6 +33,16 @@ module EE
       return super unless @project && @project.feature_available?(:repository)
 
       super + [{ category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }]
+    end
+
+    override :search_entries_scope_label
+    def search_entries_scope_label(scope, count)
+      case scope
+      when 'epics'
+        ns_('SearchResults|epic', 'SearchResults|epics', count)
+      else
+        super
+      end
     end
 
     # This is a special case for snippet searches in .com.

@@ -314,7 +314,7 @@ RSpec.describe License do
 
       it 'returns features for premium plan' do
         expect(described_class.features_for_plan('premium'))
-          .to include(:multiple_issue_assignees, :deploy_board, :file_locks)
+          .to include(:multiple_issue_assignees, :deploy_board, :file_locks, :group_wikis)
       end
 
       it 'returns empty array if no features for given plan' do

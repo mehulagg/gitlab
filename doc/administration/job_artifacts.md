@@ -99,8 +99,13 @@ artifacts, you can use an object storage like AWS S3 instead.
 This configuration relies on valid AWS credentials to be configured already.
 Use an object storage option like AWS S3 to store job artifacts.
 
+If you configure GitLab to store artifacts on object storage, you may also want to
+[eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage).
+In both cases, job logs are archived and moved to object storage when the job completes.
+
 DANGER: **Danger:**
-If you configure GitLab to store CI logs and artifacts on object storage, you must also enable [incremental logging](job_logs.md#new-incremental-logging-architecture). Otherwise, job logs will disappear or not be saved.
+In a multi-server setup you must use one of the options to
+[eliminate local disk usage for job logs](job_logs.md#prevent-local-disk-usage), or job logs could be lost.
 
 [Read more about using object storage with GitLab](object_storage.md).
 
@@ -203,9 +208,9 @@ _The artifacts are stored by default in
      enabled: true
      object_store:
        enabled: true
-       remote_directory: "artifacts" # The bucket name
+       remote_directory: "artifacts"  # The bucket name
        connection:
-         provider: AWS # Only AWS supported at the moment
+         provider: AWS  # Only AWS supported at the moment
          aws_access_key_id: AWS_ACCESS_KEY_ID
          aws_secret_access_key: AWS_SECRET_ACCESS_KEY
          region: eu-central-1

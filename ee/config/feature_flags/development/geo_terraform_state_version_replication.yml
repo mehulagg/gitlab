@@ -4,4 +4,4 @@ introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42529
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254622
 group: group::geo
 type: development
-default_enabled: false
+default_enabled: true

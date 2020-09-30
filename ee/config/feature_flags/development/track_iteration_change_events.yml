@@ -1,7 +1,0 @@
----
-name: track_iteration_change_events
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37620
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/229463
-group: group::project management
-type: development
-default_enabled: true

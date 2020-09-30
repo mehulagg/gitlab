@@ -174,6 +174,8 @@ module Gitlab
     config.assets.paths << Gemojione.images_path
     config.assets.paths << "#{config.root}/vendor/assets/fonts"
 
+    config.assets.precompile << "application_utilities.css"
+    config.assets.precompile << "application_utilities_dark.css"
     config.assets.precompile << "application_dark.css"
 
     config.assets.precompile << "startup/*.css"
@@ -185,6 +187,7 @@ module Gitlab
     config.assets.precompile << "mailers/*.css"
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
     config.assets.precompile << "page_bundles/boards.css"
+    config.assets.precompile << "page_bundles/cycle_analytics.css"
     config.assets.precompile << "page_bundles/ide.css"
     config.assets.precompile << "page_bundles/issues.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
@@ -218,13 +221,6 @@ module Gitlab
     # Import css for xterm
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
     config.assets.precompile << "xterm.css"
-
-    # Add EE assets
-    if Gitlab.ee?
-      %w[images javascripts stylesheets].each do |path|
-        config.assets.paths << "#{config.root}/ee/app/assets/#{path}"
-      end
-    end
 
     # Import path for EE specific SCSS entry point
     # In CE it will import a noop file, in EE a functioning file
@@ -342,6 +338,20 @@ module Gitlab
     initializer :before_zeitwerk, before: :let_zeitwerk_take_over, after: :prepend_helpers_path do
       Dir[Rails.root.join('config/initializers_before_autoloader/*.rb')].sort.each do |initializer|
         load_config_initializer(initializer)
+      end
+    end
+
+    # Add EE assets. They should take precedence over CE. This means if two files exist, e.g.:
+    #
+    # ee/app/assets/stylesheets/example.scss
+    # app/assets/stylesheets/example.scss
+    #
+    # The ee/ version will be preferred.
+    initializer :prefer_ee_assets, after: :append_assets_path do |app|
+      if Gitlab.ee?
+        %w[images javascripts stylesheets].each do |path|
+          app.config.assets.paths.unshift("#{config.root}/ee/app/assets/#{path}")
+        end
       end
     end
 

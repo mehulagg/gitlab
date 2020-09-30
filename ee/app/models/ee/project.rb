@@ -630,11 +630,6 @@ module EE
       change_head(root_ref) if root_ref.present?
     end
 
-    def feature_flags_client_token
-      instance = operations_feature_flags_client || create_operations_feature_flags_client!
-      instance.token
-    end
-
     override :lfs_http_url_to_repo
     def lfs_http_url_to_repo(operation)
       return super unless ::Gitlab::Geo.secondary_with_primary?

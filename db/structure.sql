@@ -9270,6 +9270,7 @@ CREATE TABLE application_settings (
     gitpod_enabled boolean DEFAULT false NOT NULL,
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
     abuse_notification_email character varying,
+    require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
@@ -14070,6 +14071,25 @@ CREATE SEQUENCE packages_dependency_links_id_seq
 
 ALTER SEQUENCE packages_dependency_links_id_seq OWNED BY packages_dependency_links.id;
 
+CREATE TABLE packages_events (
+    id bigint NOT NULL,
+    event_type smallint NOT NULL,
+    event_scope smallint NOT NULL,
+    originator_type smallint NOT NULL,
+    originator bigint,
+    created_at timestamp with time zone NOT NULL,
+    package_id bigint
+);
+
+CREATE SEQUENCE packages_events_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE packages_events_id_seq OWNED BY packages_events.id;
+
 CREATE TABLE packages_maven_metadata (
     id bigint NOT NULL,
     package_id bigint NOT NULL,
@@ -14427,7 +14447,27 @@ CREATE VIEW postgres_indexes AS
      JOIN pg_class ON ((pg_class.oid = pg_index.indexrelid)))
      JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
      JOIN pg_indexes ON ((pg_class.relname = pg_indexes.indexname)))
-  WHERE (pg_namespace.nspname <> 'pg_catalog'::name);
+  WHERE ((pg_namespace.nspname <> 'pg_catalog'::name) AND (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])));
+
+CREATE TABLE postgres_reindex_actions (
+    id bigint NOT NULL,
+    action_start timestamp with time zone NOT NULL,
+    action_end timestamp with time zone,
+    ondisk_size_bytes_start bigint NOT NULL,
+    ondisk_size_bytes_end bigint,
+    state smallint DEFAULT 0 NOT NULL,
+    index_identifier text NOT NULL,
+    CONSTRAINT check_f12527622c CHECK ((char_length(index_identifier) <= 255))
+);
+
+CREATE SEQUENCE postgres_reindex_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE postgres_reindex_actions_id_seq OWNED BY postgres_reindex_actions.id;
 
 CREATE TABLE programming_languages (
     id integer NOT NULL,
@@ -15345,7 +15385,10 @@ CREATE TABLE requirements (
     cached_markdown_version integer,
     state smallint DEFAULT 1 NOT NULL,
     title character varying(255) NOT NULL,
-    title_html text
+    title_html text,
+    description text,
+    description_html text,
+    CONSTRAINT check_785ae25b9d CHECK ((char_length(description) <= 10000))
 );
 
 CREATE SEQUENCE requirements_id_seq
@@ -17516,6 +17559,8 @@ ALTER TABLE ONLY packages_dependencies ALTER COLUMN id SET DEFAULT nextval('pack
 
 ALTER TABLE ONLY packages_dependency_links ALTER COLUMN id SET DEFAULT nextval('packages_dependency_links_id_seq'::regclass);
 
+ALTER TABLE ONLY packages_events ALTER COLUMN id SET DEFAULT nextval('packages_events_id_seq'::regclass);
+
 ALTER TABLE ONLY packages_maven_metadata ALTER COLUMN id SET DEFAULT nextval('packages_maven_metadata_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_package_files ALTER COLUMN id SET DEFAULT nextval('packages_package_files_id_seq'::regclass);
@@ -17541,6 +17586,8 @@ ALTER TABLE ONLY plan_limits ALTER COLUMN id SET DEFAULT nextval('plan_limits_id
 ALTER TABLE ONLY plans ALTER COLUMN id SET DEFAULT nextval('plans_id_seq'::regclass);
 
 ALTER TABLE ONLY pool_repositories ALTER COLUMN id SET DEFAULT nextval('pool_repositories_id_seq'::regclass);
+
+ALTER TABLE ONLY postgres_reindex_actions ALTER COLUMN id SET DEFAULT nextval('postgres_reindex_actions_id_seq'::regclass);
 
 ALTER TABLE ONLY product_analytics_events_experimental ALTER COLUMN id SET DEFAULT nextval('product_analytics_events_experimental_id_seq'::regclass);
 
@@ -18709,6 +18756,9 @@ ALTER TABLE ONLY packages_dependencies
 ALTER TABLE ONLY packages_dependency_links
     ADD CONSTRAINT packages_dependency_links_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY packages_events
+    ADD CONSTRAINT packages_events_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY packages_maven_metadata
     ADD CONSTRAINT packages_maven_metadata_pkey PRIMARY KEY (id);
 
@@ -18756,6 +18806,9 @@ ALTER TABLE ONLY plans
 
 ALTER TABLE ONLY pool_repositories
     ADD CONSTRAINT pool_repositories_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY postgres_reindex_actions
+    ADD CONSTRAINT postgres_reindex_actions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY programming_languages
     ADD CONSTRAINT programming_languages_pkey PRIMARY KEY (id);
@@ -19466,6 +19519,8 @@ CREATE UNIQUE INDEX index_approval_project_rules_groups_1 ON approval_project_ru
 
 CREATE INDEX index_approval_project_rules_groups_2 ON approval_project_rules_groups USING btree (group_id);
 
+CREATE INDEX index_approval_project_rules_on_id_with_regular_type ON approval_project_rules USING btree (id) WHERE (rule_type = 0);
+
 CREATE INDEX index_approval_project_rules_on_project_id ON approval_project_rules USING btree (project_id);
 
 CREATE INDEX index_approval_project_rules_on_rule_type ON approval_project_rules USING btree (rule_type);
@@ -19477,6 +19532,8 @@ CREATE UNIQUE INDEX index_approval_project_rules_protected_branches_unique ON ap
 CREATE UNIQUE INDEX index_approval_project_rules_users_1 ON approval_project_rules_users USING btree (approval_project_rule_id, user_id);
 
 CREATE INDEX index_approval_project_rules_users_2 ON approval_project_rules_users USING btree (user_id);
+
+CREATE INDEX index_approval_project_rules_users_on_approval_project_rule_id ON approval_project_rules_users USING btree (approval_project_rule_id);
 
 CREATE UNIQUE INDEX index_approval_rule_name_for_code_owners_rule_type ON approval_merge_request_rules USING btree (merge_request_id, name) WHERE ((rule_type = 2) AND (section IS NULL));
 
@@ -20340,6 +20397,8 @@ CREATE INDEX index_issues_on_updated_at ON issues USING btree (updated_at);
 
 CREATE INDEX index_issues_on_updated_by_id ON issues USING btree (updated_by_id) WHERE (updated_by_id IS NOT NULL);
 
+CREATE INDEX index_issues_project_id_issue_type_incident ON issues USING btree (project_id) WHERE (issue_type = 1);
+
 CREATE UNIQUE INDEX index_jira_connect_installations_on_client_key ON jira_connect_installations USING btree (client_key);
 
 CREATE INDEX index_jira_connect_subscriptions_on_namespace_id ON jira_connect_subscriptions USING btree (namespace_id);
@@ -20596,7 +20655,7 @@ CREATE UNIQUE INDEX index_namespaces_on_runners_token_encrypted ON namespaces US
 
 CREATE INDEX index_namespaces_on_shared_and_extra_runners_minutes_limit ON namespaces USING btree (shared_runners_minutes_limit, extra_shared_runners_minutes_limit);
 
-CREATE INDEX index_namespaces_on_type_partial ON namespaces USING btree (type) WHERE (type IS NOT NULL);
+CREATE INDEX index_namespaces_on_type_and_id_partial ON namespaces USING btree (type, id) WHERE (type IS NOT NULL);
 
 CREATE INDEX index_non_requested_project_members_on_source_id_and_type ON members USING btree (source_id, source_type) WHERE ((requested_at IS NULL) AND ((type)::text = 'ProjectMember'::text));
 
@@ -20692,6 +20751,8 @@ CREATE UNIQUE INDEX index_packages_dependencies_on_name_and_version_pattern ON p
 
 CREATE INDEX index_packages_dependency_links_on_dependency_id ON packages_dependency_links USING btree (dependency_id);
 
+CREATE INDEX index_packages_events_on_package_id ON packages_events USING btree (package_id);
+
 CREATE INDEX index_packages_maven_metadata_on_package_id_and_path ON packages_maven_metadata USING btree (package_id, path);
 
 CREATE INDEX index_packages_nuget_dl_metadata_on_dependency_link_id ON packages_nuget_dependency_link_metadata USING btree (dependency_link_id);
@@ -20754,6 +20815,8 @@ CREATE INDEX index_pages_domains_on_wildcard ON pages_domains USING btree (wildc
 
 CREATE UNIQUE INDEX index_partial_am_alerts_on_project_id_and_fingerprint ON alert_management_alerts USING btree (project_id, fingerprint) WHERE (status <> 2);
 
+CREATE INDEX index_partial_ci_builds_on_user_id_name_parser_features ON ci_builds USING btree (user_id, name) WHERE (((type)::text = 'Ci::Build'::text) AND ((name)::text = ANY (ARRAY[('container_scanning'::character varying)::text, ('dast'::character varying)::text, ('dependency_scanning'::character varying)::text, ('license_management'::character varying)::text, ('license_scanning'::character varying)::text, ('sast'::character varying)::text, ('coverage_fuzzing'::character varying)::text, ('secret_detection'::character varying)::text])));
+
 CREATE UNIQUE INDEX index_partitioned_foreign_keys_unique_index ON partitioned_foreign_keys USING btree (to_table, from_table, from_column);
 
 CREATE INDEX index_pat_on_user_id_and_expires_at ON personal_access_tokens USING btree (user_id, expires_at);
@@ -20777,6 +20840,8 @@ CREATE UNIQUE INDEX index_pool_repositories_on_disk_path ON pool_repositories US
 CREATE INDEX index_pool_repositories_on_shard_id ON pool_repositories USING btree (shard_id);
 
 CREATE UNIQUE INDEX index_pool_repositories_on_source_project_id_and_shard_id ON pool_repositories USING btree (source_project_id, shard_id);
+
+CREATE INDEX index_postgres_reindex_actions_on_index_identifier ON postgres_reindex_actions USING btree (index_identifier);
 
 CREATE UNIQUE INDEX index_programming_languages_on_name ON programming_languages USING btree (name);
 
@@ -23472,6 +23537,9 @@ ALTER TABLE ONLY merge_request_user_mentions
 
 ALTER TABLE ONLY ci_job_artifacts
     ADD CONSTRAINT fk_rails_c5137cb2c1 FOREIGN KEY (job_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY packages_events
+    ADD CONSTRAINT fk_rails_c6c20d0094 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY project_settings
     ADD CONSTRAINT fk_rails_c6df6e6328 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

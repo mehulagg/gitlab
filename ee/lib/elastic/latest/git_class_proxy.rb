@@ -120,7 +120,7 @@ module Elastic
           filter :blob, field: :oid
         end
 
-        bool_expr = Gitlab::Elastic::BoolExpr.new
+        bool_expr = ::Gitlab::Elastic::BoolExpr.new
         query_hash = {
           query: { bool: bool_expr },
           size: per,

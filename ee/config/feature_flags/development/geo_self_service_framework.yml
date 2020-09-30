@@ -1,7 +1,7 @@
 ---
 name: geo_self_service_framework
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24498
+rollout_issue_url:
+group: geo
 type: development
 default_enabled: false

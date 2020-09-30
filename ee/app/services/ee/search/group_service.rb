@@ -33,6 +33,19 @@ module EE
           filters: { confidential: params[:confidential], state: params[:state] }
         )
       end
+
+      override :allowed_scopes
+      def allowed_scopes
+        strong_memoize(:ee_group_allowed_scopes) do
+          super.tap do |scopes|
+            if ::Feature.enabled?(:epics_search) && group.feature_available?(:epics)
+              scopes << 'epics'
+            else
+              scopes
+            end
+          end
+        end
+      end
     end
   end
 end

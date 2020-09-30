@@ -8,10 +8,14 @@ module Projects
       before_action do
         push_frontend_feature_flag(:new_variables_ui, @project, default_enabled: true)
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
-        push_frontend_feature_flag(:ci_key_autocomplete, default_enabled: true)
       end
 
       def show
+        if Feature.enabled?(:ci_pipeline_triggers_settings_vue_ui, @project)
+          @triggers_json = ::Ci::TriggerSerializer.new.represent(
+            @project.triggers, current_user: current_user, project: @project
+          ).to_json
+        end
       end
 
       def update
@@ -116,6 +120,7 @@ module Projects
       def define_triggers_variables
         @triggers = @project.triggers
           .present(current_user: current_user)
+
         @trigger = ::Ci::Trigger.new
           .present(current_user: current_user)
       end

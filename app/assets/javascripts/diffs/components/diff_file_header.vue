@@ -224,7 +224,7 @@ export default {
       <a
         ref="titleWrapper"
         :v-once="!viewDiffsFileByFile"
-        class="gl-mr-2"
+        class="gl-mr-2 gl-text-decoration-none!"
         :href="titleLink"
         @click="handleFileNameClick"
       >
@@ -330,7 +330,7 @@ export default {
             </gl-dropdown-item>
           </template>
 
-          <template v-if="!diffFile.viewer.collapsed">
+          <template v-if="!diffFile.viewer.automaticallyCollapsed">
             <gl-dropdown-divider
               v-if="!diffFile.is_fully_expanded || diffHasDiscussions(diffFile)"
             />

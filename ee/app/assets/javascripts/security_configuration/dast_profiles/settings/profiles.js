@@ -5,76 +5,61 @@ import dastScannerProfilesDelete from 'ee/security_configuration/dast_profiles/g
 import { dastProfilesDeleteResponse } from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
 import { s__ } from '~/locale';
 
-const hasNoFeatureFlagOrIsEnabled = glFeatures => ([, { featureFlag }]) => {
-  if (!featureFlag) {
-    return true;
-  }
-
-  return Boolean(glFeatures[featureFlag]);
-};
-
-export const getProfileSettings = ({ createNewProfilePaths }, glFeatures) => {
-  const settings = {
-    siteProfiles: {
-      profileType: 'siteProfiles',
-      createNewProfilePath: createNewProfilePaths.siteProfile,
-      graphQL: {
-        query: dastSiteProfilesQuery,
-        deletion: {
-          mutation: dastSiteProfilesDelete,
-          optimisticResponse: dastProfilesDeleteResponse({
-            mutationName: 'siteProfilesDelete',
-            payloadTypeName: 'DastSiteProfileDeletePayload',
-          }),
-        },
-      },
-      tableFields: ['profileName', 'targetUrl'],
-      i18n: {
-        createNewLinkText: s__('DastProfiles|Site Profile'),
-        tabName: s__('DastProfiles|Site Profiles'),
-        errorMessages: {
-          fetchNetworkError: s__(
-            'DastProfiles|Could not fetch site profiles. Please refresh the page, or try again later.',
-          ),
-          deletionNetworkError: s__(
-            'DastProfiles|Could not delete site profile. Please refresh the page, or try again later.',
-          ),
-          deletionBackendError: s__('DastProfiles|Could not delete site profiles:'),
-        },
+export const getProfileSettings = ({ createNewProfilePaths }) => ({
+  siteProfiles: {
+    profileType: 'siteProfiles',
+    createNewProfilePath: createNewProfilePaths.siteProfile,
+    graphQL: {
+      query: dastSiteProfilesQuery,
+      deletion: {
+        mutation: dastSiteProfilesDelete,
+        optimisticResponse: dastProfilesDeleteResponse({
+          mutationName: 'siteProfilesDelete',
+          payloadTypeName: 'DastSiteProfileDeletePayload',
+        }),
       },
     },
-    scannerProfiles: {
-      profileType: 'scannerProfiles',
-      createNewProfilePath: createNewProfilePaths.scannerProfile,
-      graphQL: {
-        query: dastScannerProfilesQuery,
-        deletion: {
-          mutation: dastScannerProfilesDelete,
-          optimisticResponse: dastProfilesDeleteResponse({
-            mutationName: 'scannerProfilesDelete',
-            payloadTypeName: 'DastScannerProfileDeletePayload',
-          }),
-        },
-      },
-      featureFlag: 'securityOnDemandScansScannerProfiles',
-      tableFields: ['profileName'],
-      i18n: {
-        createNewLinkText: s__('DastProfiles|Scanner Profile'),
-        tabName: s__('DastProfiles|Scanner Profiles'),
-        errorMessages: {
-          fetchNetworkError: s__(
-            'DastProfiles|Could not fetch scanner profiles. Please refresh the page, or try again later.',
-          ),
-          deletionNetworkError: s__(
-            'DastProfiles|Could not delete scanner profile. Please refresh the page, or try again later.',
-          ),
-          deletionBackendError: s__('DastProfiles|Could not delete scanner profiles:'),
-        },
+    tableFields: ['profileName', 'targetUrl'],
+    i18n: {
+      createNewLinkText: s__('DastProfiles|Site Profile'),
+      tabName: s__('DastProfiles|Site Profiles'),
+      errorMessages: {
+        fetchNetworkError: s__(
+          'DastProfiles|Could not fetch site profiles. Please refresh the page, or try again later.',
+        ),
+        deletionNetworkError: s__(
+          'DastProfiles|Could not delete site profile. Please refresh the page, or try again later.',
+        ),
+        deletionBackendError: s__('DastProfiles|Could not delete site profiles:'),
       },
     },
-  };
-
-  return Object.fromEntries(
-    Object.entries(settings).filter(hasNoFeatureFlagOrIsEnabled(glFeatures)),
-  );
-};
+  },
+  scannerProfiles: {
+    profileType: 'scannerProfiles',
+    createNewProfilePath: createNewProfilePaths.scannerProfile,
+    graphQL: {
+      query: dastScannerProfilesQuery,
+      deletion: {
+        mutation: dastScannerProfilesDelete,
+        optimisticResponse: dastProfilesDeleteResponse({
+          mutationName: 'scannerProfilesDelete',
+          payloadTypeName: 'DastScannerProfileDeletePayload',
+        }),
+      },
+    },
+    tableFields: ['profileName'],
+    i18n: {
+      createNewLinkText: s__('DastProfiles|Scanner Profile'),
+      tabName: s__('DastProfiles|Scanner Profiles'),
+      errorMessages: {
+        fetchNetworkError: s__(
+          'DastProfiles|Could not fetch scanner profiles. Please refresh the page, or try again later.',
+        ),
+        deletionNetworkError: s__(
+          'DastProfiles|Could not delete scanner profile. Please refresh the page, or try again later.',
+        ),
+        deletionBackendError: s__('DastProfiles|Could not delete scanner profiles:'),
+      },
+    },
+  },
+});

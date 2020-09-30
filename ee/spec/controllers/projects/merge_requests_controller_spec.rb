@@ -733,6 +733,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   describe 'GET #license_scanning_reports' do
     let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
+    let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
 
     let(:params) do
       {
@@ -745,6 +746,7 @@ RSpec.describe Projects::MergeRequestsController do
     subject { get :license_scanning_reports, params: params, format: :json }
 
     before do
+      stub_licensed_features(license_scanning: true)
       allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
         .with(::Ci::CompareLicenseScanningReportsService, viewer).and_return(comparison_status)
     end
@@ -801,8 +803,48 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context "when authorizing access to license scan reports" do
-      it_behaves_like 'authorize read pipeline'
+    context "when a user is NOT authorized to read licenses on a project" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:viewer) { create(:user) }
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context "when a user is authorized to read the licenses" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:viewer) { create(:user) }
+
+      before do
+        project.add_reporter(viewer)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+
+    context "when a maintainer is authorized to read licenses on a merge request from a forked project" do
+      let(:project) { create(:project, :repository, :public, :builds_private) }
+      let(:forked_project) { fork_project(project, nil, repository: true) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: forked_project, target_project: project) }
+      let(:viewer) { create(:user) }
+
+      before do
+        project.add_maintainer(viewer)
+        forked_project.add_maintainer(user)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
     end
   end
 

@@ -120,7 +120,7 @@ RSpec.describe Issue do
       describe '.any_epic' do
         it 'returns only issues with an epic assigned' do
           expect(described_class.count).to eq 3
-          expect(described_class.any_epic).to eq [epic_issue1.issue, epic_issue2.issue]
+          expect(described_class.any_epic).to contain_exactly(epic_issue1.issue, epic_issue2.issue)
         end
       end
 
@@ -756,6 +756,18 @@ RSpec.describe Issue do
       subject { issue.supports_iterations? }
 
       it { is_expected.to eq(supports_iterations) }
+    end
+  end
+
+  describe '#issue_type_supports?' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:test_case) { create(:quality_test_case) }
+    let_it_be(:incident) { create(:incident) }
+
+    it do
+      expect(issue.issue_type_supports?(:epics)).to be(true)
+      expect(test_case.issue_type_supports?(:epics)).to be(false)
+      expect(incident.issue_type_supports?(:epics)).to be(false)
     end
   end
 end

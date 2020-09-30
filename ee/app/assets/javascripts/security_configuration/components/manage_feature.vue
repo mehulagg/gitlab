@@ -41,8 +41,6 @@ export default {
 <template>
   <gl-button
     v-if="canManageProfiles"
-    variant="success"
-    category="primary"
     :href="feature.configuration_path"
     data-testid="manageButton"
     >{{ s__('SecurityConfiguration|Manage') }}</gl-button

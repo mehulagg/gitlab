@@ -289,9 +289,10 @@ RSpec.describe Gitlab::UsageData do
         create(:project, creator: user)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: true)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: false)
-        create(:approval_project_rule, project: project)
+        create(:approval_project_rule, project: project, users: create_list(:user, 2), approvals_required: 1)
+        create(:approval_project_rule, project: project, users: [create(:user)], approvals_required: 1)
         protected_branch = create(:protected_branch, project: project)
-        create(:approval_project_rule, protected_branches: [protected_branch], project: project)
+        create(:approval_project_rule, protected_branches: [protected_branch], users: [create(:user)], approvals_required: 2, project: project)
         create(:suggestion, note: create(:note, project: project))
         create(:code_owner_rule, merge_request: merge_request, approvals_required: 3)
         create(:code_owner_rule, merge_request: merge_request, approvals_required: 7, section: 'new_section')
@@ -316,8 +317,11 @@ RSpec.describe Gitlab::UsageData do
       end
 
       expect(described_class.usage_activity_by_stage_create({})).to include(
-        approval_project_rules: 6,
+        approval_project_rules: 8,
         approval_project_rules_with_target_branch: 2,
+        approval_project_rules_with_more_approvers_than_required: 2,
+        approval_project_rules_with_less_approvers_than_required: 2,
+        approval_project_rules_with_exact_required_approvers: 2,
         projects_enforcing_code_owner_approval: 0,
         projects_with_sectional_code_owner_rules: 2,
         merge_requests_with_added_rules: 12,
@@ -333,8 +337,11 @@ RSpec.describe Gitlab::UsageData do
         total_number_of_locked_files: 14
       )
       expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
-        approval_project_rules: 6,
+        approval_project_rules: 8,
         approval_project_rules_with_target_branch: 2,
+        approval_project_rules_with_more_approvers_than_required: 2,
+        approval_project_rules_with_less_approvers_than_required: 2,
+        approval_project_rules_with_exact_required_approvers: 2,
         projects_enforcing_code_owner_approval: 0,
         projects_with_sectional_code_owner_rules: 1,
         merge_requests_with_added_rules: 6,

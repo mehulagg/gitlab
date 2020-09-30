@@ -33,6 +33,7 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include EachBatch
   extend Gitlab::Cache::RequestCache
 
   extend Gitlab::ConfigHelper
@@ -336,6 +337,8 @@ class Project < ApplicationRecord
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
 
+  has_many :terraform_states, class_name: 'Terraform::State', inverse_of: :project
+
   # GitLab Pages
   has_many :pages_domains
   has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
@@ -432,6 +435,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_by_group, if: :should_validate_visibility_level?
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
+  validate :changing_shared_runners_enabled_is_allowed
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
@@ -1183,6 +1187,15 @@ class Project < ApplicationRecord
 
     unless pages_domains.all?(&:https?)
       errors.add(:pages_https_only, _("cannot be enabled unless all domains have TLS certificates"))
+    end
+  end
+
+  def changing_shared_runners_enabled_is_allowed
+    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
+
+    if shared_runners_enabled && group && group.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group does not allow it'))
     end
   end
 
@@ -2503,6 +2516,11 @@ class Project < ApplicationRecord
     return GroupDeployKey.none unless group
 
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
+  end
+
+  def feature_flags_client_token
+    instance = operations_feature_flags_client || create_operations_feature_flags_client!
+    instance.token
   end
 
   private

@@ -2,24 +2,10 @@
 
 module Mutations
   module RequirementsManagement
-    class CreateRequirement < BaseMutation
-      include ResolvesProject
-
+    class CreateRequirement < BaseRequirement
       graphql_name 'CreateRequirement'
 
       authorize :create_requirement
-
-      field :requirement, Types::RequirementsManagement::RequirementType,
-            null: true,
-            description: 'The requirement after mutation'
-
-      argument :title, GraphQL::STRING_TYPE,
-               required: true,
-               description: 'Title of the requirement'
-
-      argument :project_path, GraphQL::ID_TYPE,
-               required: true,
-               description: 'The project full path the requirement is associated with'
 
       def resolve(args)
         project_path = args.delete(:project_path)

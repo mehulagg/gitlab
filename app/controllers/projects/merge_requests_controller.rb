@@ -27,9 +27,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
-    push_frontend_feature_flag(:deploy_from_footer, @project, default_enabled: true)
     push_frontend_feature_flag(:suggest_pipeline) if experiment_enabled?(:suggest_pipeline)
-    push_frontend_feature_flag(:code_navigation, @project, default_enabled: true)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
     push_frontend_feature_flag(:merge_ref_head_comments, @project, default_enabled: true)
     push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
@@ -39,7 +37,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:approvals_commented_by, @project, default_enabled: true)
     push_frontend_feature_flag(:hide_jump_to_next_unresolved_in_threads, default_enabled: true)
     push_frontend_feature_flag(:merge_request_widget_graphql, @project)
-    push_frontend_feature_flag(:unified_diff_lines, @project)
+    push_frontend_feature_flag(:unified_diff_lines, @project, default_enabled: true)
     push_frontend_feature_flag(:highlight_current_diff_row, @project)
     push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
   end

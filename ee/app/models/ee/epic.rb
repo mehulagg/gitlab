@@ -73,6 +73,8 @@ module EE
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
 
+      scope :with_web_entity_associations, -> { preload(:author, group: [:ip_restrictions, :route]) }
+
       scope :within_timeframe, -> (start_date, end_date) do
         where('start_date is not NULL or end_date is not NULL')
           .where('start_date is NULL or start_date <= ?', end_date)
@@ -232,6 +234,10 @@ module EE
         return items unless ids
 
         items.where("epic_issues.epic_id": ids)
+      end
+
+      def search(query)
+        fuzzy_search(query, [:title, :description])
       end
     end
 
