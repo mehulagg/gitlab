@@ -411,6 +411,9 @@ For example, to push your local commits to the _`master`_ branch of the _`origin
 git push origin master
 ```
 
+In certain occasions, Git won't allow you to push to your repository, then
+you'll need to [force an update](#force-push).
+
 NOTE: **Note:**
 To create a merge request from a fork to an upstream repository, see the
 [forking workflow](../user/project/repository/forking_workflow.md).
@@ -458,6 +461,107 @@ the master branch, you `merge` the two together:
 git checkout <name-of-branch>
 git merge master
 ```
+
+### Git rebase
+
+[Rebasing](https://git-scm.com/docs/git-rebase) is a very common operation in Git, mostly to:
+
+- Change commits: amend a commit message, squash commits (join multiple
+  commits into one), edit, and delete commits. This is known as _interactive
+  rebase_, handy for organizing the commit history of your repository and keeping it clean.
+  See [Numerous undo possibilities in Git](../topics/git/numerous_undo_possibilities_in_git/index.md#with-history-modification)
+  for details.
+- Update your feature branch with the default branch (or any other branch).
+  This is an important step for Git-based development strategies to make sure
+  the changes you're adding do not break any existing changes.
+
+For example, to update your branch `my-feature-branch`, with `master`,
+checkout your feature branch:
+
+```shell
+git checkout my-feature-branch
+```
+
+Then rebase against `master`:
+
+```shell
+git rebase origin/master
+```
+
+When you do that, Git imports all the commits submitted to `master` after the
+moment you created your feature branch until the present moment, and puts the
+commits you have in your feature branch on top of all the commits present in
+`master`.
+
+<!-- To-do: add illustration. -->
+
+If there are [merge conflicts](#merge-conflicts), Git will prompt you to fix
+them before continuing to rebase.
+
+After rebasing, you'll need to [force-push](#force-push) changes to the remote
+repository.
+
+CAUTION: **Warning:**
+As `git rebase` re-writes the commit history, it **can be harmful** to do it in
+shared branches. It can cause complex merge conflicts, hard to resolve. In
+these cases, instead of rebasing your branch against the default branch,
+consider pulling it instead (`git pull origin master`). It will have a
+similar effect without compromising the work of your contributors.
+
+#### Force-push
+
+When you perform more complex operations, for example, squash commits, reset or
+rebase your branch, you'll have to _force_ an update to the remote branch,
+since these operations imply re-writing the commit history of the branch.
+To force an update, pass the flag `--force` or `-f` to the `push` command. For
+example:
+
+```shell
+git push --force origin my-feature-branch
+```
+
+Forcing an update is **not** recommended when you're working on shared
+branches.
+
+Alternatively, you can also pass the flag [`--force-with-lease`](https://git-scm.com/docs/git-push#Documentation/git-push.txt---force-with-leaseltrefnamegt)
+instead. It can be safer not to overwrite any work on the remote
+branch if more commits were added to the remote branch by someone else:
+
+```shell
+git push --force-with-lease origin my-feature-branch
+```
+
+Note that, if the branch you want to force-push is [protected](../user/project/protected_branches.md),
+you will not be able to do so unless you unprotect it beforehand. Then you can
+force-push and re-protect it again.
+
+### Merge conflicts
+
+As Git version-control is based on comparing versions of a file line-by-line,
+whenever a line changed in your branch coincides with the same line changed in
+the target branch, Git will identify these changes as a merge conflict. This
+means you need to choose which version of that line you want to keep.
+
+Most of conflicts can be [resolved through the GitLab UI](../user/project/merge_requests/resolve_conflicts.md).
+For more complex cases, there are various methods for resolving them and
+also Git CLI apps very handy to do so, but you can also fix them locally:
+
+1. [Rebase your branch](#git-rebase) (`git rebase origin/master`) and Git will
+   prompt you with the conflicts.
+1. Open the conflicting file in a code editor of your preference.
+1. Look for the conflict markers:
+   - Beginning: `<<<<<<< HEAD`.
+   - Content with your changes.
+   - End of your changes: `=======`.
+   - Content of the latest changes on the target branch.
+   - End of the conflict `>>>>>>>`.
+1. Edit the file: choose which version (before or after `=======`) you want to keep.
+1. Make sure you've deleted the markers and save the file.
+1. Repeat the process if there are other conflicting files.
+1. Stage your changes (`git add .`).
+1. Commit your changes (`git commit -m "Fix merge conflicts"`).
+1. Continue rebasing with `git rebase --continue`.
+1. [Force-push](#force-push) to your remote branch.
 
 ## Synchronize changes in a forked repository with the upstream
 
