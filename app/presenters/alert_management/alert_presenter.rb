@@ -13,7 +13,7 @@ module AlertManagement
     delegate :metrics_dashboard_url, :runbook, to: :parsed_payload
 
     def initialize(alert, _attributes = {})
-      super
+      super(alert)
 
       @alert = alert
       @project = alert.project
