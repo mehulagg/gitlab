@@ -29,30 +29,27 @@ describe('AncestorsTreeContainer', () => {
     );
   });
 
-  it('does not render timeline when fetching', () => {
+  it('does not render timeline when fetching', async () => {
     vm.$props.isFetching = true;
 
-    return vm.$nextTick().then(() => {
-      expect(vm.$el.querySelector('.vertical-timeline')).toBeNull();
-      expect(vm.$el.querySelector('.value')).toBeNull();
-    });
+    await vm.$nextTick();
+    expect(vm.$el.querySelector('.vertical-timeline')).toBeNull();
+    expect(vm.$el.querySelector('.value')).toBeNull();
   });
 
-  it('render `None` when ancestors is an empty array', () => {
+  it('render `None` when ancestors is an empty array', async () => {
     vm.$props.ancestors = [];
 
-    return vm.$nextTick().then(() => {
-      expect(vm.$el.querySelector('.vertical-timeline')).toBeNull();
-      expect(vm.$el.querySelector('.value')).not.toBeNull();
-    });
+    await vm.$nextTick();
+    expect(vm.$el.querySelector('.vertical-timeline')).toBeNull();
+    expect(vm.$el.querySelector('.value')).not.toBeNull();
   });
 
-  it('render loading icon when isFetching is true', () => {
+  it('render loading icon when isFetching is true', async () => {
     vm.$props.isFetching = true;
 
-    return vm.$nextTick().then(() => {
-      expect(vm.$el.querySelector('.fa-spinner')).toBeDefined();
-    });
+    await vm.$nextTick();
+    expect(vm.$el.querySelector('.fa-spinner')).toBeDefined();
   });
 
   it('escapes html in the tooltip', () => {
