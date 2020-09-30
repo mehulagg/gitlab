@@ -26,7 +26,7 @@ class Packages::Package < ApplicationRecord
   validates :project, presence: true
   validates :name, presence: true
 
-  validates :name, format: { with: Gitlab::Regex.package_name_regex }, unless: :conan?
+  validates :name, format: { with: Gitlab::Regex.package_name_regex }, unless: -> { conan? || generic? }
 
   validates :name,
     uniqueness: { scope: %i[project_id version package_type] }, unless: :conan?
@@ -35,8 +35,9 @@ class Packages::Package < ApplicationRecord
   validate :valid_npm_package_name, if: :npm?
   validate :valid_composer_global_name, if: :composer?
   validate :package_already_taken, if: :npm?
-  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { npm? || nuget? }
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
+  validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
+  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { npm? || nuget? }
   validates :version, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
   validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
