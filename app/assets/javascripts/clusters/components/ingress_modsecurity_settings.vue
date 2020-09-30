@@ -232,7 +232,7 @@ export default {
               </gl-deprecated-dropdown>
             </div>
           </div>
-          <div v-if="showButtons" class="mt-3">
+          <div v-if="showButtons" class="gl-mt-5 gl-display-flex">
             <gl-button
               variant="success"
               category="primary"
@@ -242,7 +242,7 @@ export default {
             >
               {{ saveButtonLabel }}
             </gl-button>
-            <gl-button :disabled="saveButtonDisabled" @click="resetStatus">
+            <gl-button :disabled="saveButtonDisabled" class="gl-ml-3" @click="resetStatus">
               {{ __('Cancel') }}
             </gl-button>
           </div>
