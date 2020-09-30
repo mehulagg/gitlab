@@ -598,14 +598,6 @@ Container Registry, you must delete all existing images.
 - Prior to GitLab 12.10, any tags that use the same image ID as the `latest` tag
 are not deleted by the cleanup policy.
 
-## Compatibility
-
-### Docker v1 images and minimum required Docker Engine version
-
-Support for the Docker v1 API was [deprecated](https://gitlab.com/gitlab-org/container-registry/-/issues/213) and will be removed on January 22nd 2021. Although it is still possible to pull [v1 images](https://docs.docker.com/registry/spec/manifest-v2-1/) from the GitLab Container Registry, it was no longer possible to push them. With the deprecation of the v1 API, pulls will also be disabled, starting on January 22nd 2021. If you still have v1 images hosted in the GitLab Container Registry, you should update them to [v2](https://docs.docker.com/registry/spec/manifest-v2-2/) following the [instructions from Docker](https://docs.docker.com/registry/spec/deprecated-schema-v1/) using Docker Engine version [17.03](https://docs.docker.com/engine/release-notes/17.03/#17030-ce) (March 2017) or higher.
-
-Although the minimum required version of Docker Engine is 17.03 (when support for the v2 API was introduced), we recommend that you use version [17.12](https://docs.docker.com/engine/release-notes/17.12/#17120-ce) (December 2017) or higher, as those no longer support v1 images and therefore you are safe from compatibility issues.
-
 ## Disable the Container Registry for a project
 
 The Container Registry is enabled by default. 
