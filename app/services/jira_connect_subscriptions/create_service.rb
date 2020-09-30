@@ -18,6 +18,10 @@ module JiraConnectSubscriptions
       subscription = JiraConnectSubscription.new(installation: jira_connect_installation, namespace: namespace)
 
       if subscription.save
+        namespace.all_projects.each do |project|
+          JiraConnect::SyncProjectWorker.perform_async(project.id)
+        end
+
         success
       else
         error(subscription.errors.full_messages.join(', '), 422)

@@ -1,0 +1,5 @@
+---
+title: Sync MRs when a namespace is added via Jira Connect
+merge_request: 43880
+author:
+type: added

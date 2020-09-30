@@ -32,6 +32,15 @@ RSpec.describe JiraConnectSubscriptions::CreateService do
     it 'returns success' do
       expect(subject[:status]).to eq(:success)
     end
+
+    context 'namespace has projects' do
+      let(:project) { create(:project, group: group) }
+
+      it 'starts workers to sync projects' do
+        expect(JiraConnect::SyncProjectWorker).to receive(:perform_async).with(project.id)
+        subject
+      end
+    end
   end
 
   context 'when path is invalid' do
