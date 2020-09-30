@@ -23,7 +23,7 @@ For setup information, see the [Slack Notifications Service docs](../../user/pro
 
 ## Email notifications
 
-If a project has been [configured to create incidents for triggered alerts](./incidents.md#configure-incidents),
+If a project has been [configured to create incidents for triggered alerts](incidents.md#configure-incidents),
 projects members with the _Owner_ or _Maintainer_ role will be sent an email
 notification. To send additional email notifications to project members with the
 Developer role:
