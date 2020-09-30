@@ -171,16 +171,32 @@ RSpec.describe Gitlab::Database::LoadBalancing::Sticking, :redis do
     end
 
     context 'when load balancing is enabled' do
-      it 'updates the write location' do
-        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-          .and_return(true)
+      let(:lb) { Gitlab::Database::LoadBalancing::LoadBalancer.new(%w(localhost localhost)) }
 
-        lb = double(:lb, primary_write_location: 'foo')
-
+      before do
+        allow(Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
         allow(described_class).to receive(:load_balancer).and_return(lb)
 
+        allow(Gitlab::Database).to receive(:create_connection_pool)
+                                     .and_return(ActiveRecord::Base.connection_pool)
+      end
+
+      it 'avoids N+1 cached queries', :use_sql_query_cache, :request_store do
+        # Run this once to establish a baseline
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
+          described_class.mark_primary_write_location(:user, 1)
+        end
+
+        expect do
+          (1..100).each do |i|
+            described_class.mark_primary_write_location(:user, i)
+          end
+        end.not_to exceed_all_query_limit(control_count.count)
+      end
+
+      it 'updates the write location' do
         expect(described_class).to receive(:set_write_location_for)
-          .with(:user, 42, 'foo')
+          .with(:user, 42, String)
 
         described_class.mark_primary_write_location(:user, 42)
       end

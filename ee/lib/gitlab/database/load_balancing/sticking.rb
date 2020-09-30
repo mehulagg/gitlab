@@ -19,6 +19,7 @@ module Gitlab
         # The number of seconds after which a session should stop reading from
         # the primary.
         EXPIRATION = 30
+        CACHE_KEY = :gitlab_load_balancer_primary_write_location
 
         # Sticks to the primary if a write was performed.
         def self.stick_if_necessary(namespace, id)
@@ -60,7 +61,7 @@ module Gitlab
         end
 
         def self.mark_primary_write_location_helper(namespace, id)
-          location = load_balancer.primary_write_location
+          location = primary_write_location
 
           set_write_location_for(namespace, id, location)
         end
@@ -91,6 +92,13 @@ module Gitlab
         def self.load_balancer
           LoadBalancing.proxy.load_balancer
         end
+
+        def self.primary_write_location
+          load_balancer.primary_write_location
+          RequestStore[CACHE_KEY] ||= load_balancer.primary_write_location
+        end
+        private_class_method :primary_write_location
+
       end
     end
   end
