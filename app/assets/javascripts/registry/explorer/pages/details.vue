@@ -48,9 +48,7 @@ export default {
       return decodeAndParse(this.$route.params.id);
     },
     showPartialCleanupWarning() {
-      return (
-        this.queryParameters.expiration_policy_started_at && !this.dismissPartialCleanupWarning
-      );
+      return this.queryParameters.cleanup_policy_started_at && !this.dismissPartialCleanupWarning;
     },
     tracking() {
       return {

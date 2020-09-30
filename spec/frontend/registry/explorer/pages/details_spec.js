@@ -293,7 +293,7 @@ describe('Details Page', () => {
     };
 
     describe('when expiration_policy_started is not null', () => {
-      const routeParams = { expiration_policy_started_at: Date.now().toString() };
+      const routeParams = { cleanup_policy_started_at: Date.now().toString() };
 
       it('exists', () => {
         mountComponent({ routeParams });
