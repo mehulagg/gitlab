@@ -110,6 +110,6 @@ export default {
     :data-clipboard-target="target"
     :data-clipboard-text="text"
     :title="title"
-    :icon="'copy-to-clipboard'"
+    icon="copy-to-clipboard"
   />
 </template>
