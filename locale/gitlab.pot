@@ -22301,9 +22301,6 @@ msgstr ""
 msgid "Scope"
 msgstr ""
 
-msgid "Scope not supported with disabled 'users_search' feature!"
-msgstr ""
-
 msgid "Scoped issue boards"
 msgstr ""
 

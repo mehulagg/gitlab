@@ -305,8 +305,6 @@ module SearchHelper
   end
 
   def show_user_search_tab?
-    return false if Feature.disabled?(:users_search, default_enabled: true)
-
     if @project
       project_search_tabs?(:members)
     else
