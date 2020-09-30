@@ -21,7 +21,7 @@ module API
       def child_epics
         EpicsFinder.new(current_user, {
           parent_id: epic.id,
-          group_id: user_group.id,
+          group_id: user_group,
           sort: 'relative_position'
         }).execute
       end

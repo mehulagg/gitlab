@@ -112,7 +112,7 @@ module EE
 
       # rubocop: disable CodeReuse/ActiveRecord
       def find_group_epic(iid)
-        EpicsFinder.new(current_user, group_id: user_group.id).find_by!(iid: iid)
+        EpicsFinder.new(current_user, group_id: user_group).find_by!(iid: iid)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

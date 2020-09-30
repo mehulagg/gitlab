@@ -27,7 +27,7 @@ module Groups
     # rubocop: enable CodeReuse/ActiveRecord
 
     def epics(confidential_only: false)
-      finder_params = { group_id: group.id }
+      finder_params = { group_id: group }
       finder_params[:confidential] = true if confidential_only.present?
 
       # TODO: use include_descendant_groups: true optional parameter once frontend supports epics from external groups.

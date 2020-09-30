@@ -45,7 +45,7 @@ module EE
       def find_epic(epic_id)
         return if remove_epic?(epic_id)
 
-        EpicsFinder.new(current_user, group_id: group&.id, include_ancestor_groups: true).find(epic_id)
+        EpicsFinder.new(current_user, group_id: group, include_ancestor_groups: true).find(epic_id)
       rescue ActiveRecord::RecordNotFound
         raise ArgumentError, _('Epic not found for given params')
       end

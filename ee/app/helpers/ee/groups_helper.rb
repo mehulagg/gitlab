@@ -6,7 +6,7 @@ module EE
 
     def group_epics_count(state:)
       EpicsFinder
-        .new(current_user, group_id: @group.id, state: state)
+        .new(current_user, group_id: @group, state: state)
         .execute(skip_visibility_check: true)
         .count
     end
