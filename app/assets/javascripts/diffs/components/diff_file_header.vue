@@ -284,6 +284,7 @@ export default {
           data-track-label="diff_toggle_external_button"
           data-track-property="diff_toggle_external"
           icon="external-link"
+          class="diff-review-app-btn"
         />
         <gl-dropdown
           v-gl-tooltip.hover.focus="__('More actions')"
