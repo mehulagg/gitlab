@@ -1,6 +1,7 @@
 <script>
 import SkeletonLoader from '../components/skeleton_loader.vue';
 import EditArea from '../components/edit_area.vue';
+import EditMetaModal from '../components/edit_meta_modal.vue';
 import InvalidContentMessage from '../components/invalid_content_message.vue';
 import SubmitChangesError from '../components/submit_changes_error.vue';
 import appDataQuery from '../graphql/queries/app_data.query.graphql';
@@ -16,6 +17,7 @@ export default {
   components: {
     SkeletonLoader,
     EditArea,
+    EditMetaModal,
     InvalidContentMessage,
     SubmitChangesError,
   },
@@ -49,7 +51,9 @@ export default {
   data() {
     return {
       content: null,
+      images: null,
       submitChangesError: null,
+      isModalOpen: false,
       isSavingChanges: false,
     };
   },
@@ -65,16 +69,21 @@ export default {
     Tracking.event(document.body.dataset.page, TRACKING_ACTION_INITIALIZE_EDITOR);
   },
   methods: {
+    onHideModal() {
+      this.isModalOpen = false;
+      this.isSavingChanges = false;
+    },
     onDismissError() {
       this.submitChangesError = null;
     },
-    onSubmit({ content, images }) {
+    onPrepareSubmit({ content, images }) {
       this.content = content;
-      this.submitChanges(images);
-    },
-    submitChanges(images) {
-      this.isSavingChanges = true;
+      this.images = images;
 
+      this.isSavingChanges = true;
+      this.isModalOpen = true;
+    },
+    onSubmit() {
       // eslint-disable-next-line promise/catch-or-return
       this.$apollo
         .mutate({
@@ -88,7 +97,6 @@ export default {
         .finally(() => {
           this.$router.push(SUCCESS_ROUTE);
         });
-
       this.$apollo
         .mutate({
           mutation: submitContentChangesMutation,
@@ -98,7 +106,7 @@ export default {
               username: this.appData.username,
               sourcePath: this.appData.sourcePath,
               content: this.content,
-              images,
+              images: this.images,
             },
           },
         })
@@ -128,8 +136,9 @@ export default {
         :content="sourceContent.content"
         :saving-changes="isSavingChanges"
         :return-url="appData.returnUrl"
-        @submit="onSubmit"
+        @submit="onPrepareSubmit"
       />
+      <edit-meta-modal v-if="isModalOpen" @primary="onSubmit" @hide="onHideModal" />
     </template>
 
     <invalid-content-message v-else class="w-75" />

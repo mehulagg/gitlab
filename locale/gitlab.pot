@@ -4299,6 +4299,9 @@ msgstr ""
 msgid "Branches|protected"
 msgstr ""
 
+msgid "Brief title about the change"
+msgstr ""
+
 msgid "Broadcast Message was successfully created."
 msgstr ""
 
@@ -12281,6 +12284,9 @@ msgid "Go to your projects"
 msgstr ""
 
 msgid "Go to your snippets"
+msgstr ""
+
+msgid "Goal of the changes and what reviewers should be aware of"
 msgstr ""
 
 msgid "Google Cloud Platform"
@@ -24646,6 +24652,9 @@ msgstr ""
 msgid "Submit changes"
 msgstr ""
 
+msgid "Submit changes..."
+msgstr ""
+
 msgid "Submit feedback"
 msgstr ""
 
@@ -24659,6 +24668,9 @@ msgid "Submit search"
 msgstr ""
 
 msgid "Submit the current review."
+msgstr ""
+
+msgid "Submit your changes"
 msgstr ""
 
 msgid "Submitted the current review."
