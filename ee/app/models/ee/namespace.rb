@@ -194,8 +194,10 @@ module EE
       strong_memoize(:total_repository_size_excess) do
         namespace_limit = actual_size_limit
 
-        select_string = 'SUM(GREATEST(project_statistics.repository_size - COALESCE(projects.repository_size_limit, :namespace_limit), 0)) AS total_excess'
-        select_sql = self.class.sanitize_sql_array([select_string, namespace_limit: namespace_limit])
+        namespace_limit_arel = Arel::Nodes::SqlLiteral.new(namespace_limit.to_s.presence || 'NULL')
+        coalesce_arel = self.class.arel_table.coalesce(::Project.arel_table[:repository_size_limit], namespace_limit_arel)
+        greatest_arel = Arel::Nodes::NamedFunction.new('GREATEST', [::ProjectStatistics.arel_table[:repository_size] - coalesce_arel, 0])
+        select_sql = Arel::Nodes::NamedFunction.new('SUM', [greatest_arel]).to_sql
 
         condition = 'projects.repository_size_limit != 0' # Excludes projects with unlimited project-level limit
         # Includes projects with undefined project-level limit as it is set by namespace-level limit
