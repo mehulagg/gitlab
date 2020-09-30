@@ -118,6 +118,25 @@ module Elastic
         query_hash
       end
 
+      def apply_sort(query_hash, options)
+        case options[:sort]
+        when 'oldest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'asc'
+            }
+          })
+        when 'newest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'desc'
+            }
+          })
+        else
+          query_hash
+        end
+      end
+
       # Builds an elasticsearch query that will select projects the user is
       # granted access to.
       #

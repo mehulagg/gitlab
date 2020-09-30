@@ -24,6 +24,7 @@ module Elastic
         query_hash = project_ids_filter(query_hash, options)
         query_hash = confidentiality_filter(query_hash, options)
         query_hash = state_filter(query_hash, options)
+        query_hash = apply_sort(query_hash, options)
 
         search(query_hash, options)
       end
