@@ -94,6 +94,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :dependencies, only: [:index]
         resources :licenses, only: [:index, :create, :update]
 
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
+
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
         end
