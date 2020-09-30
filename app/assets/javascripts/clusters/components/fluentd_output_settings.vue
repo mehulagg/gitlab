@@ -221,7 +221,7 @@ export default {
           <strong>{{ s__('ClusterIntegration|Send Container Network Policies Logs') }}</strong>
         </gl-form-checkbox>
       </div>
-      <div v-if="showButtons" class="mt-3">
+      <div v-if="showButtons" class="gl-mt-5 gl-display-flex">
         <gl-button
           ref="saveBtn"
           class="gl-mr-3"
