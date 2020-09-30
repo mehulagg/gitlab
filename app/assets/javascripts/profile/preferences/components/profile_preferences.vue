@@ -1,25 +1,35 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import GroupOverviewSelector from 'ee_else_ce/profile/preferences/components/group_overview_selector.vue';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import createFlash, { hideFlash, FLASH_TYPES } from '~/flash';
 
 // TODO:
-// - figure out validation of form submission + flash display
-// - finalize haml migration of `group_overview_selector` and `integration_views`
 // - figure out if `app/views/profiles/preferences/_gitpod.html.haml` is being used
 // - figure out if `app/views/profiles/preferences/_sourcegraph.html.haml` is being used
 
+// Same, but new implementation:
+// - image lazy load
+// - checkbox default value
+// - radio button direct submit (all fields)
+
 // Differences to HAML implementation:
-// - Removed lazy loading of images
 // - changed select2 to select
 // - changed quote in "Show one file at a time on merge request’s Changes tab"
 // - added `gl-button` class to submit
 // - changed submit to call submit()
 
-function updateClasses(bodyClasses, applicationTheme, layout) {
+const CHECKBOX_FIELD_NAMES = [
+  'user[render_whitespace_in_code]',
+  'user[show_whitespace_in_diffs]',
+  'user[view_diffs_file_by_file]',
+  'user[time_format_in_24h]',
+];
+
+function updateClasses(bodyClasses = '', applicationTheme, layout) {
   // Remove body class for any previous theme, re-add current one
-  document.body.classList.remove(bodyClasses.split(' '));
+  document.body.classList.remove(...bodyClasses.split(' '));
   document.body.classList.add(applicationTheme);
 
   // Toggle container-fluid class
@@ -32,19 +42,11 @@ function updateClasses(bodyClasses, applicationTheme, layout) {
   }
 }
 
-function updateFlash(flash) {
-  // Show flash messages
-  if (flash.notice) {
-    createFlash({ message: flash.discard(flash.notice), type: 'notice' });
-  } else if (flash.alert) {
-    createFlash({ message: flash.discard(flash.alert), type: 'alert' });
-  }
-}
-
 export default {
   name: 'ProfilePreferences',
   components: {
     GlButton,
+    GroupOverviewSelector,
   },
   props: {
     themes: {
@@ -75,6 +77,14 @@ export default {
       type: Array,
       required: true,
     },
+    groupViewChoices: {
+      type: Array,
+      default: () => [],
+    },
+    integrationViews: {
+      type: Array,
+      default: () => [],
+    },
     userFields: {
       type: Object,
       required: true,
@@ -93,37 +103,75 @@ export default {
     },
   },
   data() {
+    console.log(this.groupViewChoices);
+    console.log(this.userFields);
     return {
       isSubmitEnabled: true,
+      selectedTabWidth: this.userFields.tabWidth,
+      selectedTheme: this.userFields.theme,
+      selectedScheme: this.userFields.scheme,
+      selectedLayout: this.userFields.layout,
+      selectedDashboard: this.userFields.dashboard,
+      selectedProjectView: this.userFields.projectView,
+      selectedRenderWhitespaceInCode: this.userFields.renderWhitespaceInCode,
+      selectedShowWhitespaceInDiffs: this.userFields.showWhitespaceInDiffs,
+      selectedViewDiffsFileByFile: this.userFields.viewDiffsFileByFile,
+      selectedPreferredLanguage: this.userFields.preferredLanguage,
+      selectedFirstDayOfWeek: this.userFields.firstDayOfWeek,
+      selectedTimeFormatIn24h: this.userFields.timeFormatIn24h,
+      selectedTimeDisplayRelative: this.userFields.timeDisplayRelative,
     };
+  },
+  computed: {
+    applicationThemes() {
+      return this.themes.reduce((memo, theme) => {
+        const { id, ...rest } = theme;
+        return { ...memo, [id]: rest };
+      }, {});
+    },
   },
   methods: {
     async handleSubmit() {
       const formData = new FormData(this.$refs.form);
+      // Ensure that checkboxes false values gets sent
+      CHECKBOX_FIELD_NAMES.forEach(name => {
+        if (formData.has(name)) {
+          formData.set(name, 1);
+        } else {
+          formData.set(name, 0);
+        }
+      });
+      for (const p of formData) {
+        console.log(p);
+      }
+      // formData.set("user[tab_width]", "-1");
       this.isSubmitEnabled = false;
-      const response = await axios.post('/profile/preferences', formData);
-      console.log(response);
+      try {
+        const response = await axios.put('/profile/preferences', formData);
+        const { message, status } = response.data;
+        let type = FLASH_TYPES.NOTICE;
+        if (status === 'error') {
+          type = FLASH_TYPES.ALERT;
+        }
+        createFlash({ message, type });
+        updateClasses(
+          this.bodyClasses,
+          this.applicationThemes[this.selectedTheme].css_class,
+          this.selectedLayout,
+        );
+      } catch (error) {
+        createFlash({ message: error });
+      }
 
-      updateClasses(
-        this.bodyClasses.split,
-        this.userFields.applicationTheme,
-        this.userFields.layout,
-      );
-      // updateFlash(this.flash);
-
-      window.location.reload();
+      this.isSubmitEnabled = true;
     },
   },
 };
-
-// action="/profile/preferences"
-// data-remote="true"
-// method="post"
 </script>
 
 <template>
   <form ref="form" class="row gl-mt-3 js-preferences-form" accept-charset="UTF-8" @submit.prevent>
-    <input name="utf8" type="hidden" value="✓" /><input type="hidden" name="_method" value="put" />
+    <input name="utf8" type="hidden" value="✓" />
     <div class="col-lg-4 application-theme">
       <h4 class="gl-mt-0">
         {{ __('Navigation theme') }}
@@ -138,14 +186,10 @@ export default {
           v-for="theme in themes"
           :key="theme.id"
           class="col-6 col-sm-4 col-md-3 gl-mb-5 gl-text-center"
+          @click="handleSubmit"
         >
           <div :class="`preview ${theme.css_class}`"></div>
-          <input
-            type="radio"
-            :value="theme.id"
-            :checked="userFields.theme === theme.id"
-            name="user[theme_id]"
-          />
+          <input v-model="selectedTheme" type="radio" :value="theme.id" name="user[theme_id]" />
           {{ theme.name }}
         </label>
       </div>
@@ -170,14 +214,15 @@ export default {
         v-for="scheme in schemes"
         :key="scheme.id"
         class="col-6 col-sm-4 col-md-3 gl-mb-5 gl-text-center"
+        @click="handleSubmit"
       >
         <div class="preview">
-          <img :src="scheme.image_url" />
+          <img class="lazy" :data-src="scheme.image_url" />
         </div>
         <input
+          v-model="selectedScheme"
           type="radio"
           :value="scheme.id"
-          :checked="userFields.scheme === scheme.id"
           name="user[color_scheme_id]"
         />
         {{ scheme.name }}
@@ -207,6 +252,8 @@ export default {
         </label>
         <div class="select-wrapper">
           <select
+            id="user_layout"
+            v-model="selectedLayout"
             class="form-control select-control"
             name="user[layout]"
             tabindex="-1"
@@ -216,7 +263,6 @@ export default {
               v-for="[optionName, optionValue] in layoutChoices"
               :key="optionValue"
               :value="optionValue"
-              :selected="optionValue === userFields.layout"
             >
               {{ optionName }}
             </option>
@@ -233,6 +279,8 @@ export default {
         </label>
         <div class="select-wrapper">
           <select
+            id="user_dashboard"
+            v-model="selectedDashboard"
             class="form-control select-control"
             name="user[dashboard]"
             tabindex="-1"
@@ -242,7 +290,6 @@ export default {
               v-for="[optionName, optionValue] in dashboardChoices"
               :key="optionValue"
               :value="optionValue"
-              :selected="optionValue === userFields.dashboard"
             >
               {{ optionName }}
             </option>
@@ -253,33 +300,8 @@ export default {
           {{ __('Choose what content you want to see on your homepage.') }}
         </div>
       </div>
-      <!--
-      = render_if_exists 'profiles/preferences/group_overview_selector', f: f # EE-specific
-      <div class="form-group">
-        <label class="label-bold" for="user_group_view">
-          {{ __('Group overview conte nt
-        </label>
-        <select
-          class="form-control select-control"
-          name="user[group_view]"
-          tabindex="-1"
-          title="Group overview content"
-        >
-          <option
-              v-for="[optionName, optionValue] in groupViewChoices"
-              :key="optionValue"
-              :value="optionValue"
-              :selected="optionValue === userFields.group"
-            >
-              {{ optionName }}
-            </option>
-          <option selected="selected" value="details">Details (default)</option>
-          <option value="security_dashboard">Security dashboard</option>
-        </select>
-        <div class="form-text text-muted">
-          {{ __('Choose what content you want to see on a group’s overview pag e.
-        </div>
-      </div> -->
+
+      <group-overview-selector :group-view-choices="groupViewChoices" :user-fields="userFields" />
 
       <div class="form-group">
         <label class="label-bold" for="user_project_view">
@@ -287,6 +309,8 @@ export default {
         </label>
         <div class="select-wrapper">
           <select
+            id="user_project_view"
+            v-model="selectedProjectView"
             class="form-control select-control"
             name="user[project_view]"
             tabindex="-1"
@@ -296,7 +320,6 @@ export default {
               v-for="[optionName, optionValue] in projectViewChoices"
               :key="optionValue"
               :value="optionValue"
-              :selected="optionValue === userFields.projectView"
             >
               {{ optionName }}
             </option>
@@ -308,39 +331,39 @@ export default {
         </div>
       </div>
       <div class="form-group form-check">
-        <input name="user[render_whitespace_in_code]" type="hidden" value="0" />
         <input
+          id="user_render_whitespace_in_code"
+          v-model="selectedRenderWhitespaceInCode"
           class="form-check-input"
-          type="checkbox"
-          value="1"
-          :checked="userFields.renderWhitespaceInCode"
           name="user[render_whitespace_in_code]"
+          type="checkbox"
+          :value="selectedRenderWhitespaceInCode"
         />
         <label class="form-check-label" for="user_render_whitespace_in_code">
           {{ __('Render whitespace characters in the Web IDE') }}
         </label>
       </div>
       <div class="form-group form-check">
-        <input name="user[show_whitespace_in_diffs]" type="hidden" value="0" />
         <input
+          id="user_show_whitespace_in_diffs"
+          v-model="selectedShowWhitespaceInDiffs"
           class="form-check-input"
-          type="checkbox"
-          value="1"
-          :checked="userFields.showWhitespaceInDiffs"
           name="user[show_whitespace_in_diffs]"
+          type="checkbox"
+          :value="selectedShowWhitespaceInDiffs"
         />
         <label class="form-check-label" for="user_show_whitespace_in_diffs">
           {{ __('Show whitespace changes in diffs') }}
         </label>
       </div>
       <div v-if="featureFlags.viewDiffsFileByFile" class="form-group form-check">
-        <input name="user[view_diffs_file_by_file]" type="hidden" value="0" />
         <input
+          id="user_view_diffs_file_by_file"
+          v-model="selectedViewDiffsFileByFile"
           class="form-check-input"
-          type="checkbox"
-          :checked="userFields.viewDiffsFileByFile"
-          value="1"
           name="user[view_diffs_file_by_file]"
+          type="checkbox"
+          :value="selectedViewDiffsFileByFile"
         />
         <label class="form-check-label" for="user_view_diffs_file_by_file">
           {{ __('Show one file at a time on merge request’s Changes tab') }}
@@ -358,13 +381,14 @@ export default {
           {{ __('Tab width') }}
         </label>
         <input
+          id="user_tab_width"
+          v-model="selectedTabWidth"
           class="form-control"
+          name="user[tab_width]"
           min="1"
           max="12"
           required="required"
           type="number"
-          :value="userFields.tabWidth"
-          name="user[tab_width]"
         />
         <div class="form-text text-muted">
           {{ __('Must be a number between 1 and 12') }}
@@ -392,6 +416,8 @@ export default {
         </label>
         <div class="select-wrapper">
           <select
+            id="user_preferred_language"
+            v-model="selectedPreferredLanguage"
             class="form-control select-control"
             name="user[preferred_language]"
             tabindex="-1"
@@ -401,7 +427,6 @@ export default {
               v-for="[optionName, optionValue] in languageChoices"
               :key="optionValue"
               :value="optionValue"
-              :selected="optionValue === userFields.preferredLanguage"
             >
               {{ optionName }}
             </option>
@@ -416,64 +441,85 @@ export default {
         <label class="label-bold" for="user_first_day_of_week">
           {{ __('First day of the week') }}
         </label>
-        <select
-          class="form-control select-control"
-          name="user[first_day_of_week]"
-          tabindex="-1"
-          title="First day of the week"
-        >
-          <option
-            v-for="[optionName, optionValue] in firstDayOfWeekChoicesWithDefault"
-            :key="optionValue"
-            :value="optionValue"
-            :selected="optionValue === userFields.firstDayOfWeek"
+        <div class="select-wrapper">
+          <select
+            id="user_first_day_of_week"
+            v-model="selectedFirstDayOfWeek"
+            class="form-control select-control"
+            name="user[first_day_of_week]"
+            tabindex="-1"
+            title="First day of the week"
           >
-            {{ optionName }}
-          </option>
-        </select>
+            <option
+              v-for="[optionName, optionValue] in firstDayOfWeekChoicesWithDefault"
+              :key="optionValue"
+              :value="optionValue"
+            >
+              {{ optionName }}
+            </option>
+          </select>
+          <i aria-hidden="true" class="fa fa-chevron-down"> </i>
+        </div>
       </div>
     </div>
 
-    <!-- = render 'integrations', f: f
-     - if Feature.enabled?(:user_time_settings)
-      .col-sm-12
-        %hr
-      .col-lg-4.profile-settings-sidebar
-        %h4.gl-mt-0= s_('Preferences|Time preferences')
-        %p= s_('Preferences|These settings will update how dates and times are displayed for you.')
-      .col-lg-8
-        .form-group
-          %h5= s_('Preferences|Time format')
-          .checkbox-icon-inline-wrapper
-            - time_format_label = capture do
-              = s_('Preferences|Display time in 24-hour format')
-            = f.check_box :time_format_in_24h
-            = f.label :time_format_in_24h do
-              = time_format_label
-          %h5= s_('Preferences|Time display')
-          .checkbox-icon-inline-wrapper
-            - time_display_label = capture do
-              = s_('Preferences|Use relative times')
-            = f.check_box :time_display_relative
-            = f.label :time_display_relative do
-              = time_display_label
-            .form-text.text-muted
-              = s_('Preferences|For example: 30 mins ago.')
-
-      .col-sm-12
-        %hr
-
-      .col-lg-4.profile-settings-sidebar#integrations
-        %h4.gl-mt-0
-          = s_('Preferences|Integrations')
-        %p
-          = s_('Preferences|Customize integrations with third party services.')
-          = succeed '.' do
-            = link_to _('Learn more'), help_page_path('user/profile/preferences.md', anchor: 'integrations'), target: '_blank'
-
-      .col-lg-8
-        - integration_views.each do |view|
-          = render view, f: f -->
+    <!-- <div v-if="featureFlags.userTimeSettings"> -->
+    <div class="col-sm-12">
+      <hr />
+    </div>
+    <div class="col-lg-4 profile-settings-sidebar">
+      <h4 class="gl-mt-0">
+        {{ __('Time preferences') }}
+      </h4>
+      <p>
+        {{ __('These settings will update how dates and times are displayed for you.') }}
+      </p>
+    </div>
+    <div class="col-lg-8">
+      <div class="form-group">
+        <h5>
+          {{ __('Time format') }}
+        </h5>
+        <div class="checkbox-icon-inline-wrapper">
+          <input
+            id="user_time_format_in_24h"
+            v-model="selectedTimeFormatIn24h"
+            type="checkbox"
+            name="user[time_format_in_24h]"
+            :value="selectedTimeFormatIn24h"
+          />
+          <label for="user_time_format_in_24h">
+            {{ __('Display time in 24-hour format') }}
+          </label>
+        </div>
+        <div class="checkbox-icon-inline-wrapper">
+          <input
+            id="user_time_display_relative"
+            v-model="selectedTimeDisplayRelRelative"
+            type="checkbox"
+            name="user[time_display_relative]"
+            :value="selectedTimeDisplayRelRelative"
+          />
+          <label for="user_time_display_relative">
+            {{ __('For example: 30 mins ago.') }}
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12">
+      <hr />
+    </div>
+    <div id="integrations" class="col-lg-4 profile-settings-sidebar">
+      <h4 class="gl-mt-0">
+        {{ __('Integrations') }}
+      </h4>
+      <p>
+        {{ __('Customize integrations with third party services.') }}
+      </p>
+    </div>
+    <div class="col-lg-8">
+      <div v-for="integrationViews" ></div>
+    </div>
 
     <div class="col-lg-4 profile-settings-sidebar"></div>
     <div class="col-lg-8">

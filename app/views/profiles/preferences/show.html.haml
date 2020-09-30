@@ -2,10 +2,15 @@
 - @content_class = "limit-container-width" unless fluid_layout
 - @themes = Gitlab::Themes.each{ |theme| }.to_json
 - @schemes = Gitlab::ColorSchemes.map{ |scheme| { image_url: path_to_image("#{scheme.css_class}-scheme-preview.png"), **scheme.to_h } }.to_json
-- @user_fields = { layout: @user.layout, dashboard: @user.dashboard, project_view: @user.project_view, render_whitespace_in_code: @user.render_whitespace_in_code, show_whitespace_in_diffs: @user.show_whitespace_in_diffs, view_diffs_file_by_file: @user.view_diffs_file_by_file, tab_width: @user.tab_width, first_day_of_week: @user.first_day_of_week, theme: Gitlab::Themes.for_user(@user).id, scheme: Gitlab::ColorSchemes.for_user(@user).id, preferred_language: @user.preferred_language, application_theme: user_application_theme }
-- data_attributes = { themes: @themes, schemes: @schemes, layout_choices: layout_choices.to_json, dashboard_choices: dashboard_choices, project_view_choices: project_view_choices.to_json,language_choices: language_choices, first_day_of_week_choices_with_default: first_day_of_week_choices_with_default.to_json, integration_views: integration_views, profile_preferences_path: profile_preferences_path, body_classes: Gitlab::Themes.body_classes, user_fields: @user_fields.to_json  }
+- @user_fields = { layout: @user.layout, dashboard: @user.dashboard, project_view: @user.project_view, render_whitespace_in_code: @user.render_whitespace_in_code, show_whitespace_in_diffs: @user.show_whitespace_in_diffs, view_diffs_file_by_file: @user.view_diffs_file_by_file, tab_width: @user.tab_width, first_day_of_week: @user.first_day_of_week, theme: Gitlab::Themes.for_user(@user).id, scheme: Gitlab::ColorSchemes.for_user(@user).id, preferred_language: @user.preferred_language, group_view: @user.group_view, time_format_in_24h: @user.time_format_in_24h, time_display_relative: @user.time_display_relative }
+- data_attributes = { themes: @themes, schemes: @schemes, layout_choices: layout_choices.to_json, dashboard_choices: dashboard_choices, project_view_choices: project_view_choices.to_json,language_choices: language_choices, first_day_of_week_choices_with_default: first_day_of_week_choices_with_default.to_json, group_view_choices: group_view_choices.to_json, integration_views: integration_views, profile_preferences_path: profile_preferences_path, body_classes: Gitlab::Themes.body_classes, user_fields: @user_fields.to_json  }
 
 - Gitlab::Themes.each do |theme|
   = stylesheet_link_tag "themes/theme_#{theme.css_class.gsub('ui-', '')}"
 
 #js-profile-preferences-app{ data: data_attributes }
+
+%p
+  = s_('Customize integrations with third party services.')
+  = succeed '.' do
+    = link_to _('Learn more'), help_page_path('user/profile/preferences.md', anchor: 'integrations'), target: '_blank'

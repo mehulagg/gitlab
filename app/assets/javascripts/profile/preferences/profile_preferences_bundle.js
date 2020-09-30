@@ -4,7 +4,7 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default () => {
   const el = document.querySelector('#js-profile-preferences-app');
-  const { viewDiffsFileByFile = true } = gon?.features;
+  const { viewDiffsFileByFile = true, userTimeSettings } = gon?.features;
   const featureFlags = {
     viewDiffsFileByFile,
   };
@@ -14,6 +14,7 @@ export default () => {
     'layoutChoices',
     'languageChoices',
     'projectViewChoices',
+    'groupViewChoices',
     'integrationViews',
     'themes',
     'schemes',
