@@ -32,7 +32,7 @@ module API
       get do
         namespaces = current_user.admin ? Namespace.all : current_user.namespaces
 
-        namespaces = namespaces.include_gitlab_subscription if Gitlab.ee?
+        namespaces = namespaces.include_gitlab_subscription.include_saml_provider if Gitlab.ee?
 
         namespaces = namespaces.search(params[:search]) if params[:search].present?
 

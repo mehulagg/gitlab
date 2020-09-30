@@ -138,7 +138,7 @@ RSpec.describe API::Namespaces do
         #   an association on group, not namespace).
         # The route adds one for each namespace.
         # And more...
-        expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(10)
+        expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(9)
       end
 
       it 'includes max_seats_used' do

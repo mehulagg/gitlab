@@ -19,7 +19,6 @@ module EE
 
       has_many :epics
 
-      has_one :saml_provider
       has_many :scim_identities
       has_many :ip_restrictions, autosave: true
       has_one :insight, foreign_key: :namespace_id
