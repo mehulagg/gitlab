@@ -374,7 +374,19 @@ class Environment < ApplicationRecord
     !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
+  def canary_track_exists?
+    canary_track.exists?
+  end
+
+  def canary_ingress_exists?
+    canary_track.ingress_exists?
+  end
+
   private
+
+  def canary_track
+    Environments::CanaryTrack.new(environment: self)
+  end
 
   def has_metrics_and_can_query?
     has_metrics? && prometheus_adapter.can_query?

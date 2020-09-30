@@ -7,6 +7,7 @@ module EE
 
     prepended do
       expose :rollout_status, if: -> (*) { can_read_deploy_board? }, using: ::RolloutStatusEntity
+      expose :ingress_status, if: -> (*) { can_read_deploy_board? }, using: ::IngressStatusEntity
       expose :has_opened_alert?, if: -> (*) { can_read_alert_management_alert? }, expose_nil: false, as: :has_opened_alert
     end
 
