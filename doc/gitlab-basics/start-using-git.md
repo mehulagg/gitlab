@@ -412,7 +412,7 @@ git push origin master
 ```
 
 In certain occasions, Git won't allow you to push to your repository, then
-you'll need to [force an update](#force-push).
+you'll need to [force an update](../topics/git/git_rebase.md#force-push).
 
 NOTE: **Note:**
 To create a merge request from a fork to an upstream repository, see the
