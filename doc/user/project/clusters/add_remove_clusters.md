@@ -368,3 +368,9 @@ When removing the cluster integration, note:
 
 To learn more on automatically deploying your applications,
 read about [Auto DevOps](../../../topics/autodevops/index.md).
+
+## Troubleshooting
+
+### There was a problem authenticating with your cluster. Please ensure your CA Certificate and Token are valid.
+
+- If you encounter this error while adding a Kubernetes cluster, ensure that you are properly pasting the service token.  Some Shells may add a line break to the service token which makes the token invalid.  Ensure that there are no line breaks by pasting your token into an editor and removing any additional spaces.
