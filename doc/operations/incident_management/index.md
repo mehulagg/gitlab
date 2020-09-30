@@ -14,7 +14,7 @@ being developed, efficiency and awareness can be increased.
 
 GitLab offers solutions for handling incidents in your applications and services,
 such as [setting up Prometheus alerts](#configure-prometheus-alerts),
-[displaying metrics](./alert_details.md#embed-metrics-in-incidents-and-issues), and sending notifications.
+[displaying metrics](./alerts.md#embed-metrics-in-incidents-and-issues), and sending notifications.
 
 ## Configure Prometheus alerts
 
@@ -33,7 +33,7 @@ When [configuring the generic alerts integration](./generic_alerts.md), GitLab
 creates a unique endpoint which receives a JSON-formatted, customizable payload.
 
 After configuration, you can manage your alerts using either the
-[alerts section](./alerts.md) or the [alert details section](./alert_details.md).
+[alerts section](./alerts.md) or the [alert details section](./alerts.md#alert-details-page).
 
 ## Integrate incidents with Slack
 
