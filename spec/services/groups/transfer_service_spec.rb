@@ -293,7 +293,7 @@ RSpec.describe Groups::TransferService do
         context 'if parent group has disabled shared runners but allows overrides' do
           let(:new_parent_group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: true) }
 
-          it 'calls update service ' do
+          it 'calls update service' do
             expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_setting: 'disabled_with_override' }).and_call_original
 
             transfer_service.execute(new_parent_group)
@@ -303,7 +303,7 @@ RSpec.describe Groups::TransferService do
         context 'if parent group does not allow shared runners' do
           let(:new_parent_group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: false) }
 
-          it 'calls update service ' do
+          it 'calls update service' do
             expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_setting: 'disabled_and_unoverridable' }).and_call_original
 
             transfer_service.execute(new_parent_group)
