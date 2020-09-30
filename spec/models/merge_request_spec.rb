@@ -46,6 +46,27 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '.for_namespace' do
+    let(:namespace) { create(:namespace) }
+    let(:project) { create(:project, namespace: namespace) }
+    let!(:mr_in_namespace) { create(:merge_request, target_project: project, source_project: project) }
+    let!(:mr_not_in_namespace) { create(:merge_request) }
+
+    subject { described_class.for_namespace(namespace) }
+
+    it { is_expected.to contain_exactly(mr_in_namespace) }
+  end
+
+  describe '.with_jira_issue_keys' do
+    let!(:mr_with_jira_title) { create(:merge_request, :unique_branches, title: 'Fix TEST-123') }
+    let!(:mr_with_jira_description) { create(:merge_request, :unique_branches, description: 'this closes TEST-321') }
+    let!(:mr_without_jira_reference) { create(:merge_request, :unique_branches) }
+
+    subject { described_class.with_jira_issue_keys }
+
+    it { is_expected.to contain_exactly(mr_with_jira_title, mr_with_jira_description) }
+  end
+
   describe '.from_and_to_forks' do
     it 'returns only MRs from and to forks (with no internal MRs)' do
       project = create(:project)
