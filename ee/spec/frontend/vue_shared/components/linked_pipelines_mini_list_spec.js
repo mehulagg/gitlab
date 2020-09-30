@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import LinkedPipelinesMiniList from 'ee/vue_shared/components/linked_pipelines_mini_list.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import mockData from './linked_pipelines_mock_data';
 
 const ListComponent = Vue.extend(LinkedPipelinesMiniList);
@@ -12,6 +13,9 @@ describe('Linked pipeline mini list', () => {
       component = new ListComponent({
         propsData: {
           triggeredBy: [mockData.triggered_by],
+        },
+        directives: {
+          GlTooltip: createMockDirective(),
         },
       }).$mount();
     });
@@ -46,8 +50,9 @@ describe('Linked pipeline mini list', () => {
 
     it('should have an activated tooltip', () => {
       const itemElement = component.$el.querySelector('.linked-pipeline-mini-item');
+      const tooltip = getBinding(itemElement, 'gl-tooltip');
 
-      expect(itemElement.getAttribute('data-original-title')).toBe('GitLabCE - running');
+      expect(tooltip.value.title).toEqual('GitLabCE - running');
     });
 
     it('should correctly set is-upstream', () => {
@@ -69,6 +74,9 @@ describe('Linked pipeline mini list', () => {
         propsData: {
           triggered: mockData.triggered,
           pipelinePath: 'my/pipeline/path',
+        },
+        directives: {
+          GlTooltip: createMockDirective(),
         },
       }).$mount();
     });
@@ -100,8 +108,9 @@ describe('Linked pipeline mini list', () => {
 
     it('should have prepped tooltips', () => {
       const itemElement = component.$el.querySelectorAll('.linked-pipeline-mini-item')[2];
+      const tooltip = getBinding(itemElement, 'gl-tooltip');
 
-      expect(itemElement.getAttribute('data-original-title')).toBe('GitLabCE - running');
+      expect(tooltip.value.title).toEqual('GitLabCE - running');
     });
 
     it('should correctly set is-downstream', () => {
@@ -128,11 +137,10 @@ describe('Linked pipeline mini list', () => {
     });
 
     it('should render the correct counterTooltipText', () => {
-      expect(
-        component.$el
-          .querySelector('.linked-pipelines-counter')
-          .getAttribute('data-original-title'),
-      ).toBe(component.counterTooltipText);
+      const counter = component.$el.querySelector('.linked-pipelines-counter')
+      const tooltip = getBinding(counter, 'gl-tooltip');
+
+      expect(tooltip.value.title).toEqual(component.counterTooltipText);
     });
   });
 });

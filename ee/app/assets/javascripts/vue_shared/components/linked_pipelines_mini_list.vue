@@ -90,25 +90,20 @@ export default {
     <a
       v-for="pipeline in linkedPipelinesTrimmed"
       :key="pipeline.id"
-      v-gl-tooltip
+      v-gl-tooltip="{ title: pipelineTooltipText(pipeline), container: 'body', placement: 'top' }"
       :href="pipeline.path"
-      :title="pipelineTooltipText(pipeline)"
       :class="triggerButtonClass(pipeline.details.status.group)"
       class="linked-pipeline-mini-item"
-      data-placement="top"
-      data-container="body"
     >
       <gl-icon :name="getStatusIcon(pipeline.details.status.icon)" />
     </a>
 
     <a
       v-if="shouldRenderCounter"
-      v-gl-tooltip
+      v-gl-tooltip="{ title: counterTooltipText, container: 'body', placement: 'top' }"
       :title="counterTooltipText"
       :href="pipelinePath"
       class="linked-pipelines-counter linked-pipeline-mini-item"
-      data-placement="top"
-      data-container="body"
     >
       {{ counterLabel }}
     </a>
