@@ -5,24 +5,24 @@ import produce from 'immer';
 import createFlash from '~/flash';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { __ } from '~/locale';
-// Interesting
-import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
-// Interesting
-import { formatDate, getDatesInRange, getDateInPast } from '~/lib/utils/datetime_utility';
+import { formatDate, getDateInPast, getMonthNames } from '~/lib/utils/datetime_utility';
 import latestUsersQuery from '../graphql/queries/latest_users_count.query.graphql';
 
 // TODO: we want to fetch 1 year's worth
 // TODO: if there is no count for a day, do we get 0?
 // TODO: group chart data by month
 
-const TIME_PERIOD_IN_DAYS = 365;
+export const formatTickAsMonth = val => {
+  const date = new Date(val);
+  const month = date.getUTCMonth();
+  const year = date.getUTCFullYear();
+  return month === 0 ? `${year}` : `${getMonthNames(true)[month]} ${year}`;
+};
+
+const TOTAL_DATAPOINTS_TO_FETCH = 365;
 const ymd = d => formatDate(d, 'yyyy-mm-dd');
-const FETCH_LIMIT = TIME_PERIOD_IN_DAYS;
-// TODO: check if empty days are returned
-// Maybe we use a Map() to store the entries by their date
-// const TODAY = new Date();
-// const START_DATE = getDateInPast(TODAY, TIME_PERIOD_IN_DAYS);
-// const DATE_RANGE = getDatesInRange(START_DATE, TODAY).map(ymd);
+const TODAY = new Date();
+const START_DATE = getDateInPast(TODAY, TOTAL_DATAPOINTS_TO_FETCH);
 
 export default {
   name: 'UsersChart',
@@ -37,11 +37,10 @@ export default {
     usersDailyCount: {
       query: latestUsersQuery,
       variables: {
-        first: FETCH_LIMIT,
+        first: TOTAL_DATAPOINTS_TO_FETCH,
         after: null,
       },
       update(data) {
-        // TODO: might need to cache data, so that we can add 0 values
         return data.users.nodes.map(({ count, recordedAt }) => [ymd(recordedAt), count]);
       },
       result({ data }) {
@@ -63,21 +62,27 @@ export default {
     isLoading() {
       // Dont show the chart until all data is fetched
       return (
-        this.$apollo.queries.usersDailyCount.loading || this.usersDailyCount.length < FETCH_LIMIT
+        this.$apollo.queries.usersDailyCount.loading ||
+        this.usersDailyCount.length < TOTAL_DATAPOINTS_TO_FETCH
       );
     },
     range() {
       return {
-        min: this.usersDailyCount[0][0],
-        max: this.usersDailyCount[this.usersDailyCount.length - 1][0],
+        max: TODAY,
+        min: START_DATE,
       };
     },
     options() {
       return {
         xAxis: {
-          // ...this.range,
+          ...this.range,
           name: __('Date'),
-          type: 'category',
+          type: 'time',
+          // 28 days
+          minInterval: 28 * 86400 * 1000,
+          axisLabel: {
+            formatter: formatTickAsMonth,
+          },
         },
         yAxis: {
           name: __('Users'),
@@ -86,14 +91,16 @@ export default {
     },
     chartUserData() {
       // TODO: this is temporary until we can sort via the query
-      return reverse(this.usersDailyCount, 'recordedAt');
+      const d = reverse(this.usersDailyCount, 'recordedAt');
+      // NOTE: for testing, to ensure the chart renders correctly with sparse data
+      return [...d.slice(0, 10), ...d.slice(50, 100), ...d.slice(180, 220), ...d.slice(290, 350)];
     },
   },
   methods: {
     fetchNextPage() {
       if (this.pageInfo.hasNextPage) {
         this.$apollo.queries.usersDailyCount.fetchMore({
-          variables: { first: FETCH_LIMIT, after: this.pageInfo.endCursor },
+          variables: { first: TOTAL_DATAPOINTS_TO_FETCH, after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const results = produce(fetchMoreResult, newUsers => {
               // eslint-disable-next-line no-param-reassign
@@ -107,7 +114,6 @@ export default {
   },
 };
 </script>
-
 <template>
   <chart-skeleton-loader v-if="isLoading" />
   <gl-line-chart
