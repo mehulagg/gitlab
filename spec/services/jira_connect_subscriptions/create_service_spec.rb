@@ -32,6 +32,34 @@ RSpec.describe JiraConnectSubscriptions::CreateService do
     it 'returns success' do
       expect(subject[:status]).to eq(:success)
     end
+
+    context 'namespace has projects' do
+      let!(:project_1) { create(:project, group: group) }
+      let!(:project_2) { create(:project, group: group) }
+
+      before do
+        stub_const("#{described_class}::MERGE_REQUEST_SYNC_BATCH_SIZE", 1)
+      end
+
+      it 'starts workers to sync projects in batches with delay' do
+        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(1.minute, [[project_1.id]])
+        expect(JiraConnect::SyncProjectWorker).to receive(:bulk_perform_in).with(2.minutes, [[project_2.id]])
+
+        subject
+      end
+
+      context 'when the jira_connect_full_namespace_sync feature flag is disabled' do
+        before do
+          stub_feature_flags(jira_connect_full_namespace_sync: false)
+        end
+
+        specify do
+          expect(JiraConnect::SyncProjectWorker).not_to receive(:bulk_perform_in_with_contexts)
+
+          subject
+        end
+      end
+    end
   end
 
   context 'when path is invalid' do
