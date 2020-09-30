@@ -337,7 +337,13 @@ module EE
         pipeline: {
           id: pipeline.id,
           path: pipeline_path(pipeline),
-          created_at: pipeline.created_at.to_s(:iso8601)
+          created_at: pipeline.created_at.to_s(:iso8601),
+          security_builds: {
+            failures: {
+              count: pipeline.latest_failed_security_builds.count,
+              path: failures_project_pipeline_path(pipeline.project, pipeline)
+            }
+          }
         }
       }
     end
