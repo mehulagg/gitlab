@@ -94,7 +94,6 @@ module Gitlab
         end
 
         def self.primary_write_location
-          load_balancer.primary_write_location
           RequestStore[CACHE_KEY] ||= load_balancer.primary_write_location
         end
         private_class_method :primary_write_location
