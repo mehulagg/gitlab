@@ -66,6 +66,15 @@ $$;
 
 COMMENT ON FUNCTION table_sync_function_2be879775d() IS 'Partitioning migration: table sync for audit_events table';
 
+CREATE FUNCTION trigger_80c224a0463a() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW."id_for_type_change" := NEW."id";
+  RETURN NEW;
+END;
+$$;
+
 CREATE TABLE audit_events_part_5fc467ac26 (
     id bigint NOT NULL,
     author_id integer NOT NULL,
@@ -10815,7 +10824,7 @@ CREATE SEQUENCE clusters_applications_cilium_id_seq
 ALTER SEQUENCE clusters_applications_cilium_id_seq OWNED BY clusters_applications_cilium.id;
 
 CREATE TABLE clusters_applications_crossplane (
-    id integer NOT NULL,
+    id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     cluster_id bigint NOT NULL,
@@ -13157,7 +13166,8 @@ CREATE TABLE merge_request_assignees (
     id bigint NOT NULL,
     user_id integer NOT NULL,
     merge_request_id integer NOT NULL,
-    created_at timestamp with time zone
+    created_at timestamp with time zone,
+    id_for_type_change bigint DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE merge_request_assignees_id_seq
@@ -21929,6 +21939,8 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
 CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+
+CREATE TRIGGER trigger_80c224a0463a BEFORE INSERT OR UPDATE ON merge_request_assignees FOR EACH ROW EXECUTE PROCEDURE trigger_80c224a0463a();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
