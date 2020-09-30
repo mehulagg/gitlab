@@ -89,7 +89,7 @@ module Gitlab
         #   limit, it is likely uncached due to having hit the default limit,
         #   making it eligible for recalculating.
         #
-        diff_bytesize >= default_patch_safe_limit_bytes && diff_bytesize < current_patch_safe_limit_bytes
+        diff_bytesize.between?(default_patch_safe_limit_bytes, current_patch_safe_limit_bytes)
       end
 
       def cacheable_files
