@@ -1,0 +1,5 @@
+---
+title: Do not try to copy issue weight events when promoting an issue to epic
+merge_request: 43891
+author:
+type: fixed
