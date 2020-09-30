@@ -8,6 +8,7 @@ Object {
   "primaryButtonText": null,
   "secondaryButtonLink": null,
   "secondaryButtonText": null,
+  "svgHeight": null,
   "svgPath": "/bar.svg",
   "title": "View dependency details for your project",
 }
@@ -21,6 +22,7 @@ Object {
   "primaryButtonText": null,
   "secondaryButtonLink": null,
   "secondaryButtonText": null,
+  "svgHeight": null,
   "svgPath": "/bar.svg",
   "title": "Dependency List has no entries",
 }

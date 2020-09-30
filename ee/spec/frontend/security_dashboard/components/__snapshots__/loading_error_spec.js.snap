@@ -8,6 +8,7 @@ Object {
   "primaryButtonText": "Sign in",
   "secondaryButtonLink": null,
   "secondaryButtonText": null,
+  "svgHeight": null,
   "svgPath": "/401.svg",
   "title": "You must sign in as an authorized user to see this report",
 }
@@ -21,6 +22,7 @@ Object {
   "primaryButtonText": null,
   "secondaryButtonLink": null,
   "secondaryButtonText": null,
+  "svgHeight": null,
   "svgPath": "/403.svg",
   "title": "You do not have sufficient permissions to access this report",
 }
