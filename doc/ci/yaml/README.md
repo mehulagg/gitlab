@@ -35,9 +35,7 @@ We have complete examples of configuring pipelines:
 
 NOTE: **Note:**
 If you have a [mirrored repository that GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
-you may need to enable pipeline triggering. Go to your project's
-
-**Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
+you may need to enable pipeline triggering. Go to your project's **Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
 
 ## Introduction
 
