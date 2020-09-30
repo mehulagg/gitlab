@@ -273,7 +273,7 @@ describe('Grouped security reports app', () => {
 
         // Renders the summary text
         expect(wrapper.vm.$el.querySelector('.js-code-text').textContent.trim()).toEqual(
-          'Security scanning detected 5 critical and 3 high severity vulnerabilities.',
+          'Security scanning detected 6 critical and 4 high severity vulnerabilities.',
         );
 
         // Renders the expand button
