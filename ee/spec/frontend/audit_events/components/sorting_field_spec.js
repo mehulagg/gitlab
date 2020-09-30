@@ -8,10 +8,6 @@ describe('SortingField component', () => {
   const initComponent = (props = {}) => {
     wrapper = shallowMount(SortingField, {
       propsData: { ...props },
-      stubs: {
-        GlNewDropdown: true,
-        GlDropdownItem: true,
-      },
     });
   };
 

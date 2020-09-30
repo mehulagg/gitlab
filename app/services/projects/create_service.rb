@@ -114,8 +114,13 @@ module Projects
     # completes), and any other affected users in the background
     def setup_authorizations
       if @project.group
-        current_user.project_authorizations.create!(project: @project,
-                                                    access_level: @project.group.max_member_access_for_user(current_user))
+        group_access_level = @project.group.max_member_access_for_user(current_user,
+                                                                       only_concrete_membership: true)
+
+        if group_access_level > GroupMember::NO_ACCESS
+          current_user.project_authorizations.create!(project: @project,
+                                                      access_level: group_access_level)
+        end
 
         if Feature.enabled?(:specialized_project_authorization_workers)
           AuthorizedProjectUpdate::ProjectCreateWorker.perform_async(@project.id)
@@ -157,7 +162,7 @@ module Projects
 
         if @project.save
           unless @project.gitlab_project_import?
-            create_services_from_active_instances_or_templates(@project)
+            Service.create_from_active_default_integrations(@project, :project_id, with_templates: true)
             @project.create_labels
           end
 
@@ -222,15 +227,6 @@ module Projects
     end
 
     private
-
-    # rubocop: disable CodeReuse/ActiveRecord
-    def create_services_from_active_instances_or_templates(project)
-      Service.active.where(instance: true).or(Service.active.where(template: true)).group_by(&:type).each do |type, records|
-        service = records.find(&:instance?) || records.find(&:template?)
-        Service.build_from_integration(project.id, service).save!
-      end
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def project_namespace
       @project_namespace ||= Namespace.find_by_id(@params[:namespace_id]) || current_user.namespace

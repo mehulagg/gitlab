@@ -106,6 +106,39 @@ RSpec.describe SearchHelper do
         })
       end
 
+      it 'includes the first 5 of the users recent merge requests' do
+        recent_merge_requests = instance_double(::Gitlab::Search::RecentMergeRequests)
+        expect(::Gitlab::Search::RecentMergeRequests).to receive(:new).with(user: user).and_return(recent_merge_requests)
+        project1 = create(:project, :with_avatar, namespace: user.namespace)
+        project2 = create(:project, namespace: user.namespace)
+        merge_request1 = create(:merge_request, :unique_branches, title: 'Merge request 1', target_project: project1, source_project: project1)
+        merge_request2 = create(:merge_request, :unique_branches, title: 'Merge request 2', target_project: project2, source_project: project2)
+
+        other_merge_requests = create_list(:merge_request, 5)
+
+        expect(recent_merge_requests).to receive(:search).with('the search term').and_return(MergeRequest.id_in_ordered([merge_request1.id, merge_request2.id, *other_merge_requests.map(&:id)]))
+
+        results = search_autocomplete_opts("the search term")
+
+        expect(results.count).to eq(5)
+
+        expect(results[0]).to include({
+          category: 'Recent merge requests',
+          id: merge_request1.id,
+          label: 'Merge request 1',
+          url: Gitlab::Routing.url_helpers.project_merge_request_path(merge_request1.project, merge_request1),
+          avatar_url: project1.avatar_url
+        })
+
+        expect(results[1]).to include({
+          category: 'Recent merge requests',
+          id: merge_request2.id,
+          label: 'Merge request 2',
+          url: Gitlab::Routing.url_helpers.project_merge_request_path(merge_request2.project, merge_request2),
+          avatar_url: '' # This project didn't have an avatar so set this to ''
+        })
+      end
+
       it "does not include the public group" do
         group = create(:group)
         expect(search_autocomplete_opts(group.name).size).to eq(0)
@@ -364,6 +397,27 @@ RSpec.describe SearchHelper do
 
         it { is_expected.to eq(false) }
       end
+    end
+  end
+
+  describe '#repository_ref' do
+    let_it_be(:project) { create(:project, :repository) }
+    let(:params) { { repository_ref: 'the-repository-ref-param' } }
+
+    subject { repository_ref(project) }
+
+    it { is_expected.to eq('the-repository-ref-param') }
+
+    context 'when the param :repository_ref is not set' do
+      let(:params) { { repository_ref: nil } }
+
+      it { is_expected.to eq(project.default_branch) }
+    end
+
+    context 'when the repository_ref param is a number' do
+      let(:params) { { repository_ref: 111111 } }
+
+      it { is_expected.to eq('111111') }
     end
   end
 end

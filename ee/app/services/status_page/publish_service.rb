@@ -97,7 +97,7 @@ module StatusPage
     end
 
     def track_event
-      track_usage_event(:incident_management_incident_published, user) unless should_unpublish?
+      track_usage_event(:incident_management_incident_published, user.id) unless should_unpublish?
     end
   end
 end

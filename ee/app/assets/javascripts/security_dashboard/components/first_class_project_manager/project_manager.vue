@@ -1,5 +1,6 @@
 <script>
 import { GlButton } from '@gitlab/ui';
+import produce from 'immer';
 import getProjects from 'ee/security_dashboard/graphql/get_projects.query.graphql';
 import projectsQuery from 'ee/security_dashboard/graphql/get_instance_security_dashboard_projects.query.graphql';
 import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/add_project_to_security_dashboard.mutation.graphql';
@@ -77,12 +78,20 @@ export default {
                 return;
               }
 
-              const data = store.readQuery({ query: projectsQuery });
+              const sourceData = store.readQuery({ query: projectsQuery });
               const newProject = results.addProjectToSecurityDashboard.project;
-              data.instanceSecurityDashboard.projects.nodes.push({
-                ...newProject,
-                vulnerabilitySeveritiesCount: newProject.vulnerabilitySeveritiesCount || null, // This is required to surpress missing field warning in GraphQL.
+
+              const data = produce(sourceData, draftData => {
+                // eslint-disable-next-line no-param-reassign
+                draftData.instanceSecurityDashboard.projects.nodes = [
+                  ...draftData.instanceSecurityDashboard.projects.nodes,
+                  {
+                    ...newProject,
+                    vulnerabilitySeveritiesCount: newProject.vulnerabilitySeveritiesCount || null,
+                  },
+                ];
               });
+
               store.writeQuery({ query: projectsQuery, data });
             },
           })
@@ -145,12 +154,15 @@ export default {
           mutation: deleteProjectFromSecurityDashboard,
           variables: { id },
           update(store) {
-            const data = store.readQuery({
-              query: projectsQuery,
+            const sourceData = store.readQuery({ query: projectsQuery });
+
+            const data = produce(sourceData, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.instanceSecurityDashboard.projects.nodes = draftData.instanceSecurityDashboard.projects.nodes.filter(
+                curr => curr.id !== id,
+              );
             });
-            data.instanceSecurityDashboard.projects.nodes = data.instanceSecurityDashboard.projects.nodes.filter(
-              curr => curr.id !== id,
-            );
+
             store.writeQuery({ query: projectsQuery, data });
           },
         })
@@ -210,6 +222,7 @@ export default {
           search: searchQuery,
           first: this.$options.PROJECTS_PER_PAGE,
           after: pageInfo.endCursor,
+          searchNamespaces: true,
         },
       });
     },

@@ -3,6 +3,6 @@
 FactoryBot.define do
   factory :dast_site do
     project
-    url { FFaker::Internet.uri(:https) }
+    url { generate(:url) }
   end
 end

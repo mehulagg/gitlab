@@ -8,7 +8,6 @@ RSpec.describe 'User deletes feature flag user list', :js do
 
   before do
     project.add_developer(developer)
-    stub_licensed_features(feature_flags: true)
     sign_in(developer)
   end
 

@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 While no configuration is required to use the [manual features](#create-an-incident-manually)
 of incident management, some simple [configuration](#configure-incidents) is needed to automate incident creation.
 
-For users with at least Developer [permissions](../../user/permissions.md), the
+For users with at least Reporter [permissions](../../user/permissions.md), the
 Incident Management list is available at **Operations > Incidents**
 in your project's sidebar. The list contains the following metrics:
 
@@ -19,12 +19,18 @@ in your project's sidebar. The list contains the following metrics:
   or **All** above the incident list.
 - **Search** - The Incident list supports a simple free text search, which filters
   on the **Title** and **Incident** fields.
-- **Severity** - Severity of a particular incident. Can have one of the following values:
-  - `Critical - S1`
-  - `High - S2`
-  - `Medium - S3`
-  - `Low - S4`
-  - `Unknown`
+- **Severity** - Severity of a particular incident, which can be one of the following
+  values:
+  - **{severity-critical}** **Critical - S1**
+  - **{severity-high}** **High - S2**
+  - **{severity-medium}** **Medium - S3**
+  - **{severity-low}** **Low - S4**
+  - **{severity-unknown}** **Unknown**
+
+  NOTE: **Note:**
+  Editing incident severity on the incident details page was
+  [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229402) in GitLab 13.4.
+
 - **Incident** - The description of the incident, which attempts to capture the
   most meaningful data.
 - **Date created** - How long ago the incident was created. This field uses the
@@ -32,10 +38,10 @@ in your project's sidebar. The list contains the following metrics:
   tooltip depending on the user's locale.
 - **Assignees** - The user assigned to the incident.
 - **Published** - Displays a green check mark (**{check-circle}**) if the incident is published
-  to a [Status Page](./status_page.md).. **(ULTIMATE)**
+  to a [Status Page](status_page.md). **(ULTIMATE)**
 
 The Incident list displays incidents sorted by incident created date.
-([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229534) to GitLab core in 13.3).)
+([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229534) to GitLab core in 13.3.)
 To see if a column is sortable, point your mouse at the header. Sortable columns
 display an arrow next to the column name.
 
@@ -79,7 +85,7 @@ when you receive notification that the alert is resolved.
 
 ## Create an incident manually
 
-If you have at least Developer [permissions](../../user/permissions.md), to create an Incident, you have two options.
+If you have at least Guest [permissions](../../user/permissions.md), to create an Incident, you have two options.
 
 ### From the Incidents List
 
@@ -97,7 +103,7 @@ If you have at least Developer [permissions](../../user/permissions.md), to crea
 
 - Navigate to **Issues > List** and click **Create Issue**.
 - Create a new issue using the `type` drop-down and select `Incident`.
-- The page will refresh and you will notice there are now only fields relevant to Incidents.
+- The page refreshes and the page only displays fields relevant to Incidents.
 
 ![Incident List Create](./img/new_incident_create_v13_4.png)
 
@@ -123,3 +129,29 @@ in both PagerDuty and GitLab:
 
 To confirm the integration is successful, trigger a test incident from PagerDuty to
 confirm that a GitLab issue is created from the incident.
+
+## Incident details
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230847) in GitLab 13.4.
+
+### Summary
+
+The summary section for incidents provides both critical details about and the
+contents of the issue template (if one was used). The highlighted bar at the top
+of the incident displays from left to right: the link to the original alert, the
+alert start time, and the event count. Beneath the highlight bar, GitLab
+displays a summary that includes the following fields:
+
+- Start time
+- Severity
+- `full_query`
+- Monitoring tool
+
+### Alert details
+
+Incidents show the details of linked alerts in a separate tab. To populate this
+tab, the incident must have been created with a linked alert. Incidents
+[created automatically](#configure-incidents) from alerts will have this
+field populated.
+
+![Incident alert details](./img/incident_alert_details_v13_4.png)

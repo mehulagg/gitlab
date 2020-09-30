@@ -232,6 +232,19 @@ RSpec.describe QuickActions::InterpretService do
               expect(updates).to eq(iteration: iteration)
               expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
             end
+
+            context 'when iteration is started' do
+              before do
+                iteration.start!
+              end
+
+              it 'assigns an iteration to an issue' do
+                _, updates, message = service.execute(content, issue)
+
+                expect(updates).to eq(iteration: iteration)
+                expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
+              end
+            end
           end
 
           context 'when the user does not have enough permissions' do

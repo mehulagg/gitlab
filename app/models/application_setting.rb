@@ -95,7 +95,7 @@ class ApplicationSetting < ApplicationRecord
             allow_blank: true,
             addressable_url: true
 
-  validates :admin_notification_email,
+  validates :abuse_notification_email,
             devise_email: true,
             allow_blank: true
 
@@ -131,6 +131,11 @@ class ApplicationSetting < ApplicationRecord
   validates :sourcegraph_url,
             presence: true,
             if: :sourcegraph_enabled
+
+  validates :gitpod_url,
+            presence: true,
+            addressable_url: { enforce_sanitization: true },
+            if: :gitpod_enabled
 
   validates :snowplow_collector_hostname,
             presence: true,

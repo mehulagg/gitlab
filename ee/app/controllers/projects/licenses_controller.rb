@@ -5,7 +5,7 @@ module Projects
     before_action :authorize_read_licenses!, only: [:index]
     before_action :authorize_admin_software_license_policy!, only: [:create, :update]
     before_action do
-      push_frontend_feature_flag(:license_compliance_denies_mr, default_enabled: false)
+      push_frontend_feature_flag(:license_compliance_denies_mr, default_enabled: true)
     end
 
     def index

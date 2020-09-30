@@ -38,10 +38,12 @@ export default {
       },
       variables() {
         const options = filterToQueryObject({
-          labels: this.selectedLabelList,
+          sourceBranches: this.selectedSourceBranch,
+          targetBranches: this.selectedTargetBranch,
+          milestoneTitle: this.selectedMilestone,
           authorUsername: this.selectedAuthor,
           assigneeUsername: this.selectedAssignee,
-          milestoneTitle: this.selectedMilestone,
+          labels: this.selectedLabelList,
         });
 
         return {
@@ -59,10 +61,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
+      selectedSourceBranch: state => state.branches.source.selected,
+      selectedTargetBranch: state => state.branches.target.selected,
       selectedMilestone: state => state.milestones.selected,
       selectedAuthor: state => state.authors.selected,
-      selectedLabelList: state => state.labels.selectedList,
       selectedAssignee: state => state.assignees.selected,
+      selectedLabelList: state => state.labels.selectedList,
     }),
     chartOptions() {
       return {

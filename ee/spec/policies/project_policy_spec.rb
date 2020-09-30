@@ -5,16 +5,9 @@ require 'spec_helper'
 RSpec.describe ProjectPolicy do
   include ExternalAuthorizationServiceHelpers
   include AdminModeHelper
+  include_context 'ProjectPolicy context'
 
-  let_it_be(:owner) { create(:user) }
-  let_it_be(:admin) { create(:admin) }
-  let_it_be(:maintainer) { create(:user) }
-  let_it_be(:developer) { create(:user) }
-  let_it_be(:reporter) { create(:user) }
-  let_it_be(:guest) { create(:user) }
-  let_it_be(:non_member) { create(:user) }
-  let_it_be(:project, refind: true) { create(:project, :public, namespace: owner.namespace) }
-  let_it_be(:private_project, refind: true) { create(:project, :private, namespace: owner.namespace) }
+  let(:project) { public_project }
 
   subject { described_class.new(current_user, project) }
 
@@ -22,35 +15,21 @@ RSpec.describe ProjectPolicy do
     stub_licensed_features(license_scanning: true)
   end
 
-  before_all do
-    project.add_maintainer(maintainer)
-    project.add_developer(developer)
-    project.add_reporter(reporter)
-    project.add_guest(guest)
-
-    private_project.add_maintainer(maintainer)
-    private_project.add_developer(developer)
-    private_project.add_reporter(reporter)
-    private_project.add_guest(guest)
-  end
-
   context 'basic permissions' do
-    include_context 'ProjectPolicy context'
-
     let(:additional_reporter_permissions) do
       %i[read_software_license_policy]
     end
 
     let(:additional_developer_permissions) do
       %i[
-        admin_vulnerability_feedback read_project_security_dashboard read_feature_flag
+        admin_vulnerability_feedback read_project_security_dashboard
         read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
         admin_vulnerability_issue_link read_merge_train
       ]
     end
 
     let(:additional_maintainer_permissions) do
-      %i[push_code_to_protected_branches admin_feature_flags_client modify_auto_fix_setting]
+      %i[push_code_to_protected_branches modify_auto_fix_setting]
     end
 
     let(:auditor_permissions) do
@@ -178,7 +157,7 @@ RSpec.describe ProjectPolicy do
       end
 
       context 'when user is logged out' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_allowed(:read_iteration) }
         it { is_expected.to be_disallowed(:create_iteration, :admin_iteration) }
@@ -194,7 +173,7 @@ RSpec.describe ProjectPolicy do
         end
 
         context 'when user is logged out' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:read_iteration, :create_iteration, :admin_iteration) }
         end
@@ -207,8 +186,7 @@ RSpec.describe ProjectPolicy do
 
     context 'when the feature is disabled' do
       before do
-        project.issues_enabled = false
-        project.save!
+        project.update!(issues_enabled: false)
       end
 
       it 'disables boards permissions' do
@@ -512,7 +490,7 @@ RSpec.describe ProjectPolicy do
       end
 
       context 'with anonymous' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_disallowed(permission) }
       end
@@ -595,7 +573,7 @@ RSpec.describe ProjectPolicy do
       end
 
       context 'with anonymous' do
-        let(:current_user) { nil }
+        let(:current_user) { anonymous }
 
         it { is_expected.to be_disallowed(:read_threat_monitoring) }
       end
@@ -644,34 +622,47 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'read_feature_flag' do
-    context 'with admin' do
-      let(:current_user) { admin }
+  describe 'admin_feature_flags_issue_links' do
+    before do
+      stub_licensed_features(feature_flags_related_issues: true)
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:admin_feature_flags_issue_links) }
 
       context 'when repository is disabled' do
         before do
           project.project_feature.update!(
-            # Disable merge_requests and builds as well, since merge_requests and
-            # builds cannot have higher visibility than repository.
             merge_requests_access_level: ProjectFeature::DISABLED,
             builds_access_level: ProjectFeature::DISABLED,
-            repository_access_level: ProjectFeature::DISABLED)
+            repository_access_level: ProjectFeature::DISABLED
+          )
         end
 
-        it { is_expected.to be_disallowed(:read_feature_flag) }
+        it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
       end
     end
 
     context 'with developer' do
       let(:current_user) { developer }
 
-      context 'when feature flags features is not available' do
+      it { is_expected.to be_allowed(:admin_feature_flags_issue_links) }
+
+      context 'when feature is unlicensed' do
         before do
-          stub_licensed_features(feature_flags: false)
+          stub_licensed_features(feature_flags_related_issues: false)
         end
 
-        it { is_expected.to be_disallowed(:read_feature_flag) }
+        it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
       end
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
     end
   end
 
@@ -735,7 +726,7 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'with anonymous' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:admin_software_license_policy) }
     end
@@ -763,7 +754,7 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { create(:user) }
 
         context 'with public access to repository' do
-          let(:project) { create(:project, :public) }
+          let(:project) { public_project }
 
           it { is_expected.to be_allowed(:read_dependencies) }
         end
@@ -827,7 +818,7 @@ RSpec.describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:read_dependencies) }
         end
@@ -887,7 +878,7 @@ RSpec.describe ProjectPolicy do
         end
 
         context 'with anonymous' do
-          let(:current_user) { nil }
+          let(:current_user) { anonymous }
 
           it { is_expected.to be_disallowed(:read_licenses) }
         end
@@ -906,7 +897,6 @@ RSpec.describe ProjectPolicy do
   end
 
   describe 'publish_status_page' do
-    let(:anonymous) { nil }
     let(:feature) { :status_page }
     let(:policy) { :publish_status_page }
 
@@ -1152,7 +1142,7 @@ RSpec.describe ProjectPolicy do
     end
 
     context 'with anonymous' do
-      let(:current_user) { nil }
+      let(:current_user) { anonymous }
 
       it { is_expected.to be_disallowed(:read_group_timelogs) }
     end
@@ -1359,7 +1349,7 @@ RSpec.describe ProjectPolicy do
     before do
       allow(project.root_namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
       allow(project).to receive(:design_management_enabled?).and_return(true)
-      stub_licensed_features(security_dashboard: true, license_scanning: true, feature_flags: true)
+      stub_licensed_features(security_dashboard: true, license_scanning: true)
     end
 
     context 'when the group has exceeded its storage limit' do

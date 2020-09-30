@@ -120,7 +120,7 @@ RSpec.describe Issue do
       describe '.any_epic' do
         it 'returns only issues with an epic assigned' do
           expect(described_class.count).to eq 3
-          expect(described_class.any_epic).to eq [epic_issue1.issue, epic_issue2.issue]
+          expect(described_class.any_epic).to contain_exactly(epic_issue1.issue, epic_issue2.issue)
         end
       end
 
@@ -180,6 +180,23 @@ RSpec.describe Issue do
           expect(described_class.count).to eq 3
           expect(described_class.in_iterations([iteration1])).to eq [iteration1_issue]
         end
+      end
+    end
+
+    context 'status page published' do
+      let_it_be(:not_published) { create(:issue) }
+      let_it_be(:published)     { create(:issue, :published) }
+
+      describe '.order_status_page_published_first' do
+        subject { described_class.order_status_page_published_first }
+
+        it { is_expected.to eq([published, not_published]) }
+      end
+
+      describe '.order_status_page_published_last' do
+        subject { described_class.order_status_page_published_last }
+
+        it { is_expected.to eq([not_published, published]) }
       end
     end
   end
@@ -419,29 +436,11 @@ RSpec.describe Issue do
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
-    describe '#max_relative_position' do
-      it 'returns maximum position' do
-        expect(issue.max_relative_position).to eq issue1.relative_position
-      end
-    end
+    describe '.relative_positioning_query_base' do
+      it 'includes cross project issues in the same group' do
+        siblings = Issue.relative_positioning_query_base(issue)
 
-    describe '#prev_relative_position' do
-      it 'returns previous position if there is an issue above' do
-        expect(issue1.prev_relative_position).to eq issue.relative_position
-      end
-
-      it 'returns nil if there is no issue above' do
-        expect(issue.prev_relative_position).to eq nil
-      end
-    end
-
-    describe '#next_relative_position' do
-      it 'returns next position if there is an issue below' do
-        expect(issue.next_relative_position).to eq issue1.relative_position
-      end
-
-      it 'returns nil if there is no issue below' do
-        expect(issue1.next_relative_position).to eq nil
+        expect(siblings).to include(issue1)
       end
     end
 

@@ -36,7 +36,7 @@ describe('Issuable output', () => {
 
   const findStickyHeader = () => wrapper.find('[data-testid="issue-sticky-header"]');
 
-  const mountComponent = (props = {}) => {
+  const mountComponent = (props = {}, options = {}) => {
     wrapper = mount(IssuableApp, {
       propsData: { ...appProps, ...props },
       provide: {
@@ -45,7 +45,9 @@ describe('Issuable output', () => {
       },
       stubs: {
         HighlightBar: true,
+        IncidentTabs: true,
       },
+      ...options,
     });
   };
 
@@ -76,6 +78,8 @@ describe('Issuable output', () => {
       });
 
     mountComponent();
+
+    jest.advanceTimersByTime(2);
   });
 
   afterEach(() => {
@@ -582,10 +586,23 @@ describe('Issuable output', () => {
 
     describe('when using incident tabs description wrapper', () => {
       beforeEach(() => {
-        mountComponent({
-          descriptionComponent: IncidentTabs,
-          showTitleBorder: false,
-        });
+        mountComponent(
+          {
+            descriptionComponent: IncidentTabs,
+            showTitleBorder: false,
+          },
+          {
+            mocks: {
+              $apollo: {
+                queries: {
+                  alert: {
+                    loading: false,
+                  },
+                },
+              },
+            },
+          },
+        );
       });
 
       it('renders the description component', () => {

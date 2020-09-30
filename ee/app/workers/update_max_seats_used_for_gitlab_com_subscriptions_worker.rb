@@ -16,6 +16,11 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
       tuples = []
 
       subscriptions.each do |subscription|
+        unless subscription.namespace
+          track_error(subscription)
+          next
+        end
+
         subscription.refresh_seat_attributes!
 
         tuples << [subscription.id, subscription.max_seats_used, subscription.seats_in_use, subscription.seats_owed]
@@ -32,5 +37,19 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
         EOF
       end
     end
+  end
+
+  def self.last_enqueue_time
+    Sidekiq::Cron::Job.find('update_max_seats_used_for_gitlab_com_subscriptions_worker')&.last_enqueue_time
+  end
+
+  private
+
+  def track_error(subscription)
+    Gitlab::ErrorTracking.track_exception(
+      StandardError.new('Namespace absent'),
+      gitlab_subscription_id: subscription.id,
+      namespace_id: subscription.namespace_id
+    )
   end
 end

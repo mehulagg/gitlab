@@ -1,13 +1,23 @@
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import BurndownChart from 'ee/burndown_chart/components/burndown_chart.vue';
 import BurnupChart from 'ee/burndown_chart/components/burnup_chart.vue';
 import { useFakeDate } from 'helpers/fake_date';
-import { day1, day2, day3, day4 } from '../mock_data';
+import waitForPromises from 'helpers/wait_for_promises';
+import { day1, day2, day3, day4, legacyBurndownEvents } from '../mock_data';
+
+function fakeDate({ date }) {
+  const [year, month, day] = date.split('-');
+
+  useFakeDate(year, month - 1, day);
+}
 
 describe('burndown_chart', () => {
   let wrapper;
+  let mock;
 
   const findChartsTitle = () => wrapper.find({ ref: 'chartsTitle' });
   const findIssuesButton = () => wrapper.find({ ref: 'totalIssuesButton' });
@@ -20,10 +30,11 @@ describe('burndown_chart', () => {
   const findNewBurndownChartButton = () => wrapper.find({ ref: 'newBurndown' });
 
   const defaultProps = {
-    startDate: '2019-08-07',
-    dueDate: '2019-09-09',
+    startDate: '2020-08-07',
+    dueDate: '2020-09-09',
     openIssuesCount: [],
     openIssuesWeight: [],
+    burndownEventsPath: '/api/v4/projects/1234/milestones/1/burndown_events',
   };
 
   const createComponent = ({ props = {}, featureEnabled = false, data = {} } = {}) => {
@@ -40,6 +51,14 @@ describe('burndown_chart', () => {
       },
     });
   };
+
+  beforeEach(() => {
+    mock = new MockAdapter(axios);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
 
   it('includes Issues and Issue weight buttons', () => {
     createComponent();
@@ -78,7 +97,32 @@ describe('burndown_chart', () => {
 
   describe('feature disabled', () => {
     beforeEach(() => {
+      fakeDate(day4);
+      mock.onGet(defaultProps.burndownEventsPath).reply(200, legacyBurndownEvents);
       createComponent({ featureEnabled: false });
+    });
+
+    it('calls fetchLegacyBurndownEvents when mounted', async () => {
+      await waitForPromises();
+
+      await wrapper.vm.$nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect(findBurndownChart().props().openIssuesCount).toEqual([
+        [defaultProps.startDate, 0],
+        [day1.date, 1],
+        [day2.date, 2],
+        [day3.date, 3],
+        [day4.date, 2],
+      ]);
+
+      expect(findBurndownChart().props().openIssuesWeight).toEqual([
+        [defaultProps.startDate, 0],
+        [day1.date, 2],
+        [day2.date, 3],
+        [day3.date, 4],
+        [day4.date, 2],
+      ]);
     });
 
     it('does not reduce width of burndown chart', () => {
@@ -95,21 +139,19 @@ describe('burndown_chart', () => {
       expect(findNewBurndownChartButton().exists()).toBe(false);
     });
 
-    it('uses burndown data from props', () => {
+    it('uses count and weight from data', () => {
       const expectedCount = [day2.date, day2.scopeCount];
       const expectedWeight = [day2.date, day2.scopeWeight];
-
-      const props = {
-        milestoneId: '1234',
-        openIssuesCount: [expectedCount],
-        openIssuesWeight: [expectedWeight],
-      };
 
       createComponent({
         data: {
           burnupData: [day1],
+          openIssuesCount: [expectedCount],
+          openIssuesWeight: [expectedWeight],
         },
-        props,
+        props: {
+          milestoneId: '1234',
+        },
         featureEnabled: false,
       });
 
@@ -174,36 +216,19 @@ describe('burndown_chart', () => {
       expect(findNewBurndownChartButton().exists()).toBe(false);
     });
 
-    describe('feature enabled and prop true', () => {
-      beforeEach(() => {
-        createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
-      });
+    it('calls fetchLegacyBurndownEvents, but only once', () => {
+      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
+      jest.spyOn(wrapper.vm, 'fetchLegacyBurndownEvents');
+      mock.onGet(defaultProps.burndownEventsPath).reply(200, []);
 
-      it('shows old/new burndown buttons', () => {
-        expect(findOldBurndownChartButton().exists()).toBe(true);
-        expect(findNewBurndownChartButton().exists()).toBe(true);
-      });
+      findOldBurndownChartButton().vm.$emit('click');
 
-      it('emits fetchLegacyBurndownEvents to trigger fetch, but only once', () => {
-        findOldBurndownChartButton().vm.$emit('click');
-
-        expect(wrapper.emitted().fetchLegacyBurndownEvents).toHaveLength(1);
-
-        findOldBurndownChartButton().vm.$emit('click');
-
-        expect(wrapper.emitted().fetchLegacyBurndownEvents).toHaveLength(1);
-      });
+      expect(wrapper.vm.fetchLegacyBurndownEvents).toHaveBeenCalledTimes(1);
     });
   });
 
   // some separate tests for the update function since it has a bunch of logic
   describe('padSparseBurnupData function', () => {
-    function fakeDate({ date }) {
-      const [year, month, day] = date.split('-');
-
-      useFakeDate(year, month - 1, day);
-    }
-
     beforeEach(() => {
       createComponent({
         props: { startDate: day1.date, dueDate: day4.date },

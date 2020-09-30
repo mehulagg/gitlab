@@ -111,6 +111,10 @@
         white-space: nowrap;
       }
     }
+
+    .pipeline-tags .label-container {
+      white-space: normal;
+    }
   }
 }
 
@@ -124,22 +128,6 @@
 }
 
 .ci-table {
-  .build.retried {
-    background-color: $gray-lightest;
-  }
-
-  .commit-link {
-    a {
-      &:focus {
-        text-decoration: none;
-      }
-    }
-
-    a:hover {
-      text-decoration: none;
-    }
-  }
-
   .avatar {
     margin-left: 0;
     float: none;
@@ -191,44 +179,11 @@
     }
   }
 
-  .icon-container {
-    display: inline-block;
-
-    &.commit-icon {
-      width: 15px;
-      text-align: center;
-    }
-  }
-
-  /**
-   * Play button with icon in dropdowns
-   */
-  .no-btn {
-    border: 0;
-    background: none;
-    outline: none;
-    width: 100%;
-    text-align: left;
-
-    .icon-play {
-      position: relative;
-      top: 2px;
-      margin-right: 5px;
-      height: 13px;
-      width: 12px;
-    }
-  }
-
   .duration,
   .finished-at {
     color: $gl-text-color-secondary;
     margin: 0;
     white-space: nowrap;
-
-    .fa {
-      font-size: 12px;
-      margin-right: 4px;
-    }
 
     svg {
       width: 12px;
@@ -240,14 +195,6 @@
 
   .build-link a {
     color: $gl-text-color;
-  }
-
-  .btn-group.open .dropdown-toggle {
-    box-shadow: none;
-  }
-
-  .pipeline-tags .label-container {
-    white-space: normal;
   }
 }
 
@@ -322,9 +269,11 @@
   }
 }
 
-.admin-builds-table {
-  .ci-table td:last-child {
-    min-width: 120px;
+[data-page='admin:jobs:index'] {
+  .admin-builds-table {
+    td:last-child {
+      min-width: 120px;
+    }
   }
 }
 
@@ -333,110 +282,108 @@
   border-bottom: 0;
 }
 
-.tab-pane {
-  &.builds .ci-table tr {
-    height: 71px;
-  }
-
-  .ci-table {
-    thead th {
-      border-top: 0;
-    }
-  }
-}
-
-.build-failures {
-  .build-state {
-    padding: 20px 2px;
-
-    .build-name {
-      font-weight: $gl-font-weight-normal;
-    }
-
-    .stage {
-      color: $gl-text-color-secondary;
-      font-weight: $gl-font-weight-normal;
-      vertical-align: middle;
-    }
-  }
-
-  .build-log {
-    border: 0;
-    line-height: initial;
-  }
-
-  .build-trace-row td {
-    border-top: 0;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    padding-top: 0;
-  }
-
-  .build-trace {
-    width: 100%;
-    text-align: left;
-    margin-top: $gl-padding;
-  }
-
-  .build-name {
-    width: 196px;
-
-    a {
-      font-weight: $gl-font-weight-bold;
-      color: $gl-text-color;
-      text-decoration: none;
-
-      &:focus,
-      &:hover {
-        text-decoration: underline;
+[data-page='projects:pipelines:show'] {
+  .tab-pane {
+    .ci-table {
+      thead th {
+        border-top: 0;
       }
     }
   }
 
-  .build-actions {
-    width: 70px;
-    text-align: right;
-  }
+  .build-failures {
+    .build-state {
+      padding: 20px 2px;
 
-  .build-stage {
-    width: 140px;
-  }
+      .build-name {
+        font-weight: $gl-font-weight-normal;
+      }
 
-  .ci-status-icon-failed {
-    padding: 10px 0 10px 12px;
-    width: 12px + 24px; // padding-left + svg width
-  }
-
-  .build-icon svg {
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
-  }
-
-  .build-state,
-  .build-trace-row {
-    > td:last-child {
-      padding-right: 0;
-    }
-  }
-
-  @include media-breakpoint-down(sm) {
-    td:empty {
-      display: none;
+      .stage {
+        color: $gl-text-color-secondary;
+        font-weight: $gl-font-weight-normal;
+        vertical-align: middle;
+      }
     }
 
-    .ci-table {
-      margin-top: 2 * $gl-padding;
+    .build-log {
+      border: 0;
+      line-height: initial;
     }
 
-    .build-trace-container {
-      padding-top: $gl-padding;
-      padding-bottom: $gl-padding;
+    .build-trace-row td {
+      border-top: 0;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      padding-top: 0;
     }
 
     .build-trace {
-      margin-bottom: 0;
-      margin-top: 0;
+      width: 100%;
+      text-align: left;
+      margin-top: $gl-padding;
+    }
+
+    .build-name {
+      width: 196px;
+
+      a {
+        font-weight: $gl-font-weight-bold;
+        color: $gl-text-color;
+        text-decoration: none;
+
+        &:focus,
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .build-actions {
+      width: 70px;
+      text-align: right;
+    }
+
+    .build-stage {
+      width: 140px;
+    }
+
+    .ci-status-icon-failed {
+      padding: 10px 0 10px 12px;
+      width: 12px + 24px; // padding-left + svg width
+    }
+
+    .build-icon svg {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+    }
+
+    .build-state,
+    .build-trace-row {
+      > td:last-child {
+        padding-right: 0;
+      }
+    }
+
+    @include media-breakpoint-down(sm) {
+      td:empty {
+        display: none;
+      }
+
+      .ci-table {
+        margin-top: 2 * $gl-padding;
+      }
+
+      .build-trace-container {
+        padding-top: $gl-padding;
+        padding-bottom: $gl-padding;
+      }
+
+      .build-trace {
+        margin-bottom: 0;
+        margin-top: 0;
+      }
     }
   }
 }
@@ -830,7 +777,6 @@ button.mini-pipeline-graph-dropdown-toggle {
   .ci-action-icon-container {
     position: absolute;
     right: 8px;
-    top: 8px;
 
     &.ci-action-icon-wrapper {
       height: $ci-action-dropdown-button-size;
@@ -852,8 +798,6 @@ button.mini-pipeline-graph-dropdown-toggle {
         width: $ci-action-dropdown-svg-size;
         height: $ci-action-dropdown-svg-size;
         fill: $gl-text-color-secondary;
-        position: relative;
-        top: 1px;
         vertical-align: initial;
       }
     }
@@ -1013,49 +957,40 @@ button.mini-pipeline-graph-dropdown-toggle {
 /**
  * Terminal
  */
-.terminal-icon {
-  margin-left: 3px;
-}
+[data-page='projects:jobs:terminal'],
+[data-page='projects:environments:terminal'] {
+  .terminal-container {
+    .content-block {
+      border-bottom: 0;
+    }
 
-.terminal-container {
-  .content-block {
-    border-bottom: 0;
-  }
+    #terminal {
+      margin-top: 10px;
 
-  #terminal {
-    margin-top: 10px;
-    min-height: 450px;
-    box-sizing: border-box;
-
-    > div {
-      min-height: 450px;
+      > div {
+        min-height: 450px;
+      }
     }
   }
 }
 
-.ci-header-container {
-  min-height: 55px;
+/**
+ * Pipelines / Jobs header
+ */
+[data-page='projects:pipelines:show'],
+[data-page='projects:jobs:show'] {
+  .ci-header-container {
+    min-height: $gl-spacing-scale-7;
+    display: flex;
 
-  .text-center {
-    padding-top: 12px;
+    .text-center {
+      padding-top: 12px;
+    }
   }
 }
 
 .pipelines-container .top-area .nav-controls > .btn:last-child {
   float: none;
-}
-
-.autodevops-title {
-  font-weight: $gl-font-weight-normal;
-  line-height: 1.5;
-}
-
-.legend-all {
-  color: $gl-text-color-secondary;
-}
-
-.legend-success {
-  color: $green-500;
 }
 
 .test-reports-table {
@@ -1080,4 +1015,20 @@ button.mini-pipeline-graph-dropdown-toggle {
 
 .progress-bar.bg-primary {
   background-color: $blue-500 !important;
+}
+
+.pipeline-stage-pill {
+  width: 10rem;
+}
+
+.pipeline-job-pill {
+  width: 8rem;
+}
+
+.stage-left-rounded {
+  border-radius: 2rem 0 0 2rem;
+}
+
+.stage-right-rounded {
+  border-radius: 0 2rem 2rem 0;
 }

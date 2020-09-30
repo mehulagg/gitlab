@@ -1,5 +1,0 @@
----
-title: Allow on-demand DAST pipelines to be found for scanned resource
-merge_request: 40982
-author:
-type: fixed

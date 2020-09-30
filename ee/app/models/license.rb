@@ -18,7 +18,6 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
-    group_wikis
     issuable_default_templates
     issue_weights
     iterations
@@ -72,7 +71,7 @@ class License < ApplicationRecord
     epics
     extended_audit_events
     external_authorization_service_api_management
-    feature_flags
+    feature_flags_related_issues
     file_locks
     geo
     generic_alert_fingerprinting
@@ -85,6 +84,8 @@ class License < ApplicationRecord
     group_project_templates
     group_repository_analytics
     group_saml
+    group_wikis
+    ide_schema_config
     issues_analytics
     jira_issues_integration
     ldap_group_sync_filter
@@ -107,6 +108,7 @@ class License < ApplicationRecord
     required_ci_templates
     scoped_labels
     smartcard_auth
+    swimlanes
     group_timelogs
     type_of_work_analytics
     minimal_access_role
@@ -284,7 +286,8 @@ class License < ApplicationRecord
     end
 
     def history
-      all.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
+      decryptable_licenses = all.select { |license| license.license.present? }
+      decryptable_licenses.sort_by { |license| [license.starts_at, license.created_at, license.expires_at] }.reverse
     end
 
     private

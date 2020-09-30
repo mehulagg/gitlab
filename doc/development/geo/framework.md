@@ -91,8 +91,6 @@ module Geo
       ::Packages::PackageFile
     end
 
-    # Change this to `true` to release replication of this model. Then remove
-    # this override in the next release.
     # The feature flag follows the format `geo_#{replicable_name}_replication`,
     # so here it would be `geo_package_file_replication`
     def self.replication_enabled_by_default?
@@ -220,8 +218,6 @@ For example, to add support for files referenced by a `Widget` model with a
          model_record.file
        end
 
-       # Change this to `true` to release replication of this model. Then remove
-       # this override in the next release.
        # The feature flag follows the format `geo_#{replicable_name}_replication`,
        # so here it would be `geo_widget_replication`
        def self.replication_enabled_by_default?
@@ -235,11 +231,10 @@ For example, to add support for files referenced by a `Widget` model with a
 `ee/lib/gitlab/geo.rb`:
 
    ```ruby
-   def self.replicator_classes
-     classes = [::Geo::PackageFileReplicator,
-                ::Geo::WidgetReplicator]
-
-     classes.select(&:enabled?)
+   REPLICATOR_CLASSES = [
+      ::Geo::PackageFileReplicator,
+      ::Geo::WidgetReplicator
+   ]
    end
    ```
 
@@ -314,10 +309,6 @@ For example, to add support for files referenced by a `Widget` model with a
      belongs_to :widget, class_name: 'Widget'
    end
    ```
-
-   The method `has_create_events?` should return `true` in most of the cases.
-   However, if the entity you add doesn't have the create event, don't add the
-   method at all.
 
 1. Update `REGISTRY_CLASSES` in `ee/app/workers/geo/secondary/registry_consistency_worker.rb`.
 
@@ -435,7 +426,7 @@ for verification state to the widgets table:
    ```
 
 1. Add a partial index on `verification_failure` and `verification_checksum` to ensure
-   re-verification can be performed efficiently. Add a migration in `ee/db/geo/migrate/`:
+   re-verification can be performed efficiently:
 
    ```ruby
    # frozen_string_literal: true
@@ -461,9 +452,9 @@ for verification state to the widgets table:
 
 ##### Option 2: Create a separate `widget_states` table with verification state fields
 
-1. Add a migration in `ee/db/geo/migrate/` to create a `widget_states` table and add a
-   partial index on `verification_failure` and `verification_checksum` to ensure
-   re-verification can be performed efficiently. Order the columns according to [our guidelines](../ordering_table_columns.md):
+1. Create a `widget_states` table and add a partial index on `verification_failure` and
+   `verification_checksum` to ensure re-verification can be performed efficiently. Order
+   the columns according to [our guidelines](../ordering_table_columns.md):
 
    ```ruby
    # frozen_string_literal: true
@@ -642,7 +633,7 @@ the Admin Area UI, and Prometheus!
          include ::Types::Geo::RegistryType
 
          graphql_name 'WidgetRegistry'
-         description 'Represents the sync and verification state of a widget'
+         description 'Represents the Geo sync and verification state of a widget'
 
          field :widget_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Widget'
        end
@@ -681,6 +672,12 @@ the Admin Area UI, and Prometheus!
    }
    ```
 
+1. Update the GraphQL reference documentation:
+
+   ```shell
+   bundle exec rake gitlab:graphql:compile_docs
+   ```
+
 Individual widget synchronization and verification data should now be available
 via the GraphQL API!
 
@@ -698,3 +695,33 @@ To do: This should be done as part of
 
 Widget sync and verification data (aggregate and individual) should now be
 available in the Admin UI!
+
+#### Releasing the feature
+
+1. In `ee/app/replicators/geo/widget_replicator.rb`, delete the `self.replication_enabled_by_default?` method:
+
+   ```ruby
+   module Geo
+     class WidgetReplicator < Gitlab::Geo::Replicator
+       ...
+
+       # REMOVE THIS METHOD
+       def self.replication_enabled_by_default?
+         false
+       end
+       # REMOVE THIS METHOD
+
+       ...
+     end
+   end
+   ```
+
+1. In `ee/app/graphql/types/geo/geo_node_type.rb`, remove the `feature_flag` option for the released type:
+
+   ```ruby
+   field :widget_registries, ::Types::Geo::WidgetRegistryType.connection_type,
+         null: true,
+         resolver: ::Resolvers::Geo::WidgetRegistriesResolver,
+         description: 'Find widget registries on this Geo node',
+         feature_flag: :geo_widget_replication # REMOVE THIS LINE
+   ```

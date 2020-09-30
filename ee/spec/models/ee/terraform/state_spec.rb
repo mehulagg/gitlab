@@ -17,8 +17,8 @@ RSpec.describe Terraform::State do
       expect(described_class.with_files_stored_locally).to have_attributes(count: 5)
     end
 
-    it 'excludes states with local storage' do
-      stub_terraform_state_object_storage(Terraform::StateUploader)
+    it 'excludes states without local storage' do
+      stub_terraform_state_object_storage
 
       create_list(:terraform_state, 5, :with_file)
 
@@ -54,14 +54,29 @@ RSpec.describe Terraform::State do
 
       before do
         stub_current_geo_node(secondary)
-        stub_terraform_state_object_storage(Terraform::StateUploader) if terraform_object_storage_enabled
+        stub_terraform_state_object_storage if terraform_object_storage_enabled
 
-        create_list(:terraform_state, 5, project: project)
-        create_list(:terraform_state, 5, project: create(:project))
+        create_list(:terraform_state, 5, :with_file, project: project)
+        create_list(:terraform_state, 5, :with_file, project: create(:project))
       end
 
       it 'returns the proper number of terraform states' do
         expect(Terraform::State.replicables_for_geo_node.count).to eq(synced_states)
+      end
+    end
+
+    context 'state versioning' do
+      let(:secondary) { create(:geo_node, sync_object_storage: true) }
+
+      before do
+        stub_current_geo_node(secondary)
+        stub_terraform_state_object_storage
+
+        create_list(:terraform_state, 5, project: project)
+      end
+
+      it 'excludes versioned states' do
+        expect(Terraform::State.replicables_for_geo_node.count).to be_zero
       end
     end
   end

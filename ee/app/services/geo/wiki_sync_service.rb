@@ -10,10 +10,13 @@ module Geo
       start_registry_sync!
       fetch_repository
       mark_sync_as_successful
+    rescue Gitlab::Git::Repository::NoRepository => e
+      log_info('Setting force_to_redownload flag')
+      fail_registry_sync!('Invalid wiki', e, force_to_redownload_wiki: true)
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, Wiki::CouldNotCreateWikiError => e
       # In some cases repository does not exist, the only way to know about this is to parse the error text.
       # If it does not exist we should consider it as successfully downloaded.
-      if e.message.include? Gitlab::GitAccess::ERROR_MESSAGES[:no_repo]
+      if e.message.include? Gitlab::GitAccess::ERROR_MESSAGES[:no_repo] # rubocop:disable Cop/LineBreakAroundConditionalBlock
         if repository_presumably_exists_on_primary?
           log_info('Wiki is not found, but it seems to exist on the primary')
           fail_registry_sync!('Wiki is not found', e)
@@ -24,9 +27,6 @@ module Geo
       else
         fail_registry_sync!('Error syncing wiki repository', e)
       end
-    rescue Gitlab::Git::Repository::NoRepository => e
-      log_info('Setting force_to_redownload flag')
-      fail_registry_sync!('Invalid wiki', e, force_to_redownload_wiki: true)
     ensure
       expire_repository_caches
     end

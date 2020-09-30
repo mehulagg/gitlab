@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :state].freeze
+  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :state, :confidential].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
 
     resources_results = [
+      recent_merge_requests_autocomplete(term),
       recent_issues_autocomplete(term),
       groups_autocomplete(term),
       projects_autocomplete(term)
@@ -83,6 +84,11 @@ module SearchHelper
       scope: search_entries_scope_label(scope, 0),
       term: "<code>#{h(term)}</code>"
     }).html_safe
+  end
+
+  def repository_ref(project)
+    # Always #to_s the repository_ref param in case the value is also a number
+    params[:repository_ref].to_s.presence || project.default_branch
   end
 
   # Overridden in EE
@@ -176,6 +182,20 @@ module SearchHelper
         label: "#{search_result_sanitize(p.full_name)}",
         url: project_path(p),
         avatar_url: p.avatar_url || ''
+      }
+    end
+  end
+
+  def recent_merge_requests_autocomplete(term, limit = 5)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).limit(limit).map do |mr|
+      {
+        category: "Recent merge requests",
+        id: mr.id,
+        label: search_result_sanitize(mr.title),
+        url: merge_request_path(mr),
+        avatar_url: mr.project.avatar_url || ''
       }
     end
   end
@@ -277,6 +297,11 @@ module SearchHelper
 
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
+  end
+
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
   end
 
   def show_user_search_tab?

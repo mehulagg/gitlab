@@ -14,7 +14,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 If you're unable to use [OAuth2](../../api/oauth2.md), you can use a personal access token to authenticate with the [GitLab API](../../api/README.md#personalproject-access-tokens).
 
-You can also use personal access tokens with Git to authenticate over HTTP or SSH. Personal access tokens are required when [Two-Factor Authentication (2FA)](../account/two_factor_authentication.md) is enabled. In both cases, you can authenticate with a token in place of your password.
+You can also use personal access tokens with Git to authenticate over HTTP or SSH. Personal access tokens are required when [Two-Factor Authentication (2FA)](account/two_factor_authentication.md) is enabled. In both cases, you can authenticate with a token in place of your password.
 
 Personal access tokens expire on the date you define, at midnight UTC.
 
@@ -85,7 +85,7 @@ token.save!
 ```
 
 This can be shortened into a single-line shell command using the
-[GitLab Rails Runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
+[Rails runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
 
 ```shell
 sudo gitlab-rails runner "token = User.find_by_username('automation-bot').personal_access_tokens.create(scopes: [:read_user, :read_repository], name: 'Automation token'); token.set_token('token-string-here123'); token.save!"
@@ -113,7 +113,7 @@ token.revoke!
 ```
 
 This can be shorted into a single-line shell command using the
-[GitLab Rails Runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
+[Rails runner](../../administration/troubleshooting/debug.md#using-the-rails-runner):
 
 ```shell
 sudo gitlab-rails runner "PersonalAccessToken.find_by_token('token-string-here123').revoke!"

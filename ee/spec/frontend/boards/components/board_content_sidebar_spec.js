@@ -3,6 +3,7 @@ import { GlDrawer } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
 import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
+import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { createStore } from '~/boards/stores';
 import { ISSUABLE } from '~/boards/constants';
 
@@ -22,7 +23,6 @@ describe('ee/BoardContentSidebar', () => {
   beforeEach(() => {
     store = createStore();
     store.state.sidebarType = ISSUABLE;
-    store.state.activeId = 1;
     store.state.issues = { '1': { title: 'One', referencePath: 'path', assignees: [] } };
     store.state.activeId = '1';
 
@@ -31,6 +31,7 @@ describe('ee/BoardContentSidebar', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('confirms we render GlDrawer', () => {
@@ -41,12 +42,8 @@ describe('ee/BoardContentSidebar', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
   });
 
-  it('renders a title of an issue in the sidebar', () => {
-    expect(wrapper.find('[data-testid="issue-title"]').text()).toContain('One');
-  });
-
-  it('renders a referencePath of an issue in the sidebar', () => {
-    expect(wrapper.find('[data-testid="issue-title"]').text()).toContain('path');
+  it('finds IssuableTitle', () => {
+    expect(wrapper.find(IssuableTitle).text()).toContain('One');
   });
 
   it('renders IssuableAssignees', () => {

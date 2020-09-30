@@ -3,6 +3,7 @@
 module Ci
   class BuildTraceChunk < ApplicationRecord
     extend ::Gitlab::Ci::Model
+    include ::Comparable
     include ::FastDestroyAll
     include ::Checksummable
     include ::Gitlab::ExclusiveLeaseHelpers
@@ -10,6 +11,8 @@ module Ci
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
     default_value_for :data_store, :redis
+
+    after_create { metrics.increment_trace_operation(operation: :chunked) }
 
     CHUNK_SIZE = 128.kilobytes
     WRITE_LOCK_RETRY = 10
@@ -25,6 +28,9 @@ module Ci
       database: 2,
       fog: 3
     }
+
+    scope :live, -> { redis }
+    scope :persisted, -> { not_redis.order(:chunk_index) }
 
     class << self
       def all_stores
@@ -59,10 +65,22 @@ module Ci
           get_store_class(store).delete_keys(value)
         end
       end
+
+      ##
+      # Sometimes we do not want to read raw data. This method makes it easier
+      # to find attributes that are just metadata excluding raw data.
+      #
+      def metadata_attributes
+        attribute_names - %w[raw_data]
+      end
     end
 
     def data
       @data ||= get_data.to_s
+    end
+
+    def crc32
+      checksum.to_i
     end
 
     def truncate(offset = 0)
@@ -116,6 +134,22 @@ module Ci
       redis?
     end
 
+    ##
+    # Build trace chunk is final (the last one that we do not expect to ever
+    # become full) when a runner submitted a build pending state and there is
+    # no chunk with higher index in the database.
+    #
+    def final?
+      build.pending_state.present? &&
+        build.trace_chunks.maximum(:chunk_index).to_i == chunk_index
+    end
+
+    def <=>(other)
+      return unless self.build_id == other.build_id
+
+      self.chunk_index <=> other.chunk_index
+    end
+
     private
 
     def get_data
@@ -128,14 +162,15 @@ module Ci
 
       current_data = data
       old_store_class = current_store
+      current_size = current_data&.bytesize.to_i
 
-      unless current_data&.bytesize.to_i == CHUNK_SIZE
+      unless current_size == CHUNK_SIZE || final?
         raise FailedToPersistDataError, 'Data is not fulfilled in a bucket'
       end
 
       self.raw_data = nil
       self.data_store = new_store
-      self.checksum = crc32(current_data)
+      self.checksum = self.class.crc32(current_data)
 
       ##
       # We need to so persist data then save a new store identifier before we
@@ -169,6 +204,8 @@ module Ci
       end
 
       current_store.append_data(self, value, offset).then do |stored|
+        metrics.increment_trace_operation(operation: :appended)
+
         raise ArgumentError, 'Trace appended incorrectly' if stored != new_size
       end
 
@@ -191,6 +228,10 @@ module Ci
        { ttl: WRITE_LOCK_TTL,
          retries: WRITE_LOCK_RETRY,
          sleep_sec: WRITE_LOCK_SLEEP }]
+    end
+
+    def metrics
+      @metrics ||= ::Gitlab::Ci::Trace::Metrics.new
     end
   end
 end

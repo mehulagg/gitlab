@@ -28,6 +28,12 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
       allow_any_instance_of(Gitlab::ExpiringSubscriptionMessage).to receive(:grace_period_effective_from).and_return(grace_period_effective_from)
     end
 
+    around do |example|
+      Timecop.freeze(today) do
+        example.run
+      end
+    end
+
     context 'subscribable installed' do
       let(:auto_renew) { false }
 
@@ -80,23 +86,17 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   let(:plan_name) { ::Plan::SILVER }
 
                   it "shows the expiring message" do
-                    Timecop.freeze(today) do
-                      expect(subject).to include('Your subscription expired! No worries, you can still use all the Silver features for now. You have 0 days to renew your subscription.')
-                    end
+                    expect(subject).to include('Your subscription expired! No worries, you can still use all the Silver features for now. You have 0 days to renew your subscription.')
                   end
                 end
 
                 it 'has a nice subject' do
-                  Timecop.freeze(today) do
-                    expect(subject).to include('Your subscription has been downgraded.')
-                  end
+                  expect(subject).to include('Your subscription has been downgraded.')
                 end
 
                 context 'no namespace' do
                   it 'has an expiration blocking message' do
-                    Timecop.freeze(today) do
-                      expect(subject).to include("You didn't renew your subscription so it was downgraded to the GitLab Core Plan")
-                    end
+                    expect(subject).to include("You didn't renew your subscription so it was downgraded to the GitLab Core Plan")
                   end
                 end
 
@@ -104,24 +104,18 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                   let(:namespace) { double(:namespace, name: 'No Limit Records') }
 
                   it 'has an expiration blocking message' do
-                    Timecop.freeze(today) do
-                      expect(subject).to include("You didn't renew your subscription for No Limit Records so it was downgraded to the free plan")
-                    end
+                    expect(subject).to include("You didn't renew your subscription for No Limit Records so it was downgraded to the free plan")
                   end
 
                   context 'is auto_renew' do
                     let(:auto_renew) { true }
 
                     it 'has a nice subject' do
-                      Timecop.freeze(today) do
-                        expect(subject).to include('Something went wrong with your automatic subscription renewal')
-                      end
+                      expect(subject).to include('Something went wrong with your automatic subscription renewal')
                     end
 
                     it 'has an expiration blocking message' do
-                      Timecop.freeze(today) do
-                        expect(subject).to include("We tried to automatically renew your subscription for No Limit Records on 2020-03-01 but something went wrong so your subscription was downgraded to the free plan. Don't worry, your data is safe. We suggest you check your payment method and get in touch with our support team (support@gitlab.com). They'll gladly help with your subscription renewal.")
-                      end
+                      expect(subject).to include("We tried to automatically renew your subscription for No Limit Records on 2020-03-01 but something went wrong so your subscription was downgraded to the free plan. Don't worry, your data is safe. We suggest you check your payment method and get in touch with our support team (support@gitlab.com). They'll gladly help with your subscription renewal.")
                     end
                   end
                 end
@@ -138,18 +132,14 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                 it 'has a nice subject' do
                   allow(subscribable).to receive(:will_block_changes?).and_return(false)
 
-                  Timecop.freeze(today) do
-                    expect(subject).to include('Your subscription expired!')
-                  end
+                  expect(subject).to include('Your subscription expired!')
                 end
 
                 it 'has an expiration blocking message' do
                   allow(subscribable).to receive(:block_changes_at).and_return(Time.utc(2020, 3, 9, 10).to_date)
                   allow(subscribable).to receive(:is_a?).with(::License).and_return(true)
 
-                  Timecop.freeze(today) do
-                    expect(subject).to include('No worries, you can still use all the Gold features for now. You have 2 days to renew your subscription.')
-                  end
+                  expect(subject).to include('No worries, you can still use all the Gold features for now. You have 2 days to renew your subscription.')
                 end
               end
             end
@@ -163,16 +153,12 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
             end
 
             it 'has a nice subject' do
-              Timecop.freeze(today) do
-                expect(subject).to include('Your subscription will expire in 2 days')
-              end
+              expect(subject).to include('Your subscription will expire in 2 days')
             end
 
             context 'without namespace' do
               it 'has an expiration blocking message' do
-                Timecop.freeze(today) do
-                  expect(subject).to include('Your Gold subscription will expire on 2020-03-09. After that, you will not to be able to create issues or merge requests as well as many other features.')
-                end
+                expect(subject).to include('Your Gold subscription will expire on 2020-03-09. After that, you will not to be able to create issues or merge requests as well as many other features.')
               end
             end
 
@@ -182,25 +168,19 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               it 'has gold plan specific messaging' do
                 allow(subscribable).to receive(:plan).and_return('gold')
 
-                Timecop.freeze(today) do
-                  expect(subject).to include('Your Gold subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or epics as well as many security features.')
-                end
+                expect(subject).to include('Your Gold subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or epics as well as many security features.')
               end
 
               it 'has silver plan specific messaging' do
                 allow(subscribable).to receive(:plan).and_return('silver')
 
-                Timecop.freeze(today) do
-                  expect(subject).to include('Your Silver subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or epics as well as many other features.')
-                end
+                expect(subject).to include('Your Silver subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or epics as well as many other features.')
               end
 
               it 'has bronze plan specific messaging' do
                 allow(subscribable).to receive(:plan).and_return('bronze')
 
-                Timecop.freeze(today) do
-                  expect(subject).to include('Your Bronze subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or code quality as well as many other features.')
-                end
+                expect(subject).to include('Your Bronze subscription for No Limit Records will expire on 2020-03-09. After that, you will not to be able to use merge approvals or code quality as well as many other features.')
               end
 
               context 'is auto_renew nil' do
@@ -238,17 +218,21 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               let(:grace_period_effective_from) { today.to_date - 40.days }
 
               it 'has a nice subject' do
-                Timecop.freeze(today) do
-                  expect(subject).to include('Your subscription has been downgraded')
-                end
+                expect(subject).to include('Your subscription has been downgraded')
+              end
+            end
+
+            context 'and is 30 days past the cutoff date' do
+              let(:grace_period_effective_from) { today.to_date - 60.days }
+
+              it 'stops displaying' do
+                expect(subject).to be nil
               end
             end
 
             context 'and not past the cutoff date' do
               it 'has a nice subject' do
-                Timecop.freeze(today) do
-                  expect(subject).to include('Your subscription will expire in 5 days')
-                end
+                expect(subject).to include('Your subscription will expire in 5 days')
               end
             end
           end

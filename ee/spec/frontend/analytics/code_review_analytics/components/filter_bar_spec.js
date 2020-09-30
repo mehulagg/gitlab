@@ -8,9 +8,10 @@ import initialFiltersState from 'ee/analytics/shared/store/modules/filters/state
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
-import { filterMilestones, filterLabels } from '../../shared/store/modules/filters/mock_data';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
+import { filterMilestones, filterLabels } from '../../shared/store/modules/filters/mock_data';
+import { getFilterParams, getFilterValues } from '../../shared/store/modules/filters/test_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -38,20 +39,10 @@ async function shouldMergeUrlParams(wrapper, result) {
   expect(commonUtils.historyPushState).toHaveBeenCalled();
 }
 
-function getFilterParams(tokens, operator, key = 'value') {
-  return tokens.map(token => {
-    return { [key]: token.title, operator };
-  });
-}
-
-function getFilterValues(tokens) {
-  return tokens.map(token => token.title);
-}
-
-const selectedMilestoneParams = getFilterParams(filterMilestones, '=');
-const unselectedMilestoneParams = getFilterParams(filterMilestones, '!=');
-const selectedLabelParams = getFilterParams(filterLabels, '=');
-const unselectedLabelParams = getFilterParams(filterLabels, '!=');
+const selectedMilestoneParams = getFilterParams(filterMilestones);
+const unselectedMilestoneParams = getFilterParams(filterMilestones, { operator: '!=' });
+const selectedLabelParams = getFilterParams(filterLabels);
+const unselectedLabelParams = getFilterParams(filterLabels, { operator: '!=' });
 
 const milestoneValues = getFilterValues(filterMilestones);
 const labelValues = getFilterValues(filterLabels);
@@ -163,9 +154,12 @@ describe('Filter bar', () => {
 
     it('clicks on the search button, setFilters is dispatched', () => {
       const filters = [
-        { type: 'milestone', value: getFilterParams(filterMilestones, '=', 'data')[2] },
-        { type: 'labels', value: getFilterParams(filterLabels, '=', 'data')[2] },
-        { type: 'labels', value: getFilterParams(filterLabels, '!=', 'data')[4] },
+        { type: 'milestone', value: getFilterParams(filterMilestones, { key: 'data' })[2] },
+        { type: 'labels', value: getFilterParams(filterLabels, { key: 'data' })[2] },
+        {
+          type: 'labels',
+          value: getFilterParams(filterLabels, { key: 'data', operator: '!=' })[4],
+        },
       ];
 
       findFilteredSearch().vm.$emit('onFilter', filters);

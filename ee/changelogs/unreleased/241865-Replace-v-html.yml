@@ -1,5 +1,0 @@
----
-title: Replace v-html with v-safe-html in configure_feature_flags_modal.vue
-merge_request: 41210
-author: Kev @KevSlashNull
-type: other

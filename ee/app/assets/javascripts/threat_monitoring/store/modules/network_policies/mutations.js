@@ -1,6 +1,10 @@
 import * as types from './mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
+const setPolicies = (state, policies) => {
+  state.policies = policies.map(policy => convertObjectPropsToCamelCase(policy));
+};
+
 export default {
   [types.SET_ENDPOINT](state, endpoint) {
     state.policiesEndpoint = endpoint;
@@ -10,11 +14,12 @@ export default {
     state.errorLoadingPolicies = false;
   },
   [types.RECEIVE_POLICIES_SUCCESS](state, policies) {
-    state.policies = policies.map(policy => convertObjectPropsToCamelCase(policy));
+    setPolicies(state, policies);
     state.isLoadingPolicies = false;
     state.errorLoadingPolicies = false;
   },
-  [types.RECEIVE_POLICIES_ERROR](state) {
+  [types.RECEIVE_POLICIES_ERROR](state, policies = []) {
+    setPolicies(state, policies);
     state.isLoadingPolicies = false;
     state.errorLoadingPolicies = true;
   },

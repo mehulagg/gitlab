@@ -11,6 +11,7 @@ module SystemNoteHelper
     'closed' => 'issue-close',
     'time_tracking' => 'timer',
     'assignee' => 'user',
+    'reviewer' => 'user',
     'title' => 'pencil-square',
     'task' => 'task-done',
     'label' => 'label',
@@ -34,7 +35,8 @@ module SystemNoteHelper
     'designs_discussion_added' => 'doc-image',
     'status' => 'status',
     'alert_issue_added' => 'issues',
-    'new_alert_added' => 'warning'
+    'new_alert_added' => 'warning',
+    'severity' => 'information-o'
   }.freeze
 
   def system_note_icon_name(note)

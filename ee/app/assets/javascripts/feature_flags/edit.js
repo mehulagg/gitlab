@@ -4,11 +4,16 @@ import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default () => {
   const el = document.querySelector('#js-edit-feature-flag');
+  const { environmentsScopeDocsPath, strategyTypeDocsPagePath } = el.dataset;
 
   return new Vue({
     el,
     components: {
       EditFeatureFlag,
+    },
+    provide: {
+      environmentsScopeDocsPath,
+      strategyTypeDocsPagePath,
     },
     render(createElement) {
       return createElement('edit-feature-flag', {

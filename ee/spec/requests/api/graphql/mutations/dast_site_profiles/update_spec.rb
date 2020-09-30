@@ -8,7 +8,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
   let!(:dast_site_profile) { create(:dast_site_profile, project: project) }
 
   let(:new_profile_name) { SecureRandom.hex }
-  let(:new_target_url) { FFaker::Internet.uri(:https) }
+  let(:new_target_url) { generate(:url) }
 
   let(:mutation_name) { :dast_site_profile_update }
   let(:mutation) do

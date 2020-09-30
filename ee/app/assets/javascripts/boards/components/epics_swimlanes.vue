@@ -28,27 +28,14 @@ export default {
       type: Boolean,
       required: true,
     },
-    boardId: {
-      type: String,
-      required: true,
-    },
     canAdminList: {
       type: Boolean,
       required: false,
       default: false,
     },
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    rootPath: {
-      type: String,
-      required: true,
-    },
   },
   computed: {
-    ...mapState(['epics', 'isLoadingIssues']),
+    ...mapState(['epics']),
     ...mapGetters(['getUnassignedIssues']),
     unassignedIssues() {
       return listId => this.getUnassignedIssues(listId);
@@ -79,11 +66,8 @@ export default {
       return this.canAdminList ? options : {};
     },
   },
-  mounted() {
-    this.fetchIssuesForAllLists();
-  },
   methods: {
-    ...mapActions(['fetchIssuesForAllLists', 'moveList']),
+    ...mapActions(['moveList']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item } = params;
       const { listId } = item.dataset;
@@ -125,7 +109,6 @@ export default {
           :can-admin-list="canAdminList"
           :list="list"
           :disabled="disabled"
-          :board-id="boardId"
           :is-swimlanes-header="true"
         />
       </div>
@@ -136,9 +119,7 @@ export default {
         :key="epic.id"
         :epic="epic"
         :lists="lists"
-        :is-loading-issues="isLoadingIssues"
         :disabled="disabled"
-        :root-path="rootPath"
         :can-admin-list="canAdminList"
       />
       <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
@@ -167,11 +148,8 @@ export default {
           :key="`${list.id}-issues`"
           :list="list"
           :issues="unassignedIssues(list.id)"
-          :group-id="groupId"
           :is-unassigned-issues-lane="true"
-          :is-loading="isLoadingIssues"
           :disabled="disabled"
-          :root-path="rootPath"
           :can-admin-list="canAdminList"
         />
       </div>

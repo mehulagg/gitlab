@@ -181,7 +181,7 @@ describe('DiffFile', () => {
       });
 
       it('updates local state when changing file state', done => {
-        vm.file.viewer.collapsed = true;
+        vm.file.viewer.automaticallyCollapsed = true;
 
         vm.$nextTick(() => {
           expect(vm.isCollapsed).toBe(true);
@@ -215,7 +215,7 @@ describe('DiffFile', () => {
     it('calls handleLoadCollapsedDiff if collapsed changed & file has no lines', done => {
       jest.spyOn(vm, 'handleLoadCollapsedDiff').mockImplementation(() => {});
 
-      vm.file.highlighted_diff_lines = undefined;
+      vm.file.highlighted_diff_lines = [];
       vm.file.parallel_diff_lines = [];
       vm.isCollapsed = true;
 
@@ -242,8 +242,8 @@ describe('DiffFile', () => {
 
       jest.spyOn(vm, 'handleLoadCollapsedDiff').mockImplementation(() => {});
 
-      vm.file.highlighted_diff_lines = undefined;
-      vm.file.parallel_diff_lines = [];
+      vm.file.highlighted_diff_lines = [];
+      vm.file.parallel_diff_lines = undefined;
       vm.isCollapsed = true;
 
       vm.$nextTick()

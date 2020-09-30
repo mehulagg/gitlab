@@ -7,6 +7,9 @@ import { getDayDifference, nDaysAfter, newDateAsLocaleTime } from '~/lib/utils/d
 import BurndownChart from './burndown_chart.vue';
 import BurnupChart from './burnup_chart.vue';
 import BurnupQuery from '../queries/burnup.query.graphql';
+import BurndownChartData from '../burn_chart_data';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 
 export default {
   components: {
@@ -26,17 +29,12 @@ export default {
       type: String,
       required: true,
     },
-    openIssuesCount: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    openIssuesWeight: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
     milestoneId: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    burndownEventsPath: {
       type: String,
       required: false,
       default: '',
@@ -70,6 +68,8 @@ export default {
   },
   data() {
     return {
+      openIssuesCount: [],
+      openIssuesWeight: [],
       issuesSelected: true,
       burnupData: [],
       useLegacyBurndown: !this.glFeatures.burnupCharts,
@@ -100,15 +100,37 @@ export default {
       return this.pluckBurnupDataProperties('scopeWeight', 'completedWeight');
     },
   },
+  mounted() {
+    if (!this.glFeatures.burnupCharts) {
+      this.fetchLegacyBurndownEvents();
+    }
+  },
   methods: {
+    fetchLegacyBurndownEvents() {
+      this.fetchedLegacyData = true;
+
+      axios
+        .get(this.burndownEventsPath)
+        .then(burndownResponse => {
+          const burndownEvents = burndownResponse.data;
+          const burndownChartData = new BurndownChartData(
+            burndownEvents,
+            this.startDate,
+            this.dueDate,
+          ).generateBurndownTimeseries();
+
+          this.openIssuesCount = burndownChartData.map(d => [d[0], d[1]]);
+          this.openIssuesWeight = burndownChartData.map(d => [d[0], d[2]]);
+        })
+        .catch(() => {
+          this.fetchedLegacyData = false;
+          createFlash(__('Error loading burndown chart data'));
+        });
+    },
     pluckBurnupDataProperties(total, completed) {
       return this.burnupData.map(data => {
         return [data.date, data[total] - data[completed]];
       });
-    },
-    fetchLegacyBurndownEvents() {
-      this.fetchedLegacyData = true;
-      this.$emit('fetchLegacyBurndownEvents');
     },
     toggleLegacyBurndown(enabled) {
       if (!this.fetchedLegacyData) {

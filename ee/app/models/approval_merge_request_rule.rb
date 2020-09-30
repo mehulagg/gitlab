@@ -5,9 +5,6 @@ class ApprovalMergeRequestRule < ApplicationRecord
   include ApprovalRuleLike
   include UsageStatistics
 
-  include IgnorableColumns
-  ignore_column :code_owner, remove_with: '13.5', remove_after: '2020-10-22'
-
   scope :not_matching_pattern, -> (pattern) { code_owner.where.not(name: pattern) }
   scope :matching_pattern, -> (pattern) { code_owner.where(name: pattern) }
 
@@ -71,15 +68,6 @@ class ApprovalMergeRequestRule < ApplicationRecord
     end
   rescue ActiveRecord::RecordNotUnique
     retry
-  end
-
-  def self.applicable_to_branch(branch)
-    includes(:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]).select do |rule|
-      next true unless rule.approval_project_rule.present?
-      next true if rule.overridden?
-
-      rule.approval_project_rule.applies_to_branch?(branch)
-    end
   end
 
   def audit_add(_model)

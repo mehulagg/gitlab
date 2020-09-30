@@ -3,8 +3,6 @@
 module Gitlab
   module UsageDataCounters
     module HLLRedisCounter
-      include Gitlab::Utils::UsageData
-
       DEFAULT_WEEKLY_KEY_EXPIRY_LENGTH = 6.weeks
       DEFAULT_DAILY_KEY_EXPIRY_LENGTH = 29.days
       DEFAULT_REDIS_SLOT = ''.freeze
@@ -33,6 +31,8 @@ module Gitlab
       # * Track event: Gitlab::UsageDataCounters::HLLRedisCounter.track_event(user_id, 'g_compliance_dashboard')
       # * Get unique counts per user: Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'g_compliance_dashboard', start_date: 28.days.ago, end_date: Date.current)
       class << self
+        include Gitlab::Utils::UsageData
+
         def track_event(entity_id, event_name, time = Time.zone.now)
           return unless Gitlab::CurrentSettings.usage_ping_enabled?
 
@@ -54,7 +54,7 @@ module Gitlab
 
           keys = keys_for_aggregation(aggregation, events: events, start_date: start_date, end_date: end_date)
 
-          Gitlab::Redis::HLL.count(keys: keys)
+          redis_usage_data { Gitlab::Redis::HLL.count(keys: keys) }
         end
 
         def categories
@@ -72,7 +72,8 @@ module Gitlab
             events_names = events_for_category(category)
 
             event_results = events_names.each_with_object({}) do |event, hash|
-              hash[event] = unique_events(event_names: event, start_date: 7.days.ago.to_date, end_date: Date.current)
+              hash["#{event}_weekly"] = unique_events(event_names: event, start_date: 7.days.ago.to_date, end_date: Date.current)
+              hash["#{event}_monthly"] = unique_events(event_names: event, start_date: 4.weeks.ago.to_date, end_date: Date.current)
             end
 
             if eligible_for_totals?(events_names)

@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:approved_license_name) { "MIT License" }
     let(:denied_license_name) { "WTFPL" }
 

@@ -7,7 +7,7 @@ module ProjectsHelper
   end
 
   def link_to_project(project)
-    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name) do
+    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name), class: 'gl-link' do
       title = content_tag(:span, project.name, class: 'project-name')
 
       if project.namespace
@@ -756,10 +756,6 @@ module ProjectsHelper
       project.has_auto_devops_implicitly_enabled? &&
       project.builds_enabled? &&
       !project.repository.gitlab_ci_yml
-  end
-
-  def native_code_navigation_enabled?(project)
-    Feature.enabled?(:code_navigation, project, default_enabled: true)
   end
 
   def show_visibility_confirm_modal?(project)

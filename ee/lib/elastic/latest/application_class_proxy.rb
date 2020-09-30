@@ -33,6 +33,12 @@ module Elastic
 
       private
 
+      def default_operator
+        return :or if Feature.enabled?(:elasticsearch_use_or_default_operator)
+
+        :and
+      end
+
       def highlight_options(fields)
         es_fields = fields.map { |field| field.split('^').first }.each_with_object({}) do |field, memo|
           memo[field.to_sym] = {}
@@ -51,7 +57,7 @@ module Elastic
                     simple_query_string: {
                       fields: fields,
                       query: query,
-                      default_operator: :and
+                      default_operator: default_operator
                     }
                   }],
                   filter: [{

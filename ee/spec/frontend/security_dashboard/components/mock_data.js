@@ -16,6 +16,7 @@ export const generateVulnerabilities = () => [
     severity: 'critical',
     state: 'dismissed',
     reportType: 'SAST',
+    resolvedOnDefaultBranch: true,
     location: {
       image:
         'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',

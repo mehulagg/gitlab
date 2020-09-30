@@ -69,9 +69,7 @@ class User < ApplicationRecord
   LOGIN_FORBIDDEN = "Your account does not have the required permission to login. Please contact your GitLab " \
                     "administrator if you think this is an error."
 
-  MINIMUM_INACTIVE_DAYS = 180
-
-  ignore_column :bio, remove_with: '13.4', remove_after: '2020-09-22'
+  MINIMUM_INACTIVE_DAYS = 90
 
   # Override Devise::Models::Trackable#update_tracked_fields!
   # to limit database writes to at most once every hour
@@ -279,6 +277,7 @@ class User < ApplicationRecord
             :view_diffs_file_by_file, :view_diffs_file_by_file=,
             :tab_width, :tab_width=,
             :sourcegraph_enabled, :sourcegraph_enabled=,
+            :gitpod_enabled, :gitpod_enabled=,
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,

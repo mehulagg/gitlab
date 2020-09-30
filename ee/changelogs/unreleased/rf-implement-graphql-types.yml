@@ -1,5 +1,0 @@
----
-title: Change the configureSast mutation to use actual GraphQL types instead of JSON types
-merge_request: 40637
-author:
-type: changed

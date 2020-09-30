@@ -42,6 +42,7 @@ module Ci
     has_many :stages, -> { order(position: :asc) }, inverse_of: :pipeline
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :commit_id, inverse_of: :pipeline
     has_many :latest_statuses_ordered_by_stage, -> { latest.order(:stage_idx, :stage) }, class_name: 'CommitStatus', foreign_key: :commit_id, inverse_of: :pipeline
+    has_many :latest_statuses, -> { latest }, class_name: 'CommitStatus', foreign_key: :commit_id, inverse_of: :pipeline
     has_many :processables, class_name: 'Ci::Processable', foreign_key: :commit_id, inverse_of: :pipeline
     has_many :bridges, class_name: 'Ci::Bridge', foreign_key: :commit_id, inverse_of: :pipeline
     has_many :builds, foreign_key: :commit_id, inverse_of: :pipeline
@@ -237,7 +238,6 @@ module Ci
       end
 
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
-        next unless pipeline.bridge_triggered?
         next unless pipeline.bridge_waiting?
 
         pipeline.run_after_commit do
@@ -578,11 +578,11 @@ module Ci
     end
 
     def retried
-      @retried ||= (statuses.order(id: :desc) - statuses.latest)
+      @retried ||= (statuses.order(id: :desc) - latest_statuses)
     end
 
     def coverage
-      coverage_array = statuses.latest.map(&:coverage).compact
+      coverage_array = latest_statuses.map(&:coverage).compact
       if coverage_array.size >= 1
         '%.2f' % (coverage_array.reduce(:+) / coverage_array.size)
       end
@@ -823,7 +823,9 @@ module Ci
 
     def same_family_pipeline_ids
       if ::Gitlab::Ci::Features.child_of_child_pipeline_enabled?(project)
-        ::Gitlab::Ci::PipelineObjectHierarchy.new(base_and_ancestors).base_and_descendants.select(:id)
+        ::Gitlab::Ci::PipelineObjectHierarchy.new(
+          base_and_ancestors(same_project: true), options: { same_project: true }
+        ).base_and_descendants.select(:id)
       else
         # If pipeline is a child of another pipeline, include the parent
         # and the siblings, otherwise return only itself and children.
@@ -874,7 +876,7 @@ module Ci
     end
 
     def builds_with_coverage
-      builds.with_coverage
+      builds.latest.with_coverage
     end
 
     def has_reports?(reports_scope)
@@ -1062,13 +1064,25 @@ module Ci
       self.ci_ref = Ci::Ref.ensure_for(self)
     end
 
-    def base_and_ancestors
+    def base_and_ancestors(same_project: false)
       # Without using `unscoped`, caller scope is also included into the query.
       # Using `unscoped` here will be redundant after Rails 6.1
       ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id))
+        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
         .base_and_ancestors
     end
+
+    # We need `base_and_ancestors` in a specific order to "break" when needed.
+    # If we use `find_each`, then the order is broken.
+    # rubocop:disable Rails/FindEach
+    def reset_ancestor_bridges!
+      base_and_ancestors.includes(:source_bridge).each do |pipeline|
+        break unless pipeline.bridge_waiting?
+
+        pipeline.source_bridge.pending!
+      end
+    end
+    # rubocop:enable Rails/FindEach
 
     private
 

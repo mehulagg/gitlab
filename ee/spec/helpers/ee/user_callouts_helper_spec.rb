@@ -217,22 +217,6 @@ RSpec.describe EE::UserCalloutsHelper do
         helper.render_dashboard_gold_trial(user)
       end
     end
-
-    context 'when render_dashboard_gold_trial feature is disabled' do
-      before do
-        stub_feature_flags(render_dashboard_gold_trial: false)
-
-        allow(helper).to receive(:show_gold_trial?).and_return(true)
-        allow(helper).to receive(:user_default_dashboard?).and_return(true)
-        allow(helper).to receive(:has_some_namespaces_with_no_trials?).and_return(true)
-      end
-
-      it 'does not render' do
-        expect(helper).not_to receive(:render)
-
-        helper.render_dashboard_gold_trial(user)
-      end
-    end
   end
 
   describe '#render_billings_gold_trial' do

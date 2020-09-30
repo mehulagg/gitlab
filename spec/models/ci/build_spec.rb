@@ -25,6 +25,7 @@ RSpec.describe Ci::Build do
   it { is_expected.to have_many(:sourced_pipelines) }
   it { is_expected.to have_many(:job_variables) }
   it { is_expected.to have_many(:report_results) }
+  it { is_expected.to have_many(:pages_deployments) }
 
   it { is_expected.to have_one(:deployment) }
   it { is_expected.to have_one(:runner_session) }
@@ -4649,6 +4650,26 @@ RSpec.describe Ci::Build do
       end
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#run_on_status_commit' do
+    it 'runs provided hook after status commit' do
+      action = spy('action')
+
+      build.run_on_status_commit { action.perform! }
+      build.success!
+
+      expect(action).to have_received(:perform!).once
+    end
+
+    it 'does not run hooks when status has not changed' do
+      action = spy('action')
+
+      build.run_on_status_commit { action.perform! }
+      build.save!
+
+      expect(action).not_to have_received(:perform!)
     end
   end
 end

@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     describe 'License merge request widget' do
       let(:approved_license_name) { "MIT" }
       let(:denied_license_name) { "Zlib" }

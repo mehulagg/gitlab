@@ -1,0 +1,7 @@
+---
+name: geo_file_transfer_validation
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/16382
+rollout_issue_url:
+group: geo
+type: development
+default_enabled: true

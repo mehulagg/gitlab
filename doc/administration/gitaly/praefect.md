@@ -171,7 +171,7 @@ We will note in the instructions below where these secrets are required.
 NOTE: **Note:**
 Do not store the GitLab application database and the Praefect
 database on the same PostgreSQL server if using
-[Geo](../geo/replication/index.md). The replication state is internal to each instance
+[Geo](../geo/index.md). The replication state is internal to each instance
 of GitLab and should not be replicated.
 
 These instructions help set up a single PostgreSQL database, which creates a single point of
@@ -547,14 +547,14 @@ To configure Praefect with TLS:
        storages:
          default:
            gitaly_address: tls://praefect1.internal:3305
-           path: /some/dummy/path
+           path: /some/local/path
          storage1:
            gitaly_address: tls://praefect2.internal:3305
-           path: /some/dummy/path
+           path: /some/local/path
    ```
 
    NOTE: **Note:**
-   `/some/dummy/path` should be set to a local folder that exists, however no
+   `/some/local/path` should be set to a local folder that exists, however no
    data will be stored in this folder. This will no longer be necessary after
    [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
 
@@ -993,6 +993,8 @@ information, see the [strong consistency epic](https://gitlab.com/groups/gitlab-
 
 To enable strong consistency:
 
+- In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable
+  strong consistency.
 - In GitLab 13.4 and later, the strong consistency voting strategy has been
   improved. Instead of requiring all nodes to agree, only the primary and half
   of the secondaries need to agree. This strategy is enabled by default. To
@@ -1196,9 +1198,16 @@ CAUTION: **Caution:**
 
 ## Data recovery
 
-If a Gitaly node fails replication jobs for any reason, it ends up hosting outdated versions of
-the affected repositories. Praefect provides tools for automatically or manually reconciling
-the outdated repositories in order to bring them fully up to date again.
+If a Gitaly node fails replication jobs for any reason, it ends up hosting outdated versions of the
+affected repositories. Praefect provides tools for:
+
+- [Automatic](#automatic-reconciliation) reconciliation, for GitLab 13.4 and later.
+- [Manual](#manual-reconciliation) reconciliation, for:
+  - GitLab 13.3 and earlier.
+  - Repositories upgraded to GitLab 13.4 and later without entries in the `repositories` table.
+    A migration tool [is planned](https://gitlab.com/gitlab-org/gitaly/-/issues/3033).
+
+These tools reconcile the outdated repositories to bring them fully up to date again.
 
 ### Automatic reconciliation
 

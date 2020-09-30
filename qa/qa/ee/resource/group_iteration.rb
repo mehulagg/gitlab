@@ -42,6 +42,38 @@ module QA
             new.click_create_iteration_button
           end
         end
+
+        def api_get_path
+          "gid://gitlab/Iteration/#{id}"
+        end
+
+        def api_post_path
+          "/graphql"
+        end
+
+        def api_post_body
+          <<~GQL
+            mutation {
+              createIteration(input: {
+                groupPath: "#{group.full_path}"
+                title: "#{@title}"
+                description: "#{@description}"
+                startDate: "#{@start_date}"
+                dueDate: "#{@due_date}"
+                }) {
+                iteration {
+                  id
+                  title
+                  description
+                  startDate
+                  dueDate
+                  webUrl
+                }
+                errors
+              }
+            }
+          GQL
+        end
       end
     end
   end

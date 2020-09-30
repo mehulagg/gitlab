@@ -4,8 +4,10 @@ import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/analytics/shared/store/modules/filters/actions';
 import * as types from 'ee/analytics/shared/store/modules/filters/mutation_types';
 import initialState from 'ee/analytics/shared/store/modules/filters/state';
+import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Api from '~/api';
 import { filterMilestones, filterUsers, filterLabels } from './mock_data';
 
 const milestonesEndpoint = 'fake_milestones_endpoint';
@@ -110,6 +112,55 @@ describe('Filters actions', () => {
         ],
         [],
       );
+    });
+  });
+
+  describe('fetchBranches', () => {
+    describe('success', () => {
+      beforeEach(() => {
+        const url = Api.buildUrl(Api.createBranchPath).replace(
+          ':id',
+          encodeURIComponent(projectEndpoint),
+        );
+        mock.onGet(url).replyOnce(httpStatusCodes.OK, mockBranches);
+      });
+
+      it('dispatches RECEIVE_BRANCHES_SUCCESS with received data', () => {
+        return testAction(
+          actions.fetchBranches,
+          null,
+          { ...state, projectEndpoint },
+          [
+            { type: types.REQUEST_BRANCHES },
+            { type: types.RECEIVE_BRANCHES_SUCCESS, payload: mockBranches },
+          ],
+          [],
+        ).then(({ data }) => {
+          expect(data).toBe(mockBranches);
+        });
+      });
+    });
+
+    describe('error', () => {
+      beforeEach(() => {
+        mock.onAny().replyOnce(httpStatusCodes.SERVICE_UNAVAILABLE);
+      });
+
+      it('dispatches RECEIVE_BRANCHES_ERROR', () => {
+        return testAction(
+          actions.fetchBranches,
+          null,
+          state,
+          [
+            { type: types.REQUEST_BRANCHES },
+            {
+              type: types.RECEIVE_BRANCHES_ERROR,
+              payload: httpStatusCodes.SERVICE_UNAVAILABLE,
+            },
+          ],
+          [],
+        ).then(() => expect(createFlash).toHaveBeenCalled());
+      });
     });
   });
 

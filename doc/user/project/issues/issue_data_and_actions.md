@@ -36,7 +36,7 @@ You can find all the information for that issue on one screen.
 - **15.** [Edit](#edit)
 - **16.** [Description](#description)
 - **17.** [Mentions](#mentions)
-- **18.** [Related Issues **(STARTER)**](#related-issues)
+- **18.** [Related Issues](#related-issues)
 - **19.** [Related Merge Requests](#related-merge-requests)
 - **20.** [Award emoji](#award-emoji)
 - **21.** [Show all activity](#show-all-activity)
@@ -196,7 +196,7 @@ allowing many formatting options.
 ### Mentions
 
 You can mention a user or a group present in your GitLab instance with `@username` or
-`@groupname` and they will be notified via todos and email, unless they have disabled
+`@groupname` and they will be notified via to-dos and email, unless they have disabled
 all notifications in their profile settings. This is controlled in the
 [notification settings](../../profile/notifications.md).
 
@@ -208,7 +208,7 @@ TIP: **Tip:**
 Avoid mentioning `@all` in issues and merge requests, as it sends an email notification
 to all the members of that project's group, which can be interpreted as spam.
 
-### Related Issues **(STARTER)**
+### Related Issues
 
 Issues that were mentioned as [related issues](related_issues.md) are listed here.
 You can also click the `+` to add more related issues.

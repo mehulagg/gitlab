@@ -110,6 +110,20 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
         end
       end
 
+      it 'executes the same number of queries regardless of the number of records returned' do
+        control = ActiveRecord::QueryRecorder.new do
+          get :index, params: valid_request_params
+        end
+
+        expect(CSV.parse(response.body).length).to eq(3)
+
+        create_daily_coverage('rspec', project, 79.0, '2020-03-10')
+
+        expect { get :index, params: valid_request_params }.not_to exceed_query_limit(control)
+
+        expect(csv_response.length).to eq(4)
+      end
+
       context 'with an invalid format' do
         it 'responds 404' do
           get :index, params: valid_request_params.merge(format: :json)

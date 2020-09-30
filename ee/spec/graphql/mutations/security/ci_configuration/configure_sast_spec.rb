@@ -32,10 +32,6 @@ RSpec.describe Mutations::Security::CiConfiguration::ConfigureSast do
     )
   end
 
-  before do
-    stub_feature_flags(security_sast_configuration: true)
-  end
-
   specify { expect(described_class).to require_graphql_authorizations(:push_code) }
 
   describe '#resolve' do
@@ -83,14 +79,6 @@ RSpec.describe Mutations::Security::CiConfiguration::ConfigureSast do
             success_path: service_result_json[:success_path],
             errors: []
           )
-        end
-      end
-
-      context 'when sast configuration feature is not enabled' do
-        it 'raises an exception' do
-          stub_feature_flags(security_sast_configuration: false)
-
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
       end
 

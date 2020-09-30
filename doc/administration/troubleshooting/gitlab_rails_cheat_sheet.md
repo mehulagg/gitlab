@@ -218,6 +218,17 @@ namespace = Namespace.find_by_full_path("")
 ::Projects::TransferService.new(p, current_user).execute(namespace)
 ```
 
+### For Removing webhooks that is getting timeout due to large webhook logs
+
+```ruby
+# ID will be the webhook_id
+WebHookLog.where(web_hook_id: ID).each_slice(ID) do |slice|
+  slice.each(&:destroy)
+end
+
+WebHook.find(ID).destroy
+```
+
 ### Bulk update service integration password for _all_ projects
 
 For example, change the Jira user's password for all projects that have the Jira
@@ -514,8 +525,8 @@ conflicting_permanent_redirects.destroy_all
 ### Close a merge request properly (if merged but still marked as open)
 
 ```ruby
-p = Project.find_by_full_path('')
-m = project.merge_requests.find_by(iid: )
+p = Project.find_by_full_path('<full/path/to/project>')
+m = p.merge_requests.find_by(iid: <iid>)
 u = User.find_by_username('')
 MergeRequests::PostMergeService.new(p, u).execute(m)
 ```

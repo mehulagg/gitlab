@@ -3,7 +3,7 @@ module EE
   module SearchHelper
     extend ::Gitlab::Utils::Override
 
-    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users].freeze
+    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users epics].freeze
 
     override :search_filter_input_options
     def search_filter_input_options(type, placeholder = _('Search or filter results...'))
@@ -30,9 +30,19 @@ module EE
 
     override :project_autocomplete
     def project_autocomplete
-      return super unless @project && @project.feature_available?(:feature_flags)
+      return super unless @project && @project.feature_available?(:repository)
 
       super + [{ category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }]
+    end
+
+    override :search_entries_scope_label
+    def search_entries_scope_label(scope, count)
+      case scope
+      when 'epics'
+        ns_('SearchResults|epic', 'SearchResults|epics', count)
+      else
+        super
+      end
     end
 
     # This is a special case for snippet searches in .com.
@@ -52,21 +62,12 @@ module EE
       end
     end
 
-    def revert_to_basic_search_filter_url
-      search_params = params
-        .permit(::SearchHelper::SEARCH_PERMITTED_PARAMS)
-        .merge(basic_search: true)
+    override :highlight_and_truncate_issue
+    def highlight_and_truncate_issue(issue, search_term, search_highlight)
+      return super unless search_service.use_elasticsearch? && search_highlight[issue.id]&.description.present?
 
-      search_path(search_params)
-    end
-
-    def show_switch_to_basic_search?(search_service)
-      return false unless ::Feature.enabled?(:switch_to_basic_search, default_enabled: false)
-      return false unless search_service.use_elasticsearch?
-
-      return true if @project
-
-      search_service.scope.in?(SWITCH_TO_BASIC_SEARCHABLE_TABS)
+      # We use Elasticsearch highlighting for results from Elasticsearch
+      Truncato.truncate(search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
     end
 
     private
@@ -82,7 +83,6 @@ module EE
       @current_user &&
         @show_snippets &&
         ::Gitlab.com? &&
-        ::Feature.enabled?(:restricted_snippet_scope_search, default_enabled: true) &&
         ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: nil)
     end
   end

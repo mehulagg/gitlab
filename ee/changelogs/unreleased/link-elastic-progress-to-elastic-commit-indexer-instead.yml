@@ -1,5 +1,0 @@
----
-title: Link Elasticsearch indexing progress to elastic_commit_indexer
-merge_request: 40928
-author:
-type: changed

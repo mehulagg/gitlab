@@ -14,19 +14,32 @@ class Projects::StaticSiteEditorController < Projects::ApplicationController
   end
 
   def show
-    config = Gitlab::StaticSiteEditor::Config::CombinedConfig.new(
-      @repository,
-      @ref,
-      @path,
-      params[:return_url]
-    )
-    @data = config.data
+    service_response = ::StaticSiteEditor::ConfigService.new(
+      container: project,
+      current_user: current_user,
+      params: {
+        ref: @ref,
+        path: @path,
+        return_url: params[:return_url]
+      }
+    ).execute
+
+    if service_response.success?
+      @data = service_response.payload
+    else
+      # TODO: For now, if the service returns any error, the user is redirected
+      #       to the root project page with the error message displayed as an alert.
+      #       See https://gitlab.com/gitlab-org/gitlab/-/issues/213285#note_414808004
+      #       for discussion of plans to handle this via a page owned by the Static Site Editor.
+      flash[:alert] = service_response.message
+      redirect_to project_path(project)
+    end
   end
 
   private
 
   def assign_ref_and_path
-    @ref, @path = extract_ref(params[:id])
+    @ref, @path = extract_ref(params.fetch(:id))
 
     render_404 if @ref.blank? || @path.blank?
   end

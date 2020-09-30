@@ -10,7 +10,6 @@ RSpec.describe 'User creates feature flag', :js do
 
   before do
     project.add_developer(user)
-    stub_licensed_features(feature_flags: true)
     stub_feature_flags(feature_flag_permissions: false)
     sign_in(user)
   end

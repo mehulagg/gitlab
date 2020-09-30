@@ -247,7 +247,7 @@ export default {
     });
 
     if (!Visibility.hidden()) {
-      this.poll.makeRequest();
+      this.poll.makeDelayedRequest(2000);
     }
 
     Visibility.change(() => {
@@ -468,7 +468,6 @@ export default {
 
       <component
         :is="descriptionComponent"
-        v-if="state.descriptionHtml"
         :can-update="canUpdate"
         :description-html="state.descriptionHtml"
         :description-text="state.descriptionText"

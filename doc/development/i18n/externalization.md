@@ -7,6 +7,9 @@ For working with internationalization (i18n),
 used tool for this task and there are a lot of applications that will help us to
 work with it.
 
+TIP: **Tip:**
+All `rake` commands described on this page must be run on a GitLab instance, usually GDK.
+
 ## Setting up GitLab Development Kit (GDK)
 
 In order to be able to work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
@@ -207,7 +210,7 @@ For the static text strings we suggest two patterns for using these translations
   ```javascript
   <script>
     export default {
-      i18n: { 
+      i18n: {
         buttonLabel: s__('Plan|Button Label')
       }
     },
@@ -429,7 +432,7 @@ To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) inst
 - In JavaScript:
 
   ```javascript
-  import { sanitize } from 'dompurify';
+  import { sanitize } from '~/lib/dompurify';
 
   const i18n = { LESS_THAN_ONE_HOUR: sanitize(__('In &lt; 1 hour'), { ALLOWED_TAGS: [] }) };
 

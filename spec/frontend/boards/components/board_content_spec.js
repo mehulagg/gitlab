@@ -23,9 +23,6 @@ describe('BoardContent', () => {
     return new Vuex.Store({
       getters,
       state,
-      actions: {
-        fetchIssuesForAllLists: () => {},
-      },
     });
   };
 
@@ -39,11 +36,7 @@ describe('BoardContent', () => {
       propsData: {
         lists: mockListsWithModel,
         canAdminList: true,
-        groupId: 1,
         disabled: false,
-        issueLinkBase: '/',
-        rootPath: '/',
-        boardId: '1',
       },
       store,
     });

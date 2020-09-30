@@ -6,7 +6,11 @@ RSpec.describe Gitlab::UsageData::Topology do
   include UsageDataHelpers
 
   describe '#topology_usage_data' do
-    subject { described_class.new.topology_usage_data }
+    subject { topology.topology_usage_data }
+
+    let(:topology) { described_class.new }
+    let(:prometheus_client) { Gitlab::PrometheusClient.new('http://localhost:9090') }
+    let(:fallback) { {} }
 
     before do
       # this pins down time shifts when benchmarking durations
@@ -16,7 +20,7 @@ RSpec.describe Gitlab::UsageData::Topology do
     shared_examples 'query topology data from Prometheus' do
       context 'tracking node metrics' do
         it 'contains node level metrics for each instance' do
-          expect_prometheus_api_to(
+          expect_prometheus_client_to(
             receive_app_request_volume_query,
             receive_query_apdex_ratio_query,
             receive_node_memory_query,
@@ -102,7 +106,7 @@ RSpec.describe Gitlab::UsageData::Topology do
 
       context 'and some node memory metrics are missing' do
         it 'removes the respective entries and includes the failures' do
-          expect_prometheus_api_to(
+          expect_prometheus_client_to(
             receive_app_request_volume_query(result: []),
             receive_query_apdex_ratio_query(result: []),
             receive_node_memory_query(result: []),
@@ -242,7 +246,7 @@ RSpec.describe Gitlab::UsageData::Topology do
         end
 
         it 'normalizes equivalent instance values and maps them to the same node' do
-          expect_prometheus_api_to(
+          expect_prometheus_client_to(
             receive_app_request_volume_query(result: []),
             receive_query_apdex_ratio_query(result: []),
             receive_node_memory_query(result: node_memory_response),
@@ -308,7 +312,7 @@ RSpec.describe Gitlab::UsageData::Topology do
 
       context 'and node metrics are missing but service metrics exist' do
         it 'still reports service metrics' do
-          expect_prometheus_api_to(
+          expect_prometheus_client_to(
             receive_app_request_volume_query(result: []),
             receive_query_apdex_ratio_query(result: []),
             receive_node_memory_query(result: []),
@@ -383,7 +387,7 @@ RSpec.describe Gitlab::UsageData::Topology do
         end
 
         it 'filters out unknown service data and reports the unknown services as a failure' do
-          expect_prometheus_api_to(
+          expect_prometheus_client_to(
             receive_app_request_volume_query(result: []),
             receive_query_apdex_ratio_query(result: []),
             receive_node_memory_query(result: []),
@@ -408,25 +412,25 @@ RSpec.describe Gitlab::UsageData::Topology do
       context 'and an error is raised when querying Prometheus' do
         context 'without timeout failures' do
           it 'returns empty result and executes subsequent queries as usual' do
-            expect_prometheus_api_to receive(:query)
-              .at_least(:once)
-              .and_raise(Gitlab::PrometheusClient::ConnectionError)
+            expect_prometheus_client_to(
+              receive(:query).at_least(:once).and_raise(Gitlab::PrometheusClient::UnexpectedResponseError)
+            )
 
             expect(subject[:topology]).to eq({
               duration_s: 0,
               failures: [
-                { 'app_requests' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'query_apdex' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'node_memory' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'node_memory_utilization' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'node_cpus' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'node_cpu_utilization' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'node_uname_info' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'service_rss' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'service_uss' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'service_pss' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'service_process_count' => 'Gitlab::PrometheusClient::ConnectionError' },
-                { 'service_workers' => 'Gitlab::PrometheusClient::ConnectionError' }
+                { 'app_requests' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'query_apdex' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'node_memory' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'node_memory_utilization' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'node_cpus' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'node_cpu_utilization' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'node_uname_info' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'service_rss' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'service_uss' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'service_pss' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'service_process_count' => 'Gitlab::PrometheusClient::UnexpectedResponseError' },
+                { 'service_workers' => 'Gitlab::PrometheusClient::UnexpectedResponseError' }
               ],
               nodes: []
             })
@@ -440,8 +444,9 @@ RSpec.describe Gitlab::UsageData::Topology do
 
           with_them do
             it 'returns empty result and cancelled subsequent queries' do
-              expect_prometheus_api_to receive(:query)
-                .and_raise(exception)
+              expect_prometheus_client_to(
+                receive(:query).and_raise(exception)
+              )
 
               expect(subject[:topology]).to eq({
                 duration_s: 0,
@@ -467,30 +472,8 @@ RSpec.describe Gitlab::UsageData::Topology do
       end
     end
 
-    context 'when Prometheus is available from Prometheus settings' do
-      before do
-        expect(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(true)
-        expect(Gitlab::Prometheus::Internal).to receive(:uri).and_return('http://prom:9090')
-      end
-
-      include_examples 'query topology data from Prometheus'
-    end
-
-    context 'when Prometheus is available from Consul service discovery' do
-      before do
-        expect(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(false)
-        expect(Gitlab::Consul::Internal).to receive(:api_url).and_return('http://127.0.0.1:8500')
-        expect(Gitlab::Consul::Internal).to receive(:discover_prometheus_uri).and_return('http://prom.net:9090')
-      end
-
-      include_examples 'query topology data from Prometheus'
-    end
-
-    context 'when Prometheus is not available' do
-      it 'returns empty result with no failures' do
-        expect(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_return(false)
-        expect(Gitlab::Consul::Internal).to receive(:api_url).and_return(nil)
-
+    shared_examples 'returns empty result with no failures' do
+      it do
         expect(subject[:topology]).to eq({
           duration_s: 0,
           failures: []
@@ -498,9 +481,25 @@ RSpec.describe Gitlab::UsageData::Topology do
       end
     end
 
+    context 'can reach a ready Prometheus client' do
+      before do
+        expect(topology).to receive(:with_prometheus_client).and_yield(prometheus_client)
+      end
+
+      it_behaves_like 'query topology data from Prometheus'
+    end
+
+    context 'can not reach a ready Prometheus client' do
+      before do
+        expect(topology).to receive(:with_prometheus_client).and_return(fallback)
+      end
+
+      it_behaves_like 'returns empty result with no failures'
+    end
+
     context 'when top-level function raises error' do
       it 'returns empty result with generic failure' do
-        allow(Gitlab::Prometheus::Internal).to receive(:prometheus_enabled?).and_raise(RuntimeError)
+        expect(topology).to receive(:with_prometheus_client).and_raise(RuntimeError)
 
         expect(subject[:topology]).to eq({
           duration_s: 0,
@@ -509,6 +508,14 @@ RSpec.describe Gitlab::UsageData::Topology do
           ]
         })
       end
+    end
+  end
+
+  def receive_ready_check_query(result: nil, raise_error: nil)
+    if raise_error.nil?
+      receive(:ready?).and_return(result.nil? ? true : result)
+    else
+      receive(:ready?).and_raise(raise_error)
     end
   end
 

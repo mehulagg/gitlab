@@ -2,12 +2,16 @@
 import { mapState, mapActions } from 'vuex';
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { __ } from '~/locale';
+import Tracking from '~/tracking';
+
+const trackingMixin = Tracking.mixin();
 
 export default {
   components: {
     GlDropdown,
     GlDropdownItem,
   },
+  mixins: [trackingMixin],
   computed: {
     ...mapState(['isShowingEpicsSwimlanes']),
 
@@ -25,6 +29,19 @@ export default {
     ...mapActions(['toggleEpicSwimlanes']),
 
     onToggle() {
+      // Track toggle event
+      this.track('click_toggle_swimlanes_button', {
+        label: 'toggle_swimlanes',
+        property: this.isShowingEpicsSwimlanes ? 'off' : 'on',
+      });
+
+      // Track if the board has swimlane active
+      if (!this.isShowingEpicsSwimlanes) {
+        this.track('click_toggle_swimlanes_button', {
+          label: 'swimlanes_active',
+        });
+      }
+
       this.toggleEpicSwimlanes();
     },
   },
@@ -50,13 +67,13 @@ export default {
       <gl-dropdown-item
         :is-check-item="true"
         :is-checked="!isShowingEpicsSwimlanes"
-        @click="toggleEpicSwimlanes()"
+        @click="onToggle()"
         >{{ groupByNoneLabel }}</gl-dropdown-item
       >
       <gl-dropdown-item
         :is-check-item="true"
         :is-checked="isShowingEpicsSwimlanes"
-        @click="toggleEpicSwimlanes()"
+        @click="onToggle()"
         >{{ groupByEpicLabel }}</gl-dropdown-item
       >
     </gl-dropdown>

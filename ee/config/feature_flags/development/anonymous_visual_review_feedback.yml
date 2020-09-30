@@ -1,0 +1,7 @@
+---
+name: anonymous_visual_review_feedback
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18710
+rollout_issue_url:
+group: group::testing
+type: development
+default_enabled: false

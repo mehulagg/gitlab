@@ -45,6 +45,7 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:tribute_autocomplete, @project)
     push_frontend_feature_flag(:vue_issuables_list, project)
     push_frontend_feature_flag(:design_management_todo_button, project, default_enabled: true)
+    push_frontend_feature_flag(:vue_sidebar_labels, @project)
   end
 
   before_action only: :show do
@@ -55,7 +56,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project)
+    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
@@ -344,10 +345,12 @@ class Projects::IssuesController < Projects::ApplicationController
   def finder_options
     options = super
 
-    return options unless service_desk?
+    options[:issue_types] = Issue::TYPES_FOR_LIST
 
-    options.reject! { |key| key == 'author_username' || key == 'author_id' }
-    options[:author_id] = User.support_bot
+    if service_desk?
+      options.reject! { |key| key == 'author_username' || key == 'author_id' }
+      options[:author_id] = User.support_bot
+    end
 
     options
   end

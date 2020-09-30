@@ -103,8 +103,8 @@ variables:
 You can then call its value in your script:
 
 ```yaml
-  script:
-    - echo "$TEST"
+script:
+  - echo "$TEST"
 ```
 
 For more details, see [`.gitlab-ci.yml` defined variables](#gitlab-ciyml-defined-variables).
@@ -547,6 +547,7 @@ The order of precedence for variables is (from highest to lowest):
    and [manual pipeline run variables](#override-a-variable-by-manually-running-a-pipeline).
 1. Project-level [variables](#custom-environment-variables) or [protected variables](#protect-a-custom-variable).
 1. Group-level [variables](#group-level-environment-variables) or [protected variables](#protect-a-custom-variable).
+1. Instance-level [variables](#instance-level-cicd-environment-variables) or [protected variables](#protect-a-custom-variable).
 1. [Inherited environment variables](#inherit-environment-variables).
 1. YAML-defined [job-level variables](../yaml/README.md#variables).
 1. YAML-defined [global variables](../yaml/README.md#variables).
@@ -570,7 +571,7 @@ in which you wish to use it.
 
 ## Where variables can be used
 
-Click [here](where_variables_can_be_used.md) for a section that describes where and how the different types of variables can be used.
+[This section](where_variables_can_be_used.md) describes where and how the different types of variables can be used.
 
 ## Advanced use
 

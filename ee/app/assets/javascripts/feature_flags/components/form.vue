@@ -9,6 +9,7 @@ import {
   GlFormTextarea,
   GlFormCheckbox,
   GlSprintf,
+  GlIcon,
 } from '@gitlab/ui';
 import Api from 'ee/api';
 import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
@@ -37,6 +38,7 @@ export default {
     GlFormCheckbox,
     GlTooltip,
     GlSprintf,
+    GlIcon,
     ToggleButton,
     EnvironmentsDropdown,
     Strategy,
@@ -107,7 +109,7 @@ export default {
     ),
 
     newHelpText: s__(
-      'FeatureFlags|Enable features for specific users and specific environments by defining feature flag strategies.',
+      'FeatureFlags|Enable features for specific users and environments by configuring feature flag strategies.',
     ),
     noStrategiesText: s__('FeatureFlags|Feature Flag has no strategies'),
   },
@@ -461,7 +463,11 @@ export default {
                         {{ s__('FeatureFlags|User IDs') }}
                       </option>
                     </select>
-                    <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+                    <gl-icon
+                      name="chevron-down"
+                      class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+                      :size="16"
+                    />
                   </div>
 
                   <div
@@ -500,9 +506,8 @@ export default {
                     <gl-form-checkbox
                       v-if="shouldDisplayIncludeUserIds(scope)"
                       v-model="scope.shouldIncludeUserIds"
+                      >{{ s__('FeatureFlags|Include additional user IDs') }}</gl-form-checkbox
                     >
-                      {{ s__('FeatureFlags|Include additional user IDs') }}
-                    </gl-form-checkbox>
                     <template v-if="shouldDisplayUserIds(scope)">
                       <label :for="rolloutUserId(index)" class="mb-2">
                         {{ s__('FeatureFlags|User IDs') }}
@@ -579,7 +584,11 @@ export default {
                     >
                       <option>{{ s__('FeatureFlags|All users') }}</option>
                     </select>
-                    <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+                    <gl-icon
+                      name="chevron-down"
+                      class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+                      :size="16"
+                    />
                   </div>
                 </div>
               </div>
@@ -597,9 +606,8 @@ export default {
         variant="success"
         class="js-ff-submit col-xs-12"
         @click="handleSubmit"
+        >{{ submitText }}</gl-button
       >
-        {{ submitText }}
-      </gl-button>
       <gl-button :href="cancelPath" class="js-ff-cancel col-xs-12 float-right">
         {{ __('Cancel') }}
       </gl-button>

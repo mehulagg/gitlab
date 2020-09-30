@@ -27,9 +27,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   before_action :authenticate_user!, only: [:assign_related_issues]
   before_action :check_user_can_push_to_source_branch!, only: [:rebase]
   before_action only: [:show] do
-    push_frontend_feature_flag(:deploy_from_footer, @project, default_enabled: true)
     push_frontend_feature_flag(:suggest_pipeline) if experiment_enabled?(:suggest_pipeline)
-    push_frontend_feature_flag(:code_navigation, @project, default_enabled: true)
     push_frontend_feature_flag(:widget_visibility_polling, @project, default_enabled: true)
     push_frontend_feature_flag(:merge_ref_head_comments, @project, default_enabled: true)
     push_frontend_feature_flag(:mr_commit_neighbor_nav, @project, default_enabled: true)
@@ -41,6 +39,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:merge_request_widget_graphql, @project)
     push_frontend_feature_flag(:unified_diff_lines, @project)
     push_frontend_feature_flag(:highlight_current_diff_row, @project)
+    push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
   end
 
   before_action do
@@ -48,6 +47,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show, :discussions]
+
+  after_action :log_merge_request_show, only: [:show]
 
   feature_category :source_code_management,
                    unless: -> (action) { action.ends_with?("_reports") }
@@ -449,6 +450,12 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     end
   end
 
+  def log_merge_request_show
+    return unless current_user && @merge_request
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).log_view(@merge_request)
+  end
+
   def authorize_read_actual_head_pipeline!
     return render_404 unless can?(current_user, :read_build, merge_request.actual_head_pipeline)
   end
@@ -456,6 +463,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   def endpoint_metadata_url(project, merge_request)
     params = request.query_parameters
     params[:view] = cookies[:diff_view] if params[:view].blank? && cookies[:diff_view].present?
+
+    if Feature.enabled?(:default_merge_ref_for_diffs, project)
+      params = params.merge(diff_head: true)
+    end
 
     diffs_metadata_project_json_merge_request_path(project, merge_request, 'json', params)
   end

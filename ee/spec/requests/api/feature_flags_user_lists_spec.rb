@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe API::FeatureFlagsUserLists do
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:reporter) { create(:user) }
 
@@ -12,12 +12,16 @@ RSpec.describe API::FeatureFlagsUserLists do
     project.add_reporter(reporter)
   end
 
-  before do
-    stub_licensed_features(feature_flags: true)
-  end
-
   def create_list(name: 'mylist', user_xids: 'user1')
     create(:operations_feature_flag_user_list, project: project, name: name, user_xids: user_xids)
+  end
+
+  def disable_repository(project)
+    project.project_feature.update!(
+      repository_access_level: ::ProjectFeature::DISABLED,
+      merge_requests_access_level: ::ProjectFeature::DISABLED,
+      builds_access_level: ::ProjectFeature::DISABLED
+    )
   end
 
   describe 'GET /projects/:id/feature_flags_user_lists' do
@@ -28,7 +32,7 @@ RSpec.describe API::FeatureFlagsUserLists do
     end
 
     it 'returns forbidden if the feature is unavailable' do
-      stub_licensed_features(feature_flags: false)
+      disable_repository(project)
 
       get api("/projects/#{project.id}/feature_flags_user_lists", developer)
 
@@ -103,7 +107,7 @@ RSpec.describe API::FeatureFlagsUserLists do
     end
 
     it 'returns forbidden if the feature is unavailable' do
-      stub_licensed_features(feature_flags: false)
+      disable_repository(project)
       list = create_list
 
       get api("/projects/#{project.id}/feature_flags_user_lists/#{list.iid}", developer)
@@ -171,7 +175,7 @@ RSpec.describe API::FeatureFlagsUserLists do
     end
 
     it 'returns forbidden if the feature is unavailable' do
-      stub_licensed_features(feature_flags: false)
+      disable_repository(project)
 
       post api("/projects/#{project.id}/feature_flags_user_lists", developer), params: {
         name: 'mylist', user_xids: 'user1'
@@ -254,7 +258,7 @@ RSpec.describe API::FeatureFlagsUserLists do
 
     it 'returns forbidden if the feature is unavailable' do
       list = create_list(name: 'original_name')
-      stub_licensed_features(feature_flags: false)
+      disable_repository(project)
 
       put api("/projects/#{project.id}/feature_flags_user_lists/#{list.iid}", developer), params: {
         name: 'mylist', user_xids: '456,789'
@@ -328,7 +332,7 @@ RSpec.describe API::FeatureFlagsUserLists do
 
     it 'returns forbidden if the feature is unavailable' do
       list = create_list
-      stub_licensed_features(feature_flags: false)
+      disable_repository(project)
 
       delete api("/projects/#{project.id}/feature_flags_user_lists/#{list.iid}", developer)
 

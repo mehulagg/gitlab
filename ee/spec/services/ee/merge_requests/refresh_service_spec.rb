@@ -13,6 +13,7 @@ RSpec.describe MergeRequests::RefreshService do
   let(:fork_user) { create(:user) }
 
   let(:source_branch) { 'between-create-delete-modify-move' }
+
   let(:merge_request) do
     create(:merge_request,
       source_project: project,
@@ -189,7 +190,7 @@ RSpec.describe MergeRequests::RefreshService do
         end
 
         before do
-          project.repository.create_file(owner, 'CODEOWNERS', file, { branch_name: 'test', message: 'codeowners' })
+          project.repository.create_file(owner, 'CODEOWNERS', file, branch_name: 'test', message: 'codeowners')
 
           subject
         end
@@ -342,7 +343,7 @@ RSpec.describe MergeRequests::RefreshService do
         Todo.where(action: Todo::APPROVAL_REQUIRED, target: merge_request)
       end
 
-      context 'push to origin repo source branch' do
+      context 'push to origin repo source branch', :sidekiq_inline do
         let(:notification_service) { spy('notification_service') }
 
         before do
@@ -444,7 +445,7 @@ RSpec.describe MergeRequests::RefreshService do
         end
       end
 
-      context 'resetting approvals if they are enabled' do
+      context 'resetting approvals if they are enabled', :sidekiq_inline do
         context 'when approvals_before_merge is disabled' do
           before do
             project.update(approvals_before_merge: 0)
@@ -487,7 +488,7 @@ RSpec.describe MergeRequests::RefreshService do
           end
         end
 
-        context 'when there are approvals' do
+        context 'when there are approvals', :sidekiq_inline do
           context 'closed merge request' do
             before do
               merge_request.close!

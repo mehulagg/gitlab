@@ -205,6 +205,12 @@ module IssuablesHelper
       author_output
     end
 
+    if access = project.team.human_max_access(issuable.author_id)
+      output << content_tag(:span, access, class: "user-access-role has-tooltip d-none d-xl-inline-block gl-ml-3 ", title: _("This user has the %{access} role in the %{name} project.") % { access: access.downcase, name: project.name })
+    elsif project.team.contributor?(issuable.author_id)
+      output << content_tag(:span, _("Contributor"), class: "user-access-role has-tooltip d-none d-xl-inline-block gl-ml-3", title: _("This user has previously committed to the %{name} project.") % { name: project.name })
+    end
+
     output << content_tag(:span, (sprite_icon('first-contribution', css_class: 'gl-icon gl-vertical-align-middle') if issuable.first_contribution?), class: 'has-tooltip gl-ml-2', title: _('1st contribution!'))
 
     output << content_tag(:span, (issuable.task_status if issuable.tasks?), id: "task_status", class: "d-none d-sm-none d-md-inline-block gl-ml-3")
@@ -377,6 +383,12 @@ module IssuablesHelper
   def assignee_sidebar_data(assignee, merge_request: nil)
     { avatar_url: assignee.avatar_url, name: assignee.name, username: assignee.username }.tap do |data|
       data[:can_merge] = merge_request.can_be_merged_by?(assignee) if merge_request
+    end
+  end
+
+  def reviewer_sidebar_data(reviewer, merge_request: nil)
+    { avatar_url: reviewer.avatar_url, name: reviewer.name, username: reviewer.username }.tap do |data|
+      data[:can_merge] = merge_request.can_be_merged_by?(reviewer) if merge_request
     end
   end
 

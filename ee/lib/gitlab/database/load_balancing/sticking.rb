@@ -49,11 +49,20 @@ module Gitlab
         def self.stick(namespace, id)
           return unless LoadBalancing.enable?
 
+          mark_primary_write_location_helper(namespace, id)
+          Session.current.use_primary!
+        end
+
+        def self.mark_primary_write_location(namespace, id)
+          return unless LoadBalancing.enable?
+
+          mark_primary_write_location_helper(namespace, id)
+        end
+
+        def self.mark_primary_write_location_helper(namespace, id)
           location = load_balancer.primary_write_location
 
           set_write_location_for(namespace, id, location)
-
-          Session.current.use_primary!
         end
 
         # Stops sticking to the primary.

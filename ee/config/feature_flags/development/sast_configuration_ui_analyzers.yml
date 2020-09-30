@@ -1,0 +1,7 @@
+---
+name: sast_configuration_ui_analyzers
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42214
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/238602
+group: group::static analysis
+type: development
+default_enabled: false

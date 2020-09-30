@@ -55,7 +55,6 @@ module EE
     def render_dashboard_gold_trial(user)
       return unless show_gold_trial?(user, GOLD_TRIAL) &&
           user_default_dashboard?(user) &&
-          ::Feature.enabled?(:render_dashboard_gold_trial, default_enabled: true) &&
           !user.owns_paid_namespace? &&
           user.any_namespace_without_trial?
 

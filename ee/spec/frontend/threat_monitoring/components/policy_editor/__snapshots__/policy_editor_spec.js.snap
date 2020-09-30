@@ -153,46 +153,45 @@ exports[`PolicyEditorApp component renders the policy editor layout 1`] = `
     >
       <!---->
        
-      <h4>
-        Rules
-      </h4>
-        
-      <div
-        class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5"
+      <dim-disable-container-stub
+        data-testid="rule-builder-container"
       >
-        <gl-button-stub
-          category="primary"
-          data-testid="add-rule"
-          icon=""
-          size="medium"
-          variant="link"
+           
+        <div
+          class="gl-p-3 gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-mb-5"
         >
-          New rule
-        </gl-button-stub>
-      </div>
+          <gl-button-stub
+            buttontextclasses=""
+            category="primary"
+            data-testid="add-rule"
+            icon=""
+            size="medium"
+            variant="link"
+          >
+            New rule
+          </gl-button-stub>
+        </div>
+      </dim-disable-container-stub>
        
-      <h4>
-        Actions
-      </h4>
-       
-      <p>
-        Traffic that does not match any rule will be blocked.
-      </p>
-       
-      <policy-action-picker-stub />
+      <dim-disable-container-stub
+        data-testid="policy-action-container"
+      >
+          
+        <policy-action-picker-stub />
+      </dim-disable-container-stub>
     </div>
      
     <div
       class="col-sm-12 col-md-6 col-lg-5 col-xl-4"
     >
-      <h5>
-        Policy preview
-      </h5>
-       
-      <policy-preview-stub
-        initialtab="0"
-        policydescription="Deny all traffic"
-        policyyaml="apiVersion: cilium.io/v2
+      <dim-disable-container-stub
+        data-testid="policy-preview-container"
+      >
+          
+        <policy-preview-stub
+          initialtab="0"
+          policydescription="Deny all traffic"
+          policyyaml="apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: ''
@@ -201,7 +200,8 @@ spec:
     matchLabels:
       network-policy.gitlab.com/disabled_by: gitlab
 "
-      />
+        />
+      </dim-disable-container-stub>
     </div>
   </div>
    
@@ -216,6 +216,7 @@ spec:
       class="col-md-auto"
     >
       <gl-button-stub
+        buttontextclasses=""
         category="primary"
         data-testid="save-policy"
         icon=""
@@ -229,6 +230,7 @@ spec:
       <!---->
        
       <gl-button-stub
+        buttontextclasses=""
         category="secondary"
         href="/threat-monitoring"
         icon=""

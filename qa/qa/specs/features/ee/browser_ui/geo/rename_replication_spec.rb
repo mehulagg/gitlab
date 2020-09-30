@@ -36,10 +36,10 @@ module QA
           @geo_project_renamed = "geo-after-rename-#{SecureRandom.hex(8)}"
           Page::Project::Settings::Main.perform do |settings|
             settings.rename_project_to(@geo_project_renamed)
-            expect(page).to have_content "Project '#{@geo_project_renamed}' was successfully updated."
+            expect(settings).to have_breadcrumb(@geo_project_renamed)
 
-            settings.expand_advanced_settings do |page|
-              page.update_project_path_to(@geo_project_renamed)
+            settings.expand_advanced_settings do |advanced_settings|
+              advanced_settings.update_project_path_to(@geo_project_renamed)
             end
           end
         end

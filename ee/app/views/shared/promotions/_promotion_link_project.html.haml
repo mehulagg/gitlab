@@ -20,7 +20,6 @@
   - if License.current&.expired?
     = link_to (!short_form ? s_('Promotions|Buy GitLab Enterprise Edition') : s_('Promotions|Buy EE')), ::EE::SUBSCRIPTIONS_PLANS_URL, class: 'btn btn-primary'
   - else
-    .gl-display-flex.gl-justify-content-end
-      = link_to s_('Promotions|Start GitLab Ultimate trial'), new_trial_url, class: 'btn btn-primary'
+    = link_to s_('Promotions|Start GitLab Ultimate trial'), new_trial_url, class: 'btn btn-primary'
 - else
   %p= s_('Promotions|Contact your Administrator to upgrade your license.')

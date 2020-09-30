@@ -10,7 +10,7 @@ module QA
           sandbox_group.path = "saml_sso_group_#{SecureRandom.hex(8)}"
         end
 
-        Runtime::Feature.enable_and_verify('group_administration_nav_item')
+        Runtime::Feature.enable(:group_administration_nav_item)
 
         @saml_idp_service = Flow::Saml.run_saml_idp_service(@group.path)
       end
@@ -96,7 +96,7 @@ module QA
       after(:all) do
         @group.remove_via_api!
 
-        Runtime::Feature.remove('group_administration_nav_item')
+        Runtime::Feature.remove(:group_administration_nav_item)
 
         page.visit Runtime::Scenario.gitlab_address
         Page::Main::Menu.perform(&:sign_out_if_signed_in)

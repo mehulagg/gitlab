@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe DastSites::FindOrCreateService do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, creator: user) }
-  let(:url) { FFaker::Internet.uri(:http) }
+  let(:url) { generate(:url) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)

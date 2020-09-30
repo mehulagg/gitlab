@@ -1,12 +1,6 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import {
-  GlButton,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlIcon,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { DEPENDENCY_LIST_TYPES } from '../store/constants';
 import { SORT_FIELDS, SORT_ORDER } from '../store/modules/list/constants';
 
@@ -14,8 +8,8 @@ export default {
   name: 'DependenciesActions',
   components: {
     GlButton,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
   },
   directives: {
@@ -72,12 +66,8 @@ export default {
 <template>
   <div class="btn-toolbar">
     <div class="btn-group flex-grow-1 mr-2">
-      <gl-deprecated-dropdown :text="sortFieldName" class="flex-grow-1 text-center" right>
-        <gl-deprecated-dropdown-item
-          v-for="(name, id) in sortFields"
-          :key="id"
-          @click="setSortField(id)"
-        >
+      <gl-dropdown :text="sortFieldName" class="flex-grow-1 text-center" right>
+        <gl-dropdown-item v-for="(name, id) in sortFields" :key="id" @click="setSortField(id)">
           <span class="d-flex">
             <gl-icon
               class="flex-shrink-0 gl-mr-2"
@@ -86,8 +76,8 @@ export default {
             />
             {{ name }}
           </span>
-        </gl-deprecated-dropdown-item>
-      </gl-deprecated-dropdown>
+        </gl-dropdown-item>
+      </gl-dropdown>
       <gl-button
         v-gl-tooltip
         :title="__('Sort direction')"

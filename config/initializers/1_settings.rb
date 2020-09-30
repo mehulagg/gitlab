@@ -297,6 +297,10 @@ Settings.pages['external_http'] ||= false unless Settings.pages['external_http']
 Settings.pages['external_https'] ||= false unless Settings.pages['external_https'].present?
 Settings.pages['artifacts_server'] ||= Settings.pages['enabled'] if Settings.pages['artifacts_server'].nil?
 Settings.pages['secret_file'] ||= Rails.root.join('.gitlab_pages_secret')
+# We want pages zip archives to be stored on the same directory as old pages hierarchical structure
+# this will allow us to easier migrate existing instances with NFS
+Settings.pages['storage_path']      = Settings.pages['path']
+Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
 
 #
 # Geo
@@ -517,6 +521,9 @@ Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['job_class'] = 'CiP
 Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['cron'] ||= '50 23 */1 * *'
 Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['job_class'] ||= 'Analytics::InstanceStatistics::CountJobTriggerWorker'
+Settings.cron_jobs['member_invitation_reminder_emails_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['member_invitation_reminder_emails_worker']['cron'] ||= '0 0 * * *'
+Settings.cron_jobs['member_invitation_reminder_emails_worker']['job_class'] = 'MemberInvitationReminderEmailsWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['adjourned_group_deletion_worker'] ||= Settingslogic.new({})
@@ -784,6 +791,7 @@ Settings.monitoring['ip_whitelist'] ||= ['127.0.0.1/8']
 Settings.monitoring['unicorn_sampler_interval'] ||= 10
 Settings.monitoring['sidekiq_exporter'] ||= Settingslogic.new({})
 Settings.monitoring.sidekiq_exporter['enabled'] ||= false
+Settings.monitoring.sidekiq_exporter['log_enabled'] ||= false
 Settings.monitoring.sidekiq_exporter['address'] ||= 'localhost'
 Settings.monitoring.sidekiq_exporter['port'] ||= 8082
 Settings.monitoring['web_exporter'] ||= Settingslogic.new({})

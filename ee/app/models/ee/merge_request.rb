@@ -19,7 +19,21 @@ module EE
       has_many :approvers, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
-      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request
+      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
+        def applicable_to_branch(branch)
+          ActiveRecord::Associations::Preloader.new.preload(
+            self,
+            [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
+          )
+
+          self.select do |rule|
+            next true unless rule.approval_project_rule.present?
+            next true if rule.overridden?
+
+            rule.approval_project_rule.applies_to_branch?(branch)
+          end
+        end
+      end
       has_one :merge_train, inverse_of: :merge_request, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
       has_many :blocks_as_blocker,
@@ -38,23 +52,6 @@ module EE
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
       delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
       delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
-
-      scope :without_approvals, -> { left_outer_joins(:approvals).where(approvals: { id: nil }) }
-      scope :with_approvals, -> { joins(:approvals) }
-      scope :approved_by_users_with_ids, -> (*user_ids) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { id: user_ids })
-          .group(:id)
-          .having("COUNT(users.id) = ?", user_ids.size)
-      end
-      scope :approved_by_users_with_usernames, -> (*usernames) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { username: usernames })
-          .group(:id)
-          .having("COUNT(users.id) = ?", usernames.size)
-      end
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -75,10 +72,6 @@ module EE
     end
 
     class_methods do
-      def select_from_union(relations)
-        where(id: from_union(relations))
-      end
-
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
         super.preload(:blocking_merge_requests)

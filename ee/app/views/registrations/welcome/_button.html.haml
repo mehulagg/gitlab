@@ -1,4 +1,1 @@
-- onboarding_issues_experiment_enabled = experiment_enabled?(:onboarding_issues)
-
-= button_tag class: %w[btn btn-success w-100], data: { qa_selector: 'get_started_button' } do
-  = in_subscription_flow? || in_trial_flow? || (onboarding_issues_experiment_enabled && !in_invitation_flow? && !in_oauth_flow?) ? _('Continue') : _('Get started!')
+= button_tag welcome_submit_button_text, class: %w[btn btn-success w-100], data: { qa_selector: 'get_started_button' }

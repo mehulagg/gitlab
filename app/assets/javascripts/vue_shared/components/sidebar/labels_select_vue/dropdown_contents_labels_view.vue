@@ -112,6 +112,7 @@ export default {
         this.currentHighlightItem += 1;
       } else if (e.keyCode === ENTER_KEY_CODE && this.currentHighlightItem > -1) {
         this.updateSelectedLabels([this.visibleLabels[this.currentHighlightItem]]);
+        this.searchKey = '';
       } else if (e.keyCode === ESC_KEY_CODE) {
         this.toggleDropdownContents();
       }
@@ -155,7 +156,11 @@ export default {
       />
     </div>
     <div class="dropdown-input" @click.stop="() => {}">
-      <gl-search-box-by-type v-model="searchKey" :autofocus="true" />
+      <gl-search-box-by-type
+        v-model="searchKey"
+        :autofocus="true"
+        data-qa-selector="dropdown_input_field"
+      />
     </div>
     <div
       v-show="showListContainer"

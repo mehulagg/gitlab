@@ -9,7 +9,7 @@ FactoryBot.define do
     skip_create
 
     initialize_with do
-      ::Gitlab::Ci::Reports::Security::Identifier.new(attributes)
+      ::Gitlab::Ci::Reports::Security::Identifier.new(**attributes)
     end
   end
 end

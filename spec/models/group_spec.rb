@@ -224,6 +224,20 @@ RSpec.describe Group do
     end
   end
 
+  describe '.without_integration' do
+    let(:another_group) { create(:group) }
+    let(:instance_integration) { build(:jira_service, :instance) }
+
+    before do
+      create(:jira_service, group: group, project: nil)
+      create(:slack_service, group: another_group, project: nil)
+    end
+
+    it 'returns groups without integration' do
+      expect(Group.without_integration(instance_integration)).to contain_exactly(another_group)
+    end
+  end
+
   describe '.public_or_visible_to_user' do
     let!(:private_group)  { create(:group, :private)  }
     let!(:internal_group) { create(:group, :internal) }
@@ -651,6 +665,19 @@ RSpec.describe Group do
 
       it 'returns correct access level' do
         expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::MAINTAINER)
+      end
+    end
+
+    context 'evaluating admin access level' do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'returns OWNER by default' do
+        expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::OWNER)
+      end
+
+      it 'returns NO_ACCESS when only concrete membership should be considered' do
+        expect(group.max_member_access_for_user(admin, only_concrete_membership: true))
+          .to eq(Gitlab::Access::NO_ACCESS)
       end
     end
   end

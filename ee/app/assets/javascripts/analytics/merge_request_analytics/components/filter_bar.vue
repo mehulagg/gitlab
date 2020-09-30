@@ -3,6 +3,7 @@ import { mapActions, mapState } from 'vuex';
 import { __ } from '~/locale';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import BranchToken from '~/vue_shared/components/filtered_search_bar/tokens/branch_token.vue';
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -25,17 +26,40 @@ export default {
   inject: ['fullPath', 'type'],
   computed: {
     ...mapState('filters', {
+      selectedSourceBranch: state => state.branches.source.selected,
+      selectedTargetBranch: state => state.branches.target.selected,
       selectedMilestone: state => state.milestones.selected,
       selectedAuthor: state => state.authors.selected,
-      selectedLabelList: state => state.labels.selectedList,
       selectedAssignee: state => state.assignees.selected,
+      selectedLabelList: state => state.labels.selectedList,
       milestonesData: state => state.milestones.data,
       labelsData: state => state.labels.data,
-      authorsData: state => state.authors.data,
       assigneesData: state => state.assignees.data,
+      authorsData: state => state.authors.data,
+      branchesData: state => state.branches.data,
     }),
     tokens() {
       return [
+        {
+          icon: 'branch',
+          title: __('Source Branch'),
+          type: 'source_branch',
+          token: BranchToken,
+          initialBranches: this.branchesData,
+          unique: true,
+          operators: [{ value: '=', description: 'is', default: 'true' }],
+          fetchBranches: this.fetchBranches,
+        },
+        {
+          icon: 'branch',
+          title: __('Target Branch'),
+          type: 'target_branch',
+          token: BranchToken,
+          initialBranches: this.branchesData,
+          unique: true,
+          operators: [{ value: '=', description: 'is', default: 'true' }],
+          fetchBranches: this.fetchBranches,
+        },
         {
           icon: 'clock',
           title: __('Milestone'),
@@ -85,6 +109,8 @@ export default {
     },
     query() {
       return filterToQueryObject({
+        source_branch_name: this.selectedSourceBranch,
+        target_branch_name: this.selectedTargetBranch,
         milestone_title: this.selectedMilestone,
         label_name: this.selectedLabelList,
         author_username: this.selectedAuthor,
@@ -93,6 +119,8 @@ export default {
     },
     initialFilterValue() {
       return prepareTokens({
+        source_branch: this.selectedSourceBranch,
+        target_branch: this.selectedTargetBranch,
         milestone: this.selectedMilestone,
         author: this.selectedAuthor,
         assignee: this.selectedAssignee,
@@ -103,15 +131,25 @@ export default {
   methods: {
     ...mapActions('filters', [
       'setFilters',
+      'fetchBranches',
       'fetchMilestones',
-      'fetchLabels',
       'fetchAuthors',
       'fetchAssignees',
+      'fetchLabels',
     ]),
     handleFilter(filters) {
-      const { labels, milestone, author, assignee } = processFilters(filters);
+      const {
+        source_branch: sourceBranch,
+        target_branch: targetBranch,
+        milestone,
+        author,
+        assignee,
+        labels,
+      } = processFilters(filters);
 
       this.setFilters({
+        selectedSourceBranch: sourceBranch ? sourceBranch[0] : null,
+        selectedTargetBranch: targetBranch ? targetBranch[0] : null,
         selectedAuthor: author ? author[0] : null,
         selectedMilestone: milestone ? milestone[0] : null,
         selectedAssignee: assignee ? assignee[0] : null,

@@ -29,6 +29,8 @@ describe('EpicAppComponent', () => {
     vm = mountComponentWithStore(Component, {
       store,
     });
+
+    jest.advanceTimersByTime(2);
   });
 
   afterEach(() => {

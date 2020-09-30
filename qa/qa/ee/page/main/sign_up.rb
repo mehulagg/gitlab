@@ -14,13 +14,6 @@ module QA
               element :get_started_button
             end
           end
-
-          private
-
-          # override FOSS
-          def click_get_started_button
-            click_element :get_started_button if has_element?(:get_started_button)
-          end
         end
       end
     end

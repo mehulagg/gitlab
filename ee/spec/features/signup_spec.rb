@@ -17,7 +17,6 @@ RSpec.describe 'Signup on EE' do
         fill_in 'new_user_name',                with: user_attrs[:name]
         fill_in 'new_user_username',            with: user_attrs[:username]
         fill_in 'new_user_email',               with: user_attrs[:email]
-        fill_in 'new_user_email_confirmation',  with: user_attrs[:email]
         fill_in 'new_user_password',            with: user_attrs[:password]
         check   'new_user_email_opted_in'
         click_button "Register"
@@ -37,7 +36,6 @@ RSpec.describe 'Signup on EE' do
         fill_in 'new_user_name',                with: user_attrs[:name]
         fill_in 'new_user_username',            with: user_attrs[:username]
         fill_in 'new_user_email',               with: user_attrs[:email]
-        fill_in 'new_user_email_confirmation',  with: user_attrs[:email]
         fill_in 'new_user_password',            with: user_attrs[:password]
         click_button "Register"
 
@@ -55,7 +53,6 @@ RSpec.describe 'Signup on EE' do
       fill_in 'new_user_name', with: user_attrs[:name].split(' ').first
       fill_in 'new_user_username', with: user_attrs[:username]
       fill_in 'new_user_email', with: user_attrs[:email]
-      fill_in 'new_user_email_confirmation', with: user_attrs[:email]
       fill_in 'new_user_password', with: user_attrs[:password]
       click_button 'Register'
       visit new_project_path
@@ -86,7 +83,6 @@ RSpec.describe 'Signup on EE' do
       fill_in 'new_user_name',                with: user_attrs[:name]
       fill_in 'new_user_username',            with: user_attrs[:username]
       fill_in 'new_user_email',               with: user_attrs[:email]
-      fill_in 'new_user_email_confirmation',  with: user_attrs[:email]
       fill_in 'new_user_password',            with: user_attrs[:password]
       click_button "Register"
 

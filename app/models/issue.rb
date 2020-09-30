@@ -19,6 +19,7 @@ class Issue < ApplicationRecord
   include WhereComposite
   include StateEventable
   include IdInOrdered
+  include Presentable
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -29,6 +30,11 @@ class Issue < ApplicationRecord
   DueNextMonthAndPreviousTwoWeeks = DueDateStruct.new('Due Next Month And Previous Two Weeks', 'next_month_and_previous_two_weeks').freeze
 
   SORTING_PREFERENCE_FIELD = :issues_sort
+
+  # Types of issues that should be displayed on lists across the app
+  # for example, project issues list, group issues list and issue boards.
+  # Some issue types, like test cases, should be hidden by default.
+  TYPES_FOR_LIST = %w(issue incident).freeze
 
   belongs_to :project
   has_one :namespace, through: :project
@@ -96,6 +102,8 @@ class Issue < ApplicationRecord
   scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
   scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
+  scope :order_severity_asc, -> { includes(:issuable_severity).order('issuable_severities.severity ASC NULLS FIRST') }
+  scope :order_severity_desc, -> { includes(:issuable_severity).order('issuable_severities.severity DESC NULLS LAST') }
 
   scope :preload_associated_models, -> { preload(:assignees, :labels, project: :namespace) }
   scope :with_web_entity_associations, -> { preload(:author, :project) }
@@ -140,6 +148,7 @@ class Issue < ApplicationRecord
 
   after_commit :expire_etag_cache, unless: :importing?
   after_save :ensure_metrics, unless: :importing?
+  after_create_commit :record_create_action, unless: :importing?
 
   attr_spammable :title, spam_title: true
   attr_spammable :description, spam_description: true
@@ -227,6 +236,8 @@ class Issue < ApplicationRecord
     when 'due_date', 'due_date_asc'                       then order_due_date_asc.with_order_id_desc
     when 'due_date_desc'                                  then order_due_date_desc.with_order_id_desc
     when 'relative_position', 'relative_position_asc'     then order_relative_position_asc.with_order_id_desc
+    when 'severity_asc'                                   then order_severity_asc.with_order_id_desc
+    when 'severity_desc'                                  then order_severity_desc.with_order_id_desc
     else
       super
     end
@@ -408,11 +419,19 @@ class Issue < ApplicationRecord
     IssueLink.inverse_link_type(type)
   end
 
+  def relocation_target
+    moved_to || duplicated_to
+  end
+
   private
 
   def ensure_metrics
     super
     metrics.record!
+  end
+
+  def record_create_action
+    Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_created_action(author: author)
   end
 
   # Returns `true` if the given User can read the current Issue.
@@ -444,20 +463,9 @@ class Issue < ApplicationRecord
     Gitlab::EtagCaching::Store.new.touch(key)
   end
 
-  def find_next_gap_before
-    super
-  rescue ActiveRecord::QueryCanceled => e
+  def could_not_move(exception)
     # Symptom of running out of space - schedule rebalancing
     IssueRebalancingWorker.perform_async(nil, project_id)
-    raise e
-  end
-
-  def find_next_gap_after
-    super
-  rescue ActiveRecord::QueryCanceled => e
-    # Symptom of running out of space - schedule rebalancing
-    IssueRebalancingWorker.perform_async(nil, project_id)
-    raise e
   end
 end
 

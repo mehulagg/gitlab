@@ -29,6 +29,8 @@ namespace :admin do
 
   resource :license, only: [:show, :new, :create, :destroy] do
     get :download, on: :member
+
+    resource :usage_export, controller: 'licenses/usage_exports', only: [:show]
   end
 
   # using `only: []` to keep duplicate routes from being created

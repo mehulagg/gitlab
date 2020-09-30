@@ -12,7 +12,7 @@ import {
   GlAlert,
   GlIcon,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, n__ } from '~/locale';
 import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
@@ -117,10 +117,12 @@ export default {
       query: throughputTableQuery,
       variables() {
         const options = filterToQueryObject({
-          labels: this.selectedLabelList,
+          sourceBranches: this.selectedSourceBranch,
+          targetBranches: this.selectedTargetBranch,
+          milestoneTitle: this.selectedMilestone,
           authorUsername: this.selectedAuthor,
           assigneeUsername: this.selectedAssignee,
-          milestoneTitle: this.selectedMilestone,
+          labels: this.selectedLabelList,
         });
 
         return {
@@ -142,10 +144,12 @@ export default {
   },
   computed: {
     ...mapState('filters', {
+      selectedSourceBranch: state => state.branches.source.selected,
+      selectedTargetBranch: state => state.branches.target.selected,
       selectedMilestone: state => state.milestones.selected,
       selectedAuthor: state => state.authors.selected,
-      selectedLabelList: state => state.labels.selectedList,
       selectedAssignee: state => state.assignees.selected,
+      selectedLabelList: state => state.labels.selectedList,
     }),
     tableDataAvailable() {
       return this.throughputTableData.length;
@@ -182,6 +186,9 @@ export default {
       return PIPELINE_STATUS_ICON_CLASSES[value] === undefined
         ? PIPELINE_STATUS_ICON_CLASSES.default
         : PIPELINE_STATUS_ICON_CLASSES[value];
+    },
+    formatApprovalText(approvals) {
+      return n__('%d Approval', '%d Approvals', approvals);
     },
   },
   assigneesVisible: ASSIGNEES_VISIBLE,
@@ -231,6 +238,15 @@ export default {
               :data-testid="$options.testIds.COMMENT_COUNT"
             >
               <gl-icon name="comments" class="gl-mr-2" /><span>{{ item.userNotesCount }}</span>
+            </li>
+            <li
+              v-if="item.approvedBy.nodes.length"
+              class="gl-text-green-500"
+              :data-testid="$options.testIds.APPROVED"
+            >
+              <gl-icon name="approval" class="gl-mr-2" /><span>{{
+                formatApprovalText(item.approvedBy.nodes.length)
+              }}</span>
             </li>
           </ul>
         </div>

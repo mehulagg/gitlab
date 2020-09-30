@@ -14,6 +14,11 @@ RSpec.describe 'Project navbar' do
     stub_feature_flags(project_iterations: false)
 
     insert_package_nav(_('Operations'))
+    insert_after_sub_nav_item(
+      _('Kubernetes'),
+      within: _('Operations'),
+      new_sub_nav_item_name: _('Feature Flags')
+    )
 
     project.add_maintainer(user)
     sign_in(user)
@@ -84,7 +89,6 @@ RSpec.describe 'Project navbar' do
   context 'when requirements is available' do
     before do
       stub_licensed_features(requirements: true)
-      stub_feature_flags(requirements_management: true)
 
       insert_after_nav_item(
         _('Merge Requests'),

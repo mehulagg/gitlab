@@ -92,6 +92,7 @@ module EE
             before do
               authorize! :admin_group, user_group
               check_audit_events_available!(user_group)
+              increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end
 
             desc 'Get a list of audit events in this group.' do

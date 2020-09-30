@@ -1,5 +1,260 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.4.0 (2020-09-22)
+
+### Security (1 change, 1 of them is from the community)
+
+- Remove v-html from environments/components/deploy_board_component.vue. !41521 (Takuya Noguchi)
+
+### Removed (2 changes)
+
+- Remove VSA duration median line. !39665
+- Remove Users over license banner. !39836
+
+### Fixed (56 changes, 6 of them are from the community)
+
+- Allow creation of confidential sub-epics from tree. !37882 (Jan Beckmann)
+- Use active user count instead historial max. !37916
+- Move Add Approver name validation error into form. !39389
+- Update environment dashboard help text. !39450
+- Add identifier check when creating vulnerability findings. !39650
+- Update epic inherited dates and create notes when reordering in epic tree. !39742
+- Fix Approval Rules table in Merge Requests bursting out of the layout in some scenarios. !39753
+- Fix group name bug for new purchase flow. !39915
+- Add docker options for Load Perf testing. !39977
+- Use Gitlab::ErrorTracking in place of project.logger for indexing errors. !39979
+- Fix unchecking all compliance frameworks for MR approvals settings. !40070
+- Remove gap on trial registrations page. !40080
+- Fix issue where the select page dropdown would be disabled on the Insights Analytics page when no charts were loaded. !40096
+- Display contents of Zuora iframe for the new purchase flow in Dark Mode. !40114
+- Activate on-demand scans nav item when editing a site profile. !40148
+- Omit sub-groups from trial selection menu. !40300
+- Geo Statuses - Fix empty section bug. !40443
+- Update description when editing iteration. !40476
+- Fix remediated badge visibility on vulnerability list. !40483
+- Fix breadcrumb for security dashboard. !40486
+- Don’t create new gitlab_subscription records on nested attributes to namespaces. !40537
+- Make vulnerability list columns have consistent widths. !40561
+- Don't overwrite user's description by default template description. !40609
+- Improve Accordion Item Focus State. !40638 (Kev @KevSlashNull)
+- Geo: Fix design repository failures with selective sync, and make container repository updates more robust. !40643
+- Prevent Download For Failed Vulnerability Export Jobs. !40656 (Kev @KevSlashNull)
+- Fix vulnerability comment delete button spinner position. !40681
+- Fix vulnerability save button spinner position. !40781
+- Fix error in migration to populate historical vulnerability statistics. !40835
+- Fix for Iterations closing a day early. !40884
+- Add missing path to project vulnerability. !40935
+- Allow on-demand DAST pipelines to be found for scanned resource. !40982
+- Support dark theme for overview of payment method component for the new purchase flow. !40988
+- Create resource weight event when setting the weight during issue creation. !41087
+- Un-nest sidebar under .context-header div in security navigation. !41176
+- Fix dasboard to dashboard. !41440
+- Geo: Avoid orphaning blob files on secondaries. !41529
+- Disable loading vulnerabilities in MR when pipeline is running. !41539 (Justin Zeng)
+- Enable secret detection for MR Widget. !41582
+- Introduce ^ as a reference prefix for Vulnerabilities. !41643
+- Fix the size of chart placeholder on Analytics pages for Merge Requests, Insights and Value stream, so it matches the actual charts. the size of the real chart shown afterwards. !41904
+- Correct sibling query for epic tree nodes. !41986
+- Fix SAST Config GraphQL mutation. !42003
+- Fix Duplicate Keys in Vulnerability Details. !42027 (Kev @KevSlashNull)
+- Hide confirmation modal after closing a blocked issue. !42068
+- Create a Geo cache invalidation event when toggling feature flags through the API. !42070
+- Track state changes using resource state events for Epics. !42088
+- This change preserves the environment when editing network policies. !42148
+- Reset scope to all-environments when last scope removed. !42287
+- Return stored seat counts in the subscriptions API endpoint. !42293
+- DAST on-demand site profiles: prevent error banner from showing. !42300
+- Fix MR Modal Vulnerability Links Overflow Modal. !42332 (Kev @KevSlashNull)
+- Fix project_ids query param for downloading coverage CSV report. !42497
+- Fix selecting all projects in group code coverage report. !42507
+- Geo - Create repository updated events only if the repository exists. !42519
+- Fix Iterations quickaction not showing all iterations. !42528
+
+### Deprecated (1 change)
+
+- Mark RunDASTScan mutation as deprecated. !42544
+
+### Changed (66 changes, 2 of them are from the community)
+
+- Use standard table colors in Dependency List. !31130
+- Disable editing health status for closed issues and show informative tooltip. !38372
+- Added Cluster Agent delete mutation for GraphQl. !38622
+- Button migration to component on dependency list. !38624
+- Update FF nav section using GitLab UI Utilities. !38768
+- Pass current_plan all the way down the partial chain. !38868
+- add CiliumNetworkPolicy into services. !39127
+- Persist when dismissing FF will look different message. !39238
+- Update URL when editing iteration. !39296
+- Move Analytics to admin panel. !39368
+- Relocate create issue button from header section to the related issues section. !39533
+- Remove project selector logic from instance security dashboard. !39631
+- Move variable audit logging to Starter. !39730
+- Epic labeling for confidential epics. !39794
+- Add How-to-upgrade link to admin license page. !39974
+- Apply sizing to SAST Configuration variable fields. !40002
+- Do not write SAST defaults via SAST Config UI. !40030
+- Create instance-level security charts component and update severity widget CSS. !40046
+- Return message when personal access token creation fails in internal API. !40073 (Taylan Develioglu)
+- Replace <gl-deprecated-button> with <gl-button> in confirm_order component. !40119
+- Revert Merge branch add_standard_field_into_payload into master. !40162
+- Hide warning to disable GitLab issues in Jira integration form. !40248
+- Add link to primary node in secondary node alert. !40297
+- Make legacy feature flags read-only. !40320
+- Remove project limit from Environments Dashboard help text. !40333
+- Use semantic HTML in Progress Bar component. !40380
+- Simplify progress bar steps logic. !40390
+- Reset CI minutes for all namespaces every month. !40396
+- Implement empty state on security dashboard. !40413
+- DAST Scanner Profile Library: change new-profile button to dropdown. !40469
+- Remove health status feature from incidents. !40520
+- Improve error message when creating issue fails. !40525
+- Allow SAST Configuration UI to be used when there's an existing CI file. !40528
+- Add support for multiple environments on the controller and service level. !40529
+- Allow for project filtering in Group code coverage Finder class. !40547
+- Allow milestone and assignee board lists to be created using GraphQL. !40551
+- Add Feature Flags Search Box shortcut. !40578
+- Enhance error messages for Add Project to Security Dashboard mutation. !40607
+- Make environments dropdown fetch results as soon as it's focused. !40624
+- Change the configureSast mutation to use actual GraphQL types instead of JSON types. !40637
+- Remove group_push_rules feature flag. !40658
+- Remove issue note from vulnerability details. !40686
+- Enhance error messages when Adding Projects to Security Dashboard. !40692
+- ee Migrating modal button in License Compliance. !40747
+- Change merge train position messaging. !40777
+- Remove weight from incidents sidebar. !40794
+- Expand retention period to 365 days for Vulnerability Statistics. !40833
+- Move group activity analytics from beta to general availability. !40916
+- Link Elasticsearch indexing progress to elastic_commit_indexer. !40928
+- Use finding_description for Details in CSV vulnerability export. !40944
+- Hide the upgrade link on the admin license page if plan Ultimate. !40977
+- Show ancestor iterations in subgroups. !40990
+- Improve the UX of the Start a Trial group selection page. !41020
+- Replace bootstrap alerts in ee/app/views/admin/push_rules/_push_rules.html.haml. !41072 (Jacopo Beschi @jacopo-beschi)
+- Only display downgraded message if on free plan. !41213
+- Sort merge requests by merged at date in Merge Request Analytics. !41272
+- Apply filters to vulnerability count list. !41566
+- Filter out incidents from related issues in epics. !41807
+- Show additional columns in Group and Instance Security Dashboards. !41829
+- Add toast to the reset pipelines minutes button. !41838
+- Add explanation text to FF create/edit sections. !41910
+- Use GitLab utility classes for the alert component instead of Bootstrap. !41974
+- Remove license check for feature flags. !42023
+- Update in preparation of supporting analyzers. !42173
+- Skip the who will be using GitLab question in signup when a user is invited. !42264
+- Expose approvals required and approvals left for merge requests in GraphQL. !42354
+
+### Performance (10 changes)
+
+- Optimize the Advanced Search query for Issues and Notes. !38095
+- Load only the requested report artifacts into the memory for vulnerability_findings endpoint. !39749
+- Add cache for elasticsearch_indexes_namespace check. !41274
+- Limit the context for paused elasticsearch jobs. !41297
+- Cache project user defined rules by branch. !41564
+- Return empty scanners list when pipeline has no reports. !41652
+- Enable elasticsearch namespace enabled cache by default. !41875
+- Refactor approval_rules association. !41965
+- Move approval reset to new service and worker. !42001
+- Geo: Improve performance of package files queries. !42294
+
+### Added (66 changes)
+
+- Add usage data for counting projects with sectional codeowner rules. !37786
+- Add group code coverage download button. !37853
+- Deployer authorisation for protected environments. !38188
+- Add ability to fetch DastSiteProfile via GraphQL. !38380
+- Added loading animations for value stream analytics. !38447
+- Add epic_id param to issue update graphQL mutation. !38678
+- Cluster token create mutation for GraphQL. !38820
+- Add GraphQL endpoint for retrieving cluster agents for a project. !38833
+- Add metrics for terraform state replication. !38959
+- Allow requirement status to be updated with GraphQL. !39371
+- Count security jobs. !39481
+- Show tooltips for License-Check and Vulnerability-Check approval rules. !39579
+- Add pagination to Environments Dashboard. !39637
+- Show license overage warning on admin dashboard. !39704
+- Add Revoke buttons to the PAT tab of the instance credential inventory. !39712
+- Show Latest Most Severe Alert on Environment. !39743
+- Add an API to add a push rule to a group. !39760
+- Add a License overview section to the Admin dashboard. !40009
+- Include subgroup issues in iteration issue list. !40099
+- Enable to delete a custom value stream. !40127
+- API to edit group push rules. !40136
+- Add endpoint to update Dast Scanner Profile. !40208
+- Add global_id field to DastScannerProfiles::Create. !40225
+- Add suggested security approval rules. !40250
+- Add deployment events to group webhooks. !40270
+- API to delete group push rule. !40293
+- Geo: Add graphql endpoints for terraform state. !40317
+- Add GraphQL endpoint for deleting a cluster agent token. !40338
+- Add EULA checkbox on license page. !40352
+- Add feedback call to action in SAST Configuration. !40363
+- Make Auto DevOps alert in Security Configuration dismissible. !40375
+- Adding counts of users using default branch locks and users using multi-branch LFS locks. !40419
+- Make searching issues/MRs by IID even easier. !40467
+- On-demand scans item on Security & Compliance configuration page. !40474
+- Allow reporters to approve MRs. !40491
+- Expose approved flag in Merge Request GraphQL API. !40505
+- Populate `resolved_on_default_branch` column for existing vulnerabilities. !40755
+- Allow fetching agent tokens from cluster agent GraphQL endpoint. !40779
+- Add detected date to vulnerability details page. !40782
+- Add delete mutation for DAST scanner profile. !40805
+- Add REST endpoint to access resource iteration events. !40850
+- Add ability to sort vulnerabilities by severity in GraphQL API. !40856
+- Delete custom value streams. !40927
+- Introduce `detectedAt` field for VulnerabilityType on GraphQL API. !41000
+- Use dast_scanner_profiles in DAST on-demand scans. !41060
+- Add ability to filter vulnerabilitiesSeveritiesCount in GraphQL for Project, Group and Instance Security Dashboard. !41067
+- Add detected column with timestamp on security dashboards. !41092
+- Create vulnerabilities route/page for instance-level security dashboard. !41156
+- Add GraphQL mutation to create test cases. !41190
+- Geo: Add rake task to check if DB replication is working. !41618
+- New checkout flow for free groups on gitlab.com. !41644
+- Add filtering by activity (has_resolution, has_issues) to Vulnerability. !41650
+- Add link to GitLab CI history in Security Configuration. !41673
+- Add ability to track unique uses of API endpoints. !41689
+- Support custom JSON schema validation in the Web IDE. !41700
+- Support moving issue between epics in GraphQL. !41790
+- Adding total counts of default branch locks and multi-branch LFS locks. !41824
+- Expose analyzer info for SAST Config. !41825
+- Add Vulnerabilities Count by Day to Project GraphQL API. !41856
+- Add policy editor to the Threat Monitoring page. !41949
+- Enable on-demand DAST scans scanner-profiles flag by default. !41950
+- Add support for reading Vault secrets from CI jobs. !42055
+- Add ability to select projects for group coverage report. !42129
+- Add + as a special reference for to GFM Autocomplete. !42190
+- Add sorting functionality to vulnerability list. !42347
+- Add mutation to Resolve Vulnerability in GraphQL. !42500
+
+### Other (26 changes, 11 of them are from the community)
+
+- Update Browser Performance Testing SiteSpeed version to 14.1.0. !37685
+- Change Advanced Global Search to Advanced Search. !39526
+- Migrate analytics stage button away from deprecated button. !39560
+- Add backend pagination to the environments dashboard. !39847
+- Deprecate -gray- variables and replace with - variables. !39860
+- Add Snowplow to Toggles on Feature Flag Table. !39995
+- Add Snowplow to Toggles on Edit Feature Flag. !40023
+- Update Standalone Vulnerabilities Page to be a Single Vue App. !40189 (Kev @KevSlashNull)
+- Migrate Bootstrap button to GlButton in the issue boards assignee dropdown list. !40398
+- Update $orange variables to match GitLab UI and address contrast for accessibility. !40652
+- Track iteraton changes using resource events. !40841
+- Replace deprecated button on status page. !41012
+- Fix typos of committed in project views. !41038 (Takuya Noguchi)
+- Replace v-html with v-safe-html in dismissal_note.vue. !41137 (Kev @KevSlashNull)
+- Replace v-html with v-safe-html in card_security_discover_app.vue. !41139 (Kev @KevSlashNull)
+- Replace deprecated buttons with new GlButton component from GitLab UI. !41154
+- Replace v-html with v-safe-html in configure_feature_flags_modal.vue. !41210 (Kev @KevSlashNull)
+- Replace v-html with v-safe-html in groups_dropdown_filter.vue. !41212 (Kev @KevSlashNull)
+- Replace v-html with inline text in weight.vue. !41325 (Kev @KevSlashNull)
+- Internationalize Admin namespace plan. !41363 (Takuya Noguchi)
+- Internationalize Admin dashboard Geo. !41368 (Takuya Noguchi)
+- Update location fingerprint for existing CS vulnerabilities. !41756
+- Rename Elasticsearch to Advanced Search in Admin UI. !42048
+- Remove without_index_namespace_callback trait. !42082 (Andrei Cirnici @acirnici)
+- Adjust Color of Low Severity Symbol. !42153 (Kev @KevSlashNull)
+- Elasticsearch reindexing: add confirmation popup and change color scheme. !42209
+
+
 ## 13.3.4 (2020-09-02)
 
 - No changes.

@@ -18,6 +18,10 @@ class EpicIssue < ApplicationRecord
 
   validate :validate_confidential_epic
 
+  def root_epic_tree_node?
+    false
+  end
+
   private
 
   def validate_confidential_epic
