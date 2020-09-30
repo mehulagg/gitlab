@@ -82,7 +82,6 @@ module Gitlab
           when *BUILD_MODELS then setup_build
           end
 
-          override_due_date_attributes
           update_project_references
           update_group_references
         end
