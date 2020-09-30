@@ -5,11 +5,11 @@ class Projects::PipelinesController < Projects::ApplicationController
   include Analytics::UniqueVisitsHelper
 
   before_action :whitelist_query_limiting, only: [:create, :retry]
-  before_action :pipeline, except: [:index, :new, :create, :charts]
+  before_action :pipeline, except: [:index, :new, :create, :charts, :new_variables]
   before_action :set_pipeline_path, only: [:show]
   before_action :authorize_read_pipeline!
   before_action :authorize_read_build!, only: [:index]
-  before_action :authorize_create_pipeline!, only: [:new, :create]
+  before_action :authorize_create_pipeline!, only: [:new, :create, :new_variables]
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
     push_frontend_feature_flag(:filter_pipelines_search, project, default_enabled: true)
@@ -204,6 +204,17 @@ class Projects::PipelinesController < Projects::ApplicationController
           .new(current_user: @current_user)
           .represent(pipeline_test_report, project: project, details: true)
       end
+    end
+  end
+
+  def new_variables
+    config = @project.repository.gitlab_ci_yml_for(params[:sha], @project.ci_config_path_or_default)
+
+    if config
+      result = Gitlab::Ci::YamlProcessor.new(config).execute
+      render json: result.variables_with_data
+    else
+      render json: {}
     end
   end
 
