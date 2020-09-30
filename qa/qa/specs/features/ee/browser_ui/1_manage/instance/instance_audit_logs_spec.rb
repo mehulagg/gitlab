@@ -45,11 +45,17 @@ module QA
       end
 
       context 'Add SSH key', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/738' do
+        key = nil
+
         before do
           sign_in
-          Resource::SSHKey.fabricate_via_browser_ui! do |resource|
+          key = Resource::SSHKey.fabricate_via_browser_ui! do |resource|
             resource.title = "key for audit event test #{Time.now.to_f}"
           end
+        end
+
+        after do
+          key&.reload!&.remove_via_api!
         end
 
         it_behaves_like 'audit event', ["Added SSH key"]
