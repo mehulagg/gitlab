@@ -18,13 +18,13 @@ module EE
                                                         :license_scanning_reports,
                                                         :sast_reports, :secret_detection_reports, :dast_reports, :metrics_reports, :coverage_fuzzing_reports]
 
-        feature_category :container_scanning, only: [:container_scanning_reports]
-        feature_category :dependency_scanning, only: [:dependency_scanning_reports]
-        feature_category :license_compliance, only: [:license_scanning_reports]
-        feature_category :static_application_security_testing, only: [:sast_reports]
-        feature_category :secret_detection, only: [:secret_detection_reports]
-        feature_category :dynamic_application_security_testing, only: [:dast_reports]
-        feature_category :metrics, only: [:metrics_reports]
+        feature_category :container_scanning, [:container_scanning_reports]
+        feature_category :dependency_scanning, [:dependency_scanning_reports]
+        feature_category :license_compliance, [:license_scanning_reports]
+        feature_category :static_application_security_testing, [:sast_reports]
+        feature_category :secret_detection, [:secret_detection_reports]
+        feature_category :dynamic_application_security_testing, [:dast_reports]
+        feature_category :metrics, [:metrics_reports]
       end
 
       def license_scanning_reports

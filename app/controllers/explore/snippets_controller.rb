@@ -3,7 +3,7 @@
 class Explore::SnippetsController < Explore::ApplicationController
   include Gitlab::NoteableMetadata
 
-  feature_category :snippets, only: [:index]
+  feature_category :snippets
 
   def index
     @snippets = SnippetsFinder.new(current_user, explore: true)

@@ -24,13 +24,19 @@ RSpec.describe "Every controller" do
     let_it_be(:routes_without_category) do
       controller_actions.map do |controller, action|
         next if controller.feature_category_for_action(action)
-        next unless controller.to_s.start_with?('B', 'C', 'D', 'E', 'F')
+        next unless controller.to_s.start_with?('B', 'C', 'D', 'E', 'F', 'Projects::MergeRequestsController')
 
         "#{controller}##{action}"
       end.compact
     end
 
     it "has feature categories" do
+      routes_without_category.map { |x| x.split('#') }.group_by(&:first).each do |controller, actions|
+        puts controller
+        puts actions.map { |x| ":#{x.last}" }.sort.join(', ')
+        puts ''
+      end
+
       expect(routes_without_category).to be_empty, "#{routes_without_category} did not have a category"
     end
 
@@ -75,9 +81,9 @@ RSpec.describe "Every controller" do
   end
 
   def actions_defined_in_feature_category_config(controller)
-    feature_category_configs = controller.send(:class_attributes)[:feature_category_config]
-    feature_category_configs.map do |config|
-      Array(config.send(:only)) + Array(config.send(:except))
-    end.flatten.uniq.map(&:to_s)
+    controller.send(:class_attributes)[:feature_category_config]
+      .values
+      .flatten
+      .map(&:to_s)
   end
 end

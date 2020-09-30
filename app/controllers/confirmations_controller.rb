@@ -3,7 +3,7 @@
 class ConfirmationsController < Devise::ConfirmationsController
   include AcceptsPendingInvitations
 
-  feature_category :users, only: [:new, :show, :create, :almost_there]
+  feature_category :users
 
   def almost_there
     flash[:notice] = nil

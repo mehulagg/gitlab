@@ -8,7 +8,7 @@ module Boards
     before_action :authorize_read_list, only: [:index]
     skip_before_action :authenticate_user!, only: [:index]
 
-    feature_category :kanban_boards, only: [:index, :create, :update, :destroy, :generate]
+    feature_category :kanban_boards
 
     def index
       lists = Boards::Lists::ListService.new(board.resource_parent, current_user).execute(board)

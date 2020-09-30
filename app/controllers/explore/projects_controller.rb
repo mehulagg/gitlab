@@ -18,7 +18,7 @@ class Explore::ProjectsController < Explore::ApplicationController
 
   rescue_from PageOutOfBoundsError, with: :page_out_of_bounds
 
-  feature_category :projects, only: [:index, :trending, :starred]
+  feature_category :projects
 
   def index
     @projects = load_projects

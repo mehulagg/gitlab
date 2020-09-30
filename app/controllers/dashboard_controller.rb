@@ -15,9 +15,9 @@ class DashboardController < Dashboard::ApplicationController
 
   respond_to :html
 
-  feature_category :audit_events, only: [:activity] # TODO: can't find a better match
-  feature_category :issue_tracking, only: [:issues, :issues_calendar]
-  feature_category :code_review, only: [:merge_requests]
+  feature_category :audit_events, [:activity] # TODO: can't find a better match
+  feature_category :issue_tracking, [:issues, :issues_calendar]
+  feature_category :code_review, [:merge_requests]
 
   def activity
     respond_to do |format|
