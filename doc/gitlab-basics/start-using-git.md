@@ -464,25 +464,23 @@ git merge master
 
 ### Git rebase
 
-[Rebasing](https://git-scm.com/docs/git-rebase) is a very common operation in Git, mostly to:
+[Rebasing](https://git-scm.com/docs/git-rebase) is a very common operation in
+Git. You have mainly two rebase options:
 
-- Change commits: amend a commit message, squash commits (join multiple
-  commits into one), edit, and delete commits. This is known as _interactive
-  rebase_, handy for organizing the commit history of your repository and keeping it clean.
-  See [Numerous undo possibilities in Git](../topics/git/numerous_undo_possibilities_in_git/index.md#with-history-modification)
-  for details.
-- Update your feature branch with the default branch (or any other branch).
-  This is an important step for Git-based development strategies to make sure
-  the changes you're adding do not break any existing changes.
+- [Regular rebase](#regular-rebase).
+- [Interactive rebase](#interactive-rebase).
+
+#### Regular rebase
+
+With a regular rebase you can update your feature branch with the default
+branch (or any other target branch).
+
+This is an important step for Git-based development strategies to make sure
+the changes you're adding do not break any existing changes added to the
+target branch after you created your feature branch.
 
 For example, to update your branch `my-feature-branch`, with `master`,
-checkout your feature branch:
-
-```shell
-git checkout my-feature-branch
-```
-
-Then rebase against `master`:
+checkout your feature branch then rebase it against `master`:
 
 ```shell
 git rebase origin/master
@@ -490,10 +488,8 @@ git rebase origin/master
 
 When you do that, Git imports all the commits submitted to `master` after the
 moment you created your feature branch until the present moment, and puts the
-commits you have in your feature branch on top of all the commits present in
+commits you have in your feature branch on top of all the commits imported from
 `master`.
-
-<!-- To-do: add illustration. -->
 
 If there are [merge conflicts](#merge-conflicts), Git will prompt you to fix
 them before continuing to rebase.
@@ -501,12 +497,61 @@ them before continuing to rebase.
 After rebasing, you'll need to [force-push](#force-push) changes to the remote
 repository.
 
+To learn more check Git's documentation on [rebasing strategies](https://git-scm.com/book/en/v2/Git-Branching-Rebasing).
+
 CAUTION: **Warning:**
 As `git rebase` re-writes the commit history, it **can be harmful** to do it in
 shared branches. It can cause complex merge conflicts, hard to resolve. In
 these cases, instead of rebasing your branch against the default branch,
 consider pulling it instead (`git pull origin master`). It will have a
 similar effect without compromising the work of your contributors.
+
+#### Interactive rebase
+
+You can use interactive rebase to amend a commit message, squash commits
+(join multiple commits into one), edit, and delete commits. It is handy for
+changing past commits messages and organizing the commit history of your
+branch to keep it clean.
+
+TIP: **Tip:**
+If you want to keep the default branch commit history clean, you don't need to
+do squash all your commits before merging manually for every merge request;
+you can enable [Squash and Merge](../user/project/merge_requests/squash_and_merge.md)
+and GitLab will do it for you automatically.
+
+When you want to change anything in recent commits, you can use interactive
+rebase by passing the flag `--interactive` or `-i` to the rebase command.
+
+For example, if you want to join the latest 2 commits in your branch, run:
+
+```shell
+git rebase -i HEAD~2
+```
+
+Then Git outputs the latest 2 commits. Edit the action you want for each of them:
+
+1. Press <kbd>i</kbd> in your keyboard to switch to editing mode.
+1. Navigate with your keyboard arrows to edit the second commit keyword from
+   `pick` to `s`, which will squash both into one. The first commit will be
+   picked and the second will be squashed into the first.
+1. Press <kbd>esc</kbd> to leave the editing mode.
+1. Type `:wq` to `write and quit`.
+1. Git will output the commit message so you have a chance to edit it.
+
+   All lines starting with `#` will be ignored and not included in the commit
+   message. Everything else will be included.
+
+   To leave it as-is type `:wq`, or, to edit the commit message, switch to the
+   editing mode as you did on step 1-3, then write and quit when you're done.
+
+1. If you haven't pushed your commits to the remote branch before rebasing,
+push normally. If you had pushed these commits already, [force-push](#force-push) instead.
+
+Note that the steps for editing through the command line can be slightly
+different depending on your operating system and the terminal you're using.
+
+See [Numerous undo possibilities in Git](../topics/git/numerous_undo_possibilities_in_git/index.md#with-history-modification)
+for a deeper look into interactive rebase.
 
 #### Force-push
 
