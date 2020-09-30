@@ -24,7 +24,7 @@ describe('AlertDetails', () => {
     name: environmentName,
     path: environmentPath,
   };
-  let glFeatures = { graphqlExposeEnvironmentPath: false };
+  let glFeatures = { enableEnvironmentPathInAlertDetails: false };
   let mock;
   let wrapper;
   const projectPath = 'root/alerts';
@@ -87,6 +87,7 @@ describe('AlertDetails', () => {
   const findCreateIncidentBtn = () => wrapper.findByTestId('createIncidentBtn');
   const findViewIncidentBtn = () => wrapper.findByTestId('viewIncidentBtn');
   const findIncidentCreationAlert = () => wrapper.findByTestId('incidentCreationError');
+  const findEnvironmentName = () => wrapper.findByTestId('environmentName');
   const findEnvironmentPath = () => wrapper.findByTestId('environmentPath');
   const findDetailsTable = () => wrapper.find(AlertDetailsTable);
 
@@ -135,7 +136,6 @@ describe('AlertDetails', () => {
         field               | data            | isShown
         ${'eventCount'}     | ${1}            | ${true}
         ${'eventCount'}     | ${undefined}    | ${false}
-        ${'environment'}    | ${undefined}    | ${false}
         ${'monitoringTool'} | ${'New Relic'}  | ${true}
         ${'monitoringTool'} | ${undefined}    | ${false}
         ${'service'}        | ${'Prometheus'} | ${true}
@@ -159,30 +159,31 @@ describe('AlertDetails', () => {
     });
 
     describe('environment fields', () => {
-      describe('whent graphqlExposeEnvironmentPath is disabled', () => {
+      describe('whent enableEnvironmentPathInAlertDetails is disabled', () => {
         beforeEach(mountComponent);
 
         it('should not show the environment', () => {
+          expect(findEnvironmentName().exists()).toBe(false);
           expect(findEnvironmentPath().exists()).toBe(false);
         });
       });
 
-      describe('whent graphqlExposeEnvironmentPath is enabled', () => {
+      describe('whent enableEnvironmentPathInAlertDetails is enabled', () => {
         beforeEach(() => {
-          glFeatures = { graphqlExposeEnvironmentPath: true };
+          glFeatures = { enableEnvironmentPathInAlertDetails: true };
           mountComponent();
         });
 
-        it('should show the environment and link to path', () => {
+        it('should show the environment name with link to path', () => {
           expect(findEnvironmentPath().text()).toBe(environmentName);
           expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
         });
 
-        it('should pnly show the environment name if the path is not provided', () => {
+        it('should only show the environment name if the path is not provided', () => {
           environmentData = { name: environmentName, path: null };
           mountComponent();
           expect(findEnvironmentPath().exists()).toBe(false);
-          expect(wrapper.findByTestId('environment').text()).toBe(environmentName);
+          expect(findEnvironmentName().text()).toBe(environmentName);
         });
       });
     });

@@ -22,7 +22,7 @@ const environmentPath = '/fake/path';
 const environmentData = { name: environmentName, path: environmentPath };
 
 describe('AlertDetails', () => {
-  let glFeatures = { graphqlExposeEnvironmentPath: false };
+  let glFeatures = { enableEnvironmentPathInAlertDetails: false };
   let wrapper;
 
   function mountComponent(propsData = {}) {
@@ -78,10 +78,7 @@ describe('AlertDetails', () => {
     });
 
     describe('with table data', () => {
-      beforeEach(() => {
-        glFeatures = { graphqlExposeEnvironmentPath: true };
-        mountComponent();
-      });
+      beforeEach(mountComponent);
 
       it('renders a table', () => {
         expect(findTableComponent().exists()).toBe(true);
@@ -91,23 +88,36 @@ describe('AlertDetails', () => {
         expect(findTableComponent().text()).toContain('SyntaxError: Invalid or unexpected token');
       });
 
-      it('should show allowed alert fields', () => {
+      it('should show allowed  alert fields', () => {
         const fields = findTableKeys();
 
         expect(findTableField(fields, 'Iid').exists()).toBe(true);
         expect(findTableField(fields, 'Title').exists()).toBe(true);
         expect(findTableField(fields, 'Severity').exists()).toBe(true);
         expect(findTableField(fields, 'Status').exists()).toBe(true);
-        expect(findTableField(fields, 'Environment').exists()).toBe(true);
       });
 
-      it('should not show disallowed alert fields', () => {
+      it('should not show disallowed and flaggedAlllowed alert fields', () => {
         const fields = findTableKeys();
 
         expect(findTableField(fields, 'Typename').exists()).toBe(false);
         expect(findTableField(fields, 'Todos').exists()).toBe(false);
         expect(findTableField(fields, 'Notes').exists()).toBe(false);
         expect(findTableField(fields, 'Assignees').exists()).toBe(false);
+        expect(findTableField(fields, 'Environment').exists()).toBe(false);
+      });
+    });
+
+    describe('whent enableEnvironmentPathInAlertDetails is enabled', () => {
+      beforeEach(() => {
+        glFeatures = { enableEnvironmentPathInAlertDetails: true };
+        mountComponent();
+      });
+
+      it('should show flaggedAlllowed alert fields', () => {
+        const fields = findTableKeys();
+
+        expect(findTableField(fields, 'Environment').exists()).toBe(true);
       });
 
       it('should apply a formatting strategy when defined', () => {
@@ -124,20 +134,6 @@ describe('AlertDetails', () => {
         });
 
         expect(findTableFieldValueByKey('Environment').text()).toBeFalsy();
-      });
-    });
-
-    describe('whent graphqlExposeEnvironmentPath is disabled', () => {
-      beforeEach(() => {
-        glFeatures = { graphqlExposeEnvironmentPath: false };
-        mountComponent();
-      });
-
-      it('should not show flaggedAllowed alert fields', () => {
-        const fields = findTableKeys();
-
-        expect(findTableField(fields, 'Iid').exists()).toBe(true);
-        expect(findTableField(fields, 'Environment').exists()).toBe(false);
       });
     });
   });

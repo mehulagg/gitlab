@@ -157,7 +157,7 @@ export default {
       return this.shouldDisplayEnvironment && this.alert?.environment?.path;
     },
     shouldDisplayEnvironment() {
-      return this.glFeatures.graphqlExposeEnvironmentPath;
+      return this.glFeatures.enableEnvironmentPathInAlertDetails;
     },
   },
   mounted() {
@@ -322,7 +322,7 @@ export default {
             >
               {{ environmentName }}
             </gl-link>
-            <span v-else data-testid="environment">{{ environmentName }}</span>
+            <span v-else data-testid="environmentName">{{ environmentName }}</span>
           </alert-summary-row>
           <alert-summary-row
             v-if="alert.startedAt"

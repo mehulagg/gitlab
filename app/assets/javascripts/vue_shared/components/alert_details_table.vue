@@ -89,7 +89,7 @@ export default {
       );
     },
     shouldDisplayEnvironment() {
-      return this.glFeatures.graphqlExposeEnvironmentPath;
+      return this.glFeatures.enableEnvironmentPathInAlertDetails;
     },
   },
   methods: {

@@ -320,7 +320,7 @@ your application's performance and how to resolve any problems.
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-environment-link-in-alert-details). **(CORE ONLY)**
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-environment-link-in-alert-details). **(CORE ONLY)**
 
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.

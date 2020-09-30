@@ -5627,7 +5627,8 @@ type Environment {
   name: String!
 
   """
-  The path to the environment. Will always return null if `graphql_expose_environment_path` feature flag is disabled
+  The path to the environment. Will always return null if
+  `enable_environment_path_in_alert_details` feature flag is disabled
   """
   path: String
 
