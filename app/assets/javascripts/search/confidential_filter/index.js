@@ -1,39 +1,36 @@
-import Vue from 'vue';
-import Translate from '~/vue_shared/translate';
-import DropdownFilter from '../components/dropdown_filter.vue';
-import {
-  FILTER_HEADER,
-  FILTER_PARAM,
-  FILTER_STATES_BY_SCOPE,
-  FILTER_STATES,
-  SCOPES,
-} from './constants';
+import { __ } from '~/locale';
 
-Vue.use(Translate);
+const header = __('Confidentiality');
 
-export default () => {
-  const el = document.getElementById('js-search-filter-by-confidential');
+const filters = {
+  ANY: {
+    label: __('Any'),
+    value: null,
+  },
+  CONFIDENTIAL: {
+    label: __('Confidential'),
+    value: 'yes',
+  },
+  NOT_CONFIDENTIAL: {
+    label: __('Not confidential'),
+    value: 'no',
+  },
+};
 
-  if (!el) return false;
+const scopes = {
+  ISSUES: 'issues',
+};
 
-  return new Vue({
-    el,
-    data() {
-      return { ...el.dataset };
-    },
+const filterByScope = {
+  [scopes.ISSUES]: [filters.ANY, filters.CONFIDENTIAL, filters.NOT_CONFIDENTIAL],
+};
 
-    render(createElement) {
-      return createElement(DropdownFilter, {
-        props: {
-          initialFilter: this.filter,
-          filtersArray: FILTER_STATES_BY_SCOPE[this.scope],
-          filters: FILTER_STATES,
-          header: FILTER_HEADER,
-          param: FILTER_PARAM,
-          scope: this.scope,
-          supportedScopes: Object.values(SCOPES),
-        },
-      });
-    },
-  });
+const filterParam = 'confidential';
+
+export default {
+  header,
+  filters,
+  scopes,
+  filterByScope,
+  filterParam,
 };

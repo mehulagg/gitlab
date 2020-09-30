@@ -1,39 +1,42 @@
-import Vue from 'vue';
-import Translate from '~/vue_shared/translate';
-import DropdownFilter from '../components/dropdown_filter.vue';
-import {
-  FILTER_HEADER,
-  FILTER_PARAM,
-  FILTER_STATES_BY_SCOPE,
-  FILTER_STATES,
-  SCOPES,
-} from './constants';
+import { __ } from '~/locale';
 
-Vue.use(Translate);
+const header = __('Status');
 
-export default () => {
-  const el = document.getElementById('js-search-filter-by-state');
+const filters = {
+  ANY: {
+    label: __('Any'),
+    value: 'all',
+  },
+  OPEN: {
+    label: __('Open'),
+    value: 'opened',
+  },
+  CLOSED: {
+    label: __('Closed'),
+    value: 'closed',
+  },
+  MERGED: {
+    label: __('Merged'),
+    value: 'merged',
+  },
+};
 
-  if (!el) return false;
+const scopes = {
+  ISSUES: 'issues',
+  MERGE_REQUESTS: 'merge_requests',
+};
 
-  return new Vue({
-    el,
-    data() {
-      return { ...el.dataset };
-    },
+const filterByScope = {
+  [scopes.ISSUES]: [filters.ANY, filters.OPEN, filters.CLOSED],
+  [scopes.MERGE_REQUESTS]: [filters.ANY, filters.OPEN, filters.MERGED, filters.CLOSED],
+};
 
-    render(createElement) {
-      return createElement(DropdownFilter, {
-        props: {
-          initialFilter: this.filter,
-          filtersArray: FILTER_STATES_BY_SCOPE[this.scope],
-          filters: FILTER_STATES,
-          header: FILTER_HEADER,
-          param: FILTER_PARAM,
-          scope: this.scope,
-          supportedScopes: Object.values(SCOPES),
-        },
-      });
-    },
-  });
+const filterParam = 'state';
+
+export default {
+  header,
+  filters,
+  scopes,
+  filterByScope,
+  filterParam,
 };
