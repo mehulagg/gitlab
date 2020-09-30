@@ -1,13 +1,13 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import statusIcon from '../mr_widget_status_icon.vue';
 
 export default {
   name: 'MRWidgetMissingBranch',
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
