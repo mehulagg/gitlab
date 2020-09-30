@@ -183,4 +183,3 @@ Upload.find_each do |upload|
 end
 p "#{uploads_deleted} remote objects were destroyed."
 ```
-
