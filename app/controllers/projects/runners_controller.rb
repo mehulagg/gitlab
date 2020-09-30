@@ -50,7 +50,9 @@ class Projects::RunnersController < Projects::ApplicationController
   end
 
   def toggle_shared_runners
-    return redirect_to project_runners_path(@project), alert: _("Can't update due to restriction on group level") if project.group && project.group.shared_runners_setting != 'enabled'
+    if !project.shared_runners_enabled && project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
+      return redirect_to project_runners_path(@project), alert: _("Cannot enable shared runners because parent group does not allow it")
+    end
 
     project.toggle!(:shared_runners_enabled)
 
