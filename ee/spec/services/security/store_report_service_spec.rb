@@ -53,6 +53,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
       it 'inserts all vulnerabilties' do
         expect { subject }.to change { Vulnerability.count }.by(findings)
       end
+
+      it 'calculates UUIDv5 for all findings' do
+        expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
+      end
     end
 
     context 'invalid data' do
@@ -116,6 +120,10 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
     it 'inserts only new findings and reuse existing ones' do
       expect { subject }.to change { Vulnerabilities::Finding.count }.by(32)
+    end
+
+    it 'calculates UUIDv5 for all findings' do
+      expect(Vulnerabilities::Finding.pluck(:uuid)).to all(be_a(String))
     end
 
     it 'inserts all finding pipelines (join model) for this new pipeline' do

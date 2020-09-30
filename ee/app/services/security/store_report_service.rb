@@ -72,10 +72,22 @@ module Security
       }
 
       begin
-        project
+        vulnerability_finding = project
           .vulnerability_findings
           .create_with(create_params)
-          .find_or_create_by!(find_params)
+          .find_or_initialize_by(find_params)
+
+        values_for_uuid = [
+          vulnerability_finding.report_type,
+          vulnerability_finding.primary_identifier&.fingerprint || find_params.dig(:primary_identifier, :fingerprint),
+          vulnerability_finding.location_fingerprint,
+          project.id
+        ].join('-')
+
+        vulnerability_finding.uuid = Gitlab::Vulnerabilities::CalculateFindingUUID.call(values_for_uuid)
+
+        vulnerability_finding.save!
+        vulnerability_finding
       rescue ActiveRecord::RecordNotUnique
         project.vulnerability_findings.find_by!(find_params)
       rescue ActiveRecord::RecordInvalid => e
