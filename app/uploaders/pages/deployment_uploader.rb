@@ -20,6 +20,14 @@ module Pages
       "@hashed"
     end
 
+    # override GitlabUploader
+    # if set to true it erases the original file when uploading
+    # and we copy from the artifacts archive, so artifacts end up
+    # without the file
+    def move_to_cache
+      false
+    end
+
     class << self
       def direct_upload_enabled?
         false

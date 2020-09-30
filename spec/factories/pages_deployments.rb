@@ -8,7 +8,6 @@ FactoryBot.define do
       deployment.file = fixture_file_upload(
         Rails.root.join("spec/fixtures/pages.zip")
       )
-      deployment.size = deployment.file.size
     end
   end
 end

@@ -6,6 +6,10 @@ RSpec.describe Pages::DeploymentUploader do
   let(:pages_deployment) { create(:pages_deployment) }
   let(:uploader) { described_class.new(pages_deployment, :file) }
 
+  let(:file) do
+    fixture_file_upload("spec/fixtures/pages.zip")
+  end
+
   subject { uploader }
 
   it_behaves_like "builds correct paths",
@@ -19,13 +23,15 @@ RSpec.describe Pages::DeploymentUploader do
     end
 
     it_behaves_like 'builds correct paths', store_dir: %r[\A\h{2}/\h{2}/\h{64}/pages_deployments/\d+\z]
+
+    it 'preserves original file when stores it' do
+      uploader.store!(file)
+
+      expect(File.exist?(file.path)).to be true
+    end
   end
 
   context 'when file is stored in valid local_path' do
-    let(:file) do
-      fixture_file_upload("spec/fixtures/pages.zip")
-    end
-
     before do
       uploader.store!(file)
     end
@@ -33,6 +39,10 @@ RSpec.describe Pages::DeploymentUploader do
     subject { uploader.file.path }
 
     it { is_expected.to match(%r[#{uploader.root}/@hashed/\h{2}/\h{2}/\h{64}/pages_deployments/#{pages_deployment.id}/pages.zip]) }
+
+    it 'preserves original file when stores it' do
+      expect(File.exist?(file.path)).to be true
+    end
   end
 
   describe '.default_store' do

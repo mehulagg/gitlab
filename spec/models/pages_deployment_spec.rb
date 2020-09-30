@@ -30,4 +30,9 @@ RSpec.describe PagesDeployment do
       expect(build(:pages_deployment).file_store).to eq(ObjectStorage::Store::REMOTE)
     end
   end
+
+  it 'saves size along with the file' do
+    deployment = create(:pages_deployment)
+    expect(deployment.size).to eq(deployment.file.size)
+  end
 end
