@@ -5,7 +5,7 @@ description: 'Image Resizing'
 
 # Image resizing for avatars and content images
 
-Currently, we are showing all uploaded images 1:1, which is of course not ideal. To improve performance greatly we will add image resizing to the backend. There are two main areas of image resizing to consider; avatars and content images.  The MVC for this implementation will focus on Avatars.  Avatars requests consist of approximately 70% of total image requests.  Their sizes are limited and the scope for resizing them is limited as well.  Content image resizing has many more considerations for size and features.  It is entirely possible that we have two separate development efforts with the same goal of increasing performance via image resizing.
+Currently, we are showing all uploaded images 1:1, which is of course not ideal. To improve performance greatly we will add image resizing to the backend. There are two main areas of image resizing to consider; avatars and content images. The MVC for this implementation will focus on Avatars. Avatars requests consist of approximately 70% of total image requests. Their sizes are limited and the scope for resizing them is limited as well. Content image resizing has many more considerations for size and features. It is entirely possible that we have two separate development efforts with the same goal of increasing performance via image resizing.
 
 ## MVC Avatar Resizing
 
@@ -13,7 +13,7 @@ We will implement a dynamic image resizing solution. This means image should be 
 
 ## Content Image Resizing
 
-Content image resizing is a more complex problem to tackle.  There are no set size restrictions and there are additional features or requirements to consider.
+Content image resizing is a more complex problem to tackle. There are no set size restrictions and there are additional features or requirements to consider.
 
 - Dynamic WebP support
 - Extract first image of GIF's so we can prevent from loading 10MB pixels
@@ -22,7 +22,7 @@ Content image resizing is a more complex problem to tackle.  There are no set si
 - Resizing recommendations (size, clarity, etc.)
 - Storage
 
-The MVC Avatar resizing implementation is integrated into Workhorse.  With the extra requirements for content image resizing, this may require further use of GraphicsMagik (GM) or a similar library and breaking it out of Workhorse.
+The MVC Avatar resizing implementation is integrated into Workhorse. With the extra requirements for content image resizing, this may require further use of GraphicsMagik (GM) or a similar library and breaking it out of Workhorse.
 
 ## Iterations
 
