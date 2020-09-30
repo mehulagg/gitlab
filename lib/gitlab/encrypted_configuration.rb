@@ -31,6 +31,8 @@ module Gitlab
         file.write(encrypt(contents))
       end
       FileUtils.mv temp_file.path, content_path
+    ensure
+      temp_file&.unlink
     end
 
     def config
