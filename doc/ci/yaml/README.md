@@ -1437,7 +1437,12 @@ the files changed by Git push events.
 
 `rules: changes` works exactly the same way as [`only: changes` and `except: changes`](#onlychangesexceptchanges),
 accepting an array of paths. Similarly, it always returns true if there is no
-Git push event, for example, when a new tag is created. It should only be used for branch pipelines or merge request pipelines.
+Git push event, for example, when a new tag is created. It's recommended to use it
+only with branch pipelines or merge request pipelines. For example, it's common to
+use `rules: changes` with one of the following `if` clauses:
+
+- `if: $CI_COMMIT_BRANCH`
+- `if: '$CI_PIPELINE_SOURCE == "merge_request_event"'`
 
 For example:
 
@@ -1542,7 +1547,7 @@ docker build:
         - Dockerfile
         - docker/scripts/*
       when: manual
-    # - when: never would be redundant here, this is implied any time rules are listed.
+      # - when: never would be redundant here, this is implied any time rules are listed.
 ```
 
 Keywords such as `branches` or `refs` that are currently available for
@@ -1749,7 +1754,7 @@ the pipeline if the following is true:
 
 In the example below, the `test` job will `only` be created when **all** of the following are true:
 
-- The pipeline has been [scheduled](../../user/project/pipelines/schedules.md) **or** runs for `master`.
+- The pipeline has been [scheduled](../pipelines/schedules.md) **or** runs for `master`.
 - The `variables` keyword matches.
 - The `kubernetes` service is active on the project.
 
@@ -1869,16 +1874,18 @@ job1:
 Using the `changes` keyword with `only` or `except` makes it possible to define if
 a job should be created based on files modified by a Git push event.
 
-This means the `only:changes` policy is useful for pipelines where:
+The `only:changes` policy is only useful for pipelines triggered by the following
+refs:
 
-- `$CI_PIPELINE_SOURCE == 'push'`
-- `$CI_PIPELINE_SOURCE == 'merge_request_event'`
-- `$CI_PIPELINE_SOURCE == 'external_pull_request_event'`
+- `branches`
+- `external_pull_requests`
+- `merge_requests` (see additional details about [using `only:changes` with pipelines for merge requests](#using-onlychanges-with-pipelines-for-merge-requests))
 
-If there is no Git push event, such as for pipelines with
-[sources other than the three above](../variables/predefined_variables.md),
-`changes` can't determine if a given file is new or old, and will always
-return true.
+CAUTION: **Caution:**
+In pipelines with [sources other than the three above](../variables/predefined_variables.md)
+`changes` can't determine if a given file is new or old and always returns `true`.
+This includes pipelines triggered by pushing new tags. Configuring jobs to use `only: changes`
+with other `only: refs` keywords is possible, but not recommended.
 
 A basic example of using `only: changes`:
 
@@ -1886,6 +1893,8 @@ A basic example of using `only: changes`:
 docker build:
   script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
   only:
+    refs:
+      - branches
     changes:
       - Dockerfile
       - docker/scripts/*
@@ -1914,6 +1923,8 @@ in double quotes or GitLab will fail to parse the `.gitlab-ci.yml`. For example:
 test:
   script: npm run test
   only:
+    refs:
+      - branches
     changes:
       - "*.json"
       - "**/*.sql"
@@ -2077,9 +2088,7 @@ This example creates four paths of execution:
 - The maximum number of jobs that a single job can need in the `needs:` array is limited:
   - For GitLab.com, the limit is 50. For more information, see our
     [infrastructure issue](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7541).
-  - For self-managed instances, the limit is:
-    - 10, if the `ci_plan_needs_size_limit` feature flag is disabled (default).
-    - 50, if the `ci_plan_needs_size_limit` feature flag is enabled. This limit [can be changed](#changing-the-needs-job-limit).
+  - For self-managed instances, the limit is: 50. This limit [can be changed](#changing-the-needs-job-limit).
 - If `needs:` refers to a job that is marked as `parallel:`.
   the current job will depend on all parallel jobs created.
 - `needs:` is similar to `dependencies:` in that it needs to use jobs from prior stages,
@@ -4047,7 +4056,9 @@ release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33014) in GitLab 13.4.
 
 `secrets` indicates the [CI Secrets](../secrets/index.md) this job needs. It should be a hash,
-and the keys should be the names of the environment variables the job needs to access the secrets.
+and the keys should be the names of the environment variables that are made available to the job.
+The value of each secret is saved in a temporary file. This file's path is stored in these
+environment variables.
 
 #### `secrets:vault` **(PREMIUM)**
 
@@ -4063,7 +4074,7 @@ field to fetch the value for:
 job:
   secrets:
     DATABASE_PASSWORD:
-      vault: production/db/password # translates to secret `kv-v2/data/production/db`, field `password`
+      vault: production/db/password  # translates to secret `kv-v2/data/production/db`, field `password`
 ```
 
 You can specify a custom secrets engine path by adding a suffix starting with `@`:
@@ -4072,7 +4083,7 @@ You can specify a custom secrets engine path by adding a suffix starting with `@
 job:
   secrets:
     DATABASE_PASSWORD:
-      vault: production/db/password@ops # translates to secret `ops/data/production/db`, field `password`
+      vault: production/db/password@ops  # translates to secret `ops/data/production/db`, field `password`
 ```
 
 In the detailed form of the syntax, you can specify all details explicitly:

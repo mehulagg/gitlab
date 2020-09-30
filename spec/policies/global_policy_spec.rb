@@ -229,12 +229,6 @@ RSpec.describe GlobalPolicy do
 
         it { is_expected.not_to be_allowed(:access_api) }
       end
-
-      it 'when `inactive_policy_condition` feature flag is turned off' do
-        stub_feature_flags(inactive_policy_condition: false)
-
-        is_expected.to be_allowed(:access_api)
-      end
     end
   end
 
@@ -321,12 +315,6 @@ RSpec.describe GlobalPolicy do
       end
 
       it { is_expected.not_to be_allowed(:access_git) }
-
-      it 'when `inactive_policy_condition` feature flag is turned off' do
-        stub_feature_flags(inactive_policy_condition: false)
-
-        is_expected.to be_allowed(:access_git)
-      end
     end
 
     context 'when terms are enforced' do
@@ -370,24 +358,6 @@ RSpec.describe GlobalPolicy do
     end
   end
 
-  describe 'read instance statistics' do
-    context 'regular user' do
-      it { is_expected.to be_disallowed(:read_instance_statistics) }
-    end
-
-    context 'admin', :enable_admin_mode do
-      let(:current_user) { create(:admin) }
-
-      it { is_expected.to be_allowed(:read_instance_statistics) }
-    end
-
-    context 'anonymous' do
-      let(:current_user) { nil }
-
-      it { is_expected.not_to be_allowed(:read_instance_statistics) }
-    end
-  end
-
   describe 'slash commands' do
     context 'regular user' do
       it { is_expected.to be_allowed(:use_slash_commands) }
@@ -421,12 +391,6 @@ RSpec.describe GlobalPolicy do
       end
 
       it { is_expected.not_to be_allowed(:use_slash_commands) }
-
-      it 'when `inactive_policy_condition` feature flag is turned off' do
-        stub_feature_flags(inactive_policy_condition: false)
-
-        is_expected.to be_allowed(:use_slash_commands)
-      end
     end
 
     context 'when access locked' do

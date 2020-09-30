@@ -1,5 +1,7 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import { GlAlert } from '@gitlab/ui';
+import { __ } from '~/locale';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { dateFormats } from '../../shared/constants';
 import Scatterplot from '../../shared/components/scatterplot.vue';
@@ -8,6 +10,7 @@ import StageDropdownFilter from './stage_dropdown_filter.vue';
 export default {
   name: 'DurationChart',
   components: {
+    GlAlert,
     Scatterplot,
     StageDropdownFilter,
     ChartSkeletonLoader,
@@ -19,10 +22,15 @@ export default {
     },
   },
   computed: {
-    ...mapState('durationChart', ['isLoading']),
+    ...mapState('durationChart', ['isLoading', 'errorMessage']),
     ...mapGetters('durationChart', ['durationChartPlottableData']),
     hasData() {
       return Boolean(!this.isLoading && this.durationChartPlottableData.length);
+    },
+    error() {
+      return this.errorMessage
+        ? this.errorMessage
+        : __('There is no data available. Please change your selection.');
     },
   },
   methods: {
@@ -37,7 +45,7 @@ export default {
 
 <template>
   <chart-skeleton-loader v-if="isLoading" size="md" class="gl-my-4 gl-py-4" />
-  <div v-else class="gl-display-flex gl-flex-direction-column">
+  <div v-else class="gl-display-flex gl-flex-direction-column" data-testid="vsa-duration-chart">
     <h4 class="gl-mt-0">{{ s__('CycleAnalytics|Days to completion') }}</h4>
     <stage-dropdown-filter
       v-if="stages.length"
@@ -52,8 +60,8 @@ export default {
       :tooltip-date-format="$options.durationChartTooltipDateFormat"
       :scatter-data="durationChartPlottableData"
     />
-    <div v-else ref="duration-chart-no-data" class="bs-callout bs-callout-info">
-      {{ __('There is no data available. Please change your selection.') }}
-    </div>
+    <gl-alert v-else variant="info" :dismissible="false" class="gl-mt-3">
+      {{ error }}
+    </gl-alert>
   </div>
 </template>

@@ -314,7 +314,7 @@ RSpec.describe License do
 
       it 'returns features for premium plan' do
         expect(described_class.features_for_plan('premium'))
-          .to include(:multiple_issue_assignees, :deploy_board, :file_locks)
+          .to include(:multiple_issue_assignees, :deploy_board, :file_locks, :group_wikis)
       end
 
       it 'returns empty array if no features for given plan' do
@@ -847,6 +847,15 @@ RSpec.describe License do
   describe '.history' do
     before(:all) do
       described_class.delete_all
+    end
+
+    it 'does not include the undecryptable license' do
+      undecryptable_license = create(:license)
+      allow(undecryptable_license).to receive(:license).and_return(nil)
+
+      allow(License).to receive(:all).and_return([undecryptable_license])
+
+      expect(described_class.history.map(&:id)).to be_empty
     end
 
     it 'returns the licenses sorted by created_at, starts_at and expires_at descending' do

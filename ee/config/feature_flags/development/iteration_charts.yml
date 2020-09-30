@@ -1,0 +1,7 @@
+---
+name: iteration_charts
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41280
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/229046
+group: group::project management
+type: development
+default_enabled: false

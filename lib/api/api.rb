@@ -194,7 +194,10 @@ module API
       mount ::API::NugetPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
-      mount ::API::ConanPackages
+      mount ::API::ConanProjectPackages
+      mount ::API::ConanInstancePackages
+      mount ::API::DebianGroupPackages
+      mount ::API::DebianProjectPackages
       mount ::API::MavenPackages
       mount ::API::NpmPackages
       mount ::API::GenericPackages
@@ -215,6 +218,7 @@ module API
       mount ::API::ProjectStatistics
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
+      mount ::API::Terraform::StateVersion
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases

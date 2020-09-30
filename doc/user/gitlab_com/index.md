@@ -38,6 +38,14 @@ The IP address for `mg.gitlab.com` is subject to change at any time.
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
 
+There are several ways to perform backups of your content on GitLab.com.
+
+Projects can be backed up in their entirety by exporting them either [through the UI](../project/settings/import_export.md) or [API](../../api/project_import_export.md#schedule-an-export), the latter of which can be used to programmatically upload exports to a storage platform such as AWS S3.
+
+With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
+
+Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki will come with it [if they were uploaded after 2020-08-22](../project/wiki/index.md#creating-a-new-wiki-page).
+
 ## Alternative SSH port
 
 GitLab.com can be reached via a [different SSH port](https://about.gitlab.com/blog/2016/02/18/gitlab-dot-com-now-supports-an-alternate-git-plus-ssh-port/) for `git+ssh`.
@@ -89,7 +97,7 @@ Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
 | [Max number of instance level variables](../../administration/instance_limits.md#number-of-instance-level-variables) | `25` | `25` |
 | [Scheduled Job Archival](../../user/admin_area/settings/continuous_integration.md#archive-jobs) | 3 months | Never |
 
-## Repository size limit
+## Account and limit settings
 
 GitLab.com has the following [account limits](../admin_area/settings/account_and_limit_settings.md) enabled. If a setting is not listed, it is set to the default value.
 
@@ -99,6 +107,7 @@ or over the repository size limit, you can [reduce your repository size with Git
 | Setting                       | GitLab.com  | Default       |
 | -----------                   | ----------- | ------------- |
 | Repository size including LFS | 10 GB       | Unlimited     |
+| Maximum import size           | 5 GB        | 50 MB         |
 
 NOTE: **Note:**
 `git push` and GitLab project imports are limited to 5 GB per request through Cloudflare. Git LFS and imports other than a file upload are not affected by this limit.
@@ -472,6 +481,10 @@ More information on this particular change can be found at
 <https://gitlab.com/gitlab-com/infrastructure/-/issues/1555>. An up to date list
 of proposed changes can be found at
 <https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=database&label_name[]=change>.
+
+## Puma
+
+GitLab.com uses the default of 60 seconds for [Puma request timeouts](https://docs.gitlab.com/omnibus/settings/puma.html#worker-timeout).
 
 ## Unicorn
 

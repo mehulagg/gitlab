@@ -42,10 +42,6 @@ export default {
   },
 
   props: {
-    helpPath: {
-      type: String,
-      required: true,
-    },
     helpClientLibrariesPath: {
       type: String,
       required: true,
@@ -80,7 +76,7 @@ export default {
       required: true,
     },
   },
-  inject: ['projectName'],
+  inject: ['projectName', 'featureFlagsHelpPagePath'],
   data() {
     return {
       enteredProjectName: '',
@@ -149,7 +145,9 @@ export default {
           </gl-link>
         </template>
         <template #docsLink="{ content }">
-          <gl-link :href="helpPath" target="_blank" data-testid="help-link">{{ content }}</gl-link>
+          <gl-link :href="featureFlagsHelpPagePath" target="_blank" data-testid="help-link">{{
+            content
+          }}</gl-link>
         </template>
       </gl-sprintf>
     </p>

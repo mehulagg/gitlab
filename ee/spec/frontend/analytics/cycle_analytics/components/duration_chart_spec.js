@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
-import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
+import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import StageDropdownFilter from 'ee/analytics/cycle_analytics/components/stage_dropdown_filter.vue';
@@ -59,7 +59,7 @@ function createComponent({
 describe('DurationChart', () => {
   let wrapper;
 
-  const findNoDataContainer = _wrapper => _wrapper.find({ ref: 'duration-chart-no-data' });
+  const findContainer = _wrapper => _wrapper.find('[data-testid="vsa-duration-chart"]');
   const findScatterPlot = _wrapper => _wrapper.find(Scatterplot);
   const findStageDropdown = _wrapper => _wrapper.find(StageDropdownFilter);
   const findLoader = _wrapper => _wrapper.find(ChartSkeletonLoader);
@@ -81,7 +81,7 @@ describe('DurationChart', () => {
   });
 
   it('renders the duration chart', () => {
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(wrapper.element).toMatchSnapshot();
   });
 
   it('renders the scatter plot', () => {
@@ -133,7 +133,7 @@ describe('DurationChart', () => {
     });
 
     it('renders the no data available message', () => {
-      expect(findNoDataContainer(wrapper).text()).toEqual(
+      expect(findContainer(wrapper).text()).toContain(
         'There is no data available. Please change your selection.',
       );
     });

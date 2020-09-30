@@ -423,24 +423,6 @@ RSpec.describe API::Issues, :mailer do
         expect(issue.reload.read_attribute(:weight)).to be_nil
       end
     end
-
-    context 'when issue weight tracking feature flag is not active' do
-      before do
-        stub_feature_flags(track_issue_weight_change_events: false)
-      end
-
-      it 'does not create a ResourceWeightEvent' do
-        expect do
-          put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 9 }
-        end.not_to change { ResourceWeightEvent.count }
-      end
-
-      it 'creates a system note' do
-        expect do
-          put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 9 }
-        end.to change { Note.count }.by(1)
-      end
-    end
   end
 
   describe 'PUT /projects/:id/issues/:issue_id to update epic' do

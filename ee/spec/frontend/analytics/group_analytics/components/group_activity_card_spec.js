@@ -2,8 +2,8 @@ import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import Api from 'ee/api';
 import GroupActivityCard from 'ee/analytics/group_analytics/components/group_activity_card.vue';
-import MetricCard from 'ee/analytics/shared/components/metric_card.vue';
 import waitForPromises from 'helpers/wait_for_promises';
+import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import axios from '~/lib/utils/axios_utils';
 
 const TEST_GROUP_ID = 'gitlab-org';

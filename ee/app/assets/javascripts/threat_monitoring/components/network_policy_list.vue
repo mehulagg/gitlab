@@ -18,8 +18,6 @@ import NetworkPolicyEditor from './network_policy_editor.vue';
 import PolicyDrawer from './policy_editor/policy_drawer.vue';
 import { CiliumNetworkPolicyKind } from './policy_editor/constants';
 
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-
 export default {
   components: {
     GlTable,
@@ -34,7 +32,6 @@ export default {
     NetworkPolicyEditor,
     PolicyDrawer,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     documentationPath: {
       type: String,
@@ -50,7 +47,7 @@ export default {
   },
   computed: {
     ...mapState('networkPolicies', ['policies', 'isLoadingPolicies', 'isUpdatingPolicy']),
-    ...mapState('threatMonitoring', ['currentEnvironmentId']),
+    ...mapState('threatMonitoring', ['currentEnvironmentId', 'allEnvironments']),
     ...mapGetters('networkPolicies', ['policiesWithDefaults']),
     documentationFullPath() {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
@@ -80,14 +77,10 @@ export default {
         : false;
     },
     shouldShowCiliumDrawer() {
-      return this.glFeatures.networkPolicyEditor && this.hasCiliumSelectedPolicy;
+      return this.hasCiliumSelectedPolicy;
     },
     shouldShowEditButton() {
-      return (
-        this.glFeatures.networkPolicyEditor &&
-        this.hasCiliumSelectedPolicy &&
-        Boolean(this.selectedPolicy.creationTimestamp)
-      );
+      return this.hasCiliumSelectedPolicy && Boolean(this.selectedPolicy.creationTimestamp);
     },
     editPolicyPath() {
       return this.hasSelectedPolicy
@@ -97,9 +90,45 @@ export default {
           )
         : '';
     },
+    fields() {
+      const namespace = {
+        key: 'namespace',
+        label: s__('NetworkPolicies|Namespace'),
+        thClass: 'font-weight-bold',
+      };
+      const fields = [
+        {
+          key: 'name',
+          label: s__('NetworkPolicies|Name'),
+          thClass: 'w-50 font-weight-bold',
+        },
+        {
+          key: 'status',
+          label: s__('NetworkPolicies|Status'),
+          thClass: 'font-weight-bold',
+        },
+        {
+          key: 'creationTimestamp',
+          label: s__('NetworkPolicies|Last modified'),
+          thClass: 'font-weight-bold',
+        },
+      ];
+      // Adds column 'namespace' only while 'all environments' option is selected
+      if (this.allEnvironments) fields.splice(1, 0, namespace);
+
+      return fields;
+    },
+  },
+  watch: {
+    currentEnvironmentId(envId) {
+      this.fetchPolicies(envId);
+    },
+  },
+  created() {
+    this.fetchPolicies(this.currentEnvironmentId);
   },
   methods: {
-    ...mapActions('networkPolicies', ['createPolicy', 'updatePolicy']),
+    ...mapActions('networkPolicies', ['fetchPolicies', 'createPolicy', 'updatePolicy']),
     getTimeAgoString(creationTimestamp) {
       if (!creationTimestamp) return '';
       return getTimeago().format(creationTimestamp);
@@ -134,23 +163,6 @@ export default {
         });
     },
   },
-  fields: [
-    {
-      key: 'name',
-      label: s__('NetworkPolicies|Name'),
-      thClass: 'w-75 font-weight-bold',
-    },
-    {
-      key: 'status',
-      label: s__('NetworkPolicies|Status'),
-      thClass: 'font-weight-bold',
-    },
-    {
-      key: 'creationTimestamp',
-      label: s__('NetworkPolicies|Last modified'),
-      thClass: 'font-weight-bold',
-    },
-  ],
   emptyStateDescription: s__(
     `NetworkPolicies|Policies are a specification of how groups of pods are allowed to communicate with each other's network endpoints.`,
   ),
@@ -183,8 +195,8 @@ export default {
 
     <div class="pt-3 px-3 bg-gray-light">
       <div class="row justify-content-between align-items-center">
-        <environment-picker ref="environmentsPicker" />
-        <div v-if="glFeatures.networkPolicyEditor" class="col-sm-auto">
+        <environment-picker ref="environmentsPicker" :include-all="true" />
+        <div class="col-sm-auto">
           <gl-button
             category="secondary"
             variant="info"
@@ -200,7 +212,7 @@ export default {
       ref="policiesTable"
       :busy="isLoadingPolicies"
       :items="policiesWithDefaults"
-      :fields="$options.fields"
+      :fields="fields"
       head-variant="white"
       stacked="md"
       thead-class="gl-text-gray-900 border-bottom"

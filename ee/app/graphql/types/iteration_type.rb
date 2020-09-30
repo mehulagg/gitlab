@@ -3,7 +3,7 @@
 module Types
   class IterationType < BaseObject
     graphql_name 'Iteration'
-    description 'Represents an iteration object.'
+    description 'Represents an iteration object'
 
     present_using IterationPresenter
 

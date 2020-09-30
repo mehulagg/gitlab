@@ -242,6 +242,7 @@ ci_pipelines:
 - latest_builds_report_results
 - messages
 - pipeline_artifacts
+- latest_statuses
 ci_refs:
 - project
 - ci_pipelines
@@ -299,6 +300,7 @@ protected_branches:
 - merge_access_levels
 - push_access_levels
 - unprotect_access_levels
+- approval_project_rules
 protected_tags:
 - project
 - create_access_levels
@@ -418,6 +420,8 @@ project:
 - project_feature
 - auto_devops
 - pages_domains
+- pages_metadatum
+- pages_deployments
 - authorized_users
 - project_authorizations
 - remote_mirrors
@@ -464,7 +468,6 @@ project:
 - approval_merge_request_rules
 - approvers
 - approver_users
-- pages_domains
 - audit_events
 - path_locks
 - approver_groups
@@ -481,6 +484,8 @@ project:
 - dast_site_profiles
 - dast_scanner_profiles
 - dast_sites
+- dast_site_tokens
+- dast_site_validations
 - operations_feature_flags
 - operations_feature_flags_client
 - operations_feature_flags_user_lists
@@ -502,7 +507,6 @@ project:
 - designs
 - project_aliases
 - external_pull_requests
-- pages_metadatum
 - alerts_service
 - grafana_integration
 - remove_source_branch_after_merge
@@ -688,6 +692,7 @@ epic:
 - due_date_sourcing_epic
 - events
 - resource_label_events
+- resource_state_events
 - user_mentions
 - note_authors
 - boards_epic_user_preferences

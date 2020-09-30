@@ -395,7 +395,7 @@ milestones.
 
 Get an overview of the vulnerabilities of all the projects in a group and its subgroups.
 
-[Learn more about the Group Security Dashboard.](security_dashboard/index.md)
+[Learn more about the Group Security Dashboard.](../application_security/security_dashboard/index.md)
 
 ## Insights **(ULTIMATE)**
 
@@ -667,6 +667,9 @@ To enable delayed deletion of projects:
 1. Navigate to the group's **Settings > General** page.
 1. Expand the **Permissions, LFS, 2FA** section, and check **Enable delayed project removal**.
 1. Click **Save changes**.
+
+NOTE: **Note:**
+The group setting for delayed deletion is not inherited by sub-groups and has to be individually defined for each group.
 
 #### Prevent project forking outside group **(PREMIUM)**
 

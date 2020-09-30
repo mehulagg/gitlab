@@ -16,6 +16,10 @@
   category: compliance
   redis_slot: compliance
   aggregation: weekly
+- name: a_compliance_audit_events_api
+  category: compliance
+  redis_slot: compliance
+  aggregation: weekly
 # Analytics category
 - name: g_analytics_contribution
   category: analytics
@@ -77,6 +81,10 @@
   category: analytics
   redis_slot: analytics
   aggregation: weekly
+- name: i_analytics_instance_statistics
+  category: analytics
+  redis_slot: analytics
+  aggregation: weekly
 - name: g_edit_by_web_ide
   category: ide_edit
   redis_slot: edit
@@ -114,6 +122,10 @@
   category: source_code
   aggregation: daily
 - name: merge_request_action
+  category: source_code
+  aggregation: daily
+- name: i_source_code_code_intelligence
+  redis_slot: source_code
   category: source_code
   aggregation: daily
 # Incident management
@@ -191,6 +203,34 @@
   redis_slot: project_management
   aggregation: daily
 - name: g_project_management_issue_made_visible
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_created
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_closed
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_reopened
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_label_changed
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_milestone_changed
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_iteration_changed
+  category: issues_edit
+  redis_slot: project_management
+  aggregation: daily
+- name: g_project_management_issue_weight_changed
   category: issues_edit
   redis_slot: project_management
   aggregation: daily

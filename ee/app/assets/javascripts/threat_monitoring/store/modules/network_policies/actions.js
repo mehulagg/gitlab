@@ -8,22 +8,27 @@ export const setEndpoints = ({ commit }, endpoints) => {
   commit(types.SET_ENDPOINT, endpoints.networkPoliciesEndpoint);
 };
 
-const commitReceivePoliciesError = (commit, payload) => {
+const commitReceivePoliciesError = (commit, data) => {
   const error =
-    payload?.error || s__('NetworkPolicies|Something went wrong, unable to fetch policies');
-  commit(types.RECEIVE_POLICIES_ERROR, error);
+    data?.error || s__('NetworkPolicies|Something went wrong, unable to fetch policies');
+  const policies = data?.payload?.length ? data.payload : [];
+  commit(types.RECEIVE_POLICIES_ERROR, policies);
   createFlash(error);
 };
 
 export const fetchPolicies = ({ state, commit }, environmentId) => {
-  if (!state.policiesEndpoint || !environmentId) return commitReceivePoliciesError(commit);
+  if (!state.policiesEndpoint) return commitReceivePoliciesError(commit);
 
   commit(types.REQUEST_POLICIES);
 
+  const params = environmentId ? { params: { environment_id: environmentId } } : {};
+
   return axios
-    .get(state.policiesEndpoint, { params: { environment_id: environmentId } })
+    .get(state.policiesEndpoint, params)
     .then(({ data }) => commit(types.RECEIVE_POLICIES_SUCCESS, data))
-    .catch(error => commitReceivePoliciesError(commit, error?.response?.data));
+    .catch(({ response }) => {
+      commitReceivePoliciesError(commit, response?.data);
+    });
 };
 
 const commitPolicyError = (commit, type, payload) => {

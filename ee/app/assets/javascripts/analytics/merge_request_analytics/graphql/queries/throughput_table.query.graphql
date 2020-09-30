@@ -7,6 +7,8 @@ query(
   $authorUsername: String
   $assigneeUsername: String
   $milestoneTitle: String
+  $sourceBranches: [String!]
+  $targetBranches: [String!]
 ) {
   project(fullPath: $fullPath) {
     mergeRequests(
@@ -18,6 +20,8 @@ query(
       authorUsername: $authorUsername
       assigneeUsername: $assigneeUsername
       milestoneTitle: $milestoneTitle
+      sourceBranches: $sourceBranches
+      targetBranches: $targetBranches
     ) {
       nodes {
         iid
@@ -53,6 +57,11 @@ query(
         }
         commitCount
         userNotesCount
+        approvedBy {
+          nodes {
+            id
+          }
+        }
       }
     }
   }

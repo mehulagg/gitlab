@@ -12,8 +12,10 @@ RSpec.describe DesignManagement::Design do
   let_it_be(:deleted_design) { create(:design, :with_versions, deleted: true) }
 
   it_behaves_like 'a class that supports relative positioning' do
+    let_it_be(:relative_parent) { create(:issue) }
+
     let(:factory) { :design }
-    let(:default_params) { { issue: issue } }
+    let(:default_params) { { issue: relative_parent } }
   end
 
   describe 'relations' do
@@ -201,6 +203,15 @@ RSpec.describe DesignManagement::Design do
 
         expect(described_class.current).to contain_exactly(design1, design2)
       end
+    end
+  end
+
+  describe ".build_full_path" do
+    it "builds the full path for a design" do
+      design = build(:design, issue: issue, filename: "hello.jpg")
+      expected_path = "#{DesignManagement.designs_directory}/issue-#{design.issue.iid}/hello.jpg"
+
+      expect(described_class.build_full_path(issue, design)).to eq(expected_path)
     end
   end
 

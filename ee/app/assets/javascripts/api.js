@@ -164,7 +164,7 @@ export default {
       .replace(':value_stream_id', valueStreamId)
       .replace(':stage_id', stageId);
 
-    return axios.get(url, { params: { ...params } });
+    return axios.get(url, { params });
   },
 
   cycleAnalyticsCreateStage({ groupId, valueStreamId, data }) {

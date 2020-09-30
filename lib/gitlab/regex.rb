@@ -80,6 +80,11 @@ module Gitlab
         @semver_regex ||= Regexp.new("\\A#{::Gitlab::Regex.unbounded_semver_regex.source}\\z", ::Gitlab::Regex.unbounded_semver_regex.options)
       end
 
+      def prefixed_semver_regex
+        # identical to semver_regex, except starting with 'v'
+        @prefixed_semver_regex ||= Regexp.new("\\Av#{::Gitlab::Regex.unbounded_semver_regex.source}\\z", ::Gitlab::Regex.unbounded_semver_regex.options)
+      end
+
       def go_package_regex
         # A Go package name looks like a URL but is not; it:
         #   - Must not have a scheme, such as http:// or https://
@@ -102,6 +107,10 @@ module Gitlab
 
       def generic_package_version_regex
         /\A\d+\.\d+\.\d+\z/
+      end
+
+      def generic_package_file_name_regex
+        maven_file_name_regex
       end
     end
 
@@ -211,8 +220,27 @@ module Gitlab
       "Must start with a letter, and cannot end with '-'"
     end
 
+    # The section start, e.g. section_start:12345678:NAME
+    def logs_section_prefix_regex
+      /section_((?:start)|(?:end)):(\d+):([a-zA-Z0-9_.-]+)/
+    end
+
+    # The optional section options, e.g. [collapsed=true]
+    def logs_section_options_regex
+      /(\[(?:\w+=\w+)(?:, ?(?:\w+=\w+))*\])?/
+    end
+
+    # The region end, always: \r\e\[0K
+    def logs_section_suffix_regex
+      /\r\033\[0K/
+    end
+
     def build_trace_section_regex
-      @build_trace_section_regexp ||= /section_((?:start)|(?:end)):(\d+):([a-zA-Z0-9_.-]+)\r\033\[0K/.freeze
+      @build_trace_section_regexp ||= %r{
+        #{logs_section_prefix_regex}
+        #{logs_section_options_regex}
+        #{logs_section_suffix_regex}
+      }x.freeze
     end
 
     def markdown_code_or_html_blocks

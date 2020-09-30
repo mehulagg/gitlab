@@ -50,7 +50,7 @@ module Gitlab
           build_access_token_check(login, password) ||
           lfs_token_check(login, password, project) ||
           oauth_access_token_check(login, password) ||
-          personal_access_token_check(password) ||
+          personal_access_token_check(password, project) ||
           deploy_token_check(login, password, project) ||
           user_with_password_for_git(login, password) ||
           Gitlab::Auth::Result.new
@@ -189,12 +189,18 @@ module Gitlab
         end
       end
 
-      def personal_access_token_check(password)
+      def personal_access_token_check(password, project)
         return unless password.present?
 
         token = PersonalAccessTokensFinder.new(state: 'active').find_by_token(password)
 
-        if token && valid_scoped_token?(token, all_available_scopes) && token.user.can?(:log_in)
+        return unless token
+
+        return if project && token.user.project_bot? && !project.bots.include?(token.user)
+
+        return unless valid_scoped_token?(token, all_available_scopes)
+
+        if token.user.project_bot? || token.user.can?(:log_in)
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
@@ -365,7 +371,7 @@ module Gitlab
       end
 
       def find_build_by_token(token)
-        ::Ci::Build.running.find_by_token(token)
+        ::Ci::AuthJobFinder.new(token: token).execute
       end
 
       def user_auth_attempt!(user, success:)

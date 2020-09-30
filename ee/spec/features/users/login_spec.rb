@@ -32,6 +32,16 @@ RSpec.describe 'Login' do
       .to change { AuditEvent.where(entity_id: -1).count }.from(0).to(1)
   end
 
+  it 'creates a security event for an invalid one-time code' do
+    user = create(:user, :two_factor)
+    gitlab_sign_in(user)
+
+    expect do
+      fill_in 'user_otp_attempt', with: 'invalid_code'
+      click_button 'Verify code'
+    end.to change { AuditEvent.count }.by(1)
+  end
+
   describe 'smartcard authentication' do
     before do
       allow(Gitlab.config.smartcard).to receive(:enabled).and_return(true)

@@ -1,17 +1,29 @@
 import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
-import actions from 'ee/boards/stores/actions';
+import actions, { gqlClient } from 'ee/boards/stores/actions';
 import * as types from 'ee/boards/stores/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
 import { ListType } from '~/boards/constants';
-
-jest.mock('axios');
+import { formatListIssues } from '~/boards/boards_util';
+import { mockLists, mockIssue, mockEpic } from '../mock_data';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
     expect(action).toThrow(new Error('Not implemented!'));
   });
 };
+
+let mock;
+
+beforeEach(() => {
+  mock = new MockAdapter(axios);
+  window.gon = { features: {} };
+});
+
+afterEach(() => {
+  mock.restore();
+});
 
 describe('setFilters', () => {
   it('should commit mutation SET_FILTERS, updates epicId with global id', done => {
@@ -51,6 +63,99 @@ describe('setFilters', () => {
   });
 });
 
+describe('fetchEpicsSwimlanes', () => {
+  const state = {
+    endpoints: {
+      fullPath: 'gitlab-org',
+      boardId: 1,
+    },
+    filterParams: {},
+    boardType: 'group',
+  };
+
+  const queryResponse = {
+    data: {
+      group: {
+        board: {
+          epics: {
+            edges: [{ node: mockEpic }],
+            pageInfo: {},
+          },
+        },
+      },
+    },
+  };
+
+  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      { withLists: false },
+      state,
+      [
+        {
+          type: types.RECEIVE_EPICS_SUCCESS,
+          payload: [mockEpic],
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      {},
+      state,
+      [{ type: types.RECEIVE_SWIMLANES_FAILURE }],
+      [],
+      done,
+    );
+  });
+
+  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', done => {
+    const queryResponseWithNextPage = {
+      data: {
+        group: {
+          board: {
+            epics: {
+              edges: [{ node: mockEpic }],
+              pageInfo: {
+                hasNextPage: true,
+                endCursor: 'ENDCURSOR',
+              },
+            },
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponseWithNextPage);
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      { withLists: false },
+      state,
+      [
+        {
+          type: types.RECEIVE_EPICS_SUCCESS,
+          payload: [mockEpic],
+        },
+      ],
+      [
+        {
+          type: 'fetchEpicsSwimlanes',
+          payload: { withLists: false, endCursor: 'ENDCURSOR' },
+        },
+      ],
+      done,
+    );
+  });
+});
+
 describe('setShowLabels', () => {
   it('should commit mutation SET_SHOW_LABELS', done => {
     const state = {
@@ -79,10 +184,16 @@ describe('updateListWipLimit', () => {
     };
 
     boardsStoreEE.initEESpecific(storeMock);
+    jest.mock('axios');
+    axios.put = jest.fn();
+    axios.put.mockResolvedValue({ data: {} });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should call the correct url', () => {
-    axios.put.mockResolvedValue({ data: {} });
     const maxIssueCount = 0;
     const activeId = 1;
 
@@ -147,6 +258,73 @@ describe('togglePromotionState', () => {
   expectNotImplemented(actions.updateIssueWeight);
 });
 
+describe('fetchIssuesForEpic', () => {
+  const listId = mockLists[0].id;
+  const epicId = mockEpic.id;
+
+  const state = {
+    endpoints: {
+      fullPath: 'gitlab-org',
+      boardId: 1,
+    },
+    filterParams: {},
+    boardType: 'group',
+  };
+
+  const queryResponse = {
+    data: {
+      group: {
+        board: {
+          lists: {
+            nodes: [
+              {
+                id: listId,
+                issues: {
+                  nodes: [mockIssue],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  };
+
+  const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
+
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchIssuesForEpic,
+      epicId,
+      state,
+      [
+        { type: types.REQUEST_ISSUES_FOR_EPIC, payload: epicId },
+        { type: types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, payload: { ...formattedIssues, epicId } },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutations REQUEST_ISSUES_FOR_EPIC and RECEIVE_ISSUES_FOR_LIST_FAILURE on failure', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(
+      actions.fetchIssuesForEpic,
+      epicId,
+      state,
+      [
+        { type: types.REQUEST_ISSUES_FOR_EPIC, payload: epicId },
+        { type: types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, payload: epicId },
+      ],
+      [],
+      done,
+    );
+  });
+});
+
 describe('toggleEpicSwimlanes', () => {
   it('should commit mutation TOGGLE_EPICS_SWIMLANES', () => {
     const state = {
@@ -164,5 +342,11 @@ describe('toggleEpicSwimlanes', () => {
       [{ type: types.TOGGLE_EPICS_SWIMLANES }],
       [],
     );
+  });
+});
+
+describe('resetEpics', () => {
+  it('commits RESET_EPICS mutation', () => {
+    return testAction(actions.resetEpics, {}, {}, [{ type: types.RESET_EPICS }], []);
   });
 });

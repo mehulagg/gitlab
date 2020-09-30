@@ -5,6 +5,30 @@ import initBlob from '~/pages/projects/init_blob';
 import GpgBadges from '~/gpg_badges';
 import '~/sourcegraph/load';
 import PipelineTourSuccessModal from '~/blob/pipeline_tour_success_modal.vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
+
+const createGitlabCiYmlVisualization = (containerId = '#js-blob-toggle-graph-preview') => {
+  const el = document.querySelector(containerId);
+  const { isCiConfigFile, blobData } = el?.dataset;
+
+  if (el && parseBoolean(isCiConfigFile)) {
+    // eslint-disable-next-line no-new
+    new Vue({
+      el,
+      components: {
+        GitlabCiYamlVisualization: () =>
+          import('~/pipelines/components/pipeline_graph/gitlab_ci_yaml_visualization.vue'),
+      },
+      render(createElement) {
+        return createElement('gitlabCiYamlVisualization', {
+          props: {
+            blobData,
+          },
+        });
+      },
+    });
+  }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   new BlobViewer(); // eslint-disable-line no-new
@@ -34,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const codeNavEl = document.getElementById('js-code-navigation');
 
-  if (gon.features?.codeNavigation && codeNavEl) {
+  if (codeNavEl) {
     const { codeNavigationPath, blobPath, definitionPathPrefix } = codeNavEl.dataset;
 
     // eslint-disable-next-line promise/catch-or-return
@@ -62,5 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
       });
     }
+  }
+
+  if (gon?.features?.gitlabCiYmlPreview) {
+    createGitlabCiYmlVisualization();
   }
 });

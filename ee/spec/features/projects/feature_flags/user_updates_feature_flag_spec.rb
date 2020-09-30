@@ -13,7 +13,6 @@ RSpec.describe 'User updates feature flag', :js do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
     stub_feature_flags(
       feature_flag_permissions: false,
       feature_flags_legacy_read_only_override: false

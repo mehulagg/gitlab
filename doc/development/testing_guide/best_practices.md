@@ -427,9 +427,9 @@ spec itself, but the former is preferred.
 It takes around one second to load tests that are using `fast_spec_helper`
 instead of 30+ seconds in case of a regular `spec_helper`.
 
-### `let` variables
+### `subject` and `let` variables
 
-GitLab's RSpec suite has made extensive use of `let`(along with it strict, non-lazy
+GitLab's RSpec suite has made extensive use of `let`(along with its strict, non-lazy
 version `let!`) variables to reduce duplication. However, this sometimes [comes at the cost of clarity](https://thoughtbot.com/blog/lets-not),
 so we need to set some guidelines for their use going forward:
 
@@ -448,6 +448,9 @@ so we need to set some guidelines for their use going forward:
 - `let!` variables should be used only in case if strict evaluation with defined
   order is required, otherwise `let` will suffice. Remember that `let` is lazy and won't
   be evaluated until it is referenced.
+- Avoid referencing `subject` in examples. Use a named subject `subject(:name)`, or a `let` variable instead, so
+  the variable has a contextual name.
+- If the `subject` is never referenced inside examples, then it's acceptable to define the `subject` without a name.
 
 ### Common test setup
 
@@ -494,10 +497,9 @@ let_it_be(:project, refind: true) { create(:project) }
 
 ### Time-sensitive tests
 
-[Timecop](https://github.com/travisjeffery/timecop) is available in our
-Ruby-based tests for verifying things that are time-sensitive. Any test that
-exercises or verifies something time-sensitive should make use of Timecop to
-prevent transient test failures.
+[`ActiveSupport::Testing::TimeHelpers`](https://api.rubyonrails.org/v6.0.3.1/classes/ActiveSupport/Testing/TimeHelpers.html)
+can be used to verify things that are time-sensitive. Any test that exercises or verifies something time-sensitive
+should make use of these helpers to prevent transient test failures.
 
 Example:
 
@@ -505,7 +507,7 @@ Example:
 it 'is overdue' do
   issue = build(:issue, due_date: Date.tomorrow)
 
-  Timecop.freeze(3.days.from_now) do
+  travel_to(3.days.from_now) do
     expect(issue).to be_overdue
   end
 end

@@ -242,7 +242,8 @@ module Gitlab
           signup_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.allow_signup? },
           web_ide_clientside_preview_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.web_ide_clientside_preview_enabled? },
           ingress_modsecurity_enabled: Feature.enabled?(:ingress_modsecurity),
-          grafana_link_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.grafana_enabled? }
+          grafana_link_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.grafana_enabled? },
+          gitpod_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.gitpod_enabled? }
         }
       end
 
@@ -428,7 +429,7 @@ module Gitlab
         {
           jira_imports_total_imported_count: count(finished_jira_imports),
           jira_imports_projects_count: distinct_count(finished_jira_imports, :project_id),
-          jira_imports_total_imported_issues_count: alt_usage_data { JiraImportState.finished_imports_count }
+          jira_imports_total_imported_issues_count: sum(JiraImportState.finished, :imported_issues_count)
         }
         # rubocop: enable UsageData/LargeTable
       end
@@ -444,8 +445,11 @@ module Gitlab
       # rubocop: enable UsageData/LargeTable
       # rubocop: enable CodeReuse/ActiveRecord
 
+      # augmented in EE
       def user_preferences_usage
-        {} # augmented in EE
+        {
+          user_preferences_user_gitpod_enabled: count(UserPreference.with_user.gitpod_enabled.merge(User.active))
+        }
       end
 
       def merge_requests_users(time_period)
@@ -469,7 +473,7 @@ module Gitlab
       end
 
       def last_28_days_time_period(column: :created_at)
-        { column => 28.days.ago..Time.current }
+        { column => 30.days.ago..2.days.ago }
       end
 
       # Source: https://gitlab.com/gitlab-data/analytics/blob/master/transform/snowflake-dbt/data/ping_metrics_to_stage_mapping_data.csv
@@ -541,6 +545,7 @@ module Gitlab
           groups: distinct_count(::GroupMember.where(time_period), :user_id),
           users_created: count(::User.where(time_period), start: user_minimum_id, finish: user_maximum_id),
           omniauth_providers: filtered_omniauth_provider_names.reject { |name| name == 'group_saml' },
+          user_auth_by_provider: distinct_count_user_auth_by_provider(time_period),
           projects_imported: {
             gitlab_project: projects_imported_count('gitlab_project', time_period),
             gitlab: projects_imported_count('gitlab', time_period),
@@ -555,7 +560,8 @@ module Gitlab
             jira: distinct_count(::JiraImportState.where(time_period), :user_id),
             fogbugz: projects_imported_count('fogbugz', time_period),
             phabricator: projects_imported_count('phabricator', time_period)
-          }
+          },
+          groups_imported: distinct_count(::GroupImportState.where(time_period), :user_id)
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -696,10 +702,10 @@ module Gitlab
         counter = Gitlab::UsageDataCounters::EditorUniqueCounter
 
         {
-          action_monthly_active_users_web_ide_edit: redis_usage_data { counter.count_web_ide_edit_actions(date_range) },
-          action_monthly_active_users_sfe_edit: redis_usage_data { counter.count_sfe_edit_actions(date_range) },
-          action_monthly_active_users_snippet_editor_edit: redis_usage_data { counter.count_snippet_editor_edit_actions(date_range) },
-          action_monthly_active_users_ide_edit: redis_usage_data { counter.count_edit_using_editor(date_range) }
+          action_monthly_active_users_web_ide_edit: redis_usage_data { counter.count_web_ide_edit_actions(**date_range) },
+          action_monthly_active_users_sfe_edit: redis_usage_data { counter.count_sfe_edit_actions(**date_range) },
+          action_monthly_active_users_snippet_editor_edit: redis_usage_data { counter.count_snippet_editor_edit_actions(**date_range) },
+          action_monthly_active_users_ide_edit: redis_usage_data { counter.count_edit_using_editor(**date_range) }
         }
       end
 
@@ -812,14 +818,13 @@ module Gitlab
         clear_memoization(:approval_merge_request_rule_maximum_id)
         clear_memoization(:project_minimum_id)
         clear_memoization(:project_maximum_id)
+        clear_memoization(:auth_providers)
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
-      # rubocop: disable UsageData/DistinctCountByLargeForeignKey
       def cluster_applications_user_distinct_count(applications, time_period)
         distinct_count(applications.where(time_period).available.joins(:cluster), 'clusters.user_id')
       end
-      # rubocop: enable UsageData/DistinctCountByLargeForeignKey
 
       def clusters_user_distinct_count(clusters, time_period)
         distinct_count(clusters.where(time_period), :user_id)
@@ -844,6 +849,39 @@ module Gitlab
 
       def projects_imported_count(from, time_period)
         distinct_count(::Project.imported_from(from).where(time_period), :creator_id) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
+      # rubocop:disable CodeReuse/ActiveRecord
+      def distinct_count_user_auth_by_provider(time_period)
+        counts = auth_providers_except_ldap.each_with_object({}) do |provider, hash|
+          hash[provider] = distinct_count(
+            ::AuthenticationEvent.success.for_provider(provider).where(time_period), :user_id)
+        end
+
+        if any_ldap_auth_providers?
+          counts['ldap'] = distinct_count(
+            ::AuthenticationEvent.success.ldap.where(time_period), :user_id
+          )
+        end
+
+        counts
+      end
+      # rubocop:enable CodeReuse/ActiveRecord
+
+      # rubocop:disable UsageData/LargeTable
+      def auth_providers
+        strong_memoize(:auth_providers) do
+          ::AuthenticationEvent.providers
+        end
+      end
+      # rubocop:enable UsageData/LargeTable
+
+      def auth_providers_except_ldap
+        auth_providers.reject { |provider| provider.starts_with?('ldap') }
+      end
+
+      def any_ldap_auth_providers?
+        auth_providers.any? { |provider| provider.starts_with?('ldap') }
       end
     end
   end

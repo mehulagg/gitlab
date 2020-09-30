@@ -1,0 +1,7 @@
+---
+name: save_issuable_health_status
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24202
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/209881
+group: group::portfolio management
+type: development
+default_enabled: true

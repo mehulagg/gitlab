@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver } from '@gitlab/ui';
+import { GlAlert, GlTable, GlEmptyState, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import { generateVulnerabilities } from './mock_data';
@@ -12,6 +12,7 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
   const findIntersectionObserver = () => wrapper.find(GlIntersectionObserver);
   const findVulnerabilities = () => wrapper.find(VulnerabilityList);
   const findAlert = () => wrapper.find(GlAlert);
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
   const createWrapper = ({ $apollo, stubs }) => {
     return shallowMount(FirstClassGroupVulnerabilities, {
@@ -41,6 +42,10 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
 
     it('passes down isLoading correctly', () => {
       expect(findVulnerabilities().props()).toMatchObject({ isLoading: true });
+    });
+
+    it('does not show the loading spinner', () => {
+      expect(findLoadingIcon().exists()).toBe(false);
     });
   });
 
@@ -109,6 +114,23 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
         vulnerabilities,
       });
     });
+
+    it('defaults to severity column for sorting', () => {
+      expect(wrapper.vm.sortBy).toBe('severity');
+    });
+
+    it('defaults to desc as sorting direction', () => {
+      expect(wrapper.vm.sortDirection).toBe('desc');
+    });
+
+    it('handles sorting', () => {
+      findVulnerabilities().vm.$listeners['sort-changed']({
+        sortBy: 'description',
+        sortDesc: false,
+      });
+      expect(wrapper.vm.sortBy).toBe('description');
+      expect(wrapper.vm.sortDirection).toBe('asc');
+    });
   });
 
   describe('when there is more than a page of vulnerabilities', () => {
@@ -131,6 +153,26 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
 
     it('should render the observer component', () => {
       expect(findIntersectionObserver().exists()).toBe(true);
+    });
+  });
+
+  describe('when the query is loading and there is another page', () => {
+    beforeEach(() => {
+      wrapper = createWrapper({
+        $apollo: {
+          queries: { vulnerabilities: { loading: true } },
+        },
+      });
+
+      wrapper.setData({
+        pageInfo: {
+          hasNextPage: true,
+        },
+      });
+    });
+
+    it('should render the loading spinner', () => {
+      expect(findLoadingIcon().exists()).toBe(true);
     });
   });
 });

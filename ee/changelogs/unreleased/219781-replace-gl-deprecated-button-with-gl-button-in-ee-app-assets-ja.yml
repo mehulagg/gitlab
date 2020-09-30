@@ -1,5 +1,0 @@
----
-title: Replace <gl-deprecated-button> with <gl-button> in confirm_order component
-merge_request: 40119
-author:
-type: changed

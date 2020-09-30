@@ -1,23 +1,15 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import $ from 'jquery';
-import { GlTooltipDirective, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
-import DiffTableCell from './diff_table_cell.vue';
-import {
-  MATCH_LINE_TYPE,
-  NEW_LINE_TYPE,
-  OLD_LINE_TYPE,
-  CONTEXT_LINE_TYPE,
-  CONTEXT_LINE_CLASS_NAME,
-  OLD_NO_NEW_LINE_TYPE,
-  PARALLEL_DIFF_VIEW_TYPE,
-  NEW_NO_NEW_LINE_TYPE,
-  EMPTY_CELL_TYPE,
-} from '../constants';
+import { GlTooltipDirective, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { CONTEXT_LINE_CLASS_NAME, PARALLEL_DIFF_VIEW_TYPE } from '../constants';
+import DiffGutterAvatars from './diff_gutter_avatars.vue';
+import * as utils from './diff_row_utils';
 
 export default {
   components: {
-    DiffTableCell,
+    GlIcon,
+    DiffGutterAvatars,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -51,64 +43,131 @@ export default {
     return {
       isLeftHover: false,
       isRightHover: false,
+      isCommentButtonRendered: false,
     };
   },
   computed: {
     ...mapGetters('diffs', ['fileLineCoverage']),
+    ...mapGetters(['isLoggedIn']),
     ...mapState({
       isHighlighted(state) {
-        if (this.isCommented) return true;
-
-        const lineCode =
-          (this.line.left && this.line.left.line_code) ||
-          (this.line.right && this.line.right.line_code);
-
-        return lineCode ? lineCode === state.diffs.highlightedRow : false;
+        const line = this.line.left?.line_code ? this.line.left : this.line.right;
+        return utils.isHighlighted(state, line, this.isCommented);
       },
     }),
-    isContextLine() {
-      return this.line.left && this.line.left.type === CONTEXT_LINE_TYPE;
+    isContextLineLeft() {
+      return utils.isContextLine(this.line.left?.type);
+    },
+    isContextLineRight() {
+      return utils.isContextLine(this.line.right?.type);
     },
     classNameMap() {
       return {
-        [CONTEXT_LINE_CLASS_NAME]: this.isContextLine,
+        [CONTEXT_LINE_CLASS_NAME]: this.isContextLineLeft,
         [PARALLEL_DIFF_VIEW_TYPE]: true,
       };
     },
     parallelViewLeftLineType() {
-      if (this.line.right && this.line.right.type === NEW_NO_NEW_LINE_TYPE) {
-        return OLD_NO_NEW_LINE_TYPE;
-      }
-
-      const lineTypeClass = this.line.left ? this.line.left.type : EMPTY_CELL_TYPE;
-
-      return [
-        lineTypeClass,
-        {
-          hll: this.isHighlighted,
-        },
-      ];
+      return utils.parallelViewLeftLineType(this.line, this.isHighlighted);
     },
     isMatchLineLeft() {
-      return this.line.left && this.line.left.type === MATCH_LINE_TYPE;
+      return utils.isMatchLine(this.line.left?.type);
     },
     isMatchLineRight() {
-      return this.line.right && this.line.right.type === MATCH_LINE_TYPE;
+      return utils.isMatchLine(this.line.right?.type);
     },
     coverageState() {
       return this.fileLineCoverage(this.filePath, this.line.right.new_line);
     },
-  },
-  created() {
-    this.newLineType = NEW_LINE_TYPE;
-    this.oldLineType = OLD_LINE_TYPE;
-    this.parallelDiffViewType = PARALLEL_DIFF_VIEW_TYPE;
+    classNameMapCellLeft() {
+      return utils.classNameMapCell(
+        this.line.left,
+        this.isHighlighted,
+        this.isLoggedIn,
+        this.isLeftHover,
+      );
+    },
+    classNameMapCellRight() {
+      return utils.classNameMapCell(
+        this.line.right,
+        this.isHighlighted,
+        this.isLoggedIn,
+        this.isRightHover,
+      );
+    },
+    addCommentTooltipLeft() {
+      return utils.addCommentTooltip(this.line.left);
+    },
+    addCommentTooltipRight() {
+      return utils.addCommentTooltip(this.line.right);
+    },
+    shouldRenderCommentButton() {
+      return utils.shouldRenderCommentButton(
+        this.isLoggedIn,
+        this.isCommentButtonRendered,
+        gon.features?.mergeRefHeadComments,
+      );
+    },
+    shouldShowCommentButtonLeft() {
+      return utils.shouldShowCommentButton(
+        this.isLeftHover,
+        this.isContextLineLeft,
+        this.isMetaLineLeft,
+        this.hasDiscussionsLeft,
+      );
+    },
+    shouldShowCommentButtonRight() {
+      return utils.shouldShowCommentButton(
+        this.isRightHover,
+        this.isContextLineRight,
+        this.isMetaLineRight,
+        this.hasDiscussionsRight,
+      );
+    },
+    hasDiscussionsLeft() {
+      return utils.hasDiscussions(this.line.left);
+    },
+    hasDiscussionsRight() {
+      return utils.hasDiscussions(this.line.right);
+    },
+    lineHrefOld() {
+      return utils.lineHref(this.line.left);
+    },
+    lineHrefNew() {
+      return utils.lineHref(this.line.right);
+    },
+    lineCode() {
+      return utils.lineCode(this.line);
+    },
+    isMetaLineLeft() {
+      return utils.isMetaLine(this.line.left?.type);
+    },
+    isMetaLineRight() {
+      return utils.isMetaLine(this.line.right?.type);
+    },
   },
   mounted() {
     this.scrollToLineIfNeededParallel(this.line);
+    this.unwatchShouldShowCommentButton = this.$watch(
+      vm => [vm.shouldShowCommentButtonLeft, vm.shouldShowCommentButtonRight].join(),
+      newVal => {
+        if (newVal) {
+          this.isCommentButtonRendered = true;
+          this.unwatchShouldShowCommentButton();
+        }
+      },
+    );
+  },
+  beforeDestroy() {
+    this.unwatchShouldShowCommentButton();
   },
   methods: {
-    ...mapActions('diffs', ['scrollToLineIfNeededParallel']),
+    ...mapActions('diffs', [
+      'scrollToLineIfNeededParallel',
+      'showCommentForm',
+      'setHighlightedRow',
+      'toggleLineDiscussions',
+    ]),
     handleMouseMove(e) {
       const isHover = e.type === 'mouseover';
       const hoveringCell = e.target.closest('td');
@@ -134,6 +193,9 @@ export default {
         table.addClass(`${lineClass}-selected`);
       }
     },
+    handleCommentButton(line) {
+      this.showCommentForm({ lineCode: line.line_code, fileHash: this.fileHash });
+    },
   },
 };
 </script>
@@ -146,21 +208,50 @@ export default {
     @mouseout="handleMouseMove"
   >
     <template v-if="line.left && !isMatchLineLeft">
-      <diff-table-cell
-        :file-hash="fileHash"
-        :line="line.left"
-        :line-type="oldLineType"
-        :is-bottom="isBottom"
-        :is-hover="isLeftHover"
-        :is-highlighted="isHighlighted"
-        :show-comment-button="true"
-        :diff-view-type="parallelDiffViewType"
-        line-position="left"
-        class="diff-line-num old_line"
-      />
+      <td ref="oldTd" :class="classNameMapCellLeft" class="diff-line-num old_line">
+        <span
+          v-if="shouldRenderCommentButton"
+          ref="addNoteTooltipLeft"
+          v-gl-tooltip
+          class="add-diff-note tooltip-wrapper"
+          :title="addCommentTooltipLeft"
+        >
+          <button
+            v-show="shouldShowCommentButtonLeft"
+            ref="addDiffNoteButtonLeft"
+            type="button"
+            class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+            :disabled="line.left.commentsDisabled"
+            @click="handleCommentButton(line.left)"
+          >
+            <gl-icon :size="12" name="comment" />
+          </button>
+        </span>
+        <a
+          v-if="line.left.old_line"
+          ref="lineNumberRefOld"
+          :data-linenumber="line.left.old_line"
+          :href="lineHrefOld"
+          @click="setHighlightedRow(lineCode)"
+        >
+        </a>
+        <diff-gutter-avatars
+          v-if="hasDiscussionsLeft"
+          :discussions="line.left.discussions"
+          :discussions-expanded="line.left.discussionsExpanded"
+          @toggleLineDiscussions="
+            toggleLineDiscussions({
+              lineCode: line.left.line_code,
+              fileHash,
+              expanded: !line.left.discussionsExpanded,
+            })
+          "
+        />
+      </td>
       <td :class="parallelViewLeftLineType" class="line-coverage left-side"></td>
       <td
         :id="line.left.line_code"
+        :key="line.left.line_code"
         v-safe-html="line.left.rich_text"
         :class="parallelViewLeftLineType"
         class="line_content with-coverage parallel left-side"
@@ -173,18 +264,46 @@ export default {
       <td class="line_content with-coverage parallel left-side empty-cell"></td>
     </template>
     <template v-if="line.right && !isMatchLineRight">
-      <diff-table-cell
-        :file-hash="fileHash"
-        :line="line.right"
-        :line-type="newLineType"
-        :is-bottom="isBottom"
-        :is-hover="isRightHover"
-        :is-highlighted="isHighlighted"
-        :show-comment-button="true"
-        :diff-view-type="parallelDiffViewType"
-        line-position="right"
-        class="diff-line-num new_line"
-      />
+      <td ref="newTd" :class="classNameMapCellRight" class="diff-line-num new_line">
+        <span
+          v-if="shouldRenderCommentButton"
+          ref="addNoteTooltipRight"
+          v-gl-tooltip
+          class="add-diff-note tooltip-wrapper"
+          :title="addCommentTooltipRight"
+        >
+          <button
+            v-show="shouldShowCommentButtonRight"
+            ref="addDiffNoteButtonRight"
+            type="button"
+            class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+            :disabled="line.right.commentsDisabled"
+            @click="handleCommentButton(line.right)"
+          >
+            <gl-icon :size="12" name="comment" />
+          </button>
+        </span>
+        <a
+          v-if="line.right.new_line"
+          ref="lineNumberRefNew"
+          :data-linenumber="line.right.new_line"
+          :href="lineHrefNew"
+          @click="setHighlightedRow(lineCode)"
+        >
+        </a>
+        <diff-gutter-avatars
+          v-if="hasDiscussionsRight"
+          :discussions="line.right.discussions"
+          :discussions-expanded="line.right.discussionsExpanded"
+          @toggleLineDiscussions="
+            toggleLineDiscussions({
+              lineCode: line.right.line_code,
+              fileHash,
+              expanded: !line.right.discussionsExpanded,
+            })
+          "
+        />
+      </td>
       <td
         v-gl-tooltip.hover
         :title="coverageState.text"
@@ -193,6 +312,7 @@ export default {
       ></td>
       <td
         :id="line.right.line_code"
+        :key="line.right.rich_text"
         v-safe-html="line.right.rich_text"
         :class="[
           line.right.type,

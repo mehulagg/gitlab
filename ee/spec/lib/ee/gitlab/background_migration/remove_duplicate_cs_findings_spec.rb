@@ -36,6 +36,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveDuplicateCsFindings, :migratio
       9d1a47927875f1aee1e2b9f16c25a8ff7586f1a6
       d7da2cc109c18d890ab239e833524d451cc45246
       d7da2cc109c18d890ab239e833524d453cd45246
+      475f029c81fa0a944bc825a44e02617867a4256d
     )
 
     expected_fingerprints = %w(
@@ -43,6 +44,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveDuplicateCsFindings, :migratio
       9d1a47927875f1aee1e2b9f16c25a8ff7586f1a6
       d7da2cc109c18d890ab239e833524d451cc45246
       d7da2cc109c18d890ab239e833524d453cd45246
+      475f029c81fa0a944bc825a44e02617867a4256d
     )
 
     7.times.each { |x| identifiers.create!(vulnerability_identifer_params(x, project.id)) }
@@ -55,6 +57,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveDuplicateCsFindings, :migratio
     findings.create!(finding_params(1, project.id).merge({ id: ids[4], location_fingerprint: Gitlab::Database::ShaAttribute.new.serialize(fingerprints[4]).to_s, vulnerability_id: vulnerability_ids[4] }))
     findings.create!(finding_params(2, project.id).merge({ id: ids[5], location_fingerprint: Gitlab::Database::ShaAttribute.new.serialize(fingerprints[5]).to_s, vulnerability_id: vulnerability_ids[5] }))
     findings.create!(finding_params(3, project.id).merge({ id: ids[6], location_fingerprint: Gitlab::Database::ShaAttribute.new.serialize(fingerprints[6]).to_s, vulnerability_id: vulnerability_ids[6] }))
+    findings.create!(finding_params(3, project.id).merge({ id: 100000, location_fingerprint: Gitlab::Database::ShaAttribute.new.serialize(fingerprints[7]).to_s, vulnerability_id: nil }))
 
     7.times.each { |x| finding_identifiers.create!(occurrence_id: ids[x], identifier_id: x ) }
     1.upto(5).each { |x| issues.create!(description: '1234', state_id: 1, project_id: project.id, id: x) }
@@ -67,8 +70,8 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveDuplicateCsFindings, :migratio
 
     described_class.new.perform(231411, 231413)
 
-    expect(findings.ids).to match_array([231800, 231412, 231413, 231411])
-    expect(findings.where(report_type: 2).count). to eq(4)
+    expect(findings.ids).to match_array([100000, 231800, 231412, 231413, 231411])
+    expect(findings.where(report_type: 2).count). to eq(5)
     expect(vulnerabilities.all.count). to eq(4)
     expect(notes.all.count). to eq(0)
     expect(finding_identifiers.all.count). to eq(4)

@@ -8,6 +8,8 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   let_it_be(:project) { create(:project, :repository, namespace: group, group: group, name: 'Cool fun project') }
   let_it_be(:sub_group) { create(:group, name: 'CA-sub-group', parent: group) }
   let_it_be(:sub_group_project) { create(:project, :repository, namespace: group, group: sub_group, name: 'Cool sub group project') }
+  let_it_be(:group_label1) { create(:group_label, group: group) }
+  let_it_be(:group_label2) { create(:group_label, group: group) }
 
   let(:milestone) { create(:milestone, project: project) }
   let(:mr) { create_merge_request_closing_issue(user, project, issue, commit_message: "References #{issue.to_reference}") }
@@ -75,7 +77,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     it 'displays empty text' do
       [
         'Value Stream Analytics can help you determine your team’s velocity',
-        'Start by choosing a group to see how your team is spending time. You can then drill down to the project level.'
+        'Filter parameters are not valid. Make sure that the end date is after the start date.'
       ].each do |content|
         expect(page).to have_content(content)
       end
@@ -142,7 +144,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       it 'displays the default list of stages' do
         stage_nav = page.find(stage_nav_selector)
 
-        %w[Issue Plan Code Test Review Staging Total].each do |item|
+        %w[Issue Plan Code Test Review Staging].each do |item|
           string_id = "CycleAnalytics|#{item}"
           expect(stage_nav).to have_content(s_(string_id))
         end
@@ -163,7 +165,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       it 'displays the default list of stages' do
         path_nav = page.find(path_nav_selector)
 
-        %w[Issue Plan Code Test Review Staging Overview].each do |item|
+        %w[Issue Plan Code Test Review Staging].each do |item|
           string_id = "CycleAnalytics|#{item}"
           expect(path_nav).to have_content(s_(string_id))
         end
@@ -287,6 +289,8 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
 
     before do
       create_cycle(user, project, issue, mr, milestone, pipeline)
+      create(:labeled_issue, created_at: 5.days.ago, project: create(:project, group: group), labels: [group_label1])
+      create(:labeled_issue, created_at: 3.days.ago, project: create(:project, group: group), labels: [group_label2])
 
       issue.metrics.update!(first_mentioned_in_commit_at: mr.created_at - 5.hours)
       mr.metrics.update!(first_deployed_to_production_at: mr.created_at + 2.hours, merged_at: mr.created_at + 1.hour)
@@ -297,54 +301,90 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
       select_group
     end
 
-    dummy_stages = [
+    stages_with_data = [
       { title: 'Issue', description: 'Time before an issue gets scheduled', events_count: 1, median: '5 days' },
-      { title: 'Plan', description: 'Time before an issue starts implementation', events_count: 0, median: 'Not enough data' },
       { title: 'Code', description: 'Time until first merge request', events_count: 1, median: 'about 5 hours' },
-      { title: 'Test', description: 'Total test time for all commits/merges', events_count: 0, median: 'Not enough data' },
       { title: 'Review', description: 'Time between merge request creation and merge/close', events_count: 1, median: 'about 1 hour' },
-      { title: 'Staging', description: 'From merge request merge until deploy to production', events_count: 1, median: 'about 1 hour' },
-      { title: 'Total', description: 'From issue creation until deploy to production', events_count: 1, median: '5 days' }
+      { title: 'Staging', description: 'From merge request merge until deploy to production', events_count: 1, median: 'about 1 hour' }
+    ]
+
+    stages_without_data = [
+      { title: 'Plan', description: 'Time before an issue starts implementation', events_count: 0, median: 'Not enough data' },
+      { title: 'Test', description: 'Total test time for all commits/merges', events_count: 0, median: 'Not enough data' }
     ]
 
     it 'each stage will have median values', :sidekiq_might_not_need_inline do
-      stages = page.all('.stage-nav .stage-median').collect(&:text)
+      stage_medians = page.all('.stage-nav .stage-median').collect(&:text)
 
-      stages.each_with_index do |median, index|
-        expect(median).to eq(dummy_stages[index][:median])
-      end
+      expect(stage_medians).to eq(["5 days", "Not enough data", "about 5 hours", "Not enough data", "about 1 hour", "about 1 hour"])
     end
 
     it 'each stage will display the events description when selected', :sidekiq_might_not_need_inline do
-      dummy_stages.each do |stage|
+      stages_without_data.each do |stage|
         select_stage(stage[:title])
+        expect(page).not_to have_selector('.stage-events .events-description')
+      end
 
-        if stage[:events_count] == 0
-          expect(page).not_to have_selector('.stage-events .events-description')
-        else
-          expect(page.find('.stage-events .events-description').text).to have_text(_(stage[:description]))
-        end
+      stages_with_data.each do |stage|
+        select_stage(stage[:title])
+        expect(page.find('.stage-events .events-description').text).to have_text(_(stage[:description]))
       end
     end
 
     it 'each stage with events will display the stage events list when selected', :sidekiq_might_not_need_inline do
-      dummy_stages.each do |stage|
+      stages_without_data.each do |stage|
         select_stage(stage[:title])
+        expect(page).not_to have_selector('.stage-events .stage-event-item')
+      end
 
-        if stage[:events_count] == 0
-          expect(page).not_to have_selector('.stage-events .stage-event-item')
-        else
-          expect(page).to have_selector('.stage-events .stage-event-list')
-          expect(page.all('.stage-events .stage-event-item').length).to eq(stage[:events_count])
-        end
+      stages_with_data.each do |stage|
+        select_stage(stage[:title])
+        expect(page).to have_selector('.stage-events .stage-event-list')
+        expect(page.all('.stage-events .stage-event-item').length).to eq(stage[:events_count])
       end
     end
 
     it 'each stage will be selectable' do
-      dummy_stages.each do |stage|
+      [].concat(stages_without_data, stages_with_data).each do |stage|
         select_stage(stage[:title])
 
         expect(page.find('.stage-nav .active .stage-name').text).to eq(stage[:title])
+      end
+    end
+
+    it 'will have data available' do
+      expect(page.find('[data-testid="vsa-stage-table"]')).not_to have_text(_("We don't have enough data to show this stage."))
+
+      duration_chart_content = page.find('[data-testid="vsa-duration-chart"]')
+      expect(duration_chart_content).not_to have_text(_("There is no data available. Please change your selection."))
+      expect(duration_chart_content).to have_text(_('Total days to completion'))
+
+      tasks_by_type_chart_content = page.find('.js-tasks-by-type-chart')
+      expect(tasks_by_type_chart_content).not_to have_text(_("There is no data available. Please change your selection."))
+    end
+
+    context 'with filters applied' do
+      before do
+        visit "#{group_analytics_cycle_analytics_path(group)}?created_before=2019-12-31&created_after=2019-11-01"
+
+        wait_for_stages_to_load
+      end
+
+      it 'will filter the stage median values' do
+        stage_medians = page.all('.stage-nav .stage-median').collect(&:text)
+
+        expect(stage_medians).to eq([_("Not enough data")] * 6)
+      end
+
+      it 'will filter the data' do
+        expect(page.find('[data-testid="vsa-stage-table"]')).to have_text(_("We don't have enough data to show this stage."))
+
+        duration_chart_content = page.find('[data-testid="vsa-duration-chart"]')
+        expect(duration_chart_content).not_to have_text(_('Total days to completion'))
+        expect(duration_chart_content).to have_text(_("There is no data available. Please change your selection."))
+
+        tasks_by_type_chart_content = page.find('.js-tasks-by-type-chart')
+        expect(tasks_by_type_chart_content).to have_text(_("There is no data available. Please change your selection."))
       end
     end
   end

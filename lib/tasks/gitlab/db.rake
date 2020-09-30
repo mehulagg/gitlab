@@ -166,5 +166,24 @@ namespace :gitlab do
     Rake::Task['db:test:load'].enhance do
       Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
     end
+
+    desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
+    task :reindex, [:index_name] => :environment do |_, args|
+      unless Feature.enabled?(:database_reindexing, type: :ops)
+        puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
+        exit
+      end
+
+      indexes = if args[:index_name]
+                  Gitlab::Database::PostgresIndex.by_identifier(args[:index_name])
+                else
+                  Gitlab::Database::PostgresIndex.regular.random_few(2)
+                end
+
+      Gitlab::Database::Reindexing.perform(indexes)
+    rescue => e
+      Gitlab::AppLogger.error(e)
+      raise
+    end
   end
 end

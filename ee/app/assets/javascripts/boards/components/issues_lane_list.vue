@@ -28,24 +28,10 @@ export default {
       required: true,
       default: () => [],
     },
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     isUnassignedIssuesLane: {
       type: Boolean,
       required: false,
       default: false,
-    },
-    isLoading: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    rootPath: {
-      type: String,
-      required: true,
     },
     canAdminList: {
       type: Boolean,
@@ -59,7 +45,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId']),
+    ...mapState(['activeId', 'filterParams']),
     treeRootWrapper() {
       return this.canAdminList ? Draggable : 'ul';
     },
@@ -77,6 +63,17 @@ export default {
       return this.canAdminList ? options : {};
     },
   },
+  watch: {
+    filterParams: {
+      handler() {
+        if (this.isUnassignedIssuesLane) {
+          this.fetchIssuesForList(this.list.id);
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   created() {
     eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
@@ -84,7 +81,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['setActiveId', 'moveIssue']),
+    ...mapActions(['setActiveId', 'moveIssue', 'fetchIssuesForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -143,14 +140,12 @@ export default {
 
 <template>
   <div
-    class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex gl-flex-shrink-0"
+    class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex! gl-flex-shrink-0"
     :class="{ 'is-collapsed': !list.isExpanded }"
   >
     <div class="board-inner gl-rounded-base gl-relative gl-w-full">
-      <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       <board-new-issue
         v-if="list.type !== 'closed' && showIssueForm && isUnassignedIssuesLane"
-        :group-id="groupId"
         :list="list"
       />
       <component
@@ -167,7 +162,6 @@ export default {
           :index="index"
           :list="list"
           :issue="issue"
-          :root-path="rootPath"
           :is-active="isActiveIssue(issue)"
           @show="showIssue(issue)"
         />

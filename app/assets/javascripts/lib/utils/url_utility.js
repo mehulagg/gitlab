@@ -16,7 +16,7 @@ function decodeUrlParameter(val) {
   return decodeURIComponent(val.replace(/\+/g, '%20'));
 }
 
-function cleanLeadingSeparator(path) {
+export function cleanLeadingSeparator(path) {
   return path.replace(PATH_SEPARATOR_LEADING_REGEX, '');
 }
 
@@ -73,9 +73,10 @@ export function getParameterValues(sParam, url = window.location) {
  * @param {String} url
  * @param {Object} options
  * @param {Boolean} options.spreadArrays - split array values into separate key/value-pairs
+ * @param {Boolean} options.sort - alphabetically sort params in the returned url (in asc order, i.e., a-z)
  */
 export function mergeUrlParams(params, url, options = {}) {
-  const { spreadArrays = false } = options;
+  const { spreadArrays = false, sort = false } = options;
   const re = /^([^?#]*)(\?[^#]*)?(.*)/;
   let merged = {};
   const [, fullpath, query, fragment] = url.match(re);
@@ -108,7 +109,9 @@ export function mergeUrlParams(params, url, options = {}) {
 
   Object.assign(merged, params);
 
-  const newQuery = Object.keys(merged)
+  const mergedKeys = sort ? Object.keys(merged).sort() : Object.keys(merged);
+
+  const newQuery = mergedKeys
     .filter(key => merged[key] !== null)
     .map(key => {
       let value = merged[key];
@@ -431,4 +434,13 @@ export function getHTTPProtocol(url) {
   }
   const protocol = url.split(':');
   return protocol.length > 1 ? protocol[0] : undefined;
+}
+
+/**
+ * Strips the filename from the given path by removing every non-slash character from the end of the
+ * passed parameter.
+ * @param {string} path
+ */
+export function stripPathTail(path = '') {
+  return path.replace(/[^/]+$/, '');
 }

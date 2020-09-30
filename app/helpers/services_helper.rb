@@ -96,7 +96,11 @@ module ServicesHelper
       trigger_events: trigger_events_for_service(integration),
       fields: fields_for_service(integration),
       inherit_from_id: integration.inherit_from_id,
-      integration_level: integration_level(integration)
+      integration_level: integration_level(integration),
+      editable: integration.editable?.to_s,
+      cancel_path: scoped_integrations_path,
+      can_test: integration.can_test?.to_s,
+      test_path: scoped_test_integration_path(integration)
     }
   end
 
@@ -118,6 +122,10 @@ module ServicesHelper
 
   def group_level_integrations?
     @group.present? && Feature.enabled?(:group_level_integrations, @group)
+  end
+
+  def instance_level_integrations?
+    !Gitlab.com?
   end
 
   extend self

@@ -14,7 +14,6 @@ module API
         route_param :project_id do
           before do
             authorize_by_unleash_instance_id!
-            authorize_feature_flags_feature!
           end
 
           get do
@@ -63,10 +62,6 @@ module API
       def authorize_by_unleash_instance_id!
         unauthorized! unless Operations::FeatureFlagsClient
           .find_for_project_and_token(project, unleash_instance_id)
-      end
-
-      def authorize_feature_flags_feature!
-        forbidden! unless project.feature_available?(:feature_flags)
       end
 
       def feature_flags

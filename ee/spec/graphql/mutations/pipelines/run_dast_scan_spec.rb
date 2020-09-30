@@ -7,7 +7,7 @@ RSpec.describe Mutations::Pipelines::RunDastScan do
   let(:project) { create(:project, :repository, group: group) }
   let(:user) { create(:user) }
   let(:project_path) { project.full_path }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:branch) { project.default_branch }
   let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
 

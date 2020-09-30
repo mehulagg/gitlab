@@ -8,7 +8,7 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
   let(:user) { create(:user) }
   let(:full_path) { project.full_path }
   let(:profile_name) { SecureRandom.hex }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }

@@ -1,7 +1,0 @@
----
-name: security_on_demand_scans_scanner_profiles
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39250
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/235545
-group: group::dynamic analysis
-type: development
-default_enabled: true

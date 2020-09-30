@@ -20,6 +20,7 @@ export default function init() {
     securityConfigurationPath,
     createSastMergeRequestPath,
     projectPath,
+    sastAnalyzersDocumentationPath,
     sastDocumentationPath,
   } = el.dataset;
 
@@ -30,6 +31,7 @@ export default function init() {
       securityConfigurationPath,
       createSastMergeRequestPath,
       projectPath,
+      sastAnalyzersDocumentationPath,
       sastDocumentationPath,
     },
     render(createElement) {

@@ -10,7 +10,6 @@ RSpec.describe Projects::FeatureFlagsController do
   let_it_be(:developer) { create(:user) }
   let_it_be(:reporter) { create(:user) }
   let(:user) { developer }
-  let(:feature_enabled) { true }
 
   before_all do
     project.add_developer(developer)
@@ -19,7 +18,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
   before do
     sign_in(user)
-    stub_licensed_features(feature_flags: feature_enabled)
   end
 
   describe 'GET index' do
@@ -38,14 +36,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
       it 'responds with success' do
         is_expected.to have_gitlab_http_status(:ok)
-      end
-    end
-
-    context 'when feature is not available' do
-      let(:feature_enabled) { false }
-
-      it 'responds with not found' do
-        is_expected.to have_gitlab_http_status(:not_found)
       end
     end
 

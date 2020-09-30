@@ -1,9 +1,10 @@
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import AuditEventsFilter from './audit_events_filter.vue';
 import DateRangeField from './date_range_field.vue';
 import SortingField from './sorting_field.vue';
 import AuditEventsTable from './audit_events_table.vue';
+import AuditEventsExportButton from './audit_events_export_button.vue';
 
 export default {
   components: {
@@ -11,6 +12,7 @@ export default {
     DateRangeField,
     SortingField,
     AuditEventsTable,
+    AuditEventsExportButton,
   },
   props: {
     events: {
@@ -37,9 +39,21 @@ export default {
       required: false,
       default: undefined,
     },
+    exportUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     ...mapState(['filterValue', 'startDate', 'endDate', 'sortBy']),
+    ...mapGetters(['buildExportHref']),
+    exportHref() {
+      return this.buildExportHref(this.exportUrl);
+    },
+    hasExportUrl() {
+      return this.exportUrl.length;
+    },
   },
   methods: {
     ...mapActions(['setDateRange', 'setFilterValue', 'setSortBy', 'searchForAuditEvents']),
@@ -49,6 +63,11 @@ export default {
 
 <template>
   <div>
+    <header>
+      <div class="gl-my-5 gl-display-flex gl-flex-direction-row gl-justify-content-end">
+        <audit-events-export-button v-if="hasExportUrl" :export-href="exportHref" />
+      </div>
+    </header>
     <div class="row-content-block second-block pb-0">
       <div class="d-flex justify-content-between audit-controls row">
         <div class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8">

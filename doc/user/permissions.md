@@ -8,7 +8,7 @@ Users have different abilities depending on the access level they have in a
 particular group or project. If a user is both in a project's group and the
 project itself, the highest permission level is used.
 
-On public and internal projects the Guest role is not enforced. All users can:
+On public and internal projects, the Guest role is not enforced. All users can:
 
 - Create issues.
 - Leave comments.
@@ -72,7 +72,7 @@ The following table depicts the various user permission levels in a project.
 | Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
 | Lock issue threads                                |         | ✓          | ✓           | ✓        | ✓      |
 | Manage issue tracker                              |         | ✓          | ✓           | ✓        | ✓      |
-| Manage related issues **(STARTER)**               |         | ✓          | ✓           | ✓        | ✓      |
+| Manage related issues                             |         | ✓          | ✓           | ✓        | ✓      |
 | Manage labels                                     |         | ✓          | ✓           | ✓        | ✓      |
 | Create code snippets                              |         | ✓          | ✓           | ✓        | ✓      |
 | See a commit status                               |         | ✓          | ✓           | ✓        | ✓      |
@@ -116,6 +116,7 @@ The following table depicts the various user permission levels in a project.
 | Create vulnerability from vulnerability finding **(ULTIMATE)** |   |     | ✓           | ✓        | ✓      |
 | Resolve vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
 | Dismiss vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
+| Revert vulnerability to detected state **(ULTIMATE)** |     |            | ✓           | ✓        | ✓      |
 | Apply code change suggestions                     |         |            | ✓           | ✓        | ✓      |
 | Create and edit wiki pages                        |         |            | ✓           | ✓        | ✓      |
 | Rewrite/remove Git tags                           |         |            | ✓           | ✓        | ✓      |
@@ -159,6 +160,7 @@ The following table depicts the various user permission levels in a project.
 | Remove fork relationship                          |         |            |             |          | ✓      |
 | Delete project                                    |         |            |             |          | ✓      |
 | Archive project                                   |         |            |             |          | ✓      |
+| Export project                                    |         |            |             | ✓        | ✓      |
 | Delete issues                                     |         |            |             |          | ✓      |
 | Delete pipelines                                  |         |            |             |          | ✓      |
 | Delete merge request                              |         |            |             |          | ✓      |
@@ -175,7 +177,7 @@ The following table depicts the various user permission levels in a project.
 
 \* Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
 
-1. Guest users are able to perform this action on public and internal projects, but not private projects.
+1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](./project/protected_branches.md).
@@ -195,7 +197,7 @@ which visibility level you select on project settings.
 
 - Disabled: disabled for everyone
 - Only team members: only team members can see even if your project is public or internal
-- Everyone with access: everyone can see depending on your project visibility level
+- Everyone with access: everyone can see depending on your project's visibility level
 - Everyone: enabled for everyone (only available for GitLab Pages)
 
 ### Protected branches
@@ -224,7 +226,7 @@ Read through the documentation on [permissions for File Locking](project/file_lo
 
 ### Confidential Issues permissions
 
-Confidential issues can be accessed by reporters and higher permission levels,
+Confidential issues can be accessed by users with reporter and higher permission levels,
 as well as by guest users that create a confidential issue. To learn more,
 read through the documentation on [permissions and access to confidential issues](project/issues/confidential_issues.md#permissions-and-access-to-confidential-issues).
 
@@ -248,7 +250,7 @@ group.
 | Pull [packages](packages/index.md)                     |       | ✓        | ✓         | ✓          | ✓     |
 | Publish [packages](packages/index.md)                  |       |          | ✓         | ✓          | ✓     |
 | View metrics dashboard annotations                     |       | ✓        | ✓         | ✓          | ✓     |
-| Create project in group                                |       |          | ✓ (3)     | ✓ (3)      | ✓ (3) |
+| Create project in group                                |       |          | ✓ (3)(5)  | ✓ (3)      | ✓ (3) |
 | Share (invite) groups with groups                      |       |          |           |            | ✓     |
 | Create/edit/delete group milestones                    |       |          | ✓         | ✓          | ✓     |
 | Create/edit/delete iterations                          |       |          | ✓         | ✓          | ✓     |
@@ -283,6 +285,7 @@ group.
    - The [instance level](admin_area/settings/visibility_and_access_controls.md#default-project-creation-protection).
    - The [group level](group/index.md#default-project-creation-level).
 1. Does not apply to subgroups.
+1. Developers can push commits to the default branch of a new project only if the [default branch protection](group/index.md#changing-the-default-branch-protection-of-a-group) is set to "Partially protected" or "Not protected".
 
 ### Subgroup permissions
 
@@ -310,7 +313,7 @@ External users:
 Access can be granted by adding the user as member to the project or group.
 Like usual users, they receive a role in the project or group with all
 the abilities that are mentioned in the [permissions table above](#project-members-permissions).
-For example, if an external user is added as Guest, and your project is
+For example, if an external user is added as Guest, and your project is internal or
 private, they do not have access to the code; you need to grant the external
 user access at the Reporter level or above if you want them to have access to the code. You should
 always take into account the
@@ -338,7 +341,7 @@ The **Internal users** field allows specifying an email address regex pattern to
 identify default internal users. New users whose email address matches the regex
 pattern are set to internal by default rather than an external collaborator.
 
-The regex pattern format is Ruby, but it needs to be convertible to JavaScript,
+The regex pattern format is in Ruby, but it needs to be convertible to JavaScript,
 and the ignore case flag is set (`/regex pattern/i`). Here are some examples:
 
 - Use `\.internal@domain\.com$` to mark email addresses ending with

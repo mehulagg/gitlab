@@ -8,11 +8,11 @@
 %section.settings.as-elasticsearch.no-animate#js-elasticsearch-settings{ class: ('expanded' if expanded), data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
     %h4
-      = _('Elasticsearch')
+      = _('Advanced Search')
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
-      = _('Elasticsearch integration. Elasticsearch AWS IAM.')
+      = _('Advanced Search with Elasticsearch')
   .settings-content
     = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting) if expanded
@@ -102,7 +102,7 @@
 
         .sub-section
           %h4= _('Elasticsearch zero-downtime reindexing')
-          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-success', method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
+          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
           .form-text.text-muted
             = _('This feature should be used with an index that was created after 13.0')
           - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
@@ -124,7 +124,7 @@
               - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
               %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
               .progress
-                .progress-bar.progress-bar-striped.bg-success{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
+                .progress-bar.progress-bar-striped.bg-primary{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
 
         .sub-section
           %h4= _('Elasticsearch indexing restrictions')

@@ -162,6 +162,17 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.count).to eq(0)
       expect(page).to have_content 'Application settings saved successfully'
     end
+
+    it 'zero-downtime reindexing shows popup', :js do
+      page.within('.as-elasticsearch') do
+        expect(page).to have_content 'Trigger cluster reindexing'
+        click_link 'Trigger cluster reindexing'
+      end
+
+      text = page.driver.browser.switch_to.alert.text
+      expect(text).to eq 'Are you sure you want to reindex?'
+      page.driver.browser.switch_to.alert.accept
+    end
   end
 
   it 'Enable Slack application' do

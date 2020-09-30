@@ -16,7 +16,7 @@ module EE
                             action: :custom,
                             custom_message: 'Ask for password reset',
                             ip_address: request.remote_ip)
-          .for_user(resource_params[:email]).unauth_security_event
+          .for_user(full_path: resource_params[:email], entity_id: nil).unauth_security_event
     end
   end
 end

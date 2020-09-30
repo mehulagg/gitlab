@@ -320,7 +320,7 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    it_behaves_like 'an object with email-formated attributes', :admin_notification_email do
+    it_behaves_like 'an object with email-formated attributes', :abuse_notification_email do
       subject { setting }
     end
 
@@ -635,6 +635,29 @@ RSpec.describe ApplicationSetting do
         allow(subject).to receive(:sourcegraph_enabled).and_return(true)
 
         expect(subject.sourcegraph_url).to be_nil
+        is_expected.to be_invalid
+      end
+    end
+
+    context 'gitpod settings' do
+      it 'is invalid if gitpod is enabled and no url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return(nil)
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an empty url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('')
+
+        is_expected.to be_invalid
+      end
+
+      it 'is invalid if gitpod is enabled and an invalid url is provided' do
+        allow(subject).to receive(:gitpod_enabled).and_return(true)
+        allow(subject).to receive(:gitpod_url).and_return('javascript:alert("test")//')
+
         is_expected.to be_invalid
       end
     end

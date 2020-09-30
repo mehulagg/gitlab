@@ -1,4 +1,7 @@
 ---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
@@ -140,7 +143,6 @@ We highly recommend users to use the minimum PostgreSQL versions specified below
 GitLab version | Minimum PostgreSQL version
 -|-
 10.0 | 9.6
-12.10 | 11
 13.0 | 11
 
 You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
@@ -151,7 +153,7 @@ Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://abou
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/replication/index.md):
+If you're using [GitLab Geo](../administration/geo/index.md):
 
 - We strongly recommend running Omnibus-managed instances as they are actively
   developed and tested. We aim to be compatible with most external (not managed

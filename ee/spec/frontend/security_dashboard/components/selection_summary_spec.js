@@ -124,22 +124,6 @@ describe('Selection Summary component', () => {
         );
       });
     });
-
-    it('should emit an event to refetch the vulnerabilities when the request is successful', () => {
-      dismissButton().trigger('submit');
-      return waitForPromises().then(() => {
-        expect(wrapper.emitted('deselect-all-vulnerabilities')).toEqual([[]]);
-        expect(wrapper.emitted('refetch-vulnerabilities')).toEqual([[]]);
-      });
-    });
-
-    it('should still emit an event to refetch the vulnerabilities when the request fails', () => {
-      mutateMock.mockRejectedValue();
-      dismissButton().trigger('submit');
-      return waitForPromises().then(() => {
-        expect(wrapper.emitted('refetch-vulnerabilities')).toEqual([[]]);
-      });
-    });
   });
 
   describe('when vulnerabilities are not selected', () => {

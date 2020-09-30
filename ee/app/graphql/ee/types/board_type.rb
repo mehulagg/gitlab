@@ -21,7 +21,7 @@ module EE
         field :weight, type: GraphQL::INT_TYPE, null: true,
               description: 'Weight of the board.'
 
-        field :epics, ::Types::EpicType.connection_type, null: true,
+        field :epics, ::Types::Boards::BoardEpicType.connection_type, null: true,
               description: 'Epics associated with board issues.',
               resolver: ::Resolvers::BoardGroupings::EpicsResolver,
               complexity: 5

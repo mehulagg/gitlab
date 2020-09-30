@@ -1,0 +1,5 @@
+---
+title: Gracefully handle gitlab:elastic:reindex_cluster unique index violation
+merge_request: 43690
+author:
+type: fixed

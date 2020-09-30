@@ -35,8 +35,8 @@ module HistoricalUserData
       CSV.generate do |csv|
         csv << ['License Key', license.data]
         csv << ['Email', license.licensee['Email']]
-        csv << ['License Start Date', license.starts_at.to_s(:csv)]
-        csv << ['License End Date', license.expires_at.to_s(:csv)]
+        csv << ['License Start Date', license.starts_at&.to_s(:csv)]
+        csv << ['License End Date', license.expires_at&.to_s(:csv)]
         csv << ['Company', license.licensee['Company']]
         csv << ['Generated At', Time.current.to_s(:csv)]
         csv << ['']

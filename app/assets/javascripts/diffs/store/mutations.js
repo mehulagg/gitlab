@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { PARALLEL_DIFF_VIEW_TYPE } from '../constants';
+import { INLINE_DIFF_VIEW_TYPE } from '../constants';
 import {
   findDiffFile,
   addLineReferences,
@@ -152,7 +152,7 @@ export default {
       inlineLines: diffFile.highlighted_diff_lines,
       parallelLines: diffFile.parallel_diff_lines,
       diffViewType: window.gon?.features?.unifiedDiffLines
-        ? PARALLEL_DIFF_VIEW_TYPE
+        ? INLINE_DIFF_VIEW_TYPE
         : state.diffViewType,
       contextLines: lines,
       bottom,
@@ -172,7 +172,7 @@ export default {
     state.diffFiles.forEach(file => {
       Object.assign(file, {
         viewer: Object.assign(file.viewer, {
-          collapsed: false,
+          automaticallyCollapsed: false,
         }),
       });
     });
@@ -355,7 +355,7 @@ export default {
     const file = state.diffFiles.find(f => f.file_path === filePath);
 
     if (file && file.viewer) {
-      file.viewer.collapsed = collapsed;
+      file.viewer.automaticallyCollapsed = collapsed;
     }
   },
   [types.SET_HIDDEN_VIEW_DIFF_FILE_LINES](state, { filePath, lines }) {

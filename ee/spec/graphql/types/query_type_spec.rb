@@ -8,6 +8,7 @@ RSpec.describe GitlabSchema.types['Query'] do
       :iteration,
       :geo_node,
       :vulnerabilities,
+      :vulnerability,
       :instance_security_dashboard,
       :vulnerabilities_count_by_day_and_severity
     ).at_least

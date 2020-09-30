@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe API::Namespaces do
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
-  let!(:group1) { create(:group, name: 'test.test-group.2') }
-  let!(:group2) { create(:group, :nested) }
-  let!(:gold_plan) { create(:gold_plan) }
+
+  let_it_be(:group1, reload: true) { create(:group, name: 'test.test-group.2') }
+  let_it_be(:group2) { create(:group, :nested) }
+  let_it_be(:gold_plan) { create(:gold_plan) }
 
   describe "GET /namespaces" do
     context "when authenticated as admin" do
@@ -111,6 +112,30 @@ RSpec.describe API::Namespaces do
           get api("/namespaces?requested_hosted_plan=gold", user)
 
           expect(json_response.first['billable_members_count']).to eq(2)
+        end
+      end
+    end
+
+    context 'with gitlab subscription' do
+      before do
+        group1.add_guest(user)
+
+        create(:gitlab_subscription, namespace: group1, max_seats_used: 1)
+      end
+
+      it 'includes max_seats_used' do
+        get api("/namespaces", user)
+
+        expect(json_response.first['max_seats_used']).to eq(1)
+      end
+    end
+
+    context 'without gitlab subscription' do
+      it 'does not include max_seats_used' do
+        get api("/namespaces", user)
+
+        json_response.each do |resp|
+          expect(resp.keys).not_to include('max_seats_used')
         end
       end
     end
@@ -285,7 +310,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'when authenticated as a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_post(user, params)
 
         expect(response).to have_gitlab_http_status(:forbidden)
@@ -347,7 +372,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'with a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_get(developer)
 
         expect(response).to have_gitlab_http_status(:forbidden)
@@ -401,7 +426,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'when authenticated as a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_put(namespace.id, user, { seats: 150 })
 
         expect(response).to have_gitlab_http_status(:forbidden)

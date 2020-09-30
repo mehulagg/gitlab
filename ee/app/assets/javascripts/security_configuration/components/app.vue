@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlLink, GlSprintf, GlTable } from '@gitlab/ui';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import { s__, __ } from '~/locale';
+import { sprintf, s__, __ } from '~/locale';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AutoFixSettings from './auto_fix_settings.vue';
@@ -67,7 +67,7 @@ export default {
       required: false,
       default: false,
     },
-    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/227575
+    // TODO: Remove as part of https://gitlab.com/gitlab-org/gitlab/-/issues/241377
     createSastMergeRequestPath: {
       type: String,
       required: true,
@@ -124,6 +124,11 @@ export default {
     dismissAutoDevopsAlert() {
       this.autoDevopsAlertDismissed = 'true';
     },
+    getFeatureDocumentationLinkLabel(item) {
+      return sprintf(s__('SecurityConfiguration|Feature documentation for %{featureName}'), {
+        featureName: item.name,
+      });
+    },
   },
   autoDevopsAlertMessage: s__(`
     SecurityConfiguration|You can quickly enable all security scanning tools by
@@ -171,6 +176,14 @@ export default {
         <div class="gl-text-gray-900">{{ item.name }}</div>
         <div>
           {{ item.description }}
+          <gl-link
+            target="_blank"
+            :href="item.link"
+            :aria-label="getFeatureDocumentationLinkLabel(item)"
+            data-testid="docsLink"
+          >
+            {{ s__('SecurityConfiguration|More information') }}
+          </gl-link>
         </div>
       </template>
 

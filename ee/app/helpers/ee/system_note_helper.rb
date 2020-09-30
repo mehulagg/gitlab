@@ -19,6 +19,7 @@ module EE
       'weight' => 'weight',
       'relate_epic' => 'epic',
       'unrelate_epic' => 'epic',
+      'vulnerability_detected' => 'search-dot',
       'vulnerability_confirmed' => 'shield',
       'vulnerability_dismissed' => 'cancel',
       'vulnerability_resolved' => 'status_closed',

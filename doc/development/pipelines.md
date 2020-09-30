@@ -122,7 +122,6 @@ graph RL;
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -228,7 +227,6 @@ graph RL;
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -392,7 +390,7 @@ graph LR
     subgraph "post-test stage";
         Z["fail-pipeline-early"];
     end
-    
+
     A --"artifact: list of test files"--> G
     G --"on failure"--> Z
 ```
@@ -460,8 +458,8 @@ of the `gitlab-org/gitlab-foss` project. These jobs are only created in the foll
 - Merge requests which include `RUN AS-IF-FOSS` in their title.
 - Merge requests that changes the CI configuration.
 
-The `* as-if-foss` jobs have the `FOSS_ONLY='1'` variable set and gets their EE-specific
-folders removed before the tests start running.
+The `* as-if-foss` jobs are run in addition to the regular EE-context jobs. They have the `FOSS_ONLY='1'` variable
+set and get their EE-specific folders removed before the tests start running.
 
 The intent is to ensure that a change won't introduce a failure once the `gitlab-org/gitlab` project will be synced to
 the `gitlab-org/gitlab-foss` project.
@@ -557,8 +555,9 @@ overwrites the Git configuration with the appropriate settings to fetch
 from the GitLab repository.
 
 `CI_REPO_CACHE_CREDENTIALS` contains the Google Cloud service account
-JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. These
-credentials are stored in the 1Password GitLab.com Production vault.
+JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. (If you’re a
+GitLab Team Member, find credentials in the
+[GitLab shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
 
 Note that this bucket should be located in the same continent as the
 runner, or [network egress charges will apply](https://cloud.google.com/storage/pricing).

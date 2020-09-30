@@ -21,6 +21,16 @@ module EE
               description: "Vulnerabilities reported on projects on the current user's instance security dashboard",
               resolver: ::Resolvers::VulnerabilitiesResolver
 
+        field :vulnerability,
+              ::Types::VulnerabilityType,
+              null: true,
+              description: "Find a vulnerability",
+              resolve: -> (_obj, args, _ctx) { ::GitlabSchema.find_by_gid(args[:id]) } do
+          argument :id, ::Types::GlobalIDType[::Vulnerability],
+                   required: true,
+                   description: 'The Global ID of the Vulnerability'
+        end
+
         field :vulnerabilities_count_by_day,
               ::Types::VulnerabilitiesCountByDayType.connection_type,
               null: true,

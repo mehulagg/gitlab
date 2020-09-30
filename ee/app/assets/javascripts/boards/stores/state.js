@@ -5,6 +5,6 @@ export default () => ({
 
   isShowingEpicsSwimlanes: false,
   epicsSwimlanesFetchInProgress: false,
-  epics: {},
-  issuesByEpicId: {},
+  epics: [],
+  epicsFlags: {},
 });

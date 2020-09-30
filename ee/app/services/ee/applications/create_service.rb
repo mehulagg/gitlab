@@ -8,7 +8,7 @@ module EE
       override :execute
       def execute(request)
         super.tap do |application|
-          audit_event_service(request.remote_ip).for_user(application.name).security_event
+          audit_event_service(request.remote_ip).for_user(full_path: application.name, entity_id: application.id).security_event
         end
       end
 

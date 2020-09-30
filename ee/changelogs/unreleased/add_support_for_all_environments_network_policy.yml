@@ -1,0 +1,5 @@
+---
+title: Add 'All Environments' option for environment dropdown if enabled
+merge_request: 40531
+author:
+type: changed

@@ -6,7 +6,11 @@ module AlertManagement
     include IncidentManagement::Settings
     include ActionView::Helpers::UrlHelper
 
-    MARKDOWN_LINE_BREAK = "  \n".freeze
+    MARKDOWN_LINE_BREAK = "  \n"
+    HORIZONTAL_LINE = "\n\n---\n\n"
+    INCIDENT_LABEL_NAME = ::IncidentManagement::CreateIncidentLabelService::LABEL_PROPERTIES[:title]
+
+    delegate :metrics_dashboard_url, :runbook, to: :parsed_payload
 
     def initialize(alert, _attributes = {})
       super
@@ -16,27 +20,16 @@ module AlertManagement
     end
 
     def issue_description
-      horizontal_line = "\n\n---\n\n"
-
       [
         issue_summary_markdown,
         alert_markdown,
         incident_management_setting.issue_template_content
-      ].compact.join(horizontal_line)
+      ].compact.join(HORIZONTAL_LINE)
     end
 
     def start_time
       started_at&.strftime('%d %B %Y, %-l:%M%p (%Z)')
     end
-
-    def issue_summary_markdown
-      <<~MARKDOWN.chomp
-        #{metadata_list}
-        #{alert_details}#{metric_embed_for_alert}
-      MARKDOWN
-    end
-
-    def metrics_dashboard_url; end
 
     def details_url
       details_project_alert_management_url(project, alert.iid)
@@ -46,17 +39,41 @@ module AlertManagement
       Gitlab::Utils::InlineHash.merge_keys(payload)
     end
 
-    private
+    def show_incident_issues_link?
+      project.incident_management_setting&.create_issue?
+    end
 
-    attr_reader :alert, :project
+    def show_performance_dashboard_link?
+      prometheus_alert.present?
+    end
 
-    def alerting_alert
-      strong_memoize(:alerting_alert) do
-        Gitlab::Alerting::Alert.new(project: project, payload: alert.payload).present
+    def incident_issues_link
+      project_issues_url(project, label_name: INCIDENT_LABEL_NAME)
+    end
+
+    def performance_dashboard_link
+      if environment
+        metrics_project_environment_url(project, environment)
+      else
+        metrics_project_environments_url(project)
       end
     end
 
-    def alert_markdown; end
+    def email_title
+      [environment&.name, query_title].compact.join(': ')
+    end
+
+    private
+
+    attr_reader :alert, :project
+    delegate :alert_markdown, :full_query, to: :parsed_payload
+
+    def issue_summary_markdown
+      <<~MARKDOWN.chomp
+        #{metadata_list}
+        #{metric_embed_for_alert}
+      MARKDOWN
+    end
 
     def metadata_list
       metadata = []
@@ -73,26 +90,9 @@ module AlertManagement
       metadata.join(MARKDOWN_LINE_BREAK)
     end
 
-    def alert_details
-      if details.present?
-        <<~MARKDOWN.chomp
-
-          #### Alert Details
-
-          #{details_list}
-        MARKDOWN
-      end
+    def metric_embed_for_alert
+      "\n[](#{metrics_dashboard_url})" if metrics_dashboard_url
     end
-
-    def details_list
-      details
-        .map { |label, value| list_item(label, value) }
-        .join(MARKDOWN_LINE_BREAK)
-    end
-
-    def metric_embed_for_alert; end
-
-    def full_query; end
 
     def list_item(key, value)
       "**#{key}:** #{value}".strip
@@ -104,6 +104,12 @@ module AlertManagement
 
     def host_links
       hosts.join(' ')
+    end
+
+    def query_title
+      return title unless prometheus_alert
+
+      "#{prometheus_alert.title} #{prometheus_alert.computed_operator} #{prometheus_alert.threshold} for 5 minutes"
     end
   end
 end

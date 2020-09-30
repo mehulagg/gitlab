@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Reviewing and managing merge requests
+# Reviewing and managing merge requests **(CORE)**
 
 Merge requests are the primary method of making changes to files in a GitLab project.
 Changes are proposed by [creating and submitting a merge request](creating_merge_requests.md),
@@ -66,6 +66,14 @@ changes, you can quickly jump to any changed file using the file tree or file
 list.
 
 ![Merge request diff file navigation](img/merge_request_diff_file_navigation.png)
+
+### Collapsed files in the Changes view
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232820) in GitLab 13.4.
+
+When you review changes in the **Changes** tab, files with a large number of changes are collapsed
+to improve performance. When files are collapsed, a warning appears at the top of the changes.
+Click **Expand file** on any file to view the changes for that file.
 
 ### File-by-file diff navigation
 
@@ -203,6 +211,11 @@ If there's an [environment](../../../ci/environments/index.md) and the applicati
 successfully deployed to it, the deployed environment and the link to the
 Review App will be shown as well.
 
+NOTE: **Note:**
+When the default branch (for example, `main`) is red due to a failed CI pipeline, the `merge` button
+When the pipeline fails in a merge request but it can be merged nonetheless,
+the **Merge** button will be colored in red.
+
 ### Post-merge pipeline status
 
 When a merge request is merged, you can see the post-merge pipeline status of
@@ -283,6 +296,17 @@ the command line.
 
 NOTE: **Note:**
 This section might move in its own document in the future.
+
+### Copy the branch name for local checkout
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23767) in GitLab 13.4.
+
+The merge request sidebar contains the branch reference for the source branch
+used to contribute changes for this merge request.
+
+To copy the branch reference into your clipboard, click the **Copy branch name** button
+(**{copy-to-clipboard}**) in the right sidebar. You can then use it to checkout the branch locally
+via command line by running `git checkout <branch-name>`.
 
 ### Checkout merge requests locally through the `head` ref
 

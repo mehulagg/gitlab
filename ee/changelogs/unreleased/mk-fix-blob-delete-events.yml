@@ -1,5 +1,0 @@
----
-title: 'Geo: Avoid orphaning blob files on secondaries'
-merge_request: 41529
-author:
-type: fixed

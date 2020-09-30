@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Security::StoreReportService, '#execute' do
-  let(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
   let(:artifact) { create(:ee_ci_job_artifact, report_type) }
   let(:project) { artifact.project }
   let(:pipeline) { artifact.job.pipeline }
@@ -55,33 +55,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
     end
 
-    context 'with container scanning vulnerabilities' do
-      let(:artifact) { create(:ee_ci_job_artifact, :container_scanning) }
-      let(:project) { artifact.project }
-      let(:pipeline) { artifact.job.pipeline }
-      let(:report) { pipeline.security_reports.get_report('container_scanning', artifact) }
-
-      it 'saves with new location' do
-        new_locations = report.findings.map(&:location).map(&:new_fingerprint)
-        expect(subject).to eq({ status: :success })
-        saved_locations = Vulnerabilities::Finding.all.map(&:location_fingerprint)
-        expect(new_locations).to match_array(saved_locations)
-      end
-
-      it 'updates existing location' do
-        allow_any_instance_of(described_class).to receive(:executed?).and_return(false)
-        expect(subject).to eq({ status: :success })
-
-        old_fingerprint = report.findings.first.location.fingerprint
-        new_fingerprint = report.findings.first.location.new_fingerprint
-        Vulnerabilities::Finding.first.update_column(:location_fingerprint, old_fingerprint)
-
-        described_class.new(pipeline, report).execute
-
-        expect(Vulnerabilities::Finding.first.location_fingerprint).to eq(new_fingerprint)
-      end
-    end
-
     context 'invalid data' do
       let(:artifact) { create(:ee_ci_job_artifact, :sast) }
       let(:finding_without_name) { build(:ci_reports_security_finding, name: nil) }
@@ -106,8 +79,8 @@ RSpec.describe Security::StoreReportService, '#execute' do
   end
 
   context 'with existing data from previous pipeline' do
-    let(:scanner) { create(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
-    let(:identifier) { create(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
+    let(:scanner) { build(:vulnerabilities_scanner, project: project, external_id: 'bandit', name: 'Bandit') }
+    let(:identifier) { build(:vulnerabilities_identifier, project: project, fingerprint: 'e6dd15eda2137be0034977a85b300a94a4f243a3') }
     let!(:new_artifact) { create(:ee_ci_job_artifact, :sast, job: new_build) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
     let(:new_pipeline) { create(:ci_pipeline, project: project) }

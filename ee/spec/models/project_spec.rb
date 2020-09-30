@@ -35,6 +35,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_exports) }
     it { is_expected.to have_many(:vulnerability_scanners) }
     it { is_expected.to have_many(:dast_site_profiles) }
+    it { is_expected.to have_many(:dast_site_tokens) }
     it { is_expected.to have_many(:dast_sites) }
     it { is_expected.to have_many(:audit_events).dependent(false) }
     it { is_expected.to have_many(:protected_environments) }
@@ -49,6 +50,65 @@ RSpec.describe Project do
 
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
+    it { is_expected.to have_many(:approval_rules) }
+
+    describe 'approval_rules association' do
+      let_it_be(:rule, reload: true) { create(:approval_project_rule) }
+      let(:project) { rule.project }
+      let(:branch) { 'stable' }
+
+      describe '#applicable_to_branch' do
+        subject { project.approval_rules.applicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to eq([rule]) }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+
+      describe '#inapplicable_to_branch' do
+        subject { project.approval_rules.inapplicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+    end
   end
 
   context 'scopes' do
@@ -2522,6 +2582,14 @@ RSpec.describe Project do
         expect(project.jira_import?).to be false
         expect { project.remove_import_data }.not_to change { ProjectImportData.count }
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 end

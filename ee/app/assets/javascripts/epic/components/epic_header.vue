@@ -129,7 +129,8 @@ export default {
         :class="actionButtonClass"
         category="secondary"
         variant="warning"
-        class="qa-close-reopen-epic-button gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+        class="gl-mt-3 gl-sm-mt-0! gl-w-full gl-sm-w-auto!"
+        data-qa-selector="close_reopen_epic_button"
         data-testid="toggle-status-button"
         @click="toggleEpicStatus(isEpicOpen)"
       >

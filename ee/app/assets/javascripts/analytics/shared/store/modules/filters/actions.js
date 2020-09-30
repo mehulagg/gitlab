@@ -12,6 +12,22 @@ export const setEndpoints = ({ commit }, params) => {
   commit(types.SET_PROJECT_ENDPOINT, projectEndpoint);
 };
 
+export function fetchBranches({ commit, state }, search = '') {
+  const { projectEndpoint } = state;
+  commit(types.REQUEST_BRANCHES);
+
+  return Api.branches(projectEndpoint, search)
+    .then(response => {
+      commit(types.RECEIVE_BRANCHES_SUCCESS, response.data);
+      return response;
+    })
+    .catch(({ response }) => {
+      const { status } = response;
+      commit(types.RECEIVE_BRANCHES_ERROR, status);
+      createFlash(__('Failed to load branches. Please try again.'));
+    });
+}
+
 export const fetchMilestones = ({ commit, state }, search_title = '') => {
   commit(types.REQUEST_MILESTONES);
   const { milestonesEndpoint } = state;

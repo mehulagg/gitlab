@@ -18,7 +18,7 @@ module API
       resource :feature_flags do
         desc 'Get all feature flags of a project' do
           detail 'This feature was introduced in GitLab 12.5'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         params do
           optional :scope, type: String, desc: 'The scope of feature flags',
@@ -35,7 +35,7 @@ module API
 
         desc 'Create a new feature flag' do
           detail 'This feature was introduced in GitLab 12.5'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         params do
           requires :name, type: String, desc: 'The name of feature flag'
@@ -86,7 +86,7 @@ module API
       resource 'feature_flags/:feature_flag_name', requirements: FEATURE_FLAG_ENDPOINT_REQUIREMENTS do
         desc 'Get a feature flag of a project' do
           detail 'This feature was introduced in GitLab 12.5'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         get do
           authorize_read_feature_flag!
@@ -96,7 +96,7 @@ module API
 
         desc 'Enable a strategy for a feature flag on an environment' do
           detail 'This feature was introduced in GitLab 12.5'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         params do
           requires :environment_scope, type: String, desc: 'The environment scope of the feature flag'
@@ -119,7 +119,7 @@ module API
 
         desc 'Disable a strategy for a feature flag on an environment' do
           detail 'This feature is going to be introduced in GitLab 12.5 if `feature_flag_api` feature flag is removed'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         params do
           requires :environment_scope, type: String, desc: 'The environment scope of the feature flag'
@@ -142,7 +142,7 @@ module API
 
         desc 'Update a feature flag' do
           detail 'This feature will be introduced in GitLab 13.1 if feature_flags_new_version feature flag is removed'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         params do
           optional :name, type: String, desc: 'The name of the feature flag'
@@ -185,7 +185,7 @@ module API
 
         desc 'Delete a feature flag' do
           detail 'This feature was introduced in GitLab 12.5'
-          success EE::API::Entities::FeatureFlag
+          success ::API::Entities::FeatureFlag
         end
         delete do
           authorize_destroy_feature_flag!
@@ -226,7 +226,7 @@ module API
 
       def present_entity(result)
         present result,
-          with: EE::API::Entities::FeatureFlag,
+          with: ::API::Entities::FeatureFlag,
           feature_flags_new_version_enabled: feature_flags_new_version_enabled?
       end
 

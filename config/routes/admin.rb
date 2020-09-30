@@ -91,8 +91,6 @@ namespace :admin do
 
   resources :instance_statistics, only: :index
   resource :dev_ops_report, controller: 'dev_ops_report', only: :show
-  # remove in 13.5
-  get '/dev_ops_score', to: redirect('admin/dev_ops_report')
   resources :cohorts, only: :index
 
   scope(path: 'projects/*namespace_id',
@@ -140,6 +138,8 @@ namespace :admin do
     delete :delete_self_monitoring_project
     get :status_delete_self_monitoring_project
   end
+
+  resources :plan_limits, only: :create
 
   resources :labels
 

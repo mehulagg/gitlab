@@ -5,27 +5,33 @@ import MockAdapter from 'axios-mock-adapter';
 import storeConfig from 'ee/analytics/merge_request_analytics/store';
 import FilterBar from 'ee/analytics/merge_request_analytics/components/filter_bar.vue';
 import initialFiltersState from 'ee/analytics/shared/store/modules/filters/state';
+import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
 import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
+import * as commonUtils from '~/lib/utils/common_utils';
+import * as urlUtils from '~/lib/utils/url_utility';
+import { ITEM_TYPE } from '~/groups/constants';
 import {
   filterMilestones,
   filterLabels,
   filterUsers,
 } from '../../shared/store/modules/filters/mock_data';
-import * as commonUtils from '~/lib/utils/common_utils';
-import * as urlUtils from '~/lib/utils/url_utility';
-import { ITEM_TYPE } from '~/groups/constants';
+import { getFilterParams, getFilterValues } from '../../shared/store/modules/filters/test_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
+const sourceBranchTokenType = 'source_branch';
+const targetBranchTokenType = 'target_branch';
 const milestoneTokenType = 'milestone';
 const labelsTokenType = 'labels';
 const authorTokenType = 'author';
 const assigneeTokenType = 'assignee';
 
 const initialFilterBarState = {
+  selectedSourceBranch: null,
+  selectedTargetBranch: null,
   selectedMilestone: null,
   selectedAuthor: null,
   selectedAssignee: null,
@@ -33,6 +39,10 @@ const initialFilterBarState = {
 };
 
 const defaultParams = {
+  source_branch_name: null,
+  'not[source_branch_name]': null,
+  target_branch_name: null,
+  'not[target_branch_name]': null,
   milestone_title: null,
   'not[milestone_title]': null,
   author_username: null,
@@ -51,22 +61,12 @@ async function shouldMergeUrlParams(wrapper, result) {
   expect(commonUtils.historyPushState).toHaveBeenCalled();
 }
 
-function getFilterParams(tokens, options = {}) {
-  const { key = 'value', operator = '=', prop = 'title' } = options;
-  return tokens.map(token => {
-    return { [key]: token[prop], operator };
-  });
-}
-
-function getFilterValues(tokens, options = {}) {
-  const { prop = 'title' } = options;
-  return tokens.map(token => token[prop]);
-}
-
+const selectedBranchParams = getFilterParams(mockBranches, { prop: 'name' });
 const selectedMilestoneParams = getFilterParams(filterMilestones);
 const selectedLabelParams = getFilterParams(filterLabels);
 const selectedUserParams = getFilterParams(filterUsers, { prop: 'name' });
 
+const branchValues = getFilterValues(mockBranches, { prop: 'name' });
 const milestoneValues = getFilterValues(filterMilestones);
 const labelValues = getFilterValues(filterLabels);
 const userValues = getFilterValues(filterUsers, { prop: 'name' });
@@ -141,6 +141,7 @@ describe('Filter bar', () => {
   describe('when the state has data', () => {
     beforeEach(() => {
       vuexStore = createStore({
+        branches: { data: mockBranches, target: {}, source: {} },
         milestones: { data: filterMilestones },
         labels: { data: filterLabels },
         authors: { data: userValues },
@@ -151,35 +152,53 @@ describe('Filter bar', () => {
 
     it('displays the milestone, label, author and assignee tokens', () => {
       const tokens = findFilteredSearch().props('tokens');
-      expect(tokens).toHaveLength(4);
-      expect(tokens[0].type).toBe(milestoneTokenType);
-      expect(tokens[1].type).toBe(labelsTokenType);
-      expect(tokens[2].type).toBe(authorTokenType);
-      expect(tokens[3].type).toBe(assigneeTokenType);
+      expect(tokens).toHaveLength(6);
+      [
+        sourceBranchTokenType,
+        targetBranchTokenType,
+        milestoneTokenType,
+        labelsTokenType,
+        authorTokenType,
+        assigneeTokenType,
+      ].forEach((tokenType, index) => {
+        expect(tokens[index].type).toBe(tokenType);
+      });
+    });
+
+    it('provides the initial source branch token', () => {
+      const { initialBranches } = getSearchToken(sourceBranchTokenType);
+
+      expect(initialBranches).toHaveLength(mockBranches.length);
+    });
+
+    it('provides the initial target branch token', () => {
+      const { initialBranches } = getSearchToken(targetBranchTokenType);
+
+      expect(initialBranches).toHaveLength(mockBranches.length);
     });
 
     it('provides the initial milestone token', () => {
-      const { initialMilestones: milestoneToken } = getSearchToken(milestoneTokenType);
+      const { initialMilestones } = getSearchToken(milestoneTokenType);
 
-      expect(milestoneToken).toHaveLength(filterMilestones.length);
+      expect(initialMilestones).toHaveLength(filterMilestones.length);
     });
 
     it('provides the initial label token', () => {
-      const { initialLabels: labelToken } = getSearchToken(labelsTokenType);
+      const { initialLabels } = getSearchToken(labelsTokenType);
 
-      expect(labelToken).toHaveLength(filterLabels.length);
+      expect(initialLabels).toHaveLength(filterLabels.length);
     });
 
     it('provides the initial author token', () => {
-      const { initialAuthors: authorToken } = getSearchToken(authorTokenType);
+      const { initialAuthors } = getSearchToken(authorTokenType);
 
-      expect(authorToken).toHaveLength(filterUsers.length);
+      expect(initialAuthors).toHaveLength(filterUsers.length);
     });
 
     it('provides the initial assignee token', () => {
-      const { initialAuthors: assigneeToken } = getSearchToken(assigneeTokenType);
+      const { initialAuthors: initialAssignees } = getSearchToken(assigneeTokenType);
 
-      expect(assigneeToken).toHaveLength(filterUsers.length);
+      expect(initialAssignees).toHaveLength(filterUsers.length);
     });
   });
 
@@ -195,6 +214,14 @@ describe('Filter bar', () => {
 
     it('clicks on the search button, setFilters is dispatched', () => {
       const filters = [
+        {
+          type: 'source_branch',
+          value: getFilterParams(mockBranches, { key: 'data', prop: 'name' })[2],
+        },
+        {
+          type: 'target_branch',
+          value: getFilterParams(mockBranches, { key: 'data', prop: 'name' })[0],
+        },
         { type: 'milestone', value: getFilterParams(filterMilestones, { key: 'data' })[2] },
         { type: 'labels', value: getFilterParams(filterLabels, { key: 'data' })[2] },
         { type: 'labels', value: getFilterParams(filterLabels, { key: 'data' })[4] },
@@ -207,6 +234,8 @@ describe('Filter bar', () => {
       expect(utils.processFilters).toHaveBeenCalledWith(filters);
 
       expect(setFiltersMock).toHaveBeenCalledWith(expect.anything(), {
+        selectedSourceBranch: selectedBranchParams[2],
+        selectedTargetBranch: selectedBranchParams[0],
         selectedMilestone: selectedMilestoneParams[2],
         selectedLabelList: [selectedLabelParams[2], selectedLabelParams[4]],
         selectedAssignee: selectedUserParams[2],
@@ -216,13 +245,15 @@ describe('Filter bar', () => {
   });
 
   describe.each`
-    stateKey               | payload                       | paramKey               | value
-    ${'selectedMilestone'} | ${selectedMilestoneParams[3]} | ${'milestone_title'}   | ${milestoneValues[3]}
-    ${'selectedMilestone'} | ${selectedMilestoneParams[0]} | ${'milestone_title'}   | ${milestoneValues[0]}
-    ${'selectedLabelList'} | ${selectedLabelParams}        | ${'label_name'}        | ${labelValues}
-    ${'selectedLabelList'} | ${selectedLabelParams}        | ${'label_name'}        | ${labelValues}
-    ${'selectedAuthor'}    | ${selectedUserParams[0]}      | ${'author_username'}   | ${userValues[0]}
-    ${'selectedAssignee'}  | ${selectedUserParams[1]}      | ${'assignee_username'} | ${userValues[1]}
+    stateKey                  | payload                       | paramKey                | value
+    ${'selectedSourceBranch'} | ${selectedBranchParams[1]}    | ${'source_branch_name'} | ${branchValues[1]}
+    ${'selectedTargetBranch'} | ${selectedBranchParams[2]}    | ${'target_branch_name'} | ${branchValues[2]}
+    ${'selectedMilestone'}    | ${selectedMilestoneParams[3]} | ${'milestone_title'}    | ${milestoneValues[3]}
+    ${'selectedMilestone'}    | ${selectedMilestoneParams[0]} | ${'milestone_title'}    | ${milestoneValues[0]}
+    ${'selectedLabelList'}    | ${selectedLabelParams}        | ${'label_name'}         | ${labelValues}
+    ${'selectedLabelList'}    | ${selectedLabelParams}        | ${'label_name'}         | ${labelValues}
+    ${'selectedAuthor'}       | ${selectedUserParams[0]}      | ${'author_username'}    | ${userValues[0]}
+    ${'selectedAssignee'}     | ${selectedUserParams[1]}      | ${'assignee_username'}  | ${userValues[1]}
   `(
     'with a $stateKey updates the $paramKey url parameter',
     ({ stateKey, payload, paramKey, value }) => {

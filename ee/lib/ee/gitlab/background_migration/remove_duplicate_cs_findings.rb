@@ -50,6 +50,8 @@ module EE
                                                 location_fingerprint: colliding_fingerprint).first
 
               next if duplicated_finding.blank?
+              # we have some findings without vulnerabilities
+              next if duplicated_finding.vulnerability.nil?
 
               ActiveRecord::Base.transaction do
                 duplicated_finding.vulnerability.delete_notes

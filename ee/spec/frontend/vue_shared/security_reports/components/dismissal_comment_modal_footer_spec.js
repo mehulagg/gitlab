@@ -1,13 +1,14 @@
 import { mount } from '@vue/test-utils';
 import component from 'ee/vue_shared/security_reports/components/dismissal_comment_modal_footer.vue';
 import Tracking from '~/tracking';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 jest.mock('~/tracking');
 
 describe('DismissalCommentModalFooter', () => {
   let origPage;
   let wrapper;
+
+  const findAddAndDismissButton = () => wrapper.find('[data-testid="add_and_dismiss_button"]');
 
   afterEach(() => {
     document.body.dataset.page = origPage;
@@ -25,11 +26,11 @@ describe('DismissalCommentModalFooter', () => {
     });
 
     it('should render the "Add comment and dismiss" button', () => {
-      expect(wrapper.find(LoadingButton).text()).toBe('Add comment & dismiss');
+      expect(findAddAndDismissButton().text()).toBe('Add comment & dismiss');
     });
 
     it('should emit the "addCommentAndDismiss" event when clicked', () => {
-      wrapper.find(LoadingButton).trigger('click');
+      findAddAndDismissButton().trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted().addCommentAndDismiss).toBeTruthy();
@@ -59,11 +60,11 @@ describe('DismissalCommentModalFooter', () => {
       });
 
       it('should render the "Add comment and dismiss" button', () => {
-        expect(wrapper.find(LoadingButton).text()).toBe('Add comment');
+        expect(findAddAndDismissButton().text()).toBe('Add comment');
       });
 
       it('should emit the "addCommentAndDismiss" event when clicked', () => {
-        wrapper.find(LoadingButton).trigger('click');
+        findAddAndDismissButton().trigger('click');
 
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.emitted().addDismissalComment).toBeTruthy();
@@ -82,11 +83,11 @@ describe('DismissalCommentModalFooter', () => {
       });
 
       it('should render the "Save comment" button', () => {
-        expect(wrapper.find(LoadingButton).text()).toBe('Save comment');
+        expect(findAddAndDismissButton().text()).toBe('Save comment');
       });
 
       it('should emit the "addCommentAndDismiss" event when clicked', () => {
-        wrapper.find(LoadingButton).trigger('click');
+        findAddAndDismissButton().trigger('click');
 
         return wrapper.vm.$nextTick().then(() => {
           expect(wrapper.emitted().addDismissalComment).toBeTruthy();

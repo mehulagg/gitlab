@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlButton } from '@gitlab/ui';
 import Project from 'ee/storage_counter/components/project.vue';
+import StorageRow from 'ee/storage_counter/components/storage_row.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 
@@ -32,6 +32,9 @@ function factory(project) {
   });
 }
 
+const findTableRow = () => wrapper.find('[data-testid="projectTableRow"]');
+const findStorageRow = () => wrapper.find(StorageRow);
+
 describe('Storage Counter project component', () => {
   beforeEach(() => {
     factory(data);
@@ -52,15 +55,18 @@ describe('Storage Counter project component', () => {
   describe('toggle row', () => {
     describe('on click', () => {
       it('toggles isOpen', () => {
-        expect(wrapper.vm.isOpen).toEqual(false);
+        expect(findStorageRow().exists()).toBe(false);
 
-        wrapper.find(GlButton).vm.$emit('click');
+        findTableRow().trigger('click');
 
-        expect(wrapper.vm.isOpen).toEqual(true);
+        wrapper.vm.$nextTick(() => {
+          expect(findStorageRow().exists()).toBe(true);
+          findTableRow().trigger('click');
 
-        wrapper.find(GlButton).vm.$emit('click');
-
-        expect(wrapper.vm.isOpen).toEqual(false);
+          wrapper.vm.$nextTick(() => {
+            expect(findStorageRow().exists()).toBe(false);
+          });
+        });
       });
     });
   });

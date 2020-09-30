@@ -8,20 +8,6 @@ RSpec.describe LicenseHelper do
     allow(Rails.application.routes).to receive(:default_url_options).and_return(url_options)
   end
 
-  describe '#api_license_url' do
-    it 'returns license API url' do
-      stub_default_url_options
-
-      expect(api_license_url(id: 1)).to eq('http://localhost/api/v4/license/1')
-    end
-
-    it 'returns license API url with relative url' do
-      stub_default_url_options(script_name: '/gitlab')
-
-      expect(api_license_url(id: 1)).to eq('http://localhost/gitlab/api/v4/license/1')
-    end
-  end
-
   describe '#current_active_user_count' do
     let(:license) { create(:license) }
 
@@ -40,12 +26,6 @@ RSpec.describe LicenseHelper do
 
         expect(current_active_user_count).to eq(User.active.count)
       end
-    end
-  end
-
-  describe '#guest_user_count' do
-    it 'returns the number of active guest users' do
-      expect(guest_user_count).to eq(User.active.count - User.active.excluding_guests.count)
     end
   end
 

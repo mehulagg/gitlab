@@ -9,11 +9,11 @@ RSpec.describe GeoNodeStatus, :geo do
   let!(:primary) { create(:geo_node, :primary) }
   let!(:secondary) { create(:geo_node) }
 
-  let!(:group)     { create(:group) }
-  let!(:project_1) { create(:project, group: group) }
-  let!(:project_2) { create(:project, group: group) }
-  let!(:project_3) { create(:project) }
-  let!(:project_4) { create(:project) }
+  let_it_be(:group)     { create(:group) }
+  let_it_be(:project_1) { create(:project, group: group) }
+  let_it_be(:project_2) { create(:project, group: group) }
+  let_it_be(:project_3) { create(:project) }
+  let_it_be(:project_4) { create(:project) }
 
   subject(:status) { described_class.current_node_status }
 
@@ -1147,10 +1147,11 @@ RSpec.describe GeoNodeStatus, :geo do
   end
 
   where(:replicator, :model_factory, :registry_factory) do
-    Geo::MergeRequestDiffReplicator | :external_merge_request_diff | :geo_merge_request_diff_registry
-    Geo::PackageFileReplicator | :package_file | :geo_package_file_registry
-    Geo::TerraformStateReplicator | :terraform_state | :geo_terraform_state_registry
-    Geo::SnippetRepositoryReplicator | :snippet_repository | :geo_snippet_repository_registry
+    Geo::MergeRequestDiffReplicator      | :external_merge_request_diff | :geo_merge_request_diff_registry
+    Geo::PackageFileReplicator           | :package_file                | :geo_package_file_registry
+    Geo::TerraformStateReplicator        | :terraform_state             | :geo_terraform_state_registry
+    Geo::TerraformStateVersionReplicator | :terraform_state_version     | :geo_terraform_state_version_registry
+    Geo::SnippetRepositoryReplicator     | :snippet_repository          | :geo_snippet_repository_registry
   end
 
   with_them do

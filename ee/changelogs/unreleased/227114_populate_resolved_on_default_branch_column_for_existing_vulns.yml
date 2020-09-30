@@ -1,5 +1,0 @@
----
-title: Populate `resolved_on_default_branch` column for existing vulnerabilities
-merge_request: 40755
-author:
-type: added

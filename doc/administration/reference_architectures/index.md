@@ -105,7 +105,7 @@ is the least complex to setup. This provides a point-in-time recovery of a prede
 > - Supported tiers: [GitLab Starter, Premium, and Ultimate](https://about.gitlab.com/pricing/)
 
 This requires separating out GitLab into multiple application nodes with an added
-[load balancer](../high_availability/load_balancer.md). The load balancer will distribute traffic
+[load balancer](../load_balancer.md). The load balancer will distribute traffic
 across GitLab application nodes. Meanwhile, each application node connects to a
 shared file server and database systems on the back end. This way, if one of the
 application servers fails, the workflow is not interrupted.
@@ -147,7 +147,7 @@ is recommended.
 > - Required domain knowledge: Storage replication
 > - Supported tiers: [GitLab Premium and Ultimate](https://about.gitlab.com/pricing/)
 
-[GitLab Geo](../geo/replication/index.md) allows you to replicate your GitLab
+[GitLab Geo](../geo/index.md) allows you to replicate your GitLab
 instance to other geographical locations as a read-only fully operational instance
 that can also be promoted in case of disaster.
 

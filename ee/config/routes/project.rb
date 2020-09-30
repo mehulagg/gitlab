@@ -16,7 +16,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
 
         namespace :quality do
-          resources :test_cases, only: [:index]
+          resources :test_cases, only: [:index, :new]
         end
 
         resources :autocomplete_sources, only: [] do
@@ -59,6 +59,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
             resource :sast, only: [:show, :create], controller: :sast_configuration
+            resource :dast_profiles, only: [:show] do
+              resources :dast_site_profiles, only: [:new, :edit]
+              resources :dast_scanner_profiles, only: [:new, :edit]
+            end
           end
 
           resource :discover, only: [:show], controller: :discover
@@ -68,6 +72,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
+              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do
@@ -91,11 +96,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
-          scope :profiles do
-            root 'dast_profiles#index', as: 'profiles'
-            resources :dast_site_profiles, only: [:new, :edit]
-            resources :dast_scanner_profiles, only: [:new, :edit]
-          end
         end
 
         namespace :integrations do

@@ -15,7 +15,8 @@ class Projects::PipelinesController < Projects::ApplicationController
     push_frontend_feature_flag(:filter_pipelines_search, project, default_enabled: true)
     push_frontend_feature_flag(:dag_pipeline_tab, project, default_enabled: true)
     push_frontend_feature_flag(:pipelines_security_report_summary, project)
-    push_frontend_feature_flag(:new_pipeline_form)
+    push_frontend_feature_flag(:new_pipeline_form, project)
+    push_frontend_feature_flag(:graphql_pipeline_header, project, type: :development, default_enabled: false)
   end
   before_action :ensure_pipeline, only: [:show]
 
@@ -78,7 +79,10 @@ class Projects::PipelinesController < Projects::ApplicationController
                          .represent(@pipeline),
                  status: :created
         else
-          render json: @pipeline.errors, status: :bad_request
+          render json: { errors: @pipeline.error_messages.map(&:content),
+                         warnings: @pipeline.warning_messages(limit: ::Gitlab::Ci::Warnings::MAX_LIMIT).map(&:content),
+                         total_warnings: @pipeline.warning_messages.length },
+                 status: :bad_request
         end
       end
     end

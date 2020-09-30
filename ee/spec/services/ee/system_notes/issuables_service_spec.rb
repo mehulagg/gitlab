@@ -13,36 +13,6 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
   let(:service) { described_class.new(noteable: noteable, project: project, author: author) }
 
-  describe '#change_weight_note' do
-    context 'when weight changed' do
-      let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', weight: 4) }
-
-      subject { service.change_weight_note }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'weight' }
-      end
-
-      it 'sets the note text' do
-        expect(subject.note).to eq "changed weight to **4**"
-      end
-    end
-
-    context 'when weight removed' do
-      let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', weight: nil) }
-
-      subject { service.change_weight_note }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'weight' }
-      end
-
-      it 'sets the note text' do
-        expect(subject.note).to eq 'removed the weight'
-      end
-    end
-  end
-
   describe '#change_health_status_note' do
     context 'when health_status changed' do
       let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', health_status: 'at_risk') }
@@ -84,60 +54,6 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
     it 'sets the note text' do
       expect(subject.note).to eq 'published this issue to the status page'
-    end
-  end
-
-  describe '#change_iteration' do
-    subject { service.change_iteration(iteration) }
-
-    context 'for a project iteration' do
-      let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'iteration' }
-      end
-
-      it_behaves_like 'a note with overridable created_at'
-
-      context 'when iteration added' do
-        it 'sets the note text' do
-          reference = iteration.to_reference(format: :id)
-
-          expect(subject.note).to eq "changed iteration to #{reference}"
-        end
-      end
-
-      context 'when iteration removed' do
-        let(:iteration) { nil }
-
-        it 'sets the note text' do
-          expect(subject.note).to eq 'removed iteration'
-        end
-      end
-    end
-
-    context 'for a group iteration' do
-      let(:iteration) { create(:iteration, group: group) }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'iteration' }
-      end
-
-      it_behaves_like 'a note with overridable created_at'
-
-      context 'when iteration added' do
-        it 'sets the note text to use the iteration id' do
-          expect(subject.note).to eq "changed iteration to #{iteration.to_reference(format: :id)}"
-        end
-      end
-
-      context 'when iteration removed' do
-        let(:iteration) { nil }
-
-        it 'sets the note text' do
-          expect(subject.note).to eq 'removed iteration'
-        end
-      end
     end
   end
 end

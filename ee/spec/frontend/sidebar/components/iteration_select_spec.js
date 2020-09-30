@@ -124,7 +124,7 @@ describe('IterationSelect', () => {
 
     describe('when user is editing', () => {
       describe('when rendering the dropdown', () => {
-        it('shows GlNewDropdown', () => {
+        it('shows GlDropdown', () => {
           createComponent({ props: { canEdit: true }, data: { editing: true } });
 
           expect(wrapper.find(GlDropdown).isVisible()).toBe(true);

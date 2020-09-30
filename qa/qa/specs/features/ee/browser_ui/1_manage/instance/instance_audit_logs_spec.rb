@@ -97,14 +97,15 @@ module QA
       end
 
       context 'Start and stop user impersonation', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/739' do
+        let!(:user_for_impersonation) { Resource::User.fabricate_via_api! }
+
         before do
           sign_in
-          user = Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1)
           Page::Main::Menu.perform(&:go_to_admin_area)
           Page::Admin::Menu.perform(&:go_to_users_overview)
           Page::Admin::Overview::Users::Index.perform do |index|
-            index.search_user(user.username)
-            index.click_user(user.username)
+            index.search_user(user_for_impersonation.username)
+            index.click_user(user_for_impersonation.username)
           end
 
           Page::Admin::Overview::Users::Show.perform(&:click_impersonate_user)
@@ -113,6 +114,10 @@ module QA
         end
 
         it_behaves_like 'audit event', ["Started Impersonation", "Stopped Impersonation"]
+
+        after do
+          user_for_impersonation.remove_via_api!
+        end
       end
 
       def sign_in

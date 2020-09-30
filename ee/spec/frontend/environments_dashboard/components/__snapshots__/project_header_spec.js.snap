@@ -68,6 +68,7 @@ exports[`Project Header matches the snapshot 1`] = `
     >
       <li>
         <gl-button-stub
+          buttontextclasses=""
           category="primary"
           class="js-remove-button"
           icon=""

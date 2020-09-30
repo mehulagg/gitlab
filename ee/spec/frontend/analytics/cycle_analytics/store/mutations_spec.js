@@ -7,7 +7,6 @@ import {
   codeStage,
   stagingStage,
   reviewStage,
-  totalStage,
   startDate,
   endDate,
   selectedProjects,
@@ -63,7 +62,6 @@ describe('Cycle analytics mutations', () => {
   it.each`
     mutation                                   | payload                                  | expectedState
     ${types.SET_FEATURE_FLAGS}                 | ${{ hasDurationChart: true }}            | ${{ featureFlags: { hasDurationChart: true } }}
-    ${types.SET_SELECTED_GROUP}                | ${{ fullPath: 'cool-beans' }}            | ${{ selectedGroup: { fullPath: 'cool-beans' }, selectedProjects: [] }}
     ${types.SET_SELECTED_PROJECTS}             | ${selectedProjects}                      | ${{ selectedProjects }}
     ${types.SET_DATE_RANGE}                    | ${{ startDate, endDate }}                | ${{ startDate, endDate }}
     ${types.SET_SELECTED_STAGE}                | ${{ id: 'first-stage' }}                 | ${{ selectedStage: { id: 'first-stage' } }}
@@ -130,7 +128,7 @@ describe('Cycle analytics mutations', () => {
       });
 
       it('will convert the stats object to stages', () => {
-        [issueStage, planStage, codeStage, stagingStage, reviewStage, totalStage].forEach(stage => {
+        [issueStage, planStage, codeStage, stagingStage, reviewStage].forEach(stage => {
           expect(state.stages).toContainEqual(stage);
         });
       });
@@ -149,7 +147,7 @@ describe('Cycle analytics mutations', () => {
   });
 
   describe(`${types.RECEIVE_STAGE_MEDIANS_SUCCESS}`, () => {
-    it('sets each id as a key in the median object with the corresponding value', () => {
+    it('sets each id as a key in the median object with the corresponding value and error', () => {
       const stateWithData = {
         medians: {},
       };
@@ -159,7 +157,10 @@ describe('Cycle analytics mutations', () => {
         { id: 2, value: 10 },
       ]);
 
-      expect(stateWithData.medians).toEqual({ '1': 20, '2': 10 });
+      expect(stateWithData.medians).toEqual({
+        '1': { value: 20, error: null },
+        '2': { value: 10, error: null },
+      });
     });
   });
 
@@ -174,7 +175,6 @@ describe('Cycle analytics mutations', () => {
     it.each`
       stateKey              | expectedState
       ${'isLoading'}        | ${true}
-      ${'selectedGroup'}    | ${initialData.group}
       ${'selectedProjects'} | ${initialData.selectedProjects}
       ${'startDate'}        | ${initialData.createdAfter}
       ${'endDate'}          | ${initialData.createdBefore}

@@ -121,11 +121,6 @@ module EE
       end
 
       with_scope :subject
-      condition(:feature_flags_disabled) do
-        !@subject.feature_available?(:feature_flags)
-      end
-
-      with_scope :subject
       condition(:code_review_analytics_enabled) do
         @subject.feature_available?(:code_review_analytics, @user)
       end
@@ -142,6 +137,11 @@ module EE
         @subject.root_namespace.over_storage_limit?
       end
 
+      with_scope :subject
+      condition(:feature_flags_related_issues_disabled) do
+        !@subject.feature_available?(:feature_flags_related_issues)
+      end
+
       rule { visual_review_bot }.policy do
         prevent :read_note
         enable :create_note
@@ -152,6 +152,10 @@ module EE
         prevent :create_merge_request_in
         prevent :create_merge_request_from
         prevent :push_code
+      end
+
+      rule { feature_flags_related_issues_disabled | repository_disabled }.policy do
+        prevent :admin_feature_flags_issue_links
       end
 
       rule { ~group_timelogs_available }.prevent :read_group_timelogs
@@ -171,13 +175,8 @@ module EE
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
         enable :update_vulnerability_feedback
-        enable :read_feature_flag
-        enable :create_feature_flag
-        enable :update_feature_flag
-        enable :destroy_feature_flag
-        enable :admin_feature_flag
-        enable :admin_feature_flags_user_lists
         enable :read_ci_minutes_quota
+        enable :admin_feature_flags_issue_links
       end
 
       rule { can?(:developer_access) & iterations_available }.policy do
@@ -223,16 +222,10 @@ module EE
 
       rule { deploy_board_disabled & ~is_development }.prevent :read_deploy_board
 
-      rule { feature_flags_disabled | repository_disabled }.policy do
-        prevent(*create_read_update_admin_destroy(:feature_flag))
-        prevent(:admin_feature_flags_user_lists)
-      end
-
       rule { can?(:maintainer_access) }.policy do
         enable :push_code_to_protected_branches
         enable :admin_path_locks
         enable :update_approvers
-        enable :admin_feature_flags_client
         enable :modify_approvers_rules
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting

@@ -274,7 +274,7 @@ Where:
 Install the latest version of a package using the following command:
 
 ```shell
-pip install --index-url https://__token__:<personal_access_token>@gitlab.com/api/v4/projects/<project_id>/packages/pypi/simple --no-deps <package_name>
+pip install --extra-index-url https://__token__:<personal_access_token>@gitlab.com/api/v4/projects/<project_id>/packages/pypi/simple --no-deps <package_name>
 ```
 
 Where:
@@ -287,7 +287,7 @@ If you were following the guide above and want to test installing the
 `MyPyPiPackage` package, you can run the following:
 
 ```shell
-pip install mypypipackage --no-deps --index-url https://__token__:<personal_access_token>@gitlab.com/api/v4/projects/<your_project_id>/packages/pypi/simple
+pip install mypypipackage --no-deps --extra-index-url https://__token__:<personal_access_token>@gitlab.com/api/v4/projects/<your_project_id>/packages/pypi/simple
 ```
 
 This should result in the following:
@@ -302,7 +302,7 @@ Successfully installed mypypipackage-0.0.1
 
 ## Using GitLab CI with PyPI packages
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11678) in GitLab 13.4.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202012) in GitLab 13.4.
 
 To work with PyPI commands within [GitLab CI/CD](./../../../ci/README.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.

@@ -27,12 +27,16 @@ export default () => {
     projectEndpoint: type === ITEM_TYPE.PROJECT ? fullPath : null,
   });
   const {
+    source_branch_name = null,
+    target_branch_name = null,
     assignee_username = null,
     author_username = null,
     milestone_title = null,
     label_name = [],
   } = urlQueryToFilter(window.location.search);
   store.dispatch('filters/initialize', {
+    selectedSourceBranch: source_branch_name,
+    selectedTargetBranch: target_branch_name,
     selectedAssignee: assignee_username,
     selectedAuthor: author_username,
     selectedMilestone: milestone_title,

@@ -19,6 +19,13 @@ module Ci
 
     private
 
+    def query
+      Ci::DailyBuildGroupReportResult.with_included_projects.recent_results(
+        query_params,
+        limit: limit
+      )
+    end
+
     def query_allowed?
       can?(current_user, :read_group_build_report_results, @group)
     end

@@ -1,0 +1,7 @@
+---
+name: disable_merge_trains
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24844
+rollout_issue_url: 
+group: group::continuous integration
+type: development
+default_enabled: false

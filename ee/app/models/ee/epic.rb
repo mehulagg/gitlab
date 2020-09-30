@@ -12,9 +12,11 @@ module EE
       include Referable
       include Awardable
       include LabelEventable
+      include StateEventable
       include UsageStatistics
       include FromUnion
       include EpicTreeSorting
+      include Presentable
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],
@@ -71,6 +73,8 @@ module EE
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
 
+      scope :with_web_entity_associations, -> { preload(:author, group: [:ip_restrictions, :route]) }
+
       scope :within_timeframe, -> (start_date, end_date) do
         where('start_date is not NULL or end_date is not NULL')
           .where('start_date is NULL or start_date <= ?', end_date)
@@ -122,6 +126,10 @@ module EE
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
 
+      def root_epic_tree_node?
+        parent_id.nil?
+      end
+
       private
 
       def set_fixed_start_date
@@ -169,7 +177,7 @@ module EE
             \/-\/epics
             \/(?<epic>\d+)
             (?<path>
-              (\/[a-z0-9_=-]+)*
+              (\/[a-z0-9_=-]+)*\/*
             )?
             (?<query>
               \?[a-z0-9_=-]+
@@ -226,6 +234,10 @@ module EE
         return items unless ids
 
         items.where("epic_issues.epic_id": ids)
+      end
+
+      def search(query)
+        fuzzy_search(query, [:title, :description])
       end
     end
 

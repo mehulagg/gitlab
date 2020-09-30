@@ -3,6 +3,10 @@ import * as types from './mutation_types';
 export default {
   [types.SET_SELECTED_FILTERS](state, params) {
     const {
+      selectedSourceBranch = null,
+      selectedSourceBranchList = [],
+      selectedTargetBranch = null,
+      selectedTargetBranchList = [],
       selectedAuthor = null,
       selectedAuthorList = [],
       selectedMilestone = null,
@@ -12,6 +16,10 @@ export default {
       selectedLabel = null,
       selectedLabelList = [],
     } = params;
+    state.branches.source.selected = selectedSourceBranch;
+    state.branches.source.selectedList = selectedSourceBranchList;
+    state.branches.target.selected = selectedTargetBranch;
+    state.branches.target.selectedList = selectedTargetBranchList;
     state.authors.selected = selectedAuthor;
     state.authors.selectedList = selectedAuthorList;
     state.assignees.selected = selectedAssignee;
@@ -84,5 +92,18 @@ export default {
     state.assignees.isLoading = false;
     state.assignees.errorCode = errorCode;
     state.assignees.data = [];
+  },
+  [types.REQUEST_BRANCHES](state) {
+    state.branches.isLoading = true;
+  },
+  [types.RECEIVE_BRANCHES_SUCCESS](state, data) {
+    state.branches.isLoading = false;
+    state.branches.data = data;
+    state.branches.errorCode = null;
+  },
+  [types.RECEIVE_BRANCHES_ERROR](state, errorCode) {
+    state.branches.isLoading = false;
+    state.branches.errorCode = errorCode;
+    state.branches.data = [];
   },
 };

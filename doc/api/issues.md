@@ -663,10 +663,10 @@ Example response:
    "weight": null,
   "has_tasks": false,
   "_links": {
-    "self": "http://gitlab.dummy:3000/api/v4/projects/1/issues/1",
-    "notes": "http://gitlab.dummy:3000/api/v4/projects/1/issues/1/notes",
-    "award_emoji": "http://gitlab.dummy:3000/api/v4/projects/1/issues/1/award_emoji",
-    "project": "http://gitlab.dummy:3000/api/v4/projects/1"
+    "self": "http://gitlab.example:3000/api/v4/projects/1/issues/1",
+    "notes": "http://gitlab.example:3000/api/v4/projects/1/issues/1/notes",
+    "award_emoji": "http://gitlab.example:3000/api/v4/projects/1/issues/1/award_emoji",
+    "project": "http://gitlab.example:3000/api/v4/projects/1"
   },
   "references": {
     "short": "#1",
@@ -1496,10 +1496,10 @@ Example response:
 }
 ```
 
-## Create a todo
+## Create a to-do
 
-Manually creates a todo for the current user on an issue. If
-there already exists a todo for the user on that issue, status code `304` is
+Manually creates a to-do for the current user on an issue. If
+there already exists a to-do for the user on that issue, status code `304` is
 returned.
 
 ```plaintext

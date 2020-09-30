@@ -172,7 +172,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:historical_data
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -236,7 +236,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:sync_seat_link
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -635,6 +635,14 @@
   :weight: 2
   :idempotent:
   :tags: []
+- :name: merge_request_reset_approvals
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: new_epic
   :feature_category: :epics
   :has_external_dependencies:
@@ -692,7 +700,7 @@
   :idempotent: true
   :tags: []
 - :name: sync_seat_link_request
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown

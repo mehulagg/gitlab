@@ -45,10 +45,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    boardId: {
-      type: String,
-      required: true,
-    },
     canAdminList: {
       type: Boolean,
       required: false,
@@ -58,6 +54,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+  },
+  inject: {
+    boardId: {
+      type: String,
     },
   },
   data() {
@@ -129,6 +130,9 @@ export default {
     collapsedTooltipTitle() {
       return this.listTitle || this.listAssignee;
     },
+    shouldDisplaySwimlanes() {
+      return this.glFeatures.boardsWithSwimlanes && this.isSwimlanesOn;
+    },
   },
   methods: {
     ...mapActions(['updateList']),
@@ -158,7 +162,7 @@ export default {
       }
     },
     updateListFunction() {
-      if (this.glFeatures.boardsWithSwimlanes && this.isSwimlanesHeader) {
+      if (this.shouldDisplaySwimlanes || this.glFeatures.graphqlBoardLists) {
         this.updateList({ listId: this.list.id, collapsed: !this.list.isExpanded });
       } else {
         this.list.update();
@@ -184,7 +188,7 @@ export default {
     <h3
       :class="{
         'user-can-drag': !disabled && !list.preset,
-        'gl-py-3': !list.isExpanded && !isSwimlanesHeader,
+        'gl-py-3 gl-h-full!': !list.isExpanded && !isSwimlanesHeader,
         'gl-border-b-0': !list.isExpanded || isSwimlanesHeader,
         'gl-py-2': !list.isExpanded && isSwimlanesHeader,
       }"
