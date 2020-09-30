@@ -3,6 +3,7 @@ import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import Home from '~/static_site_editor/pages/home.vue';
 import SkeletonLoader from '~/static_site_editor/components/skeleton_loader.vue';
 import EditArea from '~/static_site_editor/components/edit_area.vue';
+import EditMetaModal from '~/static_site_editor/components/edit_meta_modal.vue';
 import InvalidContentMessage from '~/static_site_editor/components/invalid_content_message.vue';
 import SubmitChangesError from '~/static_site_editor/components/submit_changes_error.vue';
 import submitContentChangesMutation from '~/static_site_editor/graphql/mutations/submit_content_changes.mutation.graphql';
@@ -21,6 +22,7 @@ import {
   savedContentMeta,
   submitChangesError,
   trackingCategory,
+  images,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -85,6 +87,7 @@ describe('static_site_editor/pages/home', () => {
   };
 
   const findEditArea = () => wrapper.find(EditArea);
+  const findEditMetaModal = () => wrapper.find(EditMetaModal);
   const findInvalidContentMessage = () => wrapper.find(InvalidContentMessage);
   const findSkeletonLoader = () => wrapper.find(SkeletonLoader);
   const findSubmitChangesError = () => wrapper.find(SubmitChangesError);
@@ -163,6 +166,27 @@ describe('static_site_editor/pages/home', () => {
     expect(findInvalidContentMessage().exists()).toBe(false);
   });
 
+  describe('when preparing submission', () => {
+    beforeEach(() => {
+      buildWrapper();
+      findEditArea().vm.$emit('submit', { content });
+
+      return wrapper.vm.$nextTick();
+    });
+
+    it('opens the merge request meta modal', () => {
+      expect(findEditMetaModal().exists()).toBe(true);
+    });
+
+    it('closes the merge request meta modal', () => {
+      findEditMetaModal().vm.$emit('hide');
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findEditMetaModal().exists()).toBe(false);
+      });
+    });
+  });
+
   describe('when submitting changes fails', () => {
     const setupMutateMock = () => {
       mutateMock
@@ -173,8 +197,8 @@ describe('static_site_editor/pages/home', () => {
     beforeEach(() => {
       setupMutateMock();
 
-      buildWrapper();
-      findEditArea().vm.$emit('submit', { content });
+      buildWrapper({ isModalOpen: true, content });
+      findEditMetaModal().vm.$emit('primary', mergeRequestMeta);
 
       return wrapper.vm.$nextTick();
     });
@@ -200,12 +224,6 @@ describe('static_site_editor/pages/home', () => {
     });
   });
 
-  it('does not display submit changes error when an error does not exist', () => {
-    buildWrapper();
-
-    expect(findSubmitChangesError().exists()).toBe(false);
-  });
-
   describe('when submitting changes succeeds', () => {
     const newContent = `new ${content}`;
 
@@ -216,8 +234,8 @@ describe('static_site_editor/pages/home', () => {
         },
       });
 
-      buildWrapper();
-      findEditArea().vm.$emit('submit', { content: newContent });
+      buildWrapper({ isModalOpen: true, content: newContent, images });
+      findEditMetaModal().vm.$emit('primary', mergeRequestMeta);
 
       return wrapper.vm.$nextTick();
     });
@@ -242,7 +260,7 @@ describe('static_site_editor/pages/home', () => {
             project,
             sourcePath,
             username,
-            images: undefined,
+            images,
             mergeRequestMeta,
           },
         },
@@ -252,6 +270,12 @@ describe('static_site_editor/pages/home', () => {
     it('transitions to the SUCCESS route', () => {
       expect($router.push).toHaveBeenCalledWith(SUCCESS_ROUTE);
     });
+  });
+
+  it('does not display submit changes error when an error does not exist', () => {
+    buildWrapper();
+
+    expect(findSubmitChangesError().exists()).toBe(false);
   });
 
   it('tracks when editor is initialized on the mounted lifecycle hook', () => {
