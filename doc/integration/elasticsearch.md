@@ -10,8 +10,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/109 "Elasticsearch Merge Request") in GitLab [Starter](https://about.gitlab.com/pricing/) 8.4.
 > - Support for [Amazon Elasticsearch](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-gsg.html) was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1305) in GitLab [Starter](https://about.gitlab.com/pricing/) 9.0.
 
-This document describes how to set up Elasticsearch with GitLab. After
-Elasticsearch is enabled, you'll have the benefit of fast search response times
+This document describes how to enable Advanced Global Search. After
+Advanced Global Search is enabled, you'll have the benefit of fast search response times
 and the advantage of the following special searches:
 
 - [Advanced Search](../user/search/advanced_global_search.md)
@@ -162,13 +162,13 @@ If you see an error such as `Permission denied - /home/git/gitlab-elasticsearch-
 may need to set the `production -> elasticsearch -> indexer_path` setting in your `gitlab.yml` file to
 `/usr/local/bin/gitlab-elasticsearch-indexer`, which is where the binary is installed.
 
-## Enabling Elasticsearch
+## Enabling Advanced Global Search
 
 NOTE: **Note:**
 For GitLab instances with more than 50GB repository data you can follow the instructions for [Indexing large
 instances](#indexing-large-instances) below.
 
-To enable Elasticsearch, you need to have admin access to GitLab:
+To enable Advanced Global Search, you need to have admin access to GitLab:
 
 1. Navigate to **Admin Area** (wrench icon), then **Settings > General**
    and expand the **Advanced Search** section.
@@ -177,7 +177,7 @@ To enable Elasticsearch, you need to have admin access to GitLab:
    To see the Advanced Search section, you need an active Starter
    [license](../user/admin_area/license.md).
 
-1. Configure the [Elasticsearch settings](#elasticsearch-configuration) for
+1. Configure the [Advanced Search settings](#advanced-search-configuration) for
    your Elasticsearch cluster. Do not enable **Elasticsearch indexing** or
    **Search with Elasticsearch enabled** yet.
 1. Click **Save changes** for the changes to take effect.
@@ -211,7 +211,7 @@ To enable Elasticsearch, you need to have admin access to GitLab:
    **Admin Area > Settings > General > Advanced Search** and click **Save
    changes**.
 
-### Elasticsearch configuration
+### Advanced Search configuration
 
 The following Elasticsearch settings are available:
 
@@ -243,14 +243,14 @@ If you select `Limit namespaces and projects that can be indexed`, more options 
 You can select namespaces and projects to index exclusively. Note that if the namespace is a group it will include
 any sub-groups and projects belonging to those sub-groups to be indexed as well.
 
-Elasticsearch only provides cross-group code/commit search (global) if all name-spaces are indexed. In this particular scenario where only a subset of namespaces are indexed, a global search will not provide a code or commit scope. This will be possible only in the scope of an indexed namespace. Currently there is no way to code/commit search in multiple indexed namespaces (when only a subset of namespaces has been indexed). For example if two groups are indexed, there is no way to run a single code search on both. You can only run a code search on the first group and then on the second.
+Advanced Search only provides cross-group code/commit search (global) if all name-spaces are indexed. In this particular scenario where only a subset of namespaces are indexed, a global search will not provide a code or commit scope. This will be possible only in the scope of an indexed namespace. Currently there is no way to code/commit search in multiple indexed namespaces (when only a subset of namespaces has been indexed). For example if two groups are indexed, there is no way to run a single code search on both. You can only run a code search on the first group and then on the second.
 
 You can filter the selection dropdown by writing part of the namespace or project name you're interested in.
 
 ![limit namespace filter](img/limit_namespace_filter.png)
 
 NOTE: **Note:**
-If no namespaces or projects are selected, no Elasticsearch indexing will take place.
+If no namespaces or projects are selected, no Advanced Search indexing will take place.
 
 CAUTION: **Warning:**
 If you have already indexed your instance, you will have to regenerate the index in order to delete all existing data
@@ -258,7 +258,7 @@ for filtering to work correctly. To do this run the Rake tasks `gitlab:elastic:r
 `gitlab:elastic:clear_index_status`. Afterwards, removing a namespace or a project from the list will delete the data
 from the Elasticsearch index as expected.
 
-## Disabling Elasticsearch
+## Disabling Advanced Search
 
 To disable the Elasticsearch integration:
 
@@ -288,7 +288,7 @@ alias such as we can change the underlying index at will.
 
 NOTE: **Note:**
 Any index attached to the production alias is deemed a `primary` and will be
-used by the GitLab Elasticsearch integration.
+used by the GitLab Advanced Search integration.
 
 ### Pause the indexing
 
@@ -426,7 +426,7 @@ After the reindexing is completed, the original index will be scheduled to be de
 
 While the reindexing is running, you will be able to follow its progress under that same section.
 
-## GitLab Elasticsearch Rake tasks
+## GitLab Advanced Search Rake tasks
 
 Rake tasks are available to:
 
@@ -472,7 +472,7 @@ Indexing project repositories...I, [2019-03-04T21:27:03.083410 #3384]  INFO -- :
 I, [2019-03-04T21:27:05.215266 #3384]  INFO -- : Indexing GitLab User / test (ID=33) is done!
 ```
 
-## Elasticsearch index scopes
+## Advanced Search index scopes
 
 When performing a search, the GitLab index will use the following scopes:
 
@@ -504,7 +504,7 @@ For basic guidance on choosing a cluster configuration you may refer to [Elastic
 - `refresh_interval` is a per index setting. You may want to adjust that from default `1s` to a bigger value if you don't need data in realtime. This will change how soon you will see fresh results. If that's important for you, you should leave it as close as possible to the default value.
 - You might want to raise [`indices.memory.index_buffer_size`](https://www.elastic.co/guide/en/elasticsearch/reference/current/indexing-buffer.html) to 30% or 40% if you have a lot of heavy indexing operations.
 
-### Elasticsearch integration settings guidance
+### Advanced Search integration settings guidance
 
 - The `Number of Elasticsearch shards` setting usually corresponds with the number of CPUs available in your cluster. For example, if you have a 3-node cluster with 4 cores each, this means you will benefit from having at least 3*4=12 shards in the cluster. Please note, it's only possible to change the shards number by using [Split index API](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-split-index.html) or by reindexing to a different index with a changed number of shards.
 - The `Number of Elasticsearch replicas` setting should most of the time be equal to `1` (each shard will have 1 replica). Using `0` is not recommended, because losing one node will corrupt the index.
@@ -877,6 +877,6 @@ Improvements to the `code_analyzer` pattern and filters are being discussed in [
 Sometimes there may be issues with your Elasticsearch index data and as such
 GitLab will allow you to revert to "basic search" when there are no search
 results and assuming that basic search is supported in that scope. This "basic
-search" will behave as though you don't have Elasticsearch enabled at all for
+search" will behave as though you don't have Advanced Search enabled at all for
 your instance and search using other data sources (ie. PostgreSQL data and Git
 data).
