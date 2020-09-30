@@ -6553,11 +6553,6 @@ type GrafanaIntegration {
 
 type Group {
   """
-  Additional storage purchased for the root namespace in bytes
-  """
-  additionalPurchasedStorageSize: Float
-
-  """
   Indicates whether Auto DevOps is enabled for all projects within this group
   """
   autoDevopsEnabled: Boolean
@@ -10977,11 +10972,6 @@ enum MutationOperationMode {
 }
 
 type Namespace {
-  """
-  Additional storage purchased for the root namespace in bytes
-  """
-  additionalPurchasedStorageSize: Float
-
   """
   Description of the namespace
   """

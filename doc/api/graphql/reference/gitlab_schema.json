@@ -18297,20 +18297,6 @@
           "description": null,
           "fields": [
             {
-              "name": "additionalPurchasedStorageSize",
-              "description": "Additional storage purchased for the root namespace in bytes",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "autoDevopsEnabled",
               "description": "Indicates whether Auto DevOps is enabled for all projects within this group",
               "args": [
@@ -32736,20 +32722,6 @@
           "name": "Namespace",
           "description": null,
           "fields": [
-            {
-              "name": "additionalPurchasedStorageSize",
-              "description": "Additional storage purchased for the root namespace in bytes",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
             {
               "name": "description",
               "description": "Description of the namespace",

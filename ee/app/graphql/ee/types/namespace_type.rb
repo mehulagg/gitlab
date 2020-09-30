@@ -6,11 +6,6 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
-        field :additional_purchased_storage_size,
-              GraphQL::FLOAT_TYPE,
-              null: true,
-              description: 'Additional storage purchased for the root namespace in bytes'
-
         field :storage_size_limit,
               GraphQL::FLOAT_TYPE,
               null: true,
