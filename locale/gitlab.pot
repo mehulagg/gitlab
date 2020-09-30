@@ -15720,6 +15720,21 @@ msgstr ""
 msgid "Members|%{time} by %{user}"
 msgstr ""
 
+msgid "Members|Are you sure you want to deny %{usersName}'s request to join \"%{source}\""
+msgstr ""
+
+msgid "Members|Are you sure you want to remove %{usersName} from \"%{source}\""
+msgstr ""
+
+msgid "Members|Are you sure you want to remove this orphaned member from \"%{source}\""
+msgstr ""
+
+msgid "Members|Are you sure you want to revoke the invitation for %{inviteEmail} to join \"%{source}\""
+msgstr ""
+
+msgid "Members|Are you sure you want to withdraw your access request for \"%{source}\""
+msgstr ""
+
 msgid "Members|Expired"
 msgstr ""
 
@@ -15727,6 +15742,15 @@ msgid "Members|No expiration set"
 msgstr ""
 
 msgid "Members|in %{time}"
+msgstr ""
+
+msgid "Member|Deny access"
+msgstr ""
+
+msgid "Member|Remove member"
+msgstr ""
+
+msgid "Member|Revoke invite"
 msgstr ""
 
 msgid "Memory Usage"
