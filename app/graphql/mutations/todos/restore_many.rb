@@ -37,22 +37,16 @@ module Mutations
       private
 
       def gids_of(ids)
-        ids.map { |id| ::URI::GID.build(app: GlobalID.app, model_name: Todo.name, model_id: id, params: nil).to_s }
+        ids.map { |id| Gitlab::GlobalId.as_global_id(id, model_name: Todo.name).to_s }
       end
 
       def model_ids_of(ids)
         ids.map do |gid|
-          parsed_gid = ::URI::GID.parse(gid)
-          parsed_gid.model_id.to_i if accessible_todo?(parsed_gid)
+          parsed_gid = GitlabSchema.parse_gid(gid, expected_type: ::Todo)
+          parsed_gid.model_id.to_i
+        rescue Gitlab::Graphql::Errors::ArgumentError
+          next
         end.compact
-      end
-
-      def accessible_todo?(gid)
-        gid.app == GlobalID.app && todo?(gid)
-      end
-
-      def todo?(gid)
-        GlobalID.parse(gid)&.model_class&.ancestors&.include?(Todo)
       end
 
       def raise_too_many_todos_requested_error

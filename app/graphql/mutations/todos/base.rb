@@ -6,7 +6,7 @@ module Mutations
       private
 
       def find_object(id:)
-        GitlabSchema.object_from_id(id)
+        GitlabSchema.object_from_id(id, expected_type: ::Todo)
       end
 
       def map_to_global_ids(ids)
@@ -16,7 +16,7 @@ module Mutations
       end
 
       def to_global_id(id)
-        ::URI::GID.build(app: GlobalID.app, model_name: Todo.name, model_id: id, params: nil).to_s
+        Gitlab::GlobalId.as_global_id(id, model_name: Todo.name).to_s
       end
     end
   end

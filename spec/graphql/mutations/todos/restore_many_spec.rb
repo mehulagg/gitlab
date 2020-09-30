@@ -45,7 +45,8 @@ RSpec.describe Mutations::Todos::RestoreMany do
     end
 
     it 'ignores invalid GIDs' do
-      expect { mutation.resolve(ids: ['invalid_gid']) }.to raise_error(URI::BadURIError)
+      expect { mutation.resolve(ids: [author.to_global_id.to_s]) }
+        .not_to raise_error(Gitlab::Graphql::Errors::ArgumentError)
 
       expect_states_were_not_changed
     end
@@ -79,20 +80,9 @@ RSpec.describe Mutations::Todos::RestoreMany do
       expect { restore_mutation([todo1] * 51) }.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
     end
 
-    it 'does not update todos from another app' do
-      todo4 = create(:todo)
-      todo4_gid = ::URI::GID.parse("gid://otherapp/Todo/#{todo4.id}")
-
-      result = mutation.resolve(ids: [todo4_gid.to_s])
-
-      expect(result[:updated_ids]).to be_empty
-
-      expect_states_were_not_changed
-    end
-
     it 'does not update todos from another model' do
       todo4 = create(:todo)
-      todo4_gid = ::URI::GID.parse("gid://#{GlobalID.app}/Project/#{todo4.id}")
+      todo4_gid = Gitlab::GlobalId.as_global_id(todo4.id, model_name: Project.name).to_s
 
       result = mutation.resolve(ids: [todo4_gid.to_s])
 
