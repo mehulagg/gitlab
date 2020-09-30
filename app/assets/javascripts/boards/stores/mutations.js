@@ -10,11 +10,11 @@ const notImplemented = () => {
   throw new Error('Not implemented!');
 };
 
-const removeIssueFromList = (state, listId, issueId) => {
+export const removeIssueFromList = (state, listId, issueId) => {
   Vue.set(state.issuesByListId, listId, pull(state.issuesByListId[listId], issueId));
 };
 
-const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfterId, atIndex }) => {
+export const addIssueToList = ({ state, listId, issueId, moveBeforeId, moveAfterId, atIndex }) => {
   const listIssues = state.issuesByListId[listId];
   let newIndex = atIndex || 0;
   if (moveBeforeId) {

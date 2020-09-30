@@ -38,6 +38,11 @@ export default {
       required: false,
       default: false,
     },
+    epicId: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   data() {
     return {
@@ -56,6 +61,7 @@ export default {
         group: 'board-epics-swimlanes',
         tag: 'ul',
         'ghost-class': 'board-card-drag-active',
+        'data-epic-id': this.epicId,
         'data-list-id': this.list.id,
         value: this.issues,
       };
@@ -81,7 +87,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['setActiveId', 'moveIssue', 'fetchIssuesForList']),
+    ...mapActions(['setActiveId', 'moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -132,6 +138,7 @@ export default {
         toListId: to.dataset.listId,
         moveBeforeId,
         moveAfterId,
+        epicId: to.dataset.epicId || null,
       });
     },
   },

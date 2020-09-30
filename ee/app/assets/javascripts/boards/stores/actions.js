@@ -11,11 +11,13 @@ import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import { fullEpicId } from '../boards_util';
 import { formatListIssues, fullBoardId } from '~/boards/boards_util';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '~/boards/eventhub';
 
 import createDefaultClient from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
 import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
+import issueMoveListMutation from '../queries/issue_move_list.mutation.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
@@ -233,5 +235,51 @@ export default {
 
   resetEpics: ({ commit }) => {
     commit(types.RESET_EPICS);
+  },
+
+  moveIssue: (
+    { state, commit },
+    { issueId, issueIid, issuePath, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
+  ) => {
+    const originalIssue = state.issues[issueId];
+    const fromList = state.issuesByListId[fromListId];
+    const originalIndex = fromList.indexOf(Number(issueId));
+    commit(types.MOVE_ISSUE, {
+      originalIssue,
+      fromListId,
+      toListId,
+      moveBeforeId,
+      moveAfterId,
+      epicId,
+    });
+
+    const { boardId } = state.endpoints;
+    const [fullProjectPath] = issuePath.split(/[#]/);
+
+    gqlClient
+      .mutate({
+        mutation: issueMoveListMutation,
+        variables: {
+          projectPath: fullProjectPath,
+          boardId: fullBoardId(boardId),
+          iid: issueIid,
+          fromListId: getIdFromGraphQLId(fromListId),
+          toListId: getIdFromGraphQLId(toListId),
+          moveBeforeId,
+          moveAfterId,
+          epicId,
+        },
+      })
+      .then(({ data }) => {
+        if (data?.issueMoveList?.errors.length) {
+          commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex });
+        } else {
+          const issue = data.issueMoveList?.issue;
+          commit(types.MOVE_ISSUE_SUCCESS, { issue });
+        }
+      })
+      .catch(() =>
+        commit(types.MOVE_ISSUE_FAILURE, { originalIssue, fromListId, toListId, originalIndex }),
+      );
   },
 };
