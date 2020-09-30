@@ -7,6 +7,7 @@ query issueParticipants($id: IssueID!) {
           name
           webUrl
           avatarUrl
+          id
         }
       }
     }

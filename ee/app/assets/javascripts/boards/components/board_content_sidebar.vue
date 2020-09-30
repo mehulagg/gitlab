@@ -3,7 +3,6 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlDrawer } from '@gitlab/ui';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
-import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
@@ -12,7 +11,6 @@ import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdow
 export default {
   headerHeight: `${contentTop()}px`,
   components: {
-    IssuableAssignees,
     GlDrawer,
     IssuableTitle,
     BoardSidebarEpicSelect,
@@ -44,7 +42,6 @@ export default {
     </template>
 
     <template>
-      <issuable-assignees :users="getActiveIssue.assignees" />
       <board-editable-item :title="'Assignee'">
         <template #collapsed>
           <issuable-assignees :users="getActiveIssue.assignees" />

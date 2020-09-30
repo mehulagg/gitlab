@@ -270,26 +270,26 @@ export default {
       );
   },
 
-  setAssignees: ({ commit, getters }) => {
+  setAssignees: ({ commit, getters }, assigneeUsernames) => {
     return gqlClient
       .mutate({
         mutation: updateAssignees,
         variables: {
           iid: getters.getActiveIssue.iid,
           projectPath: 'h5bp/html5-boilerplate',
-          assigneeUsernames: [], // hard coded
+          assigneeUsernames,
         },
       })
       .then(({ data }) => {
         commit('UPDATE_ISSUE_BY_ID', {
           issueId: getters.getActiveIssue.id,
           prop: 'assignees',
-          value: [],
+          value: data.issueSetAssignees.issue.assignees.edges.map(({ node }) => node),
         });
       });
   },
 
-  getAssignees: ({}, id) => {
+  getIssueParticipants: ({}, id) => {
     return gqlClient.query({
       query: getIssueParticipants,
       variables: {
