@@ -1,3 +1,3 @@
-import initFeatureFlags from 'ee/feature_flags';
+import initFeatureFlags from '~/feature_flags';
 
 document.addEventListener('DOMContentLoaded', initFeatureFlags);

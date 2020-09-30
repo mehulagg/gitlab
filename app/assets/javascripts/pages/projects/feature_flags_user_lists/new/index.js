@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import NewUserList from 'ee/user_lists/components/new_user_list.vue';
-import createStore from 'ee/user_lists/store/new';
+import NewUserList from '~/user_lists/components/new_user_list.vue';
+import createStore from '~/user_lists/store/new';
 
 Vue.use(Vuex);
 
