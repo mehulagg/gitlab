@@ -18,7 +18,7 @@ module EE
     end
 
     def by_using_license_seat(users)
-      return users unless params[:using_license_seat]
+      return users unless current_user&.admin? && params[:using_license_seat]
 
       users.using_license_seat
     end

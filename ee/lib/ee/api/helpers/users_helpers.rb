@@ -12,6 +12,7 @@ module EE
             optional :shared_runners_minutes_limit, type: Integer, desc: 'Pipeline minutes quota for this user'
             optional :extra_shared_runners_minutes_limit, type: Integer, desc: '(admin-only) Extra pipeline minutes quota for this user'
             optional :group_id_for_saml, type: Integer, desc: 'ID for group where SAML has been configured'
+            optional :using_license_seat, type: Grape::API::Boolean, default: false, desc: 'Filters only users that are using a license seat'
           end
 
           params :optional_index_params_ee do

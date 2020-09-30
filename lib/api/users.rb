@@ -91,6 +91,7 @@ module API
         use :pagination
         use :with_custom_attributes
         use :optional_index_params_ee
+        use :optional_params_ee
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get do
