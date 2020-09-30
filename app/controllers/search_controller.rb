@@ -23,6 +23,10 @@ class SearchController < ApplicationController
     search_term_present && !params[:project_id].present?
   end
 
+  before_action do
+    push_frontend_feature_flag(:search_filter_by_confidential, @group)
+  end
+
   layout 'search'
 
   def show
