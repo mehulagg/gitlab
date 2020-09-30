@@ -13,7 +13,7 @@ module Gitlab
         strong_memoize(:median_time) do
           next if @due_dates.empty?
 
-          array = @due_dates.map{ |date| date.to_time.to_f }
+          array = @due_dates.map { |date| date.to_time.to_f }
           sorted = array.sort
           len = sorted.length
 
