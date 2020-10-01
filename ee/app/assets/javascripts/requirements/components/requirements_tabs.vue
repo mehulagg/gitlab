@@ -65,7 +65,7 @@ export default {
       </template>
     </gl-tab>
   </gl-tabs>
-  <div v-else-if="isOpenTab && canCreateRequirement" class="nav-controls">
+  <div v-if="isOpenTab && canCreateRequirement" class="nav-controls">
     <gl-button
       category="primary"
       variant="success"
