@@ -12,6 +12,12 @@ RSpec.shared_examples 'spam flag is present' do
 end
 
 RSpec.shared_examples 'can raise spam flag' do
+  it 'spam parameters are passed to the service' do
+    expect(service).to receive(:new).with(anything, anything, hash_including(api: true, request: instance_of(ActionDispatch::Request)))
+
+    subject
+  end
+
   context 'when the snippet is detected as spam' do
     it 'raises spam flag' do
       allow_next_instance_of(service) do |instance|

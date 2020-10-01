@@ -55,12 +55,12 @@ module Mutations
       end
 
       def update_params(args)
-        args.tap do |update_args|
-          # We need to rename `blob_actions` into `snippet_actions` because
-          # it's the expected key param
-          update_args[:snippet_actions] = update_args.delete(:blob_actions)&.map(&:to_h)
-          update_args[:api] = true
-          update_args[:request] = context[:request]
+        with_spam_params do |spam_params|
+          args.tap do |update_args|
+            # We need to rename `blob_actions` into `snippet_actions` because
+            # it's the expected key param
+            update_args[:snippet_actions] = update_args.delete(:blob_actions)&.map(&:to_h)
+          end.merge(spam_params)
         end
       end
     end

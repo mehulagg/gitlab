@@ -83,14 +83,16 @@ module Mutations
       end
 
       def create_params(args)
-        args.tap do |create_args|
-          # We need to rename `blob_actions` into `snippet_actions` because
-          # it's the expected key param
-          create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
+        with_spam_params do |spam_params|
+          args.tap do |create_args|
+            # We need to rename `blob_actions` into `snippet_actions` because
+            # it's the expected key param
+            create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
 
-          # We need to rename `uploaded_files` into `files` because
-          # it's the expected key param
-          create_args[:files] = create_args.delete(:uploaded_files)
+            # We need to rename `uploaded_files` into `files` because
+            # it's the expected key param
+            create_args[:files] = create_args.delete(:uploaded_files)
+          end.merge(spam_params)
         end
       end
     end
