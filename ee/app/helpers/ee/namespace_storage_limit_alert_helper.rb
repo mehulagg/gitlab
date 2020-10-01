@@ -32,6 +32,12 @@ module EE
       payload
     end
 
+    def usage_quotas_alert(namespace)
+      return {} if current_user.nil?
+
+      Namespaces::CheckStorageSizeService.new(namespace, current_user, true).execute.payload
+    end
+
     def namespace_storage_alert_style(alert_level)
       if alert_level == :error || alert_level == :alert
         'danger'

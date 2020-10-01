@@ -20,5 +20,6 @@
     = render "namespaces/pipelines_quota/list",
       locals: { namespace: @group, projects: @projects }
   .tab-pane#storage-quota-tab
+    = render_if_exists "shared/inline_storage_limit_alert"
     #js-storage-counter-app{ data: { namespace_path: @group.full_path, help_page_path: help_page_path('user/group/index.md', anchor: 'storage-usage-quota'), purchase_storage_url: purchase_storage_url, is_temporary_storage_increase_visible: temporary_storage_increase_visible?(@group).to_s } }
 

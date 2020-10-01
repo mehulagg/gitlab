@@ -1,0 +1,19 @@
+- return unless current_user
+- namespace = @project&.namespace || @group
+- return unless namespace.present?
+
+- payload = usage_quotas_alert(namespace)
+- return if payload.empty?
+
+
+- alert_level = payload[:alert_level]
+- style = namespace_storage_alert_style(alert_level)
+- icon = namespace_storage_alert_icon(alert_level)
+
+.gl-py-5
+  .gl-alert{ class: "gl-alert-#{style}", role: 'alert' }
+    = sprite_icon(icon, css_class: "gl-icon gl-alert-icon")
+    .gl-alert-title
+      %h4.gl-alert-title= payload[:usage_message]
+    .gl-alert-body
+      = payload[:short_explanation_message]
