@@ -2365,7 +2365,9 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
     end
 
     describe 'POST /users/:id/deactivate' do
-      subject { post api("/users/#{user.id}/deactivate", api_user) }
+      subject { post api("/users/#{user_id}/deactivate", api_user) }
+
+      let(:user_id) { user.id }
 
       context 'performed by a non-admin user' do
         let(:api_user) { user }
@@ -2461,8 +2463,10 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
         end
 
         context 'for a user that does not exist' do
+          let(:user_id) { 0 }
+
           before do
-            post api("/users/0/deactivate", admin)
+            subject
           end
 
           it_behaves_like '404'
