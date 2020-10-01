@@ -7,8 +7,6 @@ import {
   GlFormSelect,
   GlFormText,
   GlIcon,
-  GlLink,
-  GlSprintf,
 } from '@gitlab/ui';
 import { __ } from '~/locale';
 
@@ -44,8 +42,6 @@ export default {
     GlFormSelect,
     GlFormText,
     GlIcon,
-    GlLink,
-    GlSprintf,
   },
   inject: ['service', 'serviceLevelAgreementSettings'],
   data() {
