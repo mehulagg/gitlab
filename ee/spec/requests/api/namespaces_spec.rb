@@ -123,7 +123,7 @@ RSpec.describe API::Namespaces do
         create(:gitlab_subscription, namespace: group1, max_seats_used: 1)
       end
 
-      it "avoids N+1 database queries" do
+      it "avoids additional N+1 database queries" do
         control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/namespaces", user) }
 
         create(:gitlab_subscription, namespace: group2, max_seats_used: 2)
