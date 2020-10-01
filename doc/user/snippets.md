@@ -92,6 +92,26 @@ be changed to `http-a-weird-filename-me` to be included in the snippet's
 repository. As snippets are stored by ID, changing their filenames will not break
 direct or embedded links to the snippet.
 
+### Multiple files
+
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2829) in GitLab 13.5.
+
+From 13.5, support for Snippets with multiple files is enabled for both Personal and Project Snippets.
+
+Snippets support between 1 and 10 files, which can be managed either directly via Git, the [Snippets API](../api/snippets.md), or within the GitLab UI.
+
+![Multi-file Snippet](img/gitlab_snippet_v13_5.png)
+
+Within the edit view for a Snippet, you can add or delete files:
+
+#### Add a file
+
+![Add Snippet File](img/gitlab_add_snippet_file.png)
+
+#### Delete a file
+
+![Delete Snippet File](img/gitlab_remove_snippet_file.png)
+
 ### Cloning snippets
 
 Snippets can be cloned as a regular Git repository using SSH or HTTPS. Click the **Clone**
@@ -114,11 +134,10 @@ see the documentation on [reducing repository size](../user/project/repository/r
 ### Limitations
 
 - Binary files are not supported.
-- Creating or deleting branches is not supported. Only a default *master*.
-branch is used.
+- Creating or deleting branches is not supported. Only a default *master* branch is used.
 - Git tags are not supported in snippet repositories.
-- Snippets' repositories are limited to one file. Attempting to push more
-than one file will result in an error.
+- Snippets' repositories are limited to 10 files. Attempting to push more
+than 10 files will result in an error.
 - Revisions are not *yet* visible to the user on the GitLab UI, but
 it's planned to be added in future iterations. See the [revisions tab issue](https://gitlab.com/gitlab-org/gitlab/-/issues/39271)
 for updates.
