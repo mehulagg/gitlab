@@ -262,7 +262,7 @@ export default {
       />
     </gl-form-group>
 
-    <hr />
+    <hr class="gl-border-gray-100" />
 
     <gl-form-group>
       <template #label>
@@ -284,7 +284,7 @@ export default {
 
     <div class="row">
       <gl-form-group
-        class="col-md-6"
+        class="col-md-6 mb-0"
         :state="form.spiderTimeout.state"
         :invalid-feedback="form.spiderTimeout.feedback"
       >
@@ -316,7 +316,7 @@ export default {
       </gl-form-group>
 
       <gl-form-group
-        class="col-md-6"
+        class="col-md-6 mb-0"
         :state="form.targetTimeout.state"
         :invalid-feedback="form.targetTimeout.feedback"
       >
@@ -348,7 +348,7 @@ export default {
       </gl-form-group>
     </div>
 
-    <hr />
+    <hr class="gl-border-gray-100" />
 
     <div class="row">
       <gl-form-group class="col-md-6 mb-0">
@@ -382,7 +382,7 @@ export default {
       </gl-form-group>
     </div>
 
-    <hr />
+    <hr class="gl-border-gray-100" />
 
     <gl-button
       type="submit"
