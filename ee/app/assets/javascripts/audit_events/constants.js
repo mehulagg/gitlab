@@ -59,4 +59,5 @@ export const AVAILABLE_TOKEN_TYPES = AUDIT_FILTER_CONFIGS.map(token => token.typ
 
 export const MAX_DATE_RANGE = 31;
 
-export const CURRENT_DATE = new Date();
+// This creates a date with zero time, making it simpler to match to the query date values
+export const CURRENT_DATE = new Date(new Date().toDateString());

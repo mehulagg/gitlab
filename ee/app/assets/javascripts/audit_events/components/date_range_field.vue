@@ -1,6 +1,6 @@
 <script>
 import { GlDaterangePicker } from '@gitlab/ui';
-import { dateAtFirstDayOfMonth } from '~/lib/utils/datetime_utility';
+import { dateAtFirstDayOfMonth, getDateInPast } from '~/lib/utils/datetime_utility';
 import { CURRENT_DATE, MAX_DATE_RANGE } from '../constants';
 import DateRangeButtons from './date_range_buttons.vue';
 
@@ -33,8 +33,12 @@ export default {
     },
   },
   methods: {
-    onInput(dates) {
-      this.$emit('selected', dates);
+    onInput({ startDate, endDate }) {
+      if (!startDate && endDate) {
+        this.$emit('selected', { startDate: getDateInPast(endDate, 1), endDate });
+      } else {
+        this.$emit('selected', { startDate, endDate });
+      }
     },
   },
   CURRENT_DATE,
@@ -55,6 +59,7 @@ export default {
       :default-end-date="defaultEndDate"
       :default-max-date="$options.CURRENT_DATE"
       :max-date-range="$options.MAX_DATE_RANGE"
+      :same-day-selection="true"
       start-picker-class="gl-mb-5 gl-pr-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1"
       end-picker-class="gl-mb-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1"
       @input="onInput"
