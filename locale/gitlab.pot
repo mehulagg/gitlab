@@ -14464,13 +14464,13 @@ msgstr ""
 msgid "InviteMembersModal|Invite team members"
 msgstr ""
 
+msgid "InviteMembersModal|Members were succesfully added"
+msgstr ""
+
 msgid "InviteMembersModal|Search for members to invite"
 msgstr ""
 
-msgid "InviteMembersModal|User not invited. Feature coming soon!"
-msgstr ""
-
-msgid "InviteMembersModal|Users were succesfully added"
+msgid "InviteMembersModal|Some of the members could not be added"
 msgstr ""
 
 msgid "InviteMembersModal|You're inviting members to the %{group_name} group"

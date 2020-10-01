@@ -6,13 +6,13 @@ import {
   GlDatepicker,
   GlLink,
   GlSprintf,
-  GlSearchBoxByType,
   GlButton,
   GlFormInput,
 } from '@gitlab/ui';
 import eventHub from '../event_hub';
 import { s__, sprintf } from '~/locale';
 import Api from '~/api';
+import MembersTokenSelect from '~/invite_members/components/members_token_select.vue';
 
 export default {
   name: 'InviteMembersModal',
@@ -23,9 +23,9 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlSprintf,
-    GlSearchBoxByType,
     GlButton,
     GlFormInput,
+    MembersTokenSelect,
   },
   props: {
     groupId: {
@@ -48,13 +48,18 @@ export default {
       type: String,
       required: true,
     },
+    selectedTokens: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
       visible: true,
       modalId: 'invite-members-modal',
       selectedAccessLevel: this.defaultAccessLevel,
-      newUsersToInvite: '',
+      usersToInvite: '',
       selectedDate: undefined,
     };
   },
@@ -68,13 +73,14 @@ export default {
       return {
         onComplete: () => {
           this.selectedAccessLevel = this.defaultAccessLevel;
-          this.newUsersToInvite = '';
+          this.usersToInvite = '';
+          this.selectedTokens = [];
         },
       };
     },
     postData() {
       return {
-        user_id: this.newUsersToInvite,
+        user_id: this.usersToInvite,
         access_level: this.selectedAccessLevel,
         expires_at: this.selectedDate,
         format: 'json',
@@ -89,7 +95,13 @@ export default {
   mounted() {
     eventHub.$on('openModal', this.openModal);
   },
+  created() {
+    eventHub.$on('input', this.updateNewUsersToInvite);
+  },
   methods: {
+    updateNewUsersToInvite(value) {
+      this.usersToInvite = value;
+    },
     openModal() {
       this.$root.$emit('bv::show::modal', this.modalId);
     },
@@ -103,7 +115,7 @@ export default {
     cancelInvite() {
       this.selectedAccessLevel = this.defaultAccessLevel;
       this.selectedDate = undefined;
-      this.newUsersToInvite = '';
+      this.usersToInvite = '';
       this.closeModal();
     },
     changeSelectedItem(item) {
@@ -133,8 +145,8 @@ export default {
     userPlaceholder: s__('InviteMembersModal|Search for members to invite'),
     accessLevel: s__('InviteMembersModal|Choose a role permission'),
     accessExpireDate: s__('InviteMembersModal|Access expiration date (optional)'),
-    toastMessageSuccessful: s__('InviteMembersModal|Users were succesfully added'),
-    toastMessageUnsuccessful: s__('InviteMembersModal|User not invited. Feature coming soon!'),
+    toastMessageSuccessful: s__('InviteMembersModal|Members were succesfully added'),
+    toastMessageUnsuccessful: s__('InviteMembersModal|Some of the members could not be added'),
     readMoreText: s__(`InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions`),
     inviteButtonText: s__('InviteMembersModal|Invite'),
     cancelButtonText: s__('InviteMembersModal|Cancel'),
@@ -148,14 +160,11 @@ export default {
 
       <label class="gl-font-weight-bold gl-mt-5">{{ $options.labels.userToInvite }}</label>
       <div class="gl-mt-2">
-        <gl-search-box-by-type
-          v-model="newUsersToInvite"
+        <members-token-select
+          v-model="selectedTokens"
+          :label="$options.labels.usersToInvite"
+          :aria-labelledby="$options.labels.usersToInvite"
           :placeholder="$options.labels.userPlaceholder"
-          type="text"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
         />
       </div>
 
@@ -215,9 +224,13 @@ export default {
           {{ $options.labels.cancelButtonText }}
         </gl-button>
         <div class="gl-mr-3"></div>
-        <gl-button ref="inviteButton" variant="success" @click="sendInvite">{{
-          $options.labels.inviteButtonText
-        }}</gl-button>
+        <gl-button
+          ref="inviteButton"
+          :disabled="!usersToInvite"
+          variant="success"
+          @click="sendInvite"
+          >{{ $options.labels.inviteButtonText }}</gl-button
+        >
       </div>
     </template>
   </gl-modal>
