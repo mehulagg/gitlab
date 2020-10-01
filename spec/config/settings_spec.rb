@@ -141,7 +141,7 @@ RSpec.describe Settings do
     end
 
     it 'defaults to using the enc_settings_key_base for the key' do
-      expect(Gitlab::EncryptedConfiguration).to receive(:new).with(hash_including(key: Gitlab::Application.secrets.enc_settings_key_base))
+      expect(Gitlab::EncryptedConfiguration).to receive(:new).with(hash_including(base_key: Gitlab::Application.secrets.enc_settings_key_base))
       Settings.encrypted('tmp/tests/test.enc')
     end
 

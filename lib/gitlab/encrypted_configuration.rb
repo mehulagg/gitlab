@@ -7,10 +7,15 @@ module Gitlab
     attr_reader :content_path, :key, :previous_keys
 
     CIPHER = "aes-128-gcm"
+    SALT = "\xA1L\xB6S_\xD2\xB2.\xE8\x92h\x95\x10\x8F\xFE\x8B"
 
-    def initialize(content_path: nil, key: nil, previous_keys: [])
+    def self.generate_key(base_key)
+      ActiveSupport::KeyGenerator.new(base_key).generate_key(SALT, ActiveSupport::MessageEncryptor.key_len(CIPHER))
+    end
+
+    def initialize(content_path: nil, base_key: nil, previous_keys: [])
       @content_path = Pathname.new(content_path).yield_self { |path| path.symlink? ? path.realpath : path } if content_path
-      @key = key
+      @key = self.class.generate_key(base_key) if base_key
       @previous_keys = previous_keys
     end
 
@@ -62,11 +67,11 @@ module Gitlab
     def encryptor
       return @encryptor if @encryptor
 
-      @encryptor = ActiveSupport::MessageEncryptor.new([key].pack("H*"), cipher: CIPHER)
+      @encryptor = ActiveSupport::MessageEncryptor.new(key, cipher: CIPHER)
 
       # Allow fallback to previous keys
       @previous_keys.each do |key|
-        @encryptor.rotate([key].pack("H*"))
+        @encryptor.rotate(self.class.generate_key(key))
       end
 
       @encryptor
