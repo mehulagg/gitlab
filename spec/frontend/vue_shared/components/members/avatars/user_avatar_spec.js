@@ -82,4 +82,30 @@ describe('UserAvatar', () => {
       expect(getByText("It's you").exists()).toBe(true);
     });
   });
+
+  describe('user status', () => {
+    describe('when set', () => {
+      it('displays the status emoji', () => {
+        createComponent({
+          member: {
+            ...memberMock,
+            user: {
+              ...memberMock.user,
+              status: { emoji: 'island', messageHtml: 'On vacation' },
+            },
+          },
+        });
+
+        expect(wrapper.find('gl-emoji[data-name="island"]').exists()).toBe(true);
+      });
+    });
+
+    describe('when not set', () => {
+      it('does not display status emoji', () => {
+        createComponent();
+
+        expect(wrapper.find('gl-emoji[data-name="island"]').exists()).toBe(false);
+      });
+    });
+  });
 });
