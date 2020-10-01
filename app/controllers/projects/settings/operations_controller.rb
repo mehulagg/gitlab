@@ -6,9 +6,8 @@ module Projects
       before_action :authorize_admin_operations!
       before_action :authorize_read_prometheus_alerts!, only: [:reset_alerting_token]
 
-      # How to do this only for loading the operations settings page?
       before_action do
-        push_frontend_feature_flag(:incident_sla, @group)
+        push_frontend_feature_flag(:incident_sla, type: :licensed)
       end
 
       respond_to :json, only: [:reset_alerting_token, :reset_pagerduty_token]
