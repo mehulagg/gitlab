@@ -27,8 +27,6 @@ export default () => {
     },
   } = el;
 
-  console.log('dataset', el.dataset);
-
   const service = new IncidentsSettingsService(operationsSettingsEndpoint, pagerdutyResetKeyPath);
   return new Vue({
     el,

@@ -6,6 +6,7 @@ import {
   GlFormInput,
   GlFormSelect,
   GlFormText,
+  GlIcon,
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
@@ -20,8 +21,8 @@ const units = {
   hours: {
     value: 'hours',
     text: __('hours'),
-    multiplier: 60
-  }
+    multiplier: 60,
+  },
 };
 
 export default {
@@ -43,14 +44,17 @@ export default {
     GlFormInput,
     GlFormSelect,
     GlFormText,
+    GlIcon,
     GlLink,
     GlSprintf,
   },
   inject: ['service', 'serviceLevelAgreementSettings'],
   data() {
     return {
-      enabled: this.serviceLevelAgreementSettings.active,
       duration: this.serviceLevelAgreementSettings.minutes ?? '',
+      enabled: this.serviceLevelAgreementSettings.active,
+      loading: false,
+      success: false,
       unit: units.minutes.value,
     };
   },
@@ -71,12 +75,12 @@ export default {
         return __('Time limit must be a valid number');
       }
       if (duration <= 0) {
-        return __('Time limit must be greater than 0')
+        return __('Time limit must be greater than 0');
       }
 
       const minutes = duration * units[this.unit].multiplier;
       if (minutes % 15 !== 0) {
-        return __('Time limit must be a multiple of 15 minutes')
+        return __('Time limit must be a multiple of 15 minutes');
       }
       return '';
     },
@@ -84,11 +88,29 @@ export default {
       return this.duration !== '' && this.invalidFeedback === '';
     },
   },
+  methods: {
+    updateServiceLevelAgreementSettings() {
+      this.loading = true;
+      this.success = false;
+
+      return this.service
+        .updateSettings({
+          sla_timer: this.enabled,
+          sla_timer_minutes: this.duration * units[this.unit].multiplier,
+        })
+        .then(() => {
+          this.success = true;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+  },
 };
 </script>
 
 <template>
-  <div>
+  <form @submit.prevent="updateServiceLevelAgreementSettings">
     <p class="gl-line-height-20">
       <gl-sprintf :message="$options.i18n.description">
         <template #link="{ content }">
@@ -97,7 +119,7 @@ export default {
         </template>
       </gl-sprintf>
     </p>
-    <gl-form-checkbox v-model="enabled" class="gl-my-4">
+    <gl-form-checkbox v-model="enabled" class="gl-my-4" @input="success = false">
       <span>{{ __('Activate "time to SLA" countdown timer') }}</span>
       <gl-form-text class="gl-text-gray-400 gl-font-base">
         {{ __('When activated, this will apply to all incidents within the project') }}
@@ -119,18 +141,32 @@ export default {
           number
           size="xs"
           trim
+          @input="success = false"
         />
-        <gl-form-select v-model="unit" :options="$options.units" class="gl-w-auto gl-ml-3 gl-line-height-normal gl-border-gray-400"/>
+        <gl-form-select
+          v-model="unit"
+          :options="$options.units"
+          class="gl-w-auto gl-ml-3 gl-line-height-normal gl-border-gray-400"
+          @input="success = false"
+        />
       </div>
     </gl-form-group>
     <gl-button
       ref="submitBtn"
       variant="success"
       type="submit"
-      :disabled="!isValid"
+      :disabled="!isValid || loading"
+      :loading="loading"
       class="js-no-auto-disable"
     >
       {{ __('Save changes') }}
     </gl-button>
-  </div>
+
+    <gl-icon
+      v-show="success"
+      class="js-error-tracking-connect-success gl-ml-3 text-success align-middle"
+      :aria-label="__('Saved successfully')"
+      name="check-circle"
+    />
+  </form>
 </template>
