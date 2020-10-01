@@ -29,9 +29,6 @@ export default {
       return `${name} - ${status.label}`;
     },
   },
-  mounted() {
-    this.stopDropdownClickPropagation();
-  },
   methods: {
     pipelineActionRequestComplete() {
       this.$emit('pipelineActionRequestComplete');
