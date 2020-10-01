@@ -325,11 +325,11 @@ your application's performance and how to resolve any problems.
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
-The environment information and the link are displayed in the Alert Details tab[#alert-details-tab]
+The environment information and the link are displayed in the Alert Details tab[#alert-details-tab].
 
 ### Enable or disable Environment Link in Alert Details **(CORE ONLY)**
 
-Viwing the environment is under development and not ready for production use. It is
+Viewing the environment is under development and not ready for production use. It is
 deployed behind a feature flag that is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can enable it.
@@ -358,3 +358,4 @@ To disable for just a particular project:
 ```ruby
 project = Project.find_by_full_path('your-group/your-project')
 Feature.disable(:enable_environment_path_in_alert_details, project)
+```

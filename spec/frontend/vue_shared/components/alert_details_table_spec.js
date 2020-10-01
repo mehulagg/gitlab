@@ -88,7 +88,7 @@ describe('AlertDetails', () => {
         expect(findTableComponent().text()).toContain('SyntaxError: Invalid or unexpected token');
       });
 
-      it('should show allowed  alert fields', () => {
+      it('should show allowed alert fields', () => {
         const fields = findTableKeys();
 
         expect(findTableField(fields, 'Iid').exists()).toBe(true);
@@ -97,7 +97,7 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Status').exists()).toBe(true);
       });
 
-      it('should not show disallowed and flaggedAlllowed alert fields', () => {
+      it('should not show disallowed and flaggedAllowed alert fields', () => {
         const fields = findTableKeys();
 
         expect(findTableField(fields, 'Typename').exists()).toBe(false);
@@ -108,13 +108,13 @@ describe('AlertDetails', () => {
       });
     });
 
-    describe('whent enableEnvironmentPathInAlertDetails is enabled', () => {
+    describe('when enableEnvironmentPathInAlertDetails is enabled', () => {
       beforeEach(() => {
         glFeatures = { enableEnvironmentPathInAlertDetails: true };
         mountComponent();
       });
 
-      it('should show flaggedAlllowed alert fields', () => {
+      it('should show flaggedAllowed alert fields', () => {
         const fields = findTableKeys();
 
         expect(findTableField(fields, 'Environment').exists()).toBe(true);

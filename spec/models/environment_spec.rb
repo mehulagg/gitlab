@@ -1373,7 +1373,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   end
 
   describe '#path' do
-    it "is automatically generated" do
+    it 'is automatically generated' do
       expect(environment.path).not_to be_nil
     end
   end
