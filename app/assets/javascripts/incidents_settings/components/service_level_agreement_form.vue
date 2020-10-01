@@ -33,8 +33,7 @@ export default {
     in. When activated, "time to SLA" countdown will appear on all incidents and it will
     automatically start counting down as soon as the issue is created. Should the time
     limit be exceeded, a system note and a label will be added to the issue as a note
-    that the incident was not resolved within the time allotted.
-    %{linkStart}More information%{linkEnd}`),
+    that the incident was not resolved within the time allotted.`),
   },
   units: Object.values(units),
   components: {
@@ -112,12 +111,7 @@ export default {
 <template>
   <form @submit.prevent="updateServiceLevelAgreementSettings">
     <p class="gl-line-height-20">
-      <gl-sprintf :message="$options.i18n.description">
-        <template #link="{ content }">
-          <!-- TODO: add docs -->
-          <gl-link href="/docs">{{ content }}</gl-link>
-        </template>
-      </gl-sprintf>
+      {{ $options.i18n.description }}
     </p>
     <gl-form-checkbox v-model="enabled" class="gl-my-4" @input="success = false">
       <span>{{ __('Activate "time to SLA" countdown timer') }}</span>
@@ -125,9 +119,7 @@ export default {
         {{ __('When activated, this will apply to all incidents within the project') }}
       </gl-form-text>
     </gl-form-checkbox>
-    <!-- TODO: is id required for form groups? -->
     <gl-form-group
-      id="group-sla-time"
       :invalid-feedback="invalidFeedback"
       :label="__('Time limit')"
       label-for="sla-time"
