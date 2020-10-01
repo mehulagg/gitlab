@@ -69,7 +69,6 @@ RSpec.describe 'Projects > Snippets > User updates a snippet', :js do
 
   context 'non-Vue application' do
     before do
-      stub_feature_flags(snippets_vue: false)
       stub_feature_flags(snippets_edit_vue: false)
 
       bootstrap_snippet

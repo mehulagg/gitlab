@@ -104,7 +104,6 @@ RSpec.describe 'User edits snippet', :js do
       let(:snippet_description_field) { 'personal_snippet_description' }
 
       before do
-        stub_feature_flags(snippets_vue: false)
         stub_feature_flags(snippets_edit_vue: false)
 
         sign_in(user)

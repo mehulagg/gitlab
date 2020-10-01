@@ -13,8 +13,6 @@ RSpec.describe 'Projects > Snippets > Project snippet', :js do
   let_it_be(:snippet) { create(:project_snippet, :repository, project: project, author: user) }
 
   before do
-    stub_feature_flags(snippets_vue: false)
-
     sign_in(user)
   end
 

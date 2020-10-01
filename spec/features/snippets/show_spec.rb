@@ -6,10 +6,6 @@ RSpec.describe 'Snippet', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:snippet) { create(:personal_snippet, :public, :repository, author: user) }
 
-  before do
-    stub_feature_flags(snippets_vue: false)
-  end
-
   it_behaves_like 'show and render proper snippet blob' do
     let(:anchor) { nil }
 

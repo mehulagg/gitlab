@@ -110,7 +110,6 @@ RSpec.describe 'Projects > Snippets > Create Snippet', :js do
     let(:snippet_description_view_selector) { '.snippet-header .description' }
 
     before do
-      stub_feature_flags(snippets_vue: false)
       stub_feature_flags(snippets_edit_vue: false)
 
       sign_in(user)
