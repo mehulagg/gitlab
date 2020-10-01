@@ -1,5 +1,5 @@
 ---
 title: Update Add Members Api to accept user_ids list
-merge_request:
+merge_request: 44051
 author:
 type: changed
