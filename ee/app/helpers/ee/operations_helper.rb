@@ -51,9 +51,16 @@ module EE
       setting = project_incident_management_setting
 
       {
+        sla_feature_available: sla_feature_available?,
         sla_active: setting.sla_timer.to_s,
         sla_minutes: setting.sla_timer_minutes
       }
+    end
+
+    def sla_feature_available?
+      project = project_incident_management_setting.project
+
+      project.beta_feature_available?(:incident_sla)
     end
 
     def opsgenie_mvc_data
