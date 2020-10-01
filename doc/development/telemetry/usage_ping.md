@@ -223,6 +223,25 @@ Examples:
 sum(JiraImportState.finished, :imported_issues_count)
 ```
 
+### Grouping & Batch Counters
+
+The `count`, `distinct_count`, `sum` batch counters, can accept an ActiveRecord_Relation 
+which groups by a certain column. With a grouped relation, the methods will do batch counting, 
+handle the errors, and return a hash of key, value pairs.
+
+Examples:
+
+```ruby
+count(Namespace.group(:type))
+# returns => {nil=>179, "Group"=>}
+
+batch_distinct_count(Project.group(:visibility_level), :creator_id)
+# returns => {0=>1, 10=>1, 20=>11}
+
+batch_sum(Issue.group(:state_id), :weight))
+# returns => {1=>3542, 2=>6820
+```
+
 ### Redis Counters
 
 Handles `::Redis::CommandError` and `Gitlab::UsageDataCounters::BaseCounter::UnknownEvent`
