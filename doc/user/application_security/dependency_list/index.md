@@ -32,7 +32,7 @@ Dependencies are displayed with the following information:
 | --------- | ----------- |
 | Component | The dependency's name and version |
 | Packager  | The packager used to install the dependency |
-| Location  | A link to the packager-specific lock file in your project that declared the dependency |
+| Location  | A link to the packager-specific lock file in your project that declared the dependency. It also shows the dependency paths between vulnerable dependencies and top-level dependencies wherever applicable|
 | License   | Links to dependency's software licenses |
 
 Dependencies shown are initially sorted by the severity of their known vulnerabilities, if any. They
@@ -43,6 +43,13 @@ can also be sorted by name or by the packager that installed them.
 If a dependency has known vulnerabilities, you can view them by clicking the arrow next to the
 dependency's name or the badge that indicates how many known vulnerabilities exist. For each
 vulnerability, its severity and description then appears below it.
+
+### Dependency Paths
+
+Dependency list shows the dependency paths between vulnerable dependencies and top-level dependencies. There are possibly many paths connecting a transient dependency to the top-level dependencies, but the UI only shows one of the shortest path.
+
+<!-- insert screenshot here -->
+**Note** - Dependency paths are shown only for vulnerable dependencies
 
 ## Licenses
 
