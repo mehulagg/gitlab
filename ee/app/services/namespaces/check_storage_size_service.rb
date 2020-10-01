@@ -115,7 +115,7 @@ module Namespaces
       {
         usage_in_percent: number_to_percentage(root_storage_size.usage_ratio * 100, precision: 0),
         namespace_name: root_namespace.name,
-        used_storage: formatted(root_storage_size.current_size),
+        used_storage: formatted(root_storage_size.current_size || 0),
         storage_limit: formatted(root_storage_size.limit)
       }
     end
