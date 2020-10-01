@@ -25,11 +25,8 @@ import ErrorMessage from './error_message.vue';
 import CommitEditorHeader from './commit_sidebar/editor_header.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-const markPerformance = params => {
-  performanceMarkAndMeasure(params);
-};
 const markTreePerformance = () => {
-  markPerformance({
+  performanceMarkAndMeasure({
     mark: WEBIDE_MARK_TREE_FINISH,
     measures: [
       {
@@ -41,7 +38,7 @@ const markTreePerformance = () => {
   });
 };
 const markEditorLoadPerformance = () => {
-  markPerformance({
+  performanceMarkAndMeasure({
     mark: WEBIDE_MARK_FILE_FINISH,
     measures: [
       {
@@ -53,7 +50,7 @@ const markEditorLoadPerformance = () => {
   });
 };
 const markEditorInteractionPerformance = () => {
-  markPerformance({
+  performanceMarkAndMeasure({
     mark: WEBIDE_MARK_FILE_FINISH,
     measures: [
       {
@@ -115,7 +112,7 @@ export default {
       document.querySelector('.navbar-gitlab').classList.add(`theme-${this.themeName}`);
   },
   beforeCreate() {
-    performance.mark(WEBIDE_MARK_APP_START);
+    performanceMarkAndMeasure({ mark: WEBIDE_MARK_APP_START });
   },
   methods: {
     ...mapActions(['toggleFileFinder']),
