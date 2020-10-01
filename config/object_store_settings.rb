@@ -1,6 +1,6 @@
 # Set default values for object_store settings
 class ObjectStoreSettings
-  SUPPORTED_TYPES = %w(artifacts external_diffs lfs uploads packages dependency_proxy terraform_state).freeze
+  SUPPORTED_TYPES = %w(artifacts external_diffs lfs uploads packages dependency_proxy terraform_state pages).freeze
   ALLOWED_OBJECT_STORE_OVERRIDES = %w(bucket enabled proxy_download).freeze
 
   attr_accessor :settings

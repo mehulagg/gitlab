@@ -24,6 +24,7 @@ RSpec.describe ObjectStoreSettings do
           'lfs' => { 'enabled' => true },
           'artifacts' => { 'enabled' => true },
           'external_diffs' => { 'enabled' => false },
+          'pages' => { 'enabled' => true },
           'object_store' => {
             'enabled' => true,
             'connection' => connection,
@@ -39,6 +40,9 @@ RSpec.describe ObjectStoreSettings do
               'external_diffs' => {
                 'bucket' => 'external_diffs',
                 'enabled' => false
+              },
+              'pages' => {
+                'bucket' => 'pages'
               }
             }
           }
@@ -63,6 +67,11 @@ RSpec.describe ObjectStoreSettings do
         expect(settings.lfs['object_store']['background_upload']).to be false
         expect(settings.lfs['object_store']['proxy_download']).to be true
         expect(settings.lfs['object_store']['remote_directory']).to eq('lfs-objects')
+
+        expect(settings.pages['enabled']).to be true
+        expect(settings.pages['object_store']['enabled']).to be true
+        expect(settings.pages['object_store']['connection']).to eq(connection)
+        expect(settings.pages['object_store']['remote_directory']).to eq('pages')
 
         expect(settings.external_diffs['enabled']).to be false
         expect(settings.external_diffs['object_store']['enabled']).to be false
