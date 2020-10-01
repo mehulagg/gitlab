@@ -1,0 +1,5 @@
+---
+title: 'GraphQL: Add scheduled and scheduledAt to CiJob'
+merge_request: 44054
+author:
+type: added
