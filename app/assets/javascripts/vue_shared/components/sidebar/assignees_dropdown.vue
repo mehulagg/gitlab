@@ -21,8 +21,8 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown class="show" :text="text" :header-text="headerText">
-    <b-dropdown-form>
+  <gl-dropdown data-test-id="dropdown" class="show" :text="text" :header-text="headerText">
+    <b-dropdown-form data-test-id="dropdown-form">
       <slot name="items"></slot>
     </b-dropdown-form>
   </gl-dropdown>
