@@ -22,7 +22,7 @@ export const i18n = {
   ),
   resetKey: s__('AlertSettings|Reset key'),
   copyToClipboard: s__('AlertSettings|Copy'),
-  integrationsLabel: s__('AlertSettings|Integrations'),
+  integrationsLabel: s__('AlertSettings|Add new integrations'),
   apiBaseUrlLabel: s__('AlertSettings|API URL'),
   authKeyLabel: s__('AlertSettings|Authorization key'),
   urlLabel: s__('AlertSettings|Webhook URL'),
@@ -41,7 +41,7 @@ export const i18n = {
 };
 
 export const serviceOptions = [
-  { value: 'generic', text: s__('AlertSettings|Generic') },
+  { value: 'generic', text: s__('AlertSettings|HTTP Endpoint') },
   { value: 'prometheus', text: s__('AlertSettings|External Prometheus') },
   { value: 'opsgenie', text: s__('AlertSettings|Opsgenie') },
 ];

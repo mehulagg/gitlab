@@ -14,9 +14,11 @@ import {
   GlFormSelect,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
+import IntegrationsList from './alerts_integrations_list.vue';
 import csrf from '~/lib/utils/csrf';
 import service from '../services';
 import {
@@ -46,6 +48,7 @@ export default {
     GlSprintf,
     ClipboardButton,
     ToggleButton,
+    IntegrationsList,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -147,6 +150,20 @@ export default {
       return this.isOpsgenie
         ? this.$options.targetOpsgenieUrlPlaceholder
         : this.$options.targetPrometheusUrlPlaceholder;
+    },
+    integrations() {
+      return [
+        {
+          name: s__('AlertSettings|HTTP endpoint'),
+          type: s__('AlertsIntegrations|HTTP endpoint'),
+          status: this.prometheus.activated,
+        },
+        {
+          name: s__('AlertSettings|External Prometheus'),
+          type: s__('AlertsIntegrations|Prometheus'),
+          status: this.generic.activated,
+        },
+      ];
     },
   },
   watch: {
@@ -389,21 +406,22 @@ export default {
         {{ __('Save anyway') }}
       </gl-button>
     </gl-alert>
-    <div data-testid="alert-settings-description" class="gl-mt-5">
-      <p v-for="section in sections" :key="section.text">
-        <gl-sprintf :message="section.text">
-          <template #link="{ content }">
-            <gl-link :href="section.url" target="_blank">{{ content }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </p>
-    </div>
+
+    <integrations-list :integrations="integrations" />
+
     <gl-form @submit.prevent="onSubmit" @reset.prevent="onReset">
-      <gl-form-group
-        :label="$options.i18n.integrationsLabel"
-        label-for="integrations"
-        label-class="label-bold"
-      >
+      <h5 class="gl-font-lg">{{ $options.i18n.integrationsLabel }}</h5>
+
+      <gl-form-group label-for="integrations" label-class="label-bold">
+        <div data-testid="alert-settings-description" class="gl-mt-5">
+          <p v-for="section in sections" :key="section.text">
+            <gl-sprintf :message="section.text">
+              <template #link="{ content }">
+                <gl-link :href="section.url" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </p>
+        </div>
         <gl-form-select
           v-model="selectedEndpoint"
           :options="options"
