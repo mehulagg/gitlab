@@ -107,6 +107,11 @@ export default {
   mounted() {
     this.fetchMilestones();
   },
+  watch: {
+    selectedMilestones(milestones) {
+      this.preselectedMilestones = milestones;
+    },
+  },
   methods: {
     focusSearchBox() {
       this.$refs.searchBox.$el.querySelector('input').focus();
@@ -239,7 +244,7 @@ export default {
         :section-title="$options.translations.projectMilestones"
         :total-count="dropdownItems.length"
         :items="dropdownItems"
-        :selected-milestone="milestoneTitles"
+        :selected-milestone.sync="preselectedMilestones"
         data-testid="branches-section"
         @selected="onMilestoneClicked($event)"
       />

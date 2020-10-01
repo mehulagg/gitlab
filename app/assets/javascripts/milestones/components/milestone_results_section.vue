@@ -22,17 +22,14 @@ export default {
       type: String,
       required: true,
     },
-
     totalCount: {
       type: Number,
       required: true,
     },
-
     items: {
       type: Array,
       required: true,
     },
-
     selectedMilestones: {
       type: Array,
       required: false,
@@ -46,6 +43,7 @@ export default {
   },
   methods: {
     isSelectedMilestone(item) {
+      console.log(this.selectedMilestones, item);
       return this.selectedMilestones.includes(item);
     },
   },
