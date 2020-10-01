@@ -1,5 +1,6 @@
 <script>
-import {
+  import {s__} from '~/locale';
+  import {
   GlAlert,
   GlButton,
   GlForm,
@@ -17,6 +18,7 @@ import { debounce } from 'lodash';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
+import IntegrationsList from  './alerts_integrations_list.vue';
 import csrf from '~/lib/utils/csrf';
 import service from '../services';
 import {
@@ -46,6 +48,7 @@ export default {
     GlSprintf,
     ClipboardButton,
     ToggleButton,
+    IntegrationsList,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -148,6 +151,20 @@ export default {
         ? this.$options.targetOpsgenieUrlPlaceholder
         : this.$options.targetPrometheusUrlPlaceholder;
     },
+    integrations(){
+      return [
+        {
+          name: s__('AlertSettings|HTTP Endpoint'),
+          type: s__('AlertsIntegrations|HTTP Endpoint'),
+          status: this.prometheus.activated,
+        },
+        {
+          name: s__('AlertSettings|External Prometheus'),
+          type: s__('AlertsIntegrations|HTTP Endpoint'),
+          status: this.generic.activated,
+        },
+      ]
+    }
   },
   watch: {
     'testAlert.json': debounce(function debouncedJsonValidate() {
@@ -389,6 +406,10 @@ export default {
         {{ __('Save anyway') }}
       </gl-button>
     </gl-alert>
+
+    <integrations-list :integrations="integrations"/>
+
+
     <div data-testid="alert-settings-description" class="gl-mt-5">
       <p v-for="section in sections" :key="section.text">
         <gl-sprintf :message="section.text">
