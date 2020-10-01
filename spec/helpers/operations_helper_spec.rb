@@ -145,7 +145,7 @@ RSpec.describe OperationsHelper do
     subject { helper.operations_settings_data }
 
     it 'returns the correct set of data' do
-      is_expected.to eq(
+      is_expected.to include(
         operations_settings_endpoint: project_settings_operations_path(project),
         templates: '[]',
         create_issue: 'false',
@@ -155,9 +155,7 @@ RSpec.describe OperationsHelper do
         pagerduty_active: 'true',
         pagerduty_token: operations_settings.pagerduty_token,
         pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),
-        pagerduty_reset_key_path: reset_pagerduty_token_project_settings_operations_path(project),
-        sla_active: 'false',
-        sla_minutes: operations_settings.sla_minutes
+        pagerduty_reset_key_path: reset_pagerduty_token_project_settings_operations_path(project)
       )
     end
   end
