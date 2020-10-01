@@ -80,8 +80,10 @@ export const fetchReleasesGraphQl = (
 export const fetchReleasesRest = ({ dispatch, commit, state }, { page }) => {
   commit(types.REQUEST_RELEASES);
 
+  const { sort, orderBy } = state.sorting;
+
   api
-    .releases(state.projectId, { page })
+    .releases(state.projectId, { page, sort, order_by: orderBy })
     .then(({ data, headers }) => {
       const restPageInfo = parseIntPagination(normalizeHeaders(headers));
       const camelCasedReleases = convertObjectPropsToCamelCase(data, { deep: true });
@@ -98,3 +100,5 @@ export const receiveReleasesError = ({ commit }) => {
   commit(types.RECEIVE_RELEASES_ERROR);
   createFlash(__('An error occurred while fetching the releases. Please try again.'));
 };
+
+export const setSorting = ({ commit }, data) => commit(types.SET_SORTING, data);

@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlEmptyState, GlLink, GlButton } from '@gitlab/ui';
+import { GlEmptyState, GlLink, GlButton, GlSorting, GlSortingItem } from '@gitlab/ui';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import ReleaseBlock from './release_block.vue';
@@ -13,9 +13,15 @@ export default {
     GlEmptyState,
     GlLink,
     GlButton,
+    GlSorting,
+    GlSortingItem,
     ReleaseBlock,
     ReleasesPagination,
     ReleaseSkeletonLoader,
+  },
+  translation: {
+    releaseDate: __('Release date'),
+    createdDate: __('Created date'),
   },
   computed: {
     ...mapState('list', [
@@ -62,16 +68,23 @@ export default {
 </script>
 <template>
   <div class="flex flex-column mt-2">
-    <gl-button
-      v-if="newReleasePath"
-      :href="newReleasePath"
-      :aria-describedby="shouldRenderEmptyState && 'releases-description'"
-      category="primary"
-      variant="success"
-      class="align-self-end mb-2 js-new-release-btn"
-    >
-      {{ __('New release') }}
-    </gl-button>
+    <div class="align-self-end mb-2">
+      <gl-sorting :text="sortingText" class="gl-mr-2">
+        <gl-sorting-item>Released date</gl-sorting-item>
+        <gl-sorting-item>Created date</gl-sorting-item>
+      </gl-sorting>
+
+      <gl-button
+        v-if="newReleasePath"
+        :href="newReleasePath"
+        :aria-describedby="shouldRenderEmptyState && 'releases-description'"
+        category="primary"
+        variant="success"
+        class="js-new-release-btn"
+      >
+        {{ __('New release') }}
+      </gl-button>
+    </div>
 
     <release-skeleton-loader v-if="isLoading" class="js-loading" />
 
