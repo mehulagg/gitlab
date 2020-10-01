@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Database::Reindexing do
+  include ExclusiveLeaseHelpers
+
   describe '.perform' do
     before do
       allow(Gitlab::Database::Reindexing::ReindexAction).to receive(:keep_track_of).and_yield
@@ -15,6 +17,11 @@ RSpec.describe Gitlab::Database::Reindexing do
           allow(reindexer).to receive(:perform)
         end
       end
+
+      let!(:lease) { stub_exclusive_lease(lease_key, uuid, timeout: lease_timeout) }
+      let(:lease_key) { 'gitlab_database_reindexing' }
+      let(:lease_timeout) { 1.day }
+      let(:uuid) { 'uuid' }
 
       it 'performs concurrent reindexing for each index' do
         indexes.zip(reindexers).each do |index, reindexer|
@@ -29,6 +36,18 @@ RSpec.describe Gitlab::Database::Reindexing do
         indexes.each do |index|
           expect(Gitlab::Database::Reindexing::ReindexAction).to receive(:keep_track_of).with(index).and_yield
         end
+
+        subject
+      end
+
+      it 'obtains an exclusive lease' do
+        expect_to_obtain_exclusive_lease(lease_key, timeout: lease_timeout)
+
+        subject
+      end
+
+      it 'cancels the exclusive lease' do
+        expect(lease).to receive(:cancel)
 
         subject
       end
