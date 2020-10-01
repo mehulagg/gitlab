@@ -139,10 +139,12 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
             ]
             matchers = old_notes.map do |note|
               have_attributes(
-                type: note.type,
-                author_id: note.author_id,
-                note: note.note,
-                position: note.position
+                note.attributes.slice(
+                  :type,
+                  :author_id,
+                  :note,
+                  :position
+                )
               )
             end
 
