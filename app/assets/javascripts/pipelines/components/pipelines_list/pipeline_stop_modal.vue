@@ -1,8 +1,7 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import { isEmpty } from 'lodash';
-import { GlLink } from '@gitlab/ui';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
+import { GlLink, GlModal } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import { s__, sprintf } from '~/locale';
 
@@ -13,7 +12,7 @@ import { s__, sprintf } from '~/locale';
  */
 export default {
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
     GlLink,
     CiIcon,
   },
