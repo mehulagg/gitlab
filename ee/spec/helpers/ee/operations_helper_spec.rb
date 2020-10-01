@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe OperationsHelper, :routing do
-  let_it_be(:project) { create(:project, :private) }
+  let_it_be_with_refind(:project) { create(:project, :private) }
 
   before do
     helper.instance_variable_set(:@project, project)
@@ -131,7 +131,7 @@ RSpec.describe OperationsHelper, :routing do
     subject { helper.operations_settings_data }
 
     it 'returns the correct set of data' do
-      is_expected.to include(
+      is_expected.to eq(
         operations_settings_endpoint: project_settings_operations_path(project),
         templates: '[]',
         create_issue: 'false',
@@ -142,9 +142,21 @@ RSpec.describe OperationsHelper, :routing do
         pagerduty_token: operations_settings.pagerduty_token,
         pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),
         pagerduty_reset_key_path: reset_pagerduty_token_project_settings_operations_path(project),
+        sla_feature_available: false,
         sla_active: operations_settings.sla_timer.to_s,
         sla_minutes: operations_settings.sla_timer_minutes
       )
+    end
+
+    context 'incident_sla feature enabled' do
+      # This is implicitly disabled due to it being a beta FF
+      before do
+        stub_licensed_features(incident_sla: true)
+      end
+
+      it 'returns the feature as disabled' do
+        expect(subject[:sla_feature_available]).to eq(true)
+      end
     end
   end
 end
