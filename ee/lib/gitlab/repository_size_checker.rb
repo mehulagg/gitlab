@@ -9,7 +9,7 @@ module Gitlab
     #   extend ::Gitlab::Utils::Override
     # end
 
-    override :parse_report
+    override :above_size_limit?
     def above_size_limit?
       return false unless enabled?
 
@@ -20,7 +20,7 @@ module Gitlab
       end
     end
 
-    override :parse_report
+    override :exceeded_size
     # @param change_size [int] in bytes
     def exceeded_size(change_size = 0)
       exceeded_size = super
