@@ -16,7 +16,12 @@ export const search = ({ dispatch, commit }, query) => {
 export const searchMilestones = ({ commit, state }) => {
   commit(types.REQUEST_START);
 
-  Api.projectSearch(state.projectId, state.query)
+  const options = {
+    search: state.query,
+    scope: 'milestones',
+  };
+
+  Api.projectSearch(state.projectId, options)
     .then(response => {
       commit(types.RECEIVE_MILESTONES_SUCCESS, response);
     })

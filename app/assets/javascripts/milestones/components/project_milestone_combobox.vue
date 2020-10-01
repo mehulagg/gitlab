@@ -10,14 +10,18 @@ import {
   GlBadge,
 } from '@gitlab/ui';
 import { intersection, debounce } from 'lodash';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createStore from '../stores';
 import MilestoneResultsSection from './milestone_results_section.vue';
 
 const SEARCH_DEBOUNCE_MS = 250;
 
 export default {
+  name: 'MilestoneCombobox',
+  store: createStore(),
   components: {
     GlDropdown,
     GlDropdownDivider,
@@ -30,15 +34,19 @@ export default {
     MilestoneResultsSection,
   },
   model: {
-    prop: 'preselectedMilestones',
+    prop: 'releaseMilestones',
     event: 'change',
   },
   props: {
     projectId: {
       type: String,
-      required: true,
+      required: false,
     },
-    preselectedMilestones: {
+    groupId: {
+      type: String,
+      required: false,
+    },
+    releaseMilestones: {
       type: Array,
       default: () => [],
       required: false,
@@ -52,10 +60,6 @@ export default {
   data() {
     return {
       searchQuery: '',
-      projectMilestones: [],
-      searchResults: [],
-      selectedMilestones: [],
-      requestCount: 0,
     };
   },
   translations: {
@@ -67,6 +71,11 @@ export default {
     projectMilestones: __('Project milestones'),
   },
   computed: {
+    ...mapState({
+      lastQuery: state => state.query,
+      selectedMilestones: state => state.selectedMilestones,
+    }),
+    ...mapGetters(['isLoading']),
     selectedMilestonesLabel() {
       if (this.milestoneTitles.length === 1) {
         return this.milestoneTitles[0];
@@ -84,10 +93,10 @@ export default {
       return this.$options.translations.noMilestone;
     },
     milestoneTitles() {
-      return this.preselectedMilestones.map(milestone => milestone.title);
+      return this.releaseMilestones.map(milestone => milestone.title);
     },
     dropdownItems() {
-      return this.searchResults.length ? this.searchResults : this.projectMilestones;
+      return this.searchResults.length ? this.searchResults : this.releaseMilestones;
     },
     noResults() {
       return this.searchQuery.length > 2 && this.searchResults.length === 0;
@@ -103,9 +112,17 @@ export default {
     // made inaccessible by Vue. More info:
     // https://stackoverflow.com/a/52988020/1063392
     this.debouncedSearchMilestones = debounce(this.searchMilestones, SEARCH_DEBOUNCE_MS);
+
+    if (this.projectId) {
+      this.setProjectId(this.projectId);
+    }
+
+    if (this.groupId) {
+      this.setGroupId(this.groupId);
+    }
   },
   mounted() {
-    this.fetchMilestones();
+    this.searchMilestones();
   },
   watch: {
     selectedMilestones(milestones) {
@@ -113,6 +130,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(['setProjectId', 'setSelectedMilestones', 'searchMilestones']),
     focusSearchBox() {
       this.$refs.searchBox.$el.querySelector('input').focus();
     },
@@ -239,13 +257,12 @@ export default {
       </div>
       <gl-dropdown-divider />
     </template>
-    <template v-else-if="dropdownItems.length">
+    <template v-else>
       <milestone-results-section
         :section-title="$options.translations.projectMilestones"
-        :total-count="dropdownItems.length"
-        :items="dropdownItems"
-        :selected-milestone.sync="preselectedMilestones"
-        data-testid="branches-section"
+        :total-count="projectMilestones.length"
+        :items="projectMilestones"
+        data-testid="project-milestones-section"
         @selected="onMilestoneClicked($event)"
       />
     </template>
