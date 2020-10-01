@@ -15,12 +15,11 @@ module ResourceAccessTokens
 
     def execute
       return error("#{current_user.name} cannot delete #{bot_user.name}") unless can_destroy_bot_member?
-
       return error("Failed to find bot user") unless find_member
 
       access_token.revoke!
 
-      destroy_service
+      destroy_bot_user
 
       success("Access token #{access_token.name} has been revoked and the bot user has been scheduled for deletion.")
     rescue StandardError => error
@@ -32,7 +31,7 @@ module ResourceAccessTokens
 
     attr_reader :current_user, :access_token, :bot_user, :resource
 
-    def destroy_service
+    def destroy_bot_user
       DeleteUserWorker.perform_async(current_user.id, bot_user.id, skip_authorization: true)
     end
 
