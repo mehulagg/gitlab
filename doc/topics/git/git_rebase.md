@@ -6,9 +6,13 @@ type: concepts, howto
 description: "Introduction to Git rebase, force-push, and resolving merge conflicts through the command line."
 ---
 
-# Git rebase
+# Introduction to Git rebase
 
-Before diving into this document, make sure you are familiar with [using Git through the command line](../../gitlab-basics/start-using-git.md).
+Before diving into this document, make sure you are familiar with using
+[Git through the command line](../../gitlab-basics/start-using-git.md).
+
+This guide helps you to get started with rebasing, force-pushing, and fixing
+merge conflicts locally.
 
 [Rebasing](https://git-scm.com/docs/git-rebase) is a very common operation in
 Git. You have mainly two rebase options:
@@ -16,30 +20,63 @@ Git. You have mainly two rebase options:
 - [Regular rebase](#regular-rebase).
 - [Interactive rebase](#interactive-rebase).
 
+Git rebase re-writes the branch's commit history, therefore, it's safer to
+back up your branch before rebasing to make sure you won't lose any changes.
+For example, consider a feature branch called `my-feature-branch`:
+
+1. Open your feature branch in the terminal:
+
+   ```shell
+   git checkout my-feature-branch
+   ```
+
+1. Checkout a new branch from it:
+
+   ```shell
+   git checkout -b my-feature-branch-backup
+   ```
+
+1. Go back to your original branch:
+
+   ```shell
+   git checkout my-feature-branch
+   ```
+
+Now you can safely rebase it.
+
 ## Regular rebase
 
 With a regular rebase you can update your feature branch with the default
-branch (or any other target branch).
-
+branch (or any other branch).
 This is an important step for Git-based development strategies to make sure
 the changes you're adding do not break any existing changes added to the
 target branch after you created your feature branch.
 
-For example, to update your branch `my-feature-branch`, with `master`,
-checkout your feature branch then rebase it against `master`:
+For example, to update your branch `my-feature-branch`, with `master`:
 
-```shell
-git rebase origin/master
-```
+1. Checkout your feature branch:
+
+   ```shell
+   git checkout my-feature-branch
+   ```
+
+1. Rebase it against `master`:
+
+   ```shell
+   git rebase origin/master
+   ```
 
 When you do that, Git imports all the commits submitted to `master` after the
 moment you created your feature branch until the present moment, and puts the
 commits you have in your feature branch on top of all the commits imported from
 `master`.
 
+You can replace `master` with any other branch you want to rebase against, for
+example, `release-10-3`. You can also replace `origin` with other remote
+repositories, for example, `upstream`.
+
 If there are [merge conflicts](#merge-conflicts), Git will prompt you to fix
 them before continuing to rebase.
-
 After rebasing, you'll need to [force-push](#force-push) changes to the remote
 repository.
 
@@ -49,52 +86,56 @@ CAUTION: **Warning:**
 As `git rebase` re-writes the commit history, it **can be harmful** to do it in
 shared branches. It can cause complex merge conflicts, hard to resolve. In
 these cases, instead of rebasing your branch against the default branch,
-consider pulling it instead (`git pull origin master`). It will have a
-similar effect without compromising the work of your contributors.
+consider pulling it instead (`git pull origin master`). It has a similar
+effect without compromising the work of your contributors.
 
 ## Interactive rebase
 
-You can use interactive rebase to amend a commit message, squash commits
-(join multiple commits into one), edit, delete commits, among other actions. It is handy for
-changing past commits messages and organizing the commit history of your
-branch to keep it clean.
+You can use interactive rebase to modify commits. For example, amend a commit
+message, squash commits (join multiple commits into one), edit or delete
+commits, among other options. It is handy for changing past commits messages
+as well as for organizing the commit history of your branch to keep it clean.
 
 TIP: **Tip:**
 If you want to keep the default branch commit history clean, you don't need to
-do squash all your commits before merging manually for every merge request;
+manually squash all your commits before merging every merge request;
 you can enable [Squash and Merge](../../user/project/merge_requests/squash_and_merge.md)
-and GitLab will do it for you automatically.
+and GitLab will do it automatically.
 
-When you want to change anything in recent commits, you can use interactive
+When you want to change anything in recent commits, use interactive
 rebase by passing the flag `--interactive` or `-i` to the rebase command.
 
-For example, if you want to join the latest 2 commits in your branch, run:
+For example, if you want to edit the latest 3 commits in your branch
+(`HEAD~3`), run:
 
 ```shell
-git rebase -i HEAD~2
+git rebase -i HEAD~3
 ```
 
-Then Git outputs the latest 2 commits. Edit the action you want for each of them:
+Git outputs the latest 3 commits and describes all the interactive rebase
+options you can use. The default option is `pick`, which maintains the commit
+unchanged. Replace the keyword `pick` according to the operation you want to
+perform in each commit. For example, if you want to squash them into one:
 
 1. Press <kbd>i</kbd> in your keyboard to switch to editing mode.
-1. Navigate with your keyboard arrows to edit the second commit keyword from
-   `pick` to `s`, which will squash both into one. The first commit will be
-   picked and the second will be squashed into the first.
+1. Navigate with your keyboard arrows to edit the **second** commit keyword from
+   `pick` to `squash` (or `s`). Do the same to the **third** commit.
+   The first commit should be left **unchanged** (`pick`) as we want to squash
+   the second and third into the first.
 1. Press <kbd>esc</kbd> to leave the editing mode.
-1. Type `:wq` to `write and quit`.
-1. Git will output the commit message so you have a chance to edit it.
-
-   All lines starting with `#` will be ignored and not included in the commit
+1. Type `:wq` to "write" (save) and "quit".
+1. Git outputs the commit message so you have a chance to edit it:
+   - All lines starting with `#` will be ignored and not included in the commit
    message. Everything else will be included.
-
-   To leave it as-is type `:wq`, or, to edit the commit message, switch to the
-   editing mode as you did on step 1-3, then write and quit when you're done.
-
+   - To leave it as-is type `:wq`. To edit the commit message: switch to the
+   editing mode, edit the commit message, leave the editing mode, and write
+   and quit.
 1. If you haven't pushed your commits to the remote branch before rebasing,
-push normally. If you had pushed these commits already, [force-push](#force-push) instead.
+push your changes normally. If you had pushed these commits already,
+[force-push](#force-push) instead.
 
 Note that the steps for editing through the command line can be slightly
-different depending on your operating system and the terminal you're using.
+different depending on your operating system and the shell you're using.
 
 See [Numerous undo possibilities in Git](numerous_undo_possibilities_in_git/index.md#with-history-modification)
 for a deeper look into interactive rebase.
@@ -115,7 +156,7 @@ Forcing an update is **not** recommended when you're working on shared
 branches.
 
 Alternatively, you can also pass the flag [`--force-with-lease`](https://git-scm.com/docs/git-push#Documentation/git-push.txt---force-with-leaseltrefnamegt)
-instead. It can be safer not to overwrite any work on the remote
+instead. It is safer as it does not overwrite any work on the remote
 branch if more commits were added to the remote branch by someone else:
 
 ```shell
@@ -128,28 +169,58 @@ force-push and re-protect it again.
 
 ## Merge conflicts
 
-As Git version-control is based on comparing versions of a file line-by-line,
-whenever a line changed in your branch coincides with the same line changed in
-the target branch, Git will identify these changes as a merge conflict. This
-means you need to choose which version of that line you want to keep.
+As the Git version control system is based on comparing versions of a file
+line-by-line, whenever a line changed in your branch coincides with the same
+line changed in the target branch after you created your branch from, Git will
+identify these changes as a merge conflict. To fix it, you need to choose
+which version of that line you want to keep.
 
 Most of conflicts can be [resolved through the GitLab UI](../../user/project/merge_requests/resolve_conflicts.md).
-For more complex cases, there are various methods for resolving them and
-also Git CLI apps very handy to do so, but you can also fix them locally:
 
-1. [Rebase your branch](#git-rebase) (`git rebase origin/master`) and Git will
-   prompt you with the conflicts.
+For more complex cases, there are various methods for resolving them. There are
+also Git CLI apps very handy to help you visualize the differences.
+
+As an example, to fix conflicts locally you can use the following method:
+
+1. Open the terminal and check out your feature branch.
+1. [Rebase](#regular-rebase) your branch against the target branch so Git
+   prompts you with the conflicts:
+
+   ```shell
+   git rebase origin/master
+   ```
+
 1. Open the conflicting file in a code editor of your preference.
 1. Look for the conflict markers:
-   - Beginning: `<<<<<<< HEAD`.
-   - Content with your changes.
-   - End of your changes: `=======`.
-   - Content of the latest changes on the target branch.
-   - End of the conflict `>>>>>>>`.
-1. Edit the file: choose which version (before or after `=======`) you want to keep.
-1. Make sure you've deleted the markers and save the file.
+   - It begins with the marker: `<<<<<<< HEAD`.
+   - Follows the content with your changes.
+   - The marker: `=======` indicates the end of your changes.
+   - Follows the content of the latest changes in the target branch.
+   - The marker `>>>>>>>` indicates the end of the conflict.
+1. Edit the file: choose which version (before or after `=======`) you want to
+   keep, then delete the portion of the content you don't want in the file.
+1. Make sure you've deleted the markers then save the file.
 1. Repeat the process if there are other conflicting files.
-1. Stage your changes (`git add .`).
-1. Commit your changes (`git commit -m "Fix merge conflicts"`).
-1. Continue rebasing with `git rebase --continue`.
+1. Stage your changes:
+
+   ```shell
+   git add .
+   ```
+
+1. Commit your changes:
+
+   ```shell
+   git commit -m "Fix merge conflicts"
+   ```
+
+1. Continue rebasing:
+
+   ```shell
+   git rebase --continue
+   ```
+
 1. [Force-push](#force-push) to your remote branch.
+
+If you change your mind, you can run `git rebase --abort` to stop the process.
+Git aborts rebasing and rolls back the branch to the state you had before
+running `git rebase`.
