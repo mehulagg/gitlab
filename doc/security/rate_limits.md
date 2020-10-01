@@ -40,7 +40,7 @@ There is a rate limit for [downloading repository archives](../api/repositories.
 
 ### Webhook Testing
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25750) in GitLab 13.4.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/commit/35bc85c3ca093fee58d60dacdc9ed1fd9a15adec) in GitLab 13.4.
 
 There is a rate limit for [testing webhooks](../user/project/integrations/webhooks.md#testing-webhooks), which prevents abuse of the webhook functionality.
 
