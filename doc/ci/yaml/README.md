@@ -1472,7 +1472,7 @@ use `when: never`.
 
 CAUTION: **Caution:**
 When any `rules:changes` clause is evaluated in the context of a pipeline with no PushEvent,
-it will evaluate to true by default in the absense of a calculable diff. Only pipelines with
+it will evaluate to true by default in the absence of a calculable diff. Only pipelines with
 a source `push`, `merge_request`, and `external_merge_request` have PushEvents. `rules:changes`
 on any other pipeline will **always** return true.
 
