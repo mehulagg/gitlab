@@ -20387,8 +20387,6 @@ CREATE UNIQUE INDEX index_issues_on_project_id_and_iid ON issues USING btree (pr
 
 CREATE INDEX index_issues_on_promoted_to_epic_id ON issues USING btree (promoted_to_epic_id) WHERE (promoted_to_epic_id IS NOT NULL);
 
-CREATE INDEX index_issues_on_relative_position ON issues USING btree (relative_position);
-
 CREATE INDEX index_issues_on_sprint_id ON issues USING btree (sprint_id);
 
 CREATE INDEX index_issues_on_title_trigram ON issues USING gin (title gin_trgm_ops);
