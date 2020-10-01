@@ -67,26 +67,6 @@ RSpec.describe Ci::Bridge do
     end
   end
 
-  describe 'state machine transitions' do
-    context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
-
-        bridge.enqueue!
-      end
-    end
-  end
-
-  describe 'state machine transitions' do
-    context 'when bridge points towards downstream' do
-      it 'schedules downstream pipeline creation' do
-        expect(bridge).to receive(:schedule_downstream_pipeline!)
-
-        bridge.enqueue!
-      end
-    end
-  end
-
   describe '#inherit_status_from_downstream!' do
     let(:downstream_pipeline) { build(:ci_pipeline, status: downstream_status) }
 
@@ -301,6 +281,74 @@ RSpec.describe Ci::Bridge do
 
       it 'returns nil' do
         expect(bridge.target_ref).to be_nil
+      end
+    end
+  end
+
+  describe '#play' do
+    let(:downstream_project) { create(:project) }
+    let(:user) { create(:user) }
+    let(:bridge) { create(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project) }
+
+    before do
+      project.add_maintainer(user)
+      downstream_project.add_maintainer(user)
+    end
+
+    it 'enqueues the bridge' do
+      bridge.play(user)
+
+      expect(bridge).to be_pending
+    end
+  end
+
+  describe '#playable?' do
+    context 'when bridge is a manual action' do
+      subject { build_stubbed(:ci_bridge, :manual).playable? }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when build is not a manual action' do
+      subject { build_stubbed(:ci_bridge, :created).playable? }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#action?' do
+    context 'when bridge is a manual action' do
+      subject { build_stubbed(:ci_bridge, :manual).action? }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when build is not a manual action' do
+      subject { build_stubbed(:ci_bridge, :created).action? }
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#can_run_by?' do
+    let(:downstream_project) { create(:project) }
+    let(:user) { create(:user) }
+    let(:bridge) { create(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project) }
+    subject { bridge.can_run_by?(user) }
+
+    context 'when user has access to downstream project' do
+      before do
+        downstream_project.add_maintainer(user)
+      end
+
+      it 'returns false' do
+        expect(subject).to be_truthy
+      end
+    end
+
+    context 'when user has no access to downstream project' do
+      it 'returns false' do
+        expect(subject).to be_falsey
       end
     end
   end

@@ -2401,7 +2401,7 @@ to more strictly [protect manual deployments](#protecting-manual-jobs) from bein
 run by unauthorized users.
 
 NOTE: **Note:**
-Using `when:manual` and `trigger` together results in the error `jobs:#{job-name} when
+Before 13.5, using `when:manual` and `trigger` together results in the error `jobs:#{job-name} when
 should be on_success, on_failure or always`, because `when:manual` prevents triggers
 being used.
 
@@ -3627,7 +3627,7 @@ see which job triggered a downstream pipeline by hovering your mouse cursor over
 the downstream pipeline job in the [pipeline graph](../pipelines/index.md#visualize-pipelines).
 
 NOTE: **Note:**
-Using a `trigger` with `when:manual` together results in the error `jobs:#{job-name}
+Before 13.5, using a `trigger` with `when:manual` together results in the error `jobs:#{job-name}
 when should be on_success, on_failure or always`, because `when:manual` prevents
 triggers being used.
 
