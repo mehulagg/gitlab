@@ -8,7 +8,7 @@ RSpec.describe ResourceAccessTokens::RevokeService do
   let_it_be(:user) { create(:user) }
   let(:access_token) { create(:personal_access_token, user: resource_bot) }
 
-  describe '#execute' do
+  describe '#execute', :sidekiq_inline do
     # Created shared_examples as it will easy to include specs for group bots in https://gitlab.com/gitlab-org/gitlab/-/issues/214046
     shared_examples 'revokes access token' do
       it { expect(subject.success?).to be true }
@@ -24,7 +24,9 @@ RSpec.describe ResourceAccessTokens::RevokeService do
       it 'transfer issuables of bot user to ghost user' do
         issue = create(:issue, author: resource_bot)
 
-        expect { subject }.to change {issue.author.ghost?}.to(true)
+        subject
+
+        expect(issue.reload.author.ghost?).to be true
       end
 
       it 'destroys project bot user' do
