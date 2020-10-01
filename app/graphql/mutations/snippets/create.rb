@@ -57,6 +57,7 @@ module Mutations
         end
 
         {
+          spam: snippet.spam?,
           snippet: service_response.success? ? snippet : nil,
           errors: errors_on_object(snippet)
         }

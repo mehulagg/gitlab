@@ -40,6 +40,7 @@ module Mutations
         end
 
         {
+          spam: snippet.spam?,
           snippet: result.success? ? snippet : snippet.reset,
           errors: errors_on_object(snippet)
         }
@@ -56,6 +57,8 @@ module Mutations
           # We need to rename `blob_actions` into `snippet_actions` because
           # it's the expected key param
           update_args[:snippet_actions] = update_args.delete(:blob_actions)&.map(&:to_h)
+          update_args[:api] = true
+          update_args[:request] = context[:request]
         end
       end
     end
