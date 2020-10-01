@@ -21,10 +21,13 @@ export default () => {
       pagerdutyWebhookUrl,
       pagerdutyResetKeyPath,
       autoCloseIncident,
-      slaTimer,
-      slaTimerMinutes,
+      slaActive,
+      slaMinutes,
+      slaFeatureAvailable,
     },
   } = el;
+
+  console.log('dataset', el.dataset);
 
   const service = new IncidentsSettingsService(operationsSettingsEndpoint, pagerdutyResetKeyPath);
   return new Vue({
@@ -43,8 +46,9 @@ export default () => {
         webhookUrl: pagerdutyWebhookUrl,
       },
       serviceLevelAgreementSettings: {
-        timer: parseBoolean(slaTimer),
-        timerMinutes: slaTimerMinutes,
+        active: parseBoolean(slaActive),
+        minutes: slaMinutes,
+        featureAvailable: slaFeatureAvailable,
       },
     },
     render(createElement) {
