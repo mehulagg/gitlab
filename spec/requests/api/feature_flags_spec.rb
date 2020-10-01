@@ -611,7 +611,7 @@ RSpec.describe API::FeatureFlags do
             subject
 
             scope = feature_flag.scopes.find_by_environment_scope(params[:environment_scope])
-            strategy_count = scope.strategies.select { |strategy| strategy['name'] == 'userWithId' }.count
+            strategy_count = scope.strategies.count { |strategy| strategy['name'] == 'userWithId' }
             expect(response).to have_gitlab_http_status(:ok)
             expect(strategy_count).to eq(1)
           end
