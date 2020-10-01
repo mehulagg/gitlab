@@ -1374,7 +1374,9 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
   describe '#path' do
     it 'is automatically generated' do
-      expect(environment.path).not_to be_nil
+      expect(environment.path).to eq(
+        Gitlab::Routing.url_helpers.project_environment_path(project, environment)
+      )
     end
   end
 end
