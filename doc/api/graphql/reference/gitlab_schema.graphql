@@ -2071,6 +2071,16 @@ type CiJob {
     """
     last: Int
   ): CiJobConnection
+
+  """
+  Indicates if a build is scheduled
+  """
+  scheduled: Boolean
+
+  """
+  Schedule for the build
+  """
+  scheduledAt: Time
 }
 
 """

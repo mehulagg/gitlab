@@ -5552,6 +5552,34 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "scheduled",
+              "description": "Indicates if a build is scheduled",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "scheduledAt",
+              "description": "Schedule for the build",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
