@@ -46,12 +46,12 @@ export default {
     GlLink,
     GlSprintf,
   },
-  inject: ['service'],
+  inject: ['service', 'serviceLevelAgreementSettings'],
   data() {
     return {
       enabled: false,
-      duration: '',
-      unit: units.minutes.value,
+      duration: this.serviceLevelAgreementSettings.slaTimer,
+      unit: this.serviceLevelAgreementSettings.timerMinutes,
     };
   },
   computed: {
