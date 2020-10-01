@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlButton, GlButtonGroup } from '@gitlab/ui';
+import { GlAlert, GlButton, GlButtonGroup, GlSprintf } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
@@ -18,6 +18,7 @@ export default {
     GlButtonGroup,
     BurndownChart,
     BurnupChart,
+    GlSprintf,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -221,9 +222,17 @@ export default {
       class="col-12 gl-mt-3"
       @dismiss="showInfo = false"
     >
-      {{
-        __('Burndown charts are now immutable. You can view the old chart using the toggle below.')
-      }}
+      <gl-sprintf
+        :message="
+          __(
+            `Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button.`,
+          )
+        "
+      >
+        <template #strong="{ content }">
+          <strong>{{ content }}</strong>
+        </template>
+      </gl-sprintf>
     </gl-alert>
     <div class="burndown-header gl-display-flex gl-align-items-center gl-flex-wrap">
       <h3 ref="chartsTitle">{{ title }}</h3>
@@ -257,7 +266,7 @@ export default {
           size="small"
           @click="toggleLegacyBurndown(true)"
         >
-          {{ __('Old burndown chart') }}
+          {{ __('Legacy burndown chart') }}
         </gl-button>
         <gl-button
           ref="newBurndown"
@@ -266,7 +275,7 @@ export default {
           size="small"
           @click="toggleLegacyBurndown(false)"
         >
-          {{ __('New burndown chart') }}
+          {{ __('Fixed burndown chart') }}
         </gl-button>
       </gl-button-group>
     </div>

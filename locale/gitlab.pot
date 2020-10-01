@@ -8,8 +8,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-22 19:32+0200\n"
-"PO-Revision-Date: 2020-09-22 19:32+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -4327,7 +4325,7 @@ msgstr ""
 msgid "Burndown chart"
 msgstr ""
 
-msgid "Burndown charts are now immutable. You can view the old chart using the toggle below."
+msgid "Burndown charts are now fixed. This means that removing issues from a milestone after it has expired won't affect the chart. You can view the old chart using the %{strongStart}Legacy burndown chart%{strongEnd} button."
 msgstr ""
 
 msgid "BurndownChartLabel|Open issue weight"
@@ -11279,6 +11277,9 @@ msgstr ""
 msgid "First seen"
 msgstr ""
 
+msgid "Fixed burndown chart"
+msgstr ""
+
 msgid "Fixed date"
 msgstr ""
 
@@ -14885,6 +14886,9 @@ msgstr ""
 msgid "Leave zen mode"
 msgstr ""
 
+msgid "Legacy burndown chart"
+msgstr ""
+
 msgid "Let's Encrypt does not accept emails on example.com"
 msgstr ""
 
@@ -17047,9 +17051,6 @@ msgstr ""
 msgid "New branch unavailable"
 msgstr ""
 
-msgid "New burndown chart"
-msgstr ""
-
 msgid "New changes were added. %{linkStart}Reload the page to review them%{linkEnd}"
 msgstr ""
 
@@ -17690,9 +17691,6 @@ msgid "Off"
 msgstr ""
 
 msgid "Oh no!"
-msgstr ""
-
-msgid "Old burndown chart"
 msgstr ""
 
 msgid "Oldest first"
