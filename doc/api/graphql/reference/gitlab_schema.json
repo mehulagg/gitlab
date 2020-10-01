@@ -14056,6 +14056,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a snippet detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -27458,6 +27472,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Snippet",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a snippet detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -55989,6 +56017,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "Snippet",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a snippet detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               },
               "isDeprecated": false,
