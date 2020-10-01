@@ -1,7 +1,7 @@
 <script>
 import { GlSprintf, GlAlert, GlLink } from '@gitlab/ui';
 
-import { DELETE_ALERT_TITLE, DELETE_ALERT_LINK_TEST } from '../../constants/index';
+import { DELETE_ALERT_TITLE, DELETE_ALERT_LINK_TEXT } from '../../constants/index';
 
 export default {
   components: {
@@ -15,14 +15,14 @@ export default {
   },
   i18n: {
     DELETE_ALERT_TITLE,
-    DELETE_ALERT_LINK_TEST,
+    DELETE_ALERT_LINK_TEXT,
   },
 };
 </script>
 
 <template>
   <gl-alert variant="warning" :title="$options.i18n.DELETE_ALERT_TITLE" @dismiss="$emit('dismiss')">
-    <gl-sprintf :message="$options.i18n.DELETE_ALERT_LINK_TEST">
+    <gl-sprintf :message="$options.i18n.DELETE_ALERT_LINK_TEXT">
       <template #adminLink="{content}">
         <gl-link data-testid="run-link" :href="runCleanupPoliciesHelpPagePath" target="_blank">{{
           content

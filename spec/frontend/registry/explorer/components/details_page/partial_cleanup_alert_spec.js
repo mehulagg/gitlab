@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlAlert, GlSprintf } from '@gitlab/ui';
 import component from '~/registry/explorer/components/details_page/partial_cleanup_alert.vue';
-import { DELETE_ALERT_TITLE, DELETE_ALERT_LINK_TEST } from '~/registry/explorer/constants';
+import { DELETE_ALERT_TITLE, DELETE_ALERT_LINK_TEXT } from '~/registry/explorer/constants';
 
 describe('Partial Cleanup alert', () => {
   let wrapper;
@@ -37,7 +37,7 @@ describe('Partial Cleanup alert', () => {
   it('has the right text', () => {
     mountComponent();
 
-    expect(wrapper.text()).toMatchInterpolatedText(DELETE_ALERT_LINK_TEST);
+    expect(wrapper.text()).toMatchInterpolatedText(DELETE_ALERT_LINK_TEXT);
   });
 
   it('contains run link', () => {
