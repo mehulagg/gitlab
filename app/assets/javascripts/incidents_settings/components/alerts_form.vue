@@ -64,7 +64,7 @@ export default {
     updateAlertsIntegrationSettings() {
       this.loading = true;
 
-      this.service.updateSettings(this.formData).catch(() => {
+      this.service.updateSettings(this.formData, true).catch(() => {
         this.loading = false;
       });
     },
