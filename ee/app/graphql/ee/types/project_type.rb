@@ -100,7 +100,7 @@ module EE
               ::Types::DastSiteProfileType.connection_type,
               null: true,
               description: 'DAST Site Profiles associated with the project',
-              resolve: -> (obj, _args, _ctx) { obj.dast_site_profiles.with_dast_site }
+              resolve: -> (obj, _args, _ctx) { obj.dast_site_profiles.with_dast_site_and_validation }
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,

@@ -21,7 +21,9 @@ class DastSiteValidation < ApplicationRecord
     "#{url_base}/#{url_path}"
   end
 
-  state_machine :state, initial: :pending do
+  INITIAL_STATE = :pending
+
+  state_machine :state, initial: INITIAL_STATE do
     event :start do
       transition pending: :inprogress
     end

@@ -6,7 +6,7 @@ class DastSiteProfilesFinder
   end
 
   def execute
-    relation = DastSiteProfile.with_dast_site
+    relation = DastSiteProfile.with_dast_site_and_validation
     relation = by_id(relation)
     relation = by_project(relation)
     relation
