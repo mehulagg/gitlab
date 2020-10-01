@@ -137,19 +137,20 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
               create(:diff_note_on_design, note: 'first note', noteable: designs.first, project: project, author: create(:user)),
               create(:diff_note_on_design, note: 'second note', noteable: designs.first, project: project, author: create(:user))
             ]
+            matchers = old_notes.map do |note|
+              have_attributes(
+                type: note.type,
+                author_id: note.author_id,
+                note: note.note,
+                position: note.position
+              )
+            end
 
             expect { subject }.to change { Note.count }.by(2)
 
             new_notes = target_issue.designs.first.notes.fresh
 
-            new_notes.zip(old_notes).each do |new_note, old_note|
-              expect(new_note).to have_attributes(
-                type: old_note.type,
-                author_id: old_note.author_id,
-                note: old_note.note,
-                position: old_note.position
-              )
-            end
+            expect(new_notes).to match_array(matchers)
           end
 
           it 'links the LfsObjects' do
