@@ -8,12 +8,12 @@ module Gitlab
     class GroupSearchResults < Gitlab::Elastic::SearchResults
       attr_reader :group, :default_project_filter, :filters
 
-      def initialize(current_user, query, limit_project_ids = nil, group:, public_and_internal_projects: false, default_project_filter: false, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, group:, public_and_internal_projects: false, default_project_filter: false, sort: nil, filters: {})
         @group = group
         @default_project_filter = default_project_filter
         @filters = filters
 
-        super(current_user, query, limit_project_ids, public_and_internal_projects: public_and_internal_projects, filters: filters)
+        super(current_user, query, limit_project_ids, public_and_internal_projects: public_and_internal_projects, sort: sort, filters: filters)
       end
     end
   end

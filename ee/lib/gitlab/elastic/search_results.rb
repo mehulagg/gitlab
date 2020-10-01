@@ -195,7 +195,7 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          options = base_options.merge(filters.slice(:confidential, :state))
+          options = base_options.merge(filters.slice(:sort, :confidential, :state))
 
           Issue.elastic_search(query, options: options)
         end
@@ -218,6 +218,7 @@ module Gitlab
         strong_memoize(:merge_requests) do
           options = base_options
           options[:state] = filters[:state] if filters.key?(:state)
+          options[:sort] = filters[:sort]   if filters.key?(:sort)
 
           MergeRequest.elastic_search(query, options: options)
         end

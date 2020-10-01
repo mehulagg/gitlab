@@ -30,6 +30,7 @@ module EE
           elastic_projects,
           group: group,
           public_and_internal_projects: elastic_global,
+          sort: params[:sort],
           filters: { confidential: params[:confidential], state: params[:state] }
         )
       end
