@@ -49,9 +49,9 @@ export default {
   inject: ['service', 'serviceLevelAgreementSettings'],
   data() {
     return {
-      enabled: false,
-      duration: this.serviceLevelAgreementSettings.slaTimer,
-      unit: this.serviceLevelAgreementSettings.timerMinutes,
+      enabled: this.serviceLevelAgreementSettings.active,
+      duration: this.serviceLevelAgreementSettings.minutes ?? '',
+      unit: units.minutes.value,
     };
   },
   computed: {
