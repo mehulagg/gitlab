@@ -119,7 +119,7 @@
   }
 
   @include media-breakpoint-down(xs) {
-    .incident-management-list-header {
+    .list-header {
       flex-direction: column-reverse;
     }
 

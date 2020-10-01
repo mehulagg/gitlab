@@ -38,7 +38,7 @@ module AlertManagement
     sha_attribute :fingerprint
 
     HOSTS_MAX_LENGTH = 255
-
+    
     validates :title,           length: { maximum: 200 }, presence: true
     validates :description,     length: { maximum: 1_000 }
     validates :service,         length: { maximum: 100 }

@@ -19,8 +19,10 @@ module AlertManagement
 
       collection = project.alert_management_alerts
       collection = by_status(collection)
-      collection = by_search(collection)
       collection = by_iid(collection)
+      # collection = by_assignee(items)
+      collection = by_search(collection)
+
       sort(collection)
     end
 

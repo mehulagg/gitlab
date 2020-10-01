@@ -1,4 +1,14 @@
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
+
+export const I18N = {
+  noAlertsMsg: s__(
+    'AlertManagement|No alerts available to display. See %{linkStart}enabling alert management%{linkEnd} for more information on adding alerts to the list.',
+  ),
+  errorMsg: s__(
+    "AlertManagement|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
+  ),
+  unassigned: __('Unassigned'),
+};
 
 export const ALERTS_SEVERITY_LABELS = {
   CRITICAL: s__('AlertManagement|Critical'),
@@ -63,5 +73,3 @@ export const trackAlertStatusUpdateOptions = {
   action: 'update_alert_status',
   label: 'Status',
 };
-
-export const DEFAULT_PAGE_SIZE = 20;
