@@ -8,6 +8,8 @@ module EE
 
       override :execute
       def execute
+        return false if prevent_elasticsearch_indexing_update?
+
         find_or_create_index
 
         # Repository size limit comes as MB from the view
@@ -42,6 +44,10 @@ module EE
       end
 
       private
+
+      def prevent_elasticsearch_indexing_update?
+        application_setting.elasticsearch_indexing == ::Gitlab::Utils.to_boolean(params[:elasticsearch_indexing])
+      end
 
       def find_or_create_index
         return if ::Gitlab::Elastic::Helper.default.index_exists?

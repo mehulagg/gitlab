@@ -34,28 +34,54 @@ RSpec.describe ApplicationSettings::UpdateService do
       end
     end
 
-    context 'index dependent' do
-      let(:opts) { { elasticsearch_indexing: true } }
+    context 'elasticsearch_indexing update' do
+      context 'result returned' do
+        using RSpec::Parameterized::TableSyntax
 
-      context 'when index exists' do
-        before do
-          expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
-          expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
+        where( :indexing_enabled, :input_value, :result) do
+          false | true  | true
+          true  | true  | false
+          false | false | false
+          true  | false | true
         end
 
-        it 'returns correct result' do
-          expect(service.execute).to be(true)
+        with_them do
+          let(:opts) { { elasticsearch_indexing: input_value } }
+
+          before do
+            allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(indexing_enabled)
+            allow(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
+          end
+
+          it 'returns correct result' do
+            expect(service.execute).to be(result)
+          end
         end
       end
 
-      context 'when index does not exist' do
+      context 'index creation' do
+        let(:opts) { { elasticsearch_indexing: true } }
+
         before do
-          expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
-          expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
+          allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(false)
         end
 
-        it 'returns correct result' do
-          expect(service.execute).to be(true)
+        context 'when index exists' do
+          it 'skips creating a new index' do
+            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
+            expect(Gitlab::Elastic::Helper.default).not_to(receive(:create_empty_index))
+
+            service.execute
+          end
+        end
+
+        context 'when index does not exist' do
+          it 'creates a new index' do
+            expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(false)
+            expect(Gitlab::Elastic::Helper.default).to(receive(:create_empty_index))
+
+            service.execute
+          end
         end
       end
     end
