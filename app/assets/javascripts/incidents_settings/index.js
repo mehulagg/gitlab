@@ -21,6 +21,8 @@ export default () => {
       pagerdutyWebhookUrl,
       pagerdutyResetKeyPath,
       autoCloseIncident,
+      slaTimer,
+      slaTimerMinutes,
     },
   } = el;
 
@@ -39,6 +41,10 @@ export default () => {
       pagerDutySettings: {
         active: parseBoolean(pagerdutyActive),
         webhookUrl: pagerdutyWebhookUrl,
+      },
+      serviceLevelAgreementSettings: {
+        timer: parseBoolean(slaTimer),
+        timerMinutes: slaTimerMinutes,
       },
     },
     render(createElement) {
