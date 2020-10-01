@@ -41,6 +41,7 @@ module Types
             }
 
       def details_path
+        object.details_path
       rescue NotImplementedError
         nil
       end
