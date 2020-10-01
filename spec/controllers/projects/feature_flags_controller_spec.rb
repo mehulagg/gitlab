@@ -201,7 +201,7 @@ RSpec.describe Projects::FeatureFlagsController do
         recorded = ActiveRecord::QueryRecorder.new { subject }
 
         related_count = recorded.log
-          .select { |query| query.include?('operations_feature_flag') }.count
+          .count { |query| query.include?('operations_feature_flag') }
 
         expect(related_count).to be_within(5).of(2)
       end
@@ -1167,9 +1167,9 @@ RSpec.describe Projects::FeatureFlagsController do
         }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([{
           "name" => "default",
           "parameters" => {}
@@ -1186,9 +1186,9 @@ RSpec.describe Projects::FeatureFlagsController do
         }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([{
           "name" => "gradualRolloutUserId",
           "parameters" => {
@@ -1207,9 +1207,9 @@ RSpec.describe Projects::FeatureFlagsController do
         }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([{
           "name" => "userWithId",
           "parameters" => { "userIds" => "sam,fred" }
@@ -1226,9 +1226,9 @@ RSpec.describe Projects::FeatureFlagsController do
         }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([{
           "name" => "gradualRolloutUserId",
           "parameters" => {
@@ -1247,9 +1247,9 @@ RSpec.describe Projects::FeatureFlagsController do
         }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([])
       end
 
@@ -1265,9 +1265,9 @@ RSpec.describe Projects::FeatureFlagsController do
         }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies'].length).to eq(2)
         expect(scope_json['strategies']).to include({
           "name" => "gradualRolloutUserId",
@@ -1285,9 +1285,9 @@ RSpec.describe Projects::FeatureFlagsController do
         put_request(feature_flag, scopes_attributes: [{ id: scope.id }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([{
           "name" => "default",
           "parameters" => {}
@@ -1301,9 +1301,9 @@ RSpec.describe Projects::FeatureFlagsController do
         put_request(feature_flag, scopes_attributes: [{ id: scope.id }])
 
         expect(response).to have_gitlab_http_status(:ok)
-        scope_json = json_response['scopes'].select do |s|
+        scope_json = json_response['scopes'].find do |s|
           s['environment_scope'] == 'production'
-        end.first
+        end
         expect(scope_json['strategies']).to eq([{
           "name" => "gradualRolloutUserId",
           "parameters" => { "groupId" => "default", "percentage" => "10" }
