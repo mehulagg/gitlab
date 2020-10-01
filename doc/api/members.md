@@ -288,6 +288,7 @@ POST /projects/:id/members
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `user_id` | integer         | yes | The user ID of the new member |
+| `user_ids` | integer array  | yes | An array of user IDs to add as new members |
 | `access_level` | integer | yes | A valid access level |
 | `expires_at` | string | no | A date string in the format YEAR-MONTH-DAY |
 
