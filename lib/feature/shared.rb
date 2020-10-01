@@ -21,7 +21,7 @@ class Feature
         example: <<-EOS
           Feature.enabled?(:my_feature_flag, project)
           Feature.enabled?(:my_feature_flag, project, type: :development)
-          push_frontend_feature_flag?(:my_feature_flag, project)
+          push_frontend_feature_flag(:my_feature_flag, project)
         EOS
       },
       ops: {
@@ -36,14 +36,16 @@ class Feature
         EOS
       },
       licensed: {
-        description: 'Permanent feature flags used to temporarily disable licensed features.',
-        optional: true,
+        description: 'Short lived, feature flags used to temporarily enable licensed features.',
+        optional: false,
         rollout_issue: false,
         ee_only: true,
-        default_enabled: true,
+        default_enabled: false,
         example: <<-EOS
-          project.feature_available?(:my_licensed_feature)
-          namespace.feature_available?(:my_licensed_feature)
+          License.beta_feature_available?(:my_licensed_feature)
+          project.beta_feature_available?(:my_licensed_feature)
+          namespace.beta_feature_available?(:my_licensed_feature)
+          push_frontend_beta_feature_available?(:my_licensed_feature, project)
         EOS
       }
     }.freeze

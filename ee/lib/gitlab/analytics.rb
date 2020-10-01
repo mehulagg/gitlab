@@ -19,6 +19,7 @@ module Gitlab
     FEATURE_FLAG_DEFAULTS = {
       PRODUCTIVITY_ANALYTICS_FEATURE_FLAG => true,
       GROUP_COVERAGE_REPORTS_FEATURE_FLAG => true,
+      GROUP_MERGE_REQUEST_ANALYTICS_FEATURE_FLAG => true,
       CYCLE_ANALYTICS_FEATURE_FLAG => true,
       PROJECT_MERGE_REQUEST_ANALYTICS_FEATURE_FLAG => true
     }.freeze
@@ -36,10 +37,6 @@ module Gitlab
       FEATURE_FLAGS.any? do |flag|
         feature_enabled?(flag)
       end
-    end
-
-    def self.cycle_analytics_enabled?
-      feature_enabled?(CYCLE_ANALYTICS_FEATURE_FLAG)
     end
 
     def self.productivity_analytics_enabled?

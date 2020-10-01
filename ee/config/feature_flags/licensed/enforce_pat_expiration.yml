@@ -1,0 +1,7 @@
+---
+name: enforce_pat_expiration
+introduced_by_url: 
+rollout_issue_url: 
+type: licensed
+group: 
+default_enabled: false

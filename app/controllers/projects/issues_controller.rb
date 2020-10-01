@@ -56,7 +56,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
+    push_frontend_beta_feature_available(:scoped_labels, @project, default_enabled: true)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]

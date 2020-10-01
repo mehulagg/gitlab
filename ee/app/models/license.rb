@@ -248,7 +248,7 @@ class License < ApplicationRecord
       end
     end
 
-    delegate :block_changes?, :feature_available?, to: :current, allow_nil: true
+    delegate :block_changes?, :feature_available?, :beta_feature_available?, to: :current, allow_nil: true
 
     def reset_current
       RequestStore.delete(:current_license)
@@ -366,10 +366,17 @@ class License < ApplicationRecord
   def feature_available?(feature)
     return false if trial? && expired?
 
-    # This feature might not be behind a feature flag at all, so default to true
-    return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
-
     features.include?(feature)
+  end
+
+  # This makes the feature disabled by default.
+  #
+  # This allows to:
+  # - To check a licensed feature in conjuction with a feature flag of that same name
+  # - Decide if feature flag is enabled or disabled by default
+  def beta_feature_available?(feature, default_enabled: false)
+    feature_available?(feature) &&
+      ::Feature.enabled?(feature, type: :licensed, default_enabled: default_enabled)
   end
 
   def license_id

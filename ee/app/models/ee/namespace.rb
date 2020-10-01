@@ -115,28 +115,22 @@ module EE
       project.full_path.sub(/\A#{Regexp.escape(full_path)}/, full_path_before_last_save)
     end
 
-    # This makes the feature disabled by default, in contrary to how
-    # `#feature_available?` makes a feature enabled by default.
+    # This makes the feature disabled by default.
     #
     # This allows to:
-    # - Enable the feature flag for a given group, regardless of the license.
-    #   This is useful for early testing a feature in production on a given group.
-    # - Enable the feature flag globally and still check that the license allows
-    #   it. This is the case when we're ready to enable a feature for anyone
-    #   with the correct license.
-    def beta_feature_available?(feature)
-      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
+    # - To check a licensed feature in conjuction with a feature flag of that same name
+    #   in context of the current namespace.
+    # - Decide if feature flag is enabled or disabled by default
+    def beta_feature_available?(feature, default_enabled: false)
+      feature_available?(feature) &&
+        ::Feature.enabled?(feature, self, type: :licensed, default_enabled: default_enabled)
     end
-    alias_method :alpha_feature_available?, :beta_feature_available?
 
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
     # being licensed.
     override :feature_available?
     def feature_available?(feature)
-      # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
-
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
           h[f] = load_feature_available(f)
