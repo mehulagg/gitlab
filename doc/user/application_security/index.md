@@ -210,6 +210,21 @@ automatically generates. The following scanners are supported:
   `yarn`.
 - [Container Scanning](container_scanning/index.md)
 
+#### Auto-fix merge requests
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216027) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.5.
+
+When the auto-fix feature is enabled, remediation merge requests will be automatically created
+whenever a vulnerability is detected.
+
+This feature is enabled by default but can be opted-out from the project's settings by unchecking
+the **Suggested Solutions** checkbox in **Security & Compliance > Configuration**.
+
+![Suggested Solutions Settings](img/suggested_solutions_settings_v13.5.png)
+
+Auto-fix merge requests are authored by the [**GitLab Security Bot**](/security-bot) user and labelled with the
+`gitlab-vulnerability-auto-fix` label.
+
 #### Manually applying the suggested patch
 
 Some vulnerabilities can be fixed by applying a patch that is automatically

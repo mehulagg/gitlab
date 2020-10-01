@@ -91,7 +91,7 @@ export default {
 </script>
 
 <template>
-  <section>
+  <section class="js-suggested-solutions-settings">
     <h4 class="gl-h4 gl-my-5">
       {{ __('Suggested Solutions') }}
       <gl-link
