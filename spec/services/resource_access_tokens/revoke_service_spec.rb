@@ -15,6 +15,12 @@ RSpec.describe ResourceAccessTokens::RevokeService do
 
       it { expect(subject.message).to eq("Access token #{access_token.name} has been revoked and the bot user has been scheduled for deletion.") }
 
+      it 'calls delete user worker' do
+        expect(DeleteUserWorker).to receive(:perform_async).with(user.id, resource_bot.id, skip_authorization: true)
+
+        subject
+      end
+
       it 'removes membership of bot user' do
         subject
 
@@ -29,10 +35,10 @@ RSpec.describe ResourceAccessTokens::RevokeService do
         expect(issue.reload.author.ghost?).to be true
       end
 
-      it 'destroys project bot user' do
-        expect(DeleteUserWorker).to receive(:perform_async).with(user.id, resource_bot.id, skip_authorization: true)
-
+      it 'deletes project bot user' do
         subject
+
+        expect(User.exists?(resource_bot.id)).to be_falsy
       end
     end
 

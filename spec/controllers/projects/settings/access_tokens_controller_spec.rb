@@ -150,9 +150,15 @@ RSpec.describe Projects::Settings::AccessTokensController do
 
     it_behaves_like 'feature unavailability'
 
-    context 'when feature is available' do
+    context 'when feature is available', :sidekiq_inline do
       before do
         enable_feature
+      end
+
+      it 'calls delete user worker' do
+        expect(DeleteUserWorker).to receive(:perform_async).with(user.id, bot_user.id, skip_authorization: true)
+
+        subject
       end
 
       it 'removed membership of bot user' do
