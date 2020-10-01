@@ -62,10 +62,6 @@ RSpec.describe ApplicationSettings::UpdateService do
       context 'index creation' do
         let(:opts) { { elasticsearch_indexing: true } }
 
-        before do
-          allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(false)
-        end
-
         context 'when index exists' do
           it 'skips creating a new index' do
             expect(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
