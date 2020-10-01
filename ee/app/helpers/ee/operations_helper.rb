@@ -40,7 +40,21 @@ module EE
       super.merge(opsgenie_mvc_data)
     end
 
+    override :operations_settings_data
+    def operations_settings_data
+      super.merge(incident_sla_data)
+    end
+
     private
+
+    def incident_sla_data
+      setting = project_incident_management_setting
+
+      {
+        sla_active: setting.sla_timer.to_s,
+        sla_minutes: setting.sla_timer_minutes
+      }
+    end
 
     def opsgenie_mvc_data
       return {} unless alerts_service.opsgenie_mvc_available?
