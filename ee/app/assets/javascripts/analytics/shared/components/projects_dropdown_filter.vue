@@ -56,11 +56,6 @@ export default {
       required: false,
       default: () => [],
     },
-    useGraphql: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -133,42 +128,33 @@ export default {
     fetchData() {
       this.loading = true;
 
-      if (this.useGraphql) {
-        return this.$apollo
-          .query({
-            query: getProjects,
-            variables: {
-              groupFullPath: this.groupNamespace,
-              search: this.searchTerm,
-              ...this.queryParams,
-            },
-          })
-          .then(response => {
-            const {
-              data: {
-                group: {
-                  projects: { nodes },
-                },
+      return this.$apollo
+        .query({
+          query: getProjects,
+          variables: {
+            groupFullPath: this.groupNamespace,
+            search: this.searchTerm,
+            ...this.queryParams,
+          },
+        })
+        .then(response => {
+          const {
+            data: {
+              group: {
+                projects: { nodes },
               },
-            } = response;
+            },
+          } = response;
 
-            this.loading = false;
-            this.projects = nodes;
-          });
-      }
-
-      return Api.groupProjects(this.groupId, this.searchTerm, this.queryParams, projects => {
-        this.projects = projects;
-        this.loading = false;
-      });
+          this.loading = false;
+          this.projects = nodes;
+        });
     },
     isProjectSelected(id) {
       return this.selectedProjects ? this.selectedProjectIds.includes(id) : false;
     },
     getEntityId(project) {
-      if (this.useGraphql) return getIdFromGraphQLId(project.id);
-
-      return project?.id || null;
+      return getIdFromGraphQLId(project.id);
     },
   },
 };
@@ -184,7 +170,7 @@ export default {
       <div class="gl-display-flex gl-flex-fill-1">
         <gl-avatar
           v-if="isOnlyOneProjectSelected"
-          :src="useGraphql ? selectedProjects[0].avatarUrl : selectedProjects[0].avatar_url"
+          :src="selectedProjects[0].avatarUrl"
           :entity-id="getEntityId(selectedProjects[0])"
           :entity-name="selectedProjects[0].name"
           :size="16"
@@ -213,7 +199,7 @@ export default {
           :size="16"
           :entity-id="getEntityId(project)"
           :entity-name="project.name"
-          :src="useGraphql ? project.avatarUrl : project.avatar_url"
+          :src="project.avatarUrl"
           shape="rect"
         />
         {{ project.name }}

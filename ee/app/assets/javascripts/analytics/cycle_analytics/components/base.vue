@@ -3,7 +3,7 @@ import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { PROJECTS_PER_PAGE } from '../constants';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
-import { SIMILARITY_ORDER, LAST_ACTIVITY_AT, DATE_RANGE_LIMIT } from '../../shared/constants';
+import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import DateRange from '../../shared/components/daterange.vue';
 import StageTable from './stage_table.vue';
 import DurationChart from './duration_chart.vue';
@@ -116,12 +116,8 @@ export default {
     },
     projectsQueryParams() {
       return {
-        per_page: PROJECTS_PER_PAGE,
-        with_shared: false,
-        order_by: this.featureFlags.hasAnalyticsSimilaritySearch
-          ? SIMILARITY_ORDER
-          : LAST_ACTIVITY_AT,
-        include_subgroups: true,
+        first: PROJECTS_PER_PAGE,
+        includeSubgroups: true,
       };
     },
   },
