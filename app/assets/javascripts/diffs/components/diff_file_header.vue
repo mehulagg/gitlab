@@ -9,7 +9,6 @@ import {
   GlButtonGroup,
   GlDropdown,
   GlDropdownItem,
-  GlDropdownSectionHeader,
   GlDropdownDivider,
 } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -30,7 +29,6 @@ export default {
     GlButtonGroup,
     GlDropdown,
     GlDropdownItem,
-    GlDropdownSectionHeader,
     GlDropdownDivider,
   },
   directives: {
