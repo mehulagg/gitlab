@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Terraform/Base.gitlab-ci.yml' do
-  subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Terraform/Base') }
+RSpec.describe 'Terraform/Base.latest.gitlab-ci.yml' do
+  subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('Terraform/Base.latest') }
 
   describe 'the created pipeline' do
     let(:user) { create(:admin) }
