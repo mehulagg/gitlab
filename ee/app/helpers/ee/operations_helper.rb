@@ -51,7 +51,7 @@ module EE
       setting = project_incident_management_setting
 
       {
-        sla_feature_available: sla_feature_available?,
+        sla_feature_available: sla_feature_available?.to_s,
         sla_active: setting.sla_timer.to_s,
         sla_minutes: setting.sla_timer_minutes
       }
