@@ -133,18 +133,23 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
           end
 
           it 'copies design notes correctly', :aggregate_failures, :sidekiq_inline do
-            note = create(:diff_note_on_design, noteable: designs.first, project: project)
+            old_notes = [
+              create(:diff_note_on_design, note: 'first note', noteable: designs.first, project: project, author: create(:user)),
+              create(:diff_note_on_design, note: 'second note', noteable: designs.first, project: project, author: create(:user))
+            ]
 
-            expect { subject }.to change { Note.count }.by(1)
+            expect { subject }.to change { Note.count }.by(2)
 
-            new_note = target_issue.designs.first.notes.first
+            new_notes = target_issue.designs.first.notes.fresh
 
-            expect(new_note).to have_attributes(
-              type: note.type,
-              author_id: note.author_id,
-              note: note.note,
-              position: note.position
-            )
+            new_notes.zip(old_notes).each do |new_note, old_note|
+              expect(new_note).to have_attributes(
+                type: old_note.type,
+                author_id: old_note.author_id,
+                note: old_note.note,
+                position: old_note.position
+              )
+            end
           end
 
           it 'links the LfsObjects' do
