@@ -1,46 +1,31 @@
 # frozen_string_literal: true
 
 module WhatsNewHelper
-  EMPTY_JSON = ''.to_json
+  include Gitlab::WhatsNew
 
   def whats_new_most_recent_release_items_count
-    items = parsed_most_recent_release_items
-
-    return unless items.is_a?(Array)
-
-    items.count
+    Rails.cache.fetch('whats_new:release_items_count', expires_in: CACHE_DURATION) do
+      parsed_most_recent_release_items&.count
+    end
   end
 
   def whats_new_storage_key
-    items = parsed_most_recent_release_items
+    Rails.cache.fetch('whats_new:storage_key', expires_in: CACHE_DURATION) do
+      if parsed_most_recent_release_items
+        release = parsed_most_recent_release_items.first.try(:[], 'release')
 
-    return unless items.is_a?(Array)
-
-    release = items.first.try(:[], 'release')
-
-    ['display-whats-new-notification', release].compact.join('-')
-  end
-
-  def whats_new_most_recent_release_items
-    YAML.load_file(most_recent_release_file_path).to_json
-
-  rescue => e
-    Gitlab::ErrorTracking.track_exception(e, yaml_file_path: most_recent_release_file_path)
-
-    EMPTY_JSON
+        ['display-whats-new-notification', release].compact.join('-')
+      end
+    end
   end
 
   private
 
   def parsed_most_recent_release_items
-    Gitlab::Json.parse(whats_new_most_recent_release_items)
-  end
+    Rails.cache.fetch('whats_new:parsed_release_items', expires_in: CACHE_DURATION) do
+      items = Gitlab::Json.parse(whats_new_most_recent_release_items)
 
-  def most_recent_release_file_path
-    Dir.glob(files_path).max
-  end
-
-  def files_path
-    Rails.root.join('data', 'whats_new', '*.yml')
+      items if items.is_a?(Array)
+    end
   end
 end
