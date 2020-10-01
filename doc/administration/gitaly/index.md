@@ -317,7 +317,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml`
+1. Run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 **For installations from source**
@@ -364,7 +364,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the files and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Run `sudo -u git /home/git/gitlab-shell/bin/check -config /home/git/gitlab-shell/config.yml`
+1. Run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 ### Configure Gitaly clients
