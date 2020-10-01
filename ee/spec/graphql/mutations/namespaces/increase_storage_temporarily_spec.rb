@@ -9,9 +9,7 @@ RSpec.describe Mutations::Namespaces::IncreaseStorageTemporarily do
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
   describe '#resolve' do
-    subject do
-      mutation.resolve(id: namespace.to_global_id.to_s)
-    end
+    subject { mutation.resolve(id: namespace.to_global_id.to_s) }
 
     before do
       allow_next_instance_of(EE::Namespace::RootStorageSize, namespace) do |root_storage|
@@ -36,6 +34,15 @@ RSpec.describe Mutations::Namespaces::IncreaseStorageTemporarily do
         expect(subject[:namespace]).to be_present
         expect(subject[:errors]).to be_empty
         expect(namespace.reload.temporary_storage_increase_ends_on).to be_present
+      end
+    end
+
+    context 'with invalid params' do
+      let_it_be(:namespace) { user }
+
+      it 'raises an error' do
+        expect { subject }
+          .to raise_error(Gitlab::Graphql::Errors::ArgumentError, "#{user.to_global_id} is not a valid ID for Namespace.")
       end
     end
   end

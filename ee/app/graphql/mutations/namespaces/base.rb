@@ -5,7 +5,7 @@ module Mutations
     class Base < ::Mutations::BaseMutation
       argument :id, GraphQL::ID_TYPE,
                required: true,
-               description: "The global id of the namespace to mutate"
+               description: 'The global id of the namespace to mutate'
 
       field :namespace,
             Types::NamespaceType,
@@ -15,7 +15,7 @@ module Mutations
       private
 
       def find_object(id:)
-        GitlabSchema.object_from_id(id)
+        GitlabSchema.object_from_id(id, expected_type: ::Namespace)
       end
     end
   end
