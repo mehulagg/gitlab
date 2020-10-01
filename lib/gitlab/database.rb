@@ -276,6 +276,14 @@ module Gitlab
       false
     end
 
+    def self.get_wal_insert_lsn(ar_connection)
+      row = ar_connection
+        .select_all("SELECT #{pg_current_wal_insert_lsn}()::text AS location")
+        .first
+
+      row['location'] if row
+    end
+
     private_class_method :database_version
 
     def self.add_post_migrate_path_to_rails(force: false)
