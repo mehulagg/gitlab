@@ -10,7 +10,7 @@ export default {
     $(el).tooltip({
       trigger: 'hover',
       delay,
-      sanitize: parseBoolean(el.dataset.html),
+      sanitize: parseBoolean(el.dataset.html) || parseBoolean(el.dataset.template),
     });
   },
 
