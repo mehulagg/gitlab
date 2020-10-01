@@ -26,4 +26,15 @@ describe('AssigneesDropdown Component', () => {
 
     expect(wrapper.element.tagName).toEqual('DIV');
   });
+
+  it('renders GlDropdownForm', () => {
+    createComponent({
+      propsData: {
+        text: '',
+        headerText: '',
+      },
+    });
+
+    expect(wrapper.element.tagName).toEqual('DIV');
+  });
 });
