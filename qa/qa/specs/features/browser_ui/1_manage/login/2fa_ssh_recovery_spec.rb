@@ -5,8 +5,14 @@ module QA
     include Service::Shellout
 
     describe '2FA' do
+      let!(:admin_api_client) { Runtime::API::Client.as_admin }
+      let!(:owner_api_client) { Runtime::API::Client.new(:gitlab, user: owner_user) }
+      let!(:developer_api_client) { Runtime::API::Client.new(:gitlab, user: developer_user) }
+
       let!(:owner_user) do
-        Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_2fa_owner_username_1, Runtime::Env.gitlab_qa_2fa_owner_password_1)
+        Resource::User.fabricate_via_api! do |resource|
+          resource.api_client = admin_api_client
+        end
       end
 
       let!(:developer_user) do
@@ -63,17 +69,18 @@ module QA
         group.add_member(developer_user, Resource::Members::AccessLevel::DEVELOPER)
       end
 
-      it 'allows using 2FA recovery code once only', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/972' do
+      it 'allows using 2FA recovery code via ssh once only' do
         project_push
 
-        recovery_code = enable_2fa_for_user_and_fetch_recovery_code(developer_user)
+        enable_2fa_for_user_and_fetch_recovery_code(developer_user)
 
-        Git::Repository.perform do |repository|
+        output = Git::Repository.perform do |repository|
+          repository.uri = project.repository_ssh_location.uri
+          repository.use_ssh_key(ssh_key)
           repository.reset_2fa_codes
         end
 
-        require 'pry-byebug'
-        binding.pry
+        recovery_code = output.scan(/([A-Za-z0-9]{16})\n/).flatten.first
 
         Flow::Login.sign_in(as: developer_user, skip_page_validation: true)
 
@@ -101,18 +108,6 @@ module QA
         group.remove_via_api!
         sandbox_group.remove_via_api!
         developer_user.remove_via_api!
-      end
-
-      def admin_api_client
-        @admin_api_client ||= Runtime::API::Client.as_admin
-      end
-
-      def owner_api_client
-        @owner_api_client ||= Runtime::API::Client.new(:gitlab, user: owner_user)
-      end
-
-      def developer_api_client
-        @developer_api_client ||= Runtime::API::Client.new(:gitlab, user: developer_user)
       end
 
       def enable_2fa_for_user_and_fetch_recovery_code(user)
