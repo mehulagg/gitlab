@@ -91,7 +91,6 @@ export default {
       :query-params="projectsQueryParams"
       :group-id="groupId"
       :group-namespace="groupNamespace"
-      :use-graphql="true"
       @selected="onProjectsSelected"
     />
   </div>
