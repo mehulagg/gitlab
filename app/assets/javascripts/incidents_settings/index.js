@@ -46,7 +46,7 @@ export default () => {
       serviceLevelAgreementSettings: {
         active: parseBoolean(slaActive),
         minutes: slaMinutes,
-        featureAvailable: slaFeatureAvailable,
+        available: parseBoolean(slaFeatureAvailable),
       },
     },
     render(createElement) {

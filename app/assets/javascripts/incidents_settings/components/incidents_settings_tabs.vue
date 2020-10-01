@@ -4,6 +4,7 @@ import AlertsSettingsForm from './alerts_form.vue';
 import PagerDutySettingsForm from './pagerduty_form.vue';
 import ServiceLevelAgreementForm from './service_level_agreement_form.vue';
 import { INTEGRATION_TABS_CONFIG, I18N_INTEGRATION_TABS } from '../constants';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -14,8 +15,20 @@ export default {
     PagerDutySettingsForm,
     ServiceLevelAgreementForm,
   },
-  tabs: INTEGRATION_TABS_CONFIG,
   i18n: I18N_INTEGRATION_TABS,
+  inject: ['serviceLevelAgreementSettings'],
+  computed: {
+    tabs() {
+      return [
+        ...INTEGRATION_TABS_CONFIG,
+        {
+          title: s__('IncidentSettings|Incident Settings'),
+          component: 'ServiceLevelAgreementForm',
+          active: this.serviceLevelAgreementSettings.available,
+        },
+      ];
+    },
+  },
 };
 </script>
 
@@ -40,7 +53,7 @@ export default {
     <div class="settings-content">
       <gl-tabs>
         <gl-tab
-          v-for="(tab, index) in $options.tabs"
+          v-for="(tab, index) in tabs"
           v-if="tab.active"
           :key="`${tab.title}_${index}`"
           :title="tab.title"
