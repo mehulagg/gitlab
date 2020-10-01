@@ -1,9 +1,10 @@
 <script>
-import { GlDropdown, GlDropdownForm } from '@gitlab/ui';
+import { GlDropdown } from '@gitlab/ui';
+import { BDropdownForm } from 'bootstrap-vue';
 
 export default {
   components: {
-    GlDropdownForm,
+    BDropdownForm,
     GlDropdown,
   },
   props: {
@@ -20,9 +21,9 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown data-test-id="dropdown" class="show" :text="text" :header-text="headerText">
-    <gl-dropdown-form data-test-id="dropdown-form">
+  <gl-dropdown class="show" :text="text" :header-text="headerText">
+    <b-dropdown-form>
       <slot name="items"></slot>
-    </gl-dropdown-form>
+    </b-dropdown-form>
   </gl-dropdown>
 </template>

@@ -1,40 +1,18 @@
 import { shallowMount } from '@vue/test-utils';
+import { getByText } from '@testing-library/dom';
 import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
 
 describe('AssigneesDropdown Component', () => {
-  let wrapper;
-
-  const createComponent = options => {
-    wrapper = shallowMount(AssigneesDropdown, {
-      ...options,
-    });
-  };
-  const findGlDropdown = () => {};
-
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-  });
-
-  it('renders GlDropdown', () => {
-    createComponent({
+  it('renders items slot', () => {
+    const wrapper = shallowMount(AssigneesDropdown, {
       propsData: {
         text: '',
         headerText: '',
       },
-    });
-
-    expect(wrapper.element.tagName).toEqual('DIV');
-  });
-
-  it('renders GlDropdownForm', () => {
-    createComponent({
-      propsData: {
-        text: '',
-        headerText: '',
+      slots: {
+        items: '<p>Test</p>',
       },
     });
-
-    expect(wrapper.element.tagName).toEqual('DIV');
+    expect(getByText(wrapper.element, 'Test')).toBeDefined();
   });
 });
