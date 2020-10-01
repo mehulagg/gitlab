@@ -4,6 +4,8 @@ module Gitlab
   module Ci
     module Reports
       class TestReports
+        include Gitlab::Utils::StrongMemoize
+
         attr_reader :test_suites
 
         def initialize
@@ -46,11 +48,41 @@ module Gitlab
           test_suites.transform_values(&:suite_error).compact
         end
 
+        # This method is not meant to be always called on every test report instance.
+        # This is only needed to be called on test reports that are meant to include
+        # test failure history on their test cases which will be shown on the UI.
+        #
+        # For example, on the MR widget which does comparison between base and head pipeline,
+        # this method is only called on the head test report.
+        #
+        # Calling this method will populate each test case's recent_failures
+        def load_test_failure_history!(project)
+          recent_failures_count(project).each do |key_hash, count|
+            failed_test_cases[key_hash].recent_failures_count = count
+          end
+        end
+
         TestCase::STATUS_TYPES.each do |status_type|
           define_method("#{status_type}_count") do
             # rubocop: disable CodeReuse/ActiveRecord
             test_suites.values.sum { |suite| suite.public_send("#{status_type}_count") } # rubocop:disable GitlabSecurity/PublicSend
             # rubocop: enable CodeReuse/ActiveRecord
+          end
+        end
+
+        private
+
+        def recent_failures_count(project)
+          ::Ci::TestCaseFailure.recent_failures_count(project, failed_test_cases.keys)
+        end
+
+        def failed_test_cases
+          strong_memoize(:failed_test_cases) do
+            {}.tap do |map|
+              test_suites.values.each do |test_suite|
+                map.merge!(test_suite.failed)
+              end
+            end
           end
         end
       end

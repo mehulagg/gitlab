@@ -349,6 +349,8 @@ class Project < ApplicationRecord
   has_one :operations_feature_flags_client, class_name: 'Operations::FeatureFlagsClient'
   has_many :operations_feature_flags_user_lists, class_name: 'Operations::FeatureFlags::UserList'
 
+  has_many :test_cases, class_name: 'Ci::TestCase'
+
   accepts_nested_attributes_for :variables, allow_destroy: true
   accepts_nested_attributes_for :project_feature, update_only: true
   accepts_nested_attributes_for :project_setting, update_only: true

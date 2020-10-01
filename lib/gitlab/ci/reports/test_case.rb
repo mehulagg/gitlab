@@ -11,6 +11,7 @@ module Gitlab
         STATUS_TYPES = [STATUS_ERROR, STATUS_FAILED, STATUS_SUCCESS, STATUS_SKIPPED].freeze
 
         attr_reader :name, :classname, :execution_time, :status, :file, :system_output, :stack_trace, :key, :attachment, :job
+        attr_accessor :recent_failures_count
 
         def initialize(params)
           @name = params.fetch(:name)
@@ -23,7 +24,8 @@ module Gitlab
           @attachment = params.fetch(:attachment, nil)
           @job = params.fetch(:job, nil)
 
-          @key = sanitize_key_name("#{classname}_#{name}")
+          @recent_failures_count = nil
+          @key = hash_key("#{classname}_#{name}")
         end
 
         def has_attachment?
@@ -42,8 +44,8 @@ module Gitlab
 
         private
 
-        def sanitize_key_name(key)
-          key.gsub(/[^0-9A-Za-z]/, '-')
+        def hash_key(key)
+          Digest::SHA256.hexdigest(key)
         end
       end
     end

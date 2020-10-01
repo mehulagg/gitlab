@@ -30,6 +30,7 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
     BuildTraceSectionsWorker.new.perform(build.id)
     BuildCoverageWorker.new.perform(build.id)
     Ci::BuildReportResultWorker.new.perform(build.id)
+    Ci::TestCasesWorker.new.perform(build.id)
 
     # We execute these async as these are independent operations.
     BuildHooksWorker.perform_async(build.id)
