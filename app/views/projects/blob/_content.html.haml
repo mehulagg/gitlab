@@ -5,6 +5,7 @@
 - is_ci_config_file = defined?(@blob) && defined?(@project) ? editing_ci_config?.to_s : 'false'
 
 #js-blob-toggle-graph-preview{ data: { blob_data: blob_data, is_ci_config_file: is_ci_config_file } }
+#js-blob-line-dropdown{ data: { new_issue_path: new_project_issue_url(@project), blob_path: project_blob_url(@project,tree_join(@commit.sha, @path)), blame_path: project_blame_path(@project, @id) } }
 
 = render 'projects/blob/viewer', viewer: simple_viewer, hidden: rich_viewer_active
 

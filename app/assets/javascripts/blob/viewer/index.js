@@ -1,4 +1,6 @@
 import $ from 'jquery';
+import Vue from 'vue';
+import LineDropdown from '../components/line_dropdown.vue';
 import '~/behaviors/markdown/render_gfm';
 import { deprecatedCreateFlash as Flash } from '../../flash';
 import { handleLocationHash } from '../../lib/utils/common_utils';
@@ -25,6 +27,24 @@ const loadRichBlobViewer = type => {
   }
 };
 
+const createLineDropdownApp = () => {
+  const el = document.querySelector('#js-blob-line-dropdown');
+  const { newIssuePath, blobPath, blamePath } = el.dataset;
+
+  return new Vue({
+    el,
+    render(h) {
+      return h(LineDropdown, {
+        props: {
+          newIssuePath,
+          blobPath,
+          blamePath,
+        },
+      });
+    },
+  });
+};
+
 export const handleBlobRichViewer = (viewer, type) => {
   if (!viewer || !type) return;
 
@@ -40,6 +60,9 @@ export default class BlobViewer {
   constructor() {
     const viewer = document.querySelector('.blob-viewer[data-type="rich"]');
     const type = viewer?.dataset?.richType;
+
+    createLineDropdownApp();
+
     BlobViewer.initAuxiliaryViewer();
 
     handleBlobRichViewer(viewer, type);
@@ -157,7 +180,7 @@ export default class BlobViewer {
       .then(viewer => {
         $(viewer).renderGFM();
 
-        this.$fileHolder.trigger('highlight:line');
+        this.$fileHolder.trigger('highlight:line', window.location.hash);
         handleLocationHash();
 
         this.toggleCopyButtonState();

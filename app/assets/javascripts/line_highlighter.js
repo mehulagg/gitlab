@@ -1,6 +1,7 @@
 /* eslint-disable func-names, no-underscore-dangle, no-param-reassign, consistent-return */
 
 import $ from 'jquery';
+import eventHub from '~/blob/event_hub';
 import 'vendor/jquery.scrollTo';
 
 // LineHighlighter
@@ -66,6 +67,9 @@ LineHighlighter.prototype.highlightHash = function(newHash) {
 
   if (this._hash !== '') {
     range = this.hashToRange(this._hash);
+
+    eventHub.$emit('highlight:line', range);
+
     if (range[0]) {
       this.highlightRange(range);
       const lineSelector = `#L${range[0]}`;
@@ -166,6 +170,7 @@ LineHighlighter.prototype.setHash = function(firstLineNumber, lastLineNumber) {
     hash = `#L${firstLineNumber}`;
   }
   this._hash = hash;
+  eventHub.$emit('highlight:line', this.hashToRange(hash));
   return this.__setLocationHash__(hash);
 };
 
