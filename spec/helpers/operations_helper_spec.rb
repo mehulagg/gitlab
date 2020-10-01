@@ -157,7 +157,7 @@ RSpec.describe OperationsHelper do
         pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),
         pagerduty_reset_key_path: reset_pagerduty_token_project_settings_operations_path(project),
         sla_active: 'false',
-        sla_minutes: operations_settings.sla_minutes,
+        sla_minutes: operations_settings.sla_minutes
       )
     end
   end
