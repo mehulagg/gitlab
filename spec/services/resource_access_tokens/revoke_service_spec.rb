@@ -28,7 +28,7 @@ RSpec.describe ResourceAccessTokens::RevokeService do
       end
 
       it 'destroys project bot user' do
-        expect(DeleteUserWorker).to receive(:perform).with(user.id, resource_bot.id, skip_authorization: true)
+        expect(DeleteUserWorker).to receive(:perform_async).with(user.id, resource_bot.id, skip_authorization: true)
 
         subject
       end
