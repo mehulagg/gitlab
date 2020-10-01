@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
 
 NOTE: **Note:**
-GitLab Packages does not yet support Composer 2.0. [gitlab-#259840](https://gitlab.com/gitlab-org/gitlab/-/issues/259840) proposes adding it. Consider contributing or even adding support in the issue.
+GitLab Packages does not yet support Composer 2.0. [GitLab-#259840](https://gitlab.com/gitlab-org/gitlab/-/issues/259840) proposes adding it. Consider contributing or even adding support in the issue.
 
 Publish [Composer](https://getcomposer.org/) packages in your project's Package Registry.
 Then, install the packages whenever you need to use them as a dependency.
