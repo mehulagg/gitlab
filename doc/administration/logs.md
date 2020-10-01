@@ -967,16 +967,6 @@ When [troubleshooting](troubleshooting/index.md) issues that aren't localized to
 previously listed components, it's helpful to simultaneously gather multiple logs and statistics
 from a GitLab instance.
 
-### GitLabSOS
-
-If performance degradations or cascading errors occur that can't readily be attributed to one
-of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
-can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
-to run it, see [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
-
-NOTE: **Note:**
-GitLab Support likes to use this custom-made tool.
-
 ### Briefly tail the main logs
 
 If the bug or error is readily reproducible bug or error, save the main GitLab logs
@@ -988,6 +978,16 @@ sudo gitlab-ctl tail | tee /tmp/<case-ID-and-keywords>.log
 ```
 
 Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+
+### GitLabSOS
+
+If performance degradations or cascading errors occur that can't readily be attributed to one
+of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
+can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
+to run it, see [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
+
+NOTE: **Note:**
+GitLab Support likes to use this custom-made tool.
 
 ### Fast-stats
 
