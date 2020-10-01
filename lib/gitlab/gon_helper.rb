@@ -70,6 +70,27 @@ module Gitlab
       gon.push({ features: { var_name => enabled } }, true)
     end
 
+    # Exposes the state of a licensed feature and associated feature flag
+    # to the frontend code.
+    #
+    # name            - The name of the feature flag, e.g. `my_feature`.
+    # subject         - The subject, it needs to be either project or group
+    # default_enabled - If feature flag should be by default true or false if undefined
+    def push_frontend_beta_feature_available(name, subject, default_enabled: false)
+      var_name = name.to_s.camelize(:lower)
+      enabled =
+        if subject
+          subject.beta_feature_available?(name, default_enabled: default_enabled)
+        else
+          License.beta_feature_available?(name, default_enabled: default_enabled)
+        end
+
+      # Here the `true` argument signals gon that the value should be merged
+      # into any existing ones, instead of overwriting them. This allows you to
+      # use this method to push multiple feature flags.
+      gon.push({ features: { var_name => enabled } }, true)
+    end
+
     def default_avatar_url
       # We can't use ActionController::Base.helpers.image_url because it
       # doesn't return an actual URL because request is nil for some reason.

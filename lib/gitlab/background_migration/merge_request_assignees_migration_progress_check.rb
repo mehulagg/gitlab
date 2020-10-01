@@ -15,8 +15,6 @@ module Gitlab
 
         if ongoing?
           BackgroundMigrationWorker.perform_in(RESCHEDULE_DELAY, self.class.name)
-        else
-          Feature.enable(:multiple_merge_request_assignees)
         end
       end
 

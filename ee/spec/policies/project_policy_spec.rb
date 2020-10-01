@@ -530,7 +530,6 @@ RSpec.describe ProjectPolicy do
   describe 'read_threat_monitoring' do
     context 'when threat monitoring feature is available' do
       before do
-        stub_feature_flags(threat_monitoring: true)
         stub_licensed_features(threat_monitoring: true)
       end
 
@@ -583,7 +582,6 @@ RSpec.describe ProjectPolicy do
       let(:current_user) { admin }
 
       before do
-        stub_feature_flags(threat_monitoring: false)
         stub_licensed_features(threat_monitoring: false)
       end
 
@@ -918,28 +916,17 @@ RSpec.describe ProjectPolicy do
         let(:current_user) { public_send(role) if role }
 
         before do
-          stub_feature_flags(feature => true)
           stub_licensed_features(feature => true)
           enable_admin_mode!(current_user) if admin_mode
         end
 
         it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
 
-        context 'when feature is not available' do
-          before do
-            stub_licensed_features(feature => false)
-          end
-
-          it { is_expected.to be_disallowed(policy) }
+        before do
+          stub_licensed_features(feature => false)
         end
 
-        context 'when feature flag is disabled' do
-          before do
-            stub_feature_flags(feature => false)
-          end
-
-          it { is_expected.to be_disallowed(policy) }
-        end
+        it { is_expected.to be_disallowed(policy) }
       end
     end
   end

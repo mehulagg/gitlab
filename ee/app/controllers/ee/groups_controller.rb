@@ -12,7 +12,7 @@ module EE
       before_action :ee_authorize_admin_group!, only: [:restore]
 
       before_action only: :issues do
-        push_frontend_feature_flag(:scoped_labels, @group, type: :licensed)
+        push_frontend_beta_feature_available(:scoped_labels, @group, default_enabled: true)
       end
 
       feature_category :subgroups, [:restore, :subgroups]

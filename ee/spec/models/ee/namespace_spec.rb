@@ -365,22 +365,6 @@ RSpec.describe Namespace do
         end
       end
     end
-
-    context 'when feature is disabled by a feature flag' do
-      it 'returns false' do
-        stub_feature_flags(feature => false)
-
-        is_expected.to eq(false)
-      end
-    end
-
-    context 'when feature is enabled by a feature flag' do
-      it 'returns true' do
-        stub_feature_flags(feature => true)
-
-        is_expected.to eq(true)
-      end
-    end
   end
 
   describe '#feature_available?' do

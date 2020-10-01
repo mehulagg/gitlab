@@ -1,0 +1,7 @@
+---
+name: personal_access_token_expiration_policy
+introduced_by_url: 
+rollout_issue_url: 
+type: licensed
+group: 
+default_enabled: true
