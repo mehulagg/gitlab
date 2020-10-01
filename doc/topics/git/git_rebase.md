@@ -15,7 +15,7 @@ This guide helps you to get started with rebasing, force-pushing, and fixing
 merge conflicts locally.
 
 [Rebasing](https://git-scm.com/docs/git-rebase) is a very common operation in
-Git. You have mainly two rebase options:
+Git. There are the following rebase options:
 
 - [Regular rebase](#regular-rebase).
 - [Interactive rebase](#interactive-rebase).
@@ -52,7 +52,7 @@ This is an important step for Git-based development strategies to make sure
 the changes you're adding do not break any existing changes added to the
 target branch after you created your feature branch.
 
-For example, to update your branch `my-feature-branch`, with `master`:
+For example, to update your branch `my-feature-branch` with `master`:
 
 1. Checkout your feature branch:
 
@@ -103,7 +103,7 @@ you can enable [Squash and Merge](../../user/project/merge_requests/squash_and_m
 and GitLab will do it automatically.
 
 When you want to change anything in recent commits, use interactive
-rebase by passing the flag `--interactive` or `-i` to the rebase command.
+rebase by passing the flag `--interactive` (or `-i`) to the rebase command.
 
 For example, if you want to edit the latest 3 commits in your branch
 (`HEAD~3`), run:
@@ -131,8 +131,8 @@ perform in each commit. For example, if you want to squash them into one:
    editing mode, edit the commit message, leave the editing mode, and write
    and quit.
 1. If you haven't pushed your commits to the remote branch before rebasing,
-push your changes normally. If you had pushed these commits already,
-[force-push](#force-push) instead.
+   push your changes normally. If you had pushed these commits already,
+   [force-push](#force-push) instead.
 
 Note that the steps for editing through the command line can be slightly
 different depending on your operating system and the shell you're using.
