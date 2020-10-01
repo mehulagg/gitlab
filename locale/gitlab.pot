@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-01 14:17-0400\n"
+"PO-Revision-Date: 2020-10-01 14:17-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -14024,6 +14026,15 @@ msgstr ""
 msgid "InviteMembers|Invite team members"
 msgstr ""
 
+msgid "InviteMember|Oops, this feature isn't ready yet"
+msgstr ""
+
+msgid "InviteMember|Until then, ask an owner to invite new project members for you"
+msgstr ""
+
+msgid "InviteMember|We're working to allow everyone to invite new members, making it easier for teams to get started with GitLab"
+msgstr ""
+
 msgid "Invited"
 msgstr ""
 
@@ -22891,6 +22902,9 @@ msgid "See the affected projects in the GitLab admin panel"
 msgstr ""
 
 msgid "See what's new at GitLab"
+msgstr ""
+
+msgid "See who can invite members for you"
 msgstr ""
 
 msgid "Select"

@@ -15,7 +15,7 @@ class GlEmoji extends HTMLElement {
 
     return initEmojiMap().then(() => {
       if (!unicodeVersion) {
-        const emojiInfo = getEmojiInfo(name);
+        const emojiInfo = getEmojiInfo(this.dataset.name);
 
         if (emojiInfo) {
           if (name !== emojiInfo.name) {
