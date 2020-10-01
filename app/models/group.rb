@@ -148,6 +148,16 @@ class Group < Namespace
       where('NOT EXISTS (?)', services)
     end
 
+    def belonging_to_group_without_integration(integration)
+      services = Service
+        .select('1')
+        .where('services.group_id = namespaces.id')
+        .where(type: integration.type)
+
+      Group.where('NOT EXISTS (?)', services)
+           .where(id: integration.group.descendants)
+    end
+
     private
 
     def public_to_user_arel(user)

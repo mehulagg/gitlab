@@ -11,7 +11,11 @@ class PropagateIntegrationProjectWorker
     integration = Service.find_by_id(integration_id)
     return unless integration
 
-    batch = Project.where(id: min_id..max_id).without_integration(integration)
+    batch = if integration.instance?
+              Project.where(id: min_id..max_id).without_integration(integration)
+            else
+              Project.where(id: min_id..max_id).belonging_to_group_without_integration(integration)
+            end
 
     BulkCreateIntegrationService.new(integration, batch, 'project').execute
   end

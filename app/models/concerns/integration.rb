@@ -27,5 +27,18 @@ module Integration
         .where(pending_delete: false)
         .where(archived: false)
     end
+
+    def belonging_to_group_without_integration(integration)
+      services = Service
+        .select('1')
+        .where('services.project_id = projects.id')
+        .where(type: integration.type)
+
+      Project
+        .where('NOT EXISTS (?)', services)
+        .where(id: Project.where(group: integration.group.self_and_descendants))
+        .where(pending_delete: false)
+        .where(archived: false)
+    end
   end
 end

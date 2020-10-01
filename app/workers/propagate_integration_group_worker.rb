@@ -11,7 +11,11 @@ class PropagateIntegrationGroupWorker
     integration = Service.find_by_id(integration_id)
     return unless integration
 
-    batch = Group.where(id: min_id..max_id).without_integration(integration)
+    batch = if integration.instance?
+              Group.where(id: min_id..max_id).without_integration(integration)
+            else
+              Group.where(id: min_id..max_id).belonging_to_group_without_integration(integration)
+            end
 
     BulkCreateIntegrationService.new(integration, batch, 'group').execute
   end

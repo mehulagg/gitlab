@@ -238,6 +238,20 @@ RSpec.describe Group do
     end
   end
 
+  describe '.belonging_to_group_without_integration' do
+    let!(:another_group) { create(:group) }
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_integration) { build(:jira_service, group: group, project: nil) }
+
+    before do
+      create(:slack_service, group: subgroup, project: nil)
+    end
+
+    it 'returns groups without integration' do
+      expect(Group.belonging_to_group_without_integration(group_integration)).to contain_exactly(subgroup)
+    end
+  end
+
   describe '.public_or_visible_to_user' do
     let!(:private_group)  { create(:group, :private)  }
     let!(:internal_group) { create(:group, :internal) }

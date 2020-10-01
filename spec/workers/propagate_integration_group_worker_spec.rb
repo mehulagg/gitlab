@@ -4,25 +4,48 @@ require 'spec_helper'
 
 RSpec.describe PropagateIntegrationGroupWorker do
   describe '#perform' do
-    let_it_be(:group1) { create(:group) }
-    let_it_be(:group2) { create(:group) }
     let_it_be(:integration) { create(:redmine_service, :instance) }
+    let(:batch) { double }
 
     before do
+      allow(Group).to receive(:without_integration).and_return(batch)
+
       allow(BulkCreateIntegrationService).to receive(:new)
-        .with(integration, match_array([group1, group2]), 'group')
+        .with(integration, batch, 'group')
         .and_return(double(execute: nil))
     end
 
     it_behaves_like 'an idempotent worker' do
-      let(:job_args) { [integration.id, group1.id, group2.id] }
+      let(:job_args) { [integration.id, 1, 100] }
 
       it 'calls to BulkCreateIntegrationService' do
+        expect(Group).to receive(:without_integration).and_return(batch)
+
         expect(BulkCreateIntegrationService).to receive(:new)
-          .with(integration, match_array([group1, group2]), 'group')
+          .with(integration, batch, 'group')
           .and_return(double(execute: nil))
 
         subject
+      end
+
+      context 'with a group integration' do
+        let_it_be(:group) { create(:group) }
+        let_it_be(:integration) { create(:redmine_service, group: group, project: nil) }
+        let(:job_args) { [integration.id, 1, 100] }
+
+        before do
+          allow(Group).to receive(:belonging_to_group_without_integration).and_return(batch)
+        end
+
+        it 'calls to BulkCreateIntegrationService' do
+          expect(Group).to receive(:belonging_to_group_without_integration).and_return(batch)
+
+          expect(BulkCreateIntegrationService).to receive(:new)
+            .with(integration, batch, 'group')
+            .and_return(double(execute: nil))
+
+          subject
+        end
       end
     end
 
@@ -30,7 +53,7 @@ RSpec.describe PropagateIntegrationGroupWorker do
       it 'returns without failure' do
         expect(BulkCreateIntegrationService).not_to receive(:new)
 
-        subject.perform(0, group1.id, group2.id)
+        subject.perform(0, 1, 100)
       end
     end
   end
