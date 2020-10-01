@@ -26,11 +26,7 @@ module Gitlab
     def above_size_limit?
       return false unless enabled?
 
-      if Feature.enabled?(:additional_repo_storage_by_namespace)
-        total_repository_size_excess > additional_purchased_storage && current_size > limit
-      else
-        current_size > limit
-      end
+      current_size > limit
     end
 
     # @param change_size [int] in bytes
@@ -43,10 +39,6 @@ module Gitlab
     # @param change_size [int] in bytes
     def exceeded_size(change_size = 0)
       exceeded_size = current_size + change_size - limit
-
-      if Feature.enabled?(:additional_repo_storage_by_namespace)
-        exceeded_size += total_repository_size_excess - additional_purchased_storage
-      end
 
       exceeded_size
     end

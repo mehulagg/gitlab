@@ -284,8 +284,8 @@ class Snippet < ApplicationRecord
       ::Gitlab::RepositorySizeChecker.new(
         current_size_proc: -> { repository.size.megabytes },
         limit: Gitlab::CurrentSettings.snippet_size_limit,
-        total_repository_size_excess: project&.namespace&.total_repository_size_excess,
-        additional_purchased_storage: 0
+        total_repository_size_excess: nil,
+        additional_purchased_storage: nil
       )
     end
   end

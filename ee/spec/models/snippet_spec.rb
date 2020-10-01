@@ -16,20 +16,21 @@ RSpec.describe Snippet do
 
       let(:namespace) { build(:namespace, additional_purchased_storage_size: 50) }
       let(:project) { build(:project, namespace: namespace) }
+      let(:total_repository_size_excess) { 100 }
+      let(:additional_purchased_storage) { 50.megabytes }
 
       before do
-        allow(namespace).to receive(:total_repository_size_excess).and_return(100)
+        allow(namespace).to receive(:total_repository_size_excess).and_return(total_repository_size_excess)
       end
 
-      it 'sets up size checker', :aggregate_failures do
-        expect(checker.current_size).to eq(current_size.megabytes)
-        expect(checker.limit).to eq(Gitlab::CurrentSettings.snippet_size_limit)
-        expect(checker.total_repository_size_excess).to eq(100)
-        expect(checker.additional_purchased_storage).to eq(50.megabytes)
-        expect(checker.enabled?).to be_truthy
-      end
+      include_examples 'size checker for snippet'
     end
 
-    include_examples 'size checker for snippet without project'
+    context 'when snippet without a project' do
+      let(:total_repository_size_excess) { 0 }
+      let(:additional_purchased_storage) { 0 }
+
+      include_examples 'size checker for snippet'
+    end
   end
 end
