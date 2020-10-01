@@ -58,9 +58,6 @@ describe('Design management design sidebar component', () => {
         },
       },
       stubs: { GlPopover },
-      provide: {
-        glFeatures: { designManagementTodoButton: enableTodoButton },
-      },
     });
   }
 
@@ -251,17 +248,11 @@ describe('Design management design sidebar component', () => {
     expect(wrapper.find(DesignTodoButton).exists()).toBe(false);
   });
 
-  describe('when `design_management_todo_button` feature flag is enabled', () => {
-    beforeEach(() => {
-      createComponent({}, { enableTodoButton: true });
-    });
+  it('renders sidebar root element with no top padding', () => {
+    expect(wrapper.classes()).toContain('gl-pt-0');
+  });
 
-    it('renders sidebar root element with no top padding', () => {
-      expect(wrapper.classes()).toContain('gl-pt-0');
-    });
-
-    it('renders To-Do button', () => {
-      expect(wrapper.find(DesignTodoButton).exists()).toBe(true);
-    });
+  it('renders To-Do button', () => {
+    expect(wrapper.find(DesignTodoButton).exists()).toBe(true);
   });
 });
