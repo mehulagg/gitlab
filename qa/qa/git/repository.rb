@@ -127,7 +127,7 @@ module QA
       end
 
       def reset_2fa_codes
-        run("echo yes | ssh git@localhost 2fa_recovery_codes").to_s
+        run("echo yes | ssh git@#{uri.host} 2fa_recovery_codes").to_s
       end
 
       def push_changes(branch = 'master', push_options: nil)
