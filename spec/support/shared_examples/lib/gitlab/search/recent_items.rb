@@ -5,8 +5,8 @@ require 'spec_helper'
 RSpec.shared_examples 'search recent items' do
   let_it_be(:user) { create(:user) }
   let_it_be(:recent_items) { described_class.new(user: user, items_limit: 5) }
-  let(:item) { create_item(content: 'hello world 1', project: project) }
-  let(:project) { create(:project, :public) }
+  let(:item) { create_item(content: 'hello world 1', parent: parent) }
+  let(:parent) { create(parent_type, :public) }
 
   describe '#log_view', :clean_gitlab_redis_shared_state do
     it 'adds the item to the recent items' do
@@ -19,7 +19,7 @@ RSpec.shared_examples 'search recent items' do
 
     it 'removes an item when it exceeds the size items_limit' do
       (1..6).each do |i|
-        recent_items.log_view(create_item(content: "item #{i}", project: project))
+        recent_items.log_view(create_item(content: "item #{i}", parent: parent))
       end
 
       results = recent_items.search('item')
@@ -39,7 +39,7 @@ RSpec.shared_examples 'search recent items' do
 
     it 'does not include results logged for another user' do
       another_user = create(:user)
-      another_item = create_item(content: 'hello world 2', project: project)
+      another_item = create_item(content: 'hello world 2', parent: parent)
       described_class.new(user: another_user).log_view(another_item)
       recent_items.log_view(item)
 
@@ -50,11 +50,11 @@ RSpec.shared_examples 'search recent items' do
   end
 
   describe '#search', :clean_gitlab_redis_shared_state do
-    let(:item1) { create_item(content: "matching item 1", project: project) }
-    let(:item2) { create_item(content: "matching item 2", project: project) }
-    let(:item3) { create_item(content: "matching item 3", project: project) }
-    let(:non_matching_item) { create_item(content: "different item", project: project) }
-    let!(:non_viewed_item) { create_item(content: "matching but not viewed item", project: project) }
+    let(:item1) { create_item(content: "matching item 1", parent: parent) }
+    let(:item2) { create_item(content: "matching item 2", parent: parent) }
+    let(:item3) { create_item(content: "matching item 3", parent: parent) }
+    let(:non_matching_item) { create_item(content: "different item", parent: parent) }
+    let!(:non_viewed_item) { create_item(content: "matching but not viewed item", parent: parent) }
 
     before do
       recent_items.log_view(item1)
@@ -74,12 +74,12 @@ RSpec.shared_examples 'search recent items' do
     end
 
     it 'does not leak items you no longer have access to' do
-      private_project = create(:project, :public, namespace: create(:group))
-      private_item = create_item(content: 'matching item title', project: private_project)
+      private_parent = create(parent_type, :public)
+      private_item = create_item(content: 'matching item title', parent: private_parent)
 
       recent_items.log_view(private_item)
 
-      private_project.update!(visibility_level: Project::PRIVATE)
+      private_parent.update!(visibility_level: ::Gitlab::VisibilityLevel::PRIVATE)
 
       expect(recent_items.search('matching')).not_to include(private_item)
     end
