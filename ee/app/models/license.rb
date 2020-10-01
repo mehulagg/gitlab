@@ -87,6 +87,7 @@ class License < ApplicationRecord
     group_repository_analytics
     group_saml
     group_wikis
+    incident_sla
     ide_schema_config
     issues_analytics
     jira_issues_integration
