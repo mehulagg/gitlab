@@ -1,4 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import createMockApollo from 'jest/helpers/mock_apollo_helper';
 import VueApollo from 'vue-apollo';
 import Agents from 'ee/clusters_list/components/agents.vue';
@@ -44,6 +45,30 @@ describe('Agents', () => {
       wrapper.destroy();
       wrapper = null;
     }
+  });
+
+  describe('when agents query has errored', () => {
+    beforeEach(() => {
+      return createWrapper({ agents: null });
+    });
+
+    it('displays an alert message', () => {
+      expect(wrapper.find(GlAlert).exists()).toBe(true);
+    });
+  });
+
+  describe('when agents query is loading', () => {
+    beforeEach(() => {
+      return createWrapper({ agents: [] }).then(() => {
+        wrapper.setData({ loading: true });
+
+        return wrapper.vm.$nextTick();
+      });
+    });
+
+    it('displays a loading icon', () => {
+      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    });
   });
 
   describe('when there is a list of agents', () => {

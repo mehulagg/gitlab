@@ -5337,6 +5337,9 @@ msgstr ""
 msgid "Cluster type must be specificed for Stages::ClusterEndpointInserter"
 msgstr ""
 
+msgid "ClusterAgents|An error occurred while loading your GitLab Agents"
+msgstr ""
+
 msgid "ClusterAgents|Configuration"
 msgstr ""
 
