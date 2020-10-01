@@ -1,14 +1,14 @@
 <script>
 import axios from '~/lib/utils/axios_utils';
+import { GlModal } from '@gitlab/ui';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
 
 export default {
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
   },
   props: {
     milestoneTitle: {
@@ -25,6 +25,20 @@ export default {
     },
   },
   computed: {
+    primaryProps() {
+      return {
+        text: s__('Promote milestone'),
+        attributes: [
+          { variant: 'warning' },
+          { category: 'primary' },
+        ],
+      };
+    },
+    cancelProps() {
+      return {
+        text: 'Cancel'
+      }
+    },
     title() {
       return sprintf(s__('Milestones|Promote %{milestoneTitle} to group milestone?'), {
         milestoneTitle: this.milestoneTitle,
@@ -63,17 +77,13 @@ export default {
 </script>
 <template>
   <gl-modal
-    id="promote-milestone-modal"
-    :footer-primary-button-text="s__('Milestones|Promote Milestone')"
-    footer-primary-button-variant="warning"
-    @submit="onSubmit"
+    modal-id="promote-milestone-modal"
+    :title-tag="title"
+    :primary-action="primaryProps"
+    :cancel-action="cancelProps"
+    @primary="onSubmit"
   >
-    <template #title>
-      {{ title }}
-    </template>
-    <div>
-      <p>{{ text }}</p>
-      <p>{{ s__('Milestones|This action cannot be reversed.') }}</p>
-    </div>
+    <p>{{ text }}</p>
+    <p>{{ s__('Milestones|This action cannot be reversed.') }}</p>
   </gl-modal>
 </template>

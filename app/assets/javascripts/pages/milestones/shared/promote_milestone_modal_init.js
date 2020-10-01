@@ -32,6 +32,7 @@ export default () => {
       groupName: button.dataset.groupName,
     };
     eventHub.$once('promoteMilestoneModal.requestStarted', onRequestStarted);
+    this.$root.$emit('bv::show::modal', 'promote-milestone-modal');
     eventHub.$emit('promoteMilestoneModal.props', modalProps);
   };
 
