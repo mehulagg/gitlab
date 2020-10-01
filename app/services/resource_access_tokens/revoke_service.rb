@@ -18,16 +18,12 @@ module ResourceAccessTokens
 
       return error("Failed to find bot user") unless find_member
 
-      PersonalAccessToken.transaction do
-        access_token.revoke!
+      access_token.revoke!
 
-        raise RevokeAccessTokenError, "Failed to remove #{bot_user.name} member from: #{resource.name}" unless remove_member
+      destroy_service
 
-        raise RevokeAccessTokenError, "Deletion of bot user failed" unless destroy_service
-      end
-
-      success("Revoked access token: #{access_token.name}")
-    rescue ActiveRecord::ActiveRecordError, RevokeAccessTokenError => error
+      success("Access token #{access_token.name} has been revoked and the bot user has been scheduled for deletion.")
+    rescue StandardError => error
       log_error("Failed to revoke access token for #{bot_user.name}: #{error.message}")
       error(error.message)
     end
@@ -36,12 +32,8 @@ module ResourceAccessTokens
 
     attr_reader :current_user, :access_token, :bot_user, :resource
 
-    def remove_member
-      ::Members::DestroyService.new(current_user).execute(find_member, destroy_bot: true)
-    end
-
     def destroy_service
-      ::Users::DestroyService.new(current_user).execute(bot_user, skip_authorization: true)
+      DeleteUserWorker.perform_async(current_user.id, bot_user.id, skip_authorization: true)
     end
 
     def can_destroy_bot_member?

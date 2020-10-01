@@ -13,7 +13,7 @@ RSpec.describe ResourceAccessTokens::RevokeService do
     shared_examples 'revokes access token' do
       it { expect(subject.success?).to be true }
 
-      it { expect(subject.message).to eq("Revoked access token: #{access_token.name}") }
+      it { expect(subject.message).to eq("Access token #{access_token.name} has been revoked and the bot user has been scheduled for deletion.") }
 
       it 'removes membership of bot user' do
         subject
@@ -24,15 +24,13 @@ RSpec.describe ResourceAccessTokens::RevokeService do
       it 'transfer issuables of bot user to ghost user' do
         issue = create(:issue, author: resource_bot)
 
-        subject
-
-        expect(issue.reload.author.ghost?).to be true
+        expect { subject }.to change {issue.author.ghost?}.to(true)
       end
 
       it 'destroys project bot user' do
-        subject
+        expect(DeleteUserWorker).to receive(:perform).with(user.id, resource_bot.id, skip_authorization: true)
 
-        expect(User.exists?(resource_bot.id)).to be_falsy
+        subject
       end
     end
 
@@ -118,19 +116,9 @@ RSpec.describe ResourceAccessTokens::RevokeService do
           end
         end
 
-        context 'when migration to ghost user fails' do
+        context 'when deletion of bot user fails' do
           before do
-            allow_next_instance_of(::Members::DestroyService) do |service|
-              allow(service).to receive(:execute).and_return(false)
-            end
-          end
-
-          it_behaves_like 'rollback revoke steps'
-        end
-
-        context 'when bot deletion fails' do
-          before do
-            allow_next_instance_of(::Users::DestroyService) do |service|
+            allow_next_instance_of(::ResourceAccessTokens::RevokeService) do |service|
               allow(service).to receive(:execute).and_return(false)
             end
           end
