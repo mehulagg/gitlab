@@ -9,8 +9,8 @@ module Gitlab
     def initialize(current_size_proc:, limit:, total_repository_size_excess:, additional_purchased_storage:, enabled: true)
       @current_size_proc = current_size_proc
       @limit = limit
-      @total_repository_size_excess = total_repository_size_excess
-      @additional_purchased_storage = additional_purchased_storage
+      @total_repository_size_excess = total_repository_size_excess.to_i
+      @additional_purchased_storage = additional_purchased_storage.to_i
       @enabled = enabled && limit != 0
     end
 
