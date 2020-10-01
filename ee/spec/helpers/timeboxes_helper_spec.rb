@@ -35,7 +35,7 @@ RSpec.describe TimeboxesHelper do
     describe 'with ResourceStateEvent created after milestone' do
       let(:milestone) { double('Milestone', created_at: Date.yesterday) }
 
-      befor e do
+      before do
         create(:resource_state_event, created_at: Date.current)
       end
 
