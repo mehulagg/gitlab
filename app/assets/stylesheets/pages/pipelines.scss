@@ -1003,17 +1003,19 @@ button.mini-pipeline-graph-dropdown-toggle {
   }
 }
 
-.codequality-report {
-  .media {
-    padding: $gl-padding;
-  }
+[data-page='projects:pipelines:codequality_report'] {
+  .codequality-report {
+    .media {
+      padding: $gl-padding;
+    }
 
-  .media-body {
-    flex-direction: row;
-  }
+    .media-body {
+      flex-direction: row;
+    }
 
-  .report-block-container {
-    height: auto !important;
+    .report-block-container {
+      height: auto !important;
+    }
   }
 }
 
