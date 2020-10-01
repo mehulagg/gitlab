@@ -4,12 +4,12 @@ class AddSlaMinutesToProjectIncidentManagementSettings < ActiveRecord::Migration
   DOWNTIME = false
 
   def up
-    add_column :project_incident_management_settings, :sla_enabled, :boolean, default: false
-    add_column :project_incident_management_settings, :sla_minutes, :integer
+    add_column :project_incident_management_settings, :sla_timer, :boolean, default: false
+    add_column :project_incident_management_settings, :sla_timer_minutes, :integer
   end
 
   def down
-    remove_column :project_incident_management_settings, :sla_enabled
-    remove_column :project_incident_management_settings, :sla_minutes
+    remove_column :project_incident_management_settings, :sla_timer
+    remove_column :project_incident_management_settings, :sla_timer_minutes
   end
 end
