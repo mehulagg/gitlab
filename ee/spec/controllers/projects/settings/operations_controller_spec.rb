@@ -366,9 +366,6 @@ RSpec.describe Projects::Settings::OperationsController do
             expect(setting.sla_timer).to eq(true)
             expect(setting.sla_timer_minutes).to eq(60)
           end
-
-          it_behaves_like 'an incident management gitlab tracking event', { sla_timer: '1' }, 'enabled_sla_timer'
-          it_behaves_like 'an incident management gitlab tracking event', { sla_timer: '0' }, 'disabled_sla_timer'
         end
 
         context 'without existing incident management setting' do
