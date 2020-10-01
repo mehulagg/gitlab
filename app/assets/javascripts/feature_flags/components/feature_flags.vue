@@ -1,7 +1,8 @@
 <script>
 import { createNamespacedHelpers } from 'vuex';
 import { isEmpty } from 'lodash';
-import { GlButton, GlModalDirective, GlTabs } from '@gitlab/ui';
+import { GlButton, GlModalDirective, GlTabs, GlTooltipDirective } from '@gitlab/ui';
+
 import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
 import FeatureFlagsTab from './feature_flags_tab.vue';
 import FeatureFlagsTable from './feature_flags_table.vue';
@@ -34,6 +35,7 @@ export default {
   },
   directives: {
     GlModal: GlModalDirective,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     endpoint: {
@@ -55,6 +57,15 @@ export default {
     featureFlagsClientExampleHelpPagePath: {
       type: String,
       required: true,
+    },
+    featureFlagsLimit: {
+      type: String,
+      required: true,
+    },
+    featureFlagsLimitExceeded: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     rotateInstanceIdPath: {
       type: String,
@@ -90,6 +101,7 @@ export default {
       scope,
       page: getParameterByName('page') || '1',
       isUserListAlertDismissed: false,
+      isFeatureFlagLimitShowing: this.featureFlagsLimitExceeded,
       selectedTab: Object.values(SCOPES).indexOf(scope),
     };
   },
@@ -213,11 +225,31 @@ export default {
     dataForScope(scope) {
       return this[scope];
     },
+    onDismissFeatureFlagsLimitWarning() {
+      this.isFeatureFlagLimitShowing = false;
+    },
   },
 };
 </script>
 <template>
   <div>
+    <gl-alert
+      v-if="isFeatureFlagLimitShowing"
+      variant="warning"
+      @dismiss="onDismissFeatureFlagsLimitWarning"
+    >
+      <gl-sprintf
+        :message="
+          s__(
+            'FeatureFlags|Feature flag limit reached (%{featureFlagsLimit}). Delete one or more feature flags before adding new ones.',
+          )
+        "
+      >
+        <template #featureFlagsLimit>
+          <span>{{ featureFlagsLimit }}</span>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
     <configure-feature-flags-modal
       v-if="canUserConfigure"
       :help-client-libraries-path="featureFlagsClientLibrariesHelpPagePath"
@@ -255,14 +287,25 @@ export default {
           {{ s__('FeatureFlags|New user list') }}
         </gl-button>
 
-        <gl-button
-          v-if="hasNewPath"
-          :href="newFeatureFlagPath"
-          variant="success"
-          data-testid="ff-new-button"
+        <!-- tooltips don't work on disabled elements, so we have to use a wrapper workaround -->
+        <div
+          id="newFeatureFlagButton"
+          v-gl-tooltip:newFeatureFlagButton
+          tabindex="0"
+          :title="
+            featureFlagsLimitExceeded ? s__('FeatureFlags|Feature flag limit reached!') : null
+          "
         >
-          {{ s__('FeatureFlags|New feature flag') }}
-        </gl-button>
+          <gl-button
+            v-if="hasNewPath"
+            :href="newFeatureFlagPath"
+            :disabled="featureFlagsLimitExceeded"
+            variant="success"
+            data-testid="ff-new-button"
+          >
+            {{ s__('FeatureFlags|New feature flag') }}
+          </gl-button>
+        </div>
       </div>
       <gl-tabs v-model="selectedTab" class="gl-align-items-center gl-w-full">
         <feature-flags-tab

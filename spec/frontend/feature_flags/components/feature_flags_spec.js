@@ -20,6 +20,8 @@ describe('Feature flags', () => {
     csrfToken: 'testToken',
     featureFlagsClientLibrariesHelpPagePath: '/help/feature-flags#unleash-clients',
     featureFlagsClientExampleHelpPagePath: '/help/feature-flags#client-example',
+    featureFlagsLimitExceeded: false,
+    featureFlagsLimit: '200',
     unleashApiUrl: `${TEST_HOST}/api/unleash`,
     unleashApiInstanceId: 'oP6sCNRqtRHmpy1gw2-F',
     canUserConfigure: true,
@@ -74,20 +76,31 @@ describe('Feature flags', () => {
     wrapper = null;
   });
 
+  describe('when limit exceeded', () => {
+    const propsData = { ...mockData, featureFlagsLimitExceeded: true };
+
+    beforeEach(done => {
+      mock
+        .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
+        .reply(200, getRequestData, {});
+
+      factory(propsData);
+
+      setImmediate(() => {
+        done();
+      });
+    });
+
+    it('disables the new feature flag button', () => {
+      expect(newButton().exists()).toBe(true);
+      expect(newButton().props('disabled')).toBe(true);
+    });
+  });
+
   describe('without permissions', () => {
-    const propsData = {
-      endpoint: `${TEST_HOST}/endpoint.json`,
-      csrfToken: 'testToken',
-      errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
-      featureFlagsHelpPagePath: '/help/feature-flags',
-      canUserConfigure: false,
-      canUserRotateToken: false,
-      featureFlagsClientLibrariesHelpPagePath: '/help/feature-flags#unleash-clients',
-      featureFlagsClientExampleHelpPagePath: '/help/feature-flags#client-example',
-      unleashApiUrl: `${TEST_HOST}/api/unleash`,
-      unleashApiInstanceId: 'oP6sCNRqtRHmpy1gw2-F',
-      projectId: '8',
-    };
+    const propsData = { ...mockData, canUserConfigure: false, canUserRotateToken: false };
+    delete propsData.newFeatureFlagPath;
+    delete propsData.newUserListPath;
 
     beforeEach(done => {
       mock

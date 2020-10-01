@@ -10993,6 +10993,12 @@ msgstr ""
 msgid "FeatureFlags|Feature flag %{name} will be removed. Are you sure?"
 msgstr ""
 
+msgid "FeatureFlags|Feature flag limit reached (%{featureFlagsLimit}). Delete one or more feature flags before adding new ones."
+msgstr ""
+
+msgid "FeatureFlags|Feature flag limit reached!"
+msgstr ""
+
 msgid "FeatureFlags|Feature flags allow you to configure your code into different flavors by dynamically toggling certain functionality."
 msgstr ""
 

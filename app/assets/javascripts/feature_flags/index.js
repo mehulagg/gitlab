@@ -28,6 +28,8 @@ export default () =>
           featureFlagsClientLibrariesHelpPagePath: this.dataset
             .featureFlagsClientLibrariesHelpPagePath,
           featureFlagsClientExampleHelpPagePath: this.dataset.featureFlagsClientExampleHelpPagePath,
+          featureFlagsLimitExceeded: this.dataset.featureFlagsLimitExceeded,
+          featureFlagsLimit: this.dataset.featureFlagsLimit,
           unleashApiUrl: this.dataset.unleashApiUrl,
           unleashApiInstanceId: this.dataset.unleashApiInstanceId || '',
           csrfToken: csrf.token,
