@@ -53,6 +53,9 @@ All reviewers can help ensure accuracy, clarity, completeness, and adherence to 
   - [ ] Add ~"tw::doing" when starting work on the MR.
   - [ ] Add ~"tw::finished" if Technical Writing team work on the MR is complete but it remains open.
 
+For more information on labels, refer to the corresponding [Technical Writing workflows](https://about.gitlab.com/handbook/engineering/ux/technical-writing/workflow/#labels) page in
+the handbook.
+
 **3. Maintainer**
 
 1. [ ] Review by assigned maintainer, who can always request/require the above reviews. Maintainer's review can occur before or after a technical writer review.
