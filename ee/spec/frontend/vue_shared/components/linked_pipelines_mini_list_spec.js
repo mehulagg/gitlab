@@ -137,7 +137,7 @@ describe('Linked pipeline mini list', () => {
     });
 
     it('should render the correct counterTooltipText', () => {
-      const counter = component.$el.querySelector('.linked-pipelines-counter')
+      const counter = component.$el.querySelector('.linked-pipelines-counter');
       const tooltip = getBinding(counter, 'gl-tooltip');
 
       expect(tooltip.value.title).toEqual(component.counterTooltipText);
