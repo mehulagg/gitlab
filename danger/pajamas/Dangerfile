@@ -12,6 +12,9 @@ PATTERNS = %w[
   initDeprecatedJQueryDropdown
 ].freeze
 
+BLOCKING_PATTERNS = %w[
+].freeze
+
 def get_added_lines(files)
   lines = []
   files.each do |file|
@@ -28,16 +31,25 @@ changed_lines_in_mr = get_added_lines(changed_vue_haml_files)
 has_deprecated_components = changed_lines_in_mr.select { |i| i[/#{PATTERNS.join("|")}/] }
 deprecated_components_in_mr = PATTERNS.select { |s| has_deprecated_components.join(" ")[s] }
 
-return if deprecated_components_in_mr.empty?
+has_blocking_components = changed_lines_in_mr.select { |i| i[/#{BLOCKING_PATTERNS.join("|")}/] }
+blocking_components_in_mr = BLOCKING_PATTERNS.select { |s| has_blocking_components.join(" ")[s] }
 
-warn "This merge request contains deprecated components. Please consider using Pajamas components instead."
+return if (deprecated_components_in_mr + blocking_components_in_mr).empty?
+
+if blocking_components_in_mr.any?
+  fail "This merge request contains deprecated components that have been migrated and can no longer be used. Please use Pajamas components instead."
+end
+
+if deprecated_components_in_mr.any?
+  warn "This merge request contains deprecated components. Please consider using Pajamas components instead."
+end
 
 markdown(<<~MARKDOWN)
   ## Deprecated components
 
   The following components are deprecated:
 
-  * #{deprecated_components_in_mr.join("\n* ")}
+  * #{(blocking_components_in_mr + deprecated_components_in_mr).join("\n* ")}
 
-  Please consider using [Pajamas components](https://design.gitlab.com/components/status/) instead.
+  Please use [Pajamas components](https://design.gitlab.com/components/status/) instead.
 MARKDOWN
