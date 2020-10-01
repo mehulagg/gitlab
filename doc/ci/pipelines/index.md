@@ -79,6 +79,10 @@ You can also configure specific aspects of your pipelines through the GitLab UI.
 - [Pipeline schedules](schedules.md).
 - [Custom CI/CD variables](../variables/README.md#custom-environment-variables).
 
+### Ref Specs to be injected to the runners
+
+Pipelines for merge requests passes a slightly different refspecs.
+
 ### View pipelines
 
 You can find the current and historical pipeline runs under your project's

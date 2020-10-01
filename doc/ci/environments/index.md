@@ -225,6 +225,7 @@ The assigned URL for the `review/your-branch-name` environment is [visible in th
 >
 > - `stop_review` doesn't generate a dotenv report artifact, so it won't recognize the `DYNAMIC_ENVIRONMENT_URL` variable. Therefore you should not set `environment:url:` in the `stop_review` job.
 > - If the environment URL is not valid (for example, the URL is malformed), the system doesn't update the environment URL.
+> - If the script runs in `stop_review` exists in your repository only and therfore cannot use `GIT_STRATEGY: none`, configure [Pipelines for Merge Requests](/home/shinya/workspace/thin-gdk/services/rails/src/doc/ci/merge_request_pipelines/index.md) for these jobs. So that runners can fetch repository even after a feature branch is deleted.
 
 ### Configuring manual deployments
 
@@ -682,24 +683,23 @@ deploy_review:
     name: review/$CI_COMMIT_REF_NAME
     url: https://$CI_ENVIRONMENT_SLUG.example.com
     on_stop: stop_review
-  only:
-    - branches
-  except:
-    - master
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
 
 stop_review:
   stage: deploy
-  variables:
-    GIT_STRATEGY: none
   script:
     - echo "Remove review app"
   when: manual
   environment:
     name: review/$CI_COMMIT_REF_NAME
     action: stop
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
 ```
 
-Setting the [`GIT_STRATEGY`](../yaml/README.md#git-strategy) to `none` is necessary in the
+If you cannot use [Pipelines for merge requests](https://docs.gitlab.com/ee/ci/merge_request_pipelines/),
+setting the [`GIT_STRATEGY`](../yaml/README.md#git-strategy) to `none` is necessary in the
 `stop_review` job so that the [runner](https://docs.gitlab.com/runner/) won't
 try to check out the code after the branch is deleted.
 
