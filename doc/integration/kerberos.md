@@ -114,6 +114,33 @@ Taken together, these rules mean that linking will only work if your users'
 Kerberos usernames are of the form `foo@AD.EXAMPLE.COM` and their
 LDAP Distinguished Names look like `sAMAccountName=foo,dc=ad,dc=example,dc=com`.
 
+Starting in GitLab 13.5, custom allowed realms can be configured for cases when
+the user's Kerberos realm doesn't match the domain from the user's LDAP DN. The
+configuration value must specify all domains that users may be expected to
+have. Any other domains will be ignored and an LDAP identity will not be linked.
+
+**Installations from source**
+
+1. Edit the `kerberos` section of [`gitlab.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example) to enable Kerberos ticket-based
+   authentication. 
+
+   ```yaml
+   kerberos:
+     simple_ldap_linking_allowed_realms: ['example.com','kerberos.example.com']
+   ```
+
+1. [Restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect.
+
+**Omnibus package installations**
+
+1. Edit `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_rails['kerberos_simple_ldap_linking_allowed_realms'] = ['example.com','kerberos.example.com']
+   ```
+
+1. [Reconfigure GitLab](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 ## HTTP Git access
 
 A linked Kerberos account enables you to `git pull` and `git push` using your
