@@ -39,7 +39,6 @@ cache:
     - gitlab-terraform plan
     - gitlab-terraform plan-json
   artifacts:
-    name: plan
     paths:
       - ${TF_ROOT}/plan.cache
     reports:
