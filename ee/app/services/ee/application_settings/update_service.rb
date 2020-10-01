@@ -51,6 +51,7 @@ module EE
 
       def find_or_create_index
         return if ::Gitlab::Elastic::Helper.default.index_exists?
+        return unless ::Gitlab::Utils.to_boolean(params[:elasticsearch_indexing])
 
         ::Gitlab::Elastic::Helper.default.create_empty_index
       end
