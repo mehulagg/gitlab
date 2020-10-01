@@ -116,12 +116,8 @@ export default {
     },
     projectsQueryParams() {
       return {
-        per_page: PROJECTS_PER_PAGE,
-        with_shared: false,
-        order_by: this.featureFlags.hasAnalyticsSimilaritySearch
-          ? SIMILARITY_ORDER
-          : LAST_ACTIVITY_AT,
-        include_subgroups: true,
+        first: PROJECTS_PER_PAGE,
+        includeSubgroups: true,
       };
     },
   },
