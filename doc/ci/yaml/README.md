@@ -33,11 +33,9 @@ We have complete examples of configuring pipelines:
 > - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>&nbsp;Learn how [Verizon reduced rebuilds](https://about.gitlab.com/blog/2019/02/14/verizon-customer-story/)
 >   from 30 days to under 8 hours with GitLab.
 
-NOTE: **Note:**
-If you have a [mirrored repository that GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
-you may need to enable pipeline triggering. Go to your project's
 
-**Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
+If you have a [mirrored repository that GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
+you may need to enable pipeline triggering. Go to your project's **Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
 
 ## Introduction
 
@@ -974,8 +972,7 @@ rspec:
       - $RSPEC
 ```
 
-NOTE: **Note:**
-Note that `script: rake test` has been overwritten by `script: rake rspec`.
+`script: rake test` was overwritten by `script: rake rspec`.
 
 If you do want to include the `rake test`, see [`before_script` and `after_script`](#before_script-and-after_script).
 
