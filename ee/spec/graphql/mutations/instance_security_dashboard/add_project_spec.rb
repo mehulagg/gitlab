@@ -81,6 +81,15 @@ RSpec.describe Mutations::InstanceSecurityDashboard::AddProject do
             expect(user.security_dashboard_projects).to include(already_added_project)
           end
         end
+
+        context 'with invalid params' do
+          let(:selected_project) { user }
+
+          it 'raises an error' do
+            expect { subject }
+              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, "#{user.to_global_id} is not a valid ID for Project.")
+          end
+        end
       end
     end
   end
