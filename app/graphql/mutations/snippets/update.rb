@@ -3,6 +3,8 @@
 module Mutations
   module Snippets
     class Update < Base
+      include SpammableMutationFields
+
       graphql_name 'UpdateSnippet'
 
       argument :id,

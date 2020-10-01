@@ -3,6 +3,7 @@
 module Mutations
   module Snippets
     class Create < BaseMutation
+      include SpammableMutationFields
       include ResolvesProject
 
       graphql_name 'CreateSnippet'

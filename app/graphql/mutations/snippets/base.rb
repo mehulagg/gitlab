@@ -8,11 +8,6 @@ module Mutations
             null: true,
             description: 'The snippet after mutation'
 
-      field :spam,
-            GraphQL::BOOLEAN_TYPE,
-            null: true,
-            description: 'Indicates whether the operation returns a snippet detected as spam'
-
       private
 
       def find_object(id:)
