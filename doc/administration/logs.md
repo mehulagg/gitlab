@@ -969,7 +969,7 @@ from a GitLab instance.
 
 ### Briefly tail the main logs
 
-If the bug or error is readily reproducible bug or error, save the main GitLab logs
+If the bug or error is readily reproducible, save the main GitLab logs
 [to a file](troubleshooting/linux_cheat_sheet.md#files--dirs) while reproducing the
 problem once or more times:
 
