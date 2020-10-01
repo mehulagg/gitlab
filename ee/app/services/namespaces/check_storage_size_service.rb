@@ -43,6 +43,7 @@ module Namespaces
 
       {
         explanation_message: explanation_message,
+        short_explanation_message: short_explanation_message(root_namespace),
         usage_message: usage_message,
         alert_level: alert_level,
         root_namespace: root_namespace
@@ -80,6 +81,34 @@ module Namespaces
 
     def base_message
       s_("push to your repository, create pipelines, create issues or add comments. To reduce storage capacity, delete unused repositories, artifacts, wikis, issues, and pipelines.")
+    end
+
+    def short_explanation_message(namespace)
+      namespace.root_ancestor.additional_purchased_storage_size > 0 ? purchased_storage_messages(alert_level) : no_purchased_storage_messages(alert_level)
+    end
+
+    def purchased_storage_messages(alert_level)
+      if alert_level == :error
+        s_('You have consumed all of your additional storage, please purchase more to unlock your projects over the free 10GB limit.' % { size_limit: size_limit })
+      elsif alert_level == :alert || alert_level == :warning
+        'Your purchased storage is running low. To avoid locked projects, please purchase more storage.'
+      else
+        s_('When you purchase additional storage, we automatically unlock projects that were locked when you reached the %{size_limit} limit.' % { size_limit: size_limit })
+      end
+    end
+
+    def no_purchased_storage_messages(alert_level)
+      if alert_level == :error
+        s_('You have reached the free storage limit of %{size_limit} %{namespace}. To unlock them, please purchase additional storage.' % { size_limit: size_limit, namespace: @root_namespace })
+      elsif alert_level == :alert || alert_level == :warning
+        'Your purchased storage is running low. To avoid locked projects, please purchase more storage.'
+      else
+        s_('When you purchase additional storage, we automatically unlock projects that were locked when you reached the %{size_limit} limit.' % { size_limit: size_limit })
+      end
+    end
+
+    def size_limit
+      formatted(@root_namespace.actual_size_limit)
     end
 
     def current_usage_params
