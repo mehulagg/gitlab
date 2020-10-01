@@ -138,8 +138,8 @@ out. The merge request widget also displays any
 
 ## Auto SAST
 
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
-> Select functionality made available in all tiers beginning in 13.1
+> - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.3.
+> - Select functionality made available in all tiers beginning in 13.1
 
 Static Application Security Testing (SAST) uses the
 [SAST Docker image](https://gitlab.com/gitlab-org/security-products/sast) to run static
@@ -157,8 +157,8 @@ see the documentation.
 
 ## Auto Secret Detection
 
-> Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
-> [Select functionality made available in all tiers](https://docs.gitlab.com/ee/user/application_security/secret_detection/#making-secret-detection-available-to-all-gitlab-tiers) in 13.3
+> - Introduced in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
+> - [Select functionality made available in all tiers](https://docs.gitlab.com/ee/user/application_security/secret_detection/#making-secret-detection-available-to-all-gitlab-tiers) in 13.3
 
 Secret Detection uses the
 [Secret Detection Docker image](https://gitlab.com/gitlab-org/security-products/analyzers/secrets) to run Secret Detection on the current code, and checks for leaked secrets. The
