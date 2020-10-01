@@ -9,12 +9,17 @@
       = _('Projects')
     .table-mobile-content.gl-str-truncated{ data: { testid: "user-project-count-#{user.id}" } }
       = user.authorized_projects.length
-  .table-section.section-15
+  .table-section.section-10
+    .table-mobile-header{ role: 'rowheader' }
+      = _('Groups')
+    .table-mobile-content.gl-str-truncated{ data: { testid: "user-group-count-#{user.id}" } }
+      = GroupsFinder.new(user, all_available: false).execute.count
+  .table-section.section-10
     .table-mobile-header{ role: 'rowheader' }
       = _('Created on')
     .table-mobile-content
       = l(user.created_at.to_date, format: :admin)
-  .table-section.section-15
+  .table-section.section-10
     .table-mobile-header{ role: 'rowheader' }
       = _('Last activity')
     .table-mobile-content
