@@ -28,6 +28,7 @@
         operationName: call.query.match(/^query (.+)\(/)[1],
         fetchCall: fetch(url, {
           ...opts,
+          credentials: 'same-origin',
           body: JSON.stringify(call)
         })
       }))
