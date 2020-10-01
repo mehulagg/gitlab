@@ -1,3 +1,5 @@
+- activity_pane_class = @user.bot? ? "col-12" : "col-md-12 col-lg-6"
+
 .row
   .col-12
     .calendar-block.gl-mt-3.gl-mb-3
@@ -6,25 +8,26 @@
           .spinner.spinner-md
       .user-calendar-activities.d-none.d-sm-block
 .row
-  .col-md-12.col-lg-6
+  %div{ class: activity_pane_class }
     - if can?(current_user, :read_cross_project)
       .activities-block
         .gl-mt-5
           .d-flex.align-items-center.border-bottom
             %h4.flex-grow
-              = s_('UserProfile|Activity')
+              = @user.bot? ? s_('UserProfile|Bot activity') : s_('UserProfile|Activity')
             = link_to s_('UserProfile|View all'), user_activity_path, class: "hide js-view-all"
           .overview-content-list{ data: { href: user_path } }
             .center.light.loading
               .spinner.spinner-md
 
-  .col-md-12.col-lg-6
-    .projects-block
-      .gl-mt-5
-        .d-flex.align-items-center.border-bottom
-          %h4.flex-grow
-            = s_('UserProfile|Personal projects')
-          = link_to s_('UserProfile|View all'), user_projects_path, class: "hide js-view-all"
-        .overview-content-list{ data: { href: user_projects_path } }
-          .center.light.loading
-            .spinner.spinner-md
+  - unless @user.bot?
+    .col-md-12.col-lg-6
+      .projects-block
+        .gl-mt-5
+          .d-flex.align-items-center.border-bottom
+            %h4.flex-grow
+              = s_('UserProfile|Personal projects')
+            = link_to s_('UserProfile|View all'), user_projects_path, class: "hide js-view-all"
+          .overview-content-list{ data: { href: user_projects_path } }
+            .center.light.loading
+              .spinner.spinner-md
