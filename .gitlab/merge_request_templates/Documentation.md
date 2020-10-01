@@ -53,8 +53,7 @@ All reviewers can help ensure accuracy, clarity, completeness, and adherence to 
   - [ ] Add ~"tw::doing" when starting work on the MR.
   - [ ] Add ~"tw::finished" if Technical Writing team work on the MR is complete but it remains open.
 
-For more information on labels, refer to the corresponding [Technical Writing workflows](https://about.gitlab.com/handbook/engineering/ux/technical-writing/workflow/#labels) page in
-the handbook.
+For more information about labels, see [Technical Writing workflows - Labels](https://about.gitlab.com/handbook/engineering/ux/technical-writing/workflow/#labels).
 
 **3. Maintainer**
 
