@@ -6,15 +6,16 @@ module Namespaces
     include Gitlab::Allowable
     include Gitlab::Utils::StrongMemoize
 
-    def initialize(namespace, user)
+    def initialize(namespace, user, ignore_none_level = false)
       @root_namespace = namespace.root_ancestor
       @root_storage_size = EE::Namespace::RootStorageSize.new(root_namespace)
       @user = user
+      @ignore_none_level = ignore_none_level
     end
 
     def execute
       return ServiceResponse.success unless Feature.enabled?(:namespace_storage_limit, root_namespace)
-      return ServiceResponse.success if alert_level == :none
+      return ServiceResponse.success if alert_level == :none && !@ignore_none_level
 
       if root_storage_size.above_size_limit?
         ServiceResponse.error(message: above_size_limit_message, payload: payload)
@@ -27,13 +28,15 @@ module Namespaces
 
     attr_reader :root_namespace, :root_storage_size, :user
 
-    USAGE_THRESHOLDS = {
-      none: 0.0,
-      info: 0.5,
-      warning: 0.75,
-      alert: 0.95,
-      error: 1.0
-    }.freeze
+    def usage_thresholds
+      {}.tap do |thresholds|
+        thresholds[:none] = 0.0 unless @ignore_none_level
+        thresholds[:info] = 0.5
+        thresholds[:warning] = 0.75
+        thresholds[:alert] = 0.95
+        thresholds[:error] = 1.0
+      end
+    end
 
     def payload
       return {} unless can?(user, :admin_namespace, root_namespace)
@@ -57,9 +60,9 @@ module Namespaces
     def alert_level
       strong_memoize(:alert_level) do
         usage_ratio = root_storage_size.usage_ratio
-        current_level = USAGE_THRESHOLDS.each_key.first
+        current_level = usage_thresholds.each_key.first
 
-        USAGE_THRESHOLDS.each do |level, threshold|
+        usage_thresholds.each do |level, threshold|
           current_level = level if usage_ratio >= threshold
         end
 
