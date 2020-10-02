@@ -35,7 +35,7 @@ module Gitlab
             # Can be either a string or an array of strings.
             # Do not include source maps as they are not javascript
             [dll_assets, entrypoint["assets"]].flatten.reject { |p| p =~ /.*\.map$/ }.map do |p|
-              "/#{::Rails.configuration.webpack.public_path}/#{p}"
+              "/#{Gitlab.config.webpack.public_path}/#{p}"
             end
           else
             raise AssetMissingError, "Can't find asset '#{source}' in webpack manifest"
@@ -50,7 +50,7 @@ module Gitlab
             # Can be either a string or an array of strings.
             # Do not include source maps as they are not javascript
             [paths].flatten.reject { |p| p =~ /.*\.map$/ }.map do |p|
-              "/#{::Rails.configuration.webpack.public_path}/#{p}"
+              "/#{Gitlab.config.webpack.public_path}/#{p}"
             end
           else
             raise AssetMissingError, "Can't find entry point '#{source}' in webpack manifest"
@@ -68,7 +68,7 @@ module Gitlab
         end
 
         def manifest
-          if ::Rails.configuration.webpack.dev_server.enabled
+          if Gitlab.config.webpack.dev_server.enabled
             # Don't cache if we're in dev server mode, manifest may change ...
             load_manifest
           else
@@ -78,7 +78,7 @@ module Gitlab
         end
 
         def load_manifest
-          data = if ::Rails.configuration.webpack.dev_server.enabled
+          data = if Gitlab.config.webpack.dev_server.enabled
                    load_dev_server_manifest
                  else
                    load_static_manifest
@@ -88,8 +88,8 @@ module Gitlab
         end
 
         def load_dev_server_manifest
-          host = ::Rails.configuration.webpack.dev_server.manifest_host
-          port = ::Rails.configuration.webpack.dev_server.manifest_port
+          host = Gitlab.config.webpack.dev_server.host
+          port = Gitlab.config.webpack.dev_server.port
           uri = Addressable::URI.new(scheme: 'http', host: host, port: port, path: dev_server_path)
 
           # localhost could be blocked via Gitlab::HTTP
@@ -110,13 +110,13 @@ module Gitlab
 
         def static_manifest_path
           ::Rails.root.join(
-            ::Rails.configuration.webpack.output_dir,
-            ::Rails.configuration.webpack.manifest_filename
+            Gitlab.config.webpack.output_dir,
+            Gitlab.config.webpack.manifest_filename
           )
         end
 
         def dev_server_path
-          "/#{::Rails.configuration.webpack.public_path}/#{::Rails.configuration.webpack.manifest_filename}"
+          "/#{Gitlab.config.webpack.public_path}/#{Gitlab.config.webpack.manifest_filename}"
         end
       end
     end
