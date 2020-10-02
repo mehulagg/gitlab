@@ -29,6 +29,10 @@ module QA
 
       module Dashboard
         autoload :Projects, 'qa/ee/page/dashboard/projects'
+
+        module Snippet
+          autoload :Index, 'qa/ee/page/dashboard/snippet/index'
+        end
       end
 
       module Group

@@ -475,6 +475,7 @@ module QA
       autoload :ProjectSelector, 'qa/page/component/project_selector'
       autoload :Snippet, 'qa/page/component/snippet'
       autoload :NewSnippet, 'qa/page/component/new_snippet'
+      autoload :SnippetIndex, 'qa/page/component/snippet_index'
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'

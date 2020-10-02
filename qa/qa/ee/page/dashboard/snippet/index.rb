@@ -3,7 +3,7 @@
 module QA
   module EE
     module Page
-      module Project
+      module Dashboard
         module Snippet
           module Index
             extend QA::Page::PageConcern
