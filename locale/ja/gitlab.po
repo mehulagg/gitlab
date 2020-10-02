@@ -14,7 +14,7 @@ msgstr ""
 "X-Crowdin-Language: ja\n"
 "X-Crowdin-File: /master/locale/gitlab.pot\n"
 "X-Crowdin-File-ID: 6\n"
-"PO-Revision-Date: 2020-10-02 01:01\n"
+"PO-Revision-Date: 2020-10-02 18:48\n"
 
 msgid " %{project_name}#%{issue_iid} &middot; opened %{issue_created} by %{author}"
 msgstr ""
@@ -77,11 +77,11 @@ msgstr ""
 
 msgid "%d Approval"
 msgid_plural "%d Approvals"
-msgstr[0] ""
+msgstr[0] "%d 件の承認"
 
 msgid "%d Package"
 msgid_plural "%d Packages"
-msgstr[0] ""
+msgstr[0] "%d 件のパッケージ"
 
 msgid "%d Scanned URL"
 msgid_plural "%d Scanned URLs"
@@ -117,7 +117,7 @@ msgstr[0] "%d 件のコメント"
 
 msgid "%d comment on this commit"
 msgid_plural "%d comments on this commit"
-msgstr[0] ""
+msgstr[0] "このコミットへの%d 件のコメント"
 
 msgid "%d commit"
 msgid_plural "%d commits"
@@ -172,7 +172,7 @@ msgstr[0] ""
 
 msgid "%d hour"
 msgid_plural "%d hours"
-msgstr[0] ""
+msgstr[0] "%d 時間"
 
 msgid "%d inaccessible merge request"
 msgid_plural "%d inaccessible merge requests"
@@ -184,7 +184,7 @@ msgstr[0] "%d個の課題"
 
 msgid "%d issue in this group"
 msgid_plural "%d issues in this group"
-msgstr[0] ""
+msgstr[0] "このグループに%d件の課題"
 
 msgid "%d issue selected"
 msgid_plural "%d issues selected"
@@ -192,7 +192,7 @@ msgstr[0] "%d個の課題を選択済み"
 
 msgid "%d issue successfully imported with the label"
 msgid_plural "%d issues successfully imported with the label"
-msgstr[0] ""
+msgstr[0] "%d 件の課題をラベル付きでインポートしました"
 
 msgid "%d layer"
 msgid_plural "%d layers"
@@ -224,6 +224,10 @@ msgstr[0] "%d 件以上のコメント"
 
 msgid "%d open issue"
 msgid_plural "%d open issues"
+msgstr[0] ""
+
+msgid "%d pending comment"
+msgid_plural "%d pending comments"
 msgstr[0] ""
 
 msgid "%d personal project will be removed and cannot be restored."
@@ -348,7 +352,7 @@ msgid "%{count} files touched"
 msgstr "%{count} ファイルが変更されました"
 
 msgid "%{count} more"
-msgstr "%{count} 以上"
+msgstr "他 %{count} 件"
 
 msgid "%{count} more assignees"
 msgstr "%{count} 人以上の担当者"
@@ -367,10 +371,6 @@ msgid "%{count} participant"
 msgid_plural "%{count} participants"
 msgstr[0] "%{count} 人の参加者"
 
-msgid "%{count} pending comment"
-msgid_plural "%{count} pending comments"
-msgstr[0] "保留中のコメント%{count} 件"
-
 msgid "%{count} related %{pluralized_subject}: %{links}"
 msgstr "%{count} 件の関連した %{pluralized_subject}： %{links}"
 
@@ -378,13 +378,13 @@ msgid "%{count} total weight"
 msgstr ""
 
 msgid "%{dashboard_path} could not be found."
-msgstr ""
+msgstr "%{dashboard_path} が見つかりませんでした。"
 
 msgid "%{days} days until tags are automatically removed"
 msgstr "タグが自動的に削除されるまで%{days} 日"
 
 msgid "%{deployLinkStart}Use a template to deploy to ECS%{deployLinkEnd}, or use a docker image to %{commandsLinkStart}run AWS commands in GitLab CI/CD%{commandsLinkEnd}."
-msgstr ""
+msgstr "%{deployLinkStart}テンプレートを使用してECS%{deployLinkEnd}にデプロイするか、 %{commandsLinkStart}に docker イメージを使用してGitLab CI/CD%{commandsLinkEnd} でAWSコマンドを実行します。"
 
 msgid "%{description}- Sentry event: %{errorUrl}- First seen: %{firstSeen}- Last seen: %{lastSeen} %{countLabel}: %{count}%{userCountLabel}: %{userCount}"
 msgstr "%{description}- Sentry イベント: %{errorUrl}- 最初に検出されたイベント: %{firstSeen}- 最後に検出されたイベント: %{lastSeen} %{countLabel}: %{count}%{userCountLabel}: %{userCount}"
@@ -417,7 +417,7 @@ msgid "%{firstLabel} +%{labelCount} more"
 msgstr "%{firstLabel} +%{labelCount} の詳細"
 
 msgid "%{firstMilestoneName} + %{numberOfOtherMilestones} more"
-msgstr ""
+msgstr "%{firstMilestoneName} +他 %{numberOfOtherMilestones} 件"
 
 msgid "%{global_id} is not a valid ID for %{expected_type}."
 msgstr ""
@@ -426,7 +426,7 @@ msgid "%{group_docs_link_start}Groups%{group_docs_link_end} allow you to manage 
 msgstr "%{group_docs_link_start}グループ%{group_docs_link_end}を使用すると、複数のプロジェクトを管理して共同作業を行うことができます。グループのメンバーは、所属するプロジェクトのすべてにアクセスできます。"
 
 msgid "%{group_name} group members"
-msgstr ""
+msgstr "%{group_name} グループのメンバー"
 
 msgid "%{group_name} uses group managed accounts. You need to create a new GitLab account which will be managed by %{group_name}."
 msgstr "%{group_name} はグループ管理アカウントを使用します。 %{group_name} によって管理される新しいGitLabアカウントを作成する必要があります。"
@@ -435,7 +435,7 @@ msgid "%{group_name}&%{epic_iid} &middot; opened %{epic_created} by %{author}"
 msgstr ""
 
 msgid "%{host} sign-in from new location"
-msgstr ""
+msgstr "新しい場所%{host} からのログイン"
 
 msgid "%{icon}You are about to add %{usersTag} people to the discussion. They will all receive a notification."
 msgstr ""
@@ -453,10 +453,10 @@ msgid "%{issuesSize} with a limit of %{maxIssueCount}"
 msgstr ""
 
 msgid "%{labelStart}Class:%{labelEnd} %{class}"
-msgstr ""
+msgstr "%{labelStart}クラス:%{labelEnd} %{class}"
 
 msgid "%{labelStart}Crash Address:%{labelEnd} %{crash_address}"
-msgstr ""
+msgstr "%{labelStart}クラッシュアドレス:%{labelEnd} %{crash_address}"
 
 msgid "%{labelStart}Crash State:%{labelEnd} %{stacktrace_snippet}"
 msgstr ""
@@ -479,7 +479,7 @@ msgstr ""
 msgid "%{labelStart}Namespace:%{labelEnd} %{namespace}"
 msgstr ""
 
-msgid "%{labelStart}Report Type:%{labelEnd} %{reportType}"
+msgid "%{labelStart}Scan Type:%{labelEnd} %{reportType}"
 msgstr ""
 
 msgid "%{labelStart}Scanner:%{labelEnd} %{scanner}"
@@ -510,16 +510,16 @@ msgid "%{level_name} is not allowed since the fork source project has lower visi
 msgstr "%{level_name} は許可されません。フォークしたソースプロジェクトはより可視性が低いからです。"
 
 msgid "%{link_start}Learn more%{link_end} about what information is shared with GitLab Inc."
-msgstr ""
+msgstr "GitLab Inc. にどのような情報を共有するかについては %{link_start}こちら%{link_end} を参照してください。"
 
 msgid "%{link_start}Read more%{link_end} about role permissions"
 msgstr "ロールの権限について%{link_start}もっと読む%{link_end}"
 
 msgid "%{link_start}Remove the %{draft_or_wip_snippet} prefix%{link_end} from the title to allow this merge request to be merged when it's ready."
-msgstr ""
+msgstr "タイトルから %{link_start} %{draft_or_wip_snippet} のプレフィックス %{link_end} を削除して、準備ができ次第マージリクエストをマージできるようにする。"
 
 msgid "%{link_start}Start the title with %{draft_snippet} or %{wip_snippet}%{link_end} to prevent a merge request that is a work in progress from being merged before it's ready."
-msgstr ""
+msgstr "タイトルの先頭に %{link_start} %{draft_snippet} または %{wip_snippet}%{link_end} を書いて、作業中のマージリクエストが準備ができるまでマージされないようにします。"
 
 msgid "%{listToShow}, and %{awardsListLength} more."
 msgstr "%{listToShow}、そしてさらに %{awardsListLength} 個。"
@@ -528,13 +528,13 @@ msgid "%{loadingIcon} Started"
 msgstr "%{loadingIcon} 開始"
 
 msgid "%{location} is missing required keys: %{keys}"
-msgstr ""
+msgstr "%{location} に必要なキーがありません: %{keys}"
 
 msgid "%{lock_path} is locked by GitLab User %{lock_user_id}"
 msgstr "%{lock_path} はGitLab ユーザー %{lock_user_id} によってロックされています"
 
 msgid "%{markdownDocsLinkStart}Markdown%{markdownDocsLinkEnd} and %{quickActionsDocsLinkStart}quick actions%{quickActionsDocsLinkEnd} are supported"
-msgstr ""
+msgstr "%{markdownDocsLinkStart}Markdown%{markdownDocsLinkEnd} と %{quickActionsDocsLinkStart}クイックアクション%{quickActionsDocsLinkEnd} をサポートしています"
 
 msgid "%{mergeLength}/%{usersLength} can merge"
 msgstr "%{mergeLength}/%{usersLength} 人がマージできます"
@@ -549,13 +549,13 @@ msgid "%{milestone} (expired)"
 msgstr ""
 
 msgid "%{milliseconds}ms"
-msgstr ""
+msgstr "%{milliseconds} ミリ秒"
 
 msgid "%{mrText}, this issue will be closed automatically."
 msgstr "%{mrText} 、この課題は自動的にクローズします。"
 
 msgid "%{name_with_link} has %{percent} or less Shared Runner Pipeline minutes remaining. Once it runs out, no new jobs or pipelines in its projects will run."
-msgstr ""
+msgstr "%{name_with_link} は %{percent}またはそれ以下の共有ランナーパイプライン分が残っています。これがなくなると、そのプロジェクトの新しいジョブやパイプラインは実行されなくなります。"
 
 msgid "%{name_with_link} has run out of Shared Runner Pipeline minutes so no new jobs or pipelines in its projects will run."
 msgstr ""
@@ -626,7 +626,7 @@ msgid_plural "%{releases} releases"
 msgstr[0] "%{releases} リリース"
 
 msgid "%{remaining_approvals} left"
-msgstr ""
+msgstr "残り%{remaining_approvals}"
 
 msgid "%{reportType} %{status} detected %{criticalStart}%{critical} critical%{criticalEnd} and %{highStart}%{high} high%{highEnd} severity vulnerabilities out of %{total}."
 msgstr ""
@@ -2593,6 +2593,9 @@ msgstr "GitLab ユーザフィールドが空の場合、すべての問題と�
 msgid "An error has occurred"
 msgstr "エラーが発生しました"
 
+msgid "An error occured while making the changes: %{error}"
+msgstr ""
+
 msgid "An error occurred adding a draft to the thread."
 msgstr "このスレッドに下書きを追加する際にエラーが発生しました。"
 
@@ -2865,9 +2868,6 @@ msgstr "LDAP のオーバーライド状態を保存するときにエラーが�
 
 msgid "An error occurred while saving assignees"
 msgstr "担当者の登録中にエラーが発生しました"
-
-msgid "An error occurred while saving the template. Please check if the template exists."
-msgstr "テンプレートの保存中にエラーが発生しました。テンプレートが存在するか確認してください。"
 
 msgid "An error occurred while searching for milestones"
 msgstr ""
@@ -3378,12 +3378,6 @@ msgstr "アーティファクトは正常に削除されました。"
 msgid "Artifacts"
 msgstr "アーティファクト"
 
-msgid "As U2F devices are only supported by a few browsers, we require that you set up a two-factor authentication app before a U2F device. That way you'll always be able to log in - even when you're using an unsupported browser."
-msgstr "U2Fデバイスはいくつかのブラウザでしかサポートされていないため、U2Fデバイスの前に2要素認証アプリを設定する必要があります。 そうすれば、サポートされていないブラウザを使用している場合でも、常にログインできるようになります。"
-
-msgid "As WebAuthn devices are only supported by a few browsers, we require that you set up a two-factor authentication app before a WebAuthn device. That way you'll always be able to log in - even when you're using an unsupported browser."
-msgstr ""
-
 msgid "As we continue to build more features for SAST, we'd love your feedback on the SAST configuration feature in %{linkStart}this issue%{linkEnd}."
 msgstr ""
 
@@ -3886,15 +3880,6 @@ msgstr "Bamboo のルートURL 例: https://bamboo.example.com"
 
 msgid "BambooService|You must set up automatic revision labeling and a repository trigger in Bamboo."
 msgstr "Bambooで自動リビジョンラベリングとリポジトリトリガーを設定しなければなりません。"
-
-msgid "BatchComments|Delete all pending comments"
-msgstr "保留中のコメントをすべて削除"
-
-msgid "BatchComments|Discard review?"
-msgstr "レビューを破棄しますか？"
-
-msgid "BatchComments|You're about to discard your review which will delete all of your pending comments. The deleted comments %{strong_start}cannot%{strong_end} be restored."
-msgstr "あなたはレビューを破棄しようとしています。ペンディング中のコメントはすべて破棄されます。破棄されたコメントは%{strong_start}復元できません%{strong_end}。"
 
 msgid "Be careful. Changing the project's namespace can have unintended side effects."
 msgstr "ご注意ください。プロジェクトの名前空間を変更すると、意図しない副作用が発生することがあります。"
@@ -5420,8 +5405,8 @@ msgstr "このクラスタを使用する環境を選択してください。"
 msgid "ClusterIntegration|Clear cluster cache"
 msgstr "クラスターのキャッシュを削除"
 
-msgid "ClusterIntegration|Clear the local cache of namespace and service accounts. This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
-msgstr "名前空間およびサービスアカウントのローカルキャッシュをクリアします。これはインテグレーションが同期されていない場合に必要です。キャッシュは、ネームスペースおよびサービスアカウントを必要とする次回のCIジョブ中に再作成されます。"
+msgid "ClusterIntegration|Clear the local cache of namespace and service accounts."
+msgstr ""
 
 msgid "ClusterIntegration|Cluster management project (alpha)"
 msgstr "クラスター管理プロジェクト(アルファ)"
@@ -6118,6 +6103,12 @@ msgstr ""
 
 msgid "ClusterIntegration|This account must have permissions to create a Kubernetes cluster in the %{link_to_container_project} specified below"
 msgstr "このアカウントは %{link_to_container_project} で Kubernetes クラスターを作成するのに以下の権限が必要です"
+
+msgid "ClusterIntegration|This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
+msgstr ""
+
+msgid "ClusterIntegration|This is necessary to clear existing environment-namespace associations from clusters previously managed by GitLab."
+msgstr ""
 
 msgid "ClusterIntegration|This option will allow you to install applications on RBAC clusters."
 msgstr "このオプションを使用すると、あなたはアプリケーションを RBAC クラスター上にインストールできます。"
@@ -6879,6 +6870,9 @@ msgstr[0] "タグの削除"
 msgid "ContainerRegistry|Set cleanup policy"
 msgstr "クリーンアップポリシーの設定"
 
+msgid "ContainerRegistry|Some tags were not deleted"
+msgstr ""
+
 msgid "ContainerRegistry|Something went wrong while fetching the cleanup policy."
 msgstr "クリーンアップポリシーの取得中に問題が発生しました。"
 
@@ -6916,6 +6910,9 @@ msgid "ContainerRegistry|Tags with names matching this regex pattern will %{ital
 msgstr ""
 
 msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}expire:%{italicEnd}"
+msgstr ""
+
+msgid "ContainerRegistry|The cleanup policy timed out before it could delete all tags. An administrator can %{adminLinkStart}manually run cleanup now%{adminLinkEnd} or you can wait for the cleanup policy to automatically run again. %{docLinkStart}More information%{docLinkEnd}"
 msgstr ""
 
 msgid "ContainerRegistry|The last tag related to this image was recently removed. This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process. If you have any questions, contact your administrator."
@@ -8114,6 +8111,9 @@ msgstr "日"
 msgid "Days to merge"
 msgstr "マージまでの日数"
 
+msgid "Dear Administrator,"
+msgstr ""
+
 msgid "Debug"
 msgstr "デバッグ"
 
@@ -8948,9 +8948,6 @@ msgstr "%{path} の変更を破棄しますか？"
 msgid "Discard draft"
 msgstr "下書きを破棄"
 
-msgid "Discard review"
-msgstr "レビューを破棄"
-
 msgid "DiscordService|Discord Notifications"
 msgstr "Discord 通知"
 
@@ -9412,6 +9409,9 @@ msgid "Emails"
 msgstr "メール"
 
 msgid "Emails sent from Service Desk will have this name"
+msgstr ""
+
+msgid "Emails sent to %{email} will still be supported"
 msgstr ""
 
 msgid "Emails separated by comma"
@@ -11197,9 +11197,6 @@ msgstr "フィンガープリント"
 msgid "Finish editing this message first!"
 msgstr "先にこのメッセージの編集を終えてください。"
 
-msgid "Finish review"
-msgstr "レビューを完了する"
-
 msgid "Finish setting up your dedicated account for %{group_name}."
 msgstr ""
 
@@ -11280,6 +11277,9 @@ msgstr "内部プロジェクトの場合、ログインしているすべての
 
 msgid "For more info, read the documentation."
 msgstr "詳細については、ドキュメントを読んでください。"
+
+msgid "For more information on how the number of active users is calculated, see the %{self_managed_subscriptions_doc_link} documentation."
+msgstr ""
 
 msgid "For more information, go to the "
 msgstr ""
@@ -11855,6 +11855,9 @@ msgid "GitLab / Unsubscribe"
 msgstr "GitLab / 購読解除"
 
 msgid "GitLab API"
+msgstr ""
+
+msgid "GitLab Billing Team."
 msgstr ""
 
 msgid "GitLab Group Runners can execute code for all the projects in this group."
@@ -13166,6 +13169,9 @@ msgstr ""
 
 msgid "If enabled, access to projects will be validated on an external service using their classification label."
 msgstr "有効に設定した場合、外部サービスからプロジェクトへのアクセスが分類ラベルを使用して制御されます。"
+
+msgid "If the number of active users exceeds the user limit, you will be charged for the number of %{users_over_license_link} at your next license reconciliation."
+msgstr ""
 
 msgid "If there is no previous license or if the previous license has expired, some GitLab functionality will be blocked until a new, valid license is uploaded."
 msgstr "以前のライセンスがない場合や、以前のライセンスの有効期限が切れている場合は、新しい有効なライセンスがアップロードされるまで GitLab の一部の機能がブロックされます。"
@@ -16931,7 +16937,7 @@ msgid "New Application"
 msgstr "新しいアプリケーション"
 
 msgid "New Branch"
-msgstr ""
+msgstr "新規ブランチ"
 
 msgid "New Deploy Key"
 msgstr ""
@@ -16940,10 +16946,10 @@ msgid "New Environment"
 msgstr "新しい環境"
 
 msgid "New Epic"
-msgstr ""
+msgstr "新しいエピック"
 
 msgid "New File"
-msgstr ""
+msgstr "新規ファイル"
 
 msgid "New Group"
 msgstr "新しいグループ"
@@ -17392,6 +17398,12 @@ msgstr "なし"
 
 msgid "Not Implemented"
 msgstr "未実装"
+
+msgid "Not all browsers support U2F devices. Therefore, we require that you set up a two-factor authentication app first. That way you'll always be able to sign in - even when you're using an unsupported browser."
+msgstr ""
+
+msgid "Not all browsers support WebAuthn. Therefore, we require that you set up a two-factor authentication app first. That way you'll always be able to sign in - even from an unsupported browser."
+msgstr ""
 
 msgid "Not all data has been processed yet, the accuracy of the chart for the selected timeframe is limited."
 msgstr "すべてのデータがまだ処理できていません。そのため、選択した時間範囲のチャートの精度は制限されています。"
@@ -18426,6 +18438,9 @@ msgstr "一時停止したランナーは新しいジョブを受け入れない
 msgid "Pending"
 msgstr "保留中"
 
+msgid "Pending comments"
+msgstr ""
+
 msgid "People without permission will never get a notification and won't be able to comment."
 msgstr "権限のないユーザーは一切通知を受けることがなく、またコメントすることもできません。"
 
@@ -18973,6 +18988,9 @@ msgid "Please provide a valid email address."
 msgstr "有効なメールアドレスを入力してください"
 
 msgid "Please provide attributes to update"
+msgstr ""
+
+msgid "Please reach out if you have any questions and we'll be happy to assist."
 msgstr ""
 
 msgid "Please refer to %{docs_url}"
@@ -21669,6 +21687,9 @@ msgstr "プロファイルの要求"
 msgid "Requests to these domain(s)/address(es) on the local network will be allowed when local requests from hooks and services are not allowed. IP ranges such as 1:0:0:0:0:0:0:0/124 or 127.0.0.0/28 are supported. Domain wildcards are not supported currently. Use comma, semicolon, or newline to separate multiple entries. The allowlist can hold a maximum of 1000 entries. Domains should use IDNA encoding. Ex: example.com, 192.168.1.1, 127.0.0.0/28, xn--itlab-j1a.com."
 msgstr ""
 
+msgid "Require admin approval for new sign-ups"
+msgstr ""
+
 msgid "Require all users in this group to setup Two-factor authentication"
 msgstr "このグループ内のすべてのユーザーに2要素認証のセットアップを要求する"
 
@@ -23292,6 +23313,9 @@ msgstr "%{type} の Runner の自動セットアップ"
 msgid "Set up a %{type} Runner manually"
 msgstr "%{type} のRunnerのマニュアルセットアップ"
 
+msgid "Set up a hardware device as a second factor to sign in."
+msgstr ""
+
 msgid "Set up assertions/attributes/claims (email, first_name, last_name) and NameID according to %{docsLinkStart}the documentation %{icon}%{docsLinkEnd}"
 msgstr "%{docsLinkStart}文書%{icon}%{docsLinkEnd}に従って、アサーション/属性/資格情報 (email, first_name, last_name)およびNameIDを設定してください"
 
@@ -24389,6 +24413,9 @@ msgstr ""
 msgid "StaticSiteEditor|Branch could not be created."
 msgstr ""
 
+msgid "StaticSiteEditor|Copy update"
+msgstr ""
+
 msgid "StaticSiteEditor|Could not commit the content changes."
 msgstr ""
 
@@ -25195,6 +25222,9 @@ msgstr "テスト"
 
 msgid "Thank you for signing up for your free trial! You will get additional instructions in your inbox shortly."
 msgstr "無料トライアルライセンスにお申し込みいただきありがとうございます。手順は登録されたメールアドレスに送信されます。"
+
+msgid "Thank you for your business."
+msgstr ""
 
 msgid "Thank you for your feedback!"
 msgstr ""
@@ -27732,9 +27762,6 @@ msgstr "%{link_start} スコープのラベルセット%{link_end} を作成す�
 msgid "Use Service Desk to connect with your users (e.g. to offer customer support) through email right inside GitLab"
 msgstr "サービスデスクを使用して、GitLab 内のメールでユーザと接続（例：顧客サポート）"
 
-msgid "Use a hardware device to add the second factor of authentication."
-msgstr "ハードウェアデバイスを使用して、2要素認証を追加します。"
-
 msgid "Use an one time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
 msgstr "モバイルデバイスまたはコンピュータでワンタイムパスワード認証を使用して、2要素認証を有効にします。"
 
@@ -28577,6 +28604,9 @@ msgstr "本人確認のため、あなたがロボットでないことを確認
 msgid "We will notify %{inviter} that you declined their invitation to join GitLab. You will stop receiving reminders."
 msgstr ""
 
+msgid "We would like to inform you that your subscription GitLab Enterprise Edition %{plan_name} is nearing its user limit. You have %{active_user_count} active users, which is almost at the user limit of %{maximum_user_count}."
+msgstr ""
+
 msgid "We've found no vulnerabilities"
 msgstr "脆弱性は発見されませんでした"
 
@@ -28756,6 +28786,9 @@ msgstr ""
 
 msgid "When a runner is locked, it cannot be assigned to other projects"
 msgstr "Runner がロックされている場合、他のプロジェクトに割り当てることができません"
+
+msgid "When enabled, any user visiting %{host} and creating an account will have to be explicitly approved by the admin before they can login. This setting is effective only if sign-ups are enabled."
+msgstr ""
 
 msgid "When enabled, any user visiting %{host} will be able to create an account."
 msgstr ""
@@ -29162,6 +29195,9 @@ msgstr "Kubernetes クラスターに Runner を簡単にインストールで�
 
 msgid "You can filter by 'days to merge' by clicking on the columns in the chart."
 msgstr "グラフの列をクリックして、マージ日でフィルタリングできます。"
+
+msgid "You can find more information about GitLab subscriptions in %{subscriptions_doc_link}."
+msgstr ""
 
 msgid "You can generate an access token scoped to this project for each application to use the GitLab API."
 msgstr ""
