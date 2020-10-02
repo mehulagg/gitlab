@@ -40,7 +40,7 @@ export default {
 
       const { url } = this;
 
-      this.$emit('addVideo', { url });
+      this.$emit('insertVideo', { url });
     },
     validateUrl() {
       if (!isSafeURL(this.url)) {
