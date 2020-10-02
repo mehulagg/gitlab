@@ -7,8 +7,8 @@ RSpec.describe 'Pipeline', :js do
   include ProjectForksHelper
   include ::ExclusiveLeaseHelpers
 
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project) }
+  let_it_be(:user) { create(:user) }
   let(:role) { :developer }
 
   before do
