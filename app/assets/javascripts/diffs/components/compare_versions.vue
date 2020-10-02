@@ -50,9 +50,6 @@ export default {
       'addedLines',
       'removedLines',
     ]),
-    showControls() {
-      return this.mergeRequestDiffs.length;
-    },
     toggleFileBrowserTitle() {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');
     },
@@ -75,7 +72,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="showControls" class="mr-version-controls border-top">
+  <div class="mr-version-controls border-top">
     <div
       class="mr-version-menus-container content-block"
       :class="{
