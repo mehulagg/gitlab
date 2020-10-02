@@ -16,11 +16,9 @@ class RemoveAnalyticsRepositoryTableFksOnProjects < ActiveRecord::Migration[5.2]
 
   def down
     with_lock_retries do
-      # rubocop:disable Migration/AddConcurrentForeignKey
       add_foreign_key :analytics_repository_files, :projects, on_delete: :cascade
       add_foreign_key :analytics_repository_file_edits, :projects, on_delete: :cascade
       add_foreign_key :analytics_repository_file_commits, :projects, on_delete: :cascade
-      # rubocop:enable Migration/AddConcurrentForeignKey
     end
   end
 end
