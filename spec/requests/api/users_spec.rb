@@ -2291,7 +2291,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
     end
 
     describe 'POST /users/:id/activate' do
-      subject { post api("/users/#{user_id}/activate", api_user) }
+      subject(:activate) { post api("/users/#{user_id}/activate", api_user) }
 
       let(:user_id) { user.id }
 
@@ -2299,7 +2299,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
         let(:api_user) { user }
 
         it 'is not authorized to perform the action' do
-          subject
+          activate
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -2314,7 +2314,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           end
 
           it 'activates a deactivated user' do
-            subject
+            activate
 
             expect(response).to have_gitlab_http_status(:created)
             expect(user.reload.state).to eq('active')
@@ -2327,7 +2327,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           end
 
           it 'returns 201' do
-            subject
+            activate
 
             expect(response).to have_gitlab_http_status(:created)
             expect(user.reload.state).to eq('active')
@@ -2340,7 +2340,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           end
 
           it 'returns 403' do
-            subject
+            activate
 
             expect(response).to have_gitlab_http_status(:forbidden)
             expect(json_response['message']).to eq('403 Forbidden  - A blocked user must be unblocked to be activated')
@@ -2354,7 +2354,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           end
 
           it 'returns 403' do
-            subject
+            activate
 
             expect(response).to have_gitlab_http_status(:forbidden)
             expect(json_response['message']).to eq('403 Forbidden  - A blocked user must be unblocked to be activated')
@@ -2366,7 +2366,7 @@ RSpec.describe API::Users, :do_not_mock_admin_mode do
           let(:user_id) { 0 }
 
           before do
-            subject
+            activate
           end
 
           it_behaves_like '404'
