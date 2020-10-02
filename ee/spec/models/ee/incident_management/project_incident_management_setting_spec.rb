@@ -6,7 +6,6 @@ RSpec.describe EE::IncidentManagement::ProjectIncidentManagementSetting do
   let_it_be(:project) { create(:project, :repository, create_templates: :issue) }
 
   describe 'Validations' do
-
     describe 'validate incident SLA settings' do
       subject { build(:project_incident_management_setting, sla_timer: sla_timer) }
 
