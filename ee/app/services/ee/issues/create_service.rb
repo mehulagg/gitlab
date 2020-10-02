@@ -20,6 +20,18 @@ module EE
           end
         end
       end
+
+      override :after_create
+      def after_create(issue)
+        super
+        add_incident_sla(issue)
+      end
+
+      private
+
+      def add_incident_sla(issue)
+        ::IncidentManagement::CreateSlaService.new(issue, current_user, project).execute
+      end
     end
   end
 end
