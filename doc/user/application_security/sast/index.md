@@ -554,4 +554,4 @@ For information on this, see the [general Application Security troubleshooting s
 
 ### Limitation when using rules:exists
 
-The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml) uses the `rules:exists` syntax. This directive is limited to 10000 checks and always returns `true` after reaching this number. Because of this, and depending on the number of files in your repository, a SAST job might be triggered even if the scanner doesn’t support your project.
+The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml) uses the `rules:exists` syntax. For performance reasons a maximum number of matches are made against the given glob pattern. If the number of matches exceeds the maximum, a SAST job might be triggered even if the scanner doesn’t support your project. For more details about this issue see the [rules:exists](../../../ci/yaml/README.md#rulesexists) documentation.
