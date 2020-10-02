@@ -3,11 +3,7 @@ import Vue from 'vue';
 export const mountComponent = (vueInstance, component, propsData, id) => {
   const ComponentClass = Vue.extend(component);
   const instance = new ComponentClass({ propsData, store: vueInstance.$store });
-  instance.$mount();
+  instance.$mount(vueInstance.$el.querySelector(id));
 
-  const el = vueInstance.$el.querySelector(id);
-
-  if (el) {
-    el.parentNode.replaceChild(instance.$el, el);
-  }
+  return instance;
 };
