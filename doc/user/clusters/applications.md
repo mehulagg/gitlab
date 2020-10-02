@@ -1186,7 +1186,6 @@ kubectl -n gitlab-managed-apps exec -it vault-0 sh
 This should give you your unseal keys and initial root token. Make sure to note these down
 and keep these safe as you will need them to unseal the Vault throughout its lifecycle.
 
-If you'd like to access your Vault secrets in GitLab CI you'll need to appropriately [configure your Vault server](../../ci/secrets/#configure-your-vault-server) to do so.
 
 NOTE: **Note:**
 Support for installing the Vault managed application is provided by the GitLab Release Management group.
