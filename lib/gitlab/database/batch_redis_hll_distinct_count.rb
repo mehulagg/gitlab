@@ -1,0 +1,113 @@
+# frozen_string_literal: true
+
+# For large tables, PostgreSQL can take a long time to count rows due to MVCC.
+# Implements a distinct and ordinary batch counter
+# Needs indexes on the column below to calculate max, min and range queries
+# For larger tables just set use higher batch_size with index optimization
+#
+# In order to not use a possible complex time consuming query when calculating min and max for batch_distinct_count
+# the start and finish can be sent specifically
+#
+# Grouped relations can be used as well. However, the preferred batch count should be around 10K because group by count is more expensive.
+#
+# See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22705
+#
+# Examples:
+#  extend ::Gitlab::Database::BatchCount
+#  batch_count(User.active)
+#  batch_count(::Clusters::Cluster.aws_installed.enabled, :cluster_id)
+#  batch_count(Namespace.group(:type))
+#  batch_distinct_count(::Project, :creator_id)
+#  batch_distinct_count(::Project.with_active_services.service_desk_enabled.where(time_period), start: ::User.minimum(:id), finish: ::User.maximum(:id))
+#  batch_distinct_count(Project.group(:visibility_level), :creator_id)
+#  batch_sum(User, :sign_in_count)
+#  batch_sum(Issue.group(:state_id), :weight))
+module Gitlab
+  module Database
+    module BatchRedisHllDistinctCount
+      def batch_distinct_count(relation, column = nil, batch_size: nil, start: nil, finish: nil)
+        BatchCounter.new(relation, column: column).count(batch_size: batch_size, start: start, finish: finish)
+      end
+
+      class << self
+        include BatchCount
+      end
+    end
+
+    class BatchCounter
+      FALLBACK = -1
+      MIN_REQUIRED_BATCH_SIZE = 1_250
+      MAX_ALLOWED_LOOPS = 10_000
+      SLEEP_TIME_IN_SECONDS = 0.01 # 10 msec sleep
+
+      # Each query should take < 500ms https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22705
+      DEFAULT_BATCH_SIZE = 10_000
+
+      def initialize(relation, column: nil, operation_args: nil)
+        @relation = relation
+        @column = column || relation.primary_key
+        @operation_args = operation_args
+      end
+
+      def unwanted_configuration?(finish, batch_size, start)
+        batch_size <= MIN_REQUIRED_BATCH_SIZE ||
+          (finish - start) / batch_size >= MAX_ALLOWED_LOOPS ||
+          start > finish
+      end
+
+      def count(batch_size: nil, start: nil, finish: nil)
+        raise 'BatchCount can not be run inside a transaction' if ActiveRecord::Base.connection.transaction_open?
+        raise 'Use distinct count only with non id fields' if @column == :id
+
+        batch_size ||= DEFAULT_BATCH_SIZE
+
+        start = actual_start(start)
+        finish = actual_finish(finish)
+
+        raise "Batch counting expects positive values only for #{@column}" if start < 0 || finish < 0
+        return FALLBACK if unwanted_configuration?(finish, batch_size, start)
+
+        batch_start = start
+
+        while batch_start <= finish
+          begin
+            Gitlab::Redis::HLL.add(key: redis_key, value: batch_fetch(batch_start, batch_start + batch_size), expiry: 29.days)
+            batch_start += batch_size
+          rescue ActiveRecord::QueryCanceled
+            # retry with a safe batch size & warmer cache
+            if batch_size >= 2 * MIN_REQUIRED_BATCH_SIZE
+              batch_size /= 2
+            else
+              return FALLBACK
+            end
+          end
+          sleep(SLEEP_TIME_IN_SECONDS)
+        end
+
+        Gitlab::Redis::HLL.count(keys: redis_key)
+      end
+
+      private
+
+      def redis_key
+        @redis_key ||= "usage-data-batch-distinct-count-{#{@relation.table_name}_on_#{@column}}-#{Time.current.strftime('%G-%j')}"
+      end
+
+      def batch_fetch(start, finish)
+        @relation.select(@column).where(between_condition(start, finish)).pluck(@column)
+      end
+
+      def between_condition(start, finish)
+        { @relation.primary_key => start..(finish - 1) }
+      end
+
+      def actual_start(start)
+        start || @relation.unscope(:group, :having).minimum(@column) || 0
+      end
+
+      def actual_finish(finish)
+        finish || @relation.unscope(:group, :having).maximum(@column) || 0
+      end
+    end
+  end
+end
