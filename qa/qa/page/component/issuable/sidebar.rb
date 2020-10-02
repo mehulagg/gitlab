@@ -69,6 +69,12 @@ module QA
             end
           end
 
+          def has_no_assignee_named?(username)
+            page.within(element_selector_css(:assignee_block)) do
+              has_no_text?(username)
+            end
+          end
+
           def has_avatar_image_count?(count)
             wait_assignees_block_finish_loading do
               all_elements(:avatar_image, count: count)
