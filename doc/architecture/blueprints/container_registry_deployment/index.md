@@ -3,7 +3,9 @@ comments: false
 description: 'Container Registry New Architecture'
 ---
 
-# Usage of the GitLab Container Registry
+# Container Registry New Architecture
+
+## Usage of the GitLab Container Registry
 
 With the Docker Container Registry integrated into GitLab, every GitLab project can have its own space to store its Docker images. You can use the registry to build, push and share images using the Docker client, CI/CD or the GitLab API. Each day on GitLab.com, between [150 and 200 thousand images are pushed to the registry](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=9620193&udv=0) and about [700k API events](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=7601761&udv=0). 
 
