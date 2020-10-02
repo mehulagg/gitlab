@@ -1,11 +1,10 @@
 <script>
 import { GlLineChart } from '@gitlab/ui/dist/charts';
-import { reverse } from 'lodash';
 import produce from 'immer';
 import createFlash from '~/flash';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { __ } from '~/locale';
-import { formatDate, getDateInPast, getMonthNames } from '~/lib/utils/datetime_utility';
+import { formatDate, getMonthNames } from '~/lib/utils/datetime_utility';
 import latestUsersQuery from '../graphql/queries/latest_users_count.query.graphql';
 
 // TODO: we want to fetch 1 year's worth
@@ -18,26 +17,39 @@ export const formatTickAsMonth = val => {
   return getMonthNames(true)[month];
 };
 
-const TOTAL_DATAPOINTS_TO_FETCH = 365;
 const ymd = d => formatDate(d, 'yyyy-mm-dd');
-const TODAY = new Date();
-const START_DATE = getDateInPast(TODAY, TOTAL_DATAPOINTS_TO_FETCH);
 
 export default {
   name: 'UsersChart',
   components: { GlLineChart, ChartSkeletonLoader },
+  props: {
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    totalDataPoints: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
-      usersDailyCount: [],
+      usersTotal: [],
       pageInfo: null,
     };
   },
   apollo: {
-    usersDailyCount: {
+    usersTotal: {
       query: latestUsersQuery,
-      variables: {
-        first: TOTAL_DATAPOINTS_TO_FETCH,
-        after: null,
+      variables() {
+        return {
+          first: this.totalDataPoints,
+          after: null,
+        };
       },
       update(data) {
         return data.users.nodes.map(({ count, recordedAt }) => [ymd(recordedAt), count]);
@@ -61,14 +73,13 @@ export default {
     isLoading() {
       // Dont show the chart until all data is fetched
       return (
-        this.$apollo.queries.usersDailyCount.loading ||
-        this.usersDailyCount.length < TOTAL_DATAPOINTS_TO_FETCH
+        this.$apollo.queries.usersTotal.loading || this.usersTotal.length < this.totalDataPoints
       );
     },
     range() {
       return {
-        max: TODAY,
-        min: START_DATE,
+        min: this.startDate,
+        max: this.endDate,
       };
     },
     options() {
@@ -95,15 +106,14 @@ export default {
       };
     },
     chartUserData() {
-      const d = reverse(this.usersDailyCount, 'recordedAt');
-      return d;
+      return this.usersTotal;
     },
   },
   methods: {
     fetchNextPage() {
       if (this.pageInfo.hasNextPage) {
-        this.$apollo.queries.usersDailyCount.fetchMore({
-          variables: { first: TOTAL_DATAPOINTS_TO_FETCH, after: this.pageInfo.endCursor },
+        this.$apollo.queries.usersTotal.fetchMore({
+          variables: { first: this.totalDataPoints, after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
             const results = produce(fetchMoreResult, newUsers => {
               // eslint-disable-next-line no-param-reassign

@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import InstanceStatisticsApp from '~/analytics/instance_statistics/components/app.vue';
-import InstanceCounts from '~/analytics/instance_statistics/components//instance_counts.vue';
+import InstanceCounts from '~/analytics/instance_statistics/components/instance_counts.vue';
+import UsersChart from '~/analytics/instance_statistics/components/users_chart.vue';
 
 describe('InstanceStatisticsApp', () => {
   let wrapper;
@@ -20,5 +21,9 @@ describe('InstanceStatisticsApp', () => {
 
   it('displays the instance counts component', () => {
     expect(wrapper.find(InstanceCounts).exists()).toBe(true);
+  });
+
+  it('displays the users chart component', () => {
+    expect(wrapper.find(UsersChart).exists()).toBe(true);
   });
 });
