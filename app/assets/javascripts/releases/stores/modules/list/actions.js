@@ -25,11 +25,13 @@ import { PAGE_SIZE } from '../../../constants';
  * the items returned will follow the provided cursor (this parameter is only
  * used when fetching results from the GraphQL API).
  */
-export const fetchReleases = ({ dispatch, rootGetters }, { page = 1, before, after }) => {
+export const fetchReleases = ({ dispatch, rootGetters, state }, { page = 1, before, after }) => {
+  const { sort, orderBy } = state.sorting;
+
   if (rootGetters.useGraphQLEndpoint) {
     dispatch('fetchReleasesGraphQl', { before, after });
   } else {
-    dispatch('fetchReleasesRest', { page });
+    dispatch('fetchReleasesRest', { page, sort, orderBy });
   }
 };
 
@@ -77,10 +79,8 @@ export const fetchReleasesGraphQl = (
 /**
  * Gets a paginated list of releases from the REST endpoint
  */
-export const fetchReleasesRest = ({ dispatch, commit, state }, { page }) => {
+export const fetchReleasesRest = ({ dispatch, commit, state }, { page, sort, orderBy }) => {
   commit(types.REQUEST_RELEASES);
-
-  const { sort, orderBy } = state.sorting;
 
   api
     .releases(state.projectId, { page, sort, order_by: orderBy })

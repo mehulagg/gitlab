@@ -1,11 +1,12 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlEmptyState, GlLink, GlButton, GlSorting, GlSortingItem } from '@gitlab/ui';
+import { GlEmptyState, GlLink, GlButton } from '@gitlab/ui';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import ReleaseBlock from './release_block.vue';
 import ReleasesPagination from './releases_pagination.vue';
 import ReleaseSkeletonLoader from './release_skeleton_loader.vue';
+import ReleasesSort from './releases_sort.vue';
 
 export default {
   name: 'ReleasesApp',
@@ -13,11 +14,10 @@ export default {
     GlEmptyState,
     GlLink,
     GlButton,
-    GlSorting,
-    GlSortingItem,
     ReleaseBlock,
     ReleasesPagination,
     ReleaseSkeletonLoader,
+    ReleasesSort,
   },
   translation: {
     releaseDate: __('Release date'),
@@ -69,10 +69,7 @@ export default {
 <template>
   <div class="flex flex-column mt-2">
     <div class="align-self-end mb-2">
-      <gl-sorting :text="sortingText" class="gl-mr-2">
-        <gl-sorting-item>Released date</gl-sorting-item>
-        <gl-sorting-item>Created date</gl-sorting-item>
-      </gl-sorting>
+      <releases-sort @sort:changed="fetchReleases" class="gl-mr-2" />
 
       <gl-button
         v-if="newReleasePath"
