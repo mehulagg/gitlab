@@ -63,16 +63,6 @@ describe('CompareVersions', () => {
       expect(targetDropdown.find('a span').html()).toContain(targetBranchName);
     });
 
-    it('should not render comparison dropdowns if no mergeRequestDiffs are specified', () => {
-      createWrapper({ mergeRequestDiffs: [] });
-
-      const sourceDropdown = wrapper.find('.mr-version-dropdown');
-      const targetDropdown = wrapper.find('.mr-version-compare-dropdown');
-
-      expect(sourceDropdown.exists()).toBe(false);
-      expect(targetDropdown.exists()).toBe(false);
-    });
-
     it('should render view types buttons with correct values', () => {
       const inlineBtn = wrapper.find('#inline-diff-btn');
       const parallelBtn = wrapper.find('#parallel-diff-btn');
