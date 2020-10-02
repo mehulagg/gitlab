@@ -26,7 +26,7 @@ The registry supports multiple [storage backends](https://gitlab.com/gitlab-org/
 
 The name and hierarchy of repositories, as well as image manifests and tags are also stored in the storage backend, represented by a nested structure of folders and files. [This](https://www.youtube.com/watch?v=i5mbF2bgWoM&feature=youtu.be) video gives a practical overview of the registry storage structure.
 
-## Challenges
+### Challenges
 
 With registry v3.0, we intend to include several major architectural changes. We will update the registry to store image manifests in PostgreSQL instead of ojbect storage. This will allow us to implement [lightning](https://gitlab.com/groups/gitlab-org/-/epics/3011) and [zero-downtime garbage collection](https://gitlab.com/groups/gitlab-org/-/epics/3012), saving tens of thousands of dollars each month in storage costs.
 
