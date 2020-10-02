@@ -4,9 +4,8 @@ module Ci
   class JobsFinder
     include Gitlab::Allowable
 
-    def initialize(current_user:, pipeline: nil, project: nil, params: {}, type: ::Ci::Build)
+    def initialize(pipeline: nil, project: nil, params: {}, type: ::Ci::Build)
       @pipeline = pipeline
-      @current_user = current_user
       @project = project
       @params = params
       @type = type
@@ -22,7 +21,7 @@ module Ci
 
     private
 
-    attr_reader :current_user, :pipeline, :project, :params, :type
+    attr_reader :pipeline, :project, :params, :type
 
     def init_collection
       if Feature.enabled?(:ci_jobs_finder_refactor)
@@ -33,27 +32,21 @@ module Ci
     end
 
     def all_jobs
-      raise Gitlab::Access::AccessDeniedError unless current_user&.admin?
-
       type.all
     end
 
     def project_builds
-      raise Gitlab::Access::AccessDeniedError unless can?(current_user, :read_build, project)
-
       project.builds.relevant
     end
 
     def project_jobs
       return unless project
-      raise Gitlab::Access::AccessDeniedError unless can?(current_user, :read_build, project)
 
       jobs_by_type(project, type).relevant
     end
 
     def pipeline_jobs
       return unless pipeline
-      raise Gitlab::Access::AccessDeniedError unless can?(current_user, :read_build, pipeline)
 
       jobs_by_type(pipeline, type).latest
     end

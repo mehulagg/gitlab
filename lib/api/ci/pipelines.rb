@@ -130,7 +130,7 @@ module API
 
           if Feature.enabled?(:ci_jobs_finder_refactor)
             builds = ::Ci::JobsFinder
-              .new(current_user: current_user, pipeline: pipeline, params: params)
+              .new(pipeline: pipeline, params: params)
               .execute
           else
             authorize!(:read_build, pipeline)
@@ -159,7 +159,7 @@ module API
 
           if Feature.enabled?(:ci_jobs_finder_refactor)
             bridges = ::Ci::JobsFinder
-              .new(current_user: current_user, pipeline: pipeline, params: params, type: ::Ci::Bridge)
+              .new(pipeline: pipeline, params: params, type: ::Ci::Bridge)
               .execute
           else
             authorize!(:read_pipeline, pipeline)

@@ -15,6 +15,27 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
   end
 
   describe 'GET index' do
+    context "when the user has permission to read the project's builds" do
+      it 'renders the builds' do
+        create(:ci_build, pipeline: pipeline)
+
+        get_index
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(assigns(:builds).count).to be(1)
+      end
+    end
+
+    context "when the user does not have permission to read the project's builds" do
+      let(:project) { create(:project, :private, :repository) }
+
+      it 'does not render the builds' do
+        get_index
+
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+
     context 'when scope is pending' do
       before do
         create(:ci_build, :pending, pipeline: pipeline)

@@ -5,10 +5,10 @@ class Admin::JobsController < Admin::ApplicationController
 
   def index
     # We need all builds for tabs counters
-    @all_builds = Ci::JobsFinder.new(current_user: current_user).execute
+    @all_builds = Ci::JobsFinder.new.execute
 
     @scope = params[:scope]
-    @builds = Ci::JobsFinder.new(current_user: current_user, params: params).execute
+    @builds = Ci::JobsFinder.new(params: params).execute
     @builds = @builds.eager_load_everything
     @builds = @builds.page(params[:page]).per(BUILDS_PER_PAGE).without_count
   end

@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Ci::JobsFinder, '#execute' do
-  let_it_be(:user) { create(:user) }
-  let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:project) { create(:project, :private, public_builds: false) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
   let_it_be(:job_1) { create(:ci_build) }
@@ -14,26 +12,10 @@ RSpec.describe Ci::JobsFinder, '#execute' do
   let(:params) { {} }
 
   context 'no project' do
-    subject { described_class.new(current_user: admin, params: params).execute }
+    subject { described_class.new(params: params).execute }
 
     it 'returns all jobs' do
       expect(subject).to match_array([job_1, job_2, job_3])
-    end
-
-    context 'non admin user' do
-      let(:admin) { user }
-
-      it 'returns no jobs' do
-        expect(subject).to be_empty
-      end
-    end
-
-    context 'without user' do
-      let(:admin) { nil }
-
-      it 'returns no jobs' do
-        expect(subject).to be_empty
-      end
     end
 
     context 'with ci_jobs_finder_refactor ff enabled' do
@@ -99,36 +81,10 @@ RSpec.describe Ci::JobsFinder, '#execute' do
       stub_feature_flags(ci_jobs_finder_refactor: true)
     end
 
-    context 'a project is present' do
-      subject { described_class.new(current_user: user, project: project, params: params).execute }
+    subject { described_class.new(project: project, params: params).execute }
 
-      context 'user has access to the project' do
-        before do
-          project.add_maintainer(user)
-        end
-
-        it 'returns jobs for the specified project' do
-          expect(subject).to match_array([job_3])
-        end
-      end
-
-      context 'user has no access to project builds' do
-        before do
-          project.add_guest(user)
-        end
-
-        it 'returns no jobs' do
-          expect(subject).to be_empty
-        end
-      end
-
-      context 'without user' do
-        let(:user) { nil }
-
-        it 'returns no jobs' do
-          expect(subject).to be_empty
-        end
-      end
+    it 'returns jobs for the specified project' do
+      expect(subject).to match_array([job_3])
     end
   end
 
@@ -136,36 +92,11 @@ RSpec.describe Ci::JobsFinder, '#execute' do
     before do
       stub_feature_flags(ci_jobs_finder_refactor: false)
     end
-    context 'a project is present' do
-      subject { described_class.new(current_user: user, project: project, params: params).execute }
 
-      context 'user has access to the project' do
-        before do
-          project.add_maintainer(user)
-        end
+    subject { described_class.new(project: project, params: params).execute }
 
-        it 'returns jobs for the specified project' do
-          expect(subject).to match_array([job_3])
-        end
-      end
-
-      context 'user has no access to project builds' do
-        before do
-          project.add_guest(user)
-        end
-
-        it 'returns no jobs' do
-          expect(subject).to be_empty
-        end
-      end
-
-      context 'without user' do
-        let(:user) { nil }
-
-        it 'returns no jobs' do
-          expect(subject).to be_empty
-        end
-      end
+    it 'returns jobs for the specified project' do
+      expect(subject).to match_array([job_3])
     end
   end
 end
