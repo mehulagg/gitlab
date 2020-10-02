@@ -160,10 +160,10 @@ module QA
 
       def reset_2fa_codes
         ssh_params = [uri.host]
-        ssh_params << "-p #{uri.port}" if uri.port
+        # ssh_params << "-p #{uri.port}" if uri.port
         ssh_params << "2fa_recovery_codes"
 
-        run("echo yes | ssh git@#{ssh_params.join(' ')}").to_s
+        run("echo yes | ssh -i #{private_key_file.path} -o UserKnownHostsFile=#{known_hosts_file.path} git@#{ssh_params.join(' ')}").to_s
       end
 
       def use_ssh_key(key)
@@ -173,7 +173,7 @@ module QA
 
         @known_hosts_file = Tempfile.new("known_hosts_#{SecureRandom.hex(8)}")
         keyscan_params = ['-H']
-        keyscan_params << "-p #{uri.port}" if uri.port
+        keyscan_params << "-p #{uri.port}" if uri.port && uri.port != 80
         keyscan_params << uri.host
         res = run("ssh-keyscan #{keyscan_params.join(' ')} >> #{known_hosts_file.path}")
         return res.response unless res.success?

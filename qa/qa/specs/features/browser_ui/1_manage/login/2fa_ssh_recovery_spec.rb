@@ -20,12 +20,15 @@ module QA
 
       it 'allows 2FA code recovery via ssh' do
         output = Git::Repository.perform do |repository|
-          host = URI.parse(QA::Runtime::Scenario.gitlab_address).host
-          port = URI.parse(QA::Runtime::Scenario.gitlab_address).port
+          # host = URI.parse(QA::Runtime::Scenario.gitlab_address).host
+          # port = URI.parse(QA::Runtime::Scenario.gitlab_address).port
+          #
+          # port = port == '22' ? '' : '2222'
+          #
+          # require 'pry-byebug'
+          # binding.pry
 
-          port = port == '22' ? '' : '2222'
-
-          repository.uri = URI::HTTP.build(host: host, port: port)
+          repository.uri = QA::Runtime::Scenario.gitlab_address
 
           repository.use_ssh_key(ssh_key)
 
@@ -42,6 +45,17 @@ module QA
         end
 
         expect(Page::Main::Menu.perform(&:signed_in?)).to be_truthy
+
+        Page::Main::Menu.perform(&:sign_out)
+
+        Flow::Login.sign_in(as: user, skip_page_validation: true)
+
+        Page::Main::TwoFactorAuth.perform do |two_fa_auth|
+          two_fa_auth.set_2fa_code(recovery_code)
+          two_fa_auth.click_verify_code_button
+        end
+
+        expect(page).to have_text('Invalid two-factor code')
       end
 
       def enable_2fa_for_user(user)

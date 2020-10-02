@@ -16,7 +16,8 @@ module QA
           end
 
           def click_enable_2fa_button
-            click_element(:enable_2fa_button)
+            # click_element(:enable_2fa_button)
+            click_on 'Enable two-factor authentication'
           end
 
           def delete_account(password)
