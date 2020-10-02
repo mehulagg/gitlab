@@ -41,7 +41,7 @@ module Mutations
         project = authorized_find!(full_path: full_path)
 
         service = ::DastScannerProfiles::UpdateService.new(project, current_user)
-        result = service.execute({ **service_args, id: gid.model_id })
+        result = service.execute(**{ **service_args, id: gid.model_id })
 
         if result.success?
           { id: result.payload.to_global_id, errors: [] }
