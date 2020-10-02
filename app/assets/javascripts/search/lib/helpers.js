@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign, func-names */
 import Vue from 'vue';
 
 export const mountComponent = (vueInstance, component, propsData, id) => {
@@ -6,4 +7,12 @@ export const mountComponent = (vueInstance, component, propsData, id) => {
   instance.$mount(vueInstance.$el.querySelector(id));
 
   return instance;
+};
+
+export const VueMountComponent = {
+  install(vue) {
+    vue.prototype.$mountComponent = function(component, propsData, id) {
+      mountComponent(this, component, propsData, id);
+    };
+  },
 };
