@@ -9,7 +9,7 @@ import { formatDate } from '~/lib/utils/datetime_utility';
  * where month is a dateTime string representing the first of the given month
  * and average is the average of the count
  */
-export function getAverageByMonth(items = []) {
+export function getAverageByMonth(items = [], roundTotals = false) {
   const itemsMap = items.reduce((memo, item) => {
     const { count, recordedAt } = item;
     const date = new Date(recordedAt);
@@ -24,6 +24,7 @@ export function getAverageByMonth(items = []) {
 
   return Object.keys(itemsMap).map(month => {
     const { sum, recordCount } = itemsMap[month];
-    return [month, sum / recordCount];
+    const avg = sum / recordCount;
+    return [month, roundTotals ? Math.round(avg) : avg];
   });
 }

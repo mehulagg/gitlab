@@ -7400,6 +7400,9 @@ msgstr ""
 msgid "Could not load instance counts. Please refresh the page to try again."
 msgstr ""
 
+msgid "Could not load the user chart. Please refresh the page to try again."
+msgstr ""
+
 msgid "Could not remove the trigger."
 msgstr ""
 
@@ -26089,6 +26092,9 @@ msgid "There is already a repository with that name on disk"
 msgstr ""
 
 msgid "There is no chart data available."
+msgstr ""
+
+msgid "There is no data available."
 msgstr ""
 
 msgid "There is no data available. Please change your selection."

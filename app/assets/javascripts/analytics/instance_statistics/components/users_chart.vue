@@ -1,27 +1,20 @@
 <script>
-import { GlLineChart } from '@gitlab/ui/dist/charts';
+import { GlAlert } from '@gitlab/ui';
+import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import produce from 'immer';
 import createFlash from '~/flash';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { __ } from '~/locale';
-import { formatDate, getMonthNames } from '~/lib/utils/datetime_utility';
+import { formatDateAsMonth } from '~/lib/utils/datetime_utility';
 import latestUsersQuery from '../graphql/queries/latest_users_count.query.graphql';
+import { getAverageByMonth } from '../utils';
 
-// TODO: we want to fetch 1 year's worth
-// TODO: if there is no count for a day, do we get 0?
-// TODO: group chart data by month
-// TODO: include total but not average
-
-export const formatTickAsMonth = val => {
-  const month = new Date(val).getUTCMonth();
-  return getMonthNames(true)[month];
-};
-
-const ymd = d => formatDate(d, 'yyyy-mm-dd');
+const unix = d => new Date(d).getTime();
+const sortByDate = data => [...data].sort((a, b) => unix(a[0]) > unix(b[0]));
 
 export default {
   name: 'UsersChart',
-  components: { GlLineChart, ChartSkeletonLoader },
+  components: { GlAlert, GlAreaChart, ChartSkeletonLoader },
   props: {
     startDate: {
       type: Date,
@@ -52,7 +45,7 @@ export default {
         };
       },
       update(data) {
-        return data.users.nodes.map(({ count, recordedAt }) => [ymd(recordedAt), count]);
+        return data.users?.nodes || [];
       },
       result({ data }) {
         const {
@@ -67,51 +60,44 @@ export default {
     },
   },
   i18n: {
+    yAxisTitle: __('Users'),
+    xAxisTitle: __('Month'),
     loadUserChartError: __('Could not load the user chart. Please refresh the page to try again.'),
+    noDataMessage: __('There is no data available.'),
   },
   computed: {
     isLoading() {
-      // Dont show the chart until all data is fetched
-      return (
-        this.$apollo.queries.usersTotal.loading || this.usersTotal.length < this.totalDataPoints
-      );
+      return this.$apollo.queries.usersTotal.loading || this.pageInfo?.hasNextPage;
     },
-    range() {
-      return {
-        min: this.startDate,
-        max: this.endDate,
-      };
+    chartUserData() {
+      const averaged = getAverageByMonth(
+        this.usersTotal.length > this.totalDataPoints
+          ? this.usersTotal.slice(0, this.totalDataPoints)
+          : this.usersTotal,
+        true,
+      );
+      return sortByDate(averaged);
     },
     options() {
       return {
         xAxis: {
-          ...this.range,
-          type: 'time',
-          name: __('Date'),
-          splitNumber: 12,
+          name: this.$options.i18n.xAxisTitle,
+          type: 'category',
           axisLabel: {
-            interval: 0,
-            showMinLabel: false,
-            showMaxLabel: false,
-            formatter: formatTickAsMonth,
-            align: 'right',
-          },
-          axisTick: {
-            alignWithLabel: false,
+            formatter: value => {
+              return formatDateAsMonth(value);
+            },
           },
         },
         yAxis: {
-          name: __('Users'),
+          name: this.$options.i18n.yAxisTitle,
         },
       };
-    },
-    chartUserData() {
-      return this.usersTotal;
     },
   },
   methods: {
     fetchNextPage() {
-      if (this.pageInfo.hasNextPage) {
+      if (this.pageInfo?.hasNextPage) {
         this.$apollo.queries.usersTotal.fetchMore({
           variables: { first: this.totalDataPoints, after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
@@ -129,15 +115,18 @@ export default {
 </script>
 <template>
   <div>
-    <h3>{{ __('Users') }}</h3>
+    <h3>{{ $options.i18n.yAxisTitle }}</h3>
     <chart-skeleton-loader v-if="isLoading" />
-    <gl-line-chart
+    <gl-alert v-else-if="!chartUserData.length" variant="info" :dismissible="false" class="gl-mt-3">
+      {{ $options.i18n.noDataMessage }}
+    </gl-alert>
+    <gl-area-chart
       v-else
       :option="options"
       :include-legend-avg-max="true"
       :data="[
         {
-          name: 'Users',
+          name: $options.i18n.yAxisTitle,
           data: chartUserData,
         },
       ]"

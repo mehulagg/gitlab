@@ -27,12 +27,15 @@ export const mockMergeRequestCounts = [
 export const mergeRequestsMonthlyChartData = [
   ['2020-07-01', 9.5], // average of 2020-07-x items
   ['2020-06-01', 20.666666666666668], // average of 2020-06-x items
-]
-
-export const mockUsersTotal = [
-  ['2020-09-28', 100],
-  ['2020-09-27', 150],
-  ['2020-09-26', 125],
-  ['2020-09-25', 100],
-  ['2020-09-24', 125],
 ];
+
+export const mockUsersTotalCount = [
+  { recordedAt: '2020-09-28', count: 100 },
+  { recordedAt: '2020-09-21', count: 164 },
+  { recordedAt: '2020-09-14', count: 189 },
+  { recordedAt: '2020-09-07', count: 100 },
+  { recordedAt: '2020-08-30', count: 225 },
+  { recordedAt: '2020-08-23', count: 165 },
+];
+
+export const mockUsersMonthlyChartData = [['2020-09-01', 138], ['2020-08-01', 195]];
