@@ -13,4 +13,7 @@ export default {
   [types.SET_INSTRUCTIONS](state, instructions) {
     state.instructions = instructions;
   },
+  [types.SET_SHOW_ALERT](state, show) {
+    state.showAlert = show;
+  },
 };

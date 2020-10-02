@@ -2713,9 +2713,6 @@ msgstr ""
 msgid "An error has occurred"
 msgstr ""
 
-msgid "An error has occurred fetching platform instructions"
-msgstr ""
-
 msgid "An error occured while making the changes: %{error}"
 msgstr ""
 

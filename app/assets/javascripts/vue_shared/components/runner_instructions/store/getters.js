@@ -3,16 +3,13 @@ export const hasDownloadLocationsAvailable = state => {
 };
 
 export const getSupportedArchitectures = state => {
-  if (hasDownloadLocationsAvailable(state)) {
-    return Object.keys(
-      state.availablePlatforms[state.selectedAvailablePlatform]?.download_locations,
-    );
-  }
-  return [];
+  return Object.keys(
+    state.availablePlatforms[state.selectedAvailablePlatform]?.download_locations || {},
+  );
 };
 
 export const instructionsEmpty = state => {
-  return !Object.keys(state.instructions).length > 0;
+  return !Object.keys(state.instructions).length;
 };
 
 export const getDownloadLocation = state => {

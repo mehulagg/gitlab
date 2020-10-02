@@ -40,4 +40,12 @@ describe('Runner Instructions mutations', () => {
       expect(localState.instructions).toEqual(mockInstructions);
     });
   });
+
+  describe('SET_SHOW_ALERT', () => {
+    it('should set the showAlert boolean', () => {
+      mutations.SET_SHOW_ALERT(localState, true);
+
+      expect(localState.showAlert).toEqual(true);
+    });
+  });
 });

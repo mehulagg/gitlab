@@ -76,7 +76,14 @@ describe('Runner Instructions actions', () => {
       });
 
       it('shows an error', done => {
-        testAction(actions.requestPlatformsInstructions, null, state, [], [], done);
+        testAction(
+          actions.requestPlatformsInstructions,
+          null,
+          state,
+          [],
+          [{ type: 'toggleAlert', payload: true }],
+          done,
+        );
       });
     });
   });
@@ -85,6 +92,8 @@ describe('Runner Instructions actions', () => {
     describe('successful request', () => {
       beforeEach(() => {
         state.platformsPath = '/platforms';
+        state.availablePlatforms = mockPlatformsObject;
+        state.getSupportedArchitectures = ['linux', 'windows'];
         axiosMock.onGet(state.platformsPath).reply(statusCodes.OK, mockPlatformsObject);
       });
 
@@ -97,7 +106,10 @@ describe('Runner Instructions actions', () => {
             { type: types.SET_AVAILABLE_PLATFORMS, payload: mockPlatformsObject },
             { type: types.SET_AVAILABLE_PLATFORM, payload: 'linux' },
           ],
-          [],
+          [
+            { type: 'selectArchitecture', payload: 'linux' },
+            { type: 'requestPlatformsInstructions' },
+          ],
           done,
         );
       });
@@ -110,7 +122,14 @@ describe('Runner Instructions actions', () => {
       });
 
       it('shows an error', done => {
-        testAction(actions.requestPlatforms, null, state, [], [], done);
+        testAction(
+          actions.requestPlatforms,
+          null,
+          state,
+          [],
+          [{ type: 'toggleAlert', payload: true }],
+          done,
+        );
       });
     });
   });
@@ -126,6 +145,19 @@ describe('Runner Instructions actions', () => {
           { type: 'selectArchitecture', payload: 'linux' },
           { type: 'requestPlatformsInstructions' },
         ],
+        done,
+      );
+    });
+  });
+
+  describe('toggleAlert', () => {
+    it('commits the SET_SHOW_ALERT mutation', done => {
+      testAction(
+        actions.toggleAlert,
+        true,
+        state,
+        [{ type: types.SET_SHOW_ALERT, payload: true }],
+        [],
         done,
       );
     });

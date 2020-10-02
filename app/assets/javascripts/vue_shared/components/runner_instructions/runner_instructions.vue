@@ -1,5 +1,6 @@
 <script>
 import {
+  GlAlert,
   GlButton,
   GlModal,
   GlModalDirective,
@@ -13,6 +14,7 @@ import { __, s__ } from '~/locale';
 
 export default {
   components: {
+    GlAlert,
     GlButton,
     GlButtonGroup,
     GlDropdown,
@@ -28,6 +30,7 @@ export default {
       'availablePlatforms',
       'instructions',
       'selectedArchitecture',
+      'showAlert',
     ]),
     ...mapGetters('installRunnerPopup', [
       'getSupportedArchitectures',
@@ -53,6 +56,7 @@ export default {
       'requestPlatforms',
       'selectPlatform',
       'startInstructionsRequest',
+      'toggleAlert',
     ]),
   },
   modalId: 'installation-instructions-modal',
@@ -63,6 +67,7 @@ export default {
     downloadLatestBinary: s__('Runners|Download Latest Binary'),
     registerRunner: s__('Runners|Register Runner'),
     method: __('Method'),
+    genericError: __('An error has occurred'),
   },
 };
 </script>
@@ -76,6 +81,9 @@ export default {
       :title="$options.i18n.installARunner"
       :action-secondary="closeButton"
     >
+      <gl-alert v-if="showAlert" variant="danger" @dismiss="toggleAlert(false)">
+        {{ $options.i18n.genericError }}
+      </gl-alert>
       <h5>{{ __('Environment') }}</h5>
       <gl-button-group class="gl-mb-5">
         <gl-button
@@ -113,7 +121,7 @@ export default {
         </div>
       </template>
       <template v-if="!instructionsEmpty">
-        <div v-if="!instructionsEmpty" class="gl-display-flex">
+        <div class="gl-display-flex">
           <pre class="bg-light gl-flex-fill-1" data-testid="binary-instructions">
             {{ instructions.install.trimStart() }}
           </pre>

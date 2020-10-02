@@ -5,4 +5,5 @@ export default (initialState = {}) => ({
   selectedAvailablePlatform: initialState.selectedAvailablePlatform || '', // index from the availablePlatforms array
   selectedArchitecture: initialState.selectedArchitecture || '',
   instructions: initialState.instructions || {},
+  showAlert: false,
 });
