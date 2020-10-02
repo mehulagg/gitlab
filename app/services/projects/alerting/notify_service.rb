@@ -6,12 +6,12 @@ module Projects
       include Gitlab::Utils::StrongMemoize
       include ::IncidentManagement::Settings
 
-      def execute(token)
+      def execute(token, integration = nil)
         return bad_request unless valid_payload_size?
-        return forbidden unless alerts_service_activated?
-        return unauthorized unless valid_token?(token)
+        return forbidden unless active_integration?(integration)
+        return unauthorized unless valid_token?(token, integration)
 
-        process_alert
+        process_alert(integration)
         return bad_request unless alert.persisted?
 
         process_incident_issues if process_issues?
@@ -24,11 +24,11 @@ module Projects
 
       delegate :alerts_service, :alerts_service_activated?, to: :project
 
-      def process_alert
+      def process_alert(integration)
         if alert.persisted?
           process_existing_alert
         else
-          create_alert
+          create_alert(integration)
         end
       end
 
@@ -62,14 +62,11 @@ module Projects
         SystemNoteService.auto_resolve_prometheus_alert(issue, project, User.alert_bot) if issue.reset.closed?
       end
 
-      def create_alert
+      def create_alert(integration)
         return unless alert.save
 
         alert.execute_services
-        SystemNoteService.create_new_alert(
-          alert,
-          alert.monitoring_tool || 'Generic Alert Endpoint'
-        )
+        SystemNoteService.create_new_alert(alert, notification_source(integration))
       end
 
       def process_incident_issues
@@ -106,11 +103,27 @@ module Projects
         end
       end
 
+      def notification_source(integration)
+        alert.monitoring_tool || integration&.name || 'Generic Alert Endpoint'
+      end
+
       def valid_payload_size?
         Gitlab::Utils::DeepSize.new(params).valid?
       end
 
-      def valid_token?(token)
+      def active_integration?(integration)
+        if Feature.enabled?(:multiple_http_integrations, project)
+          return true if integration
+        end
+
+        alerts_service_activated?
+      end
+
+      def valid_token?(token, integration)
+        if Feature.enabled?(:multiple_http_integrations, project)
+          return token == integration.token if integration
+        end
+
         token == alerts_service.token
       end
 

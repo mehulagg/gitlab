@@ -157,6 +157,10 @@ class Rack::Attack
       path =~ protected_paths_regex
     end
 
+    def route_params
+      @route_params ||= Rails.application.routes.recognize_path(path, { method: request_method }) rescue {}
+    end
+
     private
 
     def request_authenticator

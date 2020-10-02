@@ -107,4 +107,16 @@ RSpec.describe 'Rack Attack EE throttles' do
       let(:path) { "/#{project.full_path}/alerts/notify" }
     end
   end
+
+  describe 'requests to AlertManagement::HttpIntegration notify endpoint with oauth token' do
+    before do
+      allow_next_instance_of(Projects::Alerting::NotifyService) do |instance|
+        allow(instance).to receive(:execute).and_return(ServiceResponse.success)
+      end
+    end
+
+    it_behaves_like 'incident management rate limiting' do
+      let(:path) { "/#{project.full_path}/alerts/http-integration-name/eddd36969b2d3d6a/notify" }
+    end
+  end
 end

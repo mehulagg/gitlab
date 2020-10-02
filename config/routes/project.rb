@@ -436,6 +436,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       end
 
       post 'alerts/notify', to: 'alerting/notifications#create' # rubocop:todo Cop/PutProjectRoutesUnderScope
+      post 'alerts/:name/:endpoint_identifier/notify',
+            to: 'alerting/notifications#create',
+            as: :alert_http_integration,
+            constraints: { endpoint_identifier: /[A-Za-z0-9]+/ } # rubocop:todo Cop/PutProjectRoutesUnderScope
 
       draw :legacy_builds
 

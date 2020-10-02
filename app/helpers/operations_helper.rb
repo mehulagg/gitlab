@@ -24,9 +24,11 @@ module OperationsHelper
       'prometheus_reset_key_path' => reset_alerting_token_project_settings_operations_path(@project),
       'prometheus_authorization_key' => @project.alerting_setting&.token,
       'prometheus_api_url' => prometheus_service.api_url,
-      'authorization_key' => alerts_service.token,
+      # 'authorization_key' => alerts_service.token,
+      'authorization_key' => AlertManagement::HttpIntegration.last.token,
       'prometheus_url' => notify_project_prometheus_alerts_url(@project, format: :json),
-      'url' => alerts_service.url,
+      # 'url' => alerts_service.url,
+      'url' => AlertManagement::HttpIntegration.last.url,
       'alerts_setup_url' => help_page_path('user/project/integrations/generic_alerts.md', anchor: 'setting-up-generic-alerts'),
       'alerts_usage_url' => project_alert_management_index_path(@project),
       'disabled' => disabled.to_s
