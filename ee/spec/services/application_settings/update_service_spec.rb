@@ -35,30 +35,6 @@ RSpec.describe ApplicationSettings::UpdateService do
     end
 
     context 'elasticsearch_indexing update' do
-      context 'result returned' do
-        using RSpec::Parameterized::TableSyntax
-
-        where( :indexing_enabled, :input_value, :result) do
-          false | true  | true
-          true  | true  | false
-          false | false | false
-          true  | false | true
-        end
-
-        with_them do
-          let(:opts) { { elasticsearch_indexing: input_value } }
-
-          before do
-            allow(service.application_setting).to(receive(:elasticsearch_indexing)).and_return(indexing_enabled)
-            allow(Gitlab::Elastic::Helper.default).to(receive(:index_exists?)).and_return(true)
-          end
-
-          it 'returns correct result' do
-            expect(service.execute).to be(result)
-          end
-        end
-      end
-
       context 'index creation' do
         let(:opts) { { elasticsearch_indexing: true } }
 

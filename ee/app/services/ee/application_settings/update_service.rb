@@ -8,8 +8,6 @@ module EE
 
       override :execute
       def execute
-        return false if prevent_elasticsearch_indexing_update?
-
         # Repository size limit comes as MB from the view
         limit = params.delete(:repository_size_limit)
         application_setting.repository_size_limit = ::Gitlab::Utils.try_megabytes_to_bytes(limit) if limit
@@ -43,10 +41,6 @@ module EE
       end
 
       private
-
-      def prevent_elasticsearch_indexing_update?
-        application_setting.elasticsearch_indexing == ::Gitlab::Utils.to_boolean(params[:elasticsearch_indexing])
-      end
 
       def find_or_create_index
         # The order of checks is important. We should not attempt to create a new index
