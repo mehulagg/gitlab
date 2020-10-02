@@ -7,9 +7,9 @@ description: 'Container Registry New Architecture'
 
 ## Usage of the GitLab Container Registry
 
-With the Docker Container Registry integrated into GitLab, every GitLab project can have its own space to store its Docker images. You can use the registry to build, push and share images using the Docker client, CI/CD or the GitLab API. Each day on GitLab.com, between [150 and 200 thousand images are pushed to the registry](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=9620193&udv=0) and about [700k API events](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=7601761&udv=0). 
+With the [Container Registry](https://gitlab.com/gitlab-org/container-registry) integrated into GitLab, every GitLab project can have its own space to store its Docker images. You can use the registry to build, push and share images using the Docker client, CI/CD or the GitLab API.
 
-It’s also worth noting that although many customers use multiple registry vendors, more than 96% of instances have configured their [instance to use the GitLab Container Registry](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=9832282&udv=0). 
+Each day on GitLab.com, between [150k and 200k images are pushed to the registry](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=9620193&udv=0), generating about [700k API events](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=7601761&udv=0). It’s also worth noting that although many customers use third-party registry vendors, [more than 96% of instances](https://app.periscopedata.com/app/gitlab/527857/Package-GitLab.com-Stage-Activity-Dashboard?widget=9832282&udv=0) are using the GitLab Container Registry. 
 
 For GitLab.com and for GitLab's customers, the Container Registry is a critical component to building and deploying software. 
 
