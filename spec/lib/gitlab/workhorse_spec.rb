@@ -54,7 +54,8 @@ RSpec.describe Gitlab::Workhorse do
             commit_id: metadata['CommitId'],
             prefix: metadata['ArchivePrefix'],
             format: Gitaly::GetArchiveRequest::Format::ZIP,
-            path: path
+            path: path,
+            include_lfs_blobs: true
           ).to_proto
         )
       }.deep_stringify_keys)

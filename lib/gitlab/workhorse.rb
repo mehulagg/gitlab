@@ -269,7 +269,8 @@ module Gitlab
               commit_id: metadata['CommitId'],
               prefix: metadata['ArchivePrefix'],
               format: format,
-              path: path.presence || ""
+              path: path.presence || "",
+              include_lfs_blobs: true
             ).to_proto
           )
         }
