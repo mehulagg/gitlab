@@ -9416,6 +9416,20 @@
               "deprecationReason": null
             },
             {
+              "name": "needsRecaptcha",
+              "description": "Indicates whether the operation returns a snippet that needs the recaptcha",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "snippet",
               "description": "The snippet after mutation",
               "args": [
@@ -55990,6 +56004,20 @@
                     }
                   }
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "needsRecaptcha",
+              "description": "Indicates whether the operation returns a snippet that needs the recaptcha",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null

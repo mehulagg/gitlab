@@ -3496,6 +3496,11 @@ type CreateSnippetPayload {
   errors: [String!]!
 
   """
+  Indicates whether the operation returns a snippet that needs the recaptcha
+  """
+  needsRecaptcha: Boolean
+
+  """
   The snippet after mutation
   """
   snippet: Snippet
@@ -19221,6 +19226,11 @@ type UpdateSnippetPayload {
   Errors encountered during execution of the mutation.
   """
   errors: [String!]!
+
+  """
+  Indicates whether the operation returns a snippet that needs the recaptcha
+  """
+  needsRecaptcha: Boolean
 
   """
   The snippet after mutation

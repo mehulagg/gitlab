@@ -1,0 +1,5 @@
+---
+title: Add needs_recaptcha field to snippet mutations
+merge_request: 44122
+author:
+type: changed
