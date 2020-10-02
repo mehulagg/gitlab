@@ -1,5 +1,5 @@
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { GlIcon } from '@gitlab/ui';
 import noteableDiscussion from '../../notes/components/noteable_discussion.vue';
 
@@ -34,6 +34,11 @@ export default {
       default: '',
     },
   },
+  computed: {
+    ...mapState({
+      discussionMap: state => state.notes.discussionMap,
+    }),
+  },
   methods: {
     ...mapActions(['toggleDiscussion']),
     ...mapActions('diffs', ['removeDiscussionsFromDiff']),
@@ -53,32 +58,36 @@ export default {
   <div>
     <div
       v-for="(discussion, index) in discussions"
-      :key="discussion.id"
+      :key="discussion"
       :class="{
         collapsed: !isExpanded(discussion),
       }"
       class="discussion-notes diff-discussions position-relative"
     >
-      <ul :data-discussion-id="discussion.id" class="notes">
+      <ul :data-discussion-id="discussion" class="notes">
         <template v-if="shouldCollapseDiscussions">
           <button
             :class="{
-              'diff-notes-collapse': discussion.expanded,
-              'btn-transparent badge badge-pill': !discussion.expanded,
+              'diff-notes-collapse': discussionMap[discussion].expanded,
+              'btn-transparent badge badge-pill': !discussionMap[discussion].expanded,
             }"
             type="button"
             class="js-diff-notes-toggle"
-            @click="toggleDiscussion({ discussionId: discussion.id })"
+            @click="toggleDiscussion({ discussionId: discussiodiscussionMap[n] })"
           >
-            <gl-icon v-if="discussion.expanded" name="collapse" class="collapse-icon" />
+            <gl-icon
+              v-if="discussionMap[discussion].expanded"
+              name="collapse"
+              class="collapse-icon"
+            />
             <template v-else>
               {{ index + 1 }}
             </template>
           </button>
         </template>
         <noteable-discussion
-          v-show="isExpanded(discussion)"
-          :discussion="discussion"
+          v-show="isExpanded(discussionMap[discussion])"
+          :discussion="discussionMap[discussion]"
           :render-diff-file="false"
           :discussions-by-diff-order="true"
           :line="line"

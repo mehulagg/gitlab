@@ -6,6 +6,7 @@ import { ASC } from '../../constants';
 export default () => ({
   state: {
     discussions: [],
+    discussionMap: {},
     discussionSortOrder: ASC,
     convertedDisscussionIds: [],
     targetNoteHash: null,

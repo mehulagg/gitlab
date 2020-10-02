@@ -178,9 +178,13 @@ export default {
     });
   },
 
-  [types.SET_LINE_DISCUSSIONS_FOR_FILE](state, { discussion, diffPositionByLineCode, hash }) {
+  [types.SET_LINE_DISCUSSIONS_FOR_FILE](
+    state,
+    { discussionId, diffPositionByLineCode, hash, discussionMap },
+  ) {
     const { latestDiff } = state;
 
+    const discussion = discussionMap[discussionId];
     const discussionLineCodes = [discussion.line_code, ...(discussion.line_codes || [])];
     const fileHash = discussion.diff_file.file_hash;
     const lineCheck = line =>
@@ -198,8 +202,8 @@ export default {
       discussions: extraCheck()
         ? line.discussions &&
           line.discussions
-            .filter(() => !line.discussions.some(({ id }) => discussion.id === id))
-            .concat(lineCheck(line) ? discussion : line.discussions)
+            .filter(() => !line.discussions.some(id => discussion.id === id))
+            .concat(lineCheck(line) ? discussion.id : line.discussions)
         : [],
     });
 
@@ -207,14 +211,16 @@ export default {
       const isLineNoteTargeted =
         line.discussions &&
         line.discussions.some(
-          disc => disc.notes && disc.notes.find(note => hash === `note_${note.id}`),
+          id =>
+            discussionMap[id].notes &&
+            discussionMap[id].notes.find(note => hash === `note_${note.id}`),
         );
 
       return {
         ...line,
         discussionsExpanded:
           line.discussions && line.discussions.length
-            ? line.discussions.some(disc => !disc.resolved) || isLineNoteTargeted
+            ? line.discussions.some(id => !discussionMap[id].resolved) || isLineNoteTargeted
             : false,
       };
     };

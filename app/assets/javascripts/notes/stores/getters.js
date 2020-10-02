@@ -166,7 +166,9 @@ export const resolvedDiscussionCount = (state, getters) => {
 export const discussionTabCounter = state =>
   state.discussions.reduce(
     (acc, discussion) =>
-      acc + discussion.notes.filter(note => !note.system && !note.placeholder).length,
+      acc +
+      state.discussionMap[discussion].notes.filter(note => !note.system && !note.placeholder)
+        .length,
     0,
   );
 

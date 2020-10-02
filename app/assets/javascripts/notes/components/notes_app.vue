@@ -1,5 +1,5 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
 import { deprecatedCreateFlash as Flash } from '../../flash';
 import * as constants from '../constants';
@@ -62,9 +62,12 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      discussionMap: state => state.notes.discussionMap,
+      discussions: state => state.notes.discussions,
+    }),
     ...mapGetters([
       'isNotesFetched',
-      'discussions',
       'convertedDisscussionIds',
       'getNotesDataByProp',
       'isLoading',
@@ -269,24 +272,26 @@ export default {
               />
               <placeholder-note v-else :key="discussion.id" :note="discussion.notes[0]" />
             </template>
-            <template v-else-if="discussionIsIndividualNoteAndNotConverted(discussion)">
+            <template
+              v-else-if="discussionIsIndividualNoteAndNotConverted(discussionMap[discussion])"
+            >
               <system-note
-                v-if="discussion.notes[0].system"
-                :key="discussion.id"
-                :note="discussion.notes[0]"
+                v-if="discussionMap[discussion].notes[0].system"
+                :key="discussionMap[discussion].id"
+                :note="discussionMap[discussion].notes[0]"
               />
               <noteable-note
                 v-else
-                :key="discussion.id"
-                :note="discussion.notes[0]"
+                :key="discussionMap[discussion].id"
+                :note="discussionMap[discussion].notes[0]"
                 :show-reply-button="canReply"
-                @startReplying="startReplying(discussion.id)"
+                @startReplying="startReplying(discussionMap[discussion].id)"
               />
             </template>
             <noteable-discussion
               v-else
-              :key="discussion.id"
-              :discussion="discussion"
+              :key="discussionMap[discussion].id"
+              :discussion="discussionMap[discussion]"
               :render-diff-file="true"
               :help-page-path="helpPagePath"
             />

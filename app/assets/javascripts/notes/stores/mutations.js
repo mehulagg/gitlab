@@ -7,7 +7,7 @@ export default {
   [types.ADD_NEW_NOTE](state, data) {
     const note = data.discussion ? data.discussion.notes[0] : data;
     const { discussion_id, type } = note;
-    const [exists] = state.discussions.filter(n => n.id === note.discussion_id);
+    const exists = state.discussions.filter(id => id === note.discussion_id);
     const isDiscussion = type === constants.DISCUSSION_NOTE || type === constants.DIFF_NOTE;
 
     if (!exists) {
@@ -28,7 +28,8 @@ export default {
         noteData.diff_discussion = false;
       }
 
-      state.discussions.push(noteData);
+      state.discussionMap[noteData.id] = noteData;
+      state.discussions.push(noteData.id);
     }
   },
 
@@ -71,16 +72,16 @@ export default {
 
     for (let i = discussions.length - 1; i >= 0; i -= 1) {
       const note = discussions[i];
-      const children = note.notes;
+      const children = note?.notes;
 
-      if (children.length && !note.individual_note) {
+      if (children?.length && !note?.individual_note) {
         // remove placeholder from discussions
         for (let j = children.length - 1; j >= 0; j -= 1) {
           if (children[j].isPlaceholderNote) {
             children.splice(j, 1);
           }
         }
-      } else if (note.isPlaceholderNote) {
+      } else if (note?.isPlaceholderNote) {
         // remove placeholders from state root
         discussions.splice(i, 1);
       }
@@ -142,7 +143,13 @@ export default {
       return acc;
     }, []);
 
-    Object.assign(state, { discussions });
+    Object.assign(state, {
+      discussions: discussions.map(({ id }) => id),
+      discussionMap: discussions.reduce(
+        (acc, discussion) => ({ ...acc, [discussion.id]: discussion }),
+        {},
+      ),
+    });
   },
   [types.SET_LAST_FETCHED_AT](state, fetchedAt) {
     Object.assign(state, { lastFetchedAt: fetchedAt });
@@ -155,7 +162,7 @@ export default {
   [types.SHOW_PLACEHOLDER_NOTE](state, data) {
     let notesArr = state.discussions;
 
-    const existingDiscussion = utils.findNoteObjectById(notesArr, data.replyId);
+    const existingDiscussion = state.discussionMap[data.replyId];
     if (existingDiscussion) {
       notesArr = existingDiscussion.notes;
     }
