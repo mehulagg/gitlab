@@ -31,12 +31,6 @@ RSpec.describe "Every controller" do
     end
 
     it "has feature categories" do
-      routes_without_category.map { |x| x.split('#') }.group_by(&:first).each do |controller, actions|
-        puts controller
-        puts actions.map { |x| ":#{x.last}" }.sort.join(', ')
-        puts ''
-      end
-
       expect(routes_without_category).to be_empty, "#{routes_without_category} did not have a category"
     end
 
