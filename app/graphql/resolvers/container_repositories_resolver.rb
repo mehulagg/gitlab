@@ -9,8 +9,6 @@ module Resolvers
               description: 'Filter the container repositories by their name'
 
     def resolve(name: nil)
-      return ContainerRepository.none unless object.is_a?(::Project) || object.is_a?(Group)
-
       ContainerRepositoriesFinder.new(user: current_user, subject: object, params: { name: name })
                                  .execute
                                  .tap { track_event(:list_repositories, :container) }
