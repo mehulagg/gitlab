@@ -1,7 +1,7 @@
 <script>
 /**
  * Renders the delete button that allows deleting a stopped environment.
- * Used in the environments table and the environment detail view.
+ * Used in the environments table.
  */
 
 import $ from 'jquery';
