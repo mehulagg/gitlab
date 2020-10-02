@@ -2,6 +2,7 @@ import { __ } from '~/locale';
 
 export const CUSTOM_EVENTS = {
   openAddImageModal: 'gl_openAddImageModal',
+  openInsertVideoModal: 'gl_openInsertVideoModal',
 };
 
 export const ALLOWED_VIDEO_ORIGINS = ['https://www.youtube.com'];
@@ -25,6 +26,7 @@ export const TOOLBAR_ITEM_CONFIGS = [
   { icon: 'dash', command: 'HR', tooltip: __('Add a line') },
   { icon: 'table', event: 'openPopupAddTable', classes: 'tui-table', tooltip: __('Add a table') },
   { icon: 'doc-image', event: CUSTOM_EVENTS.openAddImageModal, tooltip: __('Insert an image') },
+  { icon: 'live-preview', event: CUSTOM_EVENTS.openInsertVideoModal, tooltip: __('Insert video') },
   { isDivider: true },
   { icon: 'code', command: 'Code', tooltip: __('Insert inline code') },
   { icon: 'doc-code', command: 'CodeBlock', tooltip: __('Insert a code block') },

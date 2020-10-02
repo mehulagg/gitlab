@@ -3,6 +3,7 @@ import 'codemirror/lib/codemirror.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
 
 import AddImageModal from './modals/add_image/add_image_modal.vue';
+import InsertVideoModal from './modals/insert_video_modal.vue';
 import { EDITOR_TYPES, EDITOR_HEIGHT, EDITOR_PREVIEW_STYLE, CUSTOM_EVENTS } from './constants';
 
 import {
@@ -21,6 +22,7 @@ export default {
         toast => toast.Editor,
       ),
     AddImageModal,
+    InsertVideoModal,
   },
   props: {
     content: {
@@ -73,6 +75,7 @@ export default {
   methods: {
     addListeners(editorApi) {
       addCustomEventListener(editorApi, CUSTOM_EVENTS.openAddImageModal, this.onOpenAddImageModal);
+      addCustomEventListener(editorApi, CUSTOM_EVENTS.openInsertVideoModal, this.onOpenInsertVideoModal);
 
       editorApi.eventManager.listen('changeMode', this.onChangeMode);
     },
@@ -81,6 +84,12 @@ export default {
         this.editorApi,
         CUSTOM_EVENTS.openAddImageModal,
         this.onOpenAddImageModal,
+      );
+
+      removeCustomEventListener(
+        this.editorApi,
+        CUSTOM_EVENTS.openInsertVideoModal,
+        this.onOpenInsertVideoModal,
       );
 
       this.editorApi.eventManager.removeEventHandler('changeMode', this.onChangeMode);
@@ -111,6 +120,13 @@ export default {
 
       addImage(this.editorInstance, image);
     },
+    onOpenInsertVideoModal() {
+      this.$refs.insertVideoModal.show();
+    },
+    onInsertVideo(url) {
+      // TODO - insert video
+      console.log('inserting video...');
+    },
     onChangeMode(newMode) {
       this.$emit('modeChange', newMode);
     },
@@ -130,5 +146,6 @@ export default {
       @load="onLoad"
     />
     <add-image-modal ref="addImageModal" :image-root="imageRoot" @addImage="onAddImage" />
+    <insert-video-modal ref="insertVideoModal" @insertVideo="onInsertVideo" />
   </div>
 </template>
