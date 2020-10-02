@@ -126,7 +126,7 @@ describe('Settings Form', () => {
 
     it('shows the default option when none are selected', () => {
       mountComponent({ props: { value: {} } });
-      expect(findFields().props('value')).toMatchObject({
+      expect(findFields().props('value')).toEqual({
         cadence: 'EVERY_DAY',
         keepN: 'TEN_TAGS',
         olderThan: 'NINETY_DAYS',
