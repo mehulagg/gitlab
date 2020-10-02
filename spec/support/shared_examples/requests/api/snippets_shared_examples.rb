@@ -7,14 +7,6 @@ RSpec.shared_examples 'raw snippet files' do
   let(:file_path)  { '%2Egitattributes' }
   let(:ref)        { 'master' }
 
-  context 'with no user' do
-    it 'requires authentication' do
-      get api(api_path)
-
-      expect(response).to have_gitlab_http_status(:unauthorized)
-    end
-  end
-
   shared_examples 'not found' do
     it 'returns 404' do
       get api(api_path, user)
