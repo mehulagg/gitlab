@@ -3,8 +3,7 @@ import { GlButton, GlTabs, GlTab } from '@gitlab/ui';
 import AlertsSettingsForm from './alerts_form.vue';
 import PagerDutySettingsForm from './pagerduty_form.vue';
 import ServiceLevelAgreementForm from './service_level_agreement_form.vue';
-import { INTEGRATION_TABS_CONFIG, I18N_INTEGRATION_TABS } from '../constants';
-import { s__ } from '~/locale';
+import { integrationTabsConfig, I18N_INTEGRATION_TABS } from '../constants';
 
 export default {
   components: {
@@ -19,14 +18,7 @@ export default {
   inject: ['serviceLevelAgreementSettings'],
   computed: {
     tabs() {
-      return [
-        ...INTEGRATION_TABS_CONFIG,
-        {
-          title: s__('IncidentSettings|Incident Settings'),
-          component: 'ServiceLevelAgreementForm',
-          active: this.serviceLevelAgreementSettings.available,
-        },
-      ];
+      return integrationTabsConfig(this.serviceLevelAgreementSettings.available);
     },
   },
 };
