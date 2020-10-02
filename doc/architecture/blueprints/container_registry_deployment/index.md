@@ -28,16 +28,31 @@ The name and hierarchy of repositories, as well as image manifests and tags are 
 
 ### Challenges
 
-With registry v3.0, we intend to include several major architectural changes. We will update the registry to store image manifests in PostgreSQL instead of ojbect storage. This will allow us to implement [lightning](https://gitlab.com/groups/gitlab-org/-/epics/3011) and [zero-downtime garbage collection](https://gitlab.com/groups/gitlab-org/-/epics/3012), saving tens of thousands of dollars each month in storage costs.
+#### Garbage Collection
 
-When considering GitLab and the Community's reliance on the registry, it's critical that we do not introduce breaking changes. Yet, when considering the amount of changes included in v3 of the registry, it's unlikely that we will not encounter bugs, especially considering the scale of the registry. That is why we will need a self-service registry deployment. So when issues arise, even though we'll do our best to avoid them, they can be remediated as quickly as possible. 
+The container registry relies on an offline *mark* and *sweep* garbage collection (GC) algorithm. To run it, the registry needs to be either shutdown or set to read-only, remaining like that during the whole GC run.
 
-The current deployment process takes 1-2 days and can be viewed in the [issue template](https://gitlab.com/gitlab-org/container-registry/-/blob/master/.gitlab/issue_templates/Release%20Plan.md).
+During the *mark* phase, the registry analyzes all repositories, creating a list of configurations, layers, and manifests that are referenced/linked in each one of them. The registry will then list all existing configurations, layers, and manifests (stored centrally) and obtain a list of those that are not referenced/linked in any repository. This is the list of blobs eligible for deletion.
 
-There are some additional challenges worth noting as well:
+With the output from the *mark* phase in hand, the registry starts the *sweep* phase, where it will loop over all blobs identified as eligible for deletion and delete them from the storage backend, one by one.
 
-- How to support backend database migrations [container-registry-#221](https://gitlab.com/gitlab-org/container-registry/-/issues/221)
-- [Whether or not PostgreSQL 12 is a hard requirement](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/11154#note_420820923)
+Doing this for a huge registry may require multiple hours/days to complete, during which the registry must remain in read-only mode. This is not feasible for platforms with tight availability requirements, such as GitLab.com.
+
+#### Performance
+
+Due to the current architecture and its reliance on the (possibly remote) storage backend to store repository and image metadata, even the most basic operations, such as listing repositories or tags, can become prohibitively slow, and it only gets worse as the registry grows in size.
+
+For example, to be able to tell which repositories exist, the registry has to walk through all folders in the storage backend and identify repositories in them. Only when all folders that exist have been visited, the registry can then reply to the client with the list of repositories. If using a remote storage backend (such as GCS or S3), performance becomes even worse, as for each visited folder multiple HTTP requests are required to list and inspect their contents.
+
+#### Insights
+
+For similar reasons as highlighted above, currently, it's not feasible to extract valuable information from the registry, such as how much space a repository is using (e.g. to enforce quotas), which repositories are using the most space, which ones are more active, detailed push/pull metrics per image or tag, etc. Not having access to these insights and metrics strongly weakens the ability to make informed decisions in regards to the product strategy.
+
+#### Additional Features
+
+Due to the metadata limitations, it's currently not feasible to implement valuable features such as [pagination](https://gitlab.com/gitlab-org/container-registry/-/issues/13#note_271769891), filtering and sorting for HTTP API, and more advanced features such as the ability to [distinguish between Docker and Helm charts images](https://gitlab.com/gitlab-org/gitlab/issues/38047).
+
+Because of all these constraints, we decided to [freeze the development of new features](https://gitlab.com/gitlab-org/container-registry/-/issues/44) until we have a solution in place to overcome all these foundational limitations.
 
 ## Goals
 
