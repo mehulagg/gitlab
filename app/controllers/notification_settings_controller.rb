@@ -3,6 +3,8 @@
 class NotificationSettingsController < ApplicationController
   before_action :authenticate_user!
 
+  feature_category :not_owned
+
   def create
     return render_404 unless can_read?(resource)
 
