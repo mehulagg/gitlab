@@ -726,6 +726,21 @@ RSpec.describe MergeRequest do
         expect(subject[:status_reason]).to eq('This merge request does not have license scanning reports')
       end
     end
+
+    context "when the head pipeline has a license scanning report" do
+      let!(:head_pipeline) { create(:ci_pipeline, status, project: project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha, builds: builds) }
+      let(:builds) { [create(:ee_ci_build, :license_scan_v2_1)] }
+
+      before do
+        synchronous_reactive_cache(merge_request)
+      end
+
+      context "when the pipeline is running" do
+        let(:status) { :running }
+
+        specify { expect(subject[:status]).to eq(:parsed) }
+      end
+    end
   end
 
   describe '#compare_metrics_reports' do
