@@ -60,6 +60,7 @@ export default {
     :title="title"
     :aria-label="title"
     class="d-none d-sm-none d-md-block"
+    variant = "danger"
     data-toggle="modal"
     data-target="#delete-environment-modal"
     @click="onClick"
