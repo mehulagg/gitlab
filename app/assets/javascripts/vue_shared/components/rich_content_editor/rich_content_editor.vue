@@ -75,7 +75,11 @@ export default {
   methods: {
     addListeners(editorApi) {
       addCustomEventListener(editorApi, CUSTOM_EVENTS.openAddImageModal, this.onOpenAddImageModal);
-      addCustomEventListener(editorApi, CUSTOM_EVENTS.openInsertVideoModal, this.onOpenInsertVideoModal);
+      addCustomEventListener(
+        editorApi,
+        CUSTOM_EVENTS.openInsertVideoModal,
+        this.onOpenInsertVideoModal,
+      );
 
       editorApi.eventManager.listen('changeMode', this.onChangeMode);
     },
