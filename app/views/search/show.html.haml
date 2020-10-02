@@ -6,13 +6,14 @@
   - page_description(_("%{count} %{scope} for term '%{term}'") % { count: @search_results.formatted_count(@scope), scope: @scope, term: @search_term })
   - page_card_attributes("Namespace" => @group&.full_path, "Project" => @project&.full_path)
 
-.page-title-holder.d-sm-flex.align-items-sm-center
-  %h1.page-title<
-    = _('Search')
-  = render_if_exists 'search/form_elasticsearch', attrs: { class: 'ml-sm-auto' }
+#js-search-app{ 'v-cloak': true, data: { scope: @scope } }
+  .page-title-holder.d-sm-flex.align-items-sm-center
+    %h1.page-title<
+      = _('Search')
+    = render_if_exists 'search/form_elasticsearch', attrs: { class: 'ml-sm-auto' }
 
-.gl-mt-3
-  = render 'search/form'
-- if @search_term
-  = render 'search/category'
-  = render 'search/results'
+  .gl-mt-3
+    = render 'search/form'
+  - if @search_term
+    = render 'search/category'
+    = render 'search/results'
