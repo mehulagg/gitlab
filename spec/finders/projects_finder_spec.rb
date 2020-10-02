@@ -346,19 +346,19 @@ RSpec.describe ProjectsFinder, :do_not_mock_admin_mode do
       context 'order by released_at' do
         let(:params) { { order_by: 'name' } }
 
-        it { is_expected.to eq([shared_project, private_project, internal_project, public_project) }
+        it { is_expected.to eq([shared_project, private_project, internal_project, public_project]) }
       end
     end
 
     context 'with sort' do
       context 'by default is ascending' do
-        it { is_expected.to eq([shared_project, private_project, internal_project, public_project.reverse) }
+        it { is_expected.to eq([shared_project, private_project, internal_project, public_project].reverse) }
       end
 
       context 'can sort descended' do
         let(:params) { { sort: 'desc' } }
 
-        it { is_expected.to eq([shared_project, private_project, internal_project, public_project) }
+        it { is_expected.to eq([shared_project, private_project, internal_project, public_project]) }
       end
     end
   end
