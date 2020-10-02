@@ -10,6 +10,7 @@ RSpec.describe API::Releases do
   let(:guest) { create(:user) }
   let(:non_project_member) { create(:user) }
   let(:commit) { create(:commit, project: project) }
+  let(:user) { maintainer }
 
   before do
     project.add_maintainer(maintainer)
@@ -21,12 +22,40 @@ RSpec.describe API::Releases do
     project.repository.add_tag(maintainer, 'v0.2', commit.id)
   end
 
+  shared_examples_for 'accepts the request' do |status_code|
+    specify do
+      expect(response).to have_gitlab_http_status(status_code)
+    end
+  end
+
+  shared_examples_for 'bad request' do |error_message|
+    specify do
+      expect(response).to have_gitlab_http_status(:bad_request)
+
+      expect(json_response['message']).to eq(error_message)
+    end
+  end
+
+  shared_examples_for 'adds the milestones' do |milestone_titles|
+    specify do
+      expect(json_response['milestones'].map {|m| m['title']}).to match_array(milestone_titles)
+    end
+  end
+
+  shared_examples_for 'has no milestones' do
+    specify do
+      expect(json_response['milestones']).to be_nil
+    end
+  end
+
   describe 'GET /projects/:id/releases' do
+    subject { get api("/projects/#{project.id}/releases", user) }
+
     context 'when there are two releases' do
       let!(:release_1) do
         create(:release,
                project: project,
-               tag: 'v0.1',
+               tag: 'v0.1a',
                author: maintainer,
                released_at: 2.days.ago)
       end
@@ -39,29 +68,23 @@ RSpec.describe API::Releases do
                released_at: 1.day.ago)
       end
 
-      it 'returns 200 HTTP status' do
-        get api("/projects/#{project.id}/releases", maintainer)
-
-        expect(response).to have_gitlab_http_status(:ok)
+      before do
+        subject
       end
 
-      it 'returns releases ordered by released_at' do
-        get api("/projects/#{project.id}/releases", maintainer)
+      it_behaves_like 'accepts the request', :ok
 
+      it 'returns releases ordered by released_at' do
         expect(json_response.count).to eq(2)
         expect(json_response.first['tag_name']).to eq(release_2.tag)
         expect(json_response.second['tag_name']).to eq(release_1.tag)
       end
 
       it 'matches response schema' do
-        get api("/projects/#{project.id}/releases", maintainer)
-
         expect(response).to match_response_schema('public_api/v4/releases')
       end
 
       it 'returns rendered helper paths' do
-        get api("/projects/#{project.id}/releases", maintainer)
-
         expect(json_response.first['commit_path']).to eq("/#{release_2.project.full_path}/-/commit/#{release_2.commit.id}")
         expect(json_response.first['tag_path']).to eq("/#{release_2.project.full_path}/-/tags/#{release_2.tag}")
         expect(json_response.second['commit_path']).to eq("/#{release_1.project.full_path}/-/commit/#{release_1.commit.id}")
@@ -69,8 +92,6 @@ RSpec.describe API::Releases do
       end
 
       it 'returns the merge requests and issues links, with correct query' do
-        get api("/projects/#{project.id}/releases", maintainer)
-
         links = json_response.first['_links']
         release = json_response.first['tag_name']
         expected_query = "release_tag=#{release}&scope=all&state=opened"
@@ -85,38 +106,39 @@ RSpec.describe API::Releases do
       end
     end
 
-    it 'returns an upcoming_release status for a future release' do
-      tomorrow = Time.now.utc + 1.day
-      create(:release, project: project, tag: 'v0.1', author: maintainer, released_at: tomorrow)
+    context 'upcoming releases' do
+      it 'returns an upcoming_release status for a future release' do
+        tomorrow = Time.now.utc + 1.day
+        create(:release, project: project, tag: 'v0.1', author: maintainer, released_at: tomorrow)
 
-      get api("/projects/#{project.id}/releases", maintainer)
+        subject
 
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response.first['upcoming_release']).to eq(true)
-    end
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.first['upcoming_release']).to eq(true)
+      end
 
-    it 'returns an upcoming_release status for a past release' do
-      yesterday = Time.now.utc - 1.day
-      create(:release, project: project, tag: 'v0.1', author: maintainer, released_at: yesterday)
+      it 'returns an upcoming_release status for a past release' do
+        yesterday = Time.now.utc - 1.day
+        create(:release, project: project, tag: 'v0.1', author: maintainer, released_at: yesterday)
 
-      get api("/projects/#{project.id}/releases", maintainer)
+        subject
 
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response.first['upcoming_release']).to eq(false)
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.first['upcoming_release']).to eq(false)
+      end
     end
 
     it 'avoids N+1 queries' do
       create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
 
       control_count = ActiveRecord::QueryRecorder.new do
-        get api("/projects/#{project.id}/releases", maintainer)
+        subject
       end.count
 
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
-      create(:release, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
+      create_list(:release, 2, :with_evidence, project: project, tag: 'v0.1', author: maintainer)
 
       expect do
-        get api("/projects/#{project.id}/releases", maintainer)
+        subject
       end.not_to exceed_query_limit(control_count)
     end
 
@@ -124,7 +146,7 @@ RSpec.describe API::Releases do
       let!(:release) { create(:release, project: project, tag: 'v1.1.5') }
 
       it 'returns the tag' do
-        get api("/projects/#{project.id}/releases", maintainer)
+        subject
 
         expect(json_response.count).to eq(1)
         expect(json_response.first['tag_name']).to eq('v1.1.5')
@@ -136,13 +158,14 @@ RSpec.describe API::Releases do
       let!(:release) { create(:release, project: project, tag: 'debian/2.4.0-1', description: "debian/2.4.0-1") }
 
       it 'returns 200 HTTP status' do
-        get api("/projects/#{project.id}/releases", maintainer)
+        subject
 
         expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
     context 'when user is a guest' do
+      let(:user) { guest }
       let!(:release) do
         create(:release,
                project: project,
@@ -152,13 +175,13 @@ RSpec.describe API::Releases do
       end
 
       it 'responds 200 OK' do
-        get api("/projects/#{project.id}/releases", guest)
+        subject
 
         expect(response).to have_gitlab_http_status(:ok)
       end
 
       it "does not expose tag, commit, source code or helper paths" do
-        get api("/projects/#{project.id}/releases", guest)
+        subject
 
         expect(response).to match_response_schema('public_api/v4/release/releases_for_guest')
         expect(json_response[0]['assets']['count']).to eq(release.links.count)
@@ -170,13 +193,13 @@ RSpec.describe API::Releases do
         let(:project) { create(:project, :repository, :public) }
 
         it 'responds 200 OK' do
-          get api("/projects/#{project.id}/releases", guest)
+          subject
 
           expect(response).to have_gitlab_http_status(:ok)
         end
 
         it "exposes tag, commit, source code and helper paths" do
-          get api("/projects/#{project.id}/releases", guest)
+          subject
 
           expect(response).to match_response_schema('public_api/v4/releases')
           expect(json_response.first['assets']['count']).to eq(release.links.count + release.sources.count)
@@ -187,8 +210,10 @@ RSpec.describe API::Releases do
     end
 
     context 'when user is not a project member' do
+      let(:user) { non_project_member }
+
       it 'cannot find the project' do
-        get api("/projects/#{project.id}/releases", non_project_member)
+        subject
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -197,7 +222,7 @@ RSpec.describe API::Releases do
         let(:project) { create(:project, :repository, :public) }
 
         it 'allows the request' do
-          get api("/projects/#{project.id}/releases", non_project_member)
+          subject
 
           expect(response).to have_gitlab_http_status(:ok)
         end
@@ -206,6 +231,8 @@ RSpec.describe API::Releases do
   end
 
   describe 'GET /projects/:id/releases/:tag_name' do
+    subject { get api("/projects/#{project.id}/releases/v0.1", user) }
+
     context 'when there is a release' do
       let!(:release) do
         create(:release,
@@ -217,13 +244,13 @@ RSpec.describe API::Releases do
       end
 
       it 'returns 200 HTTP status' do
-        get api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
 
         expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'returns a release entry' do
-        get api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
 
         expect(json_response['tag_name']).to eq(release.tag)
         expect(json_response['description']).to eq('This is v0.1')
@@ -235,13 +262,13 @@ RSpec.describe API::Releases do
       end
 
       it 'matches response schema' do
-        get api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
 
         expect(response).to match_response_schema('public_api/v4/release')
       end
 
       it 'contains source information as assets' do
-        get api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
 
         expect(json_response['assets']['sources'].map { |h| h['format'] })
           .to match_array(release.sources.map(&:format))
@@ -253,14 +280,14 @@ RSpec.describe API::Releases do
         let!(:evidence) { create(:evidence, release: release) }
 
         it 'returns the evidence' do
-          get api("/projects/#{project.id}/releases/v0.1", maintainer)
+          subject
 
           expect(json_response['evidences'].count).to eq(1)
         end
 
         it '#collected_at' do
           travel_to(Time.now.round) do
-            get api("/projects/#{project.id}/releases/v0.1", maintainer)
+            subject
 
             expect(json_response['evidences'].first['collected_at'].to_datetime.to_i).to be_within(1.minute).of(release.evidences.first.created_at.to_i)
           end
@@ -278,7 +305,7 @@ RSpec.describe API::Releases do
         let(:url) { 'https://my-external-hosting.example.com/scrambled-url/app.zip' }
 
         it 'contains link information as assets' do
-          get api("/projects/#{project.id}/releases/v0.1", maintainer)
+          subject
 
           expect(json_response['assets']['links'].count).to eq(1)
           expect(json_response['assets']['links'].first['id']).to eq(link.id)
@@ -297,7 +324,7 @@ RSpec.describe API::Releases do
           end
 
           it 'has external false' do
-            get api("/projects/#{project.id}/releases/v0.1", maintainer)
+            subject
 
             expect(json_response['assets']['links'].first['external'])
               .to be_falsy
@@ -306,8 +333,10 @@ RSpec.describe API::Releases do
       end
 
       context 'when user is a guest' do
+        let(:user) { guest }
+
         it 'responds 403 Forbidden' do
-          get api("/projects/#{project.id}/releases/v0.1", guest)
+          subject
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -316,7 +345,7 @@ RSpec.describe API::Releases do
           let(:project) { create(:project, :repository, :public) }
 
           it 'responds 200 OK' do
-            get api("/projects/#{project.id}/releases/v0.1", guest)
+            subject
 
             expect(response).to have_gitlab_http_status(:ok)
           end
@@ -327,7 +356,7 @@ RSpec.describe API::Releases do
                    tag: 'v0.1',
                    author: maintainer,
                    created_at: 2.days.ago)
-            get api("/projects/#{project.id}/releases/v0.1", guest)
+            subject
 
             expect(response).to match_response_schema('public_api/v4/release')
           end
@@ -344,10 +373,11 @@ RSpec.describe API::Releases do
     end
 
     context 'when user is not a project member' do
+      let(:user) { non_project_member }
       let!(:release) { create(:release, tag: 'v0.1', project: project) }
 
       it 'cannot find the project' do
-        get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+        subject
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -356,7 +386,7 @@ RSpec.describe API::Releases do
         let(:project) { create(:project, :repository, :public) }
 
         it 'allows the request' do
-          get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+          subject
 
           expect(response).to have_gitlab_http_status(:ok)
         end
@@ -369,13 +399,13 @@ RSpec.describe API::Releases do
           let(:milestone) { create(:milestone, project: project) }
 
           it 'matches schema' do
-            get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+            subject
 
             expect(response).to match_response_schema('public_api/v4/release')
           end
 
           it 'exposes milestones' do
-            get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+            subject
 
             expect(json_response['milestones'].first['title']).to eq(milestone.title)
           end
@@ -384,7 +414,7 @@ RSpec.describe API::Releases do
             create_list(:issue, 2, milestone: milestone, project: project)
             create_list(:issue, 3, :closed, milestone: milestone, project: project)
 
-            get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+            subject
 
             issue_stats = json_response['milestones'].first["issue_stats"]
             expect(issue_stats["total"]).to eq(5)
@@ -395,7 +425,7 @@ RSpec.describe API::Releases do
             let!(:project) { create(:project, :repository, :public, :issues_private, :merge_requests_private) }
 
             it 'does not expose milestones' do
-              get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+              subject
 
               expect(json_response['milestones']).to be_nil
             end
@@ -405,7 +435,7 @@ RSpec.describe API::Releases do
             let!(:project) { create(:project, :repository, :public, :issues_private) }
 
             it 'exposes milestones' do
-              get api("/projects/#{project.id}/releases/v0.1", non_project_member)
+              subject
 
               expect(json_response['milestones'].first['title']).to eq(milestone.title)
             end
@@ -416,6 +446,8 @@ RSpec.describe API::Releases do
   end
 
   describe 'POST /projects/:id/releases' do
+    subject { post api("/projects/#{project.id}/releases", user), params: params }
+
     let(:params) do
       {
         name: 'New release',
@@ -435,14 +467,14 @@ RSpec.describe API::Releases do
     end
 
     it 'accepts the request' do
-      post api("/projects/#{project.id}/releases", maintainer), params: params
+      subject
 
       expect(response).to have_gitlab_http_status(:created)
     end
 
     it 'creates a new release' do
       expect do
-        post api("/projects/#{project.id}/releases", maintainer), params: params
+        subject
       end.to change { Release.count }.by(1)
 
       release = project.releases.last
@@ -532,17 +564,20 @@ RSpec.describe API::Releases do
     end
 
     context 'when user is a reporter' do
+      let(:user) { reporter }
+
       it 'forbids the request' do
-        post api("/projects/#{project.id}/releases", reporter), params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
     context 'when user is not a project member' do
+      let(:user) { non_project_member }
+
       it 'forbids the request' do
-        post api("/projects/#{project.id}/releases", non_project_member),
-             params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -551,8 +586,7 @@ RSpec.describe API::Releases do
         let(:project) { create(:project, :repository, :public) }
 
         it 'forbids the request' do
-          post api("/projects/#{project.id}/releases", non_project_member),
-               params: params
+          subject
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
@@ -598,7 +632,7 @@ RSpec.describe API::Releases do
           end
         end
 
-        context 'when create two assets' do
+        context 'when creating two assets' do
           let(:params) do
             base_params.merge({
               assets: {
@@ -704,7 +738,7 @@ RSpec.describe API::Releases do
 
       it 'creates a new tag' do
         expect do
-          post api("/projects/#{project.id}/releases", maintainer), params: params
+          subject
         end.to change { Project.find_by_id(project.id).repository.tag_count }.by(1)
 
         expect(project.repository.find_tag('v4.0').dereferenced_target.id)
@@ -713,7 +747,7 @@ RSpec.describe API::Releases do
 
       it 'creates a new release' do
         expect do
-          post api("/projects/#{project.id}/releases", maintainer), params: params
+          subject
         end.to change { Release.count }.by(1)
 
         expect(project.releases.last.name).to eq('Android ~ Ice Cream Sandwich ~')
@@ -728,7 +762,7 @@ RSpec.describe API::Releases do
         let(:tag_name) { 'HEAD' }
 
         it 'returns a 400 error as failure on tag creation' do
-          post api("/projects/#{project.id}/releases", maintainer), params: params
+          subject
 
           expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response['message']).to eq('Tag name invalid')
@@ -739,7 +773,7 @@ RSpec.describe API::Releases do
         let(:tag_name) { '' }
 
         it 'returns a 400 error as failure on tag creation' do
-          post api("/projects/#{project.id}/releases", maintainer), params: params
+          subject
 
           expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response['message']).to eq('Tag name invalid')
@@ -753,15 +787,64 @@ RSpec.describe API::Releases do
       end
 
       it 'returns an error as conflicted request' do
-        post api("/projects/#{project.id}/releases", maintainer), params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:conflict)
+      end
+    end
+
+    context 'with milestones' do
+      before do
+        params.merge!(milestone_params)
+
+        subject
+      end
+
+      context 'with a project milestone' do
+        let(:milestone) { create(:milestone, project: project, title: 'v1.0') }
+        let(:milestone_params) { { milestones: [milestone.title] } }
+
+        it_behaves_like 'accepts the request', :created
+
+        it_behaves_like 'adds the milestones', ['v1.0']
+      end
+
+      context 'with multiple milestones' do
+        let(:milestone) { create(:milestone, project: project, title: 'v1.0') }
+        let(:milestone2) { create(:milestone, project: project, title: 'm2') }
+        let(:milestone_params) { { milestones: [milestone.title, milestone2.title] } }
+
+        it_behaves_like 'accepts the request', :created
+
+        it_behaves_like 'adds the milestones', ['v1.0', 'm2']
+      end
+
+      context 'with an empty milestone' do
+        let(:milestone_params) { { milestones: [] } }
+
+        it_behaves_like 'accepts the request', :created
+
+        it_behaves_like 'has no milestones'
+      end
+
+      context 'with a non-existant milestone' do
+        let(:milestone_params) { { milestones: ['xyz'] } }
+
+        it_behaves_like 'bad request', "Milestone(s) not found: xyz"
+      end
+
+      context 'with a milestone from a different project' do
+        let(:milestone) { create(:milestone, title: 'v1.0') }
+        let(:milestone_params) { { milestones: [milestone.title] } }
+
+        it_behaves_like 'bad request', "Milestone(s) not found: v1.0"
       end
     end
   end
 
   describe 'PUT /projects/:id/releases/:tag_name' do
     let(:params) { { description: 'Best release ever!' } }
+    subject { put api("/projects/#{project.id}/releases/v0.1", user), params: params }
 
     let!(:release) do
       create(:release,
@@ -773,19 +856,19 @@ RSpec.describe API::Releases do
     end
 
     it 'accepts the request' do
-      put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+      subject
 
       expect(response).to have_gitlab_http_status(:ok)
     end
 
     it 'updates the description' do
-      put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+      subject
 
       expect(project.releases.last.description).to eq('Best release ever!')
     end
 
     it 'does not change other attributes' do
-      put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+      subject
 
       expect(project.releases.last.tag).to eq('v0.1')
       expect(project.releases.last.name).to eq('New release')
@@ -793,7 +876,7 @@ RSpec.describe API::Releases do
     end
 
     it 'matches response schema' do
-      put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+      subject
 
       expect(response).to match_response_schema('public_api/v4/release')
     end
@@ -810,7 +893,7 @@ RSpec.describe API::Releases do
       let(:params) { { sha: 'xxx' } }
 
       it 'does not allow the request' do
-        put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
@@ -820,7 +903,7 @@ RSpec.describe API::Releases do
       let(:params) { {} }
 
       it 'does not allow the request' do
-        put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:bad_request)
       end
@@ -830,24 +913,27 @@ RSpec.describe API::Releases do
       let!(:release) { }
 
       it 'forbids the request' do
-        put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
     context 'when user is a reporter' do
+      let(:user) { reporter }
+
       it 'forbids the request' do
-        put api("/projects/#{project.id}/releases/v0.1", reporter), params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
     context 'when user is not a project member' do
+      let(:user) { non_project_member }
+
       it 'forbids the request' do
-        put api("/projects/#{project.id}/releases/v0.1", non_project_member),
-             params: params
+        subject
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -856,10 +942,109 @@ RSpec.describe API::Releases do
         let(:project) { create(:project, :repository, :public) }
 
         it 'forbids the request' do
-          put api("/projects/#{project.id}/releases/v0.1", non_project_member),
-               params: params
+          subject
 
           expect(response).to have_gitlab_http_status(:forbidden)
+        end
+      end
+    end
+
+    context 'with milestones' do
+      subject { put api("/projects/#{project.id}/releases/v0.1", maintainer), params: params }
+
+      context 'when a milestone is passed in' do
+        let(:milestone) { create(:milestone, project: project, title: 'v1.0') }
+        let(:returned_milestones) { json_response['milestones'].map {|m| m['title']} }
+        let(:params) { { milestones: [milestone_title] } }
+
+        before do
+          release.milestones << milestone
+        end
+
+        context 'a different milestone' do
+          let(:milestone_title) { 'v2.0' }
+          let!(:milestone2) { create(:milestone, project: project, title: milestone_title) }
+
+          it 'accepts the request' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+
+          it 'updates the milestone' do
+            subject
+
+            expect(json_response['milestones'].first['title']).to eq(milestone_title)
+          end
+        end
+
+        context 'an identical milestone' do
+          let(:milestone_title) { 'v1.0' }
+
+          it 'accepts the request' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+
+          it "does not change the milestone" do
+            subject
+
+            expect(json_response['milestones'].first['title']).to eq(milestone_title)
+          end
+        end
+
+        context 'an empty milestone' do
+          let(:milestone_title) { nil }
+
+          it 'accepts the request' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+
+          it 'removes the milestone' do
+            subject
+
+            expect(json_response['milestones']).to be_nil
+          end
+        end
+
+        context 'multiple milestones' do
+          context 'with one new' do
+            let!(:milestone2) { create(:milestone, project: project, title: 'milestone2') }
+            let(:params) { { milestones: [milestone.title, milestone2.title] } }
+
+            it 'accepts the request' do
+              subject
+
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+
+            it 'adds the new milestone' do
+              subject
+
+              expect(json_response['milestones'].map {|m| m['title']}).to match_array([milestone.title, milestone2.title])
+            end
+          end
+
+          context 'with all new' do
+            let!(:milestone2) { create(:milestone, project: project, title: 'milestone2') }
+            let!(:milestone3) { create(:milestone, project: project, title: 'milestone3') }
+            let(:milestone_params) { { milestones: [milestone2.title, milestone3.title] } }
+
+            it 'accepts the request' do
+              subject
+
+              expect(response).to have_gitlab_http_status(:ok)
+            end
+
+            it 'replaces with the 2 new milestones' do
+              subject
+
+              expect(returned_milestones).to match_array([milestone2.title, milestone3.title])
+            end
+          end
         end
       end
     end
@@ -874,21 +1059,23 @@ RSpec.describe API::Releases do
              description: 'Super nice release')
     end
 
+    subject { delete api("/projects/#{project.id}/releases/v0.1", user) }
+
     it 'accepts the request' do
-      delete api("/projects/#{project.id}/releases/v0.1", maintainer)
+      subject
 
       expect(response).to have_gitlab_http_status(:ok)
     end
 
     it 'destroys the release' do
       expect do
-        delete api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
       end.to change { Release.count }.by(-1)
     end
 
     it 'does not remove a tag in repository' do
       expect do
-        delete api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
       end.not_to change { Project.find_by_id(project.id).repository.tag_count }
     end
 
@@ -902,23 +1089,27 @@ RSpec.describe API::Releases do
       let!(:release) { }
 
       it 'forbids the request' do
-        delete api("/projects/#{project.id}/releases/v0.1", maintainer)
+        subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
     context 'when user is a reporter' do
+      let(:user) { reporter }
+
       it 'forbids the request' do
-        delete api("/projects/#{project.id}/releases/v0.1", reporter)
+        subject
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
     context 'when user is not a project member' do
+      let(:user) { non_project_member }
+
       it 'forbids the request' do
-        delete api("/projects/#{project.id}/releases/v0.1", non_project_member)
+        subject
 
         expect(response).to have_gitlab_http_status(:not_found)
       end
@@ -927,7 +1118,7 @@ RSpec.describe API::Releases do
         let(:project) { create(:project, :repository, :public) }
 
         it 'forbids the request' do
-          delete api("/projects/#{project.id}/releases/v0.1", non_project_member)
+          subject
 
           expect(response).to have_gitlab_http_status(:forbidden)
         end
