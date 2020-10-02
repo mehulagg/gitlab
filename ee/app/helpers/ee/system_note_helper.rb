@@ -5,8 +5,6 @@ module EE
     extend ::Gitlab::Utils::Override
 
     EE_ICON_NAMES_BY_ACTION = {
-      'approved' => 'approval',
-      'unapproved' => 'unapproval',
       'relate' => 'link',
       'unrelate' => 'unlink',
       'epic_issue_added' => 'issues',

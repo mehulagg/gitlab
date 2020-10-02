@@ -1,7 +1,0 @@
----
-name: elasticsearch_indexes_namespace_cache
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41274
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/244847
-group: group::global search
-type: development
-default_enabled: true

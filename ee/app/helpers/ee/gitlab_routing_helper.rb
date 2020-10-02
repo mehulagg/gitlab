@@ -26,10 +26,6 @@ module EE
       end
     end
 
-    def epic_path(entity, *args)
-      group_epic_path(entity.group, entity, *args)
-    end
-
     def license_management_api_url(project)
       expose_path(api_v4_projects_managed_licenses_path(id: project.id))
     end
@@ -40,6 +36,10 @@ module EE
 
     def vulnerability_path(entity, *args)
       project_security_vulnerability_path(entity.project, entity, *args)
+    end
+
+    def vulnerability_url(vulnerability)
+      ::Gitlab::UrlBuilder.build(vulnerability)
     end
 
     def project_vulnerability_path(project, vulnerability, *args)
@@ -58,6 +58,11 @@ module EE
         options = Rails.application.routes.default_url_options.merge(path: path)
         ActionDispatch::Http::URL.full_url_for(options)
       end
+    end
+
+    url_helper :epic
+    def epic_path(entity, *args)
+      group_epic_path(entity.group, entity, *args)
     end
 
     url_helper :user_group_saml_omniauth_metadata

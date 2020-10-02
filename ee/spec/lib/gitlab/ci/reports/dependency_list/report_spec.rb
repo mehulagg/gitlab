@@ -61,7 +61,7 @@ RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
     let(:license) { build(:ci_reports_license_scanning_report, :mit).licenses.first }
 
     before do
-      license.add_dependency(name_of_dependency_with_license)
+      license.add_dependency(name: name_of_dependency_with_license)
       report.add_dependency(dependency)
       report.apply_license(license)
     end

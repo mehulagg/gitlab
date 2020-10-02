@@ -144,13 +144,13 @@ export default {
     </div>
     <div class="ci-table" role="grid">
       <div
-        class="gl-responsive-table-row table-row-header bg-gray-light pl-2 border-top mt-3 lh-100"
+        class="gl-responsive-table-row table-row-header gl-pl-3 gl-border-t-solid gl-border-t-1 gl-border-gray-100 gl-mt-5 gl-line-height-normal gl-text-black-normal gl-font-base"
         role="row"
       >
-        <div class="table-section section-70 font-weight-bold" role="columnheader">
+        <div class="table-section section-70 gl-font-weight-bold" role="columnheader">
           {{ __('Project') }}
         </div>
-        <div class="table-section section-30 font-weight-bold" role="columnheader">
+        <div class="table-section section-30 gl-font-weight-bold" role="columnheader">
           {{ __('Usage') }}
         </div>
       </div>

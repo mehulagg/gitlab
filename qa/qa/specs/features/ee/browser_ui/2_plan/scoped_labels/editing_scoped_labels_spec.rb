@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  RSpec.describe 'Plan' do
     describe 'Editing scoped labels on issues' do
       let(:initial_label) { 'animal::fox' }
       let(:new_label_same_scope) { 'animal::dolphin' }
@@ -42,15 +42,15 @@ module QA
             new_label_different_scope_multi_colon
           ])
 
-          show.select_all_activities_filter
+          aggregate_failures do
+            expect(show).to have_label(new_label_same_scope)
+            expect(show).to have_label(new_label_different_scope)
+            expect(show).to have_label(new_label_same_scope_multi_colon)
+            expect(show).to have_label(new_label_different_scope_multi_colon)
 
-          expect(show).to have_label(new_label_same_scope)
-          expect(show).to have_label(new_label_different_scope)
-          expect(show).to have_label('group::car::porsche')
-          expect(show).to have_label('group::truck::mercedes-bens')
-
-          expect(show).not_to have_label(initial_label)
-          expect(show).not_to have_label('group::car::ferrari')
+            expect(show).not_to have_label(initial_label)
+            expect(show).not_to have_label(initial_label_multi_colon)
+          end
         end
       end
     end

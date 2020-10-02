@@ -47,7 +47,7 @@ export default {
 
 <template>
   <div>
-    <gl-dropdown :text="selectedOption.text" class="w-100 flex-column flex-lg-row form-group">
+    <gl-dropdown :text="selectedOption.text" class="w-100 flex-column flex-lg-row gl-mb-5">
       <gl-dropdown-section-header> {{ $options.SORTING_TITLE }}</gl-dropdown-section-header>
       <gl-dropdown-item
         v-for="option in $options.SORTING_OPTIONS"

@@ -138,6 +138,7 @@ module Gitlab
             pages_domains: count(PagesDomain),
             pool_repositories: count(PoolRepository),
             projects: count(Project),
+            projects_creating_incidents: distinct_count(Issue.incident, :project_id),
             projects_imported_from_github: count(Project.where(import_type: 'github')),
             projects_with_repositories_enabled: count(ProjectFeature.where('repository_access_level > ?', ProjectFeature::DISABLED)),
             projects_with_error_tracking_enabled: count(::ErrorTracking::ProjectErrorTrackingSetting.where(enabled: true)),
@@ -166,8 +167,7 @@ module Gitlab
             user_preferences_usage,
             ingress_modsecurity_usage,
             container_expiration_policies_usage,
-            service_desk_counts,
-            snowplow_event_counts
+            service_desk_counts
           ).tap do |data|
             data[:snippets] = data[:personal_snippets] + data[:project_snippets]
           end
@@ -175,7 +175,7 @@ module Gitlab
       end
       # rubocop: enable Metrics/AbcSize
 
-      def snowplow_event_counts(time_period: {})
+      def snowplow_event_counts(time_period)
         return {} unless report_snowplow_events?
 
         {
@@ -445,8 +445,11 @@ module Gitlab
       # rubocop: enable UsageData/LargeTable
       # rubocop: enable CodeReuse/ActiveRecord
 
+      # augmented in EE
       def user_preferences_usage
-        {} # augmented in EE
+        {
+          user_preferences_user_gitpod_enabled: count(UserPreference.with_user.gitpod_enabled.merge(User.active))
+        }
       end
 
       def merge_requests_users(time_period)
@@ -470,7 +473,7 @@ module Gitlab
       end
 
       def last_28_days_time_period(column: :created_at)
-        { column => 28.days.ago..Time.current }
+        { column => 30.days.ago..2.days.ago }
       end
 
       # Source: https://gitlab.com/gitlab-data/analytics/blob/master/transform/snowflake-dbt/data/ping_metrics_to_stage_mapping_data.csv
@@ -699,10 +702,10 @@ module Gitlab
         counter = Gitlab::UsageDataCounters::EditorUniqueCounter
 
         {
-          action_monthly_active_users_web_ide_edit: redis_usage_data { counter.count_web_ide_edit_actions(date_range) },
-          action_monthly_active_users_sfe_edit: redis_usage_data { counter.count_sfe_edit_actions(date_range) },
-          action_monthly_active_users_snippet_editor_edit: redis_usage_data { counter.count_snippet_editor_edit_actions(date_range) },
-          action_monthly_active_users_ide_edit: redis_usage_data { counter.count_edit_using_editor(date_range) }
+          action_monthly_active_users_web_ide_edit: redis_usage_data { counter.count_web_ide_edit_actions(**date_range) },
+          action_monthly_active_users_sfe_edit: redis_usage_data { counter.count_sfe_edit_actions(**date_range) },
+          action_monthly_active_users_snippet_editor_edit: redis_usage_data { counter.count_snippet_editor_edit_actions(**date_range) },
+          action_monthly_active_users_ide_edit: redis_usage_data { counter.count_edit_using_editor(**date_range) }
         }
       end
 

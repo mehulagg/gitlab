@@ -13,6 +13,7 @@ module Geo
     end
 
     def handle_after_create_commit
+      return false unless Gitlab::Geo.enabled?
       return unless self.class.enabled?
 
       publish(:created, **created_params)

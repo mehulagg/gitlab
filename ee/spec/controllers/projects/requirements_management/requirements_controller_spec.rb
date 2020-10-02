@@ -26,18 +26,6 @@ RSpec.describe Projects::RequirementsManagement::RequirementsController do
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template(:index)
         end
-
-        context 'when requirements_management flag is disabled' do
-          before do
-            stub_feature_flags(requirements_management: false)
-          end
-
-          it 'returns 404' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
-        end
       end
 
       context 'when feature is not available' do

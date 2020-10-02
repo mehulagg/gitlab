@@ -16,7 +16,7 @@ module EE
               description: 'Users who approved the merge request'
 
         def approved_by
-          object.approver_users
+          object.approved_by_users
         end
       end
     end

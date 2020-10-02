@@ -33,6 +33,7 @@ class Project < ApplicationRecord
   include FromUnion
   include IgnorableColumns
   include Integration
+  include EachBatch
   extend Gitlab::Cache::RequestCache
 
   extend Gitlab::ConfigHelper
@@ -336,6 +337,8 @@ class Project < ApplicationRecord
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
 
+  has_many :terraform_states, class_name: 'Terraform::State', inverse_of: :project
+
   # GitLab Pages
   has_many :pages_domains
   has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
@@ -432,6 +435,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_by_group, if: :should_validate_visibility_level?
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
+  validate :changing_shared_runners_enabled_is_allowed
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
@@ -1183,6 +1187,15 @@ class Project < ApplicationRecord
 
     unless pages_domains.all?(&:https?)
       errors.add(:pages_https_only, _("cannot be enabled unless all domains have TLS certificates"))
+    end
+  end
+
+  def changing_shared_runners_enabled_is_allowed
+    return unless Feature.enabled?(:disable_shared_runners_on_group, default_enabled: true)
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
+
+    if shared_runners_enabled && group && group.shared_runners_setting == 'disabled_and_unoverridable'
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group does not allow it'))
     end
   end
 
@@ -2292,6 +2305,10 @@ class Project < ApplicationRecord
     []
   end
 
+  def mark_primary_write_location
+    # Overriden in EE
+  end
+
   def toggle_ci_cd_settings!(settings_attribute)
     ci_cd_settings.toggle!(settings_attribute)
   end
@@ -2501,6 +2518,11 @@ class Project < ApplicationRecord
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
   end
 
+  def feature_flags_client_token
+    instance = operations_feature_flags_client || create_operations_feature_flags_client!
+    instance.token
+  end
+
   private
 
   def find_service(services, name)
@@ -2509,10 +2531,10 @@ class Project < ApplicationRecord
 
   def build_from_instance_or_template(name)
     instance = find_service(services_instances, name)
-    return Service.build_from_integration(id, instance) if instance
+    return Service.build_from_integration(instance, project_id: id) if instance
 
     template = find_service(services_templates, name)
-    return Service.build_from_integration(id, template) if template
+    return Service.build_from_integration(template, project_id: id) if template
   end
 
   def services_templates

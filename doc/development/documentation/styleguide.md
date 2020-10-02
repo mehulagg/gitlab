@@ -251,7 +251,7 @@ The table below shows what kind of documentation goes where.
 | `doc/legal/`          | Legal documents about contributing to GitLab.                                                                                           |
 | `doc/install/`        | Contains instructions for installing GitLab.                                                                                            |
 | `doc/update/`         | Contains instructions for updating GitLab.                                                                                              |
-| `doc/topics/`         | Indexes per topic (`doc/topics/topic-name/index.md`): all resources for that topic.                                                     |
+| `doc/topics/`         | Indexes per topic (`doc/topics/topic_name/index.md`): all resources for that topic.                                                     |
 
 ### Work with directories and files
 
@@ -369,7 +369,7 @@ create an issue or an MR to propose a change to the user interface text.
   - milestones
   - reorder issues
   - runner, runners, shared runners
-  - a to-do, to-dos
+  - a to-do item, to dos
 - *Some features are capitalized*, typically nouns naming GitLab-specific
   capabilities or tools. For example:
   - GitLab CI/CD
@@ -418,8 +418,11 @@ We strive to create documentation that is inclusive. This section includes
 guidance and examples in the following categories:
 
 - [Gender-specific wording](#avoid-gender-specific-wording).
+  (Tested in [`InclusionGender.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionGender.yml).)
 - [Ableist language](#avoid-ableist-language).
+  (Tested in [`InclusionAbleism.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionAbleism.yml).)
 - [Cultural sensitivity](#culturally-sensitive-language).
+  (Tested in [`InclusionCultural.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionCultural.yml).)
 
 We write our developer documentation with inclusivity and diversity in mind. This
 page is not an exhaustive reference, but describes some general guidelines and
@@ -433,11 +436,13 @@ a gender-neutral pronoun.
 
 Avoid the use of gender-specific pronouns, unless referring to a specific person.
 
+<!-- vale gitlab.InclusionGender = NO -->
 | Use                               | Avoid                           |
 |-----------------------------------|---------------------------------|
 | People, humanity                  | Mankind                         |
 | GitLab Team Members               | Manpower                        |
 | You can install; They can install | He can install; She can install |
+<!-- vale gitlab.InclusionGender = YES -->
 
 If you need to set up [Fake user information](#fake-user-information), use
 diverse or non-gendered names with common surnames.
@@ -446,6 +451,7 @@ diverse or non-gendered names with common surnames.
 
 Avoid terms that are also used in negative stereotypes for different groups.
 
+<!-- vale gitlab.InclusionAbleism = NO -->
 | Use                    | Avoid                |
 |------------------------|----------------------|
 | Check for completeness | Sanity check         |
@@ -454,6 +460,7 @@ Avoid terms that are also used in negative stereotypes for different groups.
 | Placeholder variable   | Dummy variable       |
 | Active/Inactive        | Enabled/Disabled     |
 | On/Off                 | Enabled/Disabled     |
+<!-- vale gitlab.InclusionAbleism = YES -->
 
 Credit: [Avoid ableist language](https://developers.google.com/style/inclusive-documentation#ableist-language)
 in the Google Developer Style Guide.
@@ -464,10 +471,12 @@ Avoid terms that reflect negative cultural stereotypes and history. In most
 cases, you can replace terms such as `master` and `slave` with terms that are
 more precise and functional, such as `primary` and `secondary`.
 
+<!-- vale gitlab.InclusionCultural = NO -->
 | Use                  | Avoid                 |
 |----------------------|-----------------------|
 | Primary / secondary  | Master / slave        |
 | Allowlist / denylist | Blacklist / whitelist |
+<!-- vale gitlab.InclusionCultural = YES -->
 
 For more information see the following [Internet Draft specification](https://tools.ietf.org/html/draft-knodel-terminology-02).
 
@@ -892,8 +901,8 @@ search engine optimization (SEO), use the imperative, where possible.
 For guidelines on capitalizing headings, see the section on [capitalization](#capitalization).
 
 NOTE: **Note:**
-If you change an existing title, be careful. Any such changes may affect not
-only [links](#anchor-links) within the page, but may also affect links to the
+If you change an existing title, be careful. These changes might affect not
+only [links](#anchor-links) within the page, but might also affect links to the
 GitLab documentation from both the GitLab application and external sites.
 
 ### Anchor links
@@ -1438,9 +1447,9 @@ example:
 When you need to call special attention to particular sentences, use the
 following markup to create highlighted alert boxes.
 
-Note that the alert boxes only work for one paragraph only. Multiple paragraphs,
-lists, headers and so on, will not render correctly. For multiple lines, use
-[blockquotes](#blockquotes) instead.
+Alert boxes work for one paragraph only. Multiple paragraphs, lists, and headers
+won't render correctly. For multiple lines, use [blockquotes](#blockquotes)
+instead.
 
 Alert boxes render only on the GitLab documentation site (<https://docs.gitlab.com>).
 Within GitLab itself, they will appear as plain Markdown text (like the examples
@@ -1458,23 +1467,20 @@ guidelines, but for consistency you should try to use these values:
 
 ### Note
 
-Notes catch the eye of most readers, and therefore should be used very sparingly.
-In most cases, content considered for a note should be included:
+Notes indicate additional information that is of special use to the reader.
+Notes are most effective when used _sparingly_.
 
-- As just another sentence in the previous paragraph or the most-relevant
-  paragraph.
-- As its own standalone paragraph.
-- As content under a new subheading that introduces the topic, making it more
-  visible or findable.
+Try to avoid them. Too many notes can impact the scannability of a topic and
+create an overly busy page.
 
-#### When to use
+Instead of adding a note, try one of these alternatives:
 
-Use a note when there is a reason that most or all readers who browse the
-section should see the content. That is, if missed, it’s likely to cause major
-trouble for a minority of users or significant trouble for a majority of users.
+- Re-write the sentence as part of the most-relevant paragraph.
+- Put the information into its own standalone paragraph.
+- Put the content under a new subheading that introduces the topic, which makes
+  it more visible.
 
-Weigh the costs of distracting users to whom the content is not relevant against
-the cost of users missing the content if it were not expressed as a note.
+If you must use a note, use the following formatting:
 
 ```markdown
 NOTE: **Note:**

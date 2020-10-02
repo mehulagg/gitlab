@@ -1,19 +1,20 @@
 <script>
-import { GlIcon, GlPopover } from '@gitlab/ui';
+import { GlIcon, GlPopover, GlBadge } from '@gitlab/ui';
 
 export default {
   components: {
     GlIcon,
     GlPopover,
+    GlBadge,
   },
 };
 </script>
 
 <template>
   <div class="gl-display-inline-block">
-    <span class="gl-display-inline-block gl-rounded-lg gl-bg-blue-200 gl-text-blue-500 gl-px-3">
-      <gl-icon ref="badge" name="admin" />
-    </span>
+    <gl-badge ref="badge" variant="info">
+      <gl-icon name="admin" />
+    </gl-badge>
     <gl-popover
       ref="popover"
       :content="

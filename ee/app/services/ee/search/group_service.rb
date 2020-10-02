@@ -30,8 +30,17 @@ module EE
           elastic_projects,
           group: group,
           public_and_internal_projects: elastic_global,
-          filters: { state: params[:state] }
+          filters: { confidential: params[:confidential], state: params[:state] }
         )
+      end
+
+      override :allowed_scopes
+      def allowed_scopes
+        return super unless ::Feature.enabled?(:epics_search) && group.feature_available?(:epics)
+
+        strong_memoize(:ee_group_allowed_scopes) do
+          super + %w(epics)
+        end
       end
     end
   end

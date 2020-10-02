@@ -84,5 +84,8 @@ export const throughputTableData = [
     },
     commitCount: 1,
     userNotesCount: 0,
+    approvedBy: {
+      nodes: [],
+    },
   },
 ];

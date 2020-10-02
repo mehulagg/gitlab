@@ -11,13 +11,14 @@ module Gitlab
             report_data = parse_report(json_data)
             raise SecurityReportParserError, "Invalid report format" unless report_data.is_a?(Hash)
 
-            report.scanned_resources = create_scanned_resources(report_data.dig('scan', 'scanned_resources'))
-
             create_scanner(report, report_data.dig('scan', 'scanner'))
+            create_scan(report, report_data.dig('scan'))
 
             collate_remediations(report_data).each do |vulnerability|
               create_vulnerability(report, vulnerability, report_data["version"])
             end
+
+            report_data
           rescue JSON::ParserError
             raise SecurityReportParserError, 'JSON parsing failed'
           rescue => e
@@ -26,17 +27,6 @@ module Gitlab
           end
 
           protected
-
-          def create_scanned_resources(scanned_resources)
-            return [] unless scanned_resources
-
-            scanned_resources.map do |sr|
-              uri = URI.parse(sr['url'])
-              ::Gitlab::Ci::Reports::Security::ScannedResource.new(uri, sr['method'])
-            rescue URI::InvalidURIError
-              nil
-            end.compact
-          end
 
           def parse_report(json_data)
             Gitlab::Json.parse!(json_data)
@@ -64,7 +54,6 @@ module Gitlab
           end
 
           def create_vulnerability(report, data, version)
-            scanner = create_scanner(report, data['scanner'] || mutate_scanner_tool(data['tool']))
             identifiers = create_identifiers(report, data['identifiers'])
             report.add_finding(
               ::Gitlab::Ci::Reports::Security::Finding.new(
@@ -75,10 +64,17 @@ module Gitlab
                 location: create_location(data['location'] || {}),
                 severity: parse_severity_level(data['severity']&.downcase),
                 confidence: parse_confidence_level(data['confidence']&.downcase),
-                scanner: scanner,
+                scanner: create_scanner(report, data['scanner']),
+                scan: report&.scan,
                 identifiers: identifiers,
                 raw_metadata: data.to_json,
                 metadata_version: version))
+          end
+
+          def create_scan(report, scan_data)
+            return unless scan_data.is_a?(Hash)
+
+            report.scan = ::Gitlab::Ci::Reports::Security::Scan.new(scan_data)
           end
 
           def create_scanner(report, scanner)
@@ -108,11 +104,6 @@ module Gitlab
                 external_id: identifier['value'],
                 name: identifier['name'],
                 url: identifier['url']))
-          end
-
-          # TODO: this can be removed as of `12.0`
-          def mutate_scanner_tool(tool)
-            { 'id' => tool, 'name' => tool.capitalize } if tool
           end
 
           def parse_severity_level(input)

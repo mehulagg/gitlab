@@ -1,0 +1,5 @@
+---
+title: Preload epics in GraphQL group queries using Lookahead
+merge_request: 42874
+author:
+type: performance

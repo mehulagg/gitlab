@@ -2,7 +2,6 @@
 import produce from 'immer';
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
 import securityScannersQuery from '../graphql/project_security_scanners.graphql';
@@ -17,7 +16,6 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     projectFullPath: {
       type: String,
@@ -78,9 +76,6 @@ export default {
           pipelineRun: pipelineRun.map(translateScannerName),
         };
       },
-      skip() {
-        return !this.glFeatures.scannerAlerts;
-      },
     },
   },
   computed: {
@@ -112,9 +107,6 @@ export default {
         });
       }
     },
-    refetchVulnerabilities() {
-      this.$apollo.queries.vulnerabilities.refetch();
-    },
     handleSortChange({ sortBy, sortDesc }) {
       this.sortDirection = sortDesc ? 'desc' : 'asc';
       this.sortBy = sortBy;
@@ -144,7 +136,6 @@ export default {
       :filters="filters"
       :vulnerabilities="vulnerabilities"
       :security-scanners="securityScanners"
-      @refetch-vulnerabilities="refetchVulnerabilities"
       @sort-changed="handleSortChange"
     />
     <gl-intersection-observer

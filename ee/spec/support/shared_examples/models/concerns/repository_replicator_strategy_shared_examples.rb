@@ -53,7 +53,8 @@ RSpec.shared_examples 'a repository replicator' do
       end.to change { ::Geo::Event.count }.by(1)
 
       expect(::Geo::Event.last.attributes).to include(
-        "replicable_name" => replicator.replicable_name, "event_name" => "deleted", "payload" => { "model_record_id" => replicator.model_record.id })
+        "replicable_name" => replicator.replicable_name, "event_name" => "deleted")
+      expect(::Geo::Event.last.payload).to include({ "model_record_id" => replicator.model_record.id })
     end
 
     context 'when replication feature flag is disabled' do
@@ -66,6 +67,49 @@ RSpec.shared_examples 'a repository replicator' do
 
         replicator.handle_after_destroy
       end
+    end
+  end
+
+  describe 'updated event consumption' do
+    context 'in replicables_for_geo_node list' do
+      it 'runs SnippetRepositorySyncService service' do
+        model_record.save!
+
+        sync_service = double
+
+        expect(sync_service).to receive(:execute)
+
+        expect(::Geo::FrameworkRepositorySyncService)
+          .to receive(:new).with(replicator)
+                .and_return(sync_service)
+
+        replicator.consume(:updated)
+      end
+    end
+
+    context 'not in replicables_for_geo_node list' do
+      it 'runs SnippetRepositorySyncService service' do
+        expect(::Geo::FrameworkRepositorySyncService)
+          .not_to receive(:new)
+
+        replicator.consume(:updated)
+      end
+    end
+  end
+
+  describe 'deleted event consumption' do
+    it 'runs Geo::RepositoryRegistryRemovalService service' do
+      model_record.save!
+
+      sync_service = double
+
+      expect(sync_service).to receive(:execute)
+
+      expect(Geo::RepositoryRegistryRemovalService)
+        .to receive(:new).with(replicator, {})
+              .and_return(sync_service)
+
+      replicator.consume(:deleted)
     end
   end
 

@@ -39,7 +39,7 @@ RSpec.describe 'getting merge request listings (EE) nested in a project' do
     let(:requested_fields) { query_graphql_field(:approved_by, nil, query_graphql_field(:nodes, nil, [:username])) }
 
     it 'exposes approver username' do
-      merge_request_a.approver_users << current_user
+      merge_request_a.approved_by_users << current_user
 
       execute_query
 

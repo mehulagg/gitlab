@@ -1,14 +1,7 @@
 <script>
 import Api from 'ee/api';
 import { debounce } from 'lodash';
-import {
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownSectionHeader,
-  GlIcon,
-  GlLoadingIcon,
-  GlSearchBoxByType,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlIcon, GlLoadingIcon, GlSearchBoxByType } from '@gitlab/ui';
 import { mapGetters } from 'vuex';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
@@ -20,7 +13,6 @@ export default {
   components: {
     GlDropdown,
     GlDropdownItem,
-    GlDropdownSectionHeader,
     GlIcon,
     GlLoadingIcon,
     GlSearchBoxByType,
@@ -145,11 +137,9 @@ export default {
     </template>
     <template>
       <slot name="label-dropdown-list-header">
-        <gl-dropdown-section-header
-          :active="!selectedLabelId.length"
-          @click.prevent="$emit('clearLabel')"
+        <gl-dropdown-item :active="!selectedLabelId.length" @click.prevent="$emit('clearLabel')"
           >{{ __('Select a label') }}
-        </gl-dropdown-section-header>
+        </gl-dropdown-item>
       </slot>
       <div class="mb-3 px-3">
         <gl-search-box-by-type v-model.trim="searchTerm" class="mb-2" />

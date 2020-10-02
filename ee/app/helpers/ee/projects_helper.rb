@@ -232,7 +232,7 @@ module EE
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+        }.merge!(security_dashboard_pipeline_data(project))
       end
     end
 
@@ -326,6 +326,19 @@ module EE
         strongClose: '</strong>'.html_safe,
         codeOpen: '<code>'.html_safe,
         codeClose: '</code>'.html_safe
+      }
+    end
+
+    def security_dashboard_pipeline_data(project)
+      pipeline = project.latest_pipeline_with_security_reports
+      return {} unless pipeline
+
+      {
+        pipeline: {
+          id: pipeline.id,
+          path: pipeline_path(pipeline),
+          created_at: pipeline.created_at.to_s(:iso8601)
+        }
       }
     end
   end

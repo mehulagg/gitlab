@@ -205,7 +205,7 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
 });
 
 describe('RECEIVE_EPICS_SUCCESS', () => {
-  it('populates epics with payload and set epicsFlags loading to true', () => {
+  it('populates epics with payload', () => {
     state = {
       ...state,
       epics: {},
@@ -214,5 +214,18 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
     mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
 
     expect(state.epics).toEqual(mockEpics);
+  });
+});
+
+describe('RESET_EPICS', () => {
+  it('should remove issues from issuesByListId state', () => {
+    state = {
+      ...state,
+      epics: mockEpics,
+    };
+
+    mutations.RESET_EPICS(state);
+
+    expect(state.epics).toEqual([]);
   });
 });

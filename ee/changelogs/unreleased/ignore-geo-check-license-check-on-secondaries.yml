@@ -1,0 +1,5 @@
+---
+title: Ignore rake task license check on geo secondaries
+merge_request: 42920
+author:
+type: fixed

@@ -207,6 +207,10 @@ class GeoNode < ApplicationRecord
     url
   end
 
+  def repository_url(repository)
+    Gitlab::Utils.append_path(internal_url, "#{repository.full_path}.git")
+  end
+
   def oauth_callback_url
     Gitlab::Routing.url_helpers.oauth_geo_callback_url(url_helper_args)
   end

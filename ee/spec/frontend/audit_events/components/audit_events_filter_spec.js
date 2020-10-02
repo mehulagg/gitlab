@@ -112,27 +112,4 @@ describe('AuditEventsFilter', () => {
       expect(getAvailableTokens()).toMatchObject([{ type }]);
     });
   });
-
-  describe('when setting the QA selector', () => {
-    beforeEach(() => {
-      initComponent();
-    });
-
-    it('should not set the QA selector if not provided', () => {
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-filter"]').attributes('data-qa-selector'),
-        ).toBeUndefined();
-      });
-    });
-
-    it('should set the QA selector if provided', () => {
-      wrapper.setProps({ qaSelector: 'qa_selector' });
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-filter"]').attributes('data-qa-selector'),
-        ).toEqual('qa_selector');
-      });
-    });
-  });
 });

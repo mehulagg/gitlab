@@ -693,6 +693,39 @@ RSpec.describe Projects::FeatureFlagsController do
       end
     end
 
+    context 'when creating a version 2 feature flag with a flexibleRollout strategy' do
+      let(:params) do
+        {
+          namespace_id: project.namespace,
+          project_id: project,
+          operations_feature_flag: {
+            name: 'my_feature_flag',
+            active: true,
+            version: 'new_version_flag',
+            strategies_attributes: [{
+              name: 'flexibleRollout',
+              parameters: { groupId: 'default', rollout: '15', stickiness: 'DEFAULT' },
+              scopes_attributes: [{ environment_scope: 'production' }]
+            }]
+          }
+        }
+      end
+
+      it 'creates the new strategy' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+
+        strategy_json = json_response['strategies'].first
+        expect(strategy_json['name']).to eq('flexibleRollout')
+        expect(strategy_json['parameters']).to eq({ 'groupId' => 'default', 'rollout' => '15', 'stickiness' => 'DEFAULT' })
+        expect(strategy_json['scopes'].count).to eq(1)
+
+        scope_json = strategy_json['scopes'].first
+        expect(scope_json['environment_scope']).to eq('production')
+      end
+    end
+
     context 'when creating a version 2 feature flag with a gitlabUserList strategy' do
       let!(:user_list) do
         create(:operations_feature_flag_user_list, project: project,
@@ -1356,6 +1389,24 @@ RSpec.describe Projects::FeatureFlagsController do
         expect(strategy_json['parameters']).to eq({
           'groupId' => 'default',
           'percentage' => '30'
+        })
+        expect(strategy_json['scopes']).to eq([])
+      end
+
+      it 'creates a flexibleRollout strategy' do
+        put_request(new_version_flag, strategies_attributes: [{
+          name: 'flexibleRollout',
+          parameters: { groupId: 'default', rollout: '30', stickiness: 'DEFAULT' }
+        }])
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['strategies'].count).to eq(1)
+        strategy_json = json_response['strategies'].first
+        expect(strategy_json['name']).to eq('flexibleRollout')
+        expect(strategy_json['parameters']).to eq({
+          'groupId' => 'default',
+          'rollout' => '30',
+          'stickiness' => 'DEFAULT'
         })
         expect(strategy_json['scopes']).to eq([])
       end

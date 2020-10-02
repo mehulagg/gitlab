@@ -56,15 +56,6 @@ export default {
     chevronIcon() {
       return this.isExpanded ? 'chevron-down' : 'chevron-right';
     },
-    stateText() {
-      return this.isOpen ? __('Opened') : __('Closed');
-    },
-    epicIcon() {
-      return this.isOpen ? 'epic' : 'epic-closed';
-    },
-    stateIconClass() {
-      return this.isOpen ? 'gl-text-green-500' : 'gl-text-blue-500';
-    },
     issuesCount() {
       return this.lists.reduce(
         (total, list) => total + this.getIssuesByEpic(list.id, this.epic.id).length,
@@ -125,12 +116,6 @@ export default {
           variant="link"
           data-testid="epic-lane-chevron"
           @click="toggleExpanded"
-        />
-        <gl-icon
-          class="gl-mr-2 gl-flex-shrink-0"
-          :class="stateIconClass"
-          :name="epicIcon"
-          :aria-label="stateText"
         />
         <h4
           ref="epicTitle"

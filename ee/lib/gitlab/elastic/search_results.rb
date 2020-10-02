@@ -7,17 +7,18 @@ module Gitlab
 
       DEFAULT_PER_PAGE = Gitlab::SearchResults::DEFAULT_PER_PAGE
 
-      attr_reader :current_user, :query, :public_and_internal_projects, :filters
+      attr_reader :current_user, :query, :public_and_internal_projects, :sort, :filters
 
       # Limit search results by passed projects
       # It allows us to search only for projects user has access to
       attr_reader :limit_project_ids
 
-      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, sort: nil, filters: {})
         @current_user = current_user
         @query = query
         @limit_project_ids = limit_project_ids
         @public_and_internal_projects = public_and_internal_projects
+        @sort = sort
         @filters = filters
       end
 
@@ -123,16 +124,12 @@ module Gitlab
         project_id = result['_source']['project_id'].to_i
         total_lines = content.lines.size
 
-        term =
-          if result['highlight']
-            highlighted = result['highlight']['blob.content']
-            highlighted && highlighted[0].match(/gitlabelasticsearch→(.*?)←gitlabelasticsearch/)[1]
-          end
+        highlight_content = result.dig('highlight', 'blob.content')&.first || ''
 
         found_line_number = 0
 
-        content.each_line.each_with_index do |line, index|
-          if term && line.include?(term)
+        highlight_content.each_line.each_with_index do |line, index|
+          if line.include?(::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG)
             found_line_number = index
             break
           end
@@ -174,7 +171,7 @@ module Gitlab
         relation = relation.public_send(preload_method) if preload_method # rubocop:disable GitlabSecurity/PublicSend
 
         Kaminari.paginate_array(
-          relation,
+          relation.to_a,
           total_count: paginated_base.total_count,
           limit: per_page,
           offset: per_page * (page - 1)
@@ -185,7 +182,8 @@ module Gitlab
         {
           current_user: current_user,
           project_ids: limit_project_ids,
-          public_and_internal_projects: public_and_internal_projects
+          public_and_internal_projects: public_and_internal_projects,
+          sort: sort
         }
       end
 
@@ -197,8 +195,7 @@ module Gitlab
 
       def issues
         strong_memoize(:issues) do
-          options = base_options
-          options[:state] = filters[:state] if filters.key?(:state)
+          options = base_options.merge(filters.slice(:confidential, :state))
 
           Issue.elastic_search(query, options: options)
         end

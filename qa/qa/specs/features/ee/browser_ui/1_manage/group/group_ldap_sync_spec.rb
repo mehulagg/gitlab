@@ -5,6 +5,12 @@ module QA
     describe 'LDAP Group sync' do
       include Support::Api
 
+      let(:group) do
+        Resource::Group.fabricate_via_api! do |resource|
+          resource.path = "#{group_name}-#{SecureRandom.hex(4)}"
+        end
+      end
+
       before(:all) do
         # Create the sandbox group as the LDAP user. Without this the admin user
         # would own the sandbox group and then in subsequent tests the LDAP user
@@ -62,10 +68,16 @@ module QA
         let(:owner_user) { 'enguser1' }
         let(:sync_users) { ['ENG User 2', 'ENG User 3'] }
 
+        let(:group_name) { 'Synched-engineering-group' }
+
         before do
-          @created_users = create_users_via_api(ldap_users)
-          group = create_group_and_add_user_via_api(owner_user, 'Synched-engineering-group', Resource::Members::AccessLevel::OWNER)
-          signin_and_visit_group_as_user(owner_user, group)
+          created_users = create_users_via_api(ldap_users)
+
+          group.add_member(created_users[owner_user], Resource::Members::AccessLevel::OWNER)
+
+          signin_as_user(owner_user)
+
+          group.visit!
 
           Page::Group::Menu.perform(&:go_to_ldap_sync_settings)
 
@@ -113,12 +125,16 @@ module QA
         let(:owner_user) { 'hruser1' }
         let(:sync_users) { ['HR User 2', 'HR User 3'] }
 
+        let(:group_name) { 'Synched-human-resources-group' }
+
         before do
-          @created_users = create_users_via_api(ldap_users)
+          created_users = create_users_via_api(ldap_users)
 
-          group = create_group_and_add_user_via_api(owner_user, 'Synched-human-resources-group', Resource::Members::AccessLevel::OWNER)
+          group.add_member(created_users[owner_user], Resource::Members::AccessLevel::OWNER)
 
-          signin_and_visit_group_as_user(owner_user, group)
+          signin_as_user(owner_user)
+
+          group.visit!
 
           Page::Group::Menu.perform(&:go_to_ldap_sync_settings)
 
@@ -160,23 +176,23 @@ module QA
         group
       end
 
-      def signin_and_visit_group_as_user(user_name, group)
+      def signin_as_user(user_name)
         user = Struct.new(:ldap_username, :ldap_password).new(user_name, 'password')
 
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
         Page::Main::Login.perform do |login_page|
           login_page.sign_in_using_ldap_credentials(user: user)
         end
-
-        group.visit!
       end
 
       def verify_users_synced(expected_users)
         EE::Page::Group::Members.perform do |members|
           members.click_sync_now
+
           users_synchronised = members.retry_until(reload: true) do
             expected_users.map { |user| members.has_content?(user) }.all?
           end
+
           expect(users_synchronised).to be_truthy
         end
       end

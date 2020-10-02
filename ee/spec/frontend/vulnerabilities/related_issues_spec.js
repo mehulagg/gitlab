@@ -33,7 +33,7 @@ describe('Vulnerability related issues component', () => {
   const issue1 = { id: 3, vulnerabilityLinkId: 987 };
   const issue2 = { id: 25, vulnerabilityLinkId: 876 };
 
-  const createWrapper = async (data = {}, opts) => {
+  const createWrapper = async (data = {}, provide = {}, opts) => {
     wrapper = shallowMount(RelatedIssues, {
       propsData,
       data: () => data,
@@ -44,6 +44,7 @@ describe('Vulnerability related issues component', () => {
         reportType,
         issueTrackingHelpPath,
         permissionsHelpPath,
+        ...provide,
       },
       ...opts,
     });
@@ -270,6 +271,7 @@ describe('Vulnerability related issues component', () => {
           isFetching: false,
           state: { relatedIssues: [issue1, { ...issue2, vulnerabilityLinkType: 'created' }] },
         },
+        {},
         { stubs: { RelatedIssuesBlock } },
       );
     });
@@ -289,7 +291,7 @@ describe('Vulnerability related issues component', () => {
 
     beforeEach(async () => {
       mockAxios.onGet(propsData.endpoint).replyOnce(httpStatusCodes.OK, [issue1, issue2]);
-      createWrapper({}, { stubs: { RelatedIssuesBlock } });
+      createWrapper({}, {}, { stubs: { RelatedIssuesBlock } });
       await axios.waitForAll();
     });
 
@@ -325,6 +327,19 @@ describe('Vulnerability related issues component', () => {
       findAlert().vm.$emit('dismiss');
       await wrapper.vm.$nextTick();
       expect(findAlert().exists()).toBe(false);
+    });
+  });
+
+  describe('when project issue tracking is disabled', () => {
+    it('hides the "Create Issue" button', () => {
+      createWrapper(
+        {},
+        {
+          createIssueUrl: undefined,
+        },
+      );
+
+      expect(findCreateIssueButton().exists()).toBe(false);
     });
   });
 });

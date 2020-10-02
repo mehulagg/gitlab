@@ -9,10 +9,10 @@ import { redirectTo } from '~/lib/utils/url_utility';
 const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-scans`;
 const projectPath = 'group/project';
 const defaultBranch = 'master';
-const scannerProfilesLibraryPath = '/on_demand_scans/profiles#scanner-profiles';
-const siteProfilesLibraryPath = '/on_demand_scans/profiles#site-profiles';
-const newScannerProfilePath = '/on_demand_scans/profiles/dast_scanner_profile/new';
-const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
+const scannerProfilesLibraryPath = '/security/configuration/dast_profiles#scanner-profiles';
+const siteProfilesLibraryPath = '/security/configuration/dast_profiles#site-profiles';
+const newScannerProfilePath = '/security/configuration/dast_profiles/dast_scanner_profile/new';
+const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_profiles`;
 
 const defaultProps = {
   helpPagePath,
@@ -67,7 +67,6 @@ describe('OnDemandScansApp', () => {
             },
           },
           provide: {
-            glFeatures: { securityOnDemandScansScannerProfiles: true },
             scannerProfilesLibraryPath,
             siteProfilesLibraryPath,
             newScannerProfilePath,
@@ -200,41 +199,6 @@ describe('OnDemandScansApp', () => {
           expect(wrapper.vm.isSubmitDisabled).toBe(expected);
         },
       );
-    });
-  });
-
-  describe('scanner profiles with feature flag disabled', () => {
-    beforeEach(() => {
-      createComponent({
-        provide: {
-          glFeatures: { securityOnDemandScansScannerProfiles: false },
-        },
-      });
-    });
-
-    it('shows static scanner settings and no scanner profiles component', () => {
-      expect(findScannerProfilesDropdown().exists()).toBe(false);
-      expect(findManageScannerProfilesButton().exists()).toBe(false);
-      expect(findCreateNewScannerProfileLink().exists()).toBe(false);
-      expect(wrapper.text()).toContain('Passive');
-      expect(wrapper.text()).toContain('master');
-    });
-
-    it('when submitting the form, GraphQL query does not include scanner data', async () => {
-      wrapper.vm.siteProfiles = siteProfiles;
-      await wrapper.vm.$nextTick();
-      jest
-        .spyOn(wrapper.vm.$apollo, 'mutate')
-        .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
-      findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
-      submitForm();
-      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-        mutation: dastOnDemandScanCreate,
-        variables: {
-          dastSiteProfileId: siteProfiles[0],
-          fullPath: projectPath,
-        },
-      });
     });
   });
 

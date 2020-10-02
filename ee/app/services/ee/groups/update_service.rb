@@ -116,7 +116,7 @@ module EE
         settings_params = params.slice(:prevent_forking_outside_group)
         params.delete(:prevent_forking_outside_group)
 
-        NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
+        ::NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
       end
 
       def log_audit_event

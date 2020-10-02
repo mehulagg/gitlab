@@ -170,6 +170,10 @@ module QA
         module Packages
           autoload :Index, 'qa/ee/page/project/packages/index'
         end
+
+        module Snippet
+          autoload :Index, 'qa/ee/page/project/snippet/index'
+        end
       end
 
       module MergeRequest

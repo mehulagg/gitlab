@@ -12,6 +12,7 @@ module Gitlab
           attr_reader :scanners
           attr_reader :identifiers
 
+          attr_accessor :scan
           attr_accessor :scanned_resources
           attr_accessor :error
 

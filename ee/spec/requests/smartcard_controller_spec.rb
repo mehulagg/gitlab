@@ -311,7 +311,7 @@ RSpec.describe SmartcardController, type: :request do
 
       subject do
         get(verify_certificate_smartcard_path,
-            { params: params.merge({ provider: 'ldapmain' }) })
+            params: params.merge({ provider: 'ldapmain' }))
       end
 
       before do

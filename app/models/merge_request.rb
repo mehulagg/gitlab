@@ -1302,6 +1302,14 @@ class MergeRequest < ApplicationRecord
     unlock_mr
   end
 
+  def update_and_mark_in_progress_merge_commit_sha(commit_id)
+    self.update(in_progress_merge_commit_sha: commit_id)
+    # Since another process checks for matching merge request, we need
+    # to make it possible to detect whether the query should go to the
+    # primary.
+    target_project.mark_primary_write_location
+  end
+
   def diverged_commits_count
     cache = Rails.cache.read(:"merge_request_#{id}_diverged_commits")
 
@@ -1376,8 +1384,6 @@ class MergeRequest < ApplicationRecord
   end
 
   def has_coverage_reports?
-    return false unless Feature.enabled?(:coverage_report_view, project, default_enabled: true)
-
     actual_head_pipeline&.has_coverage_reports?
   end
 
@@ -1680,6 +1686,10 @@ class MergeRequest < ApplicationRecord
 
   def allows_reviewers?
     Feature.enabled?(:merge_request_reviewers, project)
+  end
+
+  def allows_multiple_reviewers?
+    false
   end
 
   private

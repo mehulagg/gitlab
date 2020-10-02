@@ -58,11 +58,12 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
   describe 'parse_search_result' do
     let(:project) { double(:project) }
+    let(:content) { "foo\nbar\nbaz\n" }
     let(:blob) do
       {
         'blob' => {
           'commit_sha' => 'sha',
-          'content' => "foo\nbar\nbaz\n",
+          'content' => content,
           'path' => 'path/file.ext'
         }
       }
@@ -83,7 +84,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       result = {
         '_source' => blob,
         'highlight' => {
-          'blob.content' => ["foo\ngitlabelasticsearch→bar←gitlabelasticsearch\nbaz\n"]
+          'blob.content' => ["foo\n#{::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG}bar#{::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG}\nbaz\n"]
         }
       }
 
@@ -100,9 +101,65 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         data: "bar\n"
       )
     end
+
+    context 'when the highlighting finds the same terms multiple times' do
+      let(:content) do
+        <<~END
+        bar
+        bar
+        foo
+        bar # this is the highlighted bar
+        baz
+        boo
+        bar
+        END
+      end
+
+      it 'does not mistake a line that happens to include the same term that was highlighted on a later line' do
+        highlighted_content = <<~END
+        bar
+        bar
+        foo
+        #{::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG}bar#{::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG} # this is the highlighted bar
+        baz
+        boo
+        bar
+        END
+
+        result = {
+          '_source' => blob,
+          'highlight' => {
+            'blob.content' => [highlighted_content]
+          }
+        }
+
+        parsed = described_class.parse_search_result(result, project)
+
+        expected_data = <<~END
+        bar
+        foo
+        bar # this is the highlighted bar
+        baz
+        boo
+        END
+
+        expect(parsed).to be_kind_of(::Gitlab::Search::FoundBlob)
+        expect(parsed).to have_attributes(
+          id: nil,
+          path: 'path/file.ext',
+          basename: 'path/file',
+          ref: 'sha',
+          startline: 2,
+          project: project,
+          data: expected_data
+        )
+      end
+    end
   end
 
   describe 'issues' do
+    let(:scope) { 'issues' }
+
     before do
       @issue_1 = create(
         :issue,
@@ -171,15 +228,34 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:project) { create(:project, :public) }
       let!(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
       let!(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
+      let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
 
-      let(:scope) { 'issues' }
-      let(:results) { described_class.new(user, 'foo', [project], filters: filters) }
+      let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
-      include_examples 'search results filtered by state' do
-        before do
-          ensure_elasticsearch_index!
-        end
+      before do
+        project.add_developer(user)
+
+        ensure_elasticsearch_index!
       end
+
+      include_examples 'search results filtered by state'
+      include_examples 'search results filtered by confidential'
+    end
+
+    context 'ordering' do
+      let(:query) { 'sorted' }
+      let!(:project) { create(:project, :public) }
+      let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
+
+      let(:results) { described_class.new(user, query, [project.id], sort: sort) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted'
     end
   end
 
@@ -422,6 +498,8 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   end
 
   describe 'merge requests' do
+    let(:scope) { 'merge_requests' }
+
     before do
       @merge_request_1 = create(
         :merge_request,
@@ -495,7 +573,6 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
       let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
 
-      let(:scope) { 'merge_requests' }
       let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
       include_examples 'search results filtered by state' do
@@ -503,6 +580,22 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
           ensure_elasticsearch_index!
         end
       end
+    end
+
+    context 'ordering' do
+      let(:query) { 'sorted' }
+      let!(:project) { create(:project, :public) }
+      let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
+
+      let(:results) { described_class.new(user, query, [project.id], sort: sort) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted'
     end
   end
 
@@ -567,7 +660,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       results = described_class.new(user, 'defau*', limit_project_ids)
       blobs = results.objects('blobs')
 
-      expect(blobs.first.data).to include('default')
+      expect(blobs.first.data).to match(/default/i)
       expect(results.blobs_count).to eq 3
     end
 
