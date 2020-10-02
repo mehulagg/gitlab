@@ -34,7 +34,8 @@ You can view the Container Registry for a project or group.
 
 You can search, sort, filter, and [delete](#delete-images-from-within-gitlab) containers on this page.
 
-CAUTION: **Warning:**
+Only members of the project or group can access a project's Container Registry.
+
 If a project is public, so is the Container Registry.
 
 ## Use images from the Container Registry
@@ -57,7 +58,7 @@ To download and run a container image hosted in the GitLab Container Registry:
 For more information on running Docker containers, visit the
 [Docker documentation](https://docs.docker.com/engine/userguide/intro/).
 
-### Image naming convention
+## Image naming convention
 
 Images follow this naming convention:
 
@@ -65,7 +66,9 @@ Images follow this naming convention:
 <registry URL>/<namespace>/<project>/<image>
 ```
 
-There are three different ways to refer to images:
+You can append additional names to the end of an image name, up to three levels deep.
+
+These are all valid image names for images within the project named `project`:
 
 ```plaintext
 registry.example.com/namespace/project:some-tag
@@ -92,10 +95,7 @@ To build and push to the Container Registry, you can use Docker commands.
 
 #### Authenticate with the Container Registry
 
-If the project is not public, you must authenticate with the Container Registry
-before you can build and push images.
-
-Only members of the project can access a project's Container Registry.
+Before you can build and push images, you must authenticate with the Container Registry.
 
 To authenticate, you can use:
 
@@ -133,10 +133,6 @@ To build and push to the Container Registry:
 
 You can also view these commands by going to your project's **Packages & Registries > Container Registry**.
 
-NOTE: **Note:**
-There is a soft (10GB) size restriction for the Container Registry on GitLab.com,
-as part of the [repository size limit](../../project/repository/index.md).
-
 ### Build and push by using GitLab CI/CD
 
 Use [GitLab CI/CD](../../../ci/yaml/README.md) to build and push images to the
@@ -145,8 +141,7 @@ image you created.
 
 #### Authenticate by using GitLab CI/CD
 
-If the project is not public, you must authenticate with the Container Registry.
-Only members of the project can access a project's Container Registry.
+Before you can build and push images by using GitLab CI/CD, you must authenticate with the Container Registry.
 
 To use CI/CD to authenticate, you can use:
 
@@ -161,19 +156,24 @@ To use CI/CD to authenticate, you can use:
 
 - A [CI job token](../../../ci/triggers/README.md#ci-job-token).
 
-  Replace the `<username>` and `<access_token>` in the following example:
-
   ```shell
-  docker login -u <username> -p <access_token> $CI_REGISTRY
+  docker login -u $CI_JOB_USER -p $CI_JOB_TOKEN $CI_REGISTRY
   ```
 
-- A [personal access token](../../profile/personal_access_tokens.md) or
-  [deploy token](../../project/deploy_tokens/index.md#gitlab-deploy-token) with the minimum scope of:
+- A [deploy token](../../project/deploy_tokens/index.md#gitlab-deploy-token) with the minimum scope of:
   - For read (pull) access, `read_registry`.
   - For write (push) access, `write_registry`.
 
   ```shell
   docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+  ```
+
+- A [personal access token](../../profile/personal_access_tokens.md) with the minimum scope of:
+  - For read (pull) access, `read_registry`.
+  - For write (push) access, `write_registry`.
+
+  ```shell
+  docker login -u <username> -p <access_token> $CI_REGISTRY
   ```
 
 #### Configure your `.gitlab-ci.yml` file
@@ -193,10 +193,10 @@ You can configure your `.gitlab-ci.yml` file to build and push images to the Con
 - Don't build directly to the `latest` tag because multiple jobs may be
   happening simultaneously.
 
-#### CI/CD example with Docker-in-Docker
+#### Container Registry examples with GitLab CI/CD
 
-If you're using Docker-in-Docker on your runners, follow this `.gitlab-ci.yml`
-example:
+If you're using Docker-in-Docker on your runners, this is how your `.gitlab-ci.yml`
+should look:
 
 ```yaml
 build:
@@ -206,42 +206,11 @@ build:
     - docker:19.03.12-dind
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/namespace/project/image:latest .
-    - docker push $CI_REGISTRY/namespace/project/image:latest
+    - docker build -t $CI_REGISTRY/group/project/image:latest .
+    - docker push $CI_REGISTRY/group/project/image:latest
 ```
 
-<hr>
-
-Steve--This was pasted from a topic below. That topic was also about Docker-in-Docker.
-Can you help me combine them, if possible?
-
-1. Update the `image` and `service` to point to your registry.
-1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
-
-   For example:
-
-   ```yaml
-   build:
-     image: $CI_REGISTRY/namespace/project/docker:19.03.12
-     services:
-       - name: $CI_REGISTRY/namespace/project/docker:19.03.12-dind
-         alias: docker
-     stage: build
-     script:
-       - docker build -t my-docker-image .
-       - docker run my-docker-image /script/to/run/tests
-   ```
-
-If you do not set the service alias, the `docker:19.03.12` image is unable to find the
-`dind` service, and an error occurs:
-
-```plaintext
-error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
-```
-
-<hr>
-
-You can also use [other variables](../../../ci/variables/README.md) to avoid hard-coding:
+You can also make use of [other variables](../../../ci/variables/README.md) to avoid hard-coding:
 
 ```yaml
 build:
@@ -257,16 +226,14 @@ build:
     - docker push $IMAGE_TAG
 ```
 
-Here, `$CI_REGISTRY_IMAGE` is resolved to the address of the Container Registry for this project.
-Because `$CI_COMMIT_REF_NAME` resolves to the branch or tag name,
+Here, `$CI_REGISTRY_IMAGE` would be resolved to the address of the registry tied
+to this project. Since `$CI_COMMIT_REF_NAME` resolves to the branch or tag name,
 and your branch name can contain forward slashes (for example, `feature/my-feature`), it is
-safer to use `$CI_COMMIT_REF_SLUG` as the image tag. This is because image tags
-cannot contain forward slashes. We also declare our own variable, `$IMAGE_TAG`.
-Combining the two values saves additional lines in the `script` section.
+safer to use `$CI_COMMIT_REF_SLUG` as the image tag. This is due to that image tags
+cannot contain forward slashes. We also declare our own variable, `$IMAGE_TAG`,
+combining the two to save us some typing in the `script` section.
 
-#### CI/CD example with parallel tests
-
-This example splits the tasks into four pipeline stages,
+Here's a more elaborate example that splits up the tasks into 4 pipeline stages,
 including two tests that run in parallel. The `build` is stored in the container
 registry and used by subsequent stages, downloading the image
 when needed. Changes to `master` also get tagged as `latest` and deployed using
@@ -328,11 +295,42 @@ deploy:
     - master
 ```
 
+NOTE: **Note:**
 This example explicitly calls `docker pull`. If you prefer to implicitly pull the
 built image using `image:`, and use either the [Docker](https://docs.gitlab.com/runner/executors/docker.html)
 or [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html) executor,
 make sure that [`pull_policy`](https://docs.gitlab.com/runner/executors/docker.html#how-pull-policies-work)
 is set to `always`.
+
+#### Using a Docker-in-Docker image from your Container Registry
+
+To use your own Docker images for Docker-in-Docker, follow these steps
+in addition to the steps in the
+[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) section:
+
+1. Update the `image` and `service` to point to your registry.
+1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
+
+Below is an example of what your `.gitlab-ci.yml` should look like:
+
+```yaml
+build:
+  image: $CI_REGISTRY/group/project/docker:19.03.12
+  services:
+    - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
+      alias: docker
+  stage: build
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
+```
+
+If you forget to set the service alias, the `docker:19.03.12` image is unable to find the
+`dind` service, and an error like the following is thrown:
+
+```plaintext
+error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
+```
 
 ## Delete images
 
