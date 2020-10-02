@@ -27,7 +27,7 @@ RSpec.describe "Every controller" do
 
         next unless controller.to_s.start_with?('B', 'C', 'D', 'E', 'F',
                                                 'H', 'I', 'J', 'K', 'L',
-                                                'M', 'N', 'O',
+                                                'M', 'N', 'O', 'Q', 'R',
                                                 'Projects::MergeRequestsController')
 
         "#{controller}##{action}"
