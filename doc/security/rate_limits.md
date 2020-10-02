@@ -28,9 +28,9 @@ similarly mitigated by a rate limit.
 - [Protected paths](../user/admin_area/settings/protected_paths.md).
 - [Import/Export rate limits](../user/admin_area/settings/import_export_rate_limits.md).
 
-## Non-Configurable limits
+## Non-configurable limits
 
-### Repository Archives
+### Repository archives
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25750) in GitLab 12.9.
 
@@ -45,7 +45,7 @@ The **rate limit** is 5 requests per minute per user.
 
 There is a rate limit for [testing webhooks](../user/project/integrations/webhooks.md#testing-webhooks), which prevents abuse of the webhook functionality.
 
-- **Rate limit** - 5 requests per minute per user.
+The **rate limit** is 5 requests per minute per user.
 
 ## Rack Attack initializer
 
