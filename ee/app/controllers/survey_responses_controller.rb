@@ -7,6 +7,8 @@ class SurveyResponsesController < ApplicationController
 
   skip_before_action :authenticate_user!
 
+  feature_category :not_owned
+
   def index
     track_response if Gitlab.com?
 
