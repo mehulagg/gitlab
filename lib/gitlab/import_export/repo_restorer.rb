@@ -13,11 +13,10 @@ module Gitlab
 
       def restore
         return true unless File.exist?(path_to_bundle)
+        return true if repository_exists?
 
         repository.create_from_bundle(path_to_bundle)
       rescue => e
-        Repositories::DestroyService.new(repository).execute
-
         shared.error(e)
         false
       end
@@ -25,6 +24,16 @@ module Gitlab
       private
 
       attr_accessor :repository, :path_to_bundle, :shared
+
+      def repository_exists?
+        return false unless repository.exists?
+
+        shared.logger.info(
+          message: %Q{Repository "#{repository.path}" already exists.}
+        )
+
+        true
+      end
     end
   end
 end

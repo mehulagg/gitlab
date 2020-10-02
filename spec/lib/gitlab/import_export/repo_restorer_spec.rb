@@ -36,21 +36,28 @@ RSpec.describe Gitlab::ImportExport::RepoRestorer do
       expect(subject.restore).to be_truthy
     end
 
-    context 'when the repository creation fails' do
+    context 'when the repository already exists' do
       before do
-        allow_next_instance_of(Repositories::DestroyService) do |instance|
-          expect(instance).to receive(:execute).and_call_original
-        end
+        allow(project.repository).to receive(:exists?).and_return(true)
+        allow(project.repository).to receive(:path).and_return('repository_path')
       end
 
-      it 'logs the error' do
-        allow(project.repository)
-          .to receive(:create_from_bundle)
-          .and_raise('9:CreateRepositoryFromBundle: target directory is non-empty')
+      it 'returns true' do
+        expect(subject.restore).to eq(true)
+      end
 
-        expect(shared).to receive(:error).and_call_original
+      it 'does not try to re-create the repository' do
+        expect(project.repository).not_to receive(:create_from_bundle)
 
-        expect(subject.restore).to be_falsey
+        subject.restore
+      end
+
+      it 'logs the message' do
+        expect(shared.logger).to receive(:info).with(
+          message: 'Repository "repository_path" already exists.'
+        )
+
+        subject.restore
       end
     end
   end
