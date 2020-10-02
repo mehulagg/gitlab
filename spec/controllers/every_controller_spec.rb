@@ -26,7 +26,7 @@ RSpec.describe "Every controller" do
         next if controller.feature_category_for_action(action)
 
         next unless controller.to_s.start_with?('B', 'C', 'D', 'E', 'F',
-                                                'H',
+                                                'H', 'I',
                                                 'Projects::MergeRequestsController')
 
         "#{controller}##{action}"
