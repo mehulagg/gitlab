@@ -24,9 +24,6 @@ RSpec.describe ForkTargetsFinder do
 
     context 'when project root group prohibits outer forks' do
       context 'when it is configured on saml level' do
-        before do
-          create(:namespace_settings, namespace: project_group, prevent_forking_outside_group: false)
-        end
         let(:project_group) do
           create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: true).group
         end
@@ -57,7 +54,7 @@ RSpec.describe ForkTargetsFinder do
 
         context 'when project root prohibits outer forks' do
           before do
-            create(:namespace_settings, namespace: project_group, prevent_forking_outside_group: true)
+            project_group.namespace_settings.update(prevent_forking_outside_group: true)
           end
 
           it 'returns namespaces with the same root group as project one only' do
@@ -67,10 +64,6 @@ RSpec.describe ForkTargetsFinder do
         end
 
         context 'when project root does not prohibit outer forks' do
-          before do
-            create(:namespace_settings, namespace: project_group, prevent_forking_outside_group: false)
-          end
-
           it 'returns outer namespaces as well as inner' do
             expect(fork_targets).to be_a(ActiveRecord::Relation)
             expect(fork_targets).to match_array([outer_group, inner_subgroup, user.namespace])
