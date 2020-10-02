@@ -50,6 +50,10 @@ export default {
       type: String,
       required: true,
     },
+    configVariablesPath: {
+      type: String,
+      required: true,
+    },
     projectId: {
       type: String,
       required: true,
@@ -86,6 +90,7 @@ export default {
     return {
       searchTerm: '',
       refValue: this.refParam,
+      variableDescriptions: {},
       variables: [],
       error: null,
       warnings: [],
@@ -121,6 +126,8 @@ export default {
     if (this.fileParams) {
       this.setVariableParams(FILE_TYPE, this.fileParams);
     }
+
+    this.fetchConfigVariables();
   },
   methods: {
     setVariable(type, key, value) {
@@ -145,6 +152,7 @@ export default {
     },
     setRefSelected(ref) {
       this.refValue = ref;
+      this.fetchConfigVariables();
     },
     isSelected(ref) {
       return ref === this.refValue;
@@ -163,6 +171,23 @@ export default {
 
     canRemove(index) {
       return index < this.variables.length - 1;
+    },
+    fetchConfigVariables() {
+      return axios
+        .get(this.configVariablesPath, {
+          params: {
+            sha: this.refValue,
+          },
+        })
+        .then(({ data }) => {
+          const descriptions = {};
+          Object.entries(data).forEach(([key, { value, description }]) => {
+            this.setVariable(VARIABLE_TYPE, key, value);
+            descriptions[key] = description;
+          });
+
+          this.variableDescriptions = descriptions;
+        });
     },
     createPipeline() {
       const filteredVariables = this.variables
@@ -262,45 +287,52 @@ export default {
       <div
         v-for="(variable, index) in variables"
         :key="variable.uniqueId"
-        class="gl-display-flex gl-align-items-stretch gl-align-items-center gl-mb-4 gl-ml-n3 gl-pb-2 gl-border-b-solid gl-border-gray-200 gl-border-b-1 gl-flex-direction-column gl-md-flex-direction-row"
-        data-testid="ci-variable-row"
+        class="gl-mb-3 gl-ml-n3 gl-pb-2"
       >
-        <gl-form-select
-          v-model="variable.variable_type"
-          :class="$options.formElementClasses"
-          :options="$options.typeOptions"
-        />
-        <gl-form-input
-          v-model="variable.key"
-          :placeholder="s__('CiVariables|Input variable key')"
-          :class="$options.formElementClasses"
-          data-testid="pipeline-form-ci-variable-key"
-          @change.once="addEmptyVariable()"
-        />
-        <gl-form-input
-          v-model="variable.value"
-          :placeholder="s__('CiVariables|Input variable value')"
-          class="gl-mb-3"
-        />
-
-        <template v-if="variables.length > 1">
-          <gl-button
-            v-if="canRemove(index)"
-            class="gl-md-ml-3 gl-mb-3"
-            data-testid="remove-ci-variable-row"
-            variant="danger"
-            category="secondary"
-            @click="removeVariable(index)"
-          >
-            <gl-icon class="gl-mr-0! gl-display-none gl-display-md-block" name="clear" />
-            <span class="gl-display-md-none">{{ s__('CiVariables|Remove variable') }}</span>
-          </gl-button>
-          <gl-button
-            v-else
-            class="gl-md-ml-3 gl-mb-3 gl-display-none gl-display-md-block gl-visibility-hidden"
-            icon="clear"
+        <div
+          class="gl-display-flex gl-align-items-stretch gl-flex-direction-column gl-md-flex-direction-row"
+          data-testid="ci-variable-row"
+        >
+          <gl-form-select
+            v-model="variable.variable_type"
+            :class="$options.formElementClasses"
+            :options="$options.typeOptions"
           />
-        </template>
+          <gl-form-input
+            v-model="variable.key"
+            :placeholder="s__('CiVariables|Input variable key')"
+            :class="$options.formElementClasses"
+            data-testid="pipeline-form-ci-variable-key"
+            @change.once="addEmptyVariable()"
+          />
+          <gl-form-input
+            v-model="variable.value"
+            :placeholder="s__('CiVariables|Input variable value')"
+            class="gl-mb-3"
+          />
+
+          <template v-if="variables.length > 1">
+            <gl-button
+              v-if="canRemove(index)"
+              class="gl-md-ml-3 gl-mb-3"
+              data-testid="remove-ci-variable-row"
+              variant="danger"
+              category="secondary"
+              @click="removeVariable(index)"
+            >
+              <gl-icon class="gl-mr-0! gl-display-none gl-display-md-block" name="clear" />
+              <span class="gl-display-md-none">{{ s__('CiVariables|Remove variable') }}</span>
+            </gl-button>
+            <gl-button
+              v-else
+              class="gl-md-ml-3 gl-mb-3 gl-display-none gl-display-md-block gl-visibility-hidden"
+              icon="clear"
+            />
+          </template>
+        </div>
+        <div v-if="variableDescriptions[variable.key]" class="gl-text-gray-500 gl-mb-3">
+          {{ variableDescriptions[variable.key] }}
+        </div>
       </div>
 
       <template #description
