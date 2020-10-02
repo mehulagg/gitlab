@@ -15,20 +15,16 @@ import {
   GlBadge,
   GlEmptyState,
 } from '@gitlab/ui';
-import Api from '~/api';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import OperationsPageWrapper from '~/vue_shared/components/operations/operations_page_wrapper/operations_page_wrapper.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import { s__, __ } from '~/locale';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
+import { s__ } from '~/locale';
 import {
   visitUrl,
   mergeUrlParams,
   joinPaths,
-  updateHistory,
-  setUrlParams,
 } from '~/lib/utils/url_utility';
 import getIncidents from '../graphql/queries/get_incidents.query.graphql';
 import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
@@ -109,6 +105,7 @@ export default {
     GlEmptyState,
     SeverityToken,
     FilteredSearchBar,
+    OperationsPageWrapper,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -274,55 +271,6 @@ export default {
         btnText: createIncidentBtnLabel,
       };
     },
-    filteredSearchTokens() {
-      return [
-        {
-          type: 'author_username',
-          icon: 'user',
-          title: __('Author'),
-          unique: true,
-          symbol: '@',
-          token: AuthorToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
-          fetchPath: this.projectPath,
-          fetchAuthors: Api.projectUsers.bind(Api),
-        },
-        {
-          type: 'assignee_username',
-          icon: 'user',
-          title: __('Assignees'),
-          unique: true,
-          symbol: '@',
-          token: AuthorToken,
-          operators: [{ value: '=', description: __('is'), default: 'true' }],
-          fetchPath: this.projectPath,
-          fetchAuthors: Api.projectUsers.bind(Api),
-        },
-      ];
-    },
-    filteredSearchValue() {
-      const value = [];
-
-      if (this.authorUsername) {
-        value.push({
-          type: 'author_username',
-          value: { data: this.authorUsername },
-        });
-      }
-
-      if (this.assigneeUsernames) {
-        value.push({
-          type: 'assignee_username',
-          value: { data: this.assigneeUsernames },
-        });
-      }
-
-      if (this.searchTerm) {
-        value.push(this.searchTerm);
-      }
-
-      return value;
-    },
   },
   methods: {
     filterIncidentsByStatus(tabIndex) {
@@ -374,71 +322,19 @@ export default {
     getSeverity(severity) {
       return INCIDENT_SEVERITY[severity];
     },
-    handleFilterIncidents(filters) {
-      this.resetPagination();
-      const filterParams = { authorUsername: '', assigneeUsername: '', search: '' };
-
-      filters.forEach(filter => {
-        if (typeof filter === 'object') {
-          switch (filter.type) {
-            case 'author_username':
-              filterParams.authorUsername = filter.value.data;
-              break;
-            case 'assignee_username':
-              filterParams.assigneeUsername = filter.value.data;
-              break;
-            case 'filtered-search-term':
-              if (filter.value.data !== '') filterParams.search = filter.value.data;
-              break;
-            default:
-              break;
-          }
-        }
-      });
-
-      this.filterParams = filterParams;
-      this.updateUrl();
-      this.searchTerm = filterParams?.search;
-      this.authorUsername = filterParams?.authorUsername;
-      this.assigneeUsernames = filterParams?.assigneeUsername;
-    },
-    updateUrl() {
-      const queryParams = urlParamsToObject(window.location.search);
-      const { authorUsername, assigneeUsername, search } = this.filterParams || {};
-
-      if (authorUsername) {
-        queryParams.author_username = authorUsername;
-      } else {
-        delete queryParams.author_username;
-      }
-
-      if (assigneeUsername) {
-        queryParams.assignee_username = assigneeUsername;
-      } else {
-        delete queryParams.assignee_username;
-      }
-
-      if (search) {
-        queryParams.search = search;
-      } else {
-        delete queryParams.search;
-      }
-
-      updateHistory({
-        url: setUrlParams(queryParams, window.location.href, true),
-        title: document.title,
-        replace: true,
-      });
-    },
   },
 };
 </script>
 <template>
   <div class="incident-management-list">
-    <gl-alert v-if="showErrorMsg" variant="danger" @dismiss="isErrorAlertDismissed = true">
-      {{ $options.i18n.errorMsg }}
-    </gl-alert>
+    <operations-page-wrapper>
+      <template #alert>
+        <gl-alert v-if="showErrorMsg" variant="danger" @dismiss="isErrorAlertDismissed = true">
+          {{ $options.i18n.errorMsg }}
+        </gl-alert>
+      </template>
 
+    <template #header>
     <div
       class="incident-management-list-header gl-display-flex gl-justify-content-space-between gl-border-b-solid gl-border-b-1 gl-border-gray-100"
     >
@@ -468,123 +364,135 @@ export default {
         {{ $options.i18n.createIncidentBtnLabel }}
       </gl-button>
     </div>
+    </template>
 
-    <div class="filtered-search-wrapper">
-      <filtered-search-bar
-        :namespace="projectPath"
-        :search-input-placeholder="$options.i18n.searchPlaceholder"
-        :tokens="filteredSearchTokens"
-        :initial-filter-value="filteredSearchValue"
-        initial-sortby="created_desc"
-        recent-searches-storage-key="incidents"
-        class="row-content-block"
-        @onFilter="handleFilterIncidents"
-      />
-    </div>
-
-    <h4 class="gl-display-block d-md-none my-3">
-      {{ s__('IncidentManagement|Incidents') }}
-    </h4>
-    <gl-table
-      v-if="showList"
-      :items="incidents.list || []"
-      :fields="availableFields"
-      :show-empty="true"
-      :busy="loading"
-      stacked="md"
-      :tbody-tr-class="tbodyTrClass"
-      :no-local-sorting="true"
-      :sort-direction="'desc'"
-      :sort-desc.sync="sortDesc"
-      :sort-by.sync="sortBy"
-      sort-icon-left
-      fixed
-      @row-clicked="navigateToIncidentDetails"
-      @sort-changed="fetchSortedData"
-    >
-      <template #cell(severity)="{ item }">
-        <severity-token :severity="getSeverity(item.severity)" />
-      </template>
-
-      <template #cell(title)="{ item }">
-        <div :class="{ 'gl-display-flex gl-align-items-center': item.state === 'closed' }">
-          <div class="gl-max-w-full text-truncate" :title="item.title">{{ item.title }}</div>
-          <gl-icon
-            v-if="item.state === 'closed'"
-            name="issue-close"
-            class="gl-mx-1 gl-fill-blue-500 gl-flex-shrink-0"
-            :size="16"
-            data-testid="incident-closed"
-          />
-        </div>
-      </template>
-
-      <template #cell(createdAt)="{ item }">
-        <time-ago-tooltip :time="item.createdAt" />
-      </template>
-
-      <template #cell(assignees)="{ item }">
-        <div data-testid="incident-assignees">
-          <template v-if="hasAssignees(item.assignees)">
-            <gl-avatars-inline
-              :avatars="item.assignees.nodes"
-              :collapsed="true"
-              :max-visible="4"
-              :avatar-size="24"
-              badge-tooltip-prop="name"
-              :badge-tooltip-max-chars="100"
-            >
-              <template #avatar="{ avatar }">
-                <gl-avatar-link
-                  :key="avatar.username"
-                  v-gl-tooltip
-                  target="_blank"
-                  :href="avatar.webUrl"
-                  :title="avatar.name"
-                >
-                  <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
-                </gl-avatar-link>
-              </template>
-            </gl-avatars-inline>
-          </template>
-          <template v-else>
-            {{ $options.i18n.unassigned }}
-          </template>
-        </div>
-      </template>
-
-      <template v-if="publishedAvailable" #cell(published)="{ item }">
-        <published-cell
-          :status-page-published-incident="item.statusPagePublishedIncident"
-          :un-published="$options.i18n.unPublished"
+    <template #filter>
+      <div class="filtered-search-wrapper">
+        <filtered-search-bar
+          :namespace="projectPath"
+          :search-input-placeholder="$options.i18n.searchPlaceholder"
+          :tokens="filteredSearchTokens"
+          :initial-filter-value="filteredSearchValue"
+          initial-sortby="created_desc"
+          recent-searches-storage-key="incidents"
+          class="row-content-block"
+          @onFilter="handleFilterIncidents"
         />
-      </template>
-      <template #table-busy>
-        <gl-loading-icon size="lg" color="dark" class="mt-3" />
-      </template>
+      </div>
+    </template>
 
-      <template v-if="errored" #empty>
-        {{ $options.i18n.noIncidents }}
-      </template>
-    </gl-table>
+    <template #title>
+      <h4 class="gl-display-block d-md-none my-3">
+        {{ s__('IncidentManagement|Incidents') }}
+      </h4>
+    </template>
 
-    <gl-empty-state
+    <template #table>
+      <gl-table
+        v-if="showList"
+        :items="incidents.list || []"
+        :fields="availableFields"
+        :show-empty="true"
+        :busy="loading"
+        stacked="md"
+        :tbody-tr-class="tbodyTrClass"
+        :no-local-sorting="true"
+        :sort-direction="'desc'"
+        :sort-desc.sync="sortDesc"
+        :sort-by.sync="sortBy"
+        sort-icon-left
+        fixed
+        @row-clicked="navigateToIncidentDetails"
+        @sort-changed="fetchSortedData"
+      >
+        <template #cell(severity)="{ item }">
+          <severity-token :severity="getSeverity(item.severity)" />
+        </template>
+
+        <template #cell(title)="{ item }">
+          <div :class="{ 'gl-display-flex gl-align-items-center': item.state === 'closed' }">
+            <div class="gl-max-w-full text-truncate" :title="item.title">{{ item.title }}</div>
+            <gl-icon
+              v-if="item.state === 'closed'"
+              name="issue-close"
+              class="gl-mx-1 gl-fill-blue-500 gl-flex-shrink-0"
+              :size="16"
+              data-testid="incident-closed"
+            />
+          </div>
+        </template>
+
+        <template #cell(createdAt)="{ item }">
+          <time-ago-tooltip :time="item.createdAt" />
+        </template>
+
+        <template #cell(assignees)="{ item }">
+          <div data-testid="incident-assignees">
+            <template v-if="hasAssignees(item.assignees)">
+              <gl-avatars-inline
+                :avatars="item.assignees.nodes"
+                :collapsed="true"
+                :max-visible="4"
+                :avatar-size="24"
+                badge-tooltip-prop="name"
+                :badge-tooltip-max-chars="100"
+              >
+                <template #avatar="{ avatar }">
+                  <gl-avatar-link
+                    :key="avatar.username"
+                    v-gl-tooltip
+                    target="_blank"
+                    :href="avatar.webUrl"
+                    :title="avatar.name"
+                  >
+                    <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+                  </gl-avatar-link>
+                </template>
+              </gl-avatars-inline>
+            </template>
+            <template v-else>
+              {{ $options.i18n.unassigned }}
+            </template>
+          </div>
+        </template>
+
+        <template v-if="publishedAvailable" #cell(published)="{ item }">
+          <published-cell
+            :status-page-published-incident="item.statusPagePublishedIncident"
+            :un-published="$options.i18n.unPublished"
+          />
+        </template>
+        <template #table-busy>
+          <gl-loading-icon size="lg" color="dark" class="mt-3" />
+        </template>
+
+        <template v-if="errored" #empty>
+          {{ $options.i18n.noIncidents }}
+        </template>
+      </gl-table>
+    </template>
+
+
+    <!-- <gl-empty-state
       v-else
       :title="emptyStateData.title"
       :svg-path="emptyListSvgPath"
       :description="emptyStateData.description"
       :primary-button-link="emptyStateData.btnLink"
       :primary-button-text="emptyStateData.btnText"
-    />
+    /> -->
 
-    <gl-pagination
-      v-if="showPaginationControls"
-      :value="pagination.currentPage"
-      :prev-page="prevPage"
-      :next-page="nextPage"
-      align="center"
-      class="gl-pagination gl-mt-3"
-      @input="handlePageChange"
-    />
+    <template #pagination>
+      <gl-pagination
+        v-if="showPaginationControls"
+        :value="pagination.currentPage"
+        :prev-page="prevPage"
+        :next-page="nextPage"
+        align="center"
+        class="gl-pagination gl-mt-3"
+        @input="handlePageChange"
+      />
+    </template>
+    </operations-page-wrapper>
   </div>
 </template>

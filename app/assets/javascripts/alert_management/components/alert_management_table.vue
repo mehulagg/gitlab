@@ -22,7 +22,6 @@ import { __, s__ } from '~/locale';
 import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
 import { fetchPolicies } from '~/lib/graphql';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
-import OperationsTable from '~/vue_shared/components/operations/operations_table.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import Tracking from '~/tracking';
 import getAlerts from '../graphql/queries/get_alerts.query.graphql';
@@ -370,96 +369,8 @@ export default {
       <h4 class="d-block d-md-none my-3">
         {{ s__('AlertManagement|Alerts') }}
       </h4>
-      <operations-table
-        :items="alerts ? alerts.list : []"
-        :fields="$options.fields"
-        :loading="loading"
-      >
 
-      <!-- <template slot="item" slot-scope="{ itemData }">
-          <slot name="item" :itemData="itemData"></slot>
-      </template> -->
-
-       <template #cell(severity)="{ item }">
-          <div
-            class="d-inline-flex align-items-center justify-content-between"
-            data-testid="severityField"
-          >
-            <gl-icon
-              class="mr-2"
-              :size="12"
-              :name="`severity-${item.severity.toLowerCase()}`"
-              :class="`icon-${item.severity.toLowerCase()}`"
-            />
-            {{ $options.severityLabels[item.severity] }}
-          </div>
-        </template>
-<!-- 
-        <template #cell(startedAt)="{ item }">
-          <time-ago v-if="item.startedAt" :time="item.startedAt" />
-        </template>
-
-        <template #cell(eventCount)="{ item }">
-          {{ item.eventCount }}
-        </template>
-
-        <template #cell(alertLabel)="{ item }">
-          <div
-            class="gl-max-w-full text-truncate"
-            :title="`${item.iid} - ${item.title}`"
-            data-testid="idField"
-          >
-            #{{ item.iid }} {{ item.title }}
-          </div>
-        </template>
-
-        <template #cell(issue)="{ item }">
-          <gl-link v-if="item.issueIid" data-testid="issueField" :href="getIssueLink(item)">
-            #{{ item.issueIid }}
-          </gl-link>
-          <div v-else data-testid="issueField">{{ s__('AlertManagement|None') }}</div>
-        </template>
-
-        <template #cell(assignees)="{ item }">
-          <div data-testid="assigneesField">
-            <template v-if="hasAssignees(item.assignees)">
-              <gl-avatars-inline
-                :avatars="item.assignees.nodes"
-                :collapsed="true"
-                :max-visible="4"
-                :avatar-size="24"
-                badge-tooltip-prop="name"
-                :badge-tooltip-max-chars="100"
-              >
-                <template #avatar="{ avatar }">
-                  <gl-avatar-link
-                    :key="avatar.username"
-                    v-gl-tooltip
-                    target="_blank"
-                    :href="avatar.webUrl"
-                    :title="avatar.name"
-                  >
-                    <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
-                  </gl-avatar-link>
-                </template>
-              </gl-avatars-inline>
-            </template>
-            <template v-else>
-              {{ $options.i18n.unassigned }}
-            </template>
-          </div>
-        </template>
-
-        <template #cell(status)="{ item }">
-          <alert-status
-            :alert="item"
-            :project-path="projectPath"
-            :is-sidebar="false"
-            @alert-error="handleAlertError"
-          />
-        </template> -->
-      </operations-table>
-      <!-- <gl-table
+      <gl-table
         class="alert-management-table"
         :items="alerts ? alerts.list : []"
         :fields="$options.fields"
@@ -562,7 +473,7 @@ export default {
         <template #table-busy>
           <gl-loading-icon size="lg" color="dark" class="mt-3" />
         </template>
-      </gl-table> -->
+      </gl-table>
 
       <gl-pagination
         v-if="showPaginationControls"
