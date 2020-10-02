@@ -134,7 +134,16 @@ These are reason why these changes are needed
 
 ## Iterations
 
-This work is being done as part of dedicated epic: [gl-infra-#316](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/316). This epic details the proposed solution and ideas for future iterations. 
+1. ✓ Design metadata database schema;
+1. ✓ Add support for managing metadata using the database;
+1. Design plans and tools to facilitate the migration of small, medium and large repositories (in progress);
+1. Implement online garbage collection (in progress);
+1. Create database clusters in staging and production for GitLab.com;
+1. Create automated deployment pipeline for GitLab.com;
+1. Deployment and gradual migration of the existing registry for GitLab.com;
+1. Rollout support for the metadata database to self-managed installs.
+
+A more detailed list of all tasks, as well as periodic progress updates can be found in the epic [&2313](https://gitlab.com/groups/gitlab-org/-/epics/2313).
 
 ## Who
 
