@@ -95,7 +95,7 @@ module Gitlab
             elsif ordering_by_similarity?(order_value)
               ['similarity', order_value.direction, order_value.expr]
             elsif ordering_by_case?(order_value)
-              [order_value.expr.case.name.to_s, order_value.direction, order_value.expr]
+              ['case_order_value', order_value.direction, order_value.expr]
             else
               [order_value.expr.name, order_value.direction, nil]
             end

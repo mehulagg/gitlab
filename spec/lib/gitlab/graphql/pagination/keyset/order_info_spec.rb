@@ -69,7 +69,7 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::OrderInfo do
 
       it 'assigns the right attribute name, named function, and direction' do
         expect(order_list.count).to eq 1
-        expect(order_list.first.attribute_name).to eq 'pending_delete'
+        expect(order_list.first.attribute_name).to eq 'case_order_value'
         expect(order_list.first.named_function).to be_kind_of(Arel::Nodes::Case)
         expect(order_list.first.sort_direction).to eq :asc
       end
