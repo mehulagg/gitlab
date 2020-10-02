@@ -42,14 +42,12 @@ export default class BuildArtifacts {
     // But be placed below and in the middle of the file name
     $('.js-artifact-tree-row')
       .on('mouseenter', e => {
-        const $el = $(e.currentTarget)
-          .find('.js-artifact-tree-tooltip');
+        const $el = $(e.currentTarget).find('.js-artifact-tree-tooltip');
 
         show($el);
       })
       .on('mouseleave', e => {
-        const $el = $(e.currentTarget)
-          .find('.js-artifact-tree-tooltip');
+        const $el = $(e.currentTarget).find('.js-artifact-tree-tooltip');
 
         hide($el);
       });
