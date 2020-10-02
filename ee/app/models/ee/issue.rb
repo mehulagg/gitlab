@@ -49,6 +49,7 @@ module EE
       belongs_to :promoted_to_epic, class_name: 'Epic'
 
       has_one :status_page_published_incident, class_name: 'StatusPage::PublishedIncident', inverse_of: :issue
+      has_one :incident_sla, class_name: 'IncidentManagement::IncidentSla'
 
       has_many :vulnerability_links, class_name: 'Vulnerabilities::IssueLink', inverse_of: :issue
       has_many :related_vulnerabilities, through: :vulnerability_links, source: :vulnerability
