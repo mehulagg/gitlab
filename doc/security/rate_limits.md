@@ -34,7 +34,8 @@ similarly mitigated by a rate limit.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25750) in GitLab 12.9.
 
-There is a rate limit for [downloading repository archives](../api/repositories.md#get-file-archive) which applies to the project and to the user initiating the download.
+There is a rate limit for [downloading repository archives](../api/repositories.md#get-file-archive),
+which applies to the project and to the user initiating the download either through the UI or the API.
 
 The **rate limit** is 5 requests per minute per user.
 
