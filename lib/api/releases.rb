@@ -21,7 +21,7 @@ module API
         use :pagination
         optional :order_by, type: String, values: %w[released_at created_at], default: 'released_at',
                             desc: 'Return packages ordered by `released_at` or `created_at`.'
-        optional :sort, type: String, values: %w[asc desc], default: 'asc',
+        optional :sort, type: String, values: %w[asc desc], default: 'desc',
                         desc: 'Return packages sorted in `asc` or `desc` order.'
       end
       get ':id/releases' do

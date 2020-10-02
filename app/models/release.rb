@@ -101,10 +101,10 @@ class Release < ApplicationRecord
 
   def self.sort_by_attribute(method)
     case method.to_s
-    when 'created_asc' then order_created
     when 'created_at_asc' then order_created
-    when 'released_asc' then order_released
-    when 'released_desc' then order_released_desc
+    when 'created_at_desc' then order_created_desc
+    when 'released_at_asc' then order_released
+    when 'released_at_desc' then order_released_desc
     else
       order_created_desc
     end

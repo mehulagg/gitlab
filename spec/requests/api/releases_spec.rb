@@ -53,6 +53,19 @@ RSpec.describe API::Releases do
         expect(json_response.second['tag_name']).to eq(release_1.tag)
       end
 
+      context 'with sorting' do
+        let(:url) { "/projects/#{project.id}/releases" }
+        let(:access_level) { maintainer }
+  
+        it_behaves_like 'release sorting', 'released_at' do
+          let(:releases) { [release_1, release_2] }
+        end
+  
+        it_behaves_like 'release sorting', 'created_at' do
+          let(:releases) { [release_1, release_2] }
+        end
+      end
+
       it 'matches response schema' do
         get api("/projects/#{project.id}/releases", maintainer)
 
@@ -119,17 +132,6 @@ RSpec.describe API::Releases do
         get api("/projects/#{project.id}/releases", maintainer)
       end.not_to exceed_query_limit(control_count)
     end
-
-    context 'with sorting' do
-      it_behaves_like 'release sorting', 'released_at' do
-        let(:releases) { [release2, release1] }
-      end
-
-      it_behaves_like 'release sorting', 'created_at' do
-        let(:releases) { [release2, release1] }
-      end
-    end
-    
 
     context 'when tag does not exist in git repository' do
       let!(:release) { create(:release, project: project, tag: 'v1.1.5') }
