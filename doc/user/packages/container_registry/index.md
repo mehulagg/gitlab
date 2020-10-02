@@ -139,9 +139,9 @@ as part of the [repository size limit](../../project/repository/index.md).
 
 ### Build and push by using GitLab CI/CD
 
-To build and push images to the Container Registry, you can use use [GitLab CI/CD](../../../ci/yaml/README.md).
-Use it to create workflows and automate processes that involve testing, building,
-and deploying your project from the Docker image you created.
+Use [GitLab CI/CD](../../../ci/yaml/README.md) to build and push images to the
+Container Registry. Use it to test, build, and deploy your project from the Docker
+image you created.
 
 #### Authenticate by using GitLab CI/CD
 
@@ -212,7 +212,7 @@ build:
 
 <hr>
 
-Steve--This was pasted from a topic below. That topic was also about docker-in-docker.
+Steve--This was pasted from a topic below. That topic was also about Docker-in-Docker.
 Can you help me combine them, if possible?
 
 1. Update the `image` and `service` to point to your registry.
