@@ -14,7 +14,7 @@ msgstr ""
 "X-Crowdin-Language: zh-CN\n"
 "X-Crowdin-File: /master/locale/gitlab.pot\n"
 "X-Crowdin-File-ID: 6\n"
-"PO-Revision-Date: 2020-10-02 00:57\n"
+"PO-Revision-Date: 2020-10-02 18:43\n"
 
 msgid " %{project_name}#%{issue_iid} &middot; opened %{issue_created} by %{author}"
 msgstr ""
@@ -226,6 +226,10 @@ msgid "%d open issue"
 msgid_plural "%d open issues"
 msgstr[0] ""
 
+msgid "%d pending comment"
+msgid_plural "%d pending comments"
+msgstr[0] ""
+
 msgid "%d personal project will be removed and cannot be restored."
 msgid_plural "%d personal projects will be removed and cannot be restored."
 msgstr[0] "%d个个人项目将被删除，无法恢复。"
@@ -367,10 +371,6 @@ msgid "%{count} participant"
 msgid_plural "%{count} participants"
 msgstr[0] "%{count}位参与者"
 
-msgid "%{count} pending comment"
-msgid_plural "%{count} pending comments"
-msgstr[0] "%{count}个待处理的评论"
-
 msgid "%{count} related %{pluralized_subject}: %{links}"
 msgstr "%{count}个相关的%{pluralized_subject}: %{links}"
 
@@ -479,8 +479,8 @@ msgstr "%{labelStart}方法: %{labelEnd}%{method}"
 msgid "%{labelStart}Namespace:%{labelEnd} %{namespace}"
 msgstr "%{labelStart}命名空间: %{labelEnd}%{namespace}"
 
-msgid "%{labelStart}Report Type:%{labelEnd} %{reportType}"
-msgstr "%{labelStart}报告类型: %{labelEnd}%{reportType}"
+msgid "%{labelStart}Scan Type:%{labelEnd} %{reportType}"
+msgstr ""
 
 msgid "%{labelStart}Scanner:%{labelEnd} %{scanner}"
 msgstr "%{labelStart}扫描工具:%{labelEnd} %{scanner}"
@@ -2593,6 +2593,9 @@ msgstr "空GitLab用户字段将在所有问题和注释的描述中添加FogBug
 msgid "An error has occurred"
 msgstr "发生错误"
 
+msgid "An error occured while making the changes: %{error}"
+msgstr ""
+
 msgid "An error occurred adding a draft to the thread."
 msgstr "向主题添加草稿时出错。"
 
@@ -2865,9 +2868,6 @@ msgstr "保存LDAP覆盖状态时发生错误。请再试一次。"
 
 msgid "An error occurred while saving assignees"
 msgstr "保存被指派人时出现错误。"
-
-msgid "An error occurred while saving the template. Please check if the template exists."
-msgstr "保存模板时出错。请检查模板是否存在。"
 
 msgid "An error occurred while searching for milestones"
 msgstr "搜索里程碑时出错"
@@ -3378,12 +3378,6 @@ msgstr "产物已成功删除。"
 msgid "Artifacts"
 msgstr "产物"
 
-msgid "As U2F devices are only supported by a few browsers, we require that you set up a two-factor authentication app before a U2F device. That way you'll always be able to log in - even when you're using an unsupported browser."
-msgstr "由于仅有部分浏览器支持U2F设备，我们要求您在使用U2F设备之前设置一个双重认证应用。这样即使您使用不支持U2F的浏览器您也可以登录。"
-
-msgid "As WebAuthn devices are only supported by a few browsers, we require that you set up a two-factor authentication app before a WebAuthn device. That way you'll always be able to log in - even when you're using an unsupported browser."
-msgstr ""
-
 msgid "As we continue to build more features for SAST, we'd love your feedback on the SAST configuration feature in %{linkStart}this issue%{linkEnd}."
 msgstr ""
 
@@ -3886,15 +3880,6 @@ msgstr "Bamboo 根地址，例如：https://bambo.example.com"
 
 msgid "BambooService|You must set up automatic revision labeling and a repository trigger in Bamboo."
 msgstr "您必须在Bamboo中设置自动版本标签和仓库触发器。"
-
-msgid "BatchComments|Delete all pending comments"
-msgstr "删除所有待处理的评论"
-
-msgid "BatchComments|Discard review?"
-msgstr "放弃评审？"
-
-msgid "BatchComments|You're about to discard your review which will delete all of your pending comments. The deleted comments %{strong_start}cannot%{strong_end} be restored."
-msgstr "您即将放弃您的评审，该操作将删除所有待处理的评论。请注意已删除评论 %{strong_start}不能%{strong_end} 恢复。"
 
 msgid "Be careful. Changing the project's namespace can have unintended side effects."
 msgstr "请注意，更改项目的命名空间可能会产生非预期的副作用。"
@@ -5420,8 +5405,8 @@ msgstr "请选择使用此Kubernetes群集的环境。"
 msgid "ClusterIntegration|Clear cluster cache"
 msgstr "清除集群缓存"
 
-msgid "ClusterIntegration|Clear the local cache of namespace and service accounts. This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
-msgstr "清除名称空间和服务帐户的本地缓存。如集成已失去同步，则此操作为必须。缓存将在所需名称空间和服务帐户的下一个CI作业期间重新生成。"
+msgid "ClusterIntegration|Clear the local cache of namespace and service accounts."
+msgstr ""
 
 msgid "ClusterIntegration|Cluster management project (alpha)"
 msgstr "集群管理项目(alpha)"
@@ -6118,6 +6103,12 @@ msgstr ""
 
 msgid "ClusterIntegration|This account must have permissions to create a Kubernetes cluster in the %{link_to_container_project} specified below"
 msgstr "该帐户需具备在如下指定的%{link_to_container_project}中创建 Kubernetes集群的权限"
+
+msgid "ClusterIntegration|This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
+msgstr ""
+
+msgid "ClusterIntegration|This is necessary to clear existing environment-namespace associations from clusters previously managed by GitLab."
+msgstr ""
 
 msgid "ClusterIntegration|This option will allow you to install applications on RBAC clusters."
 msgstr "此选项允许您在启用RBAC的群集上安装应用程序。"
@@ -6879,6 +6870,9 @@ msgstr[0] "删除标签"
 msgid "ContainerRegistry|Set cleanup policy"
 msgstr "设置清理策略"
 
+msgid "ContainerRegistry|Some tags were not deleted"
+msgstr ""
+
 msgid "ContainerRegistry|Something went wrong while fetching the cleanup policy."
 msgstr "获取清理政策时出了错。"
 
@@ -6917,6 +6911,9 @@ msgstr "名称匹配此正则表达式的标签将%{italicStart}被保留:%{ital
 
 msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}expire:%{italicEnd}"
 msgstr "名称匹配此正则表达式的标签将%{italicStart}过期:%{italicEnd}"
+
+msgid "ContainerRegistry|The cleanup policy timed out before it could delete all tags. An administrator can %{adminLinkStart}manually run cleanup now%{adminLinkEnd} or you can wait for the cleanup policy to automatically run again. %{docLinkStart}More information%{docLinkEnd}"
+msgstr ""
 
 msgid "ContainerRegistry|The last tag related to this image was recently removed. This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process. If you have any questions, contact your administrator."
 msgstr "与此镜像相关的最后一个标签最近已被删除。空镜像和所有相关数据将作为常规垃圾收集过程的一部分自动清除。如有任何疑问，请与管理员联系。"
@@ -8114,6 +8111,9 @@ msgstr "天"
 msgid "Days to merge"
 msgstr "合并所需天数"
 
+msgid "Dear Administrator,"
+msgstr ""
+
 msgid "Debug"
 msgstr "调试"
 
@@ -8948,9 +8948,6 @@ msgstr "放弃对 %{path} 的更改吗？"
 msgid "Discard draft"
 msgstr "取消"
 
-msgid "Discard review"
-msgstr "放弃评审"
-
 msgid "DiscordService|Discord Notifications"
 msgstr "Discord 通知"
 
@@ -9413,6 +9410,9 @@ msgstr "电子邮件"
 
 msgid "Emails sent from Service Desk will have this name"
 msgstr "从服务台发送的电子邮件将具有此名称"
+
+msgid "Emails sent to %{email} will still be supported"
+msgstr ""
 
 msgid "Emails separated by comma"
 msgstr "以逗号分隔的电子邮件地址"
@@ -11197,9 +11197,6 @@ msgstr "指纹"
 msgid "Finish editing this message first!"
 msgstr "先完成此消息的编辑！"
 
-msgid "Finish review"
-msgstr "完成评审"
-
 msgid "Finish setting up your dedicated account for %{group_name}."
 msgstr "完成您的%{group_name}专用帐户设置。"
 
@@ -11280,6 +11277,9 @@ msgstr "对于内部项目，任何已登录的用户都可以查看流水线并
 
 msgid "For more info, read the documentation."
 msgstr "有关详细信息，请阅读文档。"
+
+msgid "For more information on how the number of active users is calculated, see the %{self_managed_subscriptions_doc_link} documentation."
+msgstr ""
 
 msgid "For more information, go to the "
 msgstr "如需了解详细信息，请参阅"
@@ -11855,6 +11855,9 @@ msgid "GitLab / Unsubscribe"
 msgstr "取消订阅"
 
 msgid "GitLab API"
+msgstr ""
+
+msgid "GitLab Billing Team."
 msgstr ""
 
 msgid "GitLab Group Runners can execute code for all the projects in this group."
@@ -13166,6 +13169,9 @@ msgstr "如果启用，GitLab将使用Geo处理对象存储复制。 %{linkStart
 
 msgid "If enabled, access to projects will be validated on an external service using their classification label."
 msgstr "如果启用，则使用外部服务上的分类标签来验证对项目的访问权限。"
+
+msgid "If the number of active users exceeds the user limit, you will be charged for the number of %{users_over_license_link} at your next license reconciliation."
+msgstr ""
 
 msgid "If there is no previous license or if the previous license has expired, some GitLab functionality will be blocked until a new, valid license is uploaded."
 msgstr "如果之前未上传许可证，或者上一个许可证已过期， 部分GitLab功能将无法使用，直到上传新的有效许可证。"
@@ -17393,6 +17399,12 @@ msgstr "无"
 msgid "Not Implemented"
 msgstr "尚未实现"
 
+msgid "Not all browsers support U2F devices. Therefore, we require that you set up a two-factor authentication app first. That way you'll always be able to sign in - even when you're using an unsupported browser."
+msgstr ""
+
+msgid "Not all browsers support WebAuthn. Therefore, we require that you set up a two-factor authentication app first. That way you'll always be able to sign in - even from an unsupported browser."
+msgstr ""
+
 msgid "Not all data has been processed yet, the accuracy of the chart for the selected timeframe is limited."
 msgstr "尚未处理所有数据，因此所选时间范围内图表的不一定完全准确。"
 
@@ -18426,6 +18438,9 @@ msgstr "暂停的 Runner 不接受新作业"
 msgid "Pending"
 msgstr "等待中"
 
+msgid "Pending comments"
+msgstr ""
+
 msgid "People without permission will never get a notification and won't be able to comment."
 msgstr "权限不足的用户将无法收到通知，也无法评论。"
 
@@ -18974,6 +18989,9 @@ msgstr "请提供有效的电子邮件地址。"
 
 msgid "Please provide attributes to update"
 msgstr "请提供要更新的属性"
+
+msgid "Please reach out if you have any questions and we'll be happy to assist."
+msgstr ""
 
 msgid "Please refer to %{docs_url}"
 msgstr "请参考%{docs_url}"
@@ -21669,6 +21687,9 @@ msgstr "请求分析"
 msgid "Requests to these domain(s)/address(es) on the local network will be allowed when local requests from hooks and services are not allowed. IP ranges such as 1:0:0:0:0:0:0:0/124 or 127.0.0.0/28 are supported. Domain wildcards are not supported currently. Use comma, semicolon, or newline to separate multiple entries. The allowlist can hold a maximum of 1000 entries. Domains should use IDNA encoding. Ex: example.com, 192.168.1.1, 127.0.0.0/28, xn--itlab-j1a.com."
 msgstr "当不允许来自钩子和服务的本地请求时，将允许对本地网络上这些域/地址的请求。可支持IP范围，例如1:0:0:0:0:0:0:0/124或127.0.0.0/28。当前不支持域通配符。多个条目需使用逗号，分号或换行符分隔。允许名单最多可容纳1000个条目。域应使用IDNA编码。例如：example.com，192.168.1.1、127.0.0.0/28, xn--itlab-j1a.com。"
 
+msgid "Require admin approval for new sign-ups"
+msgstr ""
+
 msgid "Require all users in this group to setup Two-factor authentication"
 msgstr "要求此群组中的所有用户都启用双重认证"
 
@@ -23292,6 +23313,9 @@ msgstr "自动设置一个%{type}的Runner"
 msgid "Set up a %{type} Runner manually"
 msgstr "手动设置%{type} Runner  "
 
+msgid "Set up a hardware device as a second factor to sign in."
+msgstr ""
+
 msgid "Set up assertions/attributes/claims (email, first_name, last_name) and NameID according to %{docsLinkStart}the documentation %{icon}%{docsLinkEnd}"
 msgstr "根据%{docsLinkStart}文档%{icon}%{docsLinkEnd}设置断言/属性/声明（email，first_name，last_name）和NameID"
 
@@ -24389,6 +24413,9 @@ msgstr "提交更改时发生错误。"
 msgid "StaticSiteEditor|Branch could not be created."
 msgstr "无法创建分支。"
 
+msgid "StaticSiteEditor|Copy update"
+msgstr ""
+
 msgid "StaticSiteEditor|Could not commit the content changes."
 msgstr "无法提交内容更改。"
 
@@ -25195,6 +25222,9 @@ msgstr "测试"
 
 msgid "Thank you for signing up for your free trial! You will get additional instructions in your inbox shortly."
 msgstr "感谢您注册免费试用版！随后您将收到有关安装使用指南的邮件。"
+
+msgid "Thank you for your business."
+msgstr ""
 
 msgid "Thank you for your feedback!"
 msgstr "感谢您的反馈！"
@@ -27732,9 +27762,6 @@ msgstr "使用 %{code_start}::%{code_end} 创建 %{link_start}有范围标签集
 msgid "Use Service Desk to connect with your users (e.g. to offer customer support) through email right inside GitLab"
 msgstr "在GitLab内部使用服务台通过电子邮件与用户联系（例如提供客户支持）"
 
-msgid "Use a hardware device to add the second factor of authentication."
-msgstr "使用硬件设备添加第二个身份验证因素。"
-
 msgid "Use an one time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
 msgstr "在您的手机或计算机上使用一次密码验证器启用双重认证 (2FA)。"
 
@@ -28577,6 +28604,9 @@ msgstr "我们要确定您是不是机器人。"
 msgid "We will notify %{inviter} that you declined their invitation to join GitLab. You will stop receiving reminders."
 msgstr ""
 
+msgid "We would like to inform you that your subscription GitLab Enterprise Edition %{plan_name} is nearing its user limit. You have %{active_user_count} active users, which is almost at the user limit of %{maximum_user_count}."
+msgstr ""
+
 msgid "We've found no vulnerabilities"
 msgstr "未发现安全漏洞"
 
@@ -28756,6 +28786,9 @@ msgstr "当部署作业成功时，跳过仍在等待的旧部署作业"
 
 msgid "When a runner is locked, it cannot be assigned to other projects"
 msgstr "当Runner被锁定时，不能将其分配给其他项目"
+
+msgid "When enabled, any user visiting %{host} and creating an account will have to be explicitly approved by the admin before they can login. This setting is effective only if sign-ups are enabled."
+msgstr ""
 
 msgid "When enabled, any user visiting %{host} will be able to create an account."
 msgstr "启用后，任何访问%{host}用户都可以创建一个帐户。"
@@ -29162,6 +29195,9 @@ msgstr "可以轻松地在Kubernetes集群上安装Runner。 %{link_to_help_page
 
 msgid "You can filter by 'days to merge' by clicking on the columns in the chart."
 msgstr "您可以通过单击图表中的列来按“合并天数”进行过滤。"
+
+msgid "You can find more information about GitLab subscriptions in %{subscriptions_doc_link}."
+msgstr ""
 
 msgid "You can generate an access token scoped to this project for each application to use the GitLab API."
 msgstr "您可以为每个应用程序生成适用于此项目的访问令牌，以使用GitLab API。"
