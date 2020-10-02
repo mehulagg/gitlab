@@ -19,8 +19,7 @@ The Container Registry is a single [Go](https://golang.org/) application. Its on
 
 ``mermaid
 graph LR
-   C((Client)) -- HTTP request --> R(Container Registry) -- Upload/download blobs<br><br>Write/read metadata --> B(Storage Backend)
-``
+   C((Client)) -- HTTP request --> R(Container Registry) -- Upload/download blobs<br><br>Write/read metadata --> B(Storage Backend``
 
 Client applications (e.g. GitLab Rails and Docker CLI) interact with the Container Registry through its [HTTP API](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md). The most common operations are pushing and pulling images to/from the registry, which require a series of HTTP requests in a specific order. The request flow for these operations is detailed [here](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs-gitlab/push-pull-requzest-flow.md).
 
@@ -67,18 +66,17 @@ The introduction of a database will affect the registry architecture, as we will
 ``mermaid
 graph LR
    C((Client)) -- HTTP request --> R(Container Registry) -- Upload/download blobs --> B(Storage Backend)
-   R -- Write/read metadata --> D[(Database)]
-``
+   R -- Write/read metadata --> D[(Database)]``
 
 With a database in place, the registry will no longer use the storage backend to write and read metadata. Instead, metadata will be stored and manipulated on the PostgreSQL database. The storage backend will then be used only for uploading and downloading blobs.
 
 ### Database
 
-For GitLab.com, the registry database will be on a separate dedicated cluster. For self-managed instances, the registry database should reside in the same instance as the GitLab database. Please see [#93](https://gitlab.com/gitlab-org/container-registry/-/issues/93) and [gitlab-com/gl-infra/infrastructure#10109](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10109) for additional context.
+For GitLab.com, the registry database will be on a separate dedicated cluster. For self-managed instances, the registry database should reside in the same instance as the GitLab database. Please see [#93](https://gitlab.com/gitlab-org/container-registry/-/issues/93) and [GitLab-com/gl-infra/infrastructure#10109](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/10109) for additional context.
 
 The design and development of the registry database adhere to the GitLab [database guidelines](https://docs.gitlab.com/ee/development/database/). Being a Go application, the required tooling to support the database will have to be developed, such as for running database migrations.
 
-Support for running *online* migrations is already supported by the registry CLI, as described in the [documentation](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs-gitlab/database-migrations.md). Apart from online migrations, [*post deployment* migrations](https://docs.gitlab.com/ee/development/post_deployment_migrations.html) are also a requirement to be implemented as outlined in [container-registry#220](https://gitlab.com/gitlab-org/container-registry/-/issues/220).
+Support for running *online* migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md). Apart from online migrations, [*post deployment* migrations](/development/post_deployment_migrations.html) are also a requirement to be implemented as outlined in [container-registry#220](https://gitlab.com/gitlab-org/container-registry/-/issues/220).
 
 ## Iterations
 
