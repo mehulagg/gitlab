@@ -21,6 +21,7 @@ module EE
 
         def validate_code_owners?
           return false if updated_from_web?
+          return false if user_access.can_push_to_branch?(branch_name)
 
           project.branch_requires_code_owner_approval?(branch_name)
         end
