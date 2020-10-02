@@ -1,6 +1,6 @@
 ---
 comments: false
-description: 'Self-service Container Registry deployment'
+description: 'Container Registry New Architecture'
 ---
 
 # Usage of the GitLab Container Registry
