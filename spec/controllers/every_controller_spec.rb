@@ -24,7 +24,10 @@ RSpec.describe "Every controller" do
     let_it_be(:routes_without_category) do
       controller_actions.map do |controller, action|
         next if controller.feature_category_for_action(action)
-        next unless controller.to_s.start_with?('B', 'C', 'D', 'E', 'F', 'Projects::MergeRequestsController')
+
+        next unless controller.to_s.start_with?('B', 'C', 'D', 'E', 'F',
+                                                'H',
+                                                'Projects::MergeRequestsController')
 
         "#{controller}##{action}"
       end.compact
