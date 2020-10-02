@@ -7,7 +7,6 @@ FactoryBot.define do
     type { 'Group' }
     owner { nil }
     project_creation_level { ::Gitlab::Access::MAINTAINER_PROJECT_ACCESS }
-    namespace_settings { association :namespace_settings, namespace: instance }
 
     after(:create) do |group|
       if group.owner
@@ -15,6 +14,7 @@ FactoryBot.define do
         # https://gitlab.com/gitlab-org/gitlab-foss/issues/43292
         raise "Don't set owner for groups, use `group.add_owner(user)` instead"
       end
+      create(:namespace_settings, namespace: group)
     end
 
     trait :public do
