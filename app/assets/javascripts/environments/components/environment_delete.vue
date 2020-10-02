@@ -61,6 +61,8 @@ export default {
     :aria-label="title"
     class="d-none d-sm-none d-md-block"
     variant = "danger"
+    category = "primary"
+    icon = "remove"
     data-toggle="modal"
     data-target="#delete-environment-modal"
     @click="onClick"
