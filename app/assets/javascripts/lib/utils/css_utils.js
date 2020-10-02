@@ -10,6 +10,6 @@ export function loadCSSFile(path) {
     };
     linkElement.href = path;
 
-    document.getElementsByTagName('head')[0].appendChild(linkElement);
+    document.head.appendChild(linkElement);
   });
 }

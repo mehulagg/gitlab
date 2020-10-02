@@ -181,7 +181,7 @@ import { loadCSSFile } from '../lib/utils/css_utils';
     }
   }
 
-  loadCSSFile(document.querySelector('.modal-profile-crop').dataset.cropppercsspath);
+  loadCSSFile(document.querySelector('.modal-profile-crop').dataset.croppercsspath);
 
   $.fn.glCrop = function(opts) {
     return this.each(function() {
