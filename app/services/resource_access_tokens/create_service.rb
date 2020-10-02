@@ -103,7 +103,28 @@ module ResourceAccessTokens
     end
 
     def provision_access(resource, user)
-      resource.add_maintainer(user)
+     # resource.add_maintainer(user)
+     # if resource project
+      case resource_type
+      when 'project'
+        ProjectMember.add_user(
+          project,
+          user,
+          :maintainer,
+          current_user: current_user,
+          expires_at: personal_access_token_params[:expires_at]
+        )
+      when 'group' # change this to GroupMember
+        ProjectMember.add_user(
+          project,
+          user,
+          :maintainer,
+          current_user: current_user,
+          expires_at: personal_access_token_params[:expires_at]
+        )
+      else # raise some error?
+        return error("Failed to provision access - resource type not valid")
+      end
     end
 
     def error(message)
