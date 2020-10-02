@@ -1,5 +1,5 @@
 include:
-  - template: License-Scanning.gitlab-ci.yml
+  - local: lib/gitlab/ci/templates/Security/License-Scanning.gitlab-ci.yml
 #   - template: Jobs/Code-Quality.gitlab-ci.yml
 #   - template: Security/SAST.gitlab-ci.yml
 #   - template: Security/Dependency-Scanning.gitlab-ci.yml
