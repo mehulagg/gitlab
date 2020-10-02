@@ -9,11 +9,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4040) in GitLab 8.8.
 > - Docker Registry manifest `v1` support was added in GitLab 8.9 to support Docker
 >   versions earlier than 1.10.
-> - Starting from GitLab 8.12, if you have 2FA enabled in your account, you need
->   to pass a [personal access token](../../profile/personal_access_tokens.md) instead of your password in order to
->   login to GitLab's Container Registry.
-> - Multiple level image names support was added in GitLab 9.1.
-> - The group level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
+> - Starting in GitLab 8.12, if you have two-factor authentication enabled in your account, you need
+>   to pass a [personal access token](../../profile/personal_access_tokens.md) instead of your password to
+>   sign in to the Container Registry.
+> - Support for multiple level image names was added in GitLab 9.1.
+> - The group-level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
 > - Searching by image repository name was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31322) in GitLab 13.0.
 
 With the Docker Container Registry integrated into GitLab, every GitLab project can
@@ -21,7 +21,6 @@ have its own space to store its Docker images.
 
 You can read more about Docker Registry at <https://docs.docker.com/registry/introduction/>.
 
-NOTE: **Note:**
 This document is the user guide. To learn how to enable the Container
 Registry for your GitLab instance, visit the
 [administrator documentation](../../../administration/packages/container_registry.md).
@@ -58,127 +57,109 @@ To download and run a container image hosted in the GitLab Container Registry:
 For more information on running Docker containers, visit the
 [Docker documentation](https://docs.docker.com/engine/userguide/intro/).
 
-## Authenticating to the GitLab Container Registry
+### Image naming convention
 
-If you visit the **Packages & Registries > Container Registry** link under your project's
-menu, you can see the explicit instructions to login to the Container Registry
-by using your GitLab credentials.
-
-For example if the Registry's URL is `registry.example.com`, then you should be
-able to log in with:
-
-```shell
-docker login registry.example.com
-```
-
-NOTE: **Note:**
-If you have [2 Factor Authentication](../../profile/account/two_factor_authentication.md)
-enabled in your account, you need to pass a
-[personal access token](../../profile/personal_access_tokens.md) instead
-of your password in order to login to GitLab's Container Registry.
-
-Credentials must be provided for authorization to any non-public registry. Only project members can access private,
-GitLab-hosted registries.
-
-There are two ways to authenticate:
-
-- By using a [personal access token](../../profile/personal_access_tokens.md).
-- By using a [deploy token](../../project/deploy_tokens/index.md).
-
-The minimum scope needed for both of them is `read_registry`.
-
-Example of using a token:
-
-```shell
-docker login registry.example.com -u <username> -p <token>
-```
-
-## Build and push images from your local machine
-
-Building and publishing images should be a straightforward process. Just make
-sure that you are using the Registry URL with the namespace and project name
-that is hosted on GitLab:
-
-```shell
-docker build -t registry.example.com/group/project/image .
-docker push registry.example.com/group/project/image
-```
-
-Your image is named after the following scheme:
+Images follow this naming convention:
 
 ```plaintext
 <registry URL>/<namespace>/<project>/<image>
 ```
 
-GitLab supports up to three levels of image repository names.
-The following examples of image tags are valid:
+There are three different ways to refer to images:
 
 ```plaintext
-registry.example.com/group/project:some-tag
-registry.example.com/group/project/image:latest
-registry.example.com/group/project/my/image:rc1
+registry.example.com/namespace/project:some-tag
 ```
 
+```plaintext
+registry.example.com/namespace/project/image:latest
+```
+
+```plaintext
+registry.example.com/namespace/project/my/image:rc1
+```
+
+## Build and push images to the Container Registry
+
+You can build and push images to the Container Registry:
+
+- By [using Docker commands](#build-and-push-by-using-docker-commands).
+- By [using GitLab CI/CD](#build-and-push-by-using-gitlab-cicd).
+
+### Build and push by using Docker commands
+
+To build and push to the Container Registry, you can use Docker commands.
+
+#### Authenticate with the Container Registry
+
+If the project is not public, you must authenticate with the Container Registry
+before you can build and push images.
+
+Only members of the project can access a project's Container Registry.
+
+To authenticate, you can use:
+
+- A [personal access token](../../profile/personal_access_tokens.md).
+- A [deploy token](../../project/deploy_tokens/index.md).
+
+Both of these require the minimum scope to be:
+
+- For read (pull) access, `read_registry`.
+- For write (push) access, `write_registry`.
+
+To authenticate, run the `docker` command. For example:
+
+   ```shell
+   docker login registry.example.com -u <username> -p <token>
+   ```
+
+#### Build and push images
+
+To build and push to the Container Registry:
+
+1. Authenticate with the Container Registry. 
+
+1. Run the command to build or push. For example, to build: 
+
+   ```shell
+   docker build -t registry.example.com/group/project/image .
+   ```
+
+   Or to push:
+
+   ```shell
+   docker push registry.example.com/group/project/image
+   ```
+
+You can also view these commands by going to your project's **Packages & Registries > Container Registry**.
+
 NOTE: **Note:**
-Currently there is a soft (10GB) size restriction for
-the Container Registry on GitLab.com, as part of the [repository size limit](../../project/repository/index.md).
+There is a soft (10GB) size restriction for the Container Registry on GitLab.com,
+as part of the [repository size limit](../../project/repository/index.md).
 
-## Build and push images using GitLab CI/CD
+### Build and push by using GitLab CI/CD
 
-While you can build and push your images from your local machine, take
-full advantage of the Container Registry by combining it with GitLab CI/CD.
-You can then create workflows and automate any processes that involve testing,
-building, and eventually deploying your project from the Docker image you
-created.
+To build and push images to the Container Registry, you can use use [GitLab CI/CD](../../../ci/yaml/README.md).
+Use it to create workflows and automate processes that involve testing, building,
+and deploying your project from the Docker image you created.
 
-Before diving into details, some things you should be aware of:
+#### Authenticate by using GitLab CI/CD
 
-- You must [authenticate to the container registry](#authenticating-to-the-container-registry-with-gitlab-cicd)
-  before running any commands. You can do this in the `before_script` if multiple
-  jobs depend on it.
-- Using `docker build --pull` fetches any changes to base
-  images before building in case your cache is stale. It takes slightly
-  longer, but it means you don’t get stuck without security patches for base images.
-- Doing an explicit `docker pull` before each `docker run` fetches
-  the latest image that was just built. This is especially important if you are
-  using multiple runners that cache images locally. Using the Git SHA in your
-  image tag makes this less necessary since each job is unique and you
-  shouldn't ever have a stale image. However, it's still possible to have a
-  stale image if you re-build a given commit after a dependency has changed.
-- You don't want to build directly to `latest` tag in case there are multiple jobs
-  happening simultaneously.
+If the project is not public, you must authenticate with the Container Registry.
+Only members of the project can access a project's Container Registry.
 
-### Authenticating to the Container Registry with GitLab CI/CD
+To use CI/CD to authenticate, you can use:
 
-There are three ways to authenticate to the Container Registry via
-[GitLab CI/CD](../../../ci/yaml/README.md):
+- The `CI_REGISTRY_USER` variable.
 
-- **Using the special `CI_REGISTRY_USER` variable**: The user specified by this variable is created for you in order to
-  push to the Registry connected to your project. Its password is automatically
-  set with the `CI_REGISTRY_PASSWORD` variable. This allows you to automate building and deploying
-  your Docker images and has read/write access to the Registry. This is ephemeral,
-  so it's only valid for one job. You can use the following example as-is:
+  This variable has read-write access to the Container Registry and is valid for
+  one job only. Its password is also automatically created and assigned to `CI_REGISTRY_PASSWORD`.
 
   ```shell
   docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   ```
 
-- **Using the GitLab Deploy Token**: You can create and use a
-  [special deploy token](../../project/deploy_tokens/index.md#gitlab-deploy-token)
-  with your projects.
-  Once created, you can use the special environment variables, and GitLab CI/CD
-  fills them in for you. You can use the following example as-is:
-
-  ```shell
-  docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
-  ```
-
-- **Using a personal access token**: You can create and use a
-  [personal access token](../../profile/personal_access_tokens.md)
-  in case your project is private:
-
-  - For read (pull) access, the scope should be `read_registry`.
-  - For write (push) access, the scope should be `write_registry`.
+- A [CI job token](../../../ci/triggers/README.md#ci-job-token).
 
   Replace the `<username>` and `<access_token>` in the following example:
 
@@ -186,10 +167,36 @@ There are three ways to authenticate to the Container Registry via
   docker login -u <username> -p <access_token> $CI_REGISTRY
   ```
 
-### Container Registry examples with GitLab CI/CD
+- A [personal access token](../../profile/personal_access_tokens.md) or
+  [deploy token](../../project/deploy_tokens/index.md#gitlab-deploy-token) with the minimum scope of:
+  - For read (pull) access, `read_registry`.
+  - For write (push) access, `write_registry`.
 
-If you're using Docker-in-Docker on your runners, this is how your `.gitlab-ci.yml`
-should look:
+  ```shell
+  docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+  ```
+
+#### Configure your `.gitlab-ci.yml` file
+
+You can configure your `.gitlab-ci.yml` file to build and push images to the Container Registry.
+
+- If multiple jobs require authentication, put the authentication command in the `before_script`.
+- Before building, use `docker build --pull` to fetch changes to base images. It takes slightly
+  longer, but it ensures your image is up-to-date.
+- Before each `docker run`, do an explicit `docker pull` to fetch
+  the image that was just built. This is especially important if you are
+  using multiple runners that cache images locally.   
+
+  If you use the Git SHA in your image tag, each job is unique and you
+  should never have a stale image. However, it's still possible to have a
+  stale image if you re-build a given commit after a dependency has changed.
+- Don't build directly to the `latest` tag because multiple jobs may be
+  happening simultaneously.
+
+#### CI/CD example with Docker-in-Docker
+
+If you're using Docker-in-Docker on your runners, follow this `.gitlab-ci.yml`
+example:
 
 ```yaml
 build:
@@ -199,11 +206,42 @@ build:
     - docker:19.03.12-dind
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/group/project/image:latest .
-    - docker push $CI_REGISTRY/group/project/image:latest
+    - docker build -t $CI_REGISTRY/namespace/project/image:latest .
+    - docker push $CI_REGISTRY/namespace/project/image:latest
 ```
 
-You can also make use of [other variables](../../../ci/variables/README.md) to avoid hard-coding:
+<hr>
+
+Steve--This was pasted from a topic below. That topic was also about docker-in-docker.
+Can you help me combine them, if possible?
+
+1. Update the `image` and `service` to point to your registry.
+1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
+
+   For example:
+
+   ```yaml
+   build:
+     image: $CI_REGISTRY/namespace/project/docker:19.03.12
+     services:
+       - name: $CI_REGISTRY/namespace/project/docker:19.03.12-dind
+         alias: docker
+     stage: build
+     script:
+       - docker build -t my-docker-image .
+       - docker run my-docker-image /script/to/run/tests
+   ```
+
+If you do not set the service alias, the `docker:19.03.12` image is unable to find the
+`dind` service, and an error occurs:
+
+```plaintext
+error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
+```
+
+<hr>
+
+You can also use [other variables](../../../ci/variables/README.md) to avoid hard-coding:
 
 ```yaml
 build:
@@ -219,14 +257,16 @@ build:
     - docker push $IMAGE_TAG
 ```
 
-Here, `$CI_REGISTRY_IMAGE` would be resolved to the address of the registry tied
-to this project. Since `$CI_COMMIT_REF_NAME` resolves to the branch or tag name,
+Here, `$CI_REGISTRY_IMAGE` is resolved to the address of the Container Registry for this project.
+Because `$CI_COMMIT_REF_NAME` resolves to the branch or tag name,
 and your branch name can contain forward slashes (for example, `feature/my-feature`), it is
-safer to use `$CI_COMMIT_REF_SLUG` as the image tag. This is due to that image tags
-cannot contain forward slashes. We also declare our own variable, `$IMAGE_TAG`,
-combining the two to save us some typing in the `script` section.
+safer to use `$CI_COMMIT_REF_SLUG` as the image tag. This is because image tags
+cannot contain forward slashes. We also declare our own variable, `$IMAGE_TAG`.
+Combining the two values saves additional lines in the `script` section.
 
-Here's a more elaborate example that splits up the tasks into 4 pipeline stages,
+#### CI/CD example with parallel tests
+
+This example splits the tasks into four pipeline stages,
 including two tests that run in parallel. The `build` is stored in the container
 registry and used by subsequent stages, downloading the image
 when needed. Changes to `master` also get tagged as `latest` and deployed using
@@ -288,42 +328,11 @@ deploy:
     - master
 ```
 
-NOTE: **Note:**
 This example explicitly calls `docker pull`. If you prefer to implicitly pull the
 built image using `image:`, and use either the [Docker](https://docs.gitlab.com/runner/executors/docker.html)
 or [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html) executor,
 make sure that [`pull_policy`](https://docs.gitlab.com/runner/executors/docker.html#how-pull-policies-work)
 is set to `always`.
-
-### Using a Docker-in-Docker image from your Container Registry
-
-To use your own Docker images for Docker-in-Docker, follow these steps
-in addition to the steps in the
-[Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) section:
-
-1. Update the `image` and `service` to point to your registry.
-1. Add a service [alias](../../../ci/yaml/README.md#servicesalias).
-
-Below is an example of what your `.gitlab-ci.yml` should look like:
-
-```yaml
-build:
-  image: $CI_REGISTRY/group/project/docker:19.03.12
-  services:
-    - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
-      alias: docker
-  stage: build
-  script:
-    - docker build -t my-docker-image .
-    - docker run my-docker-image /script/to/run/tests
-```
-
-If you forget to set the service alias, the `docker:19.03.12` image is unable to find the
-`dind` service, and an error like the following is thrown:
-
-```plaintext
-error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
-```
 
 ## Delete images
 
