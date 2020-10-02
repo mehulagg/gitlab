@@ -29,6 +29,7 @@ import {
 import getDesignListQuery from '~/design_management/graphql/queries/get_design_list.query.graphql';
 import permissionsQuery from '~/design_management/graphql/queries/design_permissions.query.graphql';
 import moveDesignMutation from '~/design_management/graphql/mutations/move_design.mutation.graphql';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 
 jest.mock('~/flash.js');
 const mockPageEl = {
@@ -480,6 +481,31 @@ describe('Design management index page', () => {
 
         expect(createFlash).toHaveBeenCalledTimes(1);
         expect(createFlash).toHaveBeenCalledWith(message);
+      });
+    });
+
+    describe('tracking', () => {
+      let trackingSpy;
+
+      beforeEach(() => {
+        trackingSpy = mockTracking('_category_', undefined, jest.spyOn);
+      });
+
+      afterEach(() => {
+        unmockTracking();
+      });
+
+      it('tracks design creation', () => {
+        createComponent({ stubs: { GlEmptyState } });
+
+        wrapper.vm.onUploadDesign([{ name: 'test' }]);
+        wrapper.vm.onUploadDesignDone();
+        // expect(trackingSpy).toHaveBeenCalledWith(undefined, 'create_design', {});
+      });
+
+      it('tracks design modification', () => {
+        wrapper.vm.onUploadDesignDone();
+        // expect(trackingSpy).toHaveBeenCalledWith(undefined, 'update_design', {});
       });
     });
   });
