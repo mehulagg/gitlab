@@ -17,9 +17,11 @@ For GitLab.com and for GitLab's customers, the Container Registry is a critical 
 
 The Container Registry is a single [Go](https://golang.org/) application. Its only dependency is the storage backend on which images and metadata are stored.
 
-``mermaid
+```mermaid
 graph LR
-   C((Client)) -- HTTP request --> R(Container Registry) -- Upload/download blobs<br><br>Write/read metadata --> B(Storage Backend``
+   C((Client)) -- HTTP request --> R(Container Registry) -- Upload/download blobs --> B(Storage Backend)
+   R -- Write/read metadata --> B
+```
 
 Client applications (e.g. GitLab Rails and Docker CLI) interact with the Container Registry through its [HTTP API](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/spec/api.md). The most common operations are pushing and pulling images to/from the registry, which require a series of HTTP requests in a specific order. The request flow for these operations is detailed [here](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs-gitlab/push-pull-requzest-flow.md).
 
@@ -63,10 +65,11 @@ The ultimate goal of the new architecture is to enable online garbage collection
 
 The introduction of a database will affect the registry architecture, as we will have one more component involved:
 
-``mermaid
+```mermaid
 graph LR
    C((Client)) -- HTTP request --> R(Container Registry) -- Upload/download blobs --> B(Storage Backend)
-   R -- Write/read metadata --> D[(Database)]``
+   R -- Write/read metadata --> D[(Database)]
+```
 
 With a database in place, the registry will no longer use the storage backend to write and read metadata. Instead, metadata will be stored and manipulated on the PostgreSQL database. The storage backend will then be used only for uploading and downloading blobs.
 
