@@ -51,7 +51,7 @@ export default {
       'removedLines',
     ]),
     showControls() {
-      return !this.commit && this.mergeRequestDiffs.length;
+      return this.mergeRequestDiffs.length;
     },
     toggleFileBrowserTitle() {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');

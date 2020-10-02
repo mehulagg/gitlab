@@ -217,7 +217,7 @@ export default {
       return visible;
     },
     showControls() {
-      return !this.commit && this.mergeRequestDiffs.length;
+      return this.mergeRequestDiffs.length;
     },
   },
   watch: {
