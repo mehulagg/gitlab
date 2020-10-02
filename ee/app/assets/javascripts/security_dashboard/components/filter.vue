@@ -122,7 +122,7 @@ export default {
       <button
         v-if="filteredOptions.length === 0"
         type="button"
-        class="dropdown-item no-pointer-events text-secondary"
+        class="dropdown-item gl-pointer-events-none text-secondary"
       >
         {{ __('No matching results') }}
       </button>
