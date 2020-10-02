@@ -35,6 +35,8 @@ module Gitlab
 
           memo[:depth] = depth
           memo[:complexity] = complexity
+          # This duration is not the execution time of the
+          # query but the execution time of the analyze.
           memo[:duration_s] = duration(memo[:time_started]).round(1)
           memo[:used_fields] = field_usages.first
           memo[:used_deprecated_fields] = field_usages.second
