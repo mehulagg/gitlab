@@ -6,10 +6,14 @@ module Gitlab
     delegate_missing_to :options
     attr_reader :content_path, :key, :previous_keys
 
-    CIPHER = "aes-128-gcm"
-    SALT = "\xA1L\xB6S_\xD2\xB2.\xE8\x92h\x95\x10\x8F\xFE\x8B"
+    CIPHER = "aes-256-gcm"
+    SALT = "GitLabEncryptedConfigSalt"
 
     def self.generate_key(base_key)
+      # Because the salt is static, we want uniqueness to be coming from the base_key
+      # Error if the base_key is empty or suspiciously short
+      raise 'Base key too small' if base_key.blank? || base_key.length < 16
+
       ActiveSupport::KeyGenerator.new(base_key).generate_key(SALT, ActiveSupport::MessageEncryptor.key_len(CIPHER))
     end
 

@@ -13,16 +13,20 @@ RSpec.describe Gitlab::EncryptedConfiguration do
       expect(configuration.previous_keys).to be_empty
     end
 
-    it 'generates 16 byte key when provided a larger base key' do
-      configuration = described_class.new(base_key: 'A' * 32)
+    it 'generates 32 byte key when provided a larger base key' do
+      configuration = described_class.new(base_key: 'A' * 64)
 
-      expect(configuration.key.bytesize).to eq 16
+      expect(configuration.key.bytesize).to eq 32
     end
 
-    it 'generates 16 byte key when provided a smaller base key' do
-      configuration = described_class.new(base_key: 'A' * 12)
+    it 'generates 32 byte key when provided a smaller base key' do
+      configuration = described_class.new(base_key: 'A' * 16)
 
-      expect(configuration.key.bytesize).to eq 16
+      expect(configuration.key.bytesize).to eq 32
+    end
+
+    it 'throws an error when the base key is too small' do
+      expect { described_class.new(base_key: 'A' * 12) }.to raise_error 'Base key too small'
     end
   end
 
@@ -37,7 +41,7 @@ RSpec.describe Gitlab::EncryptedConfiguration do
 
     describe '#write' do
       it 'encrypts the file using the provided key' do
-        encryptor = ActiveSupport::MessageEncryptor.new(Gitlab::EncryptedConfiguration.generate_key(credentials_key), cipher: 'aes-128-gcm')
+        encryptor = ActiveSupport::MessageEncryptor.new(Gitlab::EncryptedConfiguration.generate_key(credentials_key), cipher: 'aes-256-gcm')
         config = described_class.new(content_path: credentials_config_path, base_key: credentials_key)
 
         config.write('sample-content')
@@ -87,7 +91,7 @@ RSpec.describe Gitlab::EncryptedConfiguration do
       end
 
       def encryptor(key)
-        ActiveSupport::MessageEncryptor.new(Gitlab::EncryptedConfiguration.generate_key(key), cipher: 'aes-128-gcm')
+        ActiveSupport::MessageEncryptor.new(Gitlab::EncryptedConfiguration.generate_key(key), cipher: 'aes-256-gcm')
       end
 
       describe '#write' do
