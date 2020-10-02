@@ -126,10 +126,6 @@ module QA
         run("git rev-parse --abbrev-ref HEAD").to_s
       end
 
-      def reset_2fa_codes
-        run("echo yes | ssh git@#{uri.host} 2fa_recovery_codes").to_s
-      end
-
       def push_changes(branch = 'master', push_options: nil)
         cmd = ['git push']
         cmd << push_options_hash_to_string(push_options)
@@ -160,6 +156,14 @@ module QA
 
       def commits
         run('git log --oneline').to_s.split("\n")
+      end
+
+      def reset_2fa_codes
+        ssh_params = [uri.host]
+        ssh_params << "-p #{uri.port}" if uri.port
+        ssh_params << "2fa_recovery_codes"
+
+        run("echo yes | ssh git@#{ssh_params.join(' ')}").to_s
       end
 
       def use_ssh_key(key)
