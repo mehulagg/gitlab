@@ -18,7 +18,17 @@ export default {
 </script>
 <template>
   <span v-if="count === 50" class="events-info float-right">
-    <gl-icon v-gl-tooltip="{ title: n__('Limited to showing %d event at most', 'Limited to showing %d events at most', 50) }" name="warning" aria-hidden="true">
+    <gl-icon
+      v-gl-tooltip="{
+        title: n__(
+          'Limited to showing %d event at most',
+          'Limited to showing %d events at most',
+          50,
+        ),
+      }"
+      name="warning"
+      aria-hidden="true"
+    />
     {{ n__('Showing %d event', 'Showing %d events', 50) }}
   </span>
 </template>
