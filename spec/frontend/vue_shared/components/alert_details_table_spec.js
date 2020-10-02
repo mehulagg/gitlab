@@ -19,9 +19,9 @@ const mockAlert = {
 
 const environmentName = 'Production';
 const environmentPath = '/fake/path';
-const environmentData = { name: environmentName, path: environmentPath };
 
 describe('AlertDetails', () => {
+  let environmentData = { name: environmentName, path: environmentPath };
   let glFeatures = { enableEnvironmentPathInAlertDetails: false };
   let wrapper;
 
@@ -120,18 +120,14 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Environment').exists()).toBe(true);
       });
 
-      it('should apply a formatting strategy when defined', () => {
+      it('should display only the name for the environment', () => {
         expect(findTableFieldValueByKey('Iid').text()).toBe('1527542');
         expect(findTableFieldValueByKey('Environment').text()).toBe(environmentName);
       });
 
-      it('should not display any value when the environment is null', () => {
-        mountComponent({
-          alert: {
-            ...mockAlert,
-            environment: { name: null, path: null },
-          },
-        });
+      it('should not display the environment row if there is not data', () => {
+        environmentData = { name: null, path: null };
+        mountComponent();
 
         expect(findTableFieldValueByKey('Environment').text()).toBeFalsy();
       });

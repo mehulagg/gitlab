@@ -3,8 +3,6 @@ import produce from 'immer';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import { parseBoolean } from '~/lib/utils/common_utils';
-import GlFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AlertDetails from './components/alert_details.vue';
 import sidebarStatusQuery from './graphql/queries/sidebar_status.query.graphql';
 import createRouter from './router';
@@ -13,13 +11,7 @@ Vue.use(VueApollo);
 
 export default selector => {
   const domEl = document.querySelector(selector);
-  const {
-    alertId,
-    projectPath,
-    projectIssuesPath,
-    projectId,
-    shouldDisplayEnvironment,
-  } = domEl.dataset;
+  const { alertId, projectPath, projectIssuesPath, projectId } = domEl.dataset;
   const router = createRouter();
 
   const resolvers = {
@@ -64,13 +56,11 @@ export default selector => {
       alertId,
       projectIssuesPath,
       projectId,
-      shouldDisplayEnvironment: parseBoolean(shouldDisplayEnvironment),
     },
     apolloProvider,
     components: {
       AlertDetails,
     },
-    mixins: [GlFeatureFlagsMixin()],
     router,
     render(createElement) {
       return createElement('alert-details', {});

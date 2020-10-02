@@ -30,6 +30,7 @@ import AlertSidebar from './alert_sidebar.vue';
 import AlertMetrics from './alert_metrics.vue';
 import AlertDetailsTable from '~/vue_shared/components/alert_details_table.vue';
 import AlertSummaryRow from './alert_summary_row.vue';
+import GlFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const containerEl = document.querySelector('.page-with-contextual-sidebar');
 
@@ -76,6 +77,7 @@ export default {
     SystemNote,
     AlertMetrics,
   },
+  mixins: [GlFeatureFlagsMixin()],
   inject: {
     projectPath: {
       default: '',
@@ -88,9 +90,6 @@ export default {
     },
     projectIssuesPath: {
       default: '',
-    },
-    glFeatures: {
-      default: {},
     },
   },
   apollo: {

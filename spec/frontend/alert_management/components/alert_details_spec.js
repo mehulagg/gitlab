@@ -159,7 +159,7 @@ describe('AlertDetails', () => {
     });
 
     describe('environment fields', () => {
-      describe('whent enableEnvironmentPathInAlertDetails is disabled', () => {
+      describe('when enableEnvironmentPathInAlertDetails is disabled', () => {
         beforeEach(mountComponent);
 
         it('should not show the environment', () => {
@@ -168,13 +168,14 @@ describe('AlertDetails', () => {
         });
       });
 
-      describe('whent enableEnvironmentPathInAlertDetails is enabled', () => {
+      describe('when enableEnvironmentPathInAlertDetails is enabled', () => {
         beforeEach(() => {
           glFeatures = { enableEnvironmentPathInAlertDetails: true };
           mountComponent();
         });
 
         it('should show the environment name with link to path', () => {
+          expect(findEnvironmentName().exists()).toBe(false);
           expect(findEnvironmentPath().text()).toBe(environmentName);
           expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
         });

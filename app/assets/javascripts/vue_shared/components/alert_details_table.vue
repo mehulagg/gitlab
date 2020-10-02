@@ -1,18 +1,17 @@
 <script>
 import { GlLoadingIcon, GlTable } from '@gitlab/ui';
-import { identity, reduce } from 'lodash';
+import { reduce } from 'lodash';
 import { s__ } from '~/locale';
 import {
   capitalizeFirstCharacter,
   convertToSentenceCase,
   splitCamelCase,
 } from '~/lib/utils/text_utility';
+import GlFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const thClass = 'gl-bg-transparent! gl-border-1! gl-border-b-solid! gl-border-gray-200!';
 const tdClass = 'gl-border-gray-100! gl-p-5!';
-const formatStrategies = {
-  environment: env => env?.name,
-};
+
 const allowedFields = [
   'iid',
   'title',
@@ -27,21 +26,12 @@ const allowedFields = [
   'details',
 ];
 
-const formatValueByField = (fieldName, value) => {
-  const valueFormatter = formatStrategies[fieldName] || identity;
-  return valueFormatter(value);
-};
-
 export default {
   components: {
     GlLoadingIcon,
     GlTable,
   },
-  inject: {
-    glFeatures: {
-      default: {},
-    },
-  },
+  mixins: [GlFeatureFlagsMixin()],
   props: {
     alert: {
       type: Object,
@@ -80,7 +70,7 @@ export default {
         this.alert,
         (allowedItems, rawValue, fieldName) => {
           if (this.isAllowed(fieldName)) {
-            const value = formatValueByField(fieldName, rawValue);
+            const value = fieldName === 'environment' ? rawValue?.name : rawValue;
             return [...allowedItems, { fieldName, value }];
           }
           return allowedItems;
