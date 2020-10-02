@@ -28,6 +28,7 @@ class MilestonesFinder
     items = by_search_title(items)
     items = by_state(items)
     items = by_timeframe(items)
+    items = containing_date(items)
 
     order(items)
   end

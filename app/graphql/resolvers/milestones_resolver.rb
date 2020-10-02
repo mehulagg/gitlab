@@ -13,6 +13,18 @@ module Resolvers
              required: false,
              description: 'Filter milestones by state'
 
+    argument :title, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'The title of the milestone'
+
+    argument :search_title, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'A search string for the title'
+
+    argument :containing_date, Types::TimeType,
+             required: false,
+             description: 'A date that the milestone contains'
+
     type Types::MilestoneType, null: true
 
     def resolve(**args)
@@ -30,7 +42,10 @@ module Resolvers
         ids: parse_gids(args[:ids]),
         state: args[:state] || 'all',
         start_date: args[:start_date],
-        end_date: args[:end_date]
+        end_date: args[:end_date],
+        title: args[:title],
+        search_title: args[:search_title],
+        containing_date: args[:containing_date]
       }.merge(parent_id_parameters(args))
     end
 

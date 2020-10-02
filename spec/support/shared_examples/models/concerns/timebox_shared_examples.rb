@@ -240,4 +240,76 @@ RSpec.shared_examples 'a timebox' do |timebox_type|
       expect(timebox.to_ability_name).to eq(timebox_type.to_s)
     end
   end
+
+  describe '.within_timeframe' do
+    let(:factory) { timebox_type }
+
+    def box(from, to)
+      create(factory, *timebox_args, start_date: from, due_date: to)
+    end
+
+    it 'can find overlapping timeboxes' do
+      today = Time.now.utc.to_date
+      timeframe = [today - 10.days, today + 10.days]
+
+      fully_open = box(nil, nil)
+      #  ----| ................     # Not overlapping
+      non_overlapping_open_on_left = box(nil, timeframe.first - 1.day)
+      #   |--| ................     # Not overlapping
+      non_overlapping_closed_on_left = box(timeframe.first - 2.days, timeframe.first - 1.day)
+      #  ------|...............     # Overlapping
+      overlapping_open_on_left_just = box(nil, timeframe.first)
+      #  -----------------------|   # Overlapping
+      overlapping_open_on_left_fully = box(nil, timeframe.last + 1.day)
+      #  ---------|............     # Overlapping
+      overlapping_open_on_left_partial = box(nil, timeframe.first + 1.day)
+      #     |-----|............     # Overlapping
+      overlapping_closed_partial = box(timeframe.first - 1.day, timeframe.first + 1.day)
+      #        |--------------|     # Overlapping
+      exact_match = box(timeframe.first, timeframe.last)
+      #     |--------------------|  # Overlapping
+      larger = box(timeframe.first - 1.day, timeframe.last + 1.day)
+      #        ...|-----|......     # Overlapping
+      smaller = box(timeframe.first + 1.day, timeframe.last - 1.day)
+      #        .........|-----|     # Overlapping
+      at_end = box(timeframe.last - 1.day, timeframe.last)
+      #        .........|---------  # Overlapping
+      at_end_open = box(timeframe.last - 1.day, nil)
+      #      |--------------------  # Overlapping
+      cover_from_left = box(timeframe.first - 1.day, nil)
+      #        .........|--------|  # Overlapping
+      cover_from_middle_closed = box(timeframe.last - 1.day, timeframe.last + 1.day)
+      #        ...............|--|  # Overlapping
+      overlapping_at_end_just = box(timeframe.last, timeframe.last + 1.day)
+      #        ............... |-|  # Not Overlapping
+      not_overlapping_at_right_closed = box(timeframe.last + 1.day, timeframe.last + 2.days)
+      #        ............... |--  # Not Overlapping
+      not_overlapping_at_right_open = box(timeframe.last + 1.day, nil)
+
+      matches = described_class.within_timeframe(timeframe.first, timeframe.last)
+
+      expect(matches).to contain_exactly(
+        overlapping_open_on_left_just,
+        overlapping_open_on_left_fully,
+        overlapping_open_on_left_partial,
+        overlapping_closed_partial,
+        exact_match,
+        larger,
+        smaller,
+        at_end,
+        at_end_open,
+        cover_from_left,
+        cover_from_middle_closed,
+        overlapping_at_end_just
+      )
+
+      expect(matches).not_to include(
+        fully_open,
+        non_overlapping_open_on_left,
+        non_overlapping_closed_on_left,
+        not_overlapping_at_right_closed,
+        not_overlapping_at_right_open
+      )
+    end
+  end
 end
