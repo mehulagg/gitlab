@@ -465,6 +465,22 @@ DELETE /projects/:id/runners/:runner_id
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/runners/9"
 ```
 
+## Pause a runner
+
+Pause a specific runner.
+
+```plaintext
+ PUT --form "active=false"  /runners/:runner_id
+```
+
+| Attribute   | Type    | Required | Description         |
+|-------------|---------|----------|---------------------|
+| `runner_id` | integer | yes      | The ID of a runner  |
+
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: $ACCESS_TOKEN" --form "active=false"  "$GL_URL/api/v4/runners/$RUNNER_ID"
+```
+
 ## List group's runners
 
 List all runners (specific and shared) available in the group as well it's ancestor groups.
