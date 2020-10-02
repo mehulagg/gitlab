@@ -8,24 +8,24 @@ import {
   GlFormText,
   GlIcon,
 } from '@gitlab/ui';
-import { __ } from '~/locale';
+import { s__ } from '~/locale';
 
 const units = {
   minutes: {
     value: 'minutes',
-    text: __('minutes'),
+    text: s__('IncidentSettings|minutes'),
     multiplier: 1,
   },
   hours: {
     value: 'hours',
-    text: __('hours'),
+    text: s__('IncidentSettings|hours'),
     multiplier: 60,
   },
 };
 
 export default {
   i18n: {
-    description: __(`You may choose to introduce a countdown timer in incident issues
+    description: s__(`IncidentSettings|You may choose to introduce a countdown timer in incident issues
     to better track Service Level Aggreements (SLAs). The timer is automatically started
     when the incident is created, and sets a time limit for the incident to be resolved
     in. When activated, "time to SLA" countdown will appear on all incidents and it will
@@ -67,15 +67,15 @@ export default {
 
       const duration = Number(this.duration);
       if (Number.isNaN(duration)) {
-        return __('Time limit must be a valid number');
+        return s__('IncidentSettings|Time limit must be a valid number');
       }
       if (duration <= 0) {
-        return __('Time limit must be greater than 0');
+        return s__('IncidentSettings|Time limit must be greater than 0');
       }
 
       const minutes = duration * units[this.unit].multiplier;
       if (minutes % 15 !== 0) {
-        return __('Time limit must be a multiple of 15 minutes');
+        return s__('IncidentSettings|Time limit must be a multiple of 15 minutes');
       }
       return '';
     },
@@ -110,14 +110,18 @@ export default {
       {{ $options.i18n.description }}
     </p>
     <gl-form-checkbox v-model="enabled" class="gl-my-4" @input="success = false">
-      <span>{{ __('Activate "time to SLA" countdown timer') }}</span>
+      <span>{{ s__('IncidentSettings|Activate "time to SLA" countdown timer') }}</span>
       <gl-form-text class="gl-text-gray-400 gl-font-base">
-        {{ __('When activated, this will apply to all incidents within the project') }}
+        {{
+          s__(
+            'IncidentSettings|When activated, this will apply to all incidents within the project',
+          )
+        }}
       </gl-form-text>
     </gl-form-checkbox>
     <gl-form-group
       :invalid-feedback="invalidFeedback"
-      :label="__('Time limit')"
+      :label="s__('IncidentSettings|Time limit')"
       label-for="sla-time"
       :state="isValid"
     >
