@@ -446,7 +446,7 @@ export default {
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
       <compare-versions
-        v-if="mergeRequestDiffs.length"
+        v-if="showControls"
         :merge-request-diffs="mergeRequestDiffs"
         :is-limited-container="isLimitedContainer"
         :diff-files-count-text="numTotalFiles"
