@@ -66,6 +66,7 @@ module IssuableCollections
     limit = relation.limit_value.to_f
 
     return 1 if limit == 0
+    return (params[:page] || 1).to_i + 1 if row_count == -1
 
     (row_count.to_f / limit).ceil
   end

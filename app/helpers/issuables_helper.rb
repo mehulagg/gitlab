@@ -247,7 +247,20 @@ module IssuablesHelper
 
     if display_count
       count = issuables_count_for_state(issuable_type, state)
-      html << " " << content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+      tag =
+        if count == -1
+          content_tag(
+            :span,
+            '?',
+            class: 'gl-badge badge badge-pill badge-danger has-tooltip',
+            aria: { label: _('Counting took too long') },
+            title: _('Counting took too long')
+          )
+        else
+          content_tag(:span, number_with_delimiter(count), class: 'badge badge-pill')
+        end
+
+      html << " " << tag
     end
 
     html.html_safe

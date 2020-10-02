@@ -191,6 +191,22 @@ class IssuableFinder
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
+  # Determining counts when referring to issuable titles or descriptions can be
+  # very expensive, and involve the database reading gigabytes of data for a
+  # relatively minor piece of functionality. This may slow index pages by
+  # seconds in the best case, or lead to a statement timeout in the worst case.
+  #
+  # In time, we may be able to use elasticsearch or postgresql tsv columns to
+  # perform the calculation more efficiently. Until then, use a shorter timeout
+  # and return -1 as a sentinel value if it fails to complete in time.
+  def fast_count_by_state
+    ApplicationRecord.with_fast_statement_timeout do
+      count_by_state
+    end
+  rescue ActiveRecord::QueryCanceled
+    Hash.new(-1)
+  end
+
   def search
     params[:search].presence
   end

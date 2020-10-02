@@ -53,7 +53,7 @@ module Gitlab
     end
 
     def initialize_cache
-      Hash.new { |hash, finder| hash[finder] = finder.count_by_state }
+      Hash.new { |hash, finder| hash[finder] = finder.fast_count_by_state }
     end
   end
 end
