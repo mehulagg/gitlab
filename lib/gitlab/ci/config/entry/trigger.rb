@@ -40,7 +40,7 @@ module Gitlab
                 validates :config, allowed_keys: ALLOWED_KEYS
                 validates :project, presence: true
                 validates :branch, type: String, allow_nil: true
-                validates :strategy, type: String, inclusion: { in: %w[depend], message: 'should be depend' }, allow_nil: true
+                validates :strategy, type: String, inclusion: { in: %w[depend non-depend], message: 'should be depend or non-depend' }, allow_nil: true
               end
             end
 
@@ -56,7 +56,7 @@ module Gitlab
               validations do
                 validates :config, presence: true
                 validates :config, allowed_keys: ALLOWED_KEYS
-                validates :strategy, type: String, inclusion: { in: %w[depend], message: 'should be depend' }, allow_nil: true
+                validates :strategy, type: String, inclusion: { in: %w[depend non-depend], message: 'should be depend or non-depend' }, allow_nil: true
               end
 
               entry :include, ::Gitlab::Ci::Config::Entry::Includes,
