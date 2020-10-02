@@ -120,6 +120,17 @@ RSpec.describe API::Releases do
       end.not_to exceed_query_limit(control_count)
     end
 
+    context 'with sorting' do
+      it_behaves_like 'release sorting', 'released_at' do
+        let(:releases) { [release2, release1] }
+      end
+
+      it_behaves_like 'release sorting', 'created_at' do
+        let(:releases) { [release2, release1] }
+      end
+    end
+    
+
     context 'when tag does not exist in git repository' do
       let!(:release) { create(:release, project: project, tag: 'v1.1.5') }
 
