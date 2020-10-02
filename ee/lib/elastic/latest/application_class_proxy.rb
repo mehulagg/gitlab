@@ -5,6 +5,7 @@ module Elastic
     class ApplicationClassProxy < Elasticsearch::Model::Proxy::ClassMethodsProxy
       include ClassProxyUtil
       include Elastic::Latest::Routing
+      include Elastic::Latest::QueryContext::Aware
 
       def search(query, search_options = {})
         es_options = routing_options(search_options)
@@ -55,7 +56,7 @@ module Elastic
                 bool: {
                   must: [{
                     simple_query_string: {
-                      _name: QueryFactory.query_name(self.es_type, :match, :search_terms),
+                      _name: context.name(self.es_type, :match, :search_terms),
                       fields: fields,
                       query: query,
                       default_operator: default_operator
@@ -64,7 +65,7 @@ module Elastic
                   filter: [{
                     term: {
                       type: {
-                        _name: QueryFactory.query_name(:doc, :is_a, self.es_type),
+                        _name: context.name(:doc, :is_a, self.es_type),
                         value: self.es_type
                       }
                     }
@@ -93,8 +94,8 @@ module Elastic
           query: {
             bool: {
               filter: [
-                { term: { iid: { _name: QueryFactory.query_name(self.es_type, :related, :iid), value: iid } } },
-                { term: { type: { _name: QueryFactory.query_name(:doc, :is_a, self.es_type), value: self.es_type } } }
+                { term: { iid: { _name: context.name(self.es_type, :related, :iid), value: iid } } },
+                { term: { type: { _name: context.name(:doc, :is_a, self.es_type), value: self.es_type } } }
               ]
             }
           }
@@ -104,7 +105,7 @@ module Elastic
       # Builds an elasticsearch query that will select child documents from a
       # set of projects, taking user access rules into account.
       def project_ids_filter(query_hash, options)
-        QueryFactory.query_context(:project) do |context|
+        context.name(:project) do
           project_query = project_ids_query(
             options[:current_user],
             options[:project_ids],
@@ -143,7 +144,7 @@ module Elastic
         conditions = pick_projects_by_membership(scoped_project_ids, user, features)
 
         if public_and_internal_projects
-          QueryFactory.query_context(:visibility) do
+          context.name(:visibility) do
             # Skip internal projects for anonymous and external users.
             # Others are given access to all internal projects.
             #
@@ -171,23 +172,23 @@ module Elastic
       def pick_projects_by_membership(project_ids, user, features = nil)
         if features.nil?
           if project_ids == :any
-            return [{ term: { visibility_level: { _name: QueryFactory.query_name(:any), value: Project::PRIVATE } } }]
+            return [{ term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }]
           else
-            return [{ terms: { _name: QueryFactory.query_name(:membership, :id), id: project_ids } }]
+            return [{ terms: { _name: context.name(:membership, :id), id: project_ids } }]
           end
         end
 
         Array(features).map do |feature|
           condition =
             if project_ids == :any
-              { term: { visibility_level: { _name: QueryFactory.query_name(:any), value: Project::PRIVATE } } }
+              { term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }
             else
-              { terms: { _name: QueryFactory.query_name(:membership, :id), id: filter_ids_by_feature(project_ids, user, feature) } }
+              { terms: { _name: context.name(:membership, :id), id: filter_ids_by_feature(project_ids, user, feature) } }
             end
 
           limit = {
             terms: {
-              _name: QueryFactory.query_name(feature, :enabled_or_private),
+              _name: context.name(feature, :enabled_or_private),
               "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE]
             }
           }
@@ -205,7 +206,7 @@ module Elastic
       # If a project feature is specified, access is only granted if the feature
       # is enabled or, for admins & auditors, private.
       def pick_projects_by_visibility(visibility, user, features)
-        QueryFactory.query_context(visibility) do |context|
+        context.name(visibility) do |context|
           condition = { term: { visibility_level: { _name: context.name, value: visibility } } }
 
           limit_by_feature(condition, features, include_members_only: user&.can_read_all_resources?)
@@ -227,7 +228,7 @@ module Elastic
         features = Array(features)
 
         features.map do |feature|
-          QueryFactory.query_context(feature, :access_level) do |context|
+          context.name(feature, :access_level) do |context|
             limit =
               if include_members_only
                 {

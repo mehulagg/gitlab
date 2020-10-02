@@ -8,9 +8,9 @@ module Elastic
 
         query_hash = basic_query_hash(options[:in], query)
 
-        filters = [{ terms: { _name: QueryFactory.query_name(:doc, :is_a, es_type), type: [es_type] } }]
+        filters = [{ terms: { _name: context.name(:doc, :is_a, es_type), type: [es_type] } }]
 
-        QueryFactory.query_context(:project) do |context|
+        context.name(:project) do
           if options[:namespace_id]
             filters << {
               terms: {

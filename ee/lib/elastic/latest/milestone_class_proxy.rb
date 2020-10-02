@@ -6,8 +6,8 @@ module Elastic
       def elastic_search(query, options: {})
         options[:in] = %w(title^2 description)
 
-        query_hash = QueryFactory.query_context(:milestone, :match) { basic_query_hash(options[:in], query) }
-        query_hash = QueryFactory.query_context(:milestone, :related) { project_ids_filter(query_hash, options) }
+        query_hash = basic_query_hash(options[:in], query)
+        query_hash = context.name(:milestone, :related) { project_ids_filter(query_hash, options) }
 
         search(query_hash, options)
       end

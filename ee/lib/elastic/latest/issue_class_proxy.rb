@@ -20,10 +20,10 @@ module Elastic
                      end
 
         options[:features] = 'issues'
-        QueryFactory.query_context(:issue) do
-          query_hash = QueryFactory.query_context(:authorized) { project_ids_filter(query_hash, options) }
-          query_hash = QueryFactory.query_context(:confidentiality) { confidentiality_filter(query_hash, options) }
-          query_hash = QueryFactory.query_context(:match) { state_filter(query_hash, options) }
+        context.name(:issue) do
+          query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
+          query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
+          query_hash = context.name(:match) { state_filter(query_hash, options) }
         end
 
         search(query_hash, options)
@@ -46,7 +46,6 @@ module Elastic
           return query_hash if authorized_project_ids.to_set == scoped_project_ids.to_set
         end
 
-        context = QueryFactory.current_query_context
         filter = { term: { confidential: { _name: context.name(:non_confidential), value: false } } }
 
         if current_user

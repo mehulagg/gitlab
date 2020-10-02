@@ -13,9 +13,9 @@ module Elastic
         options[:in] = ['note']
         query_hash = basic_query_hash(%w[note], query)
 
-        QueryFactory.query_context(:note) do
-          query_hash = QueryFactory.query_context(:authorized) { project_ids_filter(query_hash, options) }
-          query_hash = QueryFactory.query_context(:confidentiality) { confidentiality_filter(query_hash, options) }
+        context.name(:note) do
+          query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
+          query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }
         end
 
         query_hash[:highlight] = highlight_options(options[:in])
@@ -26,7 +26,6 @@ module Elastic
       private
 
       def confidentiality_filter(query_hash, options)
-        context = QueryFactory.current_query_context
         current_user = options[:current_user]
 
         return query_hash if current_user&.can_read_all_resources?
@@ -103,7 +102,7 @@ module Elastic
       def project_ids_filter(query_hash, options)
         query_hash[:query][:bool][:filter] ||= []
 
-        project_query = QueryFactory.query_context(:project) do
+        project_query = context.name(:project) do
           project_ids_query(
             options[:current_user],
             options[:project_ids],
@@ -114,7 +113,7 @@ module Elastic
 
         filters = {
           bool: {
-            _name: QueryFactory.query_name,
+            _name: context.name,
             should: []
           }
         }
@@ -138,7 +137,7 @@ module Elastic
                     }
                   }
                 },
-                { term: { noteable_type: { _name: QueryFactory.query_name(:noteable, :is_a, noteable_type), value: noteable_type } } }
+                { term: { noteable_type: { _name: context.name(:noteable, :is_a, noteable_type), value: noteable_type } } }
               ]
             }
           }
@@ -154,7 +153,7 @@ module Elastic
       override :pick_projects_by_membership
       def pick_projects_by_membership(project_ids, user, _ = nil)
         noteable_type_to_feature.map do |noteable_type, feature|
-          QueryFactory.query_context(feature) do |context|
+          context.name(feature) do
             condition =
               if project_ids == :any
                 { term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }
@@ -176,7 +175,7 @@ module Elastic
       override :limit_by_feature
       def limit_by_feature(condition, _ = nil, include_members_only:)
         noteable_type_to_feature.map do |noteable_type, feature|
-          QueryFactory.query_context(feature) do |context|
+          context.name(feature) do
             limit =
               if include_members_only
                 { terms: { _name: context.name(:enabled_or_private), "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }

@@ -2,19 +2,29 @@
 
 module Gitlab
   module Elastic
-    class ExprName < Array
-      def self.build(*context)
-        new(context)
+    class ExprName
+      def initialize(context)
+        @context = context
+
+        @values = []
       end
 
-      def name(*context)
-        return to_s if context.empty?
+      def build(*context)
+        @values.concat(context)
 
-        ExprName.build(*self, *context).to_s
+        self
+      end
+
+      def name(*context, &block)
+        @context.name(*context, &block)
       end
 
       def to_s
-        map(&:to_s).join(":")
+        @values.map(&:to_s).join(":")
+      end
+
+      def to_a
+        @values
       end
     end
   end
