@@ -1688,8 +1688,10 @@ own line and surrounded by blank lines.
 If you're adding content to an existing topic, you can add version information
 inline with the existing text.
 
-In this case, add `[introduced/deprecated](<link-to-issue>) in GitLab X.X`. Include the paid tier
-if applicable: `[introduced/deprecated](<link-to-issue>) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.`. The issue
+In this case, add `([introduced/deprecated](<link-to-issue>) in GitLab X.X)`.
+If applicable, include the paid tier: `([introduced/deprecated](<link-to-issue>) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4)`
+
+Including the issue link is encouraged, but isn't a requirement. For example:
 
 ```markdown
 The voting strategy (introduced in GitLab 13.4) requires
