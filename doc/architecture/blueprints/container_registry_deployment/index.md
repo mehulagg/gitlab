@@ -145,6 +145,14 @@ These are reason why these changes are needed
 
 A more detailed list of all tasks, as well as periodic progress updates can be found in the epic [&2313](https://gitlab.com/groups/gitlab-org/-/epics/2313).
 
+## Relevant Links
+
+- [Allow admin to run garbage collection with zero downtime](https://gitlab.com/groups/gitlab-org/-/epics/2313)
+- [Proposal for continuous, on-demand online garbage collection](https://gitlab.com/gitlab-org/container-registry/-/issues/199)
+- [Gradual migration proposal for the GitLab.com container registry](https://gitlab.com/gitlab-org/container-registry/-/issues/191)
+- [Create a self-serve registry deployment](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/316)
+- [Database cluster for container registry](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/11154)
+
 ## Who
 
 Proposal:
