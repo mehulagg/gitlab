@@ -14,7 +14,7 @@ msgstr ""
 "X-Crowdin-Language: ru\n"
 "X-Crowdin-File: /master/locale/gitlab.pot\n"
 "X-Crowdin-File-ID: 6\n"
-"PO-Revision-Date: 2020-10-02 01:02\n"
+"PO-Revision-Date: 2020-10-02 18:49\n"
 
 msgid " %{project_name}#%{issue_iid} &middot; opened %{issue_created} by %{author}"
 msgstr ""
@@ -343,6 +343,13 @@ msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
 
+msgid "%d pending comment"
+msgid_plural "%d pending comments"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+
 msgid "%d personal project will be removed and cannot be restored."
 msgid_plural "%d personal projects will be removed and cannot be restored."
 msgstr[0] ""
@@ -538,13 +545,6 @@ msgstr[1] "%{count} участника"
 msgstr[2] "%{count} участников"
 msgstr[3] "%{count} участников"
 
-msgid "%{count} pending comment"
-msgid_plural "%{count} pending comments"
-msgstr[0] "%{count} ожидающий комментарий"
-msgstr[1] "%{count} ожидающих комментария"
-msgstr[2] "%{count} ожидающих комментариев"
-msgstr[3] "%{count} ожидающих комментариев"
-
 msgid "%{count} related %{pluralized_subject}: %{links}"
 msgstr "%{count} связанный %{pluralized_subject}: %{links}"
 
@@ -653,7 +653,7 @@ msgstr "%{labelStart}Метод:%{labelEnd} %{method}"
 msgid "%{labelStart}Namespace:%{labelEnd} %{namespace}"
 msgstr ""
 
-msgid "%{labelStart}Report Type:%{labelEnd} %{reportType}"
+msgid "%{labelStart}Scan Type:%{labelEnd} %{reportType}"
 msgstr ""
 
 msgid "%{labelStart}Scanner:%{labelEnd} %{scanner}"
@@ -2872,6 +2872,9 @@ msgstr "Пустое значение в поле Пользователь Gitla
 msgid "An error has occurred"
 msgstr "Произошла ошибка"
 
+msgid "An error occured while making the changes: %{error}"
+msgstr ""
+
 msgid "An error occurred adding a draft to the thread."
 msgstr "Произошла ошибка при добавлении черновика в тему."
 
@@ -3144,9 +3147,6 @@ msgstr "Произошла ошибка при сохранении статус
 
 msgid "An error occurred while saving assignees"
 msgstr "Произошла ошибка при сохранении ответственных"
-
-msgid "An error occurred while saving the template. Please check if the template exists."
-msgstr "Произошла ошибка во время сохранения шаблона. Пожалуйста, проверьте, существует ли шаблон."
 
 msgid "An error occurred while searching for milestones"
 msgstr ""
@@ -3672,12 +3672,6 @@ msgstr "Артефакт был успешно удален."
 msgid "Artifacts"
 msgstr "Артефакты"
 
-msgid "As U2F devices are only supported by a few browsers, we require that you set up a two-factor authentication app before a U2F device. That way you'll always be able to log in - even when you're using an unsupported browser."
-msgstr "Поскольку устройства U2F поддерживаются только несколькими браузерами, мы требуем, чтобы вы настроили двухфакторную аутентификацию перед U2F устройством. Таким образом, вы всегда сможете войти в систему, даже если вы используете неподдерживаемый браузер."
-
-msgid "As WebAuthn devices are only supported by a few browsers, we require that you set up a two-factor authentication app before a WebAuthn device. That way you'll always be able to log in - even when you're using an unsupported browser."
-msgstr ""
-
 msgid "As we continue to build more features for SAST, we'd love your feedback on the SAST configuration feature in %{linkStart}this issue%{linkEnd}."
 msgstr ""
 
@@ -4186,15 +4180,6 @@ msgstr "Корневой URL-адрес Bamboo, подобный https://bamboo.
 
 msgid "BambooService|You must set up automatic revision labeling and a repository trigger in Bamboo."
 msgstr "Вы должны настроить автоматическое присвоение меток ревизиям и триггер репозитория в сервисе Bamboo."
-
-msgid "BatchComments|Delete all pending comments"
-msgstr "Удалить все ожидающие комментарии"
-
-msgid "BatchComments|Discard review?"
-msgstr "Закрыть отзыв без сохранения?"
-
-msgid "BatchComments|You're about to discard your review which will delete all of your pending comments. The deleted comments %{strong_start}cannot%{strong_end} be restored."
-msgstr "Вы собираетесь отменить рецензию, что приведет к удалению всех ожидающих комментариев. Удалённые комментарии %{strong_start}невозможно%{strong_end} восстановить."
 
 msgid "Be careful. Changing the project's namespace can have unintended side effects."
 msgstr "Будьте осторожны. Изменение пути проекта может вызвать нежелательные побочные эффекты."
@@ -5720,7 +5705,7 @@ msgstr "Выберите, какие из ваших окружений буду
 msgid "ClusterIntegration|Clear cluster cache"
 msgstr "Очистить кэш кластера"
 
-msgid "ClusterIntegration|Clear the local cache of namespace and service accounts. This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
+msgid "ClusterIntegration|Clear the local cache of namespace and service accounts."
 msgstr ""
 
 msgid "ClusterIntegration|Cluster management project (alpha)"
@@ -6418,6 +6403,12 @@ msgstr ""
 
 msgid "ClusterIntegration|This account must have permissions to create a Kubernetes cluster in the %{link_to_container_project} specified below"
 msgstr " У этой учетной записи должны быть разрешения на создание кластера Kubernetes в %{link_to_container_project} указанных ниже"
+
+msgid "ClusterIntegration|This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts."
+msgstr ""
+
+msgid "ClusterIntegration|This is necessary to clear existing environment-namespace associations from clusters previously managed by GitLab."
+msgstr ""
 
 msgid "ClusterIntegration|This option will allow you to install applications on RBAC clusters."
 msgstr "Эта опция позволит вам устанавливать приложения на кластеры RBAC."
@@ -7191,6 +7182,9 @@ msgstr[3] "Удалить тегов"
 msgid "ContainerRegistry|Set cleanup policy"
 msgstr ""
 
+msgid "ContainerRegistry|Some tags were not deleted"
+msgstr ""
+
 msgid "ContainerRegistry|Something went wrong while fetching the cleanup policy."
 msgstr ""
 
@@ -7229,6 +7223,9 @@ msgstr ""
 
 msgid "ContainerRegistry|Tags with names matching this regex pattern will %{italicStart}expire:%{italicEnd}"
 msgstr "Теги с именами, соответствующими этому регулярному выражению, будут %{italicStart}просрочены:%{italicEnd}"
+
+msgid "ContainerRegistry|The cleanup policy timed out before it could delete all tags. An administrator can %{adminLinkStart}manually run cleanup now%{adminLinkEnd} or you can wait for the cleanup policy to automatically run again. %{docLinkStart}More information%{docLinkEnd}"
+msgstr ""
 
 msgid "ContainerRegistry|The last tag related to this image was recently removed. This empty image and any associated data will be automatically removed as part of the regular Garbage Collection process. If you have any questions, contact your administrator."
 msgstr "Последний тег, связанный с этим образом недавно был удалён. Этот пустой образ и любые связанные с ним данные будут автоматически удалены в ходе регулярной сборки мусора. Если у вас есть вопросы, свяжитесь со своим администратором."
@@ -8432,6 +8429,9 @@ msgstr "Дней"
 msgid "Days to merge"
 msgstr ""
 
+msgid "Dear Administrator,"
+msgstr ""
+
 msgid "Debug"
 msgstr "Отладка"
 
@@ -9284,9 +9284,6 @@ msgstr "Отменить изменения в %{path}?"
 msgid "Discard draft"
 msgstr "Удалить черновик"
 
-msgid "Discard review"
-msgstr "Отменить рецензию"
-
 msgid "DiscordService|Discord Notifications"
 msgstr "Discord Уведомления"
 
@@ -9752,6 +9749,9 @@ msgstr "Адреса эл. почты"
 
 msgid "Emails sent from Service Desk will have this name"
 msgstr "Письма, отправленные службой поддержки будут иметь это имя"
+
+msgid "Emails sent to %{email} will still be supported"
+msgstr ""
 
 msgid "Emails separated by comma"
 msgstr "Электронные адреса разделенные запятой"
@@ -11539,9 +11539,6 @@ msgstr ""
 msgid "Finish editing this message first!"
 msgstr "Сначала завершите редактирование этого сообщения!"
 
-msgid "Finish review"
-msgstr ""
-
 msgid "Finish setting up your dedicated account for %{group_name}."
 msgstr ""
 
@@ -11622,6 +11619,9 @@ msgstr "Во внутренних проектах: любой зарегист�
 
 msgid "For more info, read the documentation."
 msgstr "Для получения дополнительной информации читайте документацию."
+
+msgid "For more information on how the number of active users is calculated, see the %{self_managed_subscriptions_doc_link} documentation."
+msgstr ""
 
 msgid "For more information, go to the "
 msgstr ""
@@ -12197,6 +12197,9 @@ msgid "GitLab / Unsubscribe"
 msgstr "GitLab / Отписаться"
 
 msgid "GitLab API"
+msgstr ""
+
+msgid "GitLab Billing Team."
 msgstr ""
 
 msgid "GitLab Group Runners can execute code for all the projects in this group."
@@ -13513,6 +13516,9 @@ msgid "If enabled, GitLab will handle Object Storage replication using Geo. %{li
 msgstr ""
 
 msgid "If enabled, access to projects will be validated on an external service using their classification label."
+msgstr ""
+
+msgid "If the number of active users exceeds the user limit, you will be charged for the number of %{users_over_license_link} at your next license reconciliation."
 msgstr ""
 
 msgid "If there is no previous license or if the previous license has expired, some GitLab functionality will be blocked until a new, valid license is uploaded."
@@ -17783,6 +17789,12 @@ msgstr "Пусто"
 msgid "Not Implemented"
 msgstr ""
 
+msgid "Not all browsers support U2F devices. Therefore, we require that you set up a two-factor authentication app first. That way you'll always be able to sign in - even when you're using an unsupported browser."
+msgstr ""
+
+msgid "Not all browsers support WebAuthn. Therefore, we require that you set up a two-factor authentication app first. That way you'll always be able to sign in - even from an unsupported browser."
+msgstr ""
+
 msgid "Not all data has been processed yet, the accuracy of the chart for the selected timeframe is limited."
 msgstr "Были обработаны не все данные, точность графика для выбранного периода времени ограничена."
 
@@ -18819,6 +18831,9 @@ msgstr ""
 msgid "Pending"
 msgstr "В ожидании"
 
+msgid "Pending comments"
+msgstr ""
+
 msgid "People without permission will never get a notification and won't be able to comment."
 msgstr ""
 
@@ -19366,6 +19381,9 @@ msgid "Please provide a valid email address."
 msgstr ""
 
 msgid "Please provide attributes to update"
+msgstr ""
+
+msgid "Please reach out if you have any questions and we'll be happy to assist."
 msgstr ""
 
 msgid "Please refer to %{docs_url}"
@@ -22071,6 +22089,9 @@ msgstr ""
 msgid "Requests to these domain(s)/address(es) on the local network will be allowed when local requests from hooks and services are not allowed. IP ranges such as 1:0:0:0:0:0:0:0/124 or 127.0.0.0/28 are supported. Domain wildcards are not supported currently. Use comma, semicolon, or newline to separate multiple entries. The allowlist can hold a maximum of 1000 entries. Domains should use IDNA encoding. Ex: example.com, 192.168.1.1, 127.0.0.0/28, xn--itlab-j1a.com."
 msgstr ""
 
+msgid "Require admin approval for new sign-ups"
+msgstr ""
+
 msgid "Require all users in this group to setup Two-factor authentication"
 msgstr "Требовать от всех пользователей в группе настроить двух-факторную аутентификацию"
 
@@ -23739,6 +23760,9 @@ msgstr ""
 msgid "Set up a %{type} Runner manually"
 msgstr ""
 
+msgid "Set up a hardware device as a second factor to sign in."
+msgstr ""
+
 msgid "Set up assertions/attributes/claims (email, first_name, last_name) and NameID according to %{docsLinkStart}the documentation %{icon}%{docsLinkEnd}"
 msgstr ""
 
@@ -24842,6 +24866,9 @@ msgstr ""
 msgid "StaticSiteEditor|Branch could not be created."
 msgstr ""
 
+msgid "StaticSiteEditor|Copy update"
+msgstr ""
+
 msgid "StaticSiteEditor|Could not commit the content changes."
 msgstr "Невозможно зафиксировать изменения контента."
 
@@ -25657,6 +25684,9 @@ msgstr "Тесты"
 
 msgid "Thank you for signing up for your free trial! You will get additional instructions in your inbox shortly."
 msgstr "Спасибо, что подписались на бесплатный пробный период. Вскоре мы отправим дополнительные инструкции на ваш почтовый ящик."
+
+msgid "Thank you for your business."
+msgstr ""
 
 msgid "Thank you for your feedback!"
 msgstr ""
@@ -28206,9 +28236,6 @@ msgstr "Используйте %{code_start}::%{code_end}, чтобы созда
 msgid "Use Service Desk to connect with your users (e.g. to offer customer support) through email right inside GitLab"
 msgstr ""
 
-msgid "Use a hardware device to add the second factor of authentication."
-msgstr "Используйте аппаратное устройство, чтобы добавить второй фактор аутентификации."
-
 msgid "Use an one time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
 msgstr "Используйте одноразовый аутентификатор пароля на вашем мобильном устройстве или компьютере, чтобы включить двухфакторную аутентификацию (2FA)."
 
@@ -29057,6 +29084,9 @@ msgstr "Мы хотим быть уверены, что это вы, пожал�
 msgid "We will notify %{inviter} that you declined their invitation to join GitLab. You will stop receiving reminders."
 msgstr ""
 
+msgid "We would like to inform you that your subscription GitLab Enterprise Edition %{plan_name} is nearing its user limit. You have %{active_user_count} active users, which is almost at the user limit of %{maximum_user_count}."
+msgstr ""
+
 msgid "We've found no vulnerabilities"
 msgstr ""
 
@@ -29236,6 +29266,9 @@ msgstr ""
 
 msgid "When a runner is locked, it cannot be assigned to other projects"
 msgstr "Когда процесс Runner заблокирован, он не может быть назначен другим проектам"
+
+msgid "When enabled, any user visiting %{host} and creating an account will have to be explicitly approved by the admin before they can login. This setting is effective only if sign-ups are enabled."
+msgstr ""
 
 msgid "When enabled, any user visiting %{host} will be able to create an account."
 msgstr ""
@@ -29644,6 +29677,9 @@ msgid "You can easily install a Runner on a Kubernetes cluster. %{link_to_help_p
 msgstr "Вы можете легко установить Runner в кластер Kubernetes. %{link_to_help_page}"
 
 msgid "You can filter by 'days to merge' by clicking on the columns in the chart."
+msgstr ""
+
+msgid "You can find more information about GitLab subscriptions in %{subscriptions_doc_link}."
 msgstr ""
 
 msgid "You can generate an access token scoped to this project for each application to use the GitLab API."
