@@ -6,7 +6,19 @@ import { addMarkdownListeners, removeMarkdownListeners } from './lib/utils/text_
 import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 
 export default class GLForm {
-  constructor(form, enableGFM = {}) {
+  /**
+   * Create a GLForm
+   *
+   * **Why is forceNew needed?**
+   * Previously GLForm would calculate based on a class if something was needed or not. In Vue,
+   * it's possible for classes to be rerendered and lost. We need a way to tell GLForm to treat
+   * the given element as a new form, even if the class `gfm-form` already exists on it.
+   *
+   * @param {jQuery} form Root element of the GLForm
+   * @param {Object} enableGFM Object that represents which autocomplete features to enable
+   * @param {Boolean} forceNew A flag used to force this class to treat the element as a **new** form, and call Setup.
+   */
+  constructor(form, enableGFM = {}, forceNew = false) {
     this.form = form;
     this.textarea = this.form.find('textarea.js-gfm-input');
     this.enableGFM = { ...defaultAutocompleteConfig, ...enableGFM };
@@ -22,7 +34,7 @@ export default class GLForm {
     // Before we start, we should clean up any previous data for this form
     this.destroy();
     // Set up the form
-    this.setupForm();
+    this.setupForm(forceNew);
     this.form.data('glForm', this);
   }
 
@@ -39,8 +51,8 @@ export default class GLForm {
     this.form.data('glForm', null);
   }
 
-  setupForm() {
-    const isNewForm = this.form.is(':not(.gfm-form)');
+  setupForm(forceNew = false) {
+    const isNewForm = this.form.is(':not(.gfm-form)') || forceNew;
     this.form.removeClass('js-new-note-form');
     if (isNewForm) {
       this.form.find('.div-dropzone').remove();
