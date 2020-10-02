@@ -113,6 +113,12 @@ class GraphqlController < ApplicationController
 
     # Merging to :metadata will ensure these are logged as top level keys
     payload[:metadata] ||= {}
-    payload[:metadata].merge!(graphql: { operation_name: params[:operationName] })
+    payload[:metadata].merge!(graphql: logs)
+  end
+
+  def logs
+    RequestStore.store[:graphql_logs]
+                .except(:duration_s, :query_string)
+                .merge({ operation_name: params[:operationName] })
   end
 end
