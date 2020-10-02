@@ -63,7 +63,5 @@ export default {
     data-toggle="modal"
     data-target="#delete-environment-modal"
     @click="onClick"
-  >
-    <icon name="remove" />
-  </gl-button>
+  />
 </template>
