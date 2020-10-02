@@ -36,7 +36,7 @@ similarly mitigated by a rate limit.
 
 There is a rate limit for [downloading repository archives](../api/repositories.md#get-file-archive) which applies to the project and to the user initiating the download.
 
-- **Rate limit** - 5 requests per minute per user.
+The **rate limit** is 5 requests per minute per user.
 
 ### Webhook Testing
 
