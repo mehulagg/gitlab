@@ -97,7 +97,6 @@ module Gitlab
           RequestStore[CACHE_KEY] ||= load_balancer.primary_write_location
         end
         private_class_method :primary_write_location
-
       end
     end
   end
