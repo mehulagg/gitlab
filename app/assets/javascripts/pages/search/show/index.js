@@ -1,10 +1,12 @@
 import Search from './search';
-import initStateFilter from '~/search/state_filter';
-import initConfidentialFilter from '~/search/confidential_filter';
+import { queryToObject } from '~/lib/utils/url_utility';
+import createStore from '~/search/store';
+import initDropdownFilters from '~/search/dropdown_filter';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initStateFilter();
-  initConfidentialFilter();
+  const store = createStore({ query: queryToObject(window.location.search) });
+
+  initDropdownFilters(store);
 
   return new Search();
 });
