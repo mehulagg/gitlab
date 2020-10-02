@@ -610,7 +610,8 @@ To help avoid abuse, project and group imports, exports, and export downloads ar
 
 ### Non-configurable limits
 
-See [non-configurable limits](../../security/rate_limits.md#non-configurable-limits) for information on rate limits that are not configurable, and therefore also used on GitLab.com.
+See [non-configurable limits](../../security/rate_limits.md#non-configurable-limits) for information on
+rate limits that are not configurable, and therefore also used on GitLab.com.
 
 ## GitLab.com Logging
 
