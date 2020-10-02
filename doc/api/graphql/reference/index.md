@@ -932,7 +932,7 @@ Describes where code is deployed for a project.
 | `latestOpenedMostSevereAlert` | AlertManagementAlert | The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned |
 | `metricsDashboard` | MetricsDashboard | Metrics dashboard schema for the environment |
 | `name` | String! | Human-readable name of the environment |
-| `path` | String | The path to the environment. Will always return null if `enable_environment_path_in_alert_details` feature flag is disabled |
+| `path` | String | The path to the environment. |
 | `state` | String! | State of the environment, for example: available/stopped |
 
 ### Epic

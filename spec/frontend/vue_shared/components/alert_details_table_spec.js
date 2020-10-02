@@ -22,14 +22,10 @@ const environmentPath = '/fake/path';
 
 describe('AlertDetails', () => {
   let environmentData = { name: environmentName, path: environmentPath };
-  let glFeatures = { enableEnvironmentPathInAlertDetails: false };
   let wrapper;
 
   function mountComponent(propsData = {}) {
     wrapper = mount(AlertDetailsTable, {
-      provide: {
-        glFeatures,
-      },
       propsData: {
         alert: {
           ...mockAlert,
@@ -104,19 +100,6 @@ describe('AlertDetails', () => {
         expect(findTableField(fields, 'Todos').exists()).toBe(false);
         expect(findTableField(fields, 'Notes').exists()).toBe(false);
         expect(findTableField(fields, 'Assignees').exists()).toBe(false);
-        expect(findTableField(fields, 'Environment').exists()).toBe(false);
-      });
-    });
-
-    describe('when enableEnvironmentPathInAlertDetails is enabled', () => {
-      beforeEach(() => {
-        glFeatures = { enableEnvironmentPathInAlertDetails: true };
-        mountComponent();
-      });
-
-      it('should show flaggedAllowed alert fields', () => {
-        const fields = findTableKeys();
-
         expect(findTableField(fields, 'Environment').exists()).toBe(true);
       });
 

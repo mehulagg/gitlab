@@ -24,7 +24,6 @@ describe('AlertDetails', () => {
     name: environmentName,
     path: environmentPath,
   };
-  let glFeatures = { enableEnvironmentPathInAlertDetails: false };
   let mock;
   let wrapper;
   const projectPath = 'root/alerts';
@@ -40,7 +39,6 @@ describe('AlertDetails', () => {
           projectPath,
           projectIssuesPath,
           projectId,
-          glFeatures,
         },
         data() {
           return {
@@ -159,33 +157,18 @@ describe('AlertDetails', () => {
     });
 
     describe('environment fields', () => {
-      describe('when enableEnvironmentPathInAlertDetails is disabled', () => {
-        beforeEach(mountComponent);
-
-        it('should not show the environment', () => {
-          expect(findEnvironmentName().exists()).toBe(false);
-          expect(findEnvironmentPath().exists()).toBe(false);
-        });
+      it('should show the environment name with link to path', () => {
+        mountComponent();
+        expect(findEnvironmentName().exists()).toBe(false);
+        expect(findEnvironmentPath().text()).toBe(environmentName);
+        expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
       });
 
-      describe('when enableEnvironmentPathInAlertDetails is enabled', () => {
-        beforeEach(() => {
-          glFeatures = { enableEnvironmentPathInAlertDetails: true };
-          mountComponent();
-        });
-
-        it('should show the environment name with link to path', () => {
-          expect(findEnvironmentName().exists()).toBe(false);
-          expect(findEnvironmentPath().text()).toBe(environmentName);
-          expect(findEnvironmentPath().attributes('href')).toBe(environmentPath);
-        });
-
-        it('should only show the environment name if the path is not provided', () => {
-          environmentData = { name: environmentName, path: null };
-          mountComponent();
-          expect(findEnvironmentPath().exists()).toBe(false);
-          expect(findEnvironmentName().text()).toBe(environmentName);
-        });
+      it('should only show the environment name if the path is not provided', () => {
+        environmentData = { name: environmentName, path: null };
+        mountComponent();
+        expect(findEnvironmentPath().exists()).toBe(false);
+        expect(findEnvironmentName().text()).toBe(environmentName);
       });
     });
 

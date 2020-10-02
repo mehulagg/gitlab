@@ -17,8 +17,7 @@ module Types
           description: 'State of the environment, for example: available/stopped'
 
     field :path, GraphQL::STRING_TYPE, null: true,
-          description: 'The path to the environment. Will always return null ' \
-                       'if `enable_environment_path_in_alert_details` feature flag is disabled'
+          description: 'The path to the environment.'
 
     field :metrics_dashboard, Types::Metrics::DashboardType, null: true,
           description: 'Metrics dashboard schema for the environment',
@@ -28,9 +27,5 @@ module Types
           Types::AlertManagement::AlertType,
           null: true,
           description: 'The most severe open alert for the environment. If multiple alerts have equal severity, the most recent is returned'
-
-    def path
-      object.path unless Feature.disabled?(:enable_environment_path_in_alert_details)
-    end
   end
 end
