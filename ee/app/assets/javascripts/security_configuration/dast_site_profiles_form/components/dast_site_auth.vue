@@ -1,6 +1,19 @@
 <script>
 import { GlFormGroup, GlFormInput, GlToggle } from '@gitlab/ui';
 
+const isURLTypeMismatch = el => el.type === 'url' && el.validity.typeMismatch;
+
+const validateInputElement = el => {
+  const isValid = el.checkValidity();
+  const { validationMessage } = el;
+  const message = isURLTypeMismatch(el) ? 'UUUPs... :( :( ' : validationMessage;
+
+  return {
+    isValid,
+    message,
+  };
+};
+
 const initField = value => ({
   value,
   state: null,
@@ -24,13 +37,13 @@ export default {
       isAuthEnabled: false,
     };
   },
-  watch: {
-    isFormValid: { handler: 'emitUpdate', immediate: true },
-  },
   computed: {
     isFormValid() {
       return !this.isAuthEnabled || Object.values(this.form).every(({ state }) => state);
     },
+  },
+  watch: {
+    isFormValid: { handler: 'emitUpdate', immediate: true },
   },
   methods: {
     emitUpdate() {
@@ -40,9 +53,10 @@ export default {
       });
     },
     validate(fieldName, { target }) {
-      const isFieldValid = target.checkValidity();
-      this.form[fieldName].state = isFieldValid;
-      this.form[fieldName].feedback = target.validationMessage;
+      const { isValid, message } = validateInputElement(target);
+
+      this.form[fieldName].state = isValid;
+      this.form[fieldName].feedback = message;
     },
   },
 };
@@ -72,7 +86,7 @@ export default {
       >
         <gl-form-input
           v-model="form.authenticationPassword.value"
-          type="text"
+          type="password"
           required
           :state="form.authenticationPassword.state"
           @blur="validate('authenticationPassword', $event)"
