@@ -85,9 +85,6 @@ export default {
 
       return this.issuableLink({ milestone_title: title });
     },
-    scopedLabelsAvailable() {
-      return this.glFeatures.scopedLabels;
-    },
     hasWeight() {
       return isNumber(this.issuable.weight);
     },
@@ -221,7 +218,7 @@ export default {
       return mergeUrlParams(params, this.baseUrl);
     },
     isScoped({ name }) {
-      return isScopedLabel({ title: name }) && this.scopedLabelsAvailable;
+      return isScopedLabel({ title: name });
     },
     labelHref({ name }) {
       if (this.isJiraIssue) {

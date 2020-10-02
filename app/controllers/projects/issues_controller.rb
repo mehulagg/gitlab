@@ -55,10 +55,6 @@ class Projects::IssuesController < Projects::ApplicationController
     gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
   end
 
-  before_action only: :index do
-    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
-  end
-
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
 
   respond_to :html
