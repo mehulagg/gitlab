@@ -77,7 +77,7 @@ RSpec.describe 'Creating a Snippet' do
         expect(mutation_response['snippet']).to be_nil
       end
 
-      it_behaves_like 'spam flag is present'
+      it_behaves_like 'spammable fields are present'
     end
 
     shared_examples 'creates snippet' do
@@ -105,8 +105,8 @@ RSpec.describe 'Creating a Snippet' do
       end
 
       it_behaves_like 'snippet edit usage data counters'
-      it_behaves_like 'spam flag is present'
-      it_behaves_like 'can raise spam flag' do
+      it_behaves_like 'spammable fields are present'
+      it_behaves_like 'can raise spam flags' do
         let(:service) { Snippets::CreateService }
       end
     end
@@ -148,20 +148,8 @@ RSpec.describe 'Creating a Snippet' do
 
       it_behaves_like 'a mutation that returns errors in the response', errors: ["Title can't be blank"]
       it_behaves_like 'does not create snippet'
-
-      context 'when snippet is detected as spam' do
-        it 'spam flag is not raised' do
-          allow_next_instance_of(Snippets::CreateService) do |instance|
-            allow(instance).to receive(:spam_check) do |snippet, user, _|
-              snippet.spam!
-            end
-          end
-
-          subject
-
-          expect(mutation_response['spam']).to be false
-          expect(mutation_response['errors']).to eq(["Title can't be blank", "Your snippet has been recognized as spam and has been discarded."])
-        end
+      it_behaves_like 'spammable fields with validation errors' do
+        let(:service) { Snippets::CreateService }
       end
     end
 

@@ -9,6 +9,11 @@ module Mutations
             GraphQL::BOOLEAN_TYPE,
             null: true,
             description: 'Indicates whether the operation returns a snippet detected as spam'
+
+      field :needs_recaptcha,
+            GraphQL::BOOLEAN_TYPE,
+            null: true,
+            description: 'Indicates whether the operation returns a snippet that needs the recaptcha'
     end
 
     def with_spam_params(&block)
@@ -16,11 +21,21 @@ module Mutations
     end
 
     def with_spam_fields(spammable, &block)
-      { spam: spam?(spammable) }.merge!(yield)
+      { spam: spam?(spammable), needs_recaptcha: needs_recaptcha?(spammable) }.merge!(yield)
     end
 
     def spam?(spammable)
-      spammable.spam? && spammable.errors.count <= 1
+      spammable.spam? && only_spammable_error?(spammable)
+    end
+
+    def needs_recaptcha?(spammable)
+      spammable.needs_recaptcha? && Gitlab::Recaptcha.enabled? && only_spammable_error?(spammable)
+    end
+
+    private
+
+    def only_spammable_error?(spammable)
+      spammable.errors.count <= 1
     end
   end
 end

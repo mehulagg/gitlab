@@ -81,11 +81,11 @@ RSpec.describe 'Updating a Snippet' do
         end
       end
 
-      it_behaves_like 'can raise spam flag' do
+      it_behaves_like 'can raise spam flags' do
         let(:service) { Snippets::UpdateService }
       end
 
-      it_behaves_like 'spam flag is present'
+      it_behaves_like 'spammable fields are present'
 
       context 'when there are ActiveRecord validation errors' do
         let(:updated_title) { '' }
@@ -113,21 +113,9 @@ RSpec.describe 'Updating a Snippet' do
           end
         end
 
-        it_behaves_like 'spam flag is present'
-
-        context 'when snippet is detected as spam' do
-          it 'spam flag is not raised' do
-            allow_next_instance_of(Snippets::UpdateService) do |instance|
-              allow(instance).to receive(:spam_check) do |snippet, user, _|
-                snippet.spam!
-              end
-            end
-
-            subject
-
-            expect(mutation_response['spam']).to be false
-            expect(mutation_response['errors']).to eq(["Title can't be blank", "Your snippet has been recognized as spam and has been discarded."])
-          end
+        it_behaves_like 'spammable fields are present'
+        it_behaves_like 'spammable fields with validation errors' do
+          let(:service) { Snippets::UpdateService }
         end
       end
 
