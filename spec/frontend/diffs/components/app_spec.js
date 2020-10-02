@@ -740,7 +740,7 @@ describe('diffs/components/app', () => {
       expect(wrapper.find(DiffFile).exists()).toBe(true);
     });
 
-    it('doesnt render tree list when no changes exist', () => {
+    it("doesn't render tree list when no changes exist", () => {
       createComponent();
 
       expect(wrapper.find(TreeList).exists()).toBe(false);
