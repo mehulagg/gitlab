@@ -22,8 +22,8 @@ export const hasValidSelection = ({ selection, options }) =>
  * @param {String} payload.filterId the ID of the filter that the selected option belongs to
  * @returns {Array} the mutated filters array
  */
-export const setFilter = (filters, { optionId, filterId }) =>
-  filters.map(filter => {
+export const setFilter = (filters, { optionId, filterId }) => {
+  return filters.map(filter => {
     if (filter.id === filterId) {
       const { selection } = filter;
 
@@ -47,3 +47,4 @@ export const setFilter = (filters, { optionId, filterId }) =>
     }
     return filter;
   });
+};
