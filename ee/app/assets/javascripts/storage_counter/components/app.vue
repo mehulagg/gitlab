@@ -1,7 +1,9 @@
 <script>
 import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
+import UsageStatistics from './usage_statistics.vue';
 import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
@@ -16,11 +18,13 @@ export default {
     GlSprintf,
     GlIcon,
     UsageGraph,
+    UsageStatistics,
     TemporaryStorageIncreaseModal,
   },
   directives: {
     GlModalDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     namespacePath: {
       type: String,
@@ -77,6 +81,12 @@ export default {
     },
     isStorageIncreaseModalVisible() {
       return parseBoolean(this.isTemporaryStorageIncreaseVisible);
+    },
+    isAdditionalStorageFlagEnabled() {
+      return this.glFeatures.additionalRepoStorageByNamespace;
+    },
+    shouldShowUsageGraph() {
+      return Boolean(this.namespace.rootStorageStatistics && !this.isAdditionalStorageFlagEnabled);
     },
   },
   methods: {
@@ -139,10 +149,11 @@ export default {
       <div class="row py-0">
         <div class="col-sm-12">
           <usage-graph
-            v-if="namespace.rootStorageStatistics"
+            v-if="shouldShowUsageGraph"
             :root-storage-statistics="namespace.rootStorageStatistics"
             :limit="namespace.limit"
           />
+          <usage-statistics v-else />
         </div>
       </div>
     </div>
