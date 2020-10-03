@@ -1,4 +1,4 @@
-FROM ruby:2.6-stretch
+FROM ruby:2.7-buster
 LABEL maintainer="GitLab Quality Department <quality@gitlab.com>"
 
 ENV DEBIAN_FRONTEND="noninteractive"
