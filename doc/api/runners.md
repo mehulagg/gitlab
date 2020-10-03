@@ -470,7 +470,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 Pause a specific runner.
 
 ```plaintext
- PUT --form "active=false"  /runners/:runner_id
+PUT --form "active=false"  /runners/:runner_id
 ```
 
 | Attribute   | Type    | Required | Description         |
