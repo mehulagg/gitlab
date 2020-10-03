@@ -478,7 +478,7 @@ PUT --form "active=false"  /runners/:runner_id
 | `runner_id` | integer | yes      | The ID of a runner  |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: $ACCESS_TOKEN" --form "active=false"  "$GL_URL/api/v4/runners/$RUNNER_ID"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --form "active=false"  "https://gitlab.example.com/api/v4/runners/6"
 ```
 
 ## List group's runners
