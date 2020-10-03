@@ -2,6 +2,11 @@
 
 module Resolvers
   class ReleasesResolver < BaseResolver
+    argument :sort, Types::ReleaseSortEnum,
+              description: 'Sort Releases by this criteria',
+              required: false,
+              default_value: 'released_at_desc'
+
     type Types::ReleaseType.connection_type, null: true
 
     alias_method :project, :object
