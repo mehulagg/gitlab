@@ -311,7 +311,7 @@ RSpec.describe API::ProjectContainerRepositories do
         it 'properly removes tag' do
           expect(service).to receive(:execute).with(root_repository) { { status: :success } }
           expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(root_repository.project, api_user, tags: %w[rootA]) { service }
-          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag', {})
+          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag')
 
           subject
 
@@ -327,7 +327,7 @@ RSpec.describe API::ProjectContainerRepositories do
         it 'properly removes tag' do
           expect(service).to receive(:execute).with(root_repository) { { status: :success } }
           expect(Projects::ContainerRepository::DeleteTagsService).to receive(:new).with(root_repository.project, api_user, tags: %w[rootA]) { service }
-          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag', {})
+          expect(Gitlab::Tracking).to receive(:event).with(described_class.name, 'delete_tag')
 
           subject
 
