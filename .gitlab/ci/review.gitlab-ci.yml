@@ -20,7 +20,7 @@ review-build-cng:
   extends:
     - .default-retry
     - .review:rules:review-build-cng
-  image: ruby:2.6-alpine
+  image: ruby:2.7-alpine
   stage: review-prepare
   before_script:
     - source scripts/utils.sh
@@ -200,7 +200,7 @@ review-performance:
 parallel-spec-reports:
   extends:
     - .review:rules:mr-only-manual
-  image: ruby:2.6-alpine
+  image: ruby:2.7-alpine
   stage: post-qa
   dependencies: ["review-qa-all"]
   variables:
