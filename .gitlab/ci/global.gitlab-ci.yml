@@ -18,7 +18,7 @@
 
 .rails-cache:
   cache:
-    key: "rails-v2"
+    key: "rails-v3"
     paths:
       - vendor/ruby/
       - vendor/gitaly-ruby/
@@ -27,7 +27,7 @@
 
 .static-analysis-cache:
   cache:
-    key: "static-analysis-v1"
+    key: "static-analysis-v2"
     paths:
       - vendor/ruby/
       - node_modules/
@@ -43,7 +43,7 @@
 
 .qa-cache:
   cache:
-    key: "qa-v1"
+    key: "qa-v2"
     paths:
       - qa/vendor/ruby/
     policy: pull
