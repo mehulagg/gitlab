@@ -1,11 +1,13 @@
 <script>
-import { GlDeprecatedDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
+import FilterOption from './filter_option.vue';
 
 export default {
   components: {
-    GlDeprecatedDropdown,
+    GlDropdown,
     GlSearchBoxByType,
     GlIcon,
+    FilterOption,
   },
   props: {
     filter: {
@@ -57,12 +59,13 @@ export default {
 <template>
   <div class="dashboard-filter">
     <strong class="js-name">{{ filter.name }}</strong>
-    <gl-deprecated-dropdown
+    <gl-dropdown
       ref="dropdown"
       class="d-block mt-1"
       menu-class="dropdown-extended-height"
       toggle-class="d-flex w-100 justify-content-between align-items-center"
     >
+      <!-- Selected dropdown item -->
       <template slot="button-content">
         <span class="text-truncate" :data-qa-selector="qaSelector">
           {{ firstSelectedOption }}
@@ -73,6 +76,7 @@ export default {
         <i class="fa fa-chevron-down" aria-hidden="true"></i>
       </template>
 
+      <!-- Dropdown title that shows in the dropdown -->
       <div class="dropdown-title mb-0">
         {{ filter.name }}
         <button
@@ -87,7 +91,7 @@ export default {
       </div>
 
       <gl-search-box-by-type
-        v-if="filter.options.length >= 20"
+        v-if="filter.options.length >= 4"
         ref="searchBox"
         v-model="filterTerm"
         class="gl-m-3"
@@ -98,25 +102,17 @@ export default {
         data-qa-selector="filter_dropdown_content"
         :class="{ 'dropdown-content': filterId === 'project_id' }"
       >
-        <button
-          v-for="option in filteredOptions"
-          :key="option.id"
-          role="menuitem"
-          type="button"
-          class="dropdown-item"
-          @click="clickFilter(option)"
-        >
-          <span class="d-flex">
-            <gl-icon
-              v-if="isSelected(option)"
-              class="flex-shrink-0 js-check"
-              name="mobile-issue-close"
-            />
-            <span class="gl-white-space-nowrap gl-ml-2" :class="{ 'gl-pl-5': !isSelected(option) }">
-              {{ option.name }}
-            </span>
-          </span>
-        </button>
+        <slot :is-selected="isSelected" :clickFilter="clickFilter">
+          <filter-option
+            v-for="option in filteredOptions"
+            :key="option.id"
+            type="button"
+            class="dropdown-item"
+            :display-name="option.name"
+            :is-selected="isSelected(option)"
+            @click="clickFilter(option)"
+          />
+        </slot>
       </div>
 
       <button
@@ -126,6 +122,6 @@ export default {
       >
         {{ __('No matching results') }}
       </button>
-    </gl-deprecated-dropdown>
+    </gl-dropdown>
   </div>
 </template>

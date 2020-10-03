@@ -64,7 +64,7 @@ export default {
           <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
-          <filters @filterChange="handleFilterChange" />
+          <filters :query-path="projectFullPath" @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"

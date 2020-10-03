@@ -1,6 +1,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import DashboardFilter from './filter.vue';
+import DashboardFilter from './filters/filter.vue';
 import GlToggleVuex from '~/vue_shared/components/gl_toggle_vuex.vue';
 
 export default {

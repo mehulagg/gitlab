@@ -1,4 +1,4 @@
-import Filter from 'ee/security_dashboard/components/filter.vue';
+import Filter from 'ee/security_dashboard/components/filters/filter.vue';
 import { mount } from '@vue/test-utils';
 import stubChildren from 'helpers/stub_children';
 import { trimText } from 'helpers/text_helper';
