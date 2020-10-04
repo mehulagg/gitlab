@@ -3416,14 +3416,14 @@ Values for sorting projects.
 
 | Value | Description |
 | ----- | ----------- |
-| `COMPOSER` | Packages from the composer package manager |
-| `CONAN` | Packages from the conan package manager |
-| `GENERIC` | Packages from the generic package manager |
-| `GOLANG` | Packages from the golang package manager |
-| `MAVEN` | Packages from the maven package manager |
-| `NPM` | Packages from the npm package manager |
-| `NUGET` | Packages from the nuget package manager |
-| `PYPI` | Packages from the pypi package manager |
+| `COMPOSER` | Packages from the Composer package manager |
+| `CONAN` | Packages from the Conan package manager |
+| `GENERIC` | Packages from the Generic package manager |
+| `GOLANG` | Packages from the Golang package manager |
+| `MAVEN` | Packages from the Maven package manager |
+| `NPM` | Packages from the NPM package manager |
+| `NUGET` | Packages from the Nuget package manager |
+| `PYPI` | Packages from the PyPi package manager |
 
 ### PipelineConfigSourceEnum
 
