@@ -481,8 +481,11 @@ This will result in only one `Project`, `User`, and `ProjectMember` created for 
 is handled automatically using a transaction rollback.
 
 Note that if you modify an object defined inside a `let_it_be` block,
-then you will need to reload the object as needed, or use the `let_it_be_with_reload`
-alias, or specify the `reload` option to reload for every example.
+then you will need to do one of the following:
+
+- Reload the object as needed.
+- Use the `let_it_be_with_reload` alias.
+- Specify the `reload` option to reload for every example.
 
 ```ruby
 let_it_be_with_reload(:project) { create(:project) }
