@@ -1,6 +1,4 @@
 <script>
-import Tracking from '~/tracking';
-import { trackAlertListViewsOptions } from '../constants';
 import AlertManagementEmptyState from './alert_management_empty_state.vue';
 import AlertManagementTable from './alert_management_table.vue';
 
@@ -9,11 +7,8 @@ export default {
     AlertManagementEmptyState,
     AlertManagementTable,
   },
+  inject: ['projectPath'],
   props: {
-    projectPath: {
-      type: String,
-      required: true,
-    },
     alertManagementEnabled: {
       type: Boolean,
       required: true,
@@ -43,15 +38,6 @@ export default {
       type: String,
       required: false,
       default: '',
-    },
-  },
-  mounted() {
-    this.trackPageViews();
-  },
-  methods: {
-    trackPageViews() {
-      const { category, action } = trackAlertListViewsOptions;
-      Tracking.event(category, action);
     },
   },
 };

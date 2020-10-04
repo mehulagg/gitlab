@@ -18,6 +18,9 @@ export default () => {
     populatingAlertsHelpUrl,
     alertsHelpUrl,
     opsgenieMvcTargetUrl,
+    textQuery,
+    authorUsernamesQuery,
+    assigneeUsernamesQuery,
   } = domEl.dataset;
   let { alertManagementEnabled, userCanEnableAlertManagement, opsgenieMvcEnabled } = domEl.dataset;
 
@@ -50,6 +53,12 @@ export default () => {
 
   return new Vue({
     el: selector,
+    provide: {
+      projectPath,
+      textQuery,
+      authorUsernamesQuery,
+      assigneeUsernamesQuery,
+    },
     apolloProvider,
     components: {
       AlertManagementList,
@@ -57,7 +66,6 @@ export default () => {
     render(createElement) {
       return createElement('alert-management-list', {
         props: {
-          projectPath,
           enableAlertManagementPath,
           populatingAlertsHelpUrl,
           emptyAlertSvgPath,

@@ -1,6 +1,15 @@
-query getAlertsCount($searchTerm: String, $projectPath: ID!) {
+query getAlertsCount(
+  $searchTerm: String
+  $projectPath: ID!
+  $authorUsername: String = ""
+  $assigneeUsernames: String = ""
+) {
   project(fullPath: $projectPath) {
-    alertManagementAlertStatusCounts(search: $searchTerm) {
+    alertManagementAlertStatusCounts(
+      search: $searchTerm
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsernames
+    ) {
       all
       open
       acknowledged
