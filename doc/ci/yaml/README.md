@@ -4148,7 +4148,7 @@ After you define a variable, you can use it in all executed commands and scripts
 Integers and strings can be used for the variable's name and value.
 Floats cannot be used.
 
-In addition to the user-defined variables, there are:
+In addition to user-defined variables, there are:
 
 - Variables [set up by the runner itself](../variables/README.md#predefined-environment-variables).
   One example is `CI_COMMIT_REF_NAME`, which is the branch or tag the project is built for.
