@@ -53,8 +53,8 @@ export default {
   },
   inject: ['dashboardDocumentation', 'autoFixDocumentation'],
   methods: {
-    handleFilterChange(filters) {
-      this.filters = filters;
+    updateFilters(filter) {
+      this.filters = { ...this.filters, ...filter };
     },
     handleAutoFixUserCalloutClose() {
       Cookies.set('auto_fix_user_callout_dismissed', 'true');
@@ -81,7 +81,7 @@ export default {
           <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
-          <filters :query-path="projectFullPath" @filterChange="handleFilterChange" />
+          <filters :query-path="projectFullPath" @filter-changed="updateFilters" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"

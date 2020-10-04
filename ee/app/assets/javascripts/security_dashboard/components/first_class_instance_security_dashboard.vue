@@ -54,8 +54,8 @@ export default {
     },
   },
   methods: {
-    handleFilterChange(filters) {
-      this.filters = filters;
+    updateFilters(filter) {
+      this.filters = { ...this.filters, ...filter };
     },
   },
 };
@@ -73,7 +73,7 @@ export default {
       </header>
     </template>
     <template #sticky>
-      <filters v-if="shouldShowDashboard" :projects="projects" @filterChange="handleFilterChange" />
+      <filters v-if="shouldShowDashboard" :projects="projects" @filter-changed="updateFilters" />
     </template>
     <instance-security-vulnerabilities
       v-if="shouldShowDashboard"

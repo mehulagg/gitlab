@@ -15,25 +15,22 @@ export const filters = {
   stateFilter: {
     name: s__('SecurityReports|Status'),
     id: 'state',
-    options: [
-      { id: ALL, name: s__('VulnerabilityStatusTypes|All') },
-      ...parseOptions(VULNERABILITY_STATES),
-    ],
-    selection: new Set([ALL]),
+    allOption: { id: ALL, name: s__('VulnerabilityStatusTypes|All') },
+    options: parseOptions(VULNERABILITY_STATES),
   },
 
   severityFilter: {
     name: s__('SecurityReports|Severity'),
     id: 'severity',
-    options: [BASE_FILTERS.severity, ...parseOptions(SEVERITY_LEVELS)],
-    selection: new Set([ALL]),
+    allOption: BASE_FILTERS.severity,
+    options: parseOptions(SEVERITY_LEVELS),
   },
 
   scannerFilter: {
     name: s__('Reports|Scanner'),
     id: 'reportType',
+    allOption: BASE_FILTERS.report_type,
     options: parseOptions(REPORT_TYPES),
-    selection: new Set([ALL]),
   },
 
   getProjectFilter: projects => {
@@ -42,8 +39,8 @@ export const filters = {
     return {
       name: s__('SecurityReports|Project'),
       id: 'projectId',
-      options: [BASE_FILTERS.project_id, ...mapProjects(projects)],
-      selection: new Set([ALL]),
+      allOption: BASE_FILTERS.project_id,
+      options: mapProjects(projects),
     };
   },
 };
