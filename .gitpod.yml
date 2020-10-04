@@ -38,11 +38,6 @@ tasks:
         gp sync-done gdk-copied
         SECONDS=0
         cd /workspace/gitlab-development-kit
-        # add Gitpod URL to allowed hosts
-        echo "if Rails.env.development?" > gitlab/config/initializers/rails_host_authorization_gitpod.rb
-        echo "  Rails.application.config.hosts += [\"$(gp url 3000 | sed -e 's+^http://++' -e 's+^https://++')\"]" >> gitlab/config/initializers/rails_host_authorization_gitpod.rb
-        echo "end" >> gitlab/config/initializers/rails_host_authorization_gitpod.rb
-        echo "rails_host_authorization_gitpod.rb" > gitlab/.git/info/exclude
         # update GDK
         if [ "$GITLAB_UPDATE_GDK" = true ]; then
           echo "$(date) – Updating GDK" | tee -a /workspace/startup.log
