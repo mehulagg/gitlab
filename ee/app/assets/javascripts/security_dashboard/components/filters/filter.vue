@@ -28,7 +28,9 @@ export default {
     },
     firstSelectedOption() {
       if (this.selectedCount > 0) {
-        return Object.values(this.selectedOptions)[0].name;
+        const id = Object.keys(this.selectedOptions)[0];
+        const option = this.filter.options.find(x => x.id === id);
+        return option.name;
       }
 
       return this.filter.allOption.name;
@@ -47,16 +49,29 @@ export default {
   },
   watch: {
     selectedOptions() {
-      const selectedFilters = Object.values(this.selectedOptions).map(x => x.id);
-      this.$emit('filter-changed', { [this.filter.id]: selectedFilters });
+      const { id } = this.filter;
+      const selectedFilters = Object.keys(this.selectedOptions);
+      this.$emit('filter-changed', { [id]: selectedFilters });
+    },
+    '$route.query': {
+      immediate: true,
+      handler(query) {
+        const values = query[this.filter.id];
+        const valueArray = Array.isArray(values) ? values : [values];
+        const definedArray = valueArray.filter(x => x !== undefined);
+        definedArray.forEach(value => {
+          this.$set(this.selectedOptions, value, true);
+        });
+      },
     },
   },
   methods: {
     toggleFilter(option) {
+      console.log('toggle', option);
       if (this.selectedOptions[option.id]) {
         this.$delete(this.selectedOptions, option.id);
       } else {
-        this.$set(this.selectedOptions, option.id, option);
+        this.$set(this.selectedOptions, option.id, true);
       }
     },
     deselectAllOptions() {
@@ -130,7 +145,7 @@ export default {
           @click="deselectAllOptions"
         />
 
-        <slot :is-selected="isSelected" :clickFilter="toggleFilter">
+        <slot :is-selected="isSelected" :toggleFilter="toggleFilter">
           <filter-option
             v-for="option in filteredOptions"
             :key="option.id"
