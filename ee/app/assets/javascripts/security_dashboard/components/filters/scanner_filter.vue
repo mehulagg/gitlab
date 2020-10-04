@@ -1,7 +1,6 @@
 <script>
-import { groupBy } from 'lodash';
+import { groupBy, cloneDeep } from 'lodash';
 import { filters } from 'ee/security_dashboard/helpers';
-import { BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
 import DashboardFilter from './filter.vue';
 import FilterOption from './filter_option.vue';
 import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
@@ -46,46 +45,42 @@ export default {
       if (dashboardType === 'group') return groupSpecificScanners;
       return instanceSpecificScanners;
     },
-    filter() {
-      const { scannerFilter } = filters;
-      console.log('trying map', this.customScanners);
-      const customScanners = Object.values(this.customScanners)
+    customScannerOptions() {
+      return Object.values(this.customScanners)
         .flatMap(x => x)
         .map(x => ({
           id: x.externalId,
           name: x.name,
         }));
-
-      console.log('custom scanners', customScanners, scannerFilter);
-
-      customScanners.forEach(x => scannerFilter.options.push(x));
-
-      console.log('final filter', scannerFilter);
+    },
+    filterWithCustomScanners() {
+      const scannerFilter = cloneDeep(filters.scannerFilter);
+      scannerFilter.options = scannerFilter.options.concat(this.customScannerOptions);
       return scannerFilter;
     },
+    groups() {
+      const defaultGroup = { GitLab: filters.scannerFilter.options };
+      return { ...defaultGroup, ...this.customScanners };
+    },
   },
-  allOption: BASE_FILTERS.report_type,
 };
 </script>
 
 <template>
   <dashboard-filter
     #default="{ isSelected, clickFilter }"
-    :filter="filter"
+    :filter="filterWithCustomScanners"
     @setFilter="options => $emit('setFilter', options)"
   >
-    <filter-option
-      :display-name="$options.allOption.name"
-      :is-selected="isSelected($options.allOption)"
-      @click="clickFilter($options.allOption)"
-    />
-    <h2>{{ __('GitLab') }}</h2>
-    <filter-option
-      v-for="option in filter.options"
-      :key="option.id"
-      :display-name="option.name"
-      :is-selected="isSelected(option)"
-      @click="clickFilter(option)"
-    />
+    <template v-for="[groupName, options] in groups">
+      <h2 :key="groupName">{{ groupName }}</h2>
+      <filter-option
+        v-for="option in options"
+        :key="option.id || option.externalId"
+        :display-name="option.name"
+        :is-selected="isSelected(option)"
+        @click="clickFilter(option)"
+      />
+    </template>
   </dashboard-filter>
 </template>
