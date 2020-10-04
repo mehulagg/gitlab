@@ -4132,14 +4132,8 @@ Read more on [GitLab Pages user documentation](../../user/project/pages/index.md
 
 > Introduced in GitLab Runner v0.5.0.
 
-NOTE: **Note:**
-Integers (as well as strings) are legal both for variable's name and value.
-Floats are not legal and can't be used.
-
-Variables are configurable values in `.gitlab-ci.yml` that are passed to jobs.
-They can be set globally and per-job.
-When you use the `variables` keyword in jobs, it overrides the global
-YAML variables and predefined ones of the same name.
+Variables are configurable values in the `.gitlab-ci.yml` file. 
+These values are passed to jobs and can be set globally and per-job.
 
 Variables are stored in the Git repository and are meant for non-sensitive
 project configuration, for example:
@@ -4149,17 +4143,23 @@ variables:
   DATABASE_URL: "postgres://postgres@postgres/my_database"
 ```
 
-You can use these variables later in all executed commands and scripts.
+After you define a variable, you can use it in all executed commands and scripts.
+
+Integers and strings can be used for the variable's name and value.
+Floats cannot be used.
+
+In addition to the user-defined variables, there are:
+
+- Variables [set up by the runner itself](../variables/README.md#predefined-environment-variables).
+  One example is `CI_COMMIT_REF_NAME`, which is the branch or tag the project is built for.
+- Environment [variables](../variables/README.md#gitlab-cicd-environment-variables),
+  which can be set in the GitLab UI.
+
+The `variables` keyword overrides the global
+YAML variables and predefined ones of the same name.
+
 The YAML-defined variables are also set to all created service containers,
 so that you can fine tune them.
-
-Except for the user-defined variables, there are also variables [set up by the
-runner itself](../variables/README.md#predefined-environment-variables).
-One example would be `CI_COMMIT_REF_NAME`, which has the value of
-the branch or tag name the project is built for. Apart from the variables
-you can set in `.gitlab-ci.yml`, there are also environment
-[variables](../variables/README.md#gitlab-cicd-environment-variables),
-which can be set in the GitLab UI.
 
 [YAML anchors for variables](#yaml-anchors-for-variables) are available.
 
