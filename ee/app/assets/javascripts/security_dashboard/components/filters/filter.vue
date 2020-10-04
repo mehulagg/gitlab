@@ -1,5 +1,6 @@
 <script>
 import { GlDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
+import { ALL } from 'ee/security_dashboard/store/modules/filters/constants';
 import FilterOption from './filter_option.vue';
 
 export default {
@@ -18,20 +19,22 @@ export default {
   data() {
     return {
       filterTerm: '',
+      selectedOptions: {},
     };
   },
   computed: {
-    filterId() {
-      return this.filter.id;
-    },
-    selection() {
-      return this.filter.selection;
+    selectedCount() {
+      return Object.keys(this.selectedOptions).length;
     },
     firstSelectedOption() {
-      return this.filter.options.find(option => this.selection.has(option.id))?.name || '-';
+      if (this.selectedCount > 0) {
+        return Object.values(this.selectedOptions)[0].name;
+      }
+
+      return this.filter.allOption.name;
     },
     extraOptionCount() {
-      return this.selection.size - 1;
+      return Math.max(0, this.selectedCount - 1);
     },
     filteredOptions() {
       return this.filter.options.filter(option =>
@@ -42,15 +45,33 @@ export default {
       return `filter_${this.filter.name.toLowerCase().replace(' ', '_')}_dropdown`;
     },
   },
+  watch: {
+    selectedOptions() {
+      const selectedFilters = Object.values(this.selectedOptions).map(x => x.id);
+      this.$emit('filter-changed', { [this.filter.id]: selectedFilters });
+    },
+  },
   methods: {
-    clickFilter(option) {
-      this.$emit('setFilter', { filterId: this.filterId, optionId: option.id });
+    toggleFilter(option) {
+      if (this.selectedOptions[option.id]) {
+        this.$delete(this.selectedOptions, option.id);
+      } else {
+        this.$set(this.selectedOptions, option.id, option);
+      }
+    },
+    deselectAllOptions() {
+      this.selectedOptions = {};
     },
     isSelected(option) {
-      return this.selection.has(option.id);
+      // Special case for the All option, return true if there are no other selected options.
+      if (option.id === ALL && this.selectedCount <= 0) {
+        return true;
+      }
+
+      return Boolean(this.selectedOptions[option.id]);
     },
     closeDropdown() {
-      this.$refs.dropdown.$children[0].hide(true);
+      this.$refs.dropdown.hide(true);
     },
   },
 };
@@ -100,9 +121,16 @@ export default {
 
       <div
         data-qa-selector="filter_dropdown_content"
-        :class="{ 'dropdown-content': filterId === 'project_id' }"
+        :class="{ 'dropdown-content': filter.id === 'project_id' }"
       >
-        <slot :is-selected="isSelected" :clickFilter="clickFilter">
+        <filter-option
+          v-if="filter.allOption && !filterTerm.length"
+          :display-name="filter.allOption.name"
+          :is-selected="!selectedCount"
+          @click="deselectAllOptions"
+        />
+
+        <slot :is-selected="isSelected" :clickFilter="toggleFilter">
           <filter-option
             v-for="option in filteredOptions"
             :key="option.id"
@@ -110,7 +138,7 @@ export default {
             class="dropdown-item"
             :display-name="option.name"
             :is-selected="isSelected(option)"
-            @click="clickFilter(option)"
+            @click="toggleFilter(option)"
           />
         </slot>
       </div>
