@@ -1,6 +1,7 @@
 <script>
 import {
   GlButton,
+  GlForm,
   GlFormCheckbox,
   GlFormGroup,
   GlFormInput,
@@ -33,6 +34,7 @@ export default {
   units: Object.values(units),
   components: {
     GlButton,
+    GlForm,
     GlFormCheckbox,
     GlFormGroup,
     GlFormInput,
@@ -47,7 +49,6 @@ export default {
       duration: this.serviceLevelAgreementSettings.minutes ?? '',
       enabled: this.serviceLevelAgreementSettings.active,
       loading: false,
-      success: false,
       unit: units.minutes.value,
     };
   },
@@ -84,15 +85,11 @@ export default {
   methods: {
     updateServiceLevelAgreementSettings() {
       this.loading = true;
-      this.success = false;
 
       return this.service
         .updateSettings({
           sla_timer: this.enabled,
           sla_timer_minutes: this.duration * units[this.unit].multiplier,
-        })
-        .then(() => {
-          this.success = true;
         })
         .finally(() => {
           this.loading = false;
@@ -108,11 +105,11 @@ export default {
     key="service-level-agreement"
     :title="s__('IncidentSettings|Incident Settings')"
   >
-    <form class="gl-pt-3" @submit.prevent="updateServiceLevelAgreementSettings">
+    <gl-form class="gl-pt-3" @submit.prevent="updateServiceLevelAgreementSettings">
       <p class="gl-line-height-20">
         {{ $options.i18n.description }}
       </p>
-      <gl-form-checkbox v-model="enabled" class="gl-my-4" @input="success = false">
+      <gl-form-checkbox v-model="enabled" class="gl-my-4">
         <span>{{ s__('IncidentSettings|Activate "time to SLA" countdown timer') }}</span>
         <gl-form-text class="gl-text-gray-400 gl-font-base">
           {{
@@ -125,30 +122,21 @@ export default {
       <gl-form-group
         :invalid-feedback="invalidFeedback"
         :label="s__('IncidentSettings|Time limit')"
-        label-for="sla-time"
+        label-for="sla-duration"
         :state="isValid"
       >
         <div class="gl-display-flex gl-flex-direction-row">
-          <gl-form-input
-            id="sla-time"
-            v-model="duration"
-            type="number"
-            number
-            size="xs"
-            trim
-            @input="success = false"
-          />
+          <gl-form-input id="sla-duration" v-model="duration" type="number" number size="xs" trim />
           <gl-form-select
             v-model="unit"
             :options="$options.units"
             class="gl-w-auto gl-ml-3 gl-line-height-normal gl-border-gray-400"
-            @input="success = false"
           />
         </div>
       </gl-form-group>
       <gl-button variant="success" type="submit" :disabled="!isValid || loading" :loading="loading">
         {{ __('Save changes') }}
       </gl-button>
-    </form>
+    </gl-form>
   </gl-tab>
 </template>
