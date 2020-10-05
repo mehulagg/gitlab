@@ -16,11 +16,13 @@ const units = {
     value: 'minutes',
     text: s__('IncidentSettings|minutes'),
     multiplier: 1,
+    step: 15,
   },
   hours: {
     value: 'hours',
     text: s__('IncidentSettings|hours'),
     multiplier: 60,
+    step: 1,
   },
 };
 
@@ -31,7 +33,8 @@ export default {
     is created, and sets a time limit for the incident to be resolved in. When activated, "time to SLA"
     countdown will appear on all new incidents.`),
   },
-  units: Object.values(units),
+  selectOptions: Object.values(units),
+  units,
   components: {
     GlButton,
     GlForm,
@@ -53,6 +56,12 @@ export default {
     };
   },
   computed: {
+    description() {
+      if (!this.invalidFeedback) {
+        return s__('IncidentSettings|Time limit must be a multiple of 15 minutes');
+      }
+      return '';
+    },
     invalidFeedback() {
       // Don't validate when checkbox is disabled
       if (!this.enabled) {
@@ -103,7 +112,7 @@ export default {
   <gl-tab
     v-if="available"
     key="service-level-agreement"
-    :title="s__('IncidentSettings|Incident Settings')"
+    :title="s__('IncidentSettings|Incident settings')"
   >
     <gl-form class="gl-pt-3" @submit.prevent="updateServiceLevelAgreementSettings">
       <p class="gl-line-height-20">
@@ -124,12 +133,21 @@ export default {
         :label="s__('IncidentSettings|Time limit')"
         label-for="sla-duration"
         :state="isValid"
+        :description="description"
       >
         <div class="gl-display-flex gl-flex-direction-row">
-          <gl-form-input id="sla-duration" v-model="duration" type="number" number size="xs" trim />
+          <gl-form-input
+            id="sla-duration"
+            v-model="duration"
+            type="number"
+            number
+            size="xs"
+            trim
+            :step="$options.units[unit].step"
+          />
           <gl-form-select
             v-model="unit"
-            :options="$options.units"
+            :options="$options.selectOptions"
             class="gl-w-auto gl-ml-3 gl-line-height-normal gl-border-gray-400"
           />
         </div>
