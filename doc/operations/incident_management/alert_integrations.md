@@ -14,16 +14,11 @@ GitLab can accept alerts from any source via a webhook receiver. This can be con
 to use this endpoint.
 
 ## Configuration
-### Generic Integation
-When you enable the generic integration, a unique HTTP endpoint will
-be created which can receive a payload in JSON format, and will in turn
-create an incident with the payload in the body of the description. You can always
+### Generic HTTP Endpoint
+Enabling the Generic HTTP Endpoint, creates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
 [customize the payload](#customizing-the-payload) to your liking.
 
-The entire payload will be posted in the incident discussion as a comment
-authored by the GitLab Alert Bot.
-
-You will need to activate the endpoint and obtain credentials for setting up the generic alerts integration:
+You will need to activate the endpoint and obtain credentials to set up this integration:
 
 1. Sign in to GitLab as a user with maintainer [permissions](../../user/permissions.md)
    for a project.
