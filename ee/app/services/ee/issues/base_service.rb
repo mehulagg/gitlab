@@ -41,7 +41,7 @@ module EE
         return unless epic
 
         unless can?(current_user, :admin_epic, epic)
-          raise ::Gitlab::Access::AccessDeniedError
+          raise EpicAssignmentError, 'You are not allowed to add issues to the epic'
         end
 
         epic
