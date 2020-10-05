@@ -12,7 +12,10 @@ RSpec.describe NamespaceSetting do
       end
 
       context 'group with no associated saml provider' do
-        let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: true) }
+        let(:setting) do
+          group.namespace_settings.update!(prevent_forking_outside_group: true)
+          group.namespace_settings
+        end
 
         it 'returns namespace setting' do
           expect(setting.prevent_forking_outside_group?).to eq(true)
@@ -25,7 +28,10 @@ RSpec.describe NamespaceSetting do
         end
 
         context 'when it is configured to true on saml level' do
-          let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: true) }
+          let(:setting) do
+            group.namespace_settings.update!(prevent_forking_outside_group: true)
+            group.namespace_settings
+          end
 
           before do
             create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: true, group: group)
@@ -37,7 +43,7 @@ RSpec.describe NamespaceSetting do
         end
 
         context 'when it is configured to false on saml level' do
-          let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: false) }
+          let(:setting) { group.namespace_settings }
 
           before do
             create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: false, group: group)
@@ -48,7 +54,10 @@ RSpec.describe NamespaceSetting do
           end
 
           context 'when setting is configured on namespace level' do
-            let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: true) }
+            let(:setting) do
+              group.namespace_settings.update!(prevent_forking_outside_group: true)
+              group.namespace_settings
+            end
 
             it 'returns namespace setting' do
               expect(setting.prevent_forking_outside_group?).to eq(true)
@@ -59,7 +68,10 @@ RSpec.describe NamespaceSetting do
     end
 
     context 'without feature available' do
-      let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: true) }
+      let(:setting) do
+        group.namespace_settings.update!(prevent_forking_outside_group: true)
+        group.namespace_settings
+      end
 
       it 'returns false' do
         expect(setting.prevent_forking_outside_group?).to be_falsey
@@ -71,7 +83,10 @@ RSpec.describe NamespaceSetting do
         end
 
         context 'when it is configured to true on saml level' do
-          let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: false) }
+          let(:setting) do
+            group.namespace_settings.update!(prevent_forking_outside_group: true)
+            group.namespace_settings
+          end
 
           before do
             create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: true, group: group)
@@ -83,7 +98,7 @@ RSpec.describe NamespaceSetting do
         end
 
         context 'when it is configured to false on saml level' do
-          let(:setting) { create(:namespace_settings, namespace: group, prevent_forking_outside_group: false) }
+          let(:setting) { group.namespace_settings }
 
           before do
             create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: false, group: group)

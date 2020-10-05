@@ -54,7 +54,7 @@ RSpec.describe ForkTargetsFinder do
 
         context 'when project root prohibits outer forks' do
           before do
-            project_group.namespace_settings.update(prevent_forking_outside_group: true)
+            project_group.namespace_settings.update!(prevent_forking_outside_group: true)
           end
 
           it 'returns namespaces with the same root group as project one only' do
