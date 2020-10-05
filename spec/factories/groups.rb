@@ -7,7 +7,6 @@ FactoryBot.define do
     type { 'Group' }
     owner { nil }
     project_creation_level { ::Gitlab::Access::MAINTAINER_PROJECT_ACCESS }
-    association :namespace_settings, factory: :namespace_settings
 
     after(:create) do |group|
       if group.owner
