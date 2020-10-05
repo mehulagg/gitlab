@@ -25,7 +25,7 @@ module Packages
         package_detail[:composer_metadatum] = @package.composer_metadatum if @package.composer_metadatum
         package_detail[:conan_metadatum] = @package.conan_metadatum if @package.conan_metadatum
         package_detail[:dependency_links] = @package.dependency_links.map(&method(:build_dependency_links))
-        package_detail[:pipeline] = build_pipeline_info(@package.build_info.pipeline) if @package.build_info
+        package_detail[:pipeline] = build_pipeline_info(@package.pipeline) if @package.pipeline
 
         package_detail
       end

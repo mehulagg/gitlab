@@ -15,9 +15,6 @@ module Packages
           }
         )
 
-        build = params[:build]
-        package.create_build_info!(pipeline: build.pipeline) if build.present?
-
         package
       end
     end

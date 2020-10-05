@@ -16,7 +16,7 @@ class Packages::Package < ApplicationRecord
   has_one :maven_metadatum, inverse_of: :package, class_name: 'Packages::Maven::Metadatum'
   has_one :nuget_metadatum, inverse_of: :package, class_name: 'Packages::Nuget::Metadatum'
   has_one :composer_metadatum, inverse_of: :package, class_name: 'Packages::Composer::Metadatum'
-  has_one :build_info, inverse_of: :package
+  has_many :build_infos, inverse_of: :package
 
   accepts_nested_attributes_for :conan_metadatum
   accepts_nested_attributes_for :maven_metadatum
@@ -162,8 +162,12 @@ class Packages::Package < ApplicationRecord
            .order(:version)
   end
 
+  def build_info
+    build_infos.first
+  end
+
   def pipeline
-    build_info&.pipeline
+    build_info.first&.pipeline
   end
 
   def tag_names

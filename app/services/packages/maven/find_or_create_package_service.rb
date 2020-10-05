@@ -38,14 +38,16 @@ module Packages
           package_params = {
             name: package_name,
             path: params[:path],
-            version: version,
-            build: params[:build]
+            version: version
           }
 
           package =
             ::Packages::Maven::CreatePackageService.new(project, current_user, package_params)
                                                    .execute
         end
+
+        build = params[:build]
+        package.create_build_info!(pipeline: build.pipeline) if build.present?
 
         package
       end
