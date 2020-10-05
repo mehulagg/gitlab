@@ -1,6 +1,6 @@
 <script>
+import { isEmpty } from 'lodash';
 import { GlDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
-import { ALL } from 'ee/security_dashboard/store/modules/filters/constants';
 import FilterOption from './filter_option.vue';
 
 export default {
@@ -78,11 +78,6 @@ export default {
       this.selectedOptions = {};
     },
     isSelected(option) {
-      // Special case for the All option, return true if there are no other selected options.
-      if (option.id === ALL && this.selectedCount <= 0) {
-        return true;
-      }
-
       return Boolean(this.selectedOptions[option.id]);
     },
     closeDropdown() {
@@ -112,7 +107,7 @@ export default {
         <i class="fa fa-chevron-down" aria-hidden="true"></i>
       </template>
 
-      <!-- Dropdown title that shows in the dropdown -->
+      <!-- Dropdown title that shows at the top of the dropdown -->
       <div class="dropdown-title mb-0">
         {{ filter.name }}
         <button

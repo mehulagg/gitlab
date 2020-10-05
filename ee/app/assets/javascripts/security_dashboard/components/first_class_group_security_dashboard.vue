@@ -56,8 +56,8 @@ export default {
     },
   },
   methods: {
-    updateFilters(filter) {
-      this.filters = { ...this.filters, ...filter };
+    handleFilterChange(filters) {
+      this.filters = filters;
     },
   },
 };
@@ -77,7 +77,11 @@ export default {
         </header>
       </template>
       <template #sticky>
-        <filters :projects="projects" :query-path="groupFullPath" @filter-changed="updateFilters" />
+        <filters
+          :projects="projects"
+          :query-path="groupFullPath"
+          @filterChange="handleFilterChange"
+        />
       </template>
       <group-security-vulnerabilities :group-full-path="groupFullPath" :filters="filters" />
     </security-dashboard-layout>
