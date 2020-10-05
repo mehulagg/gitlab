@@ -18,7 +18,9 @@ module EE::Groups::GroupMembersHelper
       ce_members[index].merge({
         using_license: can?(current_user, :owner_access, group) && member.user&.using_gitlab_com_seat?(group),
         group_sso: member.user&.group_sso?(group),
-        group_managed_account: member.user&.group_managed_account?
+        group_managed_account: member.user&.group_managed_account?,
+        can_override: member.can_override?,
+        is_overridden: member.override
       })
     end
   end

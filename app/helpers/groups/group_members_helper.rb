@@ -35,7 +35,6 @@ module Groups::GroupMembersHelper
         requested_at: member.requested_at,
         can_update: member.can_update?,
         can_remove: member.can_remove?,
-        can_override: member.can_override?,
         access_level: {
           string_value: member.human_access,
           integer_value: member.access_level
