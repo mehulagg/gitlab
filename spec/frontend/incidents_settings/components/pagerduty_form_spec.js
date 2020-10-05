@@ -41,7 +41,6 @@ describe('Alert integration settings form', () => {
     findForm().trigger('submit');
     expect(service.updateSettings).toHaveBeenCalledWith(
       expect.objectContaining({ pagerduty_active: wrapper.vm.active }),
-      true,
     );
   });
 
