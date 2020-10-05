@@ -418,6 +418,22 @@ DANGER: **Danger:**
 Setting `POSTGRES_ENABLED` to `false` permanently deletes any existing
 channel 1 database for your environment.
 
+### `Error: unable to recognize "": no matches for kind "Deployment" in version "extensions/v1beta1"`
+
+After upgrading your Kubernetes cluster to [v1.16+](stages.md#kubernetes-1.16+),
+you may encounter this message when deploying with Auto DevOps:
+
+```plaintext
+UPGRADE FAILED
+Error: failed decoding reader into objects: unable to recognize "": no matches for kind "Deployment" in version "extensions/v1beta1"
+```
+
+This could be caused by that your in-cluster PostgreSQL was installed in a legacy way,
+and the old PostgreSQL chart [is not compatible with the Kubernetes v1.16+ API](https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/).
+
+Please follow [Detected an existing PostgreSQL database](#detected-an-existing-postgresql-database)
+for the full explanation and workaround.
+
 ## Development guides
 
 [Development guide for Auto DevOps](../../development/auto_devops.md)
