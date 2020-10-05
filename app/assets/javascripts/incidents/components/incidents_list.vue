@@ -11,13 +11,13 @@ import {
   GlEmptyState,
 } from '@gitlab/ui';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import OperationsPageWrapper from '~/vue_shared/components/operations/operations_page_wrapper/operations_page_wrapper.vue';
+import PageWrapper from '~/vue_shared/components/page_wrapper/page_wrapper.vue';
 import {
   tdClass,
   thClass,
   bodyTrClass,
   initialPaginationState,
-} from '~/vue_shared/components/operations/operations_page_wrapper/constants';
+} from '~/vue_shared/components/page_wrapper/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__ } from '~/locale';
@@ -33,9 +33,11 @@ import {
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
   INCIDENT_DETAILS_PATH,
+  trackIncidentListViewsOptions,
 } from '../constants';
 
 export default {
+  trackIncidentListViewsOptions,
   i18n: I18N,
   statusTabs: INCIDENT_STATUS_TABS,
   fields: [
@@ -80,7 +82,7 @@ export default {
     PublishedCell: () => import('ee_component/incidents/components/published_cell.vue'),
     GlEmptyState,
     SeverityToken,
-    OperationsPageWrapper,
+    PageWrapper,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -167,12 +169,15 @@ export default {
     loading() {
       return this.$apollo.queries.incidents.loading;
     },
-    hasIncidents() {
-      return this.incidents?.list?.length;
+    isEmpty() {
+      return !this.incidents?.list?.length;
+    },
+    showList() {
+      return !this.isEmpty || this.errored || this.loading;
     },
     tbodyTrClass() {
       return {
-        [bodyTrClass]: !this.loading && this.hasIncidents,
+        [bodyTrClass]: !this.loading && !this.isEmpty,
       };
     },
     newIncidentPath() {
@@ -200,12 +205,6 @@ export default {
             ],
           ]
         : this.$options.fields;
-    },
-    isEmpty() {
-      return !this.incidents.list?.length;
-    },
-    showList() {
-      return !this.isEmpty || this.errored || this.loading;
     },
     activeClosedTabHasNoIncidents() {
       const { all, closed } = this.incidentsCount || {};
@@ -272,7 +271,7 @@ export default {
 </script>
 <template>
   <div class="incident-management-list">
-    <operations-page-wrapper
+    <page-wrapper
       :loading="loading"
       :show-items="showList"
       :show-error-msg="showErrorMsg"
@@ -281,7 +280,8 @@ export default {
       :page-info="incidents.pageInfo"
       :items-count="incidentsCount"
       :status-tabs="$options.statusTabs"
-      :track-views-options="{ category: 'Incident Management', action: 'view_incidents_list' }"
+      :track-views-options="trackIncidentListViewsOptions"
+      filter-search-key="incidents"
       @page-changed="pageChanged"
       @status-changed="statusChanged"
       @filters-changed="filtersChanged"
@@ -400,6 +400,6 @@ export default {
           :primary-button-text="emptyStateData.btnText"
         />
       </template>
-    </operations-page-wrapper>
+    </page-wrapper>
   </div>
 </template>

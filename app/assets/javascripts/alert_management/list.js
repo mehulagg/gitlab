@@ -58,23 +58,20 @@ export default () => {
       textQuery,
       authorUsernamesQuery,
       assigneeUsernamesQuery,
+      enableAlertManagementPath,
+      populatingAlertsHelpUrl,
+      emptyAlertSvgPath,
+      alertManagementEnabled,
+      userCanEnableAlertManagement,
+      opsgenieMvcTargetUrl,
+      opsgenieMvcEnabled,
     },
     apolloProvider,
     components: {
       AlertManagementList,
     },
     render(createElement) {
-      return createElement('alert-management-list', {
-        props: {
-          enableAlertManagementPath,
-          populatingAlertsHelpUrl,
-          emptyAlertSvgPath,
-          alertManagementEnabled,
-          userCanEnableAlertManagement,
-          opsgenieMvcTargetUrl,
-          opsgenieMvcEnabled,
-        },
-      });
+      return createElement('alert-management-list');
     },
   });
 };

@@ -20,6 +20,7 @@ import AlertManagementTable from '~/alert_management/components/alert_management
 import { ALERTS_STATUS_TABS, trackAlertStatusUpdateOptions } from '~/alert_management/constants';
 import updateAlertStatus from '~/alert_management/graphql/mutations/update_alert_status.mutation.graphql';
 import mockAlerts from '../mocks/alerts.json';
+import defaultProvideValues from '../mocks/alerts_provide_config.json';
 import Tracking from '~/tracking';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -62,20 +63,13 @@ describe('AlertManagementTable', () => {
     return waitForPromises();
   };
 
-  function mountComponent({
-    props = {
-      alertManagementEnabled: false,
-      userCanEnableAlertManagement: false,
-    },
-    data = {},
-    loading = false,
-    stubs = {},
-  } = {}) {
+  function mountComponent({ provide = {}, data = {}, loading = false, stubs = {} } = {}) {
     wrapper = mount(AlertManagementTable, {
-      propsData: {
-        projectPath: 'gitlab-org/gitlab',
-        populatingAlertsHelpUrl: '/help/help-page.md#populating-alert-data',
-        ...props,
+      provide: {
+        ...defaultProvideValues,
+        alertManagementEnabled: true,
+        userCanEnableAlertManagement: true,
+        ...provide,
       },
       data() {
         return data;
@@ -105,7 +99,6 @@ describe('AlertManagementTable', () => {
   describe('Status Filter Tabs', () => {
     beforeEach(() => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: mockAlerts, alertsCount },
         loading: false,
         stubs: {
@@ -129,7 +122,6 @@ describe('AlertManagementTable', () => {
   describe('Alerts table', () => {
     it('loading state', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: {}, alertsCount: null },
         loading: true,
       });
@@ -144,7 +136,6 @@ describe('AlertManagementTable', () => {
 
     it('error state', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { errors: ['error'] }, alertsCount: null, hasError: true },
         loading: false,
       });
@@ -161,7 +152,6 @@ describe('AlertManagementTable', () => {
 
     it('empty state', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: [], pageInfo: {} }, alertsCount: { all: 0 }, hasError: false },
         loading: false,
       });
@@ -178,7 +168,6 @@ describe('AlertManagementTable', () => {
 
     it('has data state', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -194,7 +183,6 @@ describe('AlertManagementTable', () => {
 
     it('displays the alert ID and title formatted correctly', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -205,7 +193,6 @@ describe('AlertManagementTable', () => {
 
     it('displays status dropdown', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -214,7 +201,6 @@ describe('AlertManagementTable', () => {
 
     it('does not display a dropdown status header', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -227,7 +213,6 @@ describe('AlertManagementTable', () => {
 
     it('shows correct severity icons', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -244,7 +229,6 @@ describe('AlertManagementTable', () => {
 
     it('renders severity text', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -258,7 +242,6 @@ describe('AlertManagementTable', () => {
 
     it('renders Unassigned when no assignee(s) present', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -272,7 +255,6 @@ describe('AlertManagementTable', () => {
 
     it('renders user avatar when assignee present', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -290,7 +272,6 @@ describe('AlertManagementTable', () => {
 
     it('navigates to the detail page when alert row is clicked', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -305,7 +286,6 @@ describe('AlertManagementTable', () => {
 
     it('navigates to the detail page in new tab when alert row is clicked with the metaKey', () => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -324,7 +304,6 @@ describe('AlertManagementTable', () => {
     describe('alert issue links', () => {
       beforeEach(() => {
         mountComponent({
-          props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
           data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
           loading: false,
         });
@@ -355,7 +334,6 @@ describe('AlertManagementTable', () => {
     describe('handle date fields', () => {
       it('should display time ago dates when values provided', () => {
         mountComponent({
-          props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
           data: {
             alerts: {
               list: [
@@ -378,7 +356,6 @@ describe('AlertManagementTable', () => {
 
       it('should not display time ago dates when values not provided', () => {
         mountComponent({
-          props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
           data: {
             alerts: [
               {
@@ -403,7 +380,6 @@ describe('AlertManagementTable', () => {
 
         it('should highlight the row when alert is new', () => {
           mountComponent({
-            props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
             data: { alerts: { list: [newAlert] }, alertsCount, hasError: false },
             loading: false,
           });
@@ -417,7 +393,6 @@ describe('AlertManagementTable', () => {
 
         it('should not highlight the row when alert is not new', () => {
           mountComponent({
-            props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
             data: { alerts: { list: [oldAlert] }, alertsCount, hasError: false },
             loading: false,
           });
@@ -435,7 +410,6 @@ describe('AlertManagementTable', () => {
   describe('sorting the alert list by column', () => {
     beforeEach(() => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: {
           alerts: { list: mockAlerts },
           hasError: false,
@@ -474,7 +448,6 @@ describe('AlertManagementTable', () => {
 
     beforeEach(() => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });
@@ -553,7 +526,6 @@ describe('AlertManagementTable', () => {
     beforeEach(() => {
       jest.spyOn(Tracking, 'event');
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount },
         loading: false,
       });
@@ -574,7 +546,6 @@ describe('AlertManagementTable', () => {
   describe('Pagination', () => {
     beforeEach(() => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts, pageInfo: {} }, alertsCount, hasError: false },
         loading: false,
       });
@@ -634,7 +605,6 @@ describe('AlertManagementTable', () => {
   describe('Search', () => {
     beforeEach(() => {
       mountComponent({
-        props: { alertManagementEnabled: true, userCanEnableAlertManagement: true },
         data: { alerts: { list: mockAlerts }, alertsCount, hasError: false },
         loading: false,
       });

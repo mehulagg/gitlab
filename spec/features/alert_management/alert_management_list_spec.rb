@@ -18,9 +18,25 @@ RSpec.describe 'Incident details', :js do
     wait_for_requests
   end
 
-  context 'when a developer+ displays the alerts list' do
-    it 'shows the status tabs' do
-      expect(page).to have_selector('.gl-tabs')
+  context 'when a developer+ displays the alerts list and the alert service is not enabled' do
+    it 'shows the empty state by default' do
+      expect(page).to have_content('Surface alerts in GitLab')
+    end
+
+    it 'shows the filtered search' do
+      expect(page).not_to have_selector('.filtered-search-wrapper')
+    end
+
+    it 'shows the alert table' do
+      expect(page).not_to have_selector('.gl-table')
+    end
+  end
+
+  context 'when a developer+ displays the alerts list and the alert service is enabled' do
+    let_it_be(:alerts_service) do
+      create(:alerts_service,
+        project: project,
+      )
     end
 
     it 'shows the filtered search' do

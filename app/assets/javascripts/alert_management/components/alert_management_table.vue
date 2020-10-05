@@ -1,6 +1,6 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import {
+  GlAlert,
   GlLoadingIcon,
   GlTable,
   GlAvatarsInline,
@@ -11,20 +11,21 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
+import { s__ } from '~/locale';
 import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
-import OperationsPageWrapper from '~/vue_shared/components/operations/operations_page_wrapper/operations_page_wrapper.vue';
+import PageWrapper from '~/vue_shared/components/page_wrapper/page_wrapper.vue';
 import {
   tdClass,
   thClass,
   bodyTrClass,
   initialPaginationState,
-} from '~/vue_shared/components/operations/operations_page_wrapper/constants';
+} from '~/vue_shared/components/page_wrapper/constants';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import getAlerts from '../graphql/queries/get_alerts.query.graphql';
 import getAlertsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
 import {
+  I18N,
   ALERTS_STATUS_TABS,
   ALERTS_SEVERITY_LABELS,
   trackAlertListViewsOptions,
@@ -37,16 +38,7 @@ const TWELVE_HOURS_IN_MS = 12 * 60 * 60 * 1000;
 
 export default {
   trackAlertListViewsOptions,
-  i18n: {
-    noAlertsMsg: s__(
-      'AlertManagement|No alerts available to display. See %{linkStart}enabling alert management%{linkEnd} for more information on adding alerts to the list.',
-    ),
-    errorMsg: s__(
-      "AlertManagement|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
-    ),
-    searchPlaceholder: __('Search or filter results...'),
-    unassigned: __('Unassigned'),
-  },
+  i18n: I18N,
   fields: [
     {
       key: 'severity',
@@ -99,6 +91,7 @@ export default {
   severityLabels: ALERTS_SEVERITY_LABELS,
   statusTabs: ALERTS_STATUS_TABS,
   components: {
+    GlAlert,
     GlLoadingIcon,
     GlTable,
     GlAvatarsInline,
@@ -109,18 +102,18 @@ export default {
     GlLink,
     GlSprintf,
     AlertStatus,
-    OperationsPageWrapper,
+    PageWrapper,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['projectPath', 'textQuery', 'authorUsernamesQuery', 'assigneeUsernamesQuery'],
-  props: {
-    populatingAlertsHelpUrl: {
-      type: String,
-      required: true,
-    },
-  },
+  inject: [
+    'projectPath',
+    'textQuery',
+    'authorUsernamesQuery',
+    'assigneeUsernamesQuery',
+    'populatingAlertsHelpUrl',
+  ],
   apollo: {
     alerts: {
       query: getAlerts,
@@ -180,7 +173,7 @@ export default {
   data() {
     return {
       errored: false,
-      errorMessage: '',
+      serverErrorMessage: '',
       isErrorAlertDismissed: false,
       sort: 'STARTED_AT_DESC',
       statusFilter: [],
@@ -199,6 +192,15 @@ export default {
   computed: {
     showErrorMsg() {
       return this.errored && !this.isErrorAlertDismissed;
+    },
+    showNoAlertsMsg() {
+      return (
+        !this.errored &&
+        !this.loading &&
+        this.alertsCount?.all === 0 &&
+        !this.searchTerm &&
+        !this.isErrorAlertDismissed
+      );
     },
     loading() {
       return this.$apollo.queries.alerts.loading;
@@ -234,12 +236,8 @@ export default {
       };
     },
     handleAlertError(errorMessage) {
-      this.hasError = true;
-      this.errorMessage = errorMessage;
-    },
-    dismissError() {
-      this.hasError = false;
-      this.errorMessage = '';
+      this.errored = true;
+      this.serverErrorMessage = errorMessage;
     },
     pageChanged(pagination) {
       this.pagination = pagination;
@@ -254,6 +252,8 @@ export default {
       this.assigneeUsernames = assigneeUsernames;
     },
     errorAlertDismissed() {
+      this.errored = false;
+      this.serverErrorMessage = '';
       this.isErrorAlertDismissed = true;
     },
   },
@@ -261,7 +261,17 @@ export default {
 </script>
 <template>
   <div class="incident-management-list">
-    <operations-page-wrapper
+    <gl-alert v-if="showNoAlertsMsg" @dismiss="errorAlertDismissed">
+      <gl-sprintf :message="$options.i18n.noAlertsMsg">
+        <template #link="{ content }">
+          <gl-link class="gl-display-inline-block" :href="populatingAlertsHelpUrl" target="_blank">
+            {{ content }}
+          </gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
+
+    <page-wrapper
       :loading="loading"
       :show-items="showList"
       :show-error-msg="showErrorMsg"
@@ -271,6 +281,8 @@ export default {
       :items-count="alertsCount"
       :status-tabs="$options.statusTabs"
       :track-views-options="$options.trackAlertListViewsOptions"
+      :server-error-message="serverErrorMessage"
+      filter-search-key="alerts"
       @page-changed="pageChanged"
       @status-changed="statusChanged"
       @filters-changed="filtersChanged"
@@ -388,31 +400,6 @@ export default {
           </template>
         </gl-table>
       </template>
-      <template #emtpy-state>
-        <!-- <gl-empty-state
-          :title="emptyStateData.title"
-          :svg-path="emptyListSvgPath"
-          :description="emptyStateData.description"
-          :primary-button-link="emptyStateData.btnLink"
-          :primary-button-text="emptyStateData.btnText"
-        /> -->
-      </template>
-    </operations-page-wrapper>
-    <!-- <gl-alert v-if="showNoAlertsMsg" @dismiss="isAlertDismissed = true">
-      <gl-sprintf :message="$options.i18n.noAlertsMsg">
-        <template #link="{ content }">
-          <gl-link
-            class="gl-display-inline-block"
-            :href="populatingAlertsHelpUrl"
-            target="_blank"
-          >
-            {{ content }}
-          </gl-link>
-        </template>
-      </gl-sprintf>
-    </gl-alert>
-    <gl-alert v-if="hasError" variant="danger" data-testid="alert-error" @dismiss="dismissError">
-      <p v-html="errorMessage || $options.i18n.errorMsg"></p>
-    </gl-alert> -->
+    </page-wrapper>
   </div>
 </template>

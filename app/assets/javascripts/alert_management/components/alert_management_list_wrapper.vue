@@ -7,55 +7,24 @@ export default {
     AlertManagementEmptyState,
     AlertManagementTable,
   },
-  inject: ['projectPath'],
-  props: {
-    alertManagementEnabled: {
-      type: Boolean,
-      required: true,
-    },
-    enableAlertManagementPath: {
-      type: String,
-      required: true,
-    },
-    populatingAlertsHelpUrl: {
-      type: String,
-      required: true,
-    },
-    userCanEnableAlertManagement: {
-      type: Boolean,
-      required: true,
-    },
-    emptyAlertSvgPath: {
-      type: String,
-      required: true,
-    },
-    opsgenieMvcEnabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    opsgenieMvcTargetUrl: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
+  inject: [
+    'projectPath',
+    'textQuery',
+    'authorUsernamesQuery',
+    'assigneeUsernamesQuery',
+    'enableAlertManagementPath',
+    'populatingAlertsHelpUrl',
+    'emptyAlertSvgPath',
+    'alertManagementEnabled',
+    'userCanEnableAlertManagement',
+    'opsgenieMvcTargetUrl',
+    'opsgenieMvcEnabled',
+  ],
 };
 </script>
 <template>
   <div>
-    <alert-management-table
-      v-if="alertManagementEnabled"
-      :populating-alerts-help-url="populatingAlertsHelpUrl"
-      :project-path="projectPath"
-    />
-    <alert-management-empty-state
-      v-else
-      :empty-alert-svg-path="emptyAlertSvgPath"
-      :enable-alert-management-path="enableAlertManagementPath"
-      :user-can-enable-alert-management="userCanEnableAlertManagement"
-      :opsgenie-mvc-enabled="opsgenieMvcEnabled"
-      :opsgenie-mvc-target-url="opsgenieMvcTargetUrl"
-    />
+    <alert-management-table v-if="alertManagementEnabled" />
+    <alert-management-empty-state v-else />
   </div>
 </template>
