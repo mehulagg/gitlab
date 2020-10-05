@@ -4,45 +4,42 @@ group: Health
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Generic alerts integration
+# Alert Integrations
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13203) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.4.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/42640) to [GitLab Core](https://about.gitlab.com/pricing/) in 12.8.
 
-GitLab can accept alerts from any source via a generic webhook receiver.
-When you set up the generic alerts integration, a unique endpoint will
-be created which can receive a payload in JSON format, and will in turn
-create an issue with the payload in the body of the issue. You can always
-[customize the payload](#customizing-the-payload) to your liking.
-
-The entire payload will be posted in the issue discussion as a comment
-authored by the GitLab Alert Bot.
-
-NOTE: **Note:**
-In GitLab versions 13.1 and greater, you can configure
+GitLab can accept alerts from any source via a webhook receiver. This can be configured generically or, in GitLab versions 13.1 and greater, you can configure
 [External Prometheus instances](../metrics/alerts.md#external-prometheus-instances)
 to use this endpoint.
 
-## Setting up generic alerts
+## Configuration
+### Generic Integation
+When you enable the generic integration, a unique HTTP endpoint will
+be created which can receive a payload in JSON format, and will in turn
+create an incident with the payload in the body of the description. You can always
+[customize the payload](#customizing-the-payload) to your liking.
 
-To obtain credentials for setting up a generic alerts integration:
+The entire payload will be posted in the incident discussion as a comment
+authored by the GitLab Alert Bot.
+
+You will need to activate the endpoint and obtain credentials for setting up the generic alerts integration:
 
 1. Sign in to GitLab as a user with maintainer [permissions](../../user/permissions.md)
    for a project.
-1. Navigate to the **Operations** page for your project, depending on your
-   installed version of GitLab:
-   - *In GitLab versions 13.1 and greater,* navigate to **Settings > Operations**
-     in your project.
-   - *In GitLab versions prior to 13.1,* navigate to **Settings > Integrations**
-     in your project. GitLab will display a banner encouraging you to enable
-     the Alerts endpoint in **Settings > Operations** instead.
-1. Click **Alerts endpoint**.
+1. Navigate to **Settings > Operations** in your project.
+1. Expand the **Alerts** section
+1. Select **Generic** from the Integration drop-down
 1. Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
    for the webhook configuration.
 
+### External Prometheus Integration 
+For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration. 
+
+
 ## Customizing the payload
 
-You can customize the payload by sending the following parameters. All fields
+You can customize the payload by sending the following parameters. This applies to all types of integrations. All fields
 other than `title` are optional:
 
 | Property                  | Type            | Description |
