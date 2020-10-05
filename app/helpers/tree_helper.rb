@@ -199,14 +199,14 @@ module TreeHelper
     }
   end
 
-  def web_ide_url_data(project)
+  def web_ide_url_data(project, ref)
     can_push_code = current_user&.can?(:push_code, project)
-    fork_path = current_user&.fork_of(project)&.full_path
+    project_fork = current_user&.fork_of(project)
 
-    if fork_path && !can_push_code
-      { path: fork_path, is_fork: true }
+    if project_fork && !can_push_code
+      { path: project_tree_url(project_fork, tree_join(ref, @path || '')), is_fork: true }
     else
-      { path: project.full_path, is_fork: false }
+      { path: project_tree_url(project, tree_join(ref, @path || '')), is_fork: false }
     end
   end
 
@@ -216,7 +216,11 @@ module TreeHelper
     show_web_ide_button = (can_collaborate || current_user&.already_forked?(project) || can_create_mr_from_fork)
 
     {
-      web_ide_url_data: web_ide_url_data(project),
+      project_path: project.full_path,
+      ref: ref,
+      escaped_ref: ActionDispatch::Journey::Router::Utils.escape_path(ref),
+      edit_url: project_edit_blob_path(project, tree_join(ref, @path || '')),
+      web_ide_url_data: web_ide_url_data(project, ref),
       needs_to_fork: !can_collaborate && !current_user&.already_forked?(project),
       show_web_ide_button: show_web_ide_button,
       show_gitpod_button: show_web_ide_button && Gitlab::Gitpod.feature_and_settings_enabled?(project),

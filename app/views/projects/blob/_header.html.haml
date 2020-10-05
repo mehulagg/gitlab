@@ -1,11 +1,20 @@
+- can_visit_ide = can_collaborate_with_project?(@project) || current_user&.already_forked?(@project)
+
 - blame = local_assigns.fetch(:blame, false)
 .js-file-title.file-title-flex-parent
   = render 'projects/blob/header_content', blob: blob
 
   .file-actions<
     = render 'projects/blob/viewer_switcher', blob: blob unless blame
-    = edit_blob_button(@project, @ref, @path, blob: blob)
-    = ide_edit_button(@project, @ref, @path, blob: blob)
+    - if Feature.enabled?(:consolidated_edit_button)
+      #js-blob-web-ide-link.d-inline-block.gl-ml-3{ data: { options: vue_ide_link_data(@project, @ref).to_json } }
+        - if !can_visit_ide
+          = render 'shared/confirm_fork_modal', fork_path: ide_fork_and_edit_path(@project, @ref, @path)
+        - unless current_user&.gitpod_enabled
+          = render 'shared/gitpod/enable_gitpod_modal'
+    - else
+      = edit_blob_button(@project, @ref, @path, blob: blob)
+      = ide_edit_button(@project, @ref, @path, blob: blob)
     .btn-group.ml-2{ role: "group" }>
       = render_if_exists 'projects/blob/header_file_locks_link'
       - if current_user

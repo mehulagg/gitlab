@@ -1,19 +1,29 @@
 <script>
 import $ from 'jquery';
+import Vue from 'vue';
 import { __ } from '~/locale';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import ActionsButton from '~/vue_shared/components/actions_button.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { joinPaths, webIDEUrl } from '~/lib/utils/url_utility';
+import createRouter from '~/repository/router';
 
+const KEY_EDIT = 'edit';
 const KEY_WEB_IDE = 'webide';
 const KEY_GITPOD = 'gitpod';
 
-export default {
+const WebIdeButton = {
   components: {
     ActionsButton,
     LocalStorageSync,
   },
   props: {
     webIdeUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    editUrl: {
       type: String,
       required: false,
       default: '',
@@ -48,6 +58,11 @@ export default {
       required: false,
       default: false,
     },
+    isBlob: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -56,7 +71,20 @@ export default {
   },
   computed: {
     actions() {
-      return [this.webIdeAction, this.gitpodAction].filter(x => x);
+      return [this.editAction, this.webIdeAction, this.gitpodAction].filter(x => x);
+    },
+    editAction() {
+      if (!this.isBlob) {
+        return null;
+      }
+
+      return {
+        key: KEY_EDIT,
+        text: __('Edit'),
+        secondaryText: __('Edit this file only.'),
+        tooltip: '',
+        href: this.editUrl,
+      };
     },
     webIdeAction() {
       if (!this.showWebIdeButton) {
@@ -67,7 +95,9 @@ export default {
         ? { href: '#modal-confirm-fork', handle: () => this.showModal('#modal-confirm-fork') }
         : { href: this.webIdeUrl };
 
-      const text = this.webIdeIsFork ? __('Edit fork in Web IDE') : __('Web IDE');
+      let text = __('Web IDE');
+      if (this.isBlob) text = __('Edit in Web IDE');
+      if (this.webIdeIsFork) text = __('Edit fork in Web IDE');
 
       return {
         key: KEY_WEB_IDE,
@@ -112,11 +142,51 @@ export default {
     },
   },
 };
+
+export default WebIdeButton;
+
+export function initWebIdeLink(webIdeLinkEl, isBlob = false) {
+  if (!webIdeLinkEl) return;
+
+  const {
+    webIdeUrlData: { path: ideBasePath, isFork: webIdeIsFork },
+    projectPath,
+    escapedRef,
+    ref,
+    ...options
+  } = convertObjectPropsToCamelCase(JSON.parse(webIdeLinkEl.dataset.options), { deep: true });
+
+  const router = createRouter(projectPath, escapedRef);
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el: webIdeLinkEl,
+    router,
+    render(h) {
+      return h(WebIdeButton, {
+        props: {
+          webIdeUrl: webIDEUrl(
+            joinPaths('/', ideBasePath, 'edit', ref, '-', this.$route.params.path || '', '/'),
+          ),
+          webIdeIsFork,
+          isBlob,
+          ...options,
+        },
+      });
+    },
+  });
+}
 </script>
 
 <template>
-  <div>
-    <actions-button :actions="actions" :selected-key="selection" @select="select" />
+  <div class="d-inline-block gl-ml-3">
+    <actions-button
+      :actions="actions"
+      :selected-key="selection"
+      :variant="isBlob ? 'info' : 'default'"
+      :category="isBlob ? 'primary' : 'tertiary'"
+      @select="select"
+    />
     <local-storage-sync
       storage-key="gl-web-ide-button-selected"
       :value="selection"

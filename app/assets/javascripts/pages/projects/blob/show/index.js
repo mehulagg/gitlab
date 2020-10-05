@@ -3,6 +3,7 @@ import commitPipelineStatus from '~/projects/tree/components/commit_pipeline_sta
 import BlobViewer from '~/blob/viewer/index';
 import initBlob from '~/pages/projects/init_blob';
 import GpgBadges from '~/gpg_badges';
+import { initWebIdeLink } from '~/vue_shared/components/web_ide_link.vue';
 import '~/sourcegraph/load';
 import PipelineTourSuccessModal from '~/blob/pipeline_tour_success_modal.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
@@ -54,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
       },
     });
   }
+
+  initWebIdeLink(document.getElementById('js-blob-web-ide-link'), true);
 
   GpgBadges.fetch();
 
