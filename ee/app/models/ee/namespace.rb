@@ -209,8 +209,8 @@ module EE
       strong_memoize(:locked_project_count) do
         namespace_size_limit = actual_size_limit
 
-        count = all_projects.with_repository_size_greater_than_limit.count
-        count += all_projects.with_repository_limit_set(namespace_size_limit).count if namespace_size_limit.to_i > 0
+        count = all_projects.with_repository_size_greater_than_project_limit.count
+        count += all_projects.with_repository_limit_greater_than(namespace_size_limit).count if namespace_size_limit.to_i > 0
         count
       end
     end
@@ -448,7 +448,7 @@ module EE
       select_sql = Arel::Nodes::NamedFunction.new('SUM', [::ProjectStatistics.arel_table[:repository_size] - repository_size_limit]).to_sql
 
       relation = all_projects
-      relation = project_level ? relation.with_repository_size_greater_than_limit : relation.with_repository_limit_set(repository_size_limit)
+      relation = project_level ? relation.with_repository_size_greater_than_project_limit : relation.with_repository_limit_greater_than(repository_size_limit)
       relation.pluck(Arel.sql(select_sql)).first || 0 # rubocop:disable Rails/Pick
     end
   end

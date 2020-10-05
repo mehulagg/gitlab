@@ -30,7 +30,7 @@ module EE
       after_update :remove_mirror_repository_reference,
         if: ->(project) { project.mirror? && project.import_url_updated? }
 
-      belongs_to :mirror_user, class_name: 'User'
+      belongs_to :mirror_user, foreign_key: 'mirror_user_id', class_name: 'User'
       belongs_to :deleting_user, foreign_key: 'marked_for_deletion_by_user_id', class_name: 'User'
 
       has_one :repository_state, class_name: 'ProjectRepositoryState', inverse_of: :project
@@ -156,15 +156,15 @@ module EE
 
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
 
-      scope :with_repository_size_greater_than_limit, -> do
+      scope :with_repository_size_greater_than_project_limit, -> do
         joins(:statistics)
           .where.not(repository_size_limit: 0)
           .where('project_statistics.repository_size > projects.repository_size_limit')
       end
-      scope :with_repository_limit_set, -> (namespace_limit) do
+      scope :with_repository_limit_greater_than, -> (repository_limit) do
         joins(:statistics)
           .where(repository_size_limit: nil)
-          .where('project_statistics.repository_size > ?', namespace_limit)
+          .where('project_statistics.repository_size > ?', repository_limit)
       end
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
