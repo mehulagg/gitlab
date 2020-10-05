@@ -3,10 +3,10 @@
 module Projects
   module Integrations
     module Jira
-      IntegrationError = Class.new(StandardError)
-      RequestError = Class.new(StandardError)
-
       class IssuesFinder
+        IntegrationError = Class.new(StandardError)
+        RequestError = Class.new(StandardError)
+
         attr_reader :issues, :total_count, :per_page
 
         class << self

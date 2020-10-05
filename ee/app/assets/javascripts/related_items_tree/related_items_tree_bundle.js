@@ -43,6 +43,7 @@ export default () => {
         id,
         iid: Number(iid),
         title: initialData.initialTitleText,
+        confidential: initialData.confidential,
         reference: `${initialData.fullPath}${initialData.issuableRef}`,
         userPermissions: {
           adminEpic: initialData.canAdmin,

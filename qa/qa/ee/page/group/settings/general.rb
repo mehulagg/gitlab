@@ -42,7 +42,7 @@ module QA
             end
 
             def current_custom_project_template
-              expand_section(:custom_project_templates)
+              expand_content(:custom_project_templates)
 
               within_element(:custom_project_template_select) do
                 current_selection
@@ -50,7 +50,7 @@ module QA
             end
 
             def choose_custom_project_template(path)
-              expand_section(:custom_project_templates)
+              expand_content(:custom_project_templates)
 
               within_element(:custom_project_template_select) do
                 clear_current_selection_if_present
@@ -62,11 +62,11 @@ module QA
 
             def set_ip_address_restriction(ip_address)
               QA::Runtime::Logger.debug(%Q[Setting ip address restriction to: #{ip_address}])
-              expand_section(:permission_lfs_2fa_section)
+              expand_content(:permission_lfs_2fa_content)
 
               # GitLab UI Token Selector (https://gitlab-org.gitlab.io/gitlab-ui/?path=/story/base-token-selector--default)
               # `data-qa-*` can only be added to the wrapper so custom selector used to find token close buttons and text input
-              find_element(:ip_restriction_field).all('.gl-token-close', minimum: 0).each do |el|
+              find_element(:ip_restriction_field).all('[data-testid="close-icon"]', minimum: 0).each do |el|
                 el.click
               end
 
@@ -77,13 +77,13 @@ module QA
             end
 
             def set_membership_lock_enabled
-              expand_section :permission_lfs_2fa_section
+              expand_content :permission_lfs_2fa_content
               check_element :membership_lock_checkbox
               click_element :save_permissions_changes_button
             end
 
             def set_membership_lock_disabled
-              expand_section :permission_lfs_2fa_section
+              expand_content :permission_lfs_2fa_content
               uncheck_element :membership_lock_checkbox
               click_element :save_permissions_changes_button
             end
@@ -93,7 +93,7 @@ module QA
             end
 
             def current_file_template_repository
-              expand_section(:file_template_repositories)
+              expand_content(:file_template_repositories)
 
               within_element(:file_template_repository_dropdown) do
                 current_selection
@@ -101,7 +101,7 @@ module QA
             end
 
             def choose_file_template_repository(path)
-              expand_section(:file_template_repositories)
+              expand_content(:file_template_repositories)
 
               within_element(:file_template_repository_dropdown) do
                 clear_current_selection_if_present

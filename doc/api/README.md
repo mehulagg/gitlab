@@ -4,6 +4,8 @@ Automate GitLab via a simple and powerful API.
 
 The main GitLab API is a [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) API. Therefore, documentation in this section assumes knowledge of REST concepts.
 
+There is also a partial [OpenAPI definition](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/api/openapi/openapi.yaml), which allows you to test the API directly from the GitLab user interface. Contributions are welcome.
+
 ## Available API resources
 
 For a list of the available resources and their endpoints, see
@@ -121,7 +123,7 @@ Read more about [GitLab as an OAuth2 provider](oauth2.md).
 ### Personal/project access tokens
 
 Access tokens can be used to authenticate with the API by passing it in either the `private_token` parameter
-or the `Private-Token` header.
+or the `PRIVATE-TOKEN` header.
 
 Example of using the personal/project access token in a parameter:
 
@@ -132,7 +134,7 @@ curl "https://gitlab.example.com/api/v4/projects?private_token=<your_access_toke
 Example of using the personal/project access token in a header:
 
 ```shell
-curl --header "Private-Token: <your_access_token>" "https://gitlab.example.com/api/v4/projects"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects"
 ```
 
 You can also use personal/project access tokens with OAuth-compliant headers:
@@ -156,9 +158,21 @@ for example, without needing to explicitly pass an access token.
 With a few API endpoints you can use a [GitLab CI/CD job token](../user/project/new_ci_build_permissions_model.md#job-token)
 to authenticate with the API:
 
-- [Get job artifacts](jobs.md#get-job-artifacts)
-- [Pipeline triggers](pipeline_triggers.md)
+- Packages:
+  - [Composer Repository](../user/packages/composer_repository/index.md)
+  - [Conan Repository](../user/packages/conan_repository/index.md)
+  - [Container Registry](../user/packages/container_registry/index.md) (`$CI_REGISTRY_PASSWORD` is actually `$CI_JOB_TOKEN`, but this may change in the future)
+  - [Go Proxy](../user/packages/go_proxy/index.md)
+  - [Maven Repository](../user/packages/maven_repository/index.md#authenticating-with-a-ci-job-token)
+  - [NPM Repository](../user/packages/npm_registry/index.md#authenticating-with-a-ci-job-token)
+  - [Nuget Repository](../user/packages/nuget_repository/index.md)
+  - [PyPI Repository](../user/packages/pypi_repository/index.md#using-gitlab-ci-with-pypi-packages)
+- [Get job artifacts](job_artifacts.md#get-job-artifacts)
+- [Pipeline triggers](pipeline_triggers.md) (via `token=` parameter)
 - [Release creation](releases/index.md#create-a-release)
+- [Terraform plan](../user/infrastructure/index.md)
+
+The token is valid as long as the job is running.
 
 ### Impersonation tokens
 
@@ -176,7 +190,7 @@ For more information, refer to the
 [users API](users.md#create-an-impersonation-token) docs.
 
 Impersonation tokens are used exactly like regular personal access tokens, and can be passed in either the
-`private_token` parameter or the `Private-Token` header.
+`private_token` parameter or the `PRIVATE-TOKEN` header.
 
 #### Disable impersonation
 
@@ -218,6 +232,7 @@ Only available to [administrators](../user/permissions.md).
 
 All API requests support performing an API call as if you were another user,
 provided you are authenticated as an administrator with an OAuth or Personal Access Token that has the `sudo` scope.
+The API requests are executed with the permissions of the impersonated user.
 
 You need to pass the `sudo` parameter either via query string or a header with an ID/username of
 the user you want to perform the operation as. If passed as a header, the
@@ -263,7 +278,7 @@ GET /projects?private_token=<your_access_token>&sudo=username
 ```
 
 ```shell
-curl --header "Private-Token: <your_access_token>" --header "Sudo: username" "https://gitlab.example.com/api/v4/projects"
+curl --header "PRIVATE-TOKEN: <your_access_token>" --header "Sudo: username" "https://gitlab.example.com/api/v4/projects"
 ```
 
 Example of a valid API call and a request using cURL with sudo request,
@@ -274,7 +289,7 @@ GET /projects?private_token=<your_access_token>&sudo=23
 ```
 
 ```shell
-curl --header "Private-Token: <your_access_token>" --header "Sudo: 23" "https://gitlab.example.com/api/v4/projects"
+curl --header "PRIVATE-TOKEN: <your_access_token>" --header "Sudo: 23" "https://gitlab.example.com/api/v4/projects"
 ```
 
 ## Status codes
@@ -294,21 +309,22 @@ The following table gives an overview of how the API functions generally behave.
 
 The following table shows the possible return codes for API requests.
 
-| Return values | Description |
-| ------------- | ----------- |
-| `200 OK` | The `GET`, `PUT` or `DELETE` request was successful, the resource(s) itself is returned as JSON. |
-| `204 No Content` | The server has successfully fulfilled the request and that there is no additional content to send in the response payload body. |
-| `201 Created` | The `POST` request was successful and the resource is returned as JSON. |
-| `304 Not Modified` | Indicates that the resource has not been modified since the last request. |
-| `400 Bad Request` | A required attribute of the API request is missing, e.g., the title of an issue is not given. |
-| `401 Unauthorized` | The user is not authenticated, a valid [user token](#authentication) is necessary. |
-| `403 Forbidden` | The request is not allowed, e.g., the user is not allowed to delete a project. |
-| `404 Not Found` | A resource could not be accessed, e.g., an ID for a resource could not be found. |
+| Return values            | Description |
+| ------------------------ | ----------- |
+| `200 OK`                 | The `GET`, `PUT` or `DELETE` request was successful, the resource(s) itself is returned as JSON. |
+| `204 No Content`         | The server has successfully fulfilled the request and that there is no additional content to send in the response payload body. |
+| `201 Created`            | The `POST` request was successful and the resource is returned as JSON. |
+| `304 Not Modified`       | Indicates that the resource has not been modified since the last request. |
+| `400 Bad Request`        | A required attribute of the API request is missing, e.g., the title of an issue is not given. |
+| `401 Unauthorized`       | The user is not authenticated, a valid [user token](#authentication) is necessary. |
+| `403 Forbidden`          | The request is not allowed, e.g., the user is not allowed to delete a project. |
+| `404 Not Found`          | A resource could not be accessed, e.g., an ID for a resource could not be found. |
 | `405 Method Not Allowed` | The request is not supported. |
-| `409 Conflict` | A conflicting resource already exists, e.g., creating a project with a name that already exists. |
-| `412` | Indicates the request was denied. May happen if the `If-Unmodified-Since` header is provided when trying to delete a resource, which was modified in between. |
-| `422 Unprocessable` | The entity could not be processed. |
-| `500 Server Error` | While handling the request something went wrong server-side. |
+| `409 Conflict`           | A conflicting resource already exists, e.g., creating a project with a name that already exists. |
+| `412`                    | Indicates the request was denied. May happen if the `If-Unmodified-Since` header is provided when trying to delete a resource, which was modified in between. |
+| `422 Unprocessable`      | The entity could not be processed. |
+| `429 Too Many Requests`  | The user exceeded the [application rate limits](../administration/instance_limits.md#rate-limits). |
+| `500 Server Error`       | While handling the request, something went wrong server-side. |
 
 ## Pagination
 
@@ -337,18 +353,21 @@ In the example below, we list 50 [namespaces](namespaces.md) per page.
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces?per_page=50"
 ```
 
-#### Pagination Link header
+#### Pagination `Link` header
 
-[Link headers](https://www.w3.org/wiki/LinkHeader) are sent back with each
-response. They have `rel` set to prev/next/first/last and contain the relevant
-URL. Please use these links instead of generating your own URLs.
+[`Link` headers](https://www.w3.org/wiki/LinkHeader) are returned with each
+response. They have `rel` set to `prev`/`next`/`first`/`last` and contain the
+relevant URL. Be sure to use these links instead of generating your own URLs.
+
+NOTE: **Note:**
+For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).
 
 In the cURL example below, we limit the output to 3 items per page (`per_page=3`)
 and we request the second page (`page=2`) of [comments](notes.md) of the issue
-with ID `8` which belongs to the project with ID `8`:
+with ID `8` which belongs to the project with ID `9`:
 
 ```shell
-curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/8/issues/8/notes?per_page=3&page=2"
+curl --head --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/issues/8/notes?per_page=3&page=2"
 ```
 
 The response will then be:
@@ -374,24 +393,19 @@ X-Total-Pages: 3
 
 #### Other pagination headers
 
-Additional pagination headers are also sent back.
+GitLab also returns the following additional pagination headers:
 
-| Header | Description |
-| ------ | ----------- |
-| `X-Total`       | The total number of items |
-| `X-Total-Pages` | The total number of pages |
-| `X-Per-Page`    | The number of items per page |
+| Header          | Description                                   |
+| --------------- | --------------------------------------------- |
+| `X-Total`       | The total number of items                     |
+| `X-Total-Pages` | The total number of pages                     |
+| `X-Per-Page`    | The number of items per page                  |
 | `X-Page`        | The index of the current page (starting at 1) |
-| `X-Next-Page`   | The index of the next page |
-| `X-Prev-Page`   | The index of the previous page |
+| `X-Next-Page`   | The index of the next page                    |
+| `X-Prev-Page`   | The index of the previous page                |
 
-CAUTION: **Caution:**
-For performance reasons since
-[GitLab 11.8](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23931)
-and **behind the `api_kaminari_count_with_limit`
-[feature flag](../development/feature_flags/index.md)**, if the number of resources is
-more than 10,000, the `X-Total` and `X-Total-Pages` headers as well as the
-`rel="last"` `Link` are not present in the response headers.
+NOTE: **Note:**
+For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).
 
 ### Keyset-based pagination
 
@@ -423,12 +437,14 @@ Status: 200 OK
 ```
 
 CAUTION: **Deprecation:**
-The `Links` Header will be removed in GitLab 14.0 to be aligned with the [W3C `Link` specification](https://www.w3.org/wiki/LinkHeader)
+The `Links` header will be removed in GitLab 14.0 to be aligned with the [W3C `Link` specification](https://www.w3.org/wiki/LinkHeader).
+The `Link` header was [added in GitLab 13.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33714)
+and should be used instead.
 
 The link to the next page contains an additional filter `id_after=42` which excludes records we have retrieved already.
 Note the type of filter depends on the `order_by` option used and we may have more than one additional filter.
 
-When the end of the collection has been reached and there are no additional records to retrieve, the `Links` header is absent and the resulting array is empty.
+When the end of the collection has been reached and there are no additional records to retrieve, the `Link` header is absent and the resulting array is empty.
 
 We recommend using only the given link to retrieve the next page instead of building your own URL. Apart from the headers shown,
 we don't expose additional pagination headers.
@@ -544,7 +560,7 @@ https://gitlab.example.com/api/v4/projects/import
 
 ### Array of hashes
 
-`variables` is a parameter of type `array` containing hash key/value pairs `[{ 'key' => 'UPLOAD_TO_S3', 'value' => 'true' }]`:
+`variables` is a parameter of type `array` containing hash key/value pairs `[{ 'key': 'UPLOAD_TO_S3', 'value': 'true' }]`:
 
 ```shell
 curl --globoff --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -585,7 +601,7 @@ Such errors appear in two cases:
 
 - A required attribute of the API request is missing, e.g., the title of an
   issue is not given
-- An attribute did not pass the validation, e.g., user bio is too long
+- An attribute did not pass the validation, e.g., the user bio is too long
 
 When an attribute is missing, you will get something like:
 
@@ -636,7 +652,7 @@ follows:
 
 ## Unknown route
 
-When you try to access an API URL that does not exist you will receive 404 Not Found.
+When you try to access an API URL that does not exist, you will receive 404 Not Found.
 
 ```http
 HTTP/1.1 404 Not Found

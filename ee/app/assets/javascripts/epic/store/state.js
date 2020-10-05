@@ -14,8 +14,10 @@ export default () => ({
   epicsWebUrl: '',
   labelsWebUrl: '',
   markdownDocsPath: '',
+  newEpicWebUrl: '',
 
   // Flags
+  canCreate: false,
   canUpdate: false,
   canDestroy: false,
   canAdmin: false,

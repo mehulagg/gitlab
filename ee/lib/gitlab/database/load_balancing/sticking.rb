@@ -49,11 +49,26 @@ module Gitlab
         def self.stick(namespace, id)
           return unless LoadBalancing.enable?
 
-          location = load_balancer.primary_write_location
+          mark_primary_write_location(namespace, id)
+          Session.current.use_primary!
+        end
+
+        def self.mark_primary_write_location(namespace, id)
+          return unless LoadBalancing.configured?
+
+          # Load balancing could be enabled for the Web application server,
+          # but it's not activated for Sidekiq. We should update Redis with
+          # the write location just in case load balancing is being used.
+          location =
+            if LoadBalancing.enable?
+              load_balancer.primary_write_location
+            else
+              Gitlab::Database.get_write_location(ActiveRecord::Base.connection)
+            end
+
+          return if location.blank?
 
           set_write_location_for(namespace, id, location)
-
-          Session.current.use_primary!
         end
 
         # Stops sticking to the primary.

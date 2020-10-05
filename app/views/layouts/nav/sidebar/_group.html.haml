@@ -1,7 +1,7 @@
 - issues_count = group_issues_count(state: 'opened')
 - merge_requests_count = group_merge_requests_count(state: 'opened')
 
-.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?) }
+.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('groups_side_navigation', 'render', 'groups_side_navigation') }
   .nav-sidebar-inner-scroll
     .context-header
       = link_to group_path(@group), title: @group.name do
@@ -85,7 +85,7 @@
                   %span
                     = _('Milestones')
 
-            = render_if_exists 'layouts/nav/sidebar/iterations_link'
+            = render_if_exists 'layouts/nav/sidebar/group_iterations_link'
 
       - if group_sidebar_link?(:merge_requests)
         = nav_link(path: 'groups#merge_requests') do
@@ -123,6 +123,9 @@
 
       = render 'layouts/nav/sidebar/analytics_links', links: group_analytics_navbar_links(@group, current_user)
 
+      - if group_sidebar_link?(:wiki)
+        = render 'layouts/nav/sidebar/wiki_link', wiki_url: @group.wiki.web_url
+
       - if group_sidebar_link?(:group_members)
         = nav_link(path: 'group_members#index') do
           = link_to group_group_members_path(@group) do
@@ -135,6 +138,8 @@
               = link_to group_group_members_path(@group) do
                 %strong.fly-out-top-item-name
                   = _('Members')
+
+      = render_if_exists 'groups/invite_members_side_nav_link', group: @group
 
       - if group_sidebar_link?(:settings)
         = nav_link(path: group_settings_nav_link_paths) do
@@ -154,6 +159,12 @@
                 %span
                   = _('General')
 
+            - if group_level_integrations?
+              = nav_link(controller: :integrations) do
+                = link_to group_settings_integrations_path(@group), title: _('Integrations') do
+                  %span
+                    = _('Integrations')
+
             = nav_link(path: 'groups#projects') do
               = link_to projects_group_path(@group), title: _('Projects') do
                 %span
@@ -168,11 +179,6 @@
               = link_to group_settings_ci_cd_path(@group), title: _('CI / CD') do
                 %span
                   = _('CI / CD')
-            - if Feature.enabled?(:group_level_integrations, @group)
-              = nav_link(controller: :integrations) do
-                = link_to group_settings_integrations_path(@group), title: _('Integrations') do
-                  %span
-                    = _('Integrations')
 
             = render_if_exists "groups/ee/settings_nav"
 

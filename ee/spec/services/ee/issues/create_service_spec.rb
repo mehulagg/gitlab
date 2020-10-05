@@ -60,7 +60,7 @@ RSpec.describe Issues::CreateService do
               issue = service.execute
 
               expect(issue).to be_persisted
-              expect(issue.epic).to eq(epic)
+              expect(issue.reload.epic).to eq(epic)
               expect(issue.confidential).to eq(false)
             end
           end
@@ -78,7 +78,7 @@ RSpec.describe Issues::CreateService do
               issue = service.execute
 
               expect(issue.milestone).to eq(milestone)
-              expect(issue.epic).to eq(epic)
+              expect(issue.reload.epic).to eq(epic)
               expect(epic.reload.start_date).to eq(milestone.start_date)
               expect(epic.due_date).to eq(milestone.due_date)
             end

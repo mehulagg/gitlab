@@ -1,14 +1,30 @@
-import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
+
+import { GlButton } from '@gitlab/ui';
 
 import CreateEpicForm from 'ee/related_items_tree/components/create_epic_form.vue';
+import createDefaultStore from 'ee/related_items_tree/store';
 
-const createComponent = (isSubmitting = false) =>
-  shallowMount(CreateEpicForm, {
+import { mockInitialConfig, mockParentItem } from '../mock_data';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
+const createComponent = (isSubmitting = false) => {
+  const store = createDefaultStore();
+
+  store.dispatch('setInitialConfig', mockInitialConfig);
+  store.dispatch('setInitialParentItem', mockParentItem);
+
+  return shallowMount(CreateEpicForm, {
+    localVue,
+    store,
     propsData: {
       isSubmitting,
     },
   });
+};
 
 describe('RelatedItemsTree', () => {
   describe('CreateEpicForm', () => {
@@ -90,7 +106,7 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders form action buttons', () => {
-        const actionButtons = wrapper.findAll(GlDeprecatedButton);
+        const actionButtons = wrapper.findAll(GlButton);
 
         expect(actionButtons.at(0).text()).toBe('Create epic');
         expect(actionButtons.at(1).text()).toBe('Cancel');

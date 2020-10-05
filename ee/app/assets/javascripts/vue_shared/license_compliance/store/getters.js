@@ -120,6 +120,3 @@ export const reportContainsBlacklistedLicense = (_, getters) =>
   (getters.licenseReport || []).some(
     license => license.approvalStatus === LICENSE_APPROVAL_STATUS.DENIED,
   );
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

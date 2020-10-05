@@ -7,17 +7,17 @@ $label-blue: #428bca;
 
 .badge-inactive {
   color: $white;
-  background-color: $gray-500;
+  background-color: $gray-300;
 }
 
-.seach-icon-input,
+.search-icon-input,
 .clear-search-input {
   position: absolute;
   z-index: 10;
-  fill: $gl-gray-400;
+  fill: $gray-300;
 }
 
-.seach-icon-input {
+.search-icon-input {
   left: 4px;
   top: 10px;
 }
@@ -27,5 +27,5 @@ $label-blue: #428bca;
 }
 
 .instance-id-loading-icon {
-  right: 84px;
+  right: 52px;
 }

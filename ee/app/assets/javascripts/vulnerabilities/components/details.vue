@@ -1,7 +1,7 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
-import CodeBlock from '~/vue_shared/components/code_block.vue';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
+import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { __ } from '~/locale';
 import DetailItem from './detail_item.vue';
 
@@ -17,6 +17,9 @@ export default {
   computed: {
     location() {
       return this.vulnerability.location || {};
+    },
+    stacktraceSnippet() {
+      return this.vulnerability.stacktrace_snippet || '';
     },
     scanner() {
       return this.vulnerability.scanner || {};
@@ -86,6 +89,16 @@ export default {
         },
       ].filter(x => x.content);
     },
+    shouldShowLocation() {
+      return (
+        this.location.crash_address ||
+        this.location.crash_type ||
+        this.location.stacktrace_snippet ||
+        this.location.file ||
+        this.location.image ||
+        this.location.operating_system
+      );
+    },
   },
   methods: {
     getHeadersAsCodeBlockLines(headers) {
@@ -115,12 +128,7 @@ export default {
       <detail-item :sprintf-message="__('%{labelStart}Severity:%{labelEnd} %{severity}')">
         <severity-badge :severity="vulnerability.severity" class="gl-display-inline ml-1" />
       </detail-item>
-      <detail-item
-        v-if="vulnerability.evidence"
-        :sprintf-message="__('%{labelStart}Evidence:%{labelEnd} %{evidence}')"
-        >{{ vulnerability.evidence }}
-      </detail-item>
-      <detail-item :sprintf-message="__('%{labelStart}Report Type:%{labelEnd} %{reportType}')"
+      <detail-item :sprintf-message="__('%{labelStart}Scan Type:%{labelEnd} %{reportType}')"
         >{{ vulnerability.report_type }}
       </detail-item>
       <detail-item
@@ -143,33 +151,52 @@ export default {
         </component>
       </detail-item>
       <detail-item
-        v-if="location.image"
-        :sprintf-message="__('%{labelStart}Image:%{labelEnd} %{image}')"
-        >{{ location.image }}
+        v-if="location.class"
+        :sprintf-message="__('%{labelStart}Class:%{labelEnd} %{class}')"
+        >{{ location.class }}
       </detail-item>
       <detail-item
-        v-if="location.operating_system"
-        :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
-        >{{ location.operating_system }}
+        v-if="location.method"
+        :sprintf-message="__('%{labelStart}Method:%{labelEnd} %{method}')"
+      >
+        <code>{{ location.method }}</code>
+      </detail-item>
+      <detail-item
+        v-if="vulnerability.evidence"
+        :sprintf-message="__('%{labelStart}Evidence:%{labelEnd} %{evidence}')"
+        >{{ vulnerability.evidence }}
       </detail-item>
     </ul>
 
-    <template v-if="location.file">
+    <template v-if="shouldShowLocation">
       <h3>{{ __('Location') }}</h3>
       <ul>
-        <detail-item :sprintf-message="__('%{labelStart}File:%{labelEnd} %{file}')">
+        <detail-item
+          v-if="location.image"
+          :sprintf-message="__('%{labelStart}Image:%{labelEnd} %{image}')"
+          >{{ location.image }}
+        </detail-item>
+        <detail-item
+          v-if="location.operating_system"
+          :sprintf-message="__('%{labelStart}Namespace:%{labelEnd} %{namespace}')"
+          >{{ location.operating_system }}
+        </detail-item>
+        <detail-item
+          v-if="location.file"
+          :sprintf-message="__('%{labelStart}File:%{labelEnd} %{file}')"
+        >
           <gl-link :href="fileUrl" target="_blank">{{ fileText }}</gl-link>
         </detail-item>
         <detail-item
-          v-if="location.class"
-          :sprintf-message="__('%{labelStart}Class:%{labelEnd} %{class}')"
-          >{{ location.class }}
+          v-if="location.crash_address"
+          :sprintf-message="__('%{labelStart}Crash Address:%{labelEnd} %{crash_address}')"
+          >{{ location.crash_address }}
         </detail-item>
         <detail-item
-          v-if="location.method"
-          :sprintf-message="__('%{labelStart}Method:%{labelEnd} %{method}')"
+          v-if="location.stacktrace_snippet"
+          :sprintf-message="__('%{labelStart}Crash State:%{labelEnd} %{stacktrace_snippet}')"
         >
-          <code>{{ location.method }}</code>
+          <code-block :code="location.stacktrace_snippet" max-height="225px" />
         </detail-item>
       </ul>
     </template>
@@ -177,7 +204,11 @@ export default {
     <template v-if="vulnerability.links && vulnerability.links.length">
       <h3>{{ __('Links') }}</h3>
       <ul>
-        <li v-for="link in vulnerability.links" :key="link.url">
+        <li
+          v-for="(link, index) in vulnerability.links"
+          :key="`${index}:${link.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
           <gl-link
             :href="link.url"
             data-testid="link"
@@ -194,7 +225,11 @@ export default {
     <template v-if="vulnerability.identifiers && vulnerability.identifiers.length">
       <h3>{{ __('Identifiers') }}</h3>
       <ul>
-        <li v-for="identifier in vulnerability.identifiers" :key="identifier.url">
+        <li
+          v-for="(identifier, index) in vulnerability.identifiers"
+          :key="`${index}:${identifier.url}`"
+          class="gl-ml-0! gl-list-style-position-inside"
+        >
           <gl-link :href="identifier.url" data-testid="identifier" target="_blank">
             {{ identifier.name }}
           </gl-link>
@@ -206,8 +241,8 @@ export default {
       <h3>{{ s__('Vulnerability|Request') }}</h3>
       <ul>
         <detail-item
-          v-for="{ label, isCode, content } in requestData"
-          :key="label"
+          v-for="({ label, isCode, content }, index) in requestData"
+          :key="`${index}:${label}`"
           :sprintf-message="label"
         >
           <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />
@@ -222,8 +257,8 @@ export default {
       <h3>{{ s__('Vulnerability|Response') }}</h3>
       <ul>
         <detail-item
-          v-for="{ label, isCode, content } in responseData"
-          :key="label"
+          v-for="({ label, isCode, content }, index) in responseData"
+          :key="`${index}:${label}`"
           :sprintf-message="label"
         >
           <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />

@@ -1,5 +1,0 @@
----
-title: 'Geo: Fix incorrect Package File progress bar total count'
-merge_request: 35294
-author:
-type: fixed

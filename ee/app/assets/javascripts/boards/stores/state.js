@@ -3,9 +3,9 @@ import createStateCE from '~/boards/stores/state';
 export default () => ({
   ...createStateCE(),
 
+  canAdminEpic: false,
   isShowingEpicsSwimlanes: false,
   epicsSwimlanesFetchInProgress: false,
-  epicsSwimlanesFetchFailure: false,
-  epicsSwimlanes: {},
-  epics: {},
+  epics: [],
+  epicsFlags: {},
 });

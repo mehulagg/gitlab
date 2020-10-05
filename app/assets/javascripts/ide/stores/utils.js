@@ -12,10 +12,7 @@ export const dataStructure = () => ({
   // it can also contain a prefix `pending-` for files opened in review mode
   key: '',
   type: '',
-  projectId: '',
-  branchId: '',
   name: '',
-  url: '',
   path: '',
   tempFile: false,
   tree: [],
@@ -25,15 +22,7 @@ export const dataStructure = () => ({
   changed: false,
   staged: false,
   lastCommitSha: '',
-  lastCommit: {
-    id: '',
-    url: '',
-    message: '',
-    updatedAt: '',
-    author: '',
-  },
   rawPath: '',
-  binary: false,
   raw: '',
   content: '',
   editorRow: 1,
@@ -51,10 +40,7 @@ export const dataStructure = () => ({
 export const decorateData = entity => {
   const {
     id,
-    projectId,
-    branchId,
     type,
-    url,
     name,
     path,
     content = '',
@@ -62,7 +48,6 @@ export const decorateData = entity => {
     active = false,
     opened = false,
     changed = false,
-    binary = false,
     rawPath = '',
     file_lock,
     parentPath = '',
@@ -70,19 +55,15 @@ export const decorateData = entity => {
 
   return Object.assign(dataStructure(), {
     id,
-    projectId,
-    branchId,
     key: `${name}-${type}-${id}`,
     type,
     name,
-    url,
     path,
     tempFile,
     opened,
     active,
     changed,
     content,
-    binary,
     rawPath,
     file_lock,
     parentPath,
@@ -194,11 +175,6 @@ export const mergeTrees = (fromTree, toTree) => {
   }
 
   return toTree;
-};
-
-export const replaceFileUrl = (url, oldPath, newPath) => {
-  // Add `/-/` so that we don't accidentally replace project path
-  return url.replace(`/-/${oldPath}`, `/-/${newPath}`);
 };
 
 export const swapInStateArray = (state, arr, key, entryPath) =>

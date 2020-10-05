@@ -13,6 +13,90 @@ RSpec.describe AuditEvent, type: :model do
     it { is_expected.to validate_presence_of(:entity_type) }
   end
 
+  describe 'callbacks' do
+    context 'parallel_persist' do
+      let_it_be(:details) do
+        { author_name: 'Kungfu Panda', entity_path: 'gitlab-org/gitlab', target_details: 'Project X', target_type: 'User' }
+      end
+      let_it_be(:event) { create(:project_audit_event, details: details, entity_path: nil, target_details: nil) }
+
+      it 'sets author_name' do
+        expect(event[:author_name]).to eq('Kungfu Panda')
+      end
+
+      it 'sets entity_path' do
+        expect(event[:entity_path]).to eq('gitlab-org/gitlab')
+      end
+
+      it 'sets target_details' do
+        expect(event[:target_details]).to eq('Project X')
+      end
+    end
+
+    context 'truncate_fields' do
+      shared_examples 'a truncated field' do
+        context 'when values are provided' do
+          using RSpec::Parameterized::TableSyntax
+
+          where(:database_column, :details_value, :expected_value) do
+            :long  | nil    | :truncated
+            :short | nil    | :short
+            nil    | :long  | :truncated
+            nil    | :short | :short
+            :long  | :short | :truncated
+          end
+
+          with_them do
+            let(:values) do
+              {
+                long: 'a' * (field_limit + 1),
+                short: 'a' * field_limit,
+                truncated: 'a' * (field_limit - 3) + '...'
+              }
+            end
+
+            let(:audit_event) do
+              create(:audit_event,
+                field_name => values[database_column],
+                details: { field_name => values[details_value] }
+              )
+            end
+
+            it 'sets both values to be the same', :aggregate_failures do
+              expect(audit_event.send(field_name)).to eq(values[expected_value])
+              expect(audit_event.details[field_name]).to eq(values[expected_value])
+            end
+          end
+        end
+
+        context 'when values are not provided' do
+          let(:audit_event) do
+            create(:audit_event, field_name => nil, details: {})
+          end
+
+          it 'does not set', :aggregate_failures do
+            expect(audit_event.send(field_name)).to be_nil
+            expect(audit_event.details).not_to have_key(field_name)
+          end
+        end
+      end
+
+      context 'entity_path' do
+        let(:field_name) { :entity_path }
+        let(:field_limit) { 5_500 }
+
+        it_behaves_like 'a truncated field'
+      end
+
+      context 'target_details' do
+        let(:field_name) { :target_details }
+        let(:field_limit) { 5_500 }
+
+        it_behaves_like 'a truncated field'
+      end
+    end
+  end
+
   describe '.by_entity' do
     let_it_be(:project_event_1) { create(:project_audit_event) }
     let_it_be(:project_event_2) { create(:project_audit_event) }
@@ -114,6 +198,66 @@ RSpec.describe AuditEvent, type: :model do
 
       it 'returns a NullEntity' do
         expect(event.entity).to be_a(Gitlab::Audit::NullEntity)
+      end
+    end
+  end
+
+  describe '#ip_address' do
+    context 'when ip_address exists in both details hash and ip_address column' do
+      subject(:event) do
+        described_class.new(ip_address: '10.2.1.1', details: { ip_address: '192.168.0.1' })
+      end
+
+      it 'returns the value from ip_address column' do
+        expect(event.ip_address).to eq('10.2.1.1')
+      end
+    end
+
+    context 'when ip_address exists in details hash but not in ip_address column' do
+      subject(:event) { described_class.new(details: { ip_address: '192.168.0.1' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.ip_address).to eq('192.168.0.1')
+      end
+    end
+  end
+
+  describe '#entity_path' do
+    context 'when entity_path exists in both details hash and entity_path column' do
+      subject(:event) do
+        described_class.new(entity_path: 'gitlab-org/gitlab', details: { entity_path: 'gitlab-org/gitlab-foss' })
+      end
+
+      it 'returns the value from entity_path column' do
+        expect(event.entity_path).to eq('gitlab-org/gitlab')
+      end
+    end
+
+    context 'when entity_path exists in details hash but not in entity_path column' do
+      subject(:event) { described_class.new(details: { entity_path: 'gitlab-org/gitlab-foss' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.entity_path).to eq('gitlab-org/gitlab-foss')
+      end
+    end
+  end
+
+  describe '#target_type' do
+    context 'when target_type exists in both details hash and target_type column' do
+      subject(:event) do
+        described_class.new(target_type: 'Group', details: { target_type: 'Project' })
+      end
+
+      it 'returns the value from target_type column' do
+        expect(event.target_type).to eq('Group')
+      end
+    end
+
+    context 'when target_type exists in details hash but not in target_type column' do
+      subject(:event) { described_class.new(details: { target_type: 'Project' }) }
+
+      it 'returns the value from details hash' do
+        expect(event.target_type).to eq('Project')
       end
     end
   end

@@ -45,8 +45,7 @@ There are many ways to get to the New Issue form from within a project:
 
 ### Elements of the New Issue form
 
-> Ability to add the new issue to an epic [was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13847)
-> in [GitLab Premium](https://about.gitlab.com/pricing/) 13.1.
+> Ability to add the new issue to an epic [was introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13847) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.1.
 
 ![New issue from the issues list](img/new_issue_v13_1.png)
 
@@ -76,7 +75,7 @@ create issues for the same project.
 
 ![Create issue from group-level issue tracker](img/create_issue_from_group_level_issue_tracker.png)
 
-### New issue via Service Desk **(STARTER)**
+### New issue via Service Desk
 
 Enable [Service Desk](../service_desk.md) for your project and offer email support.
 By doing so, when your customer sends a new email, a new issue can be created in
@@ -128,6 +127,7 @@ field).
 | title                | `issue[title]`        |                                                       |
 | description          | `issue[description]`  |                                                       |
 | description template | `issuable_template`   |                                                       |
+| issue type           | `issue[issue_type]`   | Either `incident` or `issue`                                     |
 | confidential         | `issue[confidential]` | Parameter value must be `true` to set to confidential |
 
 Follow these examples to form your new issue URL with prefilled fields.
@@ -273,9 +273,22 @@ of your installation.
 
 ## Deleting issues
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/2982) in GitLab 8.6
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/2982) in GitLab 8.6.
 
 Users with [project owner permission](../../permissions.md) can delete an issue by
 editing it and clicking on the delete button.
 
 ![delete issue - button](img/delete_issue.png)
+
+## Add an issue to an iteration **(STARTER)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216158) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.2.
+
+To add an issue to an [iteration](../../group/iterations/index.md):
+
+1. In an issue sidebar, click **Edit** next to **Iteration**. A dropdown appears.
+1. Click an iteration you'd like to associate this issue with.
+
+You can also use the `/iteration`
+[quick action](../quick_actions.md#quick-actions-for-issues-merge-requests-and-epics)
+in a comment or description field.

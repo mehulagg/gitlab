@@ -3,6 +3,21 @@
 The purpose of this guide is to document potential "gotchas" that contributors
 might encounter or should avoid during development of GitLab CE and EE.
 
+## Do not read files from app/assets directory
+
+Since GitLab 10.8, Omnibus has [dropped the `app/assets` directory](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2456),
+after asset compilation. The `ee/app/assets`, `vendor/assets` directories are dropped as well.
+
+This means that reading files from that directory will fail in Omnibus-installed GitLab instances:
+
+```ruby
+file = Rails.root.join('app/assets/images/logo.svg')
+
+# This file does not exist, read will fail with:
+# Errno::ENOENT: No such file or directory @ rb_sysopen
+File.read(file)
+```
+
 ## Do not assert against the absolute value of a sequence-generated attribute
 
 Consider the following factory:
@@ -106,7 +121,7 @@ end
        Using `any_instance` to stub a method (elasticsearch_indexing) that has been defined on a prepended module (EE::ApplicationSetting) is not supported.
   ```
 
-### Alternative: `expect_next_instance_of` or `allow_next_instance_of`
+### Alternative: `expect_next_instance_of`, `allow_next_instance_of`, `expect_next_found_instance_of` or `allow_next_found_instance_of`
 
 Instead of writing:
 
@@ -130,7 +145,20 @@ end
 allow_next_instance_of(Project) do |project|
   allow(project).to receive(:add_import_job)
 end
+
+# Do this:
+expect_next_found_instance_of(Project) do |project|
+  expect(project).to receive(:add_import_job)
+end
+
+# Do this:
+allow_next_found_instance_of(Project) do |project|
+  allow(project).to receive(:add_import_job)
+end
 ```
+
+_**Note:** Since Active Record is not calling the `.new` method on model classes to instantiate the objects,
+you should use `expect_next_found_instance_of` or `allow_next_found_instance_of` mock helpers to setup mock on objects returned by Active Record query & finder methods._
 
 If we also want to initialize the instance with some particular arguments, we
 could also pass it like:
@@ -238,3 +266,34 @@ This problem will disappear as soon as we upgrade to Rails 6 and use the Zeitwer
 - Rails Guides: [Autoloading and Reloading Constants (Classic Mode)](https://guides.rubyonrails.org/autoloading_and_reloading_constants_classic_mode.html)
 - Ruby Constant lookup: [Everything you ever wanted to know about constant lookup in Ruby](http://cirw.in/blog/constant-lookup)
 - Rails 6 and Zeitwerk autoloader: [Understanding Zeitwerk in Rails 6](https://medium.com/cedarcode/understanding-zeitwerk-in-rails-6-f168a9f09a1f)
+
+## Storing assets that do not require pre-compiling
+
+Assets that need to be served to the user are stored under the `app/assets` directory, which is later pre-compiled and placed in the `public/` directory.
+
+However, you cannot access the content of any file from within `app/assets` from the application code, as we do not include that folder in production installations as a [space saving measure](https://gitlab.com/gitlab-org/omnibus-gitlab/-/commit/ca049f990b223f5e1e412830510a7516222810be).
+
+```ruby
+support_bot = User.support_bot
+
+# accessing a file from the `app/assets` folder
+support_bot.avatar = Rails.root.join('app', 'assets', 'images', 'bot_avatars', 'support_bot.png').open
+
+support_bot.save!
+```
+
+While the code above works in local environments, it errors out in production installations as the `app/assets` folder is not included.
+
+### Solution
+
+The alternative is the `lib/assets` folder. Use it if you need to add assets (like images) to the repo that meet the following conditions:
+
+- The assets do not need to be directly served to the user (and hence need not be pre-compiled).
+- The assets do need to be accessed via application code.
+
+In short:
+
+Use `app/assets` for storing any asset that needs to be precompiled and served to the end user.
+Use `lib/assets` for storing any asset that does not need to be served to the end user directly, but is still required to be accessed by the application code.
+
+MR for reference: [!37671](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37671)

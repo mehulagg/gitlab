@@ -53,7 +53,4 @@ export default {
       return acc;
     }, {});
   },
-  [types.SET_PAGE_LOADING](state, pageLoading) {
-    state.pageLoading = pageLoading;
-  },
 };

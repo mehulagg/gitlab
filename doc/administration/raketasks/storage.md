@@ -100,17 +100,17 @@ to project IDs 50 to 100 in an Omnibus GitLab installation:
 sudo gitlab-rake gitlab:storage:migrate_to_hashed ID_FROM=50 ID_TO=100
 ```
 
-You can monitor the progress in the **{admin}** **Admin Area > Monitoring > Background Jobs** page.
+You can monitor the progress in the **Admin Area > Monitoring > Background Jobs** page.
 There is a specific queue you can watch to see how long it will take to finish:
 `hashed_storage:hashed_storage_project_migrate`.
 
-After it reaches zero, you can confirm every project has been migrated by running the commands below.
+After it reaches zero, you can confirm every project has been migrated by running the commands above.
 If you find it necessary, you can run this migration script again to schedule missing projects.
 
 Any error or warning will be logged in Sidekiq's log file.
 
 NOTE: **Note:**
-If [Geo](../geo/replication/index.md) is enabled, each project that is successfully migrated
+If [Geo](../geo/index.md) is enabled, each project that is successfully migrated
 generates an event to replicate the changes on any **secondary** nodes.
 
 You only need the `gitlab:storage:migrate_to_hashed` Rake task to migrate your repositories, but we have additional
@@ -150,10 +150,10 @@ to project IDs 50 to 100 in an Omnibus GitLab installation:
 sudo gitlab-rake gitlab:storage:rollback_to_legacy ID_FROM=50 ID_TO=100
 ```
 
-You can monitor the progress in the **{admin}** **Admin Area > Monitoring > Background Jobs** page.
+You can monitor the progress in the **Admin Area > Monitoring > Background Jobs** page.
 On the **Queues** tab, you can watch the `hashed_storage:hashed_storage_project_rollback` queue to see how long the process will take to finish.
 
-After it reaches zero, you can confirm every project has been rolled back by running the commands bellow.
+After it reaches zero, you can confirm every project has been rolled back by running the commands above.
 If some projects weren't rolled back, you can run this rollback script again to schedule further rollbacks.
 Any error or warning will be logged in Sidekiq's log file.
 

@@ -75,7 +75,7 @@ module Security
         level_i = dep_i.dig(:vulnerabilities, 0, :severity) || :info
         level_j = dep_j.dig(:vulnerabilities, 0, :severity) || :info
 
-        ::Vulnerabilities::Occurrence::SEVERITY_LEVELS[level_j] <=> ::Vulnerabilities::Occurrence::SEVERITY_LEVELS[level_i]
+        ::Vulnerabilities::Finding::SEVERITY_LEVELS[level_j] <=> ::Vulnerabilities::Finding::SEVERITY_LEVELS[level_i]
       end
     end
   end

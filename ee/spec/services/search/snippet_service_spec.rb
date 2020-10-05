@@ -8,7 +8,7 @@ RSpec.describe Search::SnippetService do
   using RSpec::Parameterized::TableSyntax
 
   it_behaves_like 'EE search service shared examples', ::Gitlab::SnippetSearchResults, ::Gitlab::Elastic::SnippetSearchResults do
-    let(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
     let(:scope) { nil }
     let(:service) { described_class.new(user, params) }
   end
@@ -24,7 +24,11 @@ RSpec.describe Search::SnippetService do
       include_context 'ProjectPolicyTable context'
       include ProjectHelpers
 
-      let(:search_term) { 'foobar' }
+      let_it_be(:admin)          { create(:admin) }
+      let_it_be(:other_user)     { create(:user) }
+      let_it_be(:reporter)       { create(:user) }
+      let_it_be(:guest)          { create(:user) }
+      let_it_be(:snippet_author) { create(:user) }
 
       context 'project snippet' do
         let(:pendings) do
@@ -35,6 +39,7 @@ RSpec.describe Search::SnippetService do
             { snippet_level: :internal, project_level: :internal, feature_access_level: :enabled, membership: :non_member, expected_count: 1 }
           ]
         end
+
         let(:pending?) do
           pendings.include?(
             {
@@ -47,60 +52,87 @@ RSpec.describe Search::SnippetService do
           )
         end
 
-        let_it_be(:group) { create(:group) }
-        let!(:project) { create(:project, project_level, namespace: group) }
-        let!(:snippet) { create(:project_snippet, snippet_level, project: project, title: search_term, content: search_term) }
-        let(:user) { create_user_from_membership(project, membership) }
+        let_it_be(:group)   { create(:group) }
+        let_it_be(:project, refind: true) do
+          create(:project, :public, namespace: group).tap do |p|
+            p.add_user(reporter, :reporter)
+            p.add_user(guest, :guest)
+          end
+        end
+
+        let_it_be(:snippet) { create(:project_snippet, :public, project: project, author: snippet_author, title: 'foobar') }
 
         where(:snippet_level, :project_level, :feature_access_level, :membership, :expected_count) do
           permission_table_for_project_snippet_access
         end
 
         with_them do
-          it "respects visibility" do
-            update_feature_access_level(project, feature_access_level)
+          it 'respects visibility' do
+            project.update!(visibility_level: Gitlab::VisibilityLevel.level_value(project_level.to_s), snippets_access_level: feature_access_level)
+            snippet.update!(visibility_level: Gitlab::VisibilityLevel.level_value(snippet_level.to_s))
             ensure_elasticsearch_index!
 
             expected_objects = expected_count == 0 ? [] : [snippet]
 
-            expect_search_results(user, 'snippet_titles', expected_objects: expected_objects, pending: pending?) do |user|
-              described_class.new(user, search: search_term).execute
-            end
+            search_user = user_from_membership(membership)
 
-            expect_search_results(user, 'snippet_blobs', expected_objects: expected_objects, pending: pending?) do |user|
-              described_class.new(user, search: search_term).execute
+            expect_search_results(search_user, 'snippet_titles', expected_objects: expected_objects, pending: pending?) do |user|
+              described_class.new(user, search: snippet.title).execute
             end
           end
         end
       end
 
       context 'personal snippet' do
-        let(:user) do
-          if membership == :author
-            snippet.author
-          else
-            create_user_from_membership(nil, membership)
-          end
+        let_it_be(:public_snippet)   { create(:personal_snippet, :public, title: 'This is a public snippet', author: snippet_author) }
+        let_it_be(:private_snippet)  { create(:personal_snippet, :private, title: 'This is a private snippet', author: snippet_author) }
+        let_it_be(:internal_snippet) { create(:personal_snippet, :internal, title: 'This is a internal snippet', author: snippet_author) }
+
+        let(:snippets) do
+          {
+            public: public_snippet,
+            private: private_snippet,
+            internal: internal_snippet
+          }
         end
-        let!(:snippet) { create(:personal_snippet, snippet_level, title: search_term, content: search_term) }
+
+        let(:snippet) { snippets[snippet_level] }
 
         where(:snippet_level, :membership, :expected_count) do
           permission_table_for_personal_snippet_access
         end
 
         with_them do
-          it "respects visibility" do
+          it 'respects visibility' do
+            # When the snippets are created the ES settings are not enabled
+            # and we need to manually add them to ES for indexing.
+            ::Elastic::ProcessBookkeepingService.track!(snippet)
             ensure_elasticsearch_index!
             expected_objects = expected_count == 0 ? [] : [snippet]
 
-            expect_search_results(user, 'snippet_titles', expected_objects: expected_objects) do |user|
-              described_class.new(user, search: search_term).execute
-            end
+            search_user = user_from_membership(membership)
 
-            expect_search_results(user, 'snippet_blobs', expected_objects: expected_objects) do |user|
-              described_class.new(user, search: search_term).execute
+            expect_search_results(search_user, 'snippet_titles', expected_objects: expected_objects) do |user|
+              described_class.new(user, search: snippet.title).execute
             end
           end
+        end
+      end
+
+      def user_from_membership(membership)
+        case membership
+        when :author
+          snippet.author
+        when :anonymous
+          nil
+        when :non_member
+          other_user
+        when :admin
+          admin
+        when :reporter
+          reporter
+        else
+          guest
         end
       end
     end

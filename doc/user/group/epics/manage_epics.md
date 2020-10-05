@@ -18,12 +18,42 @@ A paginated list of epics is available in each group from where you can create
 a new epic. The list of epics includes also epics from all subgroups of the
 selected group. From your group page:
 
-1. Go to **Epics**.
+### Create an epic from the epic list
+
+To create an epic from the epic list, in a group:
+
+1. Go to **{epic}** **Epics**.
 1. Click **New epic**.
 1. Enter a descriptive title.
 1. Click **Create epic**.
 
-You will be taken to the new epic where can edit the following details:
+### Access the New Epic form
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211533) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+
+There are two ways to get to the New Epic form and create an epic in the group you're in:
+
+- From an epic in your group, click **New Epic**.
+- From anywhere, in the top menu, click **plus** (**{plus-square}**) **> New epic**.
+
+  ![New epic from an open epic](img/new_epic_from_groups_v13.2.png)
+
+### Elements of the New Epic form
+
+When you're creating a new epic, these are the fields you can fill in:
+
+- Title
+- Description
+- Confidentiality checkbox
+- Labels
+- Start date
+- Due date
+
+![New epic form](img/new_epic_form_v13.2.png)
+
+## Edit an epic
+
+After you create an epic, you can edit change the following details:
 
 - Title
 - Description
@@ -31,15 +61,16 @@ You will be taken to the new epic where can edit the following details:
 - Due date
 - Labels
 
-An epic's page contains the following tabs:
+To edit an epic's title or description:
 
-- **Epics and Issues**: epics and issues added to this epic. Child epics, and their issues, are
-  shown in a tree view.
-  - Click the <kbd>></kbd> beside a parent epic to reveal the child epics and issues.
-  - Hover over the total counts to see a breakdown of open and closed items.
-- **Roadmap**: a roadmap view of child epics which have start and due dates.
+1. Click the **Edit title and description** **{pencil}** button.
+1. Make your changes.
+1. Click **Save changes**.
 
-![epic view](img/epic_view_v13.0.png)
+To edit an epics' start date, due date, or labels:
+
+1. Click **Edit** next to each section in the epic sidebar.
+1. Select the dates or labels for your epic.
 
 ## Bulk-edit epics
 
@@ -120,25 +151,22 @@ The sort option and order is saved and used wherever you browse epics, including
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213068) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0 behind a feature flag, disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/224513) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.2.
+> - You can [use the Confidentiality option in the epic sidebar](https://gitlab.com/gitlab-org/gitlab/-/issues/197340) in GitLab [Premium](https://about.gitlab.com/pricing/) 13.3 and later.
 
-When you're creating an epic, you can make it confidential by selecting the **Make this epic
-confidential** checkbox.
+If you're working on items that contain private information, you can make an epic confidential.
 
-### Disable confidential epics **(PREMIUM ONLY)**
+NOTE: **Note:**
+A confidential epic can only contain confidential issues and confidential child epics.
 
-The confidential epics feature is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it for your self-managed instance.
+To make an epic confidential:
 
-To disable it:
-
-```ruby
-Feature.disable(:confidential_epics)
-```
+- **When creating an epic:** select the checkbox **Make this epic confidential**.
+- **In an existing epic:** in the epic's sidebar, select **Edit** next to **Confidentiality** then
+  select **Turn on**.
 
 ## Manage issues assigned to an epic
 
-### Add an issue to an epic
+### Add a new issue to an epic
 
 You can add an existing issue to an epic, or, create a new issue that's
 automatically added to the epic.
@@ -150,13 +178,13 @@ subgroups, are eligible to be added to the epic. Newly added issues appear at th
 issues in the **Epics and Issues** tab.
 
 An epic contains a list of issues and an issue can be associated with at most one epic.
-When you add an issue that's already linked to an epic, the issue is automatically unlinked from its
+When you add a new issue that's already linked to an epic, the issue is automatically unlinked from its
 current parent.
 
-To add an issue to an epic:
+To add a new issue to an epic:
 
 1. Click the **Add** dropdown button.
-1. Click **Add an issue**.
+1. Click **Add a new issue**.
 1. Identify the issue to be added, using either of the following methods:
    - Paste the link of the issue.
    - Search for the desired issue by entering part of the issue's title, then selecting the desired
@@ -240,6 +268,16 @@ The following issue metadata will be copied to the epic:
 - Upvotes/downvotes.
 - Participants.
 - Group labels that the issue already has.
+- Parent epic. **(ULTIMATE)**
+
+### Use an epic template for repeating issues
+
+You can create a spreadsheet template to manage a pattern of consistently repeating issues.
+
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For an introduction to epic templates, see [GitLab Epics and Epic Template Tip](https://www.youtube.com/watch?v=D74xKFNw8vg).
+
+For more on epic templates, see [Epic Templates - Repeatable sets of issues](https://about.gitlab.com/handbook/marketing/product-marketing/getting-started/104/).
 
 ## Manage multi-level child epics **(ULTIMATE)**
 
@@ -248,7 +286,7 @@ The following issue metadata will be copied to the epic:
 To add a child epic to an epic:
 
 1. Click the **Add** dropdown button.
-1. Click **Add an epic**.
+1. Click **Add a new epic**.
 1. Identify the epic to be added, using either of the following methods:
    - Paste the link of the epic.
    - Search for the desired issue by entering part of the epic's title, then selecting the desired
@@ -263,7 +301,7 @@ To add a child epic to an epic:
 
 New child epics appear at the top of the list in the **Epics and Issues** tab.
 You can move child epics from one epic to another.
-When you add an epic that's already linked to a parent epic, the link to its current parent is removed.
+When you add a new epic that's already linked to a parent epic, the link to its current parent is removed.
 Issues and child epics cannot be intermingled.
 
 To move child epics to another epic:

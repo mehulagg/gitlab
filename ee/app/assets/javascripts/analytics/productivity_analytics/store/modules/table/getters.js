@@ -18,6 +18,3 @@ export const columnMetricLabel = (state, _getters, _rootState, rootGetters) =>
     .find(metric => metric.key === state.columnMetric).label;
 
 export const isSelectedSortField = state => sortField => state.sortField === sortField;
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -1,6 +1,7 @@
 {
   "type": "object",
   "properties" : {
+    "title": { "type": "string" },
     "state": { "type": "string" },
     "merge_status": { "type": "string" },
     "source_branch_exists": { "type": "boolean" },
@@ -9,6 +10,13 @@
     "allow_collaboration": { "type": "boolean"},
     "allow_maintainer_to_push": { "type": "boolean"},
     "assignees": {
+      "type": ["array"],
+      "items": {
+        "type": "object",
+        "$ref": "../public_api/v4/user/basic.json"
+      }
+    },
+    "reviewers": {
       "type": ["array"],
       "items": {
         "type": "object",

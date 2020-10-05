@@ -14,6 +14,7 @@ export default () => {
     emptyStateSvgPath,
     wafNoDataSvgPath,
     networkPolicyNoDataSvgPath,
+    newPolicyPath,
     documentationPath,
     defaultEnvironmentId,
     showUserCallout,
@@ -46,6 +47,7 @@ export default () => {
           showUserCallout: parseBoolean(showUserCallout),
           userCalloutId,
           userCalloutsPath,
+          newPolicyPath,
         },
       });
     },

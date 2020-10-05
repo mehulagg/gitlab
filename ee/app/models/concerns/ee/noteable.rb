@@ -18,7 +18,7 @@ module EE
       case self
       when Epic
         ::Gitlab::Routing.url_helpers.group_epic_notes_path(group, self)
-      when Vulnerability
+      when ::Vulnerability
         ::Gitlab::Routing.url_helpers.project_security_vulnerability_notes_path(project, self)
       else
         super

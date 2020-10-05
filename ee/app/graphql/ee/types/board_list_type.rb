@@ -16,6 +16,8 @@ module EE
               description: 'Assignee in the list'
         field :limit_metric, ::EE::Types::ListLimitMetricEnum, null: true,
               description: 'The current limit metric for the list'
+        field :total_weight, GraphQL::INT_TYPE, null: true,
+          description: 'Total weight of all issues in the list'
 
         def milestone
           ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Milestone, object.milestone_id).find
@@ -23,6 +25,10 @@ module EE
 
         def assignee
           object.assignee? ? object.user : nil
+        end
+
+        def total_weight
+          metadata[:total_weight]
         end
       end
     end

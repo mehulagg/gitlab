@@ -40,6 +40,18 @@ export const EXISTING_DESIGN_DROP_INVALID_FILENAME_MESSAGE = __(
   'You must upload a file with the same file name when dropping onto an existing design.',
 );
 
+export const MOVE_DESIGN_ERROR = __(
+  'Something went wrong when reordering designs. Please try again',
+);
+
+export const CREATE_DESIGN_TODO_ERROR = __('Failed to create To-Do for the design.');
+
+export const CREATE_DESIGN_TODO_EXISTS_ERROR = __('There is already a To-Do for this design.');
+
+export const DELETE_DESIGN_TODO_ERROR = __('Failed to remove To-Do for the design.');
+
+export const TOGGLE_TODO_ERROR = __('Failed to toggle To-Do for the design.');
+
 const MAX_SKIPPED_FILES_LISTINGS = 5;
 
 const oneDesignSkippedMessage = filename =>
@@ -69,7 +81,7 @@ const someDesignsSkippedMessage = skippedFiles => {
 
 export const designDeletionError = ({ singular = true } = {}) => {
   const design = singular ? __('a design') : __('designs');
-  return sprintf(s__('Could not delete %{design}. Please try again.'), {
+  return sprintf(s__('Could not archive %{design}. Please try again.'), {
     design,
   });
 };

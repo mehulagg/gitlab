@@ -11,45 +11,37 @@ class EventCreateService
   IllegalActionError = Class.new(StandardError)
 
   def open_issue(issue, current_user)
-    create_resource_event(issue, current_user, :opened)
-
     create_record_event(issue, current_user, :created)
   end
 
   def close_issue(issue, current_user)
-    create_resource_event(issue, current_user, :closed)
-
     create_record_event(issue, current_user, :closed)
   end
 
   def reopen_issue(issue, current_user)
-    create_resource_event(issue, current_user, :reopened)
-
     create_record_event(issue, current_user, :reopened)
   end
 
   def open_mr(merge_request, current_user)
-    create_resource_event(merge_request, current_user, :opened)
-
-    create_record_event(merge_request, current_user, :created)
+    create_record_event(merge_request, current_user, :created).tap do
+      track_event(event_action: :created, event_target: MergeRequest, author_id: current_user.id)
+    end
   end
 
   def close_mr(merge_request, current_user)
-    create_resource_event(merge_request, current_user, :closed)
-
-    create_record_event(merge_request, current_user, :closed)
+    create_record_event(merge_request, current_user, :closed).tap do
+      track_event(event_action: :closed, event_target: MergeRequest, author_id: current_user.id)
+    end
   end
 
   def reopen_mr(merge_request, current_user)
-    create_resource_event(merge_request, current_user, :reopened)
-
     create_record_event(merge_request, current_user, :reopened)
   end
 
   def merge_mr(merge_request, current_user)
-    create_resource_event(merge_request, current_user, :merged)
-
-    create_record_event(merge_request, current_user, :merged)
+    create_record_event(merge_request, current_user, :merged).tap do
+      track_event(event_action: :merged, event_target: MergeRequest, author_id: current_user.id)
+    end
   end
 
   def open_milestone(milestone, current_user)
@@ -69,7 +61,11 @@ class EventCreateService
   end
 
   def leave_note(note, current_user)
-    create_record_event(note, current_user, :commented)
+    create_record_event(note, current_user, :commented).tap do
+      if note.is_a?(DiffNote) && note.for_merge_request?
+        track_event(event_action: :commented, event_target: MergeRequest, author_id: current_user.id)
+      end
+    end
   end
 
   def join_project(project, current_user)
@@ -97,8 +93,6 @@ class EventCreateService
   end
 
   def save_designs(current_user, create: [], update: [])
-    return [] unless Feature.enabled?(:design_activity_events)
-
     records = create.zip([:created].cycle) + update.zip([:updated].cycle)
     return [] if records.empty?
 
@@ -106,7 +100,6 @@ class EventCreateService
   end
 
   def destroy_designs(designs, current_user)
-    return [] unless Feature.enabled?(:design_activity_events)
     return [] unless designs.present?
 
     create_record_events(designs.zip([:destroyed].cycle), current_user)
@@ -117,23 +110,21 @@ class EventCreateService
   # @param [WikiPage::Meta] wiki_page_meta The event target
   # @param [User] author The event author
   # @param [Symbol] action One of the Event::WIKI_ACTIONS
+  # @param [String] fingerprint The de-duplication fingerprint
   #
-  # @return a tuple of event and either :found or :created
-  def wiki_event(wiki_page_meta, author, action)
+  # The fingerprint, if provided, should be sufficient to find duplicate events.
+  # Suitable values would be, for example, the current page SHA.
+  #
+  # @return [Event] the event
+  def wiki_event(wiki_page_meta, author, action, fingerprint)
     raise IllegalActionError, action unless Event::WIKI_ACTIONS.include?(action)
 
-    if duplicate = existing_wiki_event(wiki_page_meta, action)
-      return duplicate
-    end
+    track_event(event_action: action, event_target: wiki_page_meta.class, author_id: author.id)
 
-    event = create_record_event(wiki_page_meta, author, action)
-    # Ensure that the event is linked in time to the metadata, for non-deletes
-    unless event.destroyed_action?
-      time_stamp = wiki_page_meta.updated_at
-      event.update_columns(updated_at: time_stamp, created_at: time_stamp)
-    end
+    duplicate = Event.for_wiki_meta(wiki_page_meta).for_fingerprint(fingerprint).first
+    return duplicate if duplicate.present?
 
-    event
+    create_record_event(wiki_page_meta, author, action, fingerprint.presence)
   end
 
   def approve_mr(merge_request, current_user)
@@ -142,42 +133,41 @@ class EventCreateService
 
   private
 
-  def existing_wiki_event(wiki_page_meta, action)
-    if Event.actions.fetch(action) == Event.actions[:destroyed]
-      most_recent = Event.for_wiki_meta(wiki_page_meta).recent.first
-      return most_recent if most_recent.present? && Event.actions[most_recent.action] == Event.actions[action]
-    else
-      Event.for_wiki_meta(wiki_page_meta).created_at(wiki_page_meta.updated_at).first
-    end
-  end
-
-  def create_record_event(record, current_user, status)
+  def create_record_event(record, current_user, status, fingerprint = nil)
     create_event(record.resource_parent, current_user, status,
-                 target_id: record.id, target_type: record.class.name)
+                 fingerprint: fingerprint,
+                 target_id: record.id,
+                 target_type: record.class.name)
   end
 
   # If creating several events, this method will insert them all in a single
   # statement
   #
-  # @param [[Eventable, Symbol]] a list of pairs of records and a valid status
+  # @param [[Eventable, Symbol, String]] a list of tuples of records, a valid status, and fingerprint
   # @param [User] the author of the event
-  def create_record_events(pairs, current_user)
+  def create_record_events(tuples, current_user)
     base_attrs = {
       created_at: Time.now.utc,
       updated_at: Time.now.utc,
       author_id: current_user.id
     }
 
-    attribute_sets = pairs.map do |record, status|
+    attribute_sets = tuples.map do |record, status, fingerprint|
       action = Event.actions[status]
       raise IllegalActionError, "#{status} is not a valid status" if action.nil?
 
       parent_attrs(record.resource_parent)
         .merge(base_attrs)
-        .merge(action: action, target_id: record.id, target_type: record.class.name)
+        .merge(action: action, fingerprint: fingerprint, target_id: record.id, target_type: record.class.name)
     end
 
-    Event.insert_all(attribute_sets, returning: %w[id])
+    result = Event.insert_all(attribute_sets, returning: %w[id])
+
+    tuples.each do |record, status, _|
+      track_event(event_action: status, event_target: record.class, author_id: current_user.id)
+    end
+
+    result
   end
 
   def create_push_event(service_class, project, current_user, push_data)
@@ -192,6 +182,8 @@ class EventCreateService
       new_event
     end
 
+    track_event(event_action: :pushed, event_target: Project, author_id: current_user.id)
+
     Users::LastPushEventService.new(current_user)
       .cache_last_push_event(event)
 
@@ -205,7 +197,11 @@ class EventCreateService
     )
     attributes.merge!(parent_attrs(resource_parent))
 
-    Event.create!(attributes)
+    if attributes[:fingerprint].present?
+      Event.safe_find_or_create_by!(attributes)
+    else
+      Event.create!(attributes)
+    end
   end
 
   def parent_attrs(resource_parent)
@@ -221,16 +217,8 @@ class EventCreateService
     { resource_parent_attr => resource_parent.id }
   end
 
-  def create_resource_event(issuable, current_user, status)
-    return unless state_change_tracking_enabled?(issuable)
-
-    ResourceEvents::ChangeStateService.new(resource: issuable, user: current_user)
-      .execute(status)
-  end
-
-  def state_change_tracking_enabled?(issuable)
-    issuable&.respond_to?(:resource_state_events) &&
-      ::Feature.enabled?(:track_resource_state_change_events, issuable&.project)
+  def track_event(**params)
+    Gitlab::UsageDataCounters::TrackUniqueEvents.track_event(**params)
   end
 end
 

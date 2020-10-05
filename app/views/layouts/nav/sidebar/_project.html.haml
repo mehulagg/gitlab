@@ -1,6 +1,5 @@
-.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?) }
+.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **tracking_attrs('projects_side_navigation', 'render', 'projects_side_navigation') }
   .nav-sidebar-inner-scroll
-    - can_edit = can?(current_user, :admin_project, @project)
     .context-header
       = link_to project_path(@project), title: @project.name do
         .avatar-container.rect-avatar.s40.project-avatar
@@ -114,12 +113,14 @@
                 %span
                   = _('Labels')
 
-            = render_if_exists 'projects/sidebar/issues_service_desk'
+            = render 'projects/sidebar/issues_service_desk'
 
             = nav_link(controller: :milestones) do
               = link_to project_milestones_path(@project), title: _('Milestones'), class: 'qa-milestones-link' do
                 %span
                   = _('Milestones')
+
+            = render_if_exists 'layouts/nav/sidebar/project_iterations_link'
 
       - if project_nav_tab?(:external_issue_tracker)
         - issue_tracker = @project.external_issue_tracker
@@ -166,7 +167,7 @@
       = render_if_exists "layouts/nav/requirements_link", project: @project
 
       - if project_nav_tab? :pipelines
-        = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts], unless: -> { current_path?('projects/pipelines#charts') }) do
+        = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts, :test_cases], unless: -> { current_path?('projects/pipelines#charts') }) do
           = link_to project_pipelines_path(@project), class: 'shortcuts-pipelines qa-link-pipelines rspec-link-pipelines', data: { qa_selector: 'ci_cd_link' } do
             .nav-icon-container
               = sprite_icon('rocket')
@@ -174,7 +175,7 @@
               = _('CI / CD')
 
           %ul.sidebar-sub-level-items
-            = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts], html_options: { class: "fly-out-top-item" }) do
+            = nav_link(controller: [:pipelines, :builds, :jobs, :pipeline_schedules, :artifacts, :test_cases], html_options: { class: "fly-out-top-item" }) do
               = link_to project_pipelines_path(@project) do
                 %strong.fly-out-top-item-name
                   =  _('CI / CD')
@@ -203,6 +204,8 @@
                   %span
                     = _('Schedules')
 
+            = render_if_exists "layouts/nav/test_cases_link", project: @project
+
       = render_if_exists 'layouts/nav/sidebar/project_security_link' # EE-specific
 
       - if project_nav_tab? :operations
@@ -221,16 +224,22 @@
             %li.divider.fly-out-top-item
 
             - if project_nav_tab? :metrics_dashboards
-              = nav_link(controller: :environments, action: [:metrics, :metrics_redirect]) do
-                = link_to metrics_project_environments_path(@project), title: _('Metrics'), class: 'shortcuts-metrics', data: { qa_selector: 'operations_metrics_link' } do
+              = nav_link(controller: :metrics_dashboard, action: [:show]) do
+                = link_to project_metrics_dashboard_path(@project), title: _('Metrics'), class: 'shortcuts-metrics', data: { qa_selector: 'operations_metrics_link' } do
                   %span
                     = _('Metrics')
 
             - if project_nav_tab?(:alert_management)
               = nav_link(controller: :alert_management) do
-                = link_to project_alert_management_index_path(@project), title: _('Alerts'), class: 'shortcuts-tracking qa-operations-tracking-link' do
+                = link_to project_alert_management_index_path(@project), title: _('Alerts') do
                   %span
                     = _('Alerts')
+
+            - if project_nav_tab?(:incidents)
+              = nav_link(controller: :incidents) do
+                = link_to project_incidents_path(@project), title: _('Incidents'), data: { qa_selector: 'operations_incidents_link' } do
+                  %span
+                    = _('Incidents')
 
             - if project_nav_tab? :environments
               = render_if_exists "layouts/nav/sidebar/tracing_link"
@@ -242,9 +251,15 @@
 
             - if project_nav_tab?(:error_tracking)
               = nav_link(controller: :error_tracking) do
-                = link_to project_error_tracking_index_path(@project), title: _('Error Tracking'), class: 'shortcuts-tracking qa-operations-tracking-link' do
+                = link_to project_error_tracking_index_path(@project), title: _('Error Tracking') do
                   %span
                     = _('Error Tracking')
+
+            - if project_nav_tab?(:product_analytics)
+              = nav_link(controller: :product_analytics) do
+                = link_to project_product_analytics_path(@project), title: _('Product Analytics') do
+                  %span
+                    = _('Product Analytics')
 
             - if project_nav_tab? :serverless
               = nav_link(controller: :functions) do
@@ -294,11 +309,11 @@
       = render 'layouts/nav/sidebar/analytics_links', links: project_analytics_navbar_links(@project, current_user)
 
       - if project_nav_tab?(:confluence)
-        - confluence_url = @project.confluence_service.confluence_url
+        - confluence_url = project_wikis_confluence_path(@project)
         = nav_link do
           = link_to confluence_url, class: 'shortcuts-confluence' do
             .nav-icon-container
-              = sprite_icon('external-link')
+              = image_tag 'confluence.svg', alt: _('Confluence')
             %span.nav-item-name
               = _('Confluence')
           %ul.sidebar-sub-level-items.is-fly-out-only
@@ -308,18 +323,7 @@
                   = _('Confluence')
 
       - if project_nav_tab? :wiki
-        - wiki_url = wiki_path(@project.wiki)
-        = nav_link(controller: :wikis) do
-          = link_to wiki_url, class: 'shortcuts-wiki', data: { qa_selector: 'wiki_link' } do
-            .nav-icon-container
-              = sprite_icon('book')
-            %span.nav-item-name
-              = _('Wiki')
-          %ul.sidebar-sub-level-items.is-fly-out-only
-            = nav_link(controller: :wikis, html_options: { class: "fly-out-top-item" } ) do
-              = link_to wiki_url do
-                %strong.fly-out-top-item-name
-                  = _('Wiki')
+        = render 'layouts/nav/sidebar/wiki_link', wiki_url: wiki_path(@project.wiki)
 
       - if project_nav_tab?(:external_wiki)
         - external_wiki_url = @project.external_wiki.external_wiki_url

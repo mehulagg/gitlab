@@ -8,28 +8,7 @@ RSpec.describe Projects::BlobController do
 
   let(:project) { create(:project, :public, :repository) }
 
-  shared_examples "file matches a codeowners rule" do
-    # Expected behavior for both these contexts should be equivalent, however
-    #   the feature flag is used in code to control which code path is followed.
-    #
-    context ":use_legacy_codeowner_validations is true" do
-      before do
-        stub_feature_flags(use_legacy_codeowner_validations: true)
-      end
-
-      it_behaves_like "renders to the expected_view with an error msg"
-    end
-
-    context ":use_legacy_codeowner_validations is false" do
-      before do
-        stub_feature_flags(use_legacy_codeowner_validations: false)
-      end
-
-      it_behaves_like "renders to the expected_view with an error msg"
-    end
-  end
-
-  shared_examples "renders to the expected_view with an error msg" do
+  shared_examples "renders to the expected_view with a code owners error msg" do
     let(:error_msg) do
       "Pushes to protected branches that contain changes to files that match " \
       "patterns defined in `CODEOWNERS` are disabled for this project. " \
@@ -91,7 +70,7 @@ RSpec.describe Projects::BlobController do
       expect(response).to be_redirect
     end
 
-    it_behaves_like "file matches a codeowners rule" do
+    it_behaves_like "renders to the expected_view with a code owners error msg" do
       subject { post :create, params: default_params }
 
       let(:expected_view) { :new }
@@ -117,7 +96,7 @@ RSpec.describe Projects::BlobController do
       sign_in(user)
     end
 
-    it_behaves_like "file matches a codeowners rule" do
+    it_behaves_like "renders to the expected_view with a code owners error msg" do
       subject { put :update, params: default_params }
 
       let(:expected_view) { :edit }

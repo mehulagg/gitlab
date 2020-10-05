@@ -1,16 +1,14 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 import { s__ } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 export default {
   name: 'ModalFooter',
   components: {
     DismissButton,
-    GlDeprecatedButton,
-    LoadingButton,
+    GlButton,
     SplitButton,
   },
   props: {
@@ -102,9 +100,9 @@ export default {
 
 <template>
   <div>
-    <gl-deprecated-button data-dismiss="modal" :disabled="disabled">
+    <gl-button data-dismiss="modal" :disabled="disabled">
       {{ __('Cancel') }}
-    </gl-deprecated-button>
+    </gl-button>
 
     <dismiss-button
       v-if="canDismissVulnerability"
@@ -127,15 +125,17 @@ export default {
       @downloadPatch="$emit('downloadPatch')"
     />
 
-    <loading-button
+    <gl-button
       v-else-if="actionButtons.length > 0"
       :loading="actionButtons[0].isLoading"
       :disabled="actionButtons[0].isLoading || disabled"
-      :label="actionButtons[0].name"
-      container-class="btn btn-success btn-inverted"
+      variant="success"
+      category="secondary"
       class="js-action-button"
       data-qa-selector="create_issue_button"
       @click="$emit(actionButtons[0].action)"
-    />
+    >
+      {{ __(actionButtons[0].name) }}
+    </gl-button>
   </div>
 </template>

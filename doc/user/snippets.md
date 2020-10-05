@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference
+---
+
 # Snippets
 
 With GitLab Snippets you can store and share bits of code and text with other users.
@@ -96,6 +103,14 @@ This allows you to have a local copy of the snippet's repository and make
 changes as needed. You can commit those changes and push them to the remote
 master branch.
 
+### Reduce snippets repository size
+
+Since versioned Snippets are considered as part of the [namespace storage size](../user/admin_area/settings/account_and_limit_settings.md),
+it's recommended to keep snippets' repositories as compact as possible.
+
+For more information about tools to compact repositories,
+see the documentation on [reducing repository size](../user/project/repository/reducing_the_repo_size_using_git.md).
+
 ### Limitations
 
 - Binary files are not supported.
@@ -116,8 +131,8 @@ There are two main ways of how you can discover snippets in GitLab.
 
 For exploring all snippets that are visible to you, you can go to the Snippets
 dashboard of your GitLab instance via the top navigation. For GitLab.com you can
-find it [here](https://gitlab.com/dashboard/snippets). This navigates you to an
-overview that shows snippets you created and allows you to explore all snippets.
+navigate to an [overview]((https://gitlab.com/dashboard/snippets)) that shows snippets
+you created and allows you to explore all snippets.
 
 If you want to discover snippets that belong to a specific project, you can navigate
 to the Snippets page via the left side navigation on the project page.

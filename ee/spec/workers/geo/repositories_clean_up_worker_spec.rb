@@ -2,30 +2,25 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::RepositoriesCleanUpWorker, :geo, :geo_fdw do
+RSpec.describe Geo::RepositoriesCleanUpWorker, :geo do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
   describe '#perform' do
-    let(:secondary) { create(:geo_node) }
+    let_it_be(:secondary) { create(:geo_node) }
+    let_it_be(:synced_group) { create(:group) }
+    let_it_be(:synced_subgroup) { create(:group, parent: synced_group) }
+    let_it_be(:unsynced_group) { create(:group) }
+    let_it_be(:project_1) { create(:project, group: synced_group) }
+    let_it_be(:project_2) { create(:project, group: synced_group) }
+    let_it_be(:project_3) { create(:project, :repository, group: unsynced_group) }
+    let_it_be(:project_4) { create(:project, :repository, group: unsynced_group) }
+    let_it_be(:project_5) { create(:project, group: synced_subgroup) }
+    let_it_be(:project_6) { create(:project, group: synced_subgroup) }
+    let_it_be(:project_7) { create(:project) }
+    let_it_be(:project_8) { create(:project) }
 
-    let(:synced_group) { create(:group) }
-    let(:synced_subgroup) { create(:group, parent: synced_group) }
-    let(:unsynced_group) { create(:group) }
-
-    let(:project_1) { create(:project, group: synced_group) }
-    let(:project_2) { create(:project, group: synced_group) }
-    let!(:project_3) { create(:project, :repository, group: unsynced_group) }
-    let(:project_4) { create(:project, :repository, group: unsynced_group) }
-    let(:project_5) { create(:project, group: synced_subgroup) }
-    let(:project_6) { create(:project, group: synced_subgroup) }
-    let(:project_7) { create(:project) }
-    let(:project_8) { create(:project) }
-
-    before do
-      stub_current_geo_node(secondary)
-      stub_exclusive_lease
-
+    before_all do
       create(:geo_project_registry, project: project_1)
       create(:geo_project_registry, project: project_2)
       create(:geo_project_registry, project: project_4)
@@ -33,6 +28,11 @@ RSpec.describe Geo::RepositoriesCleanUpWorker, :geo, :geo_fdw do
       create(:geo_project_registry, project: project_6)
       create(:geo_project_registry, project: project_7)
       create(:geo_project_registry, project: project_8)
+    end
+
+    before do
+      stub_current_geo_node(secondary)
+      stub_exclusive_lease
     end
 
     it 'does not perform Geo::RepositoryCleanupWorker when cannnot obtain a lease' do
@@ -76,10 +76,8 @@ RSpec.describe Geo::RepositoriesCleanUpWorker, :geo, :geo_fdw do
         subject.perform(secondary.id)
       end
 
-      it 'does not leave orphaned entries in the project_registry table' do
-        Sidekiq::Testing.inline! do
-          subject.perform(secondary.id)
-        end
+      it 'does not leave orphaned entries in the project_registry table', :sidekiq_inline do
+        subject.perform(secondary.id)
 
         expect(Geo::ProjectRegistry.where(project_id: [project_3, project_4, project_7, project_8])).to be_empty
       end
@@ -109,10 +107,8 @@ RSpec.describe Geo::RepositoriesCleanUpWorker, :geo, :geo_fdw do
         subject.perform(secondary.id)
       end
 
-      it 'does not leave orphaned entries in the project_registry table' do
-        Sidekiq::Testing.inline! do
-          subject.perform(secondary.id)
-        end
+      it 'does not leave orphaned entries in the project_registry table', :sidekiq_inline do
+        subject.perform(secondary.id)
 
         expect(Geo::ProjectRegistry.where(project_id: [project_1, project_2, project_3, project_4, project_5, project_6])).to be_empty
       end

@@ -12,7 +12,7 @@ RSpec.describe Emails::DestroyService do
     it 'registers a security event' do
       stub_licensed_features(extended_audit_events: true)
 
-      expect { service.execute(email) }.to change { SecurityEvent.count }.by(1)
+      expect { service.execute(email) }.to change { AuditEvent.count }.by(1)
     end
   end
 end

@@ -7,16 +7,18 @@ may be filling up. Users will notice when this happens because new branches
 may not show up and merge requests may not be updated. The following are some
 troubleshooting steps that will help you diagnose the bottleneck.
 
-> **Note:** GitLab administrators/users should consider working through these
-> debug steps with GitLab Support so the backtraces can be analyzed by our team.
-> It may reveal a bug or necessary improvement in GitLab.
->
-> **Note:** In any of the backtraces, be wary of suspecting cases where every
-> thread appears to be waiting in the database, Redis, or waiting to acquire
-> a mutex. This **may** mean there's contention in the database, for example,
-> but look for one thread that is different than the rest. This other thread
-> may be using all available CPU, or have a Ruby Global Interpreter Lock,
-> preventing other threads from continuing.
+NOTE **Note:**
+GitLab administrators/users should consider working through these
+debug steps with GitLab Support so the backtraces can be analyzed by our team.
+It may reveal a bug or necessary improvement in GitLab.
+
+NOTE: **Note:**
+In any of the backtraces, be wary of suspecting cases where every
+thread appears to be waiting in the database, Redis, or waiting to acquire
+a mutex. This **may** mean there's contention in the database, for example,
+but look for one thread that is different than the rest. This other thread
+may be using all available CPU, or have a Ruby Global Interpreter Lock,
+preventing other threads from continuing.
 
 ## Log arguments to Sidekiq jobs
 
@@ -210,12 +212,12 @@ the query details.
 ## Managing Sidekiq queues
 
 It is possible to use [Sidekiq API](https://github.com/mperham/sidekiq/wiki/API)
-to perform a number of troubleshooting on Sidekiq.
+to perform a number of troubleshooting steps on Sidekiq.
 
 These are the administrative commands and it should only be used if currently
 admin interface is not suitable due to scale of installation.
 
-All this commands should be run using `gitlab-rails console`.
+All these commands should be run using `gitlab-rails console`.
 
 ### View the queue size
 
@@ -283,7 +285,8 @@ queue = Sidekiq::Queue.new('<queue name>')
 queue.each { |job| job.delete if <condition>}
 ```
 
-NOTE: **Note:** This will remove jobs that are queued but not started, running jobs will not be killed. Have a look at the section below for cancelling running jobs.
+NOTE: **Note:**
+This will remove jobs that are queued but not started, running jobs will not be killed. Have a look at the section below for cancelling running jobs.
 
 In the method above, `<queue-name>` is the name of the queue that contains the job(s) you want to delete and `<condition>` will decide which jobs get deleted.
 

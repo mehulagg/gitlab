@@ -1,8 +1,8 @@
 <script>
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlButton } from '@gitlab/ui';
 import { sprintf, __ } from '../../../locale';
 import getRefMixin from '../../mixins/get_ref';
-import getProjectPath from '../../queries/getProjectPath.query.graphql';
+import projectPathQuery from '../../queries/project_path.query.graphql';
 import TableHeader from './header.vue';
 import TableRow from './row.vue';
 import ParentRow from './parent_row.vue';
@@ -13,11 +13,12 @@ export default {
     TableHeader,
     TableRow,
     ParentRow,
+    GlButton,
   },
   mixins: [getRefMixin],
   apollo: {
     projectPath: {
-      query: getProjectPath,
+      query: projectPathQuery,
     },
   },
   props: {
@@ -38,6 +39,10 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    hasMore: {
+      type: Boolean,
+      required: true,
     },
   },
   data() {
@@ -63,6 +68,11 @@ export default {
     },
     showParentRow() {
       return !this.isLoading && ['', '/'].indexOf(this.path) === -1;
+    },
+  },
+  methods: {
+    showMore() {
+      this.$emit('showMore');
     },
   },
 };
@@ -96,7 +106,8 @@ export default {
               :name="entry.name"
               :path="entry.flatPath"
               :type="entry.type"
-              :url="entry.webUrl"
+              :url="entry.webUrl || entry.webPath"
+              :mode="entry.mode"
               :submodule-tree-url="entry.treeUrl"
               :lfs-oid="entry.lfsOid"
               :loading-path="loadingPath"
@@ -107,6 +118,20 @@ export default {
               <td><gl-skeleton-loading :lines="1" class="h-auto" /></td>
               <td><gl-skeleton-loading :lines="1" class="h-auto" /></td>
               <td><gl-skeleton-loading :lines="1" class="ml-auto h-auto w-50" /></td>
+            </tr>
+          </template>
+          <template v-if="hasMore">
+            <tr>
+              <td align="center" colspan="3" class="gl-p-0!">
+                <gl-button
+                  variant="link"
+                  class="gl-display-flex gl-w-full gl-py-4!"
+                  :loading="isLoading"
+                  @click="showMore"
+                >
+                  {{ s__('ProjectFileTree|Show more') }}
+                </gl-button>
+              </td>
             </tr>
           </template>
         </tbody>

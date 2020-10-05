@@ -53,6 +53,26 @@ RSpec.describe WikiHelper do
     end
   end
 
+  describe '#wiki_attachment_upload_url' do
+    let_it_be(:wiki) { build_stubbed(:project_wiki) }
+
+    before do
+      @wiki = wiki
+    end
+
+    it 'returns the upload endpoint for project wikis' do
+      expect(helper.wiki_attachment_upload_url).to end_with("/api/v4/projects/#{@wiki.project.id}/wikis/attachments")
+    end
+
+    it 'raises an exception for unsupported wiki containers' do
+      allow(wiki).to receive(:container).and_return(User.new)
+
+      expect do
+        helper.wiki_attachment_upload_url
+      end.to raise_error(TypeError)
+    end
+  end
+
   describe '#wiki_sort_controls' do
     let(:wiki) { create(:project_wiki) }
     let(:wiki_link) { helper.wiki_sort_controls(wiki, sort, direction) }
@@ -62,7 +82,7 @@ RSpec.describe WikiHelper do
       path = "/#{wiki.project.full_path}/-/wikis/pages?direction=#{direction}&sort=#{sort}"
 
       helper.link_to(path, type: 'button', class: classes, title: 'Sort direction') do
-        helper.sprite_icon("sort-#{icon_class}", size: 16)
+        helper.sprite_icon("sort-#{icon_class}")
       end
     end
 

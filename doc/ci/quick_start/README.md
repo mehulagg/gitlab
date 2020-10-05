@@ -7,31 +7,13 @@ type: reference
 
 # Getting started with GitLab CI/CD
 
-NOTE: **Note:**
-Starting from version 8.0, GitLab [Continuous Integration](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/) (CI)
-is fully integrated into GitLab itself and is [enabled](../enable_or_disable_ci.md) by default on all
-projects.
-
-NOTE: **Note:**
-Please keep in mind that only project Maintainers and Admin users have
-the permissions to access a project's settings.
-
-NOTE: **Note:**
-Coming over to GitLab from Jenkins? Check out our [reference](../jenkins/index.md)
-for converting your pre-existing pipelines over to our format.
-
-NOTE: **Note:**
-There are a few different [basic pipeline architectures](../pipelines/pipeline_architectures.md)
-that you can consider for use in your project. You may want to familiarize
-yourself with these prior to getting started.
-
 GitLab offers a [continuous integration](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/) service. For each commit or push to trigger your CI
 [pipeline](../pipelines/index.md), you must:
 
 - Add a [`.gitlab-ci.yml` file](#creating-a-gitlab-ciyml-file) to your repository's root directory.
-- Ensure your project is configured to use a [Runner](#configuring-a-runner).
+- Ensure your project is configured to use a [runner](#configuring-a-runner).
 
-The `.gitlab-ci.yml` file tells the GitLab Runner what to do. A simple pipeline commonly has
+The `.gitlab-ci.yml` file tells the runner what to do. A simple pipeline commonly has
 three [stages](../yaml/README.md#stages):
 
 - `build`
@@ -49,7 +31,11 @@ something.
 It's also common to use pipelines to automatically deploy
 tested code to staging and production environments.
 
----
+If you're already familiar with general CI/CD concepts, you can review which
+[pipeline architectures](../pipelines/pipeline_architectures.md) can be used
+in your projects. If you're coming over to GitLab from Jenkins, you can check out
+our [reference](../migration/jenkins.md) for converting your pre-existing pipelines
+over to our format.
 
 This guide assumes that you have:
 
@@ -71,7 +57,7 @@ The `.gitlab-ci.yml` file is where you configure what CI does with your project.
 It lives in the root of your repository.
 
 On any push to your repository, GitLab will look for the `.gitlab-ci.yml`
-file and start jobs on _Runners_ according to the contents of the file,
+file and start jobs on _runners_ according to the contents of the file,
 for that commit.
 
 Because `.gitlab-ci.yml` is in the repository and is version controlled, old
@@ -82,22 +68,27 @@ blog about it](https://about.gitlab.com/blog/2015/05/06/why-were-replacing-gitla
 
 ### Creating a simple `.gitlab-ci.yml` file
 
->**Note:**
-`.gitlab-ci.yml` is a [YAML](https://en.wikipedia.org/wiki/YAML) file
-so you have to pay extra attention to indentation. Always use spaces, not tabs.
+NOTE: **Note:**
+A GitLab team member has made an [unofficial visual pipeline editor](https://unofficial.gitlab.tools/visual-pipelines/).
+There is a [plan to make it an official part of GitLab](https://gitlab.com/groups/gitlab-org/-/epics/4069)
+in the future, but it's available for anyone who wants to try it at the above link.
 
 You need to create a file named `.gitlab-ci.yml` in the root directory of your
-repository. Below is an example for a Ruby on Rails project.
+repository. This is a [YAML](https://en.wikipedia.org/wiki/YAML) file
+so you have to pay extra attention to indentation. Always use spaces, not tabs.
+
+Below is an example for a Ruby on Rails project:
 
 ```yaml
-image: "ruby:2.5"
-
-before_script:
-  - apt-get update -qq && apt-get install -y -qq sqlite3 libsqlite3-dev nodejs
-  - ruby -v
-  - which ruby
-  - gem install bundler --no-document
-  - bundle install --jobs $(nproc)  "${FLAGS[@]}"
+default:
+  image: ruby:2.5
+  before_script:
+    - apt-get update
+    - apt-get install -y sqlite3 libsqlite3-dev nodejs
+    - ruby -v
+    - which ruby
+    - gem install bundler --no-document
+    - bundle install --jobs $(nproc) "${FLAGS[@]}"
 
 rspec:
   script:
@@ -119,14 +110,12 @@ The `.gitlab-ci.yml` file defines sets of jobs with constraints of how and when
 they should be run. The jobs are defined as top-level elements with a name (in
 our case `rspec` and `rubocop`) and always have to contain the `script` keyword.
 Jobs are used to create jobs, which are then picked by
-[Runners](../runners/README.md) and executed within the environment of the Runner.
+[runners](../runners/README.md) and executed within the environment of the runner.
 
 What is important is that each job is run independently from each other.
 
 If you want to check whether the `.gitlab-ci.yml` of your project is valid, there is a
-Lint tool under the page `/-/ci/lint` of your project namespace. You can also find
-a "CI Lint" button to go to this page under **CI/CD ➔ Pipelines** and
-**Pipelines ➔ Jobs** in your project.
+[CI Lint tool](../lint.md) available in every project.
 
 For more information and a complete `.gitlab-ci.yml` syntax, please read
 [the reference documentation on `.gitlab-ci.yml`](../yaml/README.md).
@@ -146,7 +135,7 @@ Now if you go to the **Pipelines** page you will see that the pipeline is
 pending.
 
 NOTE: **Note:**
-If you have a [mirrored repository where GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository-starter),
+If you have a [mirrored repository where GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
 you may need to enable pipeline triggering in your project's
 **Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
 
@@ -160,59 +149,54 @@ Clicking on it you will be directed to the jobs page for that specific commit.
 ![Single commit jobs page](img/single_commit_status_pending.png)
 
 Notice that there is a pending job which is named after what we wrote in
-`.gitlab-ci.yml`. "stuck" indicates that there is no Runner configured
+`.gitlab-ci.yml`. "stuck" indicates that there is no runner configured
 yet for this job.
 
-The next step is to configure a Runner so that it picks the pending jobs.
+The next step is to configure a runner so that it picks the pending jobs.
 
-## Configuring a Runner
+## Configuring a runner
 
-In GitLab, Runners run the jobs that you define in `.gitlab-ci.yml`. A Runner
-can be a virtual machine, a VPS, a bare-metal machine, a Docker container or
-even a cluster of containers. GitLab and the Runners communicate through an API,
-so the only requirement is that the Runner's machine has network access to the
+In GitLab, runners run the jobs that you define in `.gitlab-ci.yml`. A runner
+can be a virtual machine, a VPS, a bare-metal machine, a Docker container, or
+even a cluster of containers. GitLab and the runner communicate through an API,
+so the only requirement is that the runner's machine has network access to the
 GitLab server.
 
-A Runner can be specific to a certain project or serve multiple projects in
-GitLab. If it serves all projects it's called a _Shared Runner_.
+A runner can be specific to a certain project or serve multiple projects in
+GitLab. If it serves all projects, it's called a _shared runner_.
 
-Find more information about different Runners in the
-[Runners](../runners/README.md) documentation.
+Find more information about runners in the
+[runner](../runners/README.md) documentation.
 
-You can find whether any Runners are assigned to your project by going to
-**Settings ➔ CI/CD**. Setting up a Runner is easy and straightforward. The
-official Runner supported by GitLab is written in Go and its documentation
-can be found at <https://docs.gitlab.com/runner/>.
+The official runner supported by GitLab is written in Go.
+View [the documentation](https://docs.gitlab.com/runner/).
 
-In order to have a functional Runner you need to follow two steps:
+For a runner to be available in GitLab, you must:
 
-1. [Install it](https://docs.gitlab.com/runner/install/)
-1. [Configure it](https://docs.gitlab.com/runner/configuration/)
+1. [Install GitLab Runner](https://docs.gitlab.com/runner/install/).
+1. [Register a runner for your group or project](https://docs.gitlab.com/runner/register/).
 
-Follow the links above to set up your own Runner or use a Shared Runner as
-described in the next section.
-
-Once the Runner has been set up, you should see it on the Runners page of your
-project, following **Settings ➔ CI/CD**.
+When a runner is available, you can view it by
+clicking **Settings > CI/CD** and expanding **Runners**.
 
 ![Activated runners](img/runners_activated.png)
 
-### Shared Runners
+### Shared runners
 
-If you use [GitLab.com](https://gitlab.com/) you can use the **Shared Runners**
-provided by GitLab Inc.
+If you use [GitLab.com](https://gitlab.com/), you can use the **shared runners**
+provided by GitLab.
 
 These are special virtual machines that run on GitLab's infrastructure and can
 build any project.
 
-To enable the **Shared Runners** you have to go to your project's
-**Settings ➔ CI/CD** and click **Enable shared runners**.
+To enable shared runners, go to your project's or group's
+**Settings > CI/CD** and click **Enable shared runners**.
 
-[Read more on Shared Runners](../runners/README.md).
+[Read more about shared runners](../runners/README.md#shared-runners).
 
-## Seeing the status of your pipeline and jobs
+## Viewing the status of your pipeline and jobs
 
-After configuring the Runner successfully, you should see the status of your
+After configuring the runner successfully, you should see the status of your
 last commit change from _pending_ to either _running_, _success_ or _failed_.
 
 You can view all pipelines by going to the **Pipelines** page in your project.
@@ -232,7 +216,10 @@ you expected.
 You are also able to view the status of any commit in the various pages in
 GitLab, such as **Commits** and **Merge requests**.
 
-## Examples
+## Additional resources
 
 Visit the [examples README](../examples/README.md) to see a list of examples using GitLab
 CI with various languages.
+
+For help making your new pipelines faster and more efficient, see the
+[pipeline efficiency documentation](../pipelines/pipeline_efficiency.md).

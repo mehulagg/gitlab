@@ -4,7 +4,7 @@ import * as actions from 'ee/approvals/stores/modules/license_compliance/actions
 import * as baseMutationTypes from 'ee/approvals/stores/modules/base/mutation_types';
 import { mapApprovalSettingsResponse } from 'ee/approvals/mappers';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 

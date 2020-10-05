@@ -1,82 +1,183 @@
+import { GlLoadingIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import AxiosMockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
+import { TEST_HOST } from 'helpers/test_constants';
 import SnippetBlobEdit from '~/snippets/components/snippet_blob_edit.vue';
 import BlobHeaderEdit from '~/blob/components/blob_edit_header.vue';
 import BlobContentEdit from '~/blob/components/blob_edit_content.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import axios from '~/lib/utils/axios_utils';
+import { joinPaths } from '~/lib/utils/url_utility';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
-jest.mock('~/blob/utils', () => jest.fn());
+jest.mock('~/flash');
+
+const TEST_ID = 'blob_local_7';
+const TEST_PATH = 'foo/bar/test.md';
+const TEST_RAW_PATH = '/gitlab/raw/path/to/blob/7';
+const TEST_FULL_PATH = joinPaths(TEST_HOST, TEST_RAW_PATH);
+const TEST_CONTENT = 'Lorem ipsum dolar sit amet,\nconsectetur adipiscing elit.';
+const TEST_JSON_CONTENT = '{"abc":"lorem ipsum"}';
+
+const TEST_BLOB = {
+  id: TEST_ID,
+  rawPath: TEST_RAW_PATH,
+  path: TEST_PATH,
+  content: '',
+  isLoaded: false,
+};
+
+const TEST_BLOB_LOADED = {
+  ...TEST_BLOB,
+  content: TEST_CONTENT,
+  isLoaded: true,
+};
 
 describe('Snippet Blob Edit component', () => {
   let wrapper;
-  const value = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
-  const fileName = 'lorem.txt';
-  const findHeader = () => wrapper.find(BlobHeaderEdit);
-  const findContent = () => wrapper.find(BlobContentEdit);
+  let axiosMock;
 
-  function createComponent(props = {}) {
+  const createComponent = (props = {}) => {
     wrapper = shallowMount(SnippetBlobEdit, {
       propsData: {
-        value,
-        fileName,
-        isLoading: false,
+        blob: TEST_BLOB,
         ...props,
       },
     });
-  }
+  };
+
+  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
+  const findHeader = () => wrapper.find(BlobHeaderEdit);
+  const findContent = () => wrapper.find(BlobContentEdit);
+  const getLastUpdatedArgs = () => {
+    const event = wrapper.emitted()['blob-updated'];
+
+    return event?.[event.length - 1][0];
+  };
 
   beforeEach(() => {
-    createComponent();
+    axiosMock = new AxiosMockAdapter(axios);
+    axiosMock.onGet(TEST_FULL_PATH).reply(200, TEST_CONTENT);
   });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
+    axiosMock.restore();
   });
 
-  describe('rendering', () => {
-    it('matches the snapshot', () => {
+  describe('with not loaded blob', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('shows blob header', () => {
+      expect(findHeader().props()).toMatchObject({
+        value: TEST_BLOB.path,
+      });
+      expect(findHeader().attributes('id')).toBe(`${TEST_ID}_file_path`);
+    });
+
+    it('emits delete when deleted', () => {
+      expect(wrapper.emitted().delete).toBeUndefined();
+
+      findHeader().vm.$emit('delete');
+
+      expect(wrapper.emitted().delete).toHaveLength(1);
+    });
+
+    it('emits update when path changes', () => {
+      const newPath = 'new/path.md';
+
+      findHeader().vm.$emit('input', newPath);
+
+      expect(getLastUpdatedArgs()).toEqual({ path: newPath });
+    });
+
+    it('emits update when content is loaded', async () => {
+      await waitForPromises();
+
+      expect(getLastUpdatedArgs()).toEqual({ content: TEST_CONTENT });
+    });
+  });
+
+  describe('with unloaded blob and JSON content', () => {
+    beforeEach(() => {
+      axiosMock.onGet(TEST_FULL_PATH).reply(200, TEST_JSON_CONTENT);
+      createComponent();
+    });
+
+    // This checks against this issue https://gitlab.com/gitlab-org/gitlab/-/issues/241199
+    it('emits raw content', async () => {
+      await waitForPromises();
+
+      expect(getLastUpdatedArgs()).toEqual({ content: TEST_JSON_CONTENT });
+    });
+  });
+
+  describe('with error', () => {
+    beforeEach(() => {
+      axiosMock.reset();
+      axiosMock.onGet(TEST_FULL_PATH).replyOnce(500);
+      createComponent();
+    });
+
+    it('should call flash', async () => {
+      await waitForPromises();
+
+      expect(createFlash).toHaveBeenCalledWith(
+        "Can't fetch content for the blob: Error: Request failed with status code 500",
+      );
+    });
+  });
+
+  describe('with loaded blob', () => {
+    beforeEach(() => {
+      createComponent({ blob: TEST_BLOB_LOADED });
+    });
+
+    it('matches snapshot', () => {
       expect(wrapper.element).toMatchSnapshot();
     });
 
-    it('renders required components', () => {
-      expect(findHeader().exists()).toBe(true);
-      expect(findContent().exists()).toBe(true);
-    });
-
-    it('renders loader if isLoading equals true', () => {
-      createComponent({ isLoading: true });
-      expect(wrapper.contains(GlLoadingIcon)).toBe(true);
-      expect(findContent().exists()).toBe(false);
+    it('does not make API request', () => {
+      expect(axiosMock.history.get).toHaveLength(0);
     });
   });
 
-  describe('functionality', () => {
-    it('does not fail without content', () => {
-      const spy = jest.spyOn(global.console, 'error');
-      createComponent({ value: undefined });
-
-      expect(spy).not.toHaveBeenCalled();
-      expect(findContent().exists()).toBe(true);
+  describe.each`
+    props                                                       | showLoading | showContent
+    ${{ blob: TEST_BLOB, canDelete: true, showDelete: true }}   | ${true}     | ${false}
+    ${{ blob: TEST_BLOB, canDelete: false, showDelete: false }} | ${true}     | ${false}
+    ${{ blob: TEST_BLOB_LOADED }}                               | ${false}    | ${true}
+  `('with $props', ({ props, showLoading, showContent }) => {
+    beforeEach(() => {
+      createComponent(props);
     });
 
-    it('emits "name-change" event when the file name gets changed', () => {
-      expect(wrapper.emitted('name-change')).toBeUndefined();
-      const newFilename = 'foo.bar';
-      findHeader().vm.$emit('input', newFilename);
+    it('shows blob header', () => {
+      const { canDelete = true, showDelete = false } = props;
 
-      return nextTick().then(() => {
-        expect(wrapper.emitted('name-change')[0]).toEqual([newFilename]);
+      expect(findHeader().props()).toMatchObject({
+        canDelete,
+        showDelete,
       });
     });
 
-    it('emits "input" event when the file content gets changed', () => {
-      expect(wrapper.emitted('input')).toBeUndefined();
-      const newValue = 'foo.bar';
-      findContent().vm.$emit('input', newValue);
+    it(`handles loading icon (show=${showLoading})`, () => {
+      expect(findLoadingIcon().exists()).toBe(showLoading);
+    });
 
-      return nextTick().then(() => {
-        expect(wrapper.emitted('input')[0]).toEqual([newValue]);
-      });
+    it(`handles content (show=${showContent})`, () => {
+      expect(findContent().exists()).toBe(showContent);
+
+      if (showContent) {
+        expect(findContent().props()).toEqual({
+          value: TEST_BLOB_LOADED.content,
+          fileGlobalId: TEST_BLOB_LOADED.id,
+          fileName: TEST_BLOB_LOADED.path,
+        });
+      }
     });
   });
 });

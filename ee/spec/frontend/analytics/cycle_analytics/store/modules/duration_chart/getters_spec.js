@@ -3,9 +3,7 @@ import {
   startDate,
   endDate,
   transformedDurationData,
-  transformedDurationMedianData,
   durationChartPlottableData,
-  durationChartPlottableMedianData,
 } from '../../../mock_data';
 
 const rootState = {
@@ -33,30 +31,6 @@ describe('DurationChart getters', () => {
       expect(getters.durationChartPlottableData(stateWithDurationData, getters, rootState)).toEqual(
         [],
       );
-    });
-  });
-
-  describe('durationChartPlottableMedianData', () => {
-    it('returns plottable median data for selected stages', () => {
-      const stateWithDurationMedianData = {
-        durationMedianData: transformedDurationMedianData,
-      };
-
-      expect(
-        getters.durationChartMedianData(stateWithDurationMedianData, getters, rootState),
-      ).toEqual(durationChartPlottableMedianData);
-    });
-
-    it('returns an empty array if there is no plottable median data for the selected stages', () => {
-      const stateWithDurationMedianData = {
-        startDate,
-        endDate,
-        durationMedianData: [],
-      };
-
-      expect(
-        getters.durationChartMedianData(stateWithDurationMedianData, getters, rootState),
-      ).toEqual([]);
     });
   });
 });

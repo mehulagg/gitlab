@@ -13,17 +13,23 @@ export default () => ({
   isSavingStageOrder: false,
   errorSavingStageOrder: false,
 
-  selectedGroup: null,
+  currentGroup: null,
   selectedProjects: [],
   selectedStage: null,
-  selectedAuthor: null,
-  selectedMilestone: null,
-  selectedAssignees: [],
-  selectedLabels: [],
+  selectedValueStream: null,
 
   currentStageEvents: [],
 
+  isLoadingValueStreams: false,
+  isCreatingValueStream: false,
+  isDeletingValueStream: false,
+
+  createValueStreamErrors: {},
+  deleteValueStreamError: null,
+
   stages: [],
+  selectedStageError: '',
   summary: [],
   medians: {},
+  valueStreams: [],
 });

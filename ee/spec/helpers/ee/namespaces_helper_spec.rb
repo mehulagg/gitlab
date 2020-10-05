@@ -9,6 +9,7 @@ RSpec.describe EE::NamespacesHelper do
            :private,
            project_creation_level: admin_project_creation_level)
   end
+
   let!(:user) { create(:user) }
   let!(:user_project_creation_level) { nil }
   let!(:user_group) do
@@ -104,139 +105,55 @@ RSpec.describe EE::NamespacesHelper do
     end
   end
 
-  describe '#namespace_storage_usage_link' do
-    subject { helper.namespace_storage_usage_link(namespace) }
+  describe '#temporary_storage_increase_visible?' do
+    subject { helper.temporary_storage_increase_visible?(namespace) }
 
-    context 'when namespace is a group' do
-      let(:namespace) { build(:group) }
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:admin) { create(:user, namespace: namespace) }
+    let_it_be(:user) { create(:user) }
 
-      it { is_expected.to eq(group_usage_quotas_path(namespace, anchor: 'storage-quota-tab')) }
-    end
-
-    context 'when namespace is a user' do
-      let(:namespace) { build(:namespace) }
-
-      it { is_expected.to eq(profile_usage_quotas_path(anchor: 'storage-quota-tab')) }
-    end
-  end
-
-  describe '#purchase_storage_url' do
-    subject { helper.purchase_storage_url }
-
-    context 'when on .com' do
+    context 'when enforce_namespace_storage_limit setting enabled' do
       before do
-        allow(::Gitlab).to receive(:com?).and_return(true)
+        stub_application_setting(enforce_namespace_storage_limit: true)
       end
 
-      it { is_expected.to eq(EE::SUBSCRIPTIONS_MORE_STORAGE_URL) }
-
-      context 'when feature flag disabled' do
+      context 'when current_user is admin of namespace' do
         before do
-          stub_feature_flags(buy_storage_link: false)
+          allow(helper).to receive(:current_user).and_return(admin)
         end
 
-        it { is_expected.to be_nil }
+        it { is_expected.to eq(true) }
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(temporary_storage_increase: false)
+          end
+
+          it { is_expected.to eq(false) }
+        end
+      end
+
+      context 'when current_user is not the admin of namespace' do
+        before do
+          allow(helper).to receive(:current_user).and_return(user)
+        end
+
+        it { is_expected.to eq(false) }
       end
     end
 
-    context 'when not on .com' do
+    context 'when enforce_namespace_storage_limit setting disabled' do
       before do
-        allow(::Gitlab).to receive(:com?).and_return(false)
+        stub_application_setting(enforce_namespace_storage_limit: false)
       end
 
-      it { is_expected.to be_nil }
-    end
-  end
+      context 'when current_user is admin of namespace' do
+        before do
+          allow(helper).to receive(:current_user).and_return(admin)
+        end
 
-  describe '#namespace_storage_alert' do
-    subject { helper.namespace_storage_alert(namespace) }
-
-    let(:namespace) { build(:namespace) }
-
-    let(:payload) do
-      {
-        alert_level: :info,
-        usage_message: "Usage",
-        explanation_message: "Explanation",
-        root_namespace: namespace
-      }
-    end
-
-    before do
-      allow(helper).to receive(:current_user).and_return(admin)
-      allow_next_instance_of(Namespaces::CheckStorageSizeService, namespace, admin) do |check_storage_size_service|
-        expect(check_storage_size_service).to receive(:execute).and_return(ServiceResponse.success(payload: payload))
+        it { is_expected.to eq(false) }
       end
-    end
-
-    context 'when payload is not empty and no cookie is set' do
-      it { is_expected.to eq(payload) }
-    end
-
-    context 'when there is no current_user' do
-      before do
-        allow(helper).to receive(:current_user).and_return(nil)
-      end
-
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when payload is empty' do
-      let(:payload) { {} }
-
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when cookie is set' do
-      before do
-        helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
-      end
-
-      it { is_expected.to eq({}) }
-    end
-
-    context 'when payload is empty and cookie is set' do
-      let(:payload) { {} }
-
-      before do
-        helper.request.cookies["hide_storage_limit_alert_#{namespace.id}_info"] = 'true'
-      end
-
-      it { is_expected.to eq({}) }
-    end
-  end
-
-  describe '#namespace_storage_alert_style' do
-    using RSpec::Parameterized::TableSyntax
-
-    subject { helper.namespace_storage_alert_style(alert_level) }
-
-    where(:alert_level, :result) do
-      :info      | 'info'
-      :warning   | 'warning'
-      :error     | 'danger'
-      :alert     | 'danger'
-    end
-
-    with_them do
-      it { is_expected.to eq(result) }
-    end
-  end
-
-  describe '#namespace_storage_alert_icon' do
-    using RSpec::Parameterized::TableSyntax
-
-    subject { helper.namespace_storage_alert_icon(alert_level) }
-
-    where(:alert_level, :result) do
-      :info      | 'information-o'
-      :warning   | 'warning'
-      :error     | 'error'
-      :alert     | 'error'
-    end
-
-    with_them do
-      it { is_expected.to eq(result) }
     end
   end
 end

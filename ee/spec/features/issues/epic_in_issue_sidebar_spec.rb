@@ -84,8 +84,6 @@ RSpec.describe 'Epic in issue sidebar', :js do
       stub_licensed_features(epics: true)
 
       sign_in(user)
-      visit project_issue_path(project, issue)
-      wait_for_requests
     end
 
     it_behaves_like 'epic in issue sidebar'

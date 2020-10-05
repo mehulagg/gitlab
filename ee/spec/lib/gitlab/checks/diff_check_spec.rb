@@ -125,48 +125,8 @@ RSpec.describe Gitlab::Checks::DiffCheck do
             expect(subject).to receive(:updated_from_web?).and_return(true)
           end
 
-          context "when use_legacy_codeowner_validations is enabled" do
-            before do
-              stub_feature_flags(use_legacy_codeowner_validations: true)
-            end
-
-            context "when skip_web_ui_code_owner_validations is disabled" do
-              before do
-                stub_feature_flags(skip_web_ui_code_owner_validations: false)
-                allow(project).to receive(:branch_requires_code_owner_approval?)
-                  .once.and_return(true)
-              end
-
-              it "returns an array of Proc(s)" do
-                validations = subject.send(:path_validations)
-
-                expect(validations.any?).to be_truthy
-                expect(validations.any? { |v| !v.is_a? Proc }).to be_falsy
-              end
-
-              context "when skip_web_ui_code_owner_validations is enabled" do
-                before do
-                  stub_feature_flags(skip_web_ui_code_owner_validations: true)
-                  expect(project).not_to receive(:branch_requires_code_owner_approval?)
-                end
-
-                it "returns an empty array" do
-                  expect(subject.send(:path_validations)).to eq([])
-                end
-              end
-            end
-          end
-
-          context "when use_legacy_codeowner_validations is disabled" do
-            before do
-              stub_feature_flags(use_legacy_codeowner_validations: false)
-
-              expect(project).not_to receive(:branch_requires_code_owner_approval?)
-            end
-
-            it "returns an empty array" do
-              expect(subject.send(:path_validations)).to eq([])
-            end
+          it "returns an empty array" do
+            expect(subject.send(:path_validations)).to eq([])
           end
         end
       end

@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils';
-import axios from '~/lib/utils/axios_utils';
 import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
+import axios from '~/lib/utils/axios_utils';
 import IssueSystemNote from '~/vue_shared/components/notes/system_note.vue';
 import createStore from '~/notes/stores';
-import waitForPromises from 'helpers/wait_for_promises';
 
 describe('system note component', () => {
   let wrapper;
@@ -20,12 +20,12 @@ describe('system note component', () => {
     mock.onDelete('/path/to/diff/1').replyOnce(statusCode);
   }
 
-  const findBlankBtn = () => wrapper.find('.note-headline-light .btn-blank');
+  const findBlankBtn = () => wrapper.find('[data-testid="compare-btn"]');
 
   const findDescriptionVersion = () => wrapper.find('.description-version');
 
   const findDeleteDescriptionVersionButton = () =>
-    wrapper.find({ ref: 'deleteDescriptionVersionButton' });
+    wrapper.find('[data-testid="delete-description-version-button"]');
 
   beforeEach(() => {
     props = {
@@ -90,7 +90,9 @@ describe('system note component', () => {
         expect(findDescriptionVersion().html()).toContain(diffData);
         expect(
           wrapper
-            .find('.description-version button.delete-description-history svg.ic-remove')
+            .find(
+              '.description-version button.delete-description-history svg[data-testid="remove-icon"]',
+            )
             .exists(),
         ).toBe(true);
         done();

@@ -135,14 +135,16 @@ module Projects
     end
 
     def ensure_wiki_exists
-      ProjectWiki.new(project, project.owner).wiki
-    rescue Wiki::CouldNotCreateWikiError
+      return if project.create_wiki
+
       log_error("Could not create wiki for #{project.full_name}")
       Gitlab::Metrics.counter(:wiki_can_not_be_created_total, 'Counts the times we failed to create a wiki').increment
     end
 
     def update_pages_config
-      Projects::UpdatePagesConfigurationService.new(project).execute
+      return unless project.pages_deployed?
+
+      PagesUpdateConfigurationWorker.perform_async(project.id)
     end
 
     def changing_pages_https_only?

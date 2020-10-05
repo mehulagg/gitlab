@@ -12,8 +12,6 @@ module EE
           return false if group.errors.present?
         end
 
-        return false unless valid_path_change_with_npm_packages?
-
         handle_changes
 
         remove_insight_if_insight_project_absent
@@ -95,6 +93,7 @@ module EE
       def handle_changes
         handle_allowed_email_domains_update
         handle_ip_restriction_update
+        handle_settings_update
       end
 
       def handle_ip_restriction_update
@@ -113,18 +112,11 @@ module EE
         AllowedEmailDomains::UpdateService.new(current_user, group, comma_separated_domains).execute
       end
 
-      def valid_path_change_with_npm_packages?
-        return true unless group.packages_feature_available?
-        return true if params[:path].blank?
-        return true if !group.has_parent? && group.path == params[:path]
+      def handle_settings_update
+        settings_params = params.slice(:prevent_forking_outside_group)
+        params.delete(:prevent_forking_outside_group)
 
-        npm_packages = ::Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
-        if npm_packages.exists?
-          group.errors.add(:path, s_('GroupSettings|cannot change when group contains projects with NPM packages'))
-          return
-        end
-
-        true
+        ::NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
       end
 
       def log_audit_event

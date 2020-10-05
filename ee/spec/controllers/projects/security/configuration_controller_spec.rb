@@ -26,6 +26,16 @@ RSpec.describe Projects::Security::ConfigurationController do
         sign_in(user)
       end
 
+      it 'responds in json format when requested' do
+        get :show, params: { namespace_id: project.namespace, project_id: project, format: :json }
+
+        types = %w(sast dast dast_profiles dependency_scanning container_scanning secret_detection coverage_fuzzing license_scanning)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response['features'].map { |f| f['type'] }).to match_array(types)
+        expect(json_response['auto_fix_enabled']).to include({ 'dependency_scanning' => true, 'container_scanning' => true })
+      end
+
       it "renders data on the project's security configuration" do
         request
 
@@ -98,6 +108,13 @@ RSpec.describe Projects::Security::ConfigurationController do
       context 'with sufficient permissions' do
         let(:user) { maintainer }
         let(:setting) { project.security_setting }
+
+        it 'shows auto fix disable for dependency scanning for json format' do
+          get :show, params: { namespace_id: project.namespace, project_id: project, format: :json }
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['auto_fix_enabled']).to include({ 'dependency_scanning' => false })
+        end
 
         context 'with setup feature param' do
           let(:feature) { :dependency_scanning }

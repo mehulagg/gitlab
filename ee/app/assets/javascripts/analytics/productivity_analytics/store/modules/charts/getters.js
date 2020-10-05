@@ -15,6 +15,8 @@ import { getScatterPlotData, getMedianLineData } from '../../../utils';
 
 export const chartLoading = state => chartKey => state.charts[chartKey].isLoading;
 
+export const chartErrorCode = state => chartKey => state.charts[chartKey].errorCode;
+
 /**
  * Creates a series object for the column chart with the given chartKey.
  *

@@ -1,5 +1,0 @@
----
-title: Display validation errors when issue link creation fails
-merge_request: 33638
-author:
-type: fixed

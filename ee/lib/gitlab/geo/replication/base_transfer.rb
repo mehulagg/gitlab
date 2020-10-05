@@ -188,7 +188,11 @@ module Gitlab
 
           begin
             # Make the request
-            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).follow.get(url, headers: req_headers)
+            response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(url, headers: req_headers)
+
+            if response.status.redirect?
+              response = ::HTTP.timeout(DOWNLOAD_TIMEOUT.dup).get(response['Location'])
+            end
 
             # Check for failures
             unless response.status.success?

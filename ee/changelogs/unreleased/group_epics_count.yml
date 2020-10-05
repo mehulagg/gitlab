@@ -1,5 +1,0 @@
----
-title: Optimize permission checking when finding subgroup epics.
-merge_request: 35061
-author:
-type: performance

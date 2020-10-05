@@ -1,5 +1,0 @@
----
-title: Refresh vulnerability state and timestamp when changed by another user
-merge_request: 34837
-author:
-type: fixed

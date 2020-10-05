@@ -23,7 +23,7 @@ RSpec.describe Gitlab::Geo::Replication::BaseTransfer do
     end
   end
 
-  describe 'timeout' do
+  describe 'HTTP timeout when there are primary connection problems' do
     subject do
       described_class.new(file_type: :avatar, file_id: 1, filename: Tempfile.new,
                           expected_checksum: nil, request_data: nil, resource: nil)
@@ -92,6 +92,40 @@ RSpec.describe Gitlab::Geo::Replication::BaseTransfer do
 
     it 'returns true when is a secondary, a primary exists and filename doesnt point to an existing directory' do
       expect(subject.can_transfer?).to be_truthy
+    end
+  end
+
+  describe '#stream_from_primary_to_object_storage' do
+    let_it_be(:lfs_object) { create(:lfs_object, :with_file, :correct_oid) }
+    let(:auth_headers) { { 'Authorization' => 'Bearer 12345' } }
+    let(:download_link) { 'http://download.link' }
+
+    subject do
+      Gitlab::Geo::Replication::LfsTransfer.new(lfs_object)
+    end
+
+    before do
+      stub_current_geo_node(secondary_node)
+    end
+
+    it 'downloads file successfully' do
+      allow_next_instance_of(Gitlab::Geo::TransferRequest) do |request|
+        allow(request).to receive(:headers).and_return(auth_headers)
+      end
+
+      stub_request(:get, primary_node.geo_transfers_url(:lfs, lfs_object.id.to_s))
+        .to_return(status: 302, headers: { 'Location' => download_link })
+
+      # This stub acts as assertion that auth headers are not present,
+      # otherwise we would get 500 error
+      stub_request(:get, download_link)
+        .with(headers: auth_headers)
+        .to_return(status: 500)
+
+      stub_request(:get, download_link)
+        .to_return(status: 200)
+
+      expect(subject.stream_from_primary_to_object_storage.success).to be_truthy
     end
   end
 end

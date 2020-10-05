@@ -15,11 +15,12 @@ module ReleasesHelper
   def data_for_releases_page
     {
       project_id: @project.id,
+      project_path: @project.full_path,
       illustration_path: illustration,
       documentation_path: help_page
     }.tap do |data|
       if can?(current_user, :create_release, @project)
-        data[:new_release_path] = if Feature.enabled?(:new_release_page, @project)
+        data[:new_release_path] = if Feature.enabled?(:new_release_page, @project, default_enabled: true)
                                     new_project_release_path(@project)
                                   else
                                     new_project_tag_path(@project)
@@ -37,7 +38,8 @@ module ReleasesHelper
 
   def data_for_new_release_page
     new_edit_pages_shared_data.merge(
-      default_branch: @project.default_branch
+      default_branch: @project.default_branch,
+      releases_page_path: project_releases_path(@project)
     )
   end
 

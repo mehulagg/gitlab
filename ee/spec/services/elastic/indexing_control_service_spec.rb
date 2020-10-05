@@ -13,8 +13,17 @@ RSpec.describe Elastic::IndexingControlService, :clean_gitlab_redis_shared_state
       prepend Elastic::IndexingControl
     end
   end
+
+  let(:worker_context) do
+    { 'correlation_id' => 'context_correlation_id',
+      'meta.project' => 'gitlab-org/gitlab' }
+  end
+
+  let(:stored_context) do
+    { "#{Labkit::Context::LOG_KEY}.project" => 'gitlab-org/gitlab' }
+  end
+
   let(:worker_args) { [1, 2] }
-  let(:worker_context) { { 'correlation_id' => 'context_correlation_id' } }
 
   subject { described_class.new(worker_class) }
 
@@ -78,6 +87,17 @@ RSpec.describe Elastic::IndexingControlService, :clean_gitlab_redis_shared_state
         2.times { subject.add_to_waiting_queue!(worker_args, worker_context) }
       end.to change { subject.queue_size }.from(0).to(1)
     end
+
+    it 'only stores `project` context information' do
+      subject.add_to_waiting_queue!(worker_args, worker_context)
+
+      subject.send(:with_redis) do |r|
+        set_key = subject.send(:redis_set_key)
+        stored_job = subject.send(:deserialize, r.zrange(set_key, 0, -1).first)
+
+        expect(stored_job['context']).to eq(stored_context)
+      end
+    end
   end
 
   describe '#has_jobs_in_waiting_queue?' do
@@ -113,7 +133,7 @@ RSpec.describe Elastic::IndexingControlService, :clean_gitlab_redis_shared_state
         subject.add_to_waiting_queue!(j, worker_context)
       end
 
-      expect(Labkit::Context).to receive(:with_context).with(worker_context).exactly(jobs.count).times.and_call_original
+      expect(Labkit::Context).to receive(:with_context).with(stored_context).exactly(jobs.count).times.and_call_original
       expect(worker_class).to receive(:perform_async).exactly(jobs.count).times
 
       expect { subject.resume_processing! }.to change { subject.has_jobs_in_waiting_queue? }.from(true).to(false)
@@ -131,6 +151,7 @@ RSpec.describe Elastic::IndexingControlService, :clean_gitlab_redis_shared_state
         prepend Elastic::IndexingControl
       end
     end
+
     let(:other_subject) { described_class.new(second_worker_class) }
 
     it 'allows to use queues independently of each other' do

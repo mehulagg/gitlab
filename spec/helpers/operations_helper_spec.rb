@@ -137,7 +137,8 @@ RSpec.describe OperationsHelper do
         :project_incident_management_setting,
         project: project,
         issue_template_key: 'template-key',
-        pagerduty_active: true
+        pagerduty_active: true,
+        auto_close_incident: false
       )
     end
 
@@ -150,9 +151,10 @@ RSpec.describe OperationsHelper do
         create_issue: 'false',
         issue_template_key: 'template-key',
         send_email: 'false',
+        auto_close_incident: 'false',
         pagerduty_active: 'true',
         pagerduty_token: operations_settings.pagerduty_token,
-        pagerduty_webhook_url: project_incidents_pagerduty_url(project, token: operations_settings.pagerduty_token),
+        pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),
         pagerduty_reset_key_path: reset_pagerduty_token_project_settings_operations_path(project)
       )
     end

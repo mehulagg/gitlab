@@ -6,10 +6,6 @@ RSpec.describe 'Projects > User sees sidebar' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :private, public_builds: false, namespace: user.namespace) }
 
-  before do
-    stub_feature_flags(vue_issuables_list: false)
-  end
-
   # NOTE: See documented behaviour https://design.gitlab.com/regions/navigation#contextual-navigation
   context 'on different viewports', :js do
     include MobileHelpers
@@ -134,6 +130,7 @@ RSpec.describe 'Projects > User sees sidebar' do
 
   context 'as guest' do
     let(:guest) { create(:user) }
+    let!(:issue) { create(:issue, :opened, project: project, author: guest) }
 
     before do
       project.add_guest(guest)
@@ -148,11 +145,11 @@ RSpec.describe 'Projects > User sees sidebar' do
         expect(page).to have_content 'Project'
         expect(page).to have_content 'Issues'
         expect(page).to have_content 'Wiki'
+        expect(page).to have_content 'Operations'
 
         expect(page).not_to have_content 'Repository'
         expect(page).not_to have_content 'CI / CD'
         expect(page).not_to have_content 'Merge Requests'
-        expect(page).not_to have_content 'Operations'
       end
     end
 

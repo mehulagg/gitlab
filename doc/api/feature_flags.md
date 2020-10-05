@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9566) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.5.
 
-NOTE: **Note**
+NOTE: **Note:**
 This API is behind a [feature flag](../operations/feature_flags.md#enable-or-disable-feature-flag-strategies).
 If this flag is not enabled in your environment, you can use the [legacy feature flags API](feature_flags_legacy.md).
 
@@ -45,6 +45,7 @@ Example response:
    {
       "name":"merge_train",
       "description":"This feature is about merge train",
+      "active": true,
       "version": "new_version_flag",
       "created_at":"2019-11-04T08:13:51.423Z",
       "updated_at":"2019-11-04T08:13:51.423Z",
@@ -68,6 +69,7 @@ Example response:
    {
       "name":"new_live_trace",
       "description":"This is a new live trace feature",
+      "active": true,
       "version": "new_version_flag",
       "created_at":"2019-11-04T08:13:10.507Z",
       "updated_at":"2019-11-04T08:13:10.507Z",
@@ -94,13 +96,13 @@ Example response:
 Gets a single feature flag.
 
 ```plaintext
-GET /projects/:id/feature_flags/:name
+GET /projects/:id/feature_flags/:feature_flag_name
 ```
 
 | Attribute           | Type             | Required   | Description                                                                            |
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
-| `name`              | string           | yes        | The name of the feature flag.                                                          |
+| `feature_flag_name` | string           | yes        | The name of the feature flag.                                                          |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/feature_flags/awesome_feature
@@ -112,6 +114,7 @@ Example response:
 {
   "name": "awesome_feature",
   "description": null,
+  "active": true,
   "version": "new_version_flag",
   "created_at": "2020-05-13T19:56:33.119Z",
   "updated_at": "2020-05-13T19:56:33.119Z",
@@ -146,8 +149,9 @@ POST /projects/:id/feature_flags
 | `name`              | string           | yes        | The name of the feature flag.                                                          |
 | `version`           | string           | yes        | The version of the feature flag. Must be `new_version_flag`. Omit or set to `legacy_flag` to create a [Legacy Feature Flag](feature_flags_legacy.md). |
 | `description`       | string           | no         | The description of the feature flag.                                                   |
+| `active`            | boolean          | no         | The active state of the flag. Defaults to true. [Supported](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38350) in GitLab 13.3 and later. |
 | `strategies`        | JSON             | no         | The feature flag [strategies](../operations/feature_flags.md#feature-flag-strategies). |
-| `strategies:name`   | JSON             | no         | The strategy name.                                                                     |
+| `strategies:name`   | JSON             | no         | The strategy name. Can be `default`, `gradualRolloutUserId`, `userWithId`, or `gitlabUserList`. In [GitLab 13.5](https://gitlab.com/gitlab-org/gitlab/-/issues/36380) and later, can be [`flexibleRollout`](https://unleash.github.io/docs/activation_strategy#flexiblerollout). |
 | `strategies:parameters` | JSON         | no         | The strategy parameters.                                                               |
 | `strategies:scopes` | JSON             | no         | The scopes for the strategy.                                                           |
 | `strategies:scopes:environment_scope` | string | no | The environment spec for the scope.                                                    |
@@ -171,6 +175,7 @@ Example response:
 {
   "name": "awesome_feature",
   "description": null,
+  "active": true,
   "version": "new_version_flag",
   "created_at": "2020-05-13T19:56:33.119Z",
   "updated_at": "2020-05-13T19:56:33.119Z",
@@ -196,20 +201,22 @@ Example response:
 Updates a feature flag.
 
 ```plaintext
-PUT /projects/:id/feature_flags/:name
+PUT /projects/:id/feature_flags/:feature_flag_name
 ```
 
 | Attribute           | Type             | Required   | Description                                                                            |
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
-| `name`              | string           | yes        | The name of the feature flag.                                                          |
+| `feature_flag_name` | string           | yes        | The current name of the feature flag.                                                  |
 | `description`       | string           | no         | The description of the feature flag.                                                   |
+| `active`            | boolean          | no         | The active state of the flag. [Supported](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38350) in GitLab 13.3 and later. |
+| `name`              | string           | no         | The new name of the feature flag. [Supported](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38350) in GitLab 13.3 and later. |
 | `strategies`        | JSON             | no         | The feature flag [strategies](../operations/feature_flags.md#feature-flag-strategies). |
-| `strategies:id`     | JSON             | no         | The feature flag strategy id.                                                          |
+| `strategies:id`     | JSON             | no         | The feature flag strategy ID.                                                          |
 | `strategies:name`   | JSON             | no         | The strategy name.                                                                     |
 | `strategies:parameters` | JSON         | no         | The strategy parameters.                                                               |
 | `strategies:scopes` | JSON             | no         | The scopes for the strategy.                                                           |
-| `strategies:scopes:id` | JSON          | no         | The scopes id.                                                                         |
+| `strategies:scopes:id` | JSON          | no         | The scopes ID.                                                                         |
 | `strategies:scopes:environment_scope` | string | no | The environment spec for the scope.                                                    |
 
 ```shell
@@ -229,6 +236,7 @@ Example response:
 {
   "name": "awesome_feature",
   "description": null,
+  "active": true,
   "version": "new_version_flag",
   "created_at": "2020-05-13T20:10:32.891Z",
   "updated_at": "2020-05-13T20:10:32.891Z",
@@ -268,13 +276,13 @@ Example response:
 Deletes a feature flag.
 
 ```plaintext
-DELETE /projects/:id/feature_flags/:name
+DELETE /projects/:id/feature_flags/:feature_flag_name
 ```
 
 | Attribute           | Type             | Required   | Description                                                                            |
 | ------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).       |
-| `name`              | string           | yes        | The name of the feature flag.  |
+| `feature_flag_name` | string           | yes        | The name of the feature flag.                                                          |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" --request DELETE "https://gitlab.example.com/api/v4/projects/1/feature_flags/awesome_feature"

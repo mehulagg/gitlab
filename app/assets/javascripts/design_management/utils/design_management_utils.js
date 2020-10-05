@@ -5,17 +5,7 @@ export const isValidDesignFile = ({ type }) =>
   (type.match(VALID_DESIGN_FILE_MIMETYPE.regex) || []).length > 0;
 
 /**
- * Returns formatted array that doesn't contain
- * `edges`->`node` nesting
- *
- * @param {Array} elements
- */
-
-export const extractNodes = elements => elements.edges.map(({ node }) => node);
-
-/**
- * Returns formatted array of discussions that doesn't contain
- * `edges`->`node` nesting for child notes
+ * Returns formatted array of discussions
  *
  * @param {Array} discussions
  */
@@ -40,9 +30,24 @@ export const findVersionId = id => (id.match('::Version/(.+$)') || [])[1];
 
 export const findNoteId = id => (id.match('DiffNote/(.+$)') || [])[1];
 
-export const extractDesigns = data => data.project.issue.designCollection.designs.edges;
+export const findIssueId = id => (id.match('Issue/(.+$)') || [])[1];
 
-export const extractDesign = data => (extractDesigns(data) || [])[0]?.node;
+export const findDesignId = id => (id.match('Design/(.+$)') || [])[1];
+
+export const extractDesigns = data => data.project.issue.designCollection.designs.nodes;
+
+export const extractDesign = data => (extractDesigns(data) || [])[0];
+
+export const toDiffNoteGid = noteId => `gid://gitlab/DiffNote/${noteId}`;
+
+/**
+ * Return the note ID from a URL hash parameter
+ * @param {String} urlHash URL hash, including `#` prefix
+ */
+export const extractDesignNoteId = urlHash => {
+  const [, noteId] = urlHash.match('#note_([0-9]+$)') || [];
+  return noteId || null;
+};
 
 /**
  * Generates optimistic response for a design upload mutation
@@ -60,6 +65,10 @@ export const designUploadOptimisticResponse = files => {
     fullPath: '',
     notesCount: 0,
     event: 'NONE',
+    currentUserTodos: {
+      __typename: 'TodoConnection',
+      nodes: [],
+    },
     diffRefs: {
       __typename: 'DiffRefs',
       baseSha: '',
@@ -72,13 +81,10 @@ export const designUploadOptimisticResponse = files => {
     },
     versions: {
       __typename: 'DesignVersionConnection',
-      edges: {
-        __typename: 'DesignVersionEdge',
-        node: {
-          __typename: 'DesignVersion',
-          id: -uniqueId(),
-          sha: -uniqueId(),
-        },
+      nodes: {
+        __typename: 'DesignVersion',
+        id: -uniqueId(),
+        sha: -uniqueId(),
       },
     },
   }));
@@ -98,7 +104,8 @@ export const designUploadOptimisticResponse = files => {
 
 /**
  * Generates optimistic response for a design upload mutation
- * @param {Array<File>} files
+ *  @param {Object} note
+ *  @param {Object} position
  */
 export const updateImageDiffNoteOptimisticResponse = (note, { position }) => ({
   // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26
@@ -117,12 +124,52 @@ export const updateImageDiffNoteOptimisticResponse = (note, { position }) => ({
   },
 });
 
+/**
+ * Generates optimistic response for a design upload mutation
+ * @param {Array} designs
+ */
+export const moveDesignOptimisticResponse = designs => ({
+  // False positive i18n lint: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  __typename: 'Mutation',
+  designManagementMove: {
+    __typename: 'DesignManagementMovePayload',
+    designCollection: {
+      __typename: 'DesignCollection',
+      designs: {
+        __typename: 'DesignConnection',
+        nodes: designs,
+      },
+    },
+    errors: [],
+  },
+});
+
 const normalizeAuthor = author => ({
   ...author,
   web_url: author.webUrl,
   avatar_url: author.avatarUrl,
 });
 
-export const extractParticipants = users => users.edges.map(({ node }) => normalizeAuthor(node));
+export const extractParticipants = users => users.map(node => normalizeAuthor(node));
 
 export const getPageLayoutElement = () => document.querySelector('.layout-page');
+
+/**
+ * Extract the ID of the To-Do for a given 'delete' path
+ * Example of todoDeletePath: /delete/1234
+ * @param {String} todoDeletePath delete_path from REST API response
+ */
+export const extractTodoIdFromDeletePath = todoDeletePath =>
+  (todoDeletePath.match('todos/([0-9]+$)') || [])[1];
+
+const createTodoGid = todoId => {
+  return `gid://gitlab/Todo/${todoId}`;
+};
+
+export const createPendingTodo = todoId => {
+  return {
+    __typename: 'Todo', // eslint-disable-line @gitlab/require-i18n-strings
+    id: createTodoGid(todoId),
+  };
+};

@@ -3,10 +3,9 @@ import {
   GlAlert,
   GlButton,
   GlCollapse,
-  GlDeprecatedButton,
   GlFormCheckbox,
+  GlFormCombobox,
   GlFormGroup,
-  GlFormInput,
   GlFormSelect,
   GlFormTextarea,
   GlIcon,
@@ -26,7 +25,6 @@ import {
   AWS_TIP_MESSAGE,
 } from '../constants';
 import { awsTokens, awsTokenList } from './ci_variable_autocomplete_tokens';
-import CiKeyField from './ci_key_field.vue';
 import CiEnvironmentsDropdown from './ci_environments_dropdown.vue';
 
 export default {
@@ -36,14 +34,12 @@ export default {
   awsTipMessage: AWS_TIP_MESSAGE,
   components: {
     CiEnvironmentsDropdown,
-    CiKeyField,
     GlAlert,
     GlButton,
     GlCollapse,
-    GlDeprecatedButton,
     GlFormCheckbox,
+    GlFormCombobox,
     GlFormGroup,
-    GlFormInput,
     GlFormSelect,
     GlFormTextarea,
     GlIcon,
@@ -124,11 +120,6 @@ export default {
       return '';
     },
     tokenValidationState() {
-      // If the feature flag is off, do not validate. Remove when flag is removed.
-      if (!this.glFeatures.ciKeyAutocomplete) {
-        return true;
-      }
-
       const validator = this.$options.tokens?.[this.variable.key]?.validation;
 
       if (validator) {
@@ -205,19 +196,12 @@ export default {
     @shown="setVariableProtectedByDefault"
   >
     <form>
-      <ci-key-field
-        v-if="glFeatures.ciKeyAutocomplete"
+      <gl-form-combobox
         v-model="key"
         :token-list="$options.tokenList"
+        :label-text="__('Key')"
+        data-qa-selector="ci_variable_key_field"
       />
-
-      <gl-form-group v-else :label="__('Key')" label-for="ci-variable-key">
-        <gl-form-input
-          id="ci-variable-key"
-          v-model="key"
-          data-qa-selector="ci_variable_key_field"
-        />
-      </gl-form-group>
 
       <gl-form-group
         :label="__('Value')"
@@ -241,7 +225,7 @@ export default {
         <gl-form-group
           :label="__('Type')"
           label-for="ci-variable-type"
-          class="w-50 append-right-15"
+          class="w-50 gl-mr-5"
           :class="{ 'w-100': isGroup }"
         >
           <gl-form-select id="ci-variable-type" v-model="variable_type" :options="typeOptions" />
@@ -338,24 +322,25 @@ export default {
       </gl-alert>
     </gl-collapse>
     <template #modal-footer>
-      <gl-deprecated-button @click="hideModal">{{ __('Cancel') }}</gl-deprecated-button>
-      <gl-deprecated-button
+      <gl-button @click="hideModal">{{ __('Cancel') }}</gl-button>
+      <gl-button
         v-if="variableBeingEdited"
         ref="deleteCiVariable"
-        category="secondary"
         variant="danger"
+        category="secondary"
         data-qa-selector="ci_variable_delete_button"
         @click="deleteVarAndClose"
-        >{{ __('Delete variable') }}</gl-deprecated-button
+        >{{ __('Delete variable') }}</gl-button
       >
-      <gl-deprecated-button
+      <gl-button
         ref="updateOrAddVariable"
         :disabled="!canSubmit"
         variant="success"
+        category="primary"
         data-qa-selector="ci_variable_save_button"
         @click="updateOrAddVariable"
         >{{ modalActionText }}
-      </gl-deprecated-button>
+      </gl-button>
     </template>
   </gl-modal>
 </template>

@@ -29,45 +29,55 @@ module API
       requires :id, type: String, desc: 'The ID of a vulnerability'
     end
     resource :vulnerabilities do
+      before do
+        @vulnerability = find_and_authorize_vulnerability!(:read_vulnerability)
+      end
+
       desc 'Get a vulnerability' do
         success EE::API::Entities::Vulnerability
       end
       get ':id' do
-        vulnerability = find_and_authorize_vulnerability!(:read_vulnerability)
-        render_vulnerability(vulnerability)
+        render_vulnerability(@vulnerability)
       end
 
       desc 'Resolve a vulnerability' do
         success EE::API::Entities::Vulnerability
       end
       post ':id/resolve' do
-        vulnerability = find_and_authorize_vulnerability!(:admin_vulnerability)
-        not_modified! if vulnerability.resolved?
+        not_modified! if @vulnerability.resolved?
 
-        vulnerability = ::Vulnerabilities::ResolveService.new(current_user, vulnerability).execute
-        render_vulnerability(vulnerability)
+        @vulnerability = ::Vulnerabilities::ResolveService.new(current_user, @vulnerability).execute
+        render_vulnerability(@vulnerability)
       end
 
       desc 'Dismiss a vulnerability' do
         success EE::API::Entities::Vulnerability
       end
       post ':id/dismiss' do
-        vulnerability = find_and_authorize_vulnerability!(:admin_vulnerability)
-        not_modified! if vulnerability.dismissed?
+        not_modified! if @vulnerability.dismissed?
 
-        vulnerability = ::Vulnerabilities::DismissService.new(current_user, vulnerability).execute
-        render_vulnerability(vulnerability)
+        @vulnerability = ::Vulnerabilities::DismissService.new(current_user, @vulnerability).execute
+        render_vulnerability(@vulnerability)
       end
 
       desc 'Confirm a vulnerability' do
         success EE::API::Entities::Vulnerability
       end
       post ':id/confirm' do
-        vulnerability = find_and_authorize_vulnerability!(:admin_vulnerability)
-        not_modified! if vulnerability.confirmed?
+        not_modified! if @vulnerability.confirmed?
 
-        vulnerability = ::Vulnerabilities::ConfirmService.new(current_user, vulnerability).execute
-        render_vulnerability(vulnerability)
+        @vulnerability = ::Vulnerabilities::ConfirmService.new(current_user, @vulnerability).execute
+        render_vulnerability(@vulnerability)
+      end
+
+      desc 'Revert a vulnerability to a detected state' do
+        success EE::API::Entities::Vulnerability
+      end
+      post ':id/revert' do
+        not_modified! if @vulnerability.detected?
+
+        @vulnerability = ::Vulnerabilities::RevertToDetectedService.new(current_user, @vulnerability).execute
+        render_vulnerability(@vulnerability)
       end
     end
 

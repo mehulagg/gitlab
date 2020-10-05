@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
+require 'rspec-parameterized'
 
 load File.expand_path('../../bin/feature-flag', __dir__)
 
@@ -8,28 +9,23 @@ RSpec.describe 'bin/feature-flag' do
   using RSpec::Parameterized::TableSyntax
 
   describe FeatureFlagCreator do
-    let(:argv) { %w[feature-flag-name -t development -g group::memory -i https://url] }
+    let(:argv) { %w[feature-flag-name -t development -g group::memory -i https://url -m http://url] }
     let(:options) { FeatureFlagOptionParser.parse(argv) }
     let(:creator) { described_class.new(options) }
-    let(:existing_flag) { File.join('config', 'feature_flags', 'development', 'existing-feature-flag.yml') }
+    let(:existing_flags) do
+      { 'existing-feature-flag' => File.join('config', 'feature_flags', 'development', 'existing-feature-flag.yml') }
+    end
 
     before do
-      # create a dummy feature flag
-      FileUtils.mkdir_p(File.dirname(existing_flag))
-      File.write(existing_flag, '{}')
+      allow(creator).to receive(:all_feature_flag_names) { existing_flags }
+      allow(creator).to receive(:branch_name) { 'feature-branch' }
+      allow(creator).to receive(:editor) { nil }
 
       # ignore writes
       allow(File).to receive(:write).and_return(true)
 
       # ignore stdin
       allow($stdin).to receive(:gets).and_raise('EOF')
-
-      # ignore Git commands
-      allow(creator).to receive(:branch_name) { 'feature-branch' }
-    end
-
-    after do
-      FileUtils.rm_f(existing_flag)
     end
 
     subject { creator.execute }
@@ -115,24 +111,45 @@ RSpec.describe 'bin/feature-flag' do
     describe '.read_type' do
       let(:type) { 'development' }
 
-      it 'reads type from $stdin' do
-        expect($stdin).to receive(:gets).and_return(type)
-        expect do
+      context 'when there is only a single type defined' do
+        before do
+          stub_const('FeatureFlagOptionParser::TYPES',
+            development: { description: 'short' }
+          )
+        end
+
+        it 'returns that type' do
           expect(described_class.read_type).to eq(:development)
-        end.to output(/specify the type/).to_stdout
+        end
       end
 
-      context 'invalid type given' do
-        let(:type) { 'invalid' }
+      context 'when there are many types defined' do
+        before do
+          stub_const('FeatureFlagOptionParser::TYPES',
+            development: { description: 'short' },
+            licensed: { description: 'licensed' }
+          )
+        end
 
-        it 'shows error message and retries' do
+        it 'reads type from $stdin' do
           expect($stdin).to receive(:gets).and_return(type)
-          expect($stdin).to receive(:gets).and_raise('EOF')
-
           expect do
-            expect { described_class.read_type }.to raise_error(/EOF/)
-          end.to output(/specify the type/).to_stdout
-            .and output(/Invalid type specified/).to_stderr
+            expect(described_class.read_type).to eq(:development)
+          end.to output(/Specify the feature flag type/).to_stdout
+        end
+
+        context 'when invalid type is given' do
+          let(:type) { 'invalid' }
+
+          it 'shows error message and retries' do
+            expect($stdin).to receive(:gets).and_return(type)
+            expect($stdin).to receive(:gets).and_raise('EOF')
+
+            expect do
+              expect { described_class.read_type }.to raise_error(/EOF/)
+            end.to output(/Specify the feature flag type/).to_stdout
+              .and output(/Invalid type specified/).to_stderr
+          end
         end
       end
     end
@@ -144,7 +161,7 @@ RSpec.describe 'bin/feature-flag' do
         expect($stdin).to receive(:gets).and_return(group)
         expect do
           expect(described_class.read_group).to eq('group::memory')
-        end.to output(/specify the group/).to_stdout
+        end.to output(/Specify the group introducing the feature flag/).to_stdout
       end
 
       context 'invalid group given' do
@@ -156,21 +173,57 @@ RSpec.describe 'bin/feature-flag' do
 
           expect do
             expect { described_class.read_group }.to raise_error(/EOF/)
-          end.to output(/specify the group/).to_stdout
-            .and output(/Group needs to include/).to_stderr
+          end.to output(/Specify the group introducing the feature flag/).to_stdout
+            .and output(/The group needs to include/).to_stderr
         end
       end
     end
 
-    describe '.rollout_issue_url' do
+    describe '.read_introduced_by_url' do
+      let(:url) { 'https://merge-request' }
+
+      it 'reads type from $stdin' do
+        expect($stdin).to receive(:gets).and_return(url)
+        expect do
+          expect(described_class.read_introduced_by_url).to eq('https://merge-request')
+        end.to output(/URL of the MR introducing the feature flag/).to_stdout
+      end
+
+      context 'empty URL given' do
+        let(:url) { '' }
+
+        it 'skips entry' do
+          expect($stdin).to receive(:gets).and_return(url)
+          expect do
+            expect(described_class.read_introduced_by_url).to be_nil
+          end.to output(/URL of the MR introducing the feature flag/).to_stdout
+        end
+      end
+
+      context 'invalid URL given' do
+        let(:url) { 'invalid' }
+
+        it 'shows error message and retries' do
+          expect($stdin).to receive(:gets).and_return(url)
+          expect($stdin).to receive(:gets).and_raise('EOF')
+
+          expect do
+            expect { described_class.read_introduced_by_url }.to raise_error(/EOF/)
+          end.to output(/URL of the MR introducing the feature flag/).to_stdout
+            .and output(/URL needs to start with/).to_stderr
+        end
+      end
+    end
+
+    describe '.read_rollout_issue_url' do
       let(:options) { OpenStruct.new(name: 'foo', type: :development) }
       let(:url) { 'https://issue' }
 
       it 'reads type from $stdin' do
         expect($stdin).to receive(:gets).and_return(url)
         expect do
-          expect(described_class.read_issue_url(options)).to eq('https://issue')
-        end.to output(/Paste URL here/).to_stdout
+          expect(described_class.read_rollout_issue_url(options)).to eq('https://issue')
+        end.to output(/URL of the rollout issue/).to_stdout
       end
 
       context 'invalid URL given' do
@@ -181,10 +234,23 @@ RSpec.describe 'bin/feature-flag' do
           expect($stdin).to receive(:gets).and_raise('EOF')
 
           expect do
-            expect { described_class.read_issue_url(options) }.to raise_error(/EOF/)
-          end.to output(/Paste URL here/).to_stdout
+            expect { described_class.read_rollout_issue_url(options) }.to raise_error(/EOF/)
+          end.to output(/URL of the rollout issue/).to_stdout
             .and output(/URL needs to start/).to_stderr
         end
+      end
+    end
+
+    describe '.read_ee_only' do
+      where(:type, :is_ee_only) do
+        :development | false
+        :licensed    | true
+      end
+
+      with_them do
+        let(:options) { OpenStruct.new(name: 'foo', type: type) }
+
+        it { expect(described_class.read_ee_only(options)).to eq(is_ee_only) }
       end
     end
   end

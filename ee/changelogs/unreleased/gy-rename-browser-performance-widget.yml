@@ -1,6 +1,0 @@
----
-title: Renamed Browser Performance Testing feature to be clearer, CI report now also
-  shows unchanged values
-merge_request: 34634
-author:
-type: changed

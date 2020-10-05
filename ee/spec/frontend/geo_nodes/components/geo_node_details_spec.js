@@ -33,7 +33,7 @@ describe('GeoNodeDetailsComponent', () => {
     wrapper.destroy();
   });
 
-  const findErrorSection = () => wrapper.find('.bg-danger-100');
+  const findErrorSection = () => wrapper.find('[data-testid="errorSection"]');
   const findTroubleshootingLink = () => findErrorSection().find(GlLink);
 
   describe('template', () => {
@@ -74,7 +74,7 @@ describe('GeoNodeDetailsComponent', () => {
         });
 
         it('does not render error message section', () => {
-          expect(findErrorSection().exists()).toBeFalsy();
+          expect(findErrorSection().exists()).toBe(false);
         });
       });
     });
@@ -85,29 +85,55 @@ describe('GeoNodeDetailsComponent', () => {
       });
 
       it('does not render error message section', () => {
-        expect(findErrorSection().exists()).toBeFalsy();
+        expect(findErrorSection().exists()).toBe(false);
       });
     });
 
     describe('when version mismatched', () => {
-      beforeEach(() => {
-        createComponent({
-          nodeDetails: {
-            ...defaultProps.nodeDetails,
-            primaryVersion: '10.3.0-pre',
-            primaryRevision: 'b93c51850b',
-          },
+      describe('when node is primary', () => {
+        beforeEach(() => {
+          createComponent({
+            node: {
+              ...defaultProps.node,
+              primary: true,
+            },
+            nodeDetails: {
+              ...defaultProps.nodeDetails,
+              primaryVersion: '10.3.0-pre',
+              primaryRevision: 'b93c51850b',
+            },
+          });
+        });
+
+        it('does not render error message section', () => {
+          expect(findErrorSection().exists()).toBe(false);
         });
       });
 
-      it('renders error message section', () => {
-        expect(findErrorSection().text()).toContain(
-          'GitLab version does not match the primary node version',
-        );
-      });
+      describe('when node is secondary', () => {
+        beforeEach(() => {
+          createComponent({
+            node: {
+              ...defaultProps.node,
+              primary: false,
+            },
+            nodeDetails: {
+              ...defaultProps.nodeDetails,
+              primaryVersion: '10.3.0-pre',
+              primaryRevision: 'b93c51850b',
+            },
+          });
+        });
 
-      it('renders troubleshooting URL within error message section', () => {
-        expect(findTroubleshootingLink().attributes('href')).toBe('/foo/bar');
+        it('renders error message section', () => {
+          expect(findErrorSection().text()).toContain(
+            'GitLab version does not match the primary node version',
+          );
+        });
+
+        it('renders troubleshooting URL within error message section', () => {
+          expect(findTroubleshootingLink().attributes('href')).toBe('/foo/bar');
+        });
       });
     });
   });

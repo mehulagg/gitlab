@@ -6,7 +6,7 @@
 .cdark { color: $common-gray-dark; }
 
 .fwhite { fill: $white; }
-.fgray { fill: $gray-700; }
+.fgray { fill: $gray-500; }
 
 .text-plain,
 .text-plain:hover {
@@ -74,7 +74,7 @@
 
 .hint {
   font-style: italic;
-  color: $gl-gray-400;
+  color: $gray-200;
 }
 
 .light { color: $gl-text-color; }
@@ -162,13 +162,13 @@ table {
 .loading {
   margin: 20px auto;
   height: 40px;
-  color: $gl-gray-700;
+  color: $gray-700;
   font-size: 32px;
   text-align: center;
 }
 
 p.time {
-  color: $gl-gray-400;
+  color: $gray-200;
   font-size: 90%;
   margin: 30px 3px 3px 2px;
 }
@@ -237,7 +237,7 @@ li.note {
 }
 
 .warning_message {
-  @include message($orange-100, $orange-200, $orange-800);
+  @include message($orange-50, $orange-200, $gray-900);
 }
 
 .danger_message {
@@ -246,7 +246,7 @@ li.note {
 
 .gitlab-promo {
   a {
-    color: $gl-gray-350;
+    color: $gray-300;
     margin-right: 30px;
   }
 }
@@ -396,18 +396,11 @@ img.emoji {
   🚨 Do not use these classes — they are deprecated and being removed. 🚨
   See https://gitlab.com/gitlab-org/gitlab/-/issues/217418 for more details.
 **/
-.prepend-top-10 { margin-top: 10px; }
 .prepend-top-15 { margin-top: 15px; }
 .prepend-top-20 { margin-top: 20px; }
-.prepend-left-5 { margin-left: 5px; }
-.prepend-left-10 { margin-left: 10px; }
 .prepend-left-15 { margin-left: 15px; }
 .prepend-left-20 { margin-left: 20px; }
-.prepend-left-64 { margin-left: 64px; }
-.append-right-10 { margin-right: 10px; }
-.append-right-15 { margin-right: 15px; }
 .append-right-20 { margin-right: 20px; }
-.append-bottom-10 { margin-bottom: 10px; }
 .append-bottom-20 { margin-bottom: 20px; }
 .ml-10 { margin-left: 4.5rem; }
 .inline { display: inline-block; }
@@ -423,7 +416,6 @@ img.emoji {
 .flex-no-shrink { flex-shrink: 0; }
 .ws-initial { white-space: initial; }
 .ws-normal { white-space: normal; }
-.ws-pre-wrap { white-space: pre-wrap; }
 .overflow-auto { overflow: auto; }
 .overflow-visible { overflow: visible; }
 
@@ -436,7 +428,6 @@ img.emoji {
 /** COMMON SIZING CLASSES **/
 .w-0 { width: 0; }
 .w-8em { width: 8em; }
-.w-3rem { width: 3rem; }
 .w-15p { width: 15%; }
 .w-30p { width: 30%; }
 .w-60p { width: 60%; }
@@ -461,35 +452,6 @@ img.emoji {
   }
 }
 
-/** COMMON SPACING CLASSES **/
-/**
-  🚨 Do not use these classes — they are deprecated and being removed. 🚨
-  See https://gitlab.com/gitlab-org/gitlab/issues/36857 for more details.
-
-  Instead, if you need a spacing class, please use one from Gitlab UI —
-  https://unpkg.com/browse/@gitlab/ui/src/scss/utilities.scss — which uses the following scale.
-    $gl-spacing-scale-0: 0;
-    $gl-spacing-scale-1: 2px;
-    $gl-spacing-scale-2: 4px;
-    $gl-spacing-scale-3: 8px;
-    $gl-spacing-scale-4: 12px;
-    $gl-spacing-scale-5: 16px;
-    $gl-spacing-scale-6: 24px;
-    $gl-spacing-scale-7: 32px;
-    $gl-spacing-scale-8: 40px;
-    $gl-spacing-scale-9: 48px;
-    $gl-spacing-scale-10: 56px;
-    $gl-spacing-scale-11: 64px;
-    $gl-spacing-scale-12: 80px;
-    $gl-spacing-scale-13: 96px;
-**/
-@each $index, $padding in $spacing-scale {
-  #{'.gl-p-#{$index}-deprecated-no-really-do-not-use-me'} { padding: $padding; }
-  #{'.gl-pl-#{$index}-deprecated-no-really-do-not-use-me'} { padding-left: $padding; }
-  #{'.gl-pr-#{$index}-deprecated-no-really-do-not-use-me'} { padding-right: $padding; }
-  #{'.gl-pt-#{$index}-deprecated-no-really-do-not-use-me'} { padding-top: $padding; }
-  #{'.gl-pb-#{$index}-deprecated-no-really-do-not-use-me'} { padding-bottom: $padding; }
-}
 
 /**
  * Removes browser specific clear icon from input fields in
@@ -516,7 +478,7 @@ img.emoji {
   }
 
   &.is-dragging {
-    background-color: $gray-600;
+    background-color: $gray-400;
   }
 }
 
@@ -564,4 +526,3 @@ img.emoji {
 See https://gitlab.com/gitlab-org/gitlab/issues/36857 for more details.
 **/
 .gl-line-height-14 { line-height: $gl-line-height-14; }
-.gl-font-size-20 { font-size: $gl-font-size-20; }

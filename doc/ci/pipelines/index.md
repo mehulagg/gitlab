@@ -22,7 +22,7 @@ Pipelines comprise:
 - Jobs, which define *what* to do. For example, jobs that compile or test code.
 - Stages, which define *when* to run the jobs. For example, stages that run tests after stages that compile the code.
 
-Jobs are executed by [Runners](../runners/README.md). Multiple jobs in the same stage are executed in parallel,
+Jobs are executed by [runners](../runners/README.md). Multiple jobs in the same stage are executed in parallel,
 if there are enough concurrent runners.
 
 If *all* jobs in a stage succeed, the pipeline moves on to the next stage.
@@ -40,7 +40,7 @@ A typical pipeline might consist of four stages, executed in the following order
 - A `production` stage, with a job called `deploy-to-prod`.
 
 NOTE: **Note:**
-If you have a [mirrored repository that GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository-starter),
+If you have a [mirrored repository that GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
 you may need to enable pipeline triggering in your project's
 **Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.
 
@@ -87,13 +87,13 @@ to its **Pipelines** tab.
 
 ![Pipelines index page](img/pipelines_index_v13_0.png)
 
-Clicking a pipeline will bring you to the **Pipeline Details** page and show
+Click a pipeline to open the **Pipeline Details** page and show
 the jobs that were run for that pipeline. From here you can cancel a running pipeline,
 retry jobs on a failed pipeline, or [delete a pipeline](#delete-a-pipeline).
 
 [Starting in GitLab 12.3](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/50499), a link to the
 latest pipeline for the last commit of a given branch is available at `/project/pipelines/[branch]/latest`.
-Also, `/project/pipelines/latest` will redirect you to the latest pipeline for the last commit
+Also, `/project/pipelines/latest` redirects you to the latest pipeline for the last commit
 on the project's default branch.
 
 [Starting in GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/215367),
@@ -120,14 +120,14 @@ To execute a pipeline manually:
     1. Enter any [environment variables](../variables/README.md) required for the pipeline run.
     1. Click the **Create pipeline** button.
 
-The pipeline will execute the jobs as configured.
+The pipeline now executes the jobs as configured.
 
 ### Run a pipeline by using a URL query string
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24146) in GitLab 12.5.
 
 You can use a query string to pre-populate the **Run Pipeline** page. For example, the query string
-`.../pipelines/new?ref=my_branch&var[foo]=bar&file_var[file_foo]=file_bar` will pre-populate the
+`.../pipelines/new?ref=my_branch&var[foo]=bar&file_var[file_foo]=file_bar` pre-populates the
 **Run Pipeline** page with:
 
 - **Run for** field: `my_branch`.
@@ -174,7 +174,7 @@ stage has a job with a manual action.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/27188) in GitLab 11.11.
 
 Multiple manual actions in a single stage can be started at the same time using the "Play all manual" button.
-Once the user clicks this button, each individual manual action will be triggered and refreshed
+Once you click this button, each individual manual action is triggered and refreshed
 to an updated status.
 
 This functionality is only available:
@@ -193,13 +193,13 @@ page, then using the **Delete** button.
 ![Pipeline Delete Button](img/pipeline-delete.png)
 
 CAUTION: **Warning:**
-Deleting a pipeline will expire all pipeline caches, and delete all related objects,
+Deleting a pipeline expires all pipeline caches, and deletes all related objects,
 such as builds, logs, artifacts, and triggers. **This action cannot be undone.**
 
 ### Pipeline quotas
 
 Each user has a personal pipeline quota that tracks the usage of shared runners in all personal projects.
-Each group has a [usage quota](../../subscriptions/index.md#ci-pipeline-minutes) that tracks the usage of shared runners for all projects created within the group.
+Each group has a [usage quota](../../subscriptions/gitlab_com/index.md#ci-pipeline-minutes) that tracks the usage of shared runners for all projects created within the group.
 
 When a pipeline is triggered, regardless of who triggered it, the pipeline quota for the project owner's [namespace](../../user/group/index.md#namespaces) is used. In this case, the namespace can be the user or group that owns the project.
 
@@ -252,6 +252,7 @@ on that specific branch:
 - Run manual pipelines (using the [Web UI](#run-a-pipeline-manually) or [pipelines API](#pipelines-api)).
 - Run scheduled pipelines.
 - Run pipelines using triggers.
+- Run on-demand DAST scan.
 - Trigger manual actions on existing pipelines.
 - Retry or cancel existing jobs (using the Web UI or pipelines API).
 
@@ -263,13 +264,13 @@ sensitive information like deployment credentials and tokens.
 branches, preventing untrusted code from executing on the protected runner and
 preserving deployment keys and other credentials from being unintentionally
 accessed. In order to ensure that jobs intended to be executed on protected
-runners will not use regular runners, they must be tagged accordingly.
+runners do not use regular runners, they must be tagged accordingly.
 
 ## View jobs in a pipeline
 
 When you access a pipeline, you can see the related jobs for that pipeline.
 
-Clicking an individual job will show you its job log, and allow you to:
+Clicking an individual job shows you its job log, and allows you to:
 
 - Cancel the job.
 - Retry the job.
@@ -325,10 +326,10 @@ If you have many similar jobs, your [pipeline graph](#visualize-pipelines) becom
 to read.
 
 You can automatically group similar jobs together. If the job names are formatted in a certain way,
-they will be collapsed into a single group in regular pipeline graphs (not the mini graphs).
+they are collapsed into a single group in regular pipeline graphs (not the mini graphs).
 
-You'll know when a pipeline has grouped jobs if you don't see the retry or
-cancel button inside them. Hovering over them will show the number of grouped
+You can recognize when a pipeline has grouped jobs if you don't see the retry or
+cancel button inside them. Hovering over them shows the number of grouped
 jobs. Click to expand them.
 
 ![Grouped pipelines](img/pipelines_grouped.png)
@@ -342,7 +343,7 @@ separate each job name with a number and one of the following:
 
 You can use these symbols interchangeably.
 
-For example, these three jobs will be in a group named `build ruby`:
+In the example below, these three jobs are in a group named `build ruby`:
 
 ```yaml
 build ruby 1/3:
@@ -365,7 +366,7 @@ In the pipeline, the result is a group named `build ruby` with three jobs:
 
 ![Job group](img/job_group_v12_10.png)
 
-The jobs will be ordered by comparing the numbers from left to right. You
+The jobs are be ordered by comparing the numbers from left to right. You
 usually want the first number to be the index and the second number to be the total.
 
 [This regular expression](https://gitlab.com/gitlab-org/gitlab/blob/2f3dc314f42dbd79813e6251792853bc231e69dd/app/models/commit_status.rb#L99)
@@ -383,7 +384,7 @@ the pipeline view, *not* the play (**{play}**) button.
 
 This is useful when you want to alter the execution of a job that uses
 [custom environment variables](../variables/README.md#custom-environment-variables).
-Adding a variable name (key) and value here will override the value defined in
+Add a variable name (key) and value here to override the value defined in
 [the UI or `.gitlab-ci.yml`](../variables/README.md#custom-environment-variables),
 for a single run of the manual job.
 
@@ -410,7 +411,7 @@ For example, if you start rolling out new code and:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14664) in GitLab 12.0.
 
-Job logs are divided into sections that can be collapsed or expanded. Each section will display
+Job logs are divided into sections that can be collapsed or expanded. Each section displays
 the duration.
 
 In the following example:
@@ -422,8 +423,11 @@ In the following example:
 
 #### Custom collapsible sections
 
-You can create collapsible sections in job logs by manually outputting special codes
-that GitLab will use to determine what sections to collapse:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/14664) in GitLab 12.0.
+
+You can create [collapsible sections in job logs](../pipelines/index.md#expand-and-collapse-job-log-sections)
+by manually outputting special codes
+that GitLab uses to determine what sections to collapse:
 
 - Section start marker: `section_start:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K` + `TEXT_OF_SECTION_HEADER`
 - Section end marker: `section_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
@@ -457,6 +461,28 @@ this line should be hidden when collapsed
 section_end:1560896353:my_first_section\r\e[0K
 ```
 
+#### Pre-collapse sections
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/198413) in GitLab 13.5.
+
+You can make the job log automatically collapse collapsible sections by adding the `collapsed` option to the section start.
+Add `[collapsed=true]` after the section name and before the `\r`. The section end marker
+remains unchanged:
+
+- Section start marker with `[collapsed=true]`: `section_start:UNIX_TIMESTAMP:SECTION_NAME[collapsed=true]\r\e[0K` + `TEXT_OF_SECTION_HEADER`
+- Section end marker: `section_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
+
+Add the updated section start text to the CI configuration. For example,
+using `echo`:
+
+```yaml
+job1:
+  script:
+    - echo -e "section_start:`date +%s`:my_first_section[collapsed=true]\r\e[0KHeader of the 1st collapsible section"
+    - echo 'this line should be hidden automatically after loading the job log'
+    - echo -e "section_end:`date +%s`:my_first_section\r\e[0K"
+```
+
 ## Visualize pipelines
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5742) in GitLab 8.11.
@@ -479,7 +505,7 @@ be found when you are on a [single pipeline page](#view-pipelines). For example:
 
 ![Pipelines example](img/pipelines.png)
 
-[Multi-project pipeline graphs](../multi_project_pipelines.md#multi-project-pipeline-visualization-premium) help
+[Multi-project pipeline graphs](../multi_project_pipelines.md#multi-project-pipeline-visualization) help
 you visualize the entire pipeline, including all cross-project inter-dependencies. **(PREMIUM)**
 
 ### Pipeline mini graphs
@@ -531,32 +557,3 @@ GitLab provides API endpoints to:
 - Trigger pipeline runs. For more information, see:
   - [Triggering pipelines through the API](../triggers/README.md).
   - [Pipeline triggers API](../../api/pipeline_triggers.md).
-
-## Troubleshooting `fatal: reference is not a tree:`
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/17043) in GitLab 12.4.
-
-Previously, you'd have encountered unexpected pipeline failures when you force-pushed
-a branch to its remote repository. To illustrate the problem, suppose you've had the current workflow:
-
-1. A user creates a feature branch named `example` and pushes it to a remote repository.
-1. A new pipeline starts running on the `example` branch.
-1. A user rebases the `example` branch on the latest `master` branch and force-pushes it to its remote repository.
-1. A new pipeline starts running on the `example` branch again, however,
-   the previous pipeline (2) fails because of `fatal: reference is not a tree:` error.
-
-This is because the previous pipeline cannot find a checkout-SHA (which associated with the pipeline record)
-from the `example` branch that the commit history has already been overwritten by the force-push.
-Similarly, [Pipelines for merged results](../merge_request_pipelines/pipelines_for_merged_results/index.md)
-might have failed intermittently due to [the same reason](../merge_request_pipelines/pipelines_for_merged_results/index.md#intermittently-pipelines-fail-by-fatal-reference-is-not-a-tree-error).
-
-As of GitLab 12.4, we've improved this behavior by persisting pipeline refs exclusively.
-To illustrate its life cycle:
-
-1. A pipeline is created on a feature branch named `example`.
-1. A persistent pipeline ref is created at `refs/pipelines/<pipeline-id>`,
-   which retains the checkout-SHA of the associated pipeline record.
-   This persistent ref stays intact during the pipeline execution,
-   even if the commit history of the `example` branch has been overwritten by force-push.
-1. GitLab Runner fetches the persistent pipeline ref and gets source code from the checkout-SHA.
-1. When the pipeline finished, its persistent ref is cleaned up in a background process.

@@ -1,4 +1,8 @@
-import mutationsCE from '~/boards/stores/mutations';
+import Vue from 'vue';
+import { union } from 'lodash';
+import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
+import { moveIssueListHelper } from '~/boards/boards_util';
+import { s__ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 
 const notImplemented = () => {
@@ -10,9 +14,6 @@ export default {
   ...mutationsCE,
   [mutationTypes.SET_SHOW_LABELS]: (state, val) => {
     state.isShowingLabels = val;
-  },
-  [mutationTypes.SET_ACTIVE_LIST_ID]: (state, id) => {
-    state.activeListId = id;
   },
 
   [mutationTypes.REQUEST_AVAILABLE_BOARDS]: () => {
@@ -67,22 +68,66 @@ export default {
     notImplemented();
   },
 
+  [mutationTypes.REQUEST_ISSUES_FOR_EPIC]: (state, epicId) => {
+    Vue.set(state.epicsFlags, epicId, { isLoading: true });
+  },
+
+  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_SUCCESS]: (state, { listData, issues, epicId }) => {
+    Object.entries(listData).forEach(([listId, list]) => {
+      Vue.set(state.issuesByListId, listId, union(state.issuesByListId[listId] || [], list));
+    });
+
+    Vue.set(state, 'issues', { ...state.issues, ...issues });
+    Vue.set(state.epicsFlags, epicId, { isLoading: false });
+  },
+
+  [mutationTypes.RECEIVE_ISSUES_FOR_EPIC_FAILURE]: (state, epicId) => {
+    state.error = s__('Boards|An error occurred while fetching issues. Please reload the page.');
+    Vue.set(state.epicsFlags, epicId, { isLoading: false });
+  },
+
   [mutationTypes.TOGGLE_EPICS_SWIMLANES]: state => {
     state.isShowingEpicsSwimlanes = !state.isShowingEpicsSwimlanes;
     state.epicsSwimlanesFetchInProgress = true;
   },
 
-  [mutationTypes.RECEIVE_SWIMLANES_SUCCESS]: (state, swimlanes) => {
-    state.epicsSwimlanes = swimlanes;
+  [mutationTypes.RECEIVE_BOARD_LISTS_SUCCESS]: (state, boardLists) => {
+    state.boardLists = boardLists;
     state.epicsSwimlanesFetchInProgress = false;
   },
 
   [mutationTypes.RECEIVE_SWIMLANES_FAILURE]: state => {
-    state.epicsSwimlanesFetchFailure = true;
+    state.error = s__(
+      'Boards|An error occurred while fetching the board swimlanes. Please reload the page.',
+    );
     state.epicsSwimlanesFetchInProgress = false;
   },
 
-  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    state.epics = epics;
+  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
+    Vue.set(state, 'epics', union(state.epics || [], epics));
+    state.canAdminEpic = canAdminEpic;
+  },
+
+  [mutationTypes.RESET_EPICS]: state => {
+    Vue.set(state, 'epics', []);
+  },
+
+  [mutationTypes.MOVE_ISSUE]: (
+    state,
+    { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
+  ) => {
+    const fromList = state.boardLists.find(l => l.id === fromListId);
+    const toList = state.boardLists.find(l => l.id === toListId);
+
+    const issue = moveIssueListHelper(originalIssue, fromList, toList);
+
+    if (epicId === null) {
+      Vue.set(state.issues, issue.id, { ...issue, epic: null });
+    } else if (epicId !== undefined) {
+      Vue.set(state.issues, issue.id, { ...issue, epic: { id: epicId } });
+    }
+
+    removeIssueFromList({ state, listId: fromListId, issueId: issue.id });
+    addIssueToList({ state, listId: toListId, issueId: issue.id, moveBeforeId, moveAfterId });
   },
 };

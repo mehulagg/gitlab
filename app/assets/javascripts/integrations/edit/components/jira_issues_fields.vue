@@ -1,5 +1,4 @@
 <script>
-import eventHub from '../event_hub';
 import {
   GlFormGroup,
   GlFormCheckbox,
@@ -9,6 +8,7 @@ import {
   GlButton,
   GlCard,
 } from '@gitlab/ui';
+import eventHub from '../event_hub';
 
 export default {
   name: 'JiraIssuesFields',
@@ -36,6 +36,11 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    gitlabIssuesEnabled: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
     upgradePlanPath: {
       type: String,
@@ -89,8 +94,8 @@ export default {
           }}
         </p>
         <template v-if="showJiraIssuesIntegration">
-          <input name="service[issues_enabled]" type="hidden" value="false" />
-          <gl-form-checkbox v-model="enableJiraIssues" name="service[issues_enabled]">
+          <input name="service[issues_enabled]" type="hidden" :value="enableJiraIssues || false" />
+          <gl-form-checkbox v-model="enableJiraIssues">
             {{ s__('JiraService|Enable Jira issues') }}
             <template #help>
               {{
@@ -133,7 +138,7 @@ export default {
           :disabled="!enableJiraIssues"
         />
       </gl-form-group>
-      <p>
+      <p v-if="gitlabIssuesEnabled">
         <gl-sprintf
           :message="
             s__(

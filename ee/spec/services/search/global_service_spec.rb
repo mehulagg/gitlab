@@ -177,13 +177,70 @@ RSpec.describe Search::GlobalService do
       end
     end
 
-    context 'when ES is not used' do
+    context 'when elasticearch_search is disabled' do
       before do
-        stub_ee_application_setting(elasticsearch_limit_indexing: true)
+        stub_ee_application_setting(elasticsearch_search: false)
       end
 
       it 'does not include ES-specific scopes' do
         expect(described_class.new(user, {}).allowed_scopes).not_to include('commits')
+      end
+    end
+
+    context 'when elasticsearch_limit_indexing is enabled' do
+      before do
+        stub_ee_application_setting(elasticsearch_limit_indexing: true)
+      end
+
+      context 'when advanced_global_search_for_limited_indexing feature flag is disabled' do
+        before do
+          stub_feature_flags(advanced_global_search_for_limited_indexing: false)
+        end
+
+        it 'does not include ES-specific scopes' do
+          expect(described_class.new(user, {}).allowed_scopes).not_to include('commits')
+        end
+      end
+
+      context 'when advanced_global_search_for_limited_indexing feature flag is enabled' do
+        it 'includes ES-specific scopes' do
+          expect(described_class.new(user, {}).allowed_scopes).to include('commits')
+        end
+      end
+    end
+  end
+
+  describe '#elastic_projects' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, namespace: group) }
+    let_it_be(:another_project) { create(:project) }
+    let_it_be(:non_admin_user) { create_user_from_membership(project, :developer) }
+    let_it_be(:admin) { create(:admin) }
+
+    let(:service) { described_class.new(user, {}) }
+    let(:elastic_projects) { service.elastic_projects }
+
+    context 'when the user is an admin' do
+      let(:user) { admin }
+
+      it 'returns :any' do
+        expect(elastic_projects).to eq(:any)
+      end
+    end
+
+    context 'when the user is not an admin' do
+      let(:user) { non_admin_user }
+
+      it 'returns the projects the user has access to' do
+        expect(elastic_projects).to eq([project.id])
+      end
+    end
+
+    context 'when there is no user' do
+      let(:user) { nil }
+
+      it 'returns empty array' do
+        expect(elastic_projects).to eq([])
       end
     end
   end

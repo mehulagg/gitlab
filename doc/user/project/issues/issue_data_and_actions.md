@@ -21,13 +21,13 @@ You can find all the information for that issue on one screen.
 - **1.** [New Issue, close issue (reopen issue, report issue)](#new-issue-close-issue-reopen-issue-report-issue)
 - **2.** [To Do](#to-do)
 - **3.** [Assignee](#assignee)
-  - **3.1.** [Multiple Assignees **(STARTER)**](#multiple-assignees-starter)
-- **4.** [Epic **(PREMIUM)**](#epic-premium)
+  - **3.1.** [Multiple Assignees **(STARTER)**](#multiple-assignees)
+- **4.** [Epic **(PREMIUM)**](#epic)
 - **5.** [Milestone](#milestone)
 - **6.** [Time tracking](#time-tracking)
 - **7.** [Due date](#due-date)
 - **8.** [Labels](#labels)
-- **9.** [Weight **(STARTER)**](#weight-starter)
+- **9.** [Weight **(STARTER)**](#weight)
 - **10.** [Confidentiality](#confidentiality)
 - **11.** [Lock issue](#lock-issue)
 - **12.** [Participants](#participants)
@@ -36,7 +36,7 @@ You can find all the information for that issue on one screen.
 - **15.** [Edit](#edit)
 - **16.** [Description](#description)
 - **17.** [Mentions](#mentions)
-- **18.** [Related Issues **(STARTER)**](#related-issues-starter)
+- **18.** [Related Issues](#related-issues)
 - **19.** [Related Merge Requests](#related-merge-requests)
 - **20.** [Award emoji](#award-emoji)
 - **21.** [Show all activity](#show-all-activity)
@@ -88,7 +88,7 @@ An issue can be assigned to:
 
 - Yourself.
 - Another person.
-- [Many people](#multiple-assignees-starter). **(STARTER)**
+- [Many people](#multiple-assignees). **(STARTER)**
 
 The assignee(s) can be changed as often as needed. The idea is that the assignees are
 responsible for that issue until it's reassigned to someone else to take it from there.
@@ -196,7 +196,7 @@ allowing many formatting options.
 ### Mentions
 
 You can mention a user or a group present in your GitLab instance with `@username` or
-`@groupname` and they will be notified via todos and email, unless they have disabled
+`@groupname` and they will be notified via to-dos and email, unless they have disabled
 all notifications in their profile settings. This is controlled in the
 [notification settings](../../profile/notifications.md).
 
@@ -208,7 +208,7 @@ TIP: **Tip:**
 Avoid mentioning `@all` in issues and merge requests, as it sends an email notification
 to all the members of that project's group, which can be interpreted as spam.
 
-### Related Issues **(STARTER)**
+### Related Issues
 
 Issues that were mentioned as [related issues](related_issues.md) are listed here.
 You can also click the `+` to add more related issues.
@@ -242,7 +242,7 @@ and selecting either:
 Also:
 
 - You can mention a user or a group present in your GitLab instance with
-  `@username` or `@groupname` and they will be notified via To-Do items
+  `@username` or `@groupname` and they will be notified via to-do items
   and email, unless they have [disabled all notifications](#notifications)
   in their profile settings.
 - Mentions for yourself (the current logged in user), will be highlighted
@@ -253,7 +253,7 @@ Also:
 
 ### Create Merge Request
 
-Create a new branch and [WIP merge request](../merge_requests/work_in_progress_merge_requests.md)
+Create a new branch and [**Draft** merge request](../merge_requests/work_in_progress_merge_requests.md)
 in one action. The branch will be named `issuenumber-title` by default, but you can
 choose any name, and GitLab will verify that it is not already in use. The merge request
 will automatically inherit the milestone and labels of the issue, and will be set to
@@ -316,4 +316,4 @@ Read more how to [add or remove a zoom meeting](associate_zoom_meeting.md).
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30906) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.1.
 
-If a status page application is associated with the project, you can use the `/publish` [quick action](../quick_actions.md) to publish the issue. Refer to [GitLab Status Page](../status_page/index.md) for more information.
+If a status page application is associated with the project, you can use the `/publish` [quick action](../quick_actions.md) to publish the issue. Refer to [GitLab Status Page](../../../operations/incident_management/status_page.md) for more information.

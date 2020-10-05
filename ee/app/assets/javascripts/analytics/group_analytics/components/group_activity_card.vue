@@ -1,22 +1,15 @@
 <script>
 import Api from 'ee/api';
 import { __, s__ } from '~/locale';
-import createFlash from '~/flash';
-import { mergeUrlParams } from '~/lib/utils/url_utility';
-import MetricCard from '../../shared/components/metric_card.vue';
-
-const REPORT_PAGE_CONFIGURATION = {
-  mergeRequests: {
-    id: 'recent_merge_requests_by_group',
-  },
-};
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import MetricCard from '~/analytics/shared/components/metric_card.vue';
 
 export default {
   name: 'GroupActivityCard',
   components: {
     MetricCard,
   },
-  inject: ['groupFullPath', 'groupName', 'reportPagesPath', 'enableReportPages'],
+  inject: ['groupFullPath', 'groupName'],
   data() {
     return {
       isLoading: false,
@@ -38,7 +31,6 @@ export default {
           key,
           value,
           label,
-          link: this.generateReportPageLink(key),
         };
       });
     },
@@ -65,21 +57,6 @@ export default {
           createFlash(__('Failed to load group activity metrics. Please try again.'));
           this.isLoading = false;
         });
-    },
-    displayReportLink(key) {
-      return this.enableReportPages && Object.keys(REPORT_PAGE_CONFIGURATION).includes(key);
-    },
-    generateReportPageLink(key) {
-      return this.displayReportLink(key)
-        ? mergeUrlParams(
-            {
-              groupPath: this.groupFullPath,
-              groupName: this.groupName,
-              reportId: REPORT_PAGE_CONFIGURATION[key].id,
-            },
-            this.reportPagesPath,
-          )
-        : null;
     },
   },
 };

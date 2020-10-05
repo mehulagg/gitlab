@@ -6,11 +6,11 @@ RSpec.describe SessionsController do
   include DeviseHelpers
   include LdapHelpers
 
-  describe '#new' do
-    before do
-      set_devise_mapping(context: @request)
-    end
+  before do
+    set_devise_mapping(context: @request)
+  end
 
+  describe '#new' do
     context 'when auto sign-in is enabled' do
       before do
         stub_omniauth_setting(auto_sign_in_with_provider: :saml)
@@ -60,57 +60,53 @@ RSpec.describe SessionsController do
       end
     end
 
-    describe 'tracking data' do
-      context 'when the user is part of the experimental group' do
-        before do
-          stub_experiment_for_user(signup_flow: true)
-        end
+    it "redirects correctly for referer on same host with params" do
+      host = "test.host"
+      search_path = "/search?search=seed_project"
+      request.headers[:HTTP_REFERER] = "http://#{host}#{search_path}"
 
-        it 'doesn\'t pass tracking parameters to the frontend' do
-          get(:new)
-          expect(Gon.tracking_data).to be_nil
-        end
-      end
+      get(:new, params: { redirect_to_referer: :yes })
 
-      context 'with the experimental signup flow enabled and the user is part of the control group' do
-        before do
-          stub_experiment(signup_flow: true)
-          stub_experiment_for_user(signup_flow: false)
-          allow_any_instance_of(described_class).to receive(:experimentation_subject_id).and_return('uuid')
-        end
-
-        it 'passes the right tracking parameters to the frontend' do
-          get(:new)
-          expect(Gon.tracking_data).to eq(
-            {
-              category: 'Growth::Acquisition::Experiment::SignUpFlow',
-              action: 'start',
-              label: 'uuid',
-              property: 'control_group'
-            }
-          )
-        end
-      end
+      expect(controller.stored_location_for(:redirect)).to eq(search_path)
     end
   end
 
   describe '#create' do
-    before do
-      set_devise_mapping(context: @request)
-    end
-
     it_behaves_like 'known sign in' do
       let(:user) { create(:user) }
       let(:post_action) { post(:create, params: { user: { login: user.username, password: user.password } }) }
     end
 
     context 'when using standard authentications' do
+      let(:user) { create(:user) }
+      let(:post_action) { post(:create, params: { user: { login: user.username, password: user.password } }) }
+
       context 'invalid password' do
         it 'does not authenticate user' do
           post(:create, params: { user: { login: 'invalid', password: 'invalid' } })
 
           expect(response)
             .to set_flash.now[:alert].to /Invalid Login or password/
+        end
+      end
+
+      context 'a blocked user' do
+        it 'does not authenticate the user' do
+          user.block!
+          post_action
+
+          expect(@request.env['warden']).not_to be_authenticated
+          expect(flash[:alert]).to include('Your account has been blocked')
+        end
+      end
+
+      context 'an internal user' do
+        it 'does not authenticate the user' do
+          user.ghost!
+          post_action
+
+          expect(@request.env['warden']).not_to be_authenticated
+          expect(flash[:alert]).to include('Your account does not have the required permission to login')
         end
       end
 
@@ -163,8 +159,13 @@ RSpec.describe SessionsController do
         end
 
         it 'creates an audit log record' do
-          expect { post(:create, params: { user: user_params }) }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:with]).to eq('standard')
+          expect { post(:create, params: { user: user_params }) }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:with]).to eq('standard')
+        end
+
+        it 'creates an authentication event record' do
+          expect { post(:create, params: { user: user_params }) }.to change { AuthenticationEvent.count }.by(1)
+          expect(AuthenticationEvent.last.provider).to eq('standard')
         end
 
         include_examples 'user login request with unique ip limit', 302 do
@@ -216,7 +217,7 @@ RSpec.describe SessionsController do
 
           before do
             stub_application_setting(recaptcha_enabled: true)
-            request.headers[described_class::CAPTCHA_HEADER] = 1
+            request.headers[described_class::CAPTCHA_HEADER] = '1'
           end
 
           it 'displays an error when the reCAPTCHA is not solved' do
@@ -262,7 +263,7 @@ RSpec.describe SessionsController do
 
           context 'when there are more than 5 anonymous session with the same IP' do
             before do
-              allow(Gitlab::AnonymousSession).to receive_message_chain(:new, :stored_sessions).and_return(6)
+              allow(Gitlab::AnonymousSession).to receive_message_chain(:new, :session_count).and_return(6)
             end
 
             it 'displays an error when the reCAPTCHA is not solved' do
@@ -274,7 +275,7 @@ RSpec.describe SessionsController do
             end
 
             it 'successfully logs in a user when reCAPTCHA is solved' do
-              expect(Gitlab::AnonymousSession).to receive_message_chain(:new, :cleanup_session_per_ip_entries)
+              expect(Gitlab::AnonymousSession).to receive_message_chain(:new, :cleanup_session_per_ip_count)
 
               succesful_login(user_params)
 
@@ -288,8 +289,8 @@ RSpec.describe SessionsController do
     context 'when using two-factor authentication via OTP' do
       let(:user) { create(:user, :two_factor) }
 
-      def authenticate_2fa(user_params)
-        post(:create, params: { user: user_params }, session: { otp_user_id: user.id })
+      def authenticate_2fa(user_params, otp_user_id: user.id)
+        post(:create, params: { user: user_params }, session: { otp_user_id: otp_user_id })
       end
 
       context 'remember_me field' do
@@ -326,8 +327,22 @@ RSpec.describe SessionsController do
         end
       end
 
+      # See issue gitlab-org/gitlab#20302.
+      context 'when otp_user_id is stale' do
+        render_views
+
+        it 'favors login over otp_user_id when password is present and does not authenticate the user' do
+          authenticate_2fa(
+            { login: 'random_username', password: user.password },
+            otp_user_id: user.id
+          )
+
+          expect(response).to set_flash.now[:alert].to /Invalid Login or password/
+        end
+      end
+
       ##
-      # See #14900 issue
+      # See issue gitlab-org/gitlab-foss#14900
       #
       context 'when authenticating with login and OTP of another user' do
         context 'when another user has 2FA enabled' do
@@ -399,7 +414,7 @@ RSpec.describe SessionsController do
               end
 
               it 'warns about invalid login' do
-                expect(response).to set_flash.now[:alert].to /Your account is locked./
+                expect(flash[:alert]).to eq('Your account is locked.')
               end
 
               it 'locks the user' do
@@ -409,28 +424,21 @@ RSpec.describe SessionsController do
               it 'keeps the user locked on future login attempts' do
                 post(:create, params: { user: { login: user.username, password: user.password } })
 
-                expect(response).to set_flash.now[:alert].to /Your account is locked./
+                expect(flash[:alert]).to eq('Your account is locked.')
               end
-            end
-          end
-
-          context 'when another user does not have 2FA enabled' do
-            let(:another_user) { create(:user) }
-
-            it 'does not leak that 2FA is disabled for another user' do
-              authenticate_2fa(login: another_user.username,
-                               otp_attempt: 'invalid')
-
-              expect(response).to set_flash.now[:alert]
-                .to /Invalid two-factor code/
             end
           end
         end
       end
 
       it "creates an audit log record" do
-        expect { authenticate_2fa(login: user.username, otp_attempt: user.current_otp) }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:with]).to eq("two-factor")
+        expect { authenticate_2fa(login: user.username, otp_attempt: user.current_otp) }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:with]).to eq("two-factor")
+      end
+
+      it "creates an authentication event record" do
+        expect { authenticate_2fa(login: user.username, otp_attempt: user.current_otp) }.to change { AuthenticationEvent.count }.by(1)
+        expect(AuthenticationEvent.last.provider).to eq("two-factor")
       end
     end
 
@@ -439,6 +447,10 @@ RSpec.describe SessionsController do
 
       def authenticate_2fa_u2f(user_params)
         post(:create, params: { user: user_params }, session: { otp_user_id: user.id })
+      end
+
+      before do
+        stub_feature_flags(webauthn: false)
       end
 
       context 'remember_me field' do
@@ -466,31 +478,21 @@ RSpec.describe SessionsController do
 
       it "creates an audit log record" do
         allow(U2fRegistration).to receive(:authenticate).and_return(true)
-        expect { authenticate_2fa_u2f(login: user.username, device_response: "{}") }.to change { SecurityEvent.count }.by(1)
-        expect(SecurityEvent.last.details[:with]).to eq("two-factor-via-u2f-device")
+        expect { authenticate_2fa_u2f(login: user.username, device_response: "{}") }.to change { AuditEvent.count }.by(1)
+        expect(AuditEvent.last.details[:with]).to eq("two-factor-via-u2f-device")
       end
-    end
-  end
 
-  describe "#new" do
-    before do
-      set_devise_mapping(context: @request)
-    end
+      it "creates an authentication event record" do
+        allow(U2fRegistration).to receive(:authenticate).and_return(true)
 
-    it "redirects correctly for referer on same host with params" do
-      host = "test.host"
-      search_path = "/search?search=seed_project"
-      request.headers[:HTTP_REFERER] = "http://#{host}#{search_path}"
-
-      get(:new, params: { redirect_to_referer: :yes })
-
-      expect(controller.stored_location_for(:redirect)).to eq(search_path)
+        expect { authenticate_2fa_u2f(login: user.username, device_response: "{}") }.to change { AuthenticationEvent.count }.by(1)
+        expect(AuthenticationEvent.last.provider).to eq("two-factor-via-u2f-device")
+      end
     end
   end
 
   context 'when login fails' do
     before do
-      set_devise_mapping(context: @request)
       @request.env["warden.options"] = { action:  'unauthenticated' }
     end
 
@@ -503,10 +505,6 @@ RSpec.describe SessionsController do
 
   describe '#set_current_context' do
     let_it_be(:user) { create(:user) }
-
-    before do
-      set_devise_mapping(context: @request)
-    end
 
     context 'when signed in' do
       before do
@@ -558,6 +556,23 @@ RSpec.describe SessionsController do
 
         post(:create,
              params: { user: { login: user.username, password: user.password.succ } })
+      end
+    end
+  end
+
+  describe '#destroy' do
+    before do
+      sign_in(user)
+    end
+
+    context 'for a user whose password has expired' do
+      let(:user) { create(:user, password_expires_at: 2.days.ago) }
+
+      it 'allows to sign out successfully' do
+        delete :destroy
+
+        expect(response).to redirect_to(new_user_session_path)
+        expect(controller.current_user).to be_nil
       end
     end
   end

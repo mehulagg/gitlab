@@ -1,4 +1,4 @@
-import { GlIcon, GlDropdownItem } from '@gitlab/ui';
+import { GlIcon, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { createStore } from '~/logs/stores';
 import { mockPods, mockPodName } from '../mock_data';
@@ -17,8 +17,8 @@ describe('LogSimpleFilters', () => {
   const findPodsNoPodsText = () => wrapper.find({ ref: 'noPodsMsg' });
   const findPodsDropdownItems = () =>
     findPodsDropdown()
-      .findAll(GlDropdownItem)
-      .filter(item => !item.is('[disabled]'));
+      .findAll(GlDeprecatedDropdownItem)
+      .filter(item => !('disabled' in item.attributes()));
 
   const mockPodsLoading = () => {
     state.pods.options = [];
@@ -58,9 +58,6 @@ describe('LogSimpleFilters', () => {
 
   it('displays UI elements', () => {
     initWrapper();
-
-    expect(wrapper.isVueInstance()).toBe(true);
-    expect(wrapper.isEmpty()).toBe(false);
 
     expect(findPodsDropdown().exists()).toBe(true);
   });

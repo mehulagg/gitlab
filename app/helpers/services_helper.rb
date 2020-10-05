@@ -24,7 +24,7 @@ module ServicesHelper
     when "commit", "commit_events"
       s_("ProjectService|Event will be triggered when a commit is created/updated")
     when "deployment"
-      s_("ProjectService|Event will be triggered when a deployment finishes")
+      s_("ProjectService|Event will be triggered when a deployment starts or finishes")
     when "alert"
       s_("ProjectService|Event will be triggered when a new, unique alert is recorded")
     end
@@ -33,19 +33,6 @@ module ServicesHelper
   def service_event_field_name(event)
     event = event.pluralize if %w[merge_request issue confidential_issue].include?(event)
     "#{event}_events"
-  end
-
-  def service_event_action_field_name(action)
-    "#{action}_on_event_enabled"
-  end
-
-  def event_action_title(action)
-    case action
-    when "comment"
-      s_("ProjectService|Comment")
-    else
-      action.humanize
-    end
   end
 
   def service_save_button(disabled: false)
@@ -95,12 +82,9 @@ module ServicesHelper
     end
   end
 
-  def integration_form_refactor?
-    Feature.enabled?(:integration_form_refactor, @project, default_enabled: true)
-  end
-
   def integration_form_data(integration)
     {
+      id: integration.id,
       show_active: integration.show_active_box?.to_s,
       activated: (integration.active || integration.new_record?).to_s,
       type: integration.to_param,
@@ -108,34 +92,55 @@ module ServicesHelper
       commit_events: integration.commit_events.to_s,
       enable_comments: integration.comment_on_event_enabled.to_s,
       comment_detail: integration.comment_detail,
+      learn_more_path: integrations_help_page_path,
       trigger_events: trigger_events_for_service(integration),
-      fields: fields_for_service(integration)
+      fields: fields_for_service(integration),
+      inherit_from_id: integration.inherit_from_id,
+      integration_level: integration_level(integration),
+      editable: integration.editable?.to_s,
+      cancel_path: scoped_integrations_path,
+      can_test: integration.can_test?.to_s,
+      test_path: scoped_test_integration_path(integration)
     }
   end
 
   def trigger_events_for_service(integration)
-    return [] unless integration_form_refactor?
-
     ServiceEventSerializer.new(service: integration).represent(integration.configurable_events).to_json
   end
 
   def fields_for_service(integration)
-    return [] unless integration_form_refactor?
-
     ServiceFieldSerializer.new(service: integration).represent(integration.global_fields).to_json
   end
 
-  def show_service_trigger_events?(integration)
-    return false if integration.is_a?(JiraService) || integration_form_refactor?
-
-    integration.configurable_events.present?
+  def integrations_help_page_path
+    help_page_path('user/admin_area/settings/project_integration_management')
   end
 
   def project_jira_issues_integration?
     false
   end
 
+  def group_level_integrations?
+    @group.present? && Feature.enabled?(:group_level_integrations, @group)
+  end
+
+  def instance_level_integrations?
+    !Gitlab.com?
+  end
+
   extend self
+
+  private
+
+  def integration_level(integration)
+    if integration.instance
+      'instance'
+    elsif integration.group_id
+      'group'
+    else
+      'project'
+    end
+  end
 end
 
 ServicesHelper.prepend_if_ee('EE::ServicesHelper')

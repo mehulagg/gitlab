@@ -20,13 +20,13 @@ RSpec.describe Search::GroupService, :elastic do
   end
 
   describe 'group search' do
-    let(:term) { "Project Name" }
+    let(:term) { "RandomName" }
     let(:nested_group) { create(:group, :nested) }
 
     # These projects shouldn't be found
     let(:outside_project) { create(:project, :public, name: "Outside #{term}") }
     let(:private_project) { create(:project, :private, namespace: nested_group, name: "Private #{term}" )}
-    let(:other_project)   { create(:project, :public, namespace: nested_group, name: term.reverse) }
+    let(:other_project)   { create(:project, :public, namespace: nested_group, name: 'OtherProject') }
 
     # These projects should be found
     let(:project1) { create(:project, :internal, namespace: nested_group, name: "Inner #{term} 1") }
@@ -227,6 +227,34 @@ RSpec.describe Search::GroupService, :elastic do
             expected_objects: expected_objects
           ) do |user|
             described_class.new(user, group, search: project.name).execute
+          end
+        end
+      end
+    end
+  end
+
+  describe '#allowed_scopes' do
+    context 'epics scope' do
+      where(:feature_enabled, :epics_available, :epics_allowed) do
+        false     | false    | false
+        true      | false    | false
+        false     | true     | false
+        true      | true     | true
+      end
+
+      with_them do
+        let(:allowed_scopes) { described_class.new(user, group, {}).allowed_scopes }
+
+        before do
+          stub_feature_flags(epics_search: feature_enabled)
+          stub_licensed_features(epics: epics_available)
+        end
+
+        it 'sets correct allowed_scopes' do
+          if epics_allowed
+            expect(allowed_scopes).to include('epics')
+          else
+            expect(allowed_scopes).not_to include('epics')
           end
         end
       end

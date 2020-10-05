@@ -1,12 +1,12 @@
 - purchase_link = plan.purchase_link
-- is_current_plan = plan.code == namespace.actual_plan_name
+- is_current_plan = plan.code == current_plan&.code
 
 .col-md-6.col-lg-3
   .card.mb-5{ class: ("card-active" if is_current_plan) }
     .card-header.font-weight-bold.p-3
       = plan.name
       - if is_current_plan
-        .pull-right.text-muted
+        .float-right.text-muted
           = _("Current Plan")
 
     .card-body
@@ -17,7 +17,7 @@
         %ul.conditions.p-0.my-auto
           %li= s_("BillingPlans|per user")
           %li= s_("BillingPlans|monthly")
-      .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year.positive?) }
+      .price-per-year.text-left{ class: ("invisible" unless plan.price_per_year > 0) }
         - price_per_year = number_to_plan_currency(plan.price_per_year)
         = s_("BillingPlans|billed annually at %{price_per_year}") % { price_per_year: price_per_year }
 
@@ -33,7 +33,9 @@
 
     - if purchase_link
       .card-footer.p-3
-        .pull-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current_plan) }
+        .float-right{ class: ("invisible" unless purchase_link.action == 'upgrade' || is_current_plan) }
+          - if show_contact_sales_button?(purchase_link.action)
+            = link_to s_('BillingPlan|Contact sales'), "#{contact_sales_url}?test=inappcontactsales#{plan.code}", class: "btn btn-success btn-inverted", data: { **experiment_tracking_data_for_button_click('contact_sales') }
           - upgrade_button_class = "disabled" if is_current_plan && !namespace.trial_active?
           - cta_class = '-new' if use_new_purchase_flow?(namespace)
-          = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan, current_plan), class: "btn btn-success #{upgrade_button_class} billing-cta-purchase#{cta_class}"
+          = link_to s_('BillingPlan|Upgrade'), plan_purchase_or_upgrade_url(namespace, plan, current_plan), class: "btn btn-success #{upgrade_button_class} billing-cta-purchase#{cta_class}", data: { **experiment_tracking_data_for_button_click('upgrade') }

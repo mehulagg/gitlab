@@ -5,9 +5,9 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import DeleteButton from '../delete_button.vue';
-import ListItem from '../list_item.vue';
-import DetailsRow from './details_row.vue';
+import DetailsRow from '~/vue_shared/components/registry/details_row.vue';
 import {
   REMOVE_TAG_BUTTON_TITLE,
   DIGEST_LABEL,
@@ -197,7 +197,8 @@ export default {
           v-if="tag.digest"
           :title="tag.digest"
           :text="tag.digest"
-          css-class="btn-default btn-transparent btn-clipboard gl-p-0"
+          category="tertiary"
+          size="small"
         />
       </details-row>
     </template>
@@ -212,7 +213,8 @@ export default {
           v-if="formattedRevision"
           :title="formattedRevision"
           :text="formattedRevision"
-          css-class="btn-default btn-transparent btn-clipboard gl-p-0"
+          category="tertiary"
+          size="small"
         />
       </details-row>
     </template>

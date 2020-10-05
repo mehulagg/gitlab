@@ -105,7 +105,7 @@ RSpec.describe Ci::Build do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
         .with(:build, job.id)
 
-      job.update(status: :running)
+      job.update!(status: :running)
     end
   end
 
@@ -118,7 +118,7 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        job.update(environment: 'staging')
+        job.update!(environment: 'staging')
         create(:environment, name: 'staging', project: job.project)
 
         variable =
@@ -157,7 +157,7 @@ RSpec.describe Ci::Build do
   end
 
   describe '#collect_security_reports!' do
-    let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline.sha) }
+    let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
 
     subject { job.collect_security_reports!(security_reports) }
 
@@ -172,7 +172,7 @@ RSpec.describe Ci::Build do
         it 'parses blobs and add the results to the report' do
           subject
 
-          expect(security_reports.get_report('sast', artifact).occurrences.size).to eq(33)
+          expect(security_reports.get_report('sast', artifact).findings.size).to eq(33)
         end
 
         it 'adds the created date to the report' do
@@ -191,10 +191,10 @@ RSpec.describe Ci::Build do
         it 'parses blobs and adds the results to the reports' do
           subject
 
-          expect(security_reports.get_report('sast', sast_artifact).occurrences.size).to eq(33)
-          expect(security_reports.get_report('dependency_scanning', ds_artifact).occurrences.size).to eq(4)
-          expect(security_reports.get_report('container_scanning', cs_artifact).occurrences.size).to eq(8)
-          expect(security_reports.get_report('dast', dast_artifact).occurrences.size).to eq(20)
+          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(33)
+          expect(security_reports.get_report('dependency_scanning', ds_artifact).findings.size).to eq(4)
+          expect(security_reports.get_report('container_scanning', cs_artifact).findings.size).to eq(8)
+          expect(security_reports.get_report('dast', dast_artifact).findings.size).to eq(20)
         end
       end
 
@@ -227,15 +227,15 @@ RSpec.describe Ci::Build do
   describe '#collect_license_scanning_reports!' do
     subject { job.collect_license_scanning_reports!(license_scanning_report) }
 
-    let(:license_scanning_report) { Gitlab::Ci::Reports::LicenseScanning::Report.new }
-
-    before do
-      stub_licensed_features(license_scanning: true)
-    end
+    let(:license_scanning_report) { build(:license_scanning_report) }
 
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
-    context 'when build has a license scanning report' do
+    context 'when the build has a license scanning report' do
+      before do
+        stub_licensed_features(license_scanning: true)
+      end
+
       context 'when there is a new type report' do
         before do
           create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
@@ -272,19 +272,6 @@ RSpec.describe Ci::Build do
         it 'returns an empty report' do
           expect { subject }.not_to raise_error
           expect(license_scanning_report).to be_empty
-        end
-      end
-
-      context 'when Feature flag is disabled for License Scanning reports parsing' do
-        before do
-          stub_feature_flags(parse_license_management_reports: false)
-          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
-        end
-
-        it 'does NOT parse license scanning report' do
-          subject
-
-          expect(license_scanning_report.licenses.count).to eq(0)
         end
       end
 
@@ -519,6 +506,7 @@ RSpec.describe Ci::Build do
         }
       }
     end
+
     let(:build) { create(:ci_build, secrets: secrets) }
 
     subject { build.runner_required_feature_names }
@@ -531,13 +519,13 @@ RSpec.describe Ci::Build do
       context 'when there are secrets defined' do
         let(:secrets) { valid_secrets }
 
-        it { is_expected.to include(:secrets) }
+        it { is_expected.to include(:vault_secrets) }
       end
 
       context 'when there are no secrets defined' do
         let(:secrets) { {} }
 
-        it { is_expected.not_to include(:secrets) }
+        it { is_expected.not_to include(:vault_secrets) }
       end
     end
 
@@ -549,13 +537,13 @@ RSpec.describe Ci::Build do
       context 'when there are secrets defined' do
         let(:secrets) { valid_secrets }
 
-        it { is_expected.not_to include(:secrets) }
+        it { is_expected.not_to include(:vault_secrets) }
       end
 
       context 'when there are no secrets defined' do
         let(:secrets) { {} }
 
-        it { is_expected.not_to include(:secrets) }
+        it { is_expected.not_to include(:vault_secrets) }
       end
     end
   end

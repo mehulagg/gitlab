@@ -8,8 +8,6 @@ module EE
 
         delegate :user, :group, to: :identity
 
-        DEFAULT_ACCESS = :guest
-
         def initialize(identity)
           @identity = identity
         end
@@ -24,7 +22,11 @@ module EE
         private
 
         def add_member
-          group.add_user(user, DEFAULT_ACCESS)
+          group.add_user(user, default_membership_role)
+        end
+
+        def default_membership_role
+          group.saml_provider.default_membership_role
         end
 
         def existing_member?

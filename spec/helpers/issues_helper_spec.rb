@@ -162,7 +162,7 @@ RSpec.describe IssuesHelper do
     context 'with linked issue' do
       context 'with moved issue' do
         before do
-          issue.update(moved_to: new_issue)
+          issue.update!(moved_to: new_issue)
         end
 
         context 'when user has permission to see new issue' do
@@ -181,7 +181,7 @@ RSpec.describe IssuesHelper do
 
       context 'with duplicated issue' do
         before do
-          issue.update(duplicated_to: new_issue)
+          issue.update!(duplicated_to: new_issue)
         end
 
         context 'when user has permission to see new issue' do
@@ -203,10 +203,55 @@ RSpec.describe IssuesHelper do
       let(:user) { project.owner }
 
       before do
-        issue.update(moved_to: nil, duplicated_to: nil)
+        issue.update!(moved_to: nil, duplicated_to: nil)
       end
 
       it_behaves_like 'does not display link'
+    end
+  end
+
+  describe '#show_moved_service_desk_issue_warning?' do
+    let(:project1) { create(:project, service_desk_enabled: true) }
+    let(:project2) { create(:project, service_desk_enabled: true) }
+    let!(:old_issue) { create(:issue, author: User.support_bot, project: project1) }
+    let!(:new_issue) { create(:issue, author: User.support_bot, project: project2) }
+
+    before do
+      allow(Gitlab::IncomingEmail).to receive(:enabled?) { true }
+      allow(Gitlab::IncomingEmail).to receive(:supports_wildcard?) { true }
+
+      old_issue.update!(moved_to: new_issue)
+    end
+
+    it 'is true when moved issue project has service desk disabled' do
+      project2.update!(service_desk_enabled: false)
+
+      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(true)
+    end
+
+    it 'is false when moved issue project has service desk enabled' do
+      expect(helper.show_moved_service_desk_issue_warning?(new_issue)).to be(false)
+    end
+  end
+
+  describe '#use_startup_call' do
+    it "returns false when a query param is present" do
+      allow(controller.request).to receive(:query_parameters).and_return({ foo: 'bar' })
+
+      expect(helper.use_startup_call?).to eq(false)
+    end
+
+    it "returns false when user has stored sort preference" do
+      controller.instance_variable_set(:@sort, 'updated_asc')
+
+      expect(helper.use_startup_call?).to eq(false)
+    end
+
+    it 'returns true when request.query_parameters is empty with default sorting preference' do
+      controller.instance_variable_set(:@sort, 'created_date')
+      allow(controller.request).to receive(:query_parameters).and_return({})
+
+      expect(helper.use_startup_call?).to eq(true)
     end
   end
 end

@@ -6,18 +6,14 @@ import {
   GlIcon,
   GlFormGroup,
   GlFormCheckbox,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
 } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
-import { refreshCurrentPage } from '~/lib/utils/url_utility';
-import createFlash from '~/flash';
 import {
   I18N_ALERT_SETTINGS_FORM,
   NO_ISSUE_TEMPLATE_SELECTED,
   TAKING_INCIDENT_ACTION_DOCS_LINK,
   ISSUE_TEMPLATES_DOCS_LINK,
-  ERROR_MSG,
 } from '../constants';
 
 export default {
@@ -28,16 +24,17 @@ export default {
     GlFormGroup,
     GlIcon,
     GlFormCheckbox,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
   },
-  inject: ['alertSettings', 'operationsSettingsEndpoint'],
+  inject: ['service', 'alertSettings'],
   data() {
     return {
       templates: [NO_ISSUE_TEMPLATE_SELECTED, ...this.alertSettings.templates],
       createIssueEnabled: this.alertSettings.createIssue,
       issueTemplate: this.alertSettings.issueTemplateKey,
       sendEmailEnabled: this.alertSettings.sendEmail,
+      autoCloseIncident: this.alertSettings.autoCloseIncident,
       loading: false,
     };
   },
@@ -53,6 +50,7 @@ export default {
         create_issue: this.createIssueEnabled,
         issue_template_key: this.issueTemplate,
         send_email: this.sendEmailEnabled,
+        auto_close_incident: this.autoCloseIncident,
       };
     },
   },
@@ -65,23 +63,10 @@ export default {
     },
     updateAlertsIntegrationSettings() {
       this.loading = true;
-      return axios
-        .patch(this.operationsSettingsEndpoint, {
-          project: {
-            incident_management_setting_attributes: this.formData,
-          },
-        })
-        .then(() => {
-          refreshCurrentPage();
-        })
-        .catch(({ response }) => {
-          const message = response?.data?.message || '';
 
-          createFlash(`${ERROR_MSG} ${message}`, 'alert');
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+      this.service.updateSettings(this.formData).catch(() => {
+        this.loading = false;
+      });
     },
   },
 };
@@ -116,13 +101,13 @@ export default {
             <gl-icon name="question" :size="12" />
           </gl-link>
         </label>
-        <gl-new-dropdown
+        <gl-dropdown
           id="alert-integration-settings-issue-template"
           data-qa-selector="incident_templates_dropdown"
           :text="issueTemplateHeader"
           :block="true"
         >
-          <gl-new-dropdown-item
+          <gl-dropdown-item
             v-for="template in templates"
             :key="template.key"
             data-qa-selector="incident_templates_item"
@@ -131,8 +116,8 @@ export default {
             @click="selectIssueTemplate(template.key)"
           >
             {{ template.name }}
-          </gl-new-dropdown-item>
-        </gl-new-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
       </gl-form-group>
 
       <gl-form-group class="gl-pl-0 gl-mb-5">
@@ -140,7 +125,11 @@ export default {
           <span>{{ $options.i18n.sendEmail.label }}</span>
         </gl-form-checkbox>
       </gl-form-group>
-
+      <gl-form-group class="gl-pl-0 gl-mb-5">
+        <gl-form-checkbox v-model="autoCloseIncident">
+          <span>{{ $options.i18n.autoCloseIncidents.label }}</span>
+        </gl-form-checkbox>
+      </gl-form-group>
       <gl-button
         ref="submitBtn"
         data-qa-selector="save_changes_button"

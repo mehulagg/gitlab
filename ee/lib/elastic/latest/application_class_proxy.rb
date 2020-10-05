@@ -33,6 +33,12 @@ module Elastic
 
       private
 
+      def default_operator
+        return :or if Feature.enabled?(:elasticsearch_use_or_default_operator)
+
+        :and
+      end
+
       def highlight_options(fields)
         es_fields = fields.map { |field| field.split('^').first }.each_with_object({}) do |field, memo|
           memo[field.to_sym] = {}
@@ -51,7 +57,7 @@ module Elastic
                     simple_query_string: {
                       fields: fields,
                       query: query,
-                      default_operator: :and
+                      default_operator: default_operator
                     }
                   }],
                   filter: [{
@@ -70,11 +76,6 @@ module Elastic
               track_scores: true
             }
           end
-
-        query_hash[:sort] = [
-          { updated_at: { order: :desc } },
-          :_score
-        ]
 
         query_hash[:highlight] = highlight_options(fields)
 
@@ -117,6 +118,25 @@ module Elastic
         query_hash
       end
 
+      def apply_sort(query_hash, options)
+        case options[:sort]
+        when 'oldest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'asc'
+            }
+          })
+        when 'newest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'desc'
+            }
+          })
+        else
+          query_hash
+        end
+      end
+
       # Builds an elasticsearch query that will select projects the user is
       # granted access to.
       #
@@ -124,22 +144,20 @@ module Elastic
       # documents gated by that project feature - e.g., "issues". The feature's
       # visibility level must be taken into account.
       def project_ids_query(user, project_ids, public_and_internal_projects, features = nil)
-        # When reading cross project is not allowed, only allow searching a
-        # a single project, so the `:read_*` ability is only checked once.
-        unless Ability.allowed?(user, :read_cross_project)
-          project_ids = [] if project_ids.is_a?(Array) && project_ids.size > 1
-        end
+        scoped_project_ids = scoped_project_ids(user, project_ids)
 
         # At least one condition must be present, so pick no projects for
         # anonymous users.
         # Pick private, internal and public projects the user is a member of.
         # Pick all private projects for admins & auditors.
-        conditions = pick_projects_by_membership(project_ids, user, features)
+        conditions = pick_projects_by_membership(scoped_project_ids, user, features)
 
         if public_and_internal_projects
           # Skip internal projects for anonymous and external users.
-          # Others are given access to all internal projects. Admins & auditors
-          # get access to internal projects where the feature is private.
+          # Others are given access to all internal projects.
+          #
+          # Admins & auditors get access to internal projects even
+          # if the feature is private.
           conditions += pick_projects_by_visibility(Project::INTERNAL, user, features) if user && !user.external?
 
           # All users, including anonymous, can access public projects.
@@ -223,6 +241,33 @@ module Elastic
           .id_in(project_ids)
           .filter_by_feature_visibility(feature, user)
           .pluck_primary_key
+      end
+
+      def scoped_project_ids(current_user, project_ids)
+        return :any if project_ids == :any
+
+        project_ids ||= []
+
+        # When reading cross project is not allowed, only allow searching a
+        # a single project, so the `:read_*` ability is only checked once.
+        unless Ability.allowed?(current_user, :read_cross_project)
+          return [] if project_ids.size > 1
+        end
+
+        project_ids
+      end
+
+      def authorized_project_ids(current_user, options = {})
+        return [] unless current_user
+
+        scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        authorized_project_ids = current_user.authorized_projects(Gitlab::Access::REPORTER).pluck_primary_key.to_set
+
+        # if the current search is limited to a subset of projects, we should do
+        # confidentiality check for these projects.
+        authorized_project_ids &= scoped_project_ids.to_set unless scoped_project_ids == :any
+
+        authorized_project_ids.to_a
       end
     end
   end

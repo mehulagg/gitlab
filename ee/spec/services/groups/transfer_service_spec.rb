@@ -10,66 +10,8 @@ RSpec.describe Groups::TransferService, '#execute' do
   let(:transfer_service) { described_class.new(group, user) }
 
   before do
-    stub_licensed_features(packages: true)
     group.add_owner(user)
     new_group&.add_owner(user)
-  end
-
-  context 'with an npm package' do
-    before do
-      create(:npm_package, project: project)
-    end
-
-    shared_examples 'transfer not allowed' do
-      it 'does not allow transfer when there is a root namespace change' do
-        transfer_service.execute(new_group)
-
-        expect(transfer_service.error).to eq('Transfer failed: Group contains projects with NPM packages.')
-      end
-    end
-
-    it_behaves_like 'transfer not allowed'
-
-    context 'with a project within subgroup' do
-      let(:root_group) { create(:group) }
-      let(:group) { create(:group, parent: root_group) }
-
-      before do
-        root_group.add_owner(user)
-      end
-
-      it_behaves_like 'transfer not allowed'
-
-      context 'without a root namespace change' do
-        let(:new_group) { create(:group, parent: root_group) }
-
-        it 'allows transfer' do
-          transfer_service.execute(new_group)
-
-          expect(transfer_service.error).not_to be
-          expect(group.parent).to eq(new_group)
-        end
-      end
-
-      context 'when transferring a group into a root group' do
-        let(:new_group) { nil }
-
-        it_behaves_like 'transfer not allowed'
-      end
-    end
-  end
-
-  context 'without an npm package' do
-    context 'when transferring a group into a root group' do
-      let(:group) { create(:group, parent: create(:group)) }
-
-      it 'allows transfer' do
-        transfer_service.execute(nil)
-
-        expect(transfer_service.error).not_to be
-        expect(group.parent).to be_nil
-      end
-    end
   end
 
   context 'when visibility changes' do

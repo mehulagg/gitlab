@@ -8,6 +8,7 @@ class Groups::HooksController < Groups::ApplicationController
   before_action :authorize_admin_group!
   before_action :check_group_webhooks_available!
   before_action :set_hook, only: [:edit, :update, :test, :destroy]
+  before_action -> { create_rate_limit(:group_testing_hook, @group) }, only: :test
 
   respond_to :html
 
@@ -70,18 +71,10 @@ class Groups::HooksController < Groups::ApplicationController
 
   def hook_params
     params.require(:hook).permit(
-      :job_events,
-      :confidential_issues_events,
       :enable_ssl_verification,
-      :issues_events,
-      :merge_requests_events,
-      :note_events,
-      :pipeline_events,
-      :push_events,
-      :tag_push_events,
       :token,
       :url,
-      :wiki_page_events
+      *GroupHook.triggers.values
     )
   end
 

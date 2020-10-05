@@ -10,7 +10,6 @@ RSpec.describe 'User creates feature flag', :js do
 
   before do
     project.add_developer(user)
-    stub_licensed_features(feature_flags: true)
     stub_feature_flags(feature_flag_permissions: false)
     sign_in(user)
   end
@@ -84,11 +83,10 @@ RSpec.describe 'User creates feature flag', :js do
       it 'shows the created feature flag' do
         within_feature_flag_row(1) do
           expect(page.find('.feature-flag-name')).to have_content('ci_live_trace')
-          expect(page).to have_css('.js-feature-flag-status button.is-checked')
+          expect_status_toggle_button_to_be_checked
 
           within_feature_flag_scopes do
-            expect(page.find('.badge:nth-child(1)')).to have_content('*')
-            expect(page.find('.badge:nth-child(1)')['class']).to include('badge-active')
+            expect(page.find('[data-qa-selector="feature-flag-scope-info-badge"]:nth-child(1)')).to have_content('*')
           end
         end
       end
@@ -115,11 +113,10 @@ RSpec.describe 'User creates feature flag', :js do
       it 'shows the created feature flag' do
         within_feature_flag_row(1) do
           expect(page.find('.feature-flag-name')).to have_content('ci_live_trace')
-          expect(page).to have_css('.js-feature-flag-status button.is-checked')
+          expect_status_toggle_button_to_be_checked
 
           within_feature_flag_scopes do
-            expect(page.find('.badge:nth-child(1)')).to have_content('*')
-            expect(page.find('.badge:nth-child(1)')['class']).to include('badge-inactive')
+            expect(page.find('[data-qa-selector="feature-flag-scope-muted-badge"]:nth-child(1)')).to have_content('*')
           end
         end
       end
@@ -132,7 +129,7 @@ RSpec.describe 'User creates feature flag', :js do
 
         within_scope_row(2) do
           within_environment_spec do
-            find('.js-env-input').set("review/*")
+            find('.js-env-search > input').set("review/*")
             find('.js-create-button').click
           end
         end
@@ -147,13 +144,11 @@ RSpec.describe 'User creates feature flag', :js do
       it 'shows the created feature flag' do
         within_feature_flag_row(1) do
           expect(page.find('.feature-flag-name')).to have_content('mr_train')
-          expect(page).to have_css('.js-feature-flag-status button.is-checked')
+          expect_status_toggle_button_to_be_checked
 
           within_feature_flag_scopes do
-            expect(page.find('.badge:nth-child(1)')).to have_content('*')
-            expect(page.find('.badge:nth-child(1)')['class']).to include('badge-active')
-            expect(page.find('.badge:nth-child(2)')).to have_content('review/*')
-            expect(page.find('.badge:nth-child(2)')['class']).to include('badge-active')
+            expect(page.find('[data-qa-selector="feature-flag-scope-info-badge"]:nth-child(1)')).to have_content('*')
+            expect(page.find('[data-qa-selector="feature-flag-scope-info-badge"]:nth-child(2)')).to have_content('review/*')
           end
         end
       end
@@ -168,7 +163,7 @@ RSpec.describe 'User creates feature flag', :js do
 
         within_scope_row(2) do
           within_environment_spec do
-            find('.js-env-input').set('prod')
+            find('.js-env-search > input').set('prod')
             click_button 'production'
           end
         end
@@ -179,13 +174,11 @@ RSpec.describe 'User creates feature flag', :js do
       it 'shows the created feature flag' do
         within_feature_flag_row(1) do
           expect(page.find('.feature-flag-name')).to have_content('mr_train')
-          expect(page).to have_css('.js-feature-flag-status button.is-checked')
+          expect_status_toggle_button_to_be_checked
 
           within_feature_flag_scopes do
-            expect(page.find('.badge:nth-child(1)')).to have_content('*')
-            expect(page.find('.badge:nth-child(1)')['class']).to include('badge-active')
-            expect(page.find('.badge:nth-child(2)')).to have_content('production')
-            expect(page.find('.badge:nth-child(2)')['class']).to include('badge-inactive')
+            expect(page.find('[data-qa-selector="feature-flag-scope-info-badge"]:nth-child(1)')).to have_content('*')
+            expect(page.find('[data-qa-selector="feature-flag-scope-muted-badge"]:nth-child(2)')).to have_content('production')
           end
         end
       end

@@ -25,9 +25,6 @@ module Gitlab
           # redis-rb passes an array (e.g. [[:get, key]])
           return unless args.length == 1
 
-          # TODO: Add information about current Redis client
-          # being instrumented.
-          # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/316.
           detail_store << {
             cmd: args.first,
             duration: duration,
@@ -99,7 +96,7 @@ module Gitlab
             :gitlab_redis_client_requests_duration_seconds,
             'Client side Redis request latency, per Redis server, excluding blocking commands',
             {},
-            [0.001, 0.005, 0.01]
+            [0.1, 0.5, 0.75, 1]
           )
 
           @request_latency_histogram.observe({ storage: storage_key }, duration)

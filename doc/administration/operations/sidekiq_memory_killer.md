@@ -26,8 +26,8 @@ run as a process group leader (e.g., using `chpst -P`). If using Omnibus or the
 
 The MemoryKiller is controlled using environment variables.
 
-- `SIDEKIQ_DAEMON_MEMORY_KILLER`: defaults to 0. When set to 1, the MemoryKiller
-  works in _daemon_ mode. Otherwise, the MemoryKiller works in _legacy_ mode.
+- `SIDEKIQ_DAEMON_MEMORY_KILLER`: defaults to 1. When set to 0, the MemoryKiller
+  works in _legacy_ mode. Otherwise, the MemoryKiller works in _daemon_ mode.
 
   In _legacy_ mode, the MemoryKiller checks the Sidekiq process RSS after each job.
 
@@ -71,5 +71,5 @@ The MemoryKiller is controlled using environment variables.
 
   If the process hard shutdown/restart is not performed by Sidekiq,
   the Sidekiq process will be forcefully terminated after
-  `Sidekiq.options[:timeout] * 2` seconds. An external supervision mechanism
+  `Sidekiq.options[:timeout] + 2` seconds. An external supervision mechanism
   (e.g. runit) must restart Sidekiq afterwards.

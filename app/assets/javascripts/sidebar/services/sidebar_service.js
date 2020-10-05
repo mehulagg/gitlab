@@ -1,7 +1,6 @@
+import sidebarDetailsQuery from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
 import axios from '~/lib/utils/axios_utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import sidebarDetailsQuery from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
-import sidebarDetailsForHealthStatusFeatureFlagQuery from 'ee_else_ce/sidebar/queries/sidebarDetailsForHealthStatusFeatureFlag.query.graphql';
 
 export const gqClient = createGqClient(
   {},
@@ -27,14 +26,10 @@ export default class SidebarService {
   }
 
   get() {
-    const hasHealthStatusFeatureFlag = gon.features && gon.features.saveIssuableHealthStatus;
-
     return Promise.all([
       axios.get(this.endpoint),
       gqClient.query({
-        query: hasHealthStatusFeatureFlag
-          ? sidebarDetailsForHealthStatusFeatureFlagQuery
-          : sidebarDetailsQuery,
+        query: sidebarDetailsQuery,
         variables: {
           fullPath: this.fullPath,
           iid: this.iid.toString(),

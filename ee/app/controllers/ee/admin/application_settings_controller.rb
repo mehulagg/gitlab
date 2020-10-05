@@ -9,7 +9,10 @@ module EE
       include ::Admin::MergeRequestApprovalSettingsHelper
 
       prepended do
-        before_action :elasticsearch_reindexing_task, only: [:integrations]
+        before_action :elasticsearch_reindexing_task, only: [:general]
+
+        feature_category :provision, [:seat_link_payload]
+        feature_category :source_code_management, [:templates]
 
         def elasticsearch_reindexing_task
           @elasticsearch_reindexing_task = Elastic::ReindexingTask.last
@@ -22,7 +25,6 @@ module EE
         define_method(action) { perform_update if submitted? }
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
       def visible_application_setting_attributes
         attrs = super
 
@@ -30,36 +32,22 @@ module EE
           attrs += EE::ApplicationSettingsHelper.repository_mirror_attributes
         end
 
-        if License.feature_available?(:custom_project_templates)
-          attrs << :custom_project_templates_group_id
-        end
-
-        if License.feature_available?(:email_additional_text)
-          attrs << :email_additional_text
-        end
-
-        if License.feature_available?(:custom_file_templates)
-          attrs << :file_template_project_id
-        end
-
-        if License.feature_available?(:pseudonymizer)
-          attrs << :pseudonymizer_enabled
-        end
-
-        if License.feature_available?(:default_project_deletion_protection)
-          attrs << :default_project_deletion_protection
-        end
-
-        if License.feature_available?(:adjourned_deletion_for_projects_and_groups)
-          attrs << :deletion_adjourned_period
-        end
-
-        if License.feature_available?(:required_ci_templates)
-          attrs << :required_instance_ci_template
-        end
-
-        if License.feature_available?(:disable_name_update_for_users)
-          attrs << :updating_name_disabled_for_users
+        # License feature => attribute name
+        {
+          custom_project_templates: :custom_project_templates_group_id,
+          email_additional_text: :email_additional_text,
+          custom_file_templates: :file_template_project_id,
+          pseudonymizer: :pseudonymizer_enabled,
+          default_project_deletion_protection: :default_project_deletion_protection,
+          adjourned_deletion_for_projects_and_groups: :deletion_adjourned_period,
+          required_ci_templates: :required_instance_ci_template,
+          disable_name_update_for_users: :updating_name_disabled_for_users,
+          package_forwarding: :npm_package_requests_forwarding,
+          default_branch_protection_restriction_in_groups: :group_owners_can_manage_default_branch_protection
+        }.each do |license_feature, attribute_name|
+          if License.feature_available?(license_feature)
+            attrs << attribute_name
+          end
         end
 
         if License.feature_available?(:admin_merge_request_approvers_rules)
@@ -70,17 +58,13 @@ module EE
           attrs << { compliance_frameworks: [] }
         end
 
-        if License.feature_available?(:packages)
-          attrs << :npm_package_requests_forwarding
-        end
-
-        if License.feature_available?(:default_branch_protection_restriction_in_groups)
-          attrs << :group_owners_can_manage_default_branch_protection
+        if ::Gitlab::Geo.license_allows? && ::Feature.enabled?(:maintenance_mode)
+          attrs << :maintenance_mode
+          attrs << :maintenance_mode_message
         end
 
         attrs
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       def seat_link_payload
         data = ::Gitlab::SeatLinkData.new

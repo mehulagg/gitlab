@@ -3,7 +3,19 @@ import * as types from 'ee/roadmap/store/mutation_types';
 
 import defaultState from 'ee/roadmap/store/state';
 
-import { mockGroupId, basePath, epicsPath, mockSortedBy } from 'ee_jest/roadmap/mock_data';
+import {
+  mockGroupId,
+  basePath,
+  epicsPath,
+  mockSortedBy,
+  mockEpic,
+} from 'ee_jest/roadmap/mock_data';
+
+const setEpicMockData = state => {
+  state.epics = [mockEpic];
+  state.childrenFlags = { 'gid://gitlab/Epic/1': {} };
+  state.epicIds = ['gid://gitlab/Epic/1'];
+};
 
 describe('Roadmap Store Mutations', () => {
   let state;
@@ -255,6 +267,55 @@ describe('Roadmap Store Mutations', () => {
       mutations[types.SET_BUFFER_SIZE](state, bufferSize);
 
       expect(state.bufferSize).toBe(bufferSize);
+    });
+  });
+
+  describe('SET_FILTER_PARAMS', () => {
+    it('Should set `filterParams` and `hasFiltersApplied` to the state and reset existing epics', () => {
+      const filterParams = [{ foo: 'bar' }, { bar: 'baz' }];
+      setEpicMockData(state);
+
+      mutations[types.SET_FILTER_PARAMS](state, filterParams);
+
+      expect(state).toMatchObject({
+        filterParams,
+        hasFiltersApplied: true,
+        epics: [],
+        childrenFlags: {},
+        epicIds: [],
+      });
+    });
+  });
+
+  describe('SET_EPICS_STATE', () => {
+    it('Should set `epicsState` to the state and reset existing epics', () => {
+      const epicsState = 'all';
+      setEpicMockData(state);
+
+      mutations[types.SET_EPICS_STATE](state, epicsState);
+
+      expect(state).toMatchObject({
+        epicsState,
+        epics: [],
+        childrenFlags: {},
+        epicIds: [],
+      });
+    });
+  });
+
+  describe('SET_SORTED_BY', () => {
+    it('Should set `sortedBy` to the state and reset existing epics', () => {
+      const sortedBy = 'start_date_asc';
+      setEpicMockData(state);
+
+      mutations[types.SET_SORTED_BY](state, sortedBy);
+
+      expect(state).toMatchObject({
+        sortedBy,
+        epics: [],
+        childrenFlags: {},
+        epicIds: [],
+      });
     });
   });
 });

@@ -152,13 +152,13 @@ RSpec.describe Vulnerabilities::FeedbackEntity do
   end
 
   context 'when comment is not present' do
-    let(:feedback) { build(:vulnerability_feedback, :dismissal) }
+    let(:feedback) { build(:vulnerability_feedback, :dismissal, project: project) }
 
     it { is_expected.not_to include(:comment_details) }
   end
 
   context 'when comment is present' do
-    let(:feedback) { build(:vulnerability_feedback, :comment) }
+    let(:feedback) { build(:vulnerability_feedback, :comment, project: project) }
 
     it 'exposes comment information' do
       expect(subject).to include(:comment_details)

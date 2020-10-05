@@ -15,58 +15,60 @@ RSpec.describe SearchController, type: :request do
     get search_path, params: params
   end
 
+  shared_examples 'an efficient database result' do
+    it 'avoids N+1 database queries' do
+      create(object, *creation_traits, creation_args)
+
+      ensure_elasticsearch_index!
+
+      control = ActiveRecord::QueryRecorder.new(skip_cached: false) { send_search_request(params) }
+      create_list(object, 3, *creation_traits, creation_args)
+
+      ensure_elasticsearch_index!
+
+      expect { send_search_request(params) }.not_to exceed_all_query_limit(control).with_threshold(threshold)
+    end
+  end
+
   describe 'GET /search' do
     context 'when elasticsearch is enabled', :elastic, :sidekiq_inline do
       before do
         stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
       end
+      let(:creation_traits) { [] }
+
+      context 'for issues scope' do
+        let(:object) { :issue }
+        let(:creation_args) { { project: project } }
+        let(:params) { { search: '*', scope: 'issues' } }
+        let(:threshold) { 0 }
+
+        it_behaves_like 'an efficient database result'
+      end
 
       context 'for merge_request scope' do
-        before do
-          create(:merge_request, target_branch: 'feature_1', source_project: project)
-          create(:merge_request, target_branch: 'feature_2', source_project: project)
-          create(:merge_request, target_branch: 'feature_3', source_project: project)
-          create(:merge_request, target_branch: 'feature_4', source_project: project)
-          ensure_elasticsearch_index!
-        end
+        let(:creation_traits) { [:unique_branches] }
+        let(:object) { :merge_request }
+        let(:creation_args) { { source_project: project } }
+        let(:params) { { search: '*', scope: 'merge_requests' } }
+        let(:threshold) { 0 }
 
-        it 'avoids N+1 queries' do
-          control = ActiveRecord::QueryRecorder.new(skip_cached: false) { send_search_request(scope: 'merge_requests', search: '*') }
-
-          create(:merge_request, target_branch: 'feature_5', source_project: project)
-          create(:merge_request, target_branch: 'feature_6', source_project: project)
-          create(:merge_request, target_branch: 'feature_7', source_project: project)
-          create(:merge_request, target_branch: 'feature_8', source_project: project)
-
-          ensure_elasticsearch_index!
-
-          # some N+1 queries still exist
-          expect { send_search_request(scope: 'merge_requests', search: '*') }
-            .not_to exceed_all_query_limit(control)
-        end
+        it_behaves_like 'an efficient database result'
       end
 
       context 'for project scope' do
-        before do
-          create(:project, :public)
-          ensure_elasticsearch_index!
-        end
+        let(:creation_traits) { [:public] }
+        let(:object) { :project }
+        let(:creation_args) { {} }
+        let(:params) { { search: '*', scope: 'projects' } }
+        # some N+1 queries still exist
+        # each project requires 3 extra queries
+        #   - one count for forks
+        #   - one count for open MRs
+        #   - one count for open Issues
+        let(:threshold) { 9 }
 
-        it 'avoids N+1 queries' do
-          control = ActiveRecord::QueryRecorder.new(skip_cached: false) { send_search_request(scope: 'project', search: '*') }
-
-          create_list(:project, 3, :public)
-
-          ensure_elasticsearch_index!
-
-          # some N+1 queries still exist
-          # each project requires 3 extra queries
-          #   - one count for forks
-          #   - one count for open MRs
-          #   - one count for open Issues
-          expect { send_search_request(scope: 'project', search: '*') }
-            .not_to exceed_all_query_limit(control).with_threshold(9)
-        end
+        it_behaves_like 'an efficient database result'
       end
     end
   end

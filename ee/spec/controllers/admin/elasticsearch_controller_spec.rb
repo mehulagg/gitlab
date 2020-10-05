@@ -18,8 +18,8 @@ RSpec.describe Admin::ElasticsearchController do
 
       post :enqueue_index
 
-      expect(controller).to set_flash[:notice].to include('/admin/sidekiq/queues/elastic_full_index')
-      expect(response).to redirect_to integrations_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+      expect(controller).to set_flash[:notice].to include('/admin/sidekiq/queues/elastic_commit_indexer')
+      expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
     end
 
     context 'without an index' do
@@ -33,7 +33,7 @@ RSpec.describe Admin::ElasticsearchController do
         post :enqueue_index
 
         expect(controller).to set_flash[:warning].to include('create an index before enabling indexing')
-        expect(response).to redirect_to integrations_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+        expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
       end
     end
   end
@@ -49,7 +49,7 @@ RSpec.describe Admin::ElasticsearchController do
       post :trigger_reindexing
 
       expect(controller).to set_flash[:notice].to include('reindexing triggered')
-      expect(response).to redirect_to integrations_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+      expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
     end
 
     it 'does not create a reindexing task if there is another one' do
@@ -59,7 +59,23 @@ RSpec.describe Admin::ElasticsearchController do
       post :trigger_reindexing
 
       expect(controller).to set_flash[:warning].to include('already in progress')
-      expect(response).to redirect_to integrations_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+      expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
+    end
+  end
+
+  describe 'POST #cancel_index_deletion' do
+    before do
+      sign_in(admin)
+    end
+
+    let(:task) { create(:elastic_reindexing_task, state: :success, delete_original_index_at: Time.current) }
+
+    it 'sets delete_original_index_at to nil' do
+      post :cancel_index_deletion, params: { task_id: task.id }
+
+      expect(task.reload.delete_original_index_at).to be_nil
+      expect(controller).to set_flash[:notice].to include('deletion is canceled')
+      expect(response).to redirect_to general_admin_application_settings_path(anchor: 'js-elasticsearch-settings')
     end
   end
 end

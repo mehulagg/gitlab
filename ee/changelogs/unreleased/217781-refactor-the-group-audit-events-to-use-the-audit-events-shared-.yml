@@ -1,5 +1,0 @@
----
-title: Update group audit events to use the new searchable table
-merge_request: 33305
-author:
-type: changed

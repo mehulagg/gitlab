@@ -173,9 +173,28 @@ dot -Tsvg project_policy_spec.dot > project_policy_spec.svg
 To load the profile in [kcachegrind](https://kcachegrind.github.io/):
 
 ```shell
-stackprof tmp/project_policy_spec.dump --callgrind > project_policy_spec.callgrind
+stackprof tmp/project_policy_spec.rb.dump --callgrind > project_policy_spec.callgrind
 kcachegrind project_policy_spec.callgrind # Linux
 qcachegrind project_policy_spec.callgrind # Mac
+```
+
+For flamegraphs, enable raw collection first. Note that raw
+collection can generate a very large file, so increase the `INTERVAL`, or
+run on a smaller number of specs for smaller file size:
+
+```shell
+RAW=true bin/rspec-stackprof spec/policies/group_member_policy_spec.rb
+```
+
+You can then generate, and view the resultant flamegraph. It might take a
+while to generate based on the output file size:
+
+```shell
+# Generate
+stackprof --flamegraph tmp/group_member_policy_spec.rb.dump > group_member_policy_spec.flame
+
+# View
+stackprof --flamegraph-viewer=group_member_policy_spec.flame
 ```
 
 It may be useful to zoom in on a specific method, for example:
@@ -253,13 +272,18 @@ Currently supported profiling targets are:
 - Puma worker
 - Sidekiq
 
-NOTE: **Note:** The Puma master process is not supported. Neither is Unicorn.
+NOTE: **Note:**
+The Puma master process is not supported. Neither is Unicorn.
 Sending SIGUSR2 to either of those will trigger restarts. In the case of Puma,
 take care to only send the signal to Puma workers.
 
 This can be done via `pkill -USR2 puma:`. The `:` disambiguates between `puma
 4.3.3.gitlab.2 ...` (the master process) from `puma: cluster worker 0: ...` (the
 worker processes), selecting the latter.
+
+For Sidekiq, the signal can be sent to the `sidekiq-cluster` process via `pkill
+-USR2 bin/sidekiq-cluster`, which will forward the signal to all Sidekiq
+children. Alternatively, you can also select a specific pid of interest.
 
 Production profiles can be especially noisy. It can be helpful to visualize them
 as a [flamegraph](https://github.com/brendangregg/FlameGraph). This can be done

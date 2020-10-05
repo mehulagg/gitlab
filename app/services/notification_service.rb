@@ -35,6 +35,12 @@ class NotificationService
     @async ||= Async.new(self)
   end
 
+  def disabled_two_factor(user)
+    return unless user.can?(:receive_notifications)
+
+    mailer.disabled_two_factor_email(user).deliver_later
+  end
+
   # Always notify user about ssh key added
   # only if ssh key is not deploy key
   #
@@ -64,6 +70,13 @@ class NotificationService
     return unless user.can?(:receive_notifications)
 
     mailer.access_token_about_to_expire_email(user).deliver_later
+  end
+
+  # Notify the user when at least one of their personal access tokens has expired today
+  def access_token_expired(user)
+    return unless user.can?(:receive_notifications)
+
+    mailer.access_token_expired_email(user).deliver_later
   end
 
   # Notify a user when a previously unknown IP or device is used to
@@ -219,6 +232,33 @@ class NotificationService
         recipient.user.id,
         merge_request.id,
         previous_assignee_ids,
+        current_user.id,
+        recipient.reason
+      ).deliver_later
+    end
+  end
+
+  # When we change reviewer in a merge_request we should send an email to:
+  #
+  #  * merge_request old reviewers if their notification level is not Disabled
+  #  * merge_request new reviewers if their notification level is not Disabled
+  #  * users with custom level checked with "change reviewer merge request"
+  #
+  def changed_reviewer_of_merge_request(merge_request, current_user, previous_reviewers = [])
+    recipients = NotificationRecipients::BuildService.build_recipients(
+      merge_request,
+      current_user,
+      action: "change_reviewer",
+      previous_assignees: previous_reviewers
+    )
+
+    previous_reviewer_ids = previous_reviewers.map(&:id)
+
+    recipients.each do |recipient|
+      mailer.changed_reviewer_of_merge_request_email(
+        recipient.user.id,
+        merge_request.id,
+        previous_reviewer_ids,
         current_user.id,
         recipient.reason
       ).deliver_later
@@ -395,6 +435,10 @@ class NotificationService
     mailer.member_invited_email(group_member.real_source_type, group_member.id, token).deliver_later
   end
 
+  def invite_member_reminder(group_member, token, reminder_index)
+    mailer.member_invited_reminder_email(group_member.real_source_type, group_member.id, token, reminder_index).deliver_later
+  end
+
   def accept_group_invite(group_member)
     mailer.member_invite_accepted_email(group_member.real_source_type, group_member.id).deliver_later
   end
@@ -424,8 +468,8 @@ class NotificationService
   end
 
   def project_was_moved(project, old_path_with_namespace)
-    recipients = project.private? ? project.team.members_in_project_and_ancestors : project.team.members
-    recipients = notifiable_users(recipients, :mention, project: project)
+    recipients = project_moved_recipients(project)
+    recipients = notifiable_users(recipients, :custom, custom_action: :moved_project, project: project)
 
     recipients.each do |recipient|
       mailer.project_was_moved_email(
@@ -582,6 +626,14 @@ class NotificationService
     end
   end
 
+  def merge_when_pipeline_succeeds(merge_request, current_user)
+    recipients = ::NotificationRecipients::BuildService.build_recipients(merge_request, current_user, action: 'merge_when_pipeline_succeeds')
+
+    recipients.each do |recipient|
+      mailer.merge_when_pipeline_succeeds_email(recipient.user.id, merge_request.id, current_user.id).deliver_later
+    end
+  end
+
   protected
 
   def new_resource_email(target, method)
@@ -695,6 +747,14 @@ class NotificationService
     end
 
     recipients
+  end
+
+  def project_moved_recipients(project)
+    finder = MembersFinder.new(project, nil, params: {
+      active_without_invites_and_requests: true,
+      owners_and_maintainers: true
+    })
+    finder.execute.preload_user_and_notification_settings.map(&:user)
   end
 
   def project_maintainers_recipients(target, action:)

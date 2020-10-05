@@ -8,7 +8,7 @@
         .avatar-container.rect-avatar.s64.home-panel-avatar.mb-3
           = group_icon(@unauthenticated_group, class: 'avatar avatar-tile s64', width: 64, height: 64)
         %p.text-center
-          = (_("Finish setting up your dedicated account for <strong>%{group_name}</strong>.") % { group_name: sanitize(@group_name) }).html_safe
+          = html_escape(_("Finish setting up your dedicated account for %{group_name}.")) % { group_name: tag.strong(@group_name) }
 
       .form-group
         = f.label :email, class: 'label-bold'

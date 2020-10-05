@@ -120,11 +120,36 @@ RSpec.describe Projects::TagsController do
 
         request
 
-        release = project.releases.find_by_tag!('1.0')
+        aggregate_failures do
+          expect(response).to have_gitlab_http_status(:found)
 
-        expect(release).to be_present
-        expect(release.description).to eq(release_description)
+          release = project.releases.find_by_tag('1.0')
+
+          expect(release).to be_present
+          expect(release&.description).to eq(release_description)
+        end
       end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    let(:tag) { project.repository.add_tag(user, 'fake-tag', 'master') }
+    let(:request) do
+      delete(:destroy, params: { id: tag.name, namespace_id: project.namespace.to_param, project_id: project })
+    end
+
+    before do
+      project.add_developer(user)
+      sign_in(user)
+    end
+
+    it 'deletes tag' do
+      request
+
+      expect(response).to be_successful
+      expect(response.body).to include("Tag was removed")
+
+      expect(project.repository.find_tag(tag.name)).not_to be_present
     end
   end
 end

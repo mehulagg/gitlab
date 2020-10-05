@@ -18,7 +18,8 @@ class GroupHook < WebHook
     :merge_request_hooks,
     :job_hooks,
     :pipeline_hooks,
-    :wiki_page_hooks
+    :wiki_page_hooks,
+    :deployment_hooks
   ]
 
   belongs_to :group

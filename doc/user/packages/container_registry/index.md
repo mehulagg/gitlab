@@ -16,100 +16,44 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - The group level Container Registry was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23315) in GitLab 12.10.
 > - Searching by image repository name was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31322) in GitLab 13.0.
 
-NOTE: **Note:**
-This document is the user guide. To learn how to enable GitLab Container
-Registry across your GitLab instance, visit the
-[administrator documentation](../../../administration/packages/container_registry.md).
-
-With the Docker Container Registry integrated into GitLab, every project can
+With the Docker Container Registry integrated into GitLab, every GitLab project can
 have its own space to store its Docker images.
 
 You can read more about Docker Registry at <https://docs.docker.com/registry/introduction/>.
 
-![Container Registry repositories](img/container_registry_repositories_v13_1.png)
+NOTE: **Note:**
+This document is the user guide. To learn how to enable the Container
+Registry for your GitLab instance, visit the
+[administrator documentation](../../../administration/packages/container_registry.md).
 
-## Enable the Container Registry for your project
+## View the Container Registry
+
+You can view the Container Registry for a project or group.
+
+1. Go to your project or group.
+1. Go to **Packages & Registries > Container Registry**.
+
+You can search, sort, filter, and [delete](#delete-images-from-within-gitlab) containers on this page.
 
 CAUTION: **Warning:**
-The Container Registry follows the visibility settings of the project. If the project is public, so is the Container Registry.
+If a project is public, so is the Container Registry.
 
-If you cannot find the **Packages & Registries > Container Registry** entry under your
-project's sidebar, it is not enabled in your GitLab instance. Ask your
-administrator to enable GitLab Container Registry following the
-[administration documentation](../../../administration/packages/container_registry.md).
+## Use images from the Container Registry
 
-If you are using GitLab.com, this is enabled by default so you can start using
-the Registry immediately. Currently there is a soft (10GB) size restriction for
-Registry on GitLab.com, as part of the [repository size limit](../../project/repository/index.md).
+To download and run a container image hosted in the GitLab Container Registry:
 
-Once enabled for your GitLab instance, to enable Container Registry for your
-project:
+1. Copy the link to your container image:
+   - Go to your project or group's **Packages & Registries > Container Registry**
+     and find the image you want.
+   - Next to the image name, click the **Copy** button.
 
-1. Go to your project's **Settings > General** page.
-1. Expand the **Visibility, project features, permissions** section
-   and enable the **Container Registry** feature on your project. For new
-   projects this might be enabled by default. For existing projects
-   (prior GitLab 8.8), you will have to explicitly enable it.
-1. Press **Save changes** for the changes to take effect. You should now be able
-   to see the **Packages & Registries > Container Registry** link in the sidebar.
+    ![Container Registry image URL](img/container_registry_hover_path_13_4.png)
 
-## Control Container Registry from within GitLab
+1. Use `docker run` with the image link:
 
-GitLab offers a simple Container Registry management panel. This management panel is available
-for both projects and groups.
-
-### Control Container Registry for your project
-
-Navigate to your project's **{package}** **Packages & Registries > Container Registry**.
-
-![Container Registry project repositories](img/container_registry_repositories_with_quickstart_v13_1.png)
-
-This view will:
-
-- Show all the image repositories that belong to the project.
-- Allow you to filter image repositories by their name.
-- Allow you to [delete](#delete-images-from-within-gitlab) one or more image repository.
-- Allow you to navigate to the image repository details page.
-- Show a **Quick start** dropdown with the most common commands to log in, build and push
-- Optionally, a banner will be visible if the [cleanup policy](#cleanup-policy) is enabled for this project.
-
-### Control Container Registry for your group
-
-Navigate to your groups's **{package}** **Packages & Registries > Container Registry**.
-
-![Container Registry group repositories](img/container_registry_group_repositories_v13_1.png)
-
-This view will:
-
-- Show all the image repositories of the projects that belong to this group.
-- Allow to [delete](#delete-images-from-within-gitlab) one or more image repositories.
-- Allow to navigate to a specific image repository details page.
-
-### Image Repository details page
-
-Clicking on the name of any image repository will navigate to the details.
-
-![Container Registry project repository details](img/container_registry_repository_details_v13.0.png)
-
-NOTE: **Note:**
-The following page has the same functionalities both in the **Group level container registry**
-and in the **Project level container registry**.
-
-This view:
-
-- Shows all the image repository details.
-- Shows all the tags of the image repository.
-- Allows you to quickly copy the tag path (by clicking on the clipboard button near the tag name).
-- Allows you to [delete one or more tags](#delete-images-from-within-gitlab).
-
-## Use images from GitLab Container Registry
-
-To download and run a container from images hosted in GitLab Container Registry,
-use `docker run`:
-
-```shell
-docker run [options] registry.example.com/group/project/image [arguments]
-```
+   ```shell
+   docker run [options] registry.example.com/group/project/image [arguments]
+   ```
 
 For more information on running Docker containers, visit the
 [Docker documentation](https://docs.docker.com/engine/userguide/intro/).
@@ -118,10 +62,10 @@ For more information on running Docker containers, visit the
 
 If you visit the **Packages & Registries > Container Registry** link under your project's
 menu, you can see the explicit instructions to login to the Container Registry
-using your GitLab credentials.
+by using your GitLab credentials.
 
 For example if the Registry's URL is `registry.example.com`, then you should be
-able to login with:
+able to log in with:
 
 ```shell
 docker login registry.example.com
@@ -133,8 +77,10 @@ enabled in your account, you need to pass a
 [personal access token](../../profile/personal_access_tokens.md) instead
 of your password in order to login to GitLab's Container Registry.
 
-If a project is private, credentials will need to be provided for authorization.
-There are two ways to do this:
+Credentials must be provided for authorization to any non-public registry. Only project members can access private,
+GitLab-hosted registries.
+
+There are two ways to authenticate:
 
 - By using a [personal access token](../../profile/personal_access_tokens.md).
 - By using a [deploy token](../../project/deploy_tokens/index.md).
@@ -158,7 +104,7 @@ docker build -t registry.example.com/group/project/image .
 docker push registry.example.com/group/project/image
 ```
 
-Your image will be named after the following scheme:
+Your image is named after the following scheme:
 
 ```plaintext
 <registry URL>/<namespace>/<project>/<image>
@@ -173,15 +119,19 @@ registry.example.com/group/project/image:latest
 registry.example.com/group/project/my/image:rc1
 ```
 
+NOTE: **Note:**
+Currently there is a soft (10GB) size restriction for
+the Container Registry on GitLab.com, as part of the [repository size limit](../../project/repository/index.md).
+
 ## Build and push images using GitLab CI/CD
 
-While you can build and push your images from your local machine, the true
-power of the Container Registry comes when you combine it with GitLab CI/CD.
+While you can build and push your images from your local machine, take
+full advantage of the Container Registry by combining it with GitLab CI/CD.
 You can then create workflows and automate any processes that involve testing,
 building, and eventually deploying your project from the Docker image you
 created.
 
-Before diving into the details, some things you should be aware of:
+Before diving into details, some things you should be aware of:
 
 - You must [authenticate to the container registry](#authenticating-to-the-container-registry-with-gitlab-cicd)
   before running any commands. You can do this in the `before_script` if multiple
@@ -191,8 +141,8 @@ Before diving into the details, some things you should be aware of:
   longer, but it means you don’t get stuck without security patches for base images.
 - Doing an explicit `docker pull` before each `docker run` fetches
   the latest image that was just built. This is especially important if you are
-  using multiple Runners that cache images locally. Using the Git SHA in your
-  image tag makes this less necessary since each job will be unique and you
+  using multiple runners that cache images locally. Using the Git SHA in your
+  image tag makes this less necessary since each job is unique and you
   shouldn't ever have a stale image. However, it's still possible to have a
   stale image if you re-build a given commit after a dependency has changed.
 - You don't want to build directly to `latest` tag in case there are multiple jobs
@@ -201,10 +151,7 @@ Before diving into the details, some things you should be aware of:
 ### Authenticating to the Container Registry with GitLab CI/CD
 
 There are three ways to authenticate to the Container Registry via
-[GitLab CI/CD](../../../ci/yaml/README.md) which depend on the visibility of
-your project.
-
-Available for all projects, though more suitable for public ones:
+[GitLab CI/CD](../../../ci/yaml/README.md):
 
 - **Using the special `CI_REGISTRY_USER` variable**: The user specified by this variable is created for you in order to
   push to the Registry connected to your project. Its password is automatically
@@ -216,14 +163,22 @@ Available for all projects, though more suitable for public ones:
   docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   ```
 
-For private and internal projects:
+- **Using the GitLab Deploy Token**: You can create and use a
+  [special deploy token](../../project/deploy_tokens/index.md#gitlab-deploy-token)
+  with your projects.
+  Once created, you can use the special environment variables, and GitLab CI/CD
+  fills them in for you. You can use the following example as-is:
+
+  ```shell
+  docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+  ```
 
 - **Using a personal access token**: You can create and use a
   [personal access token](../../profile/personal_access_tokens.md)
   in case your project is private:
 
   - For read (pull) access, the scope should be `read_registry`.
-  - For read/write (pull/push) access, use `api`.
+  - For write (push) access, the scope should be `write_registry`.
 
   Replace the `<username>` and `<access_token>` in the following example:
 
@@ -231,20 +186,10 @@ For private and internal projects:
   docker login -u <username> -p <access_token> $CI_REGISTRY
   ```
 
-- **Using the GitLab Deploy Token**: You can create and use a
-  [special deploy token](../../project/deploy_tokens/index.md#gitlab-deploy-token)
-  with your private projects. It provides read-only (pull) access to the Registry.
-  Once created, you can use the special environment variables, and GitLab CI/CD
-  will fill them in for you. You can use the following example as-is:
-
-  ```shell
-  docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
-  ```
-
 ### Container Registry examples with GitLab CI/CD
 
-If you're using Docker-in-Docker on your Runners, this is how your `.gitlab-ci.yml`
-should look similar to this:
+If you're using Docker-in-Docker on your runners, this is how your `.gitlab-ci.yml`
+should look:
 
 ```yaml
 build:
@@ -276,7 +221,7 @@ build:
 
 Here, `$CI_REGISTRY_IMAGE` would be resolved to the address of the registry tied
 to this project. Since `$CI_COMMIT_REF_NAME` resolves to the branch or tag name,
-and your branch-name can contain forward slashes (e.g., feature/my-feature), it is
+and your branch name can contain forward slashes (for example, `feature/my-feature`), it is
 safer to use `$CI_COMMIT_REF_SLUG` as the image tag. This is due to that image tags
 cannot contain forward slashes. We also declare our own variable, `$IMAGE_TAG`,
 combining the two to save us some typing in the `script` section.
@@ -352,8 +297,8 @@ is set to `always`.
 
 ### Using a Docker-in-Docker image from your Container Registry
 
-If you want to use your own Docker images for Docker-in-Docker, there are a few
-things you need to do in addition to the steps in the
+To use your own Docker images for Docker-in-Docker, follow these steps
+in addition to the steps in the
 [Docker-in-Docker](../../../ci/docker/using_docker_build.md#use-docker-in-docker-workflow-with-docker-executor) section:
 
 1. Update the `image` and `service` to point to your registry.
@@ -362,19 +307,19 @@ things you need to do in addition to the steps in the
 Below is an example of what your `.gitlab-ci.yml` should look like:
 
 ```yaml
- build:
-   image: $CI_REGISTRY/group/project/docker:19.03.12
-   services:
-     - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
-       alias: docker
-   stage: build
-   script:
-     - docker build -t my-docker-image .
-     - docker run my-docker-image /script/to/run/tests
+build:
+  image: $CI_REGISTRY/group/project/docker:19.03.12
+  services:
+    - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
+      alias: docker
+  stage: build
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
 ```
 
-If you forget to set the service alias, the `docker:19.03.12` image won't find the
-`dind` service, and an error like the following will be thrown:
+If you forget to set the service alias, the `docker:19.03.12` image is unable to find the
+`dind` service, and an error like the following is thrown:
 
 ```plaintext
 error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
@@ -397,7 +342,7 @@ the deleted images.
 
 To delete images from within GitLab:
 
-1. Navigate to your project's or group's **{package}** **Packages & Registries > Container Registry**.
+1. Navigate to your project's or group's **Packages & Registries > Container Registry**.
 1. From the **Container Registry** page, you can select what you want to delete,
    by either:
 
@@ -408,8 +353,6 @@ To delete images from within GitLab:
      to delete.
 
 1. In the dialog box, click **Remove tag**.
-
-   ![Container Registry tags](img/container_registry_repository_details_v13.0.png)
 
 ### Delete images using the API
 
@@ -496,81 +439,81 @@ Container Registry.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15398) in GitLab 12.8.
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/issues/218737) from "expiration policy" to "cleanup policy" in GitLab 13.2.
 
-For a specific project, if you want to remove tags you no longer need,
-you can create a cleanup policy. When the policy is applied, tags matching the regex pattern are removed.
+The cleanup policy is a scheduled job you can use to remove tags from the Container Registry.
+For the project where it's defined, tags matching the regex pattern are removed.
 The underlying layers and images remain.
 
-To delete the underlying layers and images no longer associated with any tags, Instance Administrators can use
+To delete the underlying layers and images that aren't associated with any tags, administrators can use
 [garbage collection](../../../administration/packages/container_registry.md#removing-unused-layers-not-referenced-by-manifests) with the `-m` switch.
 
-NOTE: **Note:**
-For GitLab.com, cleanup policies are not available for projects created
-before this feature was deployed to production (February 2020).
-Support for pre-existing projects on GitLab.com
-[is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/196124).
-For self-managed instances, cleanup policies may be enabled by an admin in the
-[GitLab application settings](../../../api/settings.md#change-application-settings) by setting `container_expiration_policies_enable_historic_entries` to true.
-Note the inherent [risks involved](./index.md#use-with-external-container-registries).
+### Enable the cleanup policy
 
-The cleanup policy algorithm starts by collecting all the tags for a given repository in a list,
-then goes through a process of excluding tags from it until only the ones to be deleted remain:
+Cleanup policies can be run on all projects, with these exceptions:
 
-1. Collect all the tags for a given repository in a list.
-1. Excludes the tag named `latest` from the list.
-1. Evaluates the `name_regex`, excluding non-matching names from the list.
-1. Excludes any tags that do not have a manifest (not part of the options).
-1. Orders the remaining tags by `created_date`.
-1. Excludes from the list the N tags based on the `keep_n` value (Number of tags to retain).
-1. Excludes from the list the tags more recent than the `older_than` value (Cleanup interval).
-1. Excludes from the list any tags matching the `name_regex_keep` value (Images to preserve).
-1. Finally, the remaining tags in the list are deleted from the Container Registry.
+- For GitLab.com, the project must have been created after 2020-02-22.
+  Support for projects created earlier
+  [is planned](https://gitlab.com/gitlab-org/gitlab/-/issues/196124).
+- For self-managed GitLab instances, the project must have been created
+  in GitLab 12.8 or later. However, an administrator can enable the cleanup policy
+  for all projects (even those created before 12.8) in
+  [GitLab application settings](../../../api/settings.md#change-application-settings)
+  by setting `container_expiration_policies_enable_historic_entries` to true.
+  Alternatively, you can execute the following command in the [Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session):
 
-### Managing project cleanup policy through the UI
-
-To manage project cleanup policy, navigate to **{settings}** **Settings > CI/CD > Container Registry tag cleanup policy**.
-
-The UI allows you to configure the following:
-
-- **Cleanup policy:** enable or disable the cleanup policy.
-- **Cleanup interval:** how long tags are exempt from being deleted.
-- **Cleanup schedule:** how often the cron job checking the tags should run.
-- **Number of tags to retain:** how many tags to _always_ keep for each image.
-- **Docker tags with names matching this regex pattern will expire:** the regex used to determine what tags should be cleaned up. To qualify all tags for cleanup, use the default value of `.*`.
-- **Docker tags with names matching this regex pattern will be preserved:** the regex used to determine what tags should be preserved. To preserve all tags, use the default value of `.*`.
-
-#### Troubleshooting cleanup policies
-
-If you see the following message:
-
-"Something went wrong while updating the cleanup policy."
-
-Check the regex patterns to ensure they are valid.
-
-You can use [Rubular](https://rubular.com/) to check your regex.
-View some common [regex pattern examples](#regex-pattern-examples).
-
-### Managing project cleanup policy through the API
-
-You can set, update, and disable the cleanup policies using the GitLab API.
-
-Examples:
-
-- Select all tags, keep at least 1 tag per image, clean up any tag older than 14 days, run once a month, preserve any images with the name `master` and the policy is enabled:
-
-  ```shell
-  curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' 'https://gitlab.example.com/api/v4/projects/2'
+  ```ruby
+  ApplicationSetting.last.update(container_expiration_policies_enable_historic_entries: true)
   ```
 
-See the API documentation for further details: [Edit project](../../../api/projects.md#edit-project).
+  There are performance risks with enabling it for all projects, especially if you
+  are using an [external registry](./index.md#use-with-external-container-registries).
 
-### Use with external container registries
+### How the cleanup policy works
 
-When using an [external container registry](./../../../administration/packages/container_registry.md#use-an-external-container-registry-with-gitlab-as-an-auth-endpoint),
-running a cleanup policy on a project may have some performance risks. If a project is going to run
-a policy that will remove large quantities of tags (in the thousands), the GitLab background jobs that
-run the policy may get backed up or fail completely. It is recommended you only enable container cleanup
-policies for projects that were created before GitLab 12.8 if you are confident the amount of tags
-being cleaned up will be minimal.
+The cleanup policy collects all tags in the Container Registry and excludes tags
+until only the tags to be deleted remain.
+
+The cleanup policy:
+
+1. Collects all tags for a given repository in a list.
+1. Excludes the tag named `latest` from the list.
+1. Evaluates the `name_regex` (tags to expire), excluding non-matching names from the list.
+1. Excludes any tags that do not have a manifest (not part of the options in the UI).
+1. Orders the remaining tags by `created_date`.
+1. Excludes from the list the N tags based on the `keep_n` value (Number of tags to retain).
+1. Excludes from the list the tags more recent than the `older_than` value (Expiration interval).
+1. Excludes from the list any tags matching the `name_regex_keep` value (tags to preserve).
+1. Finally, the remaining tags in the list are deleted from the Container Registry.
+
+CAUTION: **Warning:**
+On GitLab.com, the execution time for the cleanup policy is limited, and some of the tags may remain in
+the Container Registry after the policy runs. The next time the policy runs, the remaining tags are included,
+so it may take multiple runs for all tags to be deleted.
+
+### Create a cleanup policy
+
+You can create a cleanup policy in [the API](#use-the-cleanup-policy-api) or the UI.
+
+To create a cleanup policy in the UI:
+
+1. For your project, go to **Settings > CI/CD**.
+1. Expand the **Cleanup policy for tags** section.
+1. Complete the fields.
+
+   | Field                                                                     | Description                                                                                                       |
+   |---------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+   | **Cleanup policy**                                                        | Turn the policy on or off.                                                                                        |
+   | **Expiration interval**                                                   | How long tags are exempt from being deleted.                                                                      |
+   | **Expiration schedule**                                                   | How often the policy should run.                                                                                  |
+   | **Number of tags to retain**                                              | How many tags to _always_ keep for each image.                                                                    |
+   | **Tags with names matching this regex pattern expire:**              | The regex pattern that determines which tags to remove. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+   | **Tags with names matching this regex pattern are preserved:**        | The regex pattern that determines which tags to preserve. The `latest` tag is always preserved. For all tags, use `.*`. See other [regex pattern examples](#regex-pattern-examples). |
+
+1. Click **Set cleanup policy**.
+
+Depending on the interval you chose, the policy is scheduled to run.
+
+NOTE: **Note:**
+If you edit the policy and click **Set cleanup policy** again, the interval is reset.
 
 ### Regex pattern examples
 
@@ -602,6 +545,41 @@ Here are examples of regex patterns you may want to use:
   (?:v.+|master|release)
   ```
 
+### Use the cleanup policy API
+
+You can set, update, and disable the cleanup policies using the GitLab API.
+
+Examples:
+
+- Select all tags, keep at least 1 tag per image, clean up any tag older than 14 days, run once a month, preserve any images with the name `master` and the policy is enabled:
+
+  ```shell
+  curl --request PUT --header 'Content-Type: application/json;charset=UTF-8' --header "PRIVATE-TOKEN: <your_access_token>" --data-binary '{"container_expiration_policy_attributes":{"cadence":"1month","enabled":true,"keep_n":1,"older_than":"14d","name_regex":"","name_regex_delete":".*","name_regex_keep":".*-master"}}' 'https://gitlab.example.com/api/v4/projects/2'
+  ```
+
+See the API documentation for further details: [Edit project](../../../api/projects.md#edit-project).
+
+### Use with external container registries
+
+When using an [external container registry](./../../../administration/packages/container_registry.md#use-an-external-container-registry-with-gitlab-as-an-auth-endpoint),
+running a cleanup policy on a project may have some performance risks.
+If a project runs a policy to remove thousands of tags
+the GitLab background jobs may get backed up or fail completely.
+It is recommended you only enable container cleanup
+policies for projects that were created before GitLab 12.8 if you are confident the number of tags
+being cleaned up is minimal.
+
+### Troubleshooting cleanup policies
+
+If you see the following message:
+
+"Something went wrong while updating the cleanup policy."
+
+Check the regex patterns to ensure they are valid.
+
+You can use [Rubular](https://rubular.com/) to check your regex.
+View some common [regex pattern examples](#regex-pattern-examples).
+
 ## Use the Container Registry to store Helm Charts
 
 With the launch of [Helm v3](https://helm.sh/docs/topics/registries/),
@@ -609,16 +587,29 @@ you can use the Container Registry to store Helm Charts. However, due to the way
 and stored by Docker, it is not possible for GitLab to parse this data and meet performance standards.
 [This epic](https://gitlab.com/groups/gitlab-org/-/epics/2313) updates the architecture of the Container Registry to support Helm Charts.
 
-You can read more about the above challenges [here](https://gitlab.com/gitlab-org/gitlab/-/issues/38047#note_298842890).
+[Read more about the above challenges](https://gitlab.com/gitlab-org/gitlab/-/issues/38047#note_298842890).
 
 ## Limitations
 
 - Moving or renaming existing Container Registry repositories is not supported
 once you have pushed images, because the images are signed, and the
 signature includes the repository name. To move or rename a repository with a
-Container Registry, you will have to delete all existing images.
+Container Registry, you must delete all existing images.
 - Prior to GitLab 12.10, any tags that use the same image ID as the `latest` tag
-will not be deleted by the cleanup policy.
+are not deleted by the cleanup policy.
+
+## Disable the Container Registry for a project
+
+The Container Registry is enabled by default. 
+
+You can, however, remove the Container Registry for a project:
+
+1. Go to your project's **Settings > General** page.
+1. Expand the **Visibility, project features, permissions** section
+   and disable **Container Registry**.
+1. Click **Save changes**.
+
+The **Packages & Registries > Container Registry** entry is removed from the project's sidebar.
 
 ## Troubleshooting the GitLab Container Registry
 
@@ -634,10 +625,17 @@ To get around this, you can [change the group path](../../group/index.md#changin
 [change the project path](../../project/settings/index.md#renaming-a-repository) or change the branch
 name.
 
+You may also get a `404 Not Found` or `Unknown Manifest` message if you are using
+a Docker Engine version earlier than 17.12. Later versions of Docker Engine use
+[the v2 API](https://docs.docker.com/registry/spec/manifest-v2-2/).
+
+The images in your GitLab Container Registry must also use the Docker v2 API.
+For information on how to update your images, see the [Docker help](https://docs.docker.com/registry/spec/deprecated-schema-v1).
+
 ### Troubleshoot as a GitLab server admin
 
 Troubleshooting the GitLab Container Registry, most of the times, requires
-administration access to the GitLab server.
+administrator access to the GitLab server.
 
 [Read how to troubleshoot the Container Registry](../../../administration/packages/container_registry.md#troubleshooting).
 
@@ -655,22 +653,22 @@ the project.
 
 The following procedure uses these sample project names:
 
-- For the current project: `example.gitlab.com/org/build/sample_project/cr:v2.9.1`
-- For the new project: `example.gitlab.com/new_org/build/new_sample_project/cr:v2.9.1`
+- For the current project: `gitlab.example.com/org/build/sample_project/cr:v2.9.1`
+- For the new project: `gitlab.example.com/new_org/build/new_sample_project/cr:v2.9.1`
 
 Use your own URLs to complete the following steps:
 
 1. Download the Docker images on your computer:
 
    ```shell
-   docker login example.gitlab.com
-   docker pull example.gitlab.com/org/build/sample_project/cr:v2.9.1
+   docker login gitlab.example.com
+   docker pull gitlab.example.com/org/build/sample_project/cr:v2.9.1
    ```
 
 1. Rename the images to match the new project name:
 
    ```shell
-   docker tag example.gitlab.com/org/build/sample_project/cr:v2.9.1 example.gitlab.com/new_org/build/new_sample_project/cr:v2.9.1
+   docker tag gitlab.example.com/org/build/sample_project/cr:v2.9.1 gitlab.example.com/new_org/build/new_sample_project/cr:v2.9.1
    ```
 
 1. Delete the images in both projects by using the [UI](#delete-images) or [API](../../../api/packages.md#delete-a-project-package).
@@ -680,7 +678,7 @@ Use your own URLs to complete the following steps:
 1. Restore the images:
 
    ```shell
-   docker push example.gitlab.com/new_org/build/new_sample_project/cr:v2.9.1
+   docker push gitlab.example.com/new_org/build/new_sample_project/cr:v2.9.1
    ```
 
 Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/18383) for details.

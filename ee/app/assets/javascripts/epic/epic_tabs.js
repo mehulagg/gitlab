@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import { parseBoolean } from '~/lib/utils/common_utils';
 import initRelatedItemsTree from 'ee/related_items_tree/related_items_tree_bundle';
+import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default class EpicTabs {
   constructor() {

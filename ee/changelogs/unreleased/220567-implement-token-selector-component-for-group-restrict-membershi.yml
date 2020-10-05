@@ -1,6 +1,0 @@
----
-title: Change "Restrict membership by email" field from a comma separated list to
-  the GitLab UI Token Selector component
-merge_request: 35543
-author:
-type: changed

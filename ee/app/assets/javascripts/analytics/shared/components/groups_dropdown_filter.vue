@@ -1,13 +1,14 @@
 <script>
-import { escape, debounce } from 'lodash';
+import { debounce } from 'lodash';
 import {
   GlIcon,
   GlLoadingIcon,
   GlAvatar,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownHeader as GlDropdownHeader,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownSectionHeader,
+  GlDropdownItem,
   GlSearchBoxByType,
+  GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import Api from '~/api';
@@ -21,9 +22,12 @@ export default {
     GlLoadingIcon,
     GlAvatar,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
     GlSearchBoxByType,
+  },
+  directives: {
+    SafeHtml,
   },
   props: {
     label: {
@@ -104,9 +108,7 @@ export default {
       const parts = fullName.split('/');
       const lastPart = parts.length - 1;
       return parts
-        .map((part, idx) =>
-          idx === lastPart ? `<strong>${escape(part.trim())}</strong>` : escape(part.trim()),
-        )
+        .map((part, idx) => (idx === lastPart ? `<strong>${part.trim()}</strong>` : part.trim()))
         .join(' / ');
     },
   },
@@ -131,7 +133,7 @@ export default {
       </div>
       <gl-icon class="gl-ml-2" name="chevron-down" />
     </template>
-    <gl-dropdown-header>{{ __('Groups') }}</gl-dropdown-header>
+    <gl-dropdown-section-header>{{ __('Groups') }}</gl-dropdown-section-header>
     <gl-search-box-by-type v-model.trim="searchTerm" class="gl-m-3" />
     <gl-dropdown-item
       v-for="group in availableGroups"
@@ -150,7 +152,10 @@ export default {
           :src="group.avatar_url"
           shape="rect"
         />
-        <div class="js-group-path align-middle" v-html="formatGroupPath(group.full_name)"></div>
+        <div
+          v-safe-html="formatGroupPath(group.full_name)"
+          class="js-group-path align-middle"
+        ></div>
       </div>
     </gl-dropdown-item>
     <gl-dropdown-item v-show="noResultsAvailable" class="gl-pointer-events-none text-secondary">{{

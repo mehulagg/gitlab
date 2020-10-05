@@ -23,12 +23,14 @@ describe('Event Item', () => {
       },
     };
 
-    afterEach(() => {
-      wrapper.destroy();
-    });
+    const slots = { default: '<p>Test</p>' };
 
     beforeEach(() => {
-      mountComponent({ propsData });
+      mountComponent({ propsData, slots });
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
     });
 
     it('passes the expected values to the note header component', () => {
@@ -50,6 +52,10 @@ describe('Event Item', () => {
 
     it('renders the action buttons container', () => {
       expect(wrapper.find('.action-buttons')).toExist();
+    });
+
+    it('renders the default slot', () => {
+      expect(wrapper.html()).toEqual(expect.stringContaining('<p>Test</p>'));
     });
   });
   describe('with action buttons', () => {
@@ -86,7 +92,7 @@ describe('Event Item', () => {
 
     it('renders the action buttons', () => {
       expect(wrapper.findAll(GlDeprecatedButton)).toHaveLength(2);
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.element).toMatchSnapshot();
     });
 
     it('emits the button events when clicked', () => {

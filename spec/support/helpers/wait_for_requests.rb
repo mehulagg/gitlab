@@ -42,23 +42,16 @@ module WaitForRequests
   private
 
   def finished_all_rack_requests?
-    Gitlab::Testing::RequestBlockerMiddleware.num_active_requests.zero?
+    Gitlab::Testing::RequestBlockerMiddleware.num_active_requests == 0
   end
 
   def finished_all_js_requests?
     return true unless javascript_test?
 
-    finished_all_ajax_requests? &&
-      finished_all_axios_requests?
-  end
-
-  def finished_all_axios_requests?
-    Capybara.page.evaluate_script('window.pendingRequests || 0').zero?
+    finished_all_ajax_requests?
   end
 
   def finished_all_ajax_requests?
-    return true if Capybara.page.evaluate_script('typeof jQuery === "undefined"')
-
-    Capybara.page.evaluate_script('jQuery.active').zero?
+    Capybara.page.evaluate_script('window.pendingRequests || window.pendingRailsUJSRequests || 0').zero? # rubocop:disable Style/NumericPredicate
   end
 end

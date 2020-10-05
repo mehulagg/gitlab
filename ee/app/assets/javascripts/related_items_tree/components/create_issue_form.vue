@@ -1,9 +1,9 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import {
-  GlDeprecatedButton,
-  GlDropdown,
-  GlDropdownItem,
+  GlButton,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
   GlFormInput,
   GlSearchBoxByType,
   GlLoadingIcon,
@@ -16,9 +16,9 @@ import { SEARCH_DEBOUNCE } from '../constants';
 
 export default {
   components: {
-    GlDeprecatedButton,
-    GlDropdown,
-    GlDropdownItem,
+    GlButton,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
     GlFormInput,
     GlSearchBoxByType,
     GlLoadingIcon,
@@ -33,7 +33,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects']),
+    ...mapState(['projectsFetchInProgress', 'itemCreateInProgress', 'projects', 'parentItem']),
     dropdownToggleText() {
       if (this.selectedProject) {
         return this.selectedProject.name_with_namespace;
@@ -121,13 +121,15 @@ export default {
         <gl-form-input
           ref="titleInput"
           v-model.trim="title"
-          :placeholder="__('New issue title')"
+          :placeholder="
+            parentItem.confidential ? __('New confidential issue title') : __('New issue title')
+          "
           autofocus
         />
       </div>
       <div class="col-sm">
         <label class="label-bold">{{ __('Project') }}</label>
-        <gl-dropdown
+        <gl-deprecated-dropdown
           ref="dropdownButton"
           :text="dropdownToggleText"
           class="w-100 projects-dropdown"
@@ -152,7 +154,7 @@ export default {
             <span v-if="!projects.length" class="d-block text-center p-2">{{
               __('No matches found')
             }}</span>
-            <gl-dropdown-item
+            <gl-deprecated-dropdown-item
               v-for="project in projects"
               :key="project.id"
               class="w-100"
@@ -161,27 +163,26 @@ export default {
               <project-avatar :project="project" :size="32" />
               {{ project.name }}
               <div class="text-secondary">{{ project.namespace.name }}</div>
-            </gl-dropdown-item>
+            </gl-deprecated-dropdown-item>
           </div>
-        </gl-dropdown>
+        </gl-deprecated-dropdown>
       </div>
     </div>
 
     <div class="row my-1">
       <div class="col-sm flex-sm-grow-0 mb-2 mb-sm-0">
-        <gl-deprecated-button
+        <gl-button
           class="w-100"
           variant="success"
+          category="primary"
           :disabled="!selectedProject || itemCreateInProgress"
           :loading="itemCreateInProgress"
           @click="createIssue"
-          >{{ __('Create issue') }}</gl-deprecated-button
+          >{{ __('Create issue') }}</gl-button
         >
       </div>
       <div class="col-sm flex-sm-grow-0 ml-auto">
-        <gl-deprecated-button class="w-100" @click="cancel">{{
-          __('Cancel')
-        }}</gl-deprecated-button>
+        <gl-button class="w-100" @click="cancel">{{ __('Cancel') }}</gl-button>
       </div>
     </div>
   </div>

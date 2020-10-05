@@ -8,7 +8,8 @@ This page is useful information about PostgreSQL that the GitLab Support
 Team sometimes uses while troubleshooting. GitLab is making this public, so that anyone
 can make use of the Support team's collected knowledge.
 
-CAUTION: **Caution:** Some procedures documented here may break your GitLab instance. Use at your own risk.
+CAUTION: **Caution:**
+Some procedures documented here may break your GitLab instance. Use at your own risk.
 
 If you are on a [paid tier](https://about.gitlab.com/pricing/) and are not sure how
 to use these commands, it is best to [contact Support](https://about.gitlab.com/support/)
@@ -33,7 +34,7 @@ This section is for links to information elsewhere in the GitLab documentation.
 
 - [More about external PostgreSQL](../postgresql/external.md)
 
-- [Running Geo with external PostgreSQL](../geo/replication/external_database.md)
+- [Running Geo with external PostgreSQL](../geo/setup/external_database.md)
 
 - [Upgrades when running PostgreSQL configured for HA.](https://docs.gitlab.com/omnibus/settings/database.html#upgrading-a-gitlab-ha-cluster)
 
@@ -56,7 +57,7 @@ This section is for links to information elsewhere in the GitLab documentation.
 - [GitLab database requirements](../../install/requirements.md#database) including
   - Support for MySQL was removed in GitLab 12.1; [migrate to PostgreSQL](../../update/mysql_to_postgresql.md)
   - required extension `pg_trgm`
-  - required extension `postgres_fdw` for Geo
+  - required extension `btree_gist`
 
 - Errors like this in the `production/sidekiq` log; see: [Set default_transaction_isolation into read committed](https://docs.gitlab.com/omnibus/settings/database.html#set-default_transaction_isolation-into-read-committed):
 
@@ -83,7 +84,7 @@ This section is for links to information elsewhere in the GitLab documentation.
   PANIC: could not write to file ‘pg_xlog/xlogtemp.123’: No space left on device
   ```
 
-- [Checking Geo configuration](../geo/replication/troubleshooting.md#checking-configuration) including
+- [Checking Geo configuration](../geo/replication/troubleshooting.md) including
   - reconfiguring hosts/ports
   - checking and fixing user/password mappings
 
@@ -115,7 +116,8 @@ Quoting from issue [#1](https://gitlab.com/gitlab-org/gitlab/-/issues/30528):
 
 > "If a deadlock is hit, and we resolve it through aborting the transaction after a short period, then the retry mechanisms we already have will make the deadlocked piece of work try again, and it's unlikely we'll deadlock multiple times in a row."
 
-TIP: **Tip:** In support, our general approach to reconfiguring timeouts (applies also to the HTTP stack as well) is that it's acceptable to do it temporarily as a workaround. If it makes GitLab usable for the customer, then it buys time to understand the problem more completely, implement a hot fix, or make some other change that addresses the root cause. Generally, the timeouts should be put back to reasonable defaults once the root cause is resolved.
+TIP: **Tip:**
+In support, our general approach to reconfiguring timeouts (applies also to the HTTP stack as well) is that it's acceptable to do it temporarily as a workaround. If it makes GitLab usable for the customer, then it buys time to understand the problem more completely, implement a hot fix, or make some other change that addresses the root cause. Generally, the timeouts should be put back to reasonable defaults once the root cause is resolved.
 
 In this case, the guidance we had from development was to drop deadlock_timeout and/or statement_timeout but to leave the third setting at 60s. Setting idle_in_transaction protects the database from sessions potentially hanging for days. There's more discussion in [the issue relating to introducing this timeout on GitLab.com](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/1053).
 

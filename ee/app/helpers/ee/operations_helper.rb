@@ -2,6 +2,8 @@
 
 module EE
   module OperationsHelper
+    extend ::Gitlab::Utils::Override
+
     def operations_data
       {
         'add-path' => add_operations_project_path,
@@ -30,6 +32,24 @@ module EE
         'region' => status_page_setting.aws_region,
         'aws-access-key' => status_page_setting.aws_access_key,
         'aws-secret-key' => status_page_setting.masked_aws_secret_key
+      }
+    end
+
+    override :alerts_settings_data
+    def alerts_settings_data(disabled: false)
+      super.merge(opsgenie_mvc_data)
+    end
+
+    private
+
+    def opsgenie_mvc_data
+      return {} unless alerts_service.opsgenie_mvc_available?
+
+      {
+        'opsgenie_mvc_available' => 'true',
+        'opsgenie_mvc_form_path' => scoped_integration_path(alerts_service),
+        'opsgenie_mvc_enabled' => alerts_service.opsgenie_mvc_enabled?.to_s,
+        'opsgenie_mvc_target_url' => alerts_service.opsgenie_mvc_target_url.to_s
       }
     end
   end

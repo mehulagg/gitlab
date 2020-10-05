@@ -11,13 +11,11 @@ describe('DiffsStoreMutations', () => {
       const state = {};
       const endpoint = '/diffs/endpoint';
       const projectPath = '/root/project';
-      const useSingleDiffStyle = false;
 
-      mutations[types.SET_BASE_CONFIG](state, { endpoint, projectPath, useSingleDiffStyle });
+      mutations[types.SET_BASE_CONFIG](state, { endpoint, projectPath });
 
       expect(state.endpoint).toEqual(endpoint);
       expect(state.projectPath).toEqual(projectPath);
-      expect(state.useSingleDiffStyle).toEqual(useSingleDiffStyle);
     });
   });
 
@@ -70,12 +68,13 @@ describe('DiffsStoreMutations', () => {
   });
 
   describe('SET_DIFF_DATA', () => {
-    it('should set diff data type properly', () => {
+    it('should not modify the existing state', () => {
       const state = {
         diffFiles: [
           {
-            ...diffFileMockData,
-            parallel_diff_lines: [],
+            content_sha: diffFileMockData.content_sha,
+            file_hash: diffFileMockData.file_hash,
+            highlighted_diff_lines: [],
           },
         ],
       };
@@ -85,43 +84,7 @@ describe('DiffsStoreMutations', () => {
 
       mutations[types.SET_DIFF_DATA](state, diffMock);
 
-      const firstLine = state.diffFiles[0].parallel_diff_lines[0];
-
-      expect(firstLine.right.text).toBeUndefined();
-      expect(state.diffFiles.length).toEqual(1);
-      expect(state.diffFiles[0].renderIt).toEqual(true);
-      expect(state.diffFiles[0].collapsed).toEqual(false);
-    });
-
-    describe('given diffsBatchLoad feature flag is enabled', () => {
-      beforeEach(() => {
-        gon.features = { diffsBatchLoad: true };
-      });
-
-      afterEach(() => {
-        delete gon.features;
-      });
-
-      it('should not modify the existing state', () => {
-        const state = {
-          diffFiles: [
-            {
-              content_sha: diffFileMockData.content_sha,
-              file_hash: diffFileMockData.file_hash,
-              highlighted_diff_lines: [],
-            },
-          ],
-        };
-        const diffMock = {
-          diff_files: [diffFileMockData],
-        };
-
-        mutations[types.SET_DIFF_DATA](state, diffMock);
-
-        // If the batch load is enabled, there shouldn't be any processing
-        // done on the existing state object, so we shouldn't have this.
-        expect(state.diffFiles[0].parallel_diff_lines).toBeUndefined();
-      });
+      expect(state.diffFiles[0].parallel_diff_lines).toBeUndefined();
     });
   });
 
@@ -167,14 +130,14 @@ describe('DiffsStoreMutations', () => {
     it('should change the collapsed prop from diffFiles', () => {
       const diffFile = {
         viewer: {
-          collapsed: true,
+          automaticallyCollapsed: true,
         },
       };
       const state = { expandAllFiles: true, diffFiles: [diffFile] };
 
       mutations[types.EXPAND_ALL_FILES](state);
 
-      expect(state.diffFiles[0].viewer.collapsed).toEqual(false);
+      expect(state.diffFiles[0].viewer.automaticallyCollapsed).toEqual(false);
     });
   });
 
@@ -682,6 +645,36 @@ describe('DiffsStoreMutations', () => {
       expect(state.diffFiles[0].highlighted_diff_lines[0].discussions).toHaveLength(1);
       expect(state.diffFiles[0].highlighted_diff_lines[0].discussions[0].id).toBe(1);
     });
+
+    it('should add discussion to file', () => {
+      const state = {
+        latestDiff: true,
+        diffFiles: [
+          {
+            file_hash: 'ABC',
+            discussions: [],
+            parallel_diff_lines: [],
+            highlighted_diff_lines: [],
+          },
+        ],
+      };
+      const discussion = {
+        id: 1,
+        line_code: 'ABC_1',
+        diff_discussion: true,
+        resolvable: true,
+        diff_file: {
+          file_hash: state.diffFiles[0].file_hash,
+        },
+      };
+
+      mutations[types.SET_LINE_DISCUSSIONS_FOR_FILE](state, {
+        discussion,
+        diffPositionByLineCode: null,
+      });
+
+      expect(state.diffFiles[0].discussions.length).toEqual(1);
+    });
   });
 
   describe('REMOVE_LINE_DISCUSSIONS', () => {
@@ -774,11 +767,11 @@ describe('DiffsStoreMutations', () => {
     });
   });
 
-  describe('UPDATE_CURRENT_DIFF_FILE_ID', () => {
+  describe('VIEW_DIFF_FILE', () => {
     it('updates currentDiffFileId', () => {
       const state = createState();
 
-      mutations[types.UPDATE_CURRENT_DIFF_FILE_ID](state, 'somefileid');
+      mutations[types.VIEW_DIFF_FILE](state, 'somefileid');
 
       expect(state.currentDiffFileId).toBe('somefileid');
     });
@@ -830,6 +823,7 @@ describe('DiffsStoreMutations', () => {
       const state = {
         treeEntries: {},
         tree: [],
+        isTreeLoaded: false,
       };
 
       mutations[types.SET_TREE_DATA](state, {
@@ -844,6 +838,7 @@ describe('DiffsStoreMutations', () => {
       });
 
       expect(state.tree).toEqual(['tree']);
+      expect(state.isTreeLoaded).toEqual(true);
     });
   });
 
@@ -938,12 +933,12 @@ describe('DiffsStoreMutations', () => {
   describe('SET_FILE_COLLAPSED', () => {
     it('sets collapsed', () => {
       const state = {
-        diffFiles: [{ file_path: 'test', viewer: { collapsed: false } }],
+        diffFiles: [{ file_path: 'test', viewer: { automaticallyCollapsed: false } }],
       };
 
       mutations[types.SET_FILE_COLLAPSED](state, { filePath: 'test', collapsed: true });
 
-      expect(state.diffFiles[0].viewer.collapsed).toBe(true);
+      expect(state.diffFiles[0].viewer.automaticallyCollapsed).toBe(true);
     });
   });
 

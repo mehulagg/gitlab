@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner do
+  RSpec.describe 'Verify', :runner do
     describe 'Runner registration' do
       let(:executor) { "qa-runner-#{Time.now.to_i}" }
       let!(:runner) do
@@ -15,7 +15,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'user registers a new specific runner' do
+      it 'user registers a new specific runner', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/392' do
         Flow::Login.sign_in
 
         runner.project.visit!

@@ -8,6 +8,7 @@ import SecurityDashboardTable from './security_dashboard_table.vue';
 import VulnerabilityChart from './vulnerability_chart.vue';
 import VulnerabilityCountList from './vulnerability_count_list_vuex.vue';
 import VulnerabilitySeverity from './vulnerability_severity.vue';
+import FuzzingArtifactsDownload from './fuzzing_artifacts_download.vue';
 import LoadingError from './loading_error.vue';
 
 export default {
@@ -19,6 +20,7 @@ export default {
     VulnerabilityChart,
     VulnerabilityCountList,
     VulnerabilitySeverity,
+    FuzzingArtifactsDownload,
     LoadingError,
   },
   props: {
@@ -71,8 +73,10 @@ export default {
       'isDismissingVulnerability',
       'isCreatingMergeRequest',
     ]),
+    ...mapState('pipelineJobs', ['projectId']),
     ...mapGetters('filters', ['activeFilters']),
     ...mapGetters('vulnerabilities', ['loadingVulnerabilitiesFailedWithRecognizedErrorCode']),
+    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     canCreateIssue() {
       const path = this.vulnerability.create_vulnerability_feedback_issue_path;
       return Boolean(path);
@@ -122,6 +126,7 @@ export default {
     this.fetchVulnerabilities({ ...this.activeFilters, page: this.pageInfo.page });
     this.fetchVulnerabilitiesCount(this.activeFilters);
     this.fetchVulnerabilitiesHistory(this.activeFilters);
+    this.fetchPipelineJobs();
   },
   methods: {
     ...mapActions('vulnerabilities', [
@@ -144,6 +149,7 @@ export default {
       'undoDismiss',
       'downloadPatch',
     ]),
+    ...mapActions('pipelineJobs', ['fetchPipelineJobs']),
     ...mapActions('filters', ['lockFilter', 'setHideDismissedToggleInitialState']),
     emitVulnerabilitiesCountChanged(count) {
       this.$emit('vulnerabilitiesCountChanged', count);
@@ -163,7 +169,11 @@ export default {
       <security-dashboard-layout>
         <template #header>
           <vulnerability-count-list v-if="shouldShowCountList" />
-          <filters />
+          <filters>
+            <template v-if="hasFuzzingArtifacts" #buttons>
+              <fuzzing-artifacts-download :jobs="fuzzingJobsWithArtifact" :project-id="projectId" />
+            </template>
+          </filters>
         </template>
 
         <security-dashboard-table>

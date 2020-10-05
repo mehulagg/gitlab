@@ -9,6 +9,7 @@ RSpec.describe Pseudonymizer::Uploader do
       config: YAML.load_file(Gitlab.config.pseudonymizer.manifest)
     )
   end
+
   let(:remote_directory) { subject.send(:remote_directory) }
 
   subject { described_class.new(options) }

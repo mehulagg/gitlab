@@ -184,7 +184,7 @@ RSpec.describe Projects::IssuesController do
       before do
         sign_in(user)
         allow(Gitlab).to receive(:com?).and_return(true)
-        discussion.update(author: user)
+        discussion.update!(author: user)
       end
 
       shared_context 'non inclusion of gitlab team member badge' do |result|

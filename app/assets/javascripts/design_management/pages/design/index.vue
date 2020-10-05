@@ -2,7 +2,7 @@
 import Mousetrap from 'mousetrap';
 import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
 import { ApolloMutation } from 'vue-apollo';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { fetchPolicies } from '~/lib/graphql';
 import allVersionsMixin from '../../mixins/all_versions';
 import Toolbar from '../../components/toolbar/index.vue';
@@ -12,7 +12,6 @@ import DesignPresentation from '../../components/design_presentation.vue';
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
 import DesignSidebar from '../../components/design_sidebar.vue';
 import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
-import appDataQuery from '../../graphql/queries/app_data.query.graphql';
 import createImageDiffNoteMutation from '../../graphql/mutations/create_image_diff_note.mutation.graphql';
 import updateImageDiffNoteMutation from '../../graphql/mutations/update_image_diff_note.mutation.graphql';
 import updateActiveDiscussionMutation from '../../graphql/mutations/update_active_discussion.mutation.graphql';
@@ -20,6 +19,8 @@ import {
   extractDiscussions,
   extractDesign,
   updateImageDiffNoteOptimisticResponse,
+  toDiffNoteGid,
+  extractDesignNoteId,
 } from '../../utils/design_management_utils';
 import {
   updateStoreAfterAddImageDiffNote,
@@ -32,6 +33,7 @@ import {
   DESIGN_NOT_FOUND_ERROR,
   DESIGN_VERSION_NOT_EXIST_ERROR,
   UPDATE_NOTE_ERROR,
+  TOGGLE_TODO_ERROR,
   designDeletionError,
 } from '../../utils/error_messages';
 import { trackDesignDetailView } from '../../utils/tracking';
@@ -62,22 +64,12 @@ export default {
       design: {},
       comment: '',
       annotationCoordinates: null,
-      projectPath: '',
       errorMessage: '',
-      issueIid: '',
       scale: 1,
       resolvedDiscussionsExpanded: false,
     };
   },
   apollo: {
-    appData: {
-      query: appDataQuery,
-      manual: true,
-      result({ data: { projectPath, issueIid } }) {
-        this.projectPath = projectPath;
-        this.issueIid = issueIid;
-      },
-    },
     design: {
       query: getDesignQuery,
       // We want to see cached design version if we have one, and fetch newer version on the background to update discussions
@@ -156,8 +148,11 @@ export default {
   mounted() {
     Mousetrap.bind('esc', this.closeDesign);
     this.trackEvent();
-    // We need to reset the active discussion when opening a new design
-    this.updateActiveDiscussion();
+
+    // Set active discussion immediately.
+    // This will ensure that, if a note is specified in the URL hash,
+    // the browser will scroll to, and highlight, the note in the UI
+    this.updateActiveDiscussionFromUrl();
   },
   beforeDestroy() {
     Mousetrap.unbind('esc', this.closeDesign);
@@ -232,7 +227,7 @@ export default {
     },
     onError(message, e) {
       this.errorMessage = message;
-      throw e;
+      if (e) throw e;
     },
     onCreateImageDiffNoteError(e) {
       this.onError(ADD_IMAGE_DIFF_NOTE_ERROR, e);
@@ -251,6 +246,9 @@ export default {
     },
     onResolveDiscussionError(e) {
       this.onError(UPDATE_IMAGE_DIFF_NOTE_ERROR, e);
+    },
+    onTodoError(e) {
+      this.onError(e?.message || TOGGLE_TODO_ERROR, e);
     },
     openCommentForm(annotationCoordinates) {
       this.annotationCoordinates = annotationCoordinates;
@@ -277,14 +275,19 @@ export default {
         this.isLatestVersion,
       );
     },
-    updateActiveDiscussion(id) {
+    updateActiveDiscussion(id, source = ACTIVE_DISCUSSION_SOURCE_TYPES.discussion) {
       this.$apollo.mutate({
         mutation: updateActiveDiscussionMutation,
         variables: {
           id,
-          source: ACTIVE_DISCUSSION_SOURCE_TYPES.discussion,
+          source,
         },
       });
+    },
+    updateActiveDiscussionFromUrl() {
+      const noteId = extractDesignNoteId(this.$route.hash);
+      const diffNoteGid = noteId ? toDiffNoteGid(noteId) : undefined;
+      return this.updateActiveDiscussion(diffNoteGid, ACTIVE_DISCUSSION_SOURCE_TYPES.url);
     },
     toggleResolvedComments() {
       this.resolvedDiscussionsExpanded = !this.resolvedDiscussionsExpanded;
@@ -350,6 +353,7 @@ export default {
         @updateNoteError="onUpdateNoteError"
         @resolveDiscussionError="onResolveDiscussionError"
         @toggleResolvedComments="toggleResolvedComments"
+        @todoError="onTodoError"
       >
         <template #replyForm>
           <apollo-mutation
@@ -368,8 +372,8 @@ export default {
               v-model="comment"
               :is-saving="loading"
               :markdown-preview-path="markdownPreviewPath"
-              @submitForm="mutate"
-              @cancelForm="closeCommentForm"
+              @submit-form="mutate"
+              @cancel-form="closeCommentForm"
             /> </apollo-mutation
         ></template>
       </design-sidebar>

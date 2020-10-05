@@ -19,7 +19,7 @@ module Resolvers
              description: 'The internal ID of the Iteration to look up'
     argument :include_ancestors, GraphQL::BOOLEAN_TYPE,
              required: false,
-             description: 'Whether to include ancestor Iterations. Defaults to true'
+             description: 'Whether to include ancestor iterations. Defaults to true'
 
     type Types::IterationType, null: true
 
@@ -28,9 +28,12 @@ module Resolvers
 
       authorize!
 
-      args[:include_ancestors] = true if args[:include_ancestors].nil?
+      args[:include_ancestors] = true if args[:include_ancestors].nil? && args[:iid].nil?
 
       iterations = IterationsFinder.new(context[:current_user], iterations_finder_params(args)).execute
+
+      # Necessary for scopedPath computation in IterationPresenter
+      context[:parent_object] = parent
 
       Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(iterations)
     end

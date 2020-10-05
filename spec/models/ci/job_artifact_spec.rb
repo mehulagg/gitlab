@@ -19,8 +19,10 @@ RSpec.describe Ci::JobArtifact do
 
   it_behaves_like 'having unique enum values'
 
-  it_behaves_like 'UpdateProjectStatistics' do
-    subject { build(:ci_job_artifact, :archive, size: 107464) }
+  it_behaves_like 'UpdateProjectStatistics', :with_counter_attribute do
+    let_it_be(:job, reload: true) { create(:ci_build) }
+
+    subject { build(:ci_job_artifact, :archive, job: job, size: 107464) }
   end
 
   describe '.not_expired' do
@@ -42,7 +44,7 @@ RSpec.describe Ci::JobArtifact do
       let!(:metrics_report) { create(:ci_job_artifact, :junit) }
       let!(:codequality_report) { create(:ci_job_artifact, :codequality) }
 
-      it { is_expected.to eq([metrics_report, codequality_report]) }
+      it { is_expected.to match_array([metrics_report, codequality_report]) }
     end
   end
 
@@ -107,6 +109,21 @@ RSpec.describe Ci::JobArtifact do
       it 'return the an empty array' do
         expect(described_class.terraform_reports).to eq([])
       end
+    end
+  end
+
+  describe '.associated_file_types_for' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { Ci::JobArtifact.associated_file_types_for(file_type) }
+
+    where(:file_type, :result) do
+      'codequality'         | %w(codequality)
+      'quality'             | nil
+    end
+
+    with_them do
+      it { is_expected.to eq result }
     end
   end
 
@@ -328,42 +345,6 @@ RSpec.describe Ci::JobArtifact do
     end
   end
 
-  describe '#each_blob' do
-    context 'when file format is gzip' do
-      context 'when gzip file contains one file' do
-        let(:artifact) { build(:ci_job_artifact, :junit) }
-
-        it 'iterates blob once' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.once
-        end
-      end
-
-      context 'when gzip file contains three files' do
-        let(:artifact) { build(:ci_job_artifact, :junit_with_three_testsuites) }
-
-        it 'iterates blob three times' do
-          expect { |b| artifact.each_blob(&b) }.to yield_control.exactly(3).times
-        end
-      end
-    end
-
-    context 'when file format is raw' do
-      let(:artifact) { build(:ci_job_artifact, :codequality, file_format: :raw) }
-
-      it 'iterates blob once' do
-        expect { |b| artifact.each_blob(&b) }.to yield_control.once
-      end
-    end
-
-    context 'when there are no adapters for the file format' do
-      let(:artifact) { build(:ci_job_artifact, :junit, file_format: :zip) }
-
-      it 'raises an error' do
-        expect { |b| artifact.each_blob(&b) }.to raise_error(described_class::NotSupportedAdapterError)
-      end
-    end
-  end
-
   describe 'expired?' do
     subject { artifact.expired? }
 
@@ -468,11 +449,7 @@ RSpec.describe Ci::JobArtifact do
     subject { create(:ci_job_artifact, :archive) }
 
     context 'when existing object has local store' do
-      it 'is stored locally' do
-        expect(subject.file_store).to be(ObjectStorage::Store::LOCAL)
-        expect(subject.file).to be_file_storage
-        expect(subject.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-      end
+      it_behaves_like 'mounted file in local store'
     end
 
     context 'when direct upload is enabled' do
@@ -481,11 +458,7 @@ RSpec.describe Ci::JobArtifact do
       end
 
       context 'when file is stored' do
-        it 'is stored remotely' do
-          expect(subject.file_store).to eq(ObjectStorage::Store::REMOTE)
-          expect(subject.file).not_to be_file_storage
-          expect(subject.file.object_store).to eq(ObjectStorage::Store::REMOTE)
-        end
+        it_behaves_like 'mounted file in object store'
       end
     end
   end
@@ -514,11 +487,9 @@ RSpec.describe Ci::JobArtifact do
     context 'when file type is supported' do
       let(:project_closest_setting) { 1024 }
       let(:artifact_type) { 'junit' }
+      let(:limit_name) { "#{described_class::PLAN_LIMIT_PREFIX}#{artifact_type}" }
 
-      before do
-        stub_feature_flags(ci_max_artifact_size_per_type: flag_enabled)
-        allow(build.project).to receive(:closest_setting).with(:max_artifacts_size).and_return(project_closest_setting)
-      end
+      let!(:plan_limits) { create(:plan_limits, :default_plan) }
 
       shared_examples_for 'basing off the project closest setting' do
         it { is_expected.to eq(project_closest_setting.megabytes.to_i) }
@@ -528,49 +499,40 @@ RSpec.describe Ci::JobArtifact do
         it { is_expected.to eq(max_size_for_type.megabytes.to_i) }
       end
 
-      context 'and feature flag for custom max size per type is enabled' do
-        let(:flag_enabled) { true }
-        let(:limit_name) { "#{described_class::PLAN_LIMIT_PREFIX}#{artifact_type}" }
+      before do
+        allow(build.project).to receive(:closest_setting).with(:max_artifacts_size).and_return(project_closest_setting)
+      end
 
-        let!(:plan_limits) { create(:plan_limits, :default_plan) }
-
-        context 'and plan limit is disabled for the given artifact type' do
-          before do
-            plan_limits.update!(limit_name => 0)
-          end
-
-          it_behaves_like 'basing off the project closest setting'
-
-          context 'and project closest setting results to zero' do
-            let(:project_closest_setting) { 0 }
-
-            it { is_expected.to eq(0) }
-          end
+      context 'and plan limit is disabled for the given artifact type' do
+        before do
+          plan_limits.update!(limit_name => 0)
         end
 
-        context 'and plan limit is enabled for the given artifact type' do
-          before do
-            plan_limits.update!(limit_name => max_size_for_type)
-          end
+        it_behaves_like 'basing off the project closest setting'
 
-          context 'and plan limit is smaller than project setting' do
-            let(:max_size_for_type) { project_closest_setting - 1 }
+        context 'and project closest setting results to zero' do
+          let(:project_closest_setting) { 0 }
 
-            it_behaves_like 'basing off the plan limit'
-          end
-
-          context 'and plan limit is smaller than project setting' do
-            let(:max_size_for_type) { project_closest_setting + 1 }
-
-            it_behaves_like 'basing off the project closest setting'
-          end
+          it { is_expected.to eq(0) }
         end
       end
 
-      context 'and feature flag for custom max size per type is disabled' do
-        let(:flag_enabled) { false }
+      context 'and plan limit is enabled for the given artifact type' do
+        before do
+          plan_limits.update!(limit_name => max_size_for_type)
+        end
 
-        it_behaves_like 'basing off the project closest setting'
+        context 'and plan limit is smaller than project setting' do
+          let(:max_size_for_type) { project_closest_setting - 1 }
+
+          it_behaves_like 'basing off the plan limit'
+        end
+
+        context 'and plan limit is larger than project setting' do
+          let(:max_size_for_type) { project_closest_setting + 1 }
+
+          it_behaves_like 'basing off the project closest setting'
+        end
       end
     end
   end
@@ -582,7 +544,8 @@ RSpec.describe Ci::JobArtifact do
       Please refer to https://docs.gitlab.com/ee/development/application_limits.html on how to add new plan limit columns.
 
       Take note that while existing max size plan limits default to 0, succeeding new limits are recommended to have
-      non-zero default values.
+      non-zero default values. Also, remember to update the plan limits documentation (doc/administration/instance_limits.md)
+      when changes or new entries are made.
     MSG
   end
 end

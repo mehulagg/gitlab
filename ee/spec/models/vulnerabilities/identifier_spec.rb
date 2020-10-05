@@ -3,10 +3,12 @@
 require 'spec_helper'
 
 RSpec.describe Vulnerabilities::Identifier do
+  using RSpec::Parameterized::TableSyntax
+
   describe 'associations' do
     it { is_expected.to have_many(:finding_identifiers).class_name('Vulnerabilities::FindingIdentifier') }
-    it { is_expected.to have_many(:occurrences).class_name('Vulnerabilities::Occurrence') }
-    it { is_expected.to have_many(:primary_occurrences).class_name('Vulnerabilities::Occurrence') }
+    it { is_expected.to have_many(:findings).class_name('Vulnerabilities::Finding') }
+    it { is_expected.to have_many(:primary_findings).class_name('Vulnerabilities::Finding') }
     it { is_expected.to belong_to(:project) }
   end
 
@@ -40,6 +42,54 @@ RSpec.describe Vulnerabilities::Identifier do
 
       it 'does not select the identifier' do
         is_expected.to be_empty
+      end
+    end
+  end
+
+  describe 'type check methods' do
+    shared_examples_for 'type check method' do |method:|
+      with_them do
+        let(:identifier) { build_stubbed(:vulnerabilities_identifier, external_type: external_type) }
+
+        subject { identifier.public_send(method) }
+
+        it { is_expected.to be(expected_value) }
+      end
+    end
+
+    describe '#cve?' do
+      it_behaves_like 'type check method', method: :cve? do
+        where(:external_type, :expected_value) do
+          'CVE' | true
+          'cve' | true
+          'CWE' | false
+          'cwe' | false
+          'foo' | false
+        end
+      end
+    end
+
+    describe '#cwe?' do
+      it_behaves_like 'type check method', method: :cwe? do
+        where(:external_type, :expected_value) do
+          'CWE' | true
+          'cwe' | true
+          'CVE' | false
+          'cve' | false
+          'foo' | false
+        end
+      end
+    end
+
+    describe '#other?' do
+      it_behaves_like 'type check method', method: :other? do
+        where(:external_type, :expected_value) do
+          'CWE' | false
+          'cwe' | false
+          'CVE' | false
+          'cve' | false
+          'foo' | true
+        end
       end
     end
   end

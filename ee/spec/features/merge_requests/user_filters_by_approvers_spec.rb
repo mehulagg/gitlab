@@ -17,6 +17,7 @@ RSpec.describe 'Merge Requests > User filters', :js do
   let!(:merge_request_with_two_approvers) do
     create(:merge_request, title: 'Bugfix2', approval_users: [user, first_user], source_project: project, source_branch: 'bugfix2')
   end
+
   let!(:merge_request) { create(:merge_request, title: 'Bugfix3', source_project: project, source_branch: 'bugfix3') }
   let!(:merge_request_with_group_approver) do
     group = create(:group)

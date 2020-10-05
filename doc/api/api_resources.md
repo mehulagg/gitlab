@@ -9,7 +9,7 @@ Available resources for the [GitLab API](README.md) can be grouped in the follow
 See also:
 
 - [V3 to V4](v3_to_v4.md).
-- Adding [deploy keys for multiple projects](deploy_key_multiple_projects.md).
+- Adding [deploy keys for multiple projects](deploy_keys.md#adding-deploy-keys-to-multiple-projects).
 - [API Resources for various templates](#templates-api-resources).
 
 ## Project resources
@@ -44,9 +44,10 @@ The following API resources are available in the project context:
 | [Members](members.md)                                               | `/projects/:id/members` (also available for groups)                                                                                                                                                   |
 | [Merge request approvals](merge_request_approvals.md) **(STARTER)** | `/projects/:id/approvals`, `/projects/:id/merge_requests/.../approvals`                                                                                                                               |
 | [Merge requests](merge_requests.md)                                 | `/projects/:id/merge_requests` (also available for groups and standalone)                                                                                                                             |
+| [Merge trains](merge_trains.md)                                     | `/projects/:id/merge_trains`                                                                                                                                                                          |
 | [Notes](notes.md) (comments)                                        | `/projects/:id/issues/.../notes`, `/projects/:id/snippets/.../notes`, `/projects/:id/merge_requests/.../notes` (also available for groups)                                                            |
 | [Notification settings](notification_settings.md)                   | `/projects/:id/notification_settings` (also available for groups and standalone)                                                                                                                      |
-| [Packages](packages.md) **(PREMIUM)**                               | `/projects/:id/packages`                                                                                                                                                                              |
+| [Packages](packages.md)                                             | `/projects/:id/packages`                                                                                                                                                                              |
 | [Pages domains](pages_domains.md)                                   | `/projects/:id/pages` (also available standalone)                                                                                                                                                     |
 | [Pipelines](pipelines.md)                                           | `/projects/:id/pipelines`                                                                                                                                                                             |
 | [Pipeline schedules](pipeline_schedules.md)                         | `/projects/:id/pipeline_schedules`                                                                                                                                                                    |
@@ -115,7 +116,7 @@ The following API resources are available outside of project and group contexts 
 | Resource                                           | Available endpoints                                                     |
 |:---------------------------------------------------|:------------------------------------------------------------------------|
 | [Instance-level CI/CD variables](instance_level_ci_variables.md) | `/admin/ci/variables`                                     |
-| [Admin Sidekiq queues](admin_sidekiq_queues.md)    | `/admin/sidekiq/queues/:queue_name`                                     |
+| [Sidekiq queues administration](admin_sidekiq_queues.md) **(CORE ONLY)** | `/admin/sidekiq/queues/:queue_name`               |
 | [Appearance](appearance.md) **(CORE ONLY)**        | `/application/appearance`                                               |
 | [Applications](applications.md)                    | `/applications`                                                         |
 | [Audit Events](audit_events.md) **(PREMIUM ONLY)** | `/audit_events`                                                         |
@@ -129,6 +130,7 @@ The following API resources are available outside of project and group contexts 
 | [Geo Nodes](geo_nodes.md) **(PREMIUM ONLY)**       | `/geo_nodes`                                                            |
 | [Group Activity Analytics](group_activity_analytics.md) **(STARTER)**  | `/analytics/group_activity/{issues_count | merge_requests_count | new_members_count }`  |
 | [Import repository from GitHub](import.md)         | `/import/github`                                                        |
+| [Instance clusters](instance_clusters.md)          | `/admin/clusters`                                                       |
 | [Issues](issues.md)                                | `/issues` (also available for groups and projects)                      |
 | [Issues Statistics](issues_statistics.md)          | `/issues_statistics` (also available for groups and projects)           |
 | [Keys](keys.md)                                    | `/keys`                                                                 |
@@ -139,16 +141,17 @@ The following API resources are available outside of project and group contexts 
 | [Namespaces](namespaces.md)                        | `/namespaces`                                                           |
 | [Notification settings](notification_settings.md)  | `/notification_settings` (also available for groups and projects)       |
 | [Pages domains](pages_domains.md)                  | `/pages/domains` (also available for projects)                          |
+| [Personal access tokens](personal_access_tokens.md) | `/personal_access_tokens`                                              |
 | [Projects](projects.md)                            | `/users/:id/projects` (also available for projects)                     |
 | [Project repository storage moves](project_repository_storage_moves.md) **(CORE ONLY)** | `/project_repository_storage_moves` |
 | [Runners](runners.md)                              | `/runners` (also available for projects)                                |
 | [Search](search.md)                                | `/search` (also available for groups and projects)                      |
 | [Settings](settings.md) **(CORE ONLY)**            | `/application/settings`                                                 |
 | [Statistics](statistics.md)                        | `/application/statistics`                                               |
-| [Sidekiq metrics](sidekiq_metrics.md)              | `/sidekiq`                                                              |
+| [Sidekiq metrics](sidekiq_metrics.md) **(CORE ONLY)** | `/sidekiq`                                                           |
 | [Suggestions](suggestions.md)                      | `/suggestions`                                                          |
 | [System hooks](system_hooks.md)                    | `/hooks`                                                                |
-| [Todos](todos.md)                                  | `/todos`                                                                |
+| [To-dos](todos.md)                                  | `/todos`                                                                |
 | [Users](users.md)                                  | `/users`                                                                |
 | [Validate `.gitlab-ci.yml` file](lint.md)          | `/lint`                                                                 |
 | [Version](version.md)                              | `/version`                                                              |

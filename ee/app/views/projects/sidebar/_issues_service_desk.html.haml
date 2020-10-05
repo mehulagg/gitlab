@@ -1,7 +1,0 @@
--# TODO - Remove this check when service desk gets moved into core tier
--# More information on: https://gitlab.com/gitlab-org/gitlab/-/issues/215364
-- return unless render_service_desk_menu?
-
-= nav_link(controller: :issues, action: :service_desk ) do
-  = link_to service_desk_project_issues_path(@project), title: 'Service Desk' do
-    = _('Service Desk')

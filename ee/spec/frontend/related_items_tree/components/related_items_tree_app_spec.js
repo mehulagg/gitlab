@@ -5,11 +5,11 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import RelatedItemsTreeApp from 'ee/related_items_tree/components/related_items_tree_app.vue';
 import RelatedItemsTreeHeader from 'ee/related_items_tree/components/related_items_tree_header.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
-import { issuableTypesMap } from 'ee/related_issues/constants';
 import CreateIssueForm from 'ee/related_items_tree/components/create_issue_form.vue';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
 import { getJSONFixture } from 'helpers/fixtures';
+import { issuableTypesMap } from '~/related_issues/constants';
+import axios from '~/lib/utils/axios_utils';
 
 import { mockInitialConfig, mockParentItem, mockEpics, mockIssues } from '../mock_data';
 

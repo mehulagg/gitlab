@@ -6,7 +6,6 @@ RSpec.describe 'Admin updates EE-only settings' do
   include StubENV
 
   before do
-    stub_feature_flags(instance_level_integrations: false)
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
     sign_in(create(:admin))
     allow(License).to receive(:feature_available?).and_return(true)
@@ -53,7 +52,7 @@ RSpec.describe 'Admin updates EE-only settings' do
 
   context 'Elasticsearch settings' do
     before do
-      visit integrations_admin_application_settings_path
+      visit general_admin_application_settings_path
       page.within('.as-elasticsearch') do
         click_button 'Expand'
       end
@@ -65,9 +64,11 @@ RSpec.describe 'Admin updates EE-only settings' do
         check 'Search with Elasticsearch enabled'
         fill_in 'Number of Elasticsearch shards', with: '120'
         fill_in 'Number of Elasticsearch replicas', with: '2'
+        fill_in 'Maximum file size indexed (KiB)', with: '5000'
         fill_in 'Maximum field length', with: '100000'
         fill_in 'Maximum bulk request size (MiB)', with: '17'
         fill_in 'Bulk request concurrency', with: '23'
+        fill_in 'Client request timeout', with: '30'
 
         click_button 'Save changes'
       end
@@ -77,9 +78,11 @@ RSpec.describe 'Admin updates EE-only settings' do
         expect(current_settings.elasticsearch_search).to be_truthy
         expect(current_settings.elasticsearch_shards).to eq(120)
         expect(current_settings.elasticsearch_replicas).to eq(2)
+        expect(current_settings.elasticsearch_indexed_file_size_limit_kb).to eq(5000)
         expect(current_settings.elasticsearch_indexed_field_length_limit).to eq(100000)
         expect(current_settings.elasticsearch_max_bulk_size_mb).to eq(17)
         expect(current_settings.elasticsearch_max_bulk_concurrency).to eq(23)
+        expect(current_settings.elasticsearch_client_request_timeout).to eq(30)
         expect(page).to have_content 'Application settings saved successfully'
       end
     end
@@ -113,7 +116,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       end
 
       page.within('#select2-drop') do
-        expect(page).to have_content(project.full_path)
+        expect(page).to have_content(project.name_with_namespace)
       end
 
       page.within('.as-elasticsearch') do
@@ -133,7 +136,7 @@ RSpec.describe 'Admin updates EE-only settings' do
       namespace = create(:elasticsearch_indexed_namespace).namespace
       project = create(:elasticsearch_indexed_project).project
 
-      visit integrations_admin_application_settings_path
+      visit general_admin_application_settings_path
 
       expect(ElasticsearchIndexedNamespace.count).to be > 0
       expect(ElasticsearchIndexedProject.count).to be > 0
@@ -159,11 +162,22 @@ RSpec.describe 'Admin updates EE-only settings' do
       expect(ElasticsearchIndexedProject.count).to eq(0)
       expect(page).to have_content 'Application settings saved successfully'
     end
+
+    it 'zero-downtime reindexing shows popup', :js do
+      page.within('.as-elasticsearch') do
+        expect(page).to have_content 'Trigger cluster reindexing'
+        click_link 'Trigger cluster reindexing'
+      end
+
+      text = page.driver.browser.switch_to.alert.text
+      expect(text).to eq 'Are you sure you want to reindex?'
+      page.driver.browser.switch_to.alert.accept
+    end
   end
 
   it 'Enable Slack application' do
     allow(Gitlab).to receive(:com?).and_return(true)
-    visit integrations_admin_application_settings_path
+    visit general_admin_application_settings_path
 
     page.within('.as-slack') do
       check 'Enable Slack application'

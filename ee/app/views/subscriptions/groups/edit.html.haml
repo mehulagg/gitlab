@@ -1,23 +1,23 @@
 - page_title _('Your GitLab group')
 
 .row.flex-grow-1.bg-gray-light
-  .d-flex.flex-column.align-items-center.w-100.gl-p-3-deprecated-no-really-do-not-use-me
-    %section.gl-banner.gl-banner-introduction.gl-p-2-deprecated-no-really-do-not-use-me.px-lg-6
+  .d-flex.flex-column.align-items-center.w-100.gl-p-5
+    %section.gl-banner.gl-banner-introduction.gl-p-3.px-lg-6
       .gl-banner-illustration.d-flex
         = image_tag('illustrations/subscription-success.svg', class: 'mw-xs')
       .gl-banner-content.d-flex.flex-column.justify-content-center
         %h3= _('Thanks for your purchase!')
         - number_of_users = n_('1 user', '%{num} users', params[:quantity].to_i) % { num: params[:quantity] }
         %p= _('You have successfully purchased a %{plan} plan subscription for %{seats}. You’ll receive a receipt via email.') % { plan: plan_title, seats: number_of_users }
-    .edit-group.d-flex.flex-column.align-items-center.gl-pt-5-deprecated-no-really-do-not-use-me
+    .edit-group.d-flex.flex-column.align-items-center.gl-pt-7
       - if params[:new_user]
-        #progress-bar{ data: { is_onboarding_issues_experiment_enabled: experiment_enabled?(:onboarding_issues).to_s } }
+        #progress-bar
       %h2.center= _('Create your group')
       %p
         %div= _('A group represents your organization in GitLab. Groups allow you to manage users and collaborate across multiple projects.')
         %div= _('Your %{plan} plan will be applied to your group.' % { plan: plan_title })
 
-      = form_for [:subscriptions, @group], html: { class: 'gl-show-field-errors card w-100 gl-p-3-deprecated-no-really-do-not-use-me' } do |f|
+      = form_for [:subscriptions, @group], html: { class: 'gl-show-field-errors card w-100 gl-p-5' } do |f|
         = hidden_field_tag :new_user, params[:new_user]
         = form_errors(@group)
         .row

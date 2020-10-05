@@ -6,6 +6,7 @@ module Gitlab
   module Danger
     module Helper
       RELEASE_TOOLS_BOT = 'gitlab-release-tools-bot'
+      DRAFT_REGEX = /\A*#{Regexp.union(/(?i)(\[WIP\]\s*|WIP:\s*|WIP$)/, /(?i)(\[draft\]|\(draft\)|draft:|draft\s\-\s|draft$)/)}+\s*/i.freeze
 
       # Returns a list of all files that have been added, modified or renamed.
       # `git.modified_files` might contain paths that already have been renamed,
@@ -34,13 +35,28 @@ module Gitlab
           .sort
       end
 
+      # Returns a string containing changed lines as git diff
+      #
+      # Considering changing a line in lib/gitlab/usage_data.rb it will return:
+      #
+      # [ "--- a/lib/gitlab/usage_data.rb",
+      #   "+++ b/lib/gitlab/usage_data.rb",
+      #   "+      # Test change",
+      #   "-      # Old change" ]
+      def changed_lines(changed_file)
+        diff = git.diff_for_file(changed_file)
+        return [] unless diff
+
+        diff.patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
+      end
+
       def all_ee_changes
         all_changed_files.grep(%r{\Aee/})
       end
 
       def ee?
         # Support former project name for `dev` and support local Danger run
-        %w[gitlab gitlab-ee].include?(ENV['CI_PROJECT_NAME']) || Dir.exist?('../../ee')
+        %w[gitlab gitlab-ee].include?(ENV['CI_PROJECT_NAME']) || Dir.exist?(File.expand_path('../../../ee', __dir__))
       end
 
       def gitlab_helper
@@ -77,10 +93,19 @@ module Gitlab
         end
       end
 
-      # Determines the categories a file is in, e.g., `[:frontend]`, `[:backend]`, or  `%i[frontend engineering_productivity]`.
+      # Determines the categories a file is in, e.g., `[:frontend]`, `[:backend]`, or  `%i[frontend engineering_productivity]`
+      # using filename regex and specific change regex if given.
+      #
       # @return Array<Symbol>
       def categories_for_file(file)
-        _, categories = CATEGORIES.find { |regexp, _| regexp.match?(file) }
+        _, categories = CATEGORIES.find do |key, _|
+          filename_regex, changes_regex = Array(key)
+
+          found = filename_regex.match?(file)
+          found &&= changed_lines(file).any? { |changed_line| changes_regex.match?(changed_line) } if changes_regex
+
+          found
+        end
 
         Array(categories || :unknown)
       end
@@ -102,6 +127,8 @@ module Gitlab
       }.freeze
       # First-match win, so be sure to put more specific regex at the top...
       CATEGORIES = {
+        [%r{usage_data\.rb}, %r{^(\+|-).*(count|distinct_count)\(.*\)(.*)$}] => [:database, :backend],
+
         %r{\Adoc/.*(\.(md|png|gif|jpg))\z} => :docs,
         %r{\A(CONTRIBUTING|LICENSE|MAINTENANCE|PHILOSOPHY|PROCESS|README)(\.md)?\z} => :docs,
 
@@ -146,10 +173,16 @@ module Gitlab
         %r{\A(ee/)?(danger/|lib/gitlab/danger/)} => :engineering_productivity,
         %r{\A(ee/)?scripts/} => :engineering_productivity,
         %r{\Atooling/} => :engineering_productivity,
+        %r{(CODEOWNERS)} => :engineering_productivity,
+        %r{(tests.yml)} => :engineering_productivity,
+
+        %r{\A(ee/)?spec/features/} => :test,
+        %r{\A(ee/)?spec/support/shared_examples/features/} => :test,
+        %r{\A(ee/)?spec/support/shared_contexts/features/} => :test,
+        %r{\A(ee/)?spec/support/helpers/features/} => :test,
 
         %r{\A(ee/)?app/(?!assets|views)[^/]+} => :backend,
         %r{\A(ee/)?(bin|config|generator_templates|lib|rubocop)/} => :backend,
-        %r{\A(ee/)?spec/features/} => :test,
         %r{\A(ee/)?spec/} => :backend,
         %r{\A(ee/)?vendor/} => :backend,
         %r{\A(Gemfile|Gemfile.lock|Rakefile)\z} => :backend,
@@ -162,6 +195,7 @@ module Gitlab
         # Files that don't fit into any category are marked with :none
         %r{\A(ee/)?changelogs/} => :none,
         %r{\Alocale/gitlab\.pot\z} => :none,
+        %r{\Adata/whats_new/} => :none,
 
         # Fallbacks in case the above patterns miss anything
         %r{\.rb\z} => :backend,
@@ -176,18 +210,14 @@ module Gitlab
         usernames.map { |u| Gitlab::Danger::Teammate.new('username' => u) }
       end
 
-      def missing_database_labels(current_mr_labels)
-        labels = if has_database_scoped_labels?(current_mr_labels)
-                   ['database']
-                 else
-                   ['database', 'database::review pending']
-                 end
-
-        labels - current_mr_labels
+      def sanitize_mr_title(title)
+        title.gsub(DRAFT_REGEX, '').gsub(/`/, '\\\`')
       end
 
-      def sanitize_mr_title(title)
-        title.gsub(/^WIP: */, '').gsub(/`/, '\\\`')
+      def draft_mr?
+        return false unless gitlab_helper
+
+        DRAFT_REGEX.match?(gitlab_helper.mr_json['title'])
       end
 
       def security_mr?
@@ -225,7 +255,9 @@ module Gitlab
         "/label #{labels_list(labels, sep: ' ')}"
       end
 
-      private
+      def changed_files(regex)
+        all_changed_files.grep(regex)
+      end
 
       def has_database_scoped_labels?(current_mr_labels)
         current_mr_labels.any? { |label| label.start_with?('database::') }

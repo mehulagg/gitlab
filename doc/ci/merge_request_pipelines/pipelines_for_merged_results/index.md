@@ -30,8 +30,7 @@ can still be successfully merged into the target.
 When the merge request can't be merged, the pipeline runs against the source branch only. For example, when:
 
 - The target branch has changes that conflict with the changes in the source branch.
-- The merge request is a
-  [work in progress](../../../user/project/merge_requests/work_in_progress_merge_requests.md).
+- The merge request is a [**Draft** merge request](../../../user/project/merge_requests/work_in_progress_merge_requests.md).
 
 In these cases, the pipeline runs as a [pipeline for merge requests](../index.md)
 and is labeled as `detached`. If these cases no longer exist, new pipelines will
@@ -46,8 +45,6 @@ To enable pipelines for merge results:
 
 - You must have maintainer [permissions](../../../user/permissions.md).
 - You must be using [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner) 11.9 or later.
-- You must not be forking or using cross-repo workflows. To follow progress,
-  see [#11934](https://gitlab.com/gitlab-org/gitlab/-/issues/11934).
 - You must not be using
   [fast forward merges](../../../user/project/merge_requests/fast_forward_merge.md) yet.
   To follow progress, see [#58226](https://gitlab.com/gitlab-org/gitlab/-/issues/26996).
@@ -69,7 +66,7 @@ unresolved state or your pipelines may be dropped.
 
 ## Using Merge Trains
 
-When you enable [Pipelines for merged results](#pipelines-for-merged-results-premium),
+When you enable [Pipelines for merged results](#pipelines-for-merged-results),
 GitLab [automatically displays](merge_trains/index.md#add-a-merge-request-to-a-merge-train)
 a **Start/Add Merge Train button**.
 
@@ -130,5 +127,5 @@ unexpected timing. For example, when a source or target branch is advanced.
 In this case, the pipeline fails because of `fatal: reference is not a tree:` error,
 which indicates that the checkout-SHA is not found in the merge ref.
 
-This behavior was improved at GitLab 12.4 by introducing [Persistent pipeline refs](../../pipelines/index.md#troubleshooting-fatal-reference-is-not-a-tree).
+This behavior was improved at GitLab 12.4 by introducing [Persistent pipeline refs](../../troubleshooting.md#fatal-reference-is-not-a-tree-error).
 You should be able to create pipelines at any timings without concerning the error.

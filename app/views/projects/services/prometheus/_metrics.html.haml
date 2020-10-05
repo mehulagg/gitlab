@@ -5,7 +5,7 @@
 .col-lg-3
   %p
     = s_('PrometheusService|Common metrics are automatically monitored based on a library of metrics from popular exporters.')
-    = link_to s_('PrometheusService|More information'), help_page_path('user/project/integrations/prometheus_library/index'), target: '_blank', rel: "noopener noreferrer"
+    = link_to s_('PrometheusService|More information'), help_page_path('user/project/integrations/prometheus'), target: '_blank', rel: "noopener noreferrer"
 
 .col-lg-9
   .card.js-panel-monitored-metrics{ data: { active_metrics: active_common_project_prometheus_metrics_path(project, :json), metrics_help_path: help_page_path('user/project/integrations/prometheus_library/index') } }
@@ -16,7 +16,7 @@
     .card-body
       .loading-metrics.js-loading-metrics
         %p.m-3
-          = icon('spinner spin', class: 'metrics-load-spinner')
+          = loading_icon(css_class: 'metrics-load-spinner')
           = s_('PrometheusService|Finding and configuring metrics...')
       .empty-metrics.hidden.js-empty-metrics
         %p.text-tertiary.m-3
@@ -33,5 +33,5 @@
         .flash-notice
           .flash-text
             = s_("PrometheusService|To set up automatic monitoring, add the environment variable %{variable} to exporter's queries." % { variable: "<code>$CI_ENVIRONMENT_SLUG</code>" }).html_safe
-            = link_to s_('PrometheusService|More information'), help_page_path('user/project/integrations/prometheus', anchor: 'query-variables')
+            = link_to s_('PrometheusService|More information'), help_page_path('operations/metrics/dashboards/variables.md', anchor: 'query-variables')
       %ul.list-unstyled.metrics-list.js-missing-var-metrics-list

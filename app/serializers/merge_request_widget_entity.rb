@@ -3,6 +3,8 @@
 class MergeRequestWidgetEntity < Grape::Entity
   include RequestAwareEntity
 
+  SUGGEST_PIPELINE = 'suggest_pipeline'
+
   expose :id
   expose :iid
 
@@ -12,6 +14,10 @@ class MergeRequestWidgetEntity < Grape::Entity
 
   expose :target_project_full_path do |merge_request|
     merge_request.project&.full_path
+  end
+
+  expose :can_create_pipeline_in_target_project do |merge_request|
+    can?(current_user, :create_pipeline, merge_request.target_project)
   end
 
   expose :email_patches_path do |merge_request|
@@ -56,8 +62,21 @@ class MergeRequestWidgetEntity < Grape::Entity
       merge_request.source_branch,
       file_name: '.gitlab-ci.yml',
       commit_message: s_("CommitMessage|Add %{file_name}") % { file_name: Gitlab::FileDetector::PATTERNS[:gitlab_ci] },
+      mr_path: merge_request_path(merge_request),
       suggest_gitlab_ci_yml: true
     )
+  end
+
+  expose :user_callouts_path, if: -> (*) { Gitlab::Experimentation.enabled?(:suggest_pipeline) } do |_merge_request|
+    user_callouts_path
+  end
+
+  expose :suggest_pipeline_feature_id, if: -> (*) { Gitlab::Experimentation.enabled?(:suggest_pipeline) } do |_merge_request|
+    SUGGEST_PIPELINE
+  end
+
+  expose :is_dismissed_suggest_pipeline, if: -> (*) { Gitlab::Experimentation.enabled?(:suggest_pipeline) } do |_merge_request|
+    current_user && current_user.dismissed_callout?(feature_name: SUGGEST_PIPELINE)
   end
 
   expose :human_access do |merge_request|
@@ -85,6 +104,26 @@ class MergeRequestWidgetEntity < Grape::Entity
     end
   end
 
+  expose :blob_path do
+    expose :head_path, if: -> (mr, _) { mr.source_branch_sha } do |merge_request|
+      project_blob_path(merge_request.project, merge_request.source_branch_sha)
+    end
+
+    expose :base_path, if: -> (mr, _) { mr.diff_base_sha } do |merge_request|
+      project_blob_path(merge_request.project, merge_request.diff_base_sha)
+    end
+  end
+
+  expose :codeclimate, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:codequality) } do
+    expose :head_path do |merge_request|
+      head_pipeline_downloadable_path_for_report_type(:codequality)
+    end
+
+    expose :base_path do |merge_request|
+      base_pipeline_downloadable_path_for_report_type(:codequality)
+    end
+  end
+
   private
 
   delegate :current_user, to: :request
@@ -99,9 +138,19 @@ class MergeRequestWidgetEntity < Grape::Entity
       merge_request.source_branch_exists? &&
       merge_request.source_project&.uses_default_ci_config? &&
       !merge_request.source_project.has_ci? &&
-      merge_request.commits_count.positive? &&
+      merge_request.commits_count > 0 &&
       can?(current_user, :read_build, merge_request.source_project) &&
       can?(current_user, :create_pipeline, merge_request.source_project)
+  end
+
+  def head_pipeline_downloadable_path_for_report_type(file_type)
+    object.head_pipeline&.present(current_user: current_user)
+      &.downloadable_path_for_report_type(file_type)
+  end
+
+  def base_pipeline_downloadable_path_for_report_type(file_type)
+    object.base_pipeline&.present(current_user: current_user)
+      &.downloadable_path_for_report_type(file_type)
   end
 end
 

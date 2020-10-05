@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: index, reference
 description: "Getting started with Merge Requests."
 ---
@@ -50,14 +53,14 @@ When you start a new merge request, you can immediately include the following
 options, or add them later by clicking the **Edit** button on the merge
 request's page at the top-right side:
 
-- [Assign](#assignee) the merge request to a colleague for review. With GitLab Starter and higher tiers, you can [assign it to more than one person at a time](#multiple-assignees-starter).
+- [Assign](#assignee) the merge request to a colleague for review. With GitLab Starter and higher tiers, you can [assign it to more than one person at a time](#multiple-assignees).
 - Set a [milestone](../milestones/index.md) to track time-sensitive changes.
 - Add [labels](../labels.md) to help contextualize and filter your merge requests over time.
 - Require [approval](merge_request_approvals.md) from your team. **(STARTER)**
 - [Close issues automatically](#merge-requests-to-close-issues) when they are merged.
 - Enable the [delete source branch when merge request is accepted](#deleting-the-source-branch) option to keep your repository clean.
 - Enable the [squash commits when merge request is accepted](squash_and_merge.md) option to combine all the commits into one before merging, thus keep a clean commit history in your repository.
-- Set the merge request as a [Work In Progress (WIP)](work_in_progress_merge_requests.md) to avoid accidental merges before it is ready.
+- Set the merge request as a [**Draft**](work_in_progress_merge_requests.md) to avoid accidental merges before it is ready.
 
 Once you have created the merge request, you can also:
 

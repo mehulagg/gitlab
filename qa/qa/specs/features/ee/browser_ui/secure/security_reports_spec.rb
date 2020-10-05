@@ -3,8 +3,8 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/213676', type: :investigating } do
-    let(:number_of_dependencies_in_fixture) { 7 }
+  RSpec.describe 'Secure', :runner do
+    let(:number_of_dependencies_in_fixture) { 9 }
     let(:dependency_scan_example_vuln) { 'Prototype pollution attack in mixin-deep' }
     let(:container_scan_example_vuln) { 'CVE-2017-18269 in glibc' }
     let(:sast_scan_example_vuln) { 'Cipher with no integrity' }
@@ -49,7 +49,7 @@ module QA
         @project.visit!
       end
 
-      it 'displays security reports in the pipeline' do
+      it 'displays security reports in the pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/565' do
         Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 
@@ -57,24 +57,24 @@ module QA
           pipeline.click_on_security
 
           filter_report_and_perform(pipeline, "Dependency Scanning") do
-            expect(pipeline).to have_vulnerability dependency_scan_example_vuln
+            expect(pipeline).to have_vulnerability_info_content dependency_scan_example_vuln
           end
 
           filter_report_and_perform(pipeline, "Container Scanning") do
-            expect(pipeline).to have_vulnerability container_scan_example_vuln
+            expect(pipeline).to have_vulnerability_info_content container_scan_example_vuln
           end
 
           filter_report_and_perform(pipeline, "SAST") do
-            expect(pipeline).to have_vulnerability sast_scan_example_vuln
+            expect(pipeline).to have_vulnerability_info_content sast_scan_example_vuln
           end
 
           filter_report_and_perform(pipeline, "DAST") do
-            expect(pipeline).to have_vulnerability dast_scan_example_vuln
+            expect(pipeline).to have_vulnerability_info_content dast_scan_example_vuln
           end
         end
       end
 
-      it 'displays security reports in the project security dashboard' do
+      it 'displays security reports in the project security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/566' do
         Page::Project::Menu.perform(&:click_project)
         Page::Project::Menu.perform(&:click_on_security_dashboard)
 
@@ -97,12 +97,18 @@ module QA
         end
       end
 
-      it 'displays security reports in the group security dashboard' do
+      it 'displays security reports in the group security dashboard', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/567' do
         Page::Main::Menu.perform(&:go_to_groups)
         Page::Dashboard::Groups.perform do |groups|
           groups.click_group @project.group.path
         end
         Page::Group::Menu.perform(&:click_group_security_link)
+
+        EE::Page::Group::Secure::Show.perform do |dashboard|
+          expect(dashboard).to have_security_status_project_for_severity('F', @project)
+        end
+
+        Page::Group::Menu.perform(&:click_group_vulnerability_link)
 
         EE::Page::Group::Secure::Show.perform do |dashboard|
           dashboard.filter_project(@project.name)
@@ -125,7 +131,7 @@ module QA
         end
       end
 
-      it 'displays the Dependency List' do
+      it 'displays the Dependency List', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/564' do
         Page::Project::Menu.perform(&:click_on_dependency_list)
 
         EE::Page::Project::Secure::DependencyList.perform do |dependency_list|

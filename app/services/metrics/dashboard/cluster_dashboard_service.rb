@@ -8,10 +8,12 @@ module Metrics
       DASHBOARD_PATH = 'config/prometheus/cluster_metrics.yml'
       DASHBOARD_NAME = 'Cluster'
 
+      # SHA256 hash of dashboard content
+      DASHBOARD_VERSION = 'e1a4f8cc2c044cf32273af2cd775eb484729baac0995db687d81d92686bf588e'
+
       SEQUENCE = [
         STAGES::ClusterEndpointInserter,
-        STAGES::PanelIdsInserter,
-        STAGES::Sorter
+        STAGES::PanelIdsInserter
       ].freeze
 
       class << self
@@ -25,6 +27,12 @@ module Metrics
       # Permissions are handled at the controller level
       def allowed?
         true
+      end
+
+      private
+
+      def dashboard_version
+        DASHBOARD_VERSION
       end
     end
   end

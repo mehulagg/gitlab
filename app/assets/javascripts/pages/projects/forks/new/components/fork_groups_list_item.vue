@@ -7,6 +7,7 @@ import {
   GlTooltipDirective,
   GlTooltip,
   GlBadge,
+  GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '~/groups/constants';
 import { __ } from '~/locale';
@@ -23,6 +24,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   props: {
     group: {
@@ -35,7 +37,7 @@ export default {
     },
   },
   data() {
-    return { namespaces: null };
+    return { namespaces: null, isForking: false };
   },
 
   computed: {
@@ -64,6 +66,13 @@ export default {
       return this.hasReachedProjectLimit
         ? this.$options.i18n.hasReachedProjectLimitMessage
         : this.$options.i18n.insufficientPermissionsMessage;
+    },
+  },
+
+  methods: {
+    fork() {
+      this.isForking = true;
+      this.$refs.form.submit();
     },
   },
 
@@ -112,7 +121,7 @@ export default {
             </span>
           </div>
           <div v-if="group.description" class="description">
-            <span v-html="group.markdown_description"> </span>
+            <span v-safe-html="group.markdown_description"> </span>
           </div>
         </div>
         <div class="gl-display-flex gl-flex-shrink-0">
@@ -124,14 +133,17 @@ export default {
           >
           <template v-else>
             <div ref="selectButtonWrapper">
-              <form method="POST" :action="group.fork_path">
+              <form ref="form" method="POST" :action="group.fork_path">
                 <input type="hidden" name="authenticity_token" :value="$options.csrf.token" />
                 <gl-button
                   type="submit"
-                  class="gl-h-7 gl-text-decoration-none!"
+                  class="gl-h-7"
                   :data-qa-name="group.full_name"
+                  category="secondary"
                   variant="success"
                   :disabled="isSelectButtonDisabled"
+                  :loading="isForking"
+                  @click="fork"
                   >{{ __('Select') }}</gl-button
                 >
               </form>

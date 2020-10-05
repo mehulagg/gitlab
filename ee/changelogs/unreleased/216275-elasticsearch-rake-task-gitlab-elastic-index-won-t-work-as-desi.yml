@@ -1,5 +1,0 @@
----
-title: Automatically enable Elasticsearch indexing with 'gitlab:elastic:index'
-merge_request: 35342
-author:
-type: changed

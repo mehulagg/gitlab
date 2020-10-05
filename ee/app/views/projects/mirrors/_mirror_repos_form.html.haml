@@ -40,7 +40,7 @@
       .help-block
         = _("Mirrored branches will have this prefix. If you enabled 'Only mirror protected branches' you need to include this prefix on protected branches in this project or nothing will be mirrored.")
 
-  .form-check.append-bottom-10
+  .form-check.gl-mb-3
     = f.check_box :mirror_overwrites_diverged_branches, class: 'form-check-input', checked: false
     = f.label :mirror_overwrites_diverged_branches, _('Overwrite diverged branches'), class: 'form-check-label'
     .form-text.text-muted

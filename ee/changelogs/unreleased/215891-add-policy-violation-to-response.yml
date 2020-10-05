@@ -1,5 +1,0 @@
----
-title: Prevent MR from merging if denied licenses are found
-merge_request: 34413
-author:
-type: added

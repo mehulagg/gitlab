@@ -13,6 +13,7 @@ RSpec.describe Gitlab::Ci::Config do
         - echo 'test'
     EOS
   end
+
   let(:template_yml) do
     <<-EOS
     sample_job:

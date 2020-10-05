@@ -11,18 +11,17 @@ old_notes_spec.js is the spec for the legacy, jQuery notes application. It has n
  */
 
 import $ from 'jquery';
+import '~/lib/utils/jquery_at_who';
 import { escape, uniqueId } from 'lodash';
 import Cookies from 'js-cookie';
 import Autosize from 'autosize';
-import 'jquery.caret'; // required by at.js
-import '@gitlab/at.js';
 import Vue from 'vue';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import AjaxCache from '~/lib/utils/ajax_cache';
 import syntaxHighlight from '~/syntax_highlight';
 import axios from './lib/utils/axios_utils';
 import { getLocationHash } from './lib/utils/url_utility';
-import Flash from './flash';
+import { deprecatedCreateFlash as Flash } from './flash';
 import { defaultAutocompleteConfig } from './gfm_auto_complete';
 import CommentTypeToggle from './comment_type_toggle';
 import GLForm from './gl_form';
@@ -480,11 +479,6 @@ export default class Notes {
       row = form;
     }
 
-    const lineType = this.isParallelView() ? form.find('#line_type').val() : 'old';
-    const diffAvatarContainer = row
-      .prevAll('.line_holder')
-      .first()
-      .find(`.js-avatar-container.${lineType}_line`);
     // is this the first note of discussion?
     discussionContainer = $(`.notes[data-discussion-id="${noteEntity.discussion_id}"]`);
     if (!discussionContainer.length) {
@@ -520,12 +514,6 @@ export default class Notes {
       Notes.animateAppendNote(noteEntity.html, discussionContainer);
     }
 
-    if (typeof gl.diffNotesCompileComponents !== 'undefined' && noteEntity.discussion_resolvable) {
-      gl.diffNotesCompileComponents();
-
-      this.renderDiscussionAvatar(diffAvatarContainer, noteEntity);
-    }
-
     localTimeAgo($('.js-timeago'), false);
     Notes.checkMergeRequestStatus();
     return this.updateNotesCount(1);
@@ -537,19 +525,6 @@ export default class Notes {
       .prevAll('.line_holder')
       .first()
       .get(0);
-  }
-
-  renderDiscussionAvatar(diffAvatarContainer, noteEntity) {
-    let avatarHolder = diffAvatarContainer.find('.diff-comment-avatar-holders');
-
-    if (!avatarHolder.length) {
-      avatarHolder = document.createElement('diff-note-avatars');
-      avatarHolder.setAttribute('discussion-id', noteEntity.discussion_id);
-
-      diffAvatarContainer.append(avatarHolder);
-
-      gl.diffNotesCompileComponents();
-    }
   }
 
   /**
@@ -606,10 +581,6 @@ export default class Notes {
     form.find('#note_type').val('');
     form.find('#note_project_id').remove();
     form.find('#in_reply_to_discussion_id').remove();
-    form
-      .find('.js-comment-resolve-button')
-      .closest('comment-and-resolve-btn')
-      .remove();
     this.parentTimeline = form.parents('.timeline');
 
     if (form.length) {
@@ -715,10 +686,6 @@ export default class Notes {
 
     $note_li.replaceWith($noteEntityEl);
     this.setupNewNote($noteEntityEl);
-
-    if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-      gl.diffNotesCompileComponents();
-    }
   }
 
   checkContentToAllowEditing($el) {
@@ -844,12 +811,6 @@ export default class Notes {
       const $note = $(el);
       const $notes = $note.closest('.discussion-notes');
       const discussionId = $('.notes', $notes).data('discussionId');
-
-      if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-        if (gl.diffNoteApps[noteElId]) {
-          gl.diffNoteApps[noteElId].$destroy();
-        }
-      }
 
       $note.remove();
 
@@ -979,13 +940,6 @@ export default class Notes {
     this.setupNoteForm(form);
 
     form.removeClass('js-main-target-form').addClass('discussion-form js-discussion-note-form');
-
-    if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-      const $commentBtn = form.find('comment-and-resolve-btn');
-      $commentBtn.attr(':discussion-id', `'${discussionID}'`);
-
-      gl.diffNotesCompileComponents();
-    }
 
     form.find('.js-note-text').focus();
     form.find('.js-comment-resolve-button').attr('data-discussion-id', discussionID);
@@ -1336,11 +1290,12 @@ export default class Notes {
   toggleCommitList(e) {
     const $element = $(e.currentTarget);
     const $closestSystemCommitList = $element.siblings('.system-note-commit-list');
+    const $svgChevronUpElement = $element.find('svg.js-chevron-up');
+    const $svgChevronDownElement = $element.find('svg.js-chevron-down');
 
-    $element
-      .find('.fa')
-      .toggleClass('fa-angle-down')
-      .toggleClass('fa-angle-up');
+    $svgChevronUpElement.toggleClass('gl-display-none');
+    $svgChevronDownElement.toggleClass('gl-display-none');
+
     $closestSystemCommitList.toggleClass('hide-shade');
   }
 

@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlDeprecatedButton, GlLink, GlIcon } from '@gitlab/ui';
+import { GlButton, GlLink, GlIcon } from '@gitlab/ui';
 
 import ItemWeight from 'ee/boards/components/issue_card_weight.vue';
 
@@ -10,21 +10,45 @@ import StateTooltip from 'ee/related_items_tree/components/state_tooltip.vue';
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
 import { ChildType, ChildState } from 'ee/related_items_tree/constants';
-import { PathIdSeparator } from 'ee/related_issues/constants';
+import { PathIdSeparator } from '~/related_issues/constants';
 import ItemAssignees from '~/vue_shared/components/issue/issue_assignees.vue';
 import ItemDueDate from '~/boards/components/issue_due_date.vue';
 import ItemMilestone from '~/vue_shared/components/issue/issue_milestone.vue';
 
-import { mockParentItem, mockInitialConfig, mockQueryResponse, mockIssue1 } from '../mock_data';
+import {
+  mockParentItem,
+  mockInitialConfig,
+  mockQueryResponse,
+  mockIssue1,
+  mockClosedIssue,
+  mockEpic1 as mockOpenEpic,
+  mockEpic2 as mockClosedEpic,
+  mockEpicMeta1,
+  mockEpicMeta2,
+  mockEpicMeta3,
+} from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-const mockItem = {
-  ...mockIssue1,
-  type: ChildType.Issue,
-  pathIdSeparator: PathIdSeparator.Issue,
-  assignees: epicUtils.extractIssueAssignees(mockIssue1.assignees),
+let mockItem;
+
+const createIssueItem = (mockIssue = mockIssue1) => {
+  return {
+    ...mockIssue,
+    type: ChildType.Issue,
+    pathIdSeparator: PathIdSeparator.Issue,
+    assignees: epicUtils.extractIssueAssignees(mockIssue.assignees),
+  };
+};
+
+const createEpicItem = (mockEpic = mockOpenEpic, mockEpicMeta = mockEpicMeta1) => {
+  return {
+    ...mockEpic,
+    type: ChildType.Epic,
+    pathIdSeparator: PathIdSeparator.Epic,
+    ...mockEpicMeta,
+  };
 };
 
 const createComponent = (parentItem = mockParentItem, item = mockItem) => {
@@ -53,27 +77,22 @@ const createComponent = (parentItem = mockParentItem, item = mockItem) => {
   });
 };
 
-const createEpicComponent = () => {
-  const mockEpicItem = {
-    ...mockItem,
-    type: ChildType.Epic,
-    healthStatus: mockParentItem.healthStatus,
-    descendantCounts: {
-      openedEpics: 0,
-      closedEpics: 0,
-      openedIssues: 0,
-      closedIssues: 0,
-    },
-  };
-
-  return createComponent(mockParentItem, mockEpicItem);
-};
-
 describe('RelatedItemsTree', () => {
   describe('TreeItemBody', () => {
     let wrapper;
 
+    const findCountBadge = () => wrapper.find({ ref: 'countBadge' });
+    const findIssueHealthStatus = () => wrapper.find('[data-testid="issue-health-status"]');
+    const findEpicHealthStatus = () => wrapper.find('[data-testid="epic-health-status"]');
+    const enableHealthStatus = () => {
+      wrapper.vm.$store.commit('SET_INITIAL_CONFIG', {
+        ...mockInitialConfig,
+        allowIssuableHealthStatus: true,
+      });
+    };
+
     beforeEach(() => {
+      mockItem = createIssueItem();
       wrapper = createComponent();
     });
 
@@ -170,26 +189,6 @@ describe('RelatedItemsTree', () => {
         });
       });
 
-      describe('stateIconName', () => {
-        it('returns string `issues` when `item.type` value is `issue`', () => {
-          wrapper.setProps({
-            item: { ...mockItem, type: ChildType.Issue },
-          });
-
-          return wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.stateIconName).toBe('issues');
-          });
-        });
-
-        it('returns string `epic` when `item.type` value is `epic`', () => {
-          const epicItemWrapper = createEpicComponent();
-
-          expect(epicItemWrapper.vm.stateIconName).toBe('epic');
-
-          epicItemWrapper.destroy();
-        });
-      });
-
       describe('stateIconClass', () => {
         it('returns string `issue-token-state-icon-open gl-text-green-500` when `item.state` value is `opened`', () => {
           wrapper.setProps({
@@ -242,17 +241,28 @@ describe('RelatedItemsTree', () => {
         });
       });
 
-      describe('isEpic', () => {
-        it('returns false when item type is issue', () => {
-          expect(wrapper.vm.isEpic).toBe(false);
+      describe.each`
+        createItem         | itemType   | isEpic   | stateIconName
+        ${createEpicItem}  | ${'epic'}  | ${true}  | ${'epic'}
+        ${createIssueItem} | ${'issue'} | ${false} | ${'issues'}
+      `(`when dependent on item type`, ({ createItem, isEpic, stateIconName, itemType }) => {
+        beforeEach(() => {
+          mockItem = createItem();
+          wrapper = createComponent();
         });
 
-        it('returns true when item type is epic', () => {
-          const epicItemWrapper = createEpicComponent();
+        describe('isEpic', () => {
+          it(`returns ${isEpic} when item type is ${itemType}`, () => {
+            expect(wrapper.vm.isEpic).toBe(isEpic);
+          });
+        });
 
-          expect(epicItemWrapper.vm.isEpic).toBe(true);
+        describe('stateIconName', () => {
+          it(`returns string ${stateIconName}`, async () => {
+            await wrapper.vm.$nextTick();
 
-          epicItemWrapper.destroy();
+            expect(wrapper.vm.stateIconName).toBe(stateIconName);
+          });
         });
       });
     });
@@ -348,41 +358,78 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders item remove button when `item.userPermissions.adminEpic` is true', () => {
-        const removeButton = wrapper.find(GlDeprecatedButton);
+        const removeButton = wrapper.find(GlButton);
 
         expect(removeButton.isVisible()).toBe(true);
         expect(removeButton.attributes('title')).toBe('Remove');
       });
 
-      it('does not render issue count badge when item is issue', () => {
-        expect(wrapper.find('.issue-count-badge').exists()).toBe(false);
-      });
-
-      it('render issue count badge when item is epic', () => {
-        const epicWrapper = createEpicComponent();
-
-        expect(epicWrapper.find('.issue-count-badge').exists()).toBe(true);
-
-        epicWrapper.destroy();
-      });
-
-      it('renders health status when feature', () => {
-        function testExistence(exists) {
-          const healthStatus = wrapper.find('.item-health-status').exists();
-
-          expect(healthStatus).toBe(exists);
-        }
-
-        testExistence(false);
-
-        wrapper.vm.$store.commit('SET_INITIAL_CONFIG', {
-          ...mockInitialConfig,
-          allowIssuableHealthStatus: true,
+      describe.each`
+        createItem         | countBadgeExists | itemType
+        ${createEpicItem}  | ${true}          | ${'epic'}
+        ${createIssueItem} | ${false}         | ${'issue'}
+      `('issue count badge', ({ createItem, countBadgeExists, itemType }) => {
+        beforeEach(() => {
+          mockItem = createItem();
+          wrapper = createComponent();
         });
 
-        return wrapper.vm.$nextTick(() => {
-          testExistence(true);
+        it(`${
+          countBadgeExists ? 'renders' : 'does not render'
+        } issue count badge when item type is ${itemType}`, () => {
+          expect(findCountBadge().exists()).toBe(countBadgeExists);
         });
+      });
+
+      describe('health status', () => {
+        it('renders when feature is available', async () => {
+          expect(findIssueHealthStatus().exists()).toBe(false);
+
+          enableHealthStatus();
+
+          await wrapper.vm.$nextTick();
+
+          expect(findIssueHealthStatus().exists()).toBe(true);
+        });
+
+        describe.each`
+          mockIssue          | showHealthStatus
+          ${mockIssue1}      | ${true}
+          ${mockClosedIssue} | ${false}
+        `("for '$mockIssue.state' issue", ({ mockIssue, showHealthStatus }) => {
+          beforeEach(() => {
+            mockItem = createIssueItem(mockIssue);
+            wrapper = createComponent();
+            enableHealthStatus();
+          });
+
+          it(`${showHealthStatus ? 'renders' : 'does not render'} health status`, () => {
+            expect(findIssueHealthStatus().exists()).toBe(showHealthStatus);
+          });
+        });
+
+        describe.each`
+          mockEpic          | mockEpicMeta     | childIssues        | showHealthStatus
+          ${mockOpenEpic}   | ${mockEpicMeta1} | ${'open issue(s)'} | ${true}
+          ${mockOpenEpic}   | ${mockEpicMeta2} | ${'closed'}        | ${false}
+          ${mockClosedEpic} | ${mockEpicMeta1} | ${'open issue(s)'} | ${true}
+          ${mockClosedEpic} | ${mockEpicMeta2} | ${'closed issues'} | ${false}
+          ${mockClosedEpic} | ${mockEpicMeta3} | ${'no issues'}     | ${false}
+        `(
+          "for '$mockEpic.state' epic with '$childIssues'",
+          ({ mockEpic, mockEpicMeta, showHealthStatus }) => {
+            beforeEach(() => {
+              mockItem = createEpicItem(mockEpic, mockEpicMeta);
+
+              wrapper = createComponent();
+              enableHealthStatus();
+            });
+
+            it(`${showHealthStatus ? 'renders' : 'does not render'} health status`, () => {
+              expect(findEpicHealthStatus().exists()).toBe(showHealthStatus);
+            });
+          },
+        );
       });
     });
   });

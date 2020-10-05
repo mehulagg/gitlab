@@ -1,9 +1,7 @@
 import '~/pages/admin/application_settings/index';
-
-import groupsSelect from '~/groups_select';
-
 import 'select2/select2';
 import $ from 'jquery';
+import groupsSelect from '~/groups_select';
 import { s__ } from '~/locale';
 import Api from '~/api';
 

@@ -1,10 +1,9 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import MREditModule from 'ee/approvals/stores/modules/mr_edit';
 import { createStoreOptions } from 'ee/approvals/stores';
 import RuleControls from 'ee/approvals/components/rule_controls.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -12,7 +11,7 @@ localVue.use(Vuex);
 const TEST_RULE = { id: 10 };
 
 const findButtonLabel = button => {
-  const icon = button.find(Icon);
+  const icon = button.find(GlIcon);
   return icon.exists() ? icon.attributes('aria-label') : button.text();
 };
 const hasLabel = (button, label) => findButtonLabel(button) === label;
@@ -71,7 +70,6 @@ describe('EE Approvals RuleControls', () => {
         expect(store.modules.approvals.actions.requestEditRule).toHaveBeenCalledWith(
           expect.anything(),
           TEST_RULE,
-          undefined,
         );
       });
     });
@@ -96,7 +94,6 @@ describe('EE Approvals RuleControls', () => {
         expect(store.modules.approvals.actions.requestDeleteRule).toHaveBeenCalledWith(
           expect.anything(),
           TEST_RULE,
-          undefined,
         );
       });
     });

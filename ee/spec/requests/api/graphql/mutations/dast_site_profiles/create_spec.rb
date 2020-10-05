@@ -5,48 +5,34 @@ require 'spec_helper'
 RSpec.describe 'Creating a DAST Site Profile' do
   include GraphqlHelpers
 
-  let(:project) { create(:project, :repository, creator: current_user) }
-  let(:current_user) { create(:user) }
-  let(:full_path) { project.full_path }
   let(:profile_name) { FFaker::Company.catch_phrase }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
+  let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
+  let(:mutation_name) { :dast_site_profile_create }
   let(:mutation) do
     graphql_mutation(
-      :dast_site_profile_create,
+      mutation_name,
       full_path: full_path,
       profile_name: profile_name,
       target_url: target_url
     )
   end
 
-  def mutation_response
-    graphql_mutation_response(:dast_site_profile_create)
-  end
+  it_behaves_like 'an on-demand scan mutation when user cannot run an on-demand scan'
+  it_behaves_like 'an on-demand scan mutation when user can run an on-demand scan' do
+    it 'returns the dast_site_profile id' do
+      subject
 
-  context 'when on demand scan feature is not enabled' do
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not ' \
-                             'exist or you don\'t have permission to perform this action']
-  end
-
-  context 'when on demand scan feature is enabled' do
-    before do
-      stub_feature_flags(security_on_demand_scans_feature_flag: true)
+      expect(mutation_response["id"]).to eq(dast_site_profile.to_global_id.to_s)
     end
 
-    context 'when the user does not have permission to run a dast scan' do
-      it_behaves_like 'a mutation that returns top-level errors',
-                      errors: ['The resource that you are attempting to access does not ' \
-                               'exist or you don\'t have permission to perform this action']
-    end
-
-    context 'when the user can run a dast scan' do
+    context 'when an unknown error occurs' do
       before do
-        project.add_developer(current_user)
+        allow(DastSiteProfile).to receive(:create!).and_raise(StandardError)
       end
 
-      it_behaves_like 'a mutation that returns errors in the response', errors: ['Not implemented']
+      it_behaves_like 'a mutation that returns top-level errors', errors: ['Internal server error']
     end
   end
 end

@@ -39,12 +39,14 @@ module API
         optional :my_reaction_emoji, type: String, desc: 'Return epics reacted by the authenticated user by the given emoji'
         use :pagination
       end
-      get ':id/(-/)epics' do
-        epics = paginate(find_epics(finder_params: { group_id: user_group.id })).with_api_entity_associations
+      [':id/epics', ':id/-/epics'].each do |path|
+        get path do
+          epics = paginate(find_epics(finder_params: { group_id: user_group.id })).with_api_entity_associations
 
-        # issuable_metadata has to be set because `Entities::Epic` doesn't inherit from `Entities::IssuableEntity`
-        extra_options = { issuable_metadata: Gitlab::IssuableMetadata.new(current_user, epics).data, with_labels_details: declared_params[:with_labels_details] }
-        present epics, epic_options.merge(extra_options)
+          # issuable_metadata has to be set because `Entities::Epic` doesn't inherit from `Entities::IssuableEntity`
+          extra_options = { issuable_metadata: Gitlab::IssuableMetadata.new(current_user, epics).data, with_labels_details: declared_params[:with_labels_details] }
+          present epics, epic_options.merge(extra_options)
+        end
       end
 
       desc 'Get details of an epic' do
@@ -53,10 +55,12 @@ module API
       params do
         requires :epic_iid, type: Integer, desc: 'The internal ID of an epic'
       end
-      get ':id/(-/)epics/:epic_iid' do
-        authorize_can_read!
+      [':id/epics/:epic_iid', ':id/-/epics/:epic_iid'].each do |path|
+        get path do
+          authorize_can_read!
 
-        present epic, epic_options.merge(include_subscribed: true)
+          present epic, epic_options.merge(include_subscribed: true)
+        end
       end
 
       desc 'Create a new epic' do
@@ -65,7 +69,8 @@ module API
       params do
         requires :title, type: String, desc: 'The title of an epic'
         optional :description, type: String, desc: 'The description of an epic'
-        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential. Will be ignored if `confidential_epics` feature flag is disabled'
+        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential'
+        optional :created_at, type: DateTime, desc: 'Date time when the epic was created. Available only for admins and project owners.'
         optional :start_date, as: :start_date_fixed, type: String, desc: 'The start date of an epic'
         optional :start_date_is_fixed, type: Boolean, desc: 'Indicates start date should be sourced from start_date_fixed field not the issue milestones'
         optional :end_date, as: :due_date_fixed, type: String, desc: 'The due date of an epic'
@@ -75,6 +80,9 @@ module API
       end
       post ':id/(-/)epics' do
         authorize_can_create!
+
+        # Setting created_at is allowed only for admins and owners
+        params.delete(:created_at) unless current_user.can?(:set_epic_created_at, user_group)
 
         epic = ::Epics::CreateService.new(user_group, current_user, declared_params(include_missing: false)).execute
         if epic.valid?
@@ -91,7 +99,8 @@ module API
         requires :epic_iid, type: Integer, desc: 'The internal ID of an epic'
         optional :title, type: String, desc: 'The title of an epic'
         optional :description, type: String, desc: 'The description of an epic'
-        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential. Will be ignored if `confidential_epics` feature flag is disabled'
+        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential'
+        optional :updated_at, type: DateTime, desc: 'Date time when the epic was updated. Available only for admins and project owners.'
         optional :start_date, as: :start_date_fixed, type: String, desc: 'The start date of an epic'
         optional :start_date_is_fixed, type: Boolean, desc: 'Indicates start date should be sourced from start_date_fixed field not the issue milestones'
         optional :end_date, as: :due_date_fixed, type: String, desc: 'The due date of an epic'
@@ -104,6 +113,10 @@ module API
         Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/194104')
 
         authorize_can_admin_epic!
+
+        # Setting updated_at is allowed only for admins and owners
+        params.delete(:updated_at) unless current_user.can?(:set_epic_updated_at, user_group)
+
         update_params = declared_params(include_missing: false)
         update_params.delete(:epic_iid)
 

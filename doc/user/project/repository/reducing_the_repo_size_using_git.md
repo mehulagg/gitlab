@@ -14,14 +14,12 @@ Git repositories become larger over time. When large files are added to a Git re
 - Git repository storage limits [can be reached](#storage-limits).
 
 Rewriting a repository can remove unwanted history to make the repository smaller.
-[`git filter-repo`](https://github.com/newren/git-filter-repo) is a tool for quickly rewriting Git
-repository history, and is recommended over both:
-
-- [`git filter-branch`](https://git-scm.com/docs/git-filter-branch).
-- [BFG](https://rtyley.github.io/bfg-repo-cleaner/).
+We **recommend [`git filter-repo`](https://github.com/newren/git-filter-repo/blob/main/README.md)**
+over [`git filter-branch`](https://git-scm.com/docs/git-filter-branch) and
+[BFG](https://rtyley.github.io/bfg-repo-cleaner/).
 
 DANGER: **Danger:**
-Rewriting repository history is a destructive operation. Make sure to backup your repository before
+Rewriting repository history is a destructive operation. Make sure to back up your repository before
 you begin. The best way back up a repository is to
 [export the project](../settings/import_export.md#exporting-a-project-and-its-data).
 
@@ -32,15 +30,24 @@ Git LFS files can only be removed by an Administrator using a
 
 ## Purge files from repository history
 
-To make cloning your project faster, rewrite branches and tags to remove unwanted files.
+To reduce the size of your repository in GitLab, you must remove references to large files from branches, tags, and
+other internal references (refs) that are automatically created by GitLab. These refs include:
+
+- `refs/merge-requests/*` for merge requests.
+- `refs/pipelines/*` for
+  [pipelines](../../../ci/troubleshooting.md#fatal-reference-is-not-a-tree-error).
+- `refs/environments/*` for environments.
+
+Git doesn't usually download these refs to make cloning and fetch faster, but we can use the `--mirror` option to
+download all the advertised refs.
 
 1. [Install `git filter-repo`](https://github.com/newren/git-filter-repo/blob/main/INSTALL.md)
    using a supported package manager or from source.
 
-1. Clone a fresh copy of the repository using `--bare`:
+1. Clone a fresh copy of the repository using `--bare` and `--mirror`:
 
    ```shell
-   git clone --bare https://example.gitlab.com/my/project.git
+   git clone --bare --mirror https://gitlab.example.com/my/project.git
    ```
 
 1. Using `git filter-repo`, purge any files from the history of your repository.
@@ -74,16 +81,10 @@ To make cloning your project faster, rewrite branches and tags to remove unwante
    [`git filter-repo` documentation](https://htmlpreview.github.io/?https://github.com/newren/git-filter-repo/blob/docs/html/git-filter-repo.html#EXAMPLES)
    for more examples and the complete documentation.
 
-1. Running `git filter-repo` removes all remotes. To restore the remote for your project, run:
-
-   ```shell
-   git remote add origin https://example.gitlab.com/<namespace>/<project_name>.git
-   ```
-
 1. Force push your changes to overwrite all branches on GitLab:
 
    ```shell
-   git push origin --force --all
+   git push origin --force 'refs/heads/*'
    ```
 
    [Protected branches](../protected_branches.md) will cause this to fail. To proceed, you must
@@ -92,40 +93,31 @@ To make cloning your project faster, rewrite branches and tags to remove unwante
 1. To remove large files from tagged releases, force push your changes to all tags on GitLab:
 
    ```shell
-   git push origin --force --tags
+   git push origin --force 'refs/tags/*'
    ```
 
    [Protected tags](../protected_tags.md) will cause this to fail. To proceed, you must remove tag
    protection, push, and then re-enable protected tags.
 
-1. Manually run [project housekeeping](../../../administration/housekeeping.md#manual-housekeeping)
+1. To prevent dead links to commits that no longer exist, push the `refs/replace` created by `git filter-repo`.
 
-NOTE: **Note**
+   ```shell
+   git push origin --force 'refs/replace/*'
+   ```
+
+   Refer to the Git [`replace`](https://git-scm.com/book/en/v2/Git-Tools-Replace) documentation for information on how this works.
+
+1. Run a [repository cleanup](#repository-cleanup).
+
+NOTE: **Note:**
 Project statistics are cached for performance. You may need to wait 5-10 minutes
 to see a reduction in storage utilization.
 
 ## Purge files from GitLab storage
 
-To reduce the size of your repository in GitLab, you must remove GitLab internal references to
-commits that contain large files. Before completing these steps,
-[purge files from your repository history](#purge-files-from-repository-history).
+In addition to the refs mentioned above, GitLab also creates hidden `refs/keep-around/*`to prevent commits being deleted. Hidden refs are not advertised, which means we can't download them using Git, but these refs are included in a project export.
 
-As well as [branches](branches/index.md) and tags, which are a type of Git ref, GitLab automatically
-creates other refs. These refs prevent dead links to commits, or missing diffs when viewing merge
-requests. [Repository cleanup](#repository-cleanup) can be used to remove these from GitLab.
-
-The following internal refs are not advertised:
-
-- `refs/merge-requests/*` for merge requests.
-- `refs/pipelines/*` for
-  [pipelines](../../../ci/pipelines/index.md#troubleshooting-fatal-reference-is-not-a-tree).
-- `refs/environments/*` for environments.
-
-This means they are not usually included when fetching, which makes fetching faster. In addition,
-`refs/keep-around/*` are hidden refs to prevent commits with discussion from being deleted and
-cannot be fetched at all.
-
-However, these refs can be accessed from the Git bundle inside a project export.
+To purge files from GitLab storage:
 
 1. [Install `git filter-repo`](https://github.com/newren/git-filter-repo/blob/main/INSTALL.md)
    using a supported package manager or from source.
@@ -173,6 +165,39 @@ However, these refs can be accessed from the Git bundle inside a project export.
    [`git filter-repo` documentation](https://htmlpreview.github.io/?https://github.com/newren/git-filter-repo/blob/docs/html/git-filter-repo.html#EXAMPLES)
    for more examples and the complete documentation.
 
+1. Because cloning from a bundle file sets the `origin` remote to the local bundle file, delete this `origin` remote, and set it to the URL to your repository:
+
+   ```shell
+   git remote remove origin
+   git remote add origin https://gitlab.example.com/<namespace>/<project_name>.git
+   ```
+
+1. Force push your changes to overwrite all branches on GitLab:
+
+   ```shell
+   git push origin --force 'refs/heads/*'
+   ```
+
+   [Protected branches](../protected_branches.md) will cause this to fail. To proceed, you must
+   remove branch protection, push, and then re-enable protected branches.
+
+1. To remove large files from tagged releases, force push your changes to all tags on GitLab:
+
+   ```shell
+   git push origin --force 'refs/tags/*'
+   ```
+
+   [Protected tags](../protected_tags.md) will cause this to fail. To proceed, you must remove tag
+   protection, push, and then re-enable protected tags.
+
+1. To prevent dead links to commits that no longer exist, push the `refs/replace` created by `git filter-repo`.
+
+   ```shell
+   git push origin --force 'refs/replace/*'
+   ```
+
+   Refer to the Git [`replace`](https://git-scm.com/book/en/v2/Git-Tools-Replace) documentation for information on how this works.
+
 1. Run a [repository cleanup](#repository-cleanup).
 
 ## Repository cleanup
@@ -187,16 +212,28 @@ references to these objects. You can use
 To clean up a repository:
 
 1. Go to the project for the repository.
-1. Navigate to **{settings}** **Settings > Repository**.
-1. Upload a list of objects. For example, a `commit-map` file.
+1. Navigate to **Settings > Repository**.
+1. Upload a list of objects. For example, a `commit-map` file created by `git filter-repo` which is located in the
+   `filter-repo` directory.
+
+   If your `commit-map` file is larger than 10MB, the file can be split and uploaded piece by piece:
+
+   ```shell
+   split -l 100000 filter-repo/commit-map filter-repo/commit-map-
+   ```
+
 1. Click **Start cleanup**.
 
 This will:
 
 - Remove any internal Git references to old commits.
-- Run `git gc` against the repository.
+- Run `git gc` against the repository to remove unreferenced objects. Repacking your repository will temporarily
+  cause the size of your repository to increase significantly, because the old pack files are not removed until the
+  new pack files have been created.
+- Unlink any unused LFS objects currently attached to your project, freeing up storage space.
+- Recalculate the size of your repository on disk.
 
-You will receive an email once it has completed.
+You will receive an email notification with the recalculated repository size after the cleanup has completed.
 
 When using repository cleanup, note:
 
@@ -214,9 +251,9 @@ When using repository cleanup, note:
 
 Repository size limits:
 
-- Can [be set by an administrator](../../admin_area/settings/account_and_limit_settings.md#repository-size-limit-starter-only)
+- Can [be set by an administrator](../../admin_area/settings/account_and_limit_settings.md#account-and-limit-settings)
   on self-managed instances. **(STARTER ONLY)**
-- Are [set for GitLab.com](../../gitlab_com/index.md#repository-size-limit).
+- Are [set for GitLab.com](../../gitlab_com/index.md#account-and-limit-settings).
 
 When a project has reached its size limit, you cannot:
 
@@ -230,21 +267,20 @@ You can still:
 - Create new issues.
 - Clone the project.
 
-If you exceed the repository size limit, you might try to:
+If you exceed the repository size limit, you can:
 
 1. Remove some data.
 1. Make a new commit.
 1. Push back to the repository.
 
-Perhaps you might also:
+If these actions are insufficient, you can also:
 
 - Move some blobs to LFS.
 - Remove some old dependency updates from history.
 
-Unfortunately, this workflow won't work. Deleting files in a commit doesn't actually reduce the size
-of the repository because the earlier commits and blobs still exist.
-
-What you need to do is rewrite history. We recommend the open-source community-maintained tool
+Unfortunately, this workflow doesn't work. Deleting files in a commit doesn't actually reduce the
+size of the repository, because the earlier commits and blobs still exist. Instead, you must rewrite
+history. We recommend the open-source community-maintained tool
 [`git filter-repo`](https://github.com/newren/git-filter-repo).
 
 NOTE: **Note:**
@@ -265,14 +301,9 @@ This process is not suitable for removing sensitive data like password or keys f
 Information about commits, including file content, is cached in the database, and will remain
 visible even after they have been removed from the repository.
 
-<!-- ## Troubleshooting
+## Troubleshooting
 
-Include any troubleshooting steps that you can foresee. If you know beforehand what issues
-one might have when setting this up, or when something is changed, or on upgrading, it's
-important to describe those, too. Think of things that may go wrong and include them here.
-This is important to minimize requests for support, and to avoid doc comments with
-questions that you know someone might ask.
+### Incorrect repository statistics shown in the GUI
 
-Each scenario can be a third-level heading, e.g. `### Getting error message X`.
-If you have none to add when creating a doc, leave this section in place
-but commented out to help encourage others to add to it in the future. -->
+If the displayed size or commit number is different from the exported `.tar.gz` or local repository,
+you can ask a GitLab administrator to [force an update](../../../administration/troubleshooting/gitlab_rails_cheat_sheet.md#incorrect-repository-statistics-shown-in-the-gui).

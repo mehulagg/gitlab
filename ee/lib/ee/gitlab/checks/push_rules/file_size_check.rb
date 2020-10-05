@@ -8,7 +8,7 @@ module EE
           LOG_MESSAGE = "Checking if any files are larger than the allowed size...".freeze
 
           def validate!
-            return if push_rule.nil? || push_rule.max_file_size.zero?
+            return if push_rule.nil? || push_rule.max_file_size == 0
 
             logger.log_timed(LOG_MESSAGE) do
               max_file_size = push_rule.max_file_size

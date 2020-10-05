@@ -75,15 +75,12 @@ module UpdateProjectStatistics
     end
 
     def schedule_update_project_statistic(delta)
-      return if delta.zero?
+      return if delta == 0
       return if project.nil?
 
       run_after_commit do
         ProjectStatistics.increment_statistic(
-          project_id, self.class.project_statistics_name, delta)
-
-        Namespaces::ScheduleAggregationWorker.perform_async(
-          project.namespace_id)
+          project, self.class.project_statistics_name, delta)
       end
     end
   end

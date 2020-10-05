@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::FilesExpireService, :geo, :geo_fdw do
+RSpec.describe Geo::FilesExpireService, :geo do
   let(:project) { create(:project, :legacy_storage) }
   let!(:old_full_path) { project.full_path }
 
@@ -43,7 +43,6 @@ RSpec.describe Geo::FilesExpireService, :geo, :geo_fdw do
     context 'when not in Geo secondary node' do
       it 'no-op execute action' do
         expect(subject).not_to receive(:schedule_file_removal)
-        expect(subject).not_to receive(:mark_for_resync!)
 
         subject.execute
       end

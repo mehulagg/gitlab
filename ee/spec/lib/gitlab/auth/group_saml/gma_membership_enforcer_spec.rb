@@ -31,11 +31,11 @@ RSpec.describe Gitlab::Auth::GroupSaml::GmaMembershipEnforcer do
   end
 
   context 'when the project is forked' do
-    subject { described_class.new(fork_project(project, managed_user_for_project)) }
-
     before do
       project.add_developer(managed_user_for_project)
     end
+
+    subject { described_class.new(fork_project(project, managed_user_for_project)) }
 
     context 'when user is group-managed' do
       it 'allows adding user to project' do
@@ -48,27 +48,26 @@ RSpec.describe Gitlab::Auth::GroupSaml::GmaMembershipEnforcer do
         expect(subject.can_add_user?(create(:user))).to be_falsey
       end
     end
-  end
 
-  context 'when the project is forked from deleted project' do
-    let!(:forked_project) { fork_project(project, managed_user_for_project) }
+    context 'from deleted project' do
+      let!(:forked_project) { fork_project(project, managed_user_for_project) }
 
-    before do
-      project.add_developer(managed_user_for_project)
-      project.delete
-    end
-
-    context 'when user is group-managed' do
-      it 'allows adding user to project' do
-        subject = described_class.new(forked_project)
-        expect(subject.can_add_user?(managed_user)).to be_truthy
+      before do
+        project.delete
       end
-    end
 
-    context 'when user is not group-managed' do
-      it 'does not allow adding user to project' do
-        subject = described_class.new(forked_project)
-        expect(subject.can_add_user?(create(:user))).to be_truthy
+      context 'when user is group-managed' do
+        it 'allows adding user to project' do
+          subject = described_class.new(forked_project)
+          expect(subject.can_add_user?(managed_user)).to be_truthy
+        end
+      end
+
+      context 'when user is not group-managed' do
+        it 'does not allow adding user to project' do
+          subject = described_class.new(forked_project)
+          expect(subject.can_add_user?(create(:user))).to be_truthy
+        end
       end
     end
   end

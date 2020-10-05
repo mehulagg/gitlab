@@ -217,22 +217,6 @@ RSpec.describe EE::UserCalloutsHelper do
         helper.render_dashboard_gold_trial(user)
       end
     end
-
-    context 'when render_dashboard_gold_trial feature is disabled' do
-      before do
-        stub_feature_flags(render_dashboard_gold_trial: false)
-
-        allow(helper).to receive(:show_gold_trial?).and_return(true)
-        allow(helper).to receive(:user_default_dashboard?).and_return(true)
-        allow(helper).to receive(:has_some_namespaces_with_no_trials?).and_return(true)
-      end
-
-      it 'does not render' do
-        expect(helper).not_to receive(:render)
-
-        helper.render_dashboard_gold_trial(user)
-      end
-    end
   end
 
   describe '#render_billings_gold_trial' do
@@ -344,6 +328,28 @@ RSpec.describe EE::UserCalloutsHelper do
     end
   end
 
+  describe '.show_feature_flags_new_version?' do
+    subject { helper.show_feature_flags_new_version? }
+
+    let(:user) { create(:user) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    context 'when the feature flags new version info has not been dismissed' do
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when the feature flags new version has been dismissed' do
+      before do
+        create(:user_callout, user: user, feature_name: described_class::FEATURE_FLAGS_NEW_VERISION)
+      end
+
+      it { is_expected.to be_falsy }
+    end
+  end
+
   describe '.show_token_expiry_notification?' do
     subject { helper.show_token_expiry_notification? }
 
@@ -371,28 +377,17 @@ RSpec.describe EE::UserCalloutsHelper do
       it do
         expect(subject).to be result
       end
-    end
-  end
 
-  describe '.show_standalone_vulnerabilities_introduction_banner?' do
-    subject { helper.show_standalone_vulnerabilities_introduction_banner? }
+      context 'when user is nil' do
+        before do
+          allow(helper).to receive(:current_user).and_return(nil)
+          allow(helper).to receive(:token_expiration_enforced?).and_return(false)
+        end
 
-    let(:user) { create(:user) }
-
-    before do
-      allow(helper).to receive(:current_user).and_return(user)
-    end
-
-    context 'when the introduction banner has not been dismissed' do
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when the introduction banner was dismissed' do
-      before do
-        create(:user_callout, user: user, feature_name: described_class::STANDALONE_VULNERABILITIES_INTRODUCTION_BANNER)
+        it do
+          expect(subject).to be false
+        end
       end
-
-      it { is_expected.to be_falsy }
     end
   end
 end

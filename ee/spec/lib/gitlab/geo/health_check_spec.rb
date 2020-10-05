@@ -66,8 +66,7 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
 
         context 'streaming replication' do
           it 'returns an error when replication is not working' do
-            allow(Gitlab::Database).to receive(:pg_last_wal_receive_lsn).and_return('pg_last_xlog_receive_location')
-            allow(ActiveRecord::Base).to receive_message_chain('connection.execute').with(no_args).with('SELECT * FROM pg_last_xlog_receive_location() as result').and_return(['result' => 'fake'])
+            allow(ActiveRecord::Base).to receive_message_chain('connection.execute').with(no_args).with('SELECT * FROM pg_last_wal_receive_lsn() as result').and_return(['result' => 'fake'])
             allow(ActiveRecord::Base).to receive_message_chain('connection.select_values').with(no_args).with('SELECT pid FROM pg_stat_wal_receiver').and_return([])
 
             expect(subject.perform_checks).to match(/Geo node does not appear to be replicating the database from the primary node/)
@@ -78,7 +77,6 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
           it 'returns an error when replication is not working' do
             allow(subject).to receive(:streaming_replication_enabled?).and_return(false)
             allow(subject).to receive(:archive_recovery_replication_enabled?).and_return(true)
-            allow(Gitlab::Database).to receive(:pg_last_xact_replay_timestamp).and_return('pg_last_xact_replay_timestamp')
             allow(ActiveRecord::Base).to receive_message_chain('connection.execute').with(no_args).with('SELECT * FROM pg_last_xact_replay_timestamp() as result').and_return([{ 'result' => nil }])
 
             expect(subject.perform_checks).to match(/Geo node does not appear to be replicating the database from the primary node/)
@@ -102,8 +100,6 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
           context 'that is working' do
             before do
               allow(subject).to receive(:replication_working?).and_return(true)
-              allow(Gitlab::Geo::Fdw).to receive(:enabled?) { true }
-              allow(Gitlab::Geo::Fdw).to receive(:foreign_tables_up_to_date?) { true }
             end
 
             it 'returns an error if database is not fully migrated' do
@@ -114,32 +110,6 @@ RSpec.describe Gitlab::Geo::HealthCheck, :geo do
 
               expect(message).to include('Geo database version (20170101) does not match latest migration (20170201)')
               expect(message).to include('gitlab-rake geo:db:migrate')
-            end
-
-            it 'returns an error when FDW is disabled' do
-              allow(Gitlab::Geo::Fdw).to receive(:enabled?) { false }
-
-              expect(subject.perform_checks).to match(/Geo database is not configured to use Foreign Data Wrapper/)
-            end
-
-            context 'when foreign tables are not up-to-date' do
-              before do
-                allow(Gitlab::Geo::Fdw).to receive(:foreign_tables_up_to_date?) { false }
-              end
-
-              it 'returns an error when FDW remote table is not in sync but has same amount of tables' do
-                allow(Gitlab::Geo::Fdw).to receive(:foreign_schema_tables_count) { 1 }
-                allow(Gitlab::Geo::Fdw).to receive(:gitlab_schema_tables_count) { 1 }
-
-                expect(subject.perform_checks).to match(/Geo database has an outdated FDW remote schema\./)
-              end
-
-              it 'returns an error when FDW remote table is not in sync and has same different amount of tables' do
-                allow(Gitlab::Geo::Fdw).to receive(:foreign_schema_tables_count) { 1 }
-                allow(Gitlab::Geo::Fdw).to receive(:gitlab_schema_tables_count) { 2 }
-
-                expect(subject.perform_checks).to match(/Geo database has an outdated FDW remote schema\. It contains [0-9]+ of [0-9]+ expected tables/)
-              end
             end
 
             it 'finally returns an empty string when everything is healthy' do

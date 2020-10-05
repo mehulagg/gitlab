@@ -15,6 +15,7 @@ const whiteSpaceFromCookie = Cookies.get(DIFF_WHITESPACE_COOKIE_NAME);
 
 export default () => ({
   isLoading: true,
+  isTreeLoaded: false,
   isBatchLoading: false,
   retrievingBatches: false,
   addedLines: null,
@@ -33,6 +34,7 @@ export default () => ({
   showTreeList: true,
   currentDiffFileId: '',
   projectPath: '',
+  viewedDiffFileIds: {},
   commentForms: [],
   highlightedRow: null,
   renderTreeList: true,
@@ -40,5 +42,4 @@ export default () => ({
   fileFinderVisible: false,
   dismissEndpoint: '',
   showSuggestPopover: true,
-  useSingleDiffStyle: false,
 });

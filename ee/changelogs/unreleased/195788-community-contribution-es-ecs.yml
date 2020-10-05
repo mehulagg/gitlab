@@ -1,5 +1,0 @@
----
-title: Support AWS IAM role for ECS tasks in Elasticsearch client
-merge_request: 33456
-author:
-type: added

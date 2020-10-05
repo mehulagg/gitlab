@@ -1,31 +1,35 @@
+import Cookies from 'js-cookie';
 import { shallowMount } from '@vue/test-utils';
+import { GlTabs, GlTab } from '@gitlab/ui';
 
 import ComplianceDashboard from 'ee/compliance_dashboard/components/dashboard.vue';
-import PipelineStatus from 'ee/compliance_dashboard/components/pipeline_status.vue';
-import Approvers from 'ee/compliance_dashboard/components/approvers.vue';
+import MergeRequestGrid from 'ee/compliance_dashboard/components/merge_requests/grid.vue';
+import MergeCommitsExportButton from 'ee/compliance_dashboard/components/merge_requests/merge_commits_export_button.vue';
+import { COMPLIANCE_TAB_COOKIE_KEY } from 'ee/compliance_dashboard/constants';
 import { createMergeRequests } from '../mock_data';
 
 describe('ComplianceDashboard component', () => {
   let wrapper;
 
-  const findMergeRequests = () => wrapper.findAll('[data-testid="merge-request"]');
-  const findTime = () => wrapper.find('time');
-  const findPipelineStatus = () => wrapper.find(PipelineStatus);
-  const findApprovers = () => wrapper.find(Approvers);
+  const isLastPage = false;
+  const mergeRequests = createMergeRequests({ count: 2 });
+  const mergeCommitsCsvExportPath = '/csv';
 
-  const createComponent = (props = {}, addPipeline = false) => {
+  const findMergeRequestsGrid = () => wrapper.find(MergeRequestGrid);
+  const findMergeCommitsExportButton = () => wrapper.find(MergeCommitsExportButton);
+  const findDashboardTabs = () => wrapper.find(GlTabs);
+
+  const createComponent = (props = {}) => {
     return shallowMount(ComplianceDashboard, {
       propsData: {
-        mergeRequests: createMergeRequests({ count: 2, addPipeline }),
-        isLastPage: false,
+        mergeRequests,
+        isLastPage,
+        mergeCommitsCsvExportPath,
         emptyStateSvgPath: 'empty.svg',
         ...props,
       },
       stubs: {
-        MergeRequest: {
-          props: { mergeRequest: Object },
-          template: `<div data-testid="merge-request">{{ mergeRequest.title }}</div>`,
-        },
+        GlTab,
       },
     });
   };
@@ -36,34 +40,44 @@ describe('ComplianceDashboard component', () => {
 
   describe('when there are merge requests', () => {
     beforeEach(() => {
+      Cookies.set(COMPLIANCE_TAB_COOKIE_KEY, false);
       wrapper = createComponent();
+    });
+
+    afterEach(() => {
+      Cookies.remove(COMPLIANCE_TAB_COOKIE_KEY);
     });
 
     it('matches the snapshot', () => {
       expect(wrapper.element).toMatchSnapshot();
     });
 
-    it('renders a list of merge requests', () => {
-      expect(findMergeRequests().length).toEqual(2);
+    it('renders the merge requests', () => {
+      expect(findMergeRequestsGrid().exists()).toBe(true);
     });
 
-    describe('pipeline status', () => {
-      it('does not render if there is no pipeline', () => {
-        expect(findPipelineStatus().exists()).toBe(false);
+    it('sets the MergeRequestGrid properties', () => {
+      expect(findMergeRequestsGrid().props('mergeRequests')).toBe(mergeRequests);
+      expect(findMergeRequestsGrid().props('isLastPage')).toBe(isLastPage);
+    });
+
+    it('renders the merge commit export button', () => {
+      expect(findMergeCommitsExportButton().exists()).toBe(true);
+    });
+
+    describe('and the show tabs cookie is true', () => {
+      beforeEach(() => {
+        Cookies.set(COMPLIANCE_TAB_COOKIE_KEY, true);
+        wrapper = createComponent();
       });
 
-      it('renders if there is a pipeline', () => {
-        wrapper = createComponent({}, true);
-        expect(findPipelineStatus().exists()).toBe(true);
+      it('matches the snapshot', () => {
+        expect(wrapper.element).toMatchSnapshot();
       });
-    });
 
-    it('renders the approvers list', () => {
-      expect(findApprovers().exists()).toBe(true);
-    });
-
-    it('renders the "merged at" time', () => {
-      expect(findTime().text()).toEqual('merged 2 days ago');
+      it('renders the dashboard tabs', () => {
+        expect(findDashboardTabs().exists()).toBe(true);
+      });
     });
   });
 
@@ -77,7 +91,19 @@ describe('ComplianceDashboard component', () => {
     });
 
     it('does not render merge requests', () => {
-      expect(findMergeRequests().exists()).toEqual(false);
+      expect(findMergeRequestsGrid().exists()).toBe(false);
+    });
+  });
+
+  describe('when the merge commit export link is not present', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ mergeCommitsCsvExportPath: '' });
+    });
+
+    it('does not render the merge commit export button', () => {
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findMergeCommitsExportButton().exists()).toBe(false);
+      });
     });
   });
 });

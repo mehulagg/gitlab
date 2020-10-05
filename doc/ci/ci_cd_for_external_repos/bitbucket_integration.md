@@ -9,7 +9,7 @@ type: howto
 
 GitLab CI/CD can be used with Bitbucket Cloud by:
 
-1. Creating a [CI/CD project](../../user/project/ci_cd_for_external_repo.md).
+1. Creating a [CI/CD project](index.md).
 1. Connecting your Git repository via URL.
 
 To use GitLab CI/CD with a Bitbucket Cloud repository:
@@ -19,7 +19,7 @@ To use GitLab CI/CD with a Bitbucket Cloud repository:
 
    ![Create project](img/external_repository.png)
 
-   GitLab will import the repository and enable [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository-starter).
+   GitLab will import the repository and enable [Pull Mirroring](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository).
 
 1. In GitLab create a
    [Personal Access Token](../../user/profile/personal_access_tokens.md)

@@ -1,8 +1,11 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: index, reference
 ---
 
-# Reviewing and managing merge requests
+# Reviewing and managing merge requests **(CORE)**
 
 Merge requests are the primary method of making changes to files in a GitLab project.
 Changes are proposed by [creating and submitting a merge request](creating_merge_requests.md),
@@ -64,6 +67,52 @@ list.
 
 ![Merge request diff file navigation](img/merge_request_diff_file_navigation.png)
 
+### Collapsed files in the Changes view
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232820) in GitLab 13.4.
+
+When you review changes in the **Changes** tab, files with a large number of changes are collapsed
+to improve performance. When files are collapsed, a warning appears at the top of the changes.
+Click **Expand file** on any file to view the changes for that file.
+
+### File-by-file diff navigation
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/222790) in GitLab 13.2.
+> - It's deployed behind a feature flag, enabled by default.
+> - It's recommended for production use.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-file-by-file-diff-navigation).
+
+For larger merge requests it might sometimes be useful to review single files at a time. To enable,
+from your avatar on the top-right navbar, click **Settings**, and go to **Preferences** on the left
+sidebar. Scroll down to the **Behavior** section and select **Show one file at a time on merge request's Changes tab**.
+Click **Save changes** to apply.
+
+From there, when reviewing merge requests' **Changes** tab, you will see only one file at a time. You can then click the buttons **Prev** and **Next** to view the other files changed.
+
+![File-by-file diff navigation](img/file_by_file_v13_2.png)
+
+#### Enable or disable file-by-file diff navigation **(CORE ONLY)**
+
+File-by-file diff navigation is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to disable it for your instance.
+
+To enable it:
+
+```ruby
+# Instance-wide
+Feature.enable(:view_diffs_file_by_file)
+```
+
+To disable it:
+
+```ruby
+# Instance-wide
+Feature.disable(:view_diffs_file_by_file>)
+```
+
 ### Merge requests commit navigation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18140) in GitLab 13.0.
@@ -72,6 +121,8 @@ To seamlessly navigate among commits in a merge request, from the **Commits** ta
 the commits to open the single-commit view. From there, you can navigate among the commits
 by clicking the **Prev** and **Next** buttons on the top-right of the page or by using the
 <kbd>X</kbd> and <kbd>C</kbd> keyboard shortcuts.
+
+![Merge requests commit navigation](img/commit_nav_v13_4.png)
 
 ### Incrementally expand merge request diffs
 
@@ -94,7 +145,7 @@ specific commit page.
 
 ![MR diff](img/merge_request_diff.png)
 
->**Tip:**
+TIP: **Tip:**
 You can append `?w=1` while on the diffs page of a merge request to ignore any
 whitespace changes.
 
@@ -103,9 +154,52 @@ whitespace changes.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/13950) in GitLab 11.5.
 
 GitLab provides a way of leaving comments in any part of the file being changed
-in a Merge Request. To do so, click the **...** button in the gutter of the Merge Request diff UI to expand the diff lines and leave a comment, just as you would for a changed line.
+in a Merge Request. To do so, click the **{comment}** **comment** icon in the gutter of the Merge Request diff UI to expand the diff lines and leave a comment, just as you would for a changed line.
 
 ![Comment on any diff file line](img/comment-on-any-diff-line.png)
+
+### Commenting on multiple lines
+
+> - [Introduced](https://gitlab.com/gitlab-org/ux-research/-/issues/870) in GitLab 13.2.
+> - It's deployed behind a feature flag, enabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/221268) on GitLab 13.3.
+> - It's enabled on GitLab.com.
+> - It can be disabled or enabled per-project.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-multiline-comments). **(CORE ONLY)**
+
+GitLab provides a way to select which lines of code a comment refers to. After starting a comment
+a dropdown selector is shown to select the first line that this comment refers to.
+The last line is the line that the comment icon was initially clicked on.
+
+New comments default to single line comments by having the first and last lines
+the same. Selecting a different starting line turns this into a multiline comment.
+
+![Multiline comment selection highlighted](img/multiline-comment-highlighted.png)
+
+Once a multiline comment is saved the lines of code pertaining to that comment are listed directly
+above it.
+
+![Multiline comment selection displayed above comment](img/multiline-comment-saved.png)
+
+### Enable or disable multiline comments **(CORE ONLY)**
+
+The multiline comments feature is under development but ready for production use.
+It is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can opt to enable it for your instance.
+
+To disable it:
+
+```ruby
+Feature.disable(:multiline_comments)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:multiline_comments)
+```
 
 ## Pipeline status in merge requests widgets
 
@@ -118,6 +212,11 @@ you will be able to see:
 If there's an [environment](../../../ci/environments/index.md) and the application is
 successfully deployed to it, the deployed environment and the link to the
 Review App will be shown as well.
+
+NOTE: **Note:**
+When the default branch (for example, `main`) is red due to a failed CI pipeline, the `merge` button
+When the pipeline fails in a merge request but it can be merged nonetheless,
+the **Merge** button will be colored in red.
 
 ### Post-merge pipeline status
 
@@ -197,17 +296,39 @@ Merge Request again.
 Here are some tips that will help you be more efficient with merge requests in
 the command line.
 
-> **Note:**
+NOTE: **Note:**
 This section might move in its own document in the future.
 
-### Checkout merge requests locally
+### Copy the branch name for local checkout
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23767) in GitLab 13.4.
+
+The merge request sidebar contains the branch reference for the source branch
+used to contribute changes for this merge request.
+
+To copy the branch reference into your clipboard, click the **Copy branch name** button
+(**{copy-to-clipboard}**) in the right sidebar. You can then use it to checkout the branch locally
+via command line by running `git checkout <branch-name>`.
+
+### Checkout merge requests locally through the `head` ref
 
 A merge request contains all the history from a repository, plus the additional
 commits added to the branch associated with the merge request. Here's a few
-tricks to checkout a merge request locally.
+ways to checkout a merge request locally.
 
 Please note that you can checkout a merge request locally even if the source
 project is a fork (even a private fork) of the target project.
+
+This relies on the merge request `head` ref (`refs/merge-requests/:iid/head`)
+that is available for each merge request. It allows checking out a merge
+request via its ID instead of its branch.
+
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223156) in GitLab
+13.4, 14 days after a merge request gets closed or merged, the merge request
+`head` ref will be deleted. This means that the merge request will not be available
+for local checkout via the merge request `head` ref anymore. The merge request
+can still be re-opened. Also, as long as the merge request's branch
+exists, you can still check out the branch as it won't be affected.
 
 #### Checkout locally by adding a Git alias
 

@@ -32,18 +32,11 @@ module ResourceAccessTokens
     attr_reader :resource_type, :resource
 
     def feature_enabled?
-      ::Feature.enabled?(:resource_access_token, resource)
+      return true unless ::Gitlab.com?
     end
 
     def has_permission_to_create?
-      case resource_type
-      when 'project'
-        can?(current_user, :admin_project, resource)
-      when 'group'
-        can?(current_user, :admin_group, resource)
-      else
-        false
-      end
+      %w(project group).include?(resource_type) && can?(current_user, :admin_resource_access_tokens, resource)
     end
 
     def create_user

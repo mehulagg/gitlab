@@ -101,7 +101,7 @@ module Gitlab
         vars = {
           'RAILS_ENV'               => Rails.env,
           'ELASTIC_CONNECTION_INFO' => elasticsearch_config(target),
-          'GITALY_CONNECTION_INFO'  => gitaly_connection_info,
+          'GITALY_CONNECTION_INFO'  => gitaly_config,
           'FROM_SHA'                => from_sha,
           'TO_SHA'                  => to_sha,
           'CORRELATION_ID'          => Labkit::Correlation::CorrelationId.current_id,
@@ -109,11 +109,28 @@ module Gitlab
           'SSL_CERT_DIR'            => OpenSSL::X509::DEFAULT_CERT_DIR
         }
 
-        # Users can override default SSL certificate path via SSL_CERT_FILE SSL_CERT_DIR
-        # AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is used in AWS ECS to get credentials when making AWS API calls
-        %w(SSL_CERT_FILE SSL_CERT_DIR AWS_CONTAINER_CREDENTIALS_RELATIVE_URI).each_with_object(vars) do |key, hash|
-          hash[key] = ENV[key] if ENV.key?(key)
+        # Set AWS environment variables for IAM role authentication if present
+        if Gitlab::CurrentSettings.elasticsearch_config[:aws]
+          vars = build_aws_credentials_env(vars)
         end
+
+        # Users can override default SSL certificate path via SSL_CERT_FILE SSL_CERT_DIR
+        vars.merge(ENV.slice('SSL_CERT_FILE', 'SSL_CERT_DIR'))
+      end
+
+      def build_aws_credentials_env(vars)
+        # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN need to be set as
+        # environment variable in case of using IAM role based authentication in AWS
+        # The credentials are buffered to prevent from hitting rate limit. They will be
+        # refreshed when expired
+        credentials = Gitlab::Elastic::Client.aws_credential_provider&.credentials
+        return vars unless credentials&.set?
+
+        vars.merge(
+          'AWS_ACCESS_KEY_ID' => credentials.access_key_id,
+          'AWS_SECRET_ACCESS_KEY' => credentials.secret_access_key,
+          'AWS_SESSION_TOKEN' => credentials.session_token
+        )
       end
 
       def last_commit
@@ -151,9 +168,10 @@ module Gitlab
         ).to_json
       end
 
-      def gitaly_connection_info
+      def gitaly_config
         {
-          storage: project.repository_storage
+          storage: project.repository_storage,
+          limit_file_size: Gitlab::CurrentSettings.elasticsearch_indexed_file_size_limit_kb.kilobytes
         }.merge(Gitlab::GitalyClient.connection_data(project.repository_storage)).to_json
       end
 

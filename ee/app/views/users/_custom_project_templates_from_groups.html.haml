@@ -1,10 +1,11 @@
 .custom-project-templates
   - if groups_with_project_templates.present?
     - groups_with_project_templates.each do |group|
+      - projects = group.projects.not_aimed_for_deletion
       .template-group-options.js-template-group-options{ class: ('expanded border-top-0' if groups_with_project_templates.first == group) }
         .template-header.d-flex.align-items-center
           .template-subgroup.d-flex.flex-fill.align-items-center
-            .template-options-icon-container.d-flex.justify-content-center.align-items-center.append-right-10
+            .template-options-icon-container.d-flex.justify-content-center.align-items-center.gl-mr-3
               = sprite_icon('angle-down', css_class: 's16 options-expanded-icon')
               = sprite_icon('angle-right', css_class: 's16 options-collapsed-icon')
             .avatar-container.s40
@@ -17,9 +18,9 @@
           .template-subgroup-project-count
             %span.badge.badge-pill
               %strong
-                = group.projects.count
+                = projects.count
 
-        - group.projects.each do |project|
+        - projects.each do |project|
           .template-option.align-items-center.qa-template-option-row
             .avatar-container.s40
               = project_icon(project, alt: project.name, class: 'btn-template-icon avatar s40 avatar-tile', lazy: false)
@@ -30,7 +31,7 @@
               .text-muted
                 = project.description
             .controls.d-flex.align-items-baseline
-              %a.btn.btn-default.append-right-10{ href: project_path(project), rel: 'noopener noreferrer', target: '_blank' }
+              %a.btn.btn-default.gl-mr-3{ href: project_path(project), rel: 'noopener noreferrer', target: '_blank' }
                 = _('Preview')
               %label.btn.btn-success.custom-template-button.choose-template.gl-mb-0{ for: project.name }
                 %input{ type: "radio", autocomplete: "off", name: "project[template_project_id]", id: project.name, value: project.id, data: { subgroup_id: project.namespace_id, template_name: project.name, parent_group_id: namespace_id || group.parent_id } }

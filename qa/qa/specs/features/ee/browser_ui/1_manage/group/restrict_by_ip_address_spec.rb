@@ -48,7 +48,7 @@ module QA
         let(:ip_address) { get_next_ip_address(fetch_current_ip_address) }
 
         context 'via the UI' do
-          it 'denies access' do
+          it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/862' do
             Flow::Login.sign_in(as: @user)
 
             @group.sandbox.visit!
@@ -62,7 +62,7 @@ module QA
         end
 
         context 'via the API' do
-          it 'denies access' do
+          it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/861' do
             request = create_request("/groups/#{@sandbox_group.id}")
             response = get request.url
             expect(response.code).to eq(404)
@@ -83,7 +83,11 @@ module QA
             end
           end
 
-          it 'denies access' do
+          after do
+            key.remove_via_api!
+          end
+
+          it 'denies access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/860' do
             expect { push_a_project_with_ssh_key(key) }.to raise_error(QA::Git::Repository::RepositoryCommandError, /fatal: Could not read from remote repository/)
           end
         end
@@ -93,7 +97,7 @@ module QA
         let(:ip_address) { fetch_current_ip_address }
 
         context 'via the UI' do
-          it 'allows access' do
+          it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/865' do
             Flow::Login.sign_in(as: @user)
 
             @group.sandbox.visit!
@@ -105,7 +109,7 @@ module QA
         end
 
         context 'via the API' do
-          it 'allows access' do
+          it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/864' do
             request = create_request("/groups/#{@sandbox_group.id}")
             response = get request.url
             expect(response.code).to eq(200)
@@ -126,7 +130,11 @@ module QA
             end
           end
 
-          it 'allows access' do
+          after do
+            key.remove_via_api!
+          end
+
+          it 'allows access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/863' do
             expect { push_a_project_with_ssh_key(key) }.not_to raise_error
           end
         end

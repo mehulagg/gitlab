@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
@@ -327,6 +328,7 @@ export default {
         :add-spacing-classes="false"
         :help-page-path="helpPagePath"
         :show-suggest-popover="showSuggestPopover"
+        :textarea-value="updatedNoteBody"
         @handleSuggestDismissed="() => $emit('handleSuggestDismissed')"
       >
         <textarea
@@ -336,7 +338,8 @@ export default {
           v-model="updatedNoteBody"
           :data-supports-quick-actions="!isEditing"
           name="note[note]"
-          class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form js-vue-textarea qa-reply-input"
+          class="note-textarea js-gfm-input js-note-text js-autosize markdown-area js-vue-issue-note-form"
+          data-qa-selector="reply_field"
           dir="auto"
           :aria-label="__('Description')"
           :placeholder="__('Write a comment or drag your files here…')"
@@ -375,7 +378,8 @@ export default {
             <button
               :disabled="isDisabled"
               type="button"
-              class="btn btn-success qa-start-review"
+              class="btn btn-success"
+              data-qa-selector="start_review_button"
               @click="handleAddToReview"
             >
               <template v-if="hasDrafts">{{ __('Add to review') }}</template>
@@ -384,7 +388,8 @@ export default {
             <button
               :disabled="isDisabled"
               type="button"
-              class="btn qa-comment-now js-comment-button"
+              class="btn js-comment-button"
+              data-qa-selector="comment_now_button"
               @click="handleUpdate()"
             >
               {{ __('Add comment now') }}
@@ -403,14 +408,15 @@ export default {
           <button
             :disabled="isDisabled"
             type="button"
-            class="js-vue-issue-save btn btn-success js-comment-button qa-reply-comment-button"
+            class="js-vue-issue-save btn btn-success js-comment-button"
+            data-qa-selector="reply_comment_button"
             @click="handleUpdate()"
           >
             {{ saveButtonTitle }}
           </button>
           <button
             v-if="discussion.resolvable"
-            class="btn btn-nr btn-default append-right-10 js-comment-resolve-button"
+            class="btn btn-nr btn-default gl-mr-3 js-comment-resolve-button"
             @click.prevent="handleUpdate(true)"
           >
             {{ resolveButtonTitle }}

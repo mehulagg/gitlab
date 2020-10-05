@@ -1,17 +1,15 @@
-import { editor as monacoEditor, languages as monacoLanguages, Position, Uri } from 'monaco-editor';
+import { editor as monacoEditor, languages as monacoLanguages, Uri } from 'monaco-editor';
 import { DEFAULT_THEME, themes } from '~/ide/lib/themes';
 import languages from '~/ide/lib/languages';
 import { defaultEditorOptions } from '~/ide/lib/editor_options';
 import { registerLanguages } from '~/ide/utils';
+import { joinPaths } from '~/lib/utils/url_utility';
 import { clearDomElement } from './utils';
+import { EDITOR_LITE_INSTANCE_ERROR_NO_EL, URI_PREFIX } from './constants';
 
 export default class Editor {
   constructor(options = {}) {
-    this.editorEl = null;
-    this.blobContent = '';
-    this.blobPath = '';
-    this.instance = null;
-    this.model = null;
+    this.instances = [];
     this.options = {
       extraEditorClassName: 'gl-editor-lite',
       ...defaultEditorOptions,
@@ -30,67 +28,73 @@ export default class Editor {
     monacoEditor.setTheme(theme ? themeName : DEFAULT_THEME);
   }
 
-  createInstance({ el = undefined, blobPath = '', blobContent = '' } = {}) {
-    if (!el) return;
-    this.editorEl = el;
-    this.blobContent = blobContent;
-    this.blobPath = blobPath;
-
-    clearDomElement(this.editorEl);
-
-    this.model = monacoEditor.createModel(
-      this.blobContent,
-      undefined,
-      new Uri('gitlab', false, this.blobPath),
-    );
-
-    monacoEditor.onDidCreateEditor(this.renderEditor.bind(this));
-
-    this.instance = monacoEditor.create(this.editorEl, this.options);
-    this.instance.setModel(this.model);
-  }
-
-  dispose() {
-    return this.instance && this.instance.dispose();
-  }
-
-  renderEditor() {
-    delete this.editorEl.dataset.editorLoading;
-  }
-
-  updateModelLanguage(path) {
-    if (path === this.blobPath) return;
-    this.blobPath = path;
+  static updateModelLanguage(path, instance) {
+    if (!instance) return;
+    const model = instance.getModel();
     const ext = `.${path.split('.').pop()}`;
     const language = monacoLanguages
       .getLanguages()
       .find(lang => lang.extensions.indexOf(ext) !== -1);
     const id = language ? language.id : 'plaintext';
-    monacoEditor.setModelLanguage(this.model, id);
+    monacoEditor.setModelLanguage(model, id);
   }
 
-  getValue() {
-    return this.instance.getValue();
+  /**
+   * Creates a monaco instance with the given options.
+   *
+   * @param {Object} options Options used to initialize monaco.
+   * @param {Element} options.el The element which will be used to create the monacoEditor.
+   * @param {string} options.blobPath The path used as the URI of the model. Monaco uses the extension of this path to determine the language.
+   * @param {string} options.blobContent The content to initialize the monacoEditor.
+   * @param {string} options.blobGlobalId This is used to help globally identify monaco instances that are created with the same blobPath.
+   */
+  createInstance({
+    el = undefined,
+    blobPath = '',
+    blobContent = '',
+    blobGlobalId = '',
+    ...instanceOptions
+  } = {}) {
+    if (!el) {
+      throw new Error(EDITOR_LITE_INSTANCE_ERROR_NO_EL);
+    }
+
+    clearDomElement(el);
+
+    const uriFilePath = joinPaths(URI_PREFIX, blobGlobalId, blobPath);
+
+    const model = monacoEditor.createModel(blobContent, undefined, Uri.file(uriFilePath));
+
+    monacoEditor.onDidCreateEditor(() => {
+      delete el.dataset.editorLoading;
+    });
+
+    const instance = monacoEditor.create(el, {
+      ...this.options,
+      ...instanceOptions,
+    });
+    instance.setModel(model);
+    instance.onDidDispose(() => {
+      const index = this.instances.findIndex(inst => inst === instance);
+      this.instances.splice(index, 1);
+      model.dispose();
+    });
+    instance.updateModelLanguage = path => Editor.updateModelLanguage(path, instance);
+
+    this.instances.push(instance);
+    return instance;
   }
 
-  setValue(val) {
-    this.instance.setValue(val);
+  dispose() {
+    this.instances.forEach(instance => instance.dispose());
   }
 
-  focus() {
-    this.instance.focus();
-  }
-
-  navigateFileStart() {
-    this.instance.setPosition(new Position(1, 1));
-  }
-
-  updateOptions(options = {}) {
-    this.instance.updateOptions(options);
-  }
-
-  use(exts = []) {
+  use(exts = [], instance = null) {
     const extensions = Array.isArray(exts) ? exts : [exts];
-    Object.assign(this, ...extensions);
+    if (instance) {
+      Object.assign(instance, ...extensions);
+    } else {
+      this.instances.forEach(inst => Object.assign(inst, ...extensions));
+    }
   }
 }

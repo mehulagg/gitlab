@@ -164,9 +164,83 @@ RSpec.describe 'gitlab:db namespace rake task' do
     end
   end
 
-  def run_rake_task(task_name)
+  describe 'drop_tables' do
+    subject { run_rake_task('gitlab:db:drop_tables') }
+
+    let(:tables) { %w(one two) }
+    let(:views) { %w(three four) }
+    let(:connection) { ActiveRecord::Base.connection }
+
+    before do
+      allow(connection).to receive(:execute).and_return(nil)
+
+      allow(connection).to receive(:tables).and_return(tables)
+      allow(connection).to receive(:views).and_return(views)
+    end
+
+    it 'drops all tables, except schema_migrations' do
+      expect(connection).to receive(:execute).with('DROP TABLE IF EXISTS "one" CASCADE')
+      expect(connection).to receive(:execute).with('DROP TABLE IF EXISTS "two" CASCADE')
+
+      subject
+    end
+
+    it 'drops all views' do
+      expect(connection).to receive(:execute).with('DROP VIEW IF EXISTS "three" CASCADE')
+      expect(connection).to receive(:execute).with('DROP VIEW IF EXISTS "four" CASCADE')
+
+      subject
+    end
+
+    it 'truncates schema_migrations table' do
+      expect(connection).to receive(:execute).with('TRUNCATE schema_migrations')
+
+      subject
+    end
+
+    it 'drops extra schemas' do
+      Gitlab::Database::EXTRA_SCHEMAS.each do |schema|
+        expect(connection).to receive(:execute).with("DROP SCHEMA IF EXISTS \"#{schema}\"")
+      end
+
+      subject
+    end
+  end
+
+  describe 'reindex' do
+    let(:reindex) { double('reindex') }
+    let(:indexes) { double('indexes') }
+
+    context 'when no index_name is given' do
+      it 'rebuilds a random number of large indexes' do
+        expect(Gitlab::Database::Reindexing).to receive_message_chain('candidate_indexes.random_few').and_return(indexes)
+        expect(Gitlab::Database::Reindexing).to receive(:perform).with(indexes)
+
+        run_rake_task('gitlab:db:reindex')
+      end
+    end
+
+    context 'with index name given' do
+      let(:index) { double('index') }
+
+      it 'calls the index rebuilder with the proper arguments' do
+        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.foo_idx').and_return(index)
+        expect(Gitlab::Database::Reindexing).to receive(:perform).with(index)
+
+        run_rake_task('gitlab:db:reindex', '[public.foo_idx]')
+      end
+
+      it 'raises an error if the index does not exist' do
+        expect(Gitlab::Database::PostgresIndex).to receive(:by_identifier).with('public.absent_index').and_raise(ActiveRecord::RecordNotFound)
+
+        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+  end
+
+  def run_rake_task(task_name, arguments = '')
     Rake::Task[task_name].reenable
-    Rake.application.invoke_task task_name
+    Rake.application.invoke_task("#{task_name}#{arguments}")
   end
 
   def expect_multiple_executions_of_task(test_task_name, task_to_invoke, count: 2)

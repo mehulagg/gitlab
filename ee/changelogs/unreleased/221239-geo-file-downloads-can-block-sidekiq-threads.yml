@@ -1,5 +1,0 @@
----
-title: 'Fix: Geo file downloads can block Sidekiq threads'
-merge_request:
-author:
-type: fixed

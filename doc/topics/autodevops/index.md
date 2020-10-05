@@ -3,10 +3,11 @@
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/37115) in GitLab 10.0.
 > - Generally available on GitLab 11.0.
 
-Auto DevOps provides pre-defined CI/CD configuration allowing you to automatically
-detect, build, test, deploy, and monitor your applications. Leveraging CI/CD
-best practices and tools, Auto DevOps aims to simplify the setup and execution
-of a mature and modern software development lifecycle.
+Auto DevOps are default CI/CD templates that auto-discover the source code you have. They
+enable GitLab to automatically detect, build, test, deploy, and monitor your applications.
+Leveraging [CI/CD best practices](../../ci/pipelines/pipeline_efficiency.md) and tools,
+Auto DevOps aims to simplify the setup and execution of a mature and modern software
+development lifecycle.
 
 ## Overview
 
@@ -33,7 +34,7 @@ For requirements, see [Requirements for Auto DevOps](requirements.md) for more i
 
 Auto DevOps is enabled by default for all projects and attempts to run on all pipelines
 in each project. An instance administrator can enable or disable this default in the
-[Auto DevOps settings](../../user/admin_area/settings/continuous_integration.md#auto-devops-core-only).
+[Auto DevOps settings](../../user/admin_area/settings/continuous_integration.md#auto-devops).
 Auto DevOps automatically disables in individual projects on their first pipeline failure,
 if it has not been explicitly enabled for the project.
 
@@ -83,16 +84,16 @@ project in a simple and automatic way:
 
 1. [Auto Build](stages.md#auto-build)
 1. [Auto Test](stages.md#auto-test)
-1. [Auto Code Quality](stages.md#auto-code-quality-starter) **(STARTER)**
-1. [Auto SAST (Static Application Security Testing)](stages.md#auto-sast-ultimate) **(ULTIMATE)**
-1. [Auto Secret Detection](stages.md#auto-secret-detection-ultimate) **(ULTIMATE)**
-1. [Auto Dependency Scanning](stages.md#auto-dependency-scanning-ultimate) **(ULTIMATE)**
-1. [Auto License Compliance](stages.md#auto-license-compliance-ultimate) **(ULTIMATE)**
-1. [Auto Container Scanning](stages.md#auto-container-scanning-ultimate) **(ULTIMATE)**
+1. [Auto Code Quality](stages.md#auto-code-quality)
+1. [Auto SAST (Static Application Security Testing)](stages.md#auto-sast)
+1. [Auto Secret Detection](stages.md#auto-secret-detection)
+1. [Auto Dependency Scanning](stages.md#auto-dependency-scanning) **(ULTIMATE)**
+1. [Auto License Compliance](stages.md#auto-license-compliance) **(ULTIMATE)**
+1. [Auto Container Scanning](stages.md#auto-container-scanning) **(ULTIMATE)**
 1. [Auto Review Apps](stages.md#auto-review-apps)
-1. [Auto DAST (Dynamic Application Security Testing)](stages.md#auto-dast-ultimate) **(ULTIMATE)**
+1. [Auto DAST (Dynamic Application Security Testing)](stages.md#auto-dast) **(ULTIMATE)**
 1. [Auto Deploy](stages.md#auto-deploy)
-1. [Auto Browser Performance Testing](stages.md#auto-browser-performance-testing-premium) **(PREMIUM)**
+1. [Auto Browser Performance Testing](stages.md#auto-browser-performance-testing) **(PREMIUM)**
 1. [Auto Monitoring](stages.md#auto-monitoring)
 
 As Auto DevOps relies on many different components, you should have a basic
@@ -104,13 +105,15 @@ knowledge of the following:
 - [GitLab Runner](https://docs.gitlab.com/runner/)
 - [Prometheus](https://prometheus.io/docs/introduction/overview/)
 
-Auto DevOps provides great defaults for all the stages and makes use of [CI templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates); you can, however,
-[customize](customize.md) almost everything to your needs.
+Auto DevOps provides great defaults for all the stages and makes use of
+[CI templates](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates). You can, however,
+[customize](customize.md) almost everything to your needs, and
+[manage Auto DevOps with GitLab APIs](customize.md#extend-auto-devops-with-the-api).
 
 For an overview on the creation of Auto DevOps, read more
 [in this blog post](https://about.gitlab.com/blog/2017/06/29/whats-next-for-gitlab-ci/).
 
-NOTE: **Note**
+NOTE: **Note:**
 Kubernetes clusters can [be used without](../../user/project/clusters/index.md)
 Auto DevOps.
 
@@ -130,7 +133,7 @@ any of the following places:
   [groups](../../user/group/clusters/index.md#base-domain)
 - or at the project level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
 - or at the group level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
-- or as an instance-wide fallback in **{admin}** **Admin Area > Settings** under the
+- or as an instance-wide fallback in **Admin Area > Settings** under the
   **Continuous Integration and Delivery** section
 
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
@@ -185,7 +188,7 @@ instance level.
 
 If enabling, check that your project does not have a `.gitlab-ci.yml`, or if one exists, remove it.
 
-1. Go to your project's **{settings}** **Settings > CI/CD > Auto DevOps**.
+1. Go to your project's **Settings > CI/CD > Auto DevOps**.
 1. Select the **Default to Auto DevOps pipeline** checkbox to enable it.
 1. (Optional, but recommended) When enabling, you can add in the
    [base domain](#auto-devops-base-domain) Auto DevOps uses to
@@ -207,7 +210,7 @@ is specifically enabled or disabled on the subgroup or project.
 
 To enable or disable Auto DevOps at the group level:
 
-1. Go to your group's **{settings}** **Settings > CI/CD > Auto DevOps** page.
+1. Go to your group's **Settings > CI/CD > Auto DevOps** page.
 1. Select the **Default to Auto DevOps pipeline** checkbox to enable it.
 1. Click **Save changes** for the changes to take effect.
 
@@ -216,7 +219,7 @@ To enable or disable Auto DevOps at the group level:
 Even when disabled at the instance level, group owners and project maintainers can still enable
 Auto DevOps at the group and project level, respectively.
 
-1. Go to **{admin}** **Admin Area > Settings > Continuous Integration and Deployment**.
+1. Go to **Admin Area > Settings > Continuous Integration and Deployment**.
 1. Select **Default to Auto DevOps pipeline for all projects** to enable it.
 1. (Optional) You can set up the Auto DevOps [base domain](#auto-devops-base-domain),
    for Auto Deploy and Auto Review Apps to use.
@@ -227,18 +230,18 @@ Auto DevOps at the group and project level, respectively.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/38542) in GitLab 11.0.
 
 You can change the deployment strategy used by Auto DevOps by going to your
-project's **{settings}** **Settings > CI/CD > Auto DevOps**. The following options
+project's **Settings > CI/CD > Auto DevOps**. The following options
 are available:
 
 - **Continuous deployment to production**: Enables [Auto Deploy](stages.md#auto-deploy)
   with `master` branch directly deployed to production.
 - **Continuous deployment to production using timed incremental rollout**: Sets the
-  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#timed-incremental-rollout-to-production-premium) variable
+  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#timed-incremental-rollout-to-production) variable
   to `timed`. Production deployments execute with a 5 minute delay between
   each increment in rollout.
 - **Automatic deployment to staging, manual deployment to production**: Sets the
   [`STAGING_ENABLED`](customize.md#deploy-policy-for-staging-and-production-environments) and
-  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#incremental-rollout-to-production-premium) variables
+  [`INCREMENTAL_ROLLOUT_MODE`](customize.md#incremental-rollout-to-production) variables
   to `1` and `manual`. This means:
 
   - `master` branch is directly deployed to staging.
@@ -272,18 +275,18 @@ The following table is an example of how to configure the three different cluste
 |--------------|---------------------------|-------------------------------------------|----------------------------|---|
 | review       | `review/*`                | `review.example.com`                      | `review/*`                 | The review cluster which runs all [Review Apps](../../ci/review_apps/index.md). `*` is a wildcard, used by every environment name starting with `review/`. |
 | staging      | `staging`                 | `staging.example.com`                     | `staging`                  | (Optional) The staging cluster which runs the deployments of the staging environments. You must [enable it first](customize.md#deploy-policy-for-staging-and-production-environments). |
-| production   | `production`              | `example.com`                             | `production`               | The production cluster which runs the production environment deployments. You can use [incremental rollouts](customize.md#incremental-rollout-to-production-premium). |
+| production   | `production`              | `example.com`                             | `production`               | The production cluster which runs the production environment deployments. You can use [incremental rollouts](customize.md#incremental-rollout-to-production). |
 
 To add a different cluster for each environment:
 
-1. Navigate to your project's **{cloud-gear}** **Operations > Kubernetes**.
+1. Navigate to your project's **Operations > Kubernetes**.
 1. Create the Kubernetes clusters with their respective environment scope, as
    described from the table above.
 1. After creating the clusters, navigate to each cluster and install
    Ingress. Wait for the Ingress IP address to be assigned.
 1. Make sure you've [configured your DNS](#auto-devops-base-domain) with the
    specified Auto DevOps domains.
-1. Navigate to each cluster's page, through **{cloud-gear}** **Operations > Kubernetes**,
+1. Navigate to each cluster's page, through **Operations > Kubernetes**,
    and add the domain based on its Ingress IP address.
 
 After completing configuration, you can test your setup by creating a merge request
@@ -315,7 +318,7 @@ metadata:
   name: gitlab-managed-apps-default-proxy
   namespace: gitlab-managed-apps
 spec:
-   env:
+  env:
     - name: http_proxy
       value: "PUT_YOUR_HTTP_PROXY_HERE"
     - name: https_proxy

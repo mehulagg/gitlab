@@ -23,6 +23,10 @@ module Integrations
         jira_issue.resolutiondate&.to_datetime&.utc
       end
 
+      expose :status do |jira_issue|
+        jira_issue.status.name
+      end
+
       expose :labels do |jira_issue|
         jira_issue.labels.map do |name|
           {

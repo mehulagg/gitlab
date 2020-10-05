@@ -18,7 +18,7 @@ RSpec.describe 'Groups > Billing', :js do
   end
 
   before do
-    stub_full_request("https://customers.gitlab.com/gitlab_plans?plan=#{plan}")
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}")
       .to_return(status: 200, body: File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json')))
 
     allow(Gitlab).to receive(:com?).and_return(true)

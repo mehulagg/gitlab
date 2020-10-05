@@ -16,12 +16,11 @@
   data: { token: token_in_session } }, url: clusterable.create_gcp_clusters_path, as: :cluster do |field|
   = field.text_field :name, required: true, title: s_('ClusterIntegration|Cluster name is required.'),
     label: s_('ClusterIntegration|Kubernetes cluster name'), label_class: 'label-bold'
-  - if has_multiple_clusters?
-    = field.form_group :environment_scope, label: { text: s_('ClusterIntegration|Environment scope'),
-      class: 'label-bold' } do
-      = field.text_field :environment_scope, required: true, class: 'form-control',
-        title: 'Environment scope is required.', wrapper: false
-      .form-text.text-muted= s_("ClusterIntegration|Choose which of your environments will use this cluster.")
+  = field.form_group :environment_scope, label: { text: s_('ClusterIntegration|Environment scope'),
+    class: 'label-bold' } do
+    = field.text_field :environment_scope, required: true, class: 'form-control',
+      title: 'Environment scope is required.', wrapper: false
+    .form-text.text-muted= s_("ClusterIntegration|Choose which of your environments will use this cluster.")
 
   = field.fields_for :provider_gcp, @gcp_cluster.provider_gcp do |provider_gcp_field|
     .form-group
@@ -76,8 +75,14 @@
     = field.check_box :managed, { label: s_('ClusterIntegration|GitLab-managed cluster'),
       label_class: 'label-bold' }
     .form-text.text-muted
-      = s_('ClusterIntegration|Allow GitLab to manage namespace and service accounts for this cluster.')
+      = s_('ClusterIntegration|Allow GitLab to manage namespaces and service accounts for this cluster.')
       = link_to _('More information'), help_page_path('user/project/clusters/index.md', anchor: 'gitlab-managed-clusters'), target: '_blank'
+
+  .form-group
+    = field.check_box :namespace_per_environment, { label: s_('ClusterIntegration|Namespace per environment'), label_class: 'label-bold' }
+    .form-text.text-muted
+      = s_('ClusterIntegration|Deploy each environment to its own namespace. Otherwise, environments within a project share a project-wide namespace. Note that anyone who can trigger a deployment of a namespace can read its secrets. If modified, existing environments will use their current namespaces until the cluster cache is cleared.')
+      = link_to _('More information'), help_page_path('user/project/clusters/index.md', anchor: 'custom-namespace'), target: '_blank'
 
   .form-group.js-gke-cluster-creation-submit-container
     = field.submit s_('ClusterIntegration|Create Kubernetes cluster'),

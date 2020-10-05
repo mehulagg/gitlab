@@ -2,10 +2,16 @@
 
 module Projects
   class UpdateRemoteMirrorService < BaseService
+    include Gitlab::Utils::StrongMemoize
+
     MAX_TRIES = 3
 
     def execute(remote_mirror, tries)
       return success unless remote_mirror.enabled?
+
+      if Gitlab::UrlBlocker.blocked_url?(normalized_url(remote_mirror.url))
+        return error("The remote mirror URL is invalid.")
+      end
 
       update_mirror(remote_mirror)
 
@@ -23,15 +29,18 @@ module Projects
 
     private
 
+    def normalized_url(url)
+      strong_memoize(:normalized_url) do
+        CGI.unescape(Gitlab::UrlSanitizer.sanitize(url))
+      end
+    end
+
     def update_mirror(remote_mirror)
       remote_mirror.update_start!
-
       remote_mirror.ensure_remote!
 
-      # https://gitlab.com/gitlab-org/gitaly/-/issues/2670
-      if Feature.disabled?(:gitaly_ruby_remote_branches_ls_remote, default_enabled: true)
-        repository.fetch_remote(remote_mirror.remote_name, ssh_auth: remote_mirror, no_tags: true)
-      end
+      # LFS objects must be sent first, or the push has dangling pointers
+      send_lfs_objects!(remote_mirror)
 
       response = remote_mirror.update_repository
 
@@ -43,6 +52,23 @@ module Projects
       else
         remote_mirror.update_finish!
       end
+    end
+
+    def send_lfs_objects!(remote_mirror)
+      return unless Feature.enabled?(:push_mirror_syncs_lfs, project)
+      return unless project.lfs_enabled?
+
+      # TODO: Support LFS sync over SSH
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/249587
+      return unless remote_mirror.url =~ /\Ahttps?:\/\//i
+      return unless remote_mirror.password_auth?
+
+      Lfs::PushService.new(
+        project,
+        current_user,
+        url: remote_mirror.bare_url,
+        credentials: remote_mirror.credentials
+      ).execute
     end
 
     def retry_or_fail(mirror, message, tries)

@@ -29,7 +29,8 @@ module API
       success Entities::ApplicationSetting
     end
     params do
-      optional :admin_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
+      optional :admin_notification_email, type: String, desc: 'Deprecated: Use :abuse_notification_email instead. Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
+      optional :abuse_notification_email, type: String, desc: 'Abuse reports will be sent to this address if it is set. Abuse reports are always available in the admin area.'
       optional :after_sign_up_text, type: String, desc: 'Text shown after sign up'
       optional :after_sign_out_path, type: String, desc: 'We will redirect users to this page after they sign out'
       optional :akismet_enabled, type: Boolean, desc: 'Helps prevent bots from creating issues'
@@ -61,6 +62,10 @@ module API
       end
       optional :email_author_in_body, type: Boolean, desc: 'Some email servers do not support overriding the email sender name. Enable this option to include the name of the author of the issue, merge request or comment in the email body instead.'
       optional :enabled_git_access_protocol, type: String, values: %w[ssh http nil], desc: 'Allow only the selected protocols to be used for Git access.'
+      optional :gitpod_enabled, type: Boolean, desc: 'Enable Gitpod'
+      given gitpod_enabled: ->(val) { val } do
+        requires :gitpod_url, type: String, desc: 'The configured Gitpod instance URL'
+      end
       optional :gitaly_timeout_default, type: Integer, desc: 'Default Gitaly timeout, in seconds. Set to 0 to disable timeouts.'
       optional :gitaly_timeout_fast, type: Integer, desc: 'Gitaly fast operation timeout, in seconds. Set to 0 to disable timeouts.'
       optional :gitaly_timeout_medium, type: Integer, desc: 'Medium Gitaly timeout, in seconds. Set to 0 to disable timeouts.'
@@ -69,6 +74,7 @@ module API
       optional :gravatar_enabled, type: Boolean, desc: 'Flag indicating if the Gravatar service is enabled'
       optional :help_page_hide_commercial_content, type: Boolean, desc: 'Hide marketing-related entries from help'
       optional :help_page_support_url, type: String, desc: 'Alternate support URL for help page and help dropdown'
+      optional :help_page_documentation_base_url, type: String, desc: 'Alternate documentation pages URL'
       optional :help_page_text, type: String, desc: 'Custom text displayed on the help page'
       optional :home_page_url, type: String, desc: 'We will redirect non-logged in users to this page'
       optional :housekeeping_enabled, type: Boolean, desc: 'Enable automatic repository housekeeping (git repack, git gc)'
@@ -114,8 +120,7 @@ module API
         requires :recaptcha_private_key, type: String, desc: 'Generate private key at http://www.google.com/recaptcha'
       end
       optional :repository_checks_enabled, type: Boolean, desc: "GitLab will periodically run 'git fsck' in all project and wiki repositories to look for silent disk corruption issues."
-      optional :repository_storages, type: Array[String], coerce_with: Validations::Types::CommaSeparatedToArray.coerce, desc: 'Storage paths for new projects'
-      optional :repository_storages_weighted, type: Hash, desc: 'Storage paths for new projects with a weighted value between 0 and 100'
+      optional :repository_storages_weighted, type: Hash, coerce_with: Validations::Types::HashOfIntegerValues.coerce, desc: 'Storage paths for new projects with a weighted value ranging from 0 to 100'
       optional :require_two_factor_authentication, type: Boolean, desc: 'Require all users to set up Two-factor authentication'
       given require_two_factor_authentication: ->(val) { val } do
         requires :two_factor_grace_period, type: Integer, desc: 'Amount of time (in hours) that users are allowed to skip forced configuration of two-factor authentication'
@@ -141,11 +146,9 @@ module API
       end
       optional :terminal_max_session_time, type: Integer, desc: 'Maximum time for web terminal websocket connection (in seconds). Set to 0 for unlimited time.'
       optional :usage_ping_enabled, type: Boolean, desc: 'Every week GitLab will report license usage back to GitLab, Inc.'
-      optional :instance_statistics_visibility_private, type: Boolean, desc: 'When set to `true` Instance statistics will only be available to admins'
       optional :local_markdown_version, type: Integer, desc: 'Local markdown version, increase this value when any cached markdown should be invalidated'
       optional :allow_local_requests_from_hooks_and_services, type: Boolean, desc: 'Deprecated: Use :allow_local_requests_from_web_hooks_and_services instead. Allow requests to the local network from hooks and services.' # support legacy names, can be removed in v5
       optional :snowplow_enabled, type: Grape::API::Boolean, desc: 'Enable Snowplow tracking'
-      optional :snowplow_iglu_registry_url, type: String, desc: 'The Snowplow base Iglu Schema Registry URL to use for custom context and self describing events'
       given snowplow_enabled: ->(val) { val } do
         requires :snowplow_collector_hostname, type: String, desc: 'The Snowplow collector hostname'
         optional :snowplow_cookie_domain, type: String, desc: 'The Snowplow cookie domain'
@@ -153,6 +156,7 @@ module API
       end
       optional :issues_create_limit, type: Integer, desc: "Maximum number of issue creation requests allowed per minute per user. Set to 0 for unlimited requests per minute."
       optional :raw_blob_request_limit, type: Integer, desc: "Maximum number of requests per minute for each raw path. Set to 0 for unlimited requests per minute."
+      optional :wiki_page_max_content_bytes, type: Integer, desc: "Maximum wiki page content size in bytes"
 
       ApplicationSetting::SUPPORTED_KEY_TYPES.each do |type|
         optional :"#{type}_key_restriction",
@@ -190,6 +194,11 @@ module API
       # support legacy names, can be removed in v5
       if attrs.has_key?(:allow_local_requests_from_hooks_and_services)
         attrs[:allow_local_requests_from_web_hooks_and_services] = attrs.delete(:allow_local_requests_from_hooks_and_services)
+      end
+
+      # support legacy names, can be removed in v5
+      if attrs.has_key?(:admin_notification_email)
+        attrs[:abuse_notification_email] = attrs.delete(:admin_notification_email)
       end
 
       # since 13.0 it's not possible to disable hashed storage - support can be removed in 14.0

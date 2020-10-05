@@ -1,9 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlNewDropdown, GlNewDropdownItem, GlButton, GlSearchBoxByType } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlDropdown, GlDropdownItem, GlButton, GlLink, GlSearchBoxByType } from '@gitlab/ui';
 import IterationSelect from 'ee/sidebar/components/iteration_select.vue';
 import { iterationSelectTextMap } from 'ee/sidebar/constants';
 import setIterationOnIssue from 'ee/sidebar/queries/set_iteration_on_issue.mutation.graphql';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -63,6 +63,17 @@ describe('IterationSelect', () => {
 
       expect(wrapper.find('[data-testid="select-iteration"]').text()).toBe('title');
     });
+
+    it('links to the current iteration', () => {
+      createComponent({
+        data: {
+          iterations: [{ id: 'id', title: 'title', webUrl: 'webUrl' }],
+          currentIteration: 'id',
+        },
+      });
+
+      expect(wrapper.find(GlLink).attributes().href).toBe('webUrl');
+    });
   });
 
   describe('when a user cannot edit', () => {
@@ -77,12 +88,12 @@ describe('IterationSelect', () => {
     it('opens the dropdown on click of the edit button', () => {
       createComponent({ props: { canEdit: true } });
 
-      expect(wrapper.find(GlNewDropdown).isVisible()).toBe(false);
+      expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
 
       toggleDropdown();
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.find(GlNewDropdown).isVisible()).toBe(true);
+        expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
       });
     });
 
@@ -102,7 +113,7 @@ describe('IterationSelect', () => {
       const spy = jest.fn();
       createComponent({ props: { canEdit: true } });
 
-      expect(wrapper.find(GlNewDropdown).isVisible()).toBe(false);
+      expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
 
       toggleDropdown(spy);
 
@@ -113,10 +124,10 @@ describe('IterationSelect', () => {
 
     describe('when user is editing', () => {
       describe('when rendering the dropdown', () => {
-        it('shows GlNewDropdown', () => {
+        it('shows GlDropdown', () => {
           createComponent({ props: { canEdit: true }, data: { editing: true } });
 
-          expect(wrapper.find(GlNewDropdown).isVisible()).toBe(true);
+          expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
         });
 
         describe('GlDropdownItem with the right title and id', () => {
@@ -130,7 +141,7 @@ describe('IterationSelect', () => {
           it('renders title $title', () => {
             expect(
               wrapper
-                .findAll(GlNewDropdownItem)
+                .findAll(GlDropdownItem)
                 .filter(w => w.text() === title)
                 .at(0)
                 .text(),
@@ -140,7 +151,7 @@ describe('IterationSelect', () => {
           it('checks the correct dropdown item', () => {
             expect(
               wrapper
-                .findAll(GlNewDropdownItem)
+                .findAll(GlDropdownItem)
                 .filter(w => w.props('isChecked') === true)
                 .at(0)
                 .text(),
@@ -153,12 +164,12 @@ describe('IterationSelect', () => {
             createComponent({});
           });
 
-          it('finds GlNewDropdownItem with "No iteration"', () => {
-            expect(wrapper.find(GlNewDropdownItem).text()).toBe('No iteration');
+          it('finds GlDropdownItem with "No iteration"', () => {
+            expect(wrapper.find(GlDropdownItem).text()).toBe('No iteration');
           });
 
           it('"No iteration" is checked', () => {
-            expect(wrapper.find(GlNewDropdownItem).props('isChecked')).toBe(true);
+            expect(wrapper.find(GlDropdownItem).props('isChecked')).toBe(true);
           });
         });
 
@@ -170,7 +181,7 @@ describe('IterationSelect', () => {
               });
 
               wrapper
-                .findAll(GlNewDropdownItem)
+                .findAll(GlDropdownItem)
                 .filter(w => w.text() === 'title')
                 .at(0)
                 .vm.$emit('click');
@@ -190,7 +201,7 @@ describe('IterationSelect', () => {
                 });
 
                 wrapper
-                  .findAll(GlNewDropdownItem)
+                  .findAll(GlDropdownItem)
                   .filter(w => w.text() === 'title')
                   .at(0)
                   .vm.$emit('click');
@@ -230,7 +241,7 @@ describe('IterationSelect', () => {
                   bootstrapComponent(mutationResp);
 
                   wrapper
-                    .findAll(GlNewDropdownItem)
+                    .findAll(GlDropdownItem)
                     .filter(w => w.text() === 'title')
                     .at(0)
                     .vm.$emit('click');
@@ -272,12 +283,12 @@ describe('IterationSelect', () => {
           });
 
           it('closes the dropdown', () => {
-            expect(wrapper.find(GlNewDropdown).isVisible()).toBe(true);
+            expect(wrapper.find(GlDropdown).isVisible()).toBe(true);
 
             toggleDropdown();
 
             return wrapper.vm.$nextTick().then(() => {
-              expect(wrapper.find(GlNewDropdown).isVisible()).toBe(false);
+              expect(wrapper.find(GlDropdown).isVisible()).toBe(false);
             });
           });
         });

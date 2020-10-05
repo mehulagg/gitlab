@@ -49,15 +49,15 @@ end
 RSpec.describe API::Projects do
   include ProjectForksHelper
 
-  let(:user) { create(:user) }
-  let(:user2) { create(:user) }
-  let(:user3) { create(:user) }
-  let(:admin) { create(:admin) }
-  let(:project) { create(:project, :repository, namespace: user.namespace) }
-  let(:project2) { create(:project, namespace: user.namespace) }
-  let(:project_member) { create(:project_member, :developer, user: user3, project: project) }
-  let(:user4) { create(:user, username: 'user.with.dot') }
-  let(:project3) do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:user2) { create(:user) }
+  let_it_be(:user3) { create(:user) }
+  let_it_be(:admin) { create(:admin) }
+  let_it_be(:project, reload: true) { create(:project, :repository, namespace: user.namespace) }
+  let_it_be(:project2, reload: true) { create(:project, namespace: user.namespace) }
+  let_it_be(:project_member) { create(:project_member, :developer, user: user3, project: project) }
+  let_it_be(:user4) { create(:user, username: 'user.with.dot') }
+  let_it_be(:project3, reload: true) do
     create(:project,
     :private,
     :repository,
@@ -70,19 +70,23 @@ RSpec.describe API::Projects do
     builds_enabled: false,
     snippets_enabled: false)
   end
-  let(:project_member2) do
+
+  let_it_be(:project_member2) do
     create(:project_member,
     user: user4,
     project: project3,
     access_level: ProjectMember::MAINTAINER)
   end
-  let(:project4) do
+
+  let_it_be(:project4, reload: true) do
     create(:project,
     name: 'third_project',
     path: 'third_project',
     creator_id: user4.id,
     namespace: user4.namespace)
   end
+
+  let(:user_projects) { [public_project, project, project2, project3] }
 
   shared_context 'with language detection' do
     let(:ruby) { create(:programming_language, name: 'Ruby') }
@@ -144,14 +148,7 @@ RSpec.describe API::Projects do
       end
     end
 
-    let!(:public_project) { create(:project, :public, name: 'public_project') }
-
-    before do
-      project
-      project2
-      project3
-      project4
-    end
+    let_it_be(:public_project) { create(:project, :public, name: 'public_project') }
 
     context 'when unauthenticated' do
       it_behaves_like 'projects response' do
@@ -169,7 +166,7 @@ RSpec.describe API::Projects do
       it_behaves_like 'projects response' do
         let(:filter) { {} }
         let(:current_user) { user }
-        let(:projects) { [public_project, project, project2, project3] }
+        let(:projects) { user_projects }
       end
 
       it_behaves_like 'projects response without N + 1 queries' do
@@ -206,7 +203,7 @@ RSpec.describe API::Projects do
       end
 
       it 'does not include projects marked for deletion' do
-        project.update(pending_delete: true)
+        project.update!(pending_delete: true)
 
         get api('/projects', user)
 
@@ -255,7 +252,7 @@ RSpec.describe API::Projects do
         expect(response).to include_pagination_headers
         expect(json_response).to be_an Array
 
-        statistics = json_response.first['statistics']
+        statistics = json_response.find { |p| p['id'] == project.id }['statistics']
         expect(statistics).to be_present
         expect(statistics).to include('commit_count', 'storage_size', 'repository_size', 'wiki_size', 'lfs_objects_size', 'job_artifacts_size', 'snippets_size')
       end
@@ -384,7 +381,15 @@ RSpec.describe API::Projects do
         it_behaves_like 'projects response' do
           let(:filter) { { id_after: project2.id } }
           let(:current_user) { user }
-          let(:projects) { [public_project, project, project2, project3].select { |p| p.id > project2.id } }
+          let(:projects) { user_projects.select { |p| p.id > project2.id } }
+        end
+
+        context 'regression: empty string is ignored' do
+          it_behaves_like 'projects response' do
+            let(:filter) { { id_after: '' } }
+            let(:current_user) { user }
+            let(:projects) { user_projects }
+          end
         end
       end
 
@@ -392,7 +397,15 @@ RSpec.describe API::Projects do
         it_behaves_like 'projects response' do
           let(:filter) { { id_before: project2.id } }
           let(:current_user) { user }
-          let(:projects) { [public_project, project, project2, project3].select { |p| p.id < project2.id } }
+          let(:projects) { user_projects.select { |p| p.id < project2.id } }
+        end
+
+        context 'regression: empty string is ignored' do
+          it_behaves_like 'projects response' do
+            let(:filter) { { id_before: '' } }
+            let(:current_user) { user }
+            let(:projects) { user_projects }
+          end
         end
       end
 
@@ -400,7 +413,7 @@ RSpec.describe API::Projects do
         it_behaves_like 'projects response' do
           let(:filter) { { id_before: project2.id, id_after: public_project.id } }
           let(:current_user) { user }
-          let(:projects) { [public_project, project, project2, project3].select { |p| p.id < project2.id && p.id > public_project.id } }
+          let(:projects) { user_projects.select { |p| p.id < project2.id && p.id > public_project.id } }
         end
       end
 
@@ -463,7 +476,7 @@ RSpec.describe API::Projects do
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to include_pagination_headers
           expect(json_response).to be_an Array
-          expect(json_response.first['id']).to eq(project3.id)
+          expect(json_response.map { |p| p['id'] }).to eq(user_projects.map(&:id).sort.reverse)
         end
       end
 
@@ -477,14 +490,32 @@ RSpec.describe API::Projects do
           expect(json_response.first['name']).to eq(project4.name)
           expect(json_response.first['owner']['username']).to eq(user4.username)
         end
+
+        context 'when admin creates a project' do
+          before do
+            group = create(:group)
+            project_create_opts = {
+              name: 'GitLab',
+              namespace_id: group.id
+            }
+
+            Projects::CreateService.new(admin, project_create_opts).execute
+          end
+
+          it 'does not list as owned project for admin' do
+            get api('/projects', admin), params: { owned: true }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_empty
+          end
+        end
       end
 
       context 'and with starred=true' do
         let(:public_project) { create(:project, :public) }
 
         before do
-          project_member
-          user3.update(starred_projects: [project, project2, project3, public_project])
+          user3.update!(starred_projects: [project, project2, project3, public_project])
         end
 
         it 'returns the starred projects viewable by the user' do
@@ -505,7 +536,7 @@ RSpec.describe API::Projects do
         let!(:project9) { create(:project, :public, path: 'gitlab9') }
 
         before do
-          user.update(starred_projects: [project5, project7, project8, project9])
+          user.update!(starred_projects: [project5, project7, project8, project9])
         end
 
         context 'including owned filter' do
@@ -624,7 +655,6 @@ RSpec.describe API::Projects do
 
           context 'non-admin user' do
             let(:current_user) { user }
-            let(:projects) { [public_project, project, project2, project3] }
 
             it 'returns projects ordered normally' do
               get api('/projects', current_user), params: { order_by: order_by }
@@ -632,7 +662,7 @@ RSpec.describe API::Projects do
               expect(response).to have_gitlab_http_status(:ok)
               expect(response).to include_pagination_headers
               expect(json_response).to be_an Array
-              expect(json_response.map { |project| project['id'] }).to eq(projects.map(&:id).reverse)
+              expect(json_response.map { |project| project['id'] }).to eq(user_projects.map(&:id).sort.reverse)
             end
           end
         end
@@ -668,7 +698,8 @@ RSpec.describe API::Projects do
 
     context 'with keyset pagination' do
       let(:current_user) { user }
-      let(:projects) { [public_project, project, project2, project3] }
+      let(:first_project_id) { user_projects.map(&:id).min }
+      let(:last_project_id) { user_projects.map(&:id).max }
 
       context 'headers and records' do
         let(:params) { { pagination: 'keyset', order_by: :id, sort: :asc, per_page: 1 } }
@@ -678,11 +709,11 @@ RSpec.describe API::Projects do
 
           expect(response.header).to include('Links')
           expect(response.header['Links']).to include('pagination=keyset')
-          expect(response.header['Links']).to include("id_after=#{public_project.id}")
+          expect(response.header['Links']).to include("id_after=#{first_project_id}")
 
           expect(response.header).to include('Link')
           expect(response.header['Link']).to include('pagination=keyset')
-          expect(response.header['Link']).to include("id_after=#{public_project.id}")
+          expect(response.header['Link']).to include("id_after=#{first_project_id}")
         end
 
         it 'contains only the first project with per_page = 1' do
@@ -690,7 +721,7 @@ RSpec.describe API::Projects do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response).to be_an Array
-          expect(json_response.map { |p| p['id'] }).to contain_exactly(public_project.id)
+          expect(json_response.map { |p| p['id'] }).to contain_exactly(first_project_id)
         end
 
         it 'still includes a link if the end has reached and there is no more data after this page' do
@@ -734,11 +765,11 @@ RSpec.describe API::Projects do
 
           expect(response.header).to include('Links')
           expect(response.header['Links']).to include('pagination=keyset')
-          expect(response.header['Links']).to include("id_before=#{project3.id}")
+          expect(response.header['Links']).to include("id_before=#{last_project_id}")
 
           expect(response.header).to include('Link')
           expect(response.header['Link']).to include('pagination=keyset')
-          expect(response.header['Link']).to include("id_before=#{project3.id}")
+          expect(response.header['Link']).to include("id_before=#{last_project_id}")
         end
 
         it 'contains only the last project with per_page = 1' do
@@ -746,7 +777,7 @@ RSpec.describe API::Projects do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response).to be_an Array
-          expect(json_response.map { |p| p['id'] }).to contain_exactly(project3.id)
+          expect(json_response.map { |p| p['id'] }).to contain_exactly(last_project_id)
         end
       end
 
@@ -775,7 +806,7 @@ RSpec.describe API::Projects do
             ids += Gitlab::Json.parse(response.body).map { |p| p['id'] }
           end
 
-          expect(ids).to contain_exactly(*projects.map(&:id))
+          expect(ids).to contain_exactly(*user_projects.map(&:id))
         end
       end
     end
@@ -796,7 +827,7 @@ RSpec.describe API::Projects do
         .to change { Project.count }.by(1)
       expect(response).to have_gitlab_http_status(:created)
 
-      project = Project.first
+      project = Project.last
 
       expect(project.name).to eq('Foo Project')
       expect(project.path).to eq('foo-project')
@@ -807,7 +838,7 @@ RSpec.describe API::Projects do
         .to change { Project.count }.by(1)
       expect(response).to have_gitlab_http_status(:created)
 
-      project = Project.first
+      project = Project.last
 
       expect(project.name).to eq('foo_project')
       expect(project.path).to eq('foo_project')
@@ -818,7 +849,7 @@ RSpec.describe API::Projects do
         .to change { Project.count }.by(1)
       expect(response).to have_gitlab_http_status(:created)
 
-      project = Project.first
+      project = Project.last
 
       expect(project.name).to eq('Foo Project')
       expect(project.path).to eq('path-project-Foo')
@@ -1214,7 +1245,7 @@ RSpec.describe API::Projects do
 
   describe 'GET /users/:user_id/starred_projects/' do
     before do
-      user3.update(starred_projects: [project, project2, project3])
+      user3.update!(starred_projects: [project, project2, project3])
     end
 
     it 'returns error when user not found' do
@@ -1586,6 +1617,7 @@ RSpec.describe API::Projects do
         expect(json_response['ci_default_git_depth']).to eq(project.ci_default_git_depth)
         expect(json_response['merge_method']).to eq(project.merge_method.to_s)
         expect(json_response['readme_url']).to eq(project.readme_url)
+        expect(json_response).to have_key 'packages_enabled'
       end
 
       it 'returns a group link with expiration date' do
@@ -1726,7 +1758,7 @@ RSpec.describe API::Projects do
       end
 
       it 'returns 404 when project is marked for deletion' do
-        project.update(pending_delete: true)
+        project.update!(pending_delete: true)
 
         get api("/projects/#{project.id}", user)
 
@@ -1966,7 +1998,8 @@ RSpec.describe API::Projects do
     context 'when authenticated' do
       context 'valid request' do
         it_behaves_like 'project users response' do
-          let(:current_user) { user }
+          let(:project) { project4 }
+          let(:current_user) { user4 }
         end
       end
 
@@ -1992,8 +2025,8 @@ RSpec.describe API::Projects do
         get api("/projects/#{project.id}/users?skip_users=#{user.id}", user)
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response.size).to eq(1)
-        expect(json_response[0]['id']).to eq(other_user.id)
+        expect(json_response.size).to eq(2)
+        expect(json_response.map { |m| m['id'] }).not_to include(user.id)
       end
     end
   end
@@ -2241,7 +2274,7 @@ RSpec.describe API::Projects do
     end
 
     it "returns a 400 error when sharing is disabled" do
-      project.namespace.update(share_with_group_lock: true)
+      project.namespace.update!(share_with_group_lock: true)
       post api("/projects/#{project.id}/share", user), params: { group_id: group.id, group_access: Gitlab::Access::DEVELOPER }
       expect(response).to have_gitlab_http_status(:bad_request)
     end
@@ -2339,6 +2372,20 @@ RSpec.describe API::Projects do
       expect(project_member).to be_persisted
     end
 
+    describe 'updating packages_enabled attribute' do
+      it 'is enabled by default' do
+        expect(project.packages_enabled).to be true
+      end
+
+      it 'disables project packages feature' do
+        put(api("/projects/#{project.id}", user), params: { packages_enabled: false })
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(project.reload.packages_enabled).to be false
+        expect(json_response['packages_enabled']).to eq(false)
+      end
+    end
+
     it 'returns 400 when nothing sent' do
       project_param = {}
 
@@ -2384,7 +2431,7 @@ RSpec.describe API::Projects do
       end
 
       it 'updates visibility_level from public to private' do
-        project3.update({ visibility_level: Gitlab::VisibilityLevel::PUBLIC })
+        project3.update!({ visibility_level: Gitlab::VisibilityLevel::PUBLIC })
         project_param = { visibility: 'private' }
 
         put api("/projects/#{project3.id}", user), params: project_param
@@ -2679,6 +2726,26 @@ RSpec.describe API::Projects do
         end
       end
     end
+
+    context 'when updating service desk' do
+      subject { put(api("/projects/#{project.id}", user), params: { service_desk_enabled: true }) }
+
+      before do
+        project.update!(service_desk_enabled: false)
+
+        allow(::Gitlab::IncomingEmail).to receive(:enabled?).and_return(true)
+      end
+
+      it 'returns 200' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+
+      it 'enables the service_desk' do
+        expect { subject }.to change { project.reload.service_desk_enabled }.to(true)
+      end
+    end
   end
 
   describe 'POST /projects/:id/archive' do
@@ -2824,8 +2891,8 @@ RSpec.describe API::Projects do
     let(:private_user) { create(:user, private_profile: true) }
 
     before do
-      user.update(starred_projects: [public_project])
-      private_user.update(starred_projects: [public_project])
+      user.update!(starred_projects: [public_project])
+      private_user.update!(starred_projects: [public_project])
     end
 
     it 'returns not_found(404) for not existing project' do

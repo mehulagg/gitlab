@@ -17,6 +17,14 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
   end
 
+  def expect_breadcrumb(text)
+    breadcrumbs = page.all(:css, '.breadcrumbs-list>li')
+    expect(breadcrumbs.length).to eq(3)
+    expect(breadcrumbs[0].text).to eq('Admin Area')
+    expect(breadcrumbs[1].text).to eq('Geo Nodes')
+    expect(breadcrumbs[2].text).to eq(text)
+  end
+
   before do
     allow(Gitlab::Geo).to receive(:license_allows?).and_return(true)
     sign_in(create(:admin))
@@ -87,7 +95,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     secondary_only_fields = %w(node-selective-synchronization-field node-repository-capacity-field node-file-capacity-field node-object-storage-field)
 
     it 'when primary renders only primary fields' do
-      geo_node.update(primary: true)
+      geo_node.update!(primary: true)
       visit edit_admin_geo_node_path(geo_node)
 
       expect_fields(primary_only_fields)
@@ -95,7 +103,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'when secondary renders only secondary fields' do
-      geo_node.update(primary: false)
+      geo_node.update!(primary: false)
       visit edit_admin_geo_node_path(geo_node)
 
       expect_no_fields(primary_only_fields)
@@ -103,7 +111,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
   end
 
-  describe 'create a new Geo Nodes' do
+  describe 'create a new Geo Node' do
     let(:new_ssh_key) { attributes_for(:key)[:key] }
 
     before do
@@ -122,14 +130,20 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
         expect(page).to have_content(geo_node.url)
       end
     end
+
+    it 'includes Geo Nodes in breadcrumbs' do
+      expect_breadcrumb('Add New Node')
+    end
   end
 
   describe 'update an existing Geo Node' do
-    it 'updates an existing Geo Node' do
-      geo_node.update(primary: true)
+    before do
+      geo_node.update!(primary: true)
 
       visit edit_admin_geo_node_path(geo_node)
+    end
 
+    it 'updates an existing Geo Node' do
       fill_in 'node-url-field', with: 'http://newsite.com'
       fill_in 'node-internal-url-field', with: 'http://internal-url.com'
       click_button 'Save changes'
@@ -148,6 +162,10 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
         end
       end
     end
+
+    it 'includes Geo Nodes in breadcrumbs' do
+      expect_breadcrumb('Edit Geo Node')
+    end
   end
 
   describe 'remove an existing Geo Node' do
@@ -157,7 +175,7 @@ RSpec.describe 'admin Geo Nodes', :js, :geo do
     end
 
     it 'removes an existing Geo Node' do
-      page.within(find('.geo-node-actions', match: :first)) do
+      page.within(find('[data-testid="nodeActions"]', match: :first)) do
         page.click_button('Remove')
       end
       page.within('.modal') do

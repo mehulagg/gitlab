@@ -87,7 +87,7 @@ module Gitlab
         options = options.merge({ algorithm: :concurrently })
 
         if index_exists?(table_name, column_name, options)
-          Rails.logger.warn "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}" # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.warn "Index not created because it already exists (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
@@ -113,7 +113,7 @@ module Gitlab
         options = options.merge({ algorithm: :concurrently })
 
         unless index_exists?(table_name, column_name, options)
-          Rails.logger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}" # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, column_name: #{column_name}"
           return
         end
 
@@ -136,10 +136,14 @@ module Gitlab
             'in the body of your migration class'
         end
 
+        index_name = index_name[:name] if index_name.is_a?(Hash)
+
+        raise 'remove_concurrent_index_by_name must get an index name as the second argument' if index_name.blank?
+
         options = options.merge({ algorithm: :concurrently })
 
         unless index_exists_by_name?(table_name, index_name)
-          Rails.logger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, index_name: #{index_name}" # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.warn "Index not removed because it does not exist (this may be due to an aborted migration or similar): table_name: #{table_name}, index_name: #{index_name}"
           return
         end
 
@@ -159,7 +163,6 @@ module Gitlab
       #             defaults to "CASCADE".
       # name - The name of the foreign key.
       #
-      # rubocop:disable Gitlab/RailsLogger
       def add_concurrent_foreign_key(source, target, column:, on_delete: :cascade, name: nil, validate: true)
         # Transactions would result in ALTER TABLE locks being held for the
         # duration of the transaction, defeating the purpose of this method.
@@ -173,13 +176,13 @@ module Gitlab
           name: name.presence || concurrent_foreign_key_name(source, column)
         }
 
-        if foreign_key_exists?(source, target, options)
+        if foreign_key_exists?(source, target, **options)
           warning_message = "Foreign key not created because it exists already " \
             "(this may be due to an aborted migration or similar): " \
             "source: #{source}, target: #{target}, column: #{options[:column]}, "\
             "name: #{options[:name]}, on_delete: #{options[:on_delete]}"
 
-          Rails.logger.warn warning_message
+          Gitlab::AppLogger.warn warning_message
         else
           # Using NOT VALID allows us to create a key without immediately
           # validating it. This means we keep the ALTER TABLE lock only for a
@@ -213,7 +216,6 @@ module Gitlab
           end
         end
       end
-      # rubocop:enable Gitlab/RailsLogger
 
       def validate_foreign_key(source, column, name: nil)
         fk_name = name || concurrent_foreign_key_name(source, column)
@@ -328,13 +330,13 @@ module Gitlab
       # * +timing_configuration+ - [[ActiveSupport::Duration, ActiveSupport::Duration], ...] lock timeout for the block, sleep time before the next iteration, defaults to `Gitlab::Database::WithLockRetries::DEFAULT_TIMING_CONFIGURATION`
       # * +logger+ - [Gitlab::JsonLogger]
       # * +env+ - [Hash] custom environment hash, see the example with `DISABLE_LOCK_RETRIES`
-      def with_lock_retries(**args, &block)
+      def with_lock_retries(*args, **kwargs, &block)
         merged_args = {
           klass: self.class,
           logger: Gitlab::BackgroundMigration::Logger
-        }.merge(args)
+        }.merge(kwargs)
 
-        Gitlab::Database::WithLockRetries.new(merged_args).run(&block)
+        Gitlab::Database::WithLockRetries.new(**merged_args).run(&block)
       end
 
       def true_value
@@ -536,10 +538,10 @@ module Gitlab
       # table - The table containing the column.
       # column - The name of the column to change.
       # new_type - The new column type.
-      def change_column_type_concurrently(table, column, new_type, type_cast_function: nil)
+      def change_column_type_concurrently(table, column, new_type, type_cast_function: nil, batch_column_name: :id)
         temp_column = "#{column}_for_type_change"
 
-        rename_column_concurrently(table, column, temp_column, type: new_type, type_cast_function: type_cast_function)
+        rename_column_concurrently(table, column, temp_column, type: new_type, type_cast_function: type_cast_function, batch_column_name: batch_column_name)
       end
 
       # Performs cleanup of a concurrent type change.
@@ -811,7 +813,7 @@ module Gitlab
         BEFORE INSERT OR UPDATE
         ON #{table}
         FOR EACH ROW
-        EXECUTE PROCEDURE #{trigger}()
+        EXECUTE FUNCTION #{trigger}()
         EOF
       end
 
@@ -880,7 +882,7 @@ module Gitlab
             # column.
             opclasses[new] = opclasses.delete(old) if opclasses[old]
 
-            options[:opclasses] = opclasses
+            options[:opclass] = opclasses
           end
 
           add_concurrent_index(table, new_columns, options)
@@ -992,10 +994,10 @@ into similar problems in the future (e.g. when new tables are created).
       def postgres_exists_by_name?(table, name)
         index_sql = <<~SQL
           SELECT COUNT(*)
-          FROM pg_index
-          JOIN pg_class i ON (indexrelid=i.oid)
-          JOIN pg_class t ON (indrelid=t.oid)
-          WHERE i.relname = '#{name}' AND t.relname = '#{table}'
+          FROM pg_catalog.pg_indexes
+          WHERE schemaname = #{connection.quote(current_schema)}
+            AND tablename = #{connection.quote(table)}
+            AND indexname = #{connection.quote(name)}
         SQL
 
         connection.select_value(index_sql).to_i > 0
@@ -1051,14 +1053,18 @@ into similar problems in the future (e.g. when new tables are created).
         # the table name in addition to using the constraint_name
         check_sql = <<~SQL
           SELECT COUNT(*)
-          FROM pg_constraint
-          JOIN pg_class ON pg_constraint.conrelid = pg_class.oid
-          WHERE pg_constraint.contype = 'c'
-          AND pg_constraint.conname = '#{constraint_name}'
-          AND pg_class.relname = '#{table}'
+          FROM pg_catalog.pg_constraint con
+            INNER JOIN pg_catalog.pg_class rel
+              ON rel.oid = con.conrelid
+            INNER JOIN pg_catalog.pg_namespace nsp
+              ON nsp.oid = con.connamespace
+          WHERE con.contype = 'c'
+          AND con.conname = #{connection.quote(constraint_name)}
+          AND nsp.nspname = #{connection.quote(current_schema)}
+          AND rel.relname = #{connection.quote(table)}
         SQL
 
-        connection.select_value(check_sql).positive?
+        connection.select_value(check_sql) > 0
       end
 
       # Adds a check constraint to a table
@@ -1081,7 +1087,6 @@ into similar problems in the future (e.g. when new tables are created).
       #                   Should be unique per table (not per column)
       # validate - Whether to validate the constraint in this call
       #
-      # rubocop:disable Gitlab/RailsLogger
       def add_check_constraint(table, check, constraint_name, validate: true)
         validate_check_constraint_name!(constraint_name)
 
@@ -1098,7 +1103,7 @@ into similar problems in the future (e.g. when new tables are created).
             table: #{table}, check: #{check}, constraint name: #{constraint_name}
           MESSAGE
 
-          Rails.logger.warn warning_message
+          Gitlab::AppLogger.warn warning_message
         else
           # Only add the constraint without validating it
           # Even though it is fast, ADD CONSTRAINT requires an EXCLUSIVE lock
@@ -1146,6 +1151,48 @@ into similar problems in the future (e.g. when new tables are created).
         end
       end
 
+      # Copies all check constraints for the old column to the new column.
+      #
+      # table - The table containing the columns.
+      # old - The old column.
+      # new - The new column.
+      # schema - The schema the table is defined for
+      #          If it is not provided, then the current_schema is used
+      def copy_check_constraints(table, old, new, schema: nil)
+        if transaction_open?
+          raise 'copy_check_constraints can not be run inside a transaction'
+        end
+
+        unless column_exists?(table, old)
+          raise "Column #{old} does not exist on #{table}"
+        end
+
+        unless column_exists?(table, new)
+          raise "Column #{new} does not exist on #{table}"
+        end
+
+        table_with_schema = schema.present? ? "#{schema}.#{table}" : table
+
+        check_constraints_for(table, old, schema: schema).each do |check_c|
+          constraint_name = begin
+            if check_c["constraint_def"] == "(#{old} IS NOT NULL)"
+              not_null_constraint_name(table_with_schema, new)
+            elsif check_c["constraint_def"].start_with? "(char_length(#{old}) <="
+              text_limit_name(table_with_schema, new)
+            else
+              check_constraint_name(table_with_schema, new, 'copy_check_constraint')
+            end
+          end
+
+          add_check_constraint(
+            table_with_schema,
+            check_c["constraint_def"].gsub(old.to_s, new.to_s),
+            constraint_name,
+            validate: true
+          )
+        end
+      end
+
       # Migration Helpers for adding limit to text columns
       def add_text_limit(table, column, limit, constraint_name: nil, validate: true)
         add_check_constraint(
@@ -1183,7 +1230,7 @@ into similar problems in the future (e.g. when new tables are created).
             column #{table}.#{column} is already defined as `NOT NULL`
           MESSAGE
 
-          Rails.logger.warn warning_message
+          Gitlab::AppLogger.warn warning_message
         end
       end
 
@@ -1208,12 +1255,100 @@ into similar problems in the future (e.g. when new tables are created).
         )
       end
 
+      def create_extension(extension)
+        execute('CREATE EXTENSION IF NOT EXISTS %s' % extension)
+      rescue ActiveRecord::StatementInvalid => e
+        dbname = Database.database_name
+        user = Database.username
+
+        warn(<<~MSG) if e.to_s =~ /permission denied/
+          GitLab requires the PostgreSQL extension '#{extension}' installed in database '#{dbname}', but
+          the database user is not allowed to install the extension.
+
+          You can either install the extension manually using a database superuser:
+
+            CREATE EXTENSION IF NOT EXISTS #{extension}
+
+          Or, you can solve this by logging in to the GitLab
+          database (#{dbname}) using a superuser and running:
+
+              ALTER #{user} WITH SUPERUSER
+
+          This query will grant the user superuser permissions, ensuring any database extensions
+          can be installed through migrations.
+
+          For more information, refer to https://docs.gitlab.com/ee/install/postgresql_extensions.html.
+        MSG
+
+        raise
+      end
+
+      def drop_extension(extension)
+        execute('DROP EXTENSION IF EXISTS %s' % extension)
+      rescue ActiveRecord::StatementInvalid => e
+        dbname = Database.database_name
+        user = Database.username
+
+        warn(<<~MSG) if e.to_s =~ /permission denied/
+          This migration attempts to drop the PostgreSQL extension '#{extension}'
+          installed in database '#{dbname}', but the database user is not allowed
+          to drop the extension.
+
+          You can either drop the extension manually using a database superuser:
+
+            DROP EXTENSION IF EXISTS #{extension}
+
+          Or, you can solve this by logging in to the GitLab
+          database (#{dbname}) using a superuser and running:
+
+              ALTER #{user} WITH SUPERUSER
+
+          This query will grant the user superuser permissions, ensuring any database extensions
+          can be dropped through migrations.
+
+          For more information, refer to https://docs.gitlab.com/ee/install/postgresql_extensions.html.
+        MSG
+
+        raise
+      end
+
       private
 
       def validate_check_constraint_name!(constraint_name)
         if constraint_name.to_s.length > MAX_IDENTIFIER_NAME_LENGTH
           raise "The maximum allowed constraint name is #{MAX_IDENTIFIER_NAME_LENGTH} characters"
         end
+      end
+
+      # Returns an ActiveRecord::Result containing the check constraints
+      # defined for the given column.
+      #
+      # If the schema is not provided, then the current_schema is used
+      def check_constraints_for(table, column, schema: nil)
+        check_sql = <<~SQL
+          SELECT
+            ccu.table_schema as schema_name,
+            ccu.table_name as table_name,
+            ccu.column_name as column_name,
+            con.conname as constraint_name,
+            con.consrc as constraint_def
+          FROM pg_catalog.pg_constraint con
+            INNER JOIN pg_catalog.pg_class rel
+              ON rel.oid = con.conrelid
+            INNER JOIN pg_catalog.pg_namespace nsp
+              ON nsp.oid = con.connamespace
+            INNER JOIN information_schema.constraint_column_usage ccu
+              ON con.conname = ccu.constraint_name
+                     AND nsp.nspname = ccu.constraint_schema
+                     AND rel.relname = ccu.table_name
+          WHERE  nsp.nspname = #{connection.quote(schema.presence || current_schema)}
+            AND rel.relname = #{connection.quote(table)}
+            AND ccu.column_name = #{connection.quote(column)}
+            AND con.contype = 'c'
+          ORDER BY constraint_name
+        SQL
+
+        connection.exec_query(check_sql)
       end
 
       def statement_timeout_disabled?
@@ -1226,8 +1361,9 @@ into similar problems in the future (e.g. when new tables are created).
         check_sql = <<~SQL
           SELECT c.is_nullable
           FROM information_schema.columns c
-          WHERE c.table_name = '#{table}'
-          AND c.column_name = '#{column}'
+          WHERE c.table_schema = #{connection.quote(current_schema)}
+            AND c.table_name = #{connection.quote(table)}
+            AND c.column_name = #{connection.quote(column)}
         SQL
 
         connection.select_value(check_sql) == 'YES'
@@ -1294,6 +1430,7 @@ into similar problems in the future (e.g. when new tables are created).
 
         copy_indexes(table, old, new)
         copy_foreign_keys(table, old, new)
+        copy_check_constraints(table, old, new)
       end
 
       def validate_timestamp_column_name!(column_name)

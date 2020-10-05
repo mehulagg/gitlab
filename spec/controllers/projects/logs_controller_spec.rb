@@ -22,8 +22,8 @@ RSpec.describe Projects::LogsController do
   describe 'GET #index' do
     let(:empty_project) { create(:project) }
 
-    it 'returns 404 with developer access' do
-      project.add_developer(user)
+    it 'returns 404 with reporter access' do
+      project.add_reporter(user)
 
       get :index, params: environment_params
 
@@ -31,7 +31,7 @@ RSpec.describe Projects::LogsController do
     end
 
     it 'renders empty logs page if no environment exists' do
-      empty_project.add_maintainer(user)
+      empty_project.add_developer(user)
 
       get :index, params: { namespace_id: empty_project.namespace, project_id: empty_project }
 
@@ -40,7 +40,7 @@ RSpec.describe Projects::LogsController do
     end
 
     it 'renders index template' do
-      project.add_maintainer(user)
+      project.add_developer(user)
 
       get :index, params: environment_params
 
@@ -59,6 +59,7 @@ RSpec.describe Projects::LogsController do
         container_name: container
       }
     end
+
     let(:service_result_json) { Gitlab::Json.parse(service_result.to_json) }
 
     let_it_be(:cluster) { create(:cluster, :provided_by_gcp, environment_scope: '*', projects: [project]) }
@@ -69,12 +70,25 @@ RSpec.describe Projects::LogsController do
       end
     end
 
-    it 'returns 404 with developer access' do
-      project.add_developer(user)
+    it 'returns 404 with reporter access' do
+      project.add_reporter(user)
 
       get endpoint, params: environment_params(pod_name: pod_name, format: :json)
 
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+
+    context 'with developer access' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'returns the service result' do
+        get endpoint, params: environment_params(pod_name: pod_name, format: :json)
+
+        expect(response).to have_gitlab_http_status(:success)
+        expect(json_response).to eq(service_result_json)
+      end
     end
 
     context 'with maintainer access' do
@@ -102,6 +116,34 @@ RSpec.describe Projects::LogsController do
 
         expect(response).to have_gitlab_http_status(:success)
         expect(response.headers['Poll-Interval']).to eq('3000')
+      end
+
+      context 'with gitlab managed apps logs' do
+        it 'uses cluster finder services to select cluster', :aggregate_failures do
+          cluster_list = [cluster]
+          service_params = { params: ActionController::Parameters.new(pod_name: pod_name).permit! }
+          request_params = {
+            namespace_id: project.namespace,
+            project_id: project,
+            cluster_id: cluster.id,
+            pod_name: pod_name,
+            format: :json
+          }
+
+          expect_next_instance_of(ClusterAncestorsFinder, project, user) do |finder|
+            expect(finder).to receive(:execute).and_return(cluster_list)
+            expect(cluster_list).to receive(:find).and_call_original
+          end
+
+          expect_next_instance_of(service, cluster, Gitlab::Kubernetes::Helm::NAMESPACE, service_params) do |instance|
+            expect(instance).to receive(:execute).and_return(service_result)
+          end
+
+          get endpoint, params: request_params
+
+          expect(response).to have_gitlab_http_status(:success)
+          expect(json_response).to eq(service_result_json)
+        end
       end
 
       context 'when service is processing' do

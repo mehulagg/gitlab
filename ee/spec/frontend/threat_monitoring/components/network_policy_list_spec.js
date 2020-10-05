@@ -1,18 +1,22 @@
 import { mount } from '@vue/test-utils';
+import { GlTable } from '@gitlab/ui';
 import createStore from 'ee/threat_monitoring/store';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
-import { GlTable } from '@gitlab/ui';
+import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
+import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
+import { useFakeDate } from 'helpers/fake_date';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-
 import { mockPoliciesResponse } from '../mock_data';
 
 const mockData = mockPoliciesResponse.map(policy => convertObjectPropsToCamelCase(policy));
 
 describe('NetworkPolicyList component', () => {
+  useFakeDate();
+
   let store;
   let wrapper;
 
-  const factory = ({ propsData, state, data } = {}) => {
+  const factory = ({ propsData, state, data, provide } = {}) => {
     store = createStore();
     Object.assign(store.state.networkPolicies, {
       isLoadingPolicies: false,
@@ -25,10 +29,12 @@ describe('NetworkPolicyList component', () => {
     wrapper = mount(NetworkPolicyList, {
       propsData: {
         documentationPath: 'documentation_path',
+        newPolicyPath: '/policies/new',
         ...propsData,
       },
       data,
       store,
+      provide,
     });
   };
 
@@ -55,8 +61,79 @@ describe('NetworkPolicyList component', () => {
     expect(findEnvironmentsPicker().exists()).toBe(true);
   });
 
+  it('renders the new policy button', () => {
+    const button = wrapper.find('[data-testid="new-policy"]');
+    expect(button.exists()).toBe(true);
+  });
+
+  it('does not render the new policy drawer', () => {
+    expect(wrapper.find(PolicyDrawer).exists()).toBe(false);
+  });
+
+  it('fetches policies', () => {
+    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', -1);
+  });
+
+  it('fetches policies on environment change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
+
+    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', 2);
+  });
+
+  it('does not render edit button', () => {
+    expect(wrapper.find('[data-testid="edit-button"]').exists()).toBe(false);
+  });
+
+  describe('given selected policy is a cilium policy', () => {
+    const manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: policy
+spec:
+  endpointSelector: {}`;
+
+    beforeEach(() => {
+      factory({
+        data: () => ({ selectedPolicyName: 'policy' }),
+        state: {
+          policies: [
+            {
+              name: 'policy',
+              creationTimestamp: new Date(),
+              manifest,
+            },
+          ],
+        },
+      });
+    });
+
+    it('renders the new policy drawer', () => {
+      expect(wrapper.find(PolicyDrawer).exists()).toBe(true);
+    });
+
+    it('renders edit button', () => {
+      const button = wrapper.find('[data-testid="edit-button"]');
+      expect(button.exists()).toBe(true);
+      expect(button.attributes().href).toBe('/policies/policy/edit?environment_id=-1');
+    });
+  });
+
   it('renders policies table', () => {
     expect(findPoliciesTable().element).toMatchSnapshot();
+  });
+
+  describe('with allEnvironments enabled', () => {
+    beforeEach(() => {
+      wrapper.vm.$store.state.threatMonitoring.allEnvironments = true;
+    });
+
+    it('renders policies table', () => {
+      const namespaceHeader = findPoliciesTable()
+        .findAll('[role="columnheader"]')
+        .at(1);
+      expect(namespaceHeader.text()).toBe('Namespace');
+    });
   });
 
   it('renders closed editor drawer', () => {
@@ -145,6 +222,43 @@ describe('NetworkPolicyList component', () => {
         expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/updatePolicy', {
           environmentId: -1,
           policy: mockData[0],
+        });
+      });
+
+      describe('given there is an updatePolicy error', () => {
+        beforeEach(() => {
+          jest.spyOn(store, 'dispatch').mockRejectedValue();
+        });
+
+        it('reverts isEnabled change', () => {
+          const initial = mockData[0].isEnabled;
+
+          findApplyButton().vm.$emit('click');
+
+          const policyToggle = findPolicyToggle();
+          expect(policyToggle.exists()).toBe(true);
+          expect(policyToggle.props('value')).toBe(initial);
+        });
+      });
+
+      describe('given theres is a predefined policy change', () => {
+        beforeEach(() => {
+          factory({
+            data: () => ({
+              selectedPolicyName: 'drop-outbound',
+              initialManifest: mockData[0].manifest,
+              initialEnforcementStatus: mockData[0].isEnabled,
+            }),
+          });
+        });
+
+        it('dispatches createPolicy action on apply button click', () => {
+          findApplyButton().vm.$emit('click');
+
+          expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
+            environmentId: -1,
+            policy: PREDEFINED_NETWORK_POLICIES[0],
+          });
         });
       });
     });

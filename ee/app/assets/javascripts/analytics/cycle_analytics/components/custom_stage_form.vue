@@ -7,7 +7,7 @@ import {
   GlFormSelect,
   GlLoadingIcon,
   GlDropdown,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlDropdownItem,
   GlSprintf,
 } from '@gitlab/ui';
@@ -77,7 +77,7 @@ export default {
     GlLoadingIcon,
     LabelsSelector,
     GlDropdown,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownItem,
     GlSprintf,
   },
@@ -255,10 +255,14 @@ export default {
     <gl-loading-icon class="mt-4" size="md" />
   </div>
   <form v-else class="custom-stage-form m-4 mt-0">
-    <div class="mb-1 d-flex flex-row justify-content-between">
+    <div class="gl-mb-1 gl-display-flex gl-justify-content-space-between gl-align-items-center">
       <h4>{{ formTitle }}</h4>
-      <gl-dropdown :text="__('Recover hidden stage')" class="js-recover-hidden-stage-dropdown">
-        <gl-dropdown-header>{{ __('Default stages') }}</gl-dropdown-header>
+      <gl-dropdown
+        :text="__('Recover hidden stage')"
+        class="js-recover-hidden-stage-dropdown"
+        right
+      >
+        <gl-dropdown-section-header>{{ __('Default stages') }}</gl-dropdown-section-header>
         <template v-if="hasHiddenStages">
           <gl-dropdown-item
             v-for="stage in hiddenStages"

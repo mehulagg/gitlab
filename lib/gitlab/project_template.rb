@@ -52,6 +52,7 @@ module Gitlab
         ProjectTemplate.new('gitbook', 'Pages/GitBook', _('Everything you need to create a GitLab Pages site using GitBook.'), 'https://gitlab.com/pages/gitbook', 'illustrations/logos/gitbook.svg'),
         ProjectTemplate.new('hexo', 'Pages/Hexo', _('Everything you need to create a GitLab Pages site using Hexo.'), 'https://gitlab.com/pages/hexo', 'illustrations/logos/hexo.svg'),
         ProjectTemplate.new('sse_middleman', 'Static Site Editor/Middleman', _('Middleman project with Static Site Editor support'), 'https://gitlab.com/gitlab-org/project-templates/static-site-editor-middleman'),
+        ProjectTemplate.new('gitpod_spring_petclinic', 'Gitpod/Spring Petclinic', _('A Gitpod configured Webapplication in Spring and Java'), 'https://gitlab.com/gitlab-org/project-templates/gitpod-spring-petclinic', 'illustrations/logos/gitpod.svg'),
         ProjectTemplate.new('nfhugo', 'Netlify/Hugo', _('A Hugo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features.'), 'https://gitlab.com/pages/nfhugo', 'illustrations/logos/netlify.svg'),
         ProjectTemplate.new('nfjekyll', 'Netlify/Jekyll', _('A Jekyll site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features.'), 'https://gitlab.com/pages/nfjekyll', 'illustrations/logos/netlify.svg'),
         ProjectTemplate.new('nfplainhtml', 'Netlify/Plain HTML', _('A plain HTML site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features.'), 'https://gitlab.com/pages/nfplain-html', 'illustrations/logos/netlify.svg'),
@@ -59,6 +60,7 @@ module Gitlab
         ProjectTemplate.new('nfhexo', 'Netlify/Hexo', _('A Hexo site that uses Netlify for CI/CD instead of GitLab, but still with all the other great GitLab features.'), 'https://gitlab.com/pages/nfhexo', 'illustrations/logos/netlify.svg'),
         ProjectTemplate.new('salesforcedx', 'SalesforceDX', _('A project boilerplate for Salesforce App development with Salesforce Developer tools.'), 'https://gitlab.com/gitlab-org/project-templates/salesforcedx'),
         ProjectTemplate.new('serverless_framework', 'Serverless Framework/JS', _('A basic page and serverless function that uses AWS Lambda, AWS API Gateway, and GitLab Pages'), 'https://gitlab.com/gitlab-org/project-templates/serverless-framework', 'illustrations/logos/serverless_framework.svg'),
+        ProjectTemplate.new('jsonnet', 'Jsonnet for Dynamic Child Pipelines', _('An example showing how to use Jsonnet with GitLab dynamic child pipelines'), 'https://gitlab.com/gitlab-org/project-templates/jsonnet'),
         ProjectTemplate.new('cluster_management', 'GitLab Cluster Management', _('An example project for managing Kubernetes clusters integrated with GitLab.'), 'https://gitlab.com/gitlab-org/project-templates/cluster-management')
       ].freeze
     end

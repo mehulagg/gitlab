@@ -1,11 +1,12 @@
 /* eslint-disable no-new, class-methods-use-this */
 
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
 import createEventHub from '~/helpers/event_hub_factory';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import BlobForkSuggestion from './blob/blob_fork_suggestion';
 import initChangesDropdown from './init_changes_dropdown';
 import {
@@ -21,6 +22,7 @@ import { localTimeAgo } from './lib/utils/datetime_utility';
 import syntaxHighlight from './syntax_highlight';
 import Notes from './notes';
 import { polyfillSticky } from './lib/utils/sticky';
+import initAddContextCommitsTriggers from './add_context_commits_modal';
 import { __ } from './locale';
 
 // MergeRequestTabs
@@ -166,8 +168,6 @@ export default class MergeRequestTabs {
         if (this.setUrl) {
           this.setCurrentAction(action);
         }
-
-        this.eventHub.$emit('MergeRequestTabChange', this.getCurrentAction());
       }
     }
   }
@@ -251,6 +251,8 @@ export default class MergeRequestTabs {
         }
       }
     }
+
+    this.eventHub.$emit('MergeRequestTabChange', action);
   }
 
   scrollToElement(container) {
@@ -340,6 +342,7 @@ export default class MergeRequestTabs {
         this.scrollToElement('#commits');
 
         this.toggleLoading(false);
+        initAddContextCommitsTriggers();
       })
       .catch(() => {
         this.toggleLoading(false);
@@ -358,7 +361,11 @@ export default class MergeRequestTabs {
         emptyStateSvgPath: pipelineTableViewEl.dataset.emptyStateSvgPath,
         errorStateSvgPath: pipelineTableViewEl.dataset.errorStateSvgPath,
         autoDevopsHelpPath: pipelineTableViewEl.dataset.helpAutoDevopsPath,
-        canRunPipeline: true,
+        canCreatePipelineInTargetProject: Boolean(
+          mrWidgetData?.can_create_pipeline_in_target_project,
+        ),
+        sourceProjectFullPath: mrWidgetData?.source_project_full_path || '',
+        targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
         projectId: pipelineTableViewEl.dataset.projectId,
         mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
       },
@@ -388,10 +395,6 @@ export default class MergeRequestTabs {
         $container.html(data.html);
 
         initChangesDropdown(this.stickyTop);
-
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
 
         localTimeAgo($('.js-timeago', 'div#diffs'));
         syntaxHighlight($('#diffs .js-syntax-highlight'));

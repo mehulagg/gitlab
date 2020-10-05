@@ -81,6 +81,8 @@ RSpec.describe Event do
   describe 'validations' do
     describe 'action' do
       context 'for a design' do
+        let_it_be(:author) { create(:user) }
+
         where(:action, :valid) do
           valid = described_class::DESIGN_ACTIONS.map(&:to_s).to_set
 
@@ -90,7 +92,7 @@ RSpec.describe Event do
         end
 
         with_them do
-          let(:event) { build(:design_event, action: action) }
+          let(:event) { build(:design_event, author: author, action: action) }
 
           specify { expect(event.valid?).to eq(valid) }
         end
@@ -110,6 +112,45 @@ RSpec.describe Event do
         expect(found).to include(event)
         expect(found).not_to include(false_positive)
       end
+    end
+
+    describe '.for_fingerprint' do
+      let_it_be(:with_fingerprint) { create(:event, fingerprint: 'aaa') }
+
+      before_all do
+        create(:event)
+        create(:event, fingerprint: 'bbb')
+      end
+
+      it 'returns none if there is no fingerprint' do
+        expect(described_class.for_fingerprint(nil)).to be_empty
+        expect(described_class.for_fingerprint('')).to be_empty
+      end
+
+      it 'returns none if there is no match' do
+        expect(described_class.for_fingerprint('not-found')).to be_empty
+      end
+
+      it 'can find a given event' do
+        expect(described_class.for_fingerprint(with_fingerprint.fingerprint))
+          .to contain_exactly(with_fingerprint)
+      end
+    end
+  end
+
+  describe '#fingerprint' do
+    it 'is unique scoped to target' do
+      issue = create(:issue)
+      mr = create(:merge_request)
+
+      expect { create_list(:event, 2, target: issue, fingerprint: '1234') }
+        .to raise_error(include('fingerprint'))
+
+      expect do
+        create(:event, target: mr, fingerprint: 'abcd')
+        create(:event, target: issue, fingerprint: 'abcd')
+        create(:event, target: issue, fingerprint: 'efgh')
+      end.not_to raise_error
     end
   end
 
@@ -643,15 +684,6 @@ RSpec.describe Event do
       end
     end
 
-    describe '.not_design' do
-      it 'does not contain the design events' do
-        non_design_events = events.reject(&:design?)
-
-        expect(events).not_to match_array(non_design_events)
-        expect(described_class.not_design).to match_array(non_design_events)
-      end
-    end
-
     describe '.for_wiki_page' do
       it 'only contains the wiki page events' do
         wiki_events = events.select(&:wiki_page?)
@@ -692,9 +724,17 @@ RSpec.describe Event do
         note_on_commit: true
       }
       valid_target_factories.map do |kind, needs_project|
-        extra_data = needs_project ? { project: project } : {}
+        extra_data = if kind == :merge_request
+                       { source_project: project }
+                     elsif needs_project
+                       { project: project }
+                     else
+                       {}
+                     end
+
         target = kind == :project ? nil : build(kind, **extra_data)
-        [kind, build(:event, :created, project: project, target: target)]
+
+        [kind, build(:event, :created, author: project.owner, project: project, target: target)]
       end.to_h
     end
 
@@ -877,6 +917,56 @@ RSpec.describe Event do
       expect(updated).to eq('revised')
       expect(destroyed).to eq('deleted')
       expect(archived).to eq('archived')
+    end
+
+    it 'handles correct push_action' do
+      project = create(:project)
+      user = create(:user)
+      project.add_developer(user)
+      push_event = create_push_event(project, user)
+
+      expect(push_event.push_action?).to be true
+      expect(push_event.action_name).to eq('pushed to')
+    end
+
+    context 'handles correct base actions' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:trait, :action_name) do
+        :created   | 'created'
+        :updated   | 'opened'
+        :closed    | 'closed'
+        :reopened  | 'opened'
+        :commented | 'commented on'
+        :merged    | 'accepted'
+        :joined    | 'joined'
+        :left      | 'left'
+        :destroyed | 'destroyed'
+        :expired   | 'removed due to membership expiration from'
+        :approved  | 'approved'
+      end
+
+      with_them do
+        it 'with correct name and method' do
+          event = build(:event, trait)
+
+          expect(event.action_name).to eq(action_name)
+        end
+      end
+    end
+
+    context 'for created_project_action?' do
+      it 'returns created for created event' do
+        action = build(:project_created_event)
+
+        expect(action.action_name).to eq('created')
+      end
+
+      it 'returns imported for imported event' do
+        action = build(:project_imported_event)
+
+        expect(action.action_name).to eq('imported')
+      end
     end
   end
 

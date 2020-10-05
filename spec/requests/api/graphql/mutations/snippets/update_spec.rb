@@ -12,20 +12,23 @@ RSpec.describe 'Updating a Snippet' do
   let(:updated_content) { 'Updated content' }
   let(:updated_description) { 'Updated description' }
   let(:updated_title) { 'Updated_title' }
-  let(:updated_file_name) { 'Updated file_name' }
   let(:current_user) { snippet.author }
-
+  let(:updated_file) { 'CHANGELOG' }
+  let(:deleted_file) { 'README' }
   let(:snippet_gid) { GitlabSchema.id_from_object(snippet).to_s }
   let(:mutation_vars) do
     {
       id: snippet_gid,
-      content: updated_content,
       description: updated_description,
       visibility_level: 'public',
-      file_name: updated_file_name,
-      title: updated_title
+      title: updated_title,
+      blob_actions: [
+        { action: :update, filePath: updated_file, content: updated_content },
+        { action: :delete, filePath: deleted_file }
+      ]
     }
   end
+
   let(:mutation) do
     graphql_mutation(:update_snippet, mutation_vars)
   end
@@ -49,21 +52,31 @@ RSpec.describe 'Updating a Snippet' do
     end
 
     context 'when the user has permission' do
-      it 'updates the Snippet' do
+      it 'updates the snippet record' do
         post_graphql_mutation(mutation, current_user: current_user)
 
         expect(snippet.reload.title).to eq(updated_title)
       end
 
-      it 'returns the updated Snippet' do
+      it 'updates the Snippet' do
+        blob_to_update = blob_at(updated_file)
+        blob_to_delete = blob_at(deleted_file)
+
+        expect(blob_to_update.data).not_to eq updated_content
+        expect(blob_to_delete).to be_present
+
         post_graphql_mutation(mutation, current_user: current_user)
 
-        expect(mutation_response['snippet']['blob']['richData']).to be_nil
-        expect(mutation_response['snippet']['blob']['plainData']).to match(updated_content)
-        expect(mutation_response['snippet']['title']).to eq(updated_title)
-        expect(mutation_response['snippet']['description']).to eq(updated_description)
-        expect(mutation_response['snippet']['fileName']).to eq(updated_file_name)
-        expect(mutation_response['snippet']['visibilityLevel']).to eq('public')
+        blob_to_update = blob_at(updated_file)
+        blob_to_delete = blob_at(deleted_file)
+
+        aggregate_failures do
+          expect(blob_to_update.data).to eq updated_content
+          expect(blob_to_delete).to be_nil
+          expect(mutation_response['snippet']['title']).to eq(updated_title)
+          expect(mutation_response['snippet']['description']).to eq(updated_description)
+          expect(mutation_response['snippet']['visibilityLevel']).to eq('public')
+        end
       end
 
       context 'when there are ActiveRecord validation errors' do
@@ -78,15 +91,23 @@ RSpec.describe 'Updating a Snippet' do
         end
 
         it 'returns the Snippet with its original values' do
+          blob_to_update = blob_at(updated_file)
+          blob_to_delete = blob_at(deleted_file)
+
           post_graphql_mutation(mutation, current_user: current_user)
 
-          expect(mutation_response['snippet']['blob']['richData']).to be_nil
-          expect(mutation_response['snippet']['blob']['plainData']).to match(original_content)
-          expect(mutation_response['snippet']['title']).to eq(original_title)
-          expect(mutation_response['snippet']['description']).to eq(original_description)
-          expect(mutation_response['snippet']['fileName']).to eq(original_file_name)
-          expect(mutation_response['snippet']['visibilityLevel']).to eq('private')
+          aggregate_failures do
+            expect(blob_at(updated_file).data).to eq blob_to_update.data
+            expect(blob_at(deleted_file).data).to eq blob_to_delete.data
+            expect(mutation_response['snippet']['title']).to eq(original_title)
+            expect(mutation_response['snippet']['description']).to eq(original_description)
+            expect(mutation_response['snippet']['visibilityLevel']).to eq('private')
+          end
         end
+      end
+
+      def blob_at(filename)
+        snippet.repository.blob_at('HEAD', filename)
       end
     end
   end
@@ -95,6 +116,7 @@ RSpec.describe 'Updating a Snippet' do
     let(:snippet) do
       create(:personal_snippet,
              :private,
+             :repository,
              file_name: original_file_name,
              title: original_title,
              content: original_content,
@@ -103,6 +125,7 @@ RSpec.describe 'Updating a Snippet' do
 
     it_behaves_like 'graphql update actions'
     it_behaves_like 'when the snippet is not found'
+    it_behaves_like 'snippet edit usage data counters'
   end
 
   describe 'ProjectSnippet' do
@@ -110,6 +133,7 @@ RSpec.describe 'Updating a Snippet' do
     let(:snippet) do
       create(:project_snippet,
              :private,
+             :repository,
              project: project,
              author: create(:user),
              file_name: original_file_name,
@@ -144,44 +168,10 @@ RSpec.describe 'Updating a Snippet' do
           expect(errors.first['message']).to eq(Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR)
         end
       end
+
+      it_behaves_like 'snippet edit usage data counters'
     end
 
     it_behaves_like 'when the snippet is not found'
-  end
-
-  context 'when using the files params' do
-    let!(:snippet) { create(:personal_snippet, :private, :repository) }
-    let(:updated_content) { 'updated_content' }
-    let(:updated_file) { 'CHANGELOG' }
-    let(:deleted_file) { 'README' }
-    let(:mutation_vars) do
-      {
-        id: snippet_gid,
-        files: [
-          { action: :update, filePath: updated_file, content: updated_content },
-          { action: :delete, filePath: deleted_file }
-        ]
-      }
-    end
-
-    it 'updates the Snippet' do
-      blob_to_update = blob_at(updated_file)
-      expect(blob_to_update.data).not_to eq updated_content
-
-      blob_to_delete = blob_at(deleted_file)
-      expect(blob_to_delete).to be_present
-
-      post_graphql_mutation(mutation, current_user: current_user)
-
-      blob_to_update = blob_at(updated_file)
-      expect(blob_to_update.data).to eq updated_content
-
-      blob_to_delete = blob_at(deleted_file)
-      expect(blob_to_delete).to be_nil
-    end
-
-    def blob_at(filename)
-      snippet.repository.blob_at('HEAD', filename)
-    end
   end
 end

@@ -1,6 +1,7 @@
 # Services API
 
->**Note:** This API requires an access token with Maintainer or Owner permissions
+NOTE: **Note:**
+This API requires an access token with Maintainer or Owner permissions
 
 ## List all active services
 
@@ -229,8 +230,8 @@ Parameters:
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
 | `token` | string | true | Buildkite project GitLab token |
-| `project_url` | string | true | `https://buildkite.com/example/project` |
-| `enable_ssl_verification` | boolean | false | Enable SSL verification |
+| `project_url` | string | true | Pipeline URL. For example, `https://buildkite.com/example/pipeline` |
+| `enable_ssl_verification` | boolean | false | DEPRECATED: This parameter has no effect since SSL verification will always be enabled |
 | `push_events` | boolean | false | Enable notifications for push events |
 
 ### Delete Buildkite service
@@ -496,12 +497,6 @@ GET /projects/:id/services/emails-on-push
 ## Confluence service
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/220934) in GitLab 13.2.
-> - It's deployed behind a feature flag, disabled by default.
-> - It's disabled on GitLab.com.
-> - It's able to be enabled or disabled per-project
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to
-    [enable it](#enable-or-disable-the-confluence-service-core-only). **(CORE ONLY)**
 
 Replaces the link to the internal wiki with a link to a Confluence Cloud Workspace.
 
@@ -533,31 +528,6 @@ Get Confluence service settings for a project.
 
 ```plaintext
 GET /projects/:id/services/confluence
-```
-
-### Enable or disable the Confluence service **(CORE ONLY)**
-
-The Confluence service is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it for your instance. The Confluence service can be enabled or disabled per-project
-
-To enable it:
-
-```ruby
-# Instance-wide
-Feature.enable(:confluence_integration)
-# or by project
-Feature.enable(:confluence_integration, Project.find(<project id>))
-```
-
-To disable it:
-
-```ruby
-# Instance-wide
-Feature.disable(:confluence_integration)
-# or by project
-Feature.disable(:confluence_integration, Project.find(<project id>))
 ```
 
 ## External Wiki
@@ -667,9 +637,9 @@ GET /projects/:id/services/github
 
 ## Hangouts Chat
 
-Google GSuite team collaboration tool.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20290) in GitLab 11.2.
 
->**Note:** This service was [introduced in v11.2](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20290)
+Google GSuite team collaboration tool.
 
 ### Create/Edit Hangouts Chat service
 
@@ -679,7 +649,8 @@ Set Hangouts Chat service for a project.
 PUT /projects/:id/services/hangouts-chat
 ```
 
->**Note:** Specific event parameters (for example, `push_events` flag) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
+NOTE: **Note:**
+Specific event parameters (for example, `push_events` flag) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
 
@@ -688,7 +659,7 @@ Parameters:
 | `webhook` | string | true | The Hangouts Chat webhook. For example, `https://chat.googleapis.com/v1/spaces...`. |
 | `notify_only_broken_pipelines` | boolean | false | Send notifications for broken pipelines |
 | `notify_only_default_branch` | boolean | false | DEPRECATED: This parameter has been replaced with `branches_to_be_notified` |
-| `branches_to_be_notified` | string | all | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
+| `branches_to_be_notified` | string | false | Branches to send notifications for. Valid options are "all", "default", "protected", and "default_and_protected" |
 | `push_events` | boolean | false | Enable notifications for push events |
 | `issues_events` | boolean | false | Enable notifications for issue events |
 | `confidential_issues_events` | boolean | false | Enable notifications for confidential issue events |
@@ -743,7 +714,7 @@ Parameters:
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events |
 | `tag_push_events` | boolean | false | Enable notifications for tag push events |
 | `note_events` | boolean | false | Enable notifications for note events |
-| `confidental_note_events` | boolean | false | Enable notifications for confidential note events |
+| `confidential_note_events` | boolean | false | Enable notifications for confidential note events |
 | `pipeline_events` | boolean | false | Enable notifications for pipeline events |
 
 ### Delete HipChat service
@@ -836,7 +807,7 @@ Parameters:
 | `username`      | string | yes  | The username of the user created to be used with GitLab/Jira. |
 | `password`      | string | yes  | The password of the user created to be used with GitLab/Jira. |
 | `active`        | boolean | no  | Activates or deactivates the service. Defaults to false (deactivated). |
-| `jira_issue_transition_id` | string | no | The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the **Transitions (id)** column. By default, this ID is set to `2`. |
+| `jira_issue_transition_id` | string | no | The ID of a transition that moves issues to a closed state. You can find this number under the Jira workflow administration (**Administration > Issues > Workflows**) by selecting **View** under **Operations** of the desired workflow of your project. The ID of each state can be found inside the parenthesis of each transition name under the transitions ID column. By default, this ID is set to `2`. |
 | `commit_events` | boolean | false | Enable notifications for commit events |
 | `merge_requests_events` | boolean | false | Enable notifications for merge request events |
 | `comment_on_event_enabled` | boolean | false | Enable comments inside Jira issues on each GitLab event (commit / merge request) |
@@ -1182,7 +1153,8 @@ Set Slack service for a project.
 PUT /projects/:id/services/slack
 ```
 
->**Note:** Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
+NOTE: **Note:**
+Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
 
@@ -1291,7 +1263,8 @@ Set Mattermost service for a project.
 PUT /projects/:id/services/mattermost
 ```
 
->**Note:** Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
+NOTE: **Note:**
+Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
 

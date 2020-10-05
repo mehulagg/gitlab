@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200207185149_schedule_fix_orphan_promoted_issues.rb')
+require_migration!
 
 RSpec.describe ScheduleFixOrphanPromotedIssues do
   let(:projects) { table(:projects) }

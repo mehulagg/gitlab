@@ -1,5 +1,0 @@
----
-title: Omit already-trialed namespaces from trial select options
-merge_request: 34770
-author:
-type: changed

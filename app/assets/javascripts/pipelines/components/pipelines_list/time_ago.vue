@@ -1,13 +1,13 @@
 <script>
-import iconTimerSvg from 'icons/_icon_timer.svg';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import '~/lib/utils/datetime_utility';
-import tooltip from '~/vue_shared/directives/tooltip';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
+  components: { GlIcon },
   mixins: [timeagoMixin],
   props: {
     finishedTime: {
@@ -18,11 +18,6 @@ export default {
       type: Number,
       required: true,
     },
-  },
-  data() {
-    return {
-      iconTimerSvg,
-    };
   },
   computed: {
     hasDuration() {
@@ -59,14 +54,15 @@ export default {
     <div class="table-mobile-header" role="rowheader">{{ s__('Pipeline|Duration') }}</div>
     <div class="table-mobile-content">
       <p v-if="hasDuration" class="duration">
-        <span v-html="iconTimerSvg"> </span> {{ durationFormatted }}
+        <gl-icon name="timer" class="gl-vertical-align-baseline!" aria-hidden="true" />
+        {{ durationFormatted }}
       </p>
 
       <p v-if="hasFinishedTime" class="finished-at d-none d-sm-none d-md-block">
-        <i class="fa fa-calendar" aria-hidden="true"> </i>
+        <gl-icon name="calendar" class="gl-vertical-align-baseline!" aria-hidden="true" />
 
         <time
-          v-tooltip
+          v-gl-tooltip
           :title="tooltipTitle(finishedTime)"
           data-placement="top"
           data-container="body"

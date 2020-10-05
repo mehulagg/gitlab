@@ -19,6 +19,7 @@ class IssuableBaseService < BaseService
 
   def filter_params(issuable)
     unless can_admin_issuable?(issuable)
+      params.delete(:milestone)
       params.delete(:milestone_id)
       params.delete(:labels)
       params.delete(:add_label_ids)
@@ -46,7 +47,7 @@ class IssuableBaseService < BaseService
       params[:assignee_ids] = params[:assignee_ids].first(1)
     end
 
-    assignee_ids = params[:assignee_ids].select { |assignee_id| assignee_can_read?(issuable, assignee_id) }
+    assignee_ids = params[:assignee_ids].select { |assignee_id| user_can_read?(issuable, assignee_id) }
 
     if params[:assignee_ids].map(&:to_s) == [IssuableFinder::Params::NONE]
       params[:assignee_ids] = []
@@ -57,15 +58,15 @@ class IssuableBaseService < BaseService
     end
   end
 
-  def assignee_can_read?(issuable, assignee_id)
-    new_assignee = User.find_by_id(assignee_id)
+  def user_can_read?(issuable, user_id)
+    user = User.find_by_id(user_id)
 
-    return false unless new_assignee
+    return false unless user
 
     ability_name = :"read_#{issuable.to_ability_name}"
     resource     = issuable.persisted? ? issuable : project
 
-    can?(new_assignee, ability_name, resource)
+    can?(user, ability_name, resource)
   end
 
   def filter_milestone
@@ -136,7 +137,7 @@ class IssuableBaseService < BaseService
     {}
   end
 
-  def create(issuable)
+  def create(issuable, skip_system_notes: false)
     handle_quick_actions(issuable)
     filter_params(issuable)
 
@@ -153,7 +154,7 @@ class IssuableBaseService < BaseService
     end
 
     if issuable_saved
-      Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, is_update: false)
+      create_system_notes(issuable, is_update: false) unless skip_system_notes
 
       after_create(issuable)
       execute_hooks(issuable)
@@ -184,10 +185,7 @@ class IssuableBaseService < BaseService
     handle_quick_actions(issuable)
     filter_params(issuable)
 
-    change_state(issuable)
-    change_subscription(issuable)
-    change_todo(issuable)
-    toggle_award(issuable)
+    change_additional_attributes(issuable)
     old_associations = associations_before_update(issuable)
 
     label_ids = process_label_ids(params, existing_label_ids: issuable.label_ids)
@@ -220,8 +218,9 @@ class IssuableBaseService < BaseService
       end
 
       if issuable_saved
-        Issuable::CommonSystemNotesService.new(project, current_user).execute(
-          issuable, old_labels: old_associations[:labels], old_milestone: old_associations[:milestone])
+        create_system_notes(
+          issuable, old_labels: old_associations[:labels], old_milestone: old_associations[:milestone]
+        )
 
         handle_changes(issuable, old_associations: old_associations)
 
@@ -255,7 +254,7 @@ class IssuableBaseService < BaseService
       before_update(issuable, skip_spam_check: true)
 
       if issuable.with_transaction_returning_status { issuable.save }
-        Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, old_labels: nil)
+        create_system_notes(issuable, old_labels: nil)
 
         handle_task_changes(issuable)
         invalidate_cache_counts(issuable, users: issuable.assignees.to_a)
@@ -304,12 +303,26 @@ class IssuableBaseService < BaseService
     issuable.title_changed? || issuable.description_changed?
   end
 
+  def change_additional_attributes(issuable)
+    change_state(issuable)
+    change_severity(issuable)
+    change_subscription(issuable)
+    change_todo(issuable)
+    toggle_award(issuable)
+  end
+
   def change_state(issuable)
     case params.delete(:state_event)
     when 'reopen'
       reopen_service.new(project, current_user, {}).execute(issuable)
     when 'close'
       close_service.new(project, current_user, {}).execute(issuable)
+    end
+  end
+
+  def change_severity(issuable)
+    if severity = params.delete(:severity)
+      ::IncidentManagement::Incidents::UpdateSeverityService.new(issuable, current_user, severity).execute
     end
   end
 
@@ -339,6 +352,10 @@ class IssuableBaseService < BaseService
     AwardEmojis::ToggleService.new(issuable, award, current_user).execute if award
   end
 
+  def create_system_notes(issuable, **options)
+    Issuable::CommonSystemNotesService.new(project, current_user).execute(issuable, **options)
+  end
+
   def associations_before_update(issuable)
     associations =
       {
@@ -349,12 +366,13 @@ class IssuableBaseService < BaseService
       }
     associations[:total_time_spent] = issuable.total_time_spent if issuable.respond_to?(:total_time_spent)
     associations[:description] = issuable.description
+    associations[:reviewers] = issuable.reviewers.to_a if issuable.allows_reviewers?
 
     associations
   end
 
-  def has_changes?(issuable, old_labels: [], old_assignees: [])
-    valid_attrs = [:title, :description, :assignee_ids, :milestone_id, :target_branch]
+  def has_changes?(issuable, old_labels: [], old_assignees: [], old_reviewers: [])
+    valid_attrs = [:title, :description, :assignee_ids, :reviewer_ids, :milestone_id, :target_branch]
 
     attrs_changed = valid_attrs.any? do |attr|
       issuable.previous_changes.include?(attr.to_s)
@@ -364,7 +382,9 @@ class IssuableBaseService < BaseService
 
     assignees_changed = issuable.assignees != old_assignees
 
-    attrs_changed || labels_changed || assignees_changed
+    reviewers_changed = issuable.reviewers != old_reviewers if issuable.allows_reviewers?
+
+    attrs_changed || labels_changed || assignees_changed || reviewers_changed
   end
 
   def invalidate_cache_counts(issuable, users: [])

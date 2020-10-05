@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
 import mountComponent from 'helpers/vue_mount_component_helper';
+import { withGonExperiment } from 'helpers/experimentation_helper';
 import axios from '~/lib/utils/axios_utils';
 import mrWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import eventHub from '~/vue_merge_request_widget/event_hub';
@@ -61,6 +62,9 @@ describe('mrWidgetOptions', () => {
 
     return axios.waitForAll();
   };
+
+  const findSuggestPipeline = () => vm.$el.querySelector('[data-testid="mr-suggest-pipeline"]');
+  const findSuggestPipelineButton = () => findSuggestPipeline().querySelector('button');
 
   describe('default', () => {
     beforeEach(() => {
@@ -527,7 +531,7 @@ describe('mrWidgetOptions', () => {
         vm.mr.state = 'readyToMerge';
 
         vm.$nextTick(() => {
-          const tooltip = vm.$el.querySelector('.fa-question-circle');
+          const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
           expect(vm.$el.textContent).toContain('Deletes source branch');
           expect(tooltip.getAttribute('data-original-title')).toBe(
@@ -606,6 +610,12 @@ describe('mrWidgetOptions', () => {
             .querySelector('.js-mr-wigdet-deployment-dropdown')
             .querySelectorAll('.js-filtered-dropdown-result').length,
         ).toEqual(changes.length);
+      });
+    });
+
+    describe('code quality widget', () => {
+      it('renders the component', () => {
+        expect(vm.$el.querySelector('.js-codequality-widget')).toExist();
       });
     });
 
@@ -798,42 +808,66 @@ describe('mrWidgetOptions', () => {
       });
     });
 
-    it('should not suggest pipelines', () => {
-      vm.mr.mergeRequestAddCiConfigPath = null;
-
-      expect(vm.shouldSuggestPipelines).toBeFalsy();
+    it('should not suggest pipelines when feature flag is not present', () => {
+      expect(findSuggestPipeline()).toBeNull();
     });
   });
 
-  describe('given suggestPipeline feature flag is enabled', () => {
+  describe('suggestPipeline Experiment', () => {
     beforeEach(() => {
+      mock.onAny().reply(200);
+
       // This is needed because some grandchildren Bootstrap components throw warnings
       // https://gitlab.com/gitlab-org/gitlab/issues/208458
       jest.spyOn(console, 'warn').mockImplementation();
-
-      gon.features = { suggestPipeline: true };
-      return createComponent();
     });
 
-    it('should suggest pipelines when none exist', () => {
-      vm.mr.mergeRequestAddCiConfigPath = 'some/path';
-      vm.mr.hasCI = false;
+    describe('given experiment is enabled', () => {
+      withGonExperiment('suggestPipeline');
 
-      expect(vm.shouldSuggestPipelines).toBeTruthy();
+      beforeEach(() => {
+        createComponent();
+
+        vm.mr.hasCI = false;
+      });
+
+      it('should suggest pipelines when none exist', () => {
+        expect(findSuggestPipeline()).toEqual(expect.any(Element));
+      });
+
+      it.each([
+        { isDismissedSuggestPipeline: true },
+        { mergeRequestAddCiConfigPath: null },
+        { hasCI: true },
+      ])('with %s, should not suggest pipeline', async obj => {
+        Object.assign(vm.mr, obj);
+
+        await vm.$nextTick();
+
+        expect(findSuggestPipeline()).toBeNull();
+      });
+
+      it('should allow dismiss of the suggest pipeline message', async () => {
+        findSuggestPipelineButton().click();
+
+        await vm.$nextTick();
+
+        expect(findSuggestPipeline()).toBeNull();
+      });
     });
 
-    it('should not suggest pipelines when they exist', () => {
-      vm.mr.mergeRequestAddCiConfigPath = null;
-      vm.mr.hasCI = false;
+    describe('given suggestPipeline experiment is not enabled', () => {
+      withGonExperiment('suggestPipeline', false);
 
-      expect(vm.shouldSuggestPipelines).toBeFalsy();
-    });
+      beforeEach(() => {
+        createComponent();
 
-    it('should not suggest pipelines hasCI is true', () => {
-      vm.mr.mergeRequestAddCiConfigPath = 'some/path';
-      vm.mr.hasCI = true;
+        vm.mr.hasCI = false;
+      });
 
-      expect(vm.shouldSuggestPipelines).toBeFalsy();
+      it('should not suggest pipelines when none exist', () => {
+        expect(findSuggestPipeline()).toBeNull();
+      });
     });
   });
 });

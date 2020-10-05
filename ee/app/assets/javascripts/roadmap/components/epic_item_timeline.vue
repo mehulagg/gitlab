@@ -1,7 +1,6 @@
 <script>
-import { GlPopover, GlProgressBar } from '@gitlab/ui';
+import { GlPopover, GlProgressBar, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import { generateKey } from '../utils/epic_utils';
 
 import CommonMixin from '../mixins/common_mixin';
@@ -23,7 +22,7 @@ export default {
   cellWidth: TIMELINE_CELL_MIN_WIDTH,
   components: {
     CurrentDayIndicator,
-    Icon,
+    GlIcon,
     GlPopover,
     GlProgressBar,
   },
@@ -185,7 +184,7 @@ export default {
               aria-hidden="true"
             />
             <div class="gl-font-sm d-flex align-items-center text-nowrap">
-              <icon class="gl-mr-1" :size="12" name="weight" />
+              <gl-icon class="gl-mr-1" :size="12" name="weight" />
               <p class="m-0" :aria-label="epicWeightPercentageText">{{ epicWeightPercentage }}%</p>
             </div>
           </div>

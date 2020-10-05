@@ -1,11 +1,12 @@
+import produce from 'immer';
 import { normalizeData } from 'ee_else_ce/repository/utils/commit';
 import axios from '~/lib/utils/axios_utils';
-import getCommits from './queries/getCommits.query.graphql';
-import getProjectPath from './queries/getProjectPath.query.graphql';
-import getRef from './queries/getRef.query.graphql';
+import commitsQuery from './queries/commits.query.graphql';
+import projectPathQuery from './queries/project_path.query.graphql';
+import refQuery from './queries/ref.query.graphql';
 
-let fetchpromise;
-let resolvers = [];
+const fetchpromises = {};
+const resolvers = {};
 
 export function resolveCommit(commits, path, { resolve, entry }) {
   const commit = commits.find(c => c.filePath === `${path}/${entry.name}` && c.type === entry.type);
@@ -17,15 +18,19 @@ export function resolveCommit(commits, path, { resolve, entry }) {
 
 export function fetchLogsTree(client, path, offset, resolver = null) {
   if (resolver) {
-    resolvers.push(resolver);
+    if (!resolvers[path]) {
+      resolvers[path] = [resolver];
+    } else {
+      resolvers[path].push(resolver);
+    }
   }
 
-  if (fetchpromise) return fetchpromise;
+  if (fetchpromises[path]) return fetchpromises[path];
 
-  const { projectPath } = client.readQuery({ query: getProjectPath });
-  const { escapedRef } = client.readQuery({ query: getRef });
+  const { projectPath } = client.readQuery({ query: projectPathQuery });
+  const { escapedRef } = client.readQuery({ query: refQuery });
 
-  fetchpromise = axios
+  fetchpromises[path] = axios
     .get(
       `${gon.relative_url_root}/${projectPath}/-/refs/${escapedRef}/logs_tree/${encodeURIComponent(
         path.replace(/^\//, ''),
@@ -34,25 +39,27 @@ export function fetchLogsTree(client, path, offset, resolver = null) {
         params: { format: 'json', offset },
       },
     )
-    .then(({ data, headers }) => {
+    .then(({ data: newData, headers }) => {
       const headerLogsOffset = headers['more-logs-offset'];
-      const { commits } = client.readQuery({ query: getCommits });
-      const newCommitData = [...commits, ...normalizeData(data, path)];
+      const sourceData = client.readQuery({ query: commitsQuery });
+      const data = produce(sourceData, draftState => {
+        draftState.commits.push(...normalizeData(newData, path));
+      });
       client.writeQuery({
-        query: getCommits,
-        data: { commits: newCommitData },
+        query: commitsQuery,
+        data,
       });
 
-      resolvers.forEach(r => resolveCommit(newCommitData, path, r));
+      resolvers[path].forEach(r => resolveCommit(data.commits, path, r));
 
-      fetchpromise = null;
+      delete fetchpromises[path];
 
       if (headerLogsOffset) {
         fetchLogsTree(client, path, headerLogsOffset);
       } else {
-        resolvers = [];
+        delete resolvers[path];
       }
     });
 
-  return fetchpromise;
+  return fetchpromises[path];
 }

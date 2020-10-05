@@ -1,32 +1,91 @@
-# GitLab Architecture Overview
+# GitLab architecture overview
 
 ## Software delivery
 
-There are two software distributions of GitLab: the open source [Community Edition](https://gitlab.com/gitlab-org/gitlab-foss/) (CE), and the open core [Enterprise Edition](https://gitlab.com/gitlab-org/gitlab/) (EE). GitLab is available under [different subscriptions](https://about.gitlab.com/pricing/).
+There are two software distributions of GitLab:
 
-New versions of GitLab are released in stable branches and the master branch is for bleeding edge development.
+- The open source [Community Edition](https://gitlab.com/gitlab-org/gitlab-foss/) (CE).
+- The open core [Enterprise Edition](https://gitlab.com/gitlab-org/gitlab/) (EE).
 
-For information, see the [GitLab Release Process](https://gitlab.com/gitlab-org/release/docs/-/tree/master#gitlab-release-process).
+GitLab is available under [different subscriptions](https://about.gitlab.com/pricing/).
 
-Both EE and CE require some add-on components called GitLab Shell and Gitaly. These components are available from the [GitLab Shell](https://gitlab.com/gitlab-org/gitlab-shell/-/tree/master) and [Gitaly](https://gitlab.com/gitlab-org/gitaly/-/tree/master) repositories respectively. New versions are usually tags but staying on the master branch will give you the latest stable version. New releases are generally around the same time as GitLab CE releases with the exception of informal security updates deemed critical.
+New versions of GitLab are released from stable branches, and the `master` branch is used for
+bleeding-edge development.
+
+For more information, visit the [GitLab Release Process](https://about.gitlab.com/handbook/engineering/releases/).
+
+Both distributions require additional components. These components are described in the
+[Component details](#components) section, and all have their own repositories.
+New versions of each dependent component are usually tags, but staying on the `master` branch of the
+GitLab codebase gives you the latest stable version of those components. New versions are
+generally released around the same time as GitLab releases, with the exception of informal security
+updates deemed critical.
 
 ## Components
 
-A typical install of GitLab will be on GNU/Linux. It uses NGINX or Apache as a web front end to proxypass the Unicorn web server. By default, communication between Unicorn and the front end is via a Unix domain socket but forwarding requests via TCP is also supported. The web front end accesses `/home/git/gitlab/public` bypassing the Unicorn server to serve static pages, uploads (e.g. avatar images or attachments), and pre-compiled assets. GitLab serves web pages and the [GitLab API](../api/README.md) using the Unicorn web server. It uses Sidekiq as a job queue which, in turn, uses Redis as a non-persistent database backend for job information, meta data, and incoming jobs.
+A typical install of GitLab is on GNU/Linux, but growing number of deployments also use the
+Kubernetes platform. The largest known GitLab instance is on GitLab.com, which is deployed using our
+[official GitLab Helm chart](https://docs.gitlab.com/charts/) and the [official Linux package](https://about.gitlab.com/install/).
 
-We also support deploying GitLab on Kubernetes using our [GitLab Helm chart](https://docs.gitlab.com/charts/).
+A typical installation uses NGINX or Apache as a web server to proxy through
+[GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) and into the [Puma](https://puma.io)
+application server. GitLab serves web pages and the [GitLab API](../api/README.md) using the Puma
+application server. It uses Sidekiq as a job queue which, in turn, uses Redis as a non-persistent
+database backend for job information, metadata, and incoming jobs.
 
-The GitLab web app uses PostgreSQL for persistent database information (e.g. users, permissions, issues, other meta data). GitLab stores the bare Git repositories it serves in `/home/git/repositories` by default. It also keeps default branch and hook information with the bare repository.
+By default, communication between Puma and Workhorse is via a Unix domain socket, but forwarding
+requests via TCP is also supported. Workhorse accesses the `gitlab/public` directory, bypassing the
+Puma application server to serve static pages, uploads (for example, avatar images or attachments),
+and pre-compiled assets.
 
-When serving repositories over HTTP/HTTPS GitLab utilizes the GitLab API to resolve authorization and access as well as serving Git objects.
+The GitLab application uses PostgreSQL for persistent database information (for example, users,
+permissions, issues, or other metadata). GitLab stores the bare Git repositories in the location
+defined in [the configuration file, `repositories:` section](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example).
+It also keeps default branch and hook information with the bare repository.
 
-The add-on component GitLab Shell serves repositories over SSH. It manages the SSH keys within `/home/git/.ssh/authorized_keys` which should not be manually edited. GitLab Shell accesses the bare repositories through Gitaly to serve Git objects and communicates with Redis to submit jobs to Sidekiq for GitLab to process. GitLab Shell queries the GitLab API to determine authorization and access.
+When serving repositories over HTTP/HTTPS GitLab uses the GitLab API to resolve authorization and
+access and to serve Git objects.
 
-Gitaly executes Git operations from GitLab Shell and the GitLab web app, and provides an API to the GitLab web app to get attributes from Git (e.g. title, branches, tags, other meta data), and to get blobs (e.g. diffs, commits, files).
+The add-on component GitLab Shell serves repositories over SSH. It manages the SSH keys within the
+location defined in [the configuration file, `GitLab Shell` section](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example).
+The file in that location should never be manually edited. GitLab Shell accesses the bare
+repositories through Gitaly to serve Git objects, and communicates with Redis to submit jobs to
+Sidekiq for GitLab to process. GitLab Shell queries the GitLab API to determine authorization and access.
+
+Gitaly executes Git operations from GitLab Shell and the GitLab web app, and provides an API to the
+GitLab web app to get attributes from Git (for example, title, branches, tags, or other metadata),
+and to get blobs (for example, diffs, commits, or files).
 
 You may also be interested in the [production architecture of GitLab.com](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/).
 
-### Simplified Component Overview
+## Adapting existing and introducing new components
+
+There are fundamental differences in how the application behaves when it is installed on a
+traditional Linux machine compared to a containerized platform, such as Kubernetes.
+
+Compared to [our official installation methods](https://about.gitlab.com/install/), some of the
+notable differences are:
+
+- Official Linux packages can access files on the same file system with different services.
+  [Shared files](shared_files.md) are not an option for the application running on the Kubernetes
+  platform.
+- Official Linux packages by default have services that have access to the shared configuration and
+  network. This is not the case for services running in Kubernetes, where services might be running
+  in complete isolation, or only accessible through specific ports.
+
+In other words, the shared state between services needs to be carefully considered when
+architecting new features and adding new components. Services that need to have access to the same
+files, need to be able to exchange information through the appropriate APIs. Whenever possible,
+this should not be done with files.
+
+Since components written with the API-first philosophy in mind are compatible with both methods, all
+new features and services must be written to consider Kubernetes compatibility **first**.
+
+The simplest way to ensure this, is to add support for your feature or service to
+[the official GitLab Helm chart](https://docs.gitlab.com/charts/) or reach out to
+[the Distribution team](https://about.gitlab.com/handbook/engineering/development/enablement/distribution/#how-to-work-with-distribution).
+
+### Simplified component overview
 
 This is a simplified architecture diagram that can be used to
 understand GitLab's architecture.
@@ -46,69 +105,101 @@ https://docs.google.com/drawings/d/1fBzAyklyveF-i-2q-OHUIqDkYfjjxC4mq5shwKSZHLs/
 ```mermaid
 graph TB
 
-  HTTP[HTTP/HTTPS] -- TCP 80, 443 --> NGINX[NGINX]
-  SSH -- TCP 22 --> GitLabShell[GitLab Shell]
-  SMTP[SMTP Gateway]
-  Geo[GitLab Geo Node] -- TCP 22, 80, 443 --> NGINX
+HTTP[HTTP/HTTPS] -- TCP 80, 443 --> NGINX[NGINX]
+SSH -- TCP 22 --> GitLabShell[GitLab Shell]
+SMTP[SMTP Gateway]
+Geo[GitLab Geo Node] -- TCP 22, 80, 443 --> NGINX
 
-  GitLabShell --TCP 8080 -->Unicorn["Unicorn (GitLab Rails)"]
-  GitLabShell --> Praefect
-  GitLabShell --> Redis
-  Unicorn --> PgBouncer[PgBouncer]
-  Unicorn --> Redis
-  Unicorn --> Praefect
-  Sidekiq --> Redis
-  Sidekiq --> PgBouncer
-  Sidekiq --> Praefect
-  GitLabWorkhorse[GitLab Workhorse] --> Unicorn
-  GitLabWorkhorse --> Redis
-  GitLabWorkhorse --> Praefect
-  Praefect --> Gitaly
-  NGINX --> GitLabWorkhorse
-  NGINX -- TCP 8090 --> GitLabPages[GitLab Pages]
-  NGINX --> Grafana[Grafana]
-  Grafana -- TCP 9090 --> Prometheus[Prometheus]
-  Prometheus -- TCP 80, 443 --> Unicorn
-  RedisExporter[Redis Exporter] --> Redis
-  Prometheus -- TCP 9121 --> RedisExporter
-  PostgreSQLExporter[PostgreSQL Exporter] --> PostgreSQL
-  PgBouncerExporter[PgBouncer Exporter] --> PgBouncer
-  Prometheus -- TCP 9187 --> PostgreSQLExporter
-  Prometheus -- TCP 9100 --> NodeExporter[Node Exporter]
-  Prometheus -- TCP 9168 --> GitLabExporter[GitLab Exporter]
-  Prometheus -- TCP 9127 --> PgBouncerExporter
-  GitLabExporter --> PostgreSQL
-  GitLabExporter --> GitLabShell
-  GitLabExporter --> Sidekiq
-  PgBouncer --> Consul
-  PostgreSQL --> Consul
-  PgBouncer --> PostgreSQL
-  NGINX --> Registry
-  Unicorn --> Registry
-  NGINX --> Mattermost
-  Mattermost --- Unicorn
-  Prometheus --> Alertmanager
-  Migrations --> PostgreSQL
-  Runner -- TCP 443 --> NGINX
-  Unicorn -- TCP 9200 --> Elasticsearch
-  Sidekiq -- TCP 9200 --> Elasticsearch
-  Sidekiq -- TCP 80, 443 --> Sentry
-  Unicorn -- TCP 80, 443 --> Sentry
-  Sidekiq -- UDP 6831 --> Jaeger
-  Unicorn -- UDP 6831 --> Jaeger
-  Gitaly -- UDP 6831 --> Jaeger
-  GitLabShell -- UDP 6831 --> Jaeger
-  GitLabWorkhorse -- UDP 6831 --> Jaeger
-  Alertmanager -- TCP 25 --> SMTP
-  Sidekiq -- TCP 25 --> SMTP
-  Unicorn -- TCP 25 --> SMTP
-  Unicorn -- TCP 369 --> LDAP
-  Sidekiq -- TCP 369 --> LDAP
-  Unicorn -- TCP 443 --> ObjectStorage["Object Storage"]
-  Sidekiq -- TCP 443 --> ObjectStorage
-  GitLabWorkhorse -- TCP 443 --> ObjectStorage
-  Registry -- TCP 443 --> ObjectStorage
-  Geo -- TCP 5432 --> PostgreSQL
+GitLabShell --TCP 8080 -->Puma["Puma (GitLab Rails)"]
+GitLabShell --> Praefect
+Puma --> PgBouncer[PgBouncer]
+Puma --> Redis
+Puma --> Praefect
+Sidekiq --> Redis
+Sidekiq --> PgBouncer
+Sidekiq --> Praefect
+GitLabWorkhorse[GitLab Workhorse] --> Puma
+GitLabWorkhorse --> Redis
+GitLabWorkhorse --> Praefect
+Praefect --> Gitaly
+NGINX --> GitLabWorkhorse
+NGINX -- TCP 8090 --> GitLabPages[GitLab Pages]
+NGINX --> Grafana[Grafana]
+Grafana -- TCP 9090 --> Prometheus[Prometheus]
+Prometheus -- TCP 80, 443 --> Puma
+RedisExporter[Redis Exporter] --> Redis
+Prometheus -- TCP 9121 --> RedisExporter
+PostgreSQLExporter[PostgreSQL Exporter] --> PostgreSQL
+PgBouncerExporter[PgBouncer Exporter] --> PgBouncer
+Prometheus -- TCP 9187 --> PostgreSQLExporter
+Prometheus -- TCP 9100 --> NodeExporter[Node Exporter]
+Prometheus -- TCP 9168 --> GitLabExporter[GitLab Exporter]
+Prometheus -- TCP 9127 --> PgBouncerExporter
+GitLabExporter --> PostgreSQL
+GitLabExporter --> GitLabShell
+GitLabExporter --> Sidekiq
+PgBouncer --> Consul
+PostgreSQL --> Consul
+PgBouncer --> PostgreSQL
+NGINX --> Registry
+Puma --> Registry
+NGINX --> Mattermost
+Mattermost --- Puma
+Prometheus --> Alertmanager
+Migrations --> PostgreSQL
+Runner -- TCP 443 --> NGINX
+Puma -- TCP 9200 --> Elasticsearch
+Sidekiq -- TCP 9200 --> Elasticsearch
+Sidekiq -- TCP 80, 443 --> Sentry
+Puma -- TCP 80, 443 --> Sentry
+Sidekiq -- UDP 6831 --> Jaeger
+Puma -- UDP 6831 --> Jaeger
+Gitaly -- UDP 6831 --> Jaeger
+GitLabShell -- UDP 6831 --> Jaeger
+GitLabWorkhorse -- UDP 6831 --> Jaeger
+Alertmanager -- TCP 25 --> SMTP
+Sidekiq -- TCP 25 --> SMTP
+Puma -- TCP 25 --> SMTP
+Puma -- TCP 369 --> LDAP
+Sidekiq -- TCP 369 --> LDAP
+Puma -- TCP 443 --> ObjectStorage["Object Storage"]
+Sidekiq -- TCP 443 --> ObjectStorage
+GitLabWorkhorse -- TCP 443 --> ObjectStorage
+Registry -- TCP 443 --> ObjectStorage
+Geo -- TCP 5432 --> PostgreSQL
+
+click Alertmanager "./architecture.html#alertmanager"
+click Praefect "./architecture.html#praefect"
+click Geo "./architecture.html#gitlab-geo"
+click NGINX "./architecture.html#nginx"
+click Runner "./architecture.html#gitlab-runner"
+click Registry "./architecture.html#registry"
+click ObjectStorage "./architecture.html#minio"
+click Mattermost "./architecture.html#mattermost"
+click Gitaly "./architecture.html#gitaly"
+click Jaeger "./architecture.html#jaeger"
+click GitLabWorkhorse "./architecture.html#gitlab-workhorse"
+click LDAP "./architecture.html#ldap-authentication"
+click Puma "./architecture.html#puma"
+click GitLabShell "./architecture.html#gitlab-shell"
+click SSH "./architecture.html#ssh-request-22"
+click Sidekiq "./architecture.html#sidekiq"
+click Sentry "./architecture.html#sentry"
+click GitLabExporter "./architecture.html#gitlab-exporter"
+click Elasticsearch "./architecture.html#elasticsearch"
+click Migrations "./architecture.html#database-migrations"
+click PostgreSQL "./architecture.html#postgresql"
+click Consul "./architecture.html#consul"
+click PgBouncer "./architecture.html#pgbouncer"
+click PgBouncerExporter "./architecture.html#pgbouncer-exporter"
+click RedisExporter "./architecture.html#redis-exporter"
+click Redis "./architecture.html#redis"
+click Prometheus "./architecture.html#prometheus"
+click Grafana "./architecture.html#grafana"
+click GitLabPages "./architecture.html#gitlab-pages"
+click PostgreSQLExporter "./architecture.html#postgresql-exporter"
+click SMTP "./architecture.html#outbound-email"
+click NodeExporter "./architecture.html#node-exporter"
 ```
 
 ### Component legend
@@ -140,36 +231,36 @@ Table description links:
 | [Elasticsearch](#elasticsearch)                       | Improved search within GitLab                                        |       ⤓        |      ⤓       |        ⤓         |     ❌      |   ⤓    |  ⤓  | EE Only |
 | [Gitaly](#gitaly)                                     | Git RPC service for handling all Git calls made by GitLab            |       ✅        |      ✅       |        ✅         |     ✅      |   ⚙    |  ✅  | CE & EE |
 | [GitLab Exporter](#gitlab-exporter)                   | Generates a variety of GitLab metrics                                |       ✅        |      ✅       |        ✅         |     ✅      |   ❌    |  ❌  | CE & EE |
-| [GitLab Geo Node](#gitlab-geo)                        | Geographically distributed GitLab nodes                              |       ⚙        |      ❌       |        ❌         |     ✅      |   ❌    |  ⚙  | EE Only |
-| [GitLab Managed Apps](#gitlab-managed-apps)           | Deploy Helm, Ingress, Cert-Manager, Prometheus, a Runner, JupyterHub, or Knative to a cluster |  ⤓  |  ⤓  |      ⤓       |     ⤓      |   ⤓    |  ⤓  | CE & EE |
+| [GitLab Geo Node](#gitlab-geo)                        | Geographically distributed GitLab nodes |       ⚙        |       ⚙      |        ❌         |     ✅      |   ❌    |  ⚙  | EE Only |
+| [GitLab Managed Apps](#gitlab-managed-apps)           | Deploy Helm, Ingress, Cert-Manager, Prometheus, GitLab Runner, JupyterHub, or Knative to a cluster |  ⤓  |  ⤓  |      ⤓       |     ⤓      |   ⤓    |  ⤓  | CE & EE |
 | [GitLab Pages](#gitlab-pages)                         | Hosts static websites                                                |       ⚙        |      ❌       |        ❌         |     ✅      |   ⚙    |  ⚙  | CE & EE |
 | [GitLab self-monitoring: Alertmanager](#alertmanager) | Deduplicates, groups, and routes alerts from Prometheus              |       ⚙        |      ✅       |        ⚙         |     ✅      |   ❌    |  ❌  | CE & EE |
-| [GitLab self-monitoring: Grafana](#grafana)           | Metrics dashboard                                                    |       ✅        |      ⤓       |        ⤓         |     ✅      |   ❌    |  ❌  | CE & EE |
-| [GitLab self-monitoring: Jaeger](#jaeger)             | View traces generated by the GitLab instance                         |       ❌        |      ❌       |        ❌         |     ❌      |   ⤓    |  ⚙  | CE & EE |
+| [GitLab self-monitoring: Grafana](#grafana)           | Metrics dashboard                                                    |       ✅        |      ⚙       |        ⤓         |     ✅      |   ❌    |  ❌  | CE & EE |
+| [GitLab self-monitoring: Jaeger](#jaeger)             | View traces generated by the GitLab instance                         |       ❌        |      ⚙       |        ❌         |     ❌      |   ⤓    |  ⚙  | CE & EE |
 | [GitLab self-monitoring: Prometheus](#prometheus)     | Time-series database, metrics collection, and query service          |       ✅        |      ✅       |        ⚙         |     ✅      |   ❌    |  ❌  | CE & EE |
-| [GitLab self-monitoring: Sentry](#sentry)             | Track errors generated by the GitLab instance                        |       ⤓        |      ❌       |        ❌         |     ✅      |   ⤓    |  ⤓  | CE & EE |
+| [GitLab self-monitoring: Sentry](#sentry)             | Track errors generated by the GitLab instance                        |       ⤓        |      ⤓       |        ❌         |     ✅      |   ⤓    |  ⤓  | CE & EE |
 | [GitLab Shell](#gitlab-shell)                         | Handles `git` over SSH sessions                                      |       ✅        |      ✅       |        ✅         |     ✅      |   ⚙    |  ✅  | CE & EE |
 | [GitLab Workhorse](#gitlab-workhorse)                 | Smart reverse proxy, handles large HTTP requests                     |       ✅        |      ✅       |        ✅         |     ✅      |   ⚙    |  ✅  | CE & EE |
-| [Inbound email (SMTP)](#inbound-email)                | Receive messages to update issues                                    |       ⤓        |      ⤓       |        ⤓         |     ✅      |   ⤓    |  ⤓  | CE & EE |
+| [Inbound email (SMTP)](#inbound-email)                | Receive messages to update issues                                    |       ⤓        |      ⚙       |        ⤓         |     ✅      |   ⤓    |  ⤓  | CE & EE |
 | [Jaeger integration](#jaeger)                         | Distributed tracing for deployed apps                                |       ⤓        |      ⤓       |        ⤓         |     ⤓      |   ⤓    |  ⤓  | EE Only |
 | [LDAP Authentication](#ldap-authentication)           | Authenticate users against centralized LDAP directory                |       ⤓        |      ⤓       |        ⤓         |     ❌      |   ⤓    |  ⤓  | CE & EE |
 | [Mattermost](#mattermost)                             | Open-source Slack alternative                                        |       ⚙        |      ⤓       |        ⤓         |     ⤓      |   ❌    |  ❌  | CE & EE |
 | [MinIO](#minio)                                       | Object storage service                                               |       ⤓        |      ✅       |        ✅         |     ✅      |   ❌    |  ⚙  | CE & EE |
 | [NGINX](#nginx)                                       | Routes requests to appropriate components, terminates SSL            |       ✅        |      ✅       |        ⚙         |     ✅      |   ⤓    |  ❌  | CE & EE |
 | [Node Exporter](#node-exporter)                       | Prometheus endpoint with system metrics                              |       ✅        |     N/A      |       N/A        |     ✅      |   ❌    |  ❌  | CE & EE |
-| [Outbound email (SMTP)](#outbound-email)              | Send email messages to users                                         |       ⤓        |      ⤓       |        ⤓         |     ✅      |   ⤓    |  ⤓  | CE & EE |
+| [Outbound email (SMTP)](#outbound-email)              | Send email messages to users                                         |       ⤓        |      ⚙       |        ⤓         |     ✅      |   ⤓    |  ⤓  | CE & EE |
 | [PgBouncer Exporter](#pgbouncer-exporter)             | Prometheus endpoint with PgBouncer metrics                           |       ⚙        |      ❌       |        ❌         |     ✅      |   ❌    |  ❌  | CE & EE |
 | [PgBouncer](#pgbouncer)                               | Database connection pooling, failover                                |       ⚙        |      ❌       |        ❌         |     ✅      |   ❌    |  ❌  | EE Only |
 | [PostgreSQL Exporter](#postgresql-exporter)           | Prometheus endpoint with PostgreSQL metrics                          |       ✅        |      ✅       |        ✅         |     ✅      |   ❌    |  ❌  | CE & EE |
 | [PostgreSQL](#postgresql)                             | Database                                                             |       ✅        |      ✅       |        ✅         |     ✅      |   ⤓    |  ✅  | CE & EE |
-| [Praefect](#praefect)                                 | A transparent proxy between any Git client and Gitaly storage nodes. |       ✅        |      ❌       |        ❌         |     ✅      |   ⚙    |  ✅  | CE & EE |
+| [Praefect](#praefect)                                 | A transparent proxy between any Git client and Gitaly storage nodes. |       ✅        |      ⚙       |        ❌         |     ✅      |   ⚙    |  ✅  | CE & EE |
 | [Redis Exporter](#redis-exporter)                     | Prometheus endpoint with Redis metrics                               |       ✅        |      ✅       |        ✅         |     ✅      |   ❌    |  ❌  | CE & EE |
 | [Redis](#redis)                                       | Caching service                                                      |       ✅        |      ✅       |        ✅         |     ✅      |   ⤓    |  ✅  | CE & EE |
 | [Registry](#registry)                                 | Container registry, allows pushing and pulling of images             |       ⚙        |      ✅       |        ✅         |     ✅      |   ⤓    |  ⚙  | CE & EE |
 | [Runner](#gitlab-runner)                              | Executes GitLab CI/CD jobs                                           |       ⤓        |      ✅       |        ⚙         |     ✅      |   ⚙    |  ⚙  | CE & EE |
 | [Sentry integration](#sentry)                         | Error tracking for deployed apps                                     |       ⤓        |      ⤓       |        ⤓         |     ⤓      |   ⤓    |  ⤓  | CE & EE |
 | [Sidekiq](#sidekiq)                                   | Background jobs processor                                            |       ✅        |      ✅       |        ✅         |     ✅      |   ✅    |  ✅  | CE & EE |
-| [Unicorn (GitLab Rails)](#unicorn)                    | Handles requests for the web interface and API                       |       ✅        |      ✅       |        ✅         |     ✅      |   ⚙    |  ✅  | CE & EE |
+| [Puma (GitLab Rails)](#puma)                    | Handles requests for the web interface and API                       |       ✅        |      ✅       |        ✅         |     ✅      |   ⚙    |  ✅  | CE & EE |
 
 ### Component details
 
@@ -215,7 +306,7 @@ GitLab can be considered to have two layers from a process perspective:
 
 - [Project page](https://github.com/hashicorp/consul/blob/master/README.md)
 - Configuration:
-  - [Omnibus](../administration/high_availability/consul.md)
+  - [Omnibus](../administration/consul.md)
   - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#postgresql)
 - Layer: Core Service (Data)
 - GitLab.com: [Consul](../user/gitlab_com/index.md#consul)
@@ -227,7 +318,7 @@ Consul is a tool for service discovery and configuration. Consul is distributed,
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/database.html#disabling-automatic-database-migration)
   - [Charts](https://docs.gitlab.com/charts/charts/gitlab/migrations/)
-  - [Source](../update/upgrading_from_source.md#13-install-libraries-migrations-etc)
+  - [Source](../update/upgrading_from_source.md#14-install-libraries-migrations-etc)
 - Layer: Core Service (Data)
 
 #### Elasticsearch
@@ -239,7 +330,7 @@ Consul is a tool for service discovery and configuration. Consul is distributed,
   - [Source](../integration/elasticsearch.md)
   - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/elasticsearch.md)
 - Layer: Core Service (Data)
-- GitLab.com: [Get Advanced Global Search working on GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/153) epic.
+- GitLab.com: [Get Advanced Search working on GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/153) epic.
 
 Elasticsearch is a distributed RESTful search engine built for the cloud.
 
@@ -272,8 +363,8 @@ repository updates to secondary nodes.
 #### GitLab Geo
 
 - Configuration:
-  - [Omnibus](../administration/geo/replication/index.md#setup-instructions)
-  - [Charts](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/8)
+  - [Omnibus](../administration/geo/setup/index.md)
+  - [Charts](https://docs.gitlab.com/charts/advanced/geo/)
   - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/geo.md)
 - Layer: Core Service (Processor)
 
@@ -336,20 +427,20 @@ GitLab CI/CD is the open-source continuous integration service included with Git
 - [Project page](https://gitlab.com/gitlab-org/gitlab-workhorse/blob/master/README.md)
 - Configuration:
   - [Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template)
-  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/unicorn/)
+  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/webservice/)
   - [Source](../install/installation.md#install-gitlab-workhorse)
 - Layer: Core Service (Processor)
 - Process: `gitlab-workhorse`
 - GitLab.com: [Service Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#service-architecture)
 
-[GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) is a program designed at GitLab to help alleviate pressure from Unicorn. You can read more about the [historical reasons for developing](https://about.gitlab.com/blog/2016/04/12/a-brief-history-of-gitlab-workhorse/). It's designed to act as a smart reverse proxy to help speed up GitLab as a whole.
+[GitLab Workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse) is a program designed at GitLab to help alleviate pressure from Puma. You can read more about the [historical reasons for developing](https://about.gitlab.com/blog/2016/04/12/a-brief-history-of-gitlab-workhorse/). It's designed to act as a smart reverse proxy to help speed up GitLab as a whole.
 
 #### Grafana
 
 - [Project page](https://github.com/grafana/grafana/blob/master/README.md)
 - Configuration:
   - [Omnibus](../administration/monitoring/performance/grafana_configuration.md)
-  - [Charts](https://github.com/helm/charts/tree/master/stable/grafana)
+  - [Charts](https://docs.gitlab.com/charts/charts/globals#configure-grafana-integration)
 - Layer: Monitoring
 - GitLab.com: [GitLab triage Grafana dashboard](https://dashboards.gitlab.com/d/RZmbBr7mk/gitlab-triage?refresh=30s)
 
@@ -360,7 +451,7 @@ Grafana is an open source, feature rich metrics dashboard and graph editor for G
 - [Project page](https://github.com/jaegertracing/jaeger/blob/master/README.md)
 - Configuration:
   - [Omnibus](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/4104)
-  - [Charts](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/1320)
+  - [Charts](https://docs.gitlab.com/charts/charts/globals#tracing)
   - [Source](../development/distributed_tracing.md#enabling-distributed-tracing)
   - [GDK](../development/distributed_tracing.md#using-jaeger-in-the-gitlab-development-kit)
 - Layer: Monitoring
@@ -379,7 +470,8 @@ For monitoring deployed apps, see [Jaeger tracing documentation](../operations/t
 - Layer: Core Service
 - Process: `logrotate`
 
-GitLab is comprised of a large number of services that all log. We started bundling our own logrotate as of 7.4 to make sure we were logging responsibly. This is just a packaged version of the common open source offering.
+GitLab is comprised of a large number of services that all log. We started bundling our own Logrotate
+as of GitLab 7.4 to make sure we were logging responsibly. This is just a packaged version of the common open source offering.
 
 #### Mattermost
 
@@ -435,7 +527,7 @@ NGINX has an Ingress port for all HTTP requests and routes them to the appropria
 
 - [Project page](https://github.com/pgbouncer/pgbouncer/blob/master/README.md)
 - Configuration:
-  - [Omnibus](../administration/high_availability/pgbouncer.md)
+  - [Omnibus](../administration/postgresql/pgbouncer.md)
   - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#postgresql)
 - Layer: Core Service (Data)
 - GitLab.com: [Database Architecture](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/#database-architecture)
@@ -458,7 +550,7 @@ Prometheus exporter for PgBouncer. Exports metrics at 9127/metrics.
 - [Project page](https://github.com/postgres/postgres/blob/master/README)
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/database.html)
-  - [Charts](https://github.com/helm/charts/tree/master/stable/postgresql)
+  - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#postgresql)
   - [Source](../install/installation.md#6-database)
 - Layer: Core Service (Data)
 - Process: `postgresql`
@@ -471,7 +563,7 @@ GitLab packages the popular Database to provide storage for Application meta dat
 - [Project page](https://github.com/wrouesnel/postgres_exporter/blob/master/README.md)
 - Configuration:
   - [Omnibus](../administration/monitoring/prometheus/postgres_exporter.md)
-  - [Charts](https://github.com/helm/charts/tree/master/stable/postgresql)
+  - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#postgresql)
 - Layer: Monitoring
 - Process: `postgres-exporter`
 - GitLab.com: [Monitoring of GitLab.com](https://about.gitlab.com/handbook/engineering/monitoring/)
@@ -483,7 +575,7 @@ GitLab packages the popular Database to provide storage for Application meta dat
 - [Project page](https://github.com/prometheus/prometheus/blob/master/README.md)
 - Configuration:
   - [Omnibus](../administration/monitoring/prometheus/index.md)
-  - [Charts](https://github.com/helm/charts/tree/master/stable/prometheus)
+  - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#prometheus)
 - Layer: Monitoring
 - Process: `prometheus`
 - GitLab.com: [Prometheus](../user/gitlab_com/index.md#prometheus)
@@ -495,7 +587,7 @@ Prometheus is a time-series tool that helps GitLab administrators expose metrics
 - [Project page](https://github.com/antirez/redis/blob/unstable/README.md)
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/redis.html)
-  - [Charts](https://docs.gitlab.com/charts/charts/redis/)
+  - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#redis)
   - [Source](../install/installation.md#7-redis)
 - Layer: Core Service (Data)
 - Process: `redis`
@@ -512,7 +604,7 @@ Redis is packaged to provide a place to store:
 - [Project page](https://github.com/oliver006/redis_exporter/blob/master/README.md)
 - Configuration:
   - [Omnibus](../administration/monitoring/prometheus/redis_exporter.md)
-  - [Charts](https://docs.gitlab.com/charts/charts/redis/)
+  - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#redis)
 - Layer: Monitoring
 - Process: `redis-exporter`
 - GitLab.com: [Monitoring of GitLab.com](https://about.gitlab.com/handbook/engineering/monitoring/)
@@ -523,7 +615,7 @@ Redis is packaged to provide a place to store:
 
 - [Project page](https://github.com/docker/distribution/blob/master/README.md)
 - Configuration:
-  - [Omnibus](../update/upgrading_from_source.md#13-install-libraries-migrations-etc)
+  - [Omnibus](../update/upgrading_from_source.md#14-install-libraries-migrations-etc)
   - [Charts](https://docs.gitlab.com/charts/charts/registry/)
   - [Source](../administration/packages/container_registry.md#enable-the-container-registry)
   - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/registry.md)
@@ -545,7 +637,7 @@ An external registry can also be configured to use GitLab as an auth endpoint.
 - [Project page](https://github.com/getsentry/sentry/)
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/configuration.html#error-reporting-and-logging-with-sentry)
-  - [Charts](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/1319)
+  - [Charts](https://docs.gitlab.com/charts/charts/globals#sentry-settings)
   - [Source](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
   - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
 - Layer: Monitoring
@@ -554,7 +646,7 @@ An external registry can also be configured to use GitLab as an auth endpoint.
 Sentry fundamentally is a service that helps you monitor and fix crashes in real time.
 The server is in Python, but it contains a full API for sending events from any language, in any application.
 
-For monitoring deployed apps, see the [Sentry integration docs](../user/project/operations/error_tracking.md)
+For monitoring deployed apps, see the [Sentry integration docs](../operations/error_tracking.md)
 
 #### Sidekiq
 
@@ -571,12 +663,34 @@ For monitoring deployed apps, see the [Sentry integration docs](../user/project/
 
 Sidekiq is a Ruby background job processor that pulls jobs from the Redis queue and processes them. Background jobs allow GitLab to provide a faster request/response cycle by moving work into the background.
 
+#### Puma
+
+NOTE: **Note:**
+Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
+disabled by default.
+
+- [Project page](https://gitlab.com/gitlab-org/gitlab/blob/master/README.md)
+- Configuration:
+  - [Omnibus](https://docs.gitlab.com/omnibus/settings/puma.html)
+  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/webservice/)
+  - [Source](../install/installation.md#configure-it)
+  - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
+- Layer: Core Service (Processor)
+- Process: `puma`
+- GitLab.com: [Puma](../user/gitlab_com/index.md#puma)
+
+[Puma](https://puma.io/) is a Ruby application server that is used to run the core Rails Application that provides the user facing features in GitLab. Often process output you will see this as `bundle` or `config.ru` depending on the GitLab version.
+
 #### Unicorn
+
+NOTE: **Note:**
+Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
+disabled by default.
 
 - [Project page](https://gitlab.com/gitlab-org/gitlab/blob/master/README.md)
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/unicorn.html)
-  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/unicorn/)
+  - [Charts](https://docs.gitlab.com/charts/charts/gitlab/webservice/)
   - [Source](../install/installation.md#configure-it)
   - [GDK](https://gitlab.com/gitlab-org/gitlab/blob/master/config/gitlab.yml.example)
 - Layer: Core Service (Processor)
@@ -633,11 +747,11 @@ You can install them after you create a cluster. This includes:
 - [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 - [Cert-Manager](https://cert-manager.io/docs/)
 - [Prometheus](https://prometheus.io/docs/introduction/overview/)
-- a [Runner](https://docs.gitlab.com/runner/)
+- [GitLab Runner](https://docs.gitlab.com/runner/)
 - [JupyterHub](https://jupyter.org)
 - [Knative](https://cloud.google.com/knative/)
 
-## GitLab by Request Type
+## GitLab by request type
 
 GitLab provides two "interfaces" for end users to access the service:
 
@@ -646,20 +760,20 @@ GitLab provides two "interfaces" for end users to access the service:
 
 It's important to understand the distinction as some processes are used in both and others are exclusive to a specific request type.
 
-### GitLab Web HTTP Request Cycle
+### GitLab Web HTTP request cycle
 
 When making a request to an HTTP Endpoint (think `/users/sign_in`) the request will take the following path through the GitLab Service:
 
 - NGINX - Acts as our first line reverse proxy.
-- GitLab Workhorse - This determines if it needs to go to the Rails application or somewhere else to reduce load on Unicorn.
-- Unicorn - Since this is a web request, and it needs to access the application it will go to Unicorn.
+- GitLab Workhorse - This determines if it needs to go to the Rails application or somewhere else to reduce load on Puma.
+- Puma - Since this is a web request, and it needs to access the application it will go to Puma.
 - PostgreSQL/Gitaly/Redis - Depending on the type of request, it may hit these services to store or retrieve data.
 
-### GitLab Git Request Cycle
+### GitLab Git request cycle
 
 Below we describe the different paths that HTTP vs. SSH Git requests will take. There is some overlap with the Web Request Cycle but also some differences.
 
-### Web Request (80/443)
+### Web request (80/443)
 
 Git operations over HTTP use the stateless "smart" protocol described in the
 [Git documentation](https://git-scm.com/docs/http-protocol), but responsibility
@@ -704,7 +818,7 @@ sequenceDiagram
 The sequence is similar for `git push`, except `git-receive-pack` is used
 instead of `git-upload-pack`.
 
-### SSH Request (22)
+### SSH request (22)
 
 Git operations over SSH can use the stateful protocol described in the
 [Git documentation](https://git-scm.com/docs/pack-protocol#_ssh_transport), but
@@ -769,7 +883,7 @@ except there is no round-trip into Gitaly - Rails performs the action as part
 of the [internal API](internal_api.md) call, and GitLab Shell streams the
 response back to the user directly.
 
-## System Layout
+## System layout
 
 When referring to `~git` in the pictures it means the home directory of the Git user which is typically `/home/git`.
 
@@ -779,9 +893,9 @@ The bare repositories are located in `/home/git/repositories`. GitLab is a Ruby 
 
 To serve repositories over SSH there's an add-on application called GitLab Shell which is installed in `/home/git/gitlab-shell`.
 
-### Installation Folder Summary
+### Installation folder summary
 
-To summarize here's the [directory structure of the `git` user home directory](../install/structure.md).
+To summarize here's the [directory structure of the `git` user home directory](../install/installation.md#gitlab-directory-structure).
 
 ### Processes
 
@@ -791,12 +905,12 @@ ps aux | grep '^git'
 
 GitLab has several components to operate. It requires a persistent database
 (PostgreSQL) and Redis database, and uses Apache `httpd` or NGINX to proxypass
-Unicorn. All these components should run as different system users to GitLab
-(e.g., `postgres`, `redis` and `www-data`, instead of `git`).
+Puma. All these components should run as different system users to GitLab
+(for example, `postgres`, `redis`, and `www-data`, instead of `git`).
 
-As the `git` user it starts Sidekiq and Unicorn (a simple Ruby HTTP server
+As the `git` user it starts Sidekiq and Puma (a simple Ruby HTTP server
 running on port `8080` by default). Under the GitLab user there are normally 4
-processes: `unicorn_rails master` (1 process), `unicorn_rails worker`
+processes: `puma master` (1 process), `puma cluster worker`
 (2 processes), `sidekiq` (1 process).
 
 ### Repository access
@@ -809,7 +923,7 @@ See the README for more information.
 
 ### Init scripts of the services
 
-The GitLab init script starts and stops Unicorn and Sidekiq:
+The GitLab init script starts and stops Puma and Sidekiq:
 
 ```plaintext
 /etc/init.d/gitlab
@@ -849,9 +963,9 @@ Usage: /etc/init.d/postgresql {start|stop|restart|reload|force-reload|status} [v
 
 ### Log locations of the services
 
-GitLab (includes Unicorn and Sidekiq logs):
+GitLab (includes Puma and Sidekiq logs):
 
-- `/home/git/gitlab/log/` contains `application.log`, `production.log`, `sidekiq.log`, `unicorn.stdout.log`, `git_json.log` and `unicorn.stderr.log` normally.
+- `/home/git/gitlab/log/` contains `application.log`, `production.log`, `sidekiq.log`, `puma.stdout.log`, `git_json.log` and `puma.stderr.log` normally.
 
 GitLab Shell:
 
@@ -882,17 +996,18 @@ PostgreSQL:
 
 ### GitLab specific configuration files
 
-GitLab has configuration files located in `/home/git/gitlab/config/*`. Commonly referenced config files include:
+GitLab has configuration files located in `/home/git/gitlab/config/*`. Commonly referenced
+configuration files include:
 
-- `gitlab.yml` - GitLab configuration.
-- `unicorn.rb` - Unicorn web server settings.
-- `database.yml` - Database connection settings.
+- `gitlab.yml` - GitLab configuration
+- `puma.rb` - Puma web server settings
+- `database.yml` - Database connection settings
 
 GitLab Shell has a configuration file at `/home/git/gitlab-shell/config.yml`.
 
-### Maintenance Tasks
+### Maintenance tasks
 
-[GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master) provides Rake tasks with which you see version information and run a quick check on your configuration to ensure it is configured properly within the application. See [maintenance Rake tasks](../raketasks/maintenance.md).
+[GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master) provides Rake tasks with which you see version information and run a quick check on your configuration to ensure it is configured properly within the application. See [maintenance Rake tasks](../administration/raketasks/maintenance.md).
 In a nutshell, do the following:
 
 ```shell
@@ -902,7 +1017,8 @@ bundle exec rake gitlab:env:info RAILS_ENV=production
 bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
-Note: It is recommended to log into the `git` user using `sudo -i -u git` or `sudo su - git`. While the sudo commands provided by GitLab work in Ubuntu they do not always work in RHEL.
+Note: It is recommended to log into the `git` user using `sudo -i -u git` or `sudo su - git`. While
+the `sudo` commands provided by GitLab work in Ubuntu they do not always work in RHEL.
 
 ## GitLab.com
 

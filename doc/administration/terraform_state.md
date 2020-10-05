@@ -26,7 +26,6 @@ below.
    `/etc/gitlab/gitlab.rb` and add the following line:
 
    ```ruby
-   gitlab_rails['terraform_state_enabled'] = true
    gitlab_rails['terraform_state_storage_path'] = "/mnt/storage/terraform_state"
    ```
 
@@ -76,9 +75,8 @@ See [the available connection settings for different providers](object_storage.m
    the values you want:
 
    ```ruby
-   gitlab_rails['terraform_state_enabled'] = true
    gitlab_rails['terraform_state_object_store_enabled'] = true
-   gitlab_rails['terraform_state_object_store_remote_directory'] = "terraform_state"
+   gitlab_rails['terraform_state_object_store_remote_directory'] = "terraform"
    gitlab_rails['terraform_state_object_store_connection'] = {
      'provider' => 'AWS',
      'region' => 'eu-central-1',
@@ -110,7 +108,7 @@ See [the available connection settings for different providers](object_storage.m
      enabled: true
      object_store:
        enabled: true
-       remote_directory: "terraform_state" # The bucket name
+       remote_directory: "terraform" # The bucket name
        connection:
          provider: AWS # Only AWS supported at the moment
          aws_access_key_id: AWS_ACESS_KEY_ID

@@ -26,8 +26,10 @@ module EE
       scope :project_id_in, ->(ids) { where(project_id: ids) }
       scope :with_files_stored_remotely, -> { where(file_store: ::JobArtifactUploader::Store::REMOTE) }
 
-      scope :security_reports, -> do
-        with_file_types(SECURITY_REPORT_FILE_TYPES)
+      scope :security_reports, -> (file_types: SECURITY_REPORT_FILE_TYPES) do
+        requested_file_types = *file_types
+
+        with_file_types(requested_file_types & SECURITY_REPORT_FILE_TYPES)
       end
 
       scope :license_scanning_reports, -> do
@@ -58,16 +60,37 @@ module EE
         with_file_types(METRICS_REPORT_FILE_TYPES)
       end
 
-      scope :coverage_fuzzing, -> do
+      scope :coverage_fuzzing_reports, -> do
         with_file_types(COVERAGE_FUZZING_REPORT_TYPES)
       end
+    end
 
-      def self.associated_file_types_for(file_type)
-        return unless file_types.include?(file_type)
+    class_methods do
+      extend ::Gitlab::Utils::Override
+
+      override :associated_file_types_for
+      def associated_file_types_for(file_type)
         return LICENSE_SCANNING_REPORT_FILE_TYPES if LICENSE_SCANNING_REPORT_FILE_TYPES.include?(file_type)
         return BROWSER_PERFORMANCE_REPORT_FILE_TYPES if BROWSER_PERFORMANCE_REPORT_FILE_TYPES.include?(file_type)
 
-        [file_type]
+        super
+      end
+
+      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
+        not_expired.merge(selective_sync_scope(node))
+                   .merge(object_storage_scope(node))
+      end
+
+      def object_storage_scope(node)
+        return all if node.sync_object_storage?
+
+        with_files_stored_locally
+      end
+
+      def selective_sync_scope(node)
+        return all unless node.selective_sync?
+
+        project_id_in(node.projects)
       end
     end
 

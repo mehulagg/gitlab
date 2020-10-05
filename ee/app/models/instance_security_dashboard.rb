@@ -38,6 +38,12 @@ class InstanceSecurityDashboard
     Vulnerabilities::Scanner.for_projects(projects)
   end
 
+  def vulnerability_historical_statistics
+    return Vulnerabilities::Scanner.none if projects.empty?
+
+    Vulnerabilities::HistoricalStatistic.for_project(projects)
+  end
+
   private
 
   attr_reader :project_ids, :user

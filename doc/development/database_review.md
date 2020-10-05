@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Database Review Guidelines
 
 This page is specific to database reviews. Please refer to our
@@ -19,6 +25,10 @@ A database review is required for:
   generally up to the author of a merge request to decide whether or
   not complex queries are being introduced and if they require a
   database review.
+- Changes in usage data metrics that use `count` and `distinct_count`.
+  These metrics could have complex queries over large tables.
+  See the [Telemetry Guide](telemetry/usage_ping.md#implementing-usage-ping)
+  for implementation details.
 
 A database reviewer is expected to look out for obviously complex
 queries in the change and review those closer. If the author does not
@@ -74,7 +84,8 @@ the following preparations into account.
 
 #### Preparation when adding migrations
 
-- Ensure `db/structure.sql` is updated as [documented](migration_style_guide.md#schema-changes).
+- Ensure `db/structure.sql` is updated as [documented](migration_style_guide.md#schema-changes), and additionally ensure that the relevant version files under
+`db/schema_migrations` were added or removed.
 - Make migrations reversible by using the `change` method or include a `down` method when using `up`.
   - Include either a rollback procedure or describe how to rollback changes.
 - Add the output of both migrating and rolling back for all migrations into the MR description.
@@ -145,6 +156,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
     - Ensure it was added in a post-migration.
     - Maintainer: After the merge request is merged, notify Release Managers about it on `#f_upcoming_release` Slack channel.
   - Check consistency with `db/structure.sql` and that migrations are [reversible](migration_style_guide.md#reversibility)
+  - Check that the relevant version files under `db/schema_migrations` were added or removed.
   - Check queries timing (If any): Queries executed in a migration
     need to fit comfortably within `15s` - preferably much less than that - on GitLab.com.
   - For column removals, make sure the column has been [ignored in a previous release](what_requires_downtime.md#dropping-columns)
@@ -178,10 +190,6 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - [Check query plans](understanding_explain_plans.md) and suggest improvements
     to queries (changing the query, schema or adding indexes and similar)
   - General guideline is for queries to come in below 100ms execution time
-  - If queries rely on prior migrations that are not present yet on production
-    (eg indexes, columns), you can use a [one-off instance from the restore
-    pipeline](https://ops.gitlab.net/gitlab-com/gl-infra/gitlab-restore/postgres-gprd)
-    in order to establish a proper testing environment. If you don't have access to this project, reach out to #database on Slack to get advice on how to proceed.
   - Avoid N+1 problems and minimalize the [query count](merge_request_performance_guidelines.md#query-counts).
 
 ### Timing guidelines for migrations
@@ -190,7 +198,8 @@ In general, migrations for a single deploy shouldn't take longer than
 1 hour for GitLab.com. The following guidelines are not hard rules, they were
 estimated to keep migration timing to a minimum.
 
-NOTE: **Note:** Keep in mind that all runtimes should be measured against GitLab.com.
+NOTE: **Note:**
+Keep in mind that all runtimes should be measured against GitLab.com.
 
 | Migration Type | Execution Time Recommended | Notes |
 |----|----|---|

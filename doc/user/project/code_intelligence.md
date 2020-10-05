@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference
 ---
 
@@ -10,7 +13,7 @@ Code Intelligence adds code navigation features common to interactive
 development environments (IDE), including:
 
 - Type signatures and symbol documentation.
-- Go-to definition
+- Go-to definition.
 
 Code Intelligence is built into GitLab and powered by [LSIF](https://lsif.dev/)
 (Language Server Index Format), a file format for precomputed code
@@ -23,10 +26,9 @@ Enable code intelligence for a project by adding a GitLab CI/CD job to the proje
 
 ```yaml
 code_navigation:
-  image: golang:1.14.0
+  image: sourcegraph/lsif-go:v1
   allow_failure: true # recommended
   script:
-    - go get github.com/sourcegraph/lsif-go/cmd/lsif-go
     - lsif-go
   artifacts:
     reports:
@@ -37,7 +39,17 @@ The generated LSIF file must be less than 170MiB.
 
 After the job succeeds, code intelligence data can be viewed while browsing the code:
 
-![Code intelligence](img/code_intelligence_v13_1.png)
+![Code intelligence](img/code_intelligence_v13_4.png)
+
+## Find references
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217392) in GitLab 13.2.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235735) in GitLab 13.4.
+
+To find where a particular object is being used, you can see links to specific lines of code
+under the **References** tab:
+
+![Find references](img/code_intelligence_find_references_v13_3.png)
 
 ## Language support
 

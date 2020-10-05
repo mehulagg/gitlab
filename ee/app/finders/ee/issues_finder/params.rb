@@ -50,6 +50,10 @@ module EE
           params[:epic_id]
         end
       end
+
+      def iterations
+        params[:iteration_id]
+      end
     end
   end
 end

@@ -1,5 +1,8 @@
 ---
 type: howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Enforce Two-factor Authentication (2FA)
@@ -36,8 +39,9 @@ period to `0`.
 
 If you want to enforce 2FA only for certain groups, you can:
 
-1. Enable it in the group's **Settings > General** page.
-1. Optionally specify a grace period as above.
+1. Enable it in the group's **Settings > General** page. Navigate to **Permissions, LFS, 2FA > Two-factor authentication**.
+You can then check the **Require all users in this group to setup Two-factor authentication** option.
+1. You can also specify a grace period in the **Time before enforced** option.
 
 To change this setting, you need to be administrator or owner of the group.
 
@@ -63,6 +67,17 @@ The following are important notes about 2FA:
   groups) the shortest grace period will be used.
 
 ## Disabling 2FA for everyone
+
+CAUTION: **Caution:**
+Disabling 2FA for everyone does not disable the [enforce 2FA for all users](#enforcing-2fa-for-all-users)
+or [enforce 2FA for all users in a group](#enforcing-2fa-for-all-users-in-a-group)
+settings. In addition to the steps in this section, you will need to disable any enforced 2FA
+settings so users aren't asked to set up 2FA again, the next time the user signs in to GitLab.
+Disabling 2FA for everyone does not disable the [enforce 2FA for all users](#enforcing-2fa-for-all-users)
+or [enforce 2FA for all users in a group](#enforcing-2fa-for-all-users-in-a-group)
+settings if they have been configured. In addition to the steps in this section,
+you will need to disable any enforced 2FA settings so users aren't asked to setup
+2FA again when the next login to GitLab.
 
 There may be some special situations where you want to disable 2FA for everyone
 even when forced 2FA is disabled. There is a Rake task for that:

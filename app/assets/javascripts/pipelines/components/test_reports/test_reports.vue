@@ -14,7 +14,7 @@ export default {
     TestSummaryTable,
   },
   computed: {
-    ...mapState(['hasFullReport', 'isLoading', 'selectedSuiteIndex', 'testReports']),
+    ...mapState(['isLoading', 'selectedSuiteIndex', 'testReports']),
     ...mapGetters(['getSelectedSuite']),
     showSuite() {
       return this.selectedSuiteIndex !== null;
@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchFullReport',
+      'fetchTestSuite',
       'fetchSummary',
       'setSelectedSuiteIndex',
       'removeSelectedSuiteIndex',
@@ -40,10 +40,8 @@ export default {
     summaryTableRowClick(index) {
       this.setSelectedSuiteIndex(index);
 
-      // Fetch the full report when the user clicks to see more details
-      if (!this.hasFullReport) {
-        this.fetchFullReport();
-      }
+      // Fetch the test suite when the user clicks to see more details
+      this.fetchTestSuite(index);
     },
     beforeEnterTransition() {
       document.documentElement.style.overflowX = 'hidden';
@@ -57,13 +55,14 @@ export default {
 
 <template>
   <div v-if="isLoading">
-    <gl-loading-icon size="lg" class="gl-mt-3 js-loading-spinner" />
+    <gl-loading-icon size="lg" class="gl-mt-3" />
   </div>
 
   <div
     v-else-if="!isLoading && showTests"
     ref="container"
-    class="tests-detail position-relative js-tests-detail"
+    class="tests-detail position-relative"
+    data-testid="tests-detail"
   >
     <transition
       name="slide"
@@ -87,7 +86,7 @@ export default {
   <div v-else>
     <div class="row gl-mt-3">
       <div class="col-12">
-        <p class="js-no-tests-to-show">{{ s__('TestReports|There are no tests to show.') }}</p>
+        <p data-testid="no-tests-to-show">{{ s__('TestReports|There are no tests to show.') }}</p>
       </div>
     </div>
   </div>

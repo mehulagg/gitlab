@@ -13,6 +13,7 @@ RSpec.describe MergeRequests::RefreshService do
   let(:fork_user) { create(:user) }
 
   let(:source_branch) { 'between-create-delete-modify-move' }
+
   let(:merge_request) do
     create(:merge_request,
       source_project: project,
@@ -20,6 +21,7 @@ RSpec.describe MergeRequests::RefreshService do
       target_branch: 'master',
       target_project: project)
   end
+
   let(:another_merge_request) do
     create(:merge_request,
       source_project: project,
@@ -27,6 +29,7 @@ RSpec.describe MergeRequests::RefreshService do
       target_branch: 'test',
       target_project: project)
   end
+
   let(:forked_merge_request) do
     create(:merge_request,
       source_project: forked_project,
@@ -34,6 +37,7 @@ RSpec.describe MergeRequests::RefreshService do
       target_branch: 'master',
       target_project: project)
   end
+
   let(:oldrev) { TestEnv::BRANCH_SHA[source_branch] }
   let(:newrev) { TestEnv::BRANCH_SHA['after-create-delete-modify-move'] } # Pretend source_branch is now updated
   let(:service) { described_class.new(project, current_user) }
@@ -60,7 +64,89 @@ RSpec.describe MergeRequests::RefreshService do
       end
     end
 
-    describe '#update_approvers' do
+    describe '#update_approvers_for_target_branch_merge_requests' do
+      shared_examples_for 'does not refresh the code owner rules' do
+        specify do
+          expect(::MergeRequests::SyncCodeOwnerApprovalRules).not_to receive(:new)
+          subject
+        end
+      end
+
+      subject { service.execute(oldrev, newrev, "refs/heads/master") }
+
+      let(:enable_code_owner) { true }
+      let(:enable_target_approvers) { true }
+      let!(:protected_branch) { create(:protected_branch, name: 'master', project: project, code_owner_approval_required: true) }
+      let(:newrev) { TestEnv::BRANCH_SHA['with-codeowners'] }
+
+      before do
+        stub_feature_flags(update_target_approvers: enable_target_approvers, code_owners: enable_code_owner)
+        stub_licensed_features(code_owner_approval_required: true)
+      end
+
+      context 'when the feature flags are enabled' do
+        context 'when the branch is protected' do
+          context 'when code owners file is updated' do
+            let(:irrelevant_merge_request) { another_merge_request }
+            let(:relevant_merge_request) { merge_request }
+
+            context 'when not on the merge train' do
+              it 'refreshes the code owner rules for all relevant merge requests' do
+                fake_refresh_service = instance_double(::MergeRequests::SyncCodeOwnerApprovalRules)
+
+                expect(::MergeRequests::SyncCodeOwnerApprovalRules)
+                  .to receive(:new).with(relevant_merge_request).and_return(fake_refresh_service)
+                expect(fake_refresh_service).to receive(:execute)
+
+                expect(::MergeRequests::SyncCodeOwnerApprovalRules)
+                  .not_to receive(:new).with(irrelevant_merge_request)
+
+                subject
+              end
+            end
+
+            context 'when on the merge train' do
+              let(:merge_request) do
+                create(:merge_request,
+                   :on_train,
+                   source_project: project,
+                   source_branch: source_branch,
+                   target_branch: 'master',
+                   target_project: project)
+              end
+
+              it_behaves_like 'does not refresh the code owner rules'
+            end
+          end
+
+          context 'when code owners file is not updated' do
+            let(:newrev) { TestEnv::BRANCH_SHA['after-create-delete-modify-move'] }
+
+            it_behaves_like 'does not refresh the code owner rules'
+          end
+        end
+
+        context 'when the branch is not protected' do
+          let(:protected_branch) { nil }
+
+          it_behaves_like 'does not refresh the code owner rules'
+        end
+      end
+
+      context 'when update_target_approvers is disabled' do
+        let(:enable_code_owner) { false }
+
+        it_behaves_like 'does not refresh the code owner rules'
+      end
+
+      context 'when code_owners is disabled' do
+        let(:enable_target_approvers) { false }
+
+        it_behaves_like 'does not refresh the code owner rules'
+      end
+    end
+
+    describe '#update_approvers_for_source_branch_merge_requests' do
       let(:owner) { create(:user, username: 'default-codeowner') }
       let(:current_user) { merge_request.author }
       let(:service) { described_class.new(project, current_user) }
@@ -89,7 +175,7 @@ RSpec.describe MergeRequests::RefreshService do
       it 'gets called in a specific order' do
         allow_any_instance_of(MergeRequests::BaseService).to receive(:inspect).and_return(true)
         expect(service).to receive(:reload_merge_requests).ordered
-        expect(service).to receive(:update_approvers).ordered
+        expect(service).to receive(:update_approvers_for_source_branch_merge_requests).ordered
         expect(service).to receive(:reset_approvals_for_merge_requests).ordered
 
         subject
@@ -104,7 +190,7 @@ RSpec.describe MergeRequests::RefreshService do
         end
 
         before do
-          project.repository.create_file(owner, 'CODEOWNERS', file, { branch_name: 'test', message: 'codeowners' })
+          project.repository.create_file(owner, 'CODEOWNERS', file, branch_name: 'test', message: 'codeowners')
 
           subject
         end
@@ -125,7 +211,7 @@ RSpec.describe MergeRequests::RefreshService do
           end
 
           it_behaves_like 'creates an approval rule based on current diff' do
-            let(:approval_rules_size) { 5 }
+            let(:approval_rules_size) { 7 }
           end
         end
       end
@@ -257,7 +343,7 @@ RSpec.describe MergeRequests::RefreshService do
         Todo.where(action: Todo::APPROVAL_REQUIRED, target: merge_request)
       end
 
-      context 'push to origin repo source branch' do
+      context 'push to origin repo source branch', :sidekiq_inline do
         let(:notification_service) { spy('notification_service') }
 
         before do
@@ -359,7 +445,7 @@ RSpec.describe MergeRequests::RefreshService do
         end
       end
 
-      context 'resetting approvals if they are enabled' do
+      context 'resetting approvals if they are enabled', :sidekiq_inline do
         context 'when approvals_before_merge is disabled' do
           before do
             project.update(approvals_before_merge: 0)
@@ -402,7 +488,7 @@ RSpec.describe MergeRequests::RefreshService do
           end
         end
 
-        context 'when there are approvals' do
+        context 'when there are approvals', :sidekiq_inline do
           context 'closed merge request' do
             before do
               merge_request.close!

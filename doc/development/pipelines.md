@@ -13,10 +13,38 @@ as much as possible.
 
 ## Overview
 
-### Pipeline types
+Pipelines for the GitLab project are created using the [`workflow:rules` keyword](../ci/yaml/README.md#workflowrules)
+feature of the GitLab CI/CD.
 
-Since we use the [`rules:`](../ci/yaml/README.md#rules) and [`needs:`](../ci/yaml/README.md#needs) keywords extensively,
-we have four main pipeline types which are described below. Note that an MR that includes multiple types of changes would
+Pipelines are always created for the following scenarios:
+
+- `master` branch, including on schedules, pushes, merges, and so on.
+- Merge requests.
+- Tags.
+- Stable, `auto-deploy`, and security branches.
+
+Pipeline creation is also affected by the following CI variables:
+
+- If `$FORCE_GITLAB_CI` is set, pipelines are created.
+- If `$GITLAB_INTERNAL` is not set, pipelines are not created.
+
+No pipeline is created in any other cases (for example, when pushing a branch with no
+MR for it).
+
+The source of truth for these workflow rules is defined in <https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml>.
+
+### Pipelines for Merge Requests
+
+In general, pipelines for an MR fall into one or more of the following types,
+depending on the changes made in the MR:
+
+- [Docs-only MR pipeline](#docs-only-mr-pipeline): This is typically created for an MR that only changes documentation.
+- [Code-only MR pipeline](#code-only-mr-pipeline): This is typically created for an MR that only changes code, either backend or frontend.
+- [Frontend-only MR pipeline](#frontend-only-mr-pipeline): This is typically created for an MR that only changes frontend code.
+- [QA-only MR pipeline](#qa-only-mr-pipeline): This is typically created for an MR that only changes end to end tests related code.
+
+We use the [`rules:`](../ci/yaml/README.md#rules) and [`needs:`](../ci/yaml/README.md#needs) keywords extensively
+to determine the jobs that need to be run in a pipeline. Note that an MR that includes multiple types of changes would
 have a pipelines that include jobs from multiple types (e.g. a combination of docs-only and code-only pipelines).
 
 #### Docs-only MR pipeline
@@ -28,7 +56,7 @@ graph LR
   subgraph "No needed jobs";
     1-1["danger-review (3.5 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-50["docs lint (6.75 minutes)"];
+    1-50["docs lint (9 minutes)"];
     click 1-50 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356757&udv=0"
   end
 ```
@@ -44,21 +72,21 @@ graph RL;
   subgraph "No needed jobs";
     1-1["danger-review (3.5 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-2["build-qa-image (3.4 minutes)"];
+    1-2["build-qa-image (2.4 minutes)"];
     click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914325&udv=0"
-    1-3["compile-test-assets (9.06 minutes)"];
+    1-3["compile-test-assets (8.5 minutes)"];
     click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914317&udv=0"
     1-4["compile-test-assets as-if-foss (8.35 minutes)"];
     click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356616&udv=0"
-    1-5["compile-production-assets (22 minutes)"];
+    1-5["compile-production-assets (19 minutes)"];
     click 1-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914312&udv=0"
-    1-6["setup-test-env (8.22 minutes)"];
+    1-6["setup-test-env (7.4 minutes)"];
     click 1-6 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914315&udv=0"
     1-7["review-stop-failed-deployment"];
     1-8["dependency_scanning"];
     1-9["qa:internal, qa:internal-as-if-foss"];
     1-11["qa:selectors, qa:selectors-as-if-foss"];
-    1-14["retrieve-tests-metadata (1.5 minutes)"];
+    1-14["retrieve-tests-metadata (1.9 minutes)"];
     click 1-14 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356697&udv=0"
     1-15["code_quality"];
     1-16["brakeman-sast"];
@@ -85,18 +113,15 @@ graph RL;
     2_1-1 & 2_1-2 & 2_1-3 & 2_1-4 --> 1-6;
   end
 
-  2_2-2["frontend-fixtures (17.2 minutes)"];
+  2_2-2["frontend-fixtures (16.5 minutes)"];
   class 2_2-2 criticalPath;
   click 2_2-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7910143&udv=0"
-  2_2-3["frontend-fixtures-as-if-foss (8.75 minutes)"];
-  click 2_2-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7910154&udv=0"
   2_2-4["memory-on-boot (7.19 minutes)"];
   click 2_2-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356727&udv=0"
   2_2-5["webpack-dev-server (6.1 minutes)"];
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -120,21 +145,15 @@ graph RL;
   3_1-1["jest (15 minutes)"];
   class 3_1-1 criticalPath;
   click 3_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914204&udv=0"
-  3_1-2["karma (8 minutes)"];
+  3_1-2["karma (4 minutes)"];
   click 3_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914200&udv=0"
-  3_1-3["jest-as-if-foss (19.7 minutes)"];
-  click 3_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914205&udv=0"
-  3_1-4["karma-as-if-foss (7.5 minutes)"];
-  click 3_1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914203&udv=0"
   subgraph "Needs `frontend-fixtures`";
     3_1-1 & 3_1-2 --> 2_2-2;
-    3_1-3 & 3_1-4 --> 2_2-3;
   end
 
-  3_2-1["rspec:coverage (6.5 minutes)"];
+  3_2-1["rspec:coverage (7.5 minutes)"];
   subgraph "Depends on `rspec` jobs";
     3_2-1 -.->|"(don't use needs because of limitations)"| 2_5-1;
-    class 3_2-1 criticalPath;
     click 3_2-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7248745&udv=0"
   end
 
@@ -157,21 +176,21 @@ graph RL;
   subgraph "No needed jobs";
     1-1["danger-review (3.5 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-2["build-qa-image (3.4 minutes)"];
+    1-2["build-qa-image (2.4 minutes)"];
     click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914325&udv=0"
-    1-3["compile-test-assets (9.06 minutes)"];
+    1-3["compile-test-assets (8.5 minutes)"];
     click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914317&udv=0"
     1-4["compile-test-assets as-if-foss (8.35 minutes)"];
     click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356616&udv=0"
-    1-5["compile-production-assets (22 minutes)"];
+    1-5["compile-production-assets (19 minutes)"];
     click 1-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914312&udv=0"
-    1-6["setup-test-env (8.22 minutes)"];
+    1-6["setup-test-env (7.4 minutes)"];
     click 1-6 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914315&udv=0"
     1-7["review-stop-failed-deployment"];
     1-8["dependency_scanning"];
     1-9["qa:internal, qa:internal-as-if-foss"];
     1-11["qa:selectors, qa:selectors-as-if-foss"];
-    1-14["retrieve-tests-metadata (1.5 minutes)"];
+    1-14["retrieve-tests-metadata (1.9 minutes)"];
     click 1-14 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356697&udv=0"
     1-15["code_quality"];
     1-16["brakeman-sast"];
@@ -199,18 +218,15 @@ graph RL;
     2_1-1 & 2_1-2 & 2_1-3 & 2_1-4 --> 1-6;
   end
 
-  2_2-2["frontend-fixtures (17.2 minutes)"];
+  2_2-2["frontend-fixtures (16.5 minutes)"];
   class 2_2-2 criticalPath;
   click 2_2-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7910143&udv=0"
-  2_2-3["frontend-fixtures-as-if-foss (8.75 minutes)"];
-  click 2_2-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7910154&udv=0"
   2_2-4["memory-on-boot (7.19 minutes)"];
   click 2_2-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356727&udv=0"
   2_2-5["webpack-dev-server (6.1 minutes)"];
   click 2_2-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8404303&udv=0"
   subgraph "Needs `setup-test-env` & `compile-test-assets`";
     2_2-2 & 2_2-4 & 2_2-5 --> 1-6 & 1-3;
-    2_2-3 --> 1-6 & 1-4;
   end
 
   2_3-1["build-assets-image (2.5 minutes)"];
@@ -242,21 +258,15 @@ graph RL;
   3_1-1["jest (15 minutes)"];
   class 3_1-1 criticalPath;
   click 3_1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914204&udv=0"
-  3_1-2["karma (8 minutes)"];
+  3_1-2["karma (4 minutes)"];
   click 3_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914200&udv=0"
-  3_1-3["jest-as-if-foss (19.7 minutes)"];
-  click 3_1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914205&udv=0"
-  3_1-4["karma-as-if-foss (7.5 minutes)"];
-  click 3_1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914203&udv=0"
   subgraph "Needs `frontend-fixtures`";
-    3_1-1 & 3_1-3 --> 2_2-2;
-    3_1-2 & 3_1-4 --> 2_2-3;
+    3_1-1 & 3_1-2 --> 2_2-2;
   end
 
-  3_2-1["rspec:coverage (6.5 minutes)"];
+  3_2-1["rspec:coverage (7.5 minutes)"];
   subgraph "Depends on `rspec` jobs";
     3_2-1 -.->|"(don't use needs because of limitations)"| 2_5-1;
-    class 3_2-1 criticalPath;
     click 3_2-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=7248745&udv=0"
   end
 
@@ -297,21 +307,21 @@ graph RL;
   subgraph "No needed jobs";
     1-1["danger-review (3.5 minutes)"];
     click 1-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8100542&udv=0"
-    1-2["build-qa-image (3.4 minutes)"];
+    1-2["build-qa-image (2.4 minutes)"];
     click 1-2 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914325&udv=0"
-    1-3["compile-test-assets (9.06 minutes)"];
+    1-3["compile-test-assets (8.5 minutes)"];
     click 1-3 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914317&udv=0"
     1-4["compile-test-assets as-if-foss (8.35 minutes)"];
     click 1-4 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356616&udv=0"
-    1-5["compile-production-assets (22 minutes)"];
+    1-5["compile-production-assets (19 minutes)"];
     click 1-5 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914312&udv=0"
-    1-6["setup-test-env (8.22 minutes)"];
+    1-6["setup-test-env (7.4 minutes)"];
     click 1-6 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914315&udv=0"
     1-7["review-stop-failed-deployment"];
     1-8["dependency_scanning"];
     1-9["qa:internal, qa:internal-as-if-foss"];
     1-11["qa:selectors, qa:selectors-as-if-foss"];
-    1-14["retrieve-tests-metadata (1.5 minutes)"];
+    1-14["retrieve-tests-metadata (1.9 minutes)"];
     click 1-14 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=8356697&udv=0"
     1-15["code_quality"];
     1-16["brakeman-sast"];
@@ -345,21 +355,64 @@ graph RL;
   end
 ```
 
-### `workflow:rules`
+### Fail-fast pipeline in Merge Requests
 
-We're using the [`workflow:rules` keyword](../ci/yaml/README.md#workflowrules) to
-define default rules to determine whether or not a pipeline is created.
+To provide faster feedback when a Merge Request breaks existing tests, we are experimenting with a
+fail-fast mechanism.
 
-These rules are defined in <https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml>
-and are as follows:
+An `rspec fail-fast` job is added in parallel to all other `rspec` jobs in a Merge
+Request pipeline. This job runs the tests that are directly related to the changes
+in the Merge Request.
 
-1. If `$FORCE_GITLAB_CI` is set, create a pipeline.
-1. For merge requests, create a pipeline.
-1. For `master` branch, create a pipeline (this includes on schedules, pushes, merges, etc.).
-1. For tags, create a pipeline.
-1. If `$GITLAB_INTERNAL` isn't set, don't create a pipeline.
-1. For stable, auto-deploy, and security branches, create a pipeline.
-1. For any other cases (e.g. when pushing a branch with no MR for it), no pipeline is created.
+If any of these tests fail, the `rspec fail-fast` job fails, triggering a
+`fail-pipeline-early` job to run. The `fail-pipeline-early` job:
+
+- Cancels the currently running pipeline and all in-progress jobs.
+- Sets pipeline to have status `failed`.
+
+For example:
+
+```mermaid
+graph LR
+    subgraph "prepare stage";
+        A["detect-tests"]
+    end
+
+    subgraph "test stage";
+        B["jest"];
+        C["rspec migration"];
+        D["rspec unit"];
+        E["rspec integration"];
+        F["rspec system"];
+        G["rspec fail-fast"];
+    end
+
+    subgraph "post-test stage";
+        Z["fail-pipeline-early"];
+    end
+
+    A --"artifact: list of test files"--> G
+    G --"on failure"--> Z
+```
+
+A Merge Request author may choose to opt-out of the fail fast mechanism by doing one of the following:
+
+- Including `[SKIP RSPEC FAIL-FAST]` in the Merge Request title.
+- Starting the `dont-interrupt-me` job found in the `sync` stage of a Merge Request pipeline.
+
+The `rspec fail-fast` is a no-op if there are more than 10 test files related to the
+Merge Request. This prevents `rspec fail-fast` duration from exceeding the average
+`rspec` job duration and defeating its purpose.
+
+This number can be overridden by setting a CI variable named `RSPEC_FAIL_FAST_TEST_FILE_COUNT_THRESHOLD`.
+
+NOTE: **Note:**
+This experiment is only enabled when the CI variable `RSPEC_FAIL_FAST_ENABLED=true` is set.
+
+#### Determining related test files in a Merge Request
+
+The test files related to the Merge Request are determined using the [`test_file_finder`](https://gitlab.com/gitlab-org/ci-cd/test_file_finder) gem.
+We are using a custom mapping between source file to test files, maintained in the `tests.yml` file.
 
 ### PostgreSQL versions testing
 
@@ -405,8 +458,8 @@ of the `gitlab-org/gitlab-foss` project. These jobs are only created in the foll
 - Merge requests which include `RUN AS-IF-FOSS` in their title.
 - Merge requests that changes the CI configuration.
 
-The `* as-if-foss` jobs have the `FOSS_ONLY='1'` variable set and gets their EE-specific
-folders removed before the tests start running.
+The `* as-if-foss` jobs are run in addition to the regular EE-context jobs. They have the `FOSS_ONLY='1'` variable
+set and get their EE-specific folders removed before the tests start running.
 
 The intent is to ensure that a change won't introduce a failure once the `gitlab-org/gitlab` project will be synced to
 the `gitlab-org/gitlab-foss` project.
@@ -502,8 +555,9 @@ overwrites the Git configuration with the appropriate settings to fetch
 from the GitLab repository.
 
 `CI_REPO_CACHE_CREDENTIALS` contains the Google Cloud service account
-JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. These
-credentials are stored in the 1Password GitLab.com Production vault.
+JSON for uploading to the `gitlab-ci-git-repo-cache` bucket. (If you’re a
+GitLab Team Member, find credentials in the
+[GitLab shared 1Password account](https://about.gitlab.com/handbook/security/#1password-for-teams).
 
 Note that this bucket should be located in the same continent as the
 runner, or [network egress charges will apply](https://cloud.google.com/storage/pricing).
@@ -528,14 +582,17 @@ The current stages are:
   later used by the (Helm) Review App deployment (see
   [Review Apps](testing_guide/review_apps.md) for details).
 - `review`: This stage includes jobs that deploy the GitLab and Docs Review Apps.
+- `dast`: This stage includes jobs that run a DAST full scan against the Review App
+that is deployed in stage `review`.
 - `qa`: This stage includes jobs that perform QA tasks against the Review App
-  that is deployed in the previous stage.
+  that is deployed in stage `review`.
 - `post-qa`: This stage includes jobs that build reports or gather data from
   the `qa` stage's jobs (e.g. Review App performance report).
 - `pages`: This stage includes a job that deploys the various reports as
   GitLab Pages (e.g. [`coverage-ruby`](https://gitlab-org.gitlab.io/gitlab/coverage-ruby/),
   [`coverage-javascript`](https://gitlab-org.gitlab.io/gitlab/coverage-javascript/),
-  [`webpack-report`](https://gitlab-org.gitlab.io/gitlab/webpack-report/).
+  and `webpack-report` (found at `https://gitlab-org.gitlab.io/gitlab/webpack-report/`, but there is
+  [an issue with the deployment](https://gitlab.com/gitlab-org/gitlab/-/issues/233458)).
 
 ### Default image
 
@@ -572,7 +629,7 @@ that are scoped to a single [configuration parameter](../ci/yaml/README.md#confi
 | `.static-analysis-cache` | Allows a job to use a default `cache` definition suitable for static analysis tasks. |
 | `.yarn-cache` | Allows a job to use a default `cache` definition suitable for frontend jobs that do a `yarn install`. |
 | `.assets-compile-cache` | Allows a job to use a default `cache` definition suitable for frontend jobs that compile assets. |
-| `.use-pg11` | Allows a job to use the `postgres:11.6` and `redis:alpine` services. |
+| `.use-pg11` | Allows a job to use the `postgres:11.6` and `redis:4.0-alpine` services. |
 | `.use-pg11-ee` | Same as `.use-pg11` but also use the `docker.elastic.co/elasticsearch/elasticsearch:6.4.2` services. |
 | `.use-kaniko` | Allows a job to use the `kaniko` tool to build Docker images. |
 | `.as-if-foss` | Simulate the FOSS project by setting the `FOSS_ONLY='1'` environment variable. |

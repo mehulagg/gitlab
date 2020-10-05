@@ -324,6 +324,12 @@ RSpec.describe Gitlab::Json do
     end
 
     it_behaves_like "json"
+
+    describe "#enable_oj?" do
+      it "returns true" do
+        expect(subject.enable_oj?).to be(true)
+      end
+    end
   end
 
   context "json gem" do
@@ -332,5 +338,105 @@ RSpec.describe Gitlab::Json do
     end
 
     it_behaves_like "json"
+
+    describe "#enable_oj?" do
+      it "returns false" do
+        expect(subject.enable_oj?).to be(false)
+      end
+    end
+  end
+
+  describe Gitlab::Json::GrapeFormatter do
+    subject { described_class.call(obj, env) }
+
+    let(:obj) { { test: true } }
+    let(:env) { {} }
+    let(:result) { "{\"test\":true}" }
+
+    context "oj is enabled" do
+      before do
+        stub_feature_flags(oj_json: true)
+      end
+
+      context "grape_gitlab_json flag is enabled" do
+        before do
+          stub_feature_flags(grape_gitlab_json: true)
+        end
+
+        it "generates JSON" do
+          expect(subject).to eq(result)
+        end
+
+        it "uses Gitlab::Json" do
+          expect(Gitlab::Json).to receive(:dump).with(obj)
+
+          subject
+        end
+      end
+
+      context "grape_gitlab_json flag is disabled" do
+        before do
+          stub_feature_flags(grape_gitlab_json: false)
+        end
+
+        it "generates JSON" do
+          expect(subject).to eq(result)
+        end
+
+        it "uses Grape::Formatter::Json" do
+          expect(Grape::Formatter::Json).to receive(:call).with(obj, env)
+
+          subject
+        end
+      end
+    end
+
+    context "oj is disabled" do
+      before do
+        stub_feature_flags(oj_json: false)
+      end
+
+      it "generates JSON" do
+        expect(subject).to eq(result)
+      end
+
+      it "uses Grape::Formatter::Json" do
+        expect(Grape::Formatter::Json).to receive(:call).with(obj, env)
+
+        subject
+      end
+    end
+  end
+
+  describe Gitlab::Json::LimitedEncoder do
+    subject { described_class.encode(obj, limit: 8.kilobytes) }
+
+    context 'when object size is acceptable' do
+      let(:obj) { { test: true } }
+
+      it 'returns json string' do
+        is_expected.to eq("{\"test\":true}")
+      end
+    end
+
+    context 'when object is too big' do
+      let(:obj) { [{ test: true }] * 1000 }
+
+      it 'raises LimitExceeded error' do
+        expect { subject }.to raise_error(
+          Gitlab::Json::LimitedEncoder::LimitExceeded
+        )
+      end
+    end
+
+    context 'when json_limited_encoder is disabled' do
+      let(:obj) { [{ test: true }] * 1000 }
+
+      it 'does not raise an error' do
+        stub_feature_flags(json_limited_encoder: false)
+
+        expect { subject }.not_to raise_error
+      end
+    end
   end
 end

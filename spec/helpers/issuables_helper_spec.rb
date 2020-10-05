@@ -160,7 +160,7 @@ RSpec.describe IssuablesHelper do
       end
 
       before do
-        user.destroy
+        user.destroy!
       end
 
       it 'returns "Ghost user" as edited_by' do
@@ -197,7 +197,9 @@ RSpec.describe IssuablesHelper do
         initialTitleText: issue.title,
         initialDescriptionHtml: '<p dir="auto">issue text</p>',
         initialDescriptionText: 'issue text',
-        initialTaskStatus: '0 of 0 tasks completed'
+        initialTaskStatus: '0 of 0 tasks completed',
+        issueType: 'issue',
+        iid: issue.iid.to_s
       }
       expect(helper.issuable_initial_data(issue)).to match(hash_including(expected_data))
     end
@@ -304,6 +306,38 @@ RSpec.describe IssuablesHelper do
     end
   end
 
+  describe '#reviewer_sidebar_data' do
+    let(:user) { create(:user) }
+
+    subject { helper.reviewer_sidebar_data(user, merge_request: merge_request) }
+
+    context 'without merge_request' do
+      let(:merge_request) { nil }
+
+      it 'returns hash of reviewer data' do
+        is_expected.to eql({
+          avatar_url: user.avatar_url,
+          name: user.name,
+          username: user.username
+        })
+      end
+    end
+
+    context 'with merge_request' do
+      let(:merge_request) { build(:merge_request) }
+
+      where(can_merge: [true, false])
+
+      with_them do
+        before do
+          allow(merge_request).to receive(:can_be_merged_by?).and_return(can_merge)
+        end
+
+        it { is_expected.to include({ can_merge: can_merge })}
+      end
+    end
+  end
+
   describe '#issuable_squash_option?' do
     using RSpec::Parameterized::TableSyntax
 
@@ -325,6 +359,14 @@ RSpec.describe IssuablesHelper do
 
         expect(helper.issuable_squash_option?(issuable, project)).to eq(expectation)
       end
+    end
+  end
+
+  describe '#sidebar_milestone_tooltip_label' do
+    it 'escapes HTML in the milestone title' do
+      milestone = build(:milestone, title: '&lt;img onerror=alert(1)&gt;')
+
+      expect(helper.sidebar_milestone_tooltip_label(milestone)).to eq('&lt;img onerror=alert(1)&gt;<br/>Milestone')
     end
   end
 end

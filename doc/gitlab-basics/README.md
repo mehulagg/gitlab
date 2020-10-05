@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 comments: false
 type: index
 ---
@@ -28,7 +31,7 @@ The following are guides to basic GitLab functionality:
 - [Add a file](add-file.md), to add new files to a project's repository.
 - [Create an issue](../user/project/issues/managing_issues.md#create-a-new-issue),
   to start collaborating within a project.
-- [Create a merge request](add-merge-request.md), to request changes made in a branch
+- [Create a merge request](../user/project/merge_requests/creating_merge_requests.md), to request changes made in a branch
   be merged into a project's repository.
 - See how these features come together in the [GitLab Flow introduction video](https://youtu.be/InKNIvky2KE)
   and [GitLab Flow page](../topics/gitlab_flow.md).

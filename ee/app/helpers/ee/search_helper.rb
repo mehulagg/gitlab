@@ -3,7 +3,8 @@ module EE
   module SearchHelper
     extend ::Gitlab::Utils::Override
 
-    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users].freeze
+    SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users epics].freeze
+    PLACEHOLDER = '_PLACEHOLDER_'
 
     override :search_filter_input_options
     def search_filter_input_options(type, placeholder = _('Search or filter results...'))
@@ -19,12 +20,34 @@ module EE
       options
     end
 
+    override :recent_items_autocomplete
+    def recent_items_autocomplete(term)
+      super + recent_epics_autocomplete(term)
+    end
+
     override :search_blob_title
     def search_blob_title(project, path)
       if @project
         path
       else
         (project.full_name + ': ' + content_tag(:i, path)).html_safe
+      end
+    end
+
+    override :project_autocomplete
+    def project_autocomplete
+      return super unless @project && @project.feature_available?(:repository)
+
+      super + [{ category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }]
+    end
+
+    override :search_entries_scope_label
+    def search_entries_scope_label(scope, count)
+      case scope
+      when 'epics'
+        ns_('SearchResults|epic', 'SearchResults|epics', count)
+      else
+        super
       end
     end
 
@@ -45,24 +68,63 @@ module EE
       end
     end
 
-    def revert_to_basic_search_filter_url
-      search_params = params
-        .permit(::SearchHelper::SEARCH_PERMITTED_PARAMS)
-        .merge(basic_search: true)
+    override :highlight_and_truncate_issue
+    def highlight_and_truncate_issue(issue, search_term, search_highlight)
+      return super unless search_service.use_elasticsearch? && search_highlight[issue.id]&.description.present?
 
-      search_path(search_params)
+      # We use Elasticsearch highlighting for results from Elasticsearch
+      Truncato.truncate(search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
     end
 
-    def show_switch_to_basic_search?(search_service)
-      return false unless ::Feature.enabled?(:switch_to_basic_search, default_enabled: false)
-      return false unless search_service.use_elasticsearch?
+    def advanced_search_status_marker(project)
+      ref = params[:repository_ref]
+      enabled = project.nil? || ref.blank? || ref == project.default_branch
 
-      return true if @project
+      tags = {}
+      tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
+                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         rel: :noopener,
+                                                         target: '_blank')
+                                                     .split(PLACEHOLDER)
 
-      search_service.scope.in?(SWITCH_TO_BASIC_SEARCHABLE_TABS)
+      unless enabled
+        tags[:ref_elem] = tag.a(href: '#', class: 'ref-truncated has-tooltip', data: { title: ref }) do
+          tag.code(ref, class: 'gl-white-space-nowrap')
+        end
+        tags[:default_branch] = tag.code(project.default_branch)
+        tags[:default_branch_link_start], tags[:default_branch_link_end] = link_to(PLACEHOLDER,
+                                                                                   search_path(safe_params.except(:repository_ref)),
+                                                                                   data: { testid: 'es-search-default-branch' })
+                                                                             .split(PLACEHOLDER)
+      end
+
+      # making sure all the tags are marked `html_safe`
+      message =
+        if enabled
+          _('%{doc_link_start}Advanced search%{doc_link_end} is enabled.')
+        else
+          _('%{doc_link_start}Advanced search%{doc_link_end} is disabled since %{ref_elem} is not the default branch; %{default_branch_link_start}search on %{default_branch} instead%{default_branch_link_end}.')
+        end % tags.transform_values(&:html_safe)
+
+      # wrap it inside a `div` for testing purposes
+      tag.div(message.html_safe, data: { testid: 'es-status-marker', enabled: enabled })
     end
 
     private
+
+    def recent_epics_autocomplete(term)
+      return [] unless current_user
+
+      ::Gitlab::Search::RecentEpics.new(user: current_user).search(term).map do |e|
+        {
+          category: "Recent epics",
+          id: e.id,
+          label: search_result_sanitize(e.title),
+          url: epic_path(e),
+          avatar_url: e.group.avatar_url || ''
+        }
+      end
+    end
 
     def search_multiple_assignees?(type)
       context = @project.presence || @group.presence || :dashboard
@@ -75,7 +137,6 @@ module EE
       @current_user &&
         @show_snippets &&
         ::Gitlab.com? &&
-        ::Feature.enabled?(:restricted_snippet_scope_search, default_enabled: true) &&
         ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: nil)
     end
   end

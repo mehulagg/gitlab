@@ -50,6 +50,6 @@ RSpec.describe GroupSaml::Identity::DestroyService do
   it 'logs an audit event' do
     expect do
       subject.execute
-    end.to change { SecurityEvent.count }.by(1)
+    end.to change { AuditEvent.count }.by(1)
   end
 end

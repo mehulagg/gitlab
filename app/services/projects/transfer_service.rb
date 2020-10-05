@@ -55,9 +55,17 @@ module Projects
         raise TransferError.new(s_('TransferProject|Project cannot be transferred, because tags are present in its container registry'))
       end
 
+      if project.has_packages?(:npm) && !new_namespace_has_same_root?(project)
+        raise TransferError.new(s_("TransferProject|Root namespace can't be updated if project has NPM packages"))
+      end
+
       attempt_transfer_transaction
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    def new_namespace_has_same_root?(project)
+      new_namespace.root_ancestor == project.namespace.root_ancestor
+    end
 
     def attempt_transfer_transaction
       Project.transaction do
@@ -80,8 +88,9 @@ module Projects
         # Move uploads
         move_project_uploads(project)
 
-        # Move pages
-        Gitlab::PagesTransfer.new.move_project(project.path, @old_namespace.full_path, @new_namespace.full_path)
+        # If a project is being transferred to another group it means it can already
+        # have shared runners enabled but we need to check whether the new group allows that.
+        project.shared_runners_enabled = false if project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
 
         project.old_path_with_namespace = @old_path
 
@@ -89,6 +98,8 @@ module Projects
 
         execute_system_hooks
       end
+
+      move_pages(project)
     rescue Exception # rubocop:disable Lint/RescueException
       rollback_side_effects
       raise
@@ -171,6 +182,13 @@ module Projects
         @old_namespace.full_path,
         @new_namespace.full_path
       )
+    end
+
+    def move_pages(project)
+      return unless project.pages_deployed?
+
+      transfer = Gitlab::PagesTransfer.new.async
+      transfer.move_project(project.path, @old_namespace.full_path, @new_namespace.full_path)
     end
 
     def old_wiki_repo_path

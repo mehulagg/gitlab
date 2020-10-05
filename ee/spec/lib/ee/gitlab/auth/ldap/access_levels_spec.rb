@@ -35,6 +35,7 @@ RSpec.describe EE::Gitlab::Auth::Ldap::AccessLevels do
           uid=jamesdoe,ou=users,dc=example,dc=com
         }
       end
+
       let(:master_dns) do
         %w{
           uid=johndoe,ou=users,dc=example,dc=com

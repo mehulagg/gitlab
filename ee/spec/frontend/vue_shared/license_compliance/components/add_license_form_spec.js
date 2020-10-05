@@ -1,48 +1,55 @@
 import Vue from 'vue';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, mount } from '@vue/test-utils';
 import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/add_license_form.vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
 import { LICENSE_APPROVAL_STATUS } from 'ee/vue_shared/license_compliance/constants';
 
-describe('AddLicenseForm', () => {
-  const Component = Vue.extend(LicenseIssueBody);
-  let vm;
+const KNOWN_LICENSES = [{ name: 'BSD' }, { name: 'Apache' }];
 
-  const findSubmitButton = () => vm.$el.querySelector('.js-submit');
-  const findCancelButton = () => vm.$el.querySelector('.js-cancel');
+let wrapper;
+let vm;
+
+const createComponent = (props = {}, mountFn = shallowMount) => {
+  wrapper = mountFn(LicenseIssueBody, { propsData: { knownLicenses: KNOWN_LICENSES, ...props } });
+  vm = wrapper.vm;
+};
+
+describe('AddLicenseForm', () => {
+  const findSubmitButton = () => wrapper.find('.js-submit');
+  const findCancelButton = () => wrapper.find('.js-cancel');
 
   beforeEach(() => {
-    vm = mountComponent(Component);
+    createComponent();
   });
 
   afterEach(() => {
-    vm.$destroy();
+    vm = undefined;
+    wrapper.destroy();
   });
 
   describe('interaction', () => {
-    it('clicking the Submit button submits the data and closes the form', done => {
+    it('clicking the Submit button submits the data and closes the form', async () => {
       const name = 'LICENSE_TEST';
+
+      createComponent({}, mount);
       jest.spyOn(vm, '$emit').mockImplementation(() => {});
-      vm.approvalStatus = LICENSE_APPROVAL_STATUS.ALLOWED;
-      vm.licenseName = name;
+      wrapper.setData({ approvalStatus: LICENSE_APPROVAL_STATUS.ALLOWED, licenseName: name });
 
-      Vue.nextTick(() => {
-        const linkEl = findSubmitButton();
-        linkEl.click();
+      await Vue.nextTick();
 
-        expect(vm.$emit).toHaveBeenCalledWith('addLicense', {
-          newStatus: LICENSE_APPROVAL_STATUS.ALLOWED,
-          license: { name },
-        });
+      const linkEl = findSubmitButton();
+      linkEl.trigger('click');
 
-        done();
+      expect(vm.$emit).toHaveBeenCalledWith('addLicense', {
+        newStatus: LICENSE_APPROVAL_STATUS.ALLOWED,
+        license: { name },
       });
     });
 
     it('clicking the Cancel button closes the form', () => {
+      createComponent({}, mount);
       const linkEl = findCancelButton();
       jest.spyOn(vm, '$emit').mockImplementation(() => {});
-      linkEl.click();
+      linkEl.trigger('click');
 
       expect(vm.$emit).toHaveBeenCalledWith('closeForm');
     });
@@ -51,23 +58,20 @@ describe('AddLicenseForm', () => {
   describe('computed', () => {
     describe('submitDisabled', () => {
       it('is true if the approvalStatus is empty', () => {
-        vm.licenseName = 'FOO';
-        vm.approvalStatus = '';
+        wrapper.setData({ licenseName: 'FOO', approvalStatus: '' });
 
         expect(vm.submitDisabled).toBe(true);
       });
 
       it('is true if the licenseName is empty', () => {
-        vm.licenseName = '';
-        vm.approvalStatus = LICENSE_APPROVAL_STATUS.ALLOWED;
+        wrapper.setData({ licenseName: '', approvalStatus: LICENSE_APPROVAL_STATUS.ALLOWED });
 
         expect(vm.submitDisabled).toBe(true);
       });
 
       it('is true if the entered license is duplicated', () => {
-        vm = mountComponent(Component, { managedLicenses: [{ name: 'FOO' }] });
-        vm.licenseName = 'FOO';
-        vm.approvalStatus = LICENSE_APPROVAL_STATUS.ALLOWED;
+        createComponent({ managedLicenses: [{ name: 'FOO' }] });
+        wrapper.setData({ licenseName: 'FOO', approvalStatus: LICENSE_APPROVAL_STATUS.ALLOWED });
 
         expect(vm.submitDisabled).toBe(true);
       });
@@ -75,15 +79,15 @@ describe('AddLicenseForm', () => {
 
     describe('isInvalidLicense', () => {
       it('is true if the entered license is duplicated', () => {
-        vm = mountComponent(Component, { managedLicenses: [{ name: 'FOO' }] });
-        vm.licenseName = 'FOO';
+        createComponent({ managedLicenses: [{ name: 'FOO' }] });
+        wrapper.setData({ licenseName: 'FOO' });
 
         expect(vm.isInvalidLicense).toBe(true);
       });
 
       it('is false if the entered license is unique', () => {
-        vm = mountComponent(Component, { managedLicenses: [{ name: 'FOO' }] });
-        vm.licenseName = 'FOO2';
+        createComponent({ managedLicenses: [{ name: 'FOO' }] });
+        wrapper.setData({ licenseName: 'FOO2' });
 
         expect(vm.isInvalidLicense).toBe(false);
       });
@@ -92,98 +96,99 @@ describe('AddLicenseForm', () => {
 
   describe('template', () => {
     it('renders the license select dropdown', () => {
-      const dropdownElement = vm.$el.querySelector('#js-license-dropdown');
+      const dropdownElement = wrapper.find('#js-license-dropdown');
 
-      expect(dropdownElement).not.toBeNull();
+      expect(dropdownElement.exists()).toBe(true);
     });
 
     it('renders the license approval radio buttons dropdown', () => {
-      const radioButtonParents = vm.$el.querySelectorAll('.form-check');
+      const radioButtonParents = wrapper.findAll('.form-check');
 
       expect(radioButtonParents).toHaveLength(2);
-      expect(radioButtonParents[0].innerText.trim()).toBe('Allow');
-      expect(radioButtonParents[0].querySelector('.form-check-input')).not.toBeNull();
-      expect(radioButtonParents[1].innerText.trim()).toBe('Deny');
-      expect(radioButtonParents[1].querySelector('.form-check-input')).not.toBeNull();
+      expect(radioButtonParents.at(0).text()).toBe('Allow');
+      expect(
+        radioButtonParents
+          .at(0)
+          .find('.form-check-input')
+          .exists(),
+      ).toBe(true);
+      expect(radioButtonParents.at(1).text()).toBe('Deny');
+      expect(
+        radioButtonParents
+          .at(1)
+          .find('.form-check-input')
+          .exists(),
+      ).toBe(true);
     });
 
-    it('renders error text, if there is a duplicate license', done => {
-      vm = mountComponent(Component, { managedLicenses: [{ name: 'FOO' }] });
-      vm.licenseName = 'FOO';
-      Vue.nextTick(() => {
-        const feedbackElement = vm.$el.querySelector('.invalid-feedback');
+    it('renders error text, if there is a duplicate license', async () => {
+      createComponent({ managedLicenses: [{ name: 'FOO' }] });
+      wrapper.setData({ licenseName: 'FOO' });
+      await Vue.nextTick();
 
-        expect(feedbackElement).not.toBeNull();
-        expect(feedbackElement.classList).toContain('d-block');
-        expect(feedbackElement.innerText.trim()).toBe(
-          'This license already exists in this project.',
-        );
-        done();
-      });
+      const feedbackElement = wrapper.find('.invalid-feedback');
+
+      expect(feedbackElement.exists()).toBe(true);
+      expect(feedbackElement.classes()).toContain('d-block');
+      expect(feedbackElement.text()).toBe('This license already exists in this project.');
     });
 
-    it('shows radio button descriptions, if licenseComplianceDeniesMr feature flag is enabled', done => {
-      const wrapper = shallowMount(LicenseIssueBody, {
+    it('shows radio button descriptions, if licenseComplianceDeniesMr feature flag is enabled', async () => {
+      wrapper = shallowMount(LicenseIssueBody, {
         propsData: {
           managedLicenses: [{ name: 'FOO' }],
+          knownLicenses: KNOWN_LICENSES,
         },
         provide: {
           glFeatures: { licenseComplianceDeniesMr: true },
         },
       });
 
-      Vue.nextTick(() => {
-        const descriptionElement = wrapper.findAll('.text-secondary');
+      await Vue.nextTick();
 
-        expect(descriptionElement.at(0).text()).toBe(
-          'Acceptable license to be used in the project',
-        );
+      const descriptionElement = wrapper.findAll('.text-secondary');
 
-        expect(descriptionElement.at(1).text()).toBe(
-          'Disallow merge request if detected and will instruct developer to remove',
-        );
+      expect(descriptionElement.at(0).text()).toBe('Acceptable license to be used in the project');
 
-        done();
+      expect(descriptionElement.at(1).text()).toBe(
+        'Disallow merge request if detected and will instruct developer to remove',
+      );
+    });
+
+    it('does not show radio button descriptions, if licenseComplianceDeniesMr feature flag is disabled', () => {
+      createComponent({ managedLicenses: [{ name: 'FOO' }] });
+      wrapper.setData({ licenseName: 'FOO' });
+      return Vue.nextTick().then(() => {
+        const formCheckElements = wrapper.findAll('.form-check');
+
+        expect(formCheckElements.at(0).element).toMatchSnapshot();
+        expect(formCheckElements.at(1).element).toMatchSnapshot();
       });
     });
 
-    it('does not show radio button descriptions, if licenseComplianceDeniesMr feature flag is disabled', done => {
-      vm = mountComponent(Component, { managedLicenses: [{ name: 'FOO' }] });
-      vm.licenseName = 'FOO';
-      Vue.nextTick(() => {
-        const formCheckElements = vm.$el.querySelectorAll('.form-check');
+    it('disables submit, if the form is invalid', async () => {
+      wrapper.setData({ licenseName: '' });
+      await Vue.nextTick();
 
-        expect(formCheckElements[0]).toMatchSnapshot();
-        expect(formCheckElements[1]).toMatchSnapshot();
-        done();
-      });
+      expect(vm.submitDisabled).toBe(true);
+
+      const submitButton = findSubmitButton();
+
+      expect(submitButton.exists()).toBe(true);
+      expect(submitButton.props().disabled).toBe(true);
     });
 
-    it('disables submit, if the form is invalid', done => {
-      vm.licenseName = '';
-      Vue.nextTick(() => {
-        expect(vm.submitDisabled).toBe(true);
+    it('disables submit and cancel while a new license is being added', async () => {
+      wrapper.setProps({ loading: true });
+      await Vue.nextTick();
 
-        const submitButton = findSubmitButton();
+      const submitButton = findSubmitButton();
+      const cancelButton = findCancelButton();
 
-        expect(submitButton).not.toBeNull();
-        expect(submitButton.disabled).toBe(true);
-        done();
-      });
-    });
-
-    it('disables submit and cancel while a new license is being added', done => {
-      vm.loading = true;
-      Vue.nextTick(() => {
-        const submitButton = findSubmitButton();
-        const cancelButton = findCancelButton();
-
-        expect(submitButton).not.toBeNull();
-        expect(submitButton.disabled).toBe(true);
-        expect(cancelButton).not.toBeNull();
-        expect(cancelButton.disabled).toBe(true);
-        done();
-      });
+      expect(submitButton.exists()).toBe(true);
+      expect(submitButton.props().disabled).toBe(true);
+      expect(cancelButton.exists()).toBe(true);
+      expect(cancelButton.props().disabled).toBe(true);
     });
   });
 });

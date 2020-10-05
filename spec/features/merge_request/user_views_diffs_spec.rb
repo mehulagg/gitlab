@@ -6,11 +6,11 @@ RSpec.describe 'User views diffs', :js do
   let(:merge_request) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
+
   let(:project) { create(:project, :public, :repository) }
   let(:view) { 'inline' }
 
   before do
-    stub_feature_flags(diffs_batch_load: false)
     visit(diffs_project_merge_request_path(project, merge_request, view: view))
 
     wait_for_requests
@@ -61,7 +61,7 @@ RSpec.describe 'User views diffs', :js do
   end
 
   it 'expands all diffs' do
-    first('#a5cc2925ca8258af241be7e5b0381edf30266302 .js-file-title').click
+    first('.js-file-title').click
 
     expect(page).to have_button('Expand all')
 

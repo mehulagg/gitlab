@@ -36,7 +36,7 @@ spec:
     - namespaceSelector:
         matchLabels:
           project: myproject`,
-    created_timestamp: '2020-04-14T00:08:30Z',
+    creation_timestamp: '2020-04-14T00:08:30Z',
     is_enabled: true,
   },
 ];

@@ -6,15 +6,15 @@ RSpec.describe Security::VulnerabilitiesFinder do
   let_it_be(:project) { create(:project) }
 
   let_it_be(:vulnerability1) do
-    create(:vulnerability, :with_findings, severity: :low, report_type: :sast, state: :detected, project: project)
+    create(:vulnerability, :with_findings, :with_issue_links, severity: :low, report_type: :sast, state: :detected, project: project)
   end
 
   let_it_be(:vulnerability2) do
-    create(:vulnerability, :with_findings, severity: :medium, report_type: :dast, state: :dismissed, project: project)
+    create(:vulnerability, :with_findings, resolved_on_default_branch: true, severity: :high, report_type: :dependency_scanning, state: :confirmed, project: project)
   end
 
   let_it_be(:vulnerability3) do
-    create(:vulnerability, :with_findings, severity: :high, report_type: :dependency_scanning, state: :confirmed, project: project)
+    create(:vulnerability, :with_findings, severity: :medium, report_type: :dast, state: :dismissed, project: project)
   end
 
   let(:filters) { {} }
@@ -38,7 +38,7 @@ RSpec.describe Security::VulnerabilitiesFinder do
     let(:filters) { { report_type: %w[sast dast] } }
 
     it 'only returns vulnerabilities matching the given report types' do
-      is_expected.to contain_exactly(vulnerability1, vulnerability2)
+      is_expected.to contain_exactly(vulnerability1, vulnerability3)
     end
   end
 
@@ -46,7 +46,7 @@ RSpec.describe Security::VulnerabilitiesFinder do
     let(:filters) { { severity: %w[medium high] } }
 
     it 'only returns vulnerabilities matching the given severities' do
-      is_expected.to contain_exactly(vulnerability2, vulnerability3)
+      is_expected.to contain_exactly(vulnerability3, vulnerability2)
     end
   end
 
@@ -54,15 +54,15 @@ RSpec.describe Security::VulnerabilitiesFinder do
     let(:filters) { { state: %w[detected confirmed] } }
 
     it 'only returns vulnerabilities matching the given states' do
-      is_expected.to contain_exactly(vulnerability1, vulnerability3)
+      is_expected.to contain_exactly(vulnerability1, vulnerability2)
     end
   end
 
   context 'when filtered by scanner' do
-    let(:filters) { { scanner: [vulnerability1.finding_scanner_external_id, vulnerability3.finding_scanner_external_id] } }
+    let(:filters) { { scanner: [vulnerability1.finding_scanner_external_id, vulnerability2.finding_scanner_external_id] } }
 
     it 'only returns vulnerabilities matching the given scanners' do
-      is_expected.to contain_exactly(vulnerability1, vulnerability3)
+      is_expected.to contain_exactly(vulnerability1, vulnerability2)
     end
   end
 
@@ -74,11 +74,67 @@ RSpec.describe Security::VulnerabilitiesFinder do
     let(:vulnerable) { group }
 
     before do
-      project.update(namespace: group)
+      project.update!(namespace: group)
     end
 
     it 'only returns vulnerabilities matching the given projects' do
       is_expected.to contain_exactly(another_vulnerability)
+    end
+  end
+
+  context 'when sorted' do
+    let(:filters) { { sort: method } }
+
+    context 'ascending by severity' do
+      let(:method) { :severity_asc }
+
+      it { is_expected.to eq([vulnerability1, vulnerability3, vulnerability2]) }
+    end
+
+    context 'descending by severity' do
+      let(:method) { :severity_desc }
+
+      it { is_expected.to eq([vulnerability2, vulnerability3, vulnerability1]) }
+    end
+  end
+
+  context 'when filtered by has_issues argument' do
+    let(:filters) { { has_issues: has_issues } }
+
+    context 'when has_issues is set to true' do
+      let(:has_issues) { true }
+
+      it 'only returns vulnerabilities that have issues' do
+        is_expected.to contain_exactly(vulnerability1)
+      end
+    end
+
+    context 'when has_issues is set to false' do
+      let(:has_issues) { false }
+
+      it 'only returns vulnerabilities that does not have issues' do
+        is_expected.to contain_exactly(vulnerability2, vulnerability3)
+      end
+    end
+  end
+
+  context 'when filtered by has_resolution argument' do
+    let(:filters) { { has_resolution: has_resolution } }
+
+    context 'when has_resolution is set to true' do
+      let(:has_resolution) { true }
+
+      it 'only returns vulnerabilities that have resolution' do
+        is_expected.to contain_exactly(vulnerability2)
+      end
+    end
+
+    context 'when has_resolution is set to false' do
+      let(:has_resolution) { false }
+
+      it 'only returns vulnerabilities that do not have resolution' do
+        is_expected.to contain_exactly(vulnerability1, vulnerability3)
+      end
     end
   end
 

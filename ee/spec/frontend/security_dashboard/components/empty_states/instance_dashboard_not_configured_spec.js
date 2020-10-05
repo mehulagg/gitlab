@@ -4,6 +4,7 @@ import DashboardNotConfigured from 'ee/security_dashboard/components/empty_state
 
 describe('first class instance security dashboard empty state', () => {
   let wrapper;
+  const instanceDashboardSettingsPath = '/path/to/dashboard/settings';
   const dashboardDocumentation = '/path/to/dashboard/documentation';
   const emptyStateSvgPath = '/placeholder.svg';
 
@@ -12,6 +13,7 @@ describe('first class instance security dashboard empty state', () => {
       provide: {
         dashboardDocumentation,
         emptyStateSvgPath,
+        instanceDashboardSettingsPath,
       },
     });
 
@@ -36,16 +38,7 @@ describe('first class instance security dashboard empty state', () => {
     expect(findLink().attributes('href')).toBe(dashboardDocumentation);
   });
 
-  it('contains a GlButton', () => {
-    expect(findButton().exists()).toBe(true);
-  });
-
-  it('emits `handleAddProjectsClick` on button click', async () => {
-    const eventName = 'handleAddProjectsClick';
-
-    findButton().trigger('click');
-    await wrapper.vm.$nextTick();
-
-    expect(wrapper.emitted()).toHaveProperty(eventName);
+  it('contains a GlButton with a link to settings page', () => {
+    expect(findButton().attributes('href')).toBe(instanceDashboardSettingsPath);
   });
 });

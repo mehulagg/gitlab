@@ -198,10 +198,11 @@ RSpec.describe Releases::CreateService do
         released_at: released_at
       }.compact
     end
+
     let(:last_release) { project.releases.last }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     subject { service.execute }

@@ -36,13 +36,14 @@ export default {
 
 <template>
   <div>
-    <on-demand-scans-form
-      v-if="showForm"
-      :help-page-path="helpPagePath"
-      :project-path="projectPath"
-      :default-branch="defaultBranch"
-      @cancel="showForm = false"
-    />
+    <template v-if="showForm">
+      <on-demand-scans-form
+        :help-page-path="helpPagePath"
+        :project-path="projectPath"
+        :default-branch="defaultBranch"
+        @cancel="showForm = false"
+      />
+    </template>
     <on-demand-scans-empty-state
       v-else
       :help-page-path="helpPagePath"

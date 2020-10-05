@@ -7,11 +7,22 @@ export default () => ({
   state: {
     discussions: [],
     discussionSortOrder: ASC,
+    persistSortOrder: true,
     convertedDisscussionIds: [],
     targetNoteHash: null,
     lastFetchedAt: null,
     currentDiscussionId: null,
     batchSuggestionsInfo: [],
+    currentlyFetchingDiscussions: false,
+    /**
+     * selectedCommentPosition & selectedCommentPosition structures are the same as `position.line_range`:
+     * {
+     *  start: { line_code: string, new_line: number, old_line:number, type: string },
+     *  end: { line_code: string, new_line: number, old_line:number, type: string },
+     * }
+     */
+    selectedCommentPosition: null,
+    selectedCommentPositionHover: null,
 
     // View layer
     isToggleStateButtonLoading: false,
@@ -35,6 +46,7 @@ export default () => ({
     resolvableDiscussionsCount: 0,
     unresolvedDiscussionsCount: 0,
     descriptionVersions: {},
+    isTimelineEnabled: false,
   },
   actions,
   getters,

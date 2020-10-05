@@ -87,6 +87,8 @@ module QA
 
       def api_delete_path
         "/users/#{id}"
+      rescue NoValueError
+        "/users/#{fetch_id(username)}"
       end
 
       def api_get_path
@@ -146,7 +148,7 @@ module QA
       end
 
       def fetching_own_data?
-        user&.username == username || Runtime::User.username == username
+        api_user&.username == username || Runtime::User.username == username
       end
     end
   end

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import EmptyRule from 'ee/approvals/components/empty_rule.vue';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 
 describe('Empty Rule', () => {
   let wrapper;
@@ -25,7 +25,7 @@ describe('Empty Rule', () => {
         allowMultiRule: true,
         canEdit: true,
       });
-      expect(wrapper.find(GlDeprecatedButton).exists()).toBe(false);
+      expect(wrapper.find(GlButton).exists()).toBe(false);
     });
   });
 
@@ -36,7 +36,7 @@ describe('Empty Rule', () => {
         canEdit: true,
       });
 
-      expect(wrapper.find(GlDeprecatedButton).exists()).toBe(true);
+      expect(wrapper.find(GlButton).exists()).toBe(true);
     });
 
     it('does not display "Add approval rule" button if not allowed to edit', () => {
@@ -44,7 +44,7 @@ describe('Empty Rule', () => {
         allowMultiRule: true,
         canEdit: false,
       });
-      expect(wrapper.find(GlDeprecatedButton).exists()).toBe(false);
+      expect(wrapper.find(GlButton).exists()).toBe(false);
     });
   });
 });

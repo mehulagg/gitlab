@@ -44,7 +44,6 @@ export default ({
   setupForCompany,
   fullName,
   newUser,
-  onboardingIssuesExperimentEnabled,
   groupData = '[]',
 }) => {
   const availablePlans = parsePlanData(planData);
@@ -58,7 +57,6 @@ export default ({
     availablePlans,
     selectedPlan: determineSelectedPlan(planId, availablePlans),
     isNewUser,
-    isOnboardingIssuesExperimentEnabled: parseBoolean(onboardingIssuesExperimentEnabled),
     fullName,
     groupData: groups,
     selectedGroup: groupId,

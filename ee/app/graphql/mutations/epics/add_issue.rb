@@ -11,7 +11,7 @@ module Mutations
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,
-               description: 'The project the issue belongs to'
+               description: 'The full path of the project the issue belongs to'
 
       argument :issue_iid, GraphQL::STRING_TYPE,
                required: true,

@@ -50,12 +50,12 @@ Have a look at some of our most popular topics:
 ## The entire DevOps Lifecycle
 
 GitLab is the first single application for software development, security,
-and operations that enables [Concurrent DevOps](https://about.gitlab.com/concurrent-devops/),
+and operations that enables [Concurrent DevOps](https://about.gitlab.com/topics/concurrent-devops/),
 making the software lifecycle faster and radically improving the speed of business.
 
 GitLab provides solutions for [each of the stages of the DevOps lifecycle](https://about.gitlab.com/stages-devops-lifecycle/):
 
-![DevOps Stages](img/devops-stages.png)
+![DevOps Stages](img/devops-stages-13_3.png)
 
 GitLab is like a top-of-the-line kitchen for making software. As the executive
 chef, you decide what software you want to serve. Using your recipe, GitLab handles
@@ -71,10 +71,11 @@ The following sections provide links to documentation for each DevOps stage:
 | [Create](#create)       | Source code, data creation, and management features.        |
 | [Verify](#verify)       | Testing, code quality, and continuous integration features. |
 | [Package](#package)     | Docker container registry.                                  |
+| [Secure](#secure)       | Security capability features.                               |
 | [Release](#release)     | Application release and delivery features.                  |
 | [Configure](#configure) | Application and infrastructure configuration tools.         |
 | [Monitor](#monitor)     | Application monitoring and metrics features.                |
-| [Secure](#secure)       | Security capability features.                               |
+| [Defend](#defend)       | Protection against security intrusions.                     |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
@@ -91,8 +92,8 @@ The following documentation relates to the DevOps **Manage** stage:
 | Manage topics                                                                         | Description                                                                                                                                                                                                                  |
 |:--------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Authentication and<br/>Authorization](administration/auth/README.md) **(CORE ONLY)** | Supported authentication and authorization providers.                                                                                                                                                                        |
-| [GitLab Value Stream Analytics](user/project/cycle_analytics.md)                      | Measure the time it takes to go from an [idea to production](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#from-idea-to-production-with-gitlab) for each project you have. |
-| [Instance Statistics](user/instance_statistics/index.md)                              | Discover statistics on how many GitLab features you use and user activity.                                                                                                                                                   |
+| [GitLab Value Stream Analytics](user/analytics/value_stream_analytics.md)                      | Measure the time it takes to go from an [idea to production](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#from-idea-to-production-with-gitlab) for each project you have. |
+| [Instance-level Analytics](user/admin_area/analytics/index.md)                              | Discover statistics on how many GitLab features you use and user activity.                                                                                                                                                   |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
@@ -120,12 +121,12 @@ The following documentation relates to the DevOps **Plan** stage:
 | [Milestones](user/project/milestones/index.md)                                                                                                                                                                                                                     | Set milestones for delivery of issues and merge requests, with optional due date.                                                                |
 | [Project Issue Board](user/project/issue_board.md)                                                                                                                                                                                                                 | Display issues on a Scrum or Kanban board.                                                                                                       |
 | [Quick Actions](user/project/quick_actions.md)                                                                                                                                                                                                                     | Shortcuts for common actions on issues or merge requests, replacing the need to click buttons or use dropdowns in GitLab's UI.                   |
-| [Related Issues](user/project/issues/related_issues.md) **(STARTER)**                                                                                                                                                                                              | Create a relationship between issues.                                                                                                            |
+| [Related Issues](user/project/issues/related_issues.md)                                                                                                                                                                                                          | Create a relationship between issues.                                                                                                            |
 | [Requirements Management](user/project/requirements/index.md) **(ULTIMATE)** | Check your products against a set of criteria. |
 | [Roadmap](user/group/roadmap/index.md) **(ULTIMATE)**                                                                                                                                                                                                              | Visualize epic timelines.                                                                                                                        |
-| [Service Desk](user/project/service_desk.md) **(STARTER)**                                                                                                                                                                                                         | A simple way to allow people to create issues in your GitLab instance without needing their own user account.                                    |
+| [Service Desk](user/project/service_desk.md)                                                                                                                                                                                                         | A simple way to allow people to create issues in your GitLab instance without needing their own user account.                                    |
 | [Time Tracking](user/project/time_tracking.md)                                                                                                                                                                                                                         | Track time spent on issues and merge requests.                                                                                                   |
-| [Todos](user/todos.md)                                                                                                                                                                                                                                         | Keep track of work requiring attention with a chronological list displayed on a simple dashboard.                                                |
+| [To-Do List](user/todos.md)                                                                                                                                                                                                                                         | Keep track of work requiring attention with a chronological list displayed on a simple dashboard.                                                |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
@@ -148,16 +149,17 @@ The following documentation relates to the DevOps **Create** stage:
 
 | Create topics - Projects and Groups                                                                                                                                                              | Description                                                                                      |
 |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
-| [Advanced global search](user/search/advanced_global_search.md) **(STARTER)**                                                                                                                    | Leverage Elasticsearch for faster, more advanced code search across your entire GitLab instance. |
+| [Advanced search](user/search/advanced_global_search.md) **(STARTER)**                                                                                                                    | Leverage Elasticsearch for faster, more advanced code search across your entire GitLab instance. |
 | [Advanced syntax search](user/search/advanced_search_syntax.md) **(STARTER)**                                                                                                                    | Use advanced queries for more targeted search results.                                           |
 | [Contribution analytics](user/group/contribution_analytics/index.md) **(STARTER)**                                                                                                               | See detailed statistics of group contributors.                                                   |
 | [Create](gitlab-basics/create-project.md) and [fork](gitlab-basics/fork-project.md) projects, and<br/>[import and export projects<br/>between instances](user/project/settings/import_export.md) | Create, duplicate, and move projects.                                                            |
 | [File locking](user/project/file_lock.md) **(PREMIUM)**                                                                                                                                          | Lock files to avoid merge conflicts.                                                             |
 | [GitLab Pages](user/project/pages/index.md)                                                                                                                                                      | Build, test, and deploy your static website with GitLab Pages.                                   |
 | [Groups](user/group/index.md) and [Subgroups](user/group/subgroups/index.md)                                                                                                                     | Organize your projects in groups.                                                                |
-| [Issues Analytics](user/group/issues_analytics/index.md) **(PREMIUM)**                                                                                                                           | Check how many issues were created per month.                                                    |
+| [Issue Analytics](user/group/issues_analytics/index.md) **(PREMIUM)**                                                                                                                           | Check how many issues were created per month.                                                    |
+| [Merge Request Analytics](user/analytics/merge_request_analytics.md) **(PREMIUM)**                                                                                                                           | Check your throughput productivity - how many merge requests were merged per month.                                                    |
 | [Projects](user/project/index.md), including [project access](public_access/public_access.md)<br/>and [settings](user/project/settings/index.md)                                                 | Host source code, and control your project's visibility and set configuration.                   |
-| [Search through GitLab](user/search/index.md)                                                                                                                                                    | Search for issues, merge requests, projects, groups, and todos.                                  |
+| [Search through GitLab](user/search/index.md)                                                                                                                                                    | Search for issues, merge requests, projects, groups, and to-dos.                                  |
 | [Snippets](user/snippets.md)                                                                                                                                                                     | Snippets allow you to create little bits of code.                                                |
 | [Web IDE](user/project/web_ide/index.md)                                                                                                                                                         | Edit files within GitLab's user interface.                                                       |
 | [Static Site Editor](user/project/static_site_editor/index.md)                                                                                                                                   | Edit content on static websites.                                                                 |
@@ -196,11 +198,11 @@ The following documentation relates to the DevOps **Create** stage:
 
 | Create topics - Merge Requests                                                                                                              | Description                                                                                                                           |
 |:--------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------|
-| [Checking out merge requests locally](user/project/merge_requests/reviewing_and_managing_merge_requests.md#checkout-merge-requests-locally) | Tips for working with merge requests locally.                                                                                         |
+| [Checking out merge requests locally](user/project/merge_requests/reviewing_and_managing_merge_requests.md#checkout-merge-requests-locally-through-the-head-ref) | Tips for working with merge requests locally.                                                                                         |
 | [Cherry-picking](user/project/merge_requests/cherry_pick_changes.md)                                                                        | Use GitLab for cherry-picking changes.                                                                                                |
 | [Merge request thread resolution](user/discussions/index.md#moving-a-single-thread-to-a-new-issue)                                          | Resolve threads, move threads in a merge request to an issue, and only allow merge requests to be merged if all threads are resolved. |
 | [Merge requests](user/project/merge_requests/index.md)                                                                                      | Merge request management.                                                                                                             |
-| [Work In Progress "WIP" merge requests](user/project/merge_requests/work_in_progress_merge_requests.md)                                     | Prevent merges of work-in-progress merge requests.                                                                                    |
+| [**Draft** merge requests](user/project/merge_requests/work_in_progress_merge_requests.md)                                                      | Prevent merges of draft merge requests.                                                                                               |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
@@ -212,7 +214,8 @@ The following documentation relates to the DevOps **Create** stage:
 
 | Create topics - Integration and Automation                                    | Description                                                                                                            |
 |:------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------|
-| [GitLab API](api/README.md)                                                   | Integrate GitLab via a simple and powerful API.                                                                        |
+| [GitLab REST API](api/README.md)                                              | Integrate with GitLab using our REST API. |
+| [GitLab GraphQL API](api/graphql/index.md)                                    | Integrate with GitLab using our GraphQL API. |
 | [GitLab Integration](integration/README.md)                                   | Integrate with multiple third-party services with GitLab to allow external issue trackers and external authentication. |
 | [GitLab Webhooks](user/project/integrations/webhooks.md)                      | Let GitLab notify you when new code has been pushed to your project.                                                   |
 | [Jira Development Panel](integration/jira_development_panel.md) **(PREMIUM)** | See GitLab information in the Jira Development Panel.                                                                  |
@@ -239,9 +242,9 @@ The following documentation relates to the DevOps **Verify** stage:
 
 | Verify topics                                                                     | Description                                                                                             |
 |:----------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------|
-| [Code Quality reports](user/project/merge_requests/code_quality.md) **(STARTER)** | Analyze source code quality.                                                                            |
+| [Code Quality reports](user/project/merge_requests/code_quality.md)               | Analyze source code quality.                                                                            |
 | [GitLab CI/CD](ci/README.md)                                                      | Explore the features and capabilities of Continuous Integration with GitLab.                            |
-| [JUnit test reports](ci/junit_test_reports.md)                                    | Display JUnit test reports on merge requests.                                                           |
+| [Unit test reports](ci/unit_test_reports.md)                                      | Display Unit test reports on merge requests.                                                           |
 | [Multi-project pipelines](ci/multi_project_pipelines.md) **(PREMIUM)**            | Visualize entire pipelines that span multiple projects, including all cross-project inter-dependencies. |
 | [Pipeline Graphs](ci/pipelines/index.md#visualize-pipelines)                      | Visualize builds.                                                                                       |
 | [Review Apps](ci/review_apps/index.md)                                            | Preview changes to your application right from a merge request.                                         |
@@ -264,15 +267,39 @@ The following documentation relates to the DevOps **Package** stage:
 |:----------------------------------------------------------------|:-------------------------------------------------------|
 | [Container Registry](user/packages/container_registry/index.md)   | The GitLab Container Registry enables every project in GitLab to have its own space to store [Docker](https://www.docker.com/) images. |
 | [Dependency Proxy](user/packages/dependency_proxy/index.md) **(PREMIUM)** | The GitLab Dependency Proxy sets up a local proxy for frequently used upstream images/packages. |
-| [Conan Repository](user/packages/conan_repository/index.md) **(PREMIUM)** | The GitLab Conan Repository enables every project in GitLab to have its own space to store [Conan](https://conan.io/) packages. |
-| [Maven Repository](user/packages/maven_repository/index.md) **(PREMIUM)** | The GitLab Maven Repository enables every project in GitLab to have its own space to store [Maven](https://maven.apache.org/) packages. |
-| [NPM Registry](user/packages/npm_registry/index.md) **(PREMIUM)**  | The GitLab NPM Registry enables every project in GitLab to have its own space to store [NPM](https://www.npmjs.com/) packages. |
+| [Conan Repository](user/packages/conan_repository/index.md) | The GitLab Conan Repository enables every project in GitLab to have its own space to store [Conan](https://conan.io/) packages. |
+| [Maven Repository](user/packages/maven_repository/index.md) | The GitLab Maven Repository enables every project in GitLab to have its own space to store [Maven](https://maven.apache.org/) packages. |
+| [NPM Registry](user/packages/npm_registry/index.md) | The GitLab NPM Registry enables every project in GitLab to have its own space to store [NPM](https://www.npmjs.com/) packages. |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
     Back to Overview <i class="fa fa-angle-double-up" aria-hidden="true"></i>
   </a>
 </div>
+
+### Secure
+
+Check your application for security vulnerabilities that may lead to unauthorized access, data
+leaks, or denial of service. GitLab can perform static and dynamic tests on your application's code,
+looking for known flaws and reporting them in the merge request. You can then fix flaws prior to
+merge. Security teams can use dashboards to get a high-level view on projects and groups, and start
+remediation processes when needed.
+
+The following documentation relates to the DevOps **Secure** stage:
+
+| Secure topics                                                                                         | Description                                                            |
+|:------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------|
+| [Compliance Dashboard](user/compliance/compliance_dashboard/index.md) **(ULTIMATE)**        | View the most recent Merge Request activity in a group.                |
+| [Container Scanning](user/application_security/container_scanning/index.md) **(ULTIMATE)**            | Use Clair to scan Docker images for known vulnerabilities.             |
+| [Dependency List](user/application_security/dependency_list/index.md) **(ULTIMATE)**                  | View your project's dependencies and their known vulnerabilities.      |
+| [Dependency Scanning](user/application_security/dependency_scanning/index.md) **(ULTIMATE)**          | Analyze your dependencies for known vulnerabilities.                   |
+| [Dynamic Application Security Testing (DAST)](user/application_security/dast/index.md) **(ULTIMATE)** | Analyze running web applications for known vulnerabilities.            |
+| [Group Security Dashboard](user/application_security/security_dashboard/index.md#group-security-dashboard) **(ULTIMATE)**      | View vulnerabilities in all the projects in a group and its subgroups. |
+| [Instance Security Center](user/application_security/security_dashboard/index.md#instance-security-center) **(ULTIMATE)**      | View vulnerabilities in all the projects you're interested in. |
+| [License Compliance](user/compliance/license_compliance/index.md) **(ULTIMATE)**            | Search your project's dependencies for their licenses.                 |
+| [Pipeline Security](user/application_security/security_dashboard/index.md#pipeline-security) **(ULTIMATE)**    | View the security reports for your project's pipelines.               |
+| [Project Security Dashboard](user/application_security/security_dashboard/index.md#project-security-dashboard) **(ULTIMATE)**    | View the latest security reports for your project.                     |
+| [Static Application Security Testing (SAST)](user/application_security/sast/index.md) **(ULTIMATE)**  | Analyze source code for known vulnerabilities.                         |
 
 ### Release
 
@@ -344,7 +371,7 @@ The following documentation relates to the DevOps **Monitor** stage:
 | [Health check](user/admin_area/monitoring/health_check.md)                                      | GitLab provides liveness and readiness probes to indicate service health and reachability to required services.                          |
 | [Prometheus project integration](user/project/integrations/prometheus.md)                       | Configure the Prometheus integration per project and monitor your CI/CD environments.                                                    |
 | [Prometheus metrics](user/project/integrations/prometheus_library/index.md)                     | Let Prometheus collect metrics from various services, like Kubernetes, NGINX, NGINX Ingress controller, HAProxy, and Amazon Cloud Watch. |
-| [Incident management](user/incident_management/index.md)                     | Use GitLab to help you better respond to incidents that may occur in your systems. |
+| [Incident management](operations/incident_management/index.md)                     | Use GitLab to help you better respond to incidents that may occur in your systems. |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
@@ -352,29 +379,22 @@ The following documentation relates to the DevOps **Monitor** stage:
   </a>
 </div>
 
-### Secure
+### Defend
 
-Check your application for security vulnerabilities that may lead to unauthorized access,
-data leaks, and denial of services. GitLab will perform static and dynamic tests on the
-code of your application, looking for known flaws and report them in the merge request
-so you can fix them before merging. Security teams can use dashboards to get a
-high-level view on projects and groups, and start remediation processes when needed.
+GitLab Defend enables organizations to proactively protect cloud-native environments by providing
+context-aware technologies to reduce overall security risk. Defend is a natural extension of your
+existing operation's practices and provides security visibility across the entire DevSecOps
+lifecycle. This visibility empowers your organization to apply DevSecOps best practices from the
+first line of code written and extends all the way through to greater monitoring and protection for
+your applications that are deployed in production.
 
-The following documentation relates to the DevOps **Secure** stage:
+The following documentation relates to the DevOps **Defend** stage:
 
-| Secure topics                                                                                         | Description                                                            |
+| Defend topics                                                                                         | Description                                                            |
 |:------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------|
-| [Compliance Dashboard](user/compliance/compliance_dashboard/index.md) **(ULTIMATE)**        | View the most recent Merge Request activity in a group.                |
-| [Container Scanning](user/application_security/container_scanning/index.md) **(ULTIMATE)**            | Use Clair to scan Docker images for known vulnerabilities.             |
-| [Dependency List](user/application_security/dependency_list/index.md) **(ULTIMATE)**                  | View your project's dependencies and their known vulnerabilities.      |
-| [Dependency Scanning](user/application_security/dependency_scanning/index.md) **(ULTIMATE)**          | Analyze your dependencies for known vulnerabilities.                   |
-| [Dynamic Application Security Testing (DAST)](user/application_security/dast/index.md) **(ULTIMATE)** | Analyze running web applications for known vulnerabilities.            |
-| [Group Security Dashboard](user/application_security/security_dashboard/index.md#group-security-dashboard) **(ULTIMATE)**      | View vulnerabilities in all the projects in a group and its subgroups. |
-| [Instance Security Dashboard](user/application_security/security_dashboard/index.md#instance-security-dashboard) **(ULTIMATE)**      | View vulnerabilities in all the projects you're interested in. |
-| [License Compliance](user/compliance/license_compliance/index.md) **(ULTIMATE)**            | Search your project's dependencies for their licenses.                 |
-| [Pipeline Security](user/application_security/security_dashboard/index.md#pipeline-security) **(ULTIMATE)**    | View the security reports for your project's pipelines.               |
-| [Project Security Dashboard](user/application_security/security_dashboard/index.md#project-security-dashboard) **(ULTIMATE)**    | View the latest security reports for your project.                     |
-| [Static Application Security Testing (SAST)](user/application_security/sast/index.md) **(ULTIMATE)**  | Analyze source code for known vulnerabilities.                         |
+| [Web Application Firewall with ModSecurity](user/compliance/compliance_dashboard/index.md)  | Filter, monitor, and block HTTP traffic to and from a web application. |
+| [Container Host Security](user/clusters/applications.md#install-falco-using-gitlab-cicd)                   | Detect and respond to security threats at the Kubernetes, network, and host level. |
+| [Container Network Security](user/clusters/applications.md#install-cilium-using-gitlab-cicd)               |  Detect and block unauthorized network traffic between pods and to/from the internet.|
 
 ## New to Git and GitLab?
 
@@ -450,7 +470,8 @@ There are many ways to integrate with GitLab, including:
 
 | Topic                                                      | Description                                     |
 |:-----------------------------------------------------------|:------------------------------------------------|
-| [GitLab API](api/README.md)                                | Integrate GitLab via a simple and powerful API. |
+| [GitLab REST API](api/README.md)                           | Integrate with GitLab using our REST API. |
+| [GitLab GraphQL API](api/graphql/index.md)                 | Integrate with GitLab using our GraphQL API. |
 | [Integrations and automation](#integration-and-automation) | All GitLab integration and automation options.  |
 
 <div align="right">

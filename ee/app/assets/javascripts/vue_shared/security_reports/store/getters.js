@@ -30,12 +30,21 @@ export const groupedDependencyText = ({ dependencyScanning }) =>
     messages.DEPENDENCY_SCANNING_IS_LOADING,
   );
 
+export const groupedCoverageFuzzingText = ({ coverageFuzzing }) =>
+  groupedReportText(
+    coverageFuzzing,
+    messages.COVERAGE_FUZZING,
+    messages.COVERAGE_FUZZING_HAS_ERROR,
+    messages.COVERAGE_FUZZING_IS_LOADING,
+  );
+
 export const summaryCounts = ({
   containerScanning,
   dast,
   dependencyScanning,
   sast,
   secretScanning,
+  coverageFuzzing,
 } = {}) => {
   const allNewVulns = [
     ...containerScanning.newIssues,
@@ -43,6 +52,7 @@ export const summaryCounts = ({
     ...dependencyScanning.newIssues,
     ...sast.newIssues,
     ...secretScanning.newIssues,
+    ...coverageFuzzing.newIssues,
   ];
 
   return countVulnerabilities(allNewVulns);
@@ -107,54 +117,64 @@ export const dependencyScanningStatusIcon = ({ dependencyScanning }) =>
 export const secretScanningStatusIcon = ({ secretScanning }) =>
   statusIcon(secretScanning.isLoading, secretScanning.hasError, secretScanning.newIssues.length);
 
+export const coverageFuzzingStatusIcon = ({ coverageFuzzing }) =>
+  statusIcon(coverageFuzzing.isLoading, coverageFuzzing.hasError, coverageFuzzing.newIssues.length);
+
 export const areReportsLoading = state =>
   state.sast.isLoading ||
   state.dast.isLoading ||
   state.containerScanning.isLoading ||
   state.dependencyScanning.isLoading ||
-  state.secretScanning.isLoading;
+  state.secretScanning.isLoading ||
+  state.coverageFuzzing.isLoading;
 
 export const areAllReportsLoading = state =>
   state.sast.isLoading &&
   state.dast.isLoading &&
   state.containerScanning.isLoading &&
   state.dependencyScanning.isLoading &&
-  state.secretScanning.isLoading;
+  state.secretScanning.isLoading &&
+  state.coverageFuzzing.isLoading;
 
 export const allReportsHaveError = state =>
   state.sast.hasError &&
   state.dast.hasError &&
   state.containerScanning.hasError &&
   state.dependencyScanning.hasError &&
-  state.secretScanning.hasError;
+  state.secretScanning.hasError &&
+  state.coverageFuzzing.hasError;
 
 export const anyReportHasError = state =>
   state.sast.hasError ||
   state.dast.hasError ||
   state.containerScanning.hasError ||
   state.dependencyScanning.hasError ||
-  state.secretScanning.hasError;
+  state.secretScanning.hasError ||
+  state.coverageFuzzing.hasError;
 
 export const noBaseInAllReports = state =>
   !state.sast.hasBaseReport &&
   !state.dast.hasBaseReport &&
   !state.containerScanning.hasBaseReport &&
   !state.dependencyScanning.hasBaseReport &&
-  !state.secretScanning.hasBaseReport;
+  !state.secretScanning.hasBaseReport &&
+  !state.coverageFuzzing.hasBaseReport;
 
 export const anyReportHasIssues = state =>
   state.sast.newIssues.length > 0 ||
   state.dast.newIssues.length > 0 ||
   state.containerScanning.newIssues.length > 0 ||
   state.dependencyScanning.newIssues.length > 0 ||
-  state.secretScanning.newIssues.length > 0;
+  state.secretScanning.newIssues.length > 0 ||
+  state.coverageFuzzing.newIssues.length > 0;
 
 export const isBaseSecurityReportOutOfDate = state =>
   state.sast.baseReportOutofDate ||
   state.dast.baseReportOutofDate ||
   state.containerScanning.baseReportOutofDate ||
   state.dependencyScanning.baseReportOutofDate ||
-  state.secretScanning.baseReportOutofDate;
+  state.secretScanning.baseReportOutofDate ||
+  state.coverageFuzzing.baseReportOutofDate;
 
 export const canCreateIssue = state => Boolean(state.createVulnerabilityFeedbackIssuePath);
 
@@ -163,6 +183,3 @@ export const canCreateMergeRequest = state =>
 
 export const canDismissVulnerability = state =>
   Boolean(state.createVulnerabilityFeedbackDismissalPath);
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -1,8 +1,10 @@
 <script>
-import eventHub from '../event_hub';
+/* eslint-disable vue/no-v-html */
+import { mapGetters } from 'vuex';
 import { capitalize, lowerCase, isEmpty } from 'lodash';
-import { __, sprintf } from '~/locale';
 import { GlFormGroup, GlFormCheckbox, GlFormInput, GlFormSelect, GlFormTextarea } from '@gitlab/ui';
+import eventHub from '../event_hub';
+import { __, sprintf } from '~/locale';
 
 export default {
   name: 'DynamicField',
@@ -59,6 +61,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isInheriting']),
     isCheckbox() {
       return this.type === 'checkbox';
     },
@@ -107,6 +110,7 @@ export default {
         id: this.fieldId,
         name: this.fieldName,
         state: this.valid,
+        readonly: this.isInheriting,
       };
     },
     valid() {
@@ -142,12 +146,15 @@ export default {
     </template>
 
     <template v-if="isCheckbox">
-      <input :name="fieldName" type="hidden" value="false" />
-      <gl-form-checkbox v-model="model" v-bind="sharedProps">
+      <input :name="fieldName" type="hidden" :value="model || false" />
+      <gl-form-checkbox :id="fieldId" v-model="model" :disabled="isInheriting">
         {{ humanizedTitle }}
       </gl-form-checkbox>
     </template>
-    <gl-form-select v-else-if="isSelect" v-model="model" v-bind="sharedProps" :options="options" />
+    <template v-else-if="isSelect">
+      <input type="hidden" :name="fieldName" :value="model" />
+      <gl-form-select :id="fieldId" v-model="model" :options="options" :disabled="isInheriting" />
+    </template>
     <gl-form-textarea
       v-else-if="isTextarea"
       v-model="model"

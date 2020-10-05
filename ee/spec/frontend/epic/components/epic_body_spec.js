@@ -7,19 +7,17 @@ import createStore from 'ee/epic/store';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { initialRequest } from 'jest/issue_show/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import axios from '~/lib/utils/axios_utils';
 import { mockEpicMeta, mockEpicData } from '../mock_data';
 
 describe('EpicBodyComponent', () => {
+  useMockIntersectionObserver();
+
   let vm;
   let mock;
 
   beforeEach(() => {
-    window.IntersectionObserver = class {
-      disconnect = jest.fn();
-      observe = jest.fn();
-    };
-
     mock = new MockAdapter(axios);
     mock.onGet(`${TEST_HOST}/realtime_changes`).reply(200, initialRequest);
 
@@ -31,22 +29,21 @@ describe('EpicBodyComponent', () => {
     vm = mountComponentWithStore(Component, {
       store,
     });
+
+    jest.advanceTimersByTime(5);
   });
 
   afterEach(() => {
-    delete window.IntersectionObserver;
     mock.restore();
     vm.$destroy();
   });
 
   describe('template', () => {
-    it('renders component container element with classes `issuable-details` & `content-block`', () => {
-      expect(vm.$el.classList.contains('issuable-details')).toBe(true);
-      expect(vm.$el.classList.contains('content-block')).toBe(true);
-    });
-
-    it('renders epic body container element with class `detail-page-description`', () => {
-      expect(vm.$el.querySelector('.detail-page-description')).not.toBeNull();
+    it('renders epic body container element with class `detail-page-description` & `issuable-details` & `content-block`', () => {
+      const el = vm.$el.querySelector('.detail-page-description');
+      expect(el).not.toBeNull();
+      expect(el.classList.contains('issuable-details')).toBe(true);
+      expect(el.classList.contains('content-block')).toBe(true);
     });
 
     it('renders epic body elements', () => {

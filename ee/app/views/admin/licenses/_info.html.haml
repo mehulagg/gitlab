@@ -1,5 +1,3 @@
-- return unless local_assigns.fetch(:license)
-
 .row
   .col-md-6
     .card
@@ -18,6 +16,13 @@
         %li
           %span.light= _('Plan:')
           %strong= @license.plan.capitalize
+          - unless @license.ultimate?
+            = ' - '
+            = link_to _('How to upgrade'),
+              help_page_path('subscriptions/self_managed/index.md', anchor: 'upgrade-your-subscription-tier'),
+              class: 'inline-link',
+              target: :_blank,
+              rel: :noreferrer
         %li
           %span.light= _('Uploaded:')
           %strong= time_ago_with_tooltip @license.created_at
@@ -26,18 +31,7 @@
           %strong= time_ago_with_tooltip @license.starts_at
         %li
           %span.light
-            - if @license.expired?
-              = _('Expired:')
-            - else
-              = _('Expires:')
-          - if @license.will_expire? && !@license.expired?
-            - if @license.trial?
-              %strong.has-tooltip{ title: @license.expires_at.to_formatted_s(:long), data: { placement: 'top' } }
-                = _('Free trial will expire in %{days}' % { days: pluralize(@license.remaining_days, 'day') })
-            - else
-              %strong= time_ago_with_tooltip(@license.expires_at)
-          - else
-            %strong= _('Never')
+            = render 'license_status'
 
           - if @license.expired?
             %span.badge.badge-danger.float-right
@@ -53,7 +47,7 @@
       .card-header.bg-info.text-white
         = _('Download license')
       .card-body
-        %p= _('Your license will be included in your GitLab backup and will survive upgrades, so in normal usage you should never need to re-upload your <code>.gitlab-license</code> file.').html_safe
+        %p= html_escape(_('Your license will be included in your GitLab backup and will survive upgrades, so in normal usage you should never need to re-upload your %{code_open}.gitlab-license%{code_close} file.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
         %p= _('Still, we recommend keeping a backup saved somewhere. Otherwise, if you ever need it and have lost it, you will need to request GitLab Inc. to send it to you again.')
         %br
         = link_to _('Download license'), download_admin_license_path, class: 'btn btn-info'

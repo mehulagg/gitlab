@@ -6,6 +6,7 @@ class CommitStatus < ApplicationRecord
   include AfterCommitQueue
   include Presentable
   include EnumWithNil
+  include BulkInsertableAssociations
 
   self.table_name = 'ci_builds'
 
@@ -30,6 +31,8 @@ class CommitStatus < ApplicationRecord
   scope :failed_but_allowed, -> do
     where(allow_failure: true, status: [:failed, :canceled])
   end
+
+  scope :order_id_desc, -> { order('ci_builds.id DESC') }
 
   scope :exclude_ignored, -> do
     # We want to ignore failed but allowed to fail jobs.
@@ -76,9 +79,9 @@ class CommitStatus < ApplicationRecord
     merge(or_conditions)
   end
 
-  # We use `CommitStatusEnums.failure_reasons` here so that EE can more easily
+  # We use `Enums::CommitStatus.failure_reasons` here so that EE can more easily
   # extend this `Hash` with new values.
-  enum_with_nil failure_reason: ::CommitStatusEnums.failure_reasons
+  enum_with_nil failure_reason: Enums::CommitStatus.failure_reasons
 
   ##
   # We still create some CommitStatuses outside of CreatePipelineService.
@@ -99,9 +102,7 @@ class CommitStatus < ApplicationRecord
     # will not be refreshed to pick the change
     self.processed_will_change!
 
-    if !::Gitlab::Ci::Features.atomic_processing?(project)
-      self.processed = nil
-    elsif latest?
+    if latest?
       self.processed = false # force refresh of all dependent ones
     elsif retried?
       self.processed = true # retried are considered to be already processed
@@ -163,8 +164,7 @@ class CommitStatus < ApplicationRecord
       next unless commit_status.project
 
       commit_status.run_after_commit do
-        schedule_stage_and_pipeline_update
-
+        PipelineProcessWorker.perform_async(pipeline_id)
         ExpireJobCacheWorker.perform_async(id)
       end
     end
@@ -185,14 +185,6 @@ class CommitStatus < ApplicationRecord
     select(:name)
   end
 
-  def self.status_for_prior_stages(index, project:)
-    before_stage(index).latest.slow_composite_status(project: project) || 'success'
-  end
-
-  def self.status_for_names(names, project:)
-    where(name: names).latest.slow_composite_status(project: project) || 'success'
-  end
-
   def self.update_as_processed!
     # Marks items as processed
     # we do not increase `lock_version`, as we are the one
@@ -209,7 +201,19 @@ class CommitStatus < ApplicationRecord
   end
 
   def group_name
-    name.to_s.gsub(%r{\d+[\s:/\\]+\d+\s*}, '').strip
+    # 'rspec:linux: 1/10' => 'rspec:linux'
+    common_name = name.to_s.gsub(%r{\d+[\s:\/\\]+\d+\s*}, '')
+
+    if ::Gitlab::Ci::Features.one_dimensional_matrix_enabled?
+      # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux'
+      common_name.gsub!(%r{: \[.*\]\s*\z}, '')
+    else
+      # 'rspec:linux: [aws, max memory]' => 'rspec:linux', 'rspec:linux: [aws]' => 'rspec:linux: [aws]'
+      common_name.gsub!(%r{: \[.*, .*\]\s*\z}, '')
+    end
+
+    common_name.strip!
+    common_name
   end
 
   def failed_but_allowed?
@@ -284,21 +288,6 @@ class CommitStatus < ApplicationRecord
 
   def unrecoverable_failure?
     script_failure? || missing_dependency_failure? || archived_failure? || scheduler_failure? || data_integrity_failure?
-  end
-
-  def schedule_stage_and_pipeline_update
-    if ::Gitlab::Ci::Features.atomic_processing?(project)
-      # Atomic Processing requires only single Worker
-      PipelineProcessWorker.perform_async(pipeline_id, [id])
-    else
-      if complete? || manual?
-        PipelineProcessWorker.perform_async(pipeline_id, [id])
-      else
-        PipelineUpdateWorker.perform_async(pipeline_id)
-      end
-
-      StageUpdateWorker.perform_async(stage_id)
-    end
   end
 end
 

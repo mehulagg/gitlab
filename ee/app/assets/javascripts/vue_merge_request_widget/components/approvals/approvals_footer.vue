@@ -1,13 +1,12 @@
 <script>
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import ApprovalsList from './approvals_list.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlDeprecatedButton,
     GlLoadingIcon,
     UserAvatarList,
@@ -75,7 +74,7 @@ export default {
         @click="toggle"
       >
         <gl-loading-icon v-if="!isCollapsed && isLoadingRules" />
-        <icon v-else :name="angleIcon" :size="16" />
+        <gl-icon v-else :name="angleIcon" :size="16" />
       </button>
       <template v-if="isCollapsed">
         <user-avatar-list :items="suggestedApproversTrimmed" :breakpoint="0" empty-text="" />

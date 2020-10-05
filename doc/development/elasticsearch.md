@@ -1,13 +1,21 @@
+---
+stage: Enablement
+group: Global Search
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Elasticsearch knowledge **(STARTER ONLY)**
 
 This area is to maintain a compendium of useful information when working with Elasticsearch.
 
 Information on how to enable Elasticsearch and perform the initial indexing is in
-the [Elasticsearch integration documentation](../integration/elasticsearch.md#enabling-elasticsearch).
+the [Elasticsearch integration documentation](../integration/elasticsearch.md#enabling-advanced-search).
 
 ## Deep Dive
 
 In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
+
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab's specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
 ## Supported Versions
 
@@ -60,7 +68,7 @@ The `whitespace` tokenizer was selected in order to have more control over how t
 
 Please see the `code` filter for an explanation on how tokens are split.
 
-NOTE: **Known Issues**:
+NOTE: **Note:**
 Currently the [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#known-issues).
 
 #### `code_search_analyzer`
@@ -121,6 +129,9 @@ Patterns:
 
 ## Zero downtime reindexing with multiple indices
 
+NOTE: **Note:**
+This is not applicable yet as multiple indices functionality is not fully implemented.
+
 Currently GitLab can only handle a single version of setting. Any setting/schema changes would require reindexing everything from scratch. Since reindexing can take a long time, this can cause search functionality downtime.
 
 To avoid downtime, GitLab is working to support multiple indices that
@@ -157,7 +168,8 @@ The global configurations per version are now in the `Elastic::(Version)::Config
 
 ### Creating new version of schema
 
-NOTE: **Note:** this is not applicable yet as multiple indices functionality is not fully implemented.
+NOTE: **Note:**
+This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (e.g. `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (e.g. `V12p3`).
 
@@ -208,7 +220,7 @@ logs will also include the time spent on Database and Gitaly requests, which
 may help to diagnose which part of the search is performing poorly.
 
 There are additional logs specific to Elasticsearch that are sent to
-[`elasticsearch.log`](../administration/logs.md#elasticsearchlog-starter-only)
+[`elasticsearch.log`](../administration/logs.md#elasticsearchlog)
 that may contain information to help diagnose performance issues.
 
 ### Performance Bar
@@ -219,7 +231,7 @@ be used both locally in development and on any deployed GitLab instance to
 diagnose poor search performance. This will show the exact queries being made,
 which is useful to diagnose why a search might be slow.
 
-### Correlation ID and X-Opaque-Id
+### Correlation ID and `X-Opaque-Id`
 
 Our [correlation
 ID](./distributed_tracing.md#developer-guidelines-for-working-with-correlation-ids)

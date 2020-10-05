@@ -1,7 +1,7 @@
 <script>
+import { escape, capitalize } from 'lodash';
 import { GlLoadingIcon } from '@gitlab/ui';
 import StageColumnComponent from './stage_column_component.vue';
-import GraphMixin from '../../mixins/graph_component_mixin';
 import GraphWidthMixin from '../../mixins/graph_width_mixin';
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import GraphBundleMixin from '../../mixins/graph_pipeline_bundle_mixin';
@@ -13,7 +13,7 @@ export default {
     GlLoadingIcon,
     LinkedPipelinesColumn,
   },
-  mixins: [GraphMixin, GraphWidthMixin, GraphBundleMixin],
+  mixins: [GraphWidthMixin, GraphBundleMixin],
   props: {
     isLoading: {
       type: Boolean,
@@ -43,9 +43,17 @@ export default {
   data() {
     return {
       downstreamMarginTop: null,
+      jobName: null,
+      pipelineExpanded: {
+        jobName: '',
+        expanded: false,
+      },
     };
   },
   computed: {
+    graph() {
+      return this.pipeline.details?.stages;
+    },
     hasTriggeredBy() {
       return (
         this.type !== this.$options.downstream &&
@@ -87,17 +95,46 @@ export default {
     },
   },
   methods: {
+    capitalizeStageName(name) {
+      const escapedName = escape(name);
+      return capitalize(escapedName);
+    },
+    isFirstColumn(index) {
+      return index === 0;
+    },
+    stageConnectorClass(index, stage) {
+      let className;
+
+      // If it's the first stage column and only has one job
+      if (this.isFirstColumn(index) && stage.groups.length === 1) {
+        className = 'no-margin';
+      } else if (index > 0) {
+        // If it is not the first column
+        className = 'left-margin';
+      }
+
+      return className;
+    },
+    refreshPipelineGraph() {
+      this.$emit('refreshPipelineGraph');
+    },
+    /**
+     * CSS class is applied:
+     *  - if pipeline graph contains only one stage column component
+     *
+     * @param {number} index
+     * @returns {boolean}
+     */
+    shouldAddRightMargin(index) {
+      return !(index === this.graph.length - 1);
+    },
     handleClickedDownstream(pipeline, clickedIndex, downstreamNode) {
       /**
        * Calculates the margin top of the clicked downstream pipeline by
        * subtracting the clicked downstream pipelines offsetTop by it's parent's
-       * offsetTop and then subtracting either 15 (if child) or 30 (if not a child)
-       * due to the height of node and stage name margin bottom.
+       * offsetTop and then subtracting 15
        */
-      this.downstreamMarginTop = this.calculateMarginTop(
-        downstreamNode,
-        downstreamNode.classList.contains('child-pipeline') ? 15 : 30,
-      );
+      this.downstreamMarginTop = this.calculateMarginTop(downstreamNode, 15);
 
       /**
        * If the expanded trigger is defined and the id is different than the
@@ -119,6 +156,22 @@ export default {
     },
     hasUpstream(index) {
       return index === 0 && this.hasTriggeredBy;
+    },
+    setJob(jobName) {
+      this.jobName = jobName;
+    },
+    setPipelineExpanded(jobName, expanded) {
+      if (expanded) {
+        this.pipelineExpanded = {
+          jobName,
+          expanded,
+        };
+      } else {
+        this.pipelineExpanded = {
+          expanded,
+          jobName: '',
+        };
+      }
     },
   },
 };
@@ -170,7 +223,7 @@ export default {
             v-for="(stage, index) in graph"
             :key="stage.name"
             :class="{
-              'has-upstream prepend-left-64': hasUpstream(index),
+              'has-upstream gl-ml-11': hasUpstream(index),
               'has-only-one-job': hasOnlyOneJob(stage),
               'gl-mr-26': shouldAddRightMargin(index),
             }"
@@ -180,6 +233,8 @@ export default {
             :is-first-column="isFirstColumn(index)"
             :has-triggered-by="hasTriggeredBy"
             :action="stage.status.action"
+            :job-hovered="jobName"
+            :pipeline-expanded="pipelineExpanded"
             @refreshPipelineGraph="refreshPipelineGraph"
           />
         </ul>
@@ -191,6 +246,8 @@ export default {
           :project-id="pipelineProjectId"
           graph-position="right"
           @linkedPipelineClick="handleClickedDownstream"
+          @downstreamHovered="setJob"
+          @pipelineExpandToggle="setPipelineExpanded"
         />
 
         <pipeline-graph

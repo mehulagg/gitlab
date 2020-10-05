@@ -5,10 +5,6 @@ module QA
     module Dashboard
       module Snippet
         class Edit < Page::Base
-          view 'app/views/shared/snippets/_form.html.haml' do
-            element :submit_button
-          end
-
           view 'app/assets/javascripts/snippets/components/edit.vue' do
             element :submit_button
           end
@@ -19,9 +15,12 @@ module QA
             text_area.has_text?(content) # wait for changes to take effect
           end
 
+          def change_visibility_to(visibility_type)
+            choose(visibility_type)
+          end
+
           def save_changes
-            click_element(:submit_button)
-            wait_until { assert_no_element(:submit_button) }
+            click_element(:submit_button, Page::Dashboard::Snippet::Show)
           end
 
           private

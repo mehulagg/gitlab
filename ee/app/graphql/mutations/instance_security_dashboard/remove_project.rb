@@ -18,7 +18,7 @@ module Mutations
         result = remove_project(extract_project_id(id))
 
         {
-          errors: result.zero? ? ['The project does not belong to your dashboard or you don\'t have permission to perform this action'] : []
+          errors: result == 0 ? ['The project does not belong to your dashboard or you don\'t have permission to perform this action'] : []
         }
       end
 

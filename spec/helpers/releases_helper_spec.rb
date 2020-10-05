@@ -20,7 +20,7 @@ RSpec.describe ReleasesHelper do
     let(:release) { create(:release, project: project) }
     let(:user) { create(:user) }
     let(:can_user_create_release) { false }
-    let(:common_keys) { [:project_id, :illustration_path, :documentation_path] }
+    let(:common_keys) { [:project_id, :project_path, :illustration_path, :documentation_path] }
 
     # rubocop: disable CodeReuse/ActiveRecord
     before do
@@ -80,6 +80,7 @@ RSpec.describe ReleasesHelper do
     describe '#data_for_new_release_page' do
       it 'has the needed data to display the "new release" page' do
         keys = %i(project_id
+                  releases_page_path
                   markdown_preview_path
                   markdown_docs_path
                   update_release_api_docs_path

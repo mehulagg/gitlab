@@ -77,7 +77,7 @@ sudo -u git -H bundle exec rake gitlab:backup:create RAILS_ENV=production SKIP=r
 If this fails you need to fix it before upgrading to 8.0. Also see
 <https://about.gitlab.com/get-help/>
 
-NOTE: **Note**
+NOTE: **Note:**
 For GitLab 12.1 and earlier, use `gitlab-rake gitlab:backup:create`.
 
 ### 2. Check source and target database types
@@ -205,7 +205,7 @@ If you were running GitLab and GitLab CI on the same server you can skip this
 step.
 
 Copy your CI data archive to your GitLab server. There are many ways to do
-this, below we use SSH agent forwarding and 'scp', which will be easy and fast
+this, below we use SSH agent forwarding and `scp`, which will be easy and fast
 for most setups. You can also copy the data archive first from the CI server to
 your laptop and then from your laptop to the GitLab server.
 

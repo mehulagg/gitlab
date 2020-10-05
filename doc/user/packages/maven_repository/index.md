@@ -4,9 +4,10 @@ group: Package
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# GitLab Maven Repository **(PREMIUM)**
+# GitLab Maven Repository
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5811) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/221259) to GitLab Core in 13.3.
 
 With the GitLab [Maven](https://maven.apache.org) Repository, every
 project can have its own space to store its Maven artifacts.
@@ -17,9 +18,9 @@ project can have its own space to store its Maven artifacts.
 
 NOTE: **Note:**
 This option is available only if your GitLab administrator has
-[enabled support for the Maven repository](../../../administration/packages/index.md).**(PREMIUM ONLY)**
+[enabled support for the Maven repository](../../../administration/packages/index.md).
 
-After the Packages feature is enabled, the Maven Repository will be available for
+After the Packages feature is enabled, the Maven Repository is available for
 all new projects by default. To enable it for existing projects, or if you want
 to disable it:
 
@@ -33,7 +34,7 @@ repository.
 
 ## Getting Started with Maven
 
-This section will cover installing Maven and building a package. This is a
+This section covers installing Maven and building a package. This is a
 quickstart to help if you're new to building Maven packages. If you're already
 using Maven and understand how to build your own packages, move onto the
 [next section](#adding-the-gitlab-package-registry-as-a-maven-remote).
@@ -106,7 +107,7 @@ You should see a new directory where you ran this command matching your
 
 ## Getting started with Gradle
 
-This section will cover installing Gradle and initializing a Java project. This is a
+This section covers installing Gradle and initializing a Java project. This is a
 quickstart to help if you're new to Gradle. If you're already
 using Gradle and understand how to build your own packages, move onto the
 [next section](#adding-the-gitlab-package-registry-as-a-maven-remote).
@@ -127,7 +128,7 @@ If you want to use an existing Gradle project, installation is not necessary.
 Simply execute `gradlew` (on Linux) or `gradlew.bat` (on Windows) in the project
 directory instead.
 
-You should see something imilar to the below printed in the output:
+You should see something similar to the below printed in the output:
 
 ```plaintext
 ------------------------------------------------------------
@@ -190,7 +191,7 @@ Select build script DSL:
 Enter selection (default: Groovy) [1..2]
 ```
 
-Choose `1` to create a new Java Library project which will be described in Groovy DSL. The output should be:
+Choose `1` to create a new Java Library project which is described in Groovy DSL. The output should be:
 
 ```plaintext
 Select test framework:
@@ -212,7 +213,7 @@ Enter a project name or hit enter to use the directory name as project name.
 
 The next step is to add the GitLab Package Registry as a Maven remote. If a
 project is private or you want to upload Maven artifacts to GitLab,
-credentials will need to be provided for authorization too. Support is available
+credentials must be provided for authorization too. Support is available
 for [personal access tokens](#authenticating-with-a-personal-access-token),
 [CI job tokens](#authenticating-with-a-ci-job-token), and
 [deploy tokens](../../project/deploy_tokens/index.md) only. Regular username/password
@@ -321,7 +322,7 @@ repositories {
         name "GitLab"
         credentials(HttpHeaderCredentials) {
             name = 'Job-Token'
-            value = '${CI_JOB_TOKEN}'
+            value = System.getenv("CI_JOB_TOKEN")
         }
         authentication {
             header(HttpHeaderAuthentication)
@@ -387,7 +388,7 @@ repositories {
 
 To download and upload packages from GitLab, you need a `repository` and
 `distributionManagement` section in your `pom.xml` file. If you're following the
-steps from above, then you'll need to add the following information to your
+steps from above, then you must add the following information to your
 `my-project/pom.xml` file.
 
 Depending on your workflow and the amount of Maven packages you have, there are
@@ -461,13 +462,13 @@ project's ID can be used for uploading.
 If you rely on many packages, it might be inefficient to include the `repository` section
 with a unique URL for each package. Instead, you can use the group level endpoint for
 all your Maven packages stored within one GitLab group. Only packages you have access to
-will be available for download.
+are available for download.
 
 The group level endpoint works with any package names, which means the you
 have the flexibility of naming compared to [instance level endpoint](#instance-level-maven-endpoint).
-However, GitLab will not guarantee the uniqueness of the package names within
+However, GitLab does not guarantee the uniqueness of the package names within
 the group. You can have two projects with the same package name and package
-version. As a result, GitLab will serve whichever one is more recent.
+version. As a result, GitLab serves whichever one is more recent.
 
 The example below shows how the relevant `repository` section of your `pom.xml`
 would look like. You still need a project specific URL for uploading a package in
@@ -523,7 +524,7 @@ For retrieving artifacts, you can use either the
 
 If you rely on many packages, it might be inefficient to include the `repository` section
 with a unique URL for each package. Instead, you can use the instance level endpoint for
-all maven packages stored in GitLab and the packages you have access to will be available
+all maven packages stored in GitLab and the packages you have access to are available
 for download.
 
 Note that **only packages that have the same path as the project** are exposed via
@@ -661,7 +662,7 @@ artifacts or even delete them.
 
 Installing a package from the GitLab Package Registry requires that you set up
 the [remote and authentication](#adding-the-gitlab-package-registry-as-a-maven-remote)
-as above. Once this is completed, there are two ways for installaing a package.
+as above. Once this is completed, there are two ways to install a package.
 
 ### Install using Maven with `mvn install`
 
@@ -689,7 +690,7 @@ downloaded from the GitLab Package Registry:
 Downloading from gitlab-maven: http://gitlab.com/api/v4/projects/PROJECT_ID/packages/maven/com/mycompany/mydepartment/my-project/1.0-SNAPSHOT/my-project-1.0-20200128.120857-1.pom
 ```
 
-#### Install with `mvn dependency:get`
+### Install using Maven with `mvn dependency:get`
 
 The second way to install packages is to use the Maven commands directly.
 Inside your project directory, run:
@@ -731,7 +732,7 @@ you can configure GitLab CI/CD to build new packages automatically.
 The example below shows how to create a new package each time the `master` branch
 is updated:
 
-1. Create a `ci_settings.xml` file that will serve as Maven's `settings.xml` file.
+1. Create a `ci_settings.xml` file that serves as Maven's `settings.xml` file.
    Add the server section with the same ID you defined in your `pom.xml` file.
    For example, in our case it's `gitlab-maven`:
 
@@ -782,7 +783,7 @@ is updated:
 
    ```yaml
    deploy:
-     image: maven:3.3.9-jdk-8
+     image: maven:3.6-jdk-11
      script:
        - 'mvn deploy -s ci_settings.xml'
      only:
@@ -791,9 +792,9 @@ is updated:
 
 1. Push those files to your repository.
 
-The next time the `deploy` job runs, it will copy `ci_settings.xml` to the
+The next time the `deploy` job runs, it copies `ci_settings.xml` to the
 user's home location (in this case the user is `root` since it runs in a
-Docker container), and Maven will utilize the configured CI
+Docker container), and Maven uses the configured CI
 [environment variables](../../../ci/variables/README.md#predefined-environment-variables).
 
 ### Creating Maven packages with GitLab CI/CD using Gradle
@@ -807,7 +808,7 @@ is updated:
 
    ```yaml
    deploy:
-     image: gradle:latest
+     image: gradle:6.5-jdk11
      script:
        - 'gradle publish'
      only:
@@ -815,11 +816,6 @@ is updated:
    ```
 
 1. Push those files to your repository.
-
-The next time the `deploy` job runs, it will copy `ci_settings.xml` to the
-user's home location (in this case the user is `root` since it runs in a
-Docker container), and Maven will use the configured CI
-[environment variables](../../../ci/variables/README.md#predefined-environment-variables).
 
 ### Version validation
 
@@ -833,10 +829,25 @@ You can play around with the regex and try your version strings on [this regular
 
 ## Troubleshooting
 
-### Useful Maven command line options
+### Review network trace logs
 
-There's some [maven command line options](https://maven.apache.org/ref/current/maven-embedder/cli.html)
-which maybe useful when doing tasks with GitLab CI/CD.
+If you are having issues with the Maven Repository, you may want to review network trace logs.
+
+For example, try to run `mvn deploy` locally with a PAT token and use these options:
+
+```shell
+mvn deploy \
+-Dorg.slf4j.simpleLogger.log.org.apache.maven.wagon.providers.http.httpclient=trace \
+-Dorg.slf4j.simpleLogger.log.org.apache.maven.wagon.providers.http.httpclient.wire=trace
+```
+
+CAUTION: **Caution:**
+When you set these options, all network requests are logged and a large amount of output is generated.
+
+### Useful Maven command-line options
+
+There are some [Maven command-line options](https://maven.apache.org/ref/current/maven-embedder/cli.html)
+that may be useful when performing tasks with GitLab CI/CD.
 
 - File transfer progress can make the CI logs hard to read.
   Option `-ntp,--no-transfer-progress` was added in

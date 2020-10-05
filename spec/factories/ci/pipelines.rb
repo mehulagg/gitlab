@@ -17,13 +17,13 @@ FactoryBot.define do
 
     after(:create) do |pipeline, evaluator|
       merge_request = evaluator.head_pipeline_of
-      merge_request&.update(head_pipeline: pipeline)
+      merge_request&.update!(head_pipeline: pipeline)
     end
 
     factory :ci_pipeline do
       transient { ci_ref_presence { true } }
 
-      after(:build) do |pipeline, evaluator|
+      before(:create) do |pipeline, evaluator|
         pipeline.ensure_ci_ref! if evaluator.ci_ref_presence && pipeline.ci_ref_id.nil?
       end
 
@@ -73,6 +73,14 @@ FactoryBot.define do
         end
       end
 
+      trait :with_codequality_report do
+        status { :success }
+
+        after(:build) do |pipeline, evaluator|
+          pipeline.builds << build(:ci_build, :codequality_report, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
       trait :with_test_reports do
         status { :success }
 
@@ -110,6 +118,12 @@ FactoryBot.define do
 
         after(:build) do |pipeline, evaluator|
           pipeline.builds << build(:ci_build, :coverage_reports, pipeline: pipeline, project: pipeline.project)
+        end
+      end
+
+      trait :with_coverage_report_artifact do
+        after(:build) do |pipeline, evaluator|
+          pipeline.pipeline_artifacts << build(:ci_pipeline_artifact, pipeline: pipeline, project: pipeline.project)
         end
       end
 

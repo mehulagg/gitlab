@@ -39,14 +39,6 @@ RSpec.describe API::Commits do
     end
   end
 
-  shared_examples_for "does not create a CodeOwners::Validator object" do
-    specify do
-      expect(Gitlab::CodeOwners::Validator).not_to receive(:new)
-
-      subject
-    end
-  end
-
   describe "POST /projects/:id/repository/commits" do
     let!(:url) { "/projects/#{project_id}/repository/commits" }
 
@@ -88,21 +80,7 @@ RSpec.describe API::Commits do
           let(:branch) { valid_c_params[:branch] }
           let(:paths)  { valid_c_params[:actions].first[:file_path] }
 
-          context ":use_legacy_codeowner_validations is true" do
-            before do
-              stub_feature_flags(use_legacy_codeowner_validations: true)
-            end
-
-            it_behaves_like "does not create a CodeOwners::Validator object"
-          end
-
-          context ":use_legacy_codeowner_validations is false" do
-            before do
-              stub_feature_flags(use_legacy_codeowner_validations: false)
-            end
-
-            it_behaves_like "returns a 400 from a codeowners violation"
-          end
+          it_behaves_like "returns a 400 from a codeowners violation"
         end
       end
     end
@@ -137,21 +115,7 @@ RSpec.describe API::Commits do
         let(:branch) { valid_d_params[:branch] }
         let(:paths)  { valid_d_params[:actions].first[:file_path] }
 
-        context ":use_legacy_codeowner_validations is true" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: true)
-          end
-
-          it_behaves_like "does not create a CodeOwners::Validator object"
-        end
-
-        context ":use_legacy_codeowner_validations is false" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: false)
-          end
-
-          it_behaves_like "returns a 400 from a codeowners violation"
-        end
+        it_behaves_like "returns a 400 from a codeowners violation"
       end
     end
 
@@ -190,21 +154,7 @@ RSpec.describe API::Commits do
           [action[:file_path], action[:previous_path]]
         end
 
-        context ":use_legacy_codeowner_validations is true" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: true)
-          end
-
-          it_behaves_like "does not create a CodeOwners::Validator object"
-        end
-
-        context ":use_legacy_codeowner_validations is false" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: false)
-          end
-
-          it_behaves_like "returns a 400 from a codeowners violation"
-        end
+        it_behaves_like "returns a 400 from a codeowners violation"
       end
     end
   end
@@ -235,21 +185,7 @@ RSpec.describe API::Commits do
         let(:code_owner_approval_required) { true }
         let(:paths) { commit.raw_deltas.flat_map { |diff| [diff.new_path, diff.old_path] }.uniq }
 
-        context ":use_legacy_codeowner_validations is true" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: true)
-          end
-
-          it_behaves_like "does not create a CodeOwners::Validator object"
-        end
-
-        context ":use_legacy_codeowner_validations is false" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: false)
-          end
-
-          it_behaves_like "returns a 400 from a codeowners violation"
-        end
+        it_behaves_like "returns a 400 from a codeowners violation"
       end
     end
   end
@@ -283,20 +219,7 @@ RSpec.describe API::Commits do
         let(:code_owner_approval_required) { true }
         let(:paths) { commit.raw_deltas.flat_map { |diff| [diff.new_path, diff.old_path] }.uniq }
 
-        context ":use_legacy_codeowner_validations is true" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: true)
-          end
-
-          it_behaves_like "does not create a CodeOwners::Validator object"
-        end
-
-        context ":use_legacy_codeowner_validations is false" do
-          before do
-            stub_feature_flags(use_legacy_codeowner_validations: false)
-          end
-          it_behaves_like "returns a 400 from a codeowners violation"
-        end
+        it_behaves_like "returns a 400 from a codeowners violation"
       end
     end
   end

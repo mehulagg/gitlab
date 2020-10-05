@@ -29,6 +29,7 @@ class Environment < ApplicationRecord
   has_one :last_visible_deployment, -> { visible.distinct_on_environment }, inverse_of: :environment, class_name: 'Deployment'
   has_one :last_visible_deployable, through: :last_visible_deployment, source: 'deployable', source_type: 'CommitStatus'
   has_one :last_visible_pipeline, through: :last_visible_deployable, source: 'pipeline'
+  has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :nullify_external_url
   before_validation :generate_slug, if: ->(env) { env.slug.blank? }
@@ -85,6 +86,7 @@ class Environment < ApplicationRecord
   scope :with_rank, -> do
     select('environments.*, rank() OVER (PARTITION BY project_id ORDER BY id DESC)')
   end
+  scope :for_id, -> (id) { where(id: id) }
 
   state_machine :state, initial: :available do
     event :start do
@@ -291,6 +293,10 @@ class Environment < ApplicationRecord
     !!ENV['USE_SAMPLE_METRICS']
   end
 
+  def has_opened_alert?
+    latest_opened_most_severe_alert.present?
+  end
+
   def metrics
     prometheus_adapter.query(:environment, self) if has_metrics_and_can_query?
   end
@@ -366,7 +372,7 @@ class Environment < ApplicationRecord
   end
 
   def elastic_stack_available?
-    !!deployment_platform&.cluster&.application_elastic_stack&.available?
+    !!deployment_platform&.cluster&.application_elastic_stack_available?
   end
 
   private

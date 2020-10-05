@@ -759,20 +759,56 @@ RSpec.describe GeoNode, :request_store, :geo, type: :model do
     end
   end
 
-  describe '#job_artifacts' do
-    context 'when selective sync is enabled' do
-      it 'applies a CTE statement' do
-        node.update!(selective_sync_type: 'namespaces')
+  describe '#container_repositories' do
+    let_it_be(:synced_group) { create(:group) }
+    let_it_be(:nested_group) { create(:group, parent: synced_group) }
+    let_it_be(:synced_project) { create(:project, group: synced_group) }
+    let_it_be(:synced_project_in_nested_group) { create(:project, group: nested_group) }
+    let_it_be(:unsynced_project) { create(:project) }
+    let_it_be(:project_broken_storage) { create(:project, :broken_storage) }
 
-        expect(node.job_artifacts.to_sql).to match(/WITH .+restricted_job_artifacts/)
+    let_it_be(:container_repository_1) { create(:container_repository, project: synced_project) }
+    let_it_be(:container_repository_2) { create(:container_repository, project: synced_project_in_nested_group) }
+    let_it_be(:container_repository_3) { create(:container_repository, project: unsynced_project) }
+    let_it_be(:container_repository_4) { create(:container_repository, project: project_broken_storage) }
+
+    before do
+      stub_registry_replication_config(enabled: true)
+    end
+
+    context 'with registry replication disabled' do
+      before do
+        stub_registry_replication_config(enabled: false)
+      end
+
+      it 'returns an empty relation' do
+        expect(node.container_repositories).to be_empty
       end
     end
 
-    context 'when selective sync is disabled' do
-      it 'doest not apply a CTE statement' do
-        node.update!(selective_sync_type: nil)
+    context 'without selective sync' do
+      it 'returns all container repositories' do
+        expect(node.container_repositories).to match_array([container_repository_1, container_repository_2, container_repository_3, container_repository_4])
+      end
+    end
 
-        expect(node.job_artifacts.to_sql).not_to match(/WITH .+restricted_job_artifacts/)
+    context 'with selective sync by namespace' do
+      before do
+        node.update!(selective_sync_type: 'namespaces', namespaces: [synced_group])
+      end
+
+      it 'excludes container repositories that are not in selectively synced projects' do
+        expect(node.container_repositories).to match_array([container_repository_1, container_repository_2])
+      end
+    end
+
+    context 'with selective sync by shard' do
+      before do
+        node.update!(selective_sync_type: 'shards', selective_sync_shards: ['broken'])
+      end
+
+      it 'excludes container repositories that are not in selectively synced shards' do
+        expect(node.container_repositories).to match_array([container_repository_4])
       end
     end
   end

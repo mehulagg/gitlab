@@ -118,19 +118,13 @@
 
 .alert-modal-message {
   margin-left: -1rem;
-  margin-right: -3rem;
+  margin-right: -1rem;
   margin-top: -1rem;
 }
 
 .alert-form {
-  .btn-group,
-  .action-group {
+  .btn-group {
     display: flex;
-
-    .btn {
-      flex: 1 auto;
-      box-shadow: none;
-    }
   }
 }
 
@@ -149,11 +143,11 @@
 
   &-message {
     max-width: 600px;
-    color: $gray-700;
+    color: $gray-500;
   }
 
   &-close {
-    color: $gray-700;
+    color: $gray-500;
     cursor: pointer;
   }
 

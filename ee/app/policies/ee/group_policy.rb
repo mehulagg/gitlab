@@ -21,8 +21,16 @@ module EE
         @subject.feature_available?(:cycle_analytics_for_groups)
       end
 
+      condition(:group_merge_request_analytics_available) do
+        @subject.feature_available?(:group_merge_request_analytics)
+      end
+
+      condition(:group_repository_analytics_available) do
+        @subject.feature_available?(:group_repository_analytics)
+      end
+
       condition(:group_activity_analytics_available) do
-        @subject.beta_feature_available?(:group_activity_analytics)
+        @subject.feature_available?(:group_activity_analytics)
       end
 
       condition(:can_owners_manage_ldap, scope: :global) do
@@ -39,6 +47,10 @@ module EE
 
       condition(:security_dashboard_enabled) do
         @subject.feature_available?(:security_dashboard)
+      end
+
+      condition(:prevent_group_forking_available) do
+        @subject.feature_available?(:group_forking_protection)
       end
 
       condition(:needs_new_sso_session) do
@@ -84,8 +96,10 @@ module EE
       end
 
       condition(:push_rules_available) do
-        ::Feature.enabled?(:group_push_rules, @subject.root_ancestor) && @subject.feature_available?(:push_rules)
+        @subject.feature_available?(:push_rules)
       end
+
+      condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
 
       rule { public_group | logged_in_viewable }.policy do
         enable :read_wiki
@@ -104,13 +118,17 @@ module EE
       end
 
       rule { maintainer }.policy do
-        enable :create_jira_connect_subscription
         enable :maintainer_access
         enable :admin_wiki
       end
 
-      rule { owner }.policy do
+      rule { owner | admin }.policy do
         enable :owner_access
+      end
+
+      rule { can?(:owner_access) }.policy do
+        enable :set_epic_created_at
+        enable :set_epic_updated_at
       end
 
       rule { can?(:read_cluster) & cluster_deployments_available }
@@ -122,8 +140,18 @@ module EE
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
 
+      rule { has_access & group_repository_analytics_available }
+        .enable :read_group_repository_analytics
+
+      rule { reporter & group_merge_request_analytics_available }
+        .enable :read_group_merge_request_analytics
+
       rule { reporter & cycle_analytics_available }.policy do
         enable :read_group_cycle_analytics, :create_group_stage, :read_group_stage, :update_group_stage, :delete_group_stage
+      end
+
+      rule { owner & ~has_parent & prevent_group_forking_available }.policy do
+        enable :change_prevent_group_forking
       end
 
       rule { can?(:read_group) & dependency_proxy_available }
@@ -222,8 +250,10 @@ module EE
         prevent :update_default_branch_protection
       end
 
+      # TODO: Switch to `feature_enabled?` when we enable the feature flag by default
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/207888
       desc "Group has wiki disabled"
-      condition(:wiki_disabled, score: 32) { !feature_available?(:wiki) }
+      condition(:wiki_disabled, score: 32) { !@subject.beta_feature_available?(:group_wikis) }
 
       rule { wiki_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:wiki))
@@ -253,6 +283,25 @@ module EE
       rule { admin & is_gitlab_com }.enable :update_subscription_limit
 
       rule { public_group }.enable :view_embedded_analytics_report
+
+      rule { over_storage_limit }.policy do
+        prevent :create_projects
+        prevent :create_epic
+        prevent :update_epic
+        prevent :admin_milestone
+        prevent :upload_file
+        prevent :admin_label
+        prevent :admin_list
+        prevent :admin_issue
+        prevent :admin_pipeline
+        prevent :add_cluster
+        prevent :create_cluster
+        prevent :update_cluster
+        prevent :admin_cluster
+        prevent :admin_group_member
+        prevent :create_deploy_token
+        prevent :create_subgroup
+      end
     end
 
     override :lookup_access_level!
@@ -260,21 +309,6 @@ module EE
       return ::GroupMember::NO_ACCESS if needs_new_sso_session?
 
       super
-    end
-
-    # TODO: Extract this into a helper shared with ProjectPolicy, once we implement group-level features.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/208412
-    def feature_available?(feature)
-      return false unless feature == :wiki
-
-      case subject.wiki_access_level
-      when ::ProjectFeature::DISABLED
-        false
-      when ::ProjectFeature::PRIVATE
-        admin? || access_level >= ::ProjectFeature.required_minimum_access_level(feature)
-      else
-        true
-      end
     end
 
     def ldap_lock_bypassable?
@@ -289,6 +323,14 @@ module EE
       return false if user&.admin?
 
       ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject)
+    end
+
+    # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
+    override :resource_access_token_available?
+    def resource_access_token_available?
+      return true unless ::Gitlab.com?
+
+      group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

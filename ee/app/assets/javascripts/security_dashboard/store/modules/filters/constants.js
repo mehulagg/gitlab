@@ -1,6 +1,10 @@
 import { s__ } from '~/locale';
 
 export const ALL = 'all';
+export const STATE = {
+  DETECTED: 'DETECTED',
+  CONFIRMED: 'CONFIRMED',
+};
 
 export const BASE_FILTERS = {
   severity: {

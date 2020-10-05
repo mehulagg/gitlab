@@ -36,7 +36,6 @@ module EE
             optional :help_text, type: String, desc: 'GitLab server administrator information'
             optional :repository_size_limit, type: Integer, desc: 'Size limit per repository (MB)'
             optional :file_template_project_id, type: Integer, desc: 'ID of project where instance-level file templates are stored.'
-            optional :repository_storages, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, desc: 'A list of names of enabled storage paths, taken from `gitlab.yml`. New projects will be created in one of these stores, chosen at random.'
             optional :usage_ping_enabled, type: Grape::API::Boolean, desc: 'Every week GitLab will report license usage back to GitLab, Inc.'
             optional :updating_name_disabled_for_users, type: Grape::API::Boolean, desc: 'Flag indicating if users are permitted to update their profile name'
             optional :disable_overriding_approvers_per_merge_request, type: Grape::API::Boolean, desc: 'Disable Users ability to overwrite approvers in merge requests.'
@@ -44,6 +43,8 @@ module EE
             optional :prevent_merge_requests_committers_approval, type: Grape::API::Boolean, desc: 'Disable Merge request committer ability to approve request.'
             optional :npm_package_requests_forwarding, type: Grape::API::Boolean, desc: 'NPM package requests are forwarded to npmjs.org if not found on GitLab.'
             optional :group_owners_can_manage_default_branch_protection, type: Grape::API::Boolean, desc: 'Allow owners to manage default branch protection in groups'
+            optional :maintenance_mode, type: Grape::API::Boolean, desc: 'When instance is in maintenance mode, non-admin users can sign in with read-only access and make read-only API requests'
+            optional :maintenance_mode_message, type: String, desc: 'Message displayed when instance is in maintenance mode'
           end
         end
 

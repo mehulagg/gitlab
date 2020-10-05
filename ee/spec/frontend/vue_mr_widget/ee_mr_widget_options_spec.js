@@ -1,41 +1,36 @@
 import Vue from 'vue';
 import MockAdapter from 'axios-mock-adapter';
 import mrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
-import MRWidgetStore from 'ee/vue_merge_request_widget/stores/mr_widget_store';
-import filterByKey from 'ee/vue_shared/security_reports/store/utils/filter_by_key';
 import mountComponent from 'helpers/vue_mount_component_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import { trimText } from 'helpers/text_helper';
 
-import mockData, {
-  baseIssues,
-  headIssues,
-  baseBrowserPerformance,
-  headBrowserPerformance,
-  baseLoadPerformance,
-  headLoadPerformance,
-  parsedBaseIssues,
-  parsedHeadIssues,
-} from './mock_data';
-
-import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import axios from '~/lib/utils/axios_utils';
-import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
 import {
   sastDiffSuccessMock,
   dastDiffSuccessMock,
   containerScanningDiffSuccessMock,
   dependencyScanningDiffSuccessMock,
   secretScanningDiffSuccessMock,
+  coverageFuzzingDiffSuccessMock,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
+import mockData, {
+  baseBrowserPerformance,
+  headBrowserPerformance,
+  baseLoadPerformance,
+  headLoadPerformance,
+} from './mock_data';
+
+import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/constants';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import axios from '~/lib/utils/axios_utils';
 
 const SAST_SELECTOR = '.js-sast-widget';
 const DAST_SELECTOR = '.js-dast-widget';
 const DEPENDENCY_SCANNING_SELECTOR = '.js-dependency-scanning-widget';
 const CONTAINER_SCANNING_SELECTOR = '.js-container-scanning';
 const SECRET_SCANNING_SELECTOR = '.js-secret-scanning';
+const COVERAGE_FUZZING_SELECTOR = '.js-coverage-fuzzing-widget';
 
 describe('ee merge request widget options', () => {
   let vm;
@@ -115,6 +110,7 @@ describe('ee merge request widget options', () => {
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm.loading = false;
 
         expect(
           findSecurityWidget()
@@ -139,7 +135,7 @@ describe('ee merge request widget options', () => {
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('SAST detected 1 vulnerability.');
+          ).toEqual('SAST detected 1 critical severity vulnerability.');
           done();
         });
       });
@@ -161,7 +157,7 @@ describe('ee merge request widget options', () => {
                 `${SAST_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ).trim(),
-          ).toEqual('SAST detected no new vulnerabilities.');
+          ).toEqual('SAST detected no vulnerabilities.');
           done();
         });
       });
@@ -229,7 +225,7 @@ describe('ee merge request widget options', () => {
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected 2 vulnerabilities.');
+          ).toEqual('Dependency scanning detected 1 critical and 1 high severity vulnerabilities.');
           done();
         });
       });
@@ -247,7 +243,7 @@ describe('ee merge request widget options', () => {
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
       });
 
-      it('renders no new vulnerabilities message', done => {
+      it('renders no vulnerabilities message', done => {
         setImmediate(() => {
           expect(
             trimText(
@@ -255,7 +251,7 @@ describe('ee merge request widget options', () => {
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected no new vulnerabilities.');
+          ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
         });
       });
@@ -277,7 +273,7 @@ describe('ee merge request widget options', () => {
                 `${DEPENDENCY_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Dependency scanning detected no new vulnerabilities.');
+          ).toEqual('Dependency scanning detected no vulnerabilities.');
           done();
         });
       });
@@ -295,204 +291,6 @@ describe('ee merge request widget options', () => {
           expect(
             trimText(findSecurityWidget().querySelector(DEPENDENCY_SCANNING_SELECTOR).textContent),
           ).toContain('Dependency scanning: Loading resulted in an error');
-          done();
-        });
-      });
-    });
-  });
-
-  describe('code quality', () => {
-    beforeEach(() => {
-      gl.mrWidgetData = {
-        ...mockData,
-        codeclimate: {},
-      };
-    });
-
-    describe('when it is loading', () => {
-      it('should render loading indicator', done => {
-        mock.onGet('head.json').reply(200, headIssues);
-        mock.onGet('base.json').reply(200, baseIssues);
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        vm.mr.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-
-        vm.$nextTick(() => {
-          expect(trimText(vm.$el.querySelector('.js-codequality-widget').textContent)).toContain(
-            'Loading codeclimate report',
-          );
-
-          done();
-        });
-      });
-    });
-
-    describe('with successful request', () => {
-      beforeEach(() => {
-        mock.onGet('head.json').reply(200, headIssues);
-        mock.onGet('base.json').reply(200, baseIssues);
-
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-
-        // mock worker response
-        jest.spyOn(MRWidgetStore, 'doCodeClimateComparison').mockResolvedValue({
-          newIssues: filterByKey(parsedHeadIssues, parsedBaseIssues, 'fingerprint'),
-          resolvedIssues: filterByKey(parsedBaseIssues, parsedHeadIssues, 'fingerprint'),
-        });
-      });
-
-      it('should render provided data', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toEqual('Code quality improved on 1 point and degraded on 1 point');
-          done();
-        });
-      });
-
-      describe('text connector', () => {
-        it('should only render information about fixed issues', done => {
-          setImmediate(() => {
-            vm.mr.codeclimateMetrics.newIssues = [];
-
-            Vue.nextTick(() => {
-              expect(
-                trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-              ).toEqual('Code quality improved on 1 point');
-              done();
-            });
-          });
-        });
-
-        it('should only render information about added issues', done => {
-          setImmediate(() => {
-            vm.mr.codeclimateMetrics.resolvedIssues = [];
-            Vue.nextTick(() => {
-              expect(
-                trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-              ).toEqual('Code quality degraded on 1 point');
-              done();
-            });
-          });
-        });
-      });
-    });
-
-    describe('with empty successful request', () => {
-      beforeEach(() => {
-        mock.onGet('head.json').reply(200, []);
-        mock.onGet('base.json').reply(200, []);
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-
-        // mock worker response
-        jest.spyOn(MRWidgetStore, 'doCodeClimateComparison').mockResolvedValue({
-          newIssues: filterByKey([], [], 'fingerprint'),
-          resolvedIssues: filterByKey([], [], 'fingerprint'),
-        });
-      });
-
-      afterEach(() => {
-        mock.restore();
-      });
-
-      it('should render provided data', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toEqual('No changes to code quality');
-          done();
-        });
-      });
-    });
-
-    describe('with a head_path but no base_path', () => {
-      beforeEach(() => {
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: null,
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-      });
-
-      it('should render error indicator', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toContain('Failed to load codeclimate report');
-          done();
-        });
-      });
-
-      it('should render a help icon with more information', done => {
-        setImmediate(() => {
-          expect(vm.$el.querySelector('.js-codequality-widget .btn-help')).not.toBeNull();
-          expect(vm.codequalityPopover.title).toBe('Base pipeline codequality artifact not found');
-          done();
-        });
-      });
-    });
-
-    describe('with codeclimate comparison worker rejection', () => {
-      beforeEach(() => {
-        mock.onGet('head.json').reply(200, headIssues);
-        mock.onGet('base.json').reply(200, baseIssues);
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-
-        // mock worker rejection
-        jest.spyOn(MRWidgetStore, 'doCodeClimateComparison').mockRejectedValue();
-      });
-
-      it('should render error indicator', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toEqual('Failed to load codeclimate report');
-          done();
-        });
-      });
-    });
-
-    describe('with failed request', () => {
-      beforeEach(() => {
-        mock.onGet('head.json').reply(500, []);
-        mock.onGet('base.json').reply(500, []);
-        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
-
-        gl.mrWidgetData.codeclimate = {
-          head_path: 'head.json',
-          base_path: 'base.json',
-        };
-        vm.mr.codeclimate = gl.mrWidgetData.codeclimate;
-      });
-
-      it('should render error indicator', done => {
-        setImmediate(() => {
-          expect(
-            trimText(vm.$el.querySelector('.js-codequality-widget .js-code-text').textContent),
-          ).toContain('Failed to load codeclimate report');
           done();
         });
       });
@@ -845,7 +643,7 @@ describe('ee merge request widget options', () => {
                 `${CONTAINER_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Container scanning detected 2 vulnerabilities.');
+          ).toEqual('Container scanning detected 1 critical and 1 high severity vulnerabilities.');
           done();
         });
       });
@@ -915,7 +713,7 @@ describe('ee merge request widget options', () => {
             findSecurityWidget()
               .querySelector(`${DAST_SELECTOR} .report-block-list-issue-description`)
               .textContent.trim(),
-          ).toEqual('DAST detected 1 vulnerability.');
+          ).toEqual('DAST detected 1 critical severity vulnerability.');
           done();
         });
       });
@@ -942,14 +740,84 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  describe('Secret Scanning', () => {
-    const SECRET_SCANNING_ENDPOINT = 'secret_scanning';
+  describe('Coverage Fuzzing', () => {
+    const COVERAGE_FUZZING_ENDPOINT = 'coverage_fuzzing_report';
 
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
         enabled_reports: {
-          secret_scanning: true,
+          coverage_fuzzing: true,
+        },
+        coverage_fuzzing_comparison_path: COVERAGE_FUZZING_ENDPOINT,
+        vulnerability_feedback_path: VULNERABILITY_FEEDBACK_ENDPOINT,
+      };
+    });
+
+    describe('when it is loading', () => {
+      it('should render loading indicator', () => {
+        mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+
+        expect(
+          findSecurityWidget()
+            .querySelector(COVERAGE_FUZZING_SELECTOR)
+            .textContent.trim(),
+        ).toContain('Coverage fuzzing is loading');
+      });
+    });
+
+    describe('with successful request', () => {
+      beforeEach(() => {
+        mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(200, coverageFuzzingDiffSuccessMock);
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render provided data', done => {
+        setImmediate(() => {
+          expect(
+            findSecurityWidget()
+              .querySelector(`${COVERAGE_FUZZING_SELECTOR} .report-block-list-issue-description`)
+              .textContent.trim(),
+          ).toEqual('Coverage fuzzing detected 1 critical and 1 high severity vulnerabilities.');
+          done();
+        });
+      });
+    });
+
+    describe('with failed request', () => {
+      beforeEach(() => {
+        mock.onGet(COVERAGE_FUZZING_ENDPOINT).reply(500, {});
+        mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(500, {});
+
+        vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+      });
+
+      it('should render error indicator', done => {
+        setImmediate(() => {
+          expect(
+            findSecurityWidget()
+              .querySelector(COVERAGE_FUZZING_SELECTOR)
+              .textContent.trim(),
+          ).toContain('Coverage fuzzing: Loading resulted in an error');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('Secret Scanning', () => {
+    const SECRET_SCANNING_ENDPOINT = 'secret_detection_report';
+
+    beforeEach(() => {
+      gl.mrWidgetData = {
+        ...mockData,
+        enabled_reports: {
+          secret_detection: true,
           // The below property needs to exist until
           // secret scanning is implemented in backend
           // Or for some other reason I'm yet to find
@@ -989,7 +857,7 @@ describe('ee merge request widget options', () => {
                 `${SECRET_SCANNING_SELECTOR} .report-block-list-issue-description`,
               ).textContent,
             ),
-          ).toEqual('Secret scanning detected 2 vulnerabilities.');
+          ).toEqual('Secret scanning detected 1 critical and 1 high severity vulnerabilities.');
           done();
         });
       });
@@ -1050,18 +918,6 @@ describe('ee merge request widget options', () => {
 
   describe('computed', () => {
     describe('shouldRenderApprovals', () => {
-      it('should return false when no approvals', () => {
-        vm = mountComponent(Component, {
-          mrData: {
-            ...mockData,
-            has_approvals_available: false,
-          },
-        });
-        vm.mr.state = 'readyToMerge';
-
-        expect(vm.shouldRenderApprovals).toBeFalsy();
-      });
-
       it('should return false when in empty state', () => {
         vm = mountComponent(Component, {
           mrData: {
@@ -1086,20 +942,6 @@ describe('ee merge request widget options', () => {
         expect(vm.shouldRenderApprovals).toBeTruthy();
       });
     });
-
-    describe('shouldRenderMergeTrainHelperText', () => {
-      it('should return true if MTWPS is available and the user has not yet pressed the MTWPS button', () => {
-        vm = mountComponent(Component, {
-          mrData: {
-            ...mockData,
-            available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-            auto_merge_enabled: false,
-          },
-        });
-
-        expect(vm.shouldRenderMergeTrainHelperText).toBe(true);
-      });
-    });
   });
 
   describe('rendering source branch removal status', () => {
@@ -1117,7 +959,7 @@ describe('ee merge request widget options', () => {
       vm.mr.state = 'readyToMerge';
 
       vm.$nextTick(() => {
-        const tooltip = vm.$el.querySelector('.fa-question-circle');
+        const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
         expect(tooltip.getAttribute('data-original-title')).toBe(
@@ -1198,115 +1040,6 @@ describe('ee merge request widget options', () => {
     });
   });
 
-  describe('merge train helper text', () => {
-    const getHelperTextElement = () => vm.$el.querySelector('.js-merge-train-helper-text');
-
-    it('does not render the merge train helpe text if the MTWPS strategy is not available', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MT_MERGE_STRATEGY],
-          pipeline: {
-            ...mockData.pipeline,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).not.toExist();
-    });
-
-    it('renders the correct merge train helper text when there is an existing merge train', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_trains_count: 2,
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).toExist();
-      expect(helperText.textContent).toContain(
-        'This merge request will be added to the merge train when pipeline #123 succeeds.',
-      );
-    });
-
-    it('renders the correct merge train helper text when there is no existing merge train', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_trains_count: 0,
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            active: true,
-          },
-        },
-      });
-
-      const helperText = getHelperTextElement();
-
-      expect(helperText).toExist();
-      expect(helperText.textContent).toContain(
-        'This merge request will start a merge train when pipeline #123 succeeds.',
-      );
-    });
-
-    it('renders the correct pipeline link inside the message', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            id: 123,
-            path: 'path/to/pipeline',
-            active: true,
-          },
-        },
-      });
-
-      const pipelineLink = getHelperTextElement().querySelector('.js-pipeline-link');
-
-      expect(pipelineLink).toExist();
-      expect(pipelineLink.textContent).toContain('#123');
-      expect(pipelineLink).toHaveAttr('href', 'path/to/pipeline');
-    });
-
-    it('renders the documentation link inside the message', () => {
-      vm = mountComponent(Component, {
-        mrData: {
-          ...mockData,
-          available_auto_merge_strategies: [MTWPS_MERGE_STRATEGY],
-          merge_train_when_pipeline_succeeds_docs_path: 'path/to/help',
-          pipeline: {
-            ...mockData.pipeline,
-            active: true,
-          },
-        },
-      });
-
-      const pipelineLink = getHelperTextElement().querySelector('.js-documentation-link');
-
-      expect(pipelineLink).toExist();
-      expect(pipelineLink.textContent).toContain('More information');
-      expect(pipelineLink).toHaveAttr('href', 'path/to/help');
-    });
-  });
-
   describe('data', () => {
     it('passes approval api paths to service', () => {
       const paths = {
@@ -1338,7 +1071,7 @@ describe('ee merge request widget options', () => {
         sast: false,
         container_scanning: false,
         dependency_scanning: false,
-        secret_scanning: false,
+        secret_detection: false,
       },
     ];
 

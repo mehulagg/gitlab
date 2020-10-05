@@ -1,5 +1,0 @@
----
-title: Admin UI change to trigger Elasticsearch in-cluster re-indexing
-merge_request: 35024
-author:
-type: added

@@ -15,4 +15,12 @@ class ApprovalWrappedAnyApproverRule < ApprovalWrappedRule
       approvals_left <= 0
     end
   end
+
+  def commented_approvers
+    strong_memoize(:commented_approvers) do
+      merge_request.note_authors.select do |user|
+        merge_request.can_approve?(user)
+      end
+    end
+  end
 end

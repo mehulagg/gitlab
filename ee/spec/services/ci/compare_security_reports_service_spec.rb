@@ -82,17 +82,6 @@ RSpec.describe Ci::CompareSecurityReportsService do
         expect(result[:status_reason]).to include('JSON parsing failed')
       end
     end
-
-    describe "#build_comparer" do
-      context "when the head_pipeline is nil" do
-        subject { service.build_comparer(base_pipeline, nil) }
-
-        let(:base_pipeline) { create(:ee_ci_pipeline) }
-
-        specify { expect { subject }.not_to raise_error }
-        specify { expect(subject.scans).to be_empty }
-      end
-    end
   end
 
   describe '#execute CS' do

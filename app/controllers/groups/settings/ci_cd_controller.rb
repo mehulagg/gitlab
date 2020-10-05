@@ -3,6 +3,8 @@
 module Groups
   module Settings
     class CiCdController < Groups::ApplicationController
+      include RunnerSetupScripts
+
       skip_cross_project_access_check :show
       before_action :authorize_admin_group!
       before_action :authorize_update_max_artifacts_size!, only: [:update]
@@ -11,7 +13,15 @@ module Groups
       end
       before_action :define_variables, only: [:show]
 
+      NUMBER_OF_RUNNERS_PER_PAGE = 4
+
       def show
+        runners_finder = Ci::RunnersFinder.new(current_user: current_user, group: @group, params: params)
+        # We need all runners for count
+        @all_group_runners = runners_finder.execute.except(:limit, :offset)
+        @group_runners = runners_finder.execute.page(params[:page]).per(NUMBER_OF_RUNNERS_PER_PAGE)
+
+        @sort = runners_finder.sort_key
       end
 
       def update
@@ -39,6 +49,10 @@ module Groups
         end
 
         redirect_to group_settings_ci_cd_path
+      end
+
+      def runner_setup_scripts
+        private_runner_setup_scripts(group: group)
       end
 
       private

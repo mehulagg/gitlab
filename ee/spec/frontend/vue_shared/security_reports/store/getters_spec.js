@@ -5,6 +5,7 @@ import {
   groupedDastText,
   groupedDependencyText,
   groupedSecretScanningText,
+  groupedCoverageFuzzingText,
   groupedSummaryText,
   allReportsHaveError,
   noBaseInAllReports,
@@ -44,21 +45,22 @@ describe('Security reports getters', () => {
     ${'Dependency scanning'} | ${'dependencyScanning'} | ${groupedDependencyText}
     ${'Container scanning'}  | ${'containerScanning'}  | ${groupedContainerScanningText}
     ${'DAST'}                | ${'dast'}               | ${groupedDastText}
+    ${'Coverage fuzzing'}    | ${'coverageFuzzing'}    | ${groupedCoverageFuzzingText}
   `('grouped text for $name', ({ name, scanner, getter }) => {
     describe('with no issues', () => {
       it('returns no issues text', () => {
-        expect(getter(state)).toEqual(`${name} detected no new vulnerabilities.`);
+        expect(getter(state)).toEqual(`${name} detected no vulnerabilities.`);
       });
     });
 
     it.each`
       vulnerabilities                                     | message
-      ${[]}                                               | ${`${name} detected no new vulnerabilities.`}
-      ${[generateVuln(CRITICAL), generateVuln(CRITICAL)]} | ${`${name} detected 2 critical severity vulnerabilities.`}
-      ${[generateVuln(HIGH), generateVuln(HIGH)]}         | ${`${name} detected 2 high severity vulnerabilities.`}
+      ${[]}                                               | ${`${name} detected no vulnerabilities.`}
+      ${[generateVuln(CRITICAL), generateVuln(CRITICAL)]} | ${`${name} detected %{criticalStart}2 critical%{criticalEnd} severity vulnerabilities.`}
+      ${[generateVuln(HIGH), generateVuln(HIGH)]}         | ${`${name} detected %{highStart}2 high%{highEnd} severity vulnerabilities.`}
       ${[generateVuln(LOW), generateVuln(MEDIUM)]}        | ${`${name} detected 2 vulnerabilities.`}
-      ${[generateVuln(CRITICAL), generateVuln(HIGH)]}     | ${`${name} detected 1 critical and 1 high severity vulnerabilities.`}
-      ${[generateVuln(CRITICAL), generateVuln(LOW)]}      | ${`${name} detected 1 critical severity vulnerabilities out of 2.`}
+      ${[generateVuln(CRITICAL), generateVuln(HIGH)]}     | ${`${name} detected %{criticalStart}1 critical%{criticalEnd} and %{highStart}1 high%{highEnd} severity vulnerabilities.`}
+      ${[generateVuln(CRITICAL), generateVuln(LOW)]}      | ${`${name} detected %{criticalStart}1 critical%{criticalEnd} severity vulnerabilities out of 2.`}
     `('should build the message as "$message"', ({ vulnerabilities, message }) => {
       state[scanner].newIssues = vulnerabilities;
       expect(getter(state)).toEqual(message);
@@ -79,9 +81,10 @@ describe('Security reports getters', () => {
         state.containerScanning.newIssues = [generateVuln(CRITICAL)];
         state.dast.newIssues = [generateVuln(CRITICAL)];
         state.dependencyScanning.newIssues = [generateVuln(CRITICAL)];
+        state.coverageFuzzing.newIssues = [generateVuln(CRITICAL)];
 
         expect(summaryCounts(state)).toEqual({
-          critical: 3,
+          critical: 4,
           high: 0,
           other: 0,
         });
@@ -91,10 +94,11 @@ describe('Security reports getters', () => {
         state.containerScanning.newIssues = [generateVuln(CRITICAL)];
         state.dast.newIssues = [generateVuln(CRITICAL), generateVuln(HIGH)];
         state.dependencyScanning.newIssues = [generateVuln(LOW)];
+        state.coverageFuzzing.newIssues = [generateVuln(HIGH)];
 
         expect(summaryCounts(state)).toEqual({
           critical: 2,
-          high: 1,
+          high: 2,
           other: 1,
         });
       });
@@ -133,7 +137,7 @@ describe('Security reports getters', () => {
           },
         }),
       ).toEqual(
-        'Security scanning (is loading) detected 2 critical and 4 high severity vulnerabilities.',
+        'Security scanning (is loading) detected %{criticalStart}2 critical%{criticalEnd} and %{highStart}4 high%{highEnd} severity vulnerabilities.',
       );
     });
 
@@ -144,7 +148,7 @@ describe('Security reports getters', () => {
           areReportsLoading: false,
           summaryCounts: {},
         }),
-      ).toEqual('Security scanning detected no new vulnerabilities.');
+      ).toEqual('Security scanning detected no vulnerabilities.');
     });
   });
 
@@ -221,6 +225,7 @@ describe('Security reports getters', () => {
       state.containerScanning.hasError = true;
       state.dependencyScanning.hasError = true;
       state.secretScanning.hasError = true;
+      state.coverageFuzzing.hasError = true;
 
       expect(allReportsHaveError(state)).toEqual(true);
     });

@@ -17,7 +17,7 @@
       = s_('License|You do not have a license.')
     - if License.eligible_for_trial?
       %p.trial-description= s_('License|You can start a free trial of GitLab Ultimate without any obligation or payment details.')
-      = link_to 'Start free trial', new_trial_url, target: '_blank', class: "btn btn-success btn-start-trial prepend-top-10"
+      = link_to 'Start free trial', new_trial_url, target: '_blank', class: "btn btn-success btn-start-trial gl-mt-3"
     - else
       %p.trial-description
         = s_('License|Your free trial of GitLab Ultimate expired on %{trial_ends_on}.').html_safe % {trial_ends_on: License.trial_ends_on}

@@ -52,7 +52,7 @@ module Gitlab
         end
 
         def disabled_by_feature(options)
-          options.with_feature && !::Feature.enabled?(options.with_feature)
+          options.with_feature && !::Feature.enabled?(options.with_feature, type: :ops)
         end
 
         def build_metric!(type, name, options)
@@ -68,62 +68,6 @@ module Gitlab
           else
             raise ArgumentError, "uknown metric type #{type}"
           end
-        end
-
-        # Fetch and/or initialize counter metric
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def fetch_counter(name, opts = {}, &block)
-          fetch_metric(:counter, name, opts, &block)
-        end
-
-        # Fetch and/or initialize gauge metric
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def fetch_gauge(name, opts = {}, &block)
-          fetch_metric(:gauge, name, opts, &block)
-        end
-
-        # Fetch and/or initialize histogram metric
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def fetch_histogram(name, opts = {}, &block)
-          fetch_metric(:histogram, name, opts, &block)
-        end
-
-        # Fetch and/or initialize summary metric
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def fetch_summary(name, opts = {}, &block)
-          fetch_metric(:summary, name, opts, &block)
-        end
-
-        # Define metric accessor method for a Counter
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def define_counter(name, opts = {}, &block)
-          define_metric(:counter, name, opts, &block)
-        end
-
-        # Define metric accessor method for a Gauge
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def define_gauge(name, opts = {}, &block)
-          define_metric(:gauge, name, opts, &block)
-        end
-
-        # Define metric accessor method for a Histogram
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def define_histogram(name, opts = {}, &block)
-          define_metric(:histogram, name, opts, &block)
-        end
-
-        # Define metric accessor method for a Summary
-        # @param [Symbol] name
-        # @param [Hash] opts
-        def define_summary(name, opts = {}, &block)
-          define_metric(:summary, name, opts, &block)
         end
       end
     end

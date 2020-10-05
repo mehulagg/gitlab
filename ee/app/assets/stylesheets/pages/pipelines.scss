@@ -1,3 +1,5 @@
+@import './page_bundles/pipeline_mixins';
+
 .linked-pipeline-mini-list {
   &.is-downstream {
     margin-left: -4px;
@@ -130,7 +132,7 @@
   }
 
   .linked-pipeline.build {
-    height: 41px;
+    height: 42px;
 
     &::before {
       content: none;
@@ -163,8 +165,8 @@
       }
     }
 
-    &.child-pipeline {
-      height: 68px;
+    &.downstream-pipeline {
+      height: 86px;
     }
 
     .linked-pipeline-content {

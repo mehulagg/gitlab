@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Insights::Finders::IssuableFinder do
   using RSpec::Parameterized::TableSyntax
 
   around do |example|
-    Timecop.freeze(Time.utc(2019, 3, 5)) { example.run }
+    travel_to(Time.utc(2019, 3, 5)) { example.run }
   end
 
   let(:base_query) do
@@ -132,6 +132,7 @@ RSpec.describe Gitlab::Insights::Finders::IssuableFinder do
           filter_labels: [label_bug.title],
           collection_labels: [label_manage.title, label_plan.title, label_create.title])
       end
+
       let(:projects) { {} }
 
       subject { find(entity, query: query, projects: projects) }

@@ -113,6 +113,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
         let(:operation) do
           update_project(project, user, visibility_level: Gitlab::VisibilityLevel::INTERNAL)
         end
+
         let(:fail_condition!) do
           allow_any_instance_of(Project).to receive(:update).and_return(false)
         end
@@ -141,7 +142,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
 
       context 'when enabling a wiki' do
         it 'creates a RepositoryUpdatedEvent' do
-          project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+          project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
           project.reload
 
           expect do
@@ -156,7 +157,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
       context 'when we update project but not enabling a wiki' do
         context 'when the wiki is disabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -169,7 +170,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
 
         context 'when the wiki was already enabled' do
           it 'does not create a RepositoryUpdatedEvent' do
-            project.project_feature.update(wiki_access_level: ProjectFeature::ENABLED)
+            project.project_feature.update!(wiki_access_level: ProjectFeature::ENABLED)
 
             expect do
               result = update_project(project, user, { name: 'test1' })
@@ -188,7 +189,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
       end
 
       it 'does not create a RepositoryUpdatedEvent when enabling a wiki' do
-        project.project_feature.update(wiki_access_level: ProjectFeature::DISABLED)
+        project.project_feature.update!(wiki_access_level: ProjectFeature::DISABLED)
         project.reload
 
         expect do
@@ -229,7 +230,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
   context 'when there are merge requests in merge train' do
     before do
       stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update(merge_pipelines_enabled: true)
+      project.update!(merge_pipelines_enabled: true)
     end
 
     let!(:first_merge_request) do

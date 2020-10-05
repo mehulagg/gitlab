@@ -1,8 +1,8 @@
 <script>
-import { GlLink } from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlLink, GlIcon } from '@gitlab/ui';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 import TotalTime from './total_time_component.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import iconBranch from '../svg/icon_branch.svg';
 import iconBuildStatus from '../svg/icon_build_status.svg';
 
@@ -10,7 +10,7 @@ export default {
   components: {
     UserAvatarImage,
     TotalTime,
-    Icon,
+    GlIcon,
     GlLink,
   },
   props: {
@@ -55,7 +55,7 @@ export default {
             <gl-link :href="url" class="item-build-name">{{ name }}</gl-link> &middot;
           </template>
           <gl-link :href="url" class="pipeline-id">#{{ id }}</gl-link>
-          <icon :size="16" name="fork" />
+          <gl-icon :size="16" name="fork" />
           <gl-link :href="branch.url" class="ref-name">{{ branch.name }}</gl-link>
           <span class="icon-branch" v-html="iconBranch"></span>
           <gl-link :href="commitUrl" class="commit-sha">{{ shortSha }}</gl-link>

@@ -1,5 +1,6 @@
 <script>
 import { GlTokenSelector } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 
 export default {
   name: 'CommaSeparatedListTokenSelector',
@@ -19,11 +20,54 @@ export default {
       required: false,
       default: null,
     },
+    regexValidator: {
+      type: RegExp,
+      required: false,
+      default: null,
+    },
+    disallowedValues: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    regexErrorMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    disallowedValueErrorMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    customErrorMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
       selectedTokens: [],
+      textInputValue: '',
+      hideErrorMessage: true,
     };
+  },
+  computed: {
+    tokenIsValid() {
+      return this.computedErrorMessage === '';
+    },
+    computedErrorMessage() {
+      if (this.regexValidator !== null && this.textInputValue.match(this.regexValidator) === null) {
+        return this.regexErrorMessage;
+      }
+
+      if (!isEmpty(this.disallowedValues) && this.disallowedValues.includes(this.textInputValue)) {
+        return this.disallowedValueErrorMessage;
+      }
+
+      return this.customErrorMessage;
+    },
   },
   watch: {
     selectedTokens(newValue) {
@@ -53,10 +97,29 @@ export default {
   },
   methods: {
     handleEnter(event) {
+      if (this.textInputValue !== '' && !this.tokenIsValid) {
+        this.hideErrorMessage = false;
+
+        // Trigger a focus event on the token selector to explicitly open the dropdown and display the error message
+        this.$nextTick(() => {
+          this.$refs.tokenSelector.$el
+            .querySelector('input[type="text"]')
+            .dispatchEvent(new Event('focus'));
+        });
+      }
+
       // Prevent form from submitting when adding a token
       if (event.target.value !== '') {
         event.preventDefault();
       }
+    },
+    handleTextInput(value) {
+      this.hideErrorMessage = true;
+      this.textInputValue = value;
+      this.$emit('text-input', value);
+    },
+    handleBlur() {
+      this.hideErrorMessage = true;
     },
   },
 };
@@ -64,16 +127,22 @@ export default {
 
 <template>
   <gl-token-selector
+    ref="tokenSelector"
     v-model="selectedTokens"
     container-class="gl-h-auto!"
-    allow-user-defined-tokens
-    hide-dropdown-with-no-items
+    :allow-user-defined-tokens="tokenIsValid"
+    :hide-dropdown-with-no-items="hideErrorMessage"
     :aria-labelledby="ariaLabelledby"
     :placeholder="placeholder"
     @keydown.enter="handleEnter"
+    @text-input="handleTextInput"
+    @blur="handleBlur"
   >
     <template #user-defined-token-content="{ inputText }">
       <slot name="user-defined-token-content" :input-text="inputText"></slot>
+    </template>
+    <template #no-results-content>
+      <span class="gl-text-red-500">{{ computedErrorMessage }}</span>
     </template>
   </gl-token-selector>
 </template>

@@ -1,15 +1,14 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
-import tasksByTypeStore from 'ee/analytics/cycle_analytics/store/modules/type_of_work';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import TasksByTypeChart from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_chart.vue';
 import TasksByTypeFilters from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_filters.vue';
-import { tasksByTypeData, taskByTypeFilters } from '../mock_data';
 import {
   TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST,
   TASKS_BY_TYPE_FILTERS,
 } from 'ee/analytics/cycle_analytics/constants';
+import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
+import { tasksByTypeData, taskByTypeFilters } from '../mock_data';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -22,7 +21,7 @@ const fakeStore = ({ initialGetters, initialState }) =>
   new Vuex.Store({
     modules: {
       typeOfWork: {
-        ...tasksByTypeStore,
+        namespaced: true,
         getters: {
           tasksByTypeChartData: () => tasksByTypeData,
           selectedTasksByTypeFilters: () => taskByTypeFilters,
@@ -32,6 +31,7 @@ const fakeStore = ({ initialGetters, initialState }) =>
         state: {
           ...initialState,
         },
+        actions: actionSpies,
       },
     },
   });
@@ -41,7 +41,6 @@ describe('TypeOfWorkCharts', () => {
     return shallowMount(TypeOfWorkCharts, {
       localVue,
       store: fakeStore({ initialGetters, initialState }),
-      methods: actionSpies,
       stubs: {
         TasksByTypeChart: true,
         TasksByTypeFilters: true,
@@ -54,7 +53,7 @@ describe('TypeOfWorkCharts', () => {
 
   const findSubjectFilters = _wrapper => _wrapper.find(TasksByTypeFilters);
   const findTasksByTypeChart = _wrapper => _wrapper.find(TasksByTypeChart);
-  const findLoader = _wrapper => _wrapper.find(GlLoadingIcon);
+  const findLoader = _wrapper => _wrapper.find(ChartSkeletonLoader);
   const selectedFilterText =
     "Type of work Showing data for group 'Gitlab Org' from Dec 11, 2019 to Jan 10, 2020";
 
@@ -111,7 +110,7 @@ describe('TypeOfWorkCharts', () => {
     });
 
     it('calls the setTasksByTypeFilters method', () => {
-      expect(actionSpies.setTasksByTypeFilters).toHaveBeenCalledWith(payload);
+      expect(actionSpies.setTasksByTypeFilters).toHaveBeenCalledWith(expect.any(Object), payload);
     });
   });
 

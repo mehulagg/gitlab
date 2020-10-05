@@ -7,25 +7,37 @@ RSpec.describe MergeRequestComplianceEntity do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
-  let(:merge_request) { create(:merge_request, state: :merged) }
+  let_it_be(:merge_request) { create(:merge_request, :merged) }
 
   let(:request) { double('request', current_user: user, project: project) }
-  let(:entity) { described_class.new(merge_request, request: request) }
+  let(:entity) { described_class.new(merge_request.reload, request: request) }
 
   describe '.as_json' do
     subject { entity.as_json }
 
     it 'includes merge request attributes for compliance' do
       expect(subject).to include(
-        :id, :title, :merged_at, :milestone, :path, :issuable_reference, :author, :approved_by_users
+        :id,
+        :title,
+        :merged_at,
+        :milestone,
+        :path,
+        :issuable_reference,
+        :author,
+        :approved_by_users,
+        :approval_status,
+        :target_branch,
+        :target_branch_uri,
+        :source_branch,
+        :source_branch_uri
       )
     end
 
     describe 'with an approver' do
       let_it_be(:approver) { create(:user) }
-      let!(:approval) { create :approval, merge_request: merge_request, user: approver }
+      let_it_be(:approval) { create :approval, merge_request: merge_request, user: approver }
 
-      before do
+      before_all do
         project.add_developer(approver)
       end
 
@@ -39,7 +51,7 @@ RSpec.describe MergeRequestComplianceEntity do
     end
 
     describe 'with a head pipeline' do
-      let!(:pipeline) { create(:ci_empty_pipeline, status: :success, project: project, head_pipeline_of: merge_request) }
+      let_it_be(:pipeline) { create(:ci_empty_pipeline, status: :success, project: project, head_pipeline_of: merge_request) }
 
       describe 'and the user cannot read the pipeline' do
         it 'does not include pipeline status attribute' do
@@ -55,6 +67,46 @@ RSpec.describe MergeRequestComplianceEntity do
         it 'includes pipeline status attribute' do
           expect(subject).to have_key(:pipeline_status)
         end
+      end
+    end
+
+    context 'with an approval status' do
+      let_it_be(:committers_approval_enabled) { false }
+      let_it_be(:authors_approval_enabled) { false }
+      let_it_be(:approvals_required) { 2 }
+
+      shared_examples 'the approval status' do
+        before do
+          allow(merge_request).to receive(:authors_can_approve?).and_return(authors_approval_enabled)
+          allow(merge_request).to receive(:committers_can_approve?).and_return(committers_approval_enabled)
+          allow(merge_request).to receive(:approvals_required).and_return(approvals_required)
+        end
+
+        it 'is correct' do
+          expect(subject[:approval_status]).to eq(status)
+        end
+      end
+
+      context 'all approval checks pass' do
+        let_it_be(:status) { :success }
+
+        it_behaves_like 'the approval status'
+      end
+
+      context 'only some of the approval checks pass' do
+        let_it_be(:authors_approval_enabled) { true }
+        let_it_be(:status) { :warning }
+
+        it_behaves_like 'the approval status'
+      end
+
+      context 'none of the approval checks pass' do
+        let_it_be(:committers_approval_enabled) { true }
+        let_it_be(:authors_approval_enabled) { true }
+        let_it_be(:approvals_required) { 0 }
+        let_it_be(:status) { :failed }
+
+        it_behaves_like 'the approval status'
       end
     end
   end

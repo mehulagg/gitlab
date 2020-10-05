@@ -1,18 +1,20 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlButton } from '@gitlab/ui';
 import Approvals from 'ee/vue_merge_request_widget/components/approvals/approvals.vue';
-import ApprovalsSummary from 'ee/vue_merge_request_widget/components/approvals/approvals_summary.vue';
-import ApprovalsSummaryOptional from 'ee/vue_merge_request_widget/components/approvals/approvals_summary_optional.vue';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
 import ApprovalsAuth from 'ee/vue_merge_request_widget/components/approvals/approvals_auth.vue';
-import createFlash from '~/flash';
+import MrWidgetContainer from '~/vue_merge_request_widget/components/mr_widget_container.vue';
+import ApprovalsFoss from '~/vue_merge_request_widget/components/approvals/approvals.vue';
+import ApprovalsSummary from '~/vue_merge_request_widget/components/approvals/approvals_summary.vue';
+import ApprovalsSummaryOptional from '~/vue_merge_request_widget/components/approvals/approvals_summary_optional.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import {
   FETCH_LOADING,
   FETCH_ERROR,
   APPROVE_ERROR,
   UNAPPROVE_ERROR,
-} from 'ee/vue_merge_request_widget/components/approvals/messages';
+} from '~/vue_merge_request_widget/components/approvals/messages';
 import eventHub from '~/vue_merge_request_widget/event_hub';
 
 const TEST_HELP_PATH = 'help/path';
@@ -43,6 +45,10 @@ describe('EE MRWidget approvals', () => {
         mr,
         service,
         ...props,
+      },
+      stubs: {
+        approvals: ApprovalsFoss,
+        MrWidgetContainer,
       },
     });
   };
@@ -84,6 +90,7 @@ describe('EE MRWidget approvals', () => {
       approvalRules: [],
       isOpen: true,
       state: 'open',
+      approvalsWidgetType: 'full',
     };
 
     jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
@@ -101,7 +108,7 @@ describe('EE MRWidget approvals', () => {
     });
 
     it('shows loading message', () => {
-      wrapper.setData({ fetchingApprovals: true });
+      wrapper.find(ApprovalsFoss).setData({ fetchingApprovals: true });
 
       return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.text()).toContain(FETCH_LOADING);
@@ -332,7 +339,7 @@ describe('EE MRWidget approvals', () => {
             });
 
             it('sets isApproving', () => {
-              wrapper.setData({ isApproving: true });
+              wrapper.find(ApprovalsFoss).setData({ isApproving: true });
 
               return wrapper.vm.$nextTick().then(() => {
                 expect(findApprovalsAuth().props('isApproving')).toBe(true);
@@ -340,7 +347,7 @@ describe('EE MRWidget approvals', () => {
             });
 
             it('sets hasError when auth fails', () => {
-              wrapper.setData({ hasApprovalAuthError: true });
+              wrapper.find(ApprovalsFoss).setData({ hasApprovalAuthError: true });
 
               return wrapper.vm.$nextTick().then(() => {
                 expect(findApprovalsAuth().props('hasError')).toBe(true);

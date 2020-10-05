@@ -1,39 +1,63 @@
 <script>
 import $ from 'jquery';
-import { __ } from '~/locale';
+import { GlButton } from '@gitlab/ui';
+import { mapActions } from 'vuex';
+import { __, sprintf } from '../../../locale';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import eventHub from '../../event_hub';
 
 export default {
+  components: {
+    GlButton,
+  },
+  inject: ['fullPath'],
   props: {
     isLocked: {
       required: true,
       type: Boolean,
     },
-
-    updateLockedAttribute: {
+    issuableDisplayName: {
       required: true,
-      type: Function,
+      type: String,
     },
   },
-
+  data() {
+    return {
+      isLoading: false,
+    };
+  },
   computed: {
     buttonText() {
+      if (this.isLoading) {
+        return __('Applying');
+      }
+
       return this.isLocked ? __('Unlock') : __('Lock');
     },
-
-    toggleLock() {
-      return !this.isLocked;
-    },
   },
-
   methods: {
+    ...mapActions(['updateLockedAttribute']),
     closeForm() {
       eventHub.$emit('closeLockForm');
       $(this.$el).trigger('hidden.gl.dropdown');
     },
     submitForm() {
-      this.closeForm();
-      this.updateLockedAttribute(this.toggleLock);
+      this.isLoading = true;
+
+      this.updateLockedAttribute({
+        locked: !this.isLocked,
+        fullPath: this.fullPath,
+      })
+        .catch(() => {
+          const flashMessage = __(
+            'Something went wrong trying to change the locked state of this %{issuableDisplayName}',
+          );
+          Flash(sprintf(flashMessage, { issuableDisplayName: this.issuableDisplayName }));
+        })
+        .finally(() => {
+          this.closeForm();
+          this.isLoading = false;
+        });
     },
   },
 };
@@ -41,12 +65,19 @@ export default {
 
 <template>
   <div class="sidebar-item-warning-message-actions">
-    <button type="button" class="btn btn-default append-right-10" @click="closeForm">
+    <gl-button class="gl-mr-3" @click="closeForm">
       {{ __('Cancel') }}
-    </button>
+    </gl-button>
 
-    <button type="button" class="btn btn-close" @click.prevent="submitForm">
+    <gl-button
+      data-testid="lock-toggle"
+      category="secondary"
+      variant="warning"
+      :disabled="isLoading"
+      :loading="isLoading"
+      @click.prevent="submitForm"
+    >
       {{ buttonText }}
-    </button>
+    </gl-button>
   </div>
 </template>

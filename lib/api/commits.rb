@@ -13,7 +13,7 @@ module API
 
     helpers do
       def user_access
-        @user_access ||= Gitlab::UserAccess.new(current_user, project: user_project)
+        @user_access ||= Gitlab::UserAccess.new(current_user, container: user_project)
       end
 
       def authorize_push_to_branch!(branch)
@@ -62,19 +62,29 @@ module API
                                                   first_parent: first_parent,
                                                   order: order)
 
-        commit_count =
-          if all || path || before || after || first_parent
-            user_project.repository.count_commits(ref: ref, path: path, before: before, after: after, all: all, first_parent: first_parent)
-          else
-            # Cacheable commit count.
-            user_project.repository.commit_count_for_ref(ref)
-          end
-
-        paginated_commits = Kaminari.paginate_array(commits, total_count: commit_count)
-
         serializer = with_stats ? Entities::CommitWithStats : Entities::Commit
 
-        present paginate(paginated_commits), with: serializer
+        if Feature.enabled?(:api_commits_without_count, user_project)
+          # This tells kaminari that there is 1 more commit after the one we've
+          # loaded, meaning there will be a next page, if the currently loaded set
+          # of commits is equal to the requested page size.
+          commit_count = offset + commits.size + 1
+          paginated_commits = Kaminari.paginate_array(commits, total_count: commit_count)
+
+          present paginate(paginated_commits, exclude_total_headers: true), with: serializer
+        else
+          commit_count =
+            if all || path || before || after || first_parent
+              user_project.repository.count_commits(ref: ref, path: path, before: before, after: after, all: all, first_parent: first_parent)
+            else
+              # Cacheable commit count.
+              user_project.repository.commit_count_for_ref(ref)
+            end
+
+          paginated_commits = Kaminari.paginate_array(commits, total_count: commit_count)
+
+          present paginate(paginated_commits), with: serializer
+        end
       end
 
       desc 'Commit multiple file changes as one commit' do
@@ -136,7 +146,10 @@ module API
         if result[:status] == :success
           commit_detail = user_project.repository.commit(result[:result])
 
-          Gitlab::UsageDataCounters::WebIdeCounter.increment_commits_count if find_user_from_warden
+          if find_user_from_warden
+            Gitlab::UsageDataCounters::WebIdeCounter.increment_commits_count
+            Gitlab::UsageDataCounters::EditorUniqueCounter.track_web_ide_edit_action(author: current_user)
+          end
 
           present commit_detail, with: Entities::CommitDetail, stats: params[:stats]
         else
@@ -203,6 +216,7 @@ module API
       params do
         requires :sha, type: String, desc: 'A commit sha, or the name of a branch or tag to be cherry picked'
         requires :branch, type: String, desc: 'The name of the branch', allow_blank: false
+        optional :dry_run, type: Boolean, default: false, desc: "Does not commit any changes"
       end
       post ':id/repository/commits/:sha/cherry_pick', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         authorize_push_to_branch!(params[:branch])
@@ -215,7 +229,8 @@ module API
         commit_params = {
           commit: commit,
           start_branch: params[:branch],
-          branch_name: params[:branch]
+          branch_name: params[:branch],
+          dry_run: params[:dry_run]
         }
 
         result = ::Commits::CherryPickService
@@ -223,10 +238,18 @@ module API
           .execute
 
         if result[:status] == :success
-          present user_project.repository.commit(result[:result]),
-            with: Entities::Commit
+          if params[:dry_run]
+            present dry_run: :success
+            status :ok
+          else
+            present user_project.repository.commit(result[:result]),
+              with: Entities::Commit
+          end
         else
-          error!(result.slice(:message, :error_code), 400, header)
+          response = result.slice(:message, :error_code)
+          response[:dry_run] = :error if params[:dry_run]
+
+          error!(response, 400, header)
         end
       end
 
@@ -237,6 +260,7 @@ module API
       params do
         requires :sha, type: String, desc: 'Commit SHA to revert'
         requires :branch, type: String, desc: 'Target branch name', allow_blank: false
+        optional :dry_run, type: Boolean, default: false, desc: "Does not commit any changes"
       end
       post ':id/repository/commits/:sha/revert', requirements: API::COMMIT_ENDPOINT_REQUIREMENTS do
         authorize_push_to_branch!(params[:branch])
@@ -249,7 +273,8 @@ module API
         commit_params = {
           commit: commit,
           start_branch: params[:branch],
-          branch_name: params[:branch]
+          branch_name: params[:branch],
+          dry_run: params[:dry_run]
         }
 
         result = ::Commits::RevertService
@@ -257,10 +282,18 @@ module API
           .execute
 
         if result[:status] == :success
-          present user_project.repository.commit(result[:result]),
-            with: Entities::Commit
+          if params[:dry_run]
+            present dry_run: :success
+            status :ok
+          else
+            present user_project.repository.commit(result[:result]),
+              with: Entities::Commit
+          end
         else
-          error!(result.slice(:message, :error_code), 400, header)
+          response = result.slice(:message, :error_code)
+          response[:dry_run] = :error if params[:dry_run]
+
+          error!(response, 400, header)
         end
       end
 

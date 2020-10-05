@@ -1,17 +1,24 @@
 # frozen_string_literal: true
 
 class Admin::AuditLogsController < Admin::ApplicationController
+  include Gitlab::Utils::StrongMemoize
   include AuditEvents::EnforcesValidDateParams
   include AuditEvents::AuditLogsParams
   include AuditEvents::Sortable
+  include AuditEvents::DateRange
+  include Analytics::UniqueVisitsHelper
 
   before_action :check_license_admin_audit_log_available!
+
+  track_unique_visits :index, target_id: 'i_compliance_audit_events'
+
+  feature_category :audit_events
 
   PER_PAGE = 25
 
   def index
-    @events = audit_log_events
-    @table_events = AuditEventSerializer.new.represent(@events)
+    @is_last_page = events.last_page?
+    @events = AuditEventSerializer.new.represent(events)
 
     @entity = case audit_logs_params[:entity_type]
               when 'User'
@@ -27,12 +34,18 @@ class Admin::AuditLogsController < Admin::ApplicationController
 
   private
 
-  def audit_log_events
-    level = Gitlab::Audit::Levels::Instance.new
-    events = AuditLogFinder.new(level: level, params: audit_logs_params).execute
-    events = events.page(params[:page]).per(PER_PAGE).without_count
+  def events
+    strong_memoize(:events) do
+      level = Gitlab::Audit::Levels::Instance.new
+      events = AuditLogFinder
+        .new(level: level, params: audit_logs_params)
+        .execute
+        .page(params[:page])
+        .per(PER_PAGE)
+        .without_count
 
-    Gitlab::Audit::Events::Preloader.preload!(events)
+      Gitlab::Audit::Events::Preloader.preload!(events)
+    end
   end
 
   def check_license_admin_audit_log_available!

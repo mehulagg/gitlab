@@ -4,8 +4,9 @@ require 'spec_helper'
 
 RSpec.describe Vulnerabilities::Scanner do
   describe 'associations' do
-    it { is_expected.to have_many(:occurrences).class_name('Vulnerabilities::Occurrence') }
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to have_many(:findings).class_name('Vulnerabilities::Finding') }
+    it { is_expected.to have_many(:security_findings).class_name('Security::Finding') }
   end
 
   describe 'validations' do

@@ -3,6 +3,10 @@
 class MergeRequestComplianceEntity < Grape::Entity
   include RequestAwareEntity
 
+  SUCCESS_APPROVAL_STATUS = :success
+  WARNING_APPROVAL_STATUS = :warning
+  FAILED_APPROVAL_STATUS = :failed
+
   expose :id
   expose :title
   expose :merged_at
@@ -20,6 +24,12 @@ class MergeRequestComplianceEntity < Grape::Entity
   expose :approved_by_users, using: API::Entities::UserBasic
 
   expose :pipeline_status, if: -> (*) { can_read_pipeline? }, with: DetailedStatusEntity
+  expose :approval_status
+
+  expose :target_branch
+  expose :target_branch_uri, if: -> (merge_request) { merge_request.target_branch_exists? }
+  expose :source_branch
+  expose :source_branch_uri, if: -> (merge_request) { merge_request.source_branch_exists? }
 
   private
 
@@ -31,5 +41,28 @@ class MergeRequestComplianceEntity < Grape::Entity
 
   def pipeline_status
     merge_request.head_pipeline.detailed_status(request.current_user)
+  end
+
+  def approval_status
+    # All these checks should be false for this to pass as a success
+    # If any are true then there is a violation of the separation of duties
+    checks = [
+        merge_request.authors_can_approve?,
+        merge_request.committers_can_approve?,
+        merge_request.approvals_required < 2
+    ]
+
+    return FAILED_APPROVAL_STATUS if checks.all?
+    return WARNING_APPROVAL_STATUS if checks.any?
+
+    SUCCESS_APPROVAL_STATUS
+  end
+
+  def target_branch_uri
+    project_ref_path(merge_request.project, merge_request.target_branch)
+  end
+
+  def source_branch_uri
+    project_ref_path(merge_request.project, merge_request.source_branch)
   end
 end

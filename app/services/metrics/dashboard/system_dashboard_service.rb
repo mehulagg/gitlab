@@ -6,7 +6,10 @@ module Metrics
   module Dashboard
     class SystemDashboardService < ::Metrics::Dashboard::PredefinedDashboardService
       DASHBOARD_PATH = 'config/prometheus/common_metrics.yml'
-      DASHBOARD_NAME = N_('Default dashboard')
+      DASHBOARD_NAME = N_('Overview')
+
+      # SHA256 hash of dashboard content
+      DASHBOARD_VERSION = 'ce9ae27d2913f637de851d61099bc4151583eae68b1386a2176339ef6e653223'
 
       SEQUENCE = [
         STAGES::CommonMetricsInserter,
@@ -15,7 +18,6 @@ module Metrics
         STAGES::MetricEndpointInserter,
         STAGES::VariableEndpointInserter,
         STAGES::PanelIdsInserter,
-        STAGES::Sorter,
         STAGES::AlertsInserter
       ].freeze
 
@@ -29,6 +31,12 @@ module Metrics
             out_of_the_box_dashboard: out_of_the_box_dashboard?
           }]
         end
+      end
+
+      private
+
+      def dashboard_version
+        DASHBOARD_VERSION
       end
     end
   end

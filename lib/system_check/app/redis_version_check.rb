@@ -5,8 +5,8 @@ require 'redis'
 module SystemCheck
   module App
     class RedisVersionCheck < SystemCheck::BaseCheck
-      MIN_REDIS_VERSION = '3.2.0'
-      RECOMMENDED_REDIS_VERSION = '4.0.0'
+      MIN_REDIS_VERSION = '4.0.0'
+      RECOMMENDED_REDIS_VERSION = '4.0.0' # In future we may deprecate but still support Redis 4
       set_name "Redis version >= #{RECOMMENDED_REDIS_VERSION}?"
 
       @custom_error_message = ''
@@ -37,7 +37,7 @@ module SystemCheck
           @custom_error_message
         )
         for_more_information(
-          'doc/administration/high_availability/redis.md#provide-your-own-redis-instance-core-only'
+          'doc/administration/high_availability/redis.md#provide-your-own-redis-instance'
         )
         fix_and_rerun
       end

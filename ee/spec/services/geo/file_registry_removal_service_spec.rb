@@ -362,6 +362,7 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
         PersonalFileUploader.new(snippet).store!(file)
         Upload.find_by(model: snippet, uploader: PersonalFileUploader.name)
       end
+
       let!(:registry) { create(:geo_upload_registry, :personal_file, file_id: upload.id) }
       let!(:file_path) { upload.retrieve_uploader.file.path }
 
@@ -392,6 +393,7 @@ RSpec.describe Geo::FileRegistryRemovalService, :geo do
         FaviconUploader.new(appearance).store!(file)
         Upload.find_by(model: appearance, uploader: FaviconUploader.name)
       end
+
       let!(:registry) { create(:geo_upload_registry, :favicon, file_id: upload.id) }
       let!(:file_path) { upload.retrieve_uploader.file.path }
 

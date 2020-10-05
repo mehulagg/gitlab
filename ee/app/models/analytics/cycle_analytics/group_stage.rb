@@ -6,6 +6,7 @@ module Analytics
       include Analytics::CycleAnalytics::Stage
 
       validates :group, presence: true
+      validates :name, uniqueness: { scope: [:group_id, :group_value_stream_id] }
       belongs_to :group
       belongs_to :value_stream, class_name: 'Analytics::CycleAnalytics::GroupValueStream', foreign_key: :group_value_stream_id
 

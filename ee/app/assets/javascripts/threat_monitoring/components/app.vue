@@ -58,6 +58,10 @@ export default {
       type: String,
       required: true,
     },
+    newPolicyPath: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -157,7 +161,13 @@ export default {
     </header>
 
     <gl-tabs>
-      <gl-tab :title="s__('ThreatMonitoring|Overview')">
+      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
+        <network-policy-list
+          :documentation-path="documentationPath"
+          :new-policy-path="newPolicyPath"
+        />
+      </gl-tab>
+      <gl-tab :title="s__('ThreatMonitoring|Statistics')">
         <threat-monitoring-filters />
 
         <threat-monitoring-section
@@ -191,9 +201,6 @@ export default {
           :documentation-path="documentationPath"
           documentation-anchor="container-network-policy"
         />
-      </gl-tab>
-      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
-        <network-policy-list :documentation-path="documentationPath" />
       </gl-tab>
     </gl-tabs>
   </section>

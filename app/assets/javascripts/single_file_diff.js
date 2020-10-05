@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import { __ } from './locale';
 import axios from './lib/utils/axios_utils';
-import createFlash from './flash';
+import { deprecatedCreateFlash as createFlash } from './flash';
 import FilesCommentButton from './files_comment_button';
 import initImageDiffHelper from './image_diff/helpers/init_image_diff';
 import syntaxHighlight from './syntax_highlight';
@@ -57,16 +57,10 @@ export default class SingleFileDiff {
       this.content.hide();
       this.$toggleIcon.addClass('fa-caret-right').removeClass('fa-caret-down');
       this.collapsedContent.show();
-      if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-        gl.diffNotesCompileComponents();
-      }
     } else if (this.content) {
       this.collapsedContent.hide();
       this.content.show();
       this.$toggleIcon.addClass('fa-caret-down').removeClass('fa-caret-right');
-      if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-        gl.diffNotesCompileComponents();
-      }
     } else {
       this.$toggleIcon.addClass('fa-caret-down').removeClass('fa-caret-right');
       return this.getContentHTML(cb);
@@ -89,10 +83,6 @@ export default class SingleFileDiff {
           this.content = $(ERROR_HTML);
         }
         this.collapsedContent.after(this.content);
-
-        if (typeof gl.diffNotesCompileComponents !== 'undefined') {
-          gl.diffNotesCompileComponents();
-        }
 
         const $file = $(this.file);
         FilesCommentButton.init($file);

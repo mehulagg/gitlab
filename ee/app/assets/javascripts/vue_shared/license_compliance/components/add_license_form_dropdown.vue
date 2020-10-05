@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 import $ from 'jquery';
 import select2 from 'select2/select2';
-import { KNOWN_LICENSES } from '../constants';
 
 export default {
   name: 'AddLicenseFormDropdown',
@@ -17,6 +16,10 @@ export default {
       required: false,
       default: '',
     },
+    knownLicenses: {
+      type: Array,
+      required: true,
+    },
   },
   mounted() {
     $(this.$refs.dropdownInput)
@@ -26,7 +29,10 @@ export default {
         placeholder: this.placeholder,
         createSearchChoice: term => ({ id: term, text: term }),
         createSearchChoicePosition: 'bottom',
-        data: KNOWN_LICENSES.map(license => ({ id: license, text: license })),
+        data: this.knownLicenses.map(license => ({
+          id: license,
+          text: license,
+        })),
       })
       .on('change', e => {
         this.$emit('input', e.target.value);

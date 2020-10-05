@@ -2,17 +2,18 @@
 
 class Admin::IntegrationsController < Admin::ApplicationController
   include IntegrationsActions
+  include ServicesHelper
+
+  feature_category :integrations
 
   private
 
   def find_or_initialize_integration(name)
-    if name.in?(Service.available_services_names)
-      "#{name}_service".camelize.constantize.find_or_initialize_by(instance: true) # rubocop:disable CodeReuse/ActiveRecord
-    end
+    Service.find_or_initialize_integration(name, instance: true)
   end
 
   def integrations_enabled?
-    Feature.enabled?(:instance_level_integrations)
+    instance_level_integrations?
   end
 
   def scoped_edit_integration_path(integration)

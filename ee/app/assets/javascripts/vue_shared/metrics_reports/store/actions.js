@@ -75,6 +75,3 @@ export const receiveMetricsError = ({ commit, dispatch }) => {
   commit(types.RECEIVE_METRICS_ERROR);
   dispatch('stopPolling');
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -27,7 +27,7 @@ Please note that [S/MIME signed](../administration/smime_signing_email.md) email
 ## Mailer previews
 
 Rails provides a way to preview our mailer templates in HTML and plaintext using
-dummy data.
+sample data.
 
 The previews live in [`app/mailers/previews`](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/app/mailers/previews) and can be viewed at
 [`/rails/mailers`](http://localhost:3000/rails/mailers).
@@ -115,7 +115,7 @@ Examples of valid email keys:
 - `1234567890abcdef1234567890abcdef-unsubscribe` (unsubscribe from a conversation)
 - `1234567890abcdef1234567890abcdef` (reply to a conversation)
 
-Please note that the action `-issue-` is used in GitLab Premium as the handler for the Service Desk feature.
+Please note that the action `-issue-` is used in GitLab as the handler for the Service Desk feature.
 
 ### Legacy format
 
@@ -127,7 +127,7 @@ These are the only valid legacy formats for an email handler:
 - `namespace`
 - `namespace+action`
 
-Please note that `path/to/project` is used in GitLab Premium as handler for the Service Desk feature.
+Please note that `path/to/project` is used in GitLab as the handler for the Service Desk feature.
 
 ---
 

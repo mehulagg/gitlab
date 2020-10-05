@@ -104,15 +104,6 @@ $t-gray-a-04: rgba($black, 0.04) !default;
 $t-gray-a-06: rgba($black, 0.06) !default;
 $t-gray-a-08: rgba($black, 0.08) !default;
 
-$gl-gray-100: #ddd !default;
-$gl-gray-200: #ccc !default;
-$gl-gray-350: #aaa !default;
-$gl-gray-400: #999 !default;
-$gl-gray-500: #777 !default;
-$gl-gray-600: #666 !default;
-$gl-gray-700: #555 !default;
-$gl-gray-800: #333 !default;
-
 $green-50: #ecf4ee !default;
 $green-100: #c3e6cd !default;
 $green-200: #91d4a8 !default;
@@ -137,17 +128,17 @@ $blue-800: #064787 !default;
 $blue-900: #033464 !default;
 $blue-950: #002850 !default;
 
-$orange-50: #fffaf4 !default;
-$orange-100: #fff1de !default;
-$orange-200: #fed69f !default;
-$orange-300: #fdbc60 !default;
-$orange-400: #fca429 !default;
-$orange-500: #fc9403 !default;
-$orange-600: #de7e00 !default;
-$orange-700: #c26700 !default;
-$orange-800: #a35200 !default;
-$orange-900: #853c00 !default;
-$orange-950: #592800 !default;
+$orange-50: #fdf1dd !default;
+$orange-100: #f5d9a8 !default;
+$orange-200: #e9be74 !default;
+$orange-300: #d99530 !default;
+$orange-400: #c17d10 !default;
+$orange-500: #ab6100 !default;
+$orange-600: #9e5400 !default;
+$orange-700: #8f4700 !default;
+$orange-800: #703800 !default;
+$orange-900: #5c2900 !default;
+$orange-950: #421f00 !default;
 
 $red-50: #fcf1ef !default;
 $red-100: #fdd4cd !default;
@@ -161,17 +152,29 @@ $red-800: #8d1300 !default;
 $red-900: #660e00 !default;
 $red-950: #4d0a00 !default;
 
+$purple-50: #f4f0ff !default;
+$purple-100: #e1d8f9 !default;
+$purple-200: #cbbbf2 !default;
+$purple-300: #ac93e6 !default;
+$purple-400: #9475db !default;
+$purple-500: #7b58cf !default;
+$purple-600: #694cc0 !default;
+$purple-700: #5943b6 !default;
+$purple-800: #453894 !default;
+$purple-900: #2f2a6b !default;
+$purple-950: #232150 !default;
+
 $gray-10: #fafafa !default;
 $gray-50: #f0f0f0 !default;
 $gray-100: #dbdbdb !default;
 $gray-200: #bfbfbf !default;
-$gray-300: #ccc !default;
-$gray-400: #bababa !default;
-$gray-500: #a7a7a7 !default;
-$gray-600: #919191 !default;
-$gray-700: #707070 !default;
-$gray-800: #4f4f4f !default;
-$gray-900: #2e2e2e !default;
+$gray-300: #999 !default;
+$gray-400: #868686 !default;
+$gray-500: #666 !default;
+$gray-600: #5e5e5e !default;
+$gray-700: #525252 !default;
+$gray-800: #404040 !default;
+$gray-900: #303030 !default;
 $gray-950: #1f1f1f !default;
 
 $greens: (
@@ -228,6 +231,20 @@ $reds: (
   '800': $red-800,
   '900': $red-900,
   '950': $red-950
+);
+
+$purples: (
+  '50': $purple-50,
+  '100': $purple-100,
+  '200': $purple-200,
+  '300': $purple-300,
+  '400': $purple-400,
+  '500': $purple-500,
+  '600': $purple-600,
+  '700': $purple-700,
+  '800': $purple-800,
+  '900': $purple-900,
+  '950': $purple-950
 );
 
 $grays: (
@@ -350,20 +367,17 @@ $gl-font-size-large: 16px;
 $gl-font-weight-normal: 400;
 $gl-font-weight-bold: 600;
 $gl-text-color: $gray-900;
-$gl-text-color-secondary: $gray-700;
-$gl-text-color-tertiary: $gray-600;
+$gl-text-color-secondary: $gray-500;
+$gl-text-color-tertiary: $gray-400;
 $gl-text-color-quaternary: #d6d6d6;
 $gl-text-color-inverted: $white;
 $gl-text-color-secondary-inverted: rgba($white, 0.85);
-$gl-text-color-disabled: $gray-600;
+$gl-text-color-disabled: $gray-400;
 $gl-grayish-blue: #7f8fa4;
-$gl-gray-dark: #313236;
-$gl-gray-light: #5c5c5c;
 $gl-header-color: #4c4e54;
 $gl-font-size-12: 12px;
 $gl-font-size-14: 14px;
 $gl-font-size-16: 16px;
-$gl-font-size-20: 20px;
 $gl-font-size-28: 28px;
 $gl-font-size-42: 42px;
 
@@ -446,6 +460,8 @@ $context-header-height: 60px;
 $breadcrumb-min-height: 48px;
 $home-panel-title-row-height: 64px;
 $home-panel-avatar-mobile-size: 24px;
+$issuable-title-max-width: 350px;
+$milestone-title-max-width: 75px;
 $gl-line-height: 16px;
 $gl-line-height-18: 18px;
 $gl-line-height-20: 20px;
@@ -482,6 +498,22 @@ $line-added: #ecfdf0;
 $line-added-dark: #c7f0d2 !default;
 $line-removed: #fbe9eb;
 $line-removed-dark: #fac5cd !default;
+/*
+ * The transparent colors are used in Monaco editor. Using full opacity colors
+ * would hide other layers (selected text, matching brackets).
+ *
+ * When the transparent colors get layered on white background, they create their
+ * full opacity counterparts (computed with https://stackoverflow.com/a/12228643/606571):
+ *
+ *  - white + $line-added-transparent = $line-added
+ *  - white + $line-added-transparent + $line-added-dark-transparent = $line-added-dark
+ *
+ * More details: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41553
+ */
+$line-added-transparent: rgba(160, 245, 180, 0.2);
+$line-added-dark-transparent: rgba(51, 188, 90, 0.2);
+$line-removed-transparent: rgba(235, 145, 155, 0.2);
+$line-removed-dark-transparent: rgba(246, 53, 85, 0.2);
 $line-number-old: #f9d7dc;
 $line-number-new: #ddfbe6;
 $line-number-select: #fbf2da;
@@ -586,7 +618,6 @@ $award-emoji-width-xs: 90%;
 $search-input-border-color: rgba($blue-400, 0.8);
 $search-input-width: 200px;
 $search-input-xl-width: 320px;
-$location-icon-color: #e7e9ed;
 
 /*
  *  Notes
@@ -637,10 +668,13 @@ $issue-boards-card-shadow: rgba(0, 0, 0, 0.1);
  They probably should be derived in a smarter way.
 */
 $issue-boards-filter-height: 68px;
+$issue-boards-filter-height-md: 110px;
+$issue-boards-filter-height-sm: 299px;
 $issue-boards-breadcrumbs-height-xs: 63px;
 $issue-board-list-difference-xs: $header-height + $issue-boards-breadcrumbs-height-xs;
 $issue-board-list-difference-sm: $header-height + $breadcrumb-min-height;
-$issue-board-list-difference-md: $issue-board-list-difference-sm + $issue-boards-filter-height;
+$issue-board-list-difference-md: $issue-board-list-difference-sm + $issue-boards-filter-height-md;
+$issue-board-list-difference-lg: $issue-board-list-difference-sm + $issue-boards-filter-height;
 /*
  The following heights are used in environment_logs.scss and are used for calculation of the log viewer height.
 */
@@ -748,10 +782,6 @@ $login-brand-holder-color: #888;
 $project-option-descr-color: #54565b;
 $project-network-controls-color: #888;
 
-$feature-toggle-color: #fff;
-$feature-toggle-text-color: #fff;
-$feature-toggle-color-enabled: #4a8bee;
-
 /*
  * Monitor Charts
  */
@@ -789,7 +819,6 @@ $pipeline-dropdown-line-height: 20px;
 $pipeline-dropdown-status-icon-size: 18px;
 $ci-action-dropdown-button-size: 24px;
 $ci-action-dropdown-svg-size: 12px;
-$pipelines-table-header-height: 40px;
 
 /*
 CI variable lists
@@ -838,9 +867,6 @@ $add-to-slack-popup-max-width: 400px;
 $add-to-slack-gif-max-width: 850px;
 $add-to-slack-well-max-width: 750px;
 $add-to-slack-logo-size: 100px;
-$double-headed-arrow-width: 100px;
-$double-headed-arrow-height: 25px;
-$right-arrow-size: 16px;
 
 /*
 Popup
@@ -870,7 +896,7 @@ $popover-max-width: 384px;
 $popover-box-shadow: 0 2px 3px 1px $gray-100;
 
 /*
-Issues Analytics
+Issue Analytics
 */
 $issues-analytics-popover-boarder-color: rgba(0, 0, 0, 0.15);
 
@@ -893,8 +919,3 @@ $compare-branches-sticky-header-height: 68px;
  - Issue: https://gitlab.com/gitlab-org/design.gitlab.com/issues/242
  */
 $enable-validation-icons: false;
-
-/*
-Licenses
-*/
-$license-header-cell-width: 150px;

@@ -56,6 +56,10 @@ module API
       )
     end
 
+    before do
+      set_peek_enabled_for_current_request
+    end
+
     # The locale is set to the current user's locale when `current_user` is loaded
     after { Gitlab::I18n.use_default_locale }
 
@@ -110,11 +114,13 @@ module API
     end
 
     format :json
+    formatter :json, Gitlab::Json::GrapeFormatter
     content_type :txt, "text/plain"
 
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers
     helpers ::API::Helpers::CommonHelpers
+    helpers ::API::Helpers::PerformanceBarHelpers
 
     namespace do
       after do
@@ -124,6 +130,7 @@ module API
       # Keep in alphabetical order
       mount ::API::AccessRequests
       mount ::API::Admin::Ci::Variables
+      mount ::API::Admin::InstanceClusters
       mount ::API::Admin::Sidekiq
       mount ::API::Appearance
       mount ::API::Applications
@@ -160,6 +167,7 @@ module API
       mount ::API::GroupVariables
       mount ::API::ImportBitbucketServer
       mount ::API::ImportGithub
+      mount ::API::IssueLinks
       mount ::API::Issues
       mount ::API::JobArtifacts
       mount ::API::Jobs
@@ -178,7 +186,22 @@ module API
       mount ::API::Discussions
       mount ::API::ResourceLabelEvents
       mount ::API::ResourceMilestoneEvents
+      mount ::API::ResourceStateEvents
       mount ::API::NotificationSettings
+      mount ::API::ProjectPackages
+      mount ::API::GroupPackages
+      mount ::API::PackageFiles
+      mount ::API::NugetPackages
+      mount ::API::PypiPackages
+      mount ::API::ComposerPackages
+      mount ::API::ConanProjectPackages
+      mount ::API::ConanInstancePackages
+      mount ::API::DebianGroupPackages
+      mount ::API::DebianProjectPackages
+      mount ::API::MavenPackages
+      mount ::API::NpmPackages
+      mount ::API::GenericPackages
+      mount ::API::GoProxy
       mount ::API::Pages
       mount ::API::PagesDomains
       mount ::API::ProjectClusters
@@ -195,6 +218,7 @@ module API
       mount ::API::ProjectStatistics
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
+      mount ::API::Terraform::StateVersion
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
@@ -215,6 +239,8 @@ module API
       mount ::API::Templates
       mount ::API::Todos
       mount ::API::Triggers
+      mount ::API::Unleash
+      mount ::API::UsageData
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables
@@ -223,7 +249,19 @@ module API
     end
 
     mount ::API::Internal::Base
+    mount ::API::Internal::Lfs
     mount ::API::Internal::Pages
+    mount ::API::Internal::Kubernetes
+
+    version 'v3', using: :path do
+      # Although the following endpoints are kept behind V3 namespace,
+      # they're not deprecated neither should be removed when V3 get
+      # removed.  They're needed as a layer to integrate with Jira
+      # Development Panel.
+      namespace '/', requirements: ::API::V3::Github::ENDPOINT_REQUIREMENTS do
+        mount ::API::V3::Github
+      end
+    end
 
     route :any, '*path' do
       error!('404 Not Found', 404)

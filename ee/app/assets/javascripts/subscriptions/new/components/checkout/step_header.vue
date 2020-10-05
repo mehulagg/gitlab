@@ -1,9 +1,9 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     isFinished: {
@@ -19,7 +19,7 @@ export default {
 </script>
 <template>
   <div class="d-flex">
-    <icon
+    <gl-icon
       v-show="isFinished"
       class="checkmark gl-mr-3"
       :size="18"

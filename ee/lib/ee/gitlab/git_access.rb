@@ -10,6 +10,7 @@ module EE
 
       override :check
       def check(cmd, changes)
+        check_maintenance_mode!(cmd)
         check_geo_license!
         check_smartcard_access!
 
@@ -21,6 +22,16 @@ module EE
         return true if geo?
 
         super
+      end
+
+      def group?
+        # Strict nil check, to avoid any surprises with Object#present?
+        # which can delegate to #empty?
+        !group.nil?
+      end
+
+      def group
+        container if container.is_a?(::Group)
       end
 
       protected
@@ -35,11 +46,8 @@ module EE
       private
 
       override :check_custom_action
-      def check_custom_action(cmd)
-        custom_action = custom_action_for(cmd)
-        return custom_action if custom_action
-
-        super
+      def check_custom_action
+        geo_custom_action || super
       end
 
       override :check_for_console_messages
@@ -84,6 +92,17 @@ module EE
         unless can_access_without_new_smartcard_login?
           raise ::Gitlab::GitAccess::ForbiddenError, 'Project requires smartcard login. Please login to GitLab using a smartcard.'
         end
+      end
+
+      def check_maintenance_mode!(cmd)
+        return unless cmd == 'git-receive-pack'
+        return unless maintenance_mode?
+
+        raise ::Gitlab::GitAccess::ForbiddenError, 'Git push is not allowed because this GitLab instance is currently in (read-only) maintenance mode.'
+      end
+
+      def maintenance_mode?
+        ::Gitlab::CurrentSettings.current_application_settings.maintenance_mode
       end
 
       def can_access_without_new_smartcard_login?

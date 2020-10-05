@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class MergeRequestBasicEntity < Grape::Entity
+  expose :title
   expose :public_merge_status, as: :merge_status
   expose :merge_error
   expose :state
@@ -9,6 +10,7 @@ class MergeRequestBasicEntity < Grape::Entity
   expose :milestone, using: API::Entities::Milestone
   expose :labels, using: LabelEntity
   expose :assignees, using: API::Entities::UserBasic
+  expose :reviewers, if: -> (m) { m.allows_reviewers? }, using: API::Entities::UserBasic
   expose :task_status, :task_status_short
   expose :lock_version, :lock_version
 end

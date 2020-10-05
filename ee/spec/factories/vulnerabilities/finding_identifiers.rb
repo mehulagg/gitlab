@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :vulnerabilities_finding_identifier, class: 'Vulnerabilities::FindingIdentifier' do
-    occurrence factory: :vulnerabilities_occurrence
+    finding factory: :vulnerabilities_finding
     identifier factory: :vulnerabilities_identifier
   end
 end

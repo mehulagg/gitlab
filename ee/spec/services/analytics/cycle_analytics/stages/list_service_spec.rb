@@ -28,6 +28,10 @@ RSpec.describe Analytics::CycleAnalytics::Stages::ListService do
     expect(stages.map(&:id)).to all(be_nil)
   end
 
+  it 'does not persist the value stream record' do
+    expect { subject }.not_to change { Analytics::CycleAnalytics::GroupValueStream.count }
+  end
+
   context 'when there are persisted stages' do
     let_it_be(:stage1) { create(:cycle_analytics_group_stage, parent: group, relative_position: 2, value_stream: value_stream) }
     let_it_be(:stage2) { create(:cycle_analytics_group_stage, parent: group, relative_position: 3, value_stream: value_stream) }

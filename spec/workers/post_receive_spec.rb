@@ -27,7 +27,7 @@ RSpec.describe PostReceive do
   context 'with a non-existing project' do
     let(:gl_repository) { "project-123456789" }
     let(:error_message) do
-      "Triggered hook for non-existing project with gl_repository \"#{gl_repository}\""
+      "Triggered hook for non-existing gl_repository \"#{gl_repository}\""
     end
 
     it "returns false and logs an error" do
@@ -281,7 +281,7 @@ RSpec.describe PostReceive do
 
     before do
       # Need to mock here so we can expect calls on project
-      allow(Gitlab::GlRepository).to receive(:parse).and_return([project, project, Gitlab::GlRepository::WIKI])
+      allow(Gitlab::GlRepository).to receive(:parse).and_return([project.wiki, project, Gitlab::GlRepository::WIKI])
     end
 
     it 'updates project activity' do
@@ -290,7 +290,7 @@ RSpec.describe PostReceive do
 
       # MySQL drops milliseconds in the timestamps, so advance at least
       # a second to ensure we see changes.
-      Timecop.freeze(1.second.from_now) do
+      travel_to(1.second.from_now) do
         expect do
           perform
           project.reload
@@ -314,7 +314,7 @@ RSpec.describe PostReceive do
 
       it 'processes the changes on the master branch' do
         expect_next_instance_of(Git::WikiPushService) do |service|
-          expect(service).to receive(:process_changes).and_call_original
+          expect(service).to receive(:execute).and_call_original
         end
         expect(project.wiki).to receive(:default_branch).twice.and_return(default_branch)
         expect(project.wiki.repository).to receive(:raw).and_return(raw_repo)
@@ -334,7 +334,7 @@ RSpec.describe PostReceive do
 
       before do
         allow_next_instance_of(Git::WikiPushService) do |service|
-          allow(service).to receive(:process_changes)
+          allow(service).to receive(:execute)
         end
       end
 

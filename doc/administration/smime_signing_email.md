@@ -3,7 +3,7 @@
 Notification emails sent by GitLab can be signed with S/MIME for improved
 security.
 
-> **Note:**
+NOTE: **Note:**
 Please be aware that S/MIME certificates and TLS/SSL certificates are not the
 same and are used for different purposes: TLS creates a secure channel, whereas
 S/MIME signs and/or encrypts the message itself
@@ -21,7 +21,8 @@ files must be provided:
 Optionally, you can also provide a bundle of CA certs (PEM-encoded) to be
 included on each signature. This will typically be an intermediate CA.
 
-NOTE: **Note:** Be mindful of the access levels for your private keys and visibility to
+NOTE: **Note:**
+Be mindful of the access levels for your private keys and visibility to
 third parties.
 
 **For Omnibus installations:**
@@ -38,7 +39,8 @@ third parties.
 
 1. Save the file and [reconfigure GitLab](restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-NOTE: **Note:** The key needs to be readable by the GitLab system user (`git` by default).
+NOTE: **Note:**
+The key needs to be readable by the GitLab system user (`git` by default).
 
 **For installations from source:**
 
@@ -61,7 +63,8 @@ NOTE: **Note:** The key needs to be readable by the GitLab system user (`git` by
 
 1. Save the file and [restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
 
-NOTE: **Note:** The key needs to be readable by the GitLab system user (`git` by default).
+NOTE: **Note:**
+The key needs to be readable by the GitLab system user (`git` by default).
 
 ### How to convert S/MIME PKCS#12 / PFX format to PEM encoding
 
@@ -72,8 +75,8 @@ extensions), which contain the following in a single encrypted file:
 - Intermediate certificates (if any)
 - Private key
 
-In order to export the required files in PEM encoding from the PKCS#12 file,
-the `openssl` command can be used:
+To export the required files in PEM encoding from the PKCS#12 file, the
+`openssl` command can be used:
 
 ```shell
 #-- Extract private key in PEM encoding (no password, unencrypted)

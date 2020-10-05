@@ -1,9 +1,17 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { viewerInformationForPath } from '~/vue_shared/components/content_viewer/lib/viewer_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import ContentViewer from '~/vue_shared/components/content_viewer/content_viewer.vue';
 import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
+import {
+  WEBIDE_MARK_FILE_CLICKED,
+  WEBIDE_MARK_FILE_START,
+  WEBIDE_MEASURE_FILE_AFTER_INTERACTION,
+  WEBIDE_MEASURE_FILE_FROM_REQUEST,
+} from '~/performance_constants';
+import { performanceMarkAndMeasure } from '~/performance_utils';
+import eventHub from '../eventhub';
 import {
   leftSidebarViews,
   viewerTypes,
@@ -14,7 +22,7 @@ import Editor from '../lib/editor';
 import FileTemplatesBar from './file_templates/bar.vue';
 import { __ } from '~/locale';
 import { extractMarkdownImagesFromEntries } from '../stores/utils';
-import { getPathParent, readFileAsDataURL } from '../utils';
+import { getPathParent, readFileAsDataURL, registerSchema, isTextFile } from '../utils';
 import { getRulesWithTraversal } from '../lib/editorconfig/parser';
 import mapRulesToMonaco from '../lib/editorconfig/rules_mapper';
 
@@ -48,6 +56,7 @@ export default {
       'renderWhitespaceInCode',
       'editorTheme',
       'entries',
+      'currentProjectId',
     ]),
     ...mapGetters([
       'currentMergeRequest',
@@ -55,10 +64,11 @@ export default {
       'isEditModeActive',
       'isCommitModeActive',
       'currentBranch',
+      'getJsonSchemaForPath',
     ]),
     ...mapGetters('fileTemplates', ['showFileTemplatesBar']),
     shouldHideEditor() {
-      return this.file && this.file.binary;
+      return this.file && !isTextFile(this.file);
     },
     showContentViewer() {
       return (
@@ -162,12 +172,15 @@ export default {
       }
     },
   },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: WEBIDE_MARK_FILE_START });
+  },
   beforeDestroy() {
     this.editor.dispose();
   },
   mounted() {
     if (!this.editor) {
-      this.editor = Editor.create(this.editorOptions);
+      this.editor = Editor.create(this.$store, this.editorOptions);
     }
     this.initEditor();
 
@@ -195,6 +208,8 @@ export default {
       }
 
       this.editor.clearEditor();
+
+      this.registerSchemaForFile();
 
       Promise.all([this.fetchFileData(), this.fetchEditorconfigRules()])
         .then(() => {
@@ -285,6 +300,11 @@ export default {
       });
 
       this.$emit('editorSetup');
+      if (performance.getEntriesByName(WEBIDE_MARK_FILE_CLICKED).length) {
+        eventHub.$emit(WEBIDE_MEASURE_FILE_AFTER_INTERACTION);
+      } else {
+        eventHub.$emit(WEBIDE_MEASURE_FILE_FROM_REQUEST);
+      }
     },
     refreshEditorDimensions() {
       if (this.showEditor) {
@@ -328,6 +348,10 @@ export default {
 
       // do nothing if no image is found in the clipboard
       return Promise.resolve();
+    },
+    registerSchemaForFile() {
+      const schema = this.getJsonSchemaForPath(this.file.path);
+      registerSchema(schema);
     },
   },
   viewerTypes,
@@ -379,7 +403,7 @@ export default {
       :path="file.rawPath || file.path"
       :file-path="file.path"
       :file-size="file.size"
-      :project-path="file.projectId"
+      :project-path="currentProjectId"
       :commit-sha="currentBranchCommit"
       :type="fileType"
     />
@@ -390,7 +414,7 @@ export default {
       :new-sha="currentMergeRequest.sha"
       :old-path="file.mrChange.old_path"
       :old-sha="currentMergeRequest.baseCommitSha"
-      :project-path="file.projectId"
+      :project-path="currentProjectId"
     />
   </div>
 </template>

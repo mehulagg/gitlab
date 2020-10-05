@@ -69,6 +69,7 @@ RSpec.describe AutoMerge::MergeWhenPipelineSucceedsService do
       before do
         allow(merge_request)
           .to receive_messages(head_pipeline: pipeline, actual_head_pipeline: pipeline)
+        expect(MailScheduler::NotificationServiceWorker).to receive(:perform_async).with('merge_when_pipeline_succeeds', merge_request, user).once
 
         service.execute(merge_request)
       end
@@ -106,6 +107,7 @@ RSpec.describe AutoMerge::MergeWhenPipelineSucceedsService do
 
       it 'updates the merge params' do
         expect(SystemNoteService).not_to receive(:merge_when_pipeline_succeeds)
+        expect(MailScheduler::NotificationServiceWorker).not_to receive(:perform_async).with('merge_when_pipeline_succeeds', any_args)
 
         service.execute(mr_merge_if_green_enabled)
         expect(mr_merge_if_green_enabled.merge_params).to have_key('should_remove_source_branch')

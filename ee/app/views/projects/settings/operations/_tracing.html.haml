@@ -7,14 +7,14 @@
   .settings-header{ :class => "border-top" }
     %h3{ :class => "h4" }
       = _("Jaeger tracing")
-    %button.btn.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = _('Expand')
     %p
       - if has_jaeger_url
         - tracing_link = link_to sanitize(@project.tracing_external_url, scrubber: Rails::Html::TextOnlyScrubber.new), target: "_blank", rel: 'noopener noreferrer' do
           %span
             = _('Tracing')
-            = sprite_icon('external-link', size: 16, css_class: 'ml-1 vertical-align-middle')
+            = sprite_icon('external-link', css_class: 'ml-1 vertical-align-middle')
       - else
         - tracing_link = link_to project_tracing_path(@project) do
           %span
@@ -30,7 +30,6 @@
           %p.form-text.text-muted
             - jaeger_help_url = "https://www.jaegertracing.io/docs/1.7/getting-started/"
             - link_start_tag = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: jaeger_help_url }
-            - link_end_tag = "#{sprite_icon('external-link', size: 16, css_class: 'ml-1 vertical-align-middle')}</a>".html_safe
+            - link_end_tag = "#{sprite_icon('external-link', css_class: 'ml-1 vertical-align-middle')}</a>".html_safe
             = _("For more information, please review %{link_start_tag}Jaeger's configuration doc%{link_end_tag}").html_safe % { link_start_tag: link_start_tag, link_end_tag: link_end_tag }
-
       = f.submit _('Save changes'), class: 'btn btn-success'

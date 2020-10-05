@@ -1,5 +1,0 @@
----
-title: Allow admins to see project despite of ip restriction set on a group level
-merge_request: 34086
-author:
-type: fixed

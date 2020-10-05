@@ -27,7 +27,7 @@
             .form-text.text-muted.mb-2
               = _('The above settings apply to all projects with the selected compliance framework(s).')
 
-            = f.collection_check_boxes(:compliance_frameworks, compliance_framework_checkboxes, :first, :last, include_hidden: false) do |b|
+            = f.collection_check_boxes(:compliance_frameworks, compliance_framework_checkboxes, :first, :last) do |b|
               .form-check
                 = b.check_box(class: "form-check-input")
                 = b.label(class: "form-check-label")

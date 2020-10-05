@@ -1,8 +1,5 @@
 - breadcrumb_title _("Repository")
 - page_title _("New File"), @path.presence, @ref
-- unless Feature.enabled?(:monaco_blobs)
-  - content_for :page_specific_javascripts do
-    = page_specific_javascript_tag('lib/ace.js')
 
 .editor-title-row
   %h3.page-title.blob-new-page-title
@@ -18,6 +15,7 @@
     - if should_suggest_gitlab_ci_yml?
       .js-suggest-gitlab-ci-yml-commit-changes{ data: { toggle: 'popover',
         target: '#commit-changes',
+        merge_request_path: params[:mr_path],
         track_label: 'suggest_commit_first_project_gitlab_ci_yml',
         dismiss_key: @project.id,
         human_access: human_access } }

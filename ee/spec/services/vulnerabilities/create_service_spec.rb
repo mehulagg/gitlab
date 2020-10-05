@@ -21,6 +21,7 @@ RSpec.describe Vulnerabilities::CreateService do
     end
 
     it_behaves_like 'calls Vulnerabilities::Statistics::UpdateService'
+    it_behaves_like 'calls Vulnerabilities::HistoricalStatistics::UpdateService'
 
     it 'creates a vulnerability from finding and attaches it to the vulnerability' do
       expect { subject }.to change { project.vulnerabilities.count }.by(1)
@@ -48,10 +49,10 @@ RSpec.describe Vulnerabilities::CreateService do
     end
 
     it 'starts a new transaction for the create sequence' do
-      allow(Vulnerabilities::Occurrence).to receive(:transaction).and_call_original
+      allow(Vulnerabilities::Finding).to receive(:transaction).and_call_original
 
       subject
-      expect(Vulnerabilities::Occurrence).to have_received(:transaction).with(requires_new: true).once
+      expect(Vulnerabilities::Finding).to have_received(:transaction).with(requires_new: true).once
     end
 
     context 'when finding id is unknown' do

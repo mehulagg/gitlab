@@ -1,12 +1,11 @@
 <script>
 import { escape, isEmpty } from 'lodash';
-import { GlTooltipDirective, GlLink, GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlDeprecatedBadge as GlBadge, GlIcon } from '@gitlab/ui';
 import Alerts from 'ee/vue_shared/dashboards/components/alerts.vue';
 import TimeAgo from 'ee/vue_shared/dashboards/components/time_ago.vue';
 import { STATUS_FAILED } from 'ee/vue_shared/dashboards/constants';
 import ProjectPipeline from 'ee/vue_shared/dashboards/components/project_pipeline.vue';
 import { s__, __, sprintf } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import Commit from '~/vue_shared/components/commit.vue';
@@ -22,7 +21,7 @@ export default {
     Alerts,
     ProjectPipeline,
     TimeAgo,
-    Icon,
+    GlIcon,
   },
   directives: {
     'gl-tooltip': GlTooltipDirective,
@@ -139,7 +138,7 @@ export default {
 
         <div class="col-10 col-sm-7 pr-0 pl-5 align-self-center align-middle ci-table">
           <div class="branch-commit">
-            <icon name="work" />
+            <gl-icon name="work" />
             <gl-link
               v-if="deployable"
               v-gl-tooltip="jobTooltip"

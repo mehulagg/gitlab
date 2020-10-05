@@ -4,10 +4,10 @@ import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/analytics/code_review_analytics/store/modules/merge_requests/actions';
 import * as types from 'ee/analytics/code_review_analytics/store/modules/merge_requests/mutation_types';
 import getInitialState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { mockMergeRequests } from '../../../mock_data';
 
-jest.mock('~/flash', () => jest.fn());
+jest.mock('~/flash');
 
 describe('Code review analytics mergeRequests actions', () => {
   let state;

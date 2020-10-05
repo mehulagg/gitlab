@@ -142,24 +142,6 @@ RSpec.describe API::Projects do
       end
     end
 
-    describe 'packages_enabled attribute' do
-      it 'is exposed when the feature is available' do
-        stub_licensed_features(packages: true)
-
-        get api("/projects/#{project.id}", user)
-
-        expect(json_response).to have_key 'packages_enabled'
-      end
-
-      it 'is not exposed when the feature is not available' do
-        stub_licensed_features(packages: false)
-
-        get api("/projects/#{project.id}", user)
-
-        expect(json_response).not_to have_key 'packages_enabled'
-      end
-    end
-
     describe 'compliance_frameworks attribute' do
       context 'when compliance_framework feature is available' do
         context 'when project has a compliance framework' do
@@ -717,26 +699,6 @@ RSpec.describe API::Projects do
       end
     end
 
-    context 'when updating service desk' do
-      subject { put(api("/projects/#{project.id}", user), params: { service_desk_enabled: true }) }
-
-      before do
-        project.update!(service_desk_enabled: false)
-
-        allow(::Gitlab::IncomingEmail).to receive(:enabled?).and_return(true)
-      end
-
-      it 'returns 200' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-
-      it 'enables the service_desk' do
-        expect { subject }.to change { project.reload.service_desk_enabled }.to(true)
-      end
-    end
-
     context 'when updating mirror related attributes' do
       let(:import_url) { generate(:url) }
       let(:mirror_params) do
@@ -827,40 +789,6 @@ RSpec.describe API::Projects do
         put(api("/projects/#{project.id}", developer), params: mirror_params)
 
         expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-
-    describe 'updating packages_enabled attribute' do
-      it 'is enabled by default' do
-        expect(project.packages_enabled).to be true
-      end
-
-      context 'packages feature is allowed by license' do
-        before do
-          stub_licensed_features(packages: true)
-        end
-
-        it 'disables project packages feature' do
-          put(api("/projects/#{project.id}", user), params: { packages_enabled: false })
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(project.reload.packages_enabled).to be false
-          expect(json_response['packages_enabled']).to eq(false)
-        end
-      end
-
-      context 'packages feature is not allowed by license' do
-        before do
-          stub_licensed_features(packages: false)
-        end
-
-        it 'disables project packages feature but does not return packages_enabled attribute' do
-          put(api("/projects/#{project.id}", user), params: { packages_enabled: false })
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(project.reload.packages_enabled).to be false
-          expect(json_response['packages_enabled']).to be_nil
-        end
       end
     end
 
@@ -985,14 +913,6 @@ RSpec.describe API::Projects do
 
         it_behaves_like 'deletes project immediately'
       end
-
-      context 'when configure_project_deletion_mode feature is disabled' do
-        before do
-          stub_feature_flags(configure_project_deletion_mode: false)
-        end
-
-        it_behaves_like 'marks project for deletion'
-      end
     end
 
     context 'when feature is not available' do
@@ -1010,6 +930,7 @@ RSpec.describe API::Projects do
     let!(:target_namespace) do
       create(:group).tap { |g| g.add_owner(user) }
     end
+
     let!(:group_project) { create(:project, namespace: group)}
     let(:group) { create(:group) }
 
@@ -1021,6 +942,7 @@ RSpec.describe API::Projects do
       let(:group) do
         create(:saml_provider, :enforced_group_managed_accounts, prohibited_outer_forks: true).group
       end
+
       let(:user) do
         create(:user, managing_group: group).tap do |u|
           create(:group_saml_identity, user: u, saml_provider: group.saml_provider)
@@ -1028,7 +950,7 @@ RSpec.describe API::Projects do
       end
 
       before do
-        stub_licensed_features(group_saml: true)
+        stub_licensed_features(group_saml: true, group_forking_protection: true)
       end
 
       context 'and target namespace is outer' do

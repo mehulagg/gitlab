@@ -1,9 +1,3 @@
-const twoDaysAgo = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - 2);
-  return date.toISOString();
-};
-
 const createUser = id => ({
   id,
   avatar_url: `https://${id}`,
@@ -13,26 +7,13 @@ const createUser = id => ({
   web_url: `http://localhost:3000/user-${id}`,
 });
 
-export const createMergeRequest = ({ id = 1, pipeline, approvers } = {}) => {
-  const mergeRequest = {
-    id,
-    approved_by_users: [],
-    issuable_reference: '!1',
-    merged_at: twoDaysAgo(),
-    milestone: null,
-    path: `/h5bp/html5-boilerplate/-/merge_requests/${id}`,
-    title: `Merge request ${id}`,
-  };
+export const mergedAt = () => {
+  const date = new Date();
 
-  mergeRequest.author = createUser(id);
+  date.setFullYear(2020, 0, 1);
+  date.setHours(0, 0, 0, 0);
 
-  if (pipeline) {
-    mergeRequest.pipeline_status = pipeline;
-  }
-  if (approvers) {
-    mergeRequest.approved_by_users = approvers;
-  }
-  return mergeRequest;
+  return date.toISOString();
 };
 
 export const createPipelineStatus = status => ({
@@ -47,16 +28,36 @@ export const createPipelineStatus = status => ({
   tooltip: status,
 });
 
+export const createMergeRequest = ({ id = 1, props } = {}) => {
+  const mergeRequest = {
+    id,
+    approved_by_users: [],
+    issuable_reference: '!1',
+    merged_at: mergedAt(),
+    milestone: null,
+    path: `/h5bp/html5-boilerplate/-/merge_requests/${id}`,
+    title: `Merge request ${id}`,
+    author: createUser(id),
+    pipeline_status: createPipelineStatus('success'),
+    approval_status: 'success',
+  };
+
+  return { ...mergeRequest, ...props };
+};
+
 export const createApprovers = count => {
   return Array(count)
-    .fill()
+    .fill(null)
     .map((_, id) => createUser(id));
 };
 
-export const createMergeRequests = ({ count = 1, addPipeline = false } = {}) => {
+export const createMergeRequests = ({ count = 1, props = {} } = {}) => {
   return Array(count)
-    .fill()
+    .fill(null)
     .map((_, id) =>
-      createMergeRequest({ id, pipeline: addPipeline ? createPipelineStatus('success') : null }),
+      createMergeRequest({
+        id,
+        props,
+      }),
     );
 };

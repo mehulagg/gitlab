@@ -7,6 +7,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   include StorageHelper
   include TreeHelper
   include IconsHelper
+  include BlobHelper
   include ChecksCollaboration
   include Gitlab::Utils::StrongMemoize
 
@@ -16,7 +17,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   MAX_TOPICS_TO_SHOW = 3
 
   def statistic_icon(icon_name = 'plus-square-o')
-    sprite_icon(icon_name, size: 16, css_class: 'icon gl-mr-2')
+    sprite_icon(icon_name, css_class: 'icon gl-mr-2')
   end
 
   def statistics_anchors(show_auto_devops_callout:)
@@ -114,7 +115,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def add_ci_yml_path
-    add_special_file_path(file_name: '.gitlab-ci.yml')
+    add_special_file_path(file_name: ci_config_path_or_default)
   end
 
   def add_readme_path
@@ -219,7 +220,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     if current_user && can_current_user_push_to_default_branch?
       AnchorData.new(false,
                      statistic_icon + _('New file'),
-                     project_new_blob_path(project, default_branch || 'master'),
+                     project_new_blob_path(project, default_branch_or_master),
                      'missing')
     end
   end
@@ -397,7 +398,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     commit_message ||= s_("CommitMessage|Add %{file_name}") % { file_name: file_name }
     project_new_blob_path(
       project,
-      project.default_branch || 'master',
+      default_branch_or_master,
       file_name:      file_name,
       commit_message: commit_message,
       branch_name:    branch_name

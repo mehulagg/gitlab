@@ -1,7 +1,7 @@
 - link_project = local_assigns.fetch(:link_project, false)
 - notes_count = @noteable_meta_data[snippet.id].user_notes_count
 
-%li.snippet-row.py-3
+%li.snippet-row.py-3{ data: { qa_selector: 'snippet_link', qa_snippet_title: snippet.title } }
   = image_tag avatar_icon_for_user(snippet.author), class: "avatar s40 d-none d-sm-block", alt: ''
 
   .title
@@ -10,13 +10,13 @@
 
     %ul.controls
       %li
-        = link_to gitlab_snippet_path(snippet, anchor: 'notes'), class: ('no-comments' if notes_count.zero?) do
-          = sprite_icon('comments', size: 16, css_class: 'gl-vertical-align-text-bottom')
+        = link_to gitlab_snippet_path(snippet, anchor: 'notes'), class: ('no-comments' if notes_count == 0) do
+          = sprite_icon('comments', css_class: 'gl-vertical-align-text-bottom')
           = notes_count
       %li
         %span.sr-only
           = visibility_level_label(snippet.visibility_level)
-        = visibility_level_icon(snippet.visibility_level, fw: false)
+        = visibility_level_icon(snippet.visibility_level)
 
   .snippet-info
     #{snippet.to_reference} &middot;

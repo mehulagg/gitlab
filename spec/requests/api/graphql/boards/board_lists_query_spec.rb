@@ -7,8 +7,8 @@ RSpec.describe 'get board lists' do
 
   let_it_be(:user)           { create(:user) }
   let_it_be(:unauth_user)    { create(:user) }
-  let_it_be(:project)        { create(:project, creator_id: user.id, namespace: user.namespace ) }
   let_it_be(:group)          { create(:group, :private) }
+  let_it_be(:project)        { create(:project, creator_id: user.id, group: group) }
   let_it_be(:project_label)  { create(:label, project: project, name: 'Development') }
   let_it_be(:project_label2) { create(:label, project: project, name: 'Testing') }
   let_it_be(:group_label)    { create(:group_label, group: group, name: 'Development') }
@@ -102,6 +102,27 @@ RSpec.describe 'get board lists' do
               let(:expected_results) { lists.map { |list| list.to_global_id.to_s } }
             end
           end
+        end
+      end
+    end
+
+    context 'when querying for a single list' do
+      before do
+        board_parent.add_reporter(user)
+      end
+
+      it 'returns the correct list with issue count for matching issue filters' do
+        label_list = create(:list, board: board, label: label, position: 10)
+        create(:issue, project: project, labels: [label, label2])
+        create(:issue, project: project, labels: [label])
+
+        post_graphql(query(id: global_id_of(label_list), issueFilters: { labelName: label2.title }), current_user: user)
+
+        aggregate_failures do
+          list_node = lists_data[0]['node']
+
+          expect(list_node['title']).to eq label_list.title
+          expect(list_node['issuesCount']).to eq 1
         end
       end
     end

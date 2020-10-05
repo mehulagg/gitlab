@@ -1,21 +1,28 @@
 <script>
 import { isEmpty } from 'lodash';
-import { GlIcon, GlDeprecatedButton, GlSprintf, GlLink } from '@gitlab/ui';
-import successSvg from 'icons/_icon_status_success.svg';
-import warningSvg from 'icons/_icon_status_warning.svg';
+import { GlIcon, GlButton, GlSprintf, GlLink } from '@gitlab/ui';
 import readyToMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/ready_to_merge';
 import simplePoll from '~/lib/utils/simple_poll';
-import { __, sprintf } from '~/locale';
+import { __ } from '~/locale';
 import MergeRequest from '../../../merge_request';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
-import Flash from '../../../flash';
+import { deprecatedCreateFlash as Flash } from '../../../flash';
 import statusIcon from '../mr_widget_status_icon.vue';
 import eventHub from '../../event_hub';
 import SquashBeforeMerge from './squash_before_merge.vue';
 import CommitsHeader from './commits_header.vue';
 import CommitEdit from './commit_edit.vue';
 import CommitMessageDropdown from './commit_message_dropdown.vue';
-import { AUTO_MERGE_STRATEGIES } from '../../constants';
+import { AUTO_MERGE_STRATEGIES, DANGER, INFO, WARNING } from '../../constants';
+
+const PIPELINE_RUNNING_STATE = 'running';
+const PIPELINE_FAILED_STATE = 'failed';
+const PIPELINE_PENDING_STATE = 'pending';
+const PIPELINE_SUCCESS_STATE = 'success';
+
+const MERGE_FAILED_STATUS = 'failed';
+const MERGE_SUCCESS_STATUS = 'success';
+const MERGE_HOOK_VALIDATION_ERROR_STATUS = 'hook_validation_error';
 
 export default {
   name: 'ReadyToMerge',
@@ -28,7 +35,9 @@ export default {
     GlIcon,
     GlSprintf,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
+    MergeTrainHelperText: () =>
+      import('ee_component/vue_merge_request_widget/components/merge_train_helper_text.vue'),
     MergeImmediatelyConfirmationDialog: () =>
       import(
         'ee_component/vue_merge_request_widget/components/merge_immediately_confirmation_dialog.vue'
@@ -47,8 +56,6 @@ export default {
       commitMessage: this.mr.commitMessage,
       squashBeforeMerge: this.mr.squashIsSelected,
       isSquashReadOnly: this.mr.squashIsReadonly,
-      successSvg,
-      warningSvg,
       squashCommitMessage: this.mr.squashCommitMessage,
     };
   },
@@ -60,35 +67,45 @@ export default {
       const { pipeline, isPipelineFailed, hasCI, ciStatus } = this.mr;
 
       if ((hasCI && !ciStatus) || this.hasPipelineMustSucceedConflict) {
-        return 'failed';
-      } else if (this.isAutoMergeAvailable) {
-        return 'pending';
-      } else if (!pipeline) {
-        return 'success';
-      } else if (isPipelineFailed) {
-        return 'failed';
+        return PIPELINE_FAILED_STATE;
       }
 
-      return 'success';
+      if (this.isAutoMergeAvailable) {
+        return PIPELINE_PENDING_STATE;
+      }
+
+      if (pipeline && isPipelineFailed) {
+        return PIPELINE_FAILED_STATE;
+      }
+
+      return PIPELINE_SUCCESS_STATE;
     },
     mergeButtonVariant() {
-      if (this.status === 'failed') {
-        return 'danger';
-      } else if (this.status === 'pending') {
-        return 'info';
+      if (this.status === PIPELINE_FAILED_STATE) {
+        return DANGER;
       }
-      return 'success';
+
+      if (this.status === PIPELINE_PENDING_STATE) {
+        return INFO;
+      }
+
+      return PIPELINE_SUCCESS_STATE;
     },
     iconClass() {
+      if (this.shouldRenderMergeTrainHelperText && !this.mr.preventMerge) {
+        return PIPELINE_RUNNING_STATE;
+      }
+
       if (
-        this.status === 'failed' ||
+        this.status === PIPELINE_FAILED_STATE ||
         !this.commitMessage.length ||
         !this.mr.isMergeAllowed ||
         this.mr.preventMerge
       ) {
-        return 'warning';
+        return WARNING;
       }
-      return 'success';
+
+      return PIPELINE_SUCCESS_STATE;
     },
     mergeButtonText() {
       if (this.isMergingImmediately) {
@@ -125,16 +142,7 @@ export default {
       return !this.mr.ffOnlyEnabled;
     },
     shaMismatchLink() {
-      const href = this.mr.mergeRequestDiffsPath;
-
-      return sprintf(
-        __('New changes were added. %{linkStart}Reload the page to review them%{linkEnd}'),
-        {
-          linkStart: `<a href="${href}">`,
-          linkEnd: '</a>',
-        },
-        false,
-      );
+      return this.mr.mergeRequestDiffsPath;
     },
   },
   methods: {
@@ -167,11 +175,13 @@ export default {
         .merge(options)
         .then(res => res.data)
         .then(data => {
-          const hasError = data.status === 'failed' || data.status === 'hook_validation_error';
+          const hasError =
+            data.status === MERGE_FAILED_STATUS ||
+            data.status === MERGE_HOOK_VALIDATION_ERROR_STATUS;
 
           if (AUTO_MERGE_STRATEGIES.includes(data.status)) {
             eventHub.$emit('MRWidgetUpdateRequested');
-          } else if (data.status === 'success') {
+          } else if (data.status === MERGE_SUCCESS_STATUS) {
             this.initiateMergePolling();
           } else if (hasError) {
             eventHub.$emit('FailedToMerge', data.merge_error);
@@ -269,21 +279,21 @@ export default {
 
 <template>
   <div>
-    <div class="mr-widget-body media">
+    <div class="mr-widget-body media" :class="{ 'gl-pb-3': shouldRenderMergeTrainHelperText }">
       <status-icon :status="iconClass" />
       <div class="media-body">
         <div class="mr-widget-body-controls media space-children">
           <span class="btn-group">
-            <gl-deprecated-button
-              size="sm"
+            <gl-button
+              size="medium"
+              category="primary"
               class="qa-merge-button accept-merge-request"
               :variant="mergeButtonVariant"
               :disabled="isMergeButtonDisabled"
               :loading="isMakingRequest"
               @click="handleMergeButtonClick(isAutoMergeAvailable)"
+              >{{ mergeButtonText }}</gl-button
             >
-              {{ mergeButtonText }}
-            </gl-deprecated-button>
             <button
               v-if="shouldShowMergeImmediatelyDropdown"
               :disabled="isMergeButtonDisabled"
@@ -307,7 +317,7 @@ export default {
                   @click.prevent="handleMergeButtonClick(true)"
                 >
                   <span class="media">
-                    <span class="merge-opt-icon" aria-hidden="true" v-html="successSvg"></span>
+                    <gl-icon name="status_success" class="merge-opt-icon" aria-hidden="true" />
                     <span class="media-body merge-opt-title">{{ autoMergeText }}</span>
                   </span>
                 </a>
@@ -325,7 +335,7 @@ export default {
                   @click.prevent="handleMergeImmediatelyButtonClick"
                 >
                   <span class="media">
-                    <span class="merge-opt-icon" aria-hidden="true" v-html="warningSvg"></span>
+                    <gl-icon name="status_warning" class="merge-opt-icon" aria-hidden="true" />
                     <span class="media-body merge-opt-title">{{ __('Merge immediately') }}</span>
                   </span>
                 </a>
@@ -358,6 +368,7 @@ export default {
                 <div
                   v-if="hasPipelineMustSucceedConflict"
                   class="gl-display-flex gl-align-items-center"
+                  data-testid="pipeline-succeed-conflict"
                 >
                   <gl-sprintf :message="pipelineMustSucceedConflictText" />
                   <gl-link
@@ -375,10 +386,27 @@ export default {
         </div>
         <div v-if="mr.isSHAMismatch" class="d-flex align-items-center mt-2 js-sha-mismatch">
           <gl-icon name="warning-solid" class="text-warning mr-1" />
-          <span class="text-warning" v-html="shaMismatchLink"></span>
+          <span class="text-warning">
+            <gl-sprintf
+              :message="
+                __('New changes were added. %{linkStart}Reload the page to review them%{linkEnd}')
+              "
+            >
+              <template #link="{ content }">
+                <gl-link :href="mr.mergeRequestDiffsPath">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </span>
         </div>
       </div>
     </div>
+    <merge-train-helper-text
+      v-if="shouldRenderMergeTrainHelperText"
+      :pipeline-id="mr.pipeline.id"
+      :pipeline-link="mr.pipeline.path"
+      :merge-train-length="mr.mergeTrainsCount"
+      :merge-train-when-pipeline-succeeds-docs-path="mr.mergeTrainWhenPipelineSucceedsDocsPath"
+    />
     <template v-if="shouldShowMergeControls">
       <div v-if="mr.ffOnlyEnabled" class="mr-fast-forward-message">
         {{ __('Fast-forward merge without a merge commit') }}

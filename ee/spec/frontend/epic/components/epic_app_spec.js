@@ -7,19 +7,17 @@ import createStore from 'ee/epic/store';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { initialRequest } from 'jest/issue_show/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import axios from '~/lib/utils/axios_utils';
 import { mockEpicMeta, mockEpicData } from '../mock_data';
 
 describe('EpicAppComponent', () => {
+  useMockIntersectionObserver();
+
   let vm;
   let mock;
 
   beforeEach(() => {
-    window.IntersectionObserver = class {
-      disconnect = jest.fn();
-      observe = jest.fn();
-    };
-
     mock = new MockAdapter(axios);
     mock.onGet(`${TEST_HOST}/realtime_changes`).reply(200, initialRequest);
 
@@ -31,10 +29,11 @@ describe('EpicAppComponent', () => {
     vm = mountComponentWithStore(Component, {
       store,
     });
+
+    jest.advanceTimersByTime(2);
   });
 
   afterEach(() => {
-    delete window.IntersectionObserver;
     mock.restore();
     vm.$destroy();
   });

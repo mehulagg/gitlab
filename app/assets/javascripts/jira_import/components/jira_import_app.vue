@@ -1,10 +1,7 @@
 <script>
-import { GlAlert, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { last } from 'lodash';
-import { __ } from '~/locale';
 import getJiraImportDetailsQuery from '../queries/get_jira_import_details.query.graphql';
-import initiateJiraImportMutation from '../queries/initiate_jira_import.mutation.graphql';
-import { addInProgressImportToStore } from '../utils/cache_update';
 import { isInProgress, extractJiraProjectsOptions } from '../utils/jira_import_utils';
 import JiraImportForm from './jira_import_form.vue';
 import JiraImportProgress from './jira_import_progress.vue';
@@ -15,7 +12,6 @@ export default {
   components: {
     GlAlert,
     GlLoadingIcon,
-    GlSprintf,
     JiraImportForm,
     JiraImportProgress,
     JiraImportSetup,
@@ -37,6 +33,10 @@ export default {
       type: String,
       required: true,
     },
+    projectId: {
+      type: String,
+      required: true,
+    },
     projectPath: {
       type: String,
       required: true,
@@ -51,7 +51,6 @@ export default {
       jiraImportDetails: {},
       errorMessage: '',
       showAlert: false,
-      selectedProject: undefined,
     };
   },
   apollo: {
@@ -73,46 +72,7 @@ export default {
       },
     },
   },
-  computed: {
-    numberOfPreviousImports() {
-      return this.jiraImportDetails.imports?.reduce?.(
-        (acc, jiraProject) => (jiraProject.jiraProjectKey === this.selectedProject ? acc + 1 : acc),
-        0,
-      );
-    },
-    hasPreviousImports() {
-      return this.numberOfPreviousImports > 0;
-    },
-    importLabel() {
-      return this.selectedProject
-        ? `jira-import::${this.selectedProject}-${this.numberOfPreviousImports + 1}`
-        : 'jira-import::KEY-1';
-    },
-  },
   methods: {
-    initiateJiraImport(project) {
-      this.$apollo
-        .mutate({
-          mutation: initiateJiraImportMutation,
-          variables: {
-            input: {
-              projectPath: this.projectPath,
-              jiraProjectKey: project,
-              usersMapping: [],
-            },
-          },
-          update: (store, { data }) =>
-            addInProgressImportToStore(store, data.jiraImportStart, this.projectPath),
-        })
-        .then(({ data }) => {
-          if (data.jiraImportStart.errors.length) {
-            this.setAlertMessage(data.jiraImportStart.errors.join('. '));
-          } else {
-            this.selectedProject = undefined;
-          }
-        })
-        .catch(() => this.setAlertMessage(__('There was an error importing the Jira project.')));
-    },
     setAlertMessage(message) {
       this.errorMessage = message;
       this.showAlert = true;
@@ -121,9 +81,6 @@ export default {
       this.showAlert = false;
     },
   },
-  previousImportsMessage: __(
-    'You have imported from this project %{numberOfPreviousImports} times before. Each new import will create duplicate issues.',
-  ),
 };
 </script>
 
@@ -131,11 +88,6 @@ export default {
   <div>
     <gl-alert v-if="showAlert" variant="danger" @dismiss="dismissAlert">
       {{ errorMessage }}
-    </gl-alert>
-    <gl-alert v-if="hasPreviousImports" variant="warning" :dismissible="false">
-      <gl-sprintf :message="$options.previousImportsMessage">
-        <template #numberOfPreviousImports>{{ numberOfPreviousImports }}</template>
-      </gl-sprintf>
     </gl-alert>
 
     <jira-import-setup
@@ -154,11 +106,12 @@ export default {
     />
     <jira-import-form
       v-else
-      v-model="selectedProject"
-      :import-label="importLabel"
       :issues-path="issuesPath"
+      :jira-imports="jiraImportDetails.imports"
       :jira-projects="jiraImportDetails.projects"
-      @initiateJiraImport="initiateJiraImport"
+      :project-id="projectId"
+      :project-path="projectPath"
+      @error="setAlertMessage"
     />
   </div>
 </template>

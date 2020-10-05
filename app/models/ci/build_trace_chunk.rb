@@ -2,13 +2,17 @@
 
 module Ci
   class BuildTraceChunk < ApplicationRecord
-    include FastDestroyAll
+    extend ::Gitlab::Ci::Model
+    include ::Comparable
+    include ::FastDestroyAll
+    include ::Checksummable
     include ::Gitlab::ExclusiveLeaseHelpers
-    extend Gitlab::Ci::Model
 
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
     default_value_for :data_store, :redis
+
+    after_create { metrics.increment_trace_operation(operation: :chunked) }
 
     CHUNK_SIZE = 128.kilobytes
     WRITE_LOCK_RETRY = 10
@@ -24,6 +28,9 @@ module Ci
       database: 2,
       fog: 3
     }
+
+    scope :live, -> { redis }
+    scope :persisted, -> { not_redis.order(:chunk_index) }
 
     class << self
       def all_stores
@@ -58,12 +65,22 @@ module Ci
           get_store_class(store).delete_keys(value)
         end
       end
+
+      ##
+      # Sometimes we do not want to read raw data. This method makes it easier
+      # to find attributes that are just metadata excluding raw data.
+      #
+      def metadata_attributes
+        attribute_names - %w[raw_data]
+      end
     end
 
-    ##
-    # Data is memoized for optimizing #size and #end_offset
     def data
       @data ||= get_data.to_s
+    end
+
+    def crc32
+      checksum.to_i
     end
 
     def truncate(offset = 0)
@@ -75,18 +92,16 @@ module Ci
 
     def append(new_data, offset)
       raise ArgumentError, 'New data is missing' unless new_data
-      raise ArgumentError, 'Offset is out of range' if offset > size || offset < 0
+      raise ArgumentError, 'Offset is out of range' if offset < 0 || offset > size
       raise ArgumentError, 'Chunk size overflow' if CHUNK_SIZE < (offset + new_data.bytesize)
 
-      in_lock(*lock_params) do # Write operation is atomic
-        unsafe_set_data!(data.byteslice(0, offset) + new_data)
-      end
+      in_lock(*lock_params) { unsafe_append_data!(new_data, offset) }
 
-      schedule_to_persist if full?
+      schedule_to_persist! if full?
     end
 
     def size
-      data&.bytesize.to_i
+      @size ||= @data&.bytesize || current_store.size(self) || data&.bytesize
     end
 
     def start_offset
@@ -102,58 +117,120 @@ module Ci
     end
 
     def persist_data!
-      in_lock(*lock_params) do # Write operation is atomic
-        unsafe_persist_to!(self.class.persistable_store)
-      end
+      in_lock(*lock_params) { unsafe_persist_data! }
+    end
+
+    def schedule_to_persist!
+      return if persisted?
+
+      Ci::BuildTraceChunkFlushWorker.perform_async(id)
+    end
+
+    def persisted?
+      !redis?
+    end
+
+    def live?
+      redis?
+    end
+
+    ##
+    # Build trace chunk is final (the last one that we do not expect to ever
+    # become full) when a runner submitted a build pending state and there is
+    # no chunk with higher index in the database.
+    #
+    def final?
+      build.pending_state.present? && chunks_max_index == chunk_index
+    end
+
+    def <=>(other)
+      return unless self.build_id == other.build_id
+
+      self.chunk_index <=> other.chunk_index
     end
 
     private
 
-    def unsafe_persist_to!(new_store)
+    def get_data
+      # Redis / database return UTF-8 encoded string by default
+      current_store.data(self)&.force_encoding(Encoding::BINARY)
+    end
+
+    def unsafe_persist_data!(new_store = self.class.persistable_store)
       return if data_store == new_store.to_s
 
-      current_data = get_data
+      current_data = data
+      old_store_class = current_store
+      current_size = current_data&.bytesize.to_i
 
-      unless current_data&.bytesize.to_i == CHUNK_SIZE
-        raise FailedToPersistDataError, 'Data is not fulfilled in a bucket'
+      unless current_size == CHUNK_SIZE || final?
+        raise FailedToPersistDataError, <<~MSG
+          data is not fulfilled in a bucket
+
+          size: #{current_size}
+          state: #{build.pending_state.present?}
+          max: #{chunks_max_index}
+          index: #{chunk_index}
+        MSG
       end
-
-      old_store_class = self.class.get_store_class(data_store)
 
       self.raw_data = nil
       self.data_store = new_store
+      self.checksum = self.class.crc32(current_data)
+
+      ##
+      # We need to so persist data then save a new store identifier before we
+      # remove data from the previous store to make this operation
+      # trasnaction-safe. `unsafe_set_data! calls `save!` because of this
+      # reason.
+      #
+      # TODO consider using callbacks and state machine to remove old data
+      #
       unsafe_set_data!(current_data)
 
       old_store_class.delete_data(self)
     end
 
-    def get_data
-      self.class.get_store_class(data_store).data(self)&.force_encoding(Encoding::BINARY) # Redis/Database return UTF-8 string as default
-    rescue Excon::Error::NotFound
-      # If the data store is :fog and the file does not exist in the object storage, this method returns nil.
-    end
-
     def unsafe_set_data!(value)
       raise ArgumentError, 'New data size exceeds chunk size' if value.bytesize > CHUNK_SIZE
 
-      self.class.get_store_class(data_store).set_data(self, value)
+      current_store.set_data(self, value)
+
       @data = value
+      @size = value.bytesize
 
       save! if changed?
     end
 
-    def schedule_to_persist
-      return if data_persisted?
+    def unsafe_append_data!(value, offset)
+      new_size = value.bytesize + offset
 
-      Ci::BuildTraceChunkFlushWorker.perform_async(id)
-    end
+      if new_size > CHUNK_SIZE
+        raise ArgumentError, 'New data size exceeds chunk size'
+      end
 
-    def data_persisted?
-      !redis?
+      current_store.append_data(self, value, offset).then do |stored|
+        metrics.increment_trace_operation(operation: :appended)
+
+        raise ArgumentError, 'Trace appended incorrectly' if stored != new_size
+      end
+
+      @data = nil
+      @size = new_size
+
+      save! if changed?
     end
 
     def full?
       size == CHUNK_SIZE
+    end
+
+    def current_store
+      self.class.get_store_class(data_store)
+    end
+
+    def chunks_max_index
+      build.trace_chunks.maximum(:chunk_index).to_i
     end
 
     def lock_params
@@ -161,6 +238,10 @@ module Ci
        { ttl: WRITE_LOCK_TTL,
          retries: WRITE_LOCK_RETRY,
          sleep_sec: WRITE_LOCK_SLEEP }]
+    end
+
+    def metrics
+      @metrics ||= ::Gitlab::Ci::Trace::Metrics.new
     end
   end
 end

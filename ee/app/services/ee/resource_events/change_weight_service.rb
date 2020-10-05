@@ -13,7 +13,7 @@ module EE
 
       def execute
         unless resource_weight_changes.empty?
-          ::Gitlab::Database.bulk_insert(ResourceWeightEvent.table_name, resource_weight_changes)
+          ::Gitlab::Database.bulk_insert(ResourceWeightEvent.table_name, resource_weight_changes) # rubocop:disable Gitlab/BulkInsert
           resources.each(&:expire_note_etag_cache)
         end
       end

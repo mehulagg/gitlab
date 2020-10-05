@@ -1,14 +1,13 @@
 <script>
-import { GlDeprecatedButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import eventHub from '../event_hub';
 import { NODE_ACTIONS } from '../constants';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    Icon,
-    GlDeprecatedButton,
+    GlIcon,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -87,48 +86,61 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex align-items-center justify-content-end geo-node-actions">
-    <a
+  <div
+    data-testid="nodeActions"
+    class="gl-display-flex gl-align-items-center gl-justify-content-end gl-flex-direction-column gl-sm-flex-direction-row gl-mx-5 gl-sm-mx-0"
+  >
+    <gl-button
       v-if="isSecondaryNode"
       :href="node.geoProjectsUrl"
-      class="btn btn-sm mx-1 sm-column-spacing"
+      class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
       target="_blank"
     >
-      <icon v-if="!node.current" name="external-link" /> {{ __('Open projects') }}
-    </a>
+      <span class="gl-display-flex gl-align-items-center">
+        <gl-icon v-if="!node.current" name="external-link" class="gl-mr-2" />
+        {{ __('Open projects') }}
+      </span>
+    </gl-button>
     <template v-if="nodeActionsAllowed">
-      <gl-deprecated-button
+      <gl-button
         v-if="nodeMissingOauth"
-        class="btn btn-sm btn-default mx-1 sm-column-spacing"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
         @click="onRepairNode"
       >
         {{ s__('Repair authentication') }}
-      </gl-deprecated-button>
-      <a v-if="nodeEditAllowed" :href="node.editPath" class="btn btn-sm mx-1 sm-column-spacing">
+      </gl-button>
+      <gl-button
+        v-if="nodeEditAllowed"
+        :href="node.editPath"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+      >
         {{ __('Edit') }}
-      </a>
-      <gl-deprecated-button
+      </gl-button>
+      <gl-button
         v-if="isSecondaryNode"
-        class="btn btn-sm btn-danger mx-1 sm-column-spacing"
+        data-testid="removeButton"
+        variant="danger"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
         :disabled="!nodeRemovalAllowed"
         @click="onRemoveSecondaryNode"
       >
         {{ __('Remove') }}
-      </gl-deprecated-button>
+      </gl-button>
       <div
         v-gl-tooltip.hover
         name="disabledRemovalTooltip"
-        class="mx-1 sm-column-spacing"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
         :title="disabledRemovalTooltip"
       >
-        <gl-deprecated-button
+        <gl-button
           v-if="!isSecondaryNode"
-          class="btn btn-sm btn-danger w-100"
+          variant="danger"
+          class="gl-w-full"
           :disabled="!nodeRemovalAllowed"
           @click="onRemovePrimaryNode"
         >
           {{ __('Remove') }}
-        </gl-deprecated-button>
+        </gl-button>
       </div>
     </template>
   </div>

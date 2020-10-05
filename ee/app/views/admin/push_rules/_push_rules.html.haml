@@ -1,6 +1,6 @@
 = form_for @push_rule, url: admin_push_rule_path, method: :put, html: { class: 'fieldset-form' } do |f|
   - if @push_rule.errors.any?
-    .alert.alert-danger
+    .gl-alert.gl-alert-danger
       - @push_rule.errors.full_messages.each do |msg|
         %p= msg
   = render "shared/push_rules/form", f: f, context: nil

@@ -11,6 +11,7 @@ Migration/UpdateLargeTable:
     - :ci_stages
     - :deployments
     - :events
+    - :gitlab_subscriptions
     - :issues
     - :merge_request_diff_commits
     - :merge_request_diff_files
@@ -28,7 +29,6 @@ Migration/UpdateLargeTable:
     - :resource_label_events
     - :routes
     - :sent_notifications
-    - :services
     - :system_note_metadata
     - :taggings
     - :todos

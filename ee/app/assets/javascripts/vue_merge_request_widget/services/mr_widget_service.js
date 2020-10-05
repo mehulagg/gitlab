@@ -5,31 +5,17 @@ export default class MRWidgetService extends CEWidgetService {
   constructor(mr) {
     super(mr);
 
-    this.apiApprovalsPath = mr.apiApprovalsPath;
     this.apiApprovalSettingsPath = mr.apiApprovalSettingsPath;
-    this.apiApprovePath = mr.apiApprovePath;
-    this.apiUnapprovePath = mr.apiUnapprovePath;
   }
 
-  fetchApprovals() {
-    return axios.get(this.apiApprovalsPath).then(res => res.data);
-  }
-
-  fetchApprovalSettings() {
-    return axios.get(this.apiApprovalSettingsPath).then(res => res.data);
-  }
-
-  approveMergeRequest() {
-    return axios.post(this.apiApprovePath).then(res => res.data);
-  }
   approveMergeRequestWithAuth(approvalPassword) {
     return axios
       .post(this.apiApprovePath, { approval_password: approvalPassword })
       .then(res => res.data);
   }
 
-  unapproveMergeRequest() {
-    return axios.post(this.apiUnapprovePath).then(res => res.data);
+  fetchApprovalSettings() {
+    return axios.get(this.apiApprovalSettingsPath).then(res => res.data);
   }
 
   // eslint-disable-next-line class-methods-use-this

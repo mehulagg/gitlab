@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Project import/export API
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/41899) in GitLab 10.6.
@@ -79,7 +86,11 @@ an email notifying the user to download the file, uploading the exported file to
 
 `regeneration_in_progress` is when an export file is available to download, and a request to generate a new export is in process.
 
+`none` is when there are no exports _queued_, _started_, _finished_, or _being regenerated_
+
 `_links` are only present when export has finished.
+
+`created_at` is the project create timestamp, not the export start time.
 
 ```json
 {

@@ -11,13 +11,13 @@ having an issue with GitLab, it is highly recommended that you check your
 [support options](https://about.gitlab.com/support/) first, before attempting to use
 this information.
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 Please note that some of these scripts could be damaging if not run correctly,
 or under the right conditions. We highly recommend running them under the
 guidance of a Support Engineer, or running them in a test environment with a
 backup of the instance ready to be restored, just in case.
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 Please also note that as GitLab changes, changes to the code are inevitable,
 and so some scripts may not work as they once used to. These are not kept
 up-to-date as these scripts/commands were added as they were found/needed. As
@@ -43,10 +43,13 @@ instance_of_object.method(:foo).source_location
 project.method(:private?).source_location
 ```
 
-## Query an object
+## Query the database using an ActiveRecord Model
 
 ```ruby
-o = Object.where('attribute like ?', 'ex')
+m = Model.where('attribute like ?', 'ex%')
+
+# for example to query the projects
+projects = Project.where('path like ?', 'Oumua%')
 ```
 
 ## View all keys in cache
@@ -167,7 +170,7 @@ user = User.find_by_username('root')
 # Find the project, update the xxx-changeme values from above
 project = Project.find_by_full_path('group-changeme/project-changeme')
 
-# Delete the project
+# Immediately delete the project
 ::Projects::DestroyService.new(project, user, {}).execute
 ```
 
@@ -215,6 +218,17 @@ namespace = Namespace.find_by_full_path("")
 ::Projects::TransferService.new(p, current_user).execute(namespace)
 ```
 
+### For Removing webhooks that is getting timeout due to large webhook logs
+
+```ruby
+# ID will be the webhook_id
+WebHookLog.where(web_hook_id: ID).each_slice(ID) do |slice|
+  slice.each(&:destroy)
+end
+
+WebHook.find(ID).destroy
+```
+
 ### Bulk update service integration password for _all_ projects
 
 For example, change the Jira user's password for all projects that have the Jira
@@ -242,13 +256,26 @@ p.each do |project|
 end
 ```
 
+### Incorrect repository statistics shown in the GUI
+
+After [reducing a repository size with third-party tools](../../user/project/repository/reducing_the_repo_size_using_git.md)
+the displayed size may still show old sizes or commit numbers. To force an update, do:
+
+```ruby
+p = Project.find_by_full_path('<namespace>/<project>')
+pp p.statistics
+p.statistics.refresh!
+pp p.statistics  # compare with earlier values
+```
+
 ## Wikis
 
 ### Recreate
 
 A Projects Wiki can be recreated by
 
-**Note:** This is a destructive operation, the Wiki will be empty
+NOTE: **Note:**
+This is a destructive operation, the Wiki will be empty.
 
 ```ruby
 p = Project.find_by_full_path('<username-or-group>/<project-name>')  ### enter your projects path
@@ -498,8 +525,8 @@ conflicting_permanent_redirects.destroy_all
 ### Close a merge request properly (if merged but still marked as open)
 
 ```ruby
-p = Project.find_by_full_path('')
-m = project.merge_requests.find_by(iid: )
+p = Project.find_by_full_path('<full/path/to/project>')
+m = p.merge_requests.find_by(iid: <iid>)
 u = User.find_by_username('')
 MergeRequests::PostMergeService.new(p, u).execute(m)
 ```
@@ -689,10 +716,10 @@ end
 As a GitLab administrator, you may need to reduce disk space consumption.
 A common culprit is Docker Registry images that are no longer in use. To find
 the storage broken down by each project, run the following in the
-GitLab Rails console:
+[GitLab Rails console](../troubleshooting/navigating_gitlab_via_rails_console.md):
 
 ```ruby
-projects_and_size = []
+projects_and_size = [["project_id", "creator_id", "registry_size_bytes", "project path"]]
 # You need to specify the projects that you want to look through. You can get these in any manner.
 projects = Project.last(100)
 
@@ -707,16 +734,20 @@ projects.each do |p|
    end
 
    if project_total_size > 0
-      projects_and_size << [p.full_path,project_total_size]
+      projects_and_size << [p.project_id, p.creator.id, project_total_size, p.full_path]
    end
 end
 
 # projects_and_size is filled out now
 # maybe print it as comma separated output?
 projects_and_size.each do |ps|
-   puts "%s,%s" % ps
+   puts "%s,%s,%s,%s" % ps
 end
 ```
+
+### Run the Cleanup policy now
+
+Find this content in the [Container Registry troubleshooting docs](../packages/container_registry.md#run-the-cleanup-policy-now).
 
 ## Sidekiq
 
@@ -831,19 +862,19 @@ Geo::JobArtifactRegistry.synced.missing_on_primary.pluck(:artifact_id)
 #### Get the number of verification failed repositories
 
 ```ruby
-Geo::ProjectRegistryFinder.new.count_verification_failed_repositories
+Geo::ProjectRegistry.verification_failed('repository').count
 ```
 
 #### Find the verification failed repositories
 
 ```ruby
-Geo::ProjectRegistry.verification_failed_repos
+Geo::ProjectRegistry.verification_failed('repository')
 ```
 
 ### Find repositories that failed to sync
 
 ```ruby
-Geo::ProjectRegistryFinder.new.find_failed_project_registries('repository')
+Geo::ProjectRegistry.sync_failed('repository')
 ```
 
 ### Resync repositories

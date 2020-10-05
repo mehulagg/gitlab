@@ -1,9 +1,15 @@
 <script>
 import Api from 'ee/api';
 import { debounce } from 'lodash';
-import { GlDropdown, GlDropdownItem, GlIcon, GlLoadingIcon, GlSearchBoxByType } from '@gitlab/ui';
+import {
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
+  GlIcon,
+  GlLoadingIcon,
+  GlSearchBoxByType,
+} from '@gitlab/ui';
 import { mapGetters } from 'vuex';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import { removeFlash } from '../utils';
 import { DATA_REFETCH_DELAY } from '../../shared/constants';
@@ -11,8 +17,8 @@ import { DATA_REFETCH_DELAY } from '../../shared/constants';
 export default {
   name: 'LabelsSelector',
   components: {
-    GlDropdown,
-    GlDropdownItem,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
     GlIcon,
     GlLoadingIcon,
     GlSearchBoxByType,
@@ -120,7 +126,7 @@ export default {
 };
 </script>
 <template>
-  <gl-dropdown class="w-100" toggle-class="overflow-hidden" :right="right">
+  <gl-deprecated-dropdown class="w-100" toggle-class="overflow-hidden" :right="right">
     <template #button-content>
       <slot name="label-dropdown-button">
         <span v-if="selectedLabel">
@@ -136,15 +142,17 @@ export default {
     </template>
     <template>
       <slot name="label-dropdown-list-header">
-        <gl-dropdown-item :active="!selectedLabelId.length" @click.prevent="$emit('clearLabel')"
+        <gl-deprecated-dropdown-item
+          :active="!selectedLabelId.length"
+          @click.prevent="$emit('clearLabel')"
           >{{ __('Select a label') }}
-        </gl-dropdown-item>
+        </gl-deprecated-dropdown-item>
       </slot>
       <div class="mb-3 px-3">
         <gl-search-box-by-type v-model.trim="searchTerm" class="mb-2" />
       </div>
       <div class="mb-3 px-3">
-        <gl-dropdown-item
+        <gl-deprecated-dropdown-item
           v-for="label in labels"
           :key="label.id"
           :class="{
@@ -162,7 +170,7 @@ export default {
           <span :style="{ backgroundColor: label.color }" class="d-inline-block dropdown-label-box">
           </span>
           {{ labelTitle(label) }}
-        </gl-dropdown-item>
+        </gl-deprecated-dropdown-item>
         <div v-show="loading" class="text-center">
           <gl-loading-icon :inline="true" size="md" />
         </div>
@@ -171,5 +179,5 @@ export default {
         </div>
       </div>
     </template>
-  </gl-dropdown>
+  </gl-deprecated-dropdown>
 </template>

@@ -1,7 +1,7 @@
 ---
-stage: Release
-group: Progressive Delivery
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
 type: reference
 description: "GitLab administrator: enable and disable GitLab features deployed behind feature flags"
 ---
@@ -103,10 +103,10 @@ Some feature flags can be enabled or disabled on a per project basis:
 Feature.enable(:<feature flag>, Project.find(<project id>))
 ```
 
-For example, to enable the [`:junit_pipeline_view`](../ci/junit_test_reports.md#enabling-the-junit-test-reports-feature-core-only) feature flag for project `1234`:
+For example, to enable the [`:product_analytics`](../operations/product_analytics.md#enable-or-disable-product-analytics) feature flag for project `1234`:
 
 ```ruby
-Feature.enable(:junit_pipeline_view, Project.find(1234))
+Feature.enable(:product_analytics, Project.find(1234))
 ```
 
 `Feature.enable` and `Feature.disable` always return `nil`, this is not an indication that the command failed:

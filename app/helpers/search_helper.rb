@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 module SearchHelper
-  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets].freeze
+  SEARCH_PERMITTED_PARAMS = [:search, :scope, :project_id, :group_id, :repository_ref, :snippets, :sort, :state, :confidential].freeze
 
   def search_autocomplete_opts(term)
     return unless current_user
 
     resources_results = [
+      recent_items_autocomplete(term),
       groups_autocomplete(term),
       projects_autocomplete(term)
     ].flatten
@@ -23,6 +24,10 @@ module SearchHelper
     ].flatten.uniq do |item|
       item[:label]
     end
+  end
+
+  def recent_items_autocomplete(term)
+    recent_merge_requests_autocomplete(term) + recent_issues_autocomplete(term)
   end
 
   def search_entries_info(collection, scope, term)
@@ -82,6 +87,11 @@ module SearchHelper
       scope: search_entries_scope_label(scope, 0),
       term: "<code>#{h(term)}</code>"
     }).html_safe
+  end
+
+  def repository_ref(project)
+    # Always #to_s the repository_ref param in case the value is also a number
+    params[:repository_ref].to_s.presence || project.default_branch
   end
 
   # Overridden in EE
@@ -178,6 +188,34 @@ module SearchHelper
       }
     end
   end
+
+  def recent_merge_requests_autocomplete(term)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).map do |mr|
+      {
+        category: "Recent merge requests",
+        id: mr.id,
+        label: search_result_sanitize(mr.title),
+        url: merge_request_path(mr),
+        avatar_url: mr.project.avatar_url || ''
+      }
+    end
+  end
+
+  def recent_issues_autocomplete(term)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).map do |i|
+      {
+        category: "Recent issues",
+        id: i.id,
+        label: search_result_sanitize(i.title),
+        url: issue_path(i),
+        avatar_url: i.project.avatar_url || ''
+      }
+    end
+  end
   # rubocop: enable CodeReuse/ActiveRecord
 
   def search_result_sanitize(str)
@@ -229,6 +267,7 @@ module SearchHelper
       opts[:data]['group-id'] = @group.id
       opts[:data]['labels-endpoint'] = group_labels_path(@group)
       opts[:data]['milestones-endpoint'] = group_milestones_path(@group)
+      opts[:data]['releases-endpoint'] = group_releases_path(@group)
     else
       opts[:data]['labels-endpoint'] = dashboard_labels_path
       opts[:data]['milestones-endpoint'] = dashboard_milestones_path
@@ -249,22 +288,26 @@ module SearchHelper
 
   # Sanitize a HTML field for search display. Most tags are stripped out and the
   # maximum length is set to 200 characters.
-  def search_md_sanitize(object, field)
-    html = markdown_field(object, field)
-    html = Truncato.truncate(
-      html,
+  def search_md_sanitize(source)
+    source = Truncato.truncate(
+      source,
       count_tags: false,
       count_tail: false,
       max_length: 200
     )
 
+    html = markdown(source)
+
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
   end
 
-  def show_user_search_tab?
-    return false if Feature.disabled?(:users_search, default_enabled: true)
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
+  end
 
+  def show_user_search_tab?
     if @project
       project_search_tabs?(:members)
     else

@@ -54,7 +54,7 @@ module Types
     field :container_registry_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the project stores Docker container images in a container registry'
     field :shared_runners_enabled, GraphQL::BOOLEAN_TYPE, null: true,
-          description: 'Indicates if Shared Runners are enabled for the project'
+          description: 'Indicates if shared runners are enabled for the project'
     field :lfs_enabled, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates if the project has Large File Storage (LFS) enabled'
     field :merge_requests_ff_only_enabled, GraphQL::BOOLEAN_TYPE, null: true,
@@ -134,7 +134,7 @@ module Types
           null: true,
           description: 'Merge requests of the project',
           extras: [:lookahead],
-          resolver: Resolvers::MergeRequestsResolver
+          resolver: Resolvers::ProjectMergeRequestsResolver
 
     field :merge_request,
           Types::MergeRequestType,
@@ -146,10 +146,22 @@ module Types
           Types::IssueType.connection_type,
           null: true,
           description: 'Issues of the project',
+          extras: [:lookahead],
           resolver: Resolvers::IssuesResolver
 
+    field :issue_status_counts,
+          Types::IssueStatusCountsType,
+          null: true,
+          description: 'Counts of issues by status for the project',
+          extras: [:lookahead],
+          resolver: Resolvers::IssueStatusCountsResolver
+
+    field :milestones, Types::MilestoneType.connection_type, null: true,
+          description: 'Milestones of the project',
+          resolver: Resolvers::ProjectMilestonesResolver
+
     field :project_members,
-          Types::ProjectMemberType.connection_type,
+          Types::MemberInterface.connection_type,
           description: 'Members of the project',
           resolver: Resolvers::ProjectMembersResolver
 
@@ -159,15 +171,21 @@ module Types
           description: 'Environments of the project',
           resolver: Resolvers::EnvironmentsResolver
 
-    field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
-      description: 'SAST CI configuration for the project',
-      resolver: ::Resolvers::CiConfiguration::SastResolver
+    field :environment,
+          Types::EnvironmentType,
+          null: true,
+          description: 'A single environment of the project',
+          resolver: Resolvers::EnvironmentsResolver.single
 
     field :issue,
           Types::IssueType,
           null: true,
           description: 'A single issue of the project',
           resolver: Resolvers::IssuesResolver.single
+
+    field :packages, Types::PackageType.connection_type, null: true,
+         description: 'Packages of the project',
+         resolver: Resolvers::PackagesResolver
 
     field :pipelines,
           Types::Ci::PipelineType.connection_type,
@@ -216,7 +234,7 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the project',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :jira_imports,
           Types::JiraImportType.connection_type,
@@ -275,6 +293,12 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :terraform_states,
+          Types::Terraform::StateType.connection_type,
+          null: true,
+          description: 'Terraform states associated with the project',
+          resolver: Resolvers::Terraform::StatesResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|

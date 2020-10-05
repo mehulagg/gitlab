@@ -12,10 +12,6 @@ RSpec.describe Projects::FeatureFlagsUserListsController do
     project.add_developer(developer)
   end
 
-  before do
-    stub_licensed_features(feature_flags: true)
-  end
-
   def request_params(extra_params = {})
     { namespace_id: project.namespace, project_id: project }.merge(extra_params)
   end
@@ -44,30 +40,12 @@ RSpec.describe Projects::FeatureFlagsUserListsController do
       expect(response).to have_gitlab_http_status(:not_found)
     end
 
-    it 'returns not found when feature flags are not licensed' do
-      stub_licensed_features(feature_flags: false)
-      sign_in(developer)
-
-      get(:new, params: request_params)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
     it 'renders the new page for a developer' do
       sign_in(developer)
 
       get(:new, params: request_params)
 
       expect(response).to have_gitlab_http_status(:ok)
-    end
-
-    it 'returns not found when the feature flag is off' do
-      stub_feature_flags(feature_flag_user_lists: false)
-      sign_in(developer)
-
-      get(:new, params: request_params)
-
-      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -95,15 +73,6 @@ RSpec.describe Projects::FeatureFlagsUserListsController do
     it 'returns not found for a list belonging to a another project' do
       other_project = create(:project)
       list = create(:operations_feature_flag_user_list, project: other_project)
-
-      get(:edit, params: request_params(iid: list.iid))
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
-    it 'returns not found when the feature flag is off' do
-      stub_feature_flags(feature_flag_user_lists: false)
-      list = create(:operations_feature_flag_user_list, project: project)
 
       get(:edit, params: request_params(iid: list.iid))
 

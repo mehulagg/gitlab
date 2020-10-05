@@ -1,10 +1,6 @@
 .user-callout.promotion-callout {
   margin: 20px 0 0;
 
-  &.prepend-top-10 {
-    margin-top: 10px;
-  }
-
   &.append-bottom-20 {
     margin-bottom: 20px;
   }
@@ -157,7 +153,6 @@
   }
 
   .dropdown-title {
-    margin: 0 -25px;
     padding: 0;
     overflow: initial;
     border-bottom: 0;
@@ -237,7 +232,7 @@
 
     .carousel-indicators {
       li {
-        background-color: $gray-300;
+        background-color: $gray-200;
         width: 8px;
         height: 8px;
         border-radius: 100%;
@@ -245,7 +240,7 @@
       }
 
       .active {
-        background-color: $gray-400;
+        background-color: $gray-200;
       }
     }
 

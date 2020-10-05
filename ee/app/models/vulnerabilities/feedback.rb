@@ -76,7 +76,7 @@ module Vulnerabilities
       comment.present? && comment_author.present?
     end
 
-    def occurrence_key
+    def finding_key
       {
         project_id: project_id,
         category: category,

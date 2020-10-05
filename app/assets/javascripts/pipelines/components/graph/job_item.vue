@@ -31,6 +31,7 @@ import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
  */
 
 export default {
+  hoverClass: 'gl-shadow-x0-y0-b3-s1-blue-500',
   components: {
     ActionComponent,
     JobNameComponent,
@@ -54,6 +55,16 @@ export default {
       type: Number,
       required: false,
       default: Infinity,
+    },
+    jobHovered: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    pipelineExpanded: {
+      type: Object,
+      required: false,
+      default: () => ({}),
     },
   },
   computed: {
@@ -95,6 +106,17 @@ export default {
     hasAction() {
       return this.job.status && this.job.status.action && this.job.status.action.path;
     },
+    relatedDownstreamHovered() {
+      return this.job.name === this.jobHovered;
+    },
+    relatedDownstreamExpanded() {
+      return this.job.name === this.pipelineExpanded.jobName && this.pipelineExpanded.expanded;
+    },
+    jobClasses() {
+      return this.relatedDownstreamHovered || this.relatedDownstreamExpanded
+        ? `${this.$options.hoverClass} ${this.cssClassJobName}`
+        : this.cssClassJobName;
+    },
   },
   methods: {
     pipelineActionRequestComplete() {
@@ -110,8 +132,10 @@ export default {
       v-gl-tooltip="{ boundary, placement: 'bottom' }"
       :href="status.details_path"
       :title="tooltipText"
-      :class="cssClassJobName"
+      :class="jobClasses"
       class="js-pipeline-graph-job-link qa-job-link menu-item"
+      data-testid="job-with-link"
+      @click.stop
     >
       <job-name-component :name="job.name" :status="job.status" />
     </gl-link>
@@ -120,8 +144,9 @@ export default {
       v-else
       v-gl-tooltip="{ boundary, placement: 'bottom' }"
       :title="tooltipText"
-      :class="cssClassJobName"
+      :class="jobClasses"
       class="js-job-component-tooltip non-details-job-component"
+      data-testid="job-without-link"
     >
       <job-name-component :name="job.name" :status="job.status" />
     </div>

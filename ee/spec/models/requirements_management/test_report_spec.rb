@@ -96,4 +96,36 @@ RSpec.describe RequirementsManagement::TestReport do
       end
     end
   end
+
+  describe '.build_report' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:build_author) { create(:user) }
+    let_it_be(:build) { create(:ci_build, author: build_author) }
+    let_it_be(:requirement) { create(:requirement, state: :opened) }
+    let(:now) { Time.current }
+
+    context 'when build is passed as argument' do
+      it 'builds test report with correct attributes' do
+        test_report = described_class.build_report(requirement: requirement, author: user, state: 'failed', build: build, timestamp: now)
+
+        expect(test_report.author).to eq(build.author)
+        expect(test_report.build).to eq(build)
+        expect(test_report.requirement).to eq(requirement)
+        expect(test_report.state).to eq('failed')
+        expect(test_report.created_at).to eq(now)
+      end
+    end
+
+    context 'when build is not passed as argument' do
+      it 'builds test report with correct attributes' do
+        test_report = described_class.build_report(requirement: requirement, author: user, state: 'passed', timestamp: now)
+
+        expect(test_report.author).to eq(user)
+        expect(test_report.build).to eq(nil)
+        expect(test_report.requirement).to eq(requirement)
+        expect(test_report.state).to eq('passed')
+        expect(test_report.created_at).to eq(now)
+      end
+    end
+  end
 end

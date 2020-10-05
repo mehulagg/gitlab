@@ -4,10 +4,6 @@ module Projects
   class LicensesController < Projects::ApplicationController
     before_action :authorize_read_licenses!, only: [:index]
     before_action :authorize_admin_software_license_policy!, only: [:create, :update]
-    before_action do
-      push_frontend_feature_flag(:license_approvals, default_enabled: true)
-      push_frontend_feature_flag(:license_compliance_denies_mr, default_enabled: false)
-    end
 
     def index
       respond_to do |format|

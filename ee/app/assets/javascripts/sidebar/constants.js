@@ -25,3 +25,5 @@ export const healthStatusForRestApi = {
   [healthStatus.NEEDS_ATTENTION]: 'needs_attention',
   [healthStatus.AT_RISK]: 'at_risk',
 };
+
+export const MAX_DISPLAY_WEIGHT = 99999;

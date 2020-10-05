@@ -1,9 +1,8 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
-
 import AuditFilterToken from 'ee/audit_events/components/tokens/shared/audit_filter_token.vue';
+import httpStatusCodes from '~/lib/utils/http_status';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 

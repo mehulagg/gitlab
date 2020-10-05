@@ -121,12 +121,7 @@ describe('Branches Select', () => {
 
     const selectedIndex = 1;
     const selectedId = TEST_BRANCHES_SELECTIONS[selectedIndex].id;
-    const expected = [
-      {
-        name: 'input',
-        args: [selectedId],
-      },
-    ];
+    const expected = [[selectedId]];
 
     waitForEvent($input, 'select2-loaded')
       .then(() => {
@@ -138,7 +133,7 @@ describe('Branches Select', () => {
 
     waitForEvent($input, 'change')
       .then(() => {
-        expect(wrapper.emittedByOrder()).toEqual(expected);
+        expect(wrapper.emitted().input).toEqual(expected);
       })
       .then(done)
       .catch(done.fail);

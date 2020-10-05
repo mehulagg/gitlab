@@ -5,15 +5,14 @@ module EE
     extend ::Gitlab::Utils::Override
 
     EE_ICON_TYPES = %w[
-      weight relate unrelate published
+      weight published
       epic_issue_added issue_added_to_epic epic_issue_removed issue_removed_from_epic
       epic_issue_moved issue_changed_epic epic_date_changed relate_epic unrelate_epic
-      vulnerability_confirmed vulnerability_dismissed vulnerability_resolved
+      vulnerability_confirmed vulnerability_dismissed vulnerability_resolved vulnerability_detected
       iteration
     ].freeze
 
     EE_TYPES_WITH_CROSS_REFERENCES = %w[
-      relate unrelate
       epic_issue_added issue_added_to_epic epic_issue_removed issue_removed_from_epic
       epic_issue_moved issue_changed_epic relate_epic unrelate_epic
       iteration

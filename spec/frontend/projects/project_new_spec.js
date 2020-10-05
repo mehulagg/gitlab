@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import projectNew from '~/projects/project_new';
 
 describe('New Project', () => {
@@ -33,7 +34,7 @@ describe('New Project', () => {
   });
 
   describe('deriveProjectPathFromUrl', () => {
-    const dummyImportUrl = `${gl.TEST_HOST}/dummy/import/url.git`;
+    const dummyImportUrl = `${TEST_HOST}/dummy/import/url.git`;
 
     beforeEach(() => {
       projectNew.bindEvents();

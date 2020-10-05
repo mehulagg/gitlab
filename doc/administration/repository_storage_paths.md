@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Gitaly
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference, howto
+---
+
 # Repository storage paths
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/4578) in GitLab 8.10.
@@ -60,7 +67,8 @@ files and add the full paths of the alternative repository storage paths. In
 the example below, we add two more mount points that are named `nfs_1` and `nfs_2`
 respectively.
 
-NOTE: **Note:** This example uses NFS. We do not recommend using EFS for storage as it may impact GitLab's performance. See the [relevant documentation](high_availability/nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
+NOTE: **Note:**
+This example uses NFS. We do not recommend using EFS for storage as it may impact GitLab's performance. See the [relevant documentation](nfs.md#avoid-using-awss-elastic-file-system-efs) for more details.
 
 **For installations from source**
 
@@ -81,7 +89,7 @@ NOTE: **Note:** This example uses NFS. We do not recommend using EFS for storage
 
 1. [Restart GitLab](restart_gitlab.md#installations-from-source) for the changes to take effect.
 
->**Note:**
+NOTE: **Note:**
 The [`gitlab_shell: repos_path` entry](https://gitlab.com/gitlab-org/gitlab-foss/-/blob/8-9-stable/config/gitlab.yml.example#L457) in `gitlab.yml` will be
 deprecated and replaced by `repositories: storages` in the future, so if you
 are upgrading from a version prior to 8.10, make sure to add the configuration

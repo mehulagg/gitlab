@@ -1,5 +1,0 @@
----
-title: Forbid deleting a feature flag user list associated with a strategy
-merge_request: 35275
-author:
-type: fixed

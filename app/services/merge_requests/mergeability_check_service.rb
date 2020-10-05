@@ -88,7 +88,7 @@ module MergeRequests
         sleep_sec: retry_lease ? 1.second : 0
       }
 
-      in_lock(lease_key, lease_opts, &block)
+      in_lock(lease_key, **lease_opts, &block)
     end
 
     def payload
@@ -125,7 +125,7 @@ module MergeRequests
     end
 
     def update_diff_discussion_positions!
-      return if Feature.disabled?(:merge_ref_head_comments, merge_request.target_project)
+      return if Feature.disabled?(:merge_ref_head_comments, merge_request.target_project, default_enabled: true)
 
       Discussions::CaptureDiffNotePositionsService.new(merge_request).execute
     end

@@ -9,7 +9,7 @@ RSpec.describe Mutations::Issues::SetIteration do
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
   describe '#resolve' do
-    let(:iteration) { create(:iteration, project: issue.project) }
+    let(:iteration) { create(:iteration, :skip_project_validation, project: issue.project) }
     let(:mutated_issue) { subject[:issue] }
 
     subject { mutation.resolve(project_path: issue.project.full_path, iid: issue.iid, iteration: iteration) }
@@ -40,7 +40,7 @@ RSpec.describe Mutations::Issues::SetIteration do
         let(:iteration) { nil }
 
         it 'removes the iteration' do
-          issue.update!(iteration: create(:iteration, project: issue.project))
+          issue.update!(iteration: create(:iteration, :skip_project_validation, project: issue.project))
 
           expect(mutated_issue.iteration).to eq(nil)
         end

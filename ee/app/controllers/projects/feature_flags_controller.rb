@@ -10,9 +10,13 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
 
   before_action :feature_flag, only: [:edit, :update, :destroy]
 
+  before_action :ensure_legacy_flags_writable!, only: [:update]
+
   before_action do
     push_frontend_feature_flag(:feature_flag_permissions)
     push_frontend_feature_flag(:feature_flags_new_version, project, default_enabled: true)
+    push_frontend_feature_flag(:feature_flags_legacy_read_only, project, default_enabled: true)
+    push_frontend_feature_flag(:feature_flags_legacy_read_only_override, project)
   end
 
   def index
@@ -106,12 +110,22 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
     ::Feature.enabled?(:feature_flags_new_version, project, default_enabled: true)
   end
 
+  def ensure_legacy_flags_writable!
+    if ::Feature.enabled?(:feature_flags_legacy_read_only, project, default_enabled: true) &&
+        ::Feature.disabled?(:feature_flags_legacy_read_only_override, project) &&
+        feature_flag.legacy_flag?
+      render_error_json(['Legacy feature flags are read-only'])
+    end
+  end
+
   def create_params
     params.require(:operations_feature_flag)
       .permit(:name, :description, :active, :version,
               scopes_attributes: [:environment_scope, :active,
                                   strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
-             strategies_attributes: [:name, :user_list_id, parameters: [:groupId, :percentage, :userIds], scopes_attributes: [:environment_scope]])
+              strategies_attributes: [:name, :user_list_id,
+                                      parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness],
+                                      scopes_attributes: [:environment_scope]])
   end
 
   def update_params
@@ -120,7 +134,7 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
                   scopes_attributes: [:id, :environment_scope, :active, :_destroy,
                                       strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
                  strategies_attributes: [:id, :name, :user_list_id, :_destroy,
-                                         parameters: [:groupId, :percentage, :userIds],
+                                         parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness],
                                          scopes_attributes: [:id, :environment_scope, :_destroy]])
   end
 

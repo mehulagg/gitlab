@@ -1,4 +1,4 @@
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import * as types from '../base/mutation_types';
@@ -37,17 +37,12 @@ export const postRuleSuccess = ({ dispatch }) => {
   dispatch('fetchRules');
 };
 
-export const postRuleError = () => {
-  createFlash(__('An error occurred while updating approvers'));
-};
-
 export const postRule = ({ rootState, dispatch }, rule) => {
   const { rulesPath } = rootState.settings;
 
   return axios
     .post(rulesPath, mapApprovalRuleRequest(rule))
-    .then(() => dispatch('postRuleSuccess'))
-    .catch(() => dispatch('postRuleError'));
+    .then(() => dispatch('postRuleSuccess'));
 };
 
 export const putRule = ({ rootState, dispatch }, { id, ...newRule }) => {
@@ -55,8 +50,7 @@ export const putRule = ({ rootState, dispatch }, { id, ...newRule }) => {
 
   return axios
     .put(`${rulesPath}/${id}`, mapApprovalRuleRequest(newRule))
-    .then(() => dispatch('postRuleSuccess'))
-    .catch(() => dispatch('postRuleError'));
+    .then(() => dispatch('postRuleSuccess'));
 };
 
 export const deleteRuleSuccess = ({ dispatch }) => {
@@ -82,17 +76,12 @@ export const putFallbackRuleSuccess = ({ dispatch }) => {
   dispatch('fetchRules');
 };
 
-export const putFallbackRuleError = () => {
-  createFlash(__('An error occurred while saving the approval settings'));
-};
-
 export const putFallbackRule = ({ rootState, dispatch }, fallback) => {
   const { projectPath } = rootState.settings;
 
   return axios
     .put(projectPath, mapApprovalFallbackRuleRequest(fallback))
-    .then(() => dispatch('putFallbackRuleSuccess'))
-    .catch(() => dispatch('putFallbackRuleError'));
+    .then(() => dispatch('putFallbackRuleSuccess'));
 };
 
 export const requestEditRule = ({ dispatch }, rule) => {
@@ -106,5 +95,3 @@ export const requestDeleteRule = ({ dispatch }, rule) => {
 export const addEmptyRule = ({ commit }) => {
   commit(types.ADD_EMPTY_RULE);
 };
-
-export default () => {};

@@ -8,7 +8,7 @@ module EpicLinks
       end
 
       if issuable.max_hierarchy_depth_achieved?
-        return error("This epic can't be added because the parent is already at the maximum depth from its most distant ancestor", 409)
+        return error("This epic cannot be added. One or more epics would exceed the maximum depth (#{Epic::MAX_HIERARCHY_DEPTH}) from its most distant ancestor.", 409)
       end
 
       if referenced_issuables.count == 1

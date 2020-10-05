@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  RSpec.describe 'Release', :docker do
+  RSpec.describe 'Release' do
     describe 'Multi-project pipelines' do
       let(:upstream_project_name) { "upstream-project-#{SecureRandom.hex(8)}" }
       let(:downstream_project_name) { "downstream-project-#{SecureRandom.hex(8)}" }
@@ -12,11 +12,13 @@ module QA
           project.name = upstream_project_name
         end
       end
+
       let(:downstream_project) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = downstream_project_name
         end
       end
+
       let!(:runner) do
         Resource::Runner.fabricate_via_api! do |runner|
           runner.project = upstream_project
@@ -73,7 +75,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'creates a multi-project pipeline' do
+      it 'creates a multi-project pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/560' do
         Page::MergeRequest::Show.perform do |show|
           pipeline_passed = show.retry_until(reload: true, max_attempts: 20, sleep_interval: 6) do
             show.has_content?(/Pipeline #\d+ passed/)
@@ -88,7 +90,7 @@ module QA
           expect(show).to have_passed
           expect(show).to have_no_job("downstream_job")
 
-          show.click_linked_job(downstream_project_name)
+          show.expand_child_pipeline
 
           expect(show).to have_job("downstream_job")
         end

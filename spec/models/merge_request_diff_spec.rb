@@ -103,6 +103,8 @@ RSpec.describe MergeRequestDiff do
 
       it 'ignores diffs with 0 files' do
         MergeRequestDiffFile.where(merge_request_diff_id: [closed_recently.id, merged_recently.id]).delete_all
+        closed_recently.update!(files_count: 0)
+        merged_recently.update!(files_count: 0)
 
         is_expected.to contain_exactly(outdated.id, latest.id, closed.id, merged.id)
       end
@@ -162,7 +164,8 @@ RSpec.describe MergeRequestDiff do
     let(:uploader) { ExternalDiffUploader }
     let(:file_store) { uploader::Store::LOCAL }
     let(:remote_store) { uploader::Store::REMOTE }
-    let(:diff) { create(:merge_request).merge_request_diff }
+    let(:merge_request) { create(:merge_request) }
+    let(:diff) { merge_request.merge_request_diff }
 
     it 'converts from in-database to external file storage' do
       expect(diff).not_to be_stored_externally
@@ -175,6 +178,17 @@ RSpec.describe MergeRequestDiff do
 
       expect(diff).to be_stored_externally
       expect(diff.external_diff_store).to eq(file_store)
+    end
+
+    it 'migrates a nil diff file' do
+      expect(diff).not_to be_stored_externally
+      MergeRequestDiffFile.where(merge_request_diff_id: diff.id).update_all(diff: nil)
+
+      stub_external_diffs_setting(enabled: true)
+
+      diff.migrate_files_to_external_storage!
+
+      expect(diff).to be_stored_externally
     end
 
     it 'safely handles a transaction error when migrating to external storage' do
@@ -233,6 +247,33 @@ RSpec.describe MergeRequestDiff do
 
       diff.migrate_files_to_external_storage!
     end
+
+    context 'diff adds an empty file' do
+      let(:project) { create(:project, :test_repo) }
+      let(:merge_request) do
+        create(
+          :merge_request,
+          source_project: project,
+          target_project: project,
+          source_branch: 'empty-file',
+          target_branch: 'master'
+        )
+      end
+
+      it 'migrates the diff to object storage' do
+        create_file_in_repo(project, 'master', 'empty-file', 'empty-file', '')
+
+        expect(diff).not_to be_stored_externally
+
+        stub_external_diffs_setting(enabled: true)
+        stub_external_diffs_object_storage(uploader, direct_upload: true)
+
+        diff.migrate_files_to_external_storage!
+
+        expect(diff).to be_stored_externally
+        expect(diff.external_diff_store).to eq(remote_store)
+      end
+    end
   end
 
   describe '#migrate_files_to_database!' do
@@ -263,6 +304,7 @@ RSpec.describe MergeRequestDiff do
     it 'does nothing with an empty diff' do
       stub_external_diffs_setting(enabled: true)
       MergeRequestDiffFile.where(merge_request_diff_id: diff.id).delete_all
+      diff.save! # update files_count
 
       expect(diff).not_to receive(:update!)
 
@@ -500,12 +542,69 @@ RSpec.describe MergeRequestDiff do
     include_examples 'merge request diffs'
   end
 
-  describe 'external diffs always enabled' do
+  describe 'external diffs on disk always enabled' do
     before do
       stub_external_diffs_setting(enabled: true, when: 'always')
     end
 
     include_examples 'merge request diffs'
+  end
+
+  describe 'external diffs in object storage always enabled' do
+    let(:uploader) { ExternalDiffUploader }
+    let(:remote_store) { uploader::Store::REMOTE }
+
+    subject(:diff) { merge_request.merge_request_diff }
+
+    before do
+      stub_external_diffs_setting(enabled: true, when: 'always')
+      stub_external_diffs_object_storage(uploader, direct_upload: true)
+    end
+
+    # We can't use the full merge request diffs shared examples here because
+    # reading from the fake object store isn't implemented yet
+
+    context 'empty diff' do
+      let(:merge_request) { create(:merge_request, :without_diffs) }
+
+      it 'creates an empty diff' do
+        expect(diff.state).to eq('empty')
+        expect(diff).not_to be_stored_externally
+      end
+    end
+
+    context 'normal diff' do
+      let(:merge_request) { create(:merge_request) }
+
+      it 'creates a diff in object storage' do
+        expect(diff).to be_stored_externally
+        expect(diff.state).to eq('collected')
+        expect(diff.external_diff_store).to eq(remote_store)
+      end
+    end
+
+    context 'diff adding an empty file' do
+      let(:project) { create(:project, :test_repo) }
+      let(:merge_request) do
+        create(
+          :merge_request,
+          source_project: project,
+          target_project: project,
+          source_branch: 'empty-file',
+          target_branch: 'master'
+        )
+      end
+
+      it 'creates a diff in object storage' do
+        create_file_in_repo(project, 'master', 'empty-file', 'empty-file', '')
+
+        diff.reload
+
+        expect(diff).to be_stored_externally
+        expect(diff.state).to eq('collected')
+        expect(diff.external_diff_store).to eq(remote_store)
+      end
+    end
   end
 
   describe 'exernal diffs enabled for outdated diffs' do
@@ -587,6 +686,43 @@ RSpec.describe MergeRequestDiff do
     end
   end
 
+  describe '#files_count' do
+    let_it_be(:merge_request) { create(:merge_request) }
+
+    let(:diff) { merge_request.merge_request_diff }
+    let(:actual_count) { diff.merge_request_diff_files.count }
+
+    it 'is set by default' do
+      expect(diff.read_attribute(:files_count)).to eq(actual_count)
+    end
+
+    it 'is set to the sentinel value if the actual value exceeds it' do
+      stub_const("#{described_class}::FILES_COUNT_SENTINEL", actual_count - 1)
+
+      diff.save! # update the files_count column with the stub in place
+
+      expect(diff.read_attribute(:files_count)).to eq(described_class::FILES_COUNT_SENTINEL)
+    end
+
+    it 'uses the cached count if present' do
+      diff.update_columns(files_count: actual_count + 1)
+
+      expect(diff.files_count).to eq(actual_count + 1)
+    end
+
+    it 'uses the actual count if nil' do
+      diff.update_columns(files_count: nil)
+
+      expect(diff.files_count).to eq(actual_count)
+    end
+
+    it 'uses the actual count if overflown' do
+      diff.update_columns(files_count: described_class::FILES_COUNT_SENTINEL)
+
+      expect(diff.files_count).to eq(actual_count)
+    end
+  end
+
   describe '#first_commit' do
     it 'returns first commit' do
       expect(diff_with_commits.first_commit.sha).to eq(diff_with_commits.merge_request_diff_commits.last.sha)
@@ -636,10 +772,12 @@ RSpec.describe MergeRequestDiff do
 
   describe '#modified_paths' do
     subject do
-      diff = create(:merge_request_diff)
-      create(:merge_request_diff_file, :new_file, merge_request_diff: diff)
-      create(:merge_request_diff_file, :renamed_file, merge_request_diff: diff)
-      diff
+      create(:merge_request_diff).tap do |diff|
+        create(:merge_request_diff_file, :new_file, merge_request_diff: diff)
+        create(:merge_request_diff_file, :renamed_file, merge_request_diff: diff)
+
+        diff.merge_request_diff_files.reset
+      end
     end
 
     it 'returns affected file paths' do
@@ -649,12 +787,6 @@ RSpec.describe MergeRequestDiff do
     context "when fallback_on_overflow is true" do
       let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: 'master') }
       let(:diff) { merge_request.merge_request_diff }
-
-      # before do
-      #   # Temporarily unstub diff.modified_paths in favor of original code
-      #   #
-      #   allow(diff).to receive(:modified_paths).and_call_original
-      # end
 
       context "when the merge_request_diff is overflowed" do
         before do

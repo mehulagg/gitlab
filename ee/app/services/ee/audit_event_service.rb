@@ -15,6 +15,7 @@ module EE
       old_access_level = @details[:old_access_level]
       user_id = member.id
       user_name = member.user ? member.user.name : 'Deleted User'
+      target_type = 'User'
 
       @details =
         case action
@@ -23,7 +24,7 @@ module EE
             remove: "user_access",
             author_name: @author.name,
             target_id: user_id,
-            target_type: "User",
+            target_type: target_type,
             target_details: user_name
           }
         when :expired
@@ -31,7 +32,7 @@ module EE
             remove: "user_access",
             author_name: member.created_by ? member.created_by.name : 'Deleted User',
             target_id: user_id,
-            target_type: "User",
+            target_type: target_type,
             target_details: user_name,
             system_event: true,
             reason: "access expired on #{member.expires_at}"
@@ -42,7 +43,7 @@ module EE
             as: ::Gitlab::Access.options_with_owner.key(member.access_level.to_i),
             author_name: @author.name,
             target_id: user_id,
-            target_type: "User",
+            target_type: target_type,
             target_details: user_name
           }
         when :update, :override
@@ -54,7 +55,7 @@ module EE
             expiry_to: member.expires_at,
             author_name: @author.name,
             target_id: user_id,
-            target_type: "User",
+            target_type: target_type,
             target_details: user_name
           }
         end
@@ -84,14 +85,12 @@ module EE
     #
     # @return [AuditEventService]
     def for_failed_login
-      ip = @details[:ip_address]
       auth = @details[:with] || 'STANDARD'
 
       @details = {
         failed_login: auth.upcase,
         author_name: @author.name,
-        target_details: @author.name,
-        ip_address: ip
+        target_details: @author.name
       }
 
       self
@@ -125,29 +124,29 @@ module EE
     end
 
     def prepare_security_event
-      if admin_audit_log_enabled?
-        add_security_event_admin_details!
-        add_impersonation_details!
-      end
+      add_security_event_admin_details!
+      add_impersonation_details!
     end
 
     # Creates an event record in DB
     #
-    # @return [SecurityEvent, nil] if record is persisted or nil if audit events
+    # @return [AuditEvent, nil] if record is persisted or nil if audit events
     #   features are not enabled
     def unauth_security_event
       return unless audit_events_enabled?
 
-      @details.delete(:ip_address) unless admin_audit_log_enabled?
-      @details[:entity_path] = @entity&.full_path if admin_audit_log_enabled?
+      add_security_event_admin_details!
 
-      SecurityEvent.create(
+      payload = {
         author_id: @author.id,
         entity_id: @entity.respond_to?(:id) ? @entity.id : -1,
         entity_type: 'User',
-        details: @details,
-        ip_address: ip_address
-      )
+        details: @details
+      }
+
+      payload[:ip_address] = ip_address if admin_audit_log_enabled?
+
+      ::AuditEvent.create(payload)
     end
 
     # Builds the @details attribute for user
@@ -159,8 +158,8 @@ module EE
     #   all of these incorrect usages are removed.
     #
     # @return [AuditEventService]
-    def for_user(full_path = @entity.full_path)
-      for_custom_model('user', full_path)
+    def for_user(full_path: @entity.full_path, entity_id: @entity.id)
+      for_custom_model(model: 'user', target_details: full_path, target_id: entity_id)
     end
 
     # Builds the @details attribute for project
@@ -169,7 +168,16 @@ module EE
     #
     # @return [AuditEventService]
     def for_project
-      for_custom_model('project', @entity.full_path)
+      for_custom_model(model: 'project', target_details: @entity.full_path, target_id: @entity.id)
+    end
+
+    # Builds the @details attribute for project variable
+    #
+    # This uses the [Ci::ProjectVariable] @entity as the target object being audited
+    #
+    # @return [AuditEventService]
+    def for_project_variable(project_variable_key)
+      for_custom_model(model: 'ci_variable', target_details: project_variable_key, target_id: project_variable_key)
     end
 
     # Builds the @details attribute for group
@@ -178,7 +186,16 @@ module EE
     #
     # @return [AuditEventService]
     def for_group
-      for_custom_model('group', @entity.full_path)
+      for_custom_model(model: 'group', target_details: @entity.full_path, target_id: @entity.id)
+    end
+
+    # Builds the @details attribute for group variable
+    #
+    # This uses the [Ci::GroupVariable] @entity as the target object being audited
+    #
+    # @return [AuditEventService]
+    def for_group_variable(group_variable_key)
+      for_custom_model(model: 'ci_group_variable', target_details: group_variable_key, target_id: group_variable_key)
     end
 
     def enabled?
@@ -203,7 +220,7 @@ module EE
     def method_missing(method_sym, *arguments, &block)
       super(method_sym, *arguments, &block) unless respond_to?(method_sym)
 
-      for_custom_model(method_sym.to_s.split('for_').last, *arguments)
+      for_custom_model(model: method_sym.to_s.split('for_').last, target_details: arguments[0], target_id: arguments[1])
     end
 
     def respond_to?(method, include_private = false)
@@ -219,7 +236,7 @@ module EE
       end
     end
 
-    def for_custom_model(model, key_title)
+    def for_custom_model(model:, target_details:, target_id:)
       action = @details[:action]
       model_class = model.camelize
       custom_message = @details[:custom_message]
@@ -230,44 +247,43 @@ module EE
           {
             remove: model,
             author_name: @author.name,
-            target_id: key_title,
+            target_id: target_id,
             target_type: model_class,
-            target_details: key_title
+            target_details: target_details
           }
         when :create
           {
             add: model,
             author_name: @author.name,
-            target_id: key_title,
+            target_id: target_id,
             target_type: model_class,
-            target_details: key_title
+            target_details: target_details
           }
         when :custom
           {
             custom_message: custom_message,
             author_name: @author&.name,
-            target_id: key_title,
+            target_id: target_id,
             target_type: model_class,
-            target_details: key_title,
-            ip_address: @details[:ip_address]
+            target_details: target_details
           }
         end
 
       self
     end
 
-    def ip_address
-      @author.current_sign_in_ip || @details[:ip_address]
-    end
-
     def add_security_event_admin_details!
+      return unless admin_audit_log_enabled?
+
       @details.merge!(
         ip_address: ip_address,
-        entity_path: @entity.full_path
+        entity_path: @entity&.full_path
       )
     end
 
     def add_impersonation_details!
+      return unless admin_audit_log_enabled?
+
       if @author.is_a?(::Gitlab::Audit::ImpersonatedAuthor)
         @details.merge!(impersonated_by: @author.impersonated_by)
       end

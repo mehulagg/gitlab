@@ -183,9 +183,56 @@ RSpec.describe API::Helpers do
     end
 
     it "logs an exception" do
-      expect(Rails.logger).to receive(:warn).with(/Tracking event failed/)
+      expect(Gitlab::AppLogger).to receive(:warn).with(/Tracking event failed/)
 
       subject.track_event('my_event', category: nil)
+    end
+  end
+
+  describe '#increment_unique_values' do
+    let(:value) { '9f302fea-f828-4ca9-aef4-e10bd723c0b3' }
+    let(:event_name) { 'g_compliance_dashboard' }
+    let(:unknown_event) { 'unknown' }
+    let(:feature) { "usage_data_#{event_name}" }
+
+    before do
+      skip_feature_flags_yaml_validation
+    end
+
+    context 'with feature enabled' do
+      before do
+        stub_feature_flags(feature => true)
+      end
+
+      it 'tracks redis hll event' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(value, event_name)
+
+        subject.increment_unique_values(event_name, value)
+      end
+
+      it 'logs an exception for unknown event' do
+        expect(Gitlab::AppLogger).to receive(:warn).with("Redis tracking event failed for event: #{unknown_event}, message: Unknown event #{unknown_event}")
+
+        subject.increment_unique_values(unknown_event, value)
+      end
+
+      it 'does not track event for nil values' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        subject.increment_unique_values(unknown_event, nil)
+      end
+    end
+
+    context 'with feature disabled' do
+      before do
+        stub_feature_flags(feature => false)
+      end
+
+      it 'does not track event' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        subject.increment_unique_values(event_name, value)
+      end
     end
   end
 
@@ -227,6 +274,92 @@ RSpec.describe API::Helpers do
 
       it 'does not add an additional order' do
         is_expected.to eq({ 'id' => 'asc' })
+      end
+    end
+  end
+
+  describe "#destroy_conditionally!" do
+    let!(:project) { create(:project) }
+
+    context 'when unmodified check passes' do
+      before do
+        allow(subject).to receive(:check_unmodified_since!).with(project.updated_at).and_return(true)
+      end
+
+      it 'destroys given project' do
+        allow(subject).to receive(:status).with(204)
+        allow(subject).to receive(:body).with(false)
+        expect(project).to receive(:destroy).and_call_original
+
+        expect { subject.destroy_conditionally!(project) }.to change(Project, :count).by(-1)
+      end
+    end
+
+    context 'when unmodified check fails' do
+      before do
+        allow(subject).to receive(:check_unmodified_since!).with(project.updated_at).and_throw(:error)
+      end
+
+      # #destroy_conditionally! uses Grape errors which Ruby-throws a symbol, shifting execution to somewhere else.
+      # Since this spec isn't in the Grape context, we need to simulate this ourselves.
+      # Grape throws here: https://github.com/ruby-grape/grape/blob/470f80cd48933cdf11d4c1ee02cb43e0f51a7300/lib/grape/dsl/inside_route.rb#L168-L171
+      # And catches here: https://github.com/ruby-grape/grape/blob/cf57d250c3d77a9a488d9f56918d62fd4ac745ff/lib/grape/middleware/error.rb#L38-L40
+      it 'does not destroy given project' do
+        expect(project).not_to receive(:destroy)
+
+        expect { subject.destroy_conditionally!(project) }.to throw_symbol(:error).and change { Project.count }.by(0)
+      end
+    end
+  end
+
+  describe "#check_unmodified_since!" do
+    let(:unmodified_since_header) { Time.now.change(usec: 0) }
+
+    before do
+      allow(subject).to receive(:headers).and_return('If-Unmodified-Since' => unmodified_since_header.to_s)
+    end
+
+    context 'when last modified is later than header value' do
+      it 'renders error' do
+        expect(subject).to receive(:render_api_error!)
+
+        subject.check_unmodified_since!(unmodified_since_header + 1.hour)
+      end
+    end
+
+    context 'when last modified is earlier than header value' do
+      it 'does not render error' do
+        expect(subject).not_to receive(:render_api_error!)
+
+        subject.check_unmodified_since!(unmodified_since_header - 1.hour)
+      end
+    end
+
+    context 'when last modified is equal to header value' do
+      it 'does not render error' do
+        expect(subject).not_to receive(:render_api_error!)
+
+        subject.check_unmodified_since!(unmodified_since_header)
+      end
+    end
+
+    context 'when there is no header value present' do
+      let(:unmodified_since_header) { nil }
+
+      it 'does not render error' do
+        expect(subject).not_to receive(:render_api_error!)
+
+        subject.check_unmodified_since!(Time.now)
+      end
+    end
+
+    context 'when header value is not a valid time value' do
+      let(:unmodified_since_header) { "abcd" }
+
+      it 'does not render error' do
+        expect(subject).not_to receive(:render_api_error!)
+
+        subject.check_unmodified_since!(Time.now)
       end
     end
   end

@@ -161,10 +161,6 @@ describe('EpicsListSectionComponent', () => {
         jest.spyOn(wrapper.vm, 'scrollToTodayIndicator').mockImplementation(() => {});
       });
 
-      it('sets value of `roadmapShellEl` with root component element', () => {
-        expect(wrapper.vm.roadmapShellEl instanceof HTMLElement).toBe(true);
-      });
-
       it('calls action `setBufferSize` with value based on window.innerHeight and component element position', () => {
         expect(wrapper.vm.bufferSize).toBe(16);
       });
@@ -245,7 +241,7 @@ describe('EpicsListSectionComponent', () => {
       it('returns an object containing props for EpicItem component', () => {
         expect(wrapper.vm.getEpicItemProps(1)).toEqual(
           expect.objectContaining({
-            key: 1,
+            key: `epic-${wrapper.vm.epics[1].id}`,
             props: {
               epic: wrapper.vm.epics[1],
               presetType: wrapper.vm.presetType,

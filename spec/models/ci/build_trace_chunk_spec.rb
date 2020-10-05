@@ -21,6 +21,25 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     stub_artifacts_object_storage
   end
 
+  describe 'chunk creation' do
+    let(:metrics) { spy('metrics') }
+
+    before do
+      allow(::Gitlab::Ci::Trace::Metrics)
+        .to receive(:new)
+        .and_return(metrics)
+    end
+
+    it 'increments trace operation chunked metric' do
+      build_trace_chunk.save!
+
+      expect(metrics)
+        .to have_received(:increment_trace_operation)
+        .with(operation: :chunked)
+        .once
+    end
+  end
+
   context 'FastDestroyAll' do
     let(:parent) { create(:project) }
     let(:pipeline) { create(:ci_pipeline, project: parent) }
@@ -32,7 +51,7 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
         expect(external_data_counter).to be > 0
         expect(subjects.count).to be > 0
 
-        expect { subjects.first.destroy }.to raise_error('`destroy` and `destroy_all` are forbidden. Please use `fast_destroy_all`')
+        expect { subjects.first.destroy! }.to raise_error('`destroy` and `destroy_all` are forbidden. Please use `fast_destroy_all`')
         expect { subjects.destroy_all }.to raise_error('`destroy` and `destroy_all` are forbidden. Please use `fast_destroy_all`') # rubocop: disable Cop/DestroyAll
 
         expect(subjects.count).to be > 0
@@ -57,7 +76,7 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
         expect(external_data_counter).to be > 0
         expect(subjects.count).to be > 0
 
-        expect { parent.destroy }.not_to raise_error
+        expect { parent.destroy! }.not_to raise_error
 
         expect(subjects.count).to eq(0)
         expect(external_data_counter).to eq(0)
@@ -222,6 +241,8 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             subject
 
             build_trace_chunk.reload
+
+            expect(build_trace_chunk.checksum).to be_present
             expect(build_trace_chunk.fog?).to be_truthy
             expect(build_trace_chunk.data).to eq(new_data)
           end
@@ -260,6 +281,12 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
 
         it 'has no data' do
           expect(build_trace_chunk.data).to be_empty
+        end
+
+        it 'does not read data when appending' do
+          expect(build_trace_chunk).not_to receive(:data)
+
+          build_trace_chunk.append(new_data, offset)
         end
 
         it_behaves_like 'Appending correctly'
@@ -336,6 +363,24 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
 
         it_behaves_like 'Appending correctly'
         it_behaves_like 'Scheduling no sidekiq worker'
+      end
+    end
+
+    describe 'append metrics' do
+      let(:metrics) { spy('metrics') }
+
+      before do
+        allow(::Gitlab::Ci::Trace::Metrics)
+          .to receive(:new)
+          .and_return(metrics)
+      end
+
+      it 'increments trace operation appended metric' do
+        build_trace_chunk.append('123456', 0)
+
+        expect(metrics)
+          .to have_received(:increment_trace_operation)
+          .with(operation: :appended)
       end
     end
   end
@@ -455,6 +500,8 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
   end
 
   describe '#persist_data!' do
+    let(:build) { create(:ci_build, :running) }
+
     subject { build_trace_chunk.persist_data! }
 
     shared_examples_for 'Atomic operation' do
@@ -486,7 +533,7 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(build_trace_chunk.redis?).to be_truthy
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to eq(data)
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
-            expect { Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk) }.to raise_error(Excon::Error::NotFound)
+            expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to be_nil
 
             subject
 
@@ -494,6 +541,12 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to eq(data)
+          end
+
+          it 'calculates CRC32 checksum' do
+            subject
+
+            expect(build_trace_chunk.reload.checksum).to eq '3398914352'
           end
 
           it_behaves_like 'Atomic operation'
@@ -508,7 +561,19 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(build_trace_chunk.redis?).to be_truthy
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to eq(data)
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to be_nil
-            expect { Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk) }.to raise_error(Excon::Error::NotFound)
+            expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to be_nil
+          end
+
+          context 'when chunk is a final one' do
+            before do
+              create(:ci_build_pending_state, build: build)
+            end
+
+            it 'persists the data' do
+              subject
+
+              expect(build_trace_chunk.fog?).to be_truthy
+            end
           end
         end
       end
@@ -535,7 +600,7 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(build_trace_chunk.database?).to be_truthy
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to eq(data)
-            expect { Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk) }.to raise_error(Excon::Error::NotFound)
+            expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to be_nil
 
             subject
 
@@ -557,7 +622,19 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
             expect(build_trace_chunk.database?).to be_truthy
             expect(Ci::BuildTraceChunks::Redis.new.data(build_trace_chunk)).to be_nil
             expect(Ci::BuildTraceChunks::Database.new.data(build_trace_chunk)).to eq(data)
-            expect { Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk) }.to raise_error(Excon::Error::NotFound)
+            expect(Ci::BuildTraceChunks::Fog.new.data(build_trace_chunk)).to be_nil
+          end
+
+          context 'when chunk is a final one' do
+            before do
+              create(:ci_build_pending_state, build: build)
+            end
+
+            it 'persists the data' do
+              subject
+
+              expect(build_trace_chunk.fog?).to be_truthy
+            end
           end
         end
       end
@@ -608,6 +685,54 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     end
   end
 
+  describe 'final?' do
+    let(:build) { create(:ci_build, :running) }
+
+    context 'when build pending state exists' do
+      before do
+        create(:ci_build_pending_state, build: build)
+      end
+
+      context 'when chunks is not the last one' do
+        before do
+          create(:ci_build_trace_chunk, chunk_index: 1, build: build)
+        end
+
+        it 'is not a final chunk' do
+          expect(build.reload.pending_state).to be_present
+          expect(build_trace_chunk).not_to be_final
+        end
+      end
+
+      context 'when chunks is the last one' do
+        it 'is a final chunk' do
+          expect(build.reload.pending_state).to be_present
+          expect(build_trace_chunk).to be_final
+        end
+      end
+    end
+
+    context 'when build pending state does not exist' do
+      context 'when chunks is not the last one' do
+        before do
+          create(:ci_build_trace_chunk, chunk_index: 1, build: build)
+        end
+
+        it 'is not a final chunk' do
+          expect(build.reload.pending_state).not_to be_present
+          expect(build_trace_chunk).not_to be_final
+        end
+      end
+
+      context 'when chunks is the last one' do
+        it 'is not a final chunk' do
+          expect(build.reload.pending_state).not_to be_present
+          expect(build_trace_chunk).not_to be_final
+        end
+      end
+    end
+  end
+
   describe 'deletes data in redis after a parent record destroyed' do
     let(:project) { create(:project) }
 
@@ -652,6 +777,64 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
       end
 
       it_behaves_like 'deletes all build_trace_chunk and data in redis'
+    end
+  end
+
+  describe 'comparable build trace chunks' do
+    describe '#<=>' do
+      context 'when chunks are associated with different builds' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, chunk_index: 1) }
+
+        it 'returns nil' do
+          expect(first <=> second).to be_nil
+        end
+      end
+
+      context 'when there are two chunks with different indexes' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, build: build, chunk_index: 0) }
+
+        it 'indicates the the first one is greater than then second' do
+          expect(first <=> second).to eq 1
+        end
+      end
+
+      context 'when there are two chunks with the same index within the same build' do
+        let(:chunk) { create(:ci_build_trace_chunk) }
+
+        it 'indicates the these are equal' do
+          expect(chunk <=> chunk).to be_zero # rubocop:disable Lint/UselessComparison
+        end
+      end
+    end
+
+    describe '#==' do
+      context 'when chunks have the same index' do
+        let(:chunk) { create(:ci_build_trace_chunk) }
+
+        it 'indicates that the chunks are equal' do
+          expect(chunk).to eq chunk
+        end
+      end
+
+      context 'when chunks have different indexes' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, build: build, chunk_index: 0) }
+
+        it 'indicates that the chunks are not equal' do
+          expect(first).not_to eq second
+        end
+      end
+
+      context 'when chunks are associated with different builds' do
+        let(:first) { create(:ci_build_trace_chunk, build: build, chunk_index: 1) }
+        let(:second) { create(:ci_build_trace_chunk, chunk_index: 1) }
+
+        it 'indicates that the chunks are not equal' do
+          expect(first).not_to eq second
+        end
+      end
     end
   end
 end

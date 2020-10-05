@@ -56,7 +56,7 @@ module QA
           element :new_file_option
         end
 
-        view 'app/assets/javascripts/repository/index.js' do
+        view 'app/assets/javascripts/vue_shared/components/web_ide_link.vue' do
           element :web_ide_button
         end
 
@@ -103,6 +103,8 @@ module QA
         end
 
         def click_commit(commit_msg)
+          wait_for_requests
+
           within_element(:file_tree_table) do
             click_on commit_msg
           end
@@ -141,6 +143,10 @@ module QA
 
         def open_web_ide!
           click_element :web_ide_button
+        end
+
+        def has_edit_fork_button?
+          has_element?(:web_ide_button, text: 'Edit fork in Web IDE')
         end
 
         def project_name

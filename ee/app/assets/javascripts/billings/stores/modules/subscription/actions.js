@@ -1,6 +1,6 @@
 import API from 'ee/api';
 import * as types from './mutation_types';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 
 /**
@@ -27,6 +27,3 @@ export const receiveSubscriptionError = ({ commit }) => {
   createFlash(__('An error occurred while loading the subscription details.'));
   commit(types.RECEIVE_SUBSCRIPTION_ERROR);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

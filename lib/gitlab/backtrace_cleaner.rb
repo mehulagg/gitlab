@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Remove some GitLab code from backtraces. Do not use this for logging errors in
+# production environments, as the error may be thrown by our middleware.
 module Gitlab
   module BacktraceCleaner
     IGNORE_BACKTRACES = %w[
@@ -29,7 +31,7 @@ module Gitlab
       return unless backtrace
 
       Array(Rails.backtrace_cleaner.clean(backtrace)).reject do |line|
-        line.match(IGNORED_BACKTRACES_REGEXP)
+        IGNORED_BACKTRACES_REGEXP.match?(line)
       end
     end
   end

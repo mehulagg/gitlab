@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Group navbar' do
   include NavbarStructureHelper
+  include WikiHelpers
 
   include_context 'group navbar structure'
 
@@ -32,6 +33,7 @@ RSpec.describe 'Group navbar' do
         nav_item: _('Merge Requests'),
         nav_sub_items: []
       },
+      (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),
         nav_sub_items: []
@@ -45,8 +47,10 @@ RSpec.describe 'Group navbar' do
   end
 
   before do
-    stub_feature_flags(group_push_rules: false)
+    insert_package_nav(_('Kubernetes'))
+
     stub_feature_flags(group_iterations: false)
+    stub_group_wikis(false)
     group.add_maintainer(user)
     sign_in(user)
   end
@@ -61,16 +65,19 @@ RSpec.describe 'Group navbar' do
     before do
       stub_config(registry: { enabled: true })
 
-      insert_after_nav_item(
-        _('Kubernetes'),
-        new_nav_item: {
-          nav_item: _('Packages & Registries'),
-          nav_sub_items: [_('Container Registry')]
-        }
-      )
+      insert_container_nav(_('Kubernetes'))
+
       visit group_path(group)
     end
 
     it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when invite team members is not available' do
+    it 'does not display the js-invite-members-trigger' do
+      visit group_path(group)
+
+      expect(page).not_to have_selector('.js-invite-members-trigger')
+    end
   end
 end

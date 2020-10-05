@@ -1,9 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import SidebarDatepicker from 'ee/epic/components/sidebar_items/sidebar_date_picker.vue';
 import { mockDatePickerProps } from '../../mock_data';
-import Icon from '~/vue_shared/components/icon.vue';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
@@ -29,7 +28,7 @@ describe('SidebarDatePicker', () => {
 
   const findIconByName = name =>
     wrapper
-      .findAll(Icon)
+      .findAll(GlIcon)
       .filter(w => w.props().name === name)
       .at(0);
   const findEditButton = () => wrapper.find({ ref: 'editButton' });

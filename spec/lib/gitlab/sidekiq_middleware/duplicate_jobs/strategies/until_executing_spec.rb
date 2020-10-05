@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'timecop'
 
 RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::UntilExecuting do
   let(:fake_duplicate_job) do
@@ -40,6 +39,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::UntilExecut
         allow(fake_duplicate_job).to receive(:scheduled?).and_return(false)
         allow(fake_duplicate_job).to receive(:check!).and_return('the jid')
         allow(fake_duplicate_job).to receive(:droppable?).and_return(true)
+        allow(fake_duplicate_job).to receive(:options).and_return({})
         job_hash = {}
 
         expect(fake_duplicate_job).to receive(:duplicate?).and_return(true)
@@ -76,7 +76,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::UntilExecut
 
         context 'scheduled in the future' do
           it 'adds the jid of the existing job to the job hash' do
-            Timecop.freeze do
+            freeze_time do
               allow(fake_duplicate_job).to receive(:scheduled?).twice.and_return(true)
               allow(fake_duplicate_job).to receive(:scheduled_at).and_return(Time.now + time_diff)
               allow(fake_duplicate_job).to receive(:options).and_return({ including_scheduled: true })
@@ -102,6 +102,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::UntilExecut
         allow(fake_duplicate_job).to receive(:scheduled?).and_return(false)
         allow(fake_duplicate_job).to receive(:check!).and_return('the jid')
         allow(fake_duplicate_job).to receive(:duplicate?).and_return(true)
+        allow(fake_duplicate_job).to receive(:options).and_return({})
         allow(fake_duplicate_job).to receive(:existing_jid).and_return('the jid')
         allow(fake_duplicate_job).to receive(:droppable?).and_return(true)
       end
@@ -119,7 +120,17 @@ RSpec.describe Gitlab::SidekiqMiddleware::DuplicateJobs::Strategies::UntilExecut
         fake_logger = instance_double(Gitlab::SidekiqLogging::DeduplicationLogger)
 
         expect(Gitlab::SidekiqLogging::DeduplicationLogger).to receive(:instance).and_return(fake_logger)
-        expect(fake_logger).to receive(:log).with(a_hash_including({ 'jid' => 'new jid' }), 'dropped until executing')
+        expect(fake_logger).to receive(:log).with(a_hash_including({ 'jid' => 'new jid' }), 'dropped until executing', {})
+
+        strategy.schedule({ 'jid' => 'new jid' }) {}
+      end
+
+      it 'logs the deduplication options of the worker' do
+        fake_logger = instance_double(Gitlab::SidekiqLogging::DeduplicationLogger)
+
+        expect(Gitlab::SidekiqLogging::DeduplicationLogger).to receive(:instance).and_return(fake_logger)
+        allow(fake_duplicate_job).to receive(:options).and_return({ foo: :bar })
+        expect(fake_logger).to receive(:log).with(a_hash_including({ 'jid' => 'new jid' }), 'dropped until executing', { foo: :bar })
 
         strategy.schedule({ 'jid' => 'new jid' }) {}
       end

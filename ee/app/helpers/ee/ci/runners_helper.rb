@@ -7,7 +7,7 @@ module EE
       BUY_PIPELINE_MINUTES_NOTIFICATION_DOT = 'buy_pipeline_minutes_notification_dot'
 
       def show_buy_pipeline_minutes?(project, namespace)
-        return false unless experiment_enabled?(:ci_notification_dot) || experiment_enabled?(:buy_ci_minutes_version_a)
+        return false unless experiment_enabled?(:ci_notification_dot)
 
         show_out_of_pipeline_minutes_notification?(project, namespace)
       end

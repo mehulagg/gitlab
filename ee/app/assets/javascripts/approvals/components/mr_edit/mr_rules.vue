@@ -1,6 +1,6 @@
 <script>
-import { __ } from '~/locale';
 import { mapState, mapActions } from 'vuex';
+import { __ } from '~/locale';
 import { RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR, RULE_NAME_ANY_APPROVER } from '../../constants';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import Rules from '../rules.vue';
@@ -108,7 +108,7 @@ export default {
 
 <template>
   <rules :rules="rules">
-    <template slot="thead" slot-scope="{ name, members, approvalsRequired }">
+    <template #thead="{ name, members, approvalsRequired }">
       <tr>
         <th :class="hasNamedRule ? 'w-25' : 'w-75'">{{ hasNamedRule ? name : members }}</th>
         <th :class="hasNamedRule ? 'w-50' : null">
@@ -118,7 +118,7 @@ export default {
         <th></th>
       </tr>
     </template>
-    <template slot="tbody" slot-scope="{ rules }">
+    <template #tbody="{ rules }">
       <template v-for="(rule, index) in rules">
         <empty-rule
           v-if="rule.ruleType === 'any_approver'"
@@ -131,9 +131,7 @@ export default {
         <tr v-else :key="index">
           <td>
             <div class="js-name">{{ rule.name }}</div>
-            <div ref="indicator" class="text-muted">
-              {{ indicatorText(rule) }}
-            </div>
+            <div ref="indicator" class="text-muted">{{ indicatorText(rule) }}</div>
           </td>
           <td class="js-members" :class="settings.allowMultiRule ? 'd-none d-sm-table-cell' : null">
             <user-avatar-list :items="rule.approvers" :img-size="24" />

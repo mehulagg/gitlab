@@ -1,11 +1,13 @@
 - page_title _('Jira Issues')
+- add_page_specific_style 'page_bundles/issues_list'
 
-.top-area.gl-border-b-0.gl-justify-content-end
+.top-area.gl-border-b-0.gl-mt-6
+  = render 'shared/issuable/nav', type: :issues, display_count: false
   = render 'projects/integrations/jira/issues/nav_btns'
 
-.js-issuables-list{ data: { endpoint: expose_path(project_integrations_jira_issues_path(@project, format: :json)),
+.js-issuables-list{ data: { endpoint: project_integrations_jira_issues_path(@project, format: :json),
   'can-bulk-edit': false,
-  'empty-svg-path': image_path('illustrations/issues.svg'),
+  'empty-state-meta': { svg_path: image_path('illustrations/issues.svg') },
   'sort-key': @sort,
   type: 'jira',
   project_path: @project.full_path, } }

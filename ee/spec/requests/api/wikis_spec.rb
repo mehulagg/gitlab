@@ -13,6 +13,7 @@ require 'spec_helper'
 # because they are 3 edge cases of using wiki pages.
 
 RSpec.describe API::Wikis do
+  include WikiHelpers
   include WorkhorseHelpers
 
   let_it_be(:user) { create(:user) }
@@ -21,6 +22,10 @@ RSpec.describe API::Wikis do
   let(:payload) { { content: 'content', format: 'rdoc', title: 'title' } }
   let(:expected_keys_with_content) { %w(content format slug title) }
   let(:expected_keys_without_content) { %w(format slug title) }
+
+  before do
+    stub_group_wikis(true)
+  end
 
   shared_examples_for 'wiki API 404 Group Not Found' do
     include_examples 'wiki API 404 Not Found', 'Group'
@@ -31,7 +36,7 @@ RSpec.describe API::Wikis do
 
     context 'when group wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -125,7 +130,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -250,7 +255,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -342,7 +347,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -482,7 +487,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -613,7 +618,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do

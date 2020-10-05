@@ -32,7 +32,7 @@ module Ci
 
         Ci::ProcessPipelineService
           .new(pipeline)
-          .execute(nil, initial_process: true)
+          .execute
 
         pipeline_created_counter.increment(source: :webide)
       end
@@ -70,7 +70,7 @@ module Ci
     end
 
     def load_terminal_config!
-      result = ::Ci::WebIdeConfigService.new(project, current_user, sha: sha).execute
+      result = ::Ide::TerminalConfigService.new(project, current_user, sha: sha).execute
       raise TerminalCreationError, result[:message] if result[:status] != :success
 
       @terminal = result[:terminal]

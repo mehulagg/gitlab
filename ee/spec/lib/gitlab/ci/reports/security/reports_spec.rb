@@ -3,9 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Reports::Security::Reports do
-  let(:commit_sha) { '20410773a37f49d599e5f0d45219b39304763538' }
-  let(:security_reports) { described_class.new(commit_sha) }
-  let(:artifact) { create(:ee_ci_job_artifact, :sast) }
+  let_it_be(:pipeline) { create(:ci_pipeline) }
+  let_it_be(:artifact) { create(:ee_ci_job_artifact, :sast) }
+
+  let(:security_reports) { described_class.new(pipeline) }
 
   describe '#get_report' do
     subject { security_reports.get_report(report_type, artifact) }
@@ -14,12 +15,11 @@ RSpec.describe Gitlab::Ci::Reports::Security::Reports do
       let(:report_type) { 'sast' }
 
       it { expect(subject.type).to eq('sast') }
-      it { expect(subject.commit_sha).to eq(commit_sha) }
       it { expect(subject.created_at).to eq(artifact.created_at) }
 
       it 'initializes a new report and returns it' do
         expect(Gitlab::Ci::Reports::Security::Report).to receive(:new)
-          .with('sast', commit_sha, artifact.created_at).and_call_original
+          .with('sast', pipeline, artifact.created_at).and_call_original
 
         is_expected.to be_a(Gitlab::Ci::Reports::Security::Report)
       end
@@ -38,28 +38,69 @@ RSpec.describe Gitlab::Ci::Reports::Security::Reports do
     end
   end
 
-  describe "#violates_default_policy?" do
-    subject { described_class.new(commit_sha) }
+  describe '#findings' do
+    let(:finding_1) { build(:ci_reports_security_finding, severity: 'low') }
+    let(:finding_2) { build(:ci_reports_security_finding, severity: 'high') }
+    let!(:expected_findings) { [finding_1, finding_2] }
 
-    let(:low_severity) { build(:ci_reports_security_occurrence, severity: 'low') }
-    let(:high_severity) { build(:ci_reports_security_occurrence, severity: 'high') }
+    subject { security_reports.findings }
 
-    context "when a report has a high severity vulnerability" do
-      before do
-        subject.get_report('sast', artifact).add_occurrence(high_severity)
-        subject.get_report('dependency_scanning', artifact).add_occurrence(low_severity)
-      end
-
-      it { expect(subject.violates_default_policy?).to be(true) }
+    before do
+      security_reports.get_report('sast', artifact).add_finding(finding_1)
+      security_reports.get_report('dependency_scanning', artifact).add_finding(finding_2)
     end
 
-    context "when none of the reports have a high severity vulnerability" do
-      before do
-        subject.get_report('sast', artifact).add_occurrence(low_severity)
-        subject.get_report('dependency_scanning', artifact).add_occurrence(low_severity)
+    it { is_expected.to match_array(expected_findings) }
+  end
+
+  describe "#violates_default_policy_against?" do
+    let(:low_severity_sast) { build(:ci_reports_security_finding, severity: 'low', report_type: :sast) }
+    let(:high_severity_dast) { build(:ci_reports_security_finding, severity: 'high', report_type: :dast) }
+
+    subject { security_reports.violates_default_policy_against?(target_reports) }
+
+    context 'when the target_reports is `nil`' do
+      let(:target_reports) { nil }
+
+      context "when a report has unsafe vulnerability" do
+        before do
+          security_reports.get_report('sast', artifact).add_finding(high_severity_dast)
+        end
+
+        it { is_expected.to be(true) }
       end
 
-      it { expect(subject.violates_default_policy?).to be(false) }
+      context "when none of the reports have an unsafe vulnerability" do
+        before do
+          security_reports.get_report('sast', artifact).add_finding(low_severity_sast)
+        end
+
+        it { is_expected.to be(false) }
+      end
+    end
+
+    context 'when the target_reports is not `nil`' do
+      let(:target_reports) { described_class.new(pipeline) }
+
+      context "when a report has a new unsafe vulnerability" do
+        before do
+          security_reports.get_report('sast', artifact).add_finding(high_severity_dast)
+          security_reports.get_report('dependency_scanning', artifact).add_finding(low_severity_sast)
+          target_reports.get_report('dependency_scanning', artifact).add_finding(low_severity_sast)
+        end
+
+        it { is_expected.to be(true) }
+      end
+
+      context "when none of the reports have a new unsafe vulnerability" do
+        before do
+          security_reports.get_report('sast', artifact).add_finding(high_severity_dast)
+          security_reports.get_report('sast', artifact).add_finding(low_severity_sast)
+          target_reports.get_report('sast', artifact).add_finding(high_severity_dast)
+        end
+
+        it { is_expected.to be(false) }
+      end
     end
   end
 end

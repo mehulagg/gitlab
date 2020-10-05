@@ -180,7 +180,7 @@ FactoryBot.define do
     end
 
     trait :license_management do
-      to_create { |instance| instance.save(validate: false) }
+      to_create { |instance| instance.save!(validate: false) }
 
       file_type { :license_management }
       file_format { :raw }
@@ -298,6 +298,16 @@ FactoryBot.define do
       after(:build) do |artifact, _|
         artifact.file = fixture_file_upload(
           Rails.root.join('ee/spec/fixtures/security_reports/master/gl-container-scanning-report.json'), 'application/json')
+      end
+    end
+
+    trait :common_security_report do
+      file_format { :raw }
+      file_type { :dependency_scanning }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-common-scanning-report.json'), 'application/json')
       end
     end
 

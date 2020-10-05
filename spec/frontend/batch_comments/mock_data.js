@@ -23,5 +23,3 @@ export const createDraft = () => ({
   isDraft: true,
   position: null,
 });
-
-export default () => {};

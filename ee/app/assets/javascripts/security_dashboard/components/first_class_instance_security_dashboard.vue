@@ -1,36 +1,22 @@
 <script>
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
-import createFlash from '~/flash';
-import { __, s__ } from '~/locale';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
-import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';
-import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
-import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vulnerability_chart.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import projectsQuery from 'ee/security_dashboard/graphql/get_instance_security_dashboard_projects.query.graphql';
-import ProjectManager from './first_class_project_manager/project_manager.vue';
+import createFlash from '~/flash';
+import { createProjectLoadingError } from '../helpers';
+import InstanceSecurityVulnerabilities from './first_class_instance_security_dashboard_vulnerabilities.vue';
 import CsvExportButton from './csv_export_button.vue';
-import vulnerabilityHistoryQuery from '../graphql/instance_vulnerability_history.graphql';
 import DashboardNotConfigured from './empty_states/instance_dashboard_not_configured.vue';
 
 export default {
   components: {
-    ProjectManager,
     CsvExportButton,
     SecurityDashboardLayout,
     InstanceSecurityVulnerabilities,
-    VulnerabilitySeverities,
-    VulnerabilityChart,
     Filters,
-    GlLoadingIcon,
-    GlButton,
     DashboardNotConfigured,
   },
   props: {
-    vulnerableProjectsEndpoint: {
-      type: String,
-      required: true,
-    },
     vulnerabilitiesExportEndpoint: {
       type: String,
       required: true,
@@ -43,54 +29,33 @@ export default {
         return data.instanceSecurityDashboard.projects.nodes;
       },
       error() {
-        createFlash(__('Something went wrong, unable to get projects'));
+        createFlash({ message: createProjectLoadingError() });
       },
     },
   },
   data() {
     return {
       filters: {},
-      showProjectSelector: false,
-      vulnerabilityHistoryQuery,
       projects: [],
-      isManipulatingProjects: false,
     };
   },
   computed: {
     isLoadingProjects() {
       return this.$apollo.queries.projects.loading;
     },
-    isUpdatingProjects() {
-      return this.isLoadingProjects || this.isManipulatingProjects;
-    },
     hasProjectsData() {
-      return !this.isUpdatingProjects && this.projects.length > 0;
+      return !this.isLoadingProjects && this.projects.length > 0;
     },
     shouldShowDashboard() {
-      return this.hasProjectsData && !this.showProjectSelector;
+      return this.hasProjectsData;
     },
     shouldShowEmptyState() {
-      return !this.hasProjectsData && !this.showProjectSelector && !this.isUpdatingProjects;
-    },
-    toggleButtonProps() {
-      return this.showProjectSelector
-        ? {
-            text: s__('SecurityReports|Return to dashboard'),
-          }
-        : {
-            text: s__('SecurityReports|Edit dashboard'),
-          };
+      return !this.isLoadingProjects && this.projects.length === 0;
     },
   },
   methods: {
     handleFilterChange(filters) {
       this.filters = filters;
-    },
-    toggleProjectSelector() {
-      this.showProjectSelector = !this.showProjectSelector;
-    },
-    handleProjectManipulation(value) {
-      this.isManipulatingProjects = value;
     },
   },
 };
@@ -99,15 +64,12 @@ export default {
 <template>
   <security-dashboard-layout>
     <template #header>
-      <header class="page-title-holder flex-fill d-flex align-items-center">
-        <h2 class="page-title flex-grow">{{ s__('SecurityReports|Security Dashboard') }}</h2>
-        <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
-        <gl-button
-          class="page-title-controls ml-2"
-          :variant="toggleButtonProps.variant"
-          @click="toggleProjectSelector"
-          >{{ toggleButtonProps.text }}</gl-button
-        >
+      <header class="page-title-holder gl-flex-fill-1 gl-display-flex gl-align-items-center">
+        <h2 class="page-title gl-flex-grow-1">{{ s__('SecurityReports|Vulnerability Report') }}</h2>
+        <csv-export-button
+          v-if="shouldShowDashboard"
+          :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint"
+        />
       </header>
     </template>
     <template #sticky>
@@ -118,24 +80,6 @@ export default {
       :projects="projects"
       :filters="filters"
     />
-    <dashboard-not-configured
-      v-else-if="shouldShowEmptyState"
-      @handleAddProjectsClick="toggleProjectSelector"
-    />
-    <div v-else class="d-flex justify-content-center">
-      <project-manager
-        v-if="showProjectSelector"
-        :projects="projects"
-        :is-manipulating-projects="isManipulatingProjects"
-        @handle-project-manipulation="handleProjectManipulation"
-      />
-      <gl-loading-icon v-else size="lg" class="mt-4" />
-    </div>
-    <template #aside>
-      <template v-if="shouldShowDashboard">
-        <vulnerability-chart :query="vulnerabilityHistoryQuery" class="mb-4" />
-        <vulnerability-severities :projects="projects" />
-      </template>
-    </template>
+    <dashboard-not-configured v-else-if="shouldShowEmptyState" />
   </security-dashboard-layout>
 </template>

@@ -1,13 +1,12 @@
 <script>
 import { uniqueId } from 'lodash';
-import { GlLoadingIcon, GlDeprecatedButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlIcon } from '@gitlab/ui';
 
 import { __, s__ } from '~/locale';
 import { dateInWords } from '~/lib/utils/datetime_utility';
 
 import tooltip from '~/vue_shared/directives/tooltip';
 import popover from '~/vue_shared/directives/popover';
-import Icon from '~/vue_shared/components/icon.vue';
 import DatePicker from '~/vue_shared/components/pikaday.vue';
 import CollapsedCalendarIcon from '~/vue_shared/components/sidebar/collapsed_calendar_icon.vue';
 import ToggleSidebar from '~/vue_shared/components/sidebar/toggle_sidebar.vue';
@@ -21,12 +20,12 @@ export default {
     popover,
   },
   components: {
-    Icon,
+    GlIcon,
     DatePicker,
     CollapsedCalendarIcon,
     ToggleSidebar,
     GlLoadingIcon,
-    GlDeprecatedButton,
+    GlButton,
   },
   props: {
     sidebarCollapsed: {
@@ -200,8 +199,13 @@ export default {
       {{ label }}
       <gl-loading-icon v-if="dateSaveInProgress" :inline="true" />
       <div class="float-right d-flex">
-        <icon v-popover="popoverOptions" name="question-o" class="help-icon gl-mr-2" tabindex="0" />
-        <gl-deprecated-button
+        <gl-icon
+          v-popover="popoverOptions"
+          name="question-o"
+          class="help-icon gl-mr-2"
+          tabindex="0"
+        />
+        <gl-button
           v-show="canUpdate && !editing"
           ref="editButton"
           variant="link"
@@ -209,7 +213,8 @@ export default {
           @click="startEditing"
         >
           {{ __('Edit') }}
-        </gl-deprecated-button>
+        </gl-button>
+
         <toggle-sidebar
           v-if="showToggleSidebar"
           :collapsed="sidebarCollapsed"
@@ -240,7 +245,7 @@ export default {
         <span v-else class="d-flex value-content gl-ml-1">
           <template v-if="dateFixed">
             <span>{{ dateFixedWords }}</span>
-            <icon
+            <gl-icon
               v-if="isDateInvalid && selectedDateIsFixed"
               v-popover="dateInvalidPopoverOptions"
               name="warning"
@@ -249,14 +254,14 @@ export default {
             />
             <span v-if="selectedAndEditable" class="no-value d-flex">
               &nbsp;&ndash;&nbsp;
-              <gl-deprecated-button
+              <gl-button
                 ref="removeButton"
                 variant="link"
                 class="btn-sidebar-date-remove"
                 @click="newDateSelected(null)"
               >
                 {{ __('remove') }}
-              </gl-deprecated-button>
+              </gl-button>
             </span>
           </template>
           <span v-else class="no-value"> {{ __('None') }} </span>
@@ -266,7 +271,7 @@ export default {
         v-tooltip
         :title="dateFromMilestonesTooltip"
         :class="{ 'is-option-selected': !selectedDateIsFixed }"
-        class="value-type-dynamic text-secondary d-flex prepend-top-10"
+        class="value-type-dynamic text-secondary d-flex gl-mt-3"
         data-placement="bottom"
         data-html="true"
       >
@@ -279,7 +284,7 @@ export default {
         />
         <span class="gl-ml-2">{{ __('Inherited:') }}</span>
         <span class="value-content gl-ml-1">{{ dateFromMilestonesWords }}</span>
-        <icon
+        <gl-icon
           v-if="isDateInvalid && !selectedDateIsFixed"
           v-popover="dateInvalidPopoverOptions"
           name="warning"

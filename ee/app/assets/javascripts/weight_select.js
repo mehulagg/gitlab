@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 
 import $ from 'jquery';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 function WeightSelect(els, options = {}) {
   const $els = $(els || '.js-weight-select');
@@ -20,7 +20,7 @@ function WeightSelect(els, options = {}) {
       inputField.val(options.selected);
     }
 
-    return $dropdown.glDropdown({
+    return initDeprecatedJQueryDropdown($dropdown, {
       selectable: true,
       fieldName,
       toggleLabel(selected, el) {
@@ -36,9 +36,9 @@ function WeightSelect(els, options = {}) {
         }
         return '';
       },
-      clicked(glDropdownEvt) {
-        const { e } = glDropdownEvt;
-        let selected = glDropdownEvt.selectedObj;
+      clicked(deprecatedJQueryDropdownEvt) {
+        const { e } = deprecatedJQueryDropdownEvt;
+        let selected = deprecatedJQueryDropdownEvt.selectedObj;
         const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
 
         if (options.handleClick) {

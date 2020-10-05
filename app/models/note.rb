@@ -5,6 +5,7 @@
 # A note of this type is never resolvable.
 class Note < ApplicationRecord
   extend ActiveModel::Naming
+  include Gitlab::Utils::StrongMemoize
   include Participable
   include Mentionable
   include Awardable
@@ -18,20 +19,6 @@ class Note < ApplicationRecord
   include Gitlab::SQL::Pattern
   include ThrottledTouch
   include FromUnion
-
-  module SpecialRole
-    FIRST_TIME_CONTRIBUTOR = :first_time_contributor
-
-    class << self
-      def values
-        constants.map {|const| self.const_get(const, false)}
-      end
-
-      def value?(val)
-        values.include?(val)
-      end
-    end
-  end
 
   cache_markdown_field :note, pipeline: :note, issuable_state_filter_enabled: true
 
@@ -58,9 +45,6 @@ class Note < ApplicationRecord
 
   # Attribute used to store the attributes that have been changed by quick actions.
   attr_accessor :commands_changes
-
-  # A special role that may be displayed on issuable's discussions
-  attr_accessor :special_role
 
   default_value_for :system, false
 
@@ -122,6 +106,8 @@ class Note < ApplicationRecord
   scope :common, -> { where(noteable_type: ["", nil]) }
   scope :fresh, -> { order(created_at: :asc, id: :asc) }
   scope :updated_after, ->(time) { where('updated_at > ?', time) }
+  scope :with_updated_at, ->(time) { where(updated_at: time) }
+  scope :by_updated_at, -> { reorder(:updated_at, :id) }
   scope :inc_author_project, -> { includes(:project, :author) }
   scope :inc_author, -> { includes(:author) }
   scope :inc_relations_for_view, -> do
@@ -215,10 +201,6 @@ class Note < ApplicationRecord
       user.select('noteable_id', 'COUNT(*) as count')
         .group(:noteable_id)
         .where(noteable_type: type, noteable_id: ids)
-    end
-
-    def has_special_role?(role, note)
-      note.special_role == role
     end
 
     def search(query)
@@ -339,20 +321,18 @@ class Note < ApplicationRecord
     noteable.author_id == user.id
   end
 
-  def special_role=(role)
-    raise "Role is undefined, #{role} not found in #{SpecialRole.values}" unless SpecialRole.value?(role)
-
-    @special_role = role
+  def contributor?
+    project&.team&.contributor?(self.author_id)
   end
 
-  def has_special_role?(role)
-    self.class.has_special_role?(role, self)
+  def noteable_author?(noteable)
+    return false unless ::Feature.enabled?(:show_author_on_note, project)
+
+    noteable.author == self.author
   end
 
-  def specialize_for_first_contribution!(noteable)
-    return unless noteable.author_id == self.author_id
-
-    self.special_role = Note::SpecialRole::FIRST_TIME_CONTRIBUTOR
+  def project_name
+    project&.name
   end
 
   def confidential?(include_noteable: false)
@@ -414,7 +394,7 @@ class Note < ApplicationRecord
   end
 
   def can_create_todo?
-    # Skip system notes, and notes on project snippet
+    # Skip system notes, and notes on snippets
     !system? && !for_snippet?
   end
 
@@ -446,8 +426,10 @@ class Note < ApplicationRecord
   # Consider using `#to_discussion` if we do not need to render the discussion
   # and all its notes and if we don't care about the discussion's resolvability status.
   def discussion
-    full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
-    full_discussion || to_discussion
+    strong_memoize(:discussion) do
+      full_discussion = self.noteable.notes.find_discussion(self.discussion_id) if part_of_discussion?
+      full_discussion || to_discussion
+    end
   end
 
   def start_of_discussion?
@@ -551,7 +533,17 @@ class Note < ApplicationRecord
   end
 
   def system_note_with_references_visible_for?(user)
+    return true unless system?
+
     (!system_note_with_references? || all_referenced_mentionables_allowed?(user)) && system_note_viewable_by?(user)
+  end
+
+  def parent_user
+    noteable.author if for_personal_snippet?
+  end
+
+  def skip_notification?
+    review.present?
   end
 
   private

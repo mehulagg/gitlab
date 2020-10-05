@@ -3,7 +3,8 @@
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1631) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.3.
 > - [Available in](https://gitlab.com/gitlab-org/gitlab/-/issues/3953) GitLab Community Edition 10.4.
 
-NOTE: **Note:** This document describes a drop-in replacement for the
+NOTE: **Note:**
+This document describes a drop-in replacement for the
 `authorized_keys` file. For normal (non-deploy key) users, consider using
 [SSH certificates](ssh_certificates.md). They are even faster, but are not a
 drop-in replacement.
@@ -31,10 +32,10 @@ feature for CentOS 6, follow [the instructions on how to build and install a cus
 
 By default, GitLab manages an `authorized_keys` file, which contains all the
 public SSH keys for users allowed to access GitLab. However, to maintain a
-single source of truth, [Geo](../geo/replication/index.md) needs to be configured to perform SSH fingerprint
+single source of truth, [Geo](../geo/index.md) needs to be configured to perform SSH fingerprint
 lookups via database lookup.
 
-As part of [setting up Geo](../geo/replication/index.md#setup-instructions),
+As part of [setting up Geo](../geo/index.md#setup-instructions),
 you will be required to follow the steps outlined below for both the primary and
 secondary nodes, but note that the `Write to "authorized keys" file` checkbox
 only needs to be unchecked on the primary node since it will be reflected
@@ -73,16 +74,19 @@ Confirm that SSH is working by commenting out your user's key in the `authorized
 A successful pull would mean that GitLab was able to find the key in the database,
 since it is not present in the file anymore.
 
-NOTE: **Note:** For Omnibus Docker, `AuthorizedKeysCommand` is setup by default in
+NOTE: **Note:**
+For Omnibus Docker, `AuthorizedKeysCommand` is setup by default in
 GitLab 11.11 and later.
 
-NOTE: **Note:** For Installations from source, the command would be located at
+NOTE: **Note:**
+For Installations from source, the command would be located at
 `/home/git/gitlab-shell/bin/gitlab-shell-authorized-keys-check` if [the install from source](../../install/installation.md#install-gitlab-shell) instructions were followed.
 You might want to consider creating a wrapper script somewhere else since this command needs to be
 owned by `root` and not be writable by group or others. You could also consider changing the ownership of this command
 as required, but that might require temporary ownership changes during `gitlab-shell` upgrades.
 
-CAUTION: **Caution:** Do not disable writes until SSH is confirmed to be working
+CAUTION: **Caution:**
+Do not disable writes until SSH is confirmed to be working
 perfectly, because the file will quickly become out-of-date.
 
 In the case of lookup failures (which are common), the `authorized_keys`

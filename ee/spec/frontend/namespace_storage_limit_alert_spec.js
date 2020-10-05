@@ -30,7 +30,7 @@ describe('broadcast message on dismiss', () => {
     dismiss();
 
     expect(Cookies.set).toHaveBeenCalledWith('hide_storage_limit_alert_1_info', true, {
-      expires: 365,
+      expires: 30,
     });
   });
 });

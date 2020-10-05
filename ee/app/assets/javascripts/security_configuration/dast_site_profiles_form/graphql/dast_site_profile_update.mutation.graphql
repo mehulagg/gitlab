@@ -1,0 +1,13 @@
+mutation dastSiteProfileUpdate(
+  $id: DastSiteProfileID!
+  $fullPath: ID!
+  $profileName: String!
+  $targetUrl: String
+) {
+  dastSiteProfileUpdate(
+    input: { id: $id, fullPath: $fullPath, profileName: $profileName, targetUrl: $targetUrl }
+  ) {
+    id
+    errors
+  }
+}

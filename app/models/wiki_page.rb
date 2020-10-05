@@ -31,29 +31,6 @@ class WikiPage
 
   alias_method :==, :eql?
 
-  # Sorts and groups pages by directory.
-  #
-  # pages - an array of WikiPage objects.
-  #
-  # Returns an array of WikiPage and WikiDirectory objects. The entries are
-  # sorted by alphabetical order (directories and pages inside each directory).
-  # Pages at the root level come before everything.
-  def self.group_by_directory(pages)
-    return [] if pages.blank?
-
-    pages.each_with_object([]) do |page, grouped_pages|
-      next grouped_pages << page unless page.directory.present?
-
-      directory = grouped_pages.find do |obj|
-        obj.is_a?(WikiDirectory) && obj.slug == page.directory
-      end
-
-      next directory.pages << page if directory
-
-      grouped_pages << WikiDirectory.new(page.directory, [page])
-    end
-  end
-
   def self.unhyphenize(name)
     name.gsub(/-+/, ' ')
   end
@@ -65,6 +42,7 @@ class WikiPage
   validates :title, presence: true
   validates :content, presence: true
   validate :validate_path_limits, if: :title_changed?
+  validate :validate_content_size_limit, if: :content_changed?
 
   # The GitLab Wiki instance.
   attr_reader :wiki
@@ -97,6 +75,7 @@ class WikiPage
   def slug
     attributes[:slug].presence || wiki.wiki.preview_slug(title, format)
   end
+  alias_method :id, :slug # required to use build_stubbed
 
   alias_method :to_param, :slug
 
@@ -264,8 +243,8 @@ class WikiPage
     '../shared/wikis/wiki_page'
   end
 
-  def id
-    page.version.to_s
+  def sha
+    page.version&.sha
   end
 
   def title_changed?
@@ -279,6 +258,17 @@ class WikiPage
       new_title != old_title || (title.include?('/') && new_dir != old_dir)
     else
       title.present?
+    end
+  end
+
+  def content_changed?
+    if persisted?
+      # gollum-lib always converts CRLFs to LFs in Gollum::Wiki#normalize,
+      # so we need to do the same here.
+      # Also see https://gitlab.com/gitlab-org/gitlab/-/issues/21431
+      raw_content.delete("\r") != page&.text_data
+    else
+      raw_content.present?
     end
   end
 
@@ -390,5 +380,16 @@ class WikiPage
         dirname: dirname
       })
     end
+  end
+
+  def validate_content_size_limit
+    current_value = raw_content.to_s.bytesize
+    max_size = Gitlab::CurrentSettings.wiki_page_max_content_bytes
+    return if current_value <= max_size
+
+    errors.add(:content, _('is too long (%{current_value}). The maximum size is %{max_size}.') % {
+      current_value: ActiveSupport::NumberHelper.number_to_human_size(current_value),
+      max_size: ActiveSupport::NumberHelper.number_to_human_size(max_size)
+    })
   end
 end

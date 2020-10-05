@@ -5,18 +5,17 @@ module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab Geo Wiki HTTP push secondary' do
       let(:wiki_content) { 'This tests wiki pushes via HTTP to secondary.' }
-      let(:push_content_primary) { 'This is from the Geo wiki push to primary!' }
       let(:push_content_secondary) { 'This is from the Geo wiki push to secondary!' }
-      let(:project_name) { "geo-wiki-project-#{SecureRandom.hex(8)}" }
       let(:git_push_http_path_prefix) { '/-/push_from_secondary' }
 
       wiki = nil
+      project = nil
 
       before do
         QA::Flow::Login.while_signed_in(address: :geo_primary) do
           # Create a new project and wiki
           project = Resource::Project.fabricate_via_api! do |project|
-            project.name = project_name
+            project.name = 'geo-wiki-http2-project'
             project.description = 'Geo test project'
           end
 
@@ -35,13 +34,13 @@ module QA
           Resource::Repository::WikiPush.fabricate! do |push|
             push.wiki = wiki
             push.file_name = 'Readme.md'
-            push.file_content = push_content_primary
+            push.file_content = 'This is from the Geo wiki push to primary!'
             push.commit_message = 'Update Readme.md'
           end
         end
       end
 
-      it 'is redirected to the primary and ultimately replicated to the secondary' do
+      it 'is redirected to the primary and ultimately replicated to the secondary', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/693' do
         QA::Runtime::Logger.debug('Visiting the secondary geo node')
 
         QA::Flow::Login.while_signed_in(address: :geo_secondary) do
@@ -52,8 +51,8 @@ module QA
           Page::Main::Menu.perform(&:go_to_projects)
 
           Page::Dashboard::Projects.perform do |dashboard|
-            dashboard.wait_for_project_replication(project_name)
-            dashboard.go_to_project(project_name)
+            dashboard.wait_for_project_replication(project.name)
+            dashboard.go_to_project(project.name)
           end
 
           Page::Project::Menu.perform(&:click_wiki)

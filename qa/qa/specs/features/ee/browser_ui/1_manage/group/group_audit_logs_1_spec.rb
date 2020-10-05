@@ -25,14 +25,14 @@ module QA
     end
 
     describe 'Group' do
-      before(:all) do
-        @group = Resource::Group.fabricate_via_api! do |resource|
+      let(:group) do
+        Resource::Group.fabricate_via_api! do |resource|
           resource.path = "test-group-#{SecureRandom.hex(8)}"
         end
       end
 
       before do
-        @event_count = get_audit_event_count(@group)
+        @event_count = get_audit_event_count(group)
       end
 
       let(:project) do
@@ -42,9 +42,8 @@ module QA
       end
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
-      let(:group) { @group }
 
-      context 'Add group' do
+      context 'Add group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/733' do
         let(:group_name) { 'new group' }
 
         before do
@@ -53,22 +52,15 @@ module QA
           Resource::Group.fabricate_via_browser_ui! do |group|
             group.name = group_name
           end.visit!
-          Page::Group::Menu.perform(&:click_group_general_settings_item)
         end
 
-        it_behaves_like 'audit event', ['Added group'] do
-          let(:group) do
-            Resource::Group.fabricate_via_api! do |group|
-              group.name = group_name
-            end
-          end
-        end
+        it_behaves_like 'audit event', ['Added group']
       end
 
-      context 'Change repository size limit', :requires_admin do
+      context 'Change repository size limit', :requires_admin, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/731' do
         before do
           sign_in(as_admin: true)
-          @group.visit!
+          group.visit!
           Page::Group::Menu.perform(&:click_group_general_settings_item)
           Page::Group::Settings::General.perform do |settings|
             settings.set_repository_size_limit(100)
@@ -78,11 +70,11 @@ module QA
         it_behaves_like 'audit event', ['Changed repository size limit']
       end
 
-      context 'Update group name' do
+      context 'Update group name', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/732' do
         before do
           sign_in
-          @group.visit!
-          updated_group_name = "#{@group.path}-updated"
+          group.visit!
+          updated_group_name = "#{group.path}-updated"
           Page::Group::Menu.perform(&:click_group_general_settings_item)
           Page::Group::Settings::General.perform do |settings|
             settings.set_group_name(updated_group_name)
@@ -93,12 +85,12 @@ module QA
         it_behaves_like 'audit event', ['Changed name']
       end
 
-      context 'Add user, change access level, remove user' do
+      context 'Add user, change access level, remove user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/734' do
         before do
           sign_in
-          @group.visit!
+          group.visit!
           Page::Group::Menu.perform(&:click_group_members_item)
-          Page::Group::SubMenus::Members.perform do |members_page|
+          Page::Group::Members.perform do |members_page|
             members_page.add_member(user.username)
             members_page.update_access_level(user.username, "Developer")
             members_page.remove_member(user.username)
@@ -108,22 +100,22 @@ module QA
         it_behaves_like 'audit event', ['Added user access as Guest', 'Changed access level', 'Removed user access']
       end
 
-      context 'Add and remove project access' do
+      context 'Add and remove project access', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/735' do
         before do
           sign_in
           project.visit!
 
           Page::Project::Menu.perform(&:click_members)
           Page::Project::Members.perform do |members|
-            members.invite_group(@group.path)
+            members.invite_group(group.path)
           end
 
           Page::Project::Menu.perform(&:click_members)
           Page::Project::Members.perform do |members|
-            members.remove_group(@group.path)
+            members.remove_group(group.path)
           end
 
-          @group.visit!
+          group.visit!
         end
 
         it_behaves_like 'audit event', ['Added project access', 'Removed project access']

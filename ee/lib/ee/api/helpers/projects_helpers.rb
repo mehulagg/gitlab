@@ -32,7 +32,6 @@ module EE
             optional :only_mirror_protected_branches, type: Grape::API::Boolean, desc: 'Only mirror protected branches'
             optional :mirror_overwrites_diverged_branches, type: Grape::API::Boolean, desc: 'Pull mirror overwrites diverged branches'
             optional :import_url, type: String, desc: 'URL from which the project is imported'
-            optional :packages_enabled, type: Grape::API::Boolean, desc: 'Enable project packages feature'
             optional :fallback_approvals_required, type: Integer, desc: 'Overall approvals required when no rule is present'
           end
         end
@@ -50,7 +49,6 @@ module EE
               :approvals_before_merge,
               :external_authorization_classification_label,
               :import_url,
-              :packages_enabled,
               :fallback_approvals_required
             ]
           end

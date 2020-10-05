@@ -9,11 +9,17 @@ module SecurityHelper
       empty_state_svg_path: image_path('illustrations/operations-dashboard_empty.svg'),
       project_add_endpoint: security_projects_path,
       project_list_endpoint: security_projects_path,
-      vulnerable_projects_endpoint: security_vulnerable_projects_path,
-      vulnerabilities_endpoint: security_vulnerability_findings_path,
-      vulnerabilities_history_endpoint: history_security_vulnerability_findings_path,
+      instance_dashboard_settings_path: settings_security_dashboard_path,
       vulnerability_feedback_help_path: help_page_path('user/application_security/index', anchor: 'interacting-with-the-vulnerabilities'),
       vulnerabilities_export_endpoint: expose_path(api_v4_security_vulnerability_exports_path)
+    }
+  end
+
+  def security_dashboard_unavailable_view_data
+    {
+      empty_state_svg_path: image_path('illustrations/security-dashboard-empty-state.svg'),
+      dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
+      is_unavailable: "true"
     }
   end
 end

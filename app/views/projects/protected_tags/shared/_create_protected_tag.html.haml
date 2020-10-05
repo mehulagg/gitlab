@@ -1,4 +1,4 @@
-= form_for [@project.namespace.becomes(Namespace), @project, @protected_tag], html: { class: 'new-protected-tag js-new-protected-tag' } do |f|
+= form_for [@project, @protected_tag], html: { class: 'new-protected-tag js-new-protected-tag' } do |f|
   %input{ type: 'hidden', name: 'update_section', value: 'js-protected-tags-settings' }
   .card
     .card-header
@@ -25,4 +25,4 @@
             = yield :create_access_levels
 
     .card-footer
-      = f.submit 'Protect', class: 'btn-success btn', disabled: true, data: { qa_selector: 'protect_tag_button' }
+      = f.submit _('Protect'), class: 'btn-success btn', disabled: true, data: { qa_selector: 'protect_tag_button' }

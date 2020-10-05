@@ -39,9 +39,13 @@ module EE
       has_many :path_locks,               dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :vulnerability_feedback, foreign_key: :author_id, class_name: 'Vulnerabilities::Feedback'
       has_many :commented_vulnerability_feedback, foreign_key: :comment_author_id, class_name: 'Vulnerabilities::Feedback'
+      has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :user
 
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
+
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
       has_many :users_ops_dashboard_projects
       has_many :ops_dashboard_projects, through: :users_ops_dashboard_projects, source: :project
@@ -175,41 +179,21 @@ module EE
     end
 
     def available_custom_project_templates(search: nil, subgroup_id: nil, project_id: nil)
-      templates = ::Gitlab::CurrentSettings.available_custom_project_templates(subgroup_id)
-
-      params = {}
-
-      if project_id
-        templates = templates.where(id: project_id)
-      else
-        params = { search: search, sort: 'name_asc' }
-      end
-
-      ::ProjectsFinder.new(current_user: self,
-                           project_ids_relation: templates,
-                           params: params)
-                      .execute
+      CustomProjectTemplatesFinder
+        .new(current_user: self, search: search, subgroup_id: subgroup_id, project_id: project_id)
+        .execute
     end
 
     def available_subgroups_with_custom_project_templates(group_id = nil)
       found_groups = GroupsWithTemplatesFinder.new(group_id).execute
 
-      if ::Feature.enabled?(:optimized_groups_with_templates_finder)
-        GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
-          .execute
-          .where(id: found_groups.select(:custom_project_templates_group_id))
-          .preload(:projects)
-          .joins(:projects)
-          .reorder(nil)
-          .distinct
-      else
-        GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
-          .execute
-          .where(id: found_groups.select(:custom_project_templates_group_id))
-          .includes(:projects)
-          .reorder(nil)
-          .distinct
-      end
+      GroupsFinder.new(self, min_access_level: ::Gitlab::Access::DEVELOPER)
+        .execute
+        .where(id: found_groups.select(:custom_project_templates_group_id))
+        .preload(:projects)
+        .joins(:projects)
+        .reorder(nil)
+        .distinct
     end
 
     def roadmap_layout
@@ -250,18 +234,16 @@ module EE
         .any?
     end
 
-    def managed_free_namespaces
+    def manageable_groups_eligible_for_subscription
       manageable_groups
+        .where(parent_id: nil)
         .left_joins(:gitlab_subscription)
         .merge(GitlabSubscription.left_joins(:hosted_plan).where(plans: { name: [nil, *::Plan.default_plans] }))
         .order(:name)
     end
 
     def manageable_groups_eligible_for_trial
-      manageable_groups
-        .left_joins(:gitlab_subscription)
-        .where(gitlab_subscriptions: { trial: [nil, false] })
-        .order(:name)
+      manageable_groups.eligible_for_trial.order(:name)
     end
 
     override :has_current_license?
@@ -359,6 +341,12 @@ module EE
       end
     end
 
+    def gitlab_bot?
+      strong_memoize(:gitlab_bot) do
+        bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+      end
+    end
+
     def security_dashboard
       InstanceSecurityDashboard.new(self)
     end
@@ -366,6 +354,23 @@ module EE
     def owns_upgradeable_namespace?
       !owns_paid_namespace?(plans: [::Plan::GOLD]) &&
         owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
+    end
+
+    # Returns the groups a user has access to, either through a membership or a project authorization
+    override :authorized_groups
+    def authorized_groups
+      ::Group.unscoped do
+        ::Group.from_union([
+          groups,
+          available_minimal_access_groups,
+          authorized_projects.joins(:namespace).select('namespaces.*')
+        ])
+      end
+    end
+
+    def find_or_init_board_epic_preference(board_id:, epic_id:)
+      boards_epic_user_preferences.find_or_initialize_by(
+        board_id: board_id, epic_id: epic_id)
     end
 
     protected
@@ -397,6 +402,13 @@ module EE
       return true unless License.current.exclude_guests_from_active_count?
 
       highest_role > ::Gitlab::Access::GUEST
+    end
+
+    def available_minimal_access_groups
+      return ::Group.none unless License.feature_available?(:minimal_access_role)
+      return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
+      minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
     end
   end
 end

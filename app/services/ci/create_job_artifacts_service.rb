@@ -2,6 +2,8 @@
 
 module Ci
   class CreateJobArtifactsService < ::BaseService
+    include Gitlab::Utils::UsageData
+
     ArtifactsExistError = Class.new(StandardError)
 
     LSIF_ARTIFACT_TYPE = 'lsif'
@@ -22,7 +24,11 @@ module Ci
       return result unless result[:status] == :success
 
       headers = JobArtifactUploader.workhorse_authorize(has_length: false, maximum_size: max_size(artifact_type))
-      headers[:ProcessLsif] = true if lsif?(artifact_type)
+
+      if lsif?(artifact_type)
+        headers[:ProcessLsif] = true
+        track_usage_event('i_source_code_code_intelligence', project.id)
+      end
 
       success(headers: headers)
     end
@@ -46,22 +52,13 @@ module Ci
     attr_reader :job, :project
 
     def validate_requirements(artifact_type:, filesize:)
-      return forbidden_type_error(artifact_type) if forbidden_type?(artifact_type)
       return too_large_error if too_large?(artifact_type, filesize)
 
       success
     end
 
-    def forbidden_type?(type)
-      lsif?(type) && !code_navigation_enabled?
-    end
-
     def too_large?(type, size)
       size > max_size(type) if size
-    end
-
-    def code_navigation_enabled?
-      Feature.enabled?(:code_navigation, project, default_enabled: true)
     end
 
     def lsif?(type)

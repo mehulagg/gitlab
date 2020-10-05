@@ -1,6 +1,6 @@
 <script>
-import { __ } from '~/locale';
 import { GlIcon, GlPopover } from '@gitlab/ui';
+import { __ } from '~/locale';
 import CommonMixin from '../mixins/common_mixin';
 import QuartersPresetMixin from '../mixins/quarters_preset_mixin';
 import MonthsPresetMixin from '../mixins/months_preset_mixin';

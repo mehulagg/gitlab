@@ -1,13 +1,22 @@
 import { GlIntersectionObserver } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { TEST_HOST } from 'helpers/test_constants';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import axios from '~/lib/utils/axios_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
 import '~/behaviors/markdown/render_gfm';
 import IssuableApp from '~/issue_show/components/app.vue';
 import eventHub from '~/issue_show/event_hub';
-import { initialRequest, secondRequest } from '../mock_data';
+import {
+  appProps,
+  initialRequest,
+  publishedIncidentUrl,
+  secondRequest,
+  zoomMeetingUrl,
+} from '../mock_data';
+import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
+import DescriptionComponent from '~/issue_show/components/description.vue';
+import PinnedLinks from '~/issue_show/components/pinned_links.vue';
 
 function formatText(text) {
   return text.trim().replace(/\s\s+/g, ' ');
@@ -18,15 +27,29 @@ jest.mock('~/issue_show/event_hub');
 
 const REALTIME_REQUEST_STACK = [initialRequest, secondRequest];
 
-const zoomMeetingUrl = 'https://gitlab.zoom.us/j/95919234811';
-const publishedIncidentUrl = 'https://status.com/';
-
 describe('Issuable output', () => {
+  useMockIntersectionObserver();
+
   let mock;
   let realtimeRequestCount = 0;
   let wrapper;
 
   const findStickyHeader = () => wrapper.find('[data-testid="issue-sticky-header"]');
+
+  const mountComponent = (props = {}, options = {}) => {
+    wrapper = mount(IssuableApp, {
+      propsData: { ...appProps, ...props },
+      provide: {
+        fullPath: 'gitlab-org/incidents',
+        iid: '19',
+      },
+      stubs: {
+        HighlightBar: true,
+        IncidentTabs: true,
+      },
+      ...options,
+    });
+  };
 
   beforeEach(() => {
     setFixtures(`
@@ -45,11 +68,6 @@ describe('Issuable output', () => {
       </div>
     `);
 
-    window.IntersectionObserver = class {
-      disconnect = jest.fn();
-      observe = jest.fn();
-    };
-
     mock = new MockAdapter(axios);
     mock
       .onGet('/gitlab-org/gitlab-shell/-/issues/9/realtime_changes/realtime_changes')
@@ -59,32 +77,12 @@ describe('Issuable output', () => {
         return res;
       });
 
-    wrapper = mount(IssuableApp, {
-      propsData: {
-        canUpdate: true,
-        canDestroy: true,
-        endpoint: '/gitlab-org/gitlab-shell/-/issues/9/realtime_changes',
-        updateEndpoint: TEST_HOST,
-        issuableRef: '#1',
-        issuableStatus: 'opened',
-        initialTitleHtml: '',
-        initialTitleText: '',
-        initialDescriptionHtml: 'test',
-        initialDescriptionText: 'test',
-        lockVersion: 1,
-        markdownPreviewPath: '/',
-        markdownDocsPath: '/',
-        projectNamespace: '/',
-        projectPath: '/',
-        issuableTemplateNamesPath: '/issuable-templates-path',
-        zoomMeetingUrl,
-        publishedIncidentUrl,
-      },
-    });
+    mountComponent();
+
+    jest.advanceTimersByTime(2);
   });
 
   afterEach(() => {
-    delete window.IntersectionObserver;
     mock.restore();
     realtimeRequestCount = 0;
 
@@ -137,7 +135,7 @@ describe('Issuable output', () => {
     wrapper.vm.showForm = true;
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.contains('.markdown-selector')).toBe(true);
+      expect(wrapper.find('.markdown-selector').exists()).toBe(true);
     });
   });
 
@@ -146,7 +144,7 @@ describe('Issuable output', () => {
     wrapper.setProps({ canUpdate: false });
 
     return wrapper.vm.$nextTick().then(() => {
-      expect(wrapper.contains('.markdown-selector')).toBe(false);
+      expect(wrapper.find('.markdown-selector').exists()).toBe(false);
     });
   });
 
@@ -406,7 +404,7 @@ describe('Issuable output', () => {
         .then(() => {
           expect(wrapper.vm.formState.lockedWarningVisible).toEqual(true);
           expect(wrapper.vm.formState.lock_version).toEqual(1);
-          expect(wrapper.contains('.alert')).toBe(true);
+          expect(wrapper.find('.alert').exists()).toBe(true);
         });
     });
   });
@@ -444,14 +442,14 @@ describe('Issuable output', () => {
 
   describe('show inline edit button', () => {
     it('should not render by default', () => {
-      expect(wrapper.contains('.btn-edit')).toBe(true);
+      expect(wrapper.find('.btn-edit').exists()).toBe(true);
     });
 
     it('should render if showInlineEditButton', () => {
       wrapper.setProps({ showInlineEditButton: true });
 
       return wrapper.vm.$nextTick(() => {
-        expect(wrapper.contains('.btn-edit')).toBe(true);
+        expect(wrapper.find('.btn-edit').exists()).toBe(true);
       });
     });
   });
@@ -534,7 +532,7 @@ describe('Issuable output', () => {
   describe('sticky header', () => {
     describe('when title is in view', () => {
       it('is not shown', () => {
-        expect(wrapper.contains('.issue-sticky-header')).toBe(false);
+        expect(wrapper.find('.issue-sticky-header').exists()).toBe(false);
       });
     });
 
@@ -562,6 +560,61 @@ describe('Issuable output', () => {
         return wrapper.vm.$nextTick(() => {
           expect(findStickyHeader().text()).toContain('Closed');
         });
+      });
+    });
+  });
+
+  describe('Composable description component', () => {
+    const findIncidentTabs = () => wrapper.find(IncidentTabs);
+    const findDescriptionComponent = () => wrapper.find(DescriptionComponent);
+    const findPinnedLinks = () => wrapper.find(PinnedLinks);
+    const borderClass = 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-mb-6';
+
+    describe('when using description component', () => {
+      it('renders the description component', () => {
+        expect(findDescriptionComponent().exists()).toBe(true);
+      });
+
+      it('does not render incident tabs', () => {
+        expect(findIncidentTabs().exists()).toBe(false);
+      });
+
+      it('adds a border below the header', () => {
+        expect(findPinnedLinks().attributes('class')).toContain(borderClass);
+      });
+    });
+
+    describe('when using incident tabs description wrapper', () => {
+      beforeEach(() => {
+        mountComponent(
+          {
+            descriptionComponent: IncidentTabs,
+            showTitleBorder: false,
+          },
+          {
+            mocks: {
+              $apollo: {
+                queries: {
+                  alert: {
+                    loading: false,
+                  },
+                },
+              },
+            },
+          },
+        );
+      });
+
+      it('renders the description component', () => {
+        expect(findDescriptionComponent().exists()).toBe(true);
+      });
+
+      it('renders incident tabs', () => {
+        expect(findIncidentTabs().exists()).toBe(true);
+      });
+
+      it('does not add a border below the header', () => {
+        expect(findPinnedLinks().attributes('class')).not.toContain(borderClass);
       });
     });
   });

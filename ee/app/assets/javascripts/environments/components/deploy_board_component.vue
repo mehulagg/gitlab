@@ -10,9 +10,14 @@
  * [Mockup](https://gitlab.com/gitlab-org/gitlab-foss/uploads/2f655655c0eadf655d0ae7467b53002a/environments__deploy-graphic.png)
  */
 import { isEmpty } from 'lodash';
-import { GlLoadingIcon, GlLink, GlTooltipDirective } from '@gitlab/ui';
+import {
+  GlLoadingIcon,
+  GlLink,
+  GlTooltipDirective,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import deployBoardSvg from 'ee_empty_states/icons/_deploy_board.svg';
-import { n__, s__, sprintf } from '~/locale';
+import { n__ } from '~/locale';
 import { STATUS_MAP, CANARY_STATUS } from '../constants';
 
 export default {
@@ -23,6 +28,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   props: {
     deployBoardData: {
@@ -47,26 +53,10 @@ export default {
       required: false,
       default: '',
     },
-    hasLegacyAppLabel: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     canRenderDeployBoard() {
       return !this.isEmpty && !isEmpty(this.deployBoardData);
-    },
-    legacyLabelWarningMessage() {
-      return sprintf(
-        s__(
-          'DeployBoard|Matching on the %{appLabel} label has been removed for deploy boards. To see all instances on your board, you must update your chart and redeploy.',
-        ),
-        {
-          appLabel: '<code>app</code>',
-        },
-        false,
-      );
     },
     canRenderEmptyState() {
       return this.isEmpty;
@@ -111,13 +101,6 @@ export default {
   <div class="js-deploy-board deploy-board">
     <gl-loading-icon v-if="isLoading" class="loading-icon" />
     <template v-else>
-      <div v-if="hasLegacyAppLabel" class="bs-callout bs-callout-warning mb-0 mt-0">
-        <span v-html="legacyLabelWarningMessage"></span>
-        <gl-link target="_blank" :href="deployBoardsHelpPath">
-          <strong>{{ __('More Information') }}</strong>
-        </gl-link>
-      </div>
-
       <div v-if="canRenderDeployBoard" class="deploy-board-information p-3">
         <div class="deploy-board-information">
           <section class="deploy-board-status">
@@ -180,7 +163,7 @@ export default {
       </div>
 
       <div v-if="canRenderEmptyState" class="deploy-board-empty">
-        <section class="deploy-board-empty-state-svg" v-html="deployBoardSvg"></section>
+        <section v-safe-html="deployBoardSvg" class="deploy-board-empty-state-svg"></section>
 
         <section class="deploy-board-empty-state-text">
           <span class="deploy-board-empty-state-title d-flex">{{

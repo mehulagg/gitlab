@@ -1,8 +1,9 @@
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
 import { find } from 'lodash';
-import AccessDropdown from 'ee/projects/settings/access_dropdown';
+import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { s__ } from '~/locale';
 import { ACCESS_LEVELS, LEVEL_TYPES } from './constants';
 

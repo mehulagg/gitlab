@@ -28,6 +28,18 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryUpdatedEvent, :clean_gi
       expect { subject.process }.to change(Geo::ProjectRegistry, :count).by(1)
     end
 
+    context 'when outside selective sync' do
+      before do
+        selective_sync_secondary = create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: ['non-existent'])
+
+        stub_current_geo_node(selective_sync_secondary)
+      end
+
+      it 'does not create a new project registry' do
+        expect { subject.process }.not_to change(Geo::ProjectRegistry, :count)
+      end
+    end
+
     context 'when we have an event source' do
       before do
         repository_updated_event.update!(source: event_source)

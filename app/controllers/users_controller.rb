@@ -21,6 +21,8 @@ class UsersController < ApplicationController
   before_action :authorize_read_user_profile!,
                 only: [:calendar, :calendar_activities, :groups, :projects, :contributed_projects, :starred_projects, :snippets]
 
+  feature_category :users
+
   def show
     respond_to do |format|
       format.html
@@ -35,12 +37,6 @@ class UsersController < ApplicationController
         pager_json("events/_events", @events.count, events: @events)
       end
     end
-  end
-
-  # Get all keys of a user(params[:username]) in a text format
-  # Helpful for sysadmins to put in respective servers
-  def ssh_keys
-    render plain: user.all_ssh_keys.join("\n")
   end
 
   def activity
@@ -112,7 +108,7 @@ class UsersController < ApplicationController
 
   def calendar_activities
     @calendar_date = Date.parse(params[:date]) rescue Date.today
-    @events = contributions_calendar.events_by_date(@calendar_date)
+    @events = contributions_calendar.events_by_date(@calendar_date).map(&:present)
 
     render 'calendar_activities', layout: false
   end

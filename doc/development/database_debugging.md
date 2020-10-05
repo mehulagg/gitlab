@@ -1,4 +1,10 @@
-# Database Debugging and Troubleshooting
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
+# Troubleshooting and Debugging Database
 
 This section is to help give some copy-pasta you can use as a reference when you
 run into some head-banging database problems.
@@ -11,7 +17,7 @@ Available `RAILS_ENV`:
 - `development` (this is your main GDK db).
 - `test` (used for tests like RSpec).
 
-## Nuke everything and start over
+## Delete everything and start over
 
 If you just want to delete everything and start over with an empty DB (approximately 1 minute):
 
@@ -19,7 +25,7 @@ If you just want to delete everything and start over with an empty DB (approxima
 bundle exec rake db:reset RAILS_ENV=development
 ```
 
-If you just want to delete everything and start over with dummy data (approximately 4 minutes). This
+If you just want to delete everything and start over with sample data (approximately 4 minutes). This
 also does `db:reset` and runs DB-specific migrations:
 
 ```shell
@@ -72,7 +78,7 @@ Use these instructions for exploring the GitLab database while developing with t
    1. **Port number to connect to**: `5432` (default).
    1. <!-- vale gitlab.Spelling = NO -->
       **Use an ssl connection?**
-      <!-- vale gitlab.rulename = NO --> This depends on your installation. Options are:
+      <!-- vale gitlab.Spelling = YES --> This depends on your installation. Options are:
       - **Use Secure Connection**
       - **Standard Connection** (default)
    1. **(Optional) The database to connect to**: `gitlabhq_development`.

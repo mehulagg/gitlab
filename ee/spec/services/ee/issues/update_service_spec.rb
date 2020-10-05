@@ -1,19 +1,24 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe Issues::UpdateService do
-  let(:group) { create(:group) }
+  let_it_be(:group) { create(:group) }
   let(:project) { create(:project, group: group) }
   let(:issue) { create(:issue, project: project) }
   let(:user) { issue.author }
 
   describe 'execute' do
+    before do
+      project.add_reporter(user)
+    end
+
     def update_issue(opts)
       described_class.new(project, user, opts).execute(issue)
     end
 
     context 'refresh epic dates' do
-      let(:epic) { create(:epic) }
+      let_it_be(:epic) { create(:epic) }
       let(:issue) { create(:issue, epic: epic, project: project) }
 
       context 'updating milestone' do
@@ -119,72 +124,89 @@ RSpec.describe Issues::UpdateService do
         group.add_maintainer(user)
       end
 
-      context 'group iterations' do
+      RSpec.shared_examples 'creates iteration resource event' do
         it 'creates a system note' do
-          group_iteration = create(:iteration, group: group)
-
           expect do
-            update_issue(iteration: group_iteration)
-          end.to change { Note.system.count }.by(1)
+            update_issue(iteration: iteration)
+          end.not_to change { Note.system.count }
+        end
+
+        it 'does not create a iteration change event' do
+          expect do
+            update_issue(iteration: iteration)
+          end.to change { ResourceIterationEvent.count }.by(1)
         end
       end
 
-      context 'project iterations' do
-        it 'creates a system note' do
-          project_iteration = create(:iteration, project: project)
+      context 'group iterations' do
+        let(:iteration) { create(:iteration, group: group) }
 
-          expect do
-            update_issue(iteration: project_iteration)
-          end.to change { Note.system.count }.by(1)
-        end
+        it_behaves_like 'creates iteration resource event'
+      end
+
+      context 'project iterations' do
+        let(:iteration) { create(:iteration, :skip_project_validation, project: project) }
+
+        it_behaves_like 'creates iteration resource event'
       end
     end
 
     context 'assigning epic' do
       before do
         stub_licensed_features(epics: true)
-        group.add_maintainer(user)
       end
 
       let(:epic) { create(:epic, group: group) }
 
-      context 'when issue does not belong to an epic yet' do
-        it 'assigns an issue to the provided epic' do
-          expect { update_issue(epic: epic) }.to change { issue.reload.epic }.from(nil).to(epic)
-        end
+      subject { update_issue(epic: epic) }
 
-        it 'creates system notes for the epic and the issue' do
-          expect { update_issue(epic: epic) }.to change { Note.count }.from(0).to(2)
-
-          epic_note = Note.find_by(noteable_id: epic.id, noteable_type: 'Epic')
-          issue_note = Note.find_by(noteable_id: issue.id, noteable_type: 'Issue')
-
-          expect(epic_note.system_note_metadata.action).to eq('epic_issue_added')
-          expect(issue_note.system_note_metadata.action).to eq('issue_added_to_epic')
+      context 'when a user does not have permissions to assign an epic' do
+        it 'raises an exception' do
+          expect { subject }.to raise_error(Gitlab::Access::AccessDeniedError)
         end
       end
 
-      context 'when issue does belongs to another epic' do
-        let(:epic2) { create(:epic, group: group) }
-
+      context 'when a user has permissions to assign an epic' do
         before do
-          issue.update!(epic: epic2)
+          group.add_maintainer(user)
         end
 
-        it 'assigns the issue passed to the provided epic' do
-          expect { update_issue(epic: epic) }.to change { issue.reload.epic }.from(epic2).to(epic)
+        context 'when issue does not belong to an epic yet' do
+          it 'assigns an issue to the provided epic' do
+            expect { update_issue(epic: epic) }.to change { issue.reload.epic }.from(nil).to(epic)
+          end
+
+          it 'calls EpicIssues::CreateService' do
+            link_sevice = double
+            expect(EpicIssues::CreateService).to receive(:new)
+              .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
+              .and_return(link_sevice)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
         end
 
-        it 'creates system notes for the epic and the issue' do
-          expect { update_issue(epic: epic) }.to change { Note.count }.from(0).to(3)
+        context 'when issue belongs to another epic' do
+          let(:epic2) { create(:epic, group: group) }
 
-          epic_note = Note.find_by(noteable_id: epic.id, noteable_type: 'Epic')
-          epic2_note = Note.find_by(noteable_id: epic2.id, noteable_type: 'Epic')
-          issue_note = Note.find_by(noteable_id: issue.id, noteable_type: 'Issue')
+          before do
+            issue.update!(epic: epic2)
+          end
 
-          expect(epic_note.system_note_metadata.action).to eq('epic_issue_moved')
-          expect(epic2_note.system_note_metadata.action).to eq('epic_issue_moved')
-          expect(issue_note.system_note_metadata.action).to eq('issue_changed_epic')
+          it 'assigns the issue passed to the provided epic' do
+            expect { subject }.to change { issue.reload.epic }.from(epic2).to(epic)
+          end
+
+          it 'calls EpicIssues::CreateService' do
+            link_sevice = double
+            expect(EpicIssues::CreateService).to receive(:new)
+              .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
+              .and_return(link_sevice)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
         end
       end
     end
@@ -192,34 +214,38 @@ RSpec.describe Issues::UpdateService do
     context 'removing epic' do
       before do
         stub_licensed_features(epics: true)
-        group.add_maintainer(user)
       end
 
       let(:epic) { create(:epic, group: group) }
 
-      context 'when issue does not belong to an epic yet' do
-        it 'does not do anything' do
-          expect { update_issue(epic: nil) }.not_to change { issue.reload.epic }
-        end
-      end
+      subject { update_issue(epic: nil) }
 
-      context 'when issue belongs to an epic' do
+      context 'when a user has permissions to assign an epic' do
         before do
-          issue.update!(epic: epic)
+          group.add_maintainer(user)
         end
 
-        it 'assigns a new issue to the provided epic' do
-          expect { update_issue(epic: nil) }.to change { issue.reload.epic }.from(epic).to(nil)
+        context 'when issue does not belong to an epic yet' do
+          it 'does not do anything' do
+            expect { subject }.not_to change { issue.reload.epic }
+          end
         end
 
-        it 'creates system notes for the epic and the issue' do
-          expect { update_issue(epic: nil) }.to change { Note.count }.from(0).to(2)
+        context 'when issue belongs to an epic' do
+          let!(:epic_issue) { create(:epic_issue, issue: issue, epic: epic)}
 
-          epic_note = Note.find_by(noteable_id: epic.id, noteable_type: 'Epic')
-          issue_note = Note.find_by(noteable_id: issue.id, noteable_type: 'Issue')
+          it 'unassigns the epic' do
+            expect { subject }.to change { issue.reload.epic }.from(epic).to(nil)
+          end
 
-          expect(epic_note.system_note_metadata.action).to eq('epic_issue_removed')
-          expect(issue_note.system_note_metadata.action).to eq('issue_removed_from_epic')
+          it 'calls EpicIssues::DestroyService' do
+            link_sevice = double
+            expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
+              .and_return(link_sevice)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
         end
       end
     end
@@ -232,6 +258,32 @@ RSpec.describe Issues::UpdateService do
     it_behaves_like 'issue with epic_id parameter' do
       let(:execute) { described_class.new(project, user, params).execute(issue) }
       let(:epic) { create(:epic, group: group) }
+    end
+
+    context 'when epic_id is nil' do
+      before do
+        stub_licensed_features(epics: true)
+        group.add_maintainer(user)
+      end
+
+      let(:epic) { create(:epic, group: group) }
+      let!(:epic_issue) { create(:epic_issue, epic: epic, issue: issue) }
+      let(:params) { { epic_id: nil } }
+
+      subject { update_issue(params) }
+
+      it 'removes epic issue link' do
+        expect { subject }.to change { issue.reload.epic }.from(epic).to(nil)
+      end
+
+      it 'calls EpicIssues::DestroyService' do
+        link_sevice = double
+        expect(EpicIssues::DestroyService).to receive(:new).with(epic_issue, user)
+          .and_return(link_sevice)
+        expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+        subject
+      end
     end
 
     context 'promoting to epic' do

@@ -1,9 +1,10 @@
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import AuditEventsFilter from './audit_events_filter.vue';
 import DateRangeField from './date_range_field.vue';
 import SortingField from './sorting_field.vue';
 import AuditEventsTable from './audit_events_table.vue';
+import AuditEventsExportButton from './audit_events_export_button.vue';
 
 export default {
   components: {
@@ -11,6 +12,7 @@ export default {
     DateRangeField,
     SortingField,
     AuditEventsTable,
+    AuditEventsExportButton,
   },
   props: {
     events: {
@@ -27,19 +29,21 @@ export default {
       type: Array,
       required: true,
     },
-    filterQaSelector: {
+    exportUrl: {
       type: String,
       required: false,
-      default: undefined,
-    },
-    tableQaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
+      default: '',
     },
   },
   computed: {
     ...mapState(['filterValue', 'startDate', 'endDate', 'sortBy']),
+    ...mapGetters(['buildExportHref']),
+    exportHref() {
+      return this.buildExportHref(this.exportUrl);
+    },
+    hasExportUrl() {
+      return this.exportUrl.length;
+    },
   },
   methods: {
     ...mapActions(['setDateRange', 'setFilterValue', 'setSortBy', 'searchForAuditEvents']),
@@ -49,20 +53,24 @@ export default {
 
 <template>
   <div>
-    <div class="row-content-block second-block pb-0">
-      <div class="d-flex justify-content-between audit-controls row">
-        <div class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8">
+    <header>
+      <div class="gl-my-5 gl-display-flex gl-flex-direction-row gl-justify-content-end">
+        <audit-events-export-button v-if="hasExportUrl" :export-href="exportHref" />
+      </div>
+    </header>
+    <div class="row-content-block second-block gl-pb-0">
+      <div class="gl-display-flex gl-justify-content-space-between audit-controls gl-flex-wrap">
+        <div class="gl-mb-5 gl-w-full">
           <audit-events-filter
             :filter-token-options="filterTokenOptions"
-            :qa-selector="filterQaSelector"
             :value="filterValue"
             @selected="setFilterValue"
             @submit="searchForAuditEvents"
           />
         </div>
-        <div class="d-flex col-lg-auto flex-wrap pl-lg-0">
+        <div class="gl-display-flex gl-flex-wrap gl-w-full">
           <div
-            class="audit-controls d-flex align-items-lg-center flex-column flex-lg-row col-lg-auto px-0"
+            class="audit-controls gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
           >
             <date-range-field
               :start-date="startDate"
@@ -74,10 +82,6 @@ export default {
         </div>
       </div>
     </div>
-    <audit-events-table
-      :events="events"
-      :is-last-page="isLastPage"
-      :qa-selector="tableQaSelector"
-    />
+    <audit-events-table :events="events" :is-last-page="isLastPage" />
   </div>
 </template>

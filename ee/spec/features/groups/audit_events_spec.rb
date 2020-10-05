@@ -8,6 +8,8 @@ RSpec.describe 'Groups > Audit Events', :js do
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     group.add_owner(user)
     group.add_developer(alex)
     sign_in(user)
@@ -67,7 +69,7 @@ RSpec.describe 'Groups > Audit Events', :js do
   describe 'filter by date' do
     let!(:audit_event_1) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 5.days.ago) }
     let!(:audit_event_2) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 3.days.ago) }
-    let!(:audit_event_3) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: 1.day.ago) }
+    let!(:audit_event_3) { create(:group_audit_event, entity_type: 'Group', entity_id: group.id, created_at: Date.current) }
     let!(:events_path) { :group_audit_events_path }
     let!(:entity) { group }
 

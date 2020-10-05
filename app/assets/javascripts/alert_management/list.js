@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
 import { defaultDataIdFromObject } from 'apollo-cache-inmemory';
+import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import AlertManagementList from './components/alert_management_list_wrapper.vue';
 
@@ -16,11 +16,14 @@ export default () => {
     enableAlertManagementPath,
     emptyAlertSvgPath,
     populatingAlertsHelpUrl,
+    alertsHelpUrl,
+    opsgenieMvcTargetUrl,
   } = domEl.dataset;
-  let { alertManagementEnabled, userCanEnableAlertManagement } = domEl.dataset;
+  let { alertManagementEnabled, userCanEnableAlertManagement, opsgenieMvcEnabled } = domEl.dataset;
 
   alertManagementEnabled = parseBoolean(alertManagementEnabled);
   userCanEnableAlertManagement = parseBoolean(userCanEnableAlertManagement);
+  opsgenieMvcEnabled = parseBoolean(opsgenieMvcEnabled);
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(
@@ -39,6 +42,12 @@ export default () => {
     ),
   });
 
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      alertsHelpUrl,
+    },
+  });
+
   return new Vue({
     el: selector,
     apolloProvider,
@@ -54,6 +63,8 @@ export default () => {
           emptyAlertSvgPath,
           alertManagementEnabled,
           userCanEnableAlertManagement,
+          opsgenieMvcTargetUrl,
+          opsgenieMvcEnabled,
         },
       });
     },

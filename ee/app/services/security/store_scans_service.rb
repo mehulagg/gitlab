@@ -7,22 +7,30 @@ module Security
     end
 
     def execute
-      return if @build.canceled? || @build.skipped?
+      return if canceled_or_skipped?
 
-      security_reports = @build.job_artifacts.security_reports
+      security_reports.each { |_, report| store_scan_for(report) }
+    end
 
-      scan_params = security_reports.map do |job_artifact|
-        {
-          build: @build,
-          scan_type: job_artifact.file_type,
-          scanned_resources_count: Gitlab::Ci::Parsers::Security::ScannedResources.new.scanned_resources_count(job_artifact)
-        }
+    private
+
+    attr_reader :build
+
+    def canceled_or_skipped?
+      build.canceled? || build.skipped?
+    end
+
+    def security_reports
+      ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+        build.collect_security_reports!(security_reports)
       end
+    end
 
+    def store_scan_for(report)
       ActiveRecord::Base.transaction do
-        scan_params.each do |param|
-          Security::Scan.safe_find_or_create_by!(param)
-        end
+        security_scan = Security::Scan.safe_find_or_create_by!(build: build, scan_type: report.type)
+
+        StoreFindingsMetadataService.execute(security_scan, report)
       end
     end
   end

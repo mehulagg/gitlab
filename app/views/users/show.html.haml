@@ -2,7 +2,7 @@
 - @hide_breadcrumbs = true
 - @no_container = true
 - page_title       @user.blocked? ? s_('UserProfile|Blocked user') : @user.name
-- page_description @user.bio
+- page_description @user.bio_html
 - header_title     @user.name, user_path(@user)
 - link_classes = "flex-grow-1 mx-1 "
 
@@ -13,24 +13,24 @@
   .cover-block.user-cover-block{ class: [('border-bottom' if profile_tabs.empty?)] }
     = render layout: 'users/cover_controls' do
       - if @user == current_user
-        = link_to profile_path, class: link_classes + 'btn btn-default has-tooltip', title: s_('UserProfile|Edit profile'), 'aria-label': 'Edit profile' do
-          = icon('pencil')
+        = link_to profile_path, class: link_classes + 'btn gl-button btn-default has-tooltip', title: s_('UserProfile|Edit profile'), 'aria-label': 'Edit profile' do
+          = sprite_icon('pencil')
       - elsif current_user
         - if @user.abuse_report
-          %button{ class: link_classes + 'btn btn-danger mr-1', title: s_('UserProfile|Already reported for abuse'),
-            data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } }
-            = icon('exclamation-circle')
+          %button{ class: link_classes + 'btn gl-button btn-danger', title: s_('UserProfile|Already reported for abuse'),
+            data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } }>
+            = sprite_icon('error')
         - else
-          = link_to new_abuse_report_path(user_id: @user.id, ref_url: request.referrer), class: link_classes + 'btn',
+          = link_to new_abuse_report_path(user_id: @user.id, ref_url: request.referrer), class: link_classes + 'btn gl-button',
             title: s_('UserProfile|Report abuse'), data: { toggle: 'tooltip', placement: 'bottom', container: 'body' } do
-            = icon('exclamation-circle')
+            = sprite_icon('error')
       - if can?(current_user, :read_user_profile, @user)
-        = link_to user_path(@user, rss_url_options), class: link_classes + 'btn btn-default has-tooltip', title: s_('UserProfile|Subscribe'), 'aria-label': 'Subscribe' do
-          = icon('rss')
+        = link_to user_path(@user, rss_url_options), class: link_classes + 'btn gl-button btn-svg btn-default has-tooltip', title: s_('UserProfile|Subscribe'), 'aria-label': 'Subscribe' do
+          = sprite_icon('rss', css_class: 'qa-rss-icon')
       - if current_user && current_user.admin?
-        = link_to [:admin, @user], class: link_classes + 'btn btn-default', title: s_('UserProfile|View user in admin area'),
+        = link_to [:admin, @user], class: link_classes + 'btn gl-button btn-default', title: s_('UserProfile|View user in admin area'),
           data: {toggle: 'tooltip', placement: 'bottom', container: 'body'} do
-          = icon('users')
+          = sprite_icon('user')
 
     .profile-header{ class: [('with-no-profile-tabs' if profile_tabs.empty?)] }
       .avatar-holder
@@ -55,12 +55,12 @@
           .cover-desc.cgray.mb-1.mb-sm-2
             - unless @user.location.blank?
               .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline.mb-1.mb-sm-0
-                = sprite_icon('location', size: 16, css_class: 'vertical-align-sub fgray')
+                = sprite_icon('location', css_class: 'vertical-align-sub fgray')
                 %span.vertical-align-middle
                   = @user.location
             - unless work_information(@user).blank?
               .profile-link-holder.middle-dot-divider-sm.d-block.d-sm-inline
-                = sprite_icon('work', size: 16, css_class: 'vertical-align-middle fgray')
+                = sprite_icon('work', css_class: 'vertical-align-middle fgray')
                 %span.vertical-align-middle
                   = work_information(@user)
           .cover-desc.cgray.mb-1.mb-sm-2
@@ -84,7 +84,7 @@
                 = link_to @user.public_email, "mailto:#{@user.public_email}", class: 'text-link'
         - if @user.bio.present?
           .cover-desc.cgray
-            %p.profile-user-bio
+            .profile-user-bio
               = markdown(@user.bio_html)
 
 
@@ -160,16 +160,12 @@
     .loading.hide
       .spinner.spinner-md
 
-  - if profile_tabs.empty?
-    .row
-      .col-12
-        .svg-content
-          = image_tag 'illustrations/profile_private_mode.svg'
-      .col-12.text-center
-        .text-content
-          %h4
-            - if @user.blocked?
-              = s_('UserProfile|This user is blocked')
-            - else
-              = s_('UserProfile|This user has a private profile')
-
+    - if profile_tabs.empty?
+      .svg-content
+        = image_tag 'illustrations/profile_private_mode.svg'
+      .text-content.text-center
+        %h4
+          - if @user.blocked?
+            = s_('UserProfile|This user is blocked')
+          - else
+            = s_('UserProfile|This user has a private profile')

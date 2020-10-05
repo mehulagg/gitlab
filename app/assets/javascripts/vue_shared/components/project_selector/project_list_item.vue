@@ -1,18 +1,14 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlButton, GlIcon } from '@gitlab/ui';
 import { isString } from 'lodash';
-import Icon from '~/vue_shared/components/icon.vue';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import highlight from '~/lib/utils/highlight';
 import { truncateNamespace } from '~/lib/utils/text_utility';
 
 export default {
   name: 'ProjectListItem',
-  components: {
-    Icon,
-    ProjectAvatar,
-    GlDeprecatedButton,
-  },
+  components: { GlIcon, ProjectAvatar, GlButton },
   props: {
     project: {
       type: Object,
@@ -22,15 +18,8 @@ export default {
         isString(p.name) &&
         (isString(p.name_with_namespace) || isString(p.nameWithNamespace)),
     },
-    selected: {
-      type: Boolean,
-      required: true,
-    },
-    matcher: {
-      type: String,
-      required: false,
-      default: '',
-    },
+    selected: { type: Boolean, required: true },
+    matcher: { type: String, required: false, default: '' },
   },
   computed: {
     projectNameWithNamespace() {
@@ -51,17 +40,16 @@ export default {
 };
 </script>
 <template>
-  <gl-deprecated-button
-    class="d-flex align-items-center btn pt-1 pb-1 border-0 project-list-item"
+  <gl-button
+    category="tertiary"
+    class="gl-display-flex gl-align-items-center gl-justify-content-start! gl-mb-2 gl-w-full"
     @click="onClick"
   >
-    <icon
-      class="prepend-left-10 append-right-10 flex-shrink-0 position-top-0 js-selected-icon"
-      :class="{ 'js-selected visible': selected, 'js-unselected invisible': !selected }"
-      name="mobile-issue-close"
-    />
-    <project-avatar class="flex-shrink-0 js-project-avatar" :project="project" :size="32" />
-    <div class="d-flex flex-wrap project-namespace-name-container">
+    <div
+      class="gl-display-flex gl-align-items-center gl-flex-wrap project-namespace-name-container"
+    >
+      <gl-icon v-if="selected" class="js-selected-icon" name="mobile-issue-close" />
+      <project-avatar class="gl-flex-shrink-0 js-project-avatar" :project="project" :size="32" />
       <div
         v-if="truncatedNamespace"
         :title="projectNameWithNamespace"
@@ -76,5 +64,5 @@ export default {
         v-html="highlightedProjectName"
       ></div>
     </div>
-  </gl-deprecated-button>
+  </gl-button>
 </template>

@@ -360,12 +360,12 @@ POST /projects/:id/releases
 | `name`             | string          | no                          | The release name.                                                                                                                |
 | `tag_name`         | string          | yes                         | The tag where the release will be created from.                                                                                  |
 | `description`      | string          | no                          | The description of the release. You can use [Markdown](../../user/markdown.md).                                                  |
-| `ref`              | string          | yes, if `tag_name` doesn't exist | If `tag_name` doesn't exist, the release will be created from `ref`. It can be a commit SHA, another tag name, or a branch name. |
+| `ref`              | string          | yes, if `tag_name` doesn't exist | If a tag specified in `tag_name` doesn't exist, the release will be created from `ref` and tagged with `tag_name`. It can be a commit SHA, another tag name, or a branch name. |
 | `milestones`       | array of string | no                          | The title of each milestone the release is associated with.                                                                      |
 | `assets:links`     | array of hash   | no                          | An array of assets links.                                                                                                        |
 | `assets:links:name`| string          | required by: `assets:links` | The name of the link.                                                                                                            |
 | `assets:links:url` | string          | required by: `assets:links` | The URL of the link.                                                                                                             |
-| `assets:links:filepath` | string     | no | Optional path for a [Direct Asset link](../../user/project/releases.md).
+| `assets:links:filepath` | string     | no | Optional path for a [Direct Asset link](../../user/project/releases/index.md).
 | `assets:links:link_type` | string     | no | The type of the link: `other`, `runbook`, `image`, `package`. Defaults to `other`.
 | `released_at`      | datetime        | no                          | The date when the release will be/was ready. Defaults to the current time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
 

@@ -14,14 +14,18 @@ RSpec.describe GitlabSchema.types['User'] do
       snippets
       name
       username
+      email
       avatarUrl
       webUrl
+      webPath
       todos
       state
+      status
       authoredMergeRequests
       assignedMergeRequests
       groupMemberships
       projectMemberships
+      starredProjects
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

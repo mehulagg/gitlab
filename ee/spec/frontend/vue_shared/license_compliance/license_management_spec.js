@@ -16,8 +16,7 @@ let wrapper;
 
 const managedLicenses = [approvedLicense, blacklistedLicense];
 
-const PaginatedListMock = {
-  name: 'PaginatedList',
+const PaginatedList = {
   props: ['list'],
   template: `
     <div>
@@ -47,6 +46,7 @@ const createComponent = ({ state, getters, props, actionMocks, isAdmin, options,
           managedLicenses,
           isLoadingManagedLicenses: true,
           isAdmin,
+          knownLicenses: [],
           ...state,
         },
         actions: {
@@ -63,7 +63,7 @@ const createComponent = ({ state, getters, props, actionMocks, isAdmin, options,
       ...props,
     },
     stubs: {
-      PaginatedList: PaginatedListMock,
+      PaginatedList,
     },
     provide: {
       glFeatures: { licenseComplianceDeniesMr: false },
@@ -97,7 +97,7 @@ describe('License Management', () => {
           getters: { hasPendingLicenses: () => true },
           isAdmin,
         });
-        expect(wrapper.find({ name: 'PaginatedList' }).props('list')).toBe(managedLicenses);
+        expect(wrapper.find(PaginatedList).props('list')).toBe(managedLicenses);
       });
 
       describe('when not loading', () => {
@@ -106,7 +106,7 @@ describe('License Management', () => {
         });
 
         it('should render list of managed licenses', () => {
-          expect(wrapper.find({ name: 'PaginatedList' }).props('list')).toBe(managedLicenses);
+          expect(wrapper.find(PaginatedList).props('list')).toBe(managedLicenses);
         });
       });
 
@@ -121,11 +121,7 @@ describe('License Management', () => {
           isAdmin,
         });
 
-        expect(fetchManagedLicensesMock).toHaveBeenCalledWith(
-          expect.any(Object),
-          undefined,
-          undefined,
-        );
+        expect(fetchManagedLicensesMock).toHaveBeenCalledWith(expect.any(Object), undefined);
       });
     });
   });
@@ -147,30 +143,13 @@ describe('License Management', () => {
         });
       });
 
-      describe.each([true, false])(
-        'with licenseApprovals feature flag set to "%p"',
-        licenseApprovalsEnabled => {
-          beforeEach(() => {
-            createComponent({
-              state: { isLoadingManagedLicenses: false },
-              isAdmin: true,
-              options: {
-                provide: {
-                  glFeatures: { licenseApprovals: licenseApprovalsEnabled },
-                },
-              },
-            });
-          });
-
-          it('should render the license-approvals section accordingly', () => {
-            expect(wrapper.find(LicenseComplianceApprovals).exists()).toBe(licenseApprovalsEnabled);
-          });
-        },
-      );
-
       describe('when not loading', () => {
         beforeEach(() => {
           createComponent({ state: { isLoadingManagedLicenses: false }, isAdmin: true });
+        });
+
+        it('should render the license-approvals section accordingly', () => {
+          expect(wrapper.find(LicenseComplianceApprovals).exists()).toBe(true);
         });
 
         it('should render the form if the form is open and disable the form button', () => {

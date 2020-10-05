@@ -13,9 +13,9 @@ GitLab offers integrated cluster creation for the following Kubernetes providers
 
 GitLab can also integrate with any standard Kubernetes provider, either on-premise or hosted.
 
-NOTE: **Scalable app deployment with GitLab and Google Cloud Platform**
-[Watch the webcast](https://about.gitlab.com/webcast/scalable-app-deploy/) and
-learn how to spin up a Kubernetes cluster managed by Google Cloud Platform (GCP)
+NOTE: **Note:**
+Watch the webcast [Scalable app deployment with GitLab and Google Cloud Platform](https://about.gitlab.com/webcast/scalable-app-deploy/)
+and learn how to spin up a Kubernetes cluster managed by Google Cloud Platform (GCP)
 in a few clicks.
 
 TIP: **Tip:**
@@ -110,10 +110,10 @@ GitLab creates the following resources for ABAC clusters.
 | Environment namespace | `ServiceAccount`     | Uses namespace of environment               | Deploying to a cluster |
 | Environment namespace | `Secret`             | Token for environment ServiceAccount        | Deploying to a cluster |
 
-### Security of GitLab Runners
+### Security of runners
 
-GitLab Runners have the [privileged mode](https://docs.gitlab.com/runner/executors/docker.html#the-privileged-mode)
-enabled by default, which allows them to execute special commands and running
+Runners have the [privileged mode](https://docs.gitlab.com/runner/executors/docker.html#the-privileged-mode)
+enabled by default, which allows them to execute special commands and run
 Docker in Docker. This functionality is needed to run some of the
 [Auto DevOps](../../../topics/autodevops/index.md)
 jobs. This implies the containers are running in privileged mode and you should,
@@ -124,14 +124,14 @@ turn can do almost everything that the host can do. Be aware of the
 inherent security risk associated with performing `docker run` operations on
 arbitrary images as they effectively have root access.
 
-If you don't want to use GitLab Runner in privileged mode, either:
+If you don't want to use a runner in privileged mode, either:
 
-- Use shared Runners on GitLab.com. They don't have this security issue.
-- Set up your own Runners using the configuration described at
-  [Shared Runners](../../gitlab_com/index.md#shared-runners). This involves:
+- Use shared runners on GitLab.com. They don't have this security issue.
+- Set up your own runners using the configuration described at
+  [shared runners](../../gitlab_com/index.md#shared-runners). This involves:
   1. Making sure that you don't have it installed via
      [the applications](index.md#installing-applications).
-  1. Installing a Runner
+  1. Installing a runner
      [using `docker+machine`](https://docs.gitlab.com/runner/executors/docker_machine.html).
 
 ## Create new cluster
@@ -142,7 +142,7 @@ Amazon Elastic Kubernetes Service (EKS) at the project, group, or instance level
 1. Navigate to your:
    - Project's **{cloud-gear}** **Operations > Kubernetes** page, for a project-level cluster.
    - Group's **{cloud-gear}** **Kubernetes** page, for a group-level cluster.
-   - **{admin}** **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
+   - **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
 1. Click **Add Kubernetes cluster**.
 1. Click the **Create new cluster** tab.
 1. Click either **Amazon EKS** or **Google GKE**, and follow the instructions for your desired service:
@@ -164,12 +164,12 @@ To add a Kubernetes cluster to your project, group, or instance:
 1. Navigate to your:
    1. Project's **{cloud-gear}** **Operations > Kubernetes** page, for a project-level cluster.
    1. Group's **{cloud-gear}** **Kubernetes** page, for a group-level cluster.
-   1. **{admin}** **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
+   1. **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
 1. Click **Add Kubernetes cluster**.
 1. Click the **Add existing cluster** tab and fill in the details:
    1. **Kubernetes cluster name** (required) - The name you wish to give the cluster.
    1. **Environment scope** (required) - The
-      [associated environment](index.md#setting-the-environment-scope-premium) to this cluster.
+      [associated environment](index.md#setting-the-environment-scope) to this cluster.
    1. **API URL** (required) -
       It's the URL that GitLab uses to access the Kubernetes API. Kubernetes
       exposes several APIs, we want the "base" URL that is common to all of them.
@@ -191,8 +191,20 @@ To add a Kubernetes cluster to your project, group, or instance:
          ```
 
          NOTE: **Note:**
-         If the command returns the entire certificate chain, you need copy the *root ca*
-         certificate at the bottom of the chain.
+         If the command returns the entire certificate chain, you must copy the Root CA
+         certificate and any intermediate certificates at the bottom of the chain.
+         A chain file has following structure:  
+
+         ```plaintext
+            -----BEGIN MY CERTIFICATE-----  
+            -----END MY CERTIFICATE-----  
+            -----BEGIN INTERMEDIATE CERTIFICATE-----  
+            -----END INTERMEDIATE CERTIFICATE-----  
+            -----BEGIN INTERMEDIATE CERTIFICATE-----  
+            -----END INTERMEDIATE CERTIFICATE-----  
+            -----BEGIN ROOT CERTIFICATE-----  
+            -----END ROOT CERTIFICATE-----  
+         ```
 
    1. **Token** -
       GitLab authenticates against Kubernetes using service tokens, which are
@@ -206,7 +218,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          apiVersion: v1
          kind: ServiceAccount
          metadata:
-           name: gitlab-admin
+           name: gitlab
            namespace: kube-system
          ---
          apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -219,7 +231,7 @@ To add a Kubernetes cluster to your project, group, or instance:
            name: cluster-admin
          subjects:
            - kind: ServiceAccount
-             name: gitlab-admin
+             name: gitlab
              namespace: kube-system
          ```
 
@@ -245,23 +257,23 @@ To add a Kubernetes cluster to your project, group, or instance:
          Output:
 
          ```shell
-         serviceaccount "gitlab-admin" created
+         serviceaccount "gitlab" created
          clusterrolebinding "gitlab-admin" created
          ```
 
-      1. Retrieve the token for the `gitlab-admin` service account:
+      1. Retrieve the token for the `gitlab` service account:
 
          ```shell
-         kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab-admin | awk '{print $1}')
+         kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab | awk '{print $1}')
          ```
 
          Copy the `<authentication_token>` value from the output:
 
-         ```yaml
-         Name:         gitlab-admin-token-b5zv4
+         ```plaintext
+         Name:         gitlab-token-b5zv4
          Namespace:    kube-system
          Labels:       <none>
-         Annotations:  kubernetes.io/service-account.name=gitlab-admin
+         Annotations:  kubernetes.io/service-account.name=gitlab
                       kubernetes.io/service-account.uid=bcfe66ac-39be-11e8-97e8-026dce96b6e8
 
          Type:  kubernetes.io/service-account-token
@@ -308,7 +320,8 @@ integration to work properly.
 
 ![rbac](img/rbac_v13_1.png)
 
-NOTE: **Note**: Disabling RBAC means that any application running in the cluster,
+NOTE: **Note:**
+Disabling RBAC means that any application running in the cluster,
 or user who can authenticate to the cluster, has full API access. This is a
 [security concern](index.md#security-implications), and may not be desirable.
 
@@ -330,7 +343,7 @@ a new cluster or added an existing one. To disable Kubernetes cluster integratio
 1. Navigate to your:
    - Project's **{cloud-gear}** **Operations > Kubernetes** page, for a project-level cluster.
    - Group's **{cloud-gear}** **Kubernetes** page, for a group-level cluster.
-   - **{admin}** **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
+   - **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
 1. Click on the name of the cluster.
 1. Click the **GitLab Integration** toggle.
 1. Click **Save changes**.

@@ -207,6 +207,10 @@ class GeoNode < ApplicationRecord
     url
   end
 
+  def repository_url(repository)
+    Gitlab::Utils.append_path(internal_url, "#{repository.full_path}.git")
+  end
+
   def oauth_callback_url
     Gitlab::Routing.url_helpers.oauth_geo_callback_url(url_helper_args)
   end
@@ -232,34 +236,33 @@ class GeoNode < ApplicationRecord
     # be called in an initializer and we don't want other callbacks
     # to mess with uninitialized dependencies.
     if clone_url_prefix_changed?
-      Rails.logger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}" # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}"
       update_column(:clone_url_prefix, clone_url_prefix)
     end
   end
 
-  def job_artifacts
-    return Ci::JobArtifact.all unless selective_sync?
-
-    query = Ci::JobArtifact.project_id_in(projects).select(:id)
-    cte = Gitlab::SQL::CTE.new(:restricted_job_artifacts, query)
-    job_artifact_table = Ci::JobArtifact.arel_table
-
-    inner_join_restricted_job_artifacts =
-      cte.table
-        .join(job_artifact_table, Arel::Nodes::InnerJoin)
-        .on(cte.table[:id].eq(job_artifact_table[:id]))
-        .join_sources
-
-    Ci::JobArtifact
-      .with(cte.to_arel)
-      .from(cte.table)
-      .joins(inner_join_restricted_job_artifacts)
-  end
-
   def container_repositories
+    return ContainerRepository.none unless Geo::ContainerRepositoryRegistry.replication_enabled?
     return ContainerRepository.all unless selective_sync?
 
     ContainerRepository.project_id_in(projects)
+  end
+
+  def container_repositories_include?(container_repository_id)
+    return false unless Geo::ContainerRepositoryRegistry.replication_enabled?
+    return true unless selective_sync?
+
+    container_repositories.where(id: container_repository_id).exists?
+  end
+
+  def designs
+    projects.with_designs
+  end
+
+  def designs_include?(project_id)
+    return true unless selective_sync?
+
+    designs.where(id: project_id).exists?
   end
 
   def lfs_objects
@@ -422,13 +425,5 @@ class GeoNode < ApplicationRecord
 
   def projects_for_selected_shards
     Project.within_shards(selective_sync_shards)
-  end
-
-  def project_model
-    Project
-  end
-
-  def uploads_model
-    Upload
   end
 end

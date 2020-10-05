@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
 import { createStore } from '~/ide/stores';
 import FileRowExtra from '~/ide/components/file_row_extra.vue';
-import { file, resetStore } from '../helpers';
+import { file } from '../helpers';
 
 describe('IDE extra file row component', () => {
   let Component;
@@ -32,7 +32,6 @@ describe('IDE extra file row component', () => {
 
   afterEach(() => {
     vm.$destroy();
-    resetStore(vm.$store);
 
     stagedFilesCount = 0;
     unstagedFilesCount = 0;
@@ -154,14 +153,14 @@ describe('IDE extra file row component', () => {
 
   describe('merge request icon', () => {
     it('hides when not a merge request change', () => {
-      expect(vm.$el.querySelector('.ic-git-merge')).toBe(null);
+      expect(vm.$el.querySelector('[data-testid="git-merge-icon"]')).toBe(null);
     });
 
     it('shows when a merge request change', done => {
       vm.file.mrChange = true;
 
       vm.$nextTick(() => {
-        expect(vm.$el.querySelector('.ic-git-merge')).not.toBe(null);
+        expect(vm.$el.querySelector('[data-testid="git-merge-icon"]')).not.toBe(null);
 
         done();
       });

@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 class Admin::SessionsController < ApplicationController
-  include Authenticates2FAForAdminMode
+  include AuthenticatesWithTwoFactorForAdminMode
   include InternalRedirect
   include RendersLdapServers
 
   before_action :user_is_admin!
+
+  feature_category :authentication_and_authorization
 
   def new
     if current_user_mode.admin_mode?

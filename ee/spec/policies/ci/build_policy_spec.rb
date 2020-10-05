@@ -14,22 +14,6 @@ RSpec.describe Ci::BuildPolicy do
 
     subject { user.can?(:update_build, build) }
 
-    it_behaves_like 'protected environments access'
-
-    context 'when a pipeline has manual deployment job' do
-      let!(:build) { create(:ee_ci_build, :with_deployment, :manual, :deploy_to_production, pipeline: pipeline) }
-
-      before do
-        project.add_developer(user)
-      end
-
-      it 'does not expand environment name' do
-        allow(build.project).to receive(:protected_environments_feature_available?) { true }
-        expect(build.project).to receive(:protected_environment_accessible_to?)
-        expect(build).not_to receive(:expanded_environment_name)
-
-        subject
-      end
-    end
+    it_behaves_like 'protected environments access', direct_access: true
   end
 end

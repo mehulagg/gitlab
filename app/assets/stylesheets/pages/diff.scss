@@ -13,6 +13,21 @@
     box-shadow: 0 -2px 0 0 var(--white);
     cursor: pointer;
 
+    .dropdown-menu {
+      cursor: auto;
+    }
+
+    @media (max-width: map-get($grid-breakpoints, sm)-1) {
+      .file-header-content {
+        width: 0;
+        flex: 1;
+      }
+
+      .file-actions {
+        margin-left: $gl-spacing-scale-2;
+      }
+    }
+
     @media (min-width: map-get($grid-breakpoints, md)) {
       // The `+11` is to ensure the file header border shows when scrolled -
       // the bottom of the compare-versions header and the top of the file header
@@ -53,10 +68,6 @@
           top: $performance-bar-height + $header-height + $compare-branches-sticky-header-height;
         }
       }
-    }
-
-    a:hover {
-      text-decoration: none;
     }
 
     &:hover {
@@ -102,7 +113,7 @@
 
     .file-mode-changed {
       padding: 10px;
-      color: $gl-gray-500;
+      color: $gray-500;
     }
 
     .suppressed-container {
@@ -181,7 +192,7 @@
 
       .swipe-wrap {
         overflow: hidden;
-        border-right: 1px solid $gl-gray-400;
+        border-right: 1px solid $gray-300;
         position: absolute;
         display: block;
         top: 13px;
@@ -190,7 +201,7 @@
         &.left-oriented {
           /* only for commit view (different swipe viewer) */
           border-right: 0;
-          border-left: 1px solid $gl-gray-400;
+          border-left: 1px solid $gray-300;
         }
       }
 
@@ -992,7 +1003,8 @@ table.code {
 }
 
 .frame .badge.badge-pill,
-.frame .image-comment-badge {
+.frame .image-comment-badge,
+.frame .comment-indicator {
   // Center align badges on the frame
   transform: translate(-50%, -50%);
 }
@@ -1061,7 +1073,7 @@ table.code {
 .diff-tree-list {
   position: -webkit-sticky;
   position: sticky;
-  $top-pos: $header-height + $mr-tabs-height + $mr-version-controls-height + 11px;
+  $top-pos: $header-height + $mr-tabs-height + $mr-version-controls-height + 15px;
   top: $top-pos;
   max-height: calc(100vh - #{$top-pos});
   z-index: 202;

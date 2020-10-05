@@ -22,11 +22,19 @@ module Types
       field :selective_sync_shards, type: [GraphQL::STRING_TYPE], null: true, description: 'The repository storages whose projects should be synced, if `selective_sync_type` == `shards`'
       field :selective_sync_namespaces, ::Types::NamespaceType.connection_type, null: true, method: :namespaces, description: 'The namespaces that should be synced, if `selective_sync_type` == `namespaces`'
       field :minimum_reverification_interval, GraphQL::INT_TYPE, null: true, description: 'The interval (in days) in which the repository verification is valid. Once expired, it will be reverified'
+      field :merge_request_diff_registries, ::Types::Geo::MergeRequestDiffRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::MergeRequestDiffRegistriesResolver,
+            description: 'Find merge request diff registries on this Geo node',
+            feature_flag: :geo_merge_request_diff_replication
       field :package_file_registries, ::Types::Geo::PackageFileRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::PackageFileRegistriesResolver,
-            description: 'Package file registries of the GeoNode',
-            feature_flag: :geo_self_service_framework
+            description: 'Package file registries of the GeoNode'
+      field :terraform_state_version_registries, ::Types::Geo::TerraformStateVersionRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::TerraformStateVersionRegistriesResolver,
+            description: 'Find terraform state version registries on this Geo node'
     end
   end
 end

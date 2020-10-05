@@ -38,7 +38,7 @@
         = f.check_box :notify_on_unknown_sign_in, class: 'form-check-input'
         = f.label :notify_on_unknown_sign_in, class: 'form-check-label' do
           = _('Notify users by email when sign-in location is not recognized')
-          = link_to icon('question-circle'),
+          = link_to sprite_icon('question-o'),
           'https://docs.gitlab.com/ee/user/profile/unknown_sign_in_notification.html',
           target: '_blank'
     .form-group
@@ -57,5 +57,4 @@
       = f.label :sign_in_text, class: 'label-bold'
       = f.text_area :sign_in_text, class: 'form-control', rows: 4
       .form-text.text-muted Markdown enabled
-
   = f.submit 'Save changes', class: "btn btn-success"

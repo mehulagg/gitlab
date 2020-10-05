@@ -1,5 +1,0 @@
----
-title: Fix failing filtered search when re-submitting epic tokens
-merge_request: 35205
-author:
-type: fixed

@@ -1,9 +1,115 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Event Item with action buttons renders the action buttons 1`] = `
-VueWrapper {
-  "_emitted": Object {},
-  "_emittedByOrder": Array [],
-  "isFunctionalComponent": undefined,
-}
+<div
+  class="d-flex align-items-center"
+>
+  <div
+    class="circle-icon-container gl-flex-shrink-0 gl-align-self-start ci-status-icon-success"
+  >
+    <svg
+      class="gl-icon s16"
+      data-testid="plus-icon"
+    >
+      <use
+        href="#plus"
+      />
+    </svg>
+  </div>
+   
+  <div
+    class="ml-3 flex-grow-1"
+    data-qa-selector="event_item_content"
+  >
+    <div
+      class="note-header-info pb-0"
+    >
+      <!---->
+       
+      <a
+        class="author-name-link js-user-link"
+        data-username="gitlab"
+      >
+         
+        <span
+          class="note-header-author-name bold"
+        >
+          Tanuki
+        </span>
+      </a>
+       
+      <!---->
+       
+      <span
+        class="text-nowrap author-username"
+      >
+        <a
+          class="author-username-link"
+        >
+          <span
+            class="note-headline-light"
+          >
+            @gitlab
+          </span>
+        </a>
+         
+        <!---->
+      </span>
+       
+      <span
+        class="note-headline-light note-headline-meta"
+      >
+        <span
+          class="system-note-message"
+        >
+          ·
+        </span>
+         
+        <!---->
+         
+        <!---->
+          
+        <!---->
+      </span>
+    </div>
+     
+  </div>
+   
+  <div
+    class="gl-flex-shrink-0 gl-align-self-start"
+  >
+    <button
+      class="btn px-1 btn-transparent btn-md"
+      title="Foo Action"
+      type="button"
+    >
+      <!---->
+       
+      <svg
+        class="link-highlight gl-icon s16"
+        data-testid="pencil-icon"
+      >
+        <use
+          href="#pencil"
+        />
+      </svg>
+    </button>
+    <button
+      class="btn px-1 btn-transparent btn-md"
+      title="Bar Action"
+      type="button"
+    >
+      <!---->
+       
+      <svg
+        class="link-highlight gl-icon s16"
+        data-testid="remove-icon"
+      >
+        <use
+          href="#remove"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
 `;

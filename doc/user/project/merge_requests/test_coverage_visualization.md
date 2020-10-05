@@ -7,7 +7,8 @@ type: reference, howto
 
 # Test Coverage Visualization
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/249811) in GitLab 13.5.
 
 With the help of [GitLab CI/CD](../../../ci/README.md), you can collect the test
 coverage information of your favorite testing or coverage-analysis tool, and visualize
@@ -50,7 +51,13 @@ from any job in any stage in the pipeline. The coverage will be displayed for ea
 Hovering over the coverage bar will provide further information, such as the number
 of times the line was checked by tests.
 
-## Example test coverage configuration
+NOTE: **Note:**
+The Cobertura XML parser currently does not support the `sources` element and ignores it. It is assumed that
+the `filename` of a `class` element contains the full path relative to the project root.
+
+## Example test coverage configurations
+
+### JavaScript example
 
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example uses [Mocha](https://mochajs.org/)
 JavaScript testing and [NYC](https://github.com/istanbuljs/nyc) coverage-tooling to
@@ -66,16 +73,84 @@ test:
       cobertura: coverage/cobertura-coverage.xml
 ```
 
-## Enabling the feature
+### Java examples
 
-This feature comes with the `:coverage_report_view` feature flag disabled by
-default. This feature is disabled due to some performance issues with very large
-data sets. When [the performance issue](https://gitlab.com/gitlab-org/gitlab/-/issues/211410)
-is resolved, the feature will be enabled by default.
+#### Maven example
 
-To enable this feature, ask a GitLab administrator with Rails console access to
-run the following command:
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java uses [Maven](https://maven.apache.org/)
+to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
+generate the coverage artifact.  
+You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
 
-```ruby
-Feature.enable(:coverage_report_view)
+GitLab expects the artifact in the Cobertura format, so you have to execute a few
+scripts before uploading it. The `test-jdk11` job tests the code and generates an
+XML artifact. The `coverage-jdk-11` job converts the artifact into a Cobertura report:
+
+```yaml
+test-jdk11:
+  stage: test
+  image: maven:3.6.3-jdk-11
+  script:
+    - 'mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent test jacoco:report'
+  artifacts:
+    paths:
+      - target/site/jacoco/jacoco.xml
+
+coverage-jdk11:
+  # Must be in a stage later than test-jdk11's stage. 
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or chose an existing stage like `deploy`.
+  stage: visualize
+  image: haynes/jacoco2cobertura:1.0.3
+  script:
+    # convert report from jacoco to cobertura
+    - 'python /opt/cover2cover.py target/site/jacoco/jacoco.xml src/main/java > target/site/cobertura.xml'
+    # read the <source></source> tag and prepend the path to every filename attribute
+    - 'python /opt/source2filename.py target/site/cobertura.xml'
+  needs: ["test-jdk11"]
+  dependencies:
+    - test-jdk11
+  artifacts:
+    reports:
+      cobertura: target/site/cobertura.xml
+```
+
+#### Gradle example
+
+The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java uses [Gradle](https://gradle.org/)
+to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
+generate the coverage artifact.  
+You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
+
+GitLab expects the artifact in the Cobertura format, so you have to execute a few
+scripts before uploading it. The `test-jdk11` job tests the code and generates an
+XML artifact. The `coverage-jdk-11` job converts the artifact into a Cobertura report:
+
+```yaml
+test-jdk11:
+  stage: test
+  image: gradle:6.6.1-jdk11
+  script:
+    - 'gradle test jacocoTestReport' # jacoco must be configured to create an xml report
+  artifacts:
+    paths:
+      - build/jacoco/jacoco.xml
+
+coverage-jdk11:
+  # Must be in a stage later than test-jdk11's stage. 
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or chose an existing stage like `deploy`.
+  stage: visualize
+  image: haynes/jacoco2cobertura:1.0.3
+  script:
+    # convert report from jacoco to cobertura
+    - 'python /opt/cover2cover.py build/jacoco/jacoco.xml src/main/java > build/cobertura.xml'
+    # read the <source></source> tag and prepend the path to every filename attribute
+    - 'python /opt/source2filename.py build/cobertura.xml'
+  needs: ["test-jdk11"]
+  dependencies:
+    - test-jdk11
+  artifacts:
+    reports:
+      cobertura: build/cobertura.xml
 ```

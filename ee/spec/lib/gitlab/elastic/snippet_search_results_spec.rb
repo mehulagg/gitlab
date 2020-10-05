@@ -22,8 +22,11 @@ RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_n
     end
 
     it 'returns the correct page of results' do
-      expect(results.objects('snippet_titles', page: 1, per_page: 1)).to eq([snippet2])
-      expect(results.objects('snippet_titles', page: 2, per_page: 1)).to eq([snippet])
+      # `snippet` is more relevant than `snippet2` (hence first in order) due
+      # to having a shorter title that exactly matches the query and also due
+      # to having a description that matches the query.
+      expect(results.objects('snippet_titles', page: 1, per_page: 1)).to eq([snippet])
+      expect(results.objects('snippet_titles', page: 2, per_page: 1)).to eq([snippet2])
     end
 
     it 'returns the correct number of results for one page' do

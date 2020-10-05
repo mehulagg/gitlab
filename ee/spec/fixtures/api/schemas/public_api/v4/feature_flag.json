@@ -4,6 +4,7 @@
   "properties": {
     "name": { "type": "string" },
     "description": { "type": ["string", "null"] },
+    "active": {"type": "boolean" },
     "version": { "type": "string" },
     "created_at": { "type": "date" },
     "updated_at": { "type": "date" },

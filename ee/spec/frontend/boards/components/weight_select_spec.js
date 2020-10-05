@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
 import WeightSelect from 'ee/boards/components/weight_select.vue';
-import { GlDeprecatedButton, GlDropdown } from '@gitlab/ui';
+import { GlButton, GlDeprecatedDropdown } from '@gitlab/ui';
 
 describe('WeightSelect', () => {
   let wrapper;
 
-  const editButton = () => wrapper.find(GlDeprecatedButton);
+  const editButton = () => wrapper.find(GlButton);
   const valueContainer = () => wrapper.find('.value');
-  const weightDropdown = () => wrapper.find(GlDropdown);
+  const weightDropdown = () => wrapper.find(GlDeprecatedDropdown);
   const weightSelect = () => wrapper.find({ ref: 'weight-select' });
 
   const defaultProps = {

@@ -68,6 +68,7 @@ module QA
             group.path = "access-to-protected-branch-#{SecureRandom.hex(8)}"
           end
         end
+
         let(:project) do
           Resource::Project.fabricate_via_api! do |resource|
             resource.name = 'group-with-access-to-protected-branch'

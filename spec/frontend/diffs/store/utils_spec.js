@@ -20,6 +20,14 @@ import { noteableDataMock } from '../../notes/mock_data';
 const getDiffFileMock = () => JSON.parse(JSON.stringify(diffFileMockData));
 const getDiffMetadataMock = () => JSON.parse(JSON.stringify(diffMetadata));
 
+function extractLinesFromFile(file) {
+  const unpackedParallel = file.parallel_diff_lines
+    .flatMap(({ left, right }) => [left, right])
+    .filter(Boolean);
+
+  return [...file.highlighted_diff_lines, ...unpackedParallel];
+}
+
 describe('DiffsStoreUtils', () => {
   describe('findDiffFile', () => {
     const files = [{ file_hash: 1, name: 'one' }];
@@ -429,6 +437,28 @@ describe('DiffsStoreUtils', () => {
       expect(preppedLine.right).toEqual(correctLine);
       expect(preppedLine.line_code).toEqual(correctLine.line_code);
     });
+
+    it.each`
+      brokenSymlink
+      ${false}
+      ${{}}
+      ${'anything except `false`'}
+    `(
+      "properly assigns each line's `commentsDisabled` as the same value as the parent file's `brokenSymlink` value (`$brokenSymlink`)",
+      ({ brokenSymlink }) => {
+        preppedLine = utils.prepareLineForRenamedFile({
+          diffViewType: INLINE_DIFF_VIEW_TYPE,
+          line: sourceLine,
+          index: lineIndex,
+          diffFile: {
+            ...diffFile,
+            brokenSymlink,
+          },
+        });
+
+        expect(preppedLine.commentsDisabled).toStrictEqual(brokenSymlink);
+      },
+    );
   });
 
   describe('prepareDiffData', () => {
@@ -541,6 +571,25 @@ describe('DiffsStoreUtils', () => {
           }),
         ]);
       });
+
+      it('adds the `.brokenSymlink` property to each diff file', () => {
+        preparedDiff.diff_files.forEach(file => {
+          expect(file).toEqual(expect.objectContaining({ brokenSymlink: false }));
+        });
+      });
+
+      it("copies the diff file's `.brokenSymlink` value to each of that file's child lines", () => {
+        const lines = [
+          ...preparedDiff.diff_files,
+          ...splitInlineDiff.diff_files,
+          ...splitParallelDiff.diff_files,
+          ...completedDiff.diff_files,
+        ].flatMap(file => extractLinesFromFile(file));
+
+        lines.forEach(line => {
+          expect(line.commentsDisabled).toBe(false);
+        });
+      });
     });
 
     describe('for diff metadata', () => {
@@ -602,6 +651,12 @@ describe('DiffsStoreUtils', () => {
             parallel_diff_lines: [],
           },
         ]);
+      });
+
+      it('adds the `.brokenSymlink` property to each meta diff file', () => {
+        preparedDiffFiles.forEach(file => {
+          expect(file).toMatchObject({ brokenSymlink: false });
+        });
       });
     });
   });
@@ -1110,6 +1165,61 @@ describe('DiffsStoreUtils', () => {
 
     it('returns true if cookie is `0`', () => {
       expect(utils.getDefaultWhitespace(undefined, '0')).toBe(true);
+    });
+  });
+
+  describe('isAdded', () => {
+    it.each`
+      type               | expected
+      ${'new'}           | ${true}
+      ${'new-nonewline'} | ${true}
+      ${'old'}           | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isAdded({ type })).toBe(expected);
+    });
+  });
+
+  describe('isRemoved', () => {
+    it.each`
+      type               | expected
+      ${'old'}           | ${true}
+      ${'old-nonewline'} | ${true}
+      ${'new'}           | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isRemoved({ type })).toBe(expected);
+    });
+  });
+
+  describe('isUnchanged', () => {
+    it.each`
+      type     | expected
+      ${null}  | ${true}
+      ${'new'} | ${false}
+      ${'old'} | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isUnchanged({ type })).toBe(expected);
+    });
+  });
+
+  describe('isMeta', () => {
+    it.each`
+      type               | expected
+      ${'match'}         | ${true}
+      ${'new-nonewline'} | ${true}
+      ${'old-nonewline'} | ${true}
+      ${'new'}           | ${false}
+    `('returns $expected when type is $type', ({ type, expected }) => {
+      expect(utils.isMeta({ type })).toBe(expected);
+    });
+  });
+
+  describe('parallelizeDiffLines', () => {
+    it('converts inline diff lines to parallel diff lines', () => {
+      const file = getDiffFileMock();
+
+      expect(utils.parallelizeDiffLines(file.highlighted_diff_lines)).toEqual(
+        file.parallel_diff_lines,
+      );
     });
   });
 });

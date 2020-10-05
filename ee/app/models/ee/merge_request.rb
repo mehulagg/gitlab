@@ -14,11 +14,28 @@ module EE
       include Elastic::ApplicationVersionedSearch
       include DeprecatedApprovalsBeforeMerge
       include UsageStatistics
+      include IterationEventable
 
       has_many :approvers, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
-      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request
+      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
+        def applicable_to_branch(branch)
+          ActiveRecord::Associations::Preloader.new.preload(
+            self,
+            [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
+          )
+
+          self.select do |rule|
+            next true unless rule.approval_project_rule.present?
+            next true if rule.overridden?
+
+            rule.approval_project_rule.applies_to_branch?(branch)
+          end
+        end
+      end
+      has_many :approval_merge_request_rule_sources, through: :approval_rules
+      has_many :approval_project_rules, through: :approval_merge_request_rule_sources
       has_one :merge_train, inverse_of: :merge_request, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
       has_many :blocks_as_blocker,
@@ -36,23 +53,7 @@ module EE
       delegate :sha, to: :head_pipeline, prefix: :head_pipeline, allow_nil: true
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
       delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
-
-      scope :without_approvals, -> { left_outer_joins(:approvals).where(approvals: { id: nil }) }
-      scope :with_approvals, -> { joins(:approvals) }
-      scope :approved_by_users_with_ids, -> (*user_ids) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { id: user_ids })
-          .group(:id)
-          .having("COUNT(users.id) = ?", user_ids.size)
-      end
-      scope :approved_by_users_with_usernames, -> (*usernames) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { username: usernames })
-          .group(:id)
-          .having("COUNT(users.id) = ?", usernames.size)
-      end
+      delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -66,13 +67,13 @@ module EE
           :author, :approved_by_users, :metrics,
           latest_merge_request_diff: :merge_request_diff_files, target_project: :namespace, milestone: :project)
       end
+
+      scope :including_merge_train, -> do
+        includes(:merge_train)
+      end
     end
 
     class_methods do
-      def select_from_union(relations)
-        where(id: from_union(relations))
-      end
-
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
         super.preload(:blocking_merge_requests)
@@ -98,7 +99,7 @@ module EE
     end
 
     override :mergeable?
-    def mergeable?(skip_ci_check: false)
+    def mergeable?(skip_ci_check: false, skip_discussions_check: false)
       return false unless approved?
       return false if has_denied_policies?
       return false if merge_blocked_by_other_mrs?
@@ -119,6 +120,10 @@ module EE
 
     def allows_multiple_assignees?
       project.feature_available?(:multiple_merge_request_assignees)
+    end
+
+    def allows_multiple_reviewers?
+      project.feature_available?(:multiple_merge_request_reviewers)
     end
 
     def visible_blocking_merge_requests(user)
@@ -144,8 +149,9 @@ module EE
     end
 
     def has_denied_policies?
-      return false if ::Feature.disabled?(:license_compliance_denies_mr, project, default_enabled: false)
       return false unless has_license_scanning_reports?
+
+      return false if has_approved_license_check?
 
       actual_head_pipeline.license_scanning_report.violates?(project.software_license_policies)
     end
@@ -156,7 +162,9 @@ module EE
         container_scanning: report_type_enabled?(:container_scanning),
         dast: report_type_enabled?(:dast),
         dependency_scanning: report_type_enabled?(:dependency_scanning),
-        license_scanning: report_type_enabled?(:license_scanning)
+        license_scanning: report_type_enabled?(:license_scanning),
+        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing),
+        secret_detection: report_type_enabled?(:secret_detection)
       }
     end
 
@@ -215,7 +223,7 @@ module EE
     end
 
     def compare_license_scanning_reports(current_user)
-      return missing_report_error("license scanning") unless has_license_scanning_reports?
+      return missing_report_error("license scanning") unless actual_head_pipeline&.license_scan_completed?
 
       compare_reports(::Ci::CompareLicenseScanningReportsService, current_user)
     end
@@ -230,6 +238,16 @@ module EE
       compare_reports(::Ci::CompareMetricsReportsService)
     end
 
+    def has_coverage_fuzzing_reports?
+      !!actual_head_pipeline&.has_reports?(::Ci::JobArtifact.coverage_fuzzing_reports)
+    end
+
+    def compare_coverage_fuzzing_reports(current_user)
+      return missing_report_error("coverage fuzzing") unless has_coverage_fuzzing_reports?
+
+      compare_reports(::Ci::CompareSecurityReportsService, current_user, 'coverage_fuzzing')
+    end
+
     def synchronize_approval_rules_from_target_project
       return if merged?
 
@@ -239,7 +257,19 @@ module EE
       end
     end
 
+    def missing_security_scan_types
+      return [] unless actual_head_pipeline && base_pipeline
+
+      (base_pipeline.security_scans.pluck(:scan_type) - actual_head_pipeline.security_scans.pluck(:scan_type)).uniq
+    end
+
     private
+
+    def has_approved_license_check?
+      if rule = approval_rules.license_compliance.last
+        ApprovalWrappedRule.wrap(self, rule).approved?
+      end
+    end
 
     def missing_report_error(report_type)
       { status: :error, status_reason: "This merge request does not have #{report_type} reports" }

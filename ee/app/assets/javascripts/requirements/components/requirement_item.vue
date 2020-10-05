@@ -1,19 +1,10 @@
 <script>
 import { escape } from 'lodash';
-import {
-  GlPopover,
-  GlLink,
-  GlAvatar,
-  GlDeprecatedButton,
-  GlIcon,
-  GlLoadingIcon,
-  GlTooltipDirective,
-} from '@gitlab/ui';
+import { GlPopover, GlLink, GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
-import RequirementForm from './requirement_form.vue';
 import RequirementStatusBadge from './requirement_status_badge.vue';
 
 import { FilterState } from '../constants';
@@ -23,10 +14,7 @@ export default {
     GlPopover,
     GlLink,
     GlAvatar,
-    GlDeprecatedButton,
-    GlIcon,
-    GlLoadingIcon,
-    RequirementForm,
+    GlButton,
     RequirementStatusBadge,
   },
   directives: {
@@ -48,16 +36,6 @@ export default {
           'author',
           'testReports',
         ].every(prop => value[prop]),
-    },
-    showUpdateForm: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    updateRequirementRequestActive: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     stateChangeRequestActive: {
       type: Boolean,
@@ -110,9 +88,6 @@ export default {
       }
       return '';
     },
-    handleUpdateRequirementSave(params) {
-      this.$emit('updateSave', params);
-    },
     handleArchiveClick() {
       this.$emit('archiveClick', {
         iid: this.requirement.iid,
@@ -131,14 +106,7 @@ export default {
 
 <template>
   <li class="issue requirement" :class="{ 'disabled-content': stateChangeRequestActive }">
-    <requirement-form
-      v-if="showUpdateForm"
-      :requirement="requirement"
-      :requirement-request-active="updateRequirementRequestActive"
-      @save="handleUpdateRequirementSave"
-      @cancel="$emit('updateCancel')"
-    />
-    <div v-else class="issue-box">
+    <div class="issue-box">
       <div class="issuable-info-container">
         <span class="issuable-reference text-muted d-none d-sm-block mr-2">{{ reference }}</span>
         <div class="issuable-main-info">
@@ -171,7 +139,7 @@ export default {
             class="d-block d-sm-none"
           />
         </div>
-        <div class="issuable-meta">
+        <div class="d-flex">
           <ul v-if="showIssuableMetaActions" class="controls flex-column flex-sm-row">
             <requirement-status-badge
               v-if="testReport"
@@ -180,36 +148,27 @@ export default {
               class="d-none d-sm-block"
             />
             <li v-if="canUpdate && !isArchived" class="requirement-edit d-sm-block">
-              <gl-deprecated-button
+              <gl-button
                 v-gl-tooltip
-                size="sm"
-                class="border-0"
+                icon="pencil"
                 :title="__('Edit')"
-                @click="$emit('editClick', requirement.iid)"
-              >
-                <gl-icon name="pencil" />
-              </gl-deprecated-button>
+                @click="$emit('editClick', requirement)"
+              />
             </li>
             <li v-if="canArchive && !isArchived" class="requirement-archive d-sm-block">
-              <gl-deprecated-button
+              <gl-button
+                v-if="!stateChangeRequestActive"
                 v-gl-tooltip
-                size="sm"
-                class="border-0"
+                icon="archive"
+                :loading="stateChangeRequestActive"
                 :title="__('Archive')"
                 @click="handleArchiveClick"
-              >
-                <gl-icon v-if="!stateChangeRequestActive" name="archive" />
-                <gl-loading-icon v-else />
-              </gl-deprecated-button>
+              />
             </li>
             <li v-if="canArchive && isArchived" class="requirement-reopen d-sm-block">
-              <gl-deprecated-button
-                size="xs"
-                class="p-2"
-                :loading="stateChangeRequestActive"
-                @click="handleReopenClick"
-                >{{ __('Reopen') }}</gl-deprecated-button
-              >
+              <gl-button :loading="stateChangeRequestActive" @click="handleReopenClick">{{
+                __('Reopen')
+              }}</gl-button>
             </li>
           </ul>
         </div>
@@ -222,7 +181,7 @@ export default {
         </div>
         <div class="gl-p-2 gl-w-full">
           <h5 class="gl-m-0">{{ author.name }}</h5>
-          <div class="gl-text-gray-700 gl-mb-3">@{{ author.username }}</div>
+          <div class="gl-text-gray-500 gl-mb-3">@{{ author.username }}</div>
         </div>
       </div>
     </gl-popover>

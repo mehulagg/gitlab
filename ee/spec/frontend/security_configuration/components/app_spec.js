@@ -2,7 +2,12 @@ import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import { GlAlert, GlLink } from '@gitlab/ui';
 import SecurityConfigurationApp from 'ee/security_configuration/components/app.vue';
+import FeatureStatus from 'ee/security_configuration/components/feature_status.vue';
+import ManageFeature from 'ee/security_configuration/components/manage_feature.vue';
 import stubChildren from 'helpers/stub_children';
+import { useLocalStorageSpy } from 'helpers/local_storage_helper';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import { generateFeatures } from './helpers';
 
 const propsData = {
   features: [],
@@ -11,7 +16,10 @@ const propsData = {
   autoDevopsHelpPagePath: 'http://autoDevopsHelpPagePath',
   autoDevopsPath: 'http://autoDevopsPath',
   helpPagePath: 'http://helpPagePath',
+  gitlabCiPresent: false,
+  gitlabCiHistoryPath: '/ci/history',
   autoFixSettingsProps: {},
+  createSastMergeRequestPath: 'http://createSastMergeRequestPath',
 };
 
 describe('Security Configuration App', () => {
@@ -34,22 +42,23 @@ describe('Security Configuration App', () => {
     );
   };
 
-  afterEach(() => {
-    wrapper.destroy();
+  beforeEach(() => {
+    localStorage.clear();
   });
 
-  const generateFeatures = n => {
-    return [...Array(n).keys()].map(i => ({
-      name: `name-feature-${i}`,
-      description: `description-feature-${i}`,
-      link: `link-feature-${i}`,
-      configured: i % 2 === 0,
-    }));
-  };
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
 
   const getPipelinesLink = () => wrapper.find({ ref: 'pipelinesLink' });
   const getFeaturesTable = () => wrapper.find({ ref: 'securityControlTable' });
+  const getFeaturesRows = () => getFeaturesTable().findAll('tbody tr');
   const getAlert = () => wrapper.find(GlAlert);
+  const getRowCells = row => {
+    const [feature, status, manage] = row.findAll('td').wrappers;
+    return { feature, status, manage };
+  };
 
   describe('header', () => {
     it.each`
@@ -69,29 +78,29 @@ describe('Security Configuration App', () => {
 
   describe('Auto DevOps alert', () => {
     describe.each`
-      gitlabCiPresent | autoDevopsEnabled | canEnableAutoDevops | sastConfigurationByClick | shouldShowAlert
-      ${false}        | ${false}          | ${true}             | ${true}                  | ${true}
-      ${true}         | ${false}          | ${true}             | ${true}                  | ${false}
-      ${false}        | ${true}           | ${true}             | ${true}                  | ${false}
-      ${false}        | ${false}          | ${false}            | ${true}                  | ${false}
-      ${false}        | ${false}          | ${true}             | ${false}                 | ${false}
+      gitlabCiPresent | autoDevopsEnabled | canEnableAutoDevops | dismissed | shouldShowAlert
+      ${false}        | ${false}          | ${true}             | ${false}  | ${true}
+      ${false}        | ${false}          | ${true}             | ${true}   | ${false}
+      ${true}         | ${false}          | ${true}             | ${false}  | ${false}
+      ${false}        | ${true}           | ${true}             | ${false}  | ${false}
+      ${false}        | ${false}          | ${false}            | ${false}  | ${false}
     `(
-      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled, canEnableAutoDevops is $canEnableAutoDevops, sastConfigurationByClick is $sastConfigurationByClick',
-      ({
-        gitlabCiPresent,
-        autoDevopsEnabled,
-        canEnableAutoDevops,
-        sastConfigurationByClick,
-        shouldShowAlert,
-      }) => {
+      'given gitlabCiPresent is $gitlabCiPresent, autoDevopsEnabled is $autoDevopsEnabled, dismissed is $dismissed, canEnableAutoDevops is $canEnableAutoDevops',
+      ({ gitlabCiPresent, autoDevopsEnabled, canEnableAutoDevops, dismissed, shouldShowAlert }) => {
         beforeEach(() => {
+          if (dismissed) {
+            localStorage.setItem(SecurityConfigurationApp.autoDevopsAlertStorageKey, 'true');
+          }
+
           createComponent({
             propsData: {
               gitlabCiPresent,
               autoDevopsEnabled,
               canEnableAutoDevops,
             },
-            provide: { glFeatures: { sastConfigurationByClick } },
+            stubs: {
+              LocalStorageSync,
+            },
           });
         });
 
@@ -116,12 +125,40 @@ describe('Security Configuration App', () => {
               title: 'Auto DevOps',
               primaryButtonText: 'Enable Auto DevOps',
               primaryButtonLink: propsData.autoDevopsPath,
-              dismissible: false,
             });
           });
         }
       },
     );
+
+    describe('dismissing the alert', () => {
+      useLocalStorageSpy();
+
+      beforeEach(() => {
+        createComponent({
+          propsData: {
+            gitlabCiPresent: false,
+            autoDevopsEnabled: false,
+            canEnableAutoDevops: true,
+          },
+          stubs: {
+            LocalStorageSync,
+          },
+        });
+
+        getAlert().vm.$emit('dismiss');
+      });
+
+      it('hides the alert', () => {
+        expect(getAlert().exists()).toBe(false);
+      });
+
+      it('saves dismissal in localStorage', () => {
+        expect(localStorage.setItem.mock.calls).toEqual([
+          [SecurityConfigurationApp.autoDevopsAlertStorageKey, 'true'],
+        ]);
+      });
+    });
   });
 
   describe('features table', () => {
@@ -131,15 +168,24 @@ describe('Security Configuration App', () => {
       createComponent({ propsData: { features } });
 
       expect(getFeaturesTable().classes('b-table-stacked-md')).toBeTruthy();
-      const rows = getFeaturesTable().findAll('tbody tr');
+      const rows = getFeaturesRows();
       expect(rows).toHaveLength(5);
 
       for (let i = 0; i < features.length; i += 1) {
-        const [feature, status] = rows.at(i).findAll('td').wrappers;
+        const { feature, status, manage } = getRowCells(rows.at(i));
         expect(feature.text()).toMatch(features[i].name);
         expect(feature.text()).toMatch(features[i].description);
-        expect(feature.find(GlLink).attributes('href')).toBe(features[i].link);
-        expect(status.text()).toMatch(features[i].configured ? 'Enabled' : 'Not yet enabled');
+        expect(status.find(FeatureStatus).props()).toEqual({
+          feature: features[i],
+          gitlabCiPresent: propsData.gitlabCiPresent,
+          gitlabCiHistoryPath: propsData.gitlabCiHistoryPath,
+        });
+        expect(manage.find(ManageFeature).props()).toEqual({
+          feature: features[i],
+          autoDevopsEnabled: propsData.autoDevopsEnabled,
+          createSastMergeRequestPath: propsData.createSastMergeRequestPath,
+        });
+        expect(feature.find(GlLink).props('href')).toBe(features[i].href);
       }
     });
   });

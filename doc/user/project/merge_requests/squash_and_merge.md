@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, concepts
 ---
 
@@ -24,6 +27,10 @@ Into a single commit on merge:
 
 ![A squashed commit followed by a merge commit](img/squash_squashed_commit.png)
 
+NOTE: **Note:**
+The squashed commit in this example is followed by a merge commit, because the merge method for this repository uses a merge commit. You can disable merge commits in
+**Project Settings > General > Merge requests > Merge method > Fast-forward merge**.
+
 The squashed commit's commit message will be either:
 
 - Taken from the first multi-line commit message in the merge.
@@ -35,9 +42,6 @@ This only takes effect if there are at least 2 commits. As there is nothing to s
 It can be customized before merging a merge request.
 
 ![A squash commit message editor](img/squash_mr_message.png)
-
-NOTE: **Note:**
-The squashed commit in this example is followed by a merge commit, as the merge method for this example repository uses a merge commit.
 
 Squashing also works with the fast-forward merge strategy, see [squashing and fast-forward merge](#squash-and-fast-forward-merge) for more details.
 
@@ -61,13 +65,26 @@ meaningful commit messages and:
 ## Enabling squash for a merge request
 
 Anyone who can create or edit a merge request can choose for it to be squashed
-on the merge request form:
+on the merge request form. Users can select or unselect the checkbox at the moment
+they are creating the merge request:
 
 ![Squash commits checkbox on edit form](img/squash_edit_form.png)
 
-This can then be overridden at the time of accepting the merge request:
+After the merge request is submitted, Squash and Merge can still be enabled or disabled
+by editing the merge request description:
+
+1. Scroll to the top of the merge request page and click **Edit**.
+1. Scroll down to the end of the merge request form and select the checkbox
+**Squash commits when merge request is accepted**.
+
+This setting can then be overridden at the time of accepting the merge request.
+At the end of the merge request widget, next to the **Merge** button, the **Squash commits** checkbox
+can be either selected or unselected:
 
 ![Squash commits checkbox on accept merge request form](img/squash_mr_widget.png)
+
+Note that Squash and Merge might not be available depending on the project's configuration
+for [Squash Commit Options](#squash-commits-options).
 
 ## Commit metadata for squashed commits
 
@@ -88,10 +105,12 @@ squashing can itself be considered equivalent to rebasing.
 ## Squash Commits Options
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17613) in GitLab 13.2.
-> - It's deployed behind a feature flag, disabled by default.
-> - It's disabled on GitLab.com.
-> - It's not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-squash-commit-options-core-only). **(CORE ONLY)**
+> - It was deployed behind a feature flag, disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39382) on GitLab 13.3.
+> - It's enabled on GitLab.com.
+> - It can be enabled per project.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-squash-commit-options). **(CORE ONLY)**
 
 With Squash Commits Options you can configure the behavior of Squash and Merge for your project.
 To set it up, navigate to your project's **Settings > General** and expand **Merge requests**.
@@ -116,10 +135,10 @@ squash commits locally through the command line and force-push to their remote b
 
 ### Enable or disable Squash Commit Options **(CORE ONLY)**
 
-Squash Commit Options is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
+Squash Commit Options is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it for your instance. Squash Commit Options can be enabled or disabled per-project.
+can opt to disable it.
 
 To enable it:
 
@@ -127,7 +146,7 @@ To enable it:
 # Instance-wide
 Feature.enable(:squash_options)
 # or by project
-Feature.enable(:squash_options, Project.find(<project id>))
+Feature.enable(:squash_options, Project.find(<project ID>))
 ```
 
 To disable it:
@@ -136,7 +155,7 @@ To disable it:
 # Instance-wide
 Feature.disable(:squash_options)
 # or by project
-Feature.disable(:squash_options, Project.find(<project id>))
+Feature.disable(:squash_options, Project.find(<project ID>))
 ```
 
 <!-- ## Troubleshooting

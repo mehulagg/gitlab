@@ -335,6 +335,24 @@ RSpec.describe Group do
     end
   end
 
+  describe '#vulnerability_historical_statistics' do
+    subject { group.vulnerability_historical_statistics }
+
+    let(:subgroup) { create(:group, parent: group) }
+    let(:group_project) { create(:project, namespace: group) }
+    let(:subgroup_project) { create(:project, namespace: subgroup) }
+    let(:archived_project) { create(:project, :archived, namespace: group) }
+    let(:deleted_project) { create(:project, pending_delete: true, namespace: group) }
+    let!(:group_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: group_project) }
+    let!(:subgroup_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: subgroup_project) }
+    let!(:archived_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: archived_project) }
+    let!(:deleted_vulnerability_historical_statistic) { create(:vulnerability_historical_statistic, project: deleted_project) }
+
+    it 'returns vulnerability scanners for all non-archived, non-deleted projects in the group and its subgroups' do
+      is_expected.to contain_exactly(group_vulnerability_historical_statistic, subgroup_vulnerability_historical_statistic)
+    end
+  end
+
   describe '#mark_ldap_sync_as_failed' do
     it 'sets the state to failed' do
       group.start_ldap_sync
@@ -643,8 +661,73 @@ RSpec.describe Group do
           stub_licensed_features(group_project_templates: false)
         end
 
-        it 'returns false unlicensed instance' do
+        it 'returns false for unlicensed instance' do
           is_expected.to be false
+        end
+      end
+    end
+  end
+
+  describe '#minimal_access_role_allowed?' do
+    subject { group.minimal_access_role_allowed? }
+
+    context 'licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+      end
+
+      it 'returns true for licensed instance' do
+        is_expected.to be true
+      end
+
+      it 'returns false for subgroup in licensed instance' do
+        expect(create(:group, parent: group).minimal_access_role_allowed?).to be false
+      end
+    end
+
+    context 'unlicensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+      end
+
+      it 'returns false unlicensed instance' do
+        is_expected.to be false
+      end
+    end
+  end
+
+  describe '#member?' do
+    subject { group.member?(user) }
+
+    let(:group) { create(:group) }
+    let(:user) { create(:user) }
+
+    context 'with `minimal_access_role` not licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: false)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'with `minimal_access_role` licensed' do
+      before do
+        stub_licensed_features(minimal_access_role: true)
+        create(:group_member, :minimal_access, user: user, source: group)
+      end
+
+      context 'when group is a subgroup' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when group is a top-level group' do
+        it { is_expected.to be_truthy }
+
+        it 'accepts higher level as argument' do
+          expect(group.member?(user, ::Gitlab::Access::DEVELOPER)).to be_falsey
         end
       end
     end
@@ -750,7 +833,7 @@ RSpec.describe Group do
   end
 
   describe '#self_or_ancestor_marked_for_deletion' do
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
         create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
@@ -761,7 +844,7 @@ RSpec.describe Group do
       end
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
@@ -809,12 +892,12 @@ RSpec.describe Group do
   describe '#marked_for_deletion?' do
     subject { group.marked_for_deletion? }
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when the group is marked for adjourned deletion' do
+      context 'when the group is marked for delayed deletion' do
         before do
           create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
         end
@@ -822,17 +905,17 @@ RSpec.describe Group do
         it { is_expected.to be_truthy }
       end
 
-      context 'when the group is not marked for adjourned deletion' do
+      context 'when the group is not marked for delayed deletion' do
         it { is_expected.to be_falsey }
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when the group is marked for adjourned deletion' do
+      context 'when the group is marked for delayed deletion' do
         before do
           create(:group_deletion_schedule, group: group, marked_for_deletion_on: 1.day.ago)
         end
@@ -840,7 +923,7 @@ RSpec.describe Group do
         it { is_expected.to be_falsey }
       end
 
-      context 'when the group is not marked for adjourned deletion' do
+      context 'when the group is not marked for delayed deletion' do
         it { is_expected.to be_falsey }
       end
     end
@@ -857,12 +940,12 @@ RSpec.describe Group do
       it { is_expected.to be_truthy }
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
 
-      context 'when adjourned deletion period is set to more than 0' do
+      context 'when delayed deletion period is set to more than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
@@ -870,7 +953,7 @@ RSpec.describe Group do
         it_behaves_like 'returns true'
       end
 
-      context 'when adjourned deletion period is set to 0' do
+      context 'when delayed deletion period is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end
@@ -879,12 +962,12 @@ RSpec.describe Group do
       end
     end
 
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
 
-      context 'when adjourned deletion period is set to more than 0' do
+      context 'when delayed deletion period is set to more than 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 1)
         end
@@ -892,7 +975,7 @@ RSpec.describe Group do
         it_behaves_like 'returns false'
       end
 
-      context 'when adjourned deletion period is set to 0' do
+      context 'when delayed deletion period is set to 0' do
         before do
           stub_application_setting(deletion_adjourned_period: 0)
         end
@@ -1028,25 +1111,5 @@ RSpec.describe Group do
     subject { group.owners_emails }
 
     it { is_expected.to match([user.email]) }
-  end
-
-  describe '#configure_project_deletion_mode_available?' do
-    using RSpec::Parameterized::TableSyntax
-
-    before do
-      stub_licensed_features(adjourned_deletion_for_projects_and_groups: licensed?)
-      stub_feature_flags(configure_project_deletion_mode: flag_enabled?)
-    end
-
-    where(:licensed?, :flag_enabled?, :result) do
-      true  | true  | true
-      true  | false | false
-      false | true  | false
-      false | false | false
-    end
-
-    with_them do
-      it { expect(group.configure_project_deletion_mode_available?).to be result }
-    end
   end
 end

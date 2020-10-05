@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import '~/behaviors/markdown/render_gfm';
-import { createStore } from '~/mr_notes/stores';
 import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { createStore } from '~/mr_notes/stores';
 import InlineDiffView from '~/diffs/components/inline_diff_view.vue';
 import diffFileMockData from '../mock_data/diff_file';
 import discussionsMockData from '../mock_data/diff_discussions';
@@ -30,8 +30,8 @@ describe('InlineDiffView', () => {
     it('should have rendered diff lines', () => {
       const el = component.$el;
 
-      expect(el.querySelectorAll('tr.line_holder').length).toEqual(5);
-      expect(el.querySelectorAll('tr.line_holder.new').length).toEqual(2);
+      expect(el.querySelectorAll('tr.line_holder').length).toEqual(8);
+      expect(el.querySelectorAll('tr.line_holder.new').length).toEqual(4);
       expect(el.querySelectorAll('tr.line_expansion.match').length).toEqual(1);
       expect(el.textContent.indexOf('Bad dates')).toBeGreaterThan(-1);
     });

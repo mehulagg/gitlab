@@ -23,22 +23,25 @@ exports[`SidebarDatePicker renders expected template 1`] = `
     <div
       class="float-right d-flex"
     >
-      <icon-stub
+      <gl-icon-stub
         class="help-icon gl-mr-2"
         name="question-o"
         size="16"
         tabindex="0"
       />
        
-      <gl-deprecated-button-stub
+      <gl-button-stub
+        buttontextclasses=""
+        category="primary"
         class="btn-sidebar-action"
-        size="md"
+        icon=""
+        size="medium"
         variant="link"
       >
         
         Edit
       
-      </gl-deprecated-button-stub>
+      </gl-button-stub>
        
       <!---->
     </div>
@@ -73,7 +76,7 @@ exports[`SidebarDatePicker renders expected template 1`] = `
     </div>
      
     <abbr
-      class="value-type-dynamic text-secondary d-flex prepend-top-10"
+      class="value-type-dynamic text-secondary d-flex gl-mt-3"
       data-html="true"
       data-original-title="Select an issue with milestone to set date"
       data-placement="bottom"

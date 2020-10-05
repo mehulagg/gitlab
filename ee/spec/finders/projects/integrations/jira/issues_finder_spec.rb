@@ -17,7 +17,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
 
     context 'when jira service integration does not have project_key' do
       it 'raises error' do
-        expect { subject }.to raise_error(Projects::Integrations::Jira::IntegrationError, 'Jira project key is not configured')
+        expect { subject }.to raise_error(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Jira project key is not configured')
       end
     end
 
@@ -27,7 +27,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
       end
 
       it 'raises error' do
-        expect { subject }.to raise_error(Projects::Integrations::Jira::IntegrationError, 'Jira service not configured.')
+        expect { subject }.to raise_error(Projects::Integrations::Jira::IssuesFinder::IntegrationError, 'Jira service not configured.')
       end
     end
 
@@ -48,7 +48,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesFinder do
         end
 
         it 'raises error', :aggregate_failures do
-          expect { subject }.to raise_error(Projects::Integrations::Jira::RequestError)
+          expect { subject }.to raise_error(Projects::Integrations::Jira::IssuesFinder::RequestError)
         end
       end
 

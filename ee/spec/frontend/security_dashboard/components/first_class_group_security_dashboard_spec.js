@@ -3,8 +3,6 @@ import { GlLoadingIcon } from '@gitlab/ui';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import FirstClassGroupDashboard from 'ee/security_dashboard/components/first_class_group_security_dashboard.vue';
 import FirstClassGroupVulnerabilities from 'ee/security_dashboard/components/first_class_group_security_dashboard_vulnerabilities.vue';
-import VulnerabilitySeverity from 'ee/security_dashboard/components/vulnerability_severity.vue';
-import VulnerabilityChart from 'ee/security_dashboard/components/first_class_vulnerability_chart.vue';
 import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
@@ -15,13 +13,10 @@ describe('First Class Group Dashboard Component', () => {
   const dashboardDocumentation = 'dashboard-documentation';
   const emptyStateSvgPath = 'empty-state-path';
   const groupFullPath = 'group-full-path';
-  const vulnerableProjectsEndpoint = '/vulnerable/projects';
   const vulnerabilitiesExportEndpoint = '/vulnerabilities/exports';
 
   const findDashboardLayout = () => wrapper.find(SecurityDashboardLayout);
   const findGroupVulnerabilities = () => wrapper.find(FirstClassGroupVulnerabilities);
-  const findVulnerabilitySeverity = () => wrapper.find(VulnerabilitySeverity);
-  const findVulnerabilityChart = () => wrapper.find(VulnerabilityChart);
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
   const findFilters = () => wrapper.find(Filters);
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
@@ -33,7 +28,6 @@ describe('First Class Group Dashboard Component', () => {
         dashboardDocumentation,
         emptyStateSvgPath,
         groupFullPath,
-        vulnerableProjectsEndpoint,
         vulnerabilitiesExportEndpoint,
       },
       data,
@@ -68,7 +62,7 @@ describe('First Class Group Dashboard Component', () => {
   describe('when has projects', () => {
     beforeEach(() => {
       wrapper = createWrapper({
-        data: () => ({ projects: [{ id: 1 }], projectsWereFetched: true }),
+        data: () => ({ projects: [{ id: 1, name: 'GitLab Org' }], projectsWereFetched: true }),
       });
     });
 
@@ -83,16 +77,9 @@ describe('First Class Group Dashboard Component', () => {
       expect(findFilters().exists()).toBe(true);
     });
 
-    it('has the vulnerability history chart', () => {
-      expect(findVulnerabilityChart().props('groupFullPath')).toBe(groupFullPath);
-    });
-
-    it('responds to the projectFetch event', () => {
+    it('loads projects from data', () => {
       const projects = [{ id: 1, name: 'GitLab Org' }];
-      findGroupVulnerabilities().vm.$listeners.projectFetch(projects);
-      return wrapper.vm.$nextTick(() => {
-        expect(findFilters().props('projects')).toEqual(projects);
-      });
+      expect(findFilters().props('projects')).toEqual(projects);
     });
 
     it('responds to the filterChange event', () => {
@@ -102,10 +89,6 @@ describe('First Class Group Dashboard Component', () => {
         expect(wrapper.vm.filters).toEqual(filters);
         expect(findGroupVulnerabilities().props('filters')).toEqual(filters);
       });
-    });
-
-    it('displays the vulnerability severity in an aside', () => {
-      expect(findVulnerabilitySeverity().exists()).toBe(true);
     });
 
     it('displays the csv export button', () => {

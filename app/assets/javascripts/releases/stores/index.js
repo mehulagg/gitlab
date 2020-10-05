@@ -1,10 +1,9 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
-
-Vue.use(Vuex);
+import * as getters from './getters';
 
 export default ({ modules, featureFlags }) =>
   new Vuex.Store({
     modules,
     state: { featureFlags },
+    getters,
   });

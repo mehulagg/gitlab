@@ -1,6 +1,0 @@
----
-title: Fix confidentiality note on epic's comment field to display the correct warning
-  text
-merge_request: 33486
-author:
-type: fixed

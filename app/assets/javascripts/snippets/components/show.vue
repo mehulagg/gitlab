@@ -1,26 +1,43 @@
 <script>
-import BlobEmbeddable from '~/blob/components/blob_embeddable.vue';
+import { GlLoadingIcon } from '@gitlab/ui';
+import EmbedDropdown from './embed_dropdown.vue';
 import SnippetHeader from './snippet_header.vue';
 import SnippetTitle from './snippet_title.vue';
 import SnippetBlob from './snippet_blob_view.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
+import CloneDropdownButton from '~/vue_shared/components/clone_dropdown.vue';
+import { SNIPPET_VISIBILITY_PUBLIC } from '~/snippets/constants';
+import {
+  SNIPPET_MARK_VIEW_APP_START,
+  SNIPPET_MEASURE_BLOBS_CONTENT,
+} from '~/performance_constants';
+import { performanceMarkAndMeasure } from '~/performance_utils';
+import eventHub from '~/blob/components/eventhub';
 
 import { getSnippetMixin } from '../mixins/snippets';
-import { SNIPPET_VISIBILITY_PUBLIC } from '~/snippets/constants';
+import { markBlobPerformance } from '../utils/blob';
+
+eventHub.$on(SNIPPET_MEASURE_BLOBS_CONTENT, markBlobPerformance);
 
 export default {
   components: {
-    BlobEmbeddable,
+    EmbedDropdown,
     SnippetHeader,
     SnippetTitle,
     GlLoadingIcon,
     SnippetBlob,
+    CloneDropdownButton,
   },
   mixins: [getSnippetMixin],
   computed: {
     embeddable() {
       return this.snippet.visibilityLevel === SNIPPET_VISIBILITY_PUBLIC;
     },
+    canBeCloned() {
+      return Boolean(this.snippet.sshUrlToRepo || this.snippet.httpUrlToRepo);
+    },
+  },
+  beforeCreate() {
+    performanceMarkAndMeasure({ mark: SNIPPET_MARK_VIEW_APP_START });
   },
 };
 </script>
@@ -30,15 +47,26 @@ export default {
       v-if="isLoading"
       :label="__('Loading snippet')"
       size="lg"
-      class="loading-animation prepend-top-20 append-bottom-20"
+      class="loading-animation prepend-top-20 gl-mb-6"
     />
     <template v-else>
       <snippet-header :snippet="snippet" />
       <snippet-title :snippet="snippet" />
-      <blob-embeddable v-if="embeddable" class="gl-mb-5" :url="snippet.webUrl" />
-      <div v-for="blob in blobs" :key="blob.path">
-        <snippet-blob :snippet="snippet" :blob="blob" />
+      <div class="gl-display-flex gl-justify-content-end gl-mb-5">
+        <embed-dropdown
+          v-if="embeddable"
+          :url="snippet.webUrl"
+          data-qa-selector="snippet_embed_dropdown"
+        />
+        <clone-dropdown-button
+          v-if="canBeCloned"
+          class="gl-ml-3"
+          :ssh-link="snippet.sshUrlToRepo"
+          :http-link="snippet.httpUrlToRepo"
+          data-qa-selector="clone_button"
+        />
       </div>
+      <snippet-blob v-for="blob in blobs" :key="blob.path" :snippet="snippet" :blob="blob" />
     </template>
   </div>
 </template>

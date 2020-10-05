@@ -34,7 +34,7 @@ module EE
       return {} unless issuable.is_a?(Issue)
 
       super.merge(
-        publishedIncidentUrl: StatusPage::Storage.details_url(issuable)
+        publishedIncidentUrl: ::Gitlab::StatusPage::Storage.details_url(issuable)
       )
     end
 

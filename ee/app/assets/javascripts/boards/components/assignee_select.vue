@@ -1,7 +1,6 @@
 <script>
-import { __ } from '~/locale';
-import '~/gl_dropdown';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { __ } from '~/locale';
 import UsersSelect from '~/users_select';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 
@@ -99,7 +98,7 @@ export default {
 
 <template>
   <div :class="wrapperClass" class="block">
-    <div class="title append-bottom-10">
+    <div class="title gl-mb-3">
       {{ label }}
       <button v-if="canEdit" type="button" class="edit-link btn btn-blank float-right">
         {{ __('Edit') }}
@@ -118,7 +117,7 @@ export default {
       <div v-else class="text-secondary">{{ anyUserText }}</div>
     </div>
 
-    <div class="selectbox" style="display: none">
+    <div class="selectbox" style="display: none;">
       <div class="dropdown">
         <button
           ref="dropdown"
@@ -133,16 +132,15 @@ export default {
           aria-expanded="false"
           type="button"
         >
-          <span class="dropdown-toggle-text"> {{ placeholderText }} </span>
+          <span class="dropdown-toggle-text">{{ placeholderText }}</span>
           <gl-icon
             name="chevron-down"
-            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-700"
+            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
             :size="16"
           />
         </button>
         <div
-          class="dropdown-menu dropdown-select dropdown-menu-paging
-dropdown-menu-user dropdown-menu-selectable dropdown-menu-author"
+          class="dropdown-menu dropdown-select dropdown-menu-paging dropdown-menu-user dropdown-menu-selectable dropdown-menu-author"
         >
           <div class="dropdown-input">
             <input
@@ -153,15 +151,17 @@ dropdown-menu-user dropdown-menu-selectable dropdown-menu-author"
             />
             <gl-icon
               name="search"
-              class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-500 gl-pointer-events-none"
+              class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-300 gl-pointer-events-none"
             />
             <gl-icon
               name="close"
-              class="dropdown-input-clear js-dropdown-input-clear gl-absolute gl-top-3 gl-right-5 gl-text-gray-700"
+              class="dropdown-input-clear js-dropdown-input-clear gl-absolute gl-top-3 gl-right-5 gl-text-gray-500"
             />
           </div>
           <div class="dropdown-content"></div>
-          <div class="dropdown-loading"><gl-loading-icon /></div>
+          <div class="dropdown-loading">
+            <gl-loading-icon />
+          </div>
         </div>
       </div>
     </div>

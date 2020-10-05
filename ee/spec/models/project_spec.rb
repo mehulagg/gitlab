@@ -34,6 +34,9 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_feedback) }
     it { is_expected.to have_many(:vulnerability_exports) }
     it { is_expected.to have_many(:vulnerability_scanners) }
+    it { is_expected.to have_many(:dast_site_profiles) }
+    it { is_expected.to have_many(:dast_site_tokens) }
+    it { is_expected.to have_many(:dast_sites) }
     it { is_expected.to have_many(:audit_events).dependent(false) }
     it { is_expected.to have_many(:protected_environments) }
     it { is_expected.to have_many(:approvers).dependent(:destroy) }
@@ -43,9 +46,69 @@ RSpec.describe Project do
     it { is_expected.to have_many(:upstream_projects) }
     it { is_expected.to have_many(:downstream_project_subscriptions) }
     it { is_expected.to have_many(:downstream_projects) }
+    it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
 
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
+    it { is_expected.to have_many(:approval_rules) }
+
+    describe 'approval_rules association' do
+      let_it_be(:rule, reload: true) { create(:approval_project_rule) }
+      let(:project) { rule.project }
+      let(:branch) { 'stable' }
+
+      describe '#applicable_to_branch' do
+        subject { project.approval_rules.applicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to eq([rule]) }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+
+      describe '#inapplicable_to_branch' do
+        subject { project.approval_rules.inapplicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+    end
   end
 
   context 'scopes' do
@@ -79,36 +142,6 @@ RSpec.describe Project do
 
         expect(described_class.with_active_services).to include(active_service.project)
         expect(described_class.with_active_services).not_to include(inactive_service.project)
-      end
-    end
-
-    describe '.with_active_jira_services' do
-      it 'returns the correct project' do
-        active_jira_service = create(:jira_service)
-        active_service = create(:service, active: true)
-
-        expect(described_class.with_active_jira_services).to include(active_jira_service.project)
-        expect(described_class.with_active_jira_services).not_to include(active_service.project)
-      end
-    end
-
-    describe '.with_jira_dvcs_cloud' do
-      it 'returns the correct project' do
-        jira_dvcs_cloud_project = create(:project, :jira_dvcs_cloud)
-        jira_dvcs_server_project = create(:project, :jira_dvcs_server)
-
-        expect(described_class.with_jira_dvcs_cloud).to include(jira_dvcs_cloud_project)
-        expect(described_class.with_jira_dvcs_cloud).not_to include(jira_dvcs_server_project)
-      end
-    end
-
-    describe '.with_jira_dvcs_server' do
-      it 'returns the correct project' do
-        jira_dvcs_server_project = create(:project, :jira_dvcs_server)
-        jira_dvcs_cloud_project = create(:project, :jira_dvcs_cloud)
-
-        expect(described_class.with_jira_dvcs_server).to include(jira_dvcs_server_project)
-        expect(described_class.with_jira_dvcs_server).not_to include(jira_dvcs_cloud_project)
       end
     end
 
@@ -214,6 +247,28 @@ RSpec.describe Project do
 
       it { is_expected.to contain_exactly(project_1) }
     end
+
+    describe '.has_vulnerability_statistics' do
+      let_it_be(:project_1) { create(:project) }
+      let_it_be(:project_2) { create(:project) }
+
+      before do
+        create(:vulnerability_statistic, project: project_1)
+      end
+
+      subject { described_class.has_vulnerability_statistics }
+
+      it { is_expected.to contain_exactly(project_1) }
+    end
+
+    describe '.not_aimed_for_deletion' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:delayed_deletion_project) { create(:project, marked_for_deletion_at: Date.current) }
+
+      it do
+        expect(described_class.not_aimed_for_deletion).to contain_exactly(project)
+      end
+    end
   end
 
   describe 'validations' do
@@ -275,11 +330,11 @@ RSpec.describe Project do
   describe 'setting up a mirror' do
     context 'when new project' do
       it 'creates import_state and sets next_execution_timestamp to now' do
-        project = build(:project, :mirror)
+        project = build(:project, :mirror, creator: create(:user))
 
         Timecop.freeze do
           expect do
-            project.save
+            project.save!
           end.to change { ProjectImportState.count }.by(1)
 
           expect(project.import_state.next_execution_timestamp).to be_like_time(Time.current)
@@ -488,68 +543,31 @@ RSpec.describe Project do
 
   context 'merge requests related settings' do
     shared_examples 'setting modified by application setting' do
-      context 'when compliance merge request approval settings feature flag is enabled' do
-        using RSpec::Parameterized::TableSyntax
-
-        where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
-          true     | true      | true   | true
-          false    | true      | true   | false
-          true     | false     | true   | true
-          false    | false     | true   | false
-          true     | true      | false  | true
-          false    | true      | false  | true
-          true     | false     | false  | false
-          false    | false     | false  | false
-        end
-
-        with_them do
-          let(:project) { create(:project) }
-
-          before do
-            stub_feature_flags(project_compliance_merge_request_approval_settings: true)
-            stub_licensed_features(admin_merge_request_approvers_rules: true)
-
-            allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
-            stub_application_setting(application_setting => app_setting)
-            project.update(setting => project_setting)
-          end
-
-          it 'shows proper setting' do
-            expect(project.send(setting)).to eq(final_setting)
-            expect(project.send("#{setting}?")).to eq(final_setting)
-          end
-        end
+      where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
+        true  | true  | true  | true
+        false | true  | true  | false
+        true  | false | true  | true
+        false | false | true  | false
+        true  | true  | false | true
+        false | true  | false | true
+        true  | false | false | false
+        false | false | false | false
       end
 
-      context 'when compliance merge request approval settings feature flag is disabled' do
-        using RSpec::Parameterized::TableSyntax
+      with_them do
+        let(:project) { create(:project) }
 
-        where(:app_setting, :project_setting, :feature_enabled, :final_setting) do
-          true     | true      | true   | true
-          false    | true      | true   | true
-          true     | false     | true   | true
-          false    | false     | true   | false
-          true     | true      | false  | true
-          false    | true      | false  | true
-          true     | false     | false  | false
-          false    | false     | false  | false
+        before do
+          stub_licensed_features(admin_merge_request_approvers_rules: true)
+
+          allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
+          stub_application_setting(application_setting => app_setting)
+          project.update(setting => project_setting)
         end
 
-        with_them do
-          let(:project) { create(:project) }
-
-          before do
-            stub_feature_flags(project_compliance_merge_request_approval_settings: false)
-
-            stub_licensed_features(feature => feature_enabled)
-            stub_application_setting(application_setting => app_setting)
-            project.update(setting => project_setting)
-          end
-
-          it 'shows proper setting' do
-            expect(project.send(setting)).to eq(final_setting)
-            expect(project.send("#{setting}?")).to eq(final_setting)
-          end
+        it 'shows proper setting' do
+          expect(project.send(setting)).to eq(final_setting)
+          expect(project.send("#{setting}?")).to eq(final_setting)
         end
       end
     end
@@ -576,75 +594,40 @@ RSpec.describe Project do
       let(:setting) { :merge_requests_author_approval }
       let(:application_setting) { :prevent_merge_requests_author_approval }
 
-      context 'when compliance merge request approval settings feature flag is enabled' do
-        using RSpec::Parameterized::TableSyntax
-
-        where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
-          true     | true      | true   | false
-          false    | true      | true   | true
-          true     | false     | true   | false
-          false    | false     | true   | true
-          true     | true      | false  | true
-          false    | true      | false  | true
-          true     | false     | false  | false
-          false    | false     | false  | false
-        end
-
-        with_them do
-          let(:project) { create(:project) }
-
-          before do
-            stub_feature_flags(project_compliance_merge_request_approval_settings: true)
-            stub_licensed_features(admin_merge_request_approvers_rules: true)
-
-            allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
-            stub_application_setting(application_setting => app_setting)
-            project.update(setting => project_setting)
-          end
-
-          it 'shows proper setting' do
-            expect(project.send(setting)).to eq(final_setting)
-            expect(project.send("#{setting}?")).to eq(final_setting)
-          end
-        end
+      where(:app_setting, :project_setting, :regulated_settings, :final_setting) do
+        true  | true  | true  | false
+        false | true  | true  | true
+        true  | false | true  | false
+        false | false | true  | true
+        true  | true  | false | true
+        false | true  | false | true
+        true  | false | false | false
+        false | false | false | false
       end
 
-      context 'when compliance merge request approval settings feature flag is disabled' do
-        using RSpec::Parameterized::TableSyntax
+      with_them do
+        let(:project) { create(:project) }
 
-        where(:app_setting, :project_setting, :feature_enabled, :final_setting) do
-          true     | true      | true   | false
-          false    | true      | true   | true
-          true     | false     | true   | false
-          false    | false     | true   | false
-          true     | true      | false  | true
-          false    | true      | false  | true
-          true     | false     | false  | false
-          false    | false     | false  | false
+        before do
+          stub_licensed_features(admin_merge_request_approvers_rules: true)
+
+          allow(project).to receive(:has_regulated_settings?).and_return(regulated_settings)
+          stub_application_setting(application_setting => app_setting)
+          project.update(setting => project_setting)
         end
 
-        with_them do
-          before do
-            stub_feature_flags(project_compliance_merge_request_approval_settings: false)
-
-            stub_licensed_features(feature => feature_enabled)
-            stub_application_setting(application_setting => app_setting)
-            project.update(setting => project_setting)
-          end
-
-          it 'shows proper setting' do
-            expect(project.send(setting)).to eq(final_setting)
-            expect(project.send("#{setting}?")).to eq(final_setting)
-          end
+        it 'shows proper setting' do
+          expect(project.send(setting)).to eq(final_setting)
+          expect(project.send("#{setting}?")).to eq(final_setting)
         end
       end
     end
   end
 
   describe '#has_regulated_settings?' do
-    let_it_be(:framework) { ComplianceManagement::ComplianceFramework::FRAMEWORKS.first }
-    let_it_be(:compliance_framework_setting) { create(:compliance_framework_project_setting, framework: framework.first.to_s) }
-    let_it_be(:project) { create(:project, compliance_framework_setting: compliance_framework_setting) }
+    let(:framework) { ComplianceManagement::ComplianceFramework::FRAMEWORKS.first }
+    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, framework: framework.first.to_s) }
+    let(:project) { build(:project, compliance_framework_setting: compliance_framework_setting) }
 
     subject { project.has_regulated_settings? }
 
@@ -665,7 +648,7 @@ RSpec.describe Project do
     end
 
     context 'project does not have compliance framework' do
-      let_it_be(:project) { create(:project) }
+      let(:project) { build(:project) }
 
       it { is_expected.to be_falsey }
     end
@@ -885,17 +868,6 @@ RSpec.describe Project do
                 it 'returns false' do
                   is_expected.to eq(false)
                 end
-              end
-
-              context 'with promo feature flag' do
-                let(:allowed_on_global_license) { true }
-
-                before do
-                  project.clear_memoization(:licensed_feature_available)
-                  stub_feature_flags("promo_#{feature}" => true)
-                end
-
-                it { is_expected.to be_truthy }
               end
             end
           end
@@ -1176,13 +1148,16 @@ RSpec.describe Project do
     let(:project) { create(:project) }
     let!(:approval_rules) { create_list(:approval_project_rule, 2, project: project) }
     let!(:any_approver_rule) { create(:approval_project_rule, rule_type: :any_approver, project: project) }
+    let(:branch) { nil }
+
+    subject { project.visible_user_defined_rules(branch: branch) }
 
     before do
       stub_licensed_features(multiple_approval_rules: true)
     end
 
     it 'returns all approval rules' do
-      expect(project.visible_user_defined_rules).to eq([any_approver_rule, *approval_rules])
+      expect(subject).to eq([any_approver_rule, *approval_rules])
     end
 
     context 'when multiple approval rules is not available' do
@@ -1191,7 +1166,19 @@ RSpec.describe Project do
       end
 
       it 'returns the first approval rule' do
-        expect(project.visible_user_defined_rules).to eq([any_approver_rule])
+        expect(subject).to eq([any_approver_rule])
+      end
+    end
+
+    context 'when branch is provided' do
+      let(:branch) { 'master' }
+
+      it 'caches the rules' do
+        expect(project).to receive(:user_defined_rules).and_call_original
+        subject
+
+        expect(project).not_to receive(:user_defined_rules)
+        subject
       end
     end
   end
@@ -1560,41 +1547,81 @@ RSpec.describe Project do
   end
 
   describe '#latest_pipeline_with_security_reports' do
-    let(:project) { create(:project) }
-    let!(:pipeline_1) { create(:ci_pipeline, project: project) }
-    let!(:pipeline_2) { create(:ci_pipeline, project: project) }
-    let!(:pipeline_3) { create(:ci_pipeline, project: project) }
+    let(:only_successful) { false }
 
-    subject { project.latest_pipeline_with_security_reports }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:pipeline_1) { create(:ci_pipeline, :success, project: project) }
+    let_it_be(:pipeline_2) { create(:ci_pipeline, project: project) }
+    let_it_be(:pipeline_3) { create(:ci_pipeline, :success, project: project) }
 
-    context 'when legacy reports are used' do
-      before do
-        create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
-        create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
+    subject { project.latest_pipeline_with_security_reports(only_successful: only_successful) }
+
+    context 'when all pipelines are used' do
+      context 'when legacy reports are used' do
+        before do
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
+        end
+
+        it 'returns the latest pipeline with security reports' do
+          is_expected.to eq(pipeline_2)
+        end
       end
 
-      it "returns the latest pipeline with security reports" do
-        is_expected.to eq(pipeline_2)
+      context 'when new reports are used' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :sast, pipeline: pipeline_2)
+        end
+
+        it 'returns the latest pipeline with security reports' do
+          is_expected.to eq(pipeline_2)
+        end
+
+        context 'when legacy used' do
+          before do
+            create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
+          end
+
+          it 'prefers the new reports' do
+            is_expected.to eq(pipeline_2)
+          end
+        end
       end
     end
 
-    context 'when new reports are used' do
-      before do
-        create(:ee_ci_build, :sast, pipeline: pipeline_1)
-        create(:ee_ci_build, :sast, pipeline: pipeline_2)
-      end
+    context 'when only successful pipelines are used' do
+      let(:only_successful) { true }
 
-      it "returns the latest pipeline with security reports" do
-        is_expected.to eq(pipeline_2)
-      end
-
-      context 'when legacy used' do
+      context 'when legacy reports are used' do
         before do
-          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
         end
 
-        it "prefers the new reports" do
-          is_expected.to eq(pipeline_2)
+        it "returns the latest succesful pipeline with security reports" do
+          is_expected.to eq(pipeline_1)
+        end
+      end
+
+      context 'when new reports are used' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline_1)
+          create(:ee_ci_build, :sast, pipeline: pipeline_2)
+        end
+
+        it 'returns the latest successful pipeline with security reports' do
+          is_expected.to eq(pipeline_1)
+        end
+
+        context 'when legacy used' do
+          before do
+            create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
+          end
+
+          it 'prefers the new reports' do
+            is_expected.to eq(pipeline_1)
+          end
         end
       end
     end
@@ -1715,80 +1742,86 @@ RSpec.describe Project do
   end
 
   describe '#after_import' do
-    let(:project) { create(:project) }
-    let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
-    let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
-    let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+    let_it_be(:project) { create(:project) }
 
-    before do
-      create(:import_state, project: project)
+    context 'Geo repository update events' do
+      let_it_be(:import_state) { create(:import_state, :started, project: project) }
+      let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+      let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+      let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
 
-      allow(::Geo::RepositoryUpdatedService)
-        .to receive(:new)
-        .with(project.repository)
-        .and_return(repository_updated_service)
-
-      allow(::Geo::RepositoryUpdatedService)
-        .to receive(:new)
-        .with(project.wiki.repository)
-        .and_return(wiki_updated_service)
-
-      allow(::Geo::RepositoryUpdatedService)
-        .to receive(:new)
-        .with(project.design_repository)
-        .and_return(design_updated_service)
-    end
-
-    it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
-      allow(Gitlab::Geo).to receive(:primary?).and_return(true)
-
-      expect(repository_updated_service).to receive(:execute).once
-      expect(wiki_updated_service).to receive(:execute).once
-      expect(design_updated_service).to receive(:execute).once
-
-      project.after_import
-    end
-
-    it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node' do
-      allow(Gitlab::Geo).to receive(:primary?).and_return(false)
-
-      expect(repository_updated_service).not_to receive(:execute)
-      expect(wiki_updated_service).not_to receive(:execute)
-
-      project.after_import
-    end
-
-    context 'elasticsearch indexing disabled for this project' do
       before do
-        expect(project).to receive(:use_elasticsearch?).and_return(false)
+        allow(::Geo::RepositoryUpdatedService)
+          .to receive(:new)
+          .with(project.repository)
+          .and_return(repository_updated_service)
+
+        allow(::Geo::RepositoryUpdatedService)
+          .to receive(:new)
+          .with(project.wiki.repository)
+          .and_return(wiki_updated_service)
+
+        allow(::Geo::RepositoryUpdatedService)
+          .to receive(:new)
+          .with(project.design_repository)
+          .and_return(design_updated_service)
       end
 
-      it 'does not index the wiki repository' do
-        expect(ElasticCommitIndexerWorker).not_to receive(:perform_async)
+      it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node', :aggregate_failures do
+        stub_primary_node
+
+        expect(repository_updated_service).to receive(:execute).once
+        expect(wiki_updated_service).to receive(:execute).once
+        expect(design_updated_service).to receive(:execute).once
+
+        project.after_import
+      end
+
+      it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node', :aggregate_failures do
+        expect(repository_updated_service).not_to receive(:execute)
+        expect(wiki_updated_service).not_to receive(:execute)
+        expect(design_updated_service).not_to receive(:execute)
 
         project.after_import
       end
     end
 
-    context 'elasticsearch indexing enabled for this project' do
-      before do
-        expect(project).to receive(:use_elasticsearch?).and_return(true)
-      end
+    context 'elasticsearch indexing' do
+      let_it_be(:import_state) { create(:import_state, project: project) }
 
-      it 'schedules a full index of the wiki repository' do
-        expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
-
-        project.after_import
-      end
-
-      context 'when project is forked' do
+      context 'elasticsearch indexing disabled for this project' do
         before do
-          expect(project).to receive(:forked?).and_return(true)
+          expect(project).to receive(:use_elasticsearch?).and_return(false)
         end
+
         it 'does not index the wiki repository' do
           expect(ElasticCommitIndexerWorker).not_to receive(:perform_async)
 
           project.after_import
+        end
+      end
+
+      context 'elasticsearch indexing enabled for this project' do
+        before do
+          expect(project).to receive(:use_elasticsearch?).and_return(true)
+        end
+
+        it 'schedules a full index of the wiki repository' do
+          expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+
+          project.after_import
+        end
+
+        context 'when project is forked' do
+          before do
+            expect(project).to receive(:forked?).and_return(true)
+          end
+
+          it 'does not index the wiki repository' do
+            expect(ElasticCommitIndexerWorker).not_to receive(:perform_async)
+
+            project.after_import
+          end
         end
       end
     end
@@ -2376,7 +2409,7 @@ RSpec.describe Project do
   end
 
   describe '#ancestor_marked_for_deletion' do
-    context 'adjourned deletion feature is not available' do
+    context 'delayed deletion feature is not available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: false)
       end
@@ -2394,7 +2427,7 @@ RSpec.describe Project do
       end
     end
 
-    context 'adjourned deletion feature is available' do
+    context 'delayed deletion feature is available' do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
       end
@@ -2461,18 +2494,6 @@ RSpec.describe Project do
       it { is_expected.to be result }
     end
 
-    context 'when configure_project_deletion_mode feature is disabled' do
-      before do
-        stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
-        stub_application_setting(deletion_adjourned_period: 7)
-        stub_feature_flags(configure_project_deletion_mode: false)
-      end
-
-      it 'adjourns deletion' do
-        is_expected.to be true
-      end
-    end
-
     context 'when project belongs to user namespace' do
       let_it_be(:user) { create(:user) }
       let_it_be(:user_project) { create(:project, namespace: user.namespace) }
@@ -2480,80 +2501,10 @@ RSpec.describe Project do
       before do
         stub_licensed_features(adjourned_deletion_for_projects_and_groups: true)
         stub_application_setting(deletion_adjourned_period: 7)
-        stub_feature_flags(configure_project_deletion_mode: feature_enabled?)
       end
 
-      context 'configure_project_deletion_mode is enabled' do
-        let(:feature_enabled?) { true }
-
-        it 'deletes immediately' do
-          expect(user_project.adjourned_deletion?).to be nil
-        end
-      end
-
-      context 'configure_project_deletion_mode is disabled' do
-        let(:feature_enabled?) { false }
-
-        it 'adjourns deletion' do
-          expect(user_project.adjourned_deletion?).to be true
-        end
-      end
-    end
-  end
-
-  describe '#has_packages?' do
-    let(:project) { create(:project, :public) }
-
-    subject { project.has_packages?(package_type) }
-
-    shared_examples 'returning true examples' do
-      let!(:package) { create("#{package_type}_package", project: project) }
-
-      it { is_expected.to be true }
-    end
-
-    shared_examples 'returning false examples' do
-      it { is_expected.to be false }
-    end
-
-    context 'with packages disabled' do
-      before do
-        stub_licensed_features(packages: false)
-      end
-
-      it_behaves_like 'returning false examples' do
-        let!(:package) { create(:maven_package, project: project) }
-        let(:package_type) { :maven }
-      end
-    end
-
-    context 'with packages enabled' do
-      before do
-        stub_licensed_features(packages: true)
-      end
-
-      context 'with maven packages' do
-        it_behaves_like 'returning true examples' do
-          let(:package_type) { :maven }
-        end
-      end
-
-      context 'with npm packages' do
-        it_behaves_like 'returning true examples' do
-          let(:package_type) { :npm }
-        end
-      end
-
-      context 'with conan packages' do
-        it_behaves_like 'returning true examples' do
-          let(:package_type) { :conan }
-        end
-      end
-
-      context 'with no package type' do
-        it_behaves_like 'returning false examples' do
-          let(:package_type) { nil }
-        end
+      it 'deletes immediately' do
+        expect(user_project.adjourned_deletion?).to be nil
       end
     end
   end
@@ -2619,24 +2570,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#jira_subscription_exists?' do
-    subject { project.jira_subscription_exists? }
-
-    context 'jira connect subscription exists' do
-      let!(:jira_connect_subscription) { create(:jira_connect_subscription, namespace: project.namespace) }
-
-      it { is_expected.to eq(false) }
-
-      context 'dev panel integration is available' do
-        before do
-          stub_licensed_features(jira_dev_panel_integration: true)
-        end
-
-        it { is_expected.to eq(true) }
-      end
-    end
-  end
-
   describe '#remove_import_data' do
     let(:import_data) { ProjectImportData.new(data: { 'test' => 'some data' }) }
 
@@ -2649,6 +2582,14 @@ RSpec.describe Project do
         expect(project.jira_import?).to be false
         expect { project.remove_import_data }.not_to change { ProjectImportData.count }
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 end

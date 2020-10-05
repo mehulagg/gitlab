@@ -27,11 +27,11 @@ export default {
       type: Object,
       required: true,
     },
-    milestonePath: {
+    labelsPath: {
       type: String,
       required: true,
     },
-    labelsPath: {
+    labelsWebUrl: {
       type: String,
       required: true,
     },
@@ -94,32 +94,35 @@ export default {
 
 <template>
   <div data-qa-selector="board_scope_modal">
-    <div v-if="canAdminBoard" class="media append-bottom-10">
-      <label class="form-section-title label-bold media-body">{{ __('Board scope') }}</label>
+    <div v-if="canAdminBoard" class="media">
+      <label class="form-section-title label-bold media-body">{{ __('Scope') }}</label>
       <button v-if="collapseScope" type="button" class="btn" @click="expanded = !expanded">
         {{ expandButtonText }}
       </button>
     </div>
-    <p class="text-secondary append-bottom-10">
+    <p class="text-secondary gl-mb-3">
       {{ __('Board scope affects which issues are displayed for anyone who visits this board') }}
     </p>
     <div v-if="!collapseScope || expanded">
       <board-milestone-select
         :board="board"
-        :milestone-path="milestonePath"
+        :group-id="groupId"
+        :project-id="projectId"
         :can-edit="canAdminBoard"
       />
 
       <board-labels-select
         :context="board"
         :labels-path="labelsPath"
+        :labels-web-url="labelsWebUrl"
         :can-edit="canAdminBoard"
+        :show-create="canAdminBoard"
         :enable-scoped-labels="enableScopedLabels"
+        variant="standalone"
         ability-name="issue"
         @onLabelClick="handleLabelClick"
+        >{{ __('Any label') }}</board-labels-select
       >
-        {{ __('Any label') }}
-      </board-labels-select>
 
       <assignee-select
         :board="board"

@@ -24,7 +24,7 @@ RSpec.describe SubscriptionPresenter do
     it 'remaining days more than 30 is false' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 4, 9, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to be false
       end
     end
@@ -32,7 +32,7 @@ RSpec.describe SubscriptionPresenter do
     it 'remaining days less than 30 is true' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 3, 9, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to be true
       end
     end
@@ -47,27 +47,79 @@ RSpec.describe SubscriptionPresenter do
   describe '#block_changes_at' do
     subject { presenter.block_changes_at }
 
-    it { is_expected.to eq(subscription.end_date) }
+    it { is_expected.to eq(subscription.end_date + 14.days) }
+
+    context 'when end_date is nil' do
+      it 'is nil' do
+        allow(subscription).to receive(:end_date).and_return(nil)
+
+        expect(subject).to be nil
+      end
+    end
   end
 
   describe '#block_changes?' do
     subject { presenter.block_changes? }
 
-    it { is_expected.to be false }
+    let(:today) { Time.utc(2020, 3, 7, 10) }
+
+    before do
+      allow(subscription).to receive(:end_date).and_return(end_date)
+    end
+
+    context 'end_date is nil' do
+      let(:end_date) { nil }
+
+      it { is_expected.to be false }
+    end
+
+    context 'is not expired' do
+      let(:end_date) { today + 1.day }
+
+      it 'is false' do
+        travel_to(today) do
+          expect(subject).to be false
+        end
+      end
+    end
 
     context 'is expired' do
-      before do
-        allow(subscription).to receive(:expired?).and_return(true)
+      context 'is not past grace period' do
+        let(:end_date) { today - 13.days }
+
+        it 'is false' do
+          travel_to(today) do
+            expect(subject).to be false
+          end
+        end
       end
 
-      it { is_expected.to be true }
+      context 'is past grace period' do
+        let(:end_date) { today - 15.days }
+
+        it 'is true' do
+          travel_to(today) do
+            expect(subject).to be true
+          end
+        end
+      end
     end
   end
 
   describe '#will_block_changes?' do
     subject { presenter.will_block_changes? }
 
-    it { is_expected.to be true }
+    context 'when end_date exists' do
+      it { is_expected.to be true }
+    end
+
+    context 'when end_date does not exist' do
+      it 'is false' do
+        allow(subscription).to receive(:end_date).and_return(nil)
+
+        expect(subject).to be false
+      end
+    end
   end
 
   describe '#remaining_days' do
@@ -84,8 +136,16 @@ RSpec.describe SubscriptionPresenter do
     it 'returns the number of days between end_date and today' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 3, 9, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to eq(2)
+      end
+    end
+
+    it 'is 0 if expired' do
+      allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 3, 1, 10).to_date)
+
+      travel_to(today) do
+        expect(subject).to eq(0)
       end
     end
   end

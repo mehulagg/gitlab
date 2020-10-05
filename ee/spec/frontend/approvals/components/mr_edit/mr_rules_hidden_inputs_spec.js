@@ -62,7 +62,7 @@ describe('EE Approvlas MRRulesHiddenInputs', () => {
     it('is empty', () => {
       factory();
 
-      expect(wrapper.isEmpty()).toBe(true);
+      expect(wrapper.html()).toBe('');
     });
   });
 

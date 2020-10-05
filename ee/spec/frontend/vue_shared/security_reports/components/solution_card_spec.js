@@ -53,11 +53,11 @@ describe('Solution Card', () => {
       });
 
       it('does not render the card footer', () => {
-        expect(wrapper.contains('.card-footer')).toBe(false);
+        expect(wrapper.find('.card-footer').exists()).toBe(false);
       });
 
       it('does not render the download link', () => {
-        expect(wrapper.contains('a')).toBe(false);
+        expect(wrapper.find('a').exists()).toBe(false);
       });
     });
 
@@ -74,7 +74,7 @@ describe('Solution Card', () => {
       });
 
       it('renders the card footer', () => {
-        expect(wrapper.contains('.card-footer')).toBe(true);
+        expect(wrapper.find('.card-footer').exists()).toBe(true);
       });
 
       describe('with download patch', () => {
@@ -92,7 +92,7 @@ describe('Solution Card', () => {
         it('does not render the download and apply solution message when there is a file download and a merge request already exists', () => {
           wrapper.setProps({ hasMr: true });
           return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.contains('.card-footer')).toBe(false);
+            expect(wrapper.find('.card-footer').exists()).toBe(false);
           });
         });
 

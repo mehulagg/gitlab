@@ -264,10 +264,12 @@ RSpec.describe Clusters::ClusterPresenter do
       it do
         is_expected.to include('clusters-path': clusterable_presenter.index_path,
                              'dashboard-endpoint': clusterable_presenter.metrics_dashboard_path(cluster),
-                             'documentation-path': help_page_path('user/project/clusters/index', anchor: 'monitoring-your-kubernetes-cluster-ultimate'),
+                             'documentation-path': help_page_path('user/project/clusters/index', anchor: 'monitoring-your-kubernetes-cluster'),
+                             'add-dashboard-documentation-path': help_page_path('operations/metrics/dashboards/index.md', anchor: 'add-a-new-dashboard-to-your-project'),
                              'empty-getting-started-svg-path': match_asset_path('/assets/illustrations/monitoring/getting_started.svg'),
                              'empty-loading-svg-path': match_asset_path('/assets/illustrations/monitoring/loading.svg'),
                              'empty-no-data-svg-path': match_asset_path('/assets/illustrations/monitoring/no_data.svg'),
+                             'empty-no-data-small-svg-path': match_asset_path('illustrations/chart-empty-state-small.svg'),
                              'empty-unable-to-connect-svg-path': match_asset_path('/assets/illustrations/monitoring/unable_to_connect.svg'),
                              'settings-path': '',
                              'project-path': '',
@@ -299,7 +301,17 @@ RSpec.describe Clusters::ClusterPresenter do
       end
 
       it 'returns path to logs' do
-        expect(presenter.gitlab_managed_apps_logs_path).to eq project_logs_path(project, cluster_id: cluster.id)
+        expect(presenter.gitlab_managed_apps_logs_path).to eq k8s_project_logs_path(project, cluster_id: cluster.id, format: :json)
+      end
+
+      context 'cluster has elastic stack application installed' do
+        before do
+          create(:clusters_applications_elastic_stack, :installed, cluster: cluster)
+        end
+
+        it 'returns path to logs' do
+          expect(presenter.gitlab_managed_apps_logs_path).to eq elasticsearch_project_logs_path(project, cluster_id: cluster.id, format: :json)
+        end
       end
     end
 
@@ -316,7 +328,7 @@ RSpec.describe Clusters::ClusterPresenter do
           let!(:project) { create(:project, namespace: group) }
 
           it 'returns path to logs' do
-            expect(presenter.gitlab_managed_apps_logs_path).to eq project_logs_path(project, cluster_id: cluster.id)
+            expect(presenter.gitlab_managed_apps_logs_path).to eq k8s_project_logs_path(project, cluster_id: cluster.id, format: :json)
           end
         end
 
@@ -340,7 +352,7 @@ RSpec.describe Clusters::ClusterPresenter do
 
       context 'user can read logs' do
         it 'returns path to logs' do
-          expect(presenter.gitlab_managed_apps_logs_path).to eq project_logs_path(project, cluster_id: cluster.id)
+          expect(presenter.gitlab_managed_apps_logs_path).to eq k8s_project_logs_path(project, cluster_id: cluster.id, format: :json)
         end
       end
     end

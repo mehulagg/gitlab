@@ -1,41 +1,40 @@
-import Vue from 'vue';
-
-import geoNodeActionsComponent from 'ee/geo_nodes/components/geo_node_actions.vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
+import { shallowMount } from '@vue/test-utils';
+import GeoNodeActionsComponent from 'ee/geo_nodes/components/geo_node_actions.vue';
+import { GlButton } from '@gitlab/ui';
 import eventHub from 'ee/geo_nodes/event_hub';
 import { NODE_ACTIONS } from 'ee/geo_nodes/constants';
 import { mockNodes } from '../mock_data';
 
 jest.mock('ee/geo_nodes/event_hub');
 
-const createComponent = (
-  node = mockNodes[0],
-  nodeEditAllowed = true,
-  nodeActionsAllowed = true,
-  nodeRemovalAllowed = true,
-  nodeMissingOauth = false,
-) => {
-  const Component = Vue.extend(geoNodeActionsComponent);
-
-  return mountComponent(Component, {
-    node,
-    nodeEditAllowed,
-    nodeActionsAllowed,
-    nodeRemovalAllowed,
-    nodeMissingOauth,
-  });
-};
-
 describe('GeoNodeActionsComponent', () => {
-  let vm;
+  let wrapper;
 
-  beforeEach(() => {
-    vm = createComponent();
-  });
+  const defaultProps = {
+    node: mockNodes[0],
+    nodeEditAllowed: true,
+    nodeActionsAllowed: true,
+    nodeRemovalAllowed: true,
+    nodeMissingOauth: false,
+  };
+
+  const createComponent = (props = {}) => {
+    wrapper = shallowMount(GeoNodeActionsComponent, {
+      propsData: {
+        ...defaultProps,
+        ...props,
+      },
+    });
+  };
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
+
+  const findGeoNodeActionsComponent = () => wrapper.find('[data-testid="nodeActions"]');
+  const findNodeActions = () => wrapper.findAll(GlButton);
+  const findRemoveButton = () => wrapper.find('[data-testid="removeButton"]');
 
   describe('computed', () => {
     describe('disabledRemovalTooltip', () => {
@@ -45,11 +44,11 @@ describe('GeoNodeActionsComponent', () => {
         ${false}           | ${'Cannot remove a primary node if there is a secondary node'}
       `('when nodeRemovalAllowed is $nodeRemovalAllowed', ({ nodeRemovalAllowed, tooltip }) => {
         beforeEach(() => {
-          vm = createComponent(mockNodes[0], true, true, nodeRemovalAllowed, false);
+          createComponent({ nodeRemovalAllowed });
         });
 
         it('renders the correct tooltip', () => {
-          const tip = vm.$el.querySelector('div[name=disabledRemovalTooltip]');
+          const tip = wrapper.vm.$el.querySelector('div[name=disabledRemovalTooltip]');
           expect(tip.title).toBe(tooltip);
         });
       });
@@ -57,13 +56,17 @@ describe('GeoNodeActionsComponent', () => {
   });
 
   describe('methods', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
     describe('onRemovePrimaryNode', () => {
       it('emits showNodeActionModal with actionType `remove`, node reference, modalKind, modalMessage, modalActionLabel, and modalTitle', () => {
-        vm.onRemovePrimaryNode();
+        wrapper.vm.onRemovePrimaryNode();
 
         expect(eventHub.$emit).toHaveBeenCalledWith('showNodeActionModal', {
           actionType: NODE_ACTIONS.REMOVE,
-          node: vm.node,
+          node: wrapper.vm.node,
           modalKind: 'danger',
           modalMessage:
             'Removing a Geo primary node stops the synchronization to all nodes. Are you sure?',
@@ -75,11 +78,11 @@ describe('GeoNodeActionsComponent', () => {
 
     describe('onRemoveSecondaryNode', () => {
       it('emits showNodeActionModal with actionType `remove`, node reference, modalKind, modalMessage, modalActionLabel, and modalTitle', () => {
-        vm.onRemoveSecondaryNode();
+        wrapper.vm.onRemoveSecondaryNode();
 
         expect(eventHub.$emit).toHaveBeenCalledWith('showNodeActionModal', {
           actionType: NODE_ACTIONS.REMOVE,
-          node: vm.node,
+          node: wrapper.vm.node,
           modalKind: 'danger',
           modalMessage:
             'Removing a Geo secondary node stops the synchronization to that node. Are you sure?',
@@ -91,41 +94,45 @@ describe('GeoNodeActionsComponent', () => {
 
     describe('onRepairNode', () => {
       it('emits `repairNode` event with node reference', () => {
-        vm.onRepairNode();
+        wrapper.vm.onRepairNode();
 
-        expect(eventHub.$emit).toHaveBeenCalledWith('repairNode', vm.node);
+        expect(eventHub.$emit).toHaveBeenCalledWith('repairNode', wrapper.vm.node);
       });
     });
   });
 
   describe('template', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
     it('renders container elements correctly', () => {
-      expect(vm.$el.classList.contains('geo-node-actions')).toBe(true);
-      expect(vm.$el.querySelectorAll('.btn-sm').length).not.toBe(0);
+      expect(findGeoNodeActionsComponent().exists()).toBeTruthy();
+      expect(findNodeActions()).not.toHaveLength(0);
     });
 
     describe.each`
       nodeRemovalAllowed | buttonDisabled
-      ${false}           | ${true}
-      ${true}            | ${false}
-    `(
-      `when nodeRemovalAllowed is $nodeRemovalAllowed`,
-      ({ nodeRemovalAllowed, buttonDisabled }) => {
-        let removeButton;
+      ${false}           | ${'true'}
+      ${true}            | ${undefined}
+    `(`Remove Button`, ({ nodeRemovalAllowed, buttonDisabled }) => {
+      beforeEach(() => {
+        createComponent({ node: mockNodes[1], nodeRemovalAllowed });
+      });
 
-        beforeEach(() => {
-          vm = createComponent(mockNodes[0], true, true, nodeRemovalAllowed, false);
-          removeButton = vm.$el.querySelector('.btn-danger');
-        });
-
+      describe(`when nodeRemovalAllowed is ${nodeRemovalAllowed}`, () => {
         it('has the correct button text', () => {
-          expect(removeButton.innerText.trim()).toBe('Remove');
+          expect(
+            findRemoveButton()
+              .text()
+              .trim(),
+          ).toBe('Remove');
         });
 
         it(`the button's disabled attribute should be ${buttonDisabled}`, () => {
-          expect(removeButton.disabled).toBe(buttonDisabled);
+          expect(findRemoveButton().attributes('disabled')).toBe(buttonDisabled);
         });
-      },
-    );
+      });
+    });
   });
 });

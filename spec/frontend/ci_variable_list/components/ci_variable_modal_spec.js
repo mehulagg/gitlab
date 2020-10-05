@@ -1,9 +1,8 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount, mount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { AWS_ACCESS_KEY_ID } from '~/ci_variable_list/constants';
 import CiVariableModal from '~/ci_variable_list/components/ci_variable_modal.vue';
-import CiKeyField from '~/ci_variable_list/components/ci_key_field.vue';
 import createStore from '~/ci_variable_list/store';
 import mockData from '../services/mock_data';
 import ModalStub from '../stubs';
@@ -19,7 +18,6 @@ describe('Ci variable modal', () => {
     store = createStore();
     wrapper = method(CiVariableModal, {
       attachToDocument: true,
-      provide: { glFeatures: { ciKeyAutocomplete: true } },
       stubs: {
         GlModal: ModalStub,
       },
@@ -30,38 +28,17 @@ describe('Ci variable modal', () => {
   };
 
   const findModal = () => wrapper.find(ModalStub);
-  const addOrUpdateButton = index =>
+  const findAddorUpdateButton = () =>
     findModal()
-      .findAll(GlDeprecatedButton)
-      .at(index);
+      .findAll(GlButton)
+      .wrappers.find(button => button.props('variant') === 'success');
   const deleteVariableButton = () =>
     findModal()
-      .findAll(GlDeprecatedButton)
-      .at(1);
+      .findAll(GlButton)
+      .wrappers.find(button => button.props('variant') === 'danger');
 
   afterEach(() => {
     wrapper.destroy();
-  });
-
-  describe('Feature flag', () => {
-    describe('when off', () => {
-      beforeEach(() => {
-        createComponent(shallowMount, { provide: { glFeatures: { ciKeyAutocomplete: false } } });
-      });
-
-      it('does not render the autocomplete dropdown', () => {
-        expect(wrapper.contains(CiKeyField)).toBe(false);
-      });
-    });
-
-    describe('when on', () => {
-      beforeEach(() => {
-        createComponent(shallowMount);
-      });
-      it('renders the autocomplete dropdown', () => {
-        expect(wrapper.find(CiKeyField).exists()).toBe(true);
-      });
-    });
   });
 
   describe('Basic interactions', () => {
@@ -70,7 +47,7 @@ describe('Ci variable modal', () => {
     });
 
     it('button is disabled when no key/value pair are present', () => {
-      expect(addOrUpdateButton(1).attributes('disabled')).toBeTruthy();
+      expect(findAddorUpdateButton().attributes('disabled')).toBeTruthy();
     });
   });
 
@@ -83,11 +60,11 @@ describe('Ci variable modal', () => {
     });
 
     it('button is enabled when key/value pair are present', () => {
-      expect(addOrUpdateButton(1).attributes('disabled')).toBeFalsy();
+      expect(findAddorUpdateButton().attributes('disabled')).toBeFalsy();
     });
 
     it('Add variable button dispatches addVariable action', () => {
-      addOrUpdateButton(1).vm.$emit('click');
+      findAddorUpdateButton().vm.$emit('click');
       expect(store.dispatch).toHaveBeenCalledWith('addVariable');
     });
 
@@ -153,11 +130,11 @@ describe('Ci variable modal', () => {
     });
 
     it('button text is Update variable when updating', () => {
-      expect(addOrUpdateButton(2).text()).toBe('Update variable');
+      expect(findAddorUpdateButton().text()).toBe('Update variable');
     });
 
     it('Update variable button dispatches updateVariable with correct variable', () => {
-      addOrUpdateButton(2).vm.$emit('click');
+      findAddorUpdateButton().vm.$emit('click');
       expect(store.dispatch).toHaveBeenCalledWith('updateVariable');
     });
 
@@ -190,7 +167,7 @@ describe('Ci variable modal', () => {
       });
 
       it('disables the submit button', () => {
-        expect(addOrUpdateButton(1).attributes('disabled')).toBeTruthy();
+        expect(findAddorUpdateButton().attributes('disabled')).toBeTruthy();
       });
 
       it('shows the correct error text', () => {
@@ -214,7 +191,7 @@ describe('Ci variable modal', () => {
       });
 
       it('does not disable the submit button', () => {
-        expect(addOrUpdateButton(1).attributes('disabled')).toBeFalsy();
+        expect(findAddorUpdateButton().attributes('disabled')).toBeFalsy();
       });
     });
   });

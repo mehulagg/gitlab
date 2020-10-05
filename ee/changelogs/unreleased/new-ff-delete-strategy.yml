@@ -1,5 +1,0 @@
----
-title: Remove correct feature flag strategy when removing strategy that is not persisted
-merge_request: 34889
-author:
-type: fixed

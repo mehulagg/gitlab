@@ -9,7 +9,7 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
 
   def issues
     render json: issuable_serializer.represent(
-      @autocomplete_service.issues(confidential_only: params[:confidential_only]),
+      @autocomplete_service.issues(confidential_only: params[:confidential_only], issue_types: params[:issue_types]),
       parent_group: @group
     )
   end
@@ -46,10 +46,9 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def target
-    case params[:type]&.downcase
-    when 'epic'
-      EpicsFinder.new(current_user, group_id: @group.id).find_by(iid: params[:type_id])
-    end
+    QuickActions::TargetService
+      .new(nil, current_user, group: @group)
+      .execute(params[:type], params[:type_id])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

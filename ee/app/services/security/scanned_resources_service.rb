@@ -6,7 +6,7 @@ module Security
   #
   class ScannedResourcesService
     # @param [Ci::Pipeline] pipeline
-    # @param Array[Symbol] report_types Summary report types. Valid values are members of Vulnerabilities::Occurrence::REPORT_TYPES
+    # @param Array[Symbol] report_types Summary report types. Valid values are members of Vulnerabilities::Finding::REPORT_TYPES
     # @param [Int] The maximum number of scanned resources to return
     def initialize(pipeline, report_types, limit = nil)
       @pipeline = pipeline
@@ -21,8 +21,8 @@ module Security
         scanned_resources = scanned_resources.first(@limit) if @limit
         acc[type] = scanned_resources.map do |resource|
           {
-            'request_method' => resource['method'],
-            'url' => resource['url']
+            'request_method' => resource.request_method,
+            'url' => resource.request_uri.to_s
           }
         end
       end

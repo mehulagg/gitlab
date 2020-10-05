@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Integrations
 
 Integrations allow you to integrate GitLab with other applications. They
@@ -12,9 +18,7 @@ You can find the available integrations under your project's
 There are more than 20 integrations to integrate with. Click on the one that you
 want to configure.
 
-![Integrations list](img/project_services.png)
-
-Below, you will find a list of the currently supported ones accompanied with comprehensive documentation.
+![Integrations list](img/project_integrations_v13_3.png)
 
 ## Integrations listing
 
@@ -28,14 +32,14 @@ Click on the service links to see further configuration instructions and details
 | Buildkite | Continuous integration and deployments | Yes |
 | [Bugzilla](bugzilla.md) | Bugzilla issue tracker | No |
 | Campfire | Simple web-based real-time group chat | No |
-| Confluence | Replaces the link to the internal wiki with a link to a Confluence Cloud Workspace. Service is behind a feature flag, disabled by default ([see details](../../../api/services.md#enable-or-disable-the-confluence-service-core-only)). | No |
+| [Confluence](../../../api/services.md#confluence-service) | Replaces the link to the internal wiki with a link to a Confluence Cloud Workspace | No |
 | Custom Issue Tracker | Custom issue tracker | No |
 | [Discord Notifications](discord_notifications.md) | Receive event notifications in Discord | No |
 | Drone CI | Continuous Integration platform built on Docker, written in Go | Yes |
 | [Emails on push](emails_on_push.md) | Email the commits and diff of each push to a list of recipients | No |
 | External Wiki | Replaces the link to the internal wiki with a link to an external wiki | No |
 | Flowdock | Flowdock is a collaboration web app for technical teams | No |
-| [Generic alerts](generic_alerts.md) **(ULTIMATE)** | Receive alerts on GitLab from any source | No |
+| [Generic alerts](../../../operations/incident_management/generic_alerts.md) **(ULTIMATE)** | Receive alerts on GitLab from any source | No |
 | [GitHub](github.md) **(PREMIUM)** | Sends pipeline notifications to GitHub | No |
 | [Hangouts Chat](hangouts_chat.md) | Receive events notifications in Google Hangouts Chat | No |
 | [HipChat](hipchat.md) | Private group chat and IM | No |
@@ -55,6 +59,7 @@ Click on the service links to see further configuration instructions and details
 | [Prometheus](prometheus.md) | Monitor the performance of your deployed apps | No |
 | Pushover | Pushover makes it easy to get real-time notifications on your Android device, iPhone, iPad, and Desktop | No |
 | [Redmine](redmine.md) | Redmine issue tracker | No |
+| [EWM](ewm.md) | EWM work item tracker | No |
 | [Unify Circuit](unify_circuit.md) | Receive events notifications in Unify Circuit | No |
 | [Webex Teams](webex_teams.md) | Receive events notifications in Webex Teams | No |
 | [YouTrack](youtrack.md) | YouTrack issue tracker | No |
@@ -69,16 +74,24 @@ supported by `push_hooks` and `tag_push_hooks` events won't be executed.
 The number of branches or tags supported can be changed via
 [`push_event_hooks_limit` application setting](../../../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls).
 
-## Services templates
+## Service templates
 
-Services templates is a way to set some predefined values in the Service of
-your liking which will then be pre-filled on each project's Service.
+Service templates are a way to set predefined values for a project integration across
+all new projects on the instance.
 
-Read more about [Services templates in this document](services_templates.md).
+Read more about [Service templates](services_templates.md).
+
+## Project integration management
+
+Project integration management lets you control integration settings across all projects
+of an instance. On the project level, administrators you can choose whether to inherit the
+instance configuration or provide custom settings.
+
+Read more about [Project integration management](../../admin_area/settings/project_integration_management.md).
 
 ## Troubleshooting integrations
 
-Some integrations use service hooks for integration with external applications. To confirm which ones use service hooks, see the [integrations listing](#integrations-listing). GitLab stores details of service hook requests made within the last 2 days. To view details of the requests, go to the service's configuration page.
+Some integrations use service hooks for integration with external applications. To confirm which ones use service hooks, see the [integrations listing](#integrations-listing) above. GitLab stores details of service hook requests made within the last 2 days. To view details of the requests, go to that integration's configuration page.
 
 The **Recent Deliveries** section lists the details of each request made within the last 2 days:
 
@@ -89,17 +102,17 @@ The **Recent Deliveries** section lists the details of each request made within 
 - Relative time in which the request was made
 
 To view more information about the request's execution, click the respective **View details** link.
-On the details page, you can see the data sent by GitLab (request headers and body) and the data received by GitLab (response headers and body).
+On the details page, you can see the request headers and body sent and received by GitLab.
 
-From this page, you can repeat delivery with the same data by clicking **Resend Request**.
+To repeat a delivery using the same data, click **Resend Request**.
 
 ![Recent deliveries](img/webhook_logs.png)
 
 ### Uninitialized repositories
 
 Some integrations fail with an error `Test Failed. Save Anyway` when you attempt to set them up on
-uninitialized repositories. This is because the default service test uses push data to build the
-payload for the test request, and it fails, because there are no push events for the project.
+uninitialized repositories. Some integrations use push data to build the test payload,
+and this error occurs when no push events exist in the project yet.
 
 To resolve this error, initialize the repository by pushing a test file to the project and set up
 the integration again.

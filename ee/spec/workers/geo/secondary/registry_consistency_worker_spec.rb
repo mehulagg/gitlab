@@ -2,18 +2,20 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
+RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo do
   include EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
-  let(:primary) { create(:geo_node, :primary) }
-  let(:secondary) { create(:geo_node) }
+  let_it_be(:primary) { create(:geo_node, :primary) }
+  let_it_be(:secondary) { create(:geo_node) }
+
+  let(:worker_class) { described_class }
+  let(:batch_size) { described_class::BATCH_SIZE }
 
   before do
     stub_current_geo_node(secondary)
+    stub_registry_replication_config(enabled: true)
   end
-
-  let(:worker_class) { described_class }
 
   it_behaves_like 'reenqueuer'
 
@@ -38,7 +40,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
         described_class::REGISTRY_CLASSES.each_with_index do |registry_class, index|
           first_one = index == 0
           service = double
-          expect(Geo::RegistryConsistencyService).to receive(:new).with(registry_class, batch_size: 1000).and_return(service)
+          expect(Geo::RegistryConsistencyService).to receive(:new).with(registry_class, batch_size: batch_size).and_return(service)
           expect(service).to receive(:execute).and_return(first_one)
         end
       end
@@ -58,7 +60,7 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
       before do
         described_class::REGISTRY_CLASSES.each do |registry_class|
           service = double
-          expect(Geo::RegistryConsistencyService).to receive(:new).with(registry_class, batch_size: 1000).and_return(service)
+          expect(Geo::RegistryConsistencyService).to receive(:new).with(registry_class, batch_size: batch_size).and_return(service)
           expect(service).to receive(:execute).and_return(false)
         end
       end
@@ -76,43 +78,51 @@ RSpec.describe Geo::Secondary::RegistryConsistencyWorker, :geo, :geo_fdw do
 
     # Somewhat of an integration test
     it 'creates missing registries for each registry class' do
+      project = create(:project)
+      container_repository = create(:container_repository, project: project)
+      create(:design, project: project)
       job_artifact = create(:ci_job_artifact)
       lfs_object = create(:lfs_object)
-      project = create(:project)
-      upload = create(:upload)
+      merge_request_diff = create(:merge_request_diff, :external)
       package_file = create(:conan_package_file, :conan_package)
+      terraform_state_version = create(:terraform_state_version)
+      upload = create(:upload)
 
-      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(0)
+      expect(Geo::ContainerRepositoryRegistry.where(container_repository_id: container_repository.id).count).to eq(0)
+      expect(Geo::DesignRegistry.where(project_id: project.id).count).to eq(0)
       expect(Geo::JobArtifactRegistry.where(artifact_id: job_artifact.id).count).to eq(0)
-      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(0)
-      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(0)
+      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(0)
+      expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(0)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(0)
+      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(0)
+      expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(0)
+      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(0)
 
       subject.perform
 
-      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(1)
+      expect(Geo::ContainerRepositoryRegistry.where(container_repository_id: container_repository.id).count).to eq(1)
+      expect(Geo::DesignRegistry.where(project_id: project.id).count).to eq(1)
       expect(Geo::JobArtifactRegistry.where(artifact_id: job_artifact.id).count).to eq(1)
-      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(1)
-      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(1)
+      expect(Geo::LfsObjectRegistry.where(lfs_object_id: lfs_object.id).count).to eq(1)
+      expect(Geo::MergeRequestDiffRegistry.where(merge_request_diff_id: merge_request_diff.id).count).to eq(1)
       expect(Geo::PackageFileRegistry.where(package_file_id: package_file.id).count).to eq(1)
+      expect(Geo::ProjectRegistry.where(project_id: project.id).count).to eq(1)
+      expect(Geo::TerraformStateVersionRegistry.where(terraform_state_version_id: terraform_state_version.id).count).to eq(1)
+      expect(Geo::UploadRegistry.where(file_id: upload.id).count).to eq(1)
     end
 
-    context 'when geo_project_registry_ssot_sync is disabled' do
+    context 'when geo_merge_request_diff_replication is disabled' do
       before do
-        stub_feature_flags(geo_project_registry_ssot_sync: false)
+        stub_feature_flags(geo_merge_request_diff_replication: false)
       end
 
       it 'returns false' do
         expect(subject.perform).to be_falsey
       end
 
-      it 'does not execute RegistryConsistencyService for projects' do
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::JobArtifactRegistry, batch_size: 1000).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::LfsObjectRegistry, batch_size: 1000).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::PackageFileRegistry, batch_size: 1000).and_call_original
-        allow(Geo::RegistryConsistencyService).to receive(:new).with(Geo::UploadRegistry, batch_size: 1000).and_call_original
-
-        expect(Geo::RegistryConsistencyService).not_to receive(:new).with(Geo::ProjectRegistry, batch_size: 1000)
+      it 'does not execute RegistryConsistencyService for merge request diffs' do
+        allow(Geo::RegistryConsistencyService).to receive(:new).and_call_original
+        expect(Geo::RegistryConsistencyService).not_to receive(:new).with(Geo::MergeRequestDiffRegistry, batch_size: batch_size)
 
         subject.perform
       end

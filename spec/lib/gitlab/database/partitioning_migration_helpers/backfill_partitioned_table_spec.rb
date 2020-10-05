@@ -107,21 +107,13 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::BackfillPartition
       end.to change { ::Gitlab::Database::BackgroundMigrationJob.succeeded.count }.from(0).to(1)
     end
 
-    context 'when the feature flag is disabled' do
-      let(:mock_connection) { double('connection') }
+    it 'returns the number of job records marked as succeeded' do
+      create(:background_migration_job, class_name: "::#{described_class.name}",
+        arguments: [source1.id, source3.id, source_table, destination_table, unique_key])
 
-      before do
-        allow(subject).to receive(:connection).and_return(mock_connection)
-        stub_feature_flags(backfill_partitioned_audit_events: false)
-      end
+      jobs_updated = subject.perform(source1.id, source3.id, source_table, destination_table, unique_key)
 
-      it 'exits without attempting to copy data' do
-        expect(mock_connection).not_to receive(:execute)
-
-        subject.perform(1, 100, source_table, destination_table, unique_key)
-
-        expect(destination_model.count).to eq(0)
-      end
+      expect(jobs_updated).to eq(1)
     end
 
     context 'when the job is run within an explicit transaction block' do

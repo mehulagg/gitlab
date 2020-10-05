@@ -6,17 +6,18 @@
 
 -# Note this is just for groups. For individual members please see shared/members/_member
 
-%li.member.group_member.py-2.px-3.d-flex.flex-column.flex-md-row{ id: dom_id, data: { qa_selector: 'group_row' } }
+%li.member.js-member.group_member.py-2.px-3.d-flex.flex-column.flex-md-row{ id: dom_id, data: { qa_selector: 'group_row' } }
   %span.list-item-name.mb-2.m-md-0
     = group_icon(group, class: "avatar s40 flex-shrink-0 flex-grow-0", alt: '')
     .user-info
       = link_to group.full_name, group_path(group), class: 'member'
       .cgray
         Given access #{time_ago_with_tooltip(group_link.created_at)}
-        - if group_link.expires?
-          ·
-          %span{ class: ('text-warning' if group_link.expires_soon?) }
-            = _("Expires in %{expires_at}").html_safe % { expires_at: distance_of_time_in_words_to_now(group_link.expires_at) }
+        %span.js-expires-in{ class: ('gl-display-none' unless group_link.expires?) }
+          &middot;
+          %span.js-expires-in-text{ class: ('text-warning' if group_link.expires_soon?) }
+            - if group_link.expires?
+              = _("Expires in %{expires_at}").html_safe % { expires_at: distance_of_time_in_words_to_now(group_link.expires_at) }
   .controls.member-controls.align-items-center
     = form_tag group_link_path, method: :put, remote: true, class: 'js-edit-member-form form-group d-sm-flex' do
       = hidden_field_tag "group_link[group_access]", group_link.group_access
@@ -38,7 +39,7 @@
                     data: { id: role_id, el_id: dom_id }
       .clearable-input.member-form-control.d-sm-inline-block
         = text_field_tag 'group_link[expires_at]', group_link.expires_at, class: 'form-control js-access-expiration-date js-member-update-control', placeholder: _('Expiration date'), id: "member_expires_at_#{group.id}", disabled: !can_admin_member
-        %i.clear-icon.js-clear-input
+        = sprite_icon('close', size: 16, css_class: 'clear-icon js-clear-input gl-text-gray-200')
     - if can_admin_member
       = link_to group_link_path,
         method: :delete,
@@ -46,4 +47,4 @@
         class: 'btn btn-remove m-0 ml-sm-2 align-self-center' do
         %span.d-block.d-sm-none
           = _("Delete")
-        = icon('trash', class: 'd-none d-sm-block')
+        = sprite_icon('remove', css_class: 'd-none d-sm-block')

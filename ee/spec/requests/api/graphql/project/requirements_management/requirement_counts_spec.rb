@@ -54,14 +54,6 @@ RSpec.describe 'getting requirement counts for a project' do
       expect(counts['opened']).to eq 1
       expect(counts['archived']).to eq 1
     end
-
-    context 'when requirements_management feature is disabled' do
-      before do
-        stub_feature_flags(requirements_management: false)
-      end
-
-      it_behaves_like 'nil requirement counts'
-    end
   end
 
   context 'when the user does not have access to the requirement' do

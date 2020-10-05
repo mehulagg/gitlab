@@ -16,14 +16,6 @@ module Mutations
                required: true,
                description: 'Title of the snippet'
 
-      argument :file_name, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'File name of the snippet'
-
-      argument :content, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Content of the snippet'
-
       argument :description, GraphQL::STRING_TYPE,
                required: false,
                description: 'Description of the snippet'
@@ -40,8 +32,8 @@ module Mutations
                required: false,
                description: 'The paths to files uploaded in the snippet description'
 
-      argument :files, [Types::Snippets::FileInputType],
-               description: "The snippet files to create",
+      argument :blob_actions, [Types::Snippets::BlobActionInputType],
+               description: 'Actions to perform over the snippet repository and blobs',
                required: false
 
       def resolve(args)
@@ -58,6 +50,11 @@ module Mutations
                                                          create_params(args)).execute
 
         snippet = service_response.payload[:snippet]
+
+        # Only when the user is not an api user and the operation was successful
+        if !api_user? && service_response.success?
+          ::Gitlab::UsageDataCounters::EditorUniqueCounter.track_snippet_editor_edit_action(author: current_user)
+        end
 
         {
           snippet: service_response.success? ? snippet : nil,
@@ -85,9 +82,9 @@ module Mutations
 
       def create_params(args)
         args.tap do |create_args|
-          # We need to rename `files` into `snippet_files` because
+          # We need to rename `blob_actions` into `snippet_actions` because
           # it's the expected key param
-          create_args[:snippet_files] = create_args.delete(:files)&.map(&:to_h)
+          create_args[:snippet_actions] = create_args.delete(:blob_actions)&.map(&:to_h)
 
           # We need to rename `uploaded_files` into `files` because
           # it's the expected key param

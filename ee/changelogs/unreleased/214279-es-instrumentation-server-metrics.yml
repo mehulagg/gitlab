@@ -1,5 +1,0 @@
----
-title: Add Elasticsearch to Sidekiq ServerMetrics
-merge_request: 32937
-author:
-type: added

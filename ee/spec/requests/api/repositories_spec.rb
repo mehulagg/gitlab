@@ -16,7 +16,7 @@ RSpec.describe API::Repositories do
       it 'logs the audit event' do
         expect do
           get api(route, current_user)
-        end.to change { SecurityEvent.count }.by(1)
+        end.to change { AuditEvent.count }.by(1)
       end
 
       it 'sends the archive' do

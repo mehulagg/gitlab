@@ -1,9 +1,9 @@
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardListHeaderFoss from '~/boards/components/board_list_header.vue';
-import { __, sprintf, s__ } from '~/locale';
+import { __, sprintf, s__, n__ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
-import { inactiveListId } from '~/boards/constants';
+import { inactiveId, LIST } from '~/boards/constants';
 import eventHub from '~/sidebar/event_hub';
 
 export default {
@@ -14,19 +14,30 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeListId']),
+    ...mapState(['activeId', 'issuesByListId']),
+    ...mapGetters(['isSwimlanesOn']),
+    issuesCount() {
+      if (this.isSwimlanesOn) {
+        return this.issuesByListId[this.list.id] ? this.issuesByListId[this.list.id].length : 0;
+      }
+
+      return this.list.issuesSize;
+    },
     issuesTooltip() {
-      const { issuesSize, maxIssueCount } = this.list;
+      const { maxIssueCount } = this.list;
 
       if (maxIssueCount > 0) {
-        return sprintf(__('%{issuesSize} issues with a limit of %{maxIssueCount}'), {
-          issuesSize,
+        return sprintf(__('%{issuesCount} issues with a limit of %{maxIssueCount}'), {
+          issuesCount: this.issuesCount,
           maxIssueCount,
         });
       }
 
       // TODO: Remove this pattern.
       return BoardListHeaderFoss.computed.issuesTooltip.call(this);
+    },
+    issuesTooltipLabel() {
+      return n__(`%d issue`, `%d issues`, this.issuesCount);
     },
     weightCountToolTip() {
       const { totalWeight } = this.list;
@@ -39,13 +50,13 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveListId']),
+    ...mapActions(['setActiveId']),
     openSidebarSettings() {
-      if (this.activeListId === inactiveListId) {
+      if (this.activeId === inactiveId) {
         eventHub.$emit('sidebar.closeAll');
       }
 
-      this.setActiveListId(this.list.id);
+      this.setActiveId({ id: this.list.id, sidebarType: LIST });
     },
   },
 };

@@ -50,7 +50,7 @@ RSpec.describe Groups::RestoreService do
       context 'for a group that has not been marked for deletion' do
         let(:group) { create(:group) }
 
-        it 'does not change the attributes associated with adjourned deletion' do
+        it 'does not change the attributes associated with delayed deletion' do
           subject
 
           expect(group.marked_for_deletion_on).to be_nil

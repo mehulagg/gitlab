@@ -17,15 +17,8 @@ Omnibus GitLab package.
 
 The following are the requirements for providing your own Redis instance:
 
-- Redis version 5.0 or higher is recommended, as this is what ships with
-  Omnibus GitLab packages starting with GitLab 12.7.
-- Support for Redis 3.2 is deprecated with GitLab 12.10 and will be completely
-  removed in GitLab 13.0.
-- GitLab 12.0 and later requires Redis version 3.2 or higher. Older Redis
-  versions do not support an optional count argument to SPOP which is now
-  required for [Merge Trains](../../ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md).
-- In addition, if Redis 4 or later is available, GitLab makes use of certain
-  commands like `UNLINK` and `USAGE` which were introduced only in Redis 4.
+- Find the minimum Redis version that is required in the
+  [requirements page](../../install/requirements.md).
 - Standalone Redis or Redis high availability with Sentinel are supported. Redis
   Cluster is not supported.
 - Managed Redis from cloud providers such as AWS ElastiCache will work. If these
@@ -221,7 +214,7 @@ the correct credentials for the Sentinel nodes.
 While it doesn't require a list of all Sentinel nodes, in case of a failure,
 it needs to access at least one of listed ones.
 
-The following steps should be performed in the [GitLab application server](../high_availability/gitlab.md)
+The following steps should be performed in the GitLab application server
 which ideally should not have Redis or Sentinels in the same machine:
 
 1. Edit `/home/git/gitlab/config/resque.yml` following the example in
@@ -235,13 +228,13 @@ which ideally should not have Redis or Sentinels in the same machine:
      sentinels:
        -
          host: 10.0.0.1
-         port: 26379 # point to sentinel, not to redis port
+         port: 26379  # point to sentinel, not to redis port
        -
          host: 10.0.0.2
-         port: 26379 # point to sentinel, not to redis port
+         port: 26379  # point to sentinel, not to redis port
        -
          host: 10.0.0.3
-         port: 26379 # point to sentinel, not to redis port
+         port: 26379  # point to sentinel, not to redis port
    ```
 
 1. [Restart GitLab](../restart_gitlab.md#installations-from-source) for the changes to take effect.
@@ -360,13 +353,13 @@ or a failover promotes a different **Primary** node.
      sentinels:
        -
          host: 10.0.0.1
-         port: 26379 # point to sentinel, not to redis port
+         port: 26379  # point to sentinel, not to redis port
        -
          host: 10.0.0.2
-         port: 26379 # point to sentinel, not to redis port
+         port: 26379  # point to sentinel, not to redis port
        -
          host: 10.0.0.3
-         port: 26379 # point to sentinel, not to redis port
+         port: 26379  # point to sentinel, not to redis port
    ```
 
 1. [Restart GitLab](../restart_gitlab.md#installations-from-source) for the changes to take effect.

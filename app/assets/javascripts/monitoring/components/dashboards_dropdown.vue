@@ -1,10 +1,10 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import {
   GlIcon,
   GlDropdown,
   GlDropdownItem,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlDropdownDivider,
   GlSearchBoxByType,
   GlModalDirective,
@@ -19,7 +19,7 @@ export default {
     GlIcon,
     GlDropdown,
     GlDropdownItem,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlDropdownDivider,
     GlSearchBoxByType,
   },
@@ -28,10 +28,6 @@ export default {
   },
   props: {
     defaultBranch: {
-      type: String,
-      required: true,
-    },
-    modalId: {
       type: String,
       required: true,
     },
@@ -44,9 +40,6 @@ export default {
   computed: {
     ...mapState('monitoringDashboard', ['allDashboards']),
     ...mapGetters('monitoringDashboard', ['selectedDashboard']),
-    isOutOfTheBoxDashboard() {
-      return this.selectedDashboard?.out_of_the_box_dashboard;
-    },
     selectedDashboardText() {
       return this.selectedDashboard?.display_name;
     },
@@ -70,7 +63,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions('monitoringDashboard', ['duplicateSystemDashboard']),
     dashboardDisplayName(dashboard) {
       return dashboard.display_name || dashboard.path || '';
     },
@@ -87,30 +79,28 @@ export default {
     :text="selectedDashboardText"
   >
     <div class="d-flex flex-column overflow-hidden">
-      <gl-dropdown-header class="monitor-dashboard-dropdown-header text-center">{{
-        __('Dashboard')
-      }}</gl-dropdown-header>
-      <gl-dropdown-divider />
+      <gl-dropdown-section-header>{{ __('Dashboard') }}</gl-dropdown-section-header>
       <gl-search-box-by-type
         ref="monitorDashboardsDropdownSearch"
         v-model="searchTerm"
-        class="m-2"
+        class="gl-m-3"
       />
 
       <div class="flex-fill overflow-auto">
         <gl-dropdown-item
           v-for="dashboard in starredDashboards"
           :key="dashboard.path"
-          :active="dashboard.path === selectedDashboardPath"
-          active-class="is-active"
+          :is-check-item="true"
+          :is-checked="dashboard.path === selectedDashboardPath"
           @click="selectDashboard(dashboard)"
         >
-          <div class="d-flex">
-            {{ dashboardDisplayName(dashboard) }}
-            <gl-icon class="text-muted ml-auto" name="star" />
+          <div class="gl-display-flex">
+            <span class="gl-flex-grow-1 gl-min-w-0 gl-overflow-hidden gl-overflow-wrap-break">
+              {{ dashboardDisplayName(dashboard) }}
+            </span>
+            <gl-icon class="text-muted gl-flex-shrink-0 gl-ml-3 gl-align-self-center" name="star" />
           </div>
         </gl-dropdown-item>
-
         <gl-dropdown-divider
           v-if="starredDashboards.length && nonStarredDashboards.length"
           ref="starredListDivider"
@@ -119,11 +109,13 @@ export default {
         <gl-dropdown-item
           v-for="dashboard in nonStarredDashboards"
           :key="dashboard.path"
-          :active="dashboard.path === selectedDashboardPath"
-          active-class="is-active"
+          :is-check-item="true"
+          :is-checked="dashboard.path === selectedDashboardPath"
           @click="selectDashboard(dashboard)"
         >
-          {{ dashboardDisplayName(dashboard) }}
+          <span class="gl-overflow-hidden gl-overflow-wrap-break">
+            {{ dashboardDisplayName(dashboard) }}
+          </span>
         </gl-dropdown-item>
       </div>
 
@@ -134,18 +126,6 @@ export default {
       >
         {{ __('No matching results') }}
       </div>
-
-      <!-- 
-           This Duplicate Dashboard item will be removed from the dashboards dropdown 
-           in https://gitlab.com/gitlab-org/gitlab/-/issues/223223
-      -->
-      <template v-if="isOutOfTheBoxDashboard">
-        <gl-dropdown-divider />
-
-        <gl-dropdown-item v-gl-modal="modalId" data-testid="duplicateDashboardItem">
-          {{ s__('Metrics|Duplicate dashboard') }}
-        </gl-dropdown-item>
-      </template>
     </div>
   </gl-dropdown>
 </template>

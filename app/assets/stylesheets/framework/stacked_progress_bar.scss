@@ -24,7 +24,7 @@
 
   .status-unavailable {
     padding: 0 10px;
-    color: $gray-700;
+    color: $gray-500;
   }
 
   .status-green {
@@ -37,10 +37,10 @@
 
   .status-neutral {
     background-color: $gray-100;
-    color: $gl-gray-dark;
+    color: $gray-900;
 
     &:hover {
-      background-color: $gray-300;
+      background-color: $gray-200;
     }
   }
 

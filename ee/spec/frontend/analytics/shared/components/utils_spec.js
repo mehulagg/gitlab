@@ -76,17 +76,13 @@ describe('buildProjectFromDataset', () => {
 
 describe('buildCycleAnalyticsInitialData', () => {
   it.each`
-    field                  | value
-    ${'group'}             | ${null}
-    ${'createdBefore'}     | ${null}
-    ${'createdAfter'}      | ${null}
-    ${'selectedProjects'}  | ${[]}
-    ${'selectedAuthor'}    | ${null}
-    ${'selectedMilestone'} | ${null}
-    ${'selectedLabels'}    | ${[]}
-    ${'selectedAssignees'} | ${[]}
-    ${'labelsPath'}        | ${''}
-    ${'milestonesPath'}    | ${''}
+    field                 | value
+    ${'group'}            | ${null}
+    ${'createdBefore'}    | ${null}
+    ${'createdAfter'}     | ${null}
+    ${'selectedProjects'} | ${[]}
+    ${'labelsPath'}       | ${''}
+    ${'milestonesPath'}   | ${''}
   `('will set a default value for "$field" if is not present', ({ field, value }) => {
     expect(buildCycleAnalyticsInitialData()).toMatchObject({
       [field]: value,
@@ -135,62 +131,6 @@ describe('buildCycleAnalyticsInitialData', () => {
       expect(buildCycleAnalyticsInitialData({ projects: value })).toMatchObject({
         [field]: [],
       });
-    });
-  });
-
-  describe('selectedAssignees', () => {
-    it('will be set given an array of assignees', () => {
-      const selectedAssignees = ['krillin', 'chiao-tzu'];
-      expect(
-        buildCycleAnalyticsInitialData({ assignees: JSON.stringify(selectedAssignees) }),
-      ).toMatchObject({
-        selectedAssignees,
-      });
-    });
-
-    it.each`
-      field                  | value
-      ${'selectedAssignees'} | ${null}
-      ${'selectedAssignees'} | ${[]}
-      ${'selectedAssignees'} | ${''}
-    `('will be an empty array if given a value of `$value`', ({ value, field }) => {
-      expect(buildCycleAnalyticsInitialData({ projects: value })).toMatchObject({
-        [field]: [],
-      });
-    });
-  });
-
-  describe('selectedLabels', () => {
-    it('will be set given an array of labels', () => {
-      const selectedLabels = ['krillin', 'chiao-tzu'];
-      expect(
-        buildCycleAnalyticsInitialData({ labels: JSON.stringify(selectedLabels) }),
-      ).toMatchObject({ selectedLabels });
-    });
-
-    it.each`
-      field               | value
-      ${'selectedLabels'} | ${null}
-      ${'selectedLabels'} | ${[]}
-      ${'selectedLabels'} | ${''}
-    `('will be an empty array if given a value of `$value`', ({ value, field }) => {
-      expect(buildCycleAnalyticsInitialData({ projects: value })).toMatchObject({
-        [field]: [],
-      });
-    });
-  });
-
-  describe.each`
-    field          | key                    | value
-    ${'milestone'} | ${'selectedMilestone'} | ${'cell-saga'}
-    ${'author'}    | ${'selectedAuthor'}    | ${'cell'}
-  `('$field', ({ field, value, key }) => {
-    it(`will set ${key} field with the given value`, () => {
-      expect(buildCycleAnalyticsInitialData({ [field]: value })).toMatchObject({ [key]: value });
-    });
-
-    it(`will set ${key} to null if omitted`, () => {
-      expect(buildCycleAnalyticsInitialData()).toMatchObject({ [key]: null });
     });
   });
 

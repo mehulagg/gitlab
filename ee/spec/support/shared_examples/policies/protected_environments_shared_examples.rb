@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'protected environments access' do |developer_access = true|
+RSpec.shared_examples 'protected environments access' do |developer_access: true, direct_access: false|
   using RSpec::Parameterized::TableSyntax
 
   include AdminModeHelper
@@ -13,20 +13,19 @@ RSpec.shared_examples 'protected environments access' do |developer_access = tru
   context 'when Protected Environments feature is not available in the project' do
     let(:feature_available) { false }
 
-    where(:access_level, :admin_mode, :result) do
-      :guest      | nil   | false
-      :reporter   | nil   | false
-      :developer  | nil   | developer_access
-      :maintainer | nil   | true
-      :admin      | false | false
-      :admin      | true  | true
+    where(:access_level, :result) do
+      :guest      | false
+      :reporter   | false
+      :developer  | developer_access
+      :maintainer | true
+      :admin      | true
     end
 
     with_them do
       before do
         environment
 
-        update_user_access(access_level, admin_mode, user, project)
+        update_user_access(access_level, user, project)
       end
 
       it { is_expected.to eq(result) }
@@ -40,20 +39,19 @@ RSpec.shared_examples 'protected environments access' do |developer_access = tru
       let(:protected_environment) { create(:protected_environment, name: environment.name, project: project) }
 
       context 'when user does not have access to the environment' do
-        where(:access_level, :admin_mode, :result) do
-          :guest      | nil   | false
-          :reporter   | nil   | false
-          :developer  | nil   | false
-          :maintainer | nil   | false
-          :admin      | false | false
-          :admin      | true  | true
+        where(:access_level, :result) do
+          :guest      | false
+          :reporter   | false
+          :developer  | false
+          :maintainer | false
+          :admin      | true
         end
 
         with_them do
           before do
             protected_environment
 
-            update_user_access(access_level, admin_mode, user, project)
+            update_user_access(access_level, user, project)
           end
 
           it { is_expected.to eq(result) }
@@ -61,40 +59,49 @@ RSpec.shared_examples 'protected environments access' do |developer_access = tru
       end
 
       context 'when user has access to the environment' do
-        where(:access_level, :admin_mode, :result) do
-          :guest      | nil   | false
-          :reporter   | nil   | false
-          :developer  | nil   | developer_access
-          :maintainer | nil   | true
-          :admin      | false | false
-          :admin      | true  | true
+        where(:access_level, :result) do
+          :reporter   | direct_access
+          :developer  | developer_access
+          :maintainer | true
+          :admin      | true
         end
 
         with_them do
           before do
-            protected_environment.deploy_access_levels.create(user: user)
+            protected_environment.deploy_access_levels.create!(user: user, access_level: deploy_access_level(access_level))
 
-            update_user_access(access_level, admin_mode, user, project)
+            update_user_access(access_level, user, project)
           end
-
           it { is_expected.to eq(result) }
         end
+      end
+
+      context 'when the user has access via a group' do
+        let(:group) { create(:group) }
+
+        before do
+          project.add_reporter(user)
+          group.add_reporter(user)
+
+          protected_environment.deploy_access_levels.create!(group: group, access_level: Gitlab::Access::REPORTER)
+        end
+
+        it { is_expected.to eq(direct_access) }
       end
     end
 
     context 'when environment is not protected' do
-      where(:access_level, :admin_mode, :result) do
-        :guest      | nil   | false
-        :reporter   | nil   | false
-        :developer  | nil   | developer_access
-        :maintainer | nil   | true
-        :admin      | false | false
-        :admin      | true  | true
+      where(:access_level, :result) do
+        :guest      | false
+        :reporter   | false
+        :developer  | developer_access
+        :maintainer | true
+        :admin      | true
       end
 
       with_them do
         before do
-          update_user_access(access_level, admin_mode, user, project)
+          update_user_access(access_level, user, project)
         end
 
         it { is_expected.to eq(result) }
@@ -102,12 +109,27 @@ RSpec.shared_examples 'protected environments access' do |developer_access = tru
     end
   end
 
-  def update_user_access(access_level, admin_mode, user, project)
+  def update_user_access(access_level, user, project)
     if access_level == :admin
       user.update_attribute(:admin, true)
-      enable_admin_mode!(user) if admin_mode
+      enable_admin_mode!(user)
     elsif access_level.present?
       project.add_user(user, access_level)
+    end
+  end
+
+  def deploy_access_level(access_level)
+    case access_level
+    when :guest
+      Gitlab::Access::GUEST
+    when :reporter
+      Gitlab::Access::REPORTER
+    when :developer
+      Gitlab::Access::DEVELOPER
+    when :maintainer
+      Gitlab::Access::MAINTAINER
+    when :admin
+      Gitlab::Access::MAINTAINER
     end
   end
 end

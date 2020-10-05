@@ -31,21 +31,21 @@ module Security
       sort_by_ds_analyzers!
       @target_report = ::Gitlab::Ci::Reports::Security::Report.new(
         @source_reports.first.type,
-        @source_reports.first.commit_sha,
+        @source_reports.first.pipeline,
         @source_reports.first.created_at
       )
-      @occurrences = []
+      @findings = []
     end
 
     def execute
       @source_reports.each do |source|
         copy_scanners_to_target(source)
         copy_identifiers_to_target(source)
-        copy_occurrences_to_buffer(source)
+        copy_findings_to_buffer(source)
         copy_scanned_resources_to_target(source)
       end
 
-      copy_occurrences_to_target
+      copy_findings_to_target
 
       @target_report
     end
@@ -62,8 +62,8 @@ module Security
       source_report.identifiers.values.each { |identifier| @target_report.add_identifier(identifier) }
     end
 
-    def copy_occurrences_to_buffer(source)
-      @occurrences.concat(source.occurrences)
+    def copy_findings_to_buffer(source)
+      @findings.concat(source.findings)
     end
 
     def copy_scanned_resources_to_target(source_report)
@@ -82,49 +82,49 @@ module Security
       end
     end
 
-    def deduplicate_occurrences!
+    def deduplicate_findings!
       seen_identifiers = Set.new
       deduplicated = []
 
-      @occurrences.each do |occurrence|
+      @findings.each do |finding|
         seen = false
 
         # We are looping through all identifiers in order to find the same vulnerabilities reported for the same location
         # but from different source reports and keeping only first of them
-        occurrence.identifiers.each do |identifier|
+        finding.identifiers.each do |identifier|
           # TODO: remove .downcase here after the DAST parser is harmonized to the common library identifiers' keys format
           # See https://gitlab.com/gitlab-org/gitlab/issues/11976#note_191257912
           next if %w[cwe wasc].include?(identifier.external_type.downcase) # ignored because these describe a class of vulnerabilities
 
-          seen = check_or_mark_seen_identifier!(identifier, occurrence.location.fingerprint, seen_identifiers)
+          seen = check_or_mark_seen_identifier!(identifier, finding.location.fingerprint, seen_identifiers)
 
           break if seen
         end
 
-        deduplicated << occurrence unless seen
+        deduplicated << finding unless seen
       end
 
-      @occurrences = deduplicated
+      @findings = deduplicated
     end
 
-    def sort_occurrences!
-      @occurrences.sort! do |a, b|
+    def sort_findings!
+      @findings.sort! do |a, b|
         a_severity, b_severity = a.severity, b.severity
 
         if a_severity == b_severity
           a.compare_key <=> b.compare_key
         else
-          Vulnerabilities::Occurrence::SEVERITY_LEVELS[b_severity] <=>
-            Vulnerabilities::Occurrence::SEVERITY_LEVELS[a_severity]
+          Vulnerabilities::Finding::SEVERITY_LEVELS[b_severity] <=>
+            Vulnerabilities::Finding::SEVERITY_LEVELS[a_severity]
         end
       end
     end
 
-    def copy_occurrences_to_target
-      deduplicate_occurrences!
-      sort_occurrences!
+    def copy_findings_to_target
+      deduplicate_findings!
+      sort_findings!
 
-      @occurrences.each { |occurrence| @target_report.add_occurrence(occurrence) }
+      @findings.each { |finding| @target_report.add_finding(finding) }
     end
 
     def sort_by_ds_analyzers!

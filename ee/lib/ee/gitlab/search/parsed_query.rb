@@ -4,10 +4,11 @@ module EE
   module Gitlab
     module Search
       module ParsedQuery
-        def elasticsearch_filters(object)
-          filters.map do |filter|
-            prepare_for_elasticsearch(object, filter)
-          end
+        def elasticsearch_filter_context(object)
+          {
+            filter: including_filters.map { |f| prepare_for_elasticsearch(object, f) },
+            must_not: excluding_filters.map { |f| prepare_for_elasticsearch(object, f) }
+          }
         end
 
         private

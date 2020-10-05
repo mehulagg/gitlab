@@ -1,7 +1,6 @@
 <script>
-import { GlIcon, GlSearchBoxByType, GlDropdown, GlDeprecatedButton } from '@gitlab/ui';
+import { GlIcon, GlSearchBoxByType, GlDropdown } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
-import { debounce } from 'lodash';
 import { __, n__ } from '~/locale';
 import { SELECTIVE_SYNC_NAMESPACES } from '../constants';
 
@@ -11,18 +10,12 @@ export default {
     GlIcon,
     GlSearchBoxByType,
     GlDropdown,
-    GlDeprecatedButton,
   },
   props: {
     selectedNamespaces: {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      namespaceSearch: '',
-    };
   },
   computed: {
     ...mapState(['synchronizationNamespaces']),
@@ -35,11 +28,6 @@ export default {
     noSyncNamespaces() {
       return this.synchronizationNamespaces.length === 0;
     },
-  },
-  watch: {
-    namespaceSearch: debounce(function debounceSearch() {
-      this.fetchSyncNamespaces(this.namespaceSearch);
-    }, 500),
   },
   methods: {
     ...mapActions(['fetchSyncNamespaces']),
@@ -59,14 +47,21 @@ export default {
 </script>
 
 <template>
-  <gl-dropdown :text="dropdownTitle" @show="fetchSyncNamespaces(namespaceSearch)">
-    <gl-search-box-by-type v-model="namespaceSearch" class="m-2" />
-    <li v-for="namespace in synchronizationNamespaces" :key="namespace.id">
-      <gl-deprecated-button class="d-flex align-items-center" @click="toggleNamespace(namespace)">
-        <gl-icon :class="[{ invisible: !isSelected(namespace) }]" name="mobile-issue-close" />
-        <span class="ml-1">{{ namespace.name }}</span>
-      </gl-deprecated-button>
-    </li>
-    <div v-if="noSyncNamespaces" class="text-secondary p-2">{{ __('Nothing found…') }}</div>
+  <gl-dropdown :text="dropdownTitle" @show="fetchSyncNamespaces('')">
+    <gl-search-box-by-type class=".gl-m-3" :debounce="500" @input="fetchSyncNamespaces" />
+    <button
+      v-for="namespace in synchronizationNamespaces"
+      :key="namespace.id"
+      class="dropdown-item"
+      type="button"
+      @click="toggleNamespace(namespace)"
+    >
+      <gl-icon
+        :class="[{ 'gl-visibility-hidden': !isSelected(namespace) }]"
+        name="mobile-issue-close"
+      />
+      <span class="gl-ml-2">{{ namespace.name }}</span>
+    </button>
+    <div v-if="noSyncNamespaces" class="gl-text-gray-500 gl-p-3">{{ __('Nothing found…') }}</div>
   </gl-dropdown>
 </template>

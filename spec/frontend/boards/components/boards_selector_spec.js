@@ -1,6 +1,6 @@
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { GlDropdown, GlLoadingIcon } from '@gitlab/ui';
+import { GlDeprecatedDropdown, GlLoadingIcon } from '@gitlab/ui';
 import { TEST_HOST } from 'spec/test_constants';
 import BoardsSelector from '~/boards/components/boards_selector.vue';
 import boardsStore from '~/boards/stores/boards_store';
@@ -81,12 +81,12 @@ describe('BoardsSelector', () => {
           assignee_id: null,
           labels: [],
         },
-        milestonePath: `${TEST_HOST}/milestone/path`,
         boardBaseUrl: `${TEST_HOST}/board/base/url`,
         hasMissingBoards: false,
         canAdminBoard: true,
         multipleIssueBoardsAvailable: true,
         labelsPath: `${TEST_HOST}/labels/path`,
+        labelsWebUrl: `${TEST_HOST}/labels`,
         projectId: 42,
         groupId: 19,
         scopedIssueBoardFeatureEnabled: true,
@@ -103,7 +103,7 @@ describe('BoardsSelector', () => {
     });
 
     // Emits gl-dropdown show event to simulate the dropdown is opened at initialization time
-    wrapper.find(GlDropdown).vm.$emit('show');
+    wrapper.find(GlDeprecatedDropdown).vm.$emit('show');
   });
 
   afterEach(() => {

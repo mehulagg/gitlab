@@ -5,9 +5,20 @@ description: 'Learn how to contribute to GitLab.'
 
 # Contributor and Development Docs
 
+Learn the processes and technical information needed for contributing to GitLab.
+
+This content is intended for members of the GitLab Team as well as community contributors.
+Content specific to the GitLab Team should instead be included in the [Handbook](https://about.gitlab.com/handbook/).
+
+For information on using GitLab to work on your own software projects, see the [GitLab user documentation](../user/index.md).
+
+For information on working with GitLab's API, see the [API documentation](../api/README.md).
+
+For information on how to install, configure, update, and upgrade your own GitLab instance, see the [administration documentation](../administration/index.md).
+
 ## Get started
 
-- Set up GitLab's development environment with [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/README.md)
+- Set up GitLab's development environment with [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/README.md)
 - [GitLab contributing guide](contributing/index.md)
   - [Issues workflow](contributing/issue_workflow.md) for more information on:
     - Issue tracker guidelines.
@@ -32,6 +43,7 @@ description: 'Learn how to contribute to GitLab.'
 
 **Must-reads:**
 
+- [Guide on adapting existing and introducing new components](architecture.md#adapting-existing-and-introducing-new-components)
 - [Code review guidelines](code_review.md) for reviewing code and having code reviewed
 - [Database review guidelines](database_review.md) for reviewing database-related changes and complex SQL queries, and having them reviewed
 - [Secure coding guidelines](secure_coding_guidelines.md)
@@ -45,6 +57,8 @@ Complementary reads:
 - [Danger bot](dangerbot.md)
 - [Generate a changelog entry with `bin/changelog`](changelog.md)
 - [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
+- [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
+- [Adding a new service component to GitLab](adding_service_component.md)
 
 ## UX and Frontend guides
 
@@ -134,6 +148,10 @@ See [database guidelines](database/index.md).
 
 - [Refactoring guidelines](refactoring_guide/index.md)
 
+## Deprecation guides
+
+- [Deprecation guidelines](deprecation_guidelines/index.md)
+
 ## Documentation guides
 
 - [Writing documentation](documentation/index.md)
@@ -181,6 +199,7 @@ See [database guidelines](database/index.md).
 - [Defining relations between files using projections](projections.md)
 - [Reference processing](./reference_processing.md)
 - [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
+- [Features inside `.gitlab/`](./features_inside_dot_gitlab.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

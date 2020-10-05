@@ -3,7 +3,7 @@
 class Groups::IterationsController < Groups::ApplicationController
   before_action :check_iterations_available!
   before_action :authorize_show_iteration!, only: [:index, :show]
-  before_action :authorize_create_iteration!, only: :new
+  before_action :authorize_create_iteration!, only: [:new, :edit]
 
   def index; end
 
@@ -11,17 +11,19 @@ class Groups::IterationsController < Groups::ApplicationController
 
   def new; end
 
+  def edit; end
+
   private
 
   def check_iterations_available!
-    return render_404 unless group.feature_available?(:iterations)
+    render_404 unless group.feature_available?(:iterations)
   end
 
   def authorize_create_iteration!
-    return render_404 unless can?(current_user, :create_iteration, group)
+    render_404 unless can?(current_user, :create_iteration, group)
   end
 
   def authorize_show_iteration!
-    return render_404 unless can?(current_user, :read_iteration, group)
+    render_404 unless can?(current_user, :read_iteration, group)
   end
 end

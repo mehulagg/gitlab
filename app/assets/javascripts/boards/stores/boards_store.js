@@ -1,8 +1,8 @@
 /* eslint-disable no-shadow, no-param-reassign,consistent-return */
 /* global List */
-
+/* global ListIssue */
 import $ from 'jquery';
-import { sortBy } from 'lodash';
+import { sortBy, pick } from 'lodash';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
@@ -12,9 +12,10 @@ import {
   parseBoolean,
   convertObjectPropsToCamelCase,
 } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
+import createDefaultClient from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '../eventhub';
 import { ListType } from '../constants';
 import IssueProject from '../models/project';
@@ -22,7 +23,11 @@ import ListLabel from '../models/label';
 import ListAssignee from '../models/assignee';
 import ListMilestone from '../models/milestone';
 
+import createBoardMutation from '../queries/board.mutation.graphql';
+
 const PER_PAGE = 20;
+export const gqlClient = createDefaultClient();
+
 const boardsStore = {
   disabled: false,
   timeTracking: {
@@ -81,7 +86,7 @@ const boardsStore = {
   showPage(page) {
     this.state.currentPage = page;
   },
-  addList(listObj) {
+  updateListPosition(listObj) {
     const listType = listObj.listType || listObj.list_type;
     let { position } = listObj;
     if (listType === ListType.closed) {
@@ -91,6 +96,10 @@ const boardsStore = {
     }
 
     const list = new List({ ...listObj, position });
+    return list;
+  },
+  addList(listObj) {
+    const list = this.updateListPosition(listObj);
     this.state.lists = sortBy([...this.state.lists, list], 'position');
     return list;
   },
@@ -109,7 +118,6 @@ const boardsStore = {
       .catch(() => {
         // https://gitlab.com/gitlab-org/gitlab-foss/issues/30821
       });
-    this.removeBlankState();
   },
   updateNewListDropdown(listId) {
     $(`.js-board-list-${listId}`).removeClass('is-active');
@@ -119,22 +127,14 @@ const boardsStore = {
     return !this.state.lists.filter(list => list.type !== 'backlog' && list.type !== 'closed')[0];
   },
   addBlankState() {
-    if (!this.shouldAddBlankState() || this.welcomeIsHidden() || this.disabled) return;
+    if (!this.shouldAddBlankState() || this.welcomeIsHidden()) return;
 
-    this.addList({
-      id: 'blank',
-      list_type: 'blank',
-      title: __('Welcome to your Issue Board!'),
-      position: 0,
-    });
-  },
-  removeBlankState() {
-    this.removeList('blank');
-
-    Cookies.set('issue_board_welcome_hidden', 'true', {
-      expires: 365 * 10,
-      path: '',
-    });
+    this.generateDefaultLists()
+      .then(res => res.data)
+      .then(data => Promise.all(data.map(list => this.addList(list))))
+      .catch(() => {
+        this.removeList(undefined, 'label');
+      });
   },
 
   findIssueLabel(issue, findLabel) {
@@ -299,7 +299,11 @@ const boardsStore = {
   onNewListIssueResponse(list, issue, data) {
     issue.refreshData(data);
 
-    if (list.issuesSize > 1) {
+    if (
+      !gon.features.boardsWithSwimlanes &&
+      !gon.features.graphqlBoardLists &&
+      list.issues.length > 1
+    ) {
       const moveBeforeId = list.issues[1].id;
       this.moveIssue(issue.id, null, null, null, moveBeforeId);
     }
@@ -509,6 +513,10 @@ const boardsStore = {
     eventHub.$emit('updateTokens');
   },
 
+  performSearch() {
+    eventHub.$emit('performSearch');
+  },
+
   setListDetail(newList) {
     this.detail.list = newList;
   },
@@ -527,6 +535,10 @@ const boardsStore = {
 
   setTimeTrackingLimitToHours(limitToHours) {
     this.timeTracking.limitToHours = parseBoolean(limitToHours);
+  },
+
+  generateBoardGid(boardId) {
+    return `gid://gitlab/Board/${boardId}`;
   },
 
   generateBoardsPath(id) {
@@ -641,7 +653,9 @@ const boardsStore = {
           list.issues = [];
         }
 
-        list.createIssues(data.issues);
+        data.issues.forEach(issueObj => {
+          list.addIssue(new ListIssue(issueObj));
+        });
 
         return data;
       });
@@ -700,6 +714,10 @@ const boardsStore = {
   },
 
   newIssue(id, issue) {
+    if (typeof id === 'string') {
+      id = getIdFromGraphQLId(id);
+    }
+
     return axios.post(this.generateIssuesPath(id), {
       issue,
     });
@@ -708,6 +726,10 @@ const boardsStore = {
   newListIssue(list, issue) {
     list.addIssue(issue, null, 0);
     list.issuesSize += 1;
+    let listId = list.id;
+    if (typeof listId === 'string') {
+      listId = getIdFromGraphQLId(listId);
+    }
 
     return this.newIssue(list.id, issue)
       .then(res => res.data)
@@ -777,9 +799,33 @@ const boardsStore = {
     }
 
     if (boardPayload.id) {
-      return axios.put(this.generateBoardsPath(boardPayload.id), { board: boardPayload });
+      const input = {
+        ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
+        id: this.generateBoardGid(boardPayload.id),
+      };
+
+      return Promise.all([
+        axios.put(this.generateBoardsPath(boardPayload.id), { board: boardPayload }),
+        gqlClient.mutate({
+          mutation: createBoardMutation,
+          variables: input,
+        }),
+      ]);
     }
-    return axios.post(this.generateBoardsPath(), { board: boardPayload });
+
+    return axios
+      .post(this.generateBoardsPath(), { board: boardPayload })
+      .then(resp => resp.data)
+      .then(data => {
+        gqlClient.mutate({
+          mutation: createBoardMutation,
+          variables: {
+            ...pick(boardPayload, ['hideClosedList', 'hideBacklogList']),
+            id: this.generateBoardGid(data.id),
+          },
+        });
+        return data;
+      });
   },
 
   deleteBoard({ id }) {
@@ -848,19 +894,13 @@ const boardsStore = {
   },
 
   refreshIssueData(issue, obj) {
-    issue.id = obj.id;
-    issue.iid = obj.iid;
-    issue.title = obj.title;
-    issue.confidential = obj.confidential;
-    issue.dueDate = obj.due_date;
-    issue.sidebarInfoEndpoint = obj.issue_sidebar_endpoint;
-    issue.referencePath = obj.reference_path;
-    issue.path = obj.real_path;
-    issue.toggleSubscriptionEndpoint = obj.toggle_subscription_endpoint;
+    const convertedObj = convertObjectPropsToCamelCase(obj, {
+      dropKeys: ['issue_sidebar_endpoint', 'real_path', 'webUrl'],
+    });
+    convertedObj.sidebarInfoEndpoint = obj.issue_sidebar_endpoint;
+    issue.path = obj.real_path || obj.webUrl;
     issue.project_id = obj.project_id;
-    issue.timeEstimate = obj.time_estimate;
-    issue.assignableLabelsEndpoint = obj.assignable_labels_endpoint;
-    issue.blocked = obj.blocked;
+    Object.assign(issue, convertedObj);
 
     if (obj.project) {
       issue.project = new IssueProject(obj.project);

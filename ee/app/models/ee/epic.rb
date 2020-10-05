@@ -12,9 +12,12 @@ module EE
       include Referable
       include Awardable
       include LabelEventable
+      include StateEventable
       include UsageStatistics
       include FromUnion
       include EpicTreeSorting
+      include Presentable
+      include IdInOrdered
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],
@@ -52,6 +55,7 @@ module EE
       has_many :epic_issues
       has_many :issues, through: :epic_issues
       has_many :user_mentions, class_name: "EpicUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+      has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :epic
 
       validates :group, presence: true
       validate :validate_parent, on: :create
@@ -69,6 +73,8 @@ module EE
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
+
+      scope :with_web_entity_associations, -> { preload(:author, group: [:ip_restrictions, :route]) }
 
       scope :within_timeframe, -> (start_date, end_date) do
         where('start_date is not NULL or end_date is not NULL')
@@ -121,6 +127,18 @@ module EE
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
 
+      def epic_tree_root?
+        parent_id.nil?
+      end
+
+      def self.epic_tree_node_query(node)
+        selection = <<~SELECT_LIST
+          id, relative_position, parent_id, parent_id as epic_id, '#{underscore}' as object_type
+        SELECT_LIST
+
+        select(selection).in_parents(node.parent_ids)
+      end
+
       private
 
       def set_fixed_start_date
@@ -137,6 +155,8 @@ module EE
     end
 
     class_methods do
+      extend ::Gitlab::Utils::Override
+
       # We support internal references (&epic_id) and cross-references (group.full_path&epic_id)
       #
       # Escaped versions with `&amp;` will be extracted too
@@ -168,7 +188,7 @@ module EE
             \/-\/epics
             \/(?<epic>\d+)
             (?<path>
-              (\/[a-z0-9_=-]+)*
+              (\/[a-z0-9_=-]+)*\/*
             )?
             (?<query>
               \?[a-z0-9_=-]+
@@ -190,6 +210,18 @@ module EE
         else
           super
         end
+      end
+
+      override :simple_sorts
+      def simple_sorts
+        super.merge(
+          {
+            'start_date_asc' => -> { order_start_date_asc.with_order_id_desc },
+            'start_date_desc' => -> { order_start_date_desc.with_order_id_desc },
+            'end_date_asc' => -> { order_end_date_asc.with_order_id_desc },
+            'end_date_desc' => -> { order_end_date_desc.with_order_id_desc }
+          }
+        )
       end
 
       def parent_class
@@ -225,6 +257,10 @@ module EE
         return items unless ids
 
         items.where("epic_issues.epic_id": ids)
+      end
+
+      def search(query)
+        fuzzy_search(query, [:title, :description])
       end
     end
 
@@ -353,15 +389,15 @@ module EE
       preloaded_parent_group_and_descendants ||= parent.group.self_and_descendants
 
       if self == parent
-        errors.add :parent, 'Cannot add an epic as a child of itself'
+        errors.add :parent, "This epic cannot be added. An epic cannot be added to itself."
       elsif parent.children.to_a.include?(self)
-        errors.add :parent, "This epic can't be added as it is already assigned to the parent"
+        errors.add :parent, "This epic cannot be added. It is already assigned to the parent epic."
       elsif parent.has_ancestor?(self)
-        errors.add :parent, "This epic can't be added as it is already assigned to this epic's ancestor"
+        errors.add :parent, "This epic cannot be added. It is already an ancestor of the parent epic."
       elsif !preloaded_parent_group_and_descendants.include?(group)
-        errors.add :parent, "This epic can't be added because it must belong to the same group as the parent, or subgroup of the parent epic’s group"
+        errors.add :parent, "This epic cannot be added. An epic must belong to the same group or subgroup as its parent epic."
       elsif level_depth_exceeded?(parent)
-        errors.add :parent, "This epic can't be added as the maximum depth of nested epics would be exceeded"
+        errors.add :parent, "This epic cannot be added. One or more epics would exceed the maximum depth (#{MAX_HIERARCHY_DEPTH}) from its most distant ancestor."
       end
     end
 
@@ -398,11 +434,11 @@ module EE
       return unless confidential?
 
       if issues.public_only.any?
-        errors.add :confidential, _('Cannot make epic confidential if it contains not-confidential issues')
+        errors.add :confidential, _('Cannot make the epic confidential if it contains non-confidential issues')
       end
 
       if children.public_only.any?
-        errors.add :confidential, _('Cannot make epic confidential if it contains not-confidential sub-epics')
+        errors.add :confidential, _('Cannot make the epic confidential if it contains non-confidential child epics')
       end
     end
 
@@ -410,7 +446,7 @@ module EE
       return unless parent
 
       if !confidential? && parent.confidential?
-        errors.add :confidential, _('Not-confidential epic cannot be assigned to a confidential parent epic')
+        errors.add :confidential, _('A non-confidential epic cannot be assigned to a confidential parent epic')
       end
     end
   end

@@ -15,6 +15,3 @@ export const outdatedProjects = ({ projects }) =>
 
 export const outdatedProjectsCount = (state, getters) =>
   getters.outdatedProjects.reduce((count, currentGroup) => count + currentGroup.projects.length, 0);
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

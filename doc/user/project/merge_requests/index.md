@@ -1,17 +1,16 @@
 ---
+stage: Create
+group: Source Code
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: index, reference
 ---
 
 # Merge requests
 
-Merge requests allow you to visualize and collaborate on the proposed changes
-to source code that exist as commits on a given Git branch.
+A Merge Request (**MR**) is a _request_ to _merge_ one branch into another.
 
-![Merge request view](img/merge_request.png)
-
-A Merge Request (**MR**) is the basis of GitLab as a code collaboration and version
-control platform. It's exactly as the name implies: a _request_ to _merge_ one
-branch into another.
+Use merge requests to visualize and collaborate on proposed changes
+to source code.
 
 ## Use cases
 
@@ -19,8 +18,8 @@ A. Consider you're a software developer working in a team:
 
 1. You checkout a new branch, and submit your changes through a merge request
 1. You gather feedback from your team
-1. You work on the implementation optimizing code with [Code Quality reports](code_quality.md) **(STARTER)**
-1. You verify your changes with [JUnit test reports](../../../ci/junit_test_reports.md) in GitLab CI/CD
+1. You work on the implementation optimizing code with [Code Quality reports](code_quality.md)
+1. You verify your changes with [Unit test reports](../../../ci/unit_test_reports.md) in GitLab CI/CD
 1. You avoid using dependencies whose license is not compatible with your project with [License Compliance reports](../../compliance/license_compliance/index.md) **(ULTIMATE)**
 1. You request the [approval](merge_request_approvals.md) from your manager **(STARTER)**
 1. Your manager:

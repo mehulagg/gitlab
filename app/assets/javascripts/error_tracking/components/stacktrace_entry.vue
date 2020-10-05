@@ -1,14 +1,14 @@
 <script>
-import { GlTooltip, GlSprintf } from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlTooltip, GlSprintf, GlIcon } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
     ClipboardButton,
     FileIcon,
-    Icon,
+    GlIcon,
     GlSprintf,
   },
   directives: {
@@ -80,7 +80,7 @@ export default {
     <div ref="header" class="file-title file-title-flex-parent">
       <div class="file-header-content d-flex align-content-center">
         <div v-if="hasCode" class="d-inline-block cursor-pointer" @click="toggle()">
-          <icon :name="collapseIcon" :size="16" aria-hidden="true" class="gl-mr-2" />
+          <gl-icon :name="collapseIcon" :size="16" aria-hidden="true" class="gl-mr-2" />
         </div>
         <file-icon :file-name="filePath" :size="18" aria-hidden="true" css-classes="gl-mr-2" />
         <strong
@@ -94,12 +94,14 @@ export default {
         <clipboard-button
           :title="__('Copy file path')"
           :text="filePath"
-          css-class="btn-default btn-transparent btn-clipboard position-static"
+          category="tertiary"
+          size="small"
+          css-class="gl-mr-1"
         />
 
         <gl-sprintf v-if="errorFn" :message="__('%{spanStart}in%{spanEnd} %{errorFn}')">
           <template #span="{content}">
-            <span class="gl-text-gray-400">{{ content }}&nbsp;</span>
+            <span class="gl-text-gray-200">{{ content }}&nbsp;</span>
           </template>
           <template #errorFn>
             <strong>{{ errorFn }}&nbsp;</strong>
@@ -108,7 +110,7 @@ export default {
 
         <gl-sprintf :message="__('%{spanStart}at line%{spanEnd} %{errorLine}%{errorColumn}')">
           <template #span="{content}">
-            <span class="gl-text-gray-400">{{ content }}&nbsp;</span>
+            <span class="gl-text-gray-200">{{ content }}&nbsp;</span>
           </template>
           <template #errorLine>
             <strong>{{ errorLine }}</strong>

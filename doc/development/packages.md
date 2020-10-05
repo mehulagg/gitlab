@@ -1,4 +1,10 @@
-# Packages **(PREMIUM)**
+---
+stage: Package
+group: Package
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
+# Packages
 
 This document will guide you through adding another [package management system](../administration/packages/index.md) support to GitLab.
 
@@ -25,9 +31,9 @@ The existing database model requires the following:
 
 ### API endpoints
 
-Package systems work with GitLab via API. For example `ee/lib/api/npm_packages.rb`
+Package systems work with GitLab via API. For example `lib/api/npm_packages.rb`
 implements API endpoints to work with NPM clients. So, the first thing to do is to
-add a new `ee/lib/api/your_name_packages.rb` file with API endpoints that are
+add a new `lib/api/your_name_packages.rb` file with API endpoints that are
 necessary to make the package system client to work. Usually that means having
 endpoints like:
 
@@ -61,25 +67,27 @@ The current state of existing package registries availability is:
 | Repository Type | Project Level | Group Level | Instance Level |
 |-----------------|---------------|-------------|----------------|
 | Maven           | Yes           | Yes         | Yes            |
-| Conan           | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/11679) | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/11679) | Yes |
+| Conan           | Yes           | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/11679) | Yes |
 | NPM             | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36853) | Yes | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36853) |
 | NuGet           | Yes | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/36423) | No |
 | PyPI            | Yes | No | No |
 | Go              | Yes | No - [open issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213900) | No - [open-issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213902) |
 | Composer | Yes | Yes | No |
 
-NOTE: **Note:** NPM is currently a hybrid of the instance level and group level.
+NOTE: **Note:**
+NPM is currently a hybrid of the instance level and group level.
 It is using the top-level group or namespace as the defining portion of the name
 (for example, `@my-group-name/my-package-name`).
 
-**Note:** Composer package naming scope is Instance Level.
+NOTE: **Note:**
+Composer package naming scope is Instance Level.
 
 ### Naming conventions
 
 To avoid name conflict for instance-level endpoints you will need to define a package naming convention
 that gives a way to identify the project that the package belongs to. This generally involves using the project
 ID or full project path in the package name. See
-[Conan's naming convention](../user/packages/conan_repository/index.md#package-recipe-naming-convention) as an example.
+[Conan's naming convention](../user/packages/conan_repository/index.md#package-recipe-naming-convention-for-instance-remotes) as an example.
 
 For group and project-level endpoints, naming can be less constrained and it will be up to the group and project
 members to be certain that there is no conflict between two package names. However, the system should prevent
@@ -173,15 +181,15 @@ The implementation of the different Merge Requests will vary between different p
 
 The MVC must support [Personal Access Tokens](../user/profile/personal_access_tokens.md) right from the start. We currently support two options for these tokens: OAuth and Basic Access.
 
-OAuth authentication is already supported. You can see an example in the [npm API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/api/npm_packages.rb).
+OAuth authentication is already supported. You can see an example in the [npm API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/api/npm_packages.rb).
 
 [Basic Access authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication)
 support is done by overriding a specific function in the API helpers, like
-[this example in the Conan API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/api/conan_packages.rb).
+[this example in the Conan API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/api/conan_packages.rb).
 For this authentication mechanism, keep in mind that some clients can send an unauthenticated
 request first, wait for the 401 Unauthorized response with the [`WWW-Authenticate`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate)
 field, then send an updated (authenticated) request. This case is more involved as
-GitLab needs to handle the 401 Unauthorized response. The [Nuget API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/api/nuget_packages.rb)
+GitLab needs to handle the 401 Unauthorized response. The [Nuget API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/api/nuget_packages.rb)
 supports this case.
 
 #### Authorization

@@ -178,6 +178,19 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
             model.remove_concurrent_index_by_name(:users, "index_x_by_y")
           end
+
+          it 'removes the index with keyword arguments' do
+            expect(model).to receive(:remove_index)
+              .with(:users, { algorithm: :concurrently, name: "index_x_by_y" })
+
+            model.remove_concurrent_index_by_name(:users, name: "index_x_by_y")
+          end
+
+          it 'raises an error if the index is blank' do
+            expect do
+              model.remove_concurrent_index_by_name(:users, wrong_key: "index_x_by_y")
+            end.to raise_error 'remove_concurrent_index_by_name must get an index name as the second argument'
+          end
         end
       end
     end
@@ -686,6 +699,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
           expect(model).to receive(:copy_indexes).with(:users, :old, :new)
           expect(model).to receive(:copy_foreign_keys).with(:users, :old, :new)
+          expect(model).to receive(:copy_check_constraints).with(:users, :old, :new)
 
           model.rename_column_concurrently(:users, :old, :new)
         end
@@ -699,7 +713,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
             expect(model).to receive(:add_not_null_constraint).with(:users, :new)
             expect(model).to receive(:execute).with("UPDATE \"users\" SET \"new\" = cast_to_jsonb_with_default(\"users\".\"id\") WHERE \"users\".\"id\" >= #{user.id}")
             expect(model).to receive(:execute).with("DROP TRIGGER IF EXISTS #{trigger_name}\nON \"users\"\n")
-            expect(model).to receive(:execute).with("CREATE TRIGGER #{trigger_name}\nBEFORE INSERT OR UPDATE\nON \"users\"\nFOR EACH ROW\nEXECUTE PROCEDURE #{trigger_name}()\n")
+            expect(model).to receive(:execute).with("CREATE TRIGGER #{trigger_name}\nBEFORE INSERT OR UPDATE\nON \"users\"\nFOR EACH ROW\nEXECUTE FUNCTION #{trigger_name}()\n")
             expect(model).to receive(:execute).with("CREATE OR REPLACE FUNCTION #{trigger_name}()\nRETURNS trigger AS\n$BODY$\nBEGIN\n  NEW.\"new\" := NEW.\"id\";\n  RETURN NEW;\nEND;\n$BODY$\nLANGUAGE 'plpgsql'\nVOLATILE\n")
 
             model.rename_column_concurrently(:users, :id, :new, type_cast_function: 'cast_to_jsonb_with_default')
@@ -747,6 +761,9 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           it 'copies the default to the new column' do
             expect(model).to receive(:change_column_default)
               .with(:users, :new, old_column.default)
+
+            expect(model).to receive(:copy_check_constraints)
+              .with(:users, :old, :new)
 
             model.rename_column_concurrently(:users, :old, :new)
           end
@@ -843,6 +860,7 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
         expect(model).to receive(:copy_indexes).with(:users, :new, :old)
         expect(model).to receive(:copy_foreign_keys).with(:users, :new, :old)
+        expect(model).to receive(:copy_check_constraints).with(:users, :new, :old)
 
         model.undo_cleanup_concurrent_column_rename(:users, :old, :new)
       end
@@ -881,6 +899,9 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
           expect(model).to receive(:change_column_default)
             .with(:users, :old, new_column.default)
 
+          expect(model).to receive(:copy_check_constraints)
+            .with(:users, :new, :old)
+
           model.undo_cleanup_concurrent_column_rename(:users, :old, :new)
         end
       end
@@ -890,15 +911,22 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
   describe '#change_column_type_concurrently' do
     it 'changes the column type' do
       expect(model).to receive(:rename_column_concurrently)
-        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil)
+        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil, batch_column_name: :id)
 
       model.change_column_type_concurrently('users', 'username', :text)
+    end
+
+    it 'passed the batch column name' do
+      expect(model).to receive(:rename_column_concurrently)
+        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil, batch_column_name: :user_id)
+
+      model.change_column_type_concurrently('users', 'username', :text, batch_column_name: :user_id)
     end
 
     context 'with type cast' do
       it 'changes the column type with casting the value to the new type' do
         expect(model).to receive(:rename_column_concurrently)
-          .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: 'JSON')
+          .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: 'JSON', batch_column_name: :id)
 
         model.change_column_type_concurrently('users', 'username', :text, type_cast_function: 'JSON')
       end
@@ -1108,7 +1136,65 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
                name: 'index_on_issues_gl_project_id',
                length: [],
                order: [],
-               opclasses: { 'gl_project_id' => 'bar' })
+               opclass: { 'gl_project_id' => 'bar' })
+
+        model.copy_indexes(:issues, :project_id, :gl_project_id)
+      end
+    end
+
+    context 'using an index with multiple columns and custom operator classes' do
+      it 'copies the index' do
+        index = double(:index,
+                       columns: %w(project_id foobar),
+                       name: 'index_on_issues_project_id_foobar',
+                       using: :gin,
+                       where: nil,
+                       opclasses: { 'project_id' => 'bar', 'foobar' => :gin_trgm_ops },
+                       unique: false,
+                       lengths: [],
+                       orders: [])
+
+        allow(model).to receive(:indexes_for).with(:issues, 'project_id')
+          .and_return([index])
+
+        expect(model).to receive(:add_concurrent_index)
+          .with(:issues,
+               %w(gl_project_id foobar),
+               unique: false,
+               name: 'index_on_issues_gl_project_id_foobar',
+               length: [],
+               order: [],
+               opclass: { 'gl_project_id' => 'bar', 'foobar' => :gin_trgm_ops },
+               using: :gin)
+
+        model.copy_indexes(:issues, :project_id, :gl_project_id)
+      end
+    end
+
+    context 'using an index with multiple columns and a custom operator class on the non affected column' do
+      it 'copies the index' do
+        index = double(:index,
+                       columns: %w(project_id foobar),
+                       name: 'index_on_issues_project_id_foobar',
+                       using: :gin,
+                       where: nil,
+                       opclasses: { 'foobar' => :gin_trgm_ops },
+                       unique: false,
+                       lengths: [],
+                       orders: [])
+
+        allow(model).to receive(:indexes_for).with(:issues, 'project_id')
+          .and_return([index])
+
+        expect(model).to receive(:add_concurrent_index)
+          .with(:issues,
+               %w(gl_project_id foobar),
+               unique: false,
+               name: 'index_on_issues_gl_project_id_foobar',
+               length: [],
+               order: [],
+               opclass: { 'foobar' => :gin_trgm_ops },
+               using: :gin)
 
         model.copy_indexes(:issues, :project_id, :gl_project_id)
       end
@@ -1380,13 +1466,30 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
         )
       end
 
-      after do
-        'DROP INDEX IF EXISTS test_index;'
-      end
-
       it 'returns true if an index exists' do
         expect(model.index_exists_by_name?(:projects, 'test_index'))
           .to be_truthy
+      end
+    end
+
+    context 'when an index exists for a table with the same name in another schema' do
+      before do
+        ActiveRecord::Base.connection.execute(
+          'CREATE SCHEMA new_test_schema'
+        )
+
+        ActiveRecord::Base.connection.execute(
+          'CREATE TABLE new_test_schema.projects (id integer, name character varying)'
+        )
+
+        ActiveRecord::Base.connection.execute(
+          'CREATE INDEX test_index_on_name ON new_test_schema.projects (LOWER(name));'
+        )
+      end
+
+      it 'returns false if the index does not exist in the current schema' do
+        expect(model.index_exists_by_name?(:projects, 'test_index_on_name'))
+          .to be_falsy
       end
     end
   end
@@ -1843,11 +1946,17 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       ActiveRecord::Base.connection.execute(
         'ALTER TABLE projects ADD CONSTRAINT check_1 CHECK (char_length(path) <= 5) NOT VALID'
       )
-    end
 
-    after do
       ActiveRecord::Base.connection.execute(
-        'ALTER TABLE projects DROP CONSTRAINT IF EXISTS check_1'
+        'CREATE SCHEMA new_test_schema'
+      )
+
+      ActiveRecord::Base.connection.execute(
+        'CREATE TABLE new_test_schema.projects (id integer, name character varying)'
+      )
+
+      ActiveRecord::Base.connection.execute(
+        'ALTER TABLE new_test_schema.projects ADD CONSTRAINT check_2 CHECK (char_length(name) <= 5)'
       )
     end
 
@@ -1863,6 +1972,11 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
     it 'returns false if a constraint with the same name exists in another table' do
       expect(model.check_constraint_exists?(:users, 'check_1'))
+        .to be_falsy
+    end
+
+    it 'returns false if a constraint with the same name exists for the same table in another schema' do
+      expect(model.check_constraint_exists?(:projects, 'check_2'))
         .to be_falsy
     end
   end
@@ -2063,6 +2177,103 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       expect(model).to receive(:execute).with(drop_sql)
 
       model.remove_check_constraint(:test_table, 'check_name')
+    end
+  end
+
+  describe '#copy_check_constraints' do
+    context 'inside a transaction' do
+      it 'raises an error' do
+        expect(model).to receive(:transaction_open?).and_return(true)
+
+        expect do
+          model.copy_check_constraints(:test_table, :old_column, :new_column)
+        end.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'outside a transaction' do
+      before do
+        allow(model).to receive(:transaction_open?).and_return(false)
+        allow(model).to receive(:column_exists?).and_return(true)
+      end
+
+      let(:old_column_constraints) do
+        [
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'check_d7d49d475d',
+            'constraint_def' => '(old_column IS NOT NULL)'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'check_48560e521e',
+            'constraint_def' => '(char_length(old_column) <= 255)'
+          },
+          {
+            'schema_name' => 'public',
+            'table_name' => 'test_table',
+            'column_name' => 'old_column',
+            'constraint_name' => 'custom_check_constraint',
+            'constraint_def' => '((old_column IS NOT NULL) AND (another_column IS NULL))'
+          }
+        ]
+      end
+
+      it 'copies check constraints from one column to another' do
+        allow(model).to receive(:check_constraints_for)
+        .with(:test_table, :old_column, schema: nil)
+          .and_return(old_column_constraints)
+
+        allow(model).to receive(:not_null_constraint_name).with(:test_table, :new_column)
+          .and_return('check_1')
+
+        allow(model).to receive(:text_limit_name).with(:test_table, :new_column)
+          .and_return('check_2')
+
+        allow(model).to receive(:check_constraint_name)
+          .with(:test_table, :new_column, 'copy_check_constraint')
+          .and_return('check_3')
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(new_column IS NOT NULL)',
+            'check_1',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '(char_length(new_column) <= 255)',
+            'check_2',
+            validate: true
+          ).once
+
+        expect(model).to receive(:add_check_constraint)
+          .with(
+            :test_table,
+            '((new_column IS NOT NULL) AND (another_column IS NULL))',
+            'check_3',
+            validate: true
+          ).once
+
+        model.copy_check_constraints(:test_table, :old_column, :new_column)
+      end
+
+      it 'does nothing if there are no constraints defined for the old column' do
+        allow(model).to receive(:check_constraints_for)
+        .with(:test_table, :old_column, schema: nil)
+          .and_return([])
+
+        expect(model).not_to receive(:add_check_constraint)
+
+        model.copy_check_constraints(:test_table, :old_column, :new_column)
+      end
     end
   end
 
@@ -2313,6 +2524,58 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
                      .with(:test_table, constraint_name)
 
         model.check_not_null_constraint_exists?(:test_table, :name, constraint_name: constraint_name)
+      end
+    end
+  end
+
+  describe '#create_extension' do
+    subject { model.create_extension(extension) }
+
+    let(:extension) { :btree_gist }
+
+    it 'executes CREATE EXTENSION statement' do
+      expect(model).to receive(:execute).with(/CREATE EXTENSION IF NOT EXISTS #{extension}/)
+
+      subject
+    end
+
+    context 'without proper permissions' do
+      before do
+        allow(model).to receive(:execute).with(/CREATE EXTENSION IF NOT EXISTS #{extension}/).and_raise(ActiveRecord::StatementInvalid, 'InsufficientPrivilege: permission denied')
+      end
+
+      it 'raises the exception' do
+        expect { subject }.to raise_error(ActiveRecord::StatementInvalid, /InsufficientPrivilege/)
+      end
+
+      it 'prints an error message' do
+        expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
+      end
+    end
+  end
+
+  describe '#drop_extension' do
+    subject { model.drop_extension(extension) }
+
+    let(:extension) { 'btree_gist' }
+
+    it 'executes CREATE EXTENSION statement' do
+      expect(model).to receive(:execute).with(/DROP EXTENSION IF EXISTS #{extension}/)
+
+      subject
+    end
+
+    context 'without proper permissions' do
+      before do
+        allow(model).to receive(:execute).with(/DROP EXTENSION IF EXISTS #{extension}/).and_raise(ActiveRecord::StatementInvalid, 'InsufficientPrivilege: permission denied')
+      end
+
+      it 'raises the exception' do
+        expect { subject }.to raise_error(ActiveRecord::StatementInvalid, /InsufficientPrivilege/)
+      end
+
+      it 'prints an error message' do
+        expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
       end
     end
   end

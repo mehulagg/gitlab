@@ -1,8 +1,7 @@
 import Vue from 'vue';
-import MockAdapater from 'axios-mock-adapter';
 import MilestoneSelect from 'ee/boards/components/milestone_select.vue';
 import { boardObj } from 'jest/boards/mock_data';
-import axios from '~/lib/utils/axios_utils';
+import Api from '~/api';
 import IssuableContext from '~/issuable_context';
 
 let vm;
@@ -21,12 +20,16 @@ const milestone = {
   id: 1,
   title: 'first milestone',
   name: 'first milestone',
+  due_date: '2015-05-05',
+  expired: true,
 };
 
 const milestone2 = {
   id: 2,
   title: 'second milestone',
   name: 'second milestone',
+  due_date: null,
+  expired: false,
 };
 
 describe('Milestone select component', () => {
@@ -40,7 +43,8 @@ describe('Milestone select component', () => {
     vm = new Component({
       propsData: {
         board: boardObj,
-        milestonePath: '/test/issue-boards/milestones.json',
+        groupId: 2,
+        projectId: 2,
         canEdit: true,
       },
     }).$mount('.test-container');
@@ -92,15 +96,8 @@ describe('Milestone select component', () => {
     });
 
     describe('clicking dropdown items', () => {
-      let mock;
-
       beforeEach(() => {
-        mock = new MockAdapater(axios);
-        mock.onGet('/test/issue-boards/milestones.json').reply(200, [milestone, milestone2]);
-      });
-
-      afterEach(() => {
-        mock.restore();
+        jest.spyOn(Api, 'projectMilestones').mockResolvedValue({ data: [milestone, milestone2] });
       });
 
       it('sets Any milestone', async done => {
@@ -147,9 +144,10 @@ describe('Milestone select component', () => {
         });
 
         setImmediate(() => {
-          expect(activeDropdownItem(0)).toEqual('first milestone');
-          expect(selectedText()).toEqual('first milestone');
-          expect(vm.board.milestone).toEqual(milestone);
+          // "second milestone" is not expired, hence it shows up to the top.
+          expect(activeDropdownItem(0)).toBe('second milestone');
+          expect(selectedText()).toBe('second milestone');
+          expect(vm.board.milestone).toEqual(milestone2);
           done();
         });
       });

@@ -15,6 +15,7 @@ RSpec.describe UserAnalyticsEntity do
       total_events: {}
     }
   end
+
   let(:request) { double('request', data_collector: instance_double(Gitlab::ContributionAnalytics::DataCollector, totals: events)) }
 
   subject(:json) { described_class.new(user, request: request).as_json }

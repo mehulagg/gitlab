@@ -185,12 +185,44 @@ RSpec.describe BuildDetailsEntity do
       end
     end
 
+    context 'when the build has expired artifacts' do
+      let!(:build) { create(:ci_build, :artifacts, artifacts_expire_at: 7.days.ago) }
+
+      context 'when pipeline is unlocked' do
+        before do
+          build.pipeline.unlocked!
+        end
+
+        it 'artifact locked is false' do
+          expect(subject.dig(:artifact, :locked)).to eq(false)
+        end
+
+        it 'does not expose any artifact actions path' do
+          expect(subject[:artifact].keys).not_to include(:download_path, :browse_path, :keep_path)
+        end
+      end
+
+      context 'when the pipeline is artifacts_locked' do
+        before do
+          build.pipeline.artifacts_locked!
+        end
+
+        it 'artifact locked is true' do
+          expect(subject.dig(:artifact, :locked)).to eq(true)
+        end
+
+        it 'exposes download, browse and keep artifact actions path' do
+          expect(subject[:artifact].keys).to include(:download_path, :browse_path, :keep_path)
+        end
+      end
+    end
+
     context 'when the build has archive type artifacts' do
       let!(:build) { create(:ci_build, :artifacts, artifacts_expire_at: 7.days.from_now) }
       let!(:report) { create(:ci_job_artifact, :codequality, job: build) }
 
       it 'exposes artifact details' do
-        expect(subject[:artifact].keys).to include(:download_path, :browse_path, :keep_path, :expire_at, :expired)
+        expect(subject[:artifact].keys).to include(:download_path, :browse_path, :keep_path, :expire_at, :expired, :locked)
       end
     end
   end

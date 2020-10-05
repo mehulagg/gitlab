@@ -3,22 +3,23 @@
 require 'spec_helper'
 
 RSpec.describe TodoService do
-  let(:author) { create(:user) }
-  let(:assignee) { create(:user) }
-  let(:non_member) { create(:user) }
-  let(:member) { create(:user) }
-  let(:guest) { create(:user) }
-  let(:admin) { create(:admin) }
-  let(:john_doe) { create(:user) }
-  let(:skipped) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:author) { create(:user) }
+  let_it_be(:assignee) { create(:user) }
+  let_it_be(:non_member) { create(:user) }
+  let_it_be(:member) { create(:user) }
+  let_it_be(:guest) { create(:user) }
+  let_it_be(:admin) { create(:admin) }
+  let_it_be(:john_doe) { create(:user) }
+  let_it_be(:skipped) { create(:user) }
+
   let(:skip_users) { [skipped] }
-  let(:project) { create(:project, :repository) }
   let(:mentions) { 'FYI: ' + [author, assignee, john_doe, member, guest, non_member, admin, skipped].map(&:to_reference).join(' ') }
   let(:directly_addressed) { [author, assignee, john_doe, member, guest, non_member, admin, skipped].map(&:to_reference).join(' ') }
   let(:directly_addressed_and_mentioned) { member.to_reference + ", what do you think? cc: " + [guest, admin, skipped].map(&:to_reference).join(' ') }
   let(:service) { described_class.new }
 
-  before do
+  before_all do
     project.add_guest(guest)
     project.add_developer(author)
     project.add_developer(assignee)
@@ -57,6 +58,44 @@ RSpec.describe TodoService do
       service.send(described_method, addressed_target_assigned, author)
 
       should_not_create_todo(user: guest, target: addressed_target_assigned, action: Todo::DIRECTLY_ADDRESSED)
+    end
+
+    it 'does not create a todo if already assigned' do
+      should_not_create_any_todo { service.send(described_method, target_assigned, author, [john_doe]) }
+    end
+  end
+
+  shared_examples 'reassigned reviewable target' do
+    context 'with no existing reviewers' do
+      let(:assigned_reviewers) { [] }
+
+      it 'creates a pending todo for new reviewer' do
+        target.reviewers = [john_doe]
+        service.send(described_method, target, author)
+
+        should_create_todo(user: john_doe, target: target, action: Todo::REVIEW_REQUESTED)
+      end
+    end
+
+    context 'with an existing reviewer' do
+      let(:assigned_reviewers) { [john_doe] }
+
+      it 'does not create a todo if unassigned' do
+        target.reviewers = []
+
+        should_not_create_any_todo { service.send(described_method, target, author) }
+      end
+
+      it 'creates a todo if new reviewer is the current user' do
+        target.reviewers = [john_doe]
+        service.send(described_method, target, john_doe)
+
+        should_create_todo(user: john_doe, target: target, author: john_doe, action: Todo::REVIEW_REQUESTED)
+      end
+
+      it 'does not create a todo if already assigned' do
+        should_not_create_any_todo { service.send(described_method, target, author, [john_doe]) }
+      end
     end
   end
 
@@ -153,6 +192,19 @@ RSpec.describe TodoService do
         it 'creates a todo for group members' do
           should_create_todo(user: member, target: issue)
           should_create_todo(user: john_doe, target: issue)
+        end
+      end
+
+      context 'issue is an incident' do
+        let(:issue) { create(:incident, project: project, assignees: [john_doe], author: author) }
+
+        subject do
+          service.new_issue(issue, author)
+          should_create_todo(user: john_doe, target: issue, action: Todo::ASSIGNED)
+        end
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_todo do
+          let(:current_user) { john_doe}
         end
       end
     end
@@ -456,7 +508,16 @@ RSpec.describe TodoService do
         end
 
         context 'leaving a note on a commit in a public project with private code' do
-          let(:project) { create(:project, :repository, :public, :repository_private) }
+          let_it_be(:project) { create(:project, :repository, :public, :repository_private) }
+
+          before_all do
+            project.add_guest(guest)
+            project.add_developer(author)
+            project.add_developer(assignee)
+            project.add_developer(member)
+            project.add_developer(john_doe)
+            project.add_developer(skipped)
+          end
 
           it 'creates a todo for each valid mentioned user' do
             expected_todo = base_commit_todo_attrs.merge(
@@ -492,7 +553,16 @@ RSpec.describe TodoService do
         end
 
         context 'leaving a note on a commit in a private project' do
-          let(:project) { create(:project, :repository, :private) }
+          let_it_be(:project) { create(:project, :repository, :private) }
+
+          before_all do
+            project.add_guest(guest)
+            project.add_developer(author)
+            project.add_developer(assignee)
+            project.add_developer(member)
+            project.add_developer(john_doe)
+            project.add_developer(skipped)
+          end
 
           it 'creates a todo for each valid mentioned user' do
             expected_todo = base_commit_todo_attrs.merge(
@@ -554,10 +624,10 @@ RSpec.describe TodoService do
     end
   end
 
-  describe '#reassigned_issuable' do
-    let(:described_method) { :reassigned_issuable }
+  describe '#reassigned_assignable' do
+    let(:described_method) { :reassigned_assignable }
 
-    context 'issuable is a merge request' do
+    context 'assignable is a merge request' do
       it_behaves_like 'reassigned target' do
         let(:target_assigned) { create(:merge_request, source_project: project, author: author, assignees: [john_doe], description: "- [ ] Task 1\n- [ ] Task 2 #{mentions}") }
         let(:addressed_target_assigned) { create(:merge_request, source_project: project, author: author, assignees: [john_doe], description: "#{directly_addressed}\n- [ ] Task 1\n- [ ] Task 2") }
@@ -565,11 +635,30 @@ RSpec.describe TodoService do
       end
     end
 
-    context 'issuable is an issue' do
+    context 'assignable is an issue' do
       it_behaves_like 'reassigned target' do
         let(:target_assigned) { create(:issue, project: project, author: author, assignees: [john_doe], description: "- [ ] Task 1\n- [ ] Task 2 #{mentions}") }
         let(:addressed_target_assigned) { create(:issue, project: project, author: author, assignees: [john_doe], description: "#{directly_addressed}\n- [ ] Task 1\n- [ ] Task 2") }
         let(:target_unassigned) { create(:issue, project: project, author: author, assignees: []) }
+      end
+    end
+
+    context 'assignable is an alert' do
+      it_behaves_like 'reassigned target' do
+        let(:target_assigned) { create(:alert_management_alert, project: project, assignees: [john_doe]) }
+        let(:addressed_target_assigned) { create(:alert_management_alert, project: project, assignees: [john_doe]) }
+        let(:target_unassigned) { create(:alert_management_alert, project: project, assignees: []) }
+      end
+    end
+  end
+
+  describe '#reassigned_reviewable' do
+    let(:described_method) { :reassigned_reviewable }
+
+    context 'reviewable is a merge request' do
+      it_behaves_like 'reassigned reviewable target' do
+        let(:assigned_reviewers) { [] }
+        let(:target) { create(:merge_request, source_project: project, author: author, reviewers: assigned_reviewers) }
       end
     end
   end
@@ -759,16 +848,6 @@ RSpec.describe TodoService do
       end
     end
 
-    describe '#assign_alert' do
-      let(:described_method) { :assign_alert }
-
-      it_behaves_like 'reassigned target' do
-        let(:target_assigned) { create(:alert_management_alert, project: project, assignees: [john_doe]) }
-        let(:addressed_target_assigned) { create(:alert_management_alert, project: project, assignees: [john_doe]) }
-        let(:target_unassigned) { create(:alert_management_alert, project: project, assignees: []) }
-      end
-    end
-
     describe '#merge_request_build_failed' do
       let(:merge_participants) { [mr_unassigned.author, admin] }
 
@@ -822,7 +901,17 @@ RSpec.describe TodoService do
     end
 
     describe '#new_note' do
-      let(:project) { create(:project, :repository) }
+      let_it_be(:project) { create(:project, :repository) }
+
+      before_all do
+        project.add_guest(guest)
+        project.add_developer(author)
+        project.add_developer(assignee)
+        project.add_developer(member)
+        project.add_developer(john_doe)
+        project.add_developer(skipped)
+      end
+
       let(:mention) { john_doe.to_reference }
       let(:diff_note_on_merge_request) { create(:diff_note_on_merge_request, project: project, noteable: mr_unassigned, author: author, note: "Hey #{mention}") }
       let(:addressed_diff_note_on_merge_request) { create(:diff_note_on_merge_request, project: project, noteable: mr_unassigned, author: author, note: "#{mention}, hey!") }

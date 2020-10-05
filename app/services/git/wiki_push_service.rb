@@ -5,7 +5,16 @@ module Git
     # Maximum number of change events we will process on any single push
     MAX_CHANGES = 100
 
+    attr_reader :wiki
+
+    def initialize(wiki, current_user, params)
+      @wiki, @current_user, @params = wiki, current_user, params.dup
+    end
+
     def execute
+      # Execute model-specific callbacks
+      wiki.after_post_receive
+
       process_changes
     end
 
@@ -23,7 +32,9 @@ module Git
     end
 
     def can_process_wiki_events?
-      Feature.enabled?(:wiki_events_on_git_push, project)
+      # TODO: Support activity events for group wikis
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/209306
+      wiki.is_a?(ProjectWiki)
     end
 
     def push_changes
@@ -36,12 +47,13 @@ module Git
       wiki.repository.raw.raw_changes_between(change[:oldrev], change[:newrev])
     end
 
-    def wiki
-      project.wiki
-    end
-
     def create_event_for(change)
-      event_service.execute(change.last_known_slug, change.page, change.event_action)
+      event_service.execute(
+        change.last_known_slug,
+        change.page,
+        change.event_action,
+        change.sha
+      )
     end
 
     def event_service
@@ -49,7 +61,7 @@ module Git
     end
 
     def on_default_branch?(change)
-      project.wiki.default_branch == ::Gitlab::Git.branch_name(change[:ref])
+      wiki.default_branch == ::Gitlab::Git.branch_name(change[:ref])
     end
 
     # See: [Gitlab::GitPostReceive#changes]

@@ -1,7 +1,8 @@
-import Vue from 'vue';
 import { mount } from '@vue/test-utils';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_item.vue';
+import IssueDueDate from '~/boards/components/issue_due_date.vue';
 import { defaultAssignees, defaultMilestone } from './related_issuable_mock_data';
 
 describe('RelatedIssuableItem', () => {
@@ -19,7 +20,7 @@ describe('RelatedIssuableItem', () => {
     idKey: 1,
     displayReference: 'gitlab-org/gitlab-test#1',
     pathIdSeparator: '#',
-    path: `${gl.TEST_HOST}/path`,
+    path: `${TEST_HOST}/path`,
     title: 'title',
     confidential: true,
     dueDate: '1990-12-31',
@@ -33,6 +34,9 @@ describe('RelatedIssuableItem', () => {
     dueDate: '<div class="js-due-date-slot"></div>',
     weight: '<div class="js-weight-slot"></div>',
   };
+
+  const findRemoveButton = () => wrapper.find({ ref: 'removeButton' });
+  const findLockIcon = () => wrapper.find({ ref: 'lockIcon' });
 
   beforeEach(() => {
     mountComponent({ props, slots });
@@ -70,85 +74,65 @@ describe('RelatedIssuableItem', () => {
   });
 
   describe('token state', () => {
-    let tokenState;
+    const tokenState = () => wrapper.find({ ref: 'iconElementXL' });
 
-    beforeEach(done => {
+    beforeEach(() => {
       wrapper.setProps({ state: 'opened' });
-
-      Vue.nextTick(() => {
-        tokenState = wrapper.find('.issue-token-state-icon-open');
-
-        done();
-      });
     });
 
     it('renders if hasState', () => {
-      expect(tokenState.exists()).toBe(true);
+      expect(tokenState().exists()).toBe(true);
     });
 
     it('renders state title', () => {
-      const stateTitle = tokenState.attributes('title');
+      const stateTitle = tokenState().attributes('title');
       const formattedCreateDate = formatDate(props.createdAt);
 
       expect(stateTitle).toContain('<span class="bold">Opened</span>');
-
       expect(stateTitle).toContain(`<span class="text-tertiary">${formattedCreateDate}</span>`);
     });
 
     it('renders aria label', () => {
-      expect(tokenState.attributes('aria-label')).toEqual('opened');
+      expect(tokenState().attributes('aria-label')).toEqual('opened');
     });
 
     it('renders open icon when open state', () => {
-      expect(tokenState.classes('issue-token-state-icon-open')).toBe(true);
+      expect(tokenState().classes('issue-token-state-icon-open')).toBe(true);
     });
 
-    it('renders close icon when close state', done => {
+    it('renders close icon when close state', async () => {
       wrapper.setProps({
         state: 'closed',
         closedAt: '2018-12-01T00:00:00.00Z',
       });
+      await wrapper.vm.$nextTick();
 
-      Vue.nextTick(() => {
-        expect(tokenState.classes('issue-token-state-icon-closed')).toBe(true);
-
-        done();
-      });
+      expect(tokenState().classes('issue-token-state-icon-closed')).toBe(true);
     });
   });
 
   describe('token metadata', () => {
-    let tokenMetadata;
-
-    beforeEach(done => {
-      Vue.nextTick(() => {
-        tokenMetadata = wrapper.find('.item-meta');
-
-        done();
-      });
-    });
+    const tokenMetadata = () => wrapper.find('.item-meta');
 
     it('renders item path and ID', () => {
-      const pathAndID = tokenMetadata.find('.item-path-id').text();
+      const pathAndID = tokenMetadata()
+        .find('.item-path-id')
+        .text();
 
       expect(pathAndID).toContain('gitlab-org/gitlab-test');
       expect(pathAndID).toContain('#1');
     });
 
     it('renders milestone icon and name', () => {
-      const milestoneIcon = tokenMetadata.find('.item-milestone svg use');
-      const milestoneTitle = tokenMetadata.find('.item-milestone .milestone-title');
+      const milestoneIcon = tokenMetadata().find('.item-milestone svg');
+      const milestoneTitle = tokenMetadata().find('.item-milestone .milestone-title');
 
-      expect(milestoneIcon.attributes('href')).toContain('clock');
+      expect(milestoneIcon.attributes('data-testid')).toBe('clock-icon');
       expect(milestoneTitle.text()).toContain('Milestone title');
     });
 
-    it('renders due date component', () => {
-      expect(tokenMetadata.find('.js-due-date-slot').exists()).toBe(true);
-    });
-
-    it('renders weight component', () => {
-      expect(tokenMetadata.find('.js-weight-slot').exists()).toBe(true);
+    it('renders due date component with correct due date', () => {
+      expect(wrapper.find(IssueDueDate).props('date')).toBe(props.dueDate);
     });
   });
 
@@ -162,40 +146,51 @@ describe('RelatedIssuableItem', () => {
   });
 
   describe('remove button', () => {
-    let removeBtn;
-
-    beforeEach(done => {
+    beforeEach(() => {
       wrapper.setProps({ canRemove: true });
-      Vue.nextTick(() => {
-        removeBtn = wrapper.find({ ref: 'removeButton' });
-
-        done();
-      });
     });
 
     it('renders if canRemove', () => {
-      expect(removeBtn.exists()).toBe(true);
+      expect(findRemoveButton().exists()).toBe(true);
     });
 
-    it('renders disabled button when removeDisabled', done => {
-      wrapper.vm.removeDisabled = true;
+    it('does not render the lock icon', () => {
+      expect(findLockIcon().exists()).toBe(false);
+    });
 
-      Vue.nextTick(() => {
-        expect(removeBtn.attributes('disabled')).toEqual('disabled');
+    it('renders disabled button when removeDisabled', async () => {
+      wrapper.setData({ removeDisabled: true });
+      await wrapper.vm.$nextTick();
 
-        done();
+      expect(findRemoveButton().attributes('disabled')).toEqual('disabled');
+    });
+
+    it('triggers onRemoveRequest when clicked', async () => {
+      findRemoveButton().trigger('click');
+      await wrapper.vm.$nextTick();
+      const { relatedIssueRemoveRequest } = wrapper.emitted();
+
+      expect(relatedIssueRemoveRequest.length).toBe(1);
+      expect(relatedIssueRemoveRequest[0]).toEqual([props.idKey]);
+    });
+  });
+
+  describe('when issue is locked', () => {
+    const lockedMessage = 'Issues created from a vulnerability cannot be removed';
+
+    beforeEach(() => {
+      wrapper.setProps({
+        isLocked: true,
+        lockedMessage,
       });
     });
 
-    it('triggers onRemoveRequest when clicked', () => {
-      removeBtn.trigger('click');
+    it('does not render the remove button', () => {
+      expect(findRemoveButton().exists()).toBe(false);
+    });
 
-      return wrapper.vm.$nextTick().then(() => {
-        const { relatedIssueRemoveRequest } = wrapper.emitted();
-
-        expect(relatedIssueRemoveRequest.length).toBe(1);
-        expect(relatedIssueRemoveRequest[0]).toEqual([props.idKey]);
-      });
+    it('renders the lock icon with the correct title', () => {
+      expect(findLockIcon().attributes('title')).toBe(lockedMessage);
     });
   });
 });

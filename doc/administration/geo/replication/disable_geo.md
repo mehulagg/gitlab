@@ -29,11 +29,11 @@ anymore on these nodes. You can follow our docs to [remove your secondary Geo no
 
 If the current node that you want to keep using is a secondary node, you need to first promote it to primary.
 You can use our steps on [how to promote a secondary node](../disaster_recovery/#step-3-promoting-a-secondary-node)
-in order to do that.
+to do that.
 
 ## Remove the primary node from the UI
 
-1. Go to **{admin}** **Admin Area >** **{location-dot}** **Geo** (`/admin/geo/nodes`).
+1. Go to **Admin Area > Geo** (`/admin/geo/nodes`).
 1. Click the **Remove** button for the **primary** node.
 1. Confirm by clicking **Remove** when the prompt appears.
 

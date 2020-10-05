@@ -1,10 +1,17 @@
 <script>
-import { GlButton, GlTooltipDirective, GlCarousel, GlCarouselSlide } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
-import Tracking from '~/tracking';
+import {
+  GlButton,
+  GlTooltipDirective,
+  GlCarousel,
+  GlCarouselSlide,
+  GlSprintf,
+  GlLink,
+} from '@gitlab/ui';
 import securityDependencyImageUrl from 'ee_images/promotions/security-dependencies.png';
 import securityScanningImageUrl from 'ee_images/promotions/security-scanning.png';
 import securityDashboardImageUrl from 'ee_images/promotions/security-dashboard.png';
+import Tracking from '~/tracking';
+import { s__ } from '~/locale';
 
 export default {
   directives: {
@@ -14,6 +21,8 @@ export default {
     GlButton,
     GlCarousel,
     GlCarouselSlide,
+    GlSprintf,
+    GlLink,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -109,14 +118,8 @@ export default {
         ),
       },
     ],
-    discoverPlanCaption: sprintf(
-      s__('Discover|See the other features of the %{linkStart}gold plan%{linkEnd}'),
-      {
-        linkStart:
-          '<a href="https://about.gitlab.com/pricing/saas/feature-comparison/" target="_blank" rel="noopener noreferrer">',
-        linkEnd: '</a>',
-      },
-      false,
+    discoverPlanCaption: s__(
+      'Discover|See the other features of the %{linkStart}gold plan%{linkEnd}',
     ),
   },
 };
@@ -159,13 +162,24 @@ export default {
         :key="index"
         img-blank
       >
-        <p class="gl-text-gray-900 text-left">
+        <p class="gl-text-gray-900 gl-text-left">
           {{ caption }}
         </p>
       </gl-carousel-slide>
     </gl-carousel>
     <div class="discover-footer d-flex flex-nowrap flex-row justify-content-between mx-auto my-0">
-      <p class="gl-text-gray-900 text-left mb-5" v-html="$options.i18n.discoverPlanCaption"></p>
+      <p class="gl-text-gray-900 text-left mb-5">
+        <gl-sprintf :message="$options.i18n.discoverPlanCaption">
+          <template #link="{ content }">
+            <gl-link
+              href="https://about.gitlab.com/pricing/saas/feature-comparison/"
+              target="_blank"
+            >
+              {{ content }}
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </p>
     </div>
     <div class="discover-buttons d-flex flex-nowrap flex-row justify-content-between mx-auto my-0">
       <gl-button

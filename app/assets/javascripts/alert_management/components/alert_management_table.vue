@@ -1,8 +1,12 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import {
   GlLoadingIcon,
   GlTable,
   GlAlert,
+  GlAvatarsInline,
+  GlAvatarLink,
+  GlAvatar,
   GlIcon,
   GlLink,
   GlTabs,
@@ -11,9 +15,10 @@ import {
   GlPagination,
   GlSearchBoxByType,
   GlSprintf,
+  GlTooltipDirective,
 } from '@gitlab/ui';
-import { __, s__ } from '~/locale';
 import { debounce, trim } from 'lodash';
+import { __, s__ } from '~/locale';
 import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
 import { fetchPolicies } from '~/lib/graphql';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -35,6 +40,7 @@ const tdClass =
 const thClass = 'gl-hover-bg-blue-50';
 const bodyTrClass =
   'gl-border-1 gl-border-t-solid gl-border-gray-100 gl-hover-bg-blue-50 gl-hover-cursor-pointer gl-hover-border-b-solid gl-hover-border-blue-200';
+const TH_TEST_ID = { 'data-testid': 'alert-management-severity-sort' };
 
 const initialPaginationState = {
   currentPage: 1,
@@ -55,24 +61,26 @@ export default {
       "AlertManagement|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear.",
     ),
     searchPlaceholder: __('Search or filter results...'),
+    unassigned: __('Unassigned'),
   },
   fields: [
     {
       key: 'severity',
       label: s__('AlertManagement|Severity'),
-      tdClass: `${tdClass} rounded-top text-capitalize`,
       thClass: `${thClass} gl-w-eighth`,
+      thAttr: TH_TEST_ID,
+      tdClass: `${tdClass} rounded-top text-capitalize sortable-cell`,
       sortable: true,
     },
     {
       key: 'startedAt',
       label: s__('AlertManagement|Start time'),
       thClass: `${thClass} js-started-at w-15p`,
-      tdClass,
+      tdClass: `${tdClass} sortable-cell`,
       sortable: true,
     },
     {
-      key: 'title',
+      key: 'alertLabel',
       label: s__('AlertManagement|Alert'),
       thClass: `gl-pointer-events-none`,
       tdClass,
@@ -81,7 +89,7 @@ export default {
       key: 'eventCount',
       label: s__('AlertManagement|Events'),
       thClass: `${thClass} text-right gl-w-12`,
-      tdClass: `${tdClass} text-md-right`,
+      tdClass: `${tdClass} text-md-right sortable-cell`,
       sortable: true,
     },
     {
@@ -89,7 +97,6 @@ export default {
       label: s__('AlertManagement|Issue'),
       thClass: 'gl-w-12 gl-pointer-events-none',
       tdClass,
-      sortable: false,
     },
     {
       key: 'assignees',
@@ -99,9 +106,9 @@ export default {
     },
     {
       key: 'status',
-      thClass: `${thClass} w-15p`,
       label: s__('AlertManagement|Status'),
-      tdClass: `${tdClass} rounded-bottom`,
+      thClass: `${thClass} w-15p`,
+      tdClass: `${tdClass} rounded-bottom sortable-cell`,
       sortable: true,
     },
   ],
@@ -111,6 +118,9 @@ export default {
     GlLoadingIcon,
     GlTable,
     GlAlert,
+    GlAvatarsInline,
+    GlAvatarLink,
+    GlAvatar,
     TimeAgo,
     GlIcon,
     GlLink,
@@ -121,6 +131,9 @@ export default {
     GlSearchBoxByType,
     GlSprintf,
     AlertStatus,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     projectPath: {
@@ -169,7 +182,7 @@ export default {
         };
       },
       error() {
-        this.errored = true;
+        this.hasError = true;
       },
     },
     alertsCount: {
@@ -188,10 +201,9 @@ export default {
   data() {
     return {
       searchTerm: '',
-      errored: false,
+      hasError: false,
       errorMessage: '',
       isAlertDismissed: false,
-      isErrorAlertDismissed: false,
       sort: 'STARTED_AT_DESC',
       statusFilter: [],
       filteredByStatus: '',
@@ -204,15 +216,12 @@ export default {
   computed: {
     showNoAlertsMsg() {
       return (
-        !this.errored &&
+        !this.hasError &&
         !this.loading &&
         this.alertsCount?.all === 0 &&
         !this.searchTerm &&
         !this.isAlertDismissed
       );
-    },
-    showErrorMsg() {
-      return this.errored && !this.isErrorAlertDismissed;
     },
     loading() {
       return this.$apollo.queries.alerts.loading;
@@ -258,8 +267,8 @@ export default {
         this.searchTerm = trimmedInput;
       }
     }, 500),
-    navigateToAlertDetails({ iid }) {
-      return visitUrl(joinPaths(window.location.pathname, iid, 'details'));
+    navigateToAlertDetails({ iid }, index, { metaKey }) {
+      return visitUrl(joinPaths(window.location.pathname, iid, 'details'), metaKey);
     },
     trackPageViews() {
       const { category, action } = trackAlertListViewsOptions;
@@ -269,11 +278,8 @@ export default {
       const { category, action, label } = trackAlertStatusUpdateOptions;
       Tracking.event(category, action, { label, property: status });
     },
-    getAssignees(assignees) {
-      // TODO: Update to show list of assignee(s) after https://gitlab.com/gitlab-org/gitlab/-/issues/218405
-      return assignees.nodes?.length > 0
-        ? assignees.nodes[0]?.username
-        : s__('AlertManagement|Unassigned');
+    hasAssignees(assignees) {
+      return Boolean(assignees.nodes?.length);
     },
     getIssueLink(item) {
       return joinPaths('/', this.projectPath, '-', 'issues', item.issueIid);
@@ -307,11 +313,11 @@ export default {
       };
     },
     handleAlertError(errorMessage) {
-      this.errored = true;
+      this.hasError = true;
       this.errorMessage = errorMessage;
     },
     dismissError() {
-      this.isErrorAlertDismissed = true;
+      this.hasError = false;
       this.errorMessage = '';
     },
   },
@@ -319,7 +325,7 @@ export default {
 </script>
 <template>
   <div>
-    <div class="alert-management-list">
+    <div class="incident-management-list">
       <gl-alert v-if="showNoAlertsMsg" @dismiss="isAlertDismissed = true">
         <gl-sprintf :message="$options.i18n.noAlertsMsg">
           <template #link="{ content }">
@@ -333,16 +339,14 @@ export default {
           </template>
         </gl-sprintf>
       </gl-alert>
-      <gl-alert
-        v-if="showErrorMsg"
-        variant="danger"
-        data-testid="alert-error"
-        @dismiss="dismissError"
-      >
-        {{ errorMessage || $options.i18n.errorMsg }}
+      <gl-alert v-if="hasError" variant="danger" data-testid="alert-error" @dismiss="dismissError">
+        <p v-html="errorMessage || $options.i18n.errorMsg"></p>
       </gl-alert>
 
-      <gl-tabs content-class="gl-p-0" @input="filterAlertsByStatus">
+      <gl-tabs
+        content-class="gl-p-0 gl-border-b-solid gl-border-b-1 gl-border-gray-100"
+        @input="filterAlertsByStatus"
+      >
         <gl-tab v-for="tab in $options.statusTabs" :key="tab.status">
           <template slot="title">
             <span>{{ tab.title }}</span>
@@ -404,8 +408,14 @@ export default {
           {{ item.eventCount }}
         </template>
 
-        <template #cell(title)="{ item }">
-          <div class="gl-max-w-full text-truncate" :title="item.title">{{ item.title }}</div>
+        <template #cell(alertLabel)="{ item }">
+          <div
+            class="gl-max-w-full text-truncate"
+            :title="`${item.iid} - ${item.title}`"
+            data-testid="idField"
+          >
+            #{{ item.iid }} {{ item.title }}
+          </div>
         </template>
 
         <template #cell(issue)="{ item }">
@@ -416,8 +426,32 @@ export default {
         </template>
 
         <template #cell(assignees)="{ item }">
-          <div class="gl-max-w-full text-truncate" data-testid="assigneesField">
-            {{ getAssignees(item.assignees) }}
+          <div data-testid="assigneesField">
+            <template v-if="hasAssignees(item.assignees)">
+              <gl-avatars-inline
+                :avatars="item.assignees.nodes"
+                :collapsed="true"
+                :max-visible="4"
+                :avatar-size="24"
+                badge-tooltip-prop="name"
+                :badge-tooltip-max-chars="100"
+              >
+                <template #avatar="{ avatar }">
+                  <gl-avatar-link
+                    :key="avatar.username"
+                    v-gl-tooltip
+                    target="_blank"
+                    :href="avatar.webUrl"
+                    :title="avatar.name"
+                  >
+                    <gl-avatar :src="avatar.avatarUrl" :label="avatar.name" :size="24" />
+                  </gl-avatar-link>
+                </template>
+              </gl-avatars-inline>
+            </template>
+            <template v-else>
+              {{ $options.i18n.unassigned }}
+            </template>
           </div>
         </template>
 

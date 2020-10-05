@@ -1,39 +1,47 @@
 import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
 import httpStatus from '~/lib/utils/http_status';
+import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
 import { transformStagesForPathNavigation } from '../utils';
+import { DEFAULT_VALUE_STREAM_ID } from '../constants';
 
 export const hasNoAccessError = state => state.errorCode === httpStatus.FORBIDDEN;
 
-export const currentGroupPath = ({ selectedGroup }) =>
-  selectedGroup && selectedGroup.fullPath ? selectedGroup.fullPath : null;
+export const currentValueStreamId = ({ selectedValueStream }) =>
+  selectedValueStream?.id || DEFAULT_VALUE_STREAM_ID;
 
-export const currentGroupParentPath = ({ selectedGroup }, getters) =>
-  selectedGroup?.parentId || getters.currentGroupPath;
+export const currentGroupPath = ({ currentGroup }) => currentGroup?.fullPath || null;
 
 export const selectedProjectIds = ({ selectedProjects }) =>
-  selectedProjects.length ? selectedProjects.map(({ id }) => id) : [];
+  selectedProjects?.map(({ id }) => id) || [];
 
-export const cycleAnalyticsRequestParams = (
-  {
+export const cycleAnalyticsRequestParams = (state, getters) => {
+  const {
     startDate = null,
     endDate = null,
-    selectedAuthor = null,
-    selectedMilestone = null,
-    selectedAssignees = [],
-    selectedLabels = [],
-  },
-  getters,
-) => ({
-  project_ids: getters.selectedProjectIds,
-  created_after: startDate ? dateFormat(startDate, dateFormats.isoDate) : null,
-  created_before: endDate ? dateFormat(endDate, dateFormats.isoDate) : null,
-  author_username: selectedAuthor,
-  milestone_title: selectedMilestone,
-  assignee_username: selectedAssignees,
-  label_name: selectedLabels,
-});
+    filters: {
+      authors: { selected: selectedAuthor },
+      milestones: { selected: selectedMilestone },
+      assignees: { selectedList: selectedAssigneeList },
+      labels: { selectedList: selectedLabelList },
+    },
+  } = state;
+
+  const filterBarQuery = filterToQueryObject({
+    milestone_title: selectedMilestone,
+    author_username: selectedAuthor,
+    label_name: selectedLabelList,
+    assignee_username: selectedAssigneeList,
+  });
+
+  return {
+    project_ids: getters.selectedProjectIds,
+    created_after: startDate ? dateFormat(startDate, dateFormats.isoDate) : null,
+    created_before: endDate ? dateFormat(endDate, dateFormats.isoDate) : null,
+    ...filterBarQuery,
+  };
+};
 
 const filterStagesByHiddenStatus = (stages = [], isHidden = true) =>
   stages.filter(({ hidden = false }) => hidden === isHidden);

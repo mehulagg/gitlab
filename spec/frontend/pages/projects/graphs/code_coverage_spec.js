@@ -1,12 +1,12 @@
 import MockAdapter from 'axios-mock-adapter';
 import { shallowMount } from '@vue/test-utils';
-import { GlAlert, GlIcon, GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlAlert, GlIcon, GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 
+import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import CodeCoverage from '~/pages/projects/graphs/components/code_coverage.vue';
 import { codeCoverageMockData, sortedDataByDates } from './mock_data';
-import waitForPromises from 'helpers/wait_for_promises';
 import httpStatusCodes from '~/lib/utils/http_status';
 
 describe('Code Coverage', () => {
@@ -17,7 +17,7 @@ describe('Code Coverage', () => {
 
   const findAlert = () => wrapper.find(GlAlert);
   const findAreaChart = () => wrapper.find(GlAreaChart);
-  const findAllDropdownItems = () => wrapper.findAll(GlDropdownItem);
+  const findAllDropdownItems = () => wrapper.findAll(GlDeprecatedDropdownItem);
   const findFirstDropdownItem = () => findAllDropdownItems().at(0);
   const findSecondDropdownItem = () => findAllDropdownItems().at(1);
 
@@ -124,7 +124,7 @@ describe('Code Coverage', () => {
     });
 
     it('renders the dropdown with all custom names as options', () => {
-      expect(wrapper.contains(GlDropdown)).toBeDefined();
+      expect(wrapper.find(GlDeprecatedDropdown).exists()).toBeDefined();
       expect(findAllDropdownItems()).toHaveLength(codeCoverageMockData.length);
       expect(findFirstDropdownItem().text()).toBe(codeCoverageMockData[0].group_name);
     });
@@ -150,7 +150,11 @@ describe('Code Coverage', () => {
           .find(GlIcon)
           .exists(),
       ).toBe(false);
-      expect(findSecondDropdownItem().contains(GlIcon)).toBe(true);
+      expect(
+        findSecondDropdownItem()
+          .find(GlIcon)
+          .exists(),
+      ).toBe(true);
     });
 
     it('updates the graph data when selecting a different option in dropdown', async () => {

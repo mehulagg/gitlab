@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 
 document.addEventListener('DOMContentLoaded', () => {
   const selectElement = document.getElementById('country_select');

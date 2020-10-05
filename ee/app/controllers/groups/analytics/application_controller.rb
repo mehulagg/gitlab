@@ -2,12 +2,9 @@
 
 class Groups::Analytics::ApplicationController < ApplicationController
   include RoutableActions
+  include GracefulTimeoutHandling
 
   private
-
-  def self.check_feature_flag(flag, *args)
-    before_action(*args) { render_404 unless Feature.enabled?(flag, default_enabled: Gitlab::Analytics.feature_enabled_by_default?(flag)) }
-  end
 
   def self.increment_usage_counter(counter_klass, counter, *args)
     before_action(*args) { counter_klass.count(counter) }
@@ -33,5 +30,5 @@ class Groups::Analytics::ApplicationController < ApplicationController
     @project = find_routable!(@group.projects, params['project_id'])
   end
 
-  private_class_method :check_feature_flag, :increment_usage_counter
+  private_class_method :increment_usage_counter
 end

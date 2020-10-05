@@ -59,6 +59,10 @@ module QA
         self.username, self.password = default_credentials
       end
 
+      def use_default_identity
+        configure_identity('GitLab QA', 'root@gitlab.com')
+      end
+
       def clone(opts = '')
         clone_result = run("git clone #{opts} #{uri} ./", max_attempts: 3)
         return clone_result.response unless clone_result.success?
@@ -102,6 +106,10 @@ module QA
         git_lfs_track_result.to_s + git_add_result.to_s
       end
 
+      def add_tag(tag_name)
+        run("git tag #{tag_name}").to_s
+      end
+
       def delete_tag(tag_name)
         run(%Q{git push origin --delete #{tag_name}}, max_attempts: 3).to_s
       end
@@ -114,8 +122,24 @@ module QA
         run(%Q{git config user.signingkey #{@gpg_key_id} && git config gpg.program $(command -v gpg) && git commit -S -m "#{message}"}).to_s
       end
 
-      def push_changes(branch = 'master')
-        run("git push #{uri} #{branch}", max_attempts: 3).to_s
+      def current_branch
+        run("git rev-parse --abbrev-ref HEAD").to_s
+      end
+
+      def push_changes(branch = 'master', push_options: nil)
+        cmd = ['git push']
+        cmd << push_options_hash_to_string(push_options)
+        cmd << uri
+        cmd << branch
+        run(cmd.compact.join(' '), max_attempts: 3).to_s
+      end
+
+      def push_all_branches
+        run("git push --all").to_s
+      end
+
+      def push_tags_and_branches(branches)
+        run("git push --tags origin #{branches.join(' ')}").to_s
       end
 
       def merge(branch)
@@ -189,6 +213,10 @@ module QA
         run("cat #{file}").to_s
       end
 
+      def delete_netrc
+        File.delete(netrc_file_path) if File.exist?(netrc_file_path)
+      end
+
       private
 
       attr_reader :uri, :username, :password, :known_hosts_file,
@@ -200,7 +228,7 @@ module QA
         alias_method :to_s, :response
 
         def success?
-          exitstatus.zero?
+          exitstatus == 0 && !response.include?('Error encountered')
         end
       end
 
@@ -275,6 +303,23 @@ module QA
 
       def tmp_home_dir
         @tmp_home_dir ||= File.join(Dir.tmpdir, "qa-netrc-credentials", $$.to_s)
+      end
+
+      def push_options_hash_to_string(opts)
+        return if opts.nil?
+
+        prefix = "-o merge_request"
+        opts.each_with_object([]) do |(key, value), options|
+          if value.is_a?(Array)
+            value.each do |item|
+              options << "#{prefix}.#{key}=\"#{item}\""
+            end
+          elsif value == true
+            options << "#{prefix}.#{key}"
+          else
+            options << "#{prefix}.#{key}=\"#{value}\""
+          end
+        end.join(' ')
       end
 
       def netrc_file_path

@@ -6,7 +6,7 @@ import App from './components/jira_import_app.vue';
 
 Vue.use(VueApollo);
 
-const defaultClient = createDefaultClient();
+const defaultClient = createDefaultClient({}, { assumeImmutableResults: true });
 
 const apolloProvider = new VueApollo({
   defaultClient,
@@ -28,6 +28,7 @@ export default function mountJiraImportApp() {
           isJiraConfigured: parseBoolean(el.dataset.isJiraConfigured),
           issuesPath: el.dataset.issuesPath,
           jiraIntegrationPath: el.dataset.jiraIntegrationPath,
+          projectId: el.dataset.projectId,
           projectPath: el.dataset.projectPath,
           setupIllustration: el.dataset.setupIllustration,
         },

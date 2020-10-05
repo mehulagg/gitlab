@@ -8,14 +8,13 @@
 %section.settings.as-elasticsearch.no-animate#js-elasticsearch-settings{ class: ('expanded' if expanded), data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
     %h4
-      = _('Elasticsearch')
+      = _('Advanced Search')
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
-      = _('Elasticsearch integration. Elasticsearch AWS IAM.')
+      = _('Advanced Search with Elasticsearch')
   .settings-content
-
-    = form_for @application_setting, url: integrations_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
+    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting) if expanded
 
       %fieldset
@@ -27,7 +26,7 @@
                 Elasticsearch indexing
               - unless Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text.text-muted
-                  = _('Please create an index before enabling indexing')
+                  = _('An empty index will be created if one does not already exist')
               - if Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text
                   = link_to _('Index all projects'), admin_elasticsearch_enqueue_index_path,
@@ -69,6 +68,12 @@
               = recreate_index_text
 
           .form-group
+            = f.label :elasticsearch_indexed_file_size_limit_kb, _('Maximum file size indexed (KiB)'), class: 'label-bold'
+            = f.number_field :elasticsearch_indexed_file_size_limit_kb, value: @application_setting.elasticsearch_indexed_file_size_limit_kb, class: 'form-control'
+            .form-text.text-muted
+              = _('Any files larger than this limit will not be indexed, and thus will not be searchable.')
+
+          .form-group
             = f.label :elasticsearch_indexed_field_length_limit, _('Maximum field length'), class: 'label-bold'
             = f.number_field :elasticsearch_indexed_field_length_limit, value: @application_setting.elasticsearch_indexed_field_length_limit, class: 'form-control'
             .form-text.text-muted
@@ -88,11 +93,22 @@
               = _('Maximum concurrency of Elasticsearch bulk requests per indexing operation.')
               = _('This only applies to repository indexing operations.')
 
+          .form-group
+            = f.label :elasticsearch_client_request_timeout, _('Client request timeout'), class: 'label-bold'
+            = f.number_field :elasticsearch_client_request_timeout, value: @application_setting.elasticsearch_client_request_timeout, class: 'form-control'
+            .form-text.text-muted
+              = _('Elasticsearch HTTP client timeout value in seconds.')
+              = _('Setting this to 0 means using the system default timeout value.')
+
         .sub-section
           %h4= _('Elasticsearch zero-downtime reindexing')
-          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-success', method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
+          = link_to _('Trigger cluster reindexing'), admin_elasticsearch_trigger_reindexing_path, class: 'btn btn-primary', data: { confirm: _('Are you sure you want to reindex?') }, method: :post, disabled: @elasticsearch_reindexing_task&.in_progress?
           .form-text.text-muted
             = _('This feature should be used with an index that was created after 13.0')
+          - Elastic::ReindexingTask.old_indices_scheduled_for_deletion.each do |task|
+            .form-text.text-danger
+              = _("Unused, previous index '%{index_name}' will be deleted after %{time} automatically.") % { index_name: task.index_name_from, time: task.delete_original_index_at }
+              = link_to _('Cancel index deletion'), admin_elasticsearch_cancel_index_deletion_path(task_id: task.id), method: :post
           - if @elasticsearch_reindexing_task
             - expected_documents = @elasticsearch_reindexing_task.documents_count
             - processed_documents = @elasticsearch_reindexing_task.documents_count_target
@@ -108,7 +124,7 @@
               - percentage = ((processed_documents / expected_documents.to_f) * 100).round(2)
               %p= _('Documents reindexed: %{processed_documents} (%{percentage}%%)') % { processed_documents: processed_documents, percentage: percentage }
               .progress
-                .progress-bar.progress-bar-striped.bg-success{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
+                .progress-bar.progress-bar-striped.bg-primary{ "aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => percentage, :role => "progressbar", :style => "width: #{percentage}%" }
 
         .sub-section
           %h4= _('Elasticsearch indexing restrictions')

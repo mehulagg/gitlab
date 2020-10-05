@@ -24,6 +24,7 @@ export default () => {
     emptyStateUnauthorizedSvgPath,
     emptyStateForbiddenSvgPath,
     projectFullPath,
+    pipelineJobsPath,
   } = el.dataset;
 
   const loadingErrorIllustrations = {
@@ -50,6 +51,7 @@ export default () => {
           emptyStateSvgPath,
           loadingErrorIllustrations,
           projectFullPath,
+          pipelineJobsPath,
         },
       });
     },

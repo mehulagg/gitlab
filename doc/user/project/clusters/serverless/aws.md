@@ -222,7 +222,8 @@ the environment of the deployed function:
 
 ```yaml
 provider:
-  ...
+  # Other configuration omitted
+  # ...
   environment:
     A_VARIABLE: ${env:A_VARIABLE}
 ```
@@ -245,10 +246,10 @@ functions:
   hello:
     handler: src/handler.hello
     events:
-      - http: # Rewrite this part to enable CORS
+      - http:  # Rewrite this part to enable CORS
           path: hello
           method: get
-          cors: true # <-- CORS here
+          cors: true  # <-- CORS here
 ```
 
 You also need to return CORS specific headers in your function response:
@@ -373,7 +374,7 @@ variables.
 
 To set these:
 
-1. Navigate to the project's **{settings}** **Settings > CI / CD**.
+1. Navigate to the project's **Settings > CI / CD**.
 1. Expand the **Variables** section and create entries for `AWS_ACCESS_KEY_ID` and
    `AWS_SECRET_ACCESS_KEY`.
 1. Mask the credentials so they do not show in logs using the **Masked** toggle.

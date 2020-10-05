@@ -17,15 +17,11 @@ module SearchResultHelpers
       if expected_count
         actual_count = results.public_send("#{target}_count")
 
-        expect(actual_count).to eq(expected_count), "#{target} expected count to be #{expected_count} for #{user_name}, got #{actual_count}"
+        expect(actual_count).to eq(expected_count), "#{target} expected count to be #{expected_count} for #{user_name}, got #{actual_count}: #{objects}"
       end
 
       if expected_objects
-        if expected_objects.empty?
-          expect(objects.empty?).to eq(true)
-        else
-          expect(objects).to contain_exactly(*expected_objects)
-        end
+        expect(objects).to contain_exactly(*expected_objects)
       end
     end
   end

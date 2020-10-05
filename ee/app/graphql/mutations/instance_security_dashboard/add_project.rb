@@ -5,7 +5,7 @@ module Mutations
     class AddProject < BaseMutation
       graphql_name 'AddProjectToSecurityDashboard'
 
-      authorize :read_vulnerability
+      authorize :developer_access
 
       field :project, Types::ProjectType,
             null: true,
@@ -18,10 +18,11 @@ module Mutations
       def resolve(id:)
         project = authorized_find!(id: id)
         result = add_project(project)
+        error_message = prepare_error_message(result, project)
 
         {
-          project: result ? project : nil,
-          errors: result ? [] : ['The project already belongs to your dashboard or you don\'t have permission to perform this action']
+          project: error_message ? nil : project,
+          errors: [error_message].compact
         }
       end
 
@@ -33,9 +34,20 @@ module Mutations
 
       def add_project(project)
         Dashboard::Projects::CreateService
-          .new(current_user, current_user.security_dashboard_projects, feature: :security_dashboard)
+          .new(current_user, current_user.security_dashboard_projects, ability: :read_vulnerability)
           .execute([project.id])
-          .then { |result| result.added_project_ids.include?(project.id) }
+      end
+
+      def prepare_error_message(result, project)
+        return if result.added_project_ids.include?(project.id)
+
+        if result.duplicate_project_ids.include?(project.id)
+          _('The project has already been added to your dashboard.')
+        elsif result.not_licensed_project_ids.include?(project.id)
+          _('Only projects created under a Gold license are available in Security Dashboards.')
+        else
+          _('Project was not found or you do not have permission to add this project to Security Dashboards.')
+        end
       end
     end
   end

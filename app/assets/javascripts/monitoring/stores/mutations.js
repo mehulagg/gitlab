@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import { pick } from 'lodash';
 import * as types from './mutation_types';
-import { mapToDashboardViewModel, normalizeQueryResponseData } from './utils';
+import { mapToDashboardViewModel, mapPanelToViewModel, normalizeQueryResponseData } from './utils';
 import httpStatusCodes from '~/lib/utils/http_status';
-import { BACKOFF_TIMEOUT } from '../../lib/utils/common_utils';
+import { BACKOFF_TIMEOUT } from '~/lib/utils/common_utils';
 import { dashboardEmptyStates, endpointKeys, initialStateKeys, metricStates } from '../constants';
 import { optionsFromSeriesData } from './variable_mapping';
 
@@ -53,13 +53,20 @@ const emptyStateFromError = error => {
   return metricStates.UNKNOWN_ERROR;
 };
 
+export const metricStateFromData = data => {
+  if (data?.result?.length) {
+    const result = normalizeQueryResponseData(data);
+    return { state: metricStates.OK, result: Object.freeze(result) };
+  }
+  return { state: metricStates.NO_DATA, result: null };
+};
+
 export default {
   /**
    * Dashboard panels structure and global state
    */
   [types.REQUEST_METRICS_DASHBOARD](state) {
     state.emptyState = dashboardEmptyStates.LOADING;
-    state.showEmptyState = true;
   },
   [types.RECEIVE_METRICS_DASHBOARD_SUCCESS](state, dashboardYML) {
     const { dashboard, panelGroups, variables, links } = mapToDashboardViewModel(dashboardYML);
@@ -72,13 +79,14 @@ export default {
 
     if (!state.dashboard.panelGroups.length) {
       state.emptyState = dashboardEmptyStates.NO_DATA;
+    } else {
+      state.emptyState = null;
     }
   },
   [types.RECEIVE_METRICS_DASHBOARD_FAILURE](state, error) {
     state.emptyState = error
       ? dashboardEmptyStates.UNABLE_TO_CONNECT
       : dashboardEmptyStates.NO_DATA;
-    state.showEmptyState = true;
   },
 
   [types.REQUEST_DASHBOARD_STARRING](state) {
@@ -95,6 +103,10 @@ export default {
   },
   [types.RECEIVE_DASHBOARD_STARRING_FAILURE](state) {
     state.isUpdatingStarredValue = false;
+  },
+
+  [types.SET_CURRENT_DASHBOARD](state, currentDashboard) {
+    state.currentDashboard = currentDashboard;
   },
 
   /**
@@ -150,20 +162,11 @@ export default {
   },
   [types.RECEIVE_METRIC_RESULT_SUCCESS](state, { metricId, data }) {
     const metric = findMetricInDashboard(metricId, state.dashboard);
+    const metricState = metricStateFromData(data);
+
     metric.loading = false;
-
-    state.showEmptyState = false;
-    state.emptyState = null;
-
-    if (!data.result || data.result.length === 0) {
-      metric.state = metricStates.NO_DATA;
-      metric.result = null;
-    } else {
-      const result = normalizeQueryResponseData(data);
-
-      metric.state = metricStates.OK;
-      metric.result = Object.freeze(result);
-    }
+    metric.state = metricState.state;
+    metric.result = metricState.result;
   },
   [types.RECEIVE_METRIC_RESULT_FAILURE](state, { metricId, error }) {
     const metric = findMetricInDashboard(metricId, state.dashboard);
@@ -184,12 +187,7 @@ export default {
     state.timeRange = timeRange;
   },
   [types.SET_GETTING_STARTED_EMPTY_STATE](state) {
-    state.showEmptyState = true;
     state.emptyState = dashboardEmptyStates.GETTING_STARTED;
-  },
-  [types.SET_NO_DATA_EMPTY_STATE](state) {
-    state.showEmptyState = true;
-    state.emptyState = dashboardEmptyStates.NO_DATA;
   },
   [types.SET_ALL_DASHBOARDS](state, dashboards) {
     state.allDashboards = dashboards || [];
@@ -221,5 +219,55 @@ export default {
 
     // Add new options with assign to ensure Vue reactivity
     Object.assign(variable.options, { values });
+  },
+
+  [types.REQUEST_PANEL_PREVIEW](state, panelPreviewYml) {
+    state.panelPreviewIsLoading = true;
+
+    state.panelPreviewYml = panelPreviewYml;
+    state.panelPreviewGraphData = null;
+    state.panelPreviewError = null;
+  },
+  [types.RECEIVE_PANEL_PREVIEW_SUCCESS](state, payload) {
+    state.panelPreviewIsLoading = false;
+
+    state.panelPreviewGraphData = mapPanelToViewModel(payload);
+    state.panelPreviewError = null;
+  },
+  [types.RECEIVE_PANEL_PREVIEW_FAILURE](state, error) {
+    state.panelPreviewIsLoading = false;
+
+    state.panelPreviewGraphData = null;
+    state.panelPreviewError = error;
+  },
+
+  [types.REQUEST_PANEL_PREVIEW_METRIC_RESULT](state, { index }) {
+    const metric = state.panelPreviewGraphData.metrics[index];
+
+    metric.loading = true;
+    if (!metric.result) {
+      metric.state = metricStates.LOADING;
+    }
+  },
+  [types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_SUCCESS](state, { index, data }) {
+    const metric = state.panelPreviewGraphData.metrics[index];
+    const metricState = metricStateFromData(data);
+
+    metric.loading = false;
+    metric.state = metricState.state;
+    metric.result = metricState.result;
+  },
+  [types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_FAILURE](state, { index, error }) {
+    const metric = state.panelPreviewGraphData.metrics[index];
+
+    metric.loading = false;
+    metric.state = emptyStateFromError(error);
+    metric.result = null;
+  },
+  [types.SET_PANEL_PREVIEW_TIME_RANGE](state, timeRange) {
+    state.panelPreviewTimeRange = timeRange;
+  },
+  [types.SET_PANEL_PREVIEW_IS_SHOWN](state, isPreviewShown) {
+    state.panelPreviewIsShown = isPreviewShown;
   },
 };

@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import PublishButton from '~/batch_comments/components/publish_button.vue';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import PublishButton from '~/batch_comments/components/publish_button.vue';
 import { createStore } from '~/batch_comments/stores';
 
 describe('Batch comments publish button component', () => {
@@ -27,17 +27,6 @@ describe('Batch comments publish button component', () => {
     vm.$el.click();
 
     expect(vm.$store.dispatch).toHaveBeenCalledWith('batchComments/publishReview', undefined);
-  });
-
-  it('dispatches toggleReviewDropdown when shouldPublish is false on click', () => {
-    vm.shouldPublish = false;
-
-    vm.$el.click();
-
-    expect(vm.$store.dispatch).toHaveBeenCalledWith(
-      'batchComments/toggleReviewDropdown',
-      undefined,
-    );
   });
 
   it('sets loading when isPublishing is true', done => {

@@ -76,9 +76,22 @@ export default {
           'ciReport|Secret scanning detects secrets and credentials vulnerabilities in your source code.',
         ),
         content: sprintf(
-          s__('ciReport|%{linkStartTag}Learn more about Secret Scanning %{linkEndTag}'),
+          s__('ciReport|%{linkStartTag}Learn more about Secret Detection %{linkEndTag}'),
           {
             linkStartTag: getLinkStartTag(this.secretScanningHelpPath),
+            linkEndTag,
+          },
+          false,
+        ),
+      };
+    },
+    coverageFuzzingPopover() {
+      return {
+        title: s__('ciReport|Coverage Fuzzing Title'),
+        content: sprintf(
+          s__('ciReport|%{linkStartTag}Learn more about Coverage Fuzzing %{linkEndTag}'),
+          {
+            linkStartTag: getLinkStartTag(this.coverageFuzzingHelpPath),
             linkEndTag,
           },
           false,

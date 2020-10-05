@@ -12,9 +12,9 @@ In this document, we'll present an overview of the concepts of Continuous Integr
 Continuous Delivery, and Continuous Deployment, as well as an introduction to
 GitLab CI/CD.
 
-NOTE: **Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.**
-Watch our
-["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
+NOTE: **Note:**
+Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
+Watch our ["Mastering continuous software development"](https://about.gitlab.com/webcast/mastering-ci-cd/)
 webcast to learn about continuous methods and how GitLab’s built-in CI can help you simplify and scale software development.
 
 ## Introduction to CI/CD methodologies
@@ -154,7 +154,7 @@ commits to a feature branch in a remote repository in GitLab,
 the CI/CD pipeline set for your project is triggered. By doing
 so, GitLab CI/CD:
 
-- Runs automated scripts (sequential or parallel) to:
+- Runs automated scripts (sequentially or in parallel) to:
   - Build and test your app.
   - Preview the changes per merge request with Review Apps, as you
     would see in your `localhost`.
@@ -188,9 +188,10 @@ according to each stage (Verify, Package, Release).
 
 1. **Verify**:
    - Automatically build and test your application with Continuous Integration.
-   - Analyze your source code quality with [GitLab Code Quality](../../user/project/merge_requests/code_quality.md). **(STARTER)**
-   - Determine the performance impact of code changes with [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md). **(PREMIUM)**
-   - Perform a series of tests, such as [Container Scanning](../../user/application_security/container_scanning/index.md) **(ULTIMATE)**, [Dependency Scanning](../../user/application_security/dependency_scanning/index.md) **(ULTIMATE)**, and [JUnit tests](../junit_test_reports.md).
+   - Analyze your source code quality with [GitLab Code Quality](../../user/project/merge_requests/code_quality.md).
+   - Determine the browser performance impact of code changes with [Browser Performance Testing](../../user/project/merge_requests/browser_performance_testing.md). **(PREMIUM)**
+   - Determine the server performance impact of code changes with [Load Performance Testing](../../user/project/merge_requests/load_performance_testing.md). **(PREMIUM)**
+   - Perform a series of tests, such as [Container Scanning](../../user/application_security/container_scanning/index.md) **(ULTIMATE)**, [Dependency Scanning](../../user/application_security/dependency_scanning/index.md) **(ULTIMATE)**, and [Unit tests](../unit_test_reports.md).
    - Deploy your changes with [Review Apps](../review_apps/index.md) to preview the app changes on every branch.
 1. **Package**:
    - Store Docker images with [Container Registry](../../user/packages/container_registry/index.md).
@@ -229,10 +230,13 @@ syntax and with its attributes.
 This document [introduces the concepts of GitLab CI/CD in the scope of GitLab Pages](../../user/project/pages/getting_started/pages_from_scratch.md), for deploying static websites.
 Although it's meant for users who want to write their own Pages
 script from scratch, it also serves as an introduction to the setup process for GitLab CI/CD.
-It covers the very first general steps of writing a CI/CD configuration
+It covers the first general steps of writing a CI/CD configuration
 file, so we recommend you read through it to understand GitLab's CI/CD
 logic, and learn how to write your own script (or tweak an
 existing one) for any application.
 
 For a deep view of GitLab's CI/CD configuration options, check the
 [`.gitlab-ci.yml` full reference](../yaml/README.md).
+
+For help making your pipelines faster and more efficient, see the
+[pipeline efficiency documentation](../pipelines/pipeline_efficiency.md).

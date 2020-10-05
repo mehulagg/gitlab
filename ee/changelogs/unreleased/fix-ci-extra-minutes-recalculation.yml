@@ -1,5 +1,0 @@
----
-title: Recalculate CI extra minutes when monthly minutes default to nil
-merge_request: 36046
-author:
-type: fixed

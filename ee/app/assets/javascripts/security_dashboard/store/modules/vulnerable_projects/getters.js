@@ -13,6 +13,3 @@ export const severityGroups = ({ projects }) => {
     projects: projectsForSeverityGroup(projectsWithSeverityInformation, severityGroup),
   }));
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

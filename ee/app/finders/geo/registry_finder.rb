@@ -2,32 +2,72 @@
 
 module Geo
   class RegistryFinder
-    include ::Gitlab::Utils::StrongMemoize
+    # @!method find_registries_never_attempted_sync
+    #    Return an ActiveRecord::Relation of the registry records for the
+    #    tracked type that this secondary has never attempted to sync.
+    #
+    #    Does not care about selective sync, because it considers the Registry
+    #    table to be the single source of truth. The contract is that other
+    #    processes need to ensure that the table only contains records that should
+    #    be synced.
+    #
+    #    Any registries that this secondary has ever attempted to sync that currently need to be
+    #    resynced will be handled by other find methods (like
+    #    #find_registries_needs_sync_again)
+    #
+    #    You can pass a list with `except_ids:` so you can exclude items you
+    #    already scheduled but haven't finished and aren't persisted to the database yet
+    #
+    # @param [Integer] batch_size used to limit the results returned
+    # @param [Array<Integer>] except_ids ids that will be ignored from the query
+    #
+    # rubocop:disable CodeReuse/ActiveRecord
+    def find_registries_never_attempted_sync(batch_size:, except_ids: [])
+      registry_class
+        .find_registries_never_attempted_sync(batch_size: batch_size, except_ids: except_ids)
+    end
+    # rubocop:enable CodeReuse/ActiveRecord
 
-    attr_reader :current_node_id
+    # @!method find_registries_needs_sync_again
+    #    Return an ActiveRecord::Relation of registry records marked as failed,
+    #    which are ready to be retried, excluding specified IDs, limited to
+    #    batch_size
+    #
+    # @param [Integer] batch_size used to limit the results returned
+    # @param [Array<Integer>] except_ids ids that will be ignored from the query
+    #
+    # rubocop:disable CodeReuse/ActiveRecord
+    def find_registries_needs_sync_again(batch_size:, except_ids: [])
+      registry_class
+        .find_registries_needs_sync_again(batch_size: batch_size, except_ids: except_ids)
+    end
+    # rubocop:enable CodeReuse/ActiveRecord
 
-    delegate :selective_sync?, to: :current_node, allow_nil: true
-
-    def initialize(current_node_id: nil)
-      @current_node_id = current_node_id
+    # @!method registry_count
+    #    Return a count of the registry records for the tracked type(s)
+    def registry_count
+      registry_class.count
     end
 
-    private
-
-    def current_node(fdw: true)
-      fdw ? current_node_fdw : current_node_non_fdw
+    # @!method synced_count
+    #    Return a count of the registry records for the tracked type
+    #    that are synced
+    def synced_count
+      registry_class.synced.count
     end
 
-    def current_node_fdw
-      strong_memoize(:current_node_fdw) do
-        Geo::Fdw::GeoNode.find(current_node_id) if current_node_id
-      end
+    # @!method failed_count
+    #    Return a count of the registry records for the tracked type
+    #    that are sync failed
+    def failed_count
+      registry_class.failed.count
     end
 
-    def current_node_non_fdw
-      strong_memoize(:current_node_non_fdw) do
-        GeoNode.find(current_node_id) if current_node_id
-      end
+    # @!method registry_class
+    #    Return an ActiveRecord::Base class for the tracked type
+    def registry_class
+      raise NotImplementedError,
+        "#{self.class} does not implement #{__method__}"
     end
   end
 end

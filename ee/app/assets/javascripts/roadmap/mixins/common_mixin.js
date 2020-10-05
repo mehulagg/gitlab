@@ -75,7 +75,9 @@ export default {
       };
     },
     timeframeString(roadmapItem) {
-      if (roadmapItem.startDateUndefined) {
+      if (roadmapItem.startDateUndefined && roadmapItem.endDateUndefined) {
+        return sprintf(s__('GroupRoadmap|No start and end date'));
+      } else if (roadmapItem.startDateUndefined) {
         return sprintf(s__('GroupRoadmap|No start date – %{dateWord}'), {
           dateWord: dateInWords(this.endDate, true),
         });

@@ -6,7 +6,7 @@ module Types
     graphql_name 'SecurityReportSummary'
     description 'Represents summary of a security report'
 
-    ::Vulnerabilities::Occurrence::REPORT_TYPES.keys.each do |report_type|
+    ::Vulnerabilities::Finding::REPORT_TYPES.keys.each do |report_type|
       field report_type, ::Types::SecurityReportSummarySectionType, null: true,
             description: "Aggregated counts for the #{report_type} scan"
     end

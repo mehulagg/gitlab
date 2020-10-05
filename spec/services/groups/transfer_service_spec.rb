@@ -8,6 +8,75 @@ RSpec.describe Groups::TransferService do
   let!(:group_member) { create(:group_member, :owner, group: group, user: user) }
   let(:transfer_service) { described_class.new(group, user) }
 
+  context 'handling packages' do
+    let_it_be(:group) { create(:group, :public) }
+    let(:project) { create(:project, :public, namespace: group) }
+    let(:new_group) { create(:group, :public) }
+
+    before do
+      group.add_owner(user)
+      new_group&.add_owner(user)
+    end
+
+    context 'with an npm package' do
+      before do
+        create(:npm_package, project: project)
+      end
+
+      shared_examples 'transfer not allowed' do
+        it 'does not allow transfer when there is a root namespace change' do
+          transfer_service.execute(new_group)
+
+          expect(transfer_service.error).to eq('Transfer failed: Group contains projects with NPM packages.')
+          expect(group.parent).not_to eq(new_group)
+        end
+      end
+
+      it_behaves_like 'transfer not allowed'
+
+      context 'with a project within subgroup' do
+        let(:root_group) { create(:group) }
+        let(:group) { create(:group, parent: root_group) }
+
+        before do
+          root_group.add_owner(user)
+        end
+
+        it_behaves_like 'transfer not allowed'
+
+        context 'without a root namespace change' do
+          let(:new_group) { create(:group, parent: root_group) }
+
+          it 'allows transfer' do
+            transfer_service.execute(new_group)
+
+            expect(transfer_service.error).to be nil
+            expect(group.parent).to eq(new_group)
+          end
+        end
+
+        context 'when transferring a group into a root group' do
+          let(:new_group) { nil }
+
+          it_behaves_like 'transfer not allowed'
+        end
+      end
+    end
+
+    context 'without an npm package' do
+      context 'when transferring a group into a root group' do
+        let(:group) { create(:group, parent: create(:group)) }
+
+        it 'allows transfer' do
+          transfer_service.execute(nil)
+
+          expect(transfer_service.error).to be nil
+          expect(group.parent).to be_nil
+        end
+      end
+    end
+  end
+
   shared_examples 'ensuring allowed transfer for a group' do
     context "when there's an exception on GitLab shell directories" do
       let(:new_parent_group) { create(:group, :public) }
@@ -216,6 +285,44 @@ RSpec.describe Groups::TransferService do
         end
       end
 
+      context 'shared runners configuration' do
+        before do
+          create(:group_member, :owner, group: new_parent_group, user: user)
+        end
+
+        context 'if parent group has disabled shared runners but allows overrides' do
+          let(:new_parent_group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: true) }
+
+          it 'calls update service' do
+            expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_setting: 'disabled_with_override' }).and_call_original
+
+            transfer_service.execute(new_parent_group)
+          end
+        end
+
+        context 'if parent group does not allow shared runners' do
+          let(:new_parent_group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: false) }
+
+          it 'calls update service' do
+            expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_setting: 'disabled_and_unoverridable' }).and_call_original
+
+            transfer_service.execute(new_parent_group)
+          end
+        end
+
+        context 'if parent group allows shared runners' do
+          let(:group) { create(:group, :public, :nested, shared_runners_enabled: false) }
+          let(:new_parent_group) { create(:group, shared_runners_enabled: true) }
+
+          it 'does not call update service and keeps them disabled on the group' do
+            expect(Groups::UpdateSharedRunnersService).not_to receive(:new)
+
+            transfer_service.execute(new_parent_group)
+            expect(group.reload.shared_runners_enabled).to be_falsy
+          end
+        end
+      end
+
       context 'when a group is transferred to its subgroup' do
         let(:new_parent_group) { create(:group, parent: group) }
 
@@ -346,44 +453,117 @@ RSpec.describe Groups::TransferService do
       end
 
       context 'when transferring a group with nested groups and projects' do
-        let!(:group) { create(:group, :public) }
+        let(:subgroup1) { create(:group, :private, parent: group) }
         let!(:project1) { create(:project, :repository, :private, namespace: group) }
-        let!(:subgroup1) { create(:group, :private, parent: group) }
         let!(:nested_subgroup) { create(:group, :private, parent: subgroup1) }
         let!(:nested_project) { create(:project, :repository, :private, namespace: subgroup1) }
 
         before do
           TestEnv.clean_test_path
           create(:group_member, :owner, group: new_parent_group, user: user)
-          transfer_service.execute(new_parent_group)
         end
 
-        it 'updates subgroups path' do
-          new_base_path = "#{new_parent_group.path}/#{group.path}"
-          group.children.each do |children|
-            expect(children.full_path).to eq("#{new_base_path}/#{children.path}")
+        context 'updated paths' do
+          let(:group) { create(:group, :public) }
+
+          before do
+            transfer_service.execute(new_parent_group)
           end
 
-          new_base_path = "#{new_parent_group.path}/#{group.path}/#{subgroup1.path}"
-          subgroup1.children.each do |children|
-            expect(children.full_path).to eq("#{new_base_path}/#{children.path}")
+          it 'updates subgroups path' do
+            new_base_path = "#{new_parent_group.path}/#{group.path}"
+            group.children.each do |children|
+              expect(children.full_path).to eq("#{new_base_path}/#{children.path}")
+            end
+
+            new_base_path = "#{new_parent_group.path}/#{group.path}/#{subgroup1.path}"
+            subgroup1.children.each do |children|
+              expect(children.full_path).to eq("#{new_base_path}/#{children.path}")
+            end
+          end
+
+          it 'updates projects path' do
+            new_parent_path = "#{new_parent_group.path}/#{group.path}"
+            subgroup1.projects.each do |project|
+              project_full_path = "#{new_parent_path}/#{project.namespace.path}/#{project.name}"
+              expect(project.full_path).to eq(project_full_path)
+            end
+          end
+
+          it 'creates redirect for the subgroups and projects' do
+            expect(group.redirect_routes.count).to eq(1)
+            expect(project1.redirect_routes.count).to eq(1)
+            expect(subgroup1.redirect_routes.count).to eq(1)
+            expect(nested_subgroup.redirect_routes.count).to eq(1)
+            expect(nested_project.redirect_routes.count).to eq(1)
           end
         end
 
-        it 'updates projects path' do
-          new_parent_path = "#{new_parent_group.path}/#{group.path}"
-          subgroup1.projects.each do |project|
-            project_full_path = "#{new_parent_path}/#{project.namespace.path}/#{project.name}"
-            expect(project.full_path).to eq(project_full_path)
-          end
-        end
+        context 'resets project authorizations' do
+          let(:old_parent_group) { create(:group) }
+          let(:group) { create(:group, :private, parent: old_parent_group) }
+          let(:new_group_member) { create(:user) }
+          let(:old_group_member) { create(:user) }
 
-        it 'creates redirect for the subgroups and projects' do
-          expect(group.redirect_routes.count).to eq(1)
-          expect(project1.redirect_routes.count).to eq(1)
-          expect(subgroup1.redirect_routes.count).to eq(1)
-          expect(nested_subgroup.redirect_routes.count).to eq(1)
-          expect(nested_project.redirect_routes.count).to eq(1)
+          before do
+            new_parent_group.add_maintainer(new_group_member)
+            old_parent_group.add_maintainer(old_group_member)
+            group.refresh_members_authorized_projects
+          end
+
+          it 'removes old project authorizations' do
+            expect { transfer_service.execute(new_parent_group) }.to change {
+              ProjectAuthorization.where(project_id: project1.id, user_id: old_group_member.id).size
+            }.from(1).to(0)
+          end
+
+          it 'adds new project authorizations' do
+            expect { transfer_service.execute(new_parent_group) }.to change {
+              ProjectAuthorization.where(project_id: project1.id, user_id: new_group_member.id).size
+            }.from(0).to(1)
+          end
+
+          it 'performs authorizations job immediately' do
+            expect(AuthorizedProjectsWorker).to receive(:bulk_perform_inline)
+
+            transfer_service.execute(new_parent_group)
+          end
+
+          context 'for nested projects' do
+            it 'removes old project authorizations' do
+              expect { transfer_service.execute(new_parent_group) }.to change {
+                ProjectAuthorization.where(project_id: nested_project.id, user_id: old_group_member.id).size
+              }.from(1).to(0)
+            end
+
+            it 'adds new project authorizations' do
+              expect { transfer_service.execute(new_parent_group) }.to change {
+                ProjectAuthorization.where(project_id: nested_project.id, user_id: new_group_member.id).size
+              }.from(0).to(1)
+            end
+          end
+
+          context 'for groups with many members' do
+            before do
+              11.times do
+                new_parent_group.add_maintainer(create(:user))
+              end
+            end
+
+            it 'adds new project authorizations for the user which makes a transfer' do
+              transfer_service.execute(new_parent_group)
+
+              expect(ProjectAuthorization.where(project_id: project1.id, user_id: user.id).size).to eq(1)
+              expect(ProjectAuthorization.where(project_id: nested_project.id, user_id: user.id).size).to eq(1)
+            end
+
+            it 'schedules authorizations job' do
+              expect(AuthorizedProjectsWorker).to receive(:bulk_perform_async)
+                .with(array_including(new_parent_group.members_with_parents.pluck(:user_id).map {|id| [id, anything] }))
+
+              transfer_service.execute(new_parent_group)
+            end
+          end
         end
       end
 

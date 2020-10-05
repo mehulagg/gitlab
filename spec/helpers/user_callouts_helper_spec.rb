@@ -25,7 +25,21 @@ RSpec.describe UserCalloutsHelper do
           allow(helper).to receive(:user_dismissed?).and_return(false)
         end
 
-        it { is_expected.to be true }
+        context 'when active_nav_link is in the operations section' do
+          before do
+            allow(helper).to receive(:active_nav_link?).and_return(true)
+          end
+
+          it { is_expected.to be true }
+        end
+
+        context 'when active_nav_link is not in the operations section' do
+          before do
+            allow(helper).to receive(:active_nav_link?).and_return(false)
+          end
+
+          it { is_expected.to be false }
+        end
       end
 
       context 'when user dismissed' do
@@ -67,12 +81,12 @@ RSpec.describe UserCalloutsHelper do
     end
   end
 
-  describe '.show_alerts_moved_alert?' do
-    subject { helper.show_alerts_moved_alert? }
+  describe '.show_service_templates_deprecated?' do
+    subject { helper.show_service_templates_deprecated? }
 
     context 'when user has not dismissed' do
       before do
-        allow(helper).to receive(:user_dismissed?).with(described_class::ALERTS_MOVED) { false }
+        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED) { false }
       end
 
       it { is_expected.to be true }
@@ -80,7 +94,37 @@ RSpec.describe UserCalloutsHelper do
 
     context 'when user dismissed' do
       before do
-        allow(helper).to receive(:user_dismissed?).with(described_class::ALERTS_MOVED) { true }
+        allow(helper).to receive(:user_dismissed?).with(described_class::SERVICE_TEMPLATES_DEPRECATED) { true }
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
+  describe '.show_customize_homepage_banner?' do
+    let(:customize_homepage) { true }
+
+    subject { helper.show_customize_homepage_banner?(customize_homepage) }
+
+    context 'when user has not dismissed' do
+      before do
+        allow(helper).to receive(:user_dismissed?).with(described_class::CUSTOMIZE_HOMEPAGE) { false }
+      end
+
+      context 'when customize_homepage is set' do
+        it { is_expected.to be true }
+      end
+
+      context 'when customize_homepage is false' do
+        let(:customize_homepage) { false }
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'when user dismissed' do
+      before do
+        allow(helper).to receive(:user_dismissed?).with(described_class::CUSTOMIZE_HOMEPAGE) { true }
       end
 
       it { is_expected.to be false }

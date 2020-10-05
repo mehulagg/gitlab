@@ -13,6 +13,7 @@ RSpec.describe Gitlab::Auth::Smartcard::LdapCertificate do
                     { issuer: issuer,
                       serial: '42' } )
   end
+
   let(:ldap_provider) { 'ldapmain' }
   let(:ldap_connection) { instance_double(::Net::LDAP) }
   let(:ldap_person_name) { 'John Doe' }

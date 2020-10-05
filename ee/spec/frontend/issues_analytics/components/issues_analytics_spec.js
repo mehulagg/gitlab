@@ -18,7 +18,7 @@ jest.mock('ee/issues_analytics/filtered_search_issues_analytics', () =>
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('Issues Analytics component', () => {
+describe('Issue Analytics component', () => {
   let wrapper;
   let store;
   let mountComponent;

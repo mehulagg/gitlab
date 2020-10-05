@@ -11,9 +11,8 @@ module Gitlab
           include ::Gitlab::Ci::Config::Entry::Processable
 
           ALLOWED_WHEN = %w[on_success on_failure always manual delayed].freeze
-          ALLOWED_KEYS = %i[tags script type image services
-                            allow_failure type when start_in artifacts cache
-                            dependencies before_script needs after_script
+          ALLOWED_KEYS = %i[tags script type image services start_in artifacts
+                            cache dependencies before_script after_script
                             environment coverage retry parallel interruptible timeout
                             resource_group release secrets].freeze
 
@@ -23,18 +22,9 @@ module Gitlab
             validates :config, allowed_keys: ALLOWED_KEYS + PROCESSABLE_ALLOWED_KEYS
             validates :config, required_keys: REQUIRED_BY_NEEDS, if: :has_needs?
             validates :script, presence: true
-            validates :config,
-              disallowed_keys: {
-                in: %i[release],
-                message: 'release features are not enabled'
-              },
-              unless: -> { Gitlab::Ci::Features.release_generation_enabled? }
 
             with_options allow_nil: true do
               validates :allow_failure, boolean: true
-              validates :parallel, numericality: { only_integer: true,
-                                                   greater_than_or_equal_to: 2,
-                                                   less_than_or_equal_to: 50 }
               validates :when, inclusion: {
                 in: ALLOWED_WHEN,
                 message: "should be one of: #{ALLOWED_WHEN.join(', ')}"
@@ -124,6 +114,10 @@ module Gitlab
             description: 'This job will produce a release.',
             inherit: false
 
+          entry :parallel, Entry::Product::Parallel,
+            description: 'Parallel configuration for this job.',
+            inherit: false
+
           attributes :script, :tags, :allow_failure, :when, :dependencies,
                      :needs, :retry, :parallel, :start_in,
                      :interruptible, :timeout, :resource_group, :release
@@ -174,7 +168,7 @@ module Gitlab
               environment_name: environment_defined? ? environment_value[:name] : nil,
               coverage: coverage_defined? ? coverage_value : nil,
               retry: retry_defined? ? retry_value : nil,
-              parallel: has_parallel? ? parallel.to_i : nil,
+              parallel: has_parallel? ? parallel_value : nil,
               interruptible: interruptible_defined? ? interruptible_value : nil,
               timeout: has_timeout? ? ChronicDuration.parse(timeout.to_s) : nil,
               artifacts: artifacts_value,

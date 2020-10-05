@@ -25,6 +25,7 @@ The following table lists examples with step-by-step tutorials that are containe
 | Use case                      | Resource                                                                                                                   |
 |:------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
 | Browser performance testing   | [Browser Performance Testing with the Sitespeed.io container](../../user/project/merge_requests/browser_performance_testing.md). |
+| Load performance testing      | [Load Performance Testing with the k6 container](../../user/project/merge_requests/load_performance_testing.md). |
 | Clojure                       | [Test a Clojure application with GitLab CI/CD](test-clojure-application.md).                                               |
 | Deployment with Dpl           | [Using `dpl` as deployment tool](deployment/README.md).                                                                    |
 | Elixir                        | [Testing a Phoenix application with GitLab CI/CD](test_phoenix_app_with_gitlab_ci_cd/index.md).                            |
@@ -63,6 +64,7 @@ choose one of these templates:
 - [Clojure (`Clojure.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Clojure.gitlab-ci.yml)
 - [Composer `Composer.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Composer.gitlab-ci.yml)
 - [Crystal (`Crystal.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Crystal.gitlab-ci.yml)
+- [Dart (`Dart.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Dart.gitlab-ci.yml)
 - [Django (`Django.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Django.gitlab-ci.yml)
 - [Docker (`Docker.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml)
 - [dotNET (`dotNET.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET.gitlab-ci.yml)

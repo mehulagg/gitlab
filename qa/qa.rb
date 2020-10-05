@@ -91,6 +91,7 @@ module QA
     autoload :UserGPG, 'qa/resource/user_gpg'
     autoload :Visibility, 'qa/resource/visibility'
     autoload :ProjectSnippet, 'qa/resource/project_snippet'
+    autoload :Design, 'qa/resource/design'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -107,10 +108,6 @@ module QA
       autoload :Push, 'qa/resource/repository/push'
       autoload :ProjectPush, 'qa/resource/repository/project_push'
       autoload :WikiPush, 'qa/resource/repository/wiki_push'
-    end
-
-    module Settings
-      autoload :HashedStorage, 'qa/resource/settings/hashed_storage'
     end
 
     module Wiki
@@ -151,7 +148,6 @@ module QA
         autoload :Mattermost, 'qa/scenario/test/integration/mattermost'
         autoload :ObjectStorage, 'qa/scenario/test/integration/object_storage'
         autoload :SMTP, 'qa/scenario/test/integration/smtp'
-        autoload :GitalyHA, 'qa/scenario/test/integration/gitaly_ha'
       end
 
       module Sanity
@@ -208,6 +204,7 @@ module QA
       autoload :New, 'qa/page/group/new'
       autoload :Show, 'qa/page/group/show'
       autoload :Menu, 'qa/page/group/menu'
+      autoload :Members, 'qa/page/group/members'
 
       module Milestone
         autoload :Index, 'qa/page/group/milestone/index'
@@ -216,7 +213,6 @@ module QA
 
       module SubMenus
         autoload :Common, 'qa/page/group/sub_menus/common'
-        autoload :Members, 'qa/page/group/sub_menus/members'
       end
 
       module Settings
@@ -265,6 +261,7 @@ module QA
       module Pipeline
         autoload :Index, 'qa/page/project/pipeline/index'
         autoload :Show, 'qa/page/project/pipeline/show'
+        autoload :New, 'qa/page/project/pipeline/new'
       end
 
       module Tag
@@ -275,6 +272,11 @@ module QA
 
       module Job
         autoload :Show, 'qa/page/project/job/show'
+      end
+
+      module Packages
+        autoload :Index, 'qa/page/project/packages/index'
+        autoload :Show, 'qa/page/project/packages/show'
       end
 
       module Settings
@@ -315,6 +317,7 @@ module QA
         autoload :Repository, 'qa/page/project/sub_menus/repository'
         autoload :Settings, 'qa/page/project/sub_menus/settings'
         autoload :Project, 'qa/page/project/sub_menus/project'
+        autoload :Packages, 'qa/page/project/sub_menus/packages'
       end
 
       module Issue
@@ -349,6 +352,10 @@ module QA
         module Metrics
           autoload :Show, 'qa/page/project/operations/metrics/show'
         end
+
+        module Incidents
+          autoload :Index, 'qa/page/project/operations/incidents/index'
+        end
       end
 
       module Wiki
@@ -366,6 +373,7 @@ module QA
       module Snippet
         autoload :New, 'qa/page/project/snippet/new'
         autoload :Show, 'qa/page/project/snippet/show'
+        autoload :Index, 'qa/page/project/snippet/index'
       end
     end
 
@@ -376,6 +384,10 @@ module QA
       autoload :Emails, 'qa/page/profile/emails'
       autoload :Password, 'qa/page/profile/password'
       autoload :TwoFactorAuth, 'qa/page/profile/two_factor_auth'
+
+      module Accounts
+        autoload :Show, 'qa/page/profile/accounts/show'
+      end
     end
 
     module Issuable
@@ -406,7 +418,6 @@ module QA
       autoload :NewSession, 'qa/page/admin/new_session'
 
       module Settings
-        autoload :Repository, 'qa/page/admin/settings/repository'
         autoload :General, 'qa/page/admin/settings/general'
         autoload :MetricsAndProfiling, 'qa/page/admin/settings/metrics_and_profiling'
         autoload :Network, 'qa/page/admin/settings/network'
@@ -414,7 +425,6 @@ module QA
         module Component
           autoload :IpLimits, 'qa/page/admin/settings/component/ip_limits'
           autoload :OutboundRequests, 'qa/page/admin/settings/component/outbound_requests'
-          autoload :RepositoryStorage, 'qa/page/admin/settings/component/repository_storage'
           autoload :AccountAndLimit, 'qa/page/admin/settings/component/account_and_limit'
           autoload :PerformanceBar, 'qa/page/admin/settings/component/performance_bar'
         end

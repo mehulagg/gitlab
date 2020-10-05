@@ -77,4 +77,50 @@ RSpec.describe RequirementsManagement::Requirement do
       end
     end
   end
+
+  describe '#last_test_report_state' do
+    let_it_be(:requirement) { create(:requirement) }
+
+    context 'when latest test report is passing' do
+      it 'returns passing' do
+        create(:test_report, requirement: requirement, state: :passed, build: nil)
+
+        expect(requirement.last_test_report_state).to eq('passed')
+      end
+    end
+
+    context 'when latest test report is failing' do
+      it 'returns failing' do
+        create(:test_report, requirement: requirement, state: :failed, build: nil)
+
+        expect(requirement.last_test_report_state).to eq('failed')
+      end
+    end
+
+    context 'when there are no test reports' do
+      it 'returns nil' do
+        expect(requirement.last_test_report_state).to eq(nil)
+      end
+    end
+  end
+
+  describe '#status_manually_updated' do
+    let_it_be(:requirement) { create(:requirement) }
+
+    context 'when latest test report has a build' do
+      it 'returns false' do
+        create(:test_report, requirement: requirement, state: :passed)
+
+        expect(requirement.last_test_report_manually_created?).to eq(false)
+      end
+    end
+
+    context 'when latest test report does not have a build' do
+      it 'returns true' do
+        create(:test_report, requirement: requirement, state: :passed, build: nil)
+
+        expect(requirement.last_test_report_manually_created?).to eq(true)
+      end
+    end
+  end
 end

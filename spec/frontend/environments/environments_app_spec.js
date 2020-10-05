@@ -1,6 +1,6 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import axios from '~/lib/utils/axios_utils';
 import MockAdapter from 'axios-mock-adapter';
+import axios from '~/lib/utils/axios_utils';
 import Container from '~/environments/components/container.vue';
 import EmptyState from '~/environments/components/empty_state.vue';
 import EnvironmentsApp from '~/environments/components/environments_app.vue';
@@ -39,6 +39,9 @@ describe('Environment', () => {
     wrapper = fn(EnvironmentsApp, { propsData: mockData });
     return axios.waitForAll();
   };
+
+  const findEnvironmentsTabAvailable = () => wrapper.find('.js-environments-tab-available > a');
+  const findEnvironmentsTabStopped = () => wrapper.find('.js-environments-tab-stopped > a');
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
@@ -108,8 +111,15 @@ describe('Environment', () => {
 
         it('should make an API request when using tabs', () => {
           jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
-          wrapper.find('.js-environments-tab-stopped').trigger('click');
+          findEnvironmentsTabStopped().trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledWith({ scope: 'stopped', page: '1' });
+        });
+
+        it('should not make the same API request when clicking on the current scope tab', () => {
+          // component starts at available
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          findEnvironmentsTabAvailable().trigger('click');
+          expect(wrapper.vm.updateContent).toHaveBeenCalledTimes(0);
         });
       });
     });
@@ -144,16 +154,16 @@ describe('Environment', () => {
     });
 
     it('should open a closed folder', () => {
-      expect(wrapper.find('.folder-icon.ic-chevron-right').exists()).toBe(false);
+      expect(wrapper.find('.folder-icon[data-testid="chevron-right-icon"]').exists()).toBe(false);
     });
 
     it('should close an opened folder', () => {
-      expect(wrapper.find('.folder-icon.ic-chevron-down').exists()).toBe(true);
+      expect(wrapper.find('.folder-icon[data-testid="chevron-down-icon"]').exists()).toBe(true);
 
       // close folder
       wrapper.find('.folder-name').trigger('click');
       wrapper.vm.$nextTick(() => {
-        expect(wrapper.find('.folder-icon.ic-chevron-down').exists()).toBe(false);
+        expect(wrapper.find('.folder-icon[data-testid="chevron-down-icon"]').exists()).toBe(false);
       });
     });
 

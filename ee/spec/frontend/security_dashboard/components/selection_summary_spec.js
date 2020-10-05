@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils';
 import SelectionSummary from 'ee/security_dashboard/components/selection_summary.vue';
 import { GlFormSelect, GlButton } from '@gitlab/ui';
-import createFlash from '~/flash';
-import toast from '~/vue_shared/plugins/global_toast';
 import waitForPromises from 'helpers/wait_for_promises';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import toast from '~/vue_shared/plugins/global_toast';
 
 jest.mock('~/flash');
 jest.mock('~/vue_shared/plugins/global_toast');
@@ -122,24 +122,6 @@ describe('Selection Summary component', () => {
           'There was an error dismissing the vulnerabilities.',
           'alert',
         );
-      });
-    });
-
-    it('should emit an event to refetch the vulnerabilities when the request is successful', () => {
-      dismissButton().trigger('submit');
-      return waitForPromises().then(() => {
-        expect(wrapper.emittedByOrder()).toEqual([
-          { name: 'deselect-all-vulnerabilities', args: [] },
-          { name: 'refetch-vulnerabilities', args: [] },
-        ]);
-      });
-    });
-
-    it('should still emit an event to refetch the vulnerabilities when the request fails', () => {
-      mutateMock.mockRejectedValue();
-      dismissButton().trigger('submit');
-      return waitForPromises().then(() => {
-        expect(wrapper.emittedByOrder()).toEqual([{ name: 'refetch-vulnerabilities', args: [] }]);
       });
     });
   });

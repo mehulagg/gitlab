@@ -33,7 +33,9 @@ module Gitlab
         print_ci_job_artifacts_status
         print_container_repositories_status
         print_design_repositories_status
+        print_replicators_status
         print_repositories_checked_status
+        print_replicators_checked_status
 
         print_sync_settings
         print_db_replication_lag
@@ -53,7 +55,9 @@ module Gitlab
         print_ci_job_artifacts_status
         print_container_repositories_status
         print_design_repositories_status
+        print_replicators_status
         print_repositories_checked_status
+        print_replicators_checked_status
       end
 
       def replication_verification_complete?
@@ -159,6 +163,17 @@ module Gitlab
         puts using_percentage(current_node_status.repositories_synced_in_percentage)
       end
 
+      def print_replicators_status
+        Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+          print "#{replicator_class.replicable_title_plural}: ".rjust(GEO_STATUS_COLUMN_WIDTH)
+
+          show_failed_value(replicator_class.failed_count)
+          print "#{replicator_class.synced_count}/#{replicator_class.registry_count} "
+
+          puts using_percentage(current_node_status.synced_in_percentage_for(replicator_class))
+        end
+      end
+
       def print_verified_repositories
         if Gitlab::Geo.repository_verification_enabled?
           print 'Verified Repositories: '.rjust(GEO_STATUS_COLUMN_WIDTH)
@@ -206,7 +221,7 @@ module Gitlab
       end
 
       def print_container_repositories_status
-        if Gitlab.config.geo.registry_replication.enabled
+        if ::Geo::ContainerRepositoryRegistry.replication_enabled?
           print 'Container repositories: '.rjust(GEO_STATUS_COLUMN_WIDTH)
           show_failed_value(current_node_status.container_repositories_failed_count)
           print "#{current_node_status.container_repositories_synced_count || 0}/#{current_node_status.container_repositories_count || 0} "
@@ -230,6 +245,15 @@ module Gitlab
         end
       end
 
+      def print_replicators_checked_status
+        Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+          print "#{replicator_class.replicable_title_plural} Checked: ".rjust(GEO_STATUS_COLUMN_WIDTH)
+          show_failed_value(replicator_class.checksum_failed_count)
+          print "#{replicator_class.checksummed_count}/#{replicator_class.registry_count} "
+          puts using_percentage(current_node_status.checksummed_in_percentage_for(replicator_class))
+        end
+      end
+
       def replication_complete?
         replicables.all? { |failed_count| failed_count == 0 }
       end
@@ -247,8 +271,12 @@ module Gitlab
           current_node_status.job_artifacts_failed_count,
           current_node_status.design_repositories_failed_count
         ].tap do |r|
-          if Gitlab.config.geo.registry_replication.enabled
+          if ::Geo::ContainerRepositoryRegistry.replication_enabled?
             r.push current_node_status.container_repositories_failed_count
+          end
+
+          Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+            r.push replicator_class.failed_count
           end
         end
       end
@@ -264,6 +292,10 @@ module Gitlab
 
           if Gitlab::CurrentSettings.repository_checks_enabled
             v.push current_node_status.repositories_checked_failed_count
+          end
+
+          Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
+            v.push replicator_class.checksum_failed_count
           end
         end
       end

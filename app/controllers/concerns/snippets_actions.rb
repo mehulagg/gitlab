@@ -14,8 +14,6 @@ module SnippetsActions
     skip_before_action :verify_authenticity_token,
       if: -> { action_name == 'show' && js_request? }
 
-    before_action :redirect_if_binary, only: [:edit, :update]
-
     respond_to :html
   end
 
@@ -55,10 +53,9 @@ module SnippetsActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def show
-    conditionally_expand_blob(blob)
-
     respond_to do |format|
       format.html do
+        conditionally_expand_blob(blob)
         @note = Note.new(noteable: @snippet, project: @snippet.project)
         @noteable = @snippet
 
@@ -68,11 +65,14 @@ module SnippetsActions
       end
 
       format.json do
+        conditionally_expand_blob(blob)
         render_blob_json(blob)
       end
 
       format.js do
         if @snippet.embeddable?
+          conditionally_expand_blobs(blobs)
+
           render 'shared/snippets/show'
         else
           head :not_found
@@ -109,13 +109,15 @@ module SnippetsActions
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def blob
-    return unless snippet
+    @blob ||= blobs.first
+  end
 
-    @blob ||= if snippet.empty_repo?
-                snippet.blob
-              else
-                snippet.blobs.first
-              end
+  def blobs
+    @blobs ||= if snippet.empty_repo?
+                 [snippet.blob]
+               else
+                 snippet.blobs
+               end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
@@ -129,9 +131,5 @@ module SnippetsActions
     flash.now[:alert] = errors.first if errors.present?
 
     recaptcha_check_with_fallback(errors.empty?) { render action }
-  end
-
-  def redirect_if_binary
-    redirect_to gitlab_snippet_path(snippet) if blob&.binary?
   end
 end

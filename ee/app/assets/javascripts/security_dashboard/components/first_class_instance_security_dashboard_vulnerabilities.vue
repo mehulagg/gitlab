@@ -1,14 +1,15 @@
 <script>
-import { GlAlert, GlButton, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
+import produce from 'immer';
+import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/instance_vulnerabilities.graphql';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
+import { preparePageInfo } from '../helpers';
 
 export default {
   components: {
     GlAlert,
-    GlButton,
     GlIntersectionObserver,
     GlLoadingIcon,
     VulnerabilityList,
@@ -26,11 +27,16 @@ export default {
       isFirstResultLoading: true,
       vulnerabilities: [],
       errorLoadingVulnerabilities: false,
+      sortBy: 'severity',
+      sortDirection: 'desc',
     };
   },
   computed: {
-    isQueryLoading() {
+    isLoadingQuery() {
       return this.$apollo.queries.vulnerabilities.loading;
+    },
+    sort() {
+      return `${this.sortBy}_${this.sortDirection}`;
     },
   },
   apollo: {
@@ -40,13 +46,14 @@ export default {
       variables() {
         return {
           first: VULNERABILITIES_PER_PAGE,
+          sort: this.sort,
           ...this.filters,
         };
       },
       update: ({ vulnerabilities }) => vulnerabilities.nodes,
       result({ data, loading }) {
         this.isFirstResultLoading = loading;
-        this.pageInfo = data.vulnerabilities.pageInfo;
+        this.pageInfo = preparePageInfo(data?.vulnerabilities?.pageInfo);
       },
       error() {
         this.errorLoadingVulnerabilities = true;
@@ -62,11 +69,21 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            fetchMoreResult.vulnerabilities.nodes.unshift(...previousResult.vulnerabilities.nodes);
-            return fetchMoreResult;
+            const results = produce(fetchMoreResult, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.vulnerabilities.nodes = [
+                ...previousResult.vulnerabilities.nodes,
+                ...draftData.vulnerabilities.nodes,
+              ];
+            });
+            return results;
           },
         });
       }
+    },
+    handleSortChange({ sortBy, sortDesc }) {
+      this.sortDirection = sortDesc ? 'desc' : 'asc';
+      this.sortBy = sortBy;
     },
   },
 };
@@ -92,16 +109,14 @@ export default {
       :is-loading="isFirstResultLoading"
       :vulnerabilities="vulnerabilities"
       should-show-project-namespace
+      @sort-changed="handleSortChange"
     />
     <gl-intersection-observer
       v-if="pageInfo.hasNextPage"
       class="text-center"
       @appear="fetchNextPage"
     >
-      <gl-button :disabled="isFirstResultLoading" @click="fetchNextPage">
-        <gl-loading-icon v-if="isQueryLoading" size="md" />
-        <template v-else>{{ s__('SecurityReports|Load more vulnerabilities') }}</template>
-      </gl-button>
+      <gl-loading-icon v-if="isLoadingQuery" size="md" />
     </gl-intersection-observer>
   </div>
 </template>

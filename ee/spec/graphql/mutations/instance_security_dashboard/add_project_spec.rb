@@ -37,6 +37,18 @@ RSpec.describe Mutations::InstanceSecurityDashboard::AddProject do
         end
       end
 
+      context 'when security_dashboard is disabled for my project' do
+        context 'when project is not licensed to be added to the security dashboard' do
+          let(:selected_project) { my_project }
+
+          it 'does not add project to the security dashboard', :aggregate_failures do
+            expect(subject[:project]).to be_nil
+            expect(subject[:errors]).to include('Only projects created under a Gold license are available in Security Dashboards.')
+            expect(user.security_dashboard_projects).to include(already_added_project)
+          end
+        end
+      end
+
       context 'when security_dashboard is enabled' do
         before do
           stub_licensed_features(security_dashboard: true)
@@ -65,7 +77,7 @@ RSpec.describe Mutations::InstanceSecurityDashboard::AddProject do
 
           it 'does not add project to the security dashboard', :aggregate_failures do
             expect(subject[:project]).to be_nil
-            expect(subject[:errors]).to eq(['The project already belongs to your dashboard or you don\'t have permission to perform this action'])
+            expect(subject[:errors]).to include('The project has already been added to your dashboard.')
             expect(user.security_dashboard_projects).to include(already_added_project)
           end
         end

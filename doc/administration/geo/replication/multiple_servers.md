@@ -90,7 +90,8 @@ The following steps enable a GitLab cluster to serve as the **primary** node.
 
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
-NOTE: **Note:** PostgreSQL and Redis should have already been disabled on the
+NOTE: **Note:**
+PostgreSQL and Redis should have already been disabled on the
 application servers, and connections from the application servers to those
 services on the backend servers configured, during normal GitLab multi-node set up. See
 multi-node configuration documentation for
@@ -132,20 +133,21 @@ Configure the following services, again using the non-Geo multi-node
 documentation:
 
 - [Configuring Redis for GitLab](../../redis/replication_and_failover.md#example-configuration-for-the-gitlab-application) for multiple nodes.
-- [Gitaly](../../high_availability/gitaly.md), which will store data that is
+- [Gitaly](../../gitaly/index.md), which will store data that is
   synchronized from the **primary** node.
 
 NOTE: **Note:**
-[NFS](../../high_availability/nfs.md) can be used in place of Gitaly but is not
+[NFS](../../nfs.md) can be used in place of Gitaly but is not
 recommended.
 
 ### Step 2: Configure the main read-only replica PostgreSQL database on the **secondary** node
 
-NOTE: **Note:** The following documentation assumes the database will be run on
+NOTE: **Note:**
+The following documentation assumes the database will be run on
 a single node only. Multi-node PostgreSQL on **secondary** nodes is
 [not currently supported](https://gitlab.com/groups/gitlab-org/-/epics/2536).
 
-Configure the [**secondary** database](database.md) as a read-only replica of
+Configure the [**secondary** database](../setup/database.md) as a read-only replica of
 the **primary** database. Use the following as a guide.
 
 1. Generate an MD5 hash of the desired password for the database user that the
@@ -194,19 +196,38 @@ the **primary** database. Use the following as a guide.
    geo_postgresql['enable'] = false
 
    ##
-   ## Disable `geo_logcursor` service so Rails doesn't get configured here
+   ## Disable all other services that aren't needed. Note that we had to enable
+   ## geo_secondary_role to cause some configuration changes to postgresql, but
+   ## the role enables single-node services by default.
    ##
+   alertmanager['enable'] = false
+   consul['enable'] = false
    geo_logcursor['enable'] = false
+   gitaly['enable'] = false
+   gitlab_exporter['enable'] = false
+   gitlab_workhorse['enable'] = false
+   nginx['enable'] = false
+   node_exporter['enable'] = false
+   pgbouncer_exporter['enable'] = false
+   prometheus['enable'] = false
+   redis['enable'] = false
+   redis_exporter['enable'] = false
+   repmgr['enable'] = false
+   sidekiq['enable'] = false
+   sidekiq_cluster['enable'] = false
+   puma['enable'] = false
+   unicorn['enable'] = false
    ```
 
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
 If using an external PostgreSQL instance, refer also to
-[Geo with external PostgreSQL instances](external_database.md).
+[Geo with external PostgreSQL instances](../setup/external_database.md).
 
 ### Step 3: Configure the tracking database on the **secondary** node
 
-NOTE: **Note:** This documentation assumes the tracking database will be run on
+NOTE: **Note:**
+This documentation assumes the tracking database will be run on
 only a single machine, rather than as a PostgreSQL cluster.
 
 Configure the tracking database.
@@ -239,10 +260,8 @@ Configure the tracking database.
    geo_postgresql['sql_user_password'] = '<tracking_database_password_md5_hash>'
 
    ##
-   ## Configure FDW connection to the replica database
+   ## Configure PostgreSQL connection to the replica database
    ##
-   geo_secondary['db_fdw'] = true
-   geo_postgresql['fdw_external_password'] = '<replica_database_password_plaintext>'
    geo_postgresql['md5_auth_cidr_addresses'] = ['<replica_database_ip>/32']
    gitlab_rails['db_host'] = '<replica_database_ip>'
 
@@ -250,11 +269,11 @@ Configure the tracking database.
    gitlab_rails['auto_migrate'] = false
 
    ##
-   ## Disable all other services that aren't needed, since we don't have a role
-   ## that does this.
+   ## Ensure unnecessary services are disabled
    ##
    alertmanager['enable'] = false
    consul['enable'] = false
+   geo_logcursor['enable'] = false
    gitaly['enable'] = false
    gitlab_exporter['enable'] = false
    gitlab_workhorse['enable'] = false
@@ -267,13 +286,15 @@ Configure the tracking database.
    redis_exporter['enable'] = false
    repmgr['enable'] = false
    sidekiq['enable'] = false
+   sidekiq_cluster['enable'] = false
    puma['enable'] = false
+   unicorn['enable'] = false
    ```
 
 After making these changes, [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) so the changes take effect.
 
 If using an external PostgreSQL instance, refer also to
-[Geo with external PostgreSQL instances](external_database.md).
+[Geo with external PostgreSQL instances](../setup/external_database.md).
 
 ### Step 4: Configure the frontend application servers on the **secondary** node
 
@@ -281,9 +302,9 @@ In the architecture overview, there are two machines running the GitLab
 application services. These services are enabled selectively in the
 configuration.
 
-Configure the application servers following
-[Configuring GitLab for multiple nodes](../../high_availability/gitlab.md), then make the
-following modifications:
+Configure the GitLab Rails application servers following the relevant steps
+outlined in the [reference architectures](../../reference_architectures/index.md),
+then make the following modifications:
 
 1. Edit `/etc/gitlab/gitlab.rb` on each application server in the **secondary**
    cluster, and add the following:
@@ -370,7 +391,7 @@ application servers.
 In this topology, a load balancer is required at each geographic location to
 route traffic to the application servers.
 
-See [Load Balancer for GitLab with multiple nodes](../../high_availability/load_balancer.md) for
+See [Load Balancer for GitLab with multiple nodes](../../load_balancer.md) for
 more information.
 
 ### Step 6: Configure the backend application servers on the **secondary** node
@@ -414,6 +435,7 @@ application servers above, with some changes to run only the `sidekiq` service:
    redis_exporter['enable'] = false
    repmgr['enable'] = false
    puma['enable'] = false
+   unicorn['enable'] = false
 
    ##
    ## The unique identifier for the Geo node.

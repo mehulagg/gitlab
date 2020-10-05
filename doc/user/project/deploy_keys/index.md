@@ -12,7 +12,7 @@ more repositories, by importing an SSH public key to your GitLab instance.
 
 This is useful for cloning repositories to your Continuous
 Integration (CI) server. By using deploy keys, you don't have to set up a
-dummy user account.
+fake user account.
 
 There are two types of deploy keys:
 
@@ -121,7 +121,7 @@ repositories to secure, shared services, such as CI/CD.
 
 Instance administrators can add public deploy keys:
 
-1. Go to **Admin Area** (**{admin}**) **> Deploy Keys**.
+1. Go to **Admin Area > Deploy Keys**.
 1. Click on **New deploy key**.
 
    Make sure your new key has a meaningful title, as it is the primary way for project

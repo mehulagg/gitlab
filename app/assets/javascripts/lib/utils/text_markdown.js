@@ -1,6 +1,7 @@
 /* eslint-disable func-names, no-param-reassign, operator-assignment, consistent-return */
 import $ from 'jquery';
 import { insertText } from '~/lib/utils/common_utils';
+import Shortcuts from '~/behaviors/shortcuts/shortcuts';
 
 const LINK_TAG_PATTERN = '[{text}](url)';
 
@@ -322,6 +323,8 @@ export function keypressNoteText(e) {
   const tag = keys[e.key];
 
   if (tag) {
+    e.preventDefault();
+
     updateText({
       tag,
       textArea: this,
@@ -330,27 +333,38 @@ export function keypressNoteText(e) {
       select: '',
       tagContent: '',
     });
-    e.preventDefault();
   }
 }
 /* eslint-enable @gitlab/require-i18n-strings */
 
+export function updateTextForToolbarBtn($toolbarBtn) {
+  return updateText({
+    textArea: $toolbarBtn.closest('.md-area').find('textarea'),
+    tag: $toolbarBtn.data('mdTag'),
+    cursorOffset: $toolbarBtn.data('mdCursorOffset'),
+    blockTag: $toolbarBtn.data('mdBlock'),
+    wrap: !$toolbarBtn.data('mdPrepend'),
+    select: $toolbarBtn.data('mdSelect'),
+    tagContent: $toolbarBtn.data('mdTagContent'),
+  });
+}
+
 export function addMarkdownListeners(form) {
-  $('.markdown-area').on('keydown', keypressNoteText);
-  return $('.js-md', form)
+  $('.markdown-area', form)
+    .on('keydown', keypressNoteText)
+    .each(function attachTextareaShortcutHandlers() {
+      Shortcuts.initMarkdownEditorShortcuts($(this), updateTextForToolbarBtn);
+    });
+
+  const $allToolbarBtns = $('.js-md', form)
     .off('click')
     .on('click', function() {
-      const $this = $(this);
-      return updateText({
-        textArea: $this.closest('.md-area').find('textarea'),
-        tag: $this.data('mdTag'),
-        cursorOffset: $this.data('mdCursorOffset'),
-        blockTag: $this.data('mdBlock'),
-        wrap: !$this.data('mdPrepend'),
-        select: $this.data('mdSelect'),
-        tagContent: $this.data('mdTagContent'),
-      });
+      const $toolbarBtn = $(this);
+
+      return updateTextForToolbarBtn($toolbarBtn);
     });
+
+  return $allToolbarBtns;
 }
 
 export function addEditorMarkdownListeners(editor) {
@@ -373,6 +387,11 @@ export function addEditorMarkdownListeners(editor) {
 }
 
 export function removeMarkdownListeners(form) {
-  $('.markdown-area').off('keydown');
+  $('.markdown-area', form)
+    .off('keydown', keypressNoteText)
+    .each(function removeTextareaShortcutHandlers() {
+      Shortcuts.removeMarkdownEditorShortcuts($(this));
+    });
+
   return $('.js-md', form).off('click');
 }

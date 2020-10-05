@@ -1,5 +1,0 @@
----
-title: Don't index the same project in Elasticsearch in parallel
-merge_request: 35842
-author:
-type: performance

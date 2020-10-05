@@ -1,5 +1,6 @@
 <script>
 import { GlLink } from '@gitlab/ui';
+import { Namespace } from 'ee/iterations/constants';
 import { formatDate } from '~/lib/utils/datetime_utility';
 
 export default {
@@ -11,6 +12,12 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    namespaceType: {
+      type: String,
+      required: false,
+      default: Namespace.Group,
+      validator: value => Object.values(Namespace).includes(value),
     },
   },
   methods: {
@@ -26,9 +33,9 @@ export default {
     <ul v-if="iterations.length > 0" class="content-list">
       <li v-for="iteration in iterations" :key="iteration.id" class="milestone">
         <div class="gl-mb-3">
-          <gl-link :href="iteration.webPath"
-            ><strong>{{ iteration.title }}</strong></gl-link
-          >
+          <gl-link :href="iteration.scopedPath || iteration.webPath">
+            <strong>{{ iteration.title }}</strong>
+          </gl-link>
         </div>
         <div class="text-secondary gl-mb-3">
           {{ formatDate(iteration.startDate) }}–{{ formatDate(iteration.dueDate) }}

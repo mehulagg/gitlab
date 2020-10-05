@@ -17,6 +17,8 @@ RSpec.describe 'Git LFS API and storage' do
       'X-Sendfile-Type' => sendfile
     }.compact
   end
+
+  let(:include_workhorse_jwt_header) { true }
   let(:authorization) { }
   let(:sendfile) { }
   let(:pipeline) { create(:ci_empty_pipeline, project: project) }
@@ -547,12 +549,6 @@ RSpec.describe 'Git LFS API and storage' do
           project.lfs_objects << lfs_object
         end
 
-        context 'when Deploy Token is valid' do
-          let(:deploy_token) { create(:deploy_token, projects: [project]) }
-
-          it_behaves_like 'an authorized request', renew_authorization: false
-        end
-
         context 'when Deploy Token is not valid' do
           let(:deploy_token) { create(:deploy_token, projects: [project], read_repository: false) }
 
@@ -562,7 +558,14 @@ RSpec.describe 'Git LFS API and storage' do
         context 'when Deploy Token is not related to the project' do
           let(:deploy_token) { create(:deploy_token, projects: [other_project]) }
 
-          it_behaves_like 'LFS http 404 response'
+          it_behaves_like 'LFS http 401 response'
+        end
+
+        # TODO: We should fix this test case that causes flakyness by alternating the result of the above test cases.
+        context 'when Deploy Token is valid' do
+          let(:deploy_token) { create(:deploy_token, projects: [project]) }
+
+          it_behaves_like 'an authorized request', renew_authorization: false
         end
       end
 
@@ -783,7 +786,7 @@ RSpec.describe 'Git LFS API and storage' do
           let(:authorization) { authorize_deploy_key }
 
           let(:update_user_permissions) do
-            project.deploy_keys_projects.create(deploy_key: key, can_push: true)
+            project.deploy_keys_projects.create!(deploy_key: key, can_push: true)
           end
 
           it_behaves_like 'pushes new LFS objects', renew_authorization: false
@@ -988,7 +991,7 @@ RSpec.describe 'Git LFS API and storage' do
 
           context 'and workhorse requests upload finalize for a new LFS object' do
             before do
-              lfs_object.destroy
+              lfs_object.destroy!
             end
 
             context 'with object storage disabled' do
@@ -1006,7 +1009,7 @@ RSpec.describe 'Git LFS API and storage' do
                 end
 
                 let(:tmp_object) do
-                  fog_connection.directories.new(key: 'lfs-objects').files.create(
+                  fog_connection.directories.new(key: 'lfs-objects').files.create( # rubocop: disable Rails/SaveBang
                     key: 'tmp/uploads/12312300',
                     body: 'content'
                   )
@@ -1075,14 +1078,24 @@ RSpec.describe 'Git LFS API and storage' do
             end
           end
 
-          context 'invalid tempfiles' do
+          context 'without the lfs object' do
             before do
-              lfs_object.destroy
+              lfs_object.destroy!
             end
 
             it 'rejects slashes in the tempfile name (path traversal)' do
               put_finalize('../bar', with_tempfile: true)
-              expect(response).to have_gitlab_http_status(:forbidden)
+              expect(response).to have_gitlab_http_status(:bad_request)
+            end
+
+            context 'not sending the workhorse jwt header' do
+              let(:include_workhorse_jwt_header) { false }
+
+              it 'rejects the request' do
+                put_finalize(with_tempfile: true)
+
+                expect(response).to have_gitlab_http_status(:unprocessable_entity)
+              end
             end
           end
         end
@@ -1308,7 +1321,8 @@ RSpec.describe 'Git LFS API and storage' do
         method: :put,
         file_key: :file,
         params: args.merge(file: uploaded_file),
-        headers: finalize_headers
+        headers: finalize_headers,
+        send_rewritten_field: include_workhorse_jwt_header
       )
     end
 

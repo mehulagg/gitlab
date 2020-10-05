@@ -1,16 +1,15 @@
 <script>
-import { GlTooltipDirective, GlLink, GlDeprecatedButton } from '@gitlab/ui';
+/* eslint-disable vue/no-v-html */
+import { GlTooltipDirective, GlLink, GlButton } from '@gitlab/ui';
 import { polyfillSticky } from '~/lib/utils/sticky';
-import Icon from '~/vue_shared/components/icon.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __, sprintf } from '~/locale';
 import scrollDown from '../svg/scroll_down.svg';
 
 export default {
   components: {
-    Icon,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -71,13 +70,14 @@ export default {
 <template>
   <div class="top-bar">
     <!-- truncate information -->
-    <div class="js-truncated-info truncated-info d-none d-sm-block float-left">
+    <div class="truncated-info d-none d-sm-block float-left" data-testid="log-truncated-info">
       <template v-if="isTraceSizeVisible">
         {{ jobLogSize }}
         <gl-link
           v-if="rawPath"
           :href="rawPath"
-          class="js-raw-link text-plain text-underline gl-ml-2"
+          class="text-plain text-underline gl-ml-2"
+          data-testid="raw-link"
           >{{ s__('Job|Complete Raw') }}</gl-link
         >
       </template>
@@ -86,45 +86,46 @@ export default {
 
     <div class="controllers float-right">
       <!-- links -->
-      <gl-link
+      <gl-button
         v-if="rawPath"
         v-gl-tooltip.body
         :title="s__('Job|Show complete raw')"
         :href="rawPath"
-        class="js-raw-link-controller controllers-buttons"
-      >
-        <icon name="doc-text" />
-      </gl-link>
+        class="controllers-buttons"
+        data-testid="job-raw-link-controller"
+        icon="doc-text"
+      />
 
-      <gl-link
+      <gl-button
         v-if="erasePath"
         v-gl-tooltip.body
         :title="s__('Job|Erase job log')"
         :href="erasePath"
         :data-confirm="__('Are you sure you want to erase this build?')"
-        class="js-erase-link controllers-buttons"
+        class="controllers-buttons"
+        data-testid="job-log-erase-link"
         data-method="post"
-      >
-        <icon name="remove" />
-      </gl-link>
+        icon="remove"
+      />
       <!-- eo links -->
 
       <!-- scroll buttons -->
       <div v-gl-tooltip :title="s__('Job|Scroll to top')" class="controllers-buttons">
-        <gl-deprecated-button
+        <gl-button
           :disabled="isScrollTopDisabled"
-          type="button"
-          class="js-scroll-top btn-scroll btn-transparent btn-blank"
+          class="btn-scroll btn-transparent btn-blank"
+          data-testid="job-controller-scroll-top"
+          icon="scroll_up"
           @click="handleScrollToTop"
-        >
-          <icon name="scroll_up" />
-        </gl-deprecated-button>
+        />
       </div>
 
       <div v-gl-tooltip :title="s__('Job|Scroll to bottom')" class="controllers-buttons">
-        <gl-deprecated-button
+        <gl-button
           :disabled="isScrollBottomDisabled"
           class="js-scroll-bottom btn-scroll btn-transparent btn-blank"
+          data-testid="job-controller-scroll-bottom"
+          icon="scroll_down"
           :class="{ animate: isScrollingDown }"
           @click="handleScrollToBottom"
           v-html="$options.scrollDown"

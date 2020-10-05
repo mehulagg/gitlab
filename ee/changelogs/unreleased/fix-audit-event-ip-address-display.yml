@@ -1,5 +1,0 @@
----
-title: Fix display of IP addresses in audit logs
-merge_request: 35356
-author:
-type: fixed

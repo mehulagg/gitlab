@@ -30,6 +30,7 @@ module EE
         :elasticsearch_max_bulk_concurrency,
         :elasticsearch_max_bulk_size_mb,
         :elasticsearch_replicas,
+        :elasticsearch_indexed_file_size_limit_kb,
         :elasticsearch_indexed_field_length_limit,
         :elasticsearch_search,
         :elasticsearch_shards,
@@ -37,6 +38,8 @@ module EE
         :elasticsearch_limit_indexing,
         :elasticsearch_namespace_ids,
         :elasticsearch_project_ids,
+        :elasticsearch_client_request_timeout,
+        :enforce_namespace_storage_limit,
         :geo_status_timeout,
         :geo_node_allowed_ips,
         :help_text,
@@ -99,6 +102,8 @@ module EE
         deletion_adjourned_period
         updating_name_disabled_for_users
         npm_package_requests_forwarding
+        maintenance_mode
+        maintenance_mode_message
       ]
     end
 

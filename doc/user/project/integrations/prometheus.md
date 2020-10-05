@@ -19,7 +19,8 @@ There are two ways to set up Prometheus integration, depending on where your app
 - For deployments on Kubernetes, GitLab can automatically [deploy and manage Prometheus](#managed-prometheus-on-kubernetes).
 - For other deployment targets, simply [specify the Prometheus server](#manual-configuration-of-prometheus).
 
-Once enabled, GitLab will automatically detect metrics from known services in the [metric library](prometheus_library/index.md). You can also [add your own metrics](../../../operations/metrics/index.md#adding-custom-metrics).
+Once enabled, GitLab will automatically detect metrics from known services in the [metric library](prometheus_library/index.md). You can also [add your own metrics](../../../operations/metrics/index.md#adding-custom-metrics) and create
+[custom dashboards](../../../operations/metrics/dashboards/index.md).
 
 ## Enabling Prometheus Integration
 
@@ -42,25 +43,6 @@ Once you have a connected Kubernetes cluster, deploying a managed Prometheus is 
 1. Click the **Install** button to deploy Prometheus to the cluster
 
 ![Managed Prometheus Deploy](img/prometheus_deploy.png)
-
-#### Getting metrics to display on the Metrics Dashboard
-
-After completing the steps above, you will also need deployments in order to view the
-**Operations > Metrics** page. Setting up [Auto DevOps](../../../topics/autodevops/index.md)
-will help you to quickly create a deployment:
-
-1. Navigate to your project's **Operations > Kubernetes** page, and ensure that,
-   in addition to "Prometheus", you also have "Runner" and "Ingress"
-   installed. Once "Ingress" is installed, copy its endpoint.
-1. Navigate to your project's **Settings > CI/CD** page. In the Auto DevOps section,
-   select a deployment strategy and save your changes.
-1. On the same page, in the Variables section, add a variable named `KUBE_INGRESS_BASE_DOMAIN`
-   with the value of the Ingress endpoint you have copied in the previous step. Leave the type
-   as "Variable".
-1. Navigate to your project's **CI/CD > Pipelines** page, and run a pipeline on any branch.
-1. When the pipeline has run successfully, graphs will be available on the **Operations > Metrics** page.
-
-![Monitoring Dashboard](img/prometheus_monitoring_dashboard_v13_1.png)
 
 #### About managed Prometheus deployments
 
@@ -99,14 +81,24 @@ Installing and configuring Prometheus to monitor applications is fairly straight
 
 The actual configuration of Prometheus integration within GitLab is very simple.
 All you will need is the domain name or IP address of the Prometheus server you'd like
-to integrate with.
+to integrate with. If the Prometheus resource is secured with Google's Identity-Aware Proxy (IAP),
+additional information like Client ID and Service Account credentials can be passed which
+GitLab can use to access the resource. More information about authentication from a
+service account can be found at Google's documentation for
+[Authenticating from a service account](https://cloud.google.com/iap/docs/authentication-howto#authenticating_from_a_service_account).
 
-1. Navigate to the [Integrations page](overview.md#accessing-integrations).
+1. Navigate to the [Integrations page](overview.md#accessing-integrations) at
+   **Settings > Integrations**.
 1. Click the **Prometheus** service.
-1. Provide the domain name or IP address of your server, for example `http://prometheus.example.com/` or `http://192.0.2.1/`.
+1. For **API URL**, provide the domain name or IP address of your server, such as
+   `http://prometheus.example.com/` or `http://192.0.2.1/`.
+1. (Optional) In **Google IAP Audience Client ID**, provide the Client ID of the
+   Prometheus OAuth Client secured with Google IAP.
+1. (Optional) In **Google IAP Service Account JSON**, provide the contents of the
+   Service Account credentials file that is authorized to access the Prometheus resource.
 1. Click **Save changes**.
 
-![Configure Prometheus Service](img/prometheus_service_configuration.png)
+![Configure Prometheus Service](img/prometheus_manual_configuration_v13_2.png)
 
 #### Thanos configuration in GitLab
 
@@ -129,7 +121,8 @@ one of them will be used:
   [Prometheus manual configuration](#manual-configuration-of-prometheus)
   and a [managed Prometheus on Kubernetes](#managed-prometheus-on-kubernetes),
   the manual configuration takes precedence and is used to run queries from
-  [dashboards](../../../operations/metrics/dashboards/index.md#defining-custom-dashboards-per-project) and [custom metrics](../../../operations/metrics/index.md#adding-custom-metrics).
+  [custom dashboards](../../../operations/metrics/dashboards/index.md) and
+  [custom metrics](../../../operations/metrics/index.md#adding-custom-metrics).
 - If you have managed Prometheus applications installed on Kubernetes clusters
   at **different** levels (project, group, instance), the order of precedence is described in
   [Cluster precedence](../../instance/clusters/index.md#cluster-precedence).

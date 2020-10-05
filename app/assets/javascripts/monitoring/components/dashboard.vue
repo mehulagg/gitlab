@@ -2,15 +2,14 @@
 import { mapActions, mapState, mapGetters } from 'vuex';
 import VueDraggable from 'vuedraggable';
 import Mousetrap from 'mousetrap';
-import { GlIcon, GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import DashboardHeader from './dashboard_header.vue';
 import DashboardPanel from './dashboard_panel.vue';
 import { s__ } from '~/locale';
-import createFlash from '~/flash';
-import { ESC_KEY, ESC_KEY_IE11 } from '~/lib/utils/keys';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { ESC_KEY } from '~/lib/utils/keys';
 import { mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import invalidUrl from '~/lib/utils/invalid_url';
-import Icon from '~/vue_shared/components/icon.vue';
 
 import GraphGroup from './graph_group.vue';
 import EmptyState from './empty_state.vue';
@@ -33,7 +32,6 @@ export default {
     VueDraggable,
     DashboardHeader,
     DashboardPanel,
-    Icon,
     GlIcon,
     GlButton,
     GraphGroup,
@@ -48,11 +46,6 @@ export default {
     TrackEvent: TrackEventDirective,
   },
   props: {
-    externalDashboardUrl: {
-      type: String,
-      required: false,
-      default: '',
-    },
     hasMetrics: {
       type: Boolean,
       required: false,
@@ -69,10 +62,6 @@ export default {
       default: true,
     },
     documentationPath: {
-      type: String,
-      required: true,
-    },
-    addDashboardDocumentationPath: {
       type: String,
       required: true,
     },
@@ -161,7 +150,6 @@ export default {
     ...mapState('monitoringDashboard', [
       'dashboard',
       'emptyState',
-      'showEmptyState',
       'expandedPanel',
       'variables',
       'links',
@@ -169,6 +157,9 @@ export default {
       'hasDashboardValidationWarnings',
     ]),
     ...mapGetters('monitoringDashboard', ['selectedDashboard', 'getMetricStates']),
+    shouldShowEmptyState() {
+      return Boolean(this.emptyState);
+    },
     shouldShowVariablesSection() {
       return Boolean(this.variables.length);
     },
@@ -278,6 +269,14 @@ export default {
       return null;
     },
     /**
+     * Return true if the entire group is loading.
+     * @param {String} groupKey - Identifier for group
+     * @returns {boolean}
+     */
+    isGroupLoading(groupKey) {
+      return this.groupSingleEmptyState(groupKey) === metricStates.LOADING;
+    },
+    /**
      * A group should be not collapsed if any metric is loaded (OK)
      *
      * @param {String} groupKey - Identifier for group
@@ -310,7 +309,7 @@ export default {
     },
     onKeyup(event) {
       const { key } = event;
-      if (key === ESC_KEY || key === ESC_KEY_IE11) {
+      if (key === ESC_KEY) {
         this.clearExpandedPanel();
       }
     },
@@ -388,7 +387,8 @@ export default {
     },
   },
   i18n: {
-    goBackLabel: s__('Metrics|Go back (Esc)'),
+    collapsePanelLabel: s__('Metrics|Collapse panel'),
+    collapsePanelTooltip: s__('Metrics|Collapse panel (Esc)'),
   },
 };
 </script>
@@ -399,22 +399,19 @@ export default {
       v-if="showHeader"
       ref="prometheusGraphsHeader"
       class="prometheus-graphs-header d-sm-flex flex-sm-wrap pt-2 pr-1 pb-0 pl-2 border-bottom bg-gray-light"
-      :add-dashboard-documentation-path="addDashboardDocumentationPath"
       :default-branch="defaultBranch"
       :rearrange-panels-available="rearrangePanelsAvailable"
       :custom-metrics-available="customMetricsAvailable"
       :custom-metrics-path="customMetricsPath"
       :validate-query-path="validateQueryPath"
-      :external-dashboard-url="externalDashboardUrl"
-      :has-metrics="hasMetrics"
       :is-rearranging-panels="isRearrangingPanels"
       :selected-time-range="selectedTimeRange"
       @dateTimePickerInvalid="onDateTimePickerInvalid"
       @setRearrangingPanels="onSetRearrangingPanels"
     />
-    <variables-section v-if="shouldShowVariablesSection && !showEmptyState" />
-    <links-section v-if="shouldShowLinksSection && !showEmptyState" />
-    <div v-if="!showEmptyState">
+    <template v-if="!shouldShowEmptyState">
+      <variables-section v-if="shouldShowVariablesSection" />
+      <links-section v-if="shouldShowLinksSection" />
       <dashboard-panel
         v-show="expandedPanel.panel"
         ref="expandedPanel"
@@ -431,14 +428,10 @@ export default {
             ref="goBackBtn"
             v-gl-tooltip
             class="mr-3 my-3"
-            :title="$options.i18n.goBackLabel"
+            :title="$options.i18n.collapsePanelTooltip"
             @click="onGoBack"
           >
-            <gl-icon
-              name="arrow-left"
-              :aria-label="$options.i18n.goBackLabel"
-              class="text-secondary"
-            />
+            {{ $options.i18n.collapsePanelLabel }}
           </gl-button>
         </template>
       </dashboard-panel>
@@ -449,6 +442,7 @@ export default {
           :key="`${groupData.group}.${groupData.priority}`"
           :name="groupData.group"
           :show-panels="showPanels"
+          :is-loading="isGroupLoading(groupData.key)"
           :collapse-group="collapseGroup(groupData.key)"
         >
           <vue-draggable
@@ -478,7 +472,7 @@ export default {
                   @click="removePanel(groupData.key, groupData.panels, graphIndex)"
                 >
                   <a class="mx-2 p-2 draggable-remove-link" :aria-label="__('Remove')">
-                    <icon name="close" />
+                    <gl-icon name="close" />
                   </a>
                 </div>
 
@@ -506,7 +500,7 @@ export default {
           </div>
         </graph-group>
       </div>
-    </div>
+    </template>
     <empty-state
       v-else
       :selected-state="emptyState"

@@ -4,12 +4,11 @@ group: Certify
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Service Desk **(STARTER)**
+# Service Desk
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/149) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.1.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/214839) to [GitLab Starter](https://about.gitlab.com/pricing/) in 13.0.
-
-## Overview
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/215364) to [GitLab Core](https://about.gitlab.com/pricing/) in 13.2.
 
 Service Desk is a module that allows your team to connect directly
 with any external party through email right inside of GitLab; no external tools required.
@@ -61,10 +60,10 @@ users will only see the thread through email.
 ## Configuring Service Desk
 
 NOTE: **Note:**
-Service Desk is enabled on GitLab.com. If you're a [Silver subscriber](https://about.gitlab.com/pricing/#gitlab-com),
-you can skip step 1 below; you only need to enable it per project.
+Service Desk is enabled on GitLab.com.
+You can skip step 1 below; you only need to enable it per project.
 
-If you have the correct access and a Premium license, you have the option to set up Service Desk.
+If you have project maintainer access you have the option to set up Service Desk.
 Follow these steps to do so:
 
 1. [Set up incoming email](../../administration/incoming_email.md#set-it-up) for the GitLab instance.
@@ -110,7 +109,7 @@ The **Thank you email** is the email sent to a user after they submit an issue.
 The file name of the template has to be `thank_you.md`.
 You can use `%{ISSUE_ID}` placeholder which will be replaced by an issue IID in the email and
 `%{ISSUE_PATH}` placeholder which will be replaced by project path and the issue IID.
-As the service desk issues are created as confidential (only project members can see them)
+As the Service Desk issues are created as confidential (only project members can see them)
 the response email does not provide the issue link.
 
 #### New note email
@@ -128,7 +127,7 @@ in the email, `%{ISSUE_PATH}` placeholder which will be replaced by
 You can customize the email display name. Emails sent from Service Desk will have
 this name in the `From` header. The default display name is `GitLab Support Bot`.
 
-### Using custom email address
+### Using custom email address **(CORE ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.0.
 

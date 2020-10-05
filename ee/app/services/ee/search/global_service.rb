@@ -15,8 +15,9 @@ module EE
           current_user,
           params[:search],
           elastic_projects,
-          projects,
-          elastic_global
+          public_and_internal_projects: elastic_global,
+          sort: params[:sort],
+          filters: { confidential: params[:confidential], state: params[:state] }
         )
       end
 
@@ -24,7 +25,18 @@ module EE
         nil
       end
 
+      def elastic_global
+        true
+      end
+
       def elastic_projects
+        # For elasticsearch we need the list of projects to be as small as
+        # possible since they are loaded from the DB and sent in the
+        # Elasticsearch query. It should only be strictly the project IDs the
+        # user has been given authorization for. The Elasticsearch query will
+        # additionally take care of public projects. This behaves differently
+        # to the searching Postgres case in which this list of projects is
+        # intended to be all projects that should appear in the results.
         strong_memoize(:elastic_projects) do
           if current_user&.can_read_all_resources?
             :any
@@ -36,18 +48,12 @@ module EE
         end
       end
 
-      def elastic_global
-        true
-      end
-
       override :allowed_scopes
       def allowed_scopes
         return super unless use_elasticsearch?
 
         strong_memoize(:ee_allowed_scopes) do
-          super.tap do |ce_scopes|
-            ce_scopes.concat(%w[notes wiki_blobs blobs commits])
-          end
+          super + %w[notes wiki_blobs blobs commits]
         end
       end
     end

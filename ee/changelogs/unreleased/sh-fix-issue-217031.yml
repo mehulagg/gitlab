@@ -1,5 +1,0 @@
----
-title: Fix errors when pushing with an expired license
-merge_request: 34458
-author:
-type: fixed

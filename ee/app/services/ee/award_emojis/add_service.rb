@@ -11,7 +11,7 @@ module EE
       def after_create(award)
         super
 
-        StatusPage.trigger_publish(project, current_user, award)
+        ::Gitlab::StatusPage.trigger_publish(project, current_user, award)
       end
     end
   end

@@ -41,11 +41,11 @@ exports[`UnscannedProjects component header matches the snapshot when the "helpP
       title="Project scanning help page"
     >
       <svg
-        aria-hidden="true"
-        class="align-top s12 ic-question"
+        class="align-top gl-icon s12"
+        data-testid="question-icon"
       >
         <use
-          xlink:href="#question"
+          href="#question"
         />
       </svg>
     </a>

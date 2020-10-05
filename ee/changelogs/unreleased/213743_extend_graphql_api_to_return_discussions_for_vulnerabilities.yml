@@ -1,5 +1,0 @@
----
-title: Introduce `userNotesCount` field for VulnerabilityType on GraphQL API
-merge_request: 33058
-author:
-type: added

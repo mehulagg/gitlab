@@ -275,6 +275,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
           File.join(shared.export_path, Gitlab::ImportExport.project_filename)
         end
       end
+
       let(:shared) { project.import_export_shared }
       let(:params) { {} }
 
@@ -379,12 +380,6 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver do
         ActiveRecord::Base.connection.execute("UPDATE merge_request_diff_files SET diff = '---\n- :diff: !binary |-\n    LS0tIC9kZXYvbnVsbAorKysgYi9pbWFnZXMvbnVjb3IucGRmCkBAIC0wLDAg\n    KzEsMTY3OSBAQAorJVBERi0xLjUNJeLjz9MNCisxIDAgb2JqDTw8L01ldGFk\n    YXR'")
 
         expect(project_tree_saver.save).to be true
-      end
-
-      it 'has no when YML attributes but only the DB column' do
-        expect_any_instance_of(Gitlab::Ci::YamlProcessor).not_to receive(:build_attributes)
-
-        project_tree_saver.save
       end
     end
   end

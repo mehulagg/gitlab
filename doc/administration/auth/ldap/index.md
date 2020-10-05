@@ -16,6 +16,8 @@ This integration works with most LDAP-compliant directory servers, including:
 - Open LDAP
 - 389 Server
 
+Users added through LDAP take a [licensed seat](../../../subscriptions/self_managed/index.md#choose-the-number-of-users).
+
 GitLab Enterprise Editions (EE) include enhanced integration,
 including group membership syncing as well as multiple LDAP servers support.
 
@@ -35,7 +37,7 @@ GitLab assumes that LDAP users:
 
 - Are not able to change their LDAP `mail`, `email`, or `userPrincipalName` attributes.
   An LDAP user who is allowed to change their email on the LDAP server can potentially
-  [take over any account](#enabling-ldap-sign-in-for-existing-gitlab-users-core-only)
+  [take over any account](#enabling-ldap-sign-in-for-existing-gitlab-users)
   on your GitLab server.
 - Have unique email addresses, otherwise it is possible for LDAP users with the same
   email address to share the same GitLab account.
@@ -53,9 +55,9 @@ are already logged in or are using Git over SSH will still be able to access
 GitLab for up to one hour. Manually block the user in the GitLab Admin Area to
 immediately block all access.
 
-NOTE: **Note**:
+NOTE: **Note:**
 GitLab Enterprise Edition Starter supports a
-[configurable sync time](#adjusting-ldap-user-sync-schedule-starter-only).
+[configurable sync time](#adjusting-ldap-user-sync-schedule).
 
 ## Git password authentication **(CORE ONLY)**
 
@@ -338,7 +340,7 @@ sync, while also allowing your SAML identity provider to handle additional
 checks like custom 2FA.
 
 When LDAP web sign in is disabled, users will not see a **LDAP** tab on the sign in page.
-This does not disable [using LDAP credentials for Git access](#git-password-authentication-core-only).
+This does not disable [using LDAP credentials for Git access](#git-password-authentication).
 
 **Omnibus configuration**
 
@@ -389,7 +391,7 @@ that your GitLab instance will connect to.
 
 To add another LDAP server:
 
-1. Duplicate the settings under [the main configuration](#configuration-core-only).
+1. Duplicate the settings under [the main configuration](#configuration).
 1. Edit them to match the additional LDAP server.
 
 Be sure to choose a different provider ID made of letters a-z and numbers 0-9.
@@ -544,7 +546,7 @@ following.
 1. [Restart GitLab](../../restart_gitlab.md#installations-from-source) for the changes to take effect.
 
 To take advantage of group sync, group owners or maintainers will need to [create one
-or more LDAP group links](#adding-group-links-starter-only).
+or more LDAP group links](#adding-group-links).
 
 ### Adding group links **(STARTER ONLY)**
 
@@ -596,6 +598,8 @@ group, as opposed to the full DN.
 
 ### Global group memberships lock **(STARTER ONLY)**
 
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/1793) in GitLab 12.0.
+
 "Lock memberships to LDAP synchronization" setting allows instance administrators
 to lock down user abilities to invite new members to a group.
 
@@ -607,7 +611,7 @@ When enabled, the following applies:
 
 To enable it you need to:
 
-1. [Enable LDAP](#configuration-core-only)
+1. [Enable LDAP](#configuration)
 1. Navigate to **(admin)** **Admin Area > Settings -> Visibility and access controls**.
 1. Make sure the "Lock memberships to LDAP synchronization" checkbox is enabled.
 
@@ -655,7 +659,7 @@ sync to run once every 2 hours at the top of the hour.
 ### External groups **(STARTER ONLY)**
 
 Using the `external_groups` setting will allow you to mark all users belonging
-to these groups as [external users](../../../user/permissions.md#external-users-core-only).
+to these groups as [external users](../../../user/permissions.md#external-users).
 Group membership is checked periodically through the `LdapGroupSync` background
 task.
 

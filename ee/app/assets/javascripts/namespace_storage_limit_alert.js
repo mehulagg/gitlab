@@ -5,7 +5,7 @@ const handleOnDismiss = ({ currentTarget }) => {
     dataset: { id, level },
   } = currentTarget;
 
-  Cookies.set(`hide_storage_limit_alert_${id}_${level}`, true, { expires: 365 });
+  Cookies.set(`hide_storage_limit_alert_${id}_${level}`, true, { expires: 30 });
 
   const notification = document.querySelector('.js-namespace-storage-alert');
   notification.parentNode.removeChild(notification);

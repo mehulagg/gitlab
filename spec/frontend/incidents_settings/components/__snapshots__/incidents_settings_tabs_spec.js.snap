@@ -9,16 +9,17 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
   <div
     class="settings-header"
   >
-    <h3
-      class="h4"
+    <h4
+      class="gl-my-3! gl-py-1"
     >
       
       Incidents
     
-    </h3>
+    </h4>
      
     <gl-button-stub
-      category="tertiary"
+      buttontextclasses=""
+      category="primary"
       class="js-settings-toggle"
       icon=""
       size="medium"
@@ -48,7 +49,14 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
           data-testid="AlertsSettingsForm-tab"
         />
       </gl-tab-stub>
-      <!---->
+      <gl-tab-stub
+        title="PagerDuty integration"
+      >
+        <pagerdutysettingsform-stub
+          class="gl-pt-3"
+          data-testid="PagerDutySettingsForm-tab"
+        />
+      </gl-tab-stub>
       <!---->
     </gl-tabs-stub>
   </div>

@@ -1,9 +1,9 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
-import { GlLoadingIcon } from '@gitlab/ui';
-
-import AddItemForm from 'ee/related_issues/components/add_issuable_form.vue';
+import { __, sprintf } from '~/locale';
+import AddItemForm from '~/related_issues/components/add_issuable_form.vue';
 import SlotSwitch from '~/vue_shared/components/slot_switch.vue';
 import CreateEpicForm from './create_epic_form.vue';
 import CreateIssueForm from './create_issue_form.vue';
@@ -25,6 +25,7 @@ export default {
   FORM_SLOTS,
   components: {
     GlLoadingIcon,
+    GlIcon,
     RelatedItemsTreeHeader,
     RelatedItemsTreeBody,
     AddItemForm,
@@ -32,6 +33,9 @@ export default {
     TreeItemRemoveModal,
     CreateIssueForm,
     SlotSwitch,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   computed: {
     ...mapState([
@@ -72,6 +76,24 @@ export default {
       }
 
       return null;
+    },
+    createIssuableText() {
+      return sprintf(__('Create new confidential %{issuableType}'), {
+        issuableType: this.issuableType,
+      });
+    },
+    existingIssuableText() {
+      return sprintf(__('Add existing confidential %{issuableType}'), {
+        issuableType: this.issuableType,
+      });
+    },
+    formSlots() {
+      const { addItem, createEpic, createIssue } = this.$options.FORM_SLOTS;
+      return [
+        { name: addItem, value: this.existingIssuableText },
+        { name: createEpic, value: this.createIssuableText },
+        { name: createIssue, value: this.createIssuableText },
+      ];
     },
   },
   mounted() {
@@ -148,6 +170,25 @@ export default {
     >
       <related-items-tree-header :class="{ 'border-bottom-0': itemsFetchResultEmpty }" />
       <slot-switch
+        v-if="visibleForm && parentItem.confidential"
+        :active-slot-names="[visibleForm]"
+        class="gl-p-5 gl-pb-0"
+      >
+        <h6 v-for="slot in formSlots" :key="slot.name" :slot="slot.name">
+          {{ slot.value }}
+          <gl-icon
+            v-gl-tooltip.hover
+            name="question-o"
+            class="gl-text-gray-500"
+            :title="
+              __(
+                'The parent epic is confidential and can only contain confidential epics and issues',
+              )
+            "
+          />
+        </h6>
+      </slot-switch>
+      <slot-switch
         v-if="visibleForm"
         :active-slot-names="[visibleForm]"
         class="card-body add-item-form-container"
@@ -167,6 +208,7 @@ export default {
           :has-error="itemAddFailure"
           :item-add-failure-type="itemAddFailureType"
           :item-add-failure-message="itemAddFailureMessage"
+          :confidential="parentItem.confidential"
           @pendingIssuableRemoveRequest="handlePendingItemRemove"
           @addIssuableFormInput="handleAddItemFormInput"
           @addIssuableFormBlur="handleAddItemFormBlur"

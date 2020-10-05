@@ -3,7 +3,7 @@
 module Ci
   class BuildPolicy < CommitStatusPolicy
     condition(:protected_ref) do
-      access = ::Gitlab::UserAccess.new(@user, project: @subject.project)
+      access = ::Gitlab::UserAccess.new(@user, container: @subject.project)
 
       if @subject.tag?
         !access.can_create_tag?(@subject.ref)
@@ -18,6 +18,11 @@ module Ci
       else
         !ProtectedBranch.protected?(@subject.project, @subject.ref)
       end
+    end
+
+    # overridden in EE
+    condition(:protected_environment_access) do
+      false
     end
 
     condition(:owner_of_job) do
@@ -40,7 +45,7 @@ module Ci
       @subject.pipeline.webide?
     end
 
-    rule { protected_ref | archived }.policy do
+    rule { ~protected_environment_access & (protected_ref | archived) }.policy do
       prevent :update_build
       prevent :update_commit_status
       prevent :erase_build

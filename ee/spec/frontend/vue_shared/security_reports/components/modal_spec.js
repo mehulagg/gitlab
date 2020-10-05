@@ -95,7 +95,7 @@ describe('Security Reports modal', () => {
       });
 
       it('renders create merge request and issue button as a split button', () => {
-        expect(wrapper.contains('.js-split-button')).toBe(true);
+        expect(wrapper.find('.js-split-button').exists()).toBe(true);
         expect(wrapper.find('.js-split-button').text()).toContain('Resolve with merge request');
         expect(wrapper.find('.js-split-button').text()).toContain('Create issue');
       });
@@ -114,8 +114,8 @@ describe('Security Reports modal', () => {
 
           Vue.nextTick()
             .then(() => {
-              expect(wrapper.contains('.js-split-button')).toBe(false);
-              expect(wrapper.contains('.js-action-button')).toBe(true);
+              expect(wrapper.find('.js-split-button').exists()).toBe(false);
+              expect(wrapper.find('.js-action-button').exists()).toBe(true);
               expect(wrapper.find('.js-action-button').text()).not.toContain(
                 'Resolve with merge request',
               );
@@ -204,7 +204,7 @@ describe('Security Reports modal', () => {
       });
 
       it('displays a link to the issue', () => {
-        expect(wrapper.contains(IssueNote)).toBe(true);
+        expect(wrapper.find(IssueNote).exists()).toBe(true);
       });
     });
 
@@ -241,7 +241,7 @@ describe('Security Reports modal', () => {
       });
 
       it('displays a link to the merge request', () => {
-        expect(wrapper.contains(MergeRequestNote)).toBe(true);
+        expect(wrapper.find(MergeRequestNote).exists()).toBe(true);
       });
     });
 
@@ -323,7 +323,7 @@ describe('Security Reports modal', () => {
 
       expect(solutionCard.exists()).toBe(true);
       expect(solutionCard.text()).toContain(solution);
-      expect(wrapper.contains('hr')).toBe(false);
+      expect(wrapper.find('hr').exists()).toBe(false);
     });
 
     it('is rendered if the vulnerability has a remediation', () => {
@@ -340,7 +340,7 @@ describe('Security Reports modal', () => {
       expect(solutionCard.exists()).toBe(true);
       expect(solutionCard.text()).toContain(summary);
       expect(solutionCard.props('hasDownload')).toBe(true);
-      expect(wrapper.contains('hr')).toBe(false);
+      expect(wrapper.find('hr').exists()).toBe(false);
     });
 
     it('is rendered if the vulnerability has neither a remediation nor a solution', () => {
@@ -352,7 +352,7 @@ describe('Security Reports modal', () => {
       const solutionCard = wrapper.find(SolutionCard);
 
       expect(solutionCard.exists()).toBe(true);
-      expect(wrapper.contains('hr')).toBe(false);
+      expect(wrapper.find('hr').exists()).toBe(false);
     });
   });
 

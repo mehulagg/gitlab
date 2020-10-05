@@ -1,5 +1,5 @@
-import { __ } from '~/locale';
 import { CHART_TYPES } from 'ee/insights/constants';
+import { __ } from '~/locale';
 
 const getAxisTitle = label => {
   switch (label) {

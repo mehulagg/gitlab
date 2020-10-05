@@ -1,7 +1,11 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 export default {
+  components: {
+    GlIcon,
+  },
   props: {
     placeholderText: {
       type: String,
@@ -41,12 +45,6 @@ export default {
       autocomplete="off"
     />
     <i class="fa fa-search dropdown-input-search" aria-hidden="true" data-hidden="true"> </i>
-    <i
-      class="fa fa-times dropdown-input-clear js-dropdown-input-clear"
-      aria-hidden="true"
-      data-hidden="true"
-      role="button"
-    >
-    </i>
+    <gl-icon name="search" class="dropdown-input-search" aria-hidden="true" data-hidden="true" />
   </div>
 </template>

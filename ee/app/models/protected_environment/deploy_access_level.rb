@@ -3,6 +3,7 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
   ALLOWED_ACCESS_LEVELS = [
     Gitlab::Access::MAINTAINER,
     Gitlab::Access::DEVELOPER,
+    Gitlab::Access::REPORTER,
     Gitlab::Access::ADMIN
   ].freeze
 
@@ -15,9 +16,7 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
   belongs_to :group
   belongs_to :protected_environment
 
-  validates :access_level, presence: true, if: :role?, inclusion: {
-    in: ALLOWED_ACCESS_LEVELS
-  }
+  validates :access_level, presence: true, inclusion: { in: ALLOWED_ACCESS_LEVELS }
 
   delegate :project, to: :protected_environment
 

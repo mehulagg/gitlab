@@ -32,6 +32,7 @@ RSpec.describe Issues::MoveService do
     end
 
     context 'resource weight events' do
+      let(:old_issue) { create(:issue, project: old_project, author: user, weight: 5) }
       let!(:event1) { create(:resource_weight_event, issue: old_issue, weight: 1) }
       let!(:event2) { create(:resource_weight_event, issue: old_issue, weight: 42) }
       let!(:event3) { create(:resource_weight_event, issue: old_issue, weight: 5) }
@@ -47,42 +48,15 @@ RSpec.describe Issues::MoveService do
     end
   end
 
-  describe '#rewrite_related_issues' do
+  describe '#rewrite_related_vulnerability_issues' do
     let(:user) { create(:user) }
-    let(:admin) { create(:admin) }
-    let(:authorized_project) { create(:project) }
-    let(:authorized_project2) { create(:project) }
-    let(:unauthorized_project) { create(:project) }
 
-    let(:authorized_issue_b) { create(:issue, project: authorized_project) }
-    let(:authorized_issue_c) { create(:issue, project: authorized_project2) }
-    let(:authorized_issue_d) { create(:issue, project: authorized_project2) }
-    let(:unauthorized_issue) { create(:issue, project: unauthorized_project) }
+    let!(:vulnerabilities_issue_link) { create(:vulnerabilities_issue_link, issue: old_issue) }
 
-    let!(:issue_link_a) { create(:issue_link, source: old_issue, target: authorized_issue_b) }
-    let!(:issue_link_b) { create(:issue_link, source: old_issue, target: unauthorized_issue) }
-    let!(:issue_link_c) { create(:issue_link, source: old_issue, target: authorized_issue_c) }
-    let!(:issue_link_d) { create(:issue_link, source: authorized_issue_d, target: old_issue) }
+    it 'updates all vulnerability issue links with new issue' do
+      new_issue = move_service.execute(old_issue, new_project)
 
-    before do
-      stub_licensed_features(related_issues: true)
-      authorized_project.add_developer(user)
-      authorized_project2.add_developer(user)
-    end
-
-    context 'multiple related issues' do
-      it 'moves all related issues and retains permissions' do
-        new_issue = move_service.execute(old_issue, new_project)
-
-        expect(new_issue.related_issues(admin))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d, unauthorized_issue])
-
-        expect(new_issue.related_issues(user))
-          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
-
-        expect(authorized_issue_d.related_issues(user))
-          .to match_array([new_issue])
-      end
+      expect(vulnerabilities_issue_link.reload.issue).to eq(new_issue)
     end
   end
 

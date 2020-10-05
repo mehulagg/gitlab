@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils';
-import JiraIssuesFields from '~/integrations/edit/components/jira_issues_fields.vue';
+
 import { GlFormCheckbox, GlFormInput } from '@gitlab/ui';
+
+import JiraIssuesFields from '~/integrations/edit/components/jira_issues_fields.vue';
 
 describe('JiraIssuesFields', () => {
   let wrapper;
@@ -55,7 +57,7 @@ describe('JiraIssuesFields', () => {
       // As per https://vuejs.org/v2/guide/forms.html#Checkbox-1,
       // browsers don't include unchecked boxes in form submissions.
       it('includes issues_enabled as false even if unchecked', () => {
-        expect(wrapper.contains('input[name="service[issues_enabled]"]')).toBe(true);
+        expect(wrapper.find('input[name="service[issues_enabled]"]').exists()).toBe(true);
       });
 
       it('disables project_key input', () => {
@@ -88,7 +90,23 @@ describe('JiraIssuesFields', () => {
     it('contains link to editProjectPath', () => {
       createComponent();
 
-      expect(wrapper.contains(`a[href="${defaultProps.editProjectPath}"]`)).toBe(true);
+      expect(wrapper.find(`a[href="${defaultProps.editProjectPath}"]`).exists()).toBe(true);
+    });
+
+    describe('GitLab issues warning', () => {
+      const expectedText = 'Consider disabling GitLab issues';
+
+      it('contains warning when GitLab issues is enabled', () => {
+        createComponent();
+
+        expect(wrapper.text()).toContain(expectedText);
+      });
+
+      it('does not contain warning when GitLab issues is disabled', () => {
+        createComponent({ gitlabIssuesEnabled: false });
+
+        expect(wrapper.text()).not.toContain(expectedText);
+      });
     });
   });
 });

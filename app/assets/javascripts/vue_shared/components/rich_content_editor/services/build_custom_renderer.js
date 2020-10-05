@@ -1,15 +1,20 @@
-import renderHtml from './renderers/render_html';
-import renderKramdownList from './renderers/render_kramdown_list';
-import renderKramdownText from './renderers/render_kramdown_text';
+import { union, mapValues } from 'lodash';
+import renderBlockHtml from './renderers/render_html_block';
+import renderHeading from './renderers/render_heading';
+import renderIdentifierInstanceText from './renderers/render_identifier_instance_text';
 import renderIdentifierParagraph from './renderers/render_identifier_paragraph';
-import renderEmbeddedRubyText from './renderers/render_embedded_ruby_text';
 import renderFontAwesomeHtmlInline from './renderers/render_font_awesome_html_inline';
+import renderSoftbreak from './renderers/render_softbreak';
+import renderAttributeDefinition from './renderers/render_attribute_definition';
+import renderListItem from './renderers/render_list_item';
 
 const htmlInlineRenderers = [renderFontAwesomeHtmlInline];
-const htmlRenderers = [renderHtml];
-const listRenderers = [renderKramdownList];
-const paragraphRenderers = [renderIdentifierParagraph];
-const textRenderers = [renderKramdownText, renderEmbeddedRubyText];
+const htmlBlockRenderers = [renderBlockHtml];
+const headingRenderers = [renderHeading];
+const paragraphRenderers = [renderIdentifierParagraph, renderBlockHtml];
+const textRenderers = [renderIdentifierInstanceText, renderAttributeDefinition];
+const listItemRenderers = [renderListItem];
+const softbreakRenderers = [renderSoftbreak];
 
 const executeRenderer = (renderers, node, context) => {
   const availableRenderer = renderers.find(renderer => renderer.canRender(node, context));
@@ -17,51 +22,21 @@ const executeRenderer = (renderers, node, context) => {
   return availableRenderer ? availableRenderer.render(node, context) : context.origin();
 };
 
-const buildCustomRendererFunctions = (customRenderers, defaults) => {
-  const customTypes = Object.keys(customRenderers).filter(type => !defaults[type]);
-  const customEntries = customTypes.map(type => {
-    const fn = (node, context) => executeRenderer(customRenderers[type], node, context);
-    return [type, fn];
+const buildCustomHTMLRenderer = customRenderers => {
+  const renderersByType = {
+    ...customRenderers,
+    htmlBlock: union(htmlBlockRenderers, customRenderers?.htmlBlock),
+    htmlInline: union(htmlInlineRenderers, customRenderers?.htmlInline),
+    heading: union(headingRenderers, customRenderers?.heading),
+    item: union(listItemRenderers, customRenderers?.listItem),
+    paragraph: union(paragraphRenderers, customRenderers?.paragraph),
+    text: union(textRenderers, customRenderers?.text),
+    softbreak: union(softbreakRenderers, customRenderers?.softbreak),
+  };
+
+  return mapValues(renderersByType, renderers => {
+    return (node, context) => executeRenderer(renderers, node, context);
   });
-
-  return Object.fromEntries(customEntries);
-};
-
-const buildCustomHTMLRenderer = (
-  customRenderers = { htmlBlock: [], htmlInline: [], list: [], paragraph: [], text: [] },
-) => {
-  const defaults = {
-    htmlBlock(node, context) {
-      const allHtmlRenderers = [...customRenderers.list, ...htmlRenderers];
-
-      return executeRenderer(allHtmlRenderers, node, context);
-    },
-    htmlInline(node, context) {
-      const allHtmlInlineRenderers = [...customRenderers.htmlInline, ...htmlInlineRenderers];
-
-      return executeRenderer(allHtmlInlineRenderers, node, context);
-    },
-    list(node, context) {
-      const allListRenderers = [...customRenderers.list, ...listRenderers];
-
-      return executeRenderer(allListRenderers, node, context);
-    },
-    paragraph(node, context) {
-      const allParagraphRenderers = [...customRenderers.list, ...paragraphRenderers];
-
-      return executeRenderer(allParagraphRenderers, node, context);
-    },
-    text(node, context) {
-      const allTextRenderers = [...customRenderers.text, ...textRenderers];
-
-      return executeRenderer(allTextRenderers, node, context);
-    },
-  };
-
-  return {
-    ...buildCustomRendererFunctions(customRenderers, defaults),
-    ...defaults,
-  };
 };
 
 export default buildCustomHTMLRenderer;

@@ -18,6 +18,8 @@ class Explore::ProjectsController < Explore::ApplicationController
 
   rescue_from PageOutOfBoundsError, with: :page_out_of_bounds
 
+  feature_category :projects
+
   def index
     @projects = load_projects
 
@@ -80,7 +82,7 @@ class Explore::ProjectsController < Explore::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def preload_associations(projects)
-    projects.includes(:route, :creator, :group, namespace: [:route, :owner])
+    projects.includes(:route, :creator, :group, :project_feature, namespace: [:route, :owner])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

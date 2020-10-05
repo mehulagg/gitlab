@@ -1,7 +1,7 @@
 import VueRouter from 'vue-router';
+import waitForPromises from 'helpers/wait_for_promises';
 import { createStore } from '~/ide/stores';
 import { syncRouterAndStore } from '~/ide/sync_router_and_store';
-import waitForPromises from 'helpers/wait_for_promises';
 
 const TEST_ROUTE = '/test/lorem/ipsum';
 
@@ -17,9 +17,13 @@ describe('~/ide/sync_router_and_store', () => {
 
   const getRouterCurrentPath = () => router.currentRoute.fullPath;
   const getStoreCurrentPath = () => store.state.router.fullPath;
-  const updateRouter = path => {
+  const updateRouter = async path => {
+    if (getRouterCurrentPath() === path) {
+      return;
+    }
+
     router.push(path);
-    return waitForPromises();
+    await waitForPromises();
   };
   const updateStore = path => {
     store.dispatch('router/push', path);

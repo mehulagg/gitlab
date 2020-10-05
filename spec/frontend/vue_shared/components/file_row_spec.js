@@ -1,8 +1,8 @@
 import { file } from 'jest/ide/helpers';
-import FileRow from '~/vue_shared/components/file_row.vue';
-import FileHeader from '~/vue_shared/components/file_row_header.vue';
 import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
+import FileRow from '~/vue_shared/components/file_row.vue';
+import FileHeader from '~/vue_shared/components/file_row_header.vue';
 import { escapeFileUrl } from '~/lib/utils/url_utility';
 
 describe('File row component', () => {
@@ -118,7 +118,7 @@ describe('File row component', () => {
       level: 0,
     });
 
-    expect(wrapper.contains(FileHeader)).toBe(true);
+    expect(wrapper.find(FileHeader).exists()).toBe(true);
   });
 
   it('matches the current route against encoded file URL', () => {
@@ -138,5 +138,17 @@ describe('File row component', () => {
     );
 
     expect(wrapper.vm.hasUrlAtCurrentRoute()).toBe(true);
+  });
+
+  it('render with the correct file classes prop', () => {
+    createComponent({
+      file: {
+        ...file(),
+      },
+      level: 0,
+      fileClasses: 'font-weight-bold',
+    });
+
+    expect(wrapper.find('.file-row-name').classes()).toContain('font-weight-bold');
   });
 });

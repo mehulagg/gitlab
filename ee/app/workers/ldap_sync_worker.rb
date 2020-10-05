@@ -8,18 +8,16 @@ class LdapSyncWorker # rubocop:disable Scalability/IdempotentWorker
   worker_has_external_dependencies!
 
   # rubocop: disable CodeReuse/ActiveRecord
-  # rubocop: disable Gitlab/RailsLogger
   def perform
     return unless Gitlab::Auth::Ldap::Config.group_sync_enabled?
 
-    Rails.logger.info "Performing daily LDAP sync task."
+    Gitlab::AppLogger.info "Performing daily LDAP sync task."
     User.ldap.find_each(batch_size: 100).each do |ldap_user|
-      Rails.logger.debug "Syncing user #{ldap_user.username}, #{ldap_user.email}"
+      Gitlab::AppLogger.debug "Syncing user #{ldap_user.username}, #{ldap_user.email}"
       # Use the 'update_ldap_group_links_synchronously' option to avoid creating a ton
       # of new Sidekiq jobs all at once.
       Gitlab::Auth::Ldap::Access.allowed?(ldap_user, update_ldap_group_links_synchronously: true)
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord
-  # rubocop: enable Gitlab/RailsLogger
 end

@@ -9,7 +9,7 @@ module Projects
 
       before_action only: [:show] do
         push_frontend_feature_flag(:security_auto_fix, project, default_enabled: false)
-        push_frontend_feature_flag(:sast_configuration_by_click, project, default_enabled: false)
+        push_frontend_feature_flag(:sast_configuration_ui, project, default_enabled: true)
       end
 
       before_action only: [:auto_fix] do
@@ -21,6 +21,12 @@ module Projects
         @configuration = ConfigurationPresenter.new(project,
                                                     auto_fix_permission: auto_fix_authorized?,
                                                     current_user: current_user)
+        respond_to do |format|
+          format.html
+          format.json do
+            render status: :ok, json: @configuration.to_h
+          end
+        end
       end
 
       def auto_fix

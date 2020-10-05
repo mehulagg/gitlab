@@ -9,7 +9,7 @@ module MergeRequests
     end
 
     def create_detached_merge_request_pipeline(merge_request)
-      Ci::CreatePipelineService.new(merge_request.source_project,
+      Ci::CreatePipelineService.new(pipeline_project(merge_request),
                                     current_user,
                                     ref: pipeline_ref_for_detached_merge_request_pipeline(merge_request))
         .execute(:merge_request_event, merge_request: merge_request)
@@ -31,12 +31,34 @@ module MergeRequests
 
     private
 
+    def pipeline_project(merge_request)
+      if can_create_pipeline_in_target_project?(merge_request)
+        merge_request.target_project
+      else
+        merge_request.source_project
+      end
+    end
+
     def pipeline_ref_for_detached_merge_request_pipeline(merge_request)
-      if can_use_merge_request_ref?(merge_request)
+      if can_create_pipeline_in_target_project?(merge_request)
         merge_request.ref_path
       else
         merge_request.source_branch
       end
+    end
+
+    def can_create_pipeline_in_target_project?(merge_request)
+      if Gitlab::Ci::Features.disallow_to_create_merge_request_pipelines_in_target_project?(merge_request.target_project)
+        merge_request.for_same_project?
+      else
+        can?(current_user, :create_pipeline, merge_request.target_project) &&
+          can_update_source_branch_in_target_project?(merge_request)
+      end
+    end
+
+    def can_update_source_branch_in_target_project?(merge_request)
+      ::Gitlab::UserAccess.new(current_user, container: merge_request.target_project)
+        .can_update_branch?(merge_request.source_branch_ref)
     end
   end
 end

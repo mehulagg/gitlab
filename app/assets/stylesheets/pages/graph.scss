@@ -43,13 +43,13 @@
 
   .y-axis-label {
     line {
-      stroke: $gl-gray-350;
+      stroke: $gray-300;
     }
 
     text {
       font-weight: bold;
       font-size: 12px;
-      fill: $gray-800;
+      fill: $gray-700;
     }
   }
 }
@@ -70,5 +70,5 @@
 
 .animate-flicker {
   animation: flickerAnimation 1.5s infinite;
-  fill: $gray-500;
+  fill: $gray-300;
 }

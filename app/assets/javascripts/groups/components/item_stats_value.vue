@@ -1,10 +1,10 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
-import icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    icon,
+    GlIcon,
   },
   directives: {
     tooltip,
@@ -57,6 +57,7 @@ export default {
     :title="title"
     data-container="body"
   >
-    <icon :name="iconName" /> <span v-if="isValuePresent" class="stat-value"> {{ value }} </span>
+    <gl-icon :name="iconName" />
+    <span v-if="isValuePresent" class="stat-value" data-testid="itemStatValue"> {{ value }} </span>
   </span>
 </template>

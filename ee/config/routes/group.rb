@@ -5,7 +5,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
         controller: :groups,
         constraints: { id: Gitlab::PathRegex.full_namespace_route_regex, format: /(html|json|atom|ics)/ }) do
     scope(path: '-') do
-      get :subgroups, as: :subgroups_group
+      get :subgroups, as: :subgroups_group # rubocop:todo Cop/PutGroupRoutesUnderScope
     end
   end
 
@@ -23,13 +23,20 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resource :contribution_analytics, only: [:show]
 
     namespace :analytics do
-      resource :productivity_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.productivity_analytics_enabled? }
-
-      feature_default_enabled = Gitlab::Analytics.feature_enabled_by_default?(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG)
-      constrainer = ::Constraints::FeatureConstrainer.new(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG, default_enabled: feature_default_enabled)
-      constraints(constrainer) do
-        resource :cycle_analytics, only: :show, path: 'value_stream_analytics'
-        scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
+      resource :productivity_analytics, only: :show
+      resources :coverage_reports, only: :index
+      resource :merge_request_analytics, only: :show
+      resource :repository_analytics, only: :show
+      resource :cycle_analytics, only: :show, path: 'value_stream_analytics'
+      scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
+        resources :stages, only: [:index, :create, :update, :destroy] do
+          member do
+            get :duration_chart
+            get :median
+            get :records
+          end
+        end
+        resources :value_streams, only: [:index, :create, :destroy] do
           resources :stages, only: [:index, :create, :update, :destroy] do
             member do
               get :duration_chart
@@ -37,20 +44,11 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
               get :records
             end
           end
-          resources :value_streams, only: [:index, :create] do
-            resources :stages, only: [:index, :create, :update, :destroy] do
-              member do
-                get :duration_chart
-                get :median
-                get :records
-              end
-            end
-          end
-          resource :summary, controller: :summary, only: :show
-          get '/time_summary' => 'summary#time_summary'
         end
-        get '/cycle_analytics', to: redirect('-/analytics/value_stream_analytics')
+        resource :summary, controller: :summary, only: :show
+        get '/time_summary' => 'summary#time_summary'
       end
+      get '/cycle_analytics', to: redirect('-/analytics/value_stream_analytics')
 
       scope :type_of_work do
         resource :tasks_by_type, controller: :tasks_by_type, only: :show do
@@ -122,7 +120,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
       end
     end
 
-    resources :iterations, only: [:index, :new, :show], constraints: { id: /\d+/ }
+    resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
 
     resources :issues, only: [] do
       collection do
@@ -145,17 +143,11 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
 
     namespace :security do
       resource :dashboard, only: [:show], controller: :dashboard
+      resources :vulnerabilities, only: [:index]
       resource :compliance_dashboard, only: [:show]
-      resources :vulnerable_projects, only: [:index]
       resource :discover, only: [:show], controller: :discover
       resources :credentials, only: [:index]
-
-      resources :vulnerability_findings, only: [:index] do
-        collection do
-          get :summary
-          get :history
-        end
-      end
+      resources :merge_commit_reports, only: [:index], constraints: { format: :csv }
     end
 
     resource :push_rules, only: [:edit, :update]
@@ -176,7 +168,6 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resource :roadmap, only: [:show], controller: 'roadmap'
 
     resource :dependency_proxy, only: [:show, :update]
-    resources :packages, only: [:index]
 
     post '/restore' => '/groups#restore', as: :restore
   end
@@ -185,10 +176,10 @@ end
 # Dependency proxy for containers
 # Because docker adds v2 prefix to URI this need to be outside of usual group routes
 scope format: false do
-  get 'v2', to: proc { [200, {}, ['']] }
+  get 'v2', to: proc { [200, {}, ['']] } # rubocop:disable Cop/PutGroupRoutesUnderScope
 
   constraints image: Gitlab::PathRegex.container_image_regex, sha: Gitlab::PathRegex.container_image_blob_sha_regex do
-    get 'v2/*group_id/dependency_proxy/containers/*image/manifests/*tag' => 'groups/dependency_proxy_for_containers#manifest'
-    get 'v2/*group_id/dependency_proxy/containers/*image/blobs/:sha' => 'groups/dependency_proxy_for_containers#blob'
+    get 'v2/*group_id/dependency_proxy/containers/*image/manifests/*tag' => 'groups/dependency_proxy_for_containers#manifest' # rubocop:todo Cop/PutGroupRoutesUnderScope
+    get 'v2/*group_id/dependency_proxy/containers/*image/blobs/:sha' => 'groups/dependency_proxy_for_containers#blob' # rubocop:todo Cop/PutGroupRoutesUnderScope
   end
 end

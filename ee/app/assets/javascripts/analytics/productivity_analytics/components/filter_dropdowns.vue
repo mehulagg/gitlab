@@ -1,15 +1,17 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { accessLevelReporter, projectsPerPage } from '../constants';
-import { LAST_ACTIVITY_AT } from '../../shared/constants';
+import { SIMILARITY_ORDER, LAST_ACTIVITY_AT } from '../../shared/constants';
 
 export default {
   components: {
     GroupsDropdownFilter,
     ProjectsDropdownFilter,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     group: {
       type: Object,
@@ -40,6 +42,14 @@ export default {
     projects() {
       return this.project && Object.keys(this.project).length ? [this.project] : null;
     },
+    projectsQueryParams() {
+      return {
+        per_page: projectsPerPage,
+        with_shared: false, // exclude forks
+        order_by: this.glFeatures.analyticsSimilaritySearch ? SIMILARITY_ORDER : LAST_ACTIVITY_AT,
+        include_subgroups: true,
+      };
+    },
   },
   methods: {
     ...mapActions('filters', ['setGroupNamespace', 'setProjectPath']),
@@ -69,12 +79,6 @@ export default {
   groupsQueryParams: {
     min_access_level: accessLevelReporter,
   },
-  projectsQueryParams: {
-    per_page: projectsPerPage,
-    with_shared: false, // exclude forks
-    order_by: LAST_ACTIVITY_AT,
-    include_subgroups: true,
-  },
 };
 </script>
 
@@ -92,7 +96,7 @@ export default {
       :key="groupId"
       class="project-select"
       :default-projects="projects"
-      :query-params="$options.projectsQueryParams"
+      :query-params="projectsQueryParams"
       :group-id="groupId"
       @selected="onProjectsSelected"
     />

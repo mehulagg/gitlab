@@ -73,9 +73,6 @@ msgid_plural "Branches"
 msgstr[0] "Rama"
 msgstr[1] "Ramas"
 
-msgid "Branch <strong>%{branch_name}</strong> was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}"
-msgstr "La rama <strong>%{branch_name}</strong> fue creada. Para configurar el auto despliegue, escoge una plantilla Yaml para GitLab CI y envía tus cambios. %{link_to_autodeploy_doc}"
-
 msgid "BranchSwitcherPlaceholder|Search branches"
 msgstr "Buscar ramas"
 
@@ -1074,7 +1071,7 @@ msgstr "Va a eliminar %{project_name_with_namespace}. ¡El proyecto eliminado NO
 msgid "You are going to remove the fork relationship to source project %{forked_from_project}. Are you ABSOLUTELY sure?"
 msgstr "Vas a eliminar el enlace de la bifurcación con el proyecto original %{forked_from_project}. ¿Estás TOTALMENTE seguro?"
 
-msgid "You are going to transfer %{project_name_with_namespace} to another owner. Are you ABSOLUTELY sure?"
+msgid "You are going to transfer %{project_name_with_namespace} to another namespace. Are you ABSOLUTELY sure?"
 msgstr "Vas a transferir %{project_name_with_namespace} a otro propietario. ¿Estás TOTALMENTE seguro?"
 
 msgid "You can only add files when you are on a branch"

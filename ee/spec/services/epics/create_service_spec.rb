@@ -25,20 +25,6 @@ RSpec.describe Epics::CreateService do
       expect(epic.confidential).to be_truthy
       expect(NewEpicWorker).to have_received(:perform_async).with(epic.id, user.id)
     end
-
-    context 'when confidential_epics is disabled' do
-      before do
-        stub_feature_flags(confidential_epics: false)
-      end
-
-      it 'ignores confidential attribute' do
-        expect { subject }.to change { Epic.count }.by(1)
-
-        epic = Epic.last
-        expect(epic).to be_persisted
-        expect(epic.confidential).to be_falsey
-      end
-    end
   end
 
   context 'handling fixed dates' do

@@ -1,25 +1,24 @@
 - page_title _('License')
 
-- if Feature.enabled?(:licenses_app)
-  #instance-license-mount-element{ license_app_data }
-- else
-  %h3.page-title
-    = _('Your License')
-    - if @license&.trial?
-      = render 'upload_buy_license'
-    - else
-      = link_to _('Upload New License'), new_admin_license_path, class: 'btn btn-success float-right', data: { qa_selector: 'license_upload_link' }
+%h3.page-title
+  = _('Your License')
+  - if @license&.trial?
+    = render 'upload_buy_license'
+  - else
+    = link_to _('Upload New License'), new_admin_license_path, class: 'btn btn-success float-right', data: { qa_selector: 'license_upload_link' }
 
-  %hr
+%hr
 
-  - if License.future_dated_only?
-    .gl-alert.gl-alert-info
-      = sprite_icon('information-o', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-      .gl-alert-body
-        %h4.gl-alert-title= _('You do not have an active license')
-        = _('You have a license that activates at a future date. Please see the License History table below.')
+- if License.future_dated_only?
+  .gl-alert.gl-alert-info
+    = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+    .gl-alert-body
+      %h4.gl-alert-title= _('You do not have an active license')
+      = _('You have a license that activates at a future date. Please see the License History table below.')
 
-  = render 'info', license: @license
-  = render 'breakdown', license: @license
+- if @license.present?
+  = render 'info'
+  = render 'breakdown'
 
-  = render 'license_history', license: @license, licenses: @licenses
+- if @licenses.present?
+  = render 'license_history'

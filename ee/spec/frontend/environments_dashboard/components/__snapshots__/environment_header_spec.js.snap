@@ -26,6 +26,7 @@ exports[`Environment Header has a failed pipeline matches the snapshot 1`] = `
     cssclass="btn btn-default btn-sm"
     display="[object Object]"
     link="http://example.com"
+    size="medium"
   />
 </div>
 `;
@@ -56,6 +57,7 @@ exports[`Environment Header has errors matches the snapshot 1`] = `
     cssclass="btn btn-default btn-sm"
     display="[object Object]"
     link="http://example.com"
+    size="medium"
   />
 </div>
 `;
@@ -83,7 +85,7 @@ exports[`Environment Header renders name and link to app matches the snapshot 1`
   </div>
    
   <a
-    class="btn btn-default btn-sm"
+    class="btn btn-default btn-md gl-button btn btn-default btn-sm"
     data-track-event="open_review_app"
     data-track-label="review_app"
     href="http://example.com"
@@ -91,16 +93,24 @@ exports[`Environment Header renders name and link to app matches the snapshot 1`
     target="_blank"
     title=""
   >
-    
-  View app 
-    <svg
-      aria-hidden="true"
-      class="fgray s16 ic-external-link"
+    <!---->
+     
+    <!---->
+      
+    <span
+      class="gl-button-text"
     >
-      <use
-        xlink:href="#external-link"
-      />
-    </svg>
+      
+  View app 
+      <svg
+        class="fgray gl-icon s16"
+        data-testid="external-link-icon"
+      >
+        <use
+          href="#external-link"
+        />
+      </svg>
+    </span>
   </a>
 </div>
 `;
@@ -132,7 +142,7 @@ exports[`Environment Header with environments grouped into a folder matches the 
     </gl-badge-stub>
   </div>
    
-  <icon-stub
+  <gl-icon-stub
     class="dashboard-card-icon"
     name="information"
     size="16"

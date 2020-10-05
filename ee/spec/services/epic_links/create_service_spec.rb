@@ -13,6 +13,10 @@ RSpec.describe EpicLinks::CreateService do
 
     let(:valid_reference) { epic_to_add.to_reference(full: true) }
 
+    before do
+      stub_const('Epic', ::Epic, transfer_nested_constants: true)
+    end
+
     shared_examples 'system notes created' do
       it 'creates system notes' do
         expect { subject }.to change { Note.system.count }.from(0).to(2)
@@ -85,7 +89,7 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when an epic from another group is given' do
               let(:other_group) { create(:group) }
-              let(:expected_error) { "This epic can't be added because it must belong to the same group as the parent, or subgroup of the parent epic’s group" }
+              let(:expected_error) { "This epic cannot be added. An epic must belong to the same group or subgroup as its parent epic." }
               let(:expected_code) { 409 }
 
               before do
@@ -97,7 +101,7 @@ RSpec.describe EpicLinks::CreateService do
 
             context 'when hierarchy is cyclic' do
               context 'when given child epic is the same as given parent' do
-                let(:expected_error) { 'Cannot add an epic as a child of itself' }
+                let(:expected_error) { "This epic cannot be added. An epic cannot be added to itself." }
                 let(:expected_code) { 409 }
 
                 subject { add_epic([epic.to_reference(full: true)]) }
@@ -106,7 +110,7 @@ RSpec.describe EpicLinks::CreateService do
               end
 
               context 'when given child epic is parent of the given parent' do
-                let(:expected_error) { "This epic can't be added as it is already assigned to this epic's ancestor" }
+                let(:expected_error) { "This epic cannot be added. It is already an ancestor of the parent epic." }
                 let(:expected_code) { 409 }
 
                 before do
@@ -117,7 +121,7 @@ RSpec.describe EpicLinks::CreateService do
               end
 
               context 'when new child epic is an ancestor of the given parent' do
-                let(:expected_error) { "This epic can't be added as it is already assigned to this epic's ancestor" }
+                let(:expected_error) { "This epic cannot be added. It is already an ancestor of the parent epic." }
                 let(:expected_code) { 409 }
 
                 before do
@@ -136,7 +140,7 @@ RSpec.describe EpicLinks::CreateService do
                 epic_to_add.update(parent: epic)
               end
 
-              let(:expected_error) { "This epic can't be added as it is already assigned to the parent" }
+              let(:expected_error) { "This epic cannot be added. It is already assigned to the parent epic." }
               let(:expected_code) { 409 }
 
               include_examples 'returns an error'
@@ -152,14 +156,14 @@ RSpec.describe EpicLinks::CreateService do
                 epic.update(parent: epic4)
               end
 
-              let(:expected_error) { "This epic can't be added because the parent is already at the maximum depth from its most distant ancestor" }
+              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (5) from its most distant ancestor." }
               let(:expected_code) { 409 }
 
               include_examples 'returns an error'
             end
 
             context 'when total depth after adding would exceed depth limit' do
-              let(:expected_error) { "This epic can't be added as the maximum depth of nested epics would be exceeded" }
+              let(:expected_error) { "This epic cannot be added. One or more epics would exceed the maximum depth (5) from its most distant ancestor." }
               let(:expected_code) { 409 }
 
               before do
@@ -281,8 +285,8 @@ RSpec.describe EpicLinks::CreateService do
                 expect(subject).to eq(
                   status: :error,
                   http_status: 422,
-                  message: "#{invalid_epic1.to_reference} cannot be added: Not-confidential epic cannot be assigned to a confidential parent epic. "\
-                           "#{invalid_epic2.to_reference} cannot be added: Not-confidential epic cannot be assigned to a confidential parent epic"
+                  message: "#{invalid_epic1.to_reference} cannot be added: A non-confidential epic cannot be assigned to a confidential parent epic. "\
+                           "#{invalid_epic2.to_reference} cannot be added: A non-confidential epic cannot be assigned to a confidential parent epic"
                 )
               end
             end

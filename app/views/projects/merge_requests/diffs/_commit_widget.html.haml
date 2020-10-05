@@ -1,9 +1,0 @@
--#-----------------------------------------------------------------
-  WARNING: Please keep changes up-to-date with the following files:
-  - `assets/javascripts/diffs/components/commit_widget.vue`
--#-----------------------------------------------------------------
-- if @commit
-  .info-well.d-none.d-sm-block.gl-mt-3
-    .well-segment
-      %ul.blob-commit-info
-        = render 'projects/commits/commit', commit: @commit, merge_request: @merge_request, view_details: true

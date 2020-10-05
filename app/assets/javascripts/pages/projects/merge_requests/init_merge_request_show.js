@@ -6,7 +6,7 @@ import howToMerge from '~/how_to_merge';
 import initPipelines from '~/commit/pipelines/pipelines_bundle';
 import initVueIssuableSidebarApp from '~/issuable_sidebar/sidebar_bundle';
 import initSourcegraph from '~/sourcegraph';
-import initPopover from '~/mr_tabs_popover';
+import loadAwardsHandler from '~/awards_handler';
 
 export default function() {
   new ZenMode(); // eslint-disable-line no-new
@@ -20,10 +20,5 @@ export default function() {
   handleLocationHash();
   howToMerge();
   initSourcegraph();
-
-  const tabHighlightEl = document.querySelector('.js-tabs-feature-highlight');
-
-  if (tabHighlightEl) {
-    initPopover(tabHighlightEl);
-  }
+  loadAwardsHandler();
 }

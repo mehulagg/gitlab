@@ -2,9 +2,9 @@
 require 'spec_helper'
 
 RSpec.describe Epics::CloseService do
-  let(:group) { create(:group, :internal) }
-  let(:user) { create(:user) }
-  let(:epic) { create(:epic, group: group) }
+  let_it_be(:group) { create(:group, :internal) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:epic, reload: true) { create(:epic, group: group) }
 
   describe '#execute' do
     subject { described_class.new(group, user) }
@@ -25,7 +25,7 @@ RSpec.describe Epics::CloseService do
       end
 
       context 'when a user has permissions to update the epic' do
-        before do
+        before_all do
           group.add_maintainer(user)
         end
 
@@ -42,13 +42,12 @@ RSpec.describe Epics::CloseService do
             expect { subject.execute(epic) }.to change { epic.closed_at }
           end
 
-          it 'creates a system note about epic close' do
-            expect { subject.execute(epic) }.to change { epic.notes.count }.by(1)
+          it 'creates a resource state event' do
+            expect { subject.execute(epic) }.to change { epic.resource_state_events.count }.by(1)
 
-            note = epic.notes.last
+            event = epic.resource_state_events.last
 
-            expect(note.note).to eq('closed')
-            expect(note.system_note_metadata.action).to eq('closed')
+            expect(event.state).to eq('closed')
           end
 
           it 'notifies the subscribers' do
@@ -82,8 +81,8 @@ RSpec.describe Epics::CloseService do
             expect { subject.execute(epic) }.not_to change { epic.closed_by }
           end
 
-          it 'does not create a system note' do
-            expect { subject.execute(epic) }.not_to change { epic.notes.count }
+          it 'does not create a resource state event' do
+            expect { subject.execute(epic) }.not_to change { epic.resource_state_events.count }
           end
 
           it 'does not send any emails' do

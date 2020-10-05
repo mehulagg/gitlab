@@ -12,6 +12,12 @@ module EE
               description: 'Total storage limit of the root namespace in bytes',
               resolve: -> (obj, _args, _ctx) { EE::Namespace::RootStorageSize.new(obj).limit }
 
+        field :is_temporary_storage_increase_enabled,
+              GraphQL::BOOLEAN_TYPE,
+              null: false,
+              description: 'Status of the temporary storage increase',
+              resolve: -> (obj, _args, _ctx) { obj.temporary_storage_increase_enabled? }
+
         field :temporary_storage_increase_ends_on,
               ::Types::TimeType,
               null: true,

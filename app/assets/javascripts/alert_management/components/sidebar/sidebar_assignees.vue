@@ -3,18 +3,19 @@ import {
   GlIcon,
   GlDropdown,
   GlDropdownDivider,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlDropdownItem,
+  GlSearchBoxByType,
   GlLoadingIcon,
   GlTooltip,
   GlButton,
   GlSprintf,
 } from '@gitlab/ui';
+import { debounce } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
-import { s__, __ } from '~/locale';
+import { s__ } from '~/locale';
 import alertSetAssignees from '../../graphql/mutations/alert_set_assignees.mutation.graphql';
 import SidebarAssignee from './sidebar_assignee.vue';
-import { debounce } from 'lodash';
 
 const DATA_REFETCH_DELAY = 250;
 
@@ -36,7 +37,8 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlDropdownDivider,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
+    GlSearchBoxByType,
     GlLoadingIcon,
     GlTooltip,
     GlButton,
@@ -82,8 +84,11 @@ export default {
     userName() {
       return this.alert?.assignees?.nodes[0]?.username;
     },
-    assignedUser() {
-      return this.userName || __('None');
+    userFullName() {
+      return this.alert?.assignees?.nodes[0]?.name;
+    },
+    userImg() {
+      return this.alert?.assignees?.nodes[0]?.avatarUrl;
     },
     sortedUsers() {
       return this.users
@@ -167,7 +172,7 @@ export default {
 
           if (errors[0]) {
             this.$emit(
-              'alert-sidebar-error',
+              'alert-error',
               `${this.$options.i18n.UPDATE_ALERT_ASSIGNEES_GRAPHQL_ERROR} ${errors[0]}.`,
             );
           }
@@ -184,15 +189,15 @@ export default {
 </script>
 
 <template>
-  <div class="block alert-status">
-    <div ref="status" class="sidebar-collapsed-icon" @click="$emit('toggle-sidebar')">
+  <div class="block alert-assignees ">
+    <div ref="assignees" class="sidebar-collapsed-icon" @click="$emit('toggle-sidebar')">
       <gl-icon name="user" :size="14" />
       <gl-loading-icon v-if="isUpdating" />
     </div>
-    <gl-tooltip :target="() => $refs.status" boundary="viewport" placement="left">
+    <gl-tooltip :target="() => $refs.assignees" boundary="viewport" placement="left">
       <gl-sprintf :message="$options.i18n.ASSIGNEES_BLOCK">
         <template #assignees>
-          {{ assignedUser }}
+          {{ userName }}
         </template>
       </gl-sprintf>
     </gl-tooltip>
@@ -215,32 +220,20 @@ export default {
       <div class="dropdown dropdown-menu-selectable" :class="dropdownClass">
         <gl-dropdown
           ref="dropdown"
-          :text="assignedUser"
+          :text="userName"
           class="w-100"
           toggle-class="dropdown-menu-toggle"
-          variant="outline-default"
           @keydown.esc.native="hideDropdown"
           @hide="hideDropdown"
         >
-          <div class="dropdown-title">
-            <span class="alert-title">{{ __('Assign To') }}</span>
-            <gl-button
-              :aria-label="__('Close')"
-              variant="link"
-              class="dropdown-title-button dropdown-menu-close"
-              icon="close"
-              @click="hideDropdown"
-            />
-          </div>
-          <div class="dropdown-input">
-            <input
-              v-model.trim="search"
-              class="dropdown-input-field"
-              type="search"
-              :placeholder="__('Search users')"
-            />
-            <gl-icon name="search" class="dropdown-input-search ic-search" data-hidden="true" />
-          </div>
+          <p class="gl-new-dropdown-header-top">
+            {{ __('Assign To') }}
+          </p>
+          <gl-search-box-by-type
+            v-model.trim="search"
+            class="m-2"
+            :placeholder="__('Search users')"
+          />
           <div class="dropdown-content dropdown-body">
             <template v-if="userListValid">
               <gl-dropdown-item
@@ -252,9 +245,9 @@ export default {
               </gl-dropdown-item>
               <gl-dropdown-divider />
 
-              <gl-dropdown-header class="mt-0">
+              <gl-dropdown-section-header>
                 {{ __('Assignee') }}
-              </gl-dropdown-header>
+              </gl-dropdown-section-header>
               <sidebar-assignee
                 v-for="user in sortedUsers"
                 :key="user.username"
@@ -263,23 +256,37 @@ export default {
                 @update-alert-assignees="updateAlertAssignees"
               />
             </template>
-            <gl-dropdown-item v-else-if="userListEmpty">
+            <p v-else-if="userListEmpty" class="mx-3 my-2">
               {{ __('No Matching Results') }}
-            </gl-dropdown-item>
+            </p>
             <gl-loading-icon v-else />
           </div>
         </gl-dropdown>
       </div>
 
       <gl-loading-icon v-if="isUpdating" :inline="true" />
-      <p v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !userName }">
-        <span v-if="userName" class="gl-text-gray-700" data-testid="assigned-users">{{
-          assignedUser
-        }}</span>
-        <span v-else class="gl-display-flex gl-align-items-center">
+      <div v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !userName }">
+        <div v-if="userName" class="gl-display-inline-flex gl-mt-2" data-testid="assigned-users">
+          <span class="gl-relative mr-2">
+            <img
+              :alt="userName"
+              :src="userImg"
+              :width="32"
+              class="avatar avatar-inline gl-m-0 s32"
+              data-qa-selector="avatar_image"
+            />
+          </span>
+          <span class="gl-display-flex gl-flex-direction-column gl-overflow-hidden">
+            <strong class="dropdown-menu-user-full-name">
+              {{ userFullName }}
+            </strong>
+            <span class="dropdown-menu-user-username">{{ userName }}</span>
+          </span>
+        </div>
+        <span v-else class="gl-display-flex gl-align-items-center gl-line-height-normal">
           {{ __('None') }} -
           <gl-button
-            class="gl-pl-2"
+            class="gl-ml-2"
             href="#"
             variant="link"
             data-testid="unassigned-users"
@@ -288,7 +295,7 @@ export default {
             {{ __('assign yourself') }}
           </gl-button>
         </span>
-      </p>
+      </div>
     </div>
   </div>
 </template>

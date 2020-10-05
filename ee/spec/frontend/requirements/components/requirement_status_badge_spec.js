@@ -73,7 +73,7 @@ describe('RequirementStatusBadge', () => {
       expect(badgeEl.exists()).toBe(true);
       expect(badgeEl.props('variant')).toBe('success');
       expect(badgeEl.text()).toBe('satisfied');
-      expect(badgeEl.contains(GlIcon)).toBe(true);
+      expect(badgeEl.find(GlIcon).exists()).toBe(true);
       expect(badgeEl.find(GlIcon).props('name')).toBe('status_success');
     });
 

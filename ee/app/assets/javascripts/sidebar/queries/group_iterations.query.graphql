@@ -5,6 +5,7 @@ query groupIterations($fullPath: ID!, $title: String) {
         id
         title
         state
+        webUrl
       }
     }
   }

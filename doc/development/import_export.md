@@ -244,7 +244,7 @@ project_tree:
       - :push_event_payload
   - issues:
     - events:
-    - ...
+    # ...
 ```
 
 Only include the following attributes for the models specified:
@@ -254,8 +254,7 @@ included_attributes:
   user:
     - :id
     - :email
-  ...
-
+  # ...
 ```
 
 Do not include the following attributes for the models specified:
@@ -408,4 +407,5 @@ tree
     └── 4352.json
 ```
 
-CAUTION: **Caution:** When updating these fixtures, please ensure you update both `json` files and `tree` folder, as the tests apply to both.
+CAUTION: **Caution:**
+When updating these fixtures, please ensure you update both `json` files and `tree` folder, as the tests apply to both.

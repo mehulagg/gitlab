@@ -121,13 +121,6 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
           expect(response).to have_gitlab_http_status(:ok)
           expect(assigns(:build).id).to eq(job.id)
         end
-
-        it 'has the correct build collection' do
-          builds = assigns(:builds).map(&:id)
-
-          expect(builds).to include(job.id, second_job.id)
-          expect(builds).not_to include(third_job.id)
-        end
       end
 
       context 'when job does not exist' do
@@ -201,33 +194,85 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       end
 
       context 'when job has artifacts' do
-        before do
-          get_show_json
-        end
-
         context 'with not expiry date' do
           let(:job) { create(:ci_build, :success, :artifacts, pipeline: pipeline) }
 
-          it 'exposes needed information' do
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response).to match_response_schema('job/job_details')
-            expect(json_response['artifact']['download_path']).to match(%r{artifacts/download})
-            expect(json_response['artifact']['browse_path']).to match(%r{artifacts/browse})
-            expect(json_response['artifact']).not_to have_key('expired')
-            expect(json_response['artifact']).not_to have_key('expired_at')
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']['download_path']).to match(%r{artifacts/download})
+              expect(json_response['artifact']['browse_path']).to match(%r{artifacts/browse})
+              expect(json_response['artifact']).not_to have_key('keep_path')
+              expect(json_response['artifact']).not_to have_key('expired')
+              expect(json_response['artifact']).not_to have_key('expired_at')
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']['download_path']).to match(%r{artifacts/download})
+              expect(json_response['artifact']['browse_path']).to match(%r{artifacts/browse})
+              expect(json_response['artifact']).not_to have_key('keep_path')
+              expect(json_response['artifact']).not_to have_key('expired')
+              expect(json_response['artifact']).not_to have_key('expired_at')
+            end
           end
         end
 
-        context 'with expiry date' do
+        context 'with expired artifacts' do
           let(:job) { create(:ci_build, :success, :artifacts, :expired, pipeline: pipeline) }
 
-          it 'exposes needed information' do
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response).to match_response_schema('job/job_details')
-            expect(json_response['artifact']).not_to have_key('download_path')
-            expect(json_response['artifact']).not_to have_key('browse_path')
-            expect(json_response['artifact']['expired']).to eq(true)
-            expect(json_response['artifact']['expire_at']).not_to be_empty
+          context 'when artifacts are unlocked' do
+            before do
+              job.pipeline.unlocked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']).not_to have_key('download_path')
+              expect(json_response['artifact']).not_to have_key('browse_path')
+              expect(json_response['artifact']).not_to have_key('keep_path')
+              expect(json_response['artifact']['expired']).to eq(true)
+              expect(json_response['artifact']['expire_at']).not_to be_empty
+              expect(json_response['artifact']['locked']).to eq(false)
+            end
+          end
+
+          context 'when artifacts are locked' do
+            before do
+              job.pipeline.artifacts_locked!
+            end
+
+            it 'exposes needed information' do
+              get_show_json
+
+              expect(response).to have_gitlab_http_status(:ok)
+              expect(response).to match_response_schema('job/job_details')
+              expect(json_response['artifact']).to have_key('download_path')
+              expect(json_response['artifact']).to have_key('browse_path')
+              expect(json_response['artifact']).to have_key('keep_path')
+              expect(json_response['artifact']['expired']).to eq(true)
+              expect(json_response['artifact']['expire_at']).not_to be_empty
+              expect(json_response['artifact']['locked']).to eq(true)
+            end
           end
         end
       end

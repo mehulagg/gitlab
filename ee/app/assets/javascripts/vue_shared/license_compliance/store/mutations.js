@@ -20,6 +20,11 @@ export default {
       isAdmin: data,
     });
   },
+  [types.SET_KNOWN_LICENSES](state, data) {
+    Object.assign(state, {
+      knownLicenses: data,
+    });
+  },
   [types.RECEIVE_MANAGED_LICENSES_SUCCESS](state, licenses = []) {
     const managedLicenses = licenses.map(normalizeLicense).reverse();
 

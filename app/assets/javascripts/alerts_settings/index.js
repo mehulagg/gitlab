@@ -20,34 +20,48 @@ export default el => {
     formPath,
     authorizationKey,
     url,
+    opsgenieMvcAvailable,
+    opsgenieMvcFormPath,
+    opsgenieMvcEnabled,
+    opsgenieMvcTargetUrl,
   } = el.dataset;
 
-  const activated = parseBoolean(activatedStr);
+  const genericActivated = parseBoolean(activatedStr);
   const prometheusIsActivated = parseBoolean(prometheusActivated);
+  const opsgenieMvcActivated = parseBoolean(opsgenieMvcEnabled);
+  const opsgenieMvcIsAvailable = parseBoolean(opsgenieMvcAvailable);
 
   return new Vue({
     el,
+    provide: {
+      prometheus: {
+        activated: prometheusIsActivated,
+        prometheusUrl,
+        authorizationKey: prometheusAuthorizationKey,
+        prometheusFormPath,
+        prometheusResetKeyPath,
+        prometheusApiUrl,
+      },
+      generic: {
+        alertsSetupUrl,
+        alertsUsageUrl,
+        activated: genericActivated,
+        formPath,
+        authorizationKey,
+        url,
+      },
+      opsgenie: {
+        formPath: opsgenieMvcFormPath,
+        activated: opsgenieMvcActivated,
+        opsgenieMvcTargetUrl,
+        opsgenieMvcIsAvailable,
+      },
+    },
+    components: {
+      AlertSettingsForm,
+    },
     render(createElement) {
-      return createElement(AlertSettingsForm, {
-        props: {
-          prometheus: {
-            prometheusIsActivated,
-            prometheusUrl,
-            prometheusAuthorizationKey,
-            prometheusFormPath,
-            prometheusResetKeyPath,
-            prometheusApiUrl,
-          },
-          generic: {
-            alertsSetupUrl,
-            alertsUsageUrl,
-            initialActivated: activated,
-            formPath,
-            initialAuthorizationKey: authorizationKey,
-            url,
-          },
-        },
-      });
+      return createElement('alert-settings-form');
     },
   });
 };

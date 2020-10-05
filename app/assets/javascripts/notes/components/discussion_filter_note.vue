@@ -1,14 +1,14 @@
 <script>
-import { GlDeprecatedButton } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+/* eslint-disable vue/no-v-html */
+import { GlButton, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
 import notesEventHub from '../event_hub';
 
 export default {
   components: {
-    GlDeprecatedButton,
-    Icon,
+    GlButton,
+    GlIcon,
   },
   computed: {
     timelineContent() {
@@ -35,17 +35,17 @@ export default {
 <template>
   <li class="timeline-entry note note-wrapper discussion-filter-note js-discussion-filter-note">
     <div class="timeline-icon d-none d-lg-flex">
-      <icon name="comment" />
+      <gl-icon name="comment" />
     </div>
     <div class="timeline-content">
       <div ref="timelineContent" v-html="timelineContent"></div>
       <div class="discussion-filter-actions mt-2">
-        <gl-deprecated-button ref="showAllActivity" variant="default" @click="selectFilter(0)">
+        <gl-button ref="showAllActivity" variant="default" @click="selectFilter(0)">
           {{ __('Show all activity') }}
-        </gl-deprecated-button>
-        <gl-deprecated-button ref="showComments" variant="default" @click="selectFilter(1)">
+        </gl-button>
+        <gl-button ref="showComments" variant="default" @click="selectFilter(1)">
           {{ __('Show comments only') }}
-        </gl-deprecated-button>
+        </gl-button>
       </div>
     </div>
   </li>

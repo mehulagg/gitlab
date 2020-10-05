@@ -20,14 +20,18 @@ class MergeRequest < ApplicationRecord
   include IgnorableColumns
   include MilestoneEventable
   include StateEventable
+  include ApprovableBase
+  include IdInOrdered
 
   extend ::Gitlab::Utils::Override
 
   sha_attribute :squash_commit_sha
+  sha_attribute :merge_ref_sha
 
   self.reactive_cache_key = ->(model) { [model.project.id, model.iid] }
   self.reactive_cache_refresh_interval = 10.minutes
   self.reactive_cache_lifetime = 10.minutes
+  self.reactive_cache_work_type = :no_dependency
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
@@ -39,7 +43,7 @@ class MergeRequest < ApplicationRecord
   has_internal_id :iid, scope: :target_project, track_if: -> { !importing? }, init: ->(s) { s&.target_project&.merge_requests&.maximum(:iid) }
 
   has_many :merge_request_diffs
-  has_many :merge_request_context_commits
+  has_many :merge_request_context_commits, inverse_of: :merge_request
   has_many :merge_request_context_commit_diff_files, through: :merge_request_context_commits, source: :diff_files
 
   has_one :merge_request_diff,
@@ -79,6 +83,8 @@ class MergeRequest < ApplicationRecord
 
   has_many :merge_request_assignees
   has_many :assignees, class_name: "User", through: :merge_request_assignees
+  has_many :merge_request_reviewers
+  has_many :reviewers, class_name: "User", through: :merge_request_reviewers
   has_many :user_mentions, class_name: "MergeRequestUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
   has_many :deployment_merge_requests
@@ -92,9 +98,6 @@ class MergeRequest < ApplicationRecord
   has_many :draft_notes
   has_many :reviews, inverse_of: :merge_request
 
-  has_many :approvals, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
-  has_many :approved_by_users, through: :approvals, source: :user
-
   KNOWN_MERGE_PARAMS = [
     :auto_merge_strategy,
     :should_remove_source_branch,
@@ -107,7 +110,6 @@ class MergeRequest < ApplicationRecord
 
   after_create :ensure_merge_request_diff
   after_update :clear_memoized_shas
-  after_update :clear_memoized_source_branch_exists
   after_update :reload_diff_if_branch_changed
   after_commit :ensure_metrics, on: [:create, :update], unless: :importing?
   after_commit :expire_etag_cache, unless: :importing?
@@ -119,6 +121,8 @@ class MergeRequest < ApplicationRecord
   # Temporary fields to store compare vars
   # when creating new merge request
   attr_accessor :can_be_created, :compare_commits, :diff_options, :compare
+
+  participant :reviewers
 
   # Keep states definition to be evaluated before the state_machine block to avoid spec failures.
   # If this gets evaluated after, the `merged` and `locked` states which are overrided can be nil.
@@ -252,25 +256,43 @@ class MergeRequest < ApplicationRecord
     joins(:notes).where(notes: { commit_id: sha })
   end
   scope :join_project, -> { joins(:target_project) }
+  scope :join_metrics, -> do
+    query = joins(:metrics)
+    query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
+    query
+  end
   scope :references_project, -> { references(:target_project) }
-
-  PROJECT_ROUTE_AND_NAMESPACE_ROUTE = [
-    target_project: [:route, { namespace: :route }],
-    source_project: [:route, { namespace: :route }]
-  ].freeze
-
   scope :with_api_entity_associations, -> {
-    preload(:assignees, :author, :unresolved_notes, :labels, :milestone,
-            :timelogs, :latest_merge_request_diff,
-            *PROJECT_ROUTE_AND_NAMESPACE_ROUTE,
-            metrics: [:latest_closed_by, :merged_by])
+    preload_routables
+      .preload(:assignees, :author, :unresolved_notes, :labels, :milestone,
+               :timelogs, :latest_merge_request_diff,
+               target_project: :project_feature,
+               metrics: [:latest_closed_by, :merged_by])
   }
+
+  scope :with_csv_entity_associations, -> { preload(:assignees, :approved_by_users, :author, :milestone, metrics: [:merged_by]) }
 
   scope :by_target_branch_wildcard, ->(wildcard_branch_name) do
     where("target_branch LIKE ?", ApplicationRecord.sanitize_sql_like(wildcard_branch_name).tr('*', '%'))
   end
   scope :by_target_branch, ->(branch_name) { where(target_branch: branch_name) }
+  scope :order_merged_at, ->(direction) do
+    query = join_metrics.order(Gitlab::Database.nulls_last_order('merge_request_metrics.merged_at', direction))
+
+    # Add `merge_request_metrics.merged_at` to the `SELECT` in order to make the keyset pagination work.
+    query.select(*query.arel.projections, MergeRequest::Metrics.arel_table[:merged_at].as('"merge_request_metrics.merged_at"'))
+  end
+  scope :order_merged_at_asc, -> { order_merged_at('ASC') }
+  scope :order_merged_at_desc, -> { order_merged_at('DESC') }
   scope :preload_source_project, -> { preload(:source_project) }
+  scope :preload_target_project, -> { preload(:target_project) }
+  scope :preload_routables, -> do
+    preload(target_project: [:route, { namespace: :route }],
+            source_project: [:route, { namespace: :route }])
+  end
+  scope :preload_author, -> { preload(:author) }
+  scope :preload_approved_by_users, -> { preload(:approved_by_users) }
+  scope :preload_metrics, -> (relation) { preload(metrics: relation) }
 
   scope :with_auto_merge_enabled, -> do
     with_state(:opened).where(auto_merge_enabled: true)
@@ -293,7 +315,7 @@ class MergeRequest < ApplicationRecord
   alias_attribute :auto_merge_enabled, :merge_when_pipeline_succeeds
   alias_method :issuing_parent, :target_project
 
-  delegate :active?, to: :head_pipeline, prefix: true, allow_nil: true
+  delegate :active?, :builds_with_coverage, to: :head_pipeline, prefix: true, allow_nil: true
   delegate :success?, :active?, to: :actual_head_pipeline, prefix: true, allow_nil: true
 
   RebaseLockTimeout = Class.new(StandardError)
@@ -318,6 +340,15 @@ class MergeRequest < ApplicationRecord
       .pluck(:target_branch)
   end
 
+  def self.sort_by_attribute(method, excluded_labels: [])
+    case method.to_s
+    when 'merged_at', 'merged_at_asc' then order_merged_at_asc.with_order_id_desc
+    when 'merged_at_desc' then order_merged_at_desc.with_order_id_desc
+    else
+      super
+    end
+  end
+
   def rebase_in_progress?
     rebase_jid.present? && Gitlab::SidekiqStatus.running?(rebase_jid)
   end
@@ -332,7 +363,11 @@ class MergeRequest < ApplicationRecord
   def merge_pipeline
     return unless merged?
 
-    target_project.pipeline_for(target_branch, merge_commit_sha)
+    # When the merge_method is :merge there will be a merge_commit_sha, however
+    # when it is fast-forward there is no merge commit, so we must fall back to
+    # either the squash commit (if the MR was squashed) or the diff head commit.
+    sha = merge_commit_sha || squash_commit_sha || diff_head_sha
+    target_project.latest_pipeline(target_branch, sha)
   end
 
   # Pattern used to extract `!123` merge request references from text
@@ -430,7 +465,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def context_commits(limit: nil)
-    @context_commits ||= merge_request_context_commits.limit(limit).map(&:to_commit)
+    @context_commits ||= merge_request_context_commits.order_by_committed_date_desc.limit(limit).map(&:to_commit)
   end
 
   def recent_context_commits
@@ -595,7 +630,7 @@ class MergeRequest < ApplicationRecord
   def diff_size
     # Calling `merge_request_diff.diffs.real_size` will also perform
     # highlighting, which we don't need here.
-    merge_request_diff&.real_size || diff_stats&.real_size || diffs.real_size
+    merge_request_diff&.real_size || diff_stats&.real_size(project: project) || diffs.real_size
   end
 
   def modified_paths(past_merge_request_diff: nil, fallback_on_overflow: false)
@@ -866,10 +901,6 @@ class MergeRequest < ApplicationRecord
     clear_memoization(:target_branch_head)
   end
 
-  def clear_memoized_source_branch_exists
-    clear_memoization(:source_branch_exists)
-  end
-
   def reload_diff_if_branch_changed
     if (saved_change_to_source_branch? || saved_change_to_target_branch?) &&
         (source_branch_head && target_branch_head)
@@ -927,8 +958,9 @@ class MergeRequest < ApplicationRecord
     self.class.wip_title(self.title)
   end
 
-  def mergeable?(skip_ci_check: false)
-    return false unless mergeable_state?(skip_ci_check: skip_ci_check)
+  def mergeable?(skip_ci_check: false, skip_discussions_check: false)
+    return false unless mergeable_state?(skip_ci_check: skip_ci_check,
+                                         skip_discussions_check: skip_discussions_check)
 
     check_mergeability
 
@@ -1030,6 +1062,10 @@ class MergeRequest < ApplicationRecord
     target_project != source_project
   end
 
+  def for_same_project?
+    target_project == source_project
+  end
+
   # If the merge request closes any issues, save this information in the
   # `MergeRequestsClosingIssues` model. This is a performance optimization.
   # Calculating this information for a number of merge requests requires
@@ -1117,11 +1153,9 @@ class MergeRequest < ApplicationRecord
   end
 
   def source_branch_exists?
-    strong_memoize(:source_branch_exists) do
-      next false unless self.source_project
+    return false unless self.source_project
 
-      self.source_project.repository.branch_exists?(self.source_branch)
-    end
+    self.source_project.repository.branch_exists?(self.source_branch)
   end
 
   def target_branch_exists?
@@ -1179,12 +1213,12 @@ class MergeRequest < ApplicationRecord
   end
 
   def can_be_merged_by?(user)
-    access = ::Gitlab::UserAccess.new(user, project: project)
+    access = ::Gitlab::UserAccess.new(user, container: project)
     access.can_update_branch?(target_branch)
   end
 
   def can_be_merged_via_command_line_by?(user)
-    access = ::Gitlab::UserAccess.new(user, project: project)
+    access = ::Gitlab::UserAccess.new(user, container: project)
     access.can_push_to_branch?(target_branch)
   end
 
@@ -1227,6 +1261,8 @@ class MergeRequest < ApplicationRecord
   # Returns the current merge-ref HEAD commit.
   #
   def merge_ref_head
+    return project.repository.commit(merge_ref_sha) if merge_ref_sha
+
     project.repository.commit(merge_ref_path)
   end
 
@@ -1266,6 +1302,14 @@ class MergeRequest < ApplicationRecord
     unlock_mr
   end
 
+  def update_and_mark_in_progress_merge_commit_sha(commit_id)
+    self.update(in_progress_merge_commit_sha: commit_id)
+    # Since another process checks for matching merge request, we need
+    # to make it possible to detect whether the query should go to the
+    # primary.
+    target_project.mark_primary_write_location
+  end
+
   def diverged_commits_count
     cache = Rails.cache.read(:"merge_request_#{id}_diverged_commits")
 
@@ -1295,7 +1339,7 @@ class MergeRequest < ApplicationRecord
 
   def all_pipelines
     strong_memoize(:all_pipelines) do
-      Ci::PipelinesForMergeRequestFinder.new(self).all
+      Ci::PipelinesForMergeRequestFinder.new(self, nil).all
     end
   end
 
@@ -1340,9 +1384,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def has_coverage_reports?
-    return false unless Feature.enabled?(:coverage_report_view, project)
-
-    actual_head_pipeline&.has_reports?(Ci::JobArtifact.coverage_reports)
+    actual_head_pipeline&.has_coverage_reports?
   end
 
   def has_terraform_reports?
@@ -1442,6 +1484,19 @@ class MergeRequest < ApplicationRecord
     Commit.truncate_sha(merge_commit_sha) if merge_commit_sha
   end
 
+  def merged_commit_sha
+    return unless merged?
+
+    sha = merge_commit_sha || squash_commit_sha || diff_head_sha
+    sha.presence
+  end
+
+  def short_merged_commit_sha
+    if sha = merged_commit_sha
+      Commit.truncate_sha(sha)
+    end
+  end
+
   def can_be_reverted?(current_user)
     return false unless merge_commit
     return false unless merged_at
@@ -1463,6 +1518,7 @@ class MergeRequest < ApplicationRecord
 
       metrics&.merged_at ||
         merge_event&.created_at ||
+        resource_state_events.find_by(state: :merged)&.created_at ||
         notes.system.reorder(nil).find_by(note: 'merged')&.created_at
     end
   end
@@ -1556,7 +1612,7 @@ class MergeRequest < ApplicationRecord
   def first_contribution?
     return false if project.team.max_member_access(author_id) > Gitlab::Access::GUEST
 
-    project.merge_requests.merged.where(author_id: author_id).empty?
+    !project.merge_requests.merged.exists?(author_id: author_id)
   end
 
   # TODO: remove once production database rename completes
@@ -1606,7 +1662,12 @@ class MergeRequest < ApplicationRecord
 
   override :ensure_metrics
   def ensure_metrics
-    MergeRequest::Metrics.safe_find_or_create_by(merge_request_id: id).tap do |metrics_record|
+    # Backward compatibility: some merge request metrics records will not have target_project_id filled in.
+    # In that case the first `safe_find_or_create_by` will return false.
+    # The second finder call will be eliminated in https://gitlab.com/gitlab-org/gitlab/-/issues/233507
+    metrics_record = MergeRequest::Metrics.safe_find_or_create_by(merge_request_id: id, target_project_id: target_project_id) || MergeRequest::Metrics.safe_find_or_create_by(merge_request_id: id)
+
+    metrics_record.tap do |metrics_record|
       # Make sure we refresh the loaded association object with the newly created/loaded item.
       # This is needed in order to have the exact functionality than before.
       #
@@ -1616,9 +1677,19 @@ class MergeRequest < ApplicationRecord
       # merge_request.ensure_metrics
       # merge_request.metrics # should return the metrics record and not nil
       # merge_request.metrics.merge_request # should return the same MR record
+
+      metrics_record.target_project_id = target_project_id
       metrics_record.association(:merge_request).target = self
       association(:metrics).target = metrics_record
     end
+  end
+
+  def allows_reviewers?
+    Feature.enabled?(:merge_request_reviewers, project)
+  end
+
+  def allows_multiple_reviewers?
+    false
   end
 
   private

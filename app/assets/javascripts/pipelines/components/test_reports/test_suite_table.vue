@@ -1,15 +1,13 @@
 <script>
 import { mapGetters } from 'vuex';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltipDirective, GlFriendlyWrap, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { GlTooltipDirective } from '@gitlab/ui';
-import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
 
 export default {
   name: 'TestsSuiteTable',
   components: {
-    Icon,
-    SmartVirtualList,
+    GlIcon,
+    GlFriendlyWrap,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -27,8 +25,7 @@ export default {
       return this.getSuiteTests.length > 0;
     },
   },
-  maxShownRows: 30,
-  typicalRowHeight: 75,
+  wrapSymbols: ['::', '#', '.', '_', '-', '/', '\\'],
 };
 </script>
 
@@ -43,7 +40,7 @@ export default {
     <div v-if="hasSuites" class="test-reports-table gl-mb-3 js-test-cases-table">
       <div role="row" class="gl-responsive-table-row table-row-header font-weight-bold fgray">
         <div role="rowheader" class="table-section section-20">
-          {{ __('Class') }}
+          {{ __('Suite') }}
         </div>
         <div role="rowheader" class="table-section section-20">
           {{ __('Name') }}
@@ -59,70 +56,60 @@ export default {
         </div>
       </div>
 
-      <smart-virtual-list
-        :length="getSuiteTests.length"
-        :remain="$options.maxShownRows"
-        :size="$options.typicalRowHeight"
+      <div
+        v-for="(testCase, index) in getSuiteTests"
+        :key="index"
+        class="gl-responsive-table-row rounded align-items-md-start mt-xs-3 js-case-row"
       >
-        <div
-          v-for="(testCase, index) in getSuiteTests"
-          :key="index"
-          class="gl-responsive-table-row rounded align-items-md-start mt-xs-3 js-case-row"
-        >
-          <div class="table-section section-20 section-wrap">
-            <div role="rowheader" class="table-mobile-header">{{ __('Class') }}</div>
+        <div class="table-section section-20 section-wrap">
+          <div role="rowheader" class="table-mobile-header">{{ __('Suite') }}</div>
+          <div class="table-mobile-content pr-md-1 gl-overflow-wrap-break">
+            <gl-friendly-wrap :symbols="$options.wrapSymbols" :text="testCase.classname" />
+          </div>
+        </div>
+
+        <div class="table-section section-20 section-wrap">
+          <div role="rowheader" class="table-mobile-header">{{ __('Name') }}</div>
+          <div class="table-mobile-content pr-md-1 gl-overflow-wrap-break">
+            <gl-friendly-wrap
+              data-testid="caseName"
+              :symbols="$options.wrapSymbols"
+              :text="testCase.name"
+            />
+          </div>
+        </div>
+
+        <div class="table-section section-10 section-wrap">
+          <div role="rowheader" class="table-mobile-header">{{ __('Status') }}</div>
+          <div class="table-mobile-content text-center">
             <div
-              v-gl-tooltip
-              :title="testCase.classname"
-              class="table-mobile-content pr-md-1 text-truncate"
+              class="add-border ci-status-icon d-flex align-items-center justify-content-end justify-content-md-center"
+              :class="`ci-status-icon-${testCase.status}`"
             >
-              {{ testCase.classname }}
-            </div>
-          </div>
-
-          <div class="table-section section-20 section-wrap">
-            <div role="rowheader" class="table-mobile-header">{{ __('Name') }}</div>
-            <div
-              v-gl-tooltip
-              :title="testCase.name"
-              class="table-mobile-content pr-md-1 text-truncate"
-            >
-              {{ testCase.name }}
-            </div>
-          </div>
-
-          <div class="table-section section-10 section-wrap">
-            <div role="rowheader" class="table-mobile-header">{{ __('Status') }}</div>
-            <div class="table-mobile-content text-center">
-              <div
-                class="add-border ci-status-icon d-flex align-items-center justify-content-end justify-content-md-center"
-                :class="`ci-status-icon-${testCase.status}`"
-              >
-                <icon :size="24" :name="testCase.icon" />
-              </div>
-            </div>
-          </div>
-
-          <div class="table-section flex-grow-1">
-            <div role="rowheader" class="table-mobile-header">{{ __('Trace'), }}</div>
-            <div class="table-mobile-content">
-              <pre
-                v-if="testCase.system_output"
-                class="build-trace build-trace-rounded text-left"
-              ><code class="bash p-0">{{testCase.system_output}}</code></pre>
-            </div>
-          </div>
-
-          <div class="table-section section-10 section-wrap">
-            <div role="rowheader" class="table-mobile-header">
-              {{ __('Duration') }}
-            </div>
-            <div class="table-mobile-content text-right pr-sm-1">
-              {{ testCase.formattedTime }}
+              <gl-icon :size="24" :name="testCase.icon" />
             </div>
           </div>
         </div>
-      </smart-virtual-list>
+
+        <div class="table-section flex-grow-1">
+          <div role="rowheader" class="table-mobile-header">{{ __('Trace'), }}</div>
+          <div class="table-mobile-content">
+            <pre
+              v-if="testCase.system_output"
+              class="build-trace build-trace-rounded text-left"
+            ><code class="bash p-0">{{testCase.system_output}}</code></pre>
+          </div>
+        </div>
+
+        <div class="table-section section-10 section-wrap">
+          <div role="rowheader" class="table-mobile-header">
+            {{ __('Duration') }}
+          </div>
+          <div class="table-mobile-content text-right pr-sm-1">
+            {{ testCase.formattedTime }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <div v-else>

@@ -1,6 +1,7 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapState, mapActions } from 'vuex';
-import { GlSkeletonLoading } from '@gitlab/ui';
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import DiffFileHeader from '~/diffs/components/diff_file_header.vue';
 import DiffViewer from '~/vue_shared/components/diff_viewer/diff_viewer.vue';
 import ImageDiffOverlay from '~/diffs/components/image_diff_overlay.vue';
@@ -75,7 +76,7 @@ export default {
       :discussion-path="discussion.discussion_path"
       :diff-file="discussion.diff_file"
       :can-current-user-fork="false"
-      :expanded="!discussion.diff_file.viewer.collapsed"
+      :expanded="!discussion.diff_file.viewer.automaticallyCollapsed"
     />
     <div v-if="isTextFile" class="diff-content">
       <table class="code js-syntax-highlight" :class="$options.userColorSchemeClass">

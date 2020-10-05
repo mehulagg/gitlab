@@ -79,6 +79,8 @@ function generateEntries() {
   const manualEntries = {
     default: defaultEntries,
     sentry: './sentry/index.js',
+    performance_bar: './performance_bar/index.js',
+    chrome_84_icon_fix: './lib/chrome_84_icon_fix.js',
   };
 
   return Object.assign(manualEntries, autoEntries);
@@ -115,6 +117,15 @@ if (IS_EE) {
     ee_spec: path.join(ROOT_PATH, 'ee/spec/javascripts'),
     ee_jest: path.join(ROOT_PATH, 'ee/spec/frontend'),
     ee_else_ce: path.join(ROOT_PATH, 'ee/app/assets/javascripts'),
+  });
+}
+
+if (!IS_PRODUCTION) {
+  const fixtureDir = IS_EE ? 'fixtures-ee' : 'fixtures';
+
+  Object.assign(alias, {
+    test_fixtures: path.join(ROOT_PATH, `tmp/tests/frontend/${fixtureDir}`),
+    test_helpers: path.join(ROOT_PATH, 'spec/frontend_integration/test_helpers'),
   });
 }
 
@@ -257,6 +268,8 @@ module.exports = {
     runtimeChunk: 'single',
     splitChunks: {
       maxInitialRequests: 20,
+      // In order to prevent firewalls tripping up: https://gitlab.com/gitlab-org/gitlab/-/issues/22648
+      automaticNameDelimiter: '-',
       cacheGroups: {
         default: false,
         common: () => ({
@@ -265,10 +278,18 @@ module.exports = {
           chunks: 'initial',
           minChunks: autoEntriesCount * 0.9,
         }),
+        graphql: {
+          priority: 16,
+          name: 'graphql',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/][^\\/]*(immer|apollo|graphql|zen-observable)[^\\/]*[\\/]/,
+          minChunks: 2,
+          reuseExistingChunk: true,
+        },
         monaco: {
           priority: 15,
           name: 'monaco',
-          chunks: 'initial',
+          chunks: 'all',
           test: /[\\/]node_modules[\\/]monaco-editor[\\/]/,
           minChunks: 2,
           reuseExistingChunk: true,
@@ -315,6 +336,8 @@ module.exports = {
           chunks: false,
           modules: false,
           assets: true,
+          errors: !IS_PRODUCTION,
+          warnings: !IS_PRODUCTION,
         });
 
         // tell our rails helper where to find the DLL files
@@ -533,6 +556,7 @@ module.exports = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*',
     },
+    contentBase: false,
     stats: 'errors-only',
     hot: DEV_SERVER_LIVERELOAD,
     inline: DEV_SERVER_LIVERELOAD,

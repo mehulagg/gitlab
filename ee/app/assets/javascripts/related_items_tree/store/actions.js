@@ -4,8 +4,8 @@ import {
   itemAddFailureTypesMap,
   pathIndeterminateErrorMap,
   relatedIssuesRemoveErrorMap,
-} from 'ee/related_issues/constants';
-import flash from '~/flash';
+} from '~/related_issues/constants';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { s__, __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
@@ -389,6 +389,7 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
+    confidential: state.parentItem.confidential,
     groupId: state.parentItem.fullPath,
     parentEpicIid: state.parentItem.iid,
     title: itemTitle,
@@ -589,6 +590,3 @@ export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
     })
     .catch(() => dispatch('receiveProjectsFailure'));
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

@@ -31,10 +31,25 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
         expect(data[:package_manager]).to eq('bundler')
         expect(data[:location][:blob_path]).to eq(blob_path)
         expect(data[:location][:path]).to eq('rails/Gemfile.lock')
+        expect(data[:location][:top_level]).to be_falsey
+        expect(data[:location][:ancestors].first[:name]).to eq('dep1')
         expect(data[:version]).to eq('2.2.0')
         expect(data[:vulnerabilities]).to be_empty
         expect(data[:licenses]).to be_empty
       end
+    end
+
+    context 'when feature flag for dependency path is off' do
+      let(:dependency) { parsed_report['dependency_files'][0]['dependencies'][0] }
+      let(:location) { data[:location] }
+
+      before do
+        stub_feature_flags(path_to_vulnerable_dependency: false)
+      end
+
+      it { expect(location[:top_level]).to be_nil }
+      it { expect(location[:ancestors]).to be_nil }
+      it { expect(location[:path]).to eq('rails/Gemfile.lock') }
     end
 
     context 'with vulnerable dependency' do
@@ -60,6 +75,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Formatters::DependencyList do
       'pip'      | 'Python (pip)'
       'maven'    | 'Java (Maven)'
       'composer' | 'PHP (Composer)'
+      'conan'    | 'C/C++ (Conan)'
       ''         | ''
     end
 

@@ -1,9 +1,11 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
 import statusIcon from '~/vue_merge_request_widget/components/mr_widget_status_icon.vue';
 
 export default {
   components: {
+    GlIcon,
     statusIcon,
   },
   directives: {
@@ -31,7 +33,7 @@ export default {
         rel="noopener noreferrer nofollow"
         data-container="body"
       >
-        <i class="fa fa-question-circle"></i>
+        <gl-icon name="question-o" />
       </a>
     </div>
   </div>

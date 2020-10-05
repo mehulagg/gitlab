@@ -8,6 +8,8 @@ RSpec.describe IssuesFinder do
     include_context 'IssuesFinder#execute context'
 
     context 'scope: all' do
+      let_it_be(:group) { create(:group) }
+
       let(:scope) { 'all' }
 
       describe 'filter by weight' do
@@ -76,8 +78,6 @@ RSpec.describe IssuesFinder do
       end
 
       context 'filter by epic' do
-        let_it_be(:group) { create(:group) }
-
         let_it_be(:epic_1) { create(:epic, group: group) }
         let_it_be(:epic_2) { create(:epic, group: group) }
         let_it_be(:sub_epic) { create(:epic, group: group, parent: epic_1) }
@@ -119,6 +119,54 @@ RSpec.describe IssuesFinder do
 
           it 'returns filtered issues' do
             expect(issues).to contain_exactly(issue_1, issue_2, issue_subepic)
+          end
+        end
+      end
+
+      context 'filter by iteration' do
+        let_it_be(:iteration_1) { create(:iteration, group: group) }
+        let_it_be(:iteration_2) { create(:iteration, group: group) }
+
+        let_it_be(:iteration_1_issue) { create(:issue, project: project1, iteration: iteration_1) }
+        let_it_be(:iteration_2_issue) { create(:issue, project: project1, iteration: iteration_2) }
+
+        context 'filter issues with no iteration' do
+          let(:params) { { iteration_id: ::IssuableFinder::Params::FILTER_NONE } }
+
+          it 'returns all issues without iterations' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
+          end
+        end
+
+        context 'filter issues with any iteration' do
+          let(:params) { { iteration_id: ::IssuableFinder::Params::FILTER_ANY } }
+
+          it 'returns filtered issues' do
+            expect(issues).to contain_exactly(iteration_1_issue, iteration_2_issue)
+          end
+        end
+
+        context 'filter issues by iteration' do
+          let(:params) { { iteration_id: iteration_1.id } }
+
+          it 'returns all issues with the iteration' do
+            expect(issues).to contain_exactly(iteration_1_issue)
+          end
+        end
+
+        context 'filter issues by multiple iterations' do
+          let(:params) { { iteration_id: [iteration_1.id, iteration_2.id] } }
+
+          it 'returns all issues with the iteration' do
+            expect(issues).to contain_exactly(iteration_1_issue, iteration_2_issue)
+          end
+        end
+
+        context 'without iteration_id param' do
+          let(:params) { { iteration_id: nil } }
+
+          it 'returns unfiltered issues' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4, iteration_1_issue, iteration_2_issue)
           end
         end
       end

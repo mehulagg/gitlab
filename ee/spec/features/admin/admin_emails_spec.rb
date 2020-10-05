@@ -26,6 +26,7 @@ RSpec.describe 'Admin::Emails', :clean_gitlab_redis_shared_state do
       'An email notification was recently sent from the admin panel. '\
       'Please wait 10 minutes before attempting to send another message.'
     end
+
     let(:submit_button) { find('input[type="submit"]') }
 
     before do

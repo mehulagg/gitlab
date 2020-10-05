@@ -13,7 +13,7 @@ export const dropdownButtonText = (state, getters) => {
     : state.selectedLabels;
 
   if (!selectedLabels.length) {
-    return __('Label');
+    return state.dropdownButtonText || __('Label');
   } else if (selectedLabels.length > 1) {
     return sprintf(s__('LabelSelect|%{firstLabelName} +%{remainingLabelCount} more'), {
       firstLabelName: selectedLabels[0].title,
@@ -44,5 +44,9 @@ export const isDropdownVariantSidebar = state => state.variant === DropdownVaria
  */
 export const isDropdownVariantStandalone = state => state.variant === DropdownVariant.Standalone;
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+/**
+ * Returns boolean representing whether dropdown variant
+ * is `embedded`
+ * @param {object} state
+ */
+export const isDropdownVariantEmbedded = state => state.variant === DropdownVariant.Embedded;

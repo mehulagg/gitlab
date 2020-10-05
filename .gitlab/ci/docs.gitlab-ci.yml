@@ -27,7 +27,7 @@
 review-docs-deploy:
   extends: .review-docs
   script:
-    - ./scripts/trigger-build-docs deploy
+    - ./scripts/trigger-build docs deploy
 
 # Cleanup remote environment of gitlab-docs
 review-docs-cleanup:
@@ -36,13 +36,13 @@ review-docs-cleanup:
     name: review-docs/$DOCS_GITLAB_REPO_SUFFIX-$CI_MERGE_REQUEST_IID
     action: stop
   script:
-    - ./scripts/trigger-build-docs cleanup
+    - ./scripts/trigger-build docs cleanup
 
 docs lint:
   extends:
     - .default-retry
     - .docs:rules:docs-lint
-  image: "registry.gitlab.com/gitlab-org/gitlab-docs:lint"
+  image: "registry.gitlab.com/gitlab-org/gitlab-docs/lint:vale-2.4.0-markdownlint-0.23.2"
   stage: test
   needs: []
   script:
@@ -58,6 +58,15 @@ docs lint:
     - bundle exec nanoc check internal_links
     # Check the internal anchor links
     - bundle exec nanoc check internal_anchors
+
+ui-docs-links lint:
+  extends:
+    - .docs:rules:docs-lint
+    - .static-analysis-base
+  stage: test
+  needs: []
+  script:
+    - bundle exec haml-lint -i DocumentationLinks
 
 graphql-reference-verify:
   extends:

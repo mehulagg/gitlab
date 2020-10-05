@@ -14,8 +14,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 >   value, so the burndown chart considers them as closed on the milestone
 >  `start_date`. In that case, a warning will be displayed.
 
-## Overview
-
 Burndown Charts are visual representations of the progress of completing a milestone.
 
 ![burndown chart](img/burndown_chart.png)
@@ -35,7 +33,7 @@ Burndown Charts are generally used for tracking and analyzing the completion of
 a milestone. Therefore, their use cases are tied to the
 [use you are assigning your milestone to](index.md).
 
-To exemplify, suppose you lead a team of developers in a large company,
+For example, suppose you lead a team of developers in a large company,
 and you follow this workflow:
 
 - Your company set the goal for the quarter to deliver 10 new features for your app

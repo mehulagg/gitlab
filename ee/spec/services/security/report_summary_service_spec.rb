@@ -20,9 +20,6 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     create(:ci_build, :success, name: 'ds_job', pipeline: pipeline, project: project) do |job|
       create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: project)
     end
-
-    create_security_scan(project, pipeline, 'dast', 26)
-    create_security_scan(project, pipeline, 'sast', 12)
   end
 
   before do
@@ -83,7 +80,7 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     it 'returns the scanned_resources_count' do
       expect(result).to match(a_hash_including(
                                 dast: a_hash_including(scanned_resources_count: 26),
-                                sast: a_hash_including(scanned_resources_count: 12),
+                                sast: a_hash_including(scanned_resources_count: 0),
                                 container_scanning: a_hash_including(scanned_resources_count: 0),
                                 dependency_scanning: a_hash_including(scanned_resources_count: 0)
                               ))
@@ -102,8 +99,14 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
       expect(result[:dast][:scanned_resources].length).to eq(20)
     end
 
-    it 'returns the scanned_resources_csv_path as nil' do
-      expect(result[:dast][:scanned_resources_csv_path]).to be_nil
+    it 'returns the scanned_resources_csv_path' do
+      expected_path = Gitlab::Routing.url_helpers.project_security_scanned_resources_path(
+        project,
+        format: :csv,
+        pipeline_id: pipeline.id
+      )
+
+      expect(result[:dast][:scanned_resources_csv_path]).to eq(expected_path)
     end
 
     context 'When no security scans ran' do
@@ -114,9 +117,4 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
       end
     end
   end
-end
-
-def create_security_scan(project, pipeline, report_type, scanned_resources_count)
-  dast_build = create(:ee_ci_build, :artifacts, project: project, pipeline: pipeline, name: report_type)
-  create(:security_scan, scan_type: report_type, scanned_resources_count: scanned_resources_count, build: dast_build)
 end

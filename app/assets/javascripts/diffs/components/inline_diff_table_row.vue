@@ -1,23 +1,18 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlTooltipDirective } from '@gitlab/ui';
-import DiffTableCell from './diff_table_cell.vue';
-import {
-  MATCH_LINE_TYPE,
-  NEW_LINE_TYPE,
-  OLD_LINE_TYPE,
-  CONTEXT_LINE_TYPE,
-  CONTEXT_LINE_CLASS_NAME,
-  LINE_POSITION_LEFT,
-  LINE_POSITION_RIGHT,
-} from '../constants';
+import { GlTooltipDirective, GlIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { CONTEXT_LINE_CLASS_NAME } from '../constants';
+import DiffGutterAvatars from './diff_gutter_avatars.vue';
+import * as utils from './diff_row_utils';
 
 export default {
   components: {
-    DiffTableCell,
+    DiffGutterAvatars,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   props: {
     fileHash: {
@@ -37,6 +32,11 @@ export default {
       required: false,
       default: false,
     },
+    isCommented: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -44,14 +44,15 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isLoggedIn']),
     ...mapGetters('diffs', ['fileLineCoverage']),
     ...mapState({
       isHighlighted(state) {
-        return this.line.line_code !== null && this.line.line_code === state.diffs.highlightedRow;
+        return utils.isHighlighted(state, this.line, this.isCommented);
       },
     }),
     isContextLine() {
-      return this.line.type === CONTEXT_LINE_TYPE;
+      return utils.isContextLine(this.line.type);
     },
     classNameMap() {
       return [
@@ -65,27 +66,65 @@ export default {
       return this.line.line_code || `${this.fileHash}_${this.line.old_line}_${this.line.new_line}`;
     },
     isMatchLine() {
-      return this.line.type === MATCH_LINE_TYPE;
+      return utils.isMatchLine(this.line.type);
     },
     coverageState() {
       return this.fileLineCoverage(this.filePath, this.line.new_line);
     },
-  },
-  created() {
-    this.newLineType = NEW_LINE_TYPE;
-    this.oldLineType = OLD_LINE_TYPE;
-    this.linePositionLeft = LINE_POSITION_LEFT;
-    this.linePositionRight = LINE_POSITION_RIGHT;
+    isMetaLine() {
+      return utils.isMetaLine(this.line.type);
+    },
+    classNameMapCell() {
+      return utils.classNameMapCell(this.line, this.isHighlighted, this.isLoggedIn, this.isHover);
+    },
+    addCommentTooltip() {
+      return utils.addCommentTooltip(this.line);
+    },
+    shouldRenderCommentButton() {
+      return utils.shouldRenderCommentButton(
+        this.isLoggedIn,
+        true,
+        gon.features?.mergeRefHeadComments,
+      );
+    },
+    shouldShowCommentButton() {
+      return utils.shouldShowCommentButton(
+        this.isHover,
+        this.isContextLine,
+        this.isMetaLine,
+        this.hasDiscussions,
+      );
+    },
+    hasDiscussions() {
+      return utils.hasDiscussions(this.line);
+    },
+    lineHref() {
+      return utils.lineHref(this.line);
+    },
+    lineCode() {
+      return utils.lineCode(this.line);
+    },
+    shouldShowAvatarsOnGutter() {
+      return this.hasDiscussions;
+    },
   },
   mounted() {
     this.scrollToLineIfNeededInline(this.line);
   },
   methods: {
-    ...mapActions('diffs', ['scrollToLineIfNeededInline']),
+    ...mapActions('diffs', [
+      'scrollToLineIfNeededInline',
+      'showCommentForm',
+      'setHighlightedRow',
+      'toggleLineDiscussions',
+    ]),
     handleMouseMove(e) {
       // To show the comment icon on the gutter we need to know if we hover the line.
       // Current table structure doesn't allow us to do this with CSS in both of the diff view types
       this.isHover = e.type === 'mouseover';
+    },
+    handleCommentButton() {
+      this.showCommentForm({ lineCode: this.line.line_code, fileHash: this.fileHash });
     },
   },
 };
@@ -100,25 +139,52 @@ export default {
     @mouseover="handleMouseMove"
     @mouseout="handleMouseMove"
   >
-    <diff-table-cell
-      :file-hash="fileHash"
-      :line="line"
-      :line-type="oldLineType"
-      :is-bottom="isBottom"
-      :is-hover="isHover"
-      :show-comment-button="true"
-      :is-highlighted="isHighlighted"
-      class="diff-line-num old_line"
-    />
-    <diff-table-cell
-      :file-hash="fileHash"
-      :line="line"
-      :line-type="newLineType"
-      :is-bottom="isBottom"
-      :is-hover="isHover"
-      :is-highlighted="isHighlighted"
-      class="diff-line-num new_line qa-new-diff-line"
-    />
+    <td ref="oldTd" class="diff-line-num old_line" :class="classNameMapCell">
+      <span
+        v-if="shouldRenderCommentButton"
+        ref="addNoteTooltip"
+        v-gl-tooltip
+        class="add-diff-note tooltip-wrapper"
+        :title="addCommentTooltip"
+      >
+        <button
+          v-show="shouldShowCommentButton"
+          ref="addDiffNoteButton"
+          type="button"
+          class="add-diff-note note-button js-add-diff-note-button qa-diff-comment"
+          :disabled="line.commentsDisabled"
+          @click="handleCommentButton"
+        >
+          <gl-icon :size="12" name="comment" />
+        </button>
+      </span>
+      <a
+        v-if="line.old_line"
+        ref="lineNumberRefOld"
+        :data-linenumber="line.old_line"
+        :href="lineHref"
+        @click="setHighlightedRow(lineCode)"
+      >
+      </a>
+      <diff-gutter-avatars
+        v-if="shouldShowAvatarsOnGutter"
+        :discussions="line.discussions"
+        :discussions-expanded="line.discussionsExpanded"
+        @toggleLineDiscussions="
+          toggleLineDiscussions({ lineCode, fileHash, expanded: !line.discussionsExpanded })
+        "
+      />
+    </td>
+    <td ref="newTd" class="diff-line-num new_line qa-new-diff-line" :class="classNameMapCell">
+      <a
+        v-if="line.new_line"
+        ref="lineNumberRefNew"
+        :data-linenumber="line.new_line"
+        :href="lineHref"
+        @click="setHighlightedRow(lineCode)"
+      >
+      </a>
+    </td>
     <td
       v-gl-tooltip.hover
       :title="coverageState.text"
@@ -126,6 +192,8 @@ export default {
       class="line-coverage"
     ></td>
     <td
+      :key="line.line_code"
+      v-safe-html="line.rich_text"
       :class="[
         line.type,
         {
@@ -133,7 +201,6 @@ export default {
         },
       ]"
       class="line_content with-coverage"
-      v-html="line.rich_text"
     ></td>
   </tr>
 </template>

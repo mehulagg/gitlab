@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
 module StubObjectStorage
-  def stub_packages_object_storage(**params)
-    stub_object_storage_uploader(config: ::Gitlab.config.packages.object_store,
-                                  uploader: ::Packages::PackageFileUploader,
-                                  remote_directory: 'packages',
-                                  **params)
-  end
-
   def stub_dependency_proxy_object_storage(**params)
     stub_object_storage_uploader(config: ::Gitlab.config.dependency_proxy.object_store,
                                   uploader: ::DependencyProxy::FileUploader,
@@ -21,7 +14,7 @@ module StubObjectStorage
   end
 
   def stub_object_storage_uploader(
-        config:,
+    config:,
         uploader:,
         remote_directory:,
         enabled: true,
@@ -44,7 +37,7 @@ module StubObjectStorage
     Fog.mock!
 
     ::Fog::Storage.new(connection_params).tap do |connection|
-      connection.directories.create(key: remote_directory)
+      connection.directories.create(key: remote_directory) # rubocop:disable Rails/SaveBang
 
       # Cleanup remaining files
       connection.directories.each do |directory|
@@ -54,9 +47,9 @@ module StubObjectStorage
     end
   end
 
-  def stub_artifacts_object_storage(**params)
+  def stub_artifacts_object_storage(uploader = JobArtifactUploader, **params)
     stub_object_storage_uploader(config: Gitlab.config.artifacts.object_store,
-                                 uploader: JobArtifactUploader,
+                                 uploader: uploader,
                                  remote_directory: 'artifacts',
                                  **params)
   end
@@ -89,10 +82,24 @@ module StubObjectStorage
                                  **params)
   end
 
-  def stub_terraform_state_object_storage(uploader = described_class, **params)
+  def stub_terraform_state_object_storage(**params)
     stub_object_storage_uploader(config: Gitlab.config.terraform_state.object_store,
+                                 uploader: Terraform::VersionedStateUploader,
+                                 remote_directory: 'terraform',
+                                 **params)
+  end
+
+  def stub_terraform_state_version_object_storage(**params)
+    stub_object_storage_uploader(config: Gitlab.config.terraform_state.object_store,
+                                 uploader: Terraform::StateUploader,
+                                 remote_directory: 'terraform',
+                                 **params)
+  end
+
+  def stub_pages_object_storage(uploader = described_class, **params)
+    stub_object_storage_uploader(config: Gitlab.config.pages.object_store,
                                  uploader: uploader,
-                                 remote_directory: 'terraform_state',
+                                 remote_directory: 'pages',
                                  **params)
   end
 

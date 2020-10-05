@@ -1,5 +1,0 @@
----
-title: Fix passing filter params to VSA time summary queries
-merge_request: 36441
-author:
-type: fixed

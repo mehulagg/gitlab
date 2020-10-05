@@ -12,7 +12,7 @@ module Deployments
       Deployment.find_by_id(deployment_id).try do |deployment|
         break unless deployment.success?
 
-        Deployments::AfterCreateService.new(deployment).execute
+        Deployments::UpdateEnvironmentService.new(deployment).execute
       end
     end
   end

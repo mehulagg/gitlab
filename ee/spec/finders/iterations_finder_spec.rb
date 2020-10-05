@@ -10,8 +10,8 @@ RSpec.describe IterationsFinder do
   let_it_be(:user) { create(:user) }
   let!(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, group: group, title: 'one test', start_date: now - 1.day, due_date: now) }
   let!(:upcoming_group_iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
-  let!(:iteration_from_project_1) { create(:started_iteration, project: project_1, start_date: 2.days.from_now, due_date: 3.days.from_now) }
-  let!(:iteration_from_project_2) { create(:started_iteration, project: project_2, start_date: 4.days.from_now, due_date: 5.days.from_now) }
+  let!(:iteration_from_project_1) { create(:started_iteration, :skip_project_validation, project: project_1, start_date: 3.days.from_now, due_date: 4.days.from_now) }
+  let!(:iteration_from_project_2) { create(:started_iteration, :skip_project_validation, project: project_2, start_date: 5.days.from_now, due_date: 6.days.from_now) }
   let(:project_ids) { [project_1.id, project_2.id] }
 
   subject { described_class.new(user, params).execute }
@@ -123,15 +123,15 @@ RSpec.describe IterationsFinder do
         end
 
         it 'returns iterations which start before the timeframe' do
-          iteration = create(:iteration, :skip_future_date_validation, project: project_2, start_date: now - 5.days, due_date: now - 3.days)
+          iteration = create(:iteration, :skip_project_validation, :skip_future_date_validation, project: project_2, start_date: now - 5.days, due_date: now - 3.days)
           params.merge!(start_date: now - 3.days, end_date: now - 2.days)
 
           expect(subject).to match_array([iteration])
         end
 
         it 'returns iterations which end after the timeframe' do
-          iteration = create(:iteration, project: project_2, start_date: 6.days.from_now, due_date: 2.weeks.from_now)
-          params.merge!(start_date: 6.days.from_now, end_date: 7.days.from_now)
+          iteration = create(:iteration, :skip_project_validation, project: project_2, start_date: 9.days.from_now, due_date: 2.weeks.from_now)
+          params.merge!(start_date: 9.days.from_now, end_date: 10.days.from_now)
 
           expect(subject).to match_array([iteration])
         end

@@ -13,10 +13,5 @@ module Ci
     def get_report(pipeline)
       Security::PipelineVulnerabilitiesFinder.new(pipeline: pipeline, params: { report_type: [params[:report_type]], scope: 'all' }).execute
     end
-
-    def build_comparer(base_pipeline, head_pipeline)
-      head_scans = head_pipeline&.security_scans || Security::Scan.none
-      comparer_class.new(get_report(base_pipeline), get_report(head_pipeline), head_security_scans: head_scans)
-    end
   end
 end

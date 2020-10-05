@@ -9,8 +9,13 @@ import DropdownButton from '~/vue_shared/components/sidebar/labels_select_vue/dr
 import DropdownContents from '~/vue_shared/components/sidebar/labels_select_vue/dropdown_contents.vue';
 
 import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
+import { isInViewport } from '~/lib/utils/common_utils';
 
 import { mockConfig } from './mock_data';
+
+jest.mock('~/lib/utils/common_utils', () => ({
+  isInViewport: jest.fn().mockReturnValue(true),
+}));
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -21,6 +26,9 @@ const createComponent = (config = mockConfig, slots = {}) =>
     slots,
     store: new Vuex.Store(labelsSelectModule()),
     propsData: config,
+    stubs: {
+      'dropdown-contents': DropdownContents,
+    },
   });
 
 describe('LabelsSelectRoot', () => {
@@ -57,6 +65,33 @@ describe('LabelsSelectRoot', () => {
           ]),
         );
       });
+
+      it('calls `handleDropdownClose` with state.labels filterd using `set` prop when dropdown variant is `embedded`', () => {
+        wrapper = createComponent({
+          ...mockConfig,
+          variant: 'embedded',
+        });
+
+        jest.spyOn(wrapper.vm, 'handleDropdownClose').mockImplementation();
+
+        wrapper.vm.handleVuexActionDispatch(
+          { type: 'toggleDropdownContents' },
+          {
+            showDropdownButton: false,
+            showDropdownContents: false,
+            labels: [{ id: 1 }, { id: 2, set: true }],
+          },
+        );
+
+        expect(wrapper.vm.handleDropdownClose).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            {
+              id: 2,
+              set: true,
+            },
+          ]),
+        );
+      });
     });
 
     describe('handleDropdownClose', () => {
@@ -89,18 +124,23 @@ describe('LabelsSelectRoot', () => {
       expect(wrapper.attributes('class')).toContain('labels-select-wrapper position-relative');
     });
 
-    it('renders component root element with CSS class `is-standalone` when `state.variant` is "standalone"', () => {
-      const wrapperStandalone = createComponent({
-        ...mockConfig,
-        variant: 'standalone',
-      });
+    it.each`
+      variant         | cssClass
+      ${'standalone'} | ${'is-standalone'}
+      ${'embedded'}   | ${'is-embedded'}
+    `(
+      'renders component root element with CSS class `$cssClass` when `state.variant` is "$variant"',
+      ({ variant, cssClass }) => {
+        wrapper = createComponent({
+          ...mockConfig,
+          variant,
+        });
 
-      return wrapperStandalone.vm.$nextTick(() => {
-        expect(wrapperStandalone.classes()).toContain('is-standalone');
-
-        wrapperStandalone.destroy();
-      });
-    });
+        return wrapper.vm.$nextTick(() => {
+          expect(wrapper.classes()).toContain(cssClass);
+        });
+      },
+    );
 
     it('renders `dropdown-value-collapsed` component when `allowLabelCreate` prop is `true`', () => {
       expect(wrapper.find(DropdownValueCollapsed).exists()).toBe(true);
@@ -110,11 +150,10 @@ describe('LabelsSelectRoot', () => {
       expect(wrapper.find(DropdownTitle).exists()).toBe(true);
     });
 
-    it('renders `dropdown-value` component with slot when `showDropdownButton` prop is `false`', () => {
+    it('renders `dropdown-value` component', () => {
       const wrapperDropdownValue = createComponent(mockConfig, {
         default: 'None',
       });
-      wrapperDropdownValue.vm.$store.state.showDropdownButton = false;
 
       return wrapperDropdownValue.vm.$nextTick(() => {
         const valueComp = wrapperDropdownValue.find(DropdownValue);
@@ -137,6 +176,43 @@ describe('LabelsSelectRoot', () => {
 
       return wrapper.vm.$nextTick(() => {
         expect(wrapper.find(DropdownContents).exists()).toBe(true);
+      });
+    });
+
+    describe('sets content direction based on viewport', () => {
+      it('does not set direction when `state.variant` is not "embedded"', () => {
+        wrapper.vm.$store.dispatch('toggleDropdownContents');
+
+        wrapper.vm.setContentIsOnViewport(wrapper.vm.$store.state);
+
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.find(DropdownContents).props('renderOnTop')).toBe(false);
+        });
+      });
+
+      describe('when `state.variant` is "embedded"', () => {
+        beforeEach(() => {
+          wrapper = createComponent({ ...mockConfig, variant: 'embedded' });
+          wrapper.vm.$store.dispatch('toggleDropdownContents');
+        });
+
+        it('set direction when out of viewport', () => {
+          isInViewport.mockImplementation(() => false);
+          wrapper.vm.setContentIsOnViewport(wrapper.vm.$store.state);
+
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.find(DropdownContents).props('renderOnTop')).toBe(true);
+          });
+        });
+
+        it('does not set direction when inside of viewport', () => {
+          isInViewport.mockImplementation(() => true);
+          wrapper.vm.setContentIsOnViewport(wrapper.vm.$store.state);
+
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.find(DropdownContents).props('renderOnTop')).toBe(false);
+          });
+        });
       });
     });
   });

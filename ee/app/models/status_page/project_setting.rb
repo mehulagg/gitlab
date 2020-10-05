@@ -62,7 +62,7 @@ module StatusPage
     def storage_client
       return unless enabled?
 
-      StatusPage::Storage::S3Client.new(
+      Gitlab::StatusPage::Storage::S3Client.new(
         region: aws_region,
         bucket_name: aws_s3_bucket_name,
         access_key_id: aws_access_key,

@@ -24,8 +24,6 @@ module EE
       end
 
       def validate_against_codeowner_rules!
-        return if ::Feature.enabled?(:use_legacy_codeowner_validations)
-
         codeowners_error = check_against_codeowners(project, params[:branch_name], extracted_paths)
 
         if codeowners_error.present?

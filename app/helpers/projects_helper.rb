@@ -7,7 +7,7 @@ module ProjectsHelper
   end
 
   def link_to_project(project)
-    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name) do
+    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name), class: 'gl-link' do
       title = content_tag(:span, project.name, class: 'project-name')
 
       if project.namespace
@@ -104,12 +104,12 @@ module ProjectsHelper
   end
 
   def remove_project_message(project)
-    _("You are going to remove %{project_full_name}. Removed project CANNOT be restored! Are you ABSOLUTELY sure?") %
+    _("You are going to delete %{project_full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
   def transfer_project_message(project)
-    _("You are going to transfer %{project_full_name} to another owner. Are you ABSOLUTELY sure?") %
+    _("You are going to transfer %{project_full_name} to another namespace. Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
@@ -184,9 +184,8 @@ module ProjectsHelper
   end
 
   def autodeploy_flash_notice(branch_name)
-    translation = _("Branch <strong>%{branch_name}</strong> was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}") %
-      { branch_name: truncate(sanitize(branch_name)), link_to_autodeploy_doc: link_to_autodeploy_doc }
-    translation.html_safe
+    html_escape(_("Branch %{branch_name} was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}")) %
+      { branch_name: tag.strong(truncate(sanitize(branch_name))), link_to_autodeploy_doc: link_to_autodeploy_doc }
   end
 
   def project_list_cache_key(project, pipeline_status: true)
@@ -353,14 +352,14 @@ module ProjectsHelper
 
     description =
       if share_with_group && share_with_members
-        _("You can invite a new member to <strong>%{project_name}</strong> or invite another group.")
+        _("You can invite a new member to %{project_name} or invite another group.")
       elsif share_with_group
-        _("You can invite another group to <strong>%{project_name}</strong>.")
+        _("You can invite another group to %{project_name}.")
       elsif share_with_members
-        _("You can invite a new member to <strong>%{project_name}</strong>.")
+        _("You can invite a new member to %{project_name}.")
       end
 
-    description.html_safe % { project_name: project.name }
+    html_escape(description) % { project_name: tag.strong(project.name) }
   end
 
   def metrics_external_dashboard_url
@@ -421,6 +420,10 @@ module ProjectsHelper
       nav_tabs << :operations
     end
 
+    if can_view_product_analytics?(current_user, project)
+      nav_tabs << :product_analytics
+    end
+
     tab_ability_map.each do |tab, ability|
       if can?(current_user, ability, project)
         nav_tabs << tab
@@ -429,7 +432,17 @@ module ProjectsHelper
 
     apply_external_nav_tabs(nav_tabs, project)
 
+    nav_tabs += package_nav_tabs(project, current_user)
+
     nav_tabs
+  end
+
+  def package_nav_tabs(project, current_user)
+    [].tap do |tabs|
+      if ::Gitlab.config.packages.enabled && can?(current_user, :read_package, project)
+        tabs << :packages
+      end
+    end
   end
 
   def apply_external_nav_tabs(nav_tabs, project)
@@ -455,6 +468,7 @@ module ProjectsHelper
       serverless:         :read_cluster,
       error_tracking:     :read_sentry_issue,
       alert_management:   :read_alert_management_alert,
+      incidents:          :read_issue,
       labels:             :read_label,
       issues:             :read_issue,
       project_members:    :read_project_member,
@@ -463,9 +477,21 @@ module ProjectsHelper
   end
 
   def can_view_operations_tab?(current_user, project)
-    [:read_environment, :read_cluster, :metrics_dashboard].any? do |ability|
+    [
+      :metrics_dashboard,
+      :read_alert_management_alert,
+      :read_environment,
+      :read_issue,
+      :read_sentry_issue,
+      :read_cluster
+    ].any? do |ability|
       can?(current_user, ability, project)
     end
+  end
+
+  def can_view_product_analytics?(current_user, project)
+    Feature.enabled?(:product_analytics, project) &&
+      can?(current_user, :read_product_analytics, project)
   end
 
   def search_tab_ability_map
@@ -584,6 +610,7 @@ module ProjectsHelper
   def project_permissions_settings(project)
     feature = project.project_feature
     {
+      packagesEnabled: !!project.packages_enabled,
       visibilityLevel: project.visibility_level,
       requestAccessEnabled: !!project.request_access_enabled,
       issuesAccessLevel: feature.issues_access_level,
@@ -604,6 +631,8 @@ module ProjectsHelper
 
   def project_permissions_panel_data(project)
     {
+      packagesAvailable: ::Gitlab.config.packages.enabled,
+      packagesHelpPath: help_page_path('user/packages/index'),
       currentSettings: project_permissions_settings(project),
       canDisableEmails: can_disable_emails?(project, current_user),
       canChangeVisibilityLevel: can_change_visibility_level?(project, current_user),
@@ -618,7 +647,7 @@ module ProjectsHelper
       pagesAvailable: Gitlab.config.pages.enabled,
       pagesAccessControlEnabled: Gitlab.config.pages.access_control,
       pagesAccessControlForced: ::Gitlab::Pages.access_control_is_forced?,
-      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control-core')
+      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control')
     }
   end
 
@@ -719,9 +748,13 @@ module ProjectsHelper
       functions
       error_tracking
       alert_management
+      incidents
+      incident_management
       user
       gcp
       logs
+      product_analytics
+      metrics_dashboard
     ]
   end
 
@@ -730,10 +763,6 @@ module ProjectsHelper
       project.has_auto_devops_implicitly_enabled? &&
       project.builds_enabled? &&
       !project.repository.gitlab_ci_yml
-  end
-
-  def native_code_navigation_enabled?(project)
-    Feature.enabled?(:code_navigation, project, default_enabled: true)
   end
 
   def show_visibility_confirm_modal?(project)
@@ -748,11 +777,7 @@ module ProjectsHelper
   def project_access_token_available?(project)
     return false if ::Gitlab.com?
 
-    ::Feature.enabled?(:resource_access_token, project)
-  end
-
-  def render_service_desk_menu?
-    false
+    can?(current_user, :admin_resource_access_tokens, project)
   end
 end
 

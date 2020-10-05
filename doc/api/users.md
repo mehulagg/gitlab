@@ -2,8 +2,6 @@
 
 ## List users
 
-Active users = Total accounts - Blocked users
-
 Get a list of users.
 
 This function takes pagination parameters `page` and `per_page` to restrict the list of users.
@@ -49,9 +47,9 @@ For example:
 GET /users?username=jack_smith
 ```
 
-In addition, you can filter users based on states eg. `blocked`, `active`
-This works only to filter users who are `blocked` or `active`.
-It does not support `active=false` or `blocked=false`.
+In addition, you can filter users based on the states `blocked` and `active`.
+It does not support `active=false` or `blocked=false`. The list of active users
+is the total number of users minus the blocked users.
 
 ```plaintext
 GET /users?active=true
@@ -59,6 +57,15 @@ GET /users?active=true
 
 ```plaintext
 GET /users?blocked=true
+```
+
+GitLab supports bot users such as the [alert bot](../operations/incident_management/generic_alerts.md)
+or the [support bot](../user/project/service_desk.md#support-bot-user).
+To exclude these users from the users' list, you can use the parameter `exclude_internal=true`
+([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/241144) in GitLab 13.4).
+
+```plaintext
+GET /users?exclude_internal=true
 ```
 
 NOTE: **Note:**
@@ -314,11 +321,13 @@ Example Responses:
   "current_sign_in_ip": "196.165.1.102",
   "last_sign_in_ip": "172.127.2.22",
   "plan": "gold",
-  "trial": true
+  "trial": true,
+  "sign_in_count": 1337
 }
 ```
 
-NOTE: **Note:** The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
+NOTE: **Note:**
+The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
 
 Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
 the `shared_runners_minutes_limit`, and `extra_shared_runners_minutes_limit` parameters.
@@ -765,7 +774,7 @@ POST /user/keys
 
 Parameters:
 
-- `title` (required) - new SSH Key's title
+- `title` (required) - new SSH key's title
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
@@ -804,12 +813,12 @@ POST /users/:id/keys
 Parameters:
 
 - `id` (required) - ID of specified user
-- `title` (required) - new SSH Key's title
+- `title` (required) - new SSH key's title
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
 NOTE: **Note:**
-This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events-premium-only). **(PREMIUM)**
+This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events). **(PREMIUM)**
 
 ## Delete SSH key for current user
 
@@ -941,7 +950,7 @@ Returns `204 No Content` on success, or `404 Not found` if the key cannot be fou
 
 ## List all GPG keys for given user
 
-Get a list of a specified user's GPG keys. Available only for admins.
+Get a list of a specified user's GPG keys. This endpoint can be accessed without authentication.
 
 ```plaintext
 GET /users/:id/gpg_keys
@@ -1052,6 +1061,10 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 Get a list of currently authenticated user's emails.
 
+NOTE: **Note:**
+Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
+does not return the primary email address.
+
 ```plaintext
 GET /user/emails
 ```
@@ -1076,6 +1089,10 @@ Parameters:
 ## List emails for user
 
 Get a list of a specified user's emails. Available only for admin
+
+NOTE: **Note:**
+Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
+does not return the primary email address.
 
 ```plaintext
 GET /users/:id/emails
@@ -1283,6 +1300,7 @@ Example response:
 [
    {
       "active" : true,
+      "user_id" : 2,
       "scopes" : [
          "api"
       ],
@@ -1295,6 +1313,7 @@ Example response:
    },
    {
       "active" : false,
+      "user_id" : 2,
       "scopes" : [
          "read_user"
       ],
@@ -1334,6 +1353,7 @@ Example response:
 ```json
 {
    "active" : true,
+   "user_id" : 2,
    "scopes" : [
       "api"
    ],
@@ -1377,6 +1397,7 @@ Example response:
 {
    "id" : 2,
    "revoked" : false,
+   "user_id" : 2,
    "scopes" : [
       "api"
    ],
@@ -1412,7 +1433,8 @@ Parameters:
 
 ### Get user activities (admin only)
 
-NOTE: **Note:** This API endpoint is only available on 8.15 (EE) and 9.1 (CE) and above.
+NOTE: **Note:**
+This API endpoint is only available on 8.15 (EE) and 9.1 (CE) and above.
 
 Get the last activity date for all users, sorted from oldest to newest.
 

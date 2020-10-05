@@ -1,5 +1,0 @@
----
-title: Avoid N+1 of group associations in Search
-merge_request: 36544
-author:
-type: performance

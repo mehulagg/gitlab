@@ -4,8 +4,13 @@ require 'spec_helper'
 
 RSpec.describe Admin::PropagateIntegrationService do
   describe '.propagate' do
-    let(:excluded_attributes) { %w[id project_id inherit_from_id instance created_at updated_at title description] }
-    let!(:project) { create(:project) }
+    include JiraServiceHelper
+
+    before do
+      stub_jira_service_test
+    end
+
+    let_it_be(:project) { create(:project) }
     let!(:instance_integration) do
       JiraService.create!(
         instance: true,
@@ -32,7 +37,7 @@ RSpec.describe Admin::PropagateIntegrationService do
 
     let!(:not_inherited_integration) do
       JiraService.create!(
-        project: create(:project),
+        project: project,
         inherit_from_id: nil,
         instance: false,
         active: true,
@@ -43,9 +48,9 @@ RSpec.describe Admin::PropagateIntegrationService do
       )
     end
 
-    let!(:another_inherited_integration) do
+    let!(:different_type_inherited_integration) do
       BambooService.create!(
-        project: create(:project),
+        project: project,
         inherit_from_id: instance_integration.id,
         instance: false,
         active: true,
@@ -57,93 +62,37 @@ RSpec.describe Admin::PropagateIntegrationService do
       )
     end
 
-    shared_examples 'inherits settings from integration' do
-      it 'updates the inherited integrations' do
-        described_class.propagate(integration: instance_integration, overwrite: overwrite)
+    context 'with inherited integration' do
+      let(:integration) { inherited_integration }
 
-        expect(integration.reload.inherit_from_id).to eq(instance_integration.id)
-        expect(integration.attributes.except(*excluded_attributes))
-          .to eq(instance_integration.attributes.except(*excluded_attributes))
-      end
+      it 'calls to PropagateIntegrationProjectWorker' do
+        expect(PropagateIntegrationInheritWorker).to receive(:perform_async)
+          .with(instance_integration.id, inherited_integration.id, inherited_integration.id)
 
-      context 'integration with data fields' do
-        let(:excluded_attributes) { %w[id service_id created_at updated_at] }
-
-        it 'updates the data fields from inherited integrations' do
-          described_class.propagate(integration: instance_integration, overwrite: overwrite)
-
-          expect(integration.reload.data_fields.attributes.except(*excluded_attributes))
-            .to eq(instance_integration.data_fields.attributes.except(*excluded_attributes))
-        end
+        described_class.propagate(instance_integration)
       end
     end
 
-    shared_examples 'does not inherit settings from integration' do
-      it 'does not update the not inherited integrations' do
-        described_class.propagate(integration: instance_integration, overwrite: overwrite)
+    context 'with a project without integration' do
+      let!(:another_project) { create(:project) }
 
-        expect(integration.reload.attributes.except(*excluded_attributes))
-          .not_to eq(instance_integration.attributes.except(*excluded_attributes))
+      it 'calls to PropagateIntegrationProjectWorker' do
+        expect(PropagateIntegrationProjectWorker).to receive(:perform_async)
+          .with(instance_integration.id, another_project.id, another_project.id)
+
+        described_class.propagate(instance_integration)
       end
     end
 
-    context 'update only inherited integrations' do
-      let(:overwrite) { false }
+    context 'with a group without integration' do
+      let!(:group) { create(:group) }
 
-      it_behaves_like 'inherits settings from integration' do
-        let(:integration) { inherited_integration }
+      it 'calls to PropagateIntegrationProjectWorker' do
+        expect(PropagateIntegrationGroupWorker).to receive(:perform_async)
+          .with(instance_integration.id, group.id, group.id)
+
+        described_class.propagate(instance_integration)
       end
-
-      it_behaves_like 'does not inherit settings from integration' do
-        let(:integration) { not_inherited_integration }
-      end
-
-      it_behaves_like 'does not inherit settings from integration' do
-        let(:integration) { another_inherited_integration }
-      end
-
-      it_behaves_like 'inherits settings from integration' do
-        let(:integration) { project.jira_service }
-      end
-    end
-
-    context 'update all integrations' do
-      let(:overwrite) { true }
-
-      it_behaves_like 'inherits settings from integration' do
-        let(:integration) { inherited_integration }
-      end
-
-      it_behaves_like 'inherits settings from integration' do
-        let(:integration) { not_inherited_integration }
-      end
-
-      it_behaves_like 'does not inherit settings from integration' do
-        let(:integration) { another_inherited_integration }
-      end
-
-      it_behaves_like 'inherits settings from integration' do
-        let(:integration) { project.jira_service }
-      end
-    end
-
-    it 'updates project#has_external_issue_tracker for issue tracker services' do
-      described_class.propagate(integration: instance_integration, overwrite: true)
-
-      expect(project.reload.has_external_issue_tracker).to eq(true)
-    end
-
-    it 'updates project#has_external_wiki for external wiki services' do
-      instance_integration = ExternalWikiService.create!(
-        instance: true,
-        active: true,
-        push_events: false,
-        external_wiki_url: 'http://external-wiki-url.com'
-      )
-
-      described_class.propagate(integration: instance_integration, overwrite: true)
-
-      expect(project.reload.has_external_wiki).to eq(true)
     end
   end
 end

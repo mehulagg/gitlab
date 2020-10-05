@@ -20,20 +20,9 @@ module EE
         end
 
         def validate_code_owners?
-          return false if updated_from_web? && skip_web_ui_code_owner_validations?
+          return false if updated_from_web?
 
           project.branch_requires_code_owner_approval?(branch_name)
-        end
-
-        # To allow self-hosted installations to ignore CODEOWNERS rules when
-        # clicking Merge in the UI. By default, these rules are not skipped.
-        #
-        # Issue to remove this feature flag:
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/217427
-        def skip_web_ui_code_owner_validations?
-          return true unless ::Feature.enabled?(:use_legacy_codeowner_validations)
-
-          ::Feature.enabled?(:skip_web_ui_code_owner_validations, project)
         end
 
         def validate_code_owners

@@ -11,8 +11,29 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
 
   let_it_be(:action_params) { { project_id: project, namespace_id: project.namespace, environment_id: environment.id } }
 
+  let_it_be(:manifest) do
+    <<~POLICY
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: example-name
+        namespace: example-namespace
+      spec:
+        podSelector:
+          matchLabels:
+            role: db
+        policyTypes:
+        - Ingress
+        ingress:
+        - from:
+          - namespaceSelector:
+              matchLabels:
+                project: myproject
+    POLICY
+  end
+
   shared_examples 'CRUD service errors' do
-    context 'with a error service response' do
+    context 'with an error service response' do
       before do
         allow(service).to receive(:execute) { ServiceResponse.error(http_status: :bad_request, message: 'error') }
       end
@@ -21,7 +42,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         subject
 
         expect(response).to have_gitlab_http_status(:bad_request)
-        expect(response.body).to eq('{"error":"error"}')
+        expect(response.body).to eq('{"payload":{},"error":"error"}')
       end
     end
   end
@@ -147,14 +168,14 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         Gitlab::Kubernetes::NetworkPolicy.new(
           name: 'policy',
           namespace: 'another',
-          pod_selector: { matchLabels: { role: 'db' } },
+          selector: { matchLabels: { role: 'db' } },
           ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
         )
       end
 
       before do
         group.add_developer(user)
-        allow(NetworkPolicies::ResourcesService).to receive(:new).with(environment: environment) { service }
+        allow(NetworkPolicies::ResourcesService).to receive(:new).with(environment_id: environment.id.to_s, project: project) { service }
       end
 
       it 'responds with policies' do
@@ -184,29 +205,9 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
       Gitlab::Kubernetes::NetworkPolicy.new(
         name: 'policy',
         namespace: 'another',
-        pod_selector: { matchLabels: { role: 'db' } },
+        selector: { matchLabels: { role: 'db' } },
         ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
       )
-    end
-    let(:manifest) do
-      <<~POLICY
-        apiVersion: networking.k8s.io/v1
-        kind: NetworkPolicy
-        metadata:
-          name: example-name
-          namespace: example-namespace
-        spec:
-          podSelector:
-            matchLabels:
-              role: db
-          policyTypes:
-          - Ingress
-          ingress:
-          - from:
-            - namespaceSelector:
-                matchLabels:
-                  project: myproject
-      POLICY
     end
 
     context 'with authorized user' do
@@ -214,7 +215,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         group.add_developer(user)
         allow(NetworkPolicies::DeployResourceService).to(
           receive(:new)
-            .with(policy: kind_of(Gitlab::Kubernetes::NetworkPolicy), environment: environment)
+            .with(manifest: manifest, environment: environment)
             .and_return(service)
         )
       end
@@ -247,29 +248,9 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
       Gitlab::Kubernetes::NetworkPolicy.new(
         name: 'policy',
         namespace: 'another',
-        pod_selector: { matchLabels: { role: 'db' } },
+        selector: { matchLabels: { role: 'db' } },
         ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
       )
-    end
-    let(:manifest) do
-      <<~POLICY
-        apiVersion: networking.k8s.io/v1
-        kind: NetworkPolicy
-        metadata:
-          name: example-name
-          namespace: example-namespace
-        spec:
-          podSelector:
-            matchLabels:
-              role: db
-          policyTypes:
-          - Ingress
-          ingress:
-          - from:
-            - namespaceSelector:
-                matchLabels:
-                  project: myproject
-      POLICY
     end
 
     context 'with authorized user' do
@@ -277,7 +258,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         group.add_developer(user)
         allow(NetworkPolicies::DeployResourceService).to(
           receive(:new)
-            .with(policy: kind_of(Gitlab::Kubernetes::NetworkPolicy), environment: environment, resource_name: 'example-policy')
+            .with(manifest: manifest, environment: environment, enabled: enabled, resource_name: 'example-policy')
             .and_return(service)
         )
       end
@@ -290,34 +271,6 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
       end
 
       include_examples 'CRUD service errors'
-
-      context 'with enabled param' do
-        let(:enabled) { true }
-
-        before do
-          allow(Gitlab::Kubernetes::NetworkPolicy).to receive(:new) { policy }
-        end
-
-        it 'enables policy and responds with success' do
-          expect(policy).to receive(:enable)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:success)
-        end
-
-        context 'with enabled=false' do
-          let(:enabled) { false }
-
-          it 'disables policy and responds with success' do
-            expect(policy).to receive(:disable)
-
-            subject
-
-            expect(response).to have_gitlab_http_status(:success)
-          end
-        end
-      end
     end
 
     context 'with unauthorized user' do
@@ -330,7 +283,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
   end
 
   describe 'DELETE #destroy' do
-    subject { delete :destroy, params: action_params.merge(id: 'example-policy'), format: :json }
+    subject { delete :destroy, params: action_params.merge(id: 'example-policy', manifest: manifest), format: :json }
 
     let(:service) { instance_double('NetworkPolicies::DeleteResourceService', execute: ServiceResponse.success) }
 
@@ -339,7 +292,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         group.add_developer(user)
         allow(NetworkPolicies::DeleteResourceService).to(
           receive(:new)
-            .with(environment: environment, resource_name: 'example-policy')
+            .with(environment: environment, manifest: manifest, resource_name: 'example-policy')
             .and_return(service)
         )
       end

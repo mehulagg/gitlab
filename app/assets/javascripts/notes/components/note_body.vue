@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapActions, mapGetters, mapState } from 'vuex';
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
@@ -44,7 +45,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['getDiscussion']),
+    ...mapGetters(['getDiscussion', 'suggestionsCount']),
     discussion() {
       if (!this.note.isDraft) return {};
 
@@ -124,6 +125,7 @@ export default {
     <suggestions
       v-if="hasSuggestion && !isEditing"
       :suggestions="note.suggestions"
+      :suggestions-count="suggestionsCount"
       :batch-suggestions-info="batchSuggestionsInfo"
       :note-html="note.note_html"
       :line-type="lineType"

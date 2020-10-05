@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
-import { parseBoolean } from '~/lib/utils/common_utils';
 import FirstClassProjectSecurityDashboard from './components/first_class_project_security_dashboard.vue';
 import FirstClassGroupSecurityDashboard from './components/first_class_group_security_dashboard.vue';
 import FirstClassInstanceSecurityDashboard from './components/first_class_instance_security_dashboard.vue';
@@ -9,16 +8,11 @@ import createStore from './store';
 import createRouter from './router';
 import apolloProvider from './graphql/provider';
 
-const isRequired = message => {
-  throw new Error(message);
-};
+export default (el, dashboardType) => {
+  if (!el) {
+    return null;
+  }
 
-export default (
-  /* eslint-disable @gitlab/require-i18n-strings */
-  el = isRequired('No element was passed to the security dashboard initializer'),
-  dashboardType = isRequired('No dashboard type was passed to the security dashboard initializer'),
-  /* eslint-enable @gitlab/require-i18n-strings */
-) => {
   if (el.dataset.isUnavailable) {
     return new Vue({
       el,
@@ -33,6 +27,7 @@ export default (
     });
   }
 
+  const provide = {};
   const props = {
     hasVulnerabilities: Boolean(el.dataset.hasVulnerabilities),
     securityDashboardHelpPath: el.dataset.securityDashboardHelpPath,
@@ -47,14 +42,11 @@ export default (
   if (dashboardType === DASHBOARD_TYPES.PROJECT) {
     component = FirstClassProjectSecurityDashboard;
     props.projectFullPath = el.dataset.projectFullPath;
-    props.userCalloutId = el.dataset.userCalloutId;
-    props.userCalloutsPath = el.dataset.userCalloutsPath;
-    props.showIntroductionBanner = parseBoolean(el.dataset.showIntroductionBanner);
   } else if (dashboardType === DASHBOARD_TYPES.GROUP) {
     component = FirstClassGroupSecurityDashboard;
     props.groupFullPath = el.dataset.groupFullPath;
-    props.vulnerableProjectsEndpoint = el.dataset.vulnerableProjectsEndpoint;
   } else if (dashboardType === DASHBOARD_TYPES.INSTANCE) {
+    provide.instanceDashboardSettingsPath = el.dataset.instanceDashboardSettingsPath;
     component = FirstClassInstanceSecurityDashboard;
   }
 
@@ -70,6 +62,9 @@ export default (
       dashboardDocumentation: el.dataset.dashboardDocumentation,
       noVulnerabilitiesSvgPath: el.dataset.noVulnerabilitiesSvgPath,
       emptyStateSvgPath: el.dataset.emptyStateSvgPath,
+      notEnabledScannersHelpPath: el.dataset.notEnabledScannersHelpPath,
+      noPipelineRunScannersHelpPath: el.dataset.noPipelineRunScannersHelpPath,
+      ...provide,
     }),
     render(createElement) {
       return createElement(component, { props });

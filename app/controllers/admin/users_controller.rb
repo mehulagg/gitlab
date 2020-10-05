@@ -5,10 +5,14 @@ class Admin::UsersController < Admin::ApplicationController
 
   before_action :user, except: [:index, :new, :create]
   before_action :check_impersonation_availability, only: :impersonate
+  before_action :ensure_destroy_prerequisites_met, only: [:destroy]
+
+  feature_category :users
 
   def index
     @users = User.filter_items(params[:filter]).order_name_asc
     @users = @users.search_with_secondary_emails(params[:search_query]) if params[:search_query].present?
+    @users = @users.includes(:authorized_projects) # rubocop: disable CodeReuse/ActiveRecord
     @users = @users.sort_by_attribute(@sort = params[:sort])
     @users = @users.page(params[:page])
   end
@@ -111,10 +115,14 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def disable_two_factor
-    update_user { |user| user.disable_two_factor! }
+    result = TwoFactor::DestroyService.new(current_user, user: user).execute
 
-    redirect_to admin_user_path(user),
-      notice: _('Two-factor Authentication has been disabled for this user')
+    if result[:status] == :success
+      redirect_to admin_user_path(user),
+        notice: _('Two-factor authentication has been disabled for this user')
+    else
+      redirect_to admin_user_path(user), alert: result[:message]
+    end
   end
 
   def create
@@ -145,7 +153,7 @@ class Admin::UsersController < Admin::ApplicationController
         password_confirmation: params[:user][:password_confirmation]
       }
 
-      password_params[:password_expires_at] = Time.current unless changing_own_password?
+      password_params[:password_expires_at] = Time.current if admin_making_changes_for_another_user?
 
       user_params_with_pass.merge!(password_params)
     end
@@ -153,6 +161,7 @@ class Admin::UsersController < Admin::ApplicationController
     respond_to do |format|
       result = Users::UpdateService.new(current_user, user_params_with_pass.merge(user: user)).execute do |user|
         user.skip_reconfirmation!
+        user.send_only_admin_changed_your_password_notification! if admin_making_changes_for_another_user?
       end
 
       if result[:status] == :success
@@ -168,7 +177,7 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def destroy
-    user.delete_async(deleted_by: current_user, params: params.permit(:hard_delete))
+    user.delete_async(deleted_by: current_user, params: destroy_params)
 
     respond_to do |format|
       format.html { redirect_to admin_users_path, status: :found, notice: _("The user is being deleted.") }
@@ -193,8 +202,26 @@ class Admin::UsersController < Admin::ApplicationController
 
   protected
 
-  def changing_own_password?
-    user == current_user
+  def admin_making_changes_for_another_user?
+    user != current_user
+  end
+
+  def destroy_params
+    params.permit(:hard_delete)
+  end
+
+  def ensure_destroy_prerequisites_met
+    return if hard_delete?
+
+    if user.solo_owned_groups.present?
+      message = s_('AdminUsers|You must transfer ownership or delete the groups owned by this user before you can delete their account')
+
+      redirect_to admin_user_path(user), status: :see_other, alert: message
+    end
+  end
+
+  def hard_delete?
+    destroy_params[:hard_delete]
   end
 
   def user

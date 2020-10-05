@@ -8,16 +8,13 @@ RSpec.describe Admin::MergeRequestApprovalSettingsHelper do
 
     subject { helper.show_compliance_merge_request_approval_settings? }
 
-    where(:feature_flag, :licensed, :result) do
-      true  | true  | true
-      true  | false | false
-      false | true  | false
-      false | false | false
+    where(:licensed, :result) do
+      true  | true
+      false | false
     end
 
     with_them do
       before do
-        stub_feature_flags(admin_compliance_merge_request_approval_settings: feature_flag)
         stub_licensed_features(admin_merge_request_approvers_rules: licensed)
       end
 

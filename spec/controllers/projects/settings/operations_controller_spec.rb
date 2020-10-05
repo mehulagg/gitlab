@@ -152,7 +152,8 @@ RSpec.describe Projects::Settings::OperationsController do
             create_issue: 'false',
             send_email: 'false',
             issue_template_key: 'some-other-template',
-            pagerduty_active: 'true'
+            pagerduty_active: 'true',
+            auto_close_incident: 'true'
           }
         }
       end
@@ -171,7 +172,7 @@ RSpec.describe Projects::Settings::OperationsController do
             new_incident_management_settings = params
 
             expect(Gitlab::Tracking).to receive(:event)
-              .with('IncidentManagement::Settings', event_key, kind_of(Hash))
+              .with('IncidentManagement::Settings', event_key, any_args)
 
             patch :update, params: project_params(project, incident_management_setting_attributes: new_incident_management_settings)
 
@@ -187,6 +188,8 @@ RSpec.describe Projects::Settings::OperationsController do
         it_behaves_like 'a gitlab tracking event', { send_email: '0' }, 'disabled_sending_emails'
         it_behaves_like 'a gitlab tracking event', { pagerduty_active: '1' }, 'enabled_pagerduty_webhook'
         it_behaves_like 'a gitlab tracking event', { pagerduty_active: '0' }, 'disabled_pagerduty_webhook'
+        it_behaves_like 'a gitlab tracking event', { auto_close_incident: '1' }, 'enabled_auto_close_incident'
+        it_behaves_like 'a gitlab tracking event', { auto_close_incident: '0' }, 'disabled_auto_close_incident'
       end
     end
 
@@ -206,7 +209,7 @@ RSpec.describe Projects::Settings::OperationsController do
           reset_pagerduty_token
 
           new_token = incident_management_setting.reload.pagerduty_token
-          new_webhook_url = project_incidents_pagerduty_url(project, token: new_token)
+          new_webhook_url = project_incidents_integrations_pagerduty_url(project, token: new_token)
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['pagerduty_webhook_url']).to eq(new_webhook_url)
@@ -219,7 +222,7 @@ RSpec.describe Projects::Settings::OperationsController do
         it 'does not reset a token' do
           reset_pagerduty_token
 
-          new_webhook_url = project_incidents_pagerduty_url(project, token: nil)
+          new_webhook_url = project_incidents_integrations_pagerduty_url(project, token: nil)
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['pagerduty_webhook_url']).to eq(new_webhook_url)

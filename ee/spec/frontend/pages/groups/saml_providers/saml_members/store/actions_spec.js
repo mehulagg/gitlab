@@ -4,7 +4,7 @@ import { fetchPage } from 'ee/pages/groups/saml_providers/saml_members/store/act
 import createInitialState from 'ee/pages/groups/saml_providers/saml_members/store/state';
 import Api from '~/api';
 
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 
 jest.mock('~/flash');
 jest.mock('~/api', () => ({

@@ -20,17 +20,6 @@ RSpec.describe MergeRequestWidgetEntity do
     described_class.new(merge_request, current_user: user, request: request)
   end
 
-  it 'has blob path data' do
-    allow(merge_request).to receive_messages(
-      base_pipeline: pipeline,
-      head_pipeline: pipeline
-    )
-
-    expect(subject.as_json).to include(:blob_path)
-    expect(subject.as_json[:blob_path]).to include(:base_path)
-    expect(subject.as_json[:blob_path]).to include(:head_path)
-  end
-
   def create_all_artifacts
     artifacts = %i(codequality performance browser_performance load_performance)
 

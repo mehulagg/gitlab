@@ -1,4 +1,5 @@
-import { PathIdSeparator } from 'ee/related_issues/constants';
+import { PathIdSeparator } from '~/related_issues/constants';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
 
 import { ChildType } from '../constants';
@@ -101,3 +102,16 @@ export const extractChildIssues = issues =>
  */
 export const processQueryResponse = ({ epic }) =>
   applySorts([...extractChildEpics(epic.children), ...extractChildIssues(epic.issues)]);
+
+/**
+ * Returns formatted query string with the supplied issue_types
+ * to be used for autoCompleteSources issues
+ *
+ * @param {Array} issueTypes
+ * @param {Object} autoCompleteSources
+ * @return {String} autoCompleteSources
+ */
+export const processIssueTypeIssueSources = (issueTypes, autoCompleteSources) =>
+  autoCompleteSources.issues
+    ? mergeUrlParams({ issue_types: issueTypes }, autoCompleteSources.issues)
+    : '';

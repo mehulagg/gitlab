@@ -22,6 +22,7 @@ RSpec.describe 'User comments on a diff', :js do
   let(:merge_request) do
     create(:merge_request_with_diffs, source_project: project, target_project: project, source_branch: 'merge-test')
   end
+
   let(:user) { create(:user) }
 
   before do
@@ -118,7 +119,8 @@ RSpec.describe 'User comments on a diff', :js do
     it 'can add and remove suggestions from a batch' do
       files.each_with_index do |file, index|
         page.within("[id='#{file[:hash]}']") do
-          find("button[title='Show full file']").click
+          find('.js-diff-more-actions').click
+          click_button 'Show full file'
           wait_for_requests
 
           click_diff_line(find("[id='#{file[:line_code]}']"))
@@ -129,7 +131,9 @@ RSpec.describe 'User comments on a diff', :js do
             wait_for_requests
           end
         end
+      end
 
+      files.each_with_index do |file, index|
         page.within("[id='#{file[:hash]}']") do
           expect(page).not_to have_content('Applied')
 

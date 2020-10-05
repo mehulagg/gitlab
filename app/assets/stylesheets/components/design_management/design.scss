@@ -1,3 +1,6 @@
+$design-pin-diameter: 28px;
+$t-gray-a-16-design-pin: rgba($black, 0.16);
+
 .layout-page.design-detail-layout {
   max-height: 100vh;
 }
@@ -9,8 +12,53 @@
     top: 35px;
   }
 
-  .design-pin {
-    transition: opacity 0.5s ease;
+  .badge.badge-pill {
+    display: flex;
+    height: $design-pin-diameter;
+    width: $design-pin-diameter;
+    box-sizing: content-box;
+    background-color: $purple-500;
+    color: $white;
+    font-weight: $gl-font-weight-bold;
+    border-radius: 50%;
+    z-index: 1;
+    padding: 0;
+
+    &.resolved {
+      background-color: $gray-500;
+    }
+  }
+
+  .comment-indicator {
+    border-radius: 50%;
+  }
+
+  .comment-indicator,
+  .frame .badge.badge-pill {
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  /**
+   * Design pin that overlays the design
+   */
+  .frame .badge.badge-pill {
+    box-shadow: 0 2px 4px $t-gray-a-08, 0 0 1px $t-gray-a-24;
+    border: $white 2px solid;
+    will-change: transform, box-shadow, opacity;
+    // NOTE: verbose transition property required for Safari
+    transition: transform $general-hover-transition-duration linear, box-shadow $general-hover-transition-duration linear, opacity $general-hover-transition-duration linear;
+    transform-origin: 0 0;
+    transform: translate(-50%, -50%);
+
+    &:hover {
+      transform: scale(1.2) translate(-50%, -50%);
+    }
+
+    &:active {
+      box-shadow: 0 0 4px $t-gray-a-16-design-pin, 0 4px 12px $t-gray-a-16-design-pin;
+    }
 
     &.inactive {
       @include gl-opacity-5;
@@ -18,20 +66,6 @@
       &:hover {
         @include gl-opacity-10;
       }
-    }
-  }
-
-  .badge.badge-pill {
-    display: flex;
-    height: 28px;
-    width: 28px;
-    background-color: $blue-400;
-    color: $white;
-    border: $white 1px solid;
-    border-radius: 50%;
-
-    &.resolved {
-      background-color: $gray-700;
     }
   }
 }
@@ -101,13 +135,16 @@
       border-left: 1px solid $gray-100;
       position: absolute;
       left: 28px;
-      top: -18px;
-      height: 18px;
+      top: -17px;
+      height: 17px;
     }
 
     .design-note {
       padding: $gl-padding;
       list-style: none;
+      transition: background $gl-transition-duration-medium $general-hover-transition-curve;
+      border-top-left-radius: $border-radius-default; // same border radius used by .bordered-box
+      border-top-right-radius: $border-radius-default;
 
       a {
         color: inherit;
@@ -145,12 +182,16 @@
   }
 }
 
+.design-card-header {
+  background: transparent;
+}
+
 .design-dropzone-border {
   border: 2px dashed $gray-100;
 }
 
 .design-dropzone-card {
-  transition: border $general-hover-transition-duration $general-hover-transition-curve;
+  transition: border $gl-transition-duration-medium $general-hover-transition-curve;
   color: $gl-text-color;
 
   &:focus,
@@ -161,7 +202,7 @@
   }
 
   &:hover {
-    border-color: $gray-500;
+    border-color: $gray-300;
   }
 }
 

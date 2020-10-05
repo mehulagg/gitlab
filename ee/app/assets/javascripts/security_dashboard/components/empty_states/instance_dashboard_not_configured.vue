@@ -7,12 +7,7 @@ export default {
     GlButton,
     GlLink,
   },
-  inject: ['dashboardDocumentation', 'emptyStateSvgPath'],
-  methods: {
-    handleAddProjectsClick() {
-      this.$emit('handleAddProjectsClick');
-    },
-  },
+  inject: ['dashboardDocumentation', 'emptyStateSvgPath', 'instanceDashboardSettingsPath'],
 };
 </script>
 
@@ -32,7 +27,7 @@ export default {
       }}</gl-link>
     </template>
     <template #actions>
-      <gl-button variant="success" @click="handleAddProjectsClick">
+      <gl-button variant="success" :href="instanceDashboardSettingsPath">
         {{ s__('SecurityReports|Add projects') }}
       </gl-button>
     </template>

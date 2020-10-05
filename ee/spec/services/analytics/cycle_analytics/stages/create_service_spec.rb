@@ -52,8 +52,8 @@ RSpec.describe Analytics::CycleAnalytics::Stages::CreateService do
   end
 
   describe 'persistence of default stages' do
-    let(:persisted_stages) { group.cycle_analytics_stages }
-    let(:customized_stages) { group.cycle_analytics_stages.where(custom: true) }
+    let(:persisted_stages) { value_stream.stages }
+    let(:customized_stages) { value_stream.stages.where(custom: true) }
     let(:default_stages) { Gitlab::Analytics::CycleAnalytics::DefaultStages.all }
     let(:expected_stage_count) { default_stages.count + customized_stages.count }
 
@@ -79,6 +79,19 @@ RSpec.describe Analytics::CycleAnalytics::Stages::CreateService do
 
         it 'creates records for the default stages only once plus two customized stage records' do
           expect(group.cycle_analytics_stages.count).to eq(expected_stage_count)
+        end
+      end
+
+      context 'when creating a stage for the second value stream' do
+        before do
+          first_value_stream = create(:cycle_analytics_group_value_stream, group: group)
+          described_class.new(parent: group, params: params.merge(name: 'other stage', value_stream: first_value_stream), current_user: user).execute
+        end
+
+        it 'persists the new stage and the default stages for the second value streams' do
+          subject
+
+          expect(value_stream.stages.count).to eq(Gitlab::Analytics::CycleAnalytics::DefaultStages.all.size + 1)
         end
       end
     end

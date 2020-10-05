@@ -4,7 +4,8 @@ module Vulnerabilities
   class Scanner < ApplicationRecord
     self.table_name = "vulnerability_scanners"
 
-    has_many :occurrences, class_name: 'Vulnerabilities::Occurrence'
+    has_many :findings, class_name: 'Vulnerabilities::Finding', inverse_of: :scanner
+    has_many :security_findings, class_name: 'Security::Finding', inverse_of: :scanner
 
     belongs_to :project
 
@@ -17,7 +18,7 @@ module Vulnerabilities
 
     scope :for_projects, -> (project_ids) { where(project_id: project_ids) }
     scope :with_report_type, -> do
-      joins(:occurrences)
+      joins(:findings)
         .select('DISTINCT ON ("vulnerability_scanners"."external_id", "vulnerability_occurrences"."report_type") "vulnerability_scanners".*, "vulnerability_occurrences"."report_type" AS "report_type"')
         .order('"vulnerability_scanners"."external_id" ASC, "vulnerability_occurrences"."report_type" ASC')
     end

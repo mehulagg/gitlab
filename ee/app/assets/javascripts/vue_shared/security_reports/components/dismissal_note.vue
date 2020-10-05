@@ -1,15 +1,14 @@
 <script>
-import { escape } from 'lodash';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
-import { GlDeprecatedButton } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlButton, GlSprintf, GlLink } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
   components: {
     EventItem,
-    GlDeprecatedButton,
-    LoadingButton,
+    GlButton,
+    GlSprintf,
+    GlLink,
   },
   props: {
     feedback: {
@@ -43,33 +42,23 @@ export default {
     },
   },
   computed: {
+    pipeline() {
+      return this.feedback?.pipeline;
+    },
     eventText() {
-      const { project, feedback } = this;
-      const { pipeline } = feedback;
+      const { project, pipeline } = this;
 
-      const pipelineLink =
-        pipeline && pipeline.path && pipeline.id
-          ? `<a href="${pipeline.path}">#${pipeline.id}</a>`
-          : null;
+      const hasPipeline = Boolean(pipeline?.path && pipeline?.id);
+      const hasProject = Boolean(project?.url && project?.value);
 
-      const projectLink =
-        project && project.url && project.value
-          ? `<a href="${escape(project.url)}">${escape(project.value)}</a>`
-          : null;
+      if (hasPipeline && hasProject) {
+        return __('Dismissed on pipeline %{pipelineLink} at %{projectLink}');
+      } else if (hasPipeline) {
+        return __('Dismissed on pipeline %{pipelineLink}');
+      } else if (hasProject) {
+        return __('Dismissed at %{projectLink}');
+      }
 
-      if (pipelineLink && projectLink) {
-        return sprintf(
-          __('Dismissed on pipeline %{pipelineLink} at %{projectLink}'),
-          { pipelineLink, projectLink },
-          false,
-        );
-      }
-      if (pipelineLink && !projectLink) {
-        return sprintf(__('Dismissed on pipeline %{pipelineLink}'), { pipelineLink }, false);
-      }
-      if (!pipelineLink && projectLink) {
-        return sprintf(__('Dismissed at %{projectLink}'), { projectLink }, false);
-      }
       return __('Dismissed');
     },
     commentDetails() {
@@ -101,7 +90,16 @@ export default {
       icon-name="cancel"
       icon-class="ci-status-icon-pending"
     >
-      <div v-if="feedback.created_at" v-html="eventText"></div>
+      <div v-if="feedback.created_at">
+        <gl-sprintf :message="eventText">
+          <template v-if="pipeline" #pipelineLink>
+            <gl-link :href="pipeline.path">#{{ pipeline.id }}</gl-link>
+          </template>
+          <template v-if="project" #projectLink>
+            <gl-link :href="project.value">{{ project.value }}</gl-link>
+          </template>
+        </gl-sprintf>
+      </div>
     </event-item>
     <template v-if="commentDetails && !isCommentingOnDismissal">
       <hr class="my-3" />
@@ -118,15 +116,12 @@ export default {
 
         <template #right-content>
           <div class="d-flex flex-grow-1 align-self-start flex-row-reverse">
-            <loading-button
-              :label="__('Delete comment')"
-              container-class="btn btn-remove"
-              @click="$emit('deleteDismissalComment')"
-            />
-
-            <gl-deprecated-button class="mr-2" @click="$emit('hideDismissalDeleteButtons')">
+            <gl-button category="primary" variant="danger" @click="$emit('deleteDismissalComment')">
+              {{ __('Delete comment') }}
+            </gl-button>
+            <gl-button class="mr-2" @click="$emit('hideDismissalDeleteButtons')">
               {{ __('Cancel') }}
-            </gl-deprecated-button>
+            </gl-button>
           </div>
         </template>
       </event-item>

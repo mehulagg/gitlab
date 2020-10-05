@@ -1,5 +1,0 @@
----
-title: Fix bug with IndexStatus not being set on indexing project
-merge_request: 36266
-author:
-type: fixed

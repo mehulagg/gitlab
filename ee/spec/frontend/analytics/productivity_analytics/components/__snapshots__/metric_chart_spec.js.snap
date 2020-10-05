@@ -4,13 +4,17 @@ exports[`MetricChart component template when isLoading is false and chart data i
 <div>
   <!---->
    
-  <div
-    class="bs-callout bs-callout-info"
+  <gl-alert-stub
+    dismisslabel="Dismiss"
+    primarybuttonlink=""
+    primarybuttontext=""
+    secondarybuttonlink=""
+    secondarybuttontext=""
+    title=""
+    variant="info"
   >
-    
-      There is no data available. Please change your selection.
-    
-  </div>
+    There is no data available. Please change your selection.
+  </gl-alert-stub>
 </div>
 `;
 
@@ -19,19 +23,28 @@ exports[`MetricChart component template when isLoading is false and chartData is
   <!---->
    
   <gl-dropdown-stub
+    category="tertiary"
     class="mb-4 metric-dropdown"
+    headertext=""
     menu-class="w-100 mw-100"
+    size="medium"
     text="Please select a metric"
-    toggle-class="dropdown-menu-toggle w-100"
+    toggleclass="dropdown-menu-toggle w-100"
+    variant="default"
   >
     <gl-dropdown-item-stub
       active-class="is-active"
+      avatarurl=""
       class="w-100"
+      iconcolor=""
+      iconname=""
+      iconrightname=""
+      secondarytext=""
     >
       <span
         class="d-flex"
       >
-        <icon-stub
+        <gl-icon-stub
           aria-label="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"
@@ -45,12 +58,17 @@ exports[`MetricChart component template when isLoading is false and chartData is
     </gl-dropdown-item-stub>
     <gl-dropdown-item-stub
       active-class="is-active"
+      avatarurl=""
       class="w-100"
+      iconcolor=""
+      iconname=""
+      iconrightname=""
+      secondarytext=""
     >
       <span
         class="d-flex"
       >
-        <icon-stub
+        <gl-icon-stub
           aria-label="Selected"
           class="flex-shrink-0 gl-mr-2 invisible"
           name="mobile-issue-close"

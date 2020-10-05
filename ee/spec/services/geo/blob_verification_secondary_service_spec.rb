@@ -14,7 +14,7 @@ RSpec.describe Geo::BlobVerificationSecondaryService, :geo do
   describe '#execute' do
     let_it_be(:package_file) { create(:conan_package_file, :conan_recipe_file, verification_checksum: '62fc1ec4ce60') }
 
-    let_it_be(:registry) { create(:geo_package_file_registry, :synced, package_file: package_file) }
+    let!(:registry) { create(:geo_package_file_registry, :synced, package_file: package_file) }
 
     subject(:service) { described_class.new(package_file.replicator) }
 

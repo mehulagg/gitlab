@@ -3,11 +3,15 @@
 # This module makes it possible to handle items as a list, where the order of items can be easily altered
 # Requirements:
 #
-# - Only works for ActiveRecord models
-# - relative_position integer field must present on the model
-# - This module uses GROUP BY: the model should have a parent relation, example: project -> issues, project is the parent relation (issues table has a parent_id column)
+# The model must have the following named columns:
+#  - id: integer
+#  - relative_position: integer
 #
-# Setup like this in the body of your class:
+# The model must support a concept of siblings via a child->parent relationship,
+# to enable rebalancing and `GROUP BY` in queries.
+# - example: project -> issues, project is the parent relation (issues table has a parent_id column)
+#
+# Two class methods must be defined when including this concern:
 #
 #     include RelativePositioning
 #
@@ -23,224 +27,183 @@
 #
 module RelativePositioning
   extend ActiveSupport::Concern
-
-  MIN_POSITION = 0
-  START_POSITION = Gitlab::Database::MAX_INT_VALUE / 2
-  MAX_POSITION = Gitlab::Database::MAX_INT_VALUE
-  IDEAL_DISTANCE = 500
+  include ::Gitlab::RelativePositioning
 
   class_methods do
     def move_nulls_to_end(objects)
-      objects = objects.reject(&:relative_position)
-
-      return if objects.empty?
-
-      max_relative_position = objects.first.max_relative_position
-
-      self.transaction do
-        objects.each do |object|
-          relative_position = position_between(max_relative_position || START_POSITION, MAX_POSITION)
-          object.relative_position = relative_position
-          max_relative_position = relative_position
-          object.save(touch: false)
-        end
-      end
+      move_nulls(objects, at_end: true)
     end
 
-    # This method takes two integer values (positions) and
-    # calculates the position between them. The range is huge as
-    # the maximum integer value is 2147483647. We are incrementing position by IDEAL_DISTANCE * 2 every time
-    # when we have enough space. If distance is less than IDEAL_DISTANCE, we are calculating an average number.
-    def position_between(pos_before, pos_after)
-      pos_before ||= MIN_POSITION
-      pos_after ||= MAX_POSITION
+    def move_nulls_to_start(objects)
+      move_nulls(objects, at_end: false)
+    end
 
-      pos_before, pos_after = [pos_before, pos_after].sort
+    private
 
-      halfway = (pos_after + pos_before) / 2
-      distance_to_halfway = pos_after - halfway
+    # @api private
+    def gap_size(context, gaps:, at_end:, starting_from:)
+      total_width = IDEAL_DISTANCE * gaps
+      size = if at_end && starting_from + total_width >= MAX_POSITION
+               (MAX_POSITION - starting_from) / gaps
+             elsif !at_end && starting_from - total_width <= MIN_POSITION
+               (starting_from - MIN_POSITION) / gaps
+             else
+               IDEAL_DISTANCE
+             end
 
-      if distance_to_halfway < IDEAL_DISTANCE
-        halfway
+      return [size, starting_from] if size >= MIN_GAP
+
+      if at_end
+        terminus = context.max_sibling
+        terminus.shift_left
+        max_relative_position = terminus.relative_position
+        [[(MAX_POSITION - max_relative_position) / gaps, IDEAL_DISTANCE].min, max_relative_position]
       else
-        if pos_before == MIN_POSITION
-          pos_after - IDEAL_DISTANCE
-        elsif pos_after == MAX_POSITION
-          pos_before + IDEAL_DISTANCE
-        else
-          halfway
+        terminus = context.min_sibling
+        terminus.shift_right
+        min_relative_position = terminus.relative_position
+        [[(min_relative_position - MIN_POSITION) / gaps, IDEAL_DISTANCE].min, min_relative_position]
+      end
+    end
+
+    # @api private
+    # @param [Array<RelativePositioning>] objects The objects to give positions to. The relative
+    #                                             order will be preserved (i.e. when this method returns,
+    #                                             objects.first.relative_position < objects.last.relative_position)
+    # @param [Boolean] at_end: The placement.
+    #                          If `true`, then all objects with `null` positions are placed _after_
+    #                          all siblings with positions. If `false`, all objects with `null`
+    #                          positions are placed _before_ all siblings with positions.
+    # @returns [Number] The number of moved records.
+    def move_nulls(objects, at_end:)
+      objects = objects.reject(&:relative_position)
+      return 0 if objects.empty?
+
+      number_of_gaps = objects.size # 1 to the nearest neighbour, and one between each
+      representative = RelativePositioning.mover.context(objects.first)
+
+      position = if at_end
+                   representative.max_relative_position
+                 else
+                   representative.min_relative_position
+                 end
+
+      position ||= START_POSITION # If there are no positioned siblings, start from START_POSITION
+
+      gap = 0
+      attempts = 10 # consolidate up to 10 gaps to find enough space
+      while gap < 1 && attempts > 0
+        gap, position = gap_size(representative, gaps: number_of_gaps, at_end: at_end, starting_from: position)
+        attempts -= 1
+      end
+
+      # Allow placing items next to each other, if we have to.
+      gap = 1 if gap < MIN_GAP
+      delta = at_end ? gap : -gap
+      indexed = (at_end ? objects : objects.reverse).each_with_index
+
+      # Some classes are polymorphic, and not all siblings are in the same table.
+      by_model = indexed.group_by { |pair| pair.first.class }
+      lower_bound, upper_bound = at_end ? [position, MAX_POSITION] : [MIN_POSITION, position]
+
+      by_model.each do |model, pairs|
+        model.transaction do
+          pairs.each_slice(100) do |batch|
+            # These are known to be integers, one from the DB, and the other
+            # calculated by us, and thus safe to interpolate
+            values = batch.map do |obj, i|
+              desired_pos = position + delta * (i + 1)
+              pos = desired_pos.clamp(lower_bound, upper_bound)
+              obj.relative_position = pos
+              "(#{obj.id}, #{pos})"
+            end.join(', ')
+
+            model.connection.exec_query(<<~SQL, "UPDATE #{model.table_name} positions")
+              WITH cte(cte_id, new_pos) AS (
+               SELECT *
+               FROM (VALUES #{values}) as t (id, pos)
+              )
+              UPDATE #{model.table_name}
+              SET relative_position = cte.new_pos
+              FROM cte
+              WHERE cte_id = id
+            SQL
+          end
         end
       end
+
+      objects.size
     end
   end
 
-  def min_relative_position(&block)
-    calculate_relative_position('MIN', &block)
-  end
-
-  def max_relative_position(&block)
-    calculate_relative_position('MAX', &block)
-  end
-
-  def prev_relative_position
-    prev_pos = nil
-
-    if self.relative_position
-      prev_pos = max_relative_position do |relation|
-        relation.where('relative_position < ?', self.relative_position)
-      end
-    end
-
-    prev_pos
-  end
-
-  def next_relative_position
-    next_pos = nil
-
-    if self.relative_position
-      next_pos = min_relative_position do |relation|
-        relation.where('relative_position > ?', self.relative_position)
-      end
-    end
-
-    next_pos
+  def self.mover
+    ::Gitlab::RelativePositioning::Mover.new(START_POSITION, (MIN_POSITION..MAX_POSITION))
   end
 
   def move_between(before, after)
-    return move_after(before) unless after
-    return move_before(after) unless before
+    before, after = [before, after].sort_by(&:relative_position) if before && after
 
-    # If there is no place to insert an item we need to create one by moving the item
-    # before this and all preceding items until there is a gap
-    before, after = after, before if after.relative_position < before.relative_position
-    if (after.relative_position - before.relative_position) < 2
-      after.move_sequence_before
-      before.reset
-    end
-
-    self.relative_position = self.class.position_between(before.relative_position, after.relative_position)
+    RelativePositioning.mover.move(self, before, after)
+  rescue ActiveRecord::QueryCanceled, NoSpaceLeft => e
+    could_not_move(e)
+    raise e
   end
 
   def move_after(before = self)
-    pos_before = before.relative_position
-    pos_after = before.next_relative_position
-
-    if pos_after && (pos_after - pos_before) < 2
-      before.move_sequence_after
-      pos_after = before.next_relative_position
-    end
-
-    self.relative_position = self.class.position_between(pos_before, pos_after)
+    RelativePositioning.mover.move(self, before, nil)
+  rescue ActiveRecord::QueryCanceled, NoSpaceLeft => e
+    could_not_move(e)
+    raise e
   end
 
   def move_before(after = self)
-    pos_after = after.relative_position
-    pos_before = after.prev_relative_position
-
-    if pos_before && (pos_after - pos_before) < 2
-      after.move_sequence_before
-      pos_before = after.prev_relative_position
-    end
-
-    self.relative_position = self.class.position_between(pos_before, pos_after)
+    RelativePositioning.mover.move(self, nil, after)
+  rescue ActiveRecord::QueryCanceled, NoSpaceLeft => e
+    could_not_move(e)
+    raise e
   end
 
   def move_to_end
-    self.relative_position = self.class.position_between(max_relative_position || START_POSITION, MAX_POSITION)
+    RelativePositioning.mover.move_to_end(self)
+  rescue NoSpaceLeft => e
+    could_not_move(e)
+    self.relative_position = MAX_POSITION
+  rescue ActiveRecord::QueryCanceled => e
+    could_not_move(e)
+    raise e
   end
 
   def move_to_start
-    self.relative_position = self.class.position_between(min_relative_position || START_POSITION, MIN_POSITION)
+    RelativePositioning.mover.move_to_start(self)
+  rescue NoSpaceLeft => e
+    could_not_move(e)
+    self.relative_position = MIN_POSITION
+  rescue ActiveRecord::QueryCanceled => e
+    could_not_move(e)
+    raise e
   end
 
-  # Moves the sequence before the current item to the middle of the next gap
-  # For example, we have 5 11 12 13 14 15 and the current item is 15
-  # This moves the sequence 11 12 13 14 to 8 9 10 11
-  def move_sequence_before
-    next_gap = find_next_gap_before
-    delta = optimum_delta_for_gap(next_gap)
-
-    move_sequence(next_gap[:start], relative_position, -delta)
-  end
-
-  # Moves the sequence after the current item to the middle of the next gap
-  # For example, we have 11 12 13 14 15 21 and the current item is 11
-  # This moves the sequence 12 13 14 15 to 15 16 17 18
-  def move_sequence_after
-    next_gap = find_next_gap_after
-    delta = optimum_delta_for_gap(next_gap)
-
-    move_sequence(relative_position, next_gap[:start], delta)
-  end
-
-  private
-
-  # Supposing that we have a sequence of items: 1 5 11 12 13 and the current item is 13
-  # This would return: `{ start: 11, end: 5 }`
-  def find_next_gap_before
-    items_with_next_pos = scoped_items
-                            .select('relative_position AS pos, LEAD(relative_position) OVER (ORDER BY relative_position DESC) AS next_pos')
-                            .where('relative_position <= ?', relative_position)
-                            .order(relative_position: :desc)
-
-    find_next_gap(items_with_next_pos).tap do |gap|
-      gap[:end] ||= MIN_POSITION
-    end
-  end
-
-  # Supposing that we have a sequence of items: 13 14 15 20 24 and the current item is 13
-  # This would return: `{ start: 15, end: 20 }`
-  def find_next_gap_after
-    items_with_next_pos = scoped_items
-                            .select('relative_position AS pos, LEAD(relative_position) OVER (ORDER BY relative_position ASC) AS next_pos')
-                            .where('relative_position >= ?', relative_position)
-                            .order(:relative_position)
-
-    find_next_gap(items_with_next_pos).tap do |gap|
-      gap[:end] ||= MAX_POSITION
-    end
-  end
-
-  def find_next_gap(items_with_next_pos)
-    gap = self.class.from(items_with_next_pos, :items_with_next_pos)
-                    .where('ABS(pos - next_pos) > 1 OR next_pos IS NULL')
-                    .limit(1)
-                    .pluck(:pos, :next_pos)
-                    .first
-
-    { start: gap[0], end: gap[1] }
-  end
-
-  def optimum_delta_for_gap(gap)
-    delta = ((gap[:start] - gap[:end]) / 2.0).abs.ceil
-
-    [delta, IDEAL_DISTANCE].min
-  end
-
-  def move_sequence(start_pos, end_pos, delta)
-    scoped_items
-      .where.not(id: self.id)
-      .where('relative_position BETWEEN ? AND ?', start_pos, end_pos)
+  # This method is used during rebalancing - override it to customise the update
+  # logic:
+  def update_relative_siblings(relation, range, delta)
+    relation
+      .where(relative_position: range)
       .update_all("relative_position = relative_position + #{delta}")
   end
 
-  def calculate_relative_position(calculation)
-    # When calculating across projects, this is much more efficient than
-    # MAX(relative_position) without the GROUP BY, due to index usage:
-    # https://gitlab.com/gitlab-org/gitlab-foss/issues/54276#note_119340977
-    relation = scoped_items
-                 .order(Gitlab::Database.nulls_last_order('position', 'DESC'))
-                 .group(self.class.relative_positioning_parent_column)
-                 .limit(1)
-
-    relation = yield relation if block_given?
-
-    relation
-      .pluck(self.class.relative_positioning_parent_column, Arel.sql("#{calculation}(relative_position) AS position"))
-      .first&.last
+  # This method is used to exclude the current self (or another object)
+  # from a relation. Customize this if `id <> :id` is not sufficient
+  def exclude_self(relation, excluded: self)
+    relation.id_not_in(excluded.id)
   end
 
-  def scoped_items
-    self.class.relative_positioning_query_base(self)
+  # Override if you want to be notified of failures to move
+  def could_not_move(exception)
+  end
+
+  # Override if the implementing class is not a simple application record, for
+  # example if the record is loaded from a union.
+  def reset_relative_position
+    reset.relative_position
   end
 end

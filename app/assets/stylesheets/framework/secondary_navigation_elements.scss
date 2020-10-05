@@ -28,10 +28,6 @@
         text-decoration: none;
         color: $black;
         border-bottom: 2px solid $gray-darkest;
-
-        .badge.badge-pill {
-          color: $black;
-        }
       }
     }
 
@@ -97,13 +93,8 @@
     }
 
     /* Small devices (phones, tablets, 768px and lower) */
-    @include media-breakpoint-down(xs) {
+    @include media-breakpoint-down(sm) {
       width: 100%;
-
-      &.mobile-separator {
-        border-bottom: 1px solid $border-color;
-        margin-bottom: $gl-padding-8;
-      }
     }
   }
 
@@ -414,8 +405,4 @@
       max-width: 250px;
     }
   }
-}
-
-.new-project-item-select-button .fa-caret-down {
-  margin-left: 2px;
 }

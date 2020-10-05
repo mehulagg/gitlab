@@ -14,8 +14,8 @@ describe('BoardScope', () => {
         labels: [],
         assignee: {},
       },
-      milestonePath: `${TEST_HOST}/milestones`,
       labelsPath: `${TEST_HOST}/labels`,
+      labelsWebUrl: `${TEST_HOST}/-/labels`,
     };
 
     wrapper = mount(BoardScope, {

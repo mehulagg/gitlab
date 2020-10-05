@@ -26,19 +26,26 @@ module Epics
     def set_new_parent
       return unless new_parent && new_parent_different?
 
-      moving_object.parent = new_parent
-      validate_new_parent
+      service = create_issuable_links(new_parent)
+      return unless service[:status] == :error
+
+      service[:message]
     end
 
     def new_parent_different?
       params[:new_parent_id] != GitlabSchema.id_from_object(moving_object.parent)
     end
 
-    def validate_new_parent
-      return unless moving_object.respond_to?(:valid_parent?)
-      return if moving_object.valid_parent?
+    def create_issuable_links(parent)
+      service, issuable = if moving_object.is_a?(Epic)
+                            [EpicLinks::CreateService, moving_object]
+                          elsif moving_object.is_a?(EpicIssue)
+                            [EpicIssues::CreateService, moving_object.issue]
+                          end
 
-      moving_object.errors[:parent]&.first
+      return unless service.present?
+
+      service.new(parent, current_user, { target_issuable: issuable }).execute
     end
 
     def move!
@@ -110,6 +117,10 @@ module Epics
       if new_parent
         return false unless can?(current_user, :admin_epic, new_parent.group)
         return false unless moving_object.parent && can?(current_user, :admin_epic, moving_object.parent.group)
+
+        if moving_object.is_a?(Epic)
+          return false unless can?(current_user, :admin_epic_link, moving_object.parent.group)
+        end
       end
 
       true

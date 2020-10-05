@@ -1,6 +1,0 @@
----
-title: 'Analytics Insights page: Load charts individually, instead of waiting for
-  all data to load before displaying the page'
-merge_request: 34290
-author:
-type: changed

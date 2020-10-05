@@ -63,6 +63,24 @@ RSpec.describe GroupPolicy do
     end
   end
 
+  shared_examples 'deploy token does not get confused with user' do
+    before do
+      deploy_token.update!(id: user_id)
+    end
+
+    let(:deploy_token) { create(:deploy_token) }
+    let(:current_user) { deploy_token }
+
+    it do
+      expect_disallowed(*read_group_permissions)
+      expect_disallowed(*guest_permissions)
+      expect_disallowed(*reporter_permissions)
+      expect_disallowed(*developer_permissions)
+      expect_disallowed(*maintainer_permissions)
+      expect_disallowed(*owner_permissions)
+    end
+  end
+
   context 'guests' do
     let(:current_user) { guest }
 
@@ -73,6 +91,10 @@ RSpec.describe GroupPolicy do
       expect_disallowed(*developer_permissions)
       expect_disallowed(*maintainer_permissions)
       expect_disallowed(*owner_permissions)
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { guest.id }
     end
   end
 
@@ -87,6 +109,10 @@ RSpec.describe GroupPolicy do
       expect_disallowed(*maintainer_permissions)
       expect_disallowed(*owner_permissions)
     end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { reporter.id }
+    end
   end
 
   context 'developer' do
@@ -100,6 +126,10 @@ RSpec.describe GroupPolicy do
       expect_disallowed(*maintainer_permissions)
       expect_disallowed(*owner_permissions)
     end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { developer.id }
+    end
   end
 
   context 'maintainer' do
@@ -107,7 +137,7 @@ RSpec.describe GroupPolicy do
 
     context 'with subgroup_creation level set to maintainer' do
       before_all do
-        group.update(subgroup_creation_level: ::Gitlab::Access::MAINTAINER_SUBGROUP_ACCESS)
+        group.update!(subgroup_creation_level: ::Gitlab::Access::MAINTAINER_SUBGROUP_ACCESS)
       end
 
       it 'allows every maintainer permission plus creating subgroups' do
@@ -136,6 +166,10 @@ RSpec.describe GroupPolicy do
         expect_disallowed(*owner_permissions)
       end
     end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { maintainer.id }
+    end
   end
 
   context 'owner' do
@@ -148,6 +182,10 @@ RSpec.describe GroupPolicy do
       expect_allowed(*developer_permissions)
       expect_allowed(*maintainer_permissions)
       expect_allowed(*owner_permissions)
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { owner.id }
     end
   end
 
@@ -165,6 +203,14 @@ RSpec.describe GroupPolicy do
 
     context 'with admin mode', :enable_admin_mode do
       specify { expect_allowed(*admin_permissions) }
+    end
+
+    it_behaves_like 'deploy token does not get confused with user' do
+      let(:user_id) { admin.id }
+
+      context 'with admin mode', :enable_admin_mode do
+        it { expect_disallowed(*admin_permissions) }
+      end
     end
   end
 
@@ -363,7 +409,7 @@ RSpec.describe GroupPolicy do
   context 'transfer_projects' do
     shared_examples_for 'allowed to transfer projects' do
       before do
-        group.update(project_creation_level: project_creation_level)
+        group.update!(project_creation_level: project_creation_level)
       end
 
       it { is_expected.to be_allowed(:transfer_projects) }
@@ -371,7 +417,7 @@ RSpec.describe GroupPolicy do
 
     shared_examples_for 'not allowed to transfer projects' do
       before do
-        group.update(project_creation_level: project_creation_level)
+        group.update!(project_creation_level: project_creation_level)
       end
 
       it { is_expected.to be_disallowed(:transfer_projects) }
@@ -445,7 +491,7 @@ RSpec.describe GroupPolicy do
   context 'create_projects' do
     context 'when group has no project creation level set' do
       before_all do
-        group.update(project_creation_level: nil)
+        group.update!(project_creation_level: nil)
       end
 
       context 'reporter' do
@@ -475,7 +521,7 @@ RSpec.describe GroupPolicy do
 
     context 'when group has project creation level set to no one' do
       before_all do
-        group.update(project_creation_level: ::Gitlab::Access::NO_ONE_PROJECT_ACCESS)
+        group.update!(project_creation_level: ::Gitlab::Access::NO_ONE_PROJECT_ACCESS)
       end
 
       context 'reporter' do
@@ -505,7 +551,7 @@ RSpec.describe GroupPolicy do
 
     context 'when group has project creation level set to maintainer only' do
       before_all do
-        group.update(project_creation_level: ::Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
+        group.update!(project_creation_level: ::Gitlab::Access::MAINTAINER_PROJECT_ACCESS)
       end
 
       context 'reporter' do
@@ -535,7 +581,7 @@ RSpec.describe GroupPolicy do
 
     context 'when group has project creation level set to developers + maintainer' do
       before_all do
-        group.update(project_creation_level: ::Gitlab::Access::DEVELOPER_MAINTAINER_PROJECT_ACCESS)
+        group.update!(project_creation_level: ::Gitlab::Access::DEVELOPER_MAINTAINER_PROJECT_ACCESS)
       end
 
       context 'reporter' do
@@ -567,7 +613,7 @@ RSpec.describe GroupPolicy do
   context 'create_subgroup' do
     context 'when group has subgroup creation level set to owner' do
       before_all do
-        group.update(subgroup_creation_level: ::Gitlab::Access::OWNER_SUBGROUP_ACCESS)
+        group.update!(subgroup_creation_level: ::Gitlab::Access::OWNER_SUBGROUP_ACCESS)
       end
 
       context 'reporter' do
@@ -597,7 +643,7 @@ RSpec.describe GroupPolicy do
 
     context 'when group has subgroup creation level set to maintainer' do
       before_all do
-        group.update(subgroup_creation_level: ::Gitlab::Access::MAINTAINER_SUBGROUP_ACCESS)
+        group.update!(subgroup_creation_level: ::Gitlab::Access::MAINTAINER_SUBGROUP_ACCESS)
       end
 
       context 'reporter' do
@@ -706,7 +752,7 @@ RSpec.describe GroupPolicy do
 
         context 'which does not have design management enabled' do
           before do
-            project.update(lfs_enabled: false)
+            project.update!(lfs_enabled: false)
           end
 
           it { is_expected.not_to be_allowed(:read_design_activity) }
@@ -722,4 +768,118 @@ RSpec.describe GroupPolicy do
       end
     end
   end
+
+  describe 'create_jira_connect_subscription' do
+    context 'admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { create(:user) }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+    end
+  end
+
+  describe 'read_package' do
+    context 'admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_allowed(:read_package) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:read_package) }
+    end
+
+    context 'with non member' do
+      let(:current_user) { create(:user) }
+
+      it { is_expected.to be_disallowed(:read_package) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_disallowed(:read_package) }
+    end
+  end
+
+  context 'deploy token access' do
+    let!(:group_deploy_token) do
+      create(:group_deploy_token, group: group, deploy_token: deploy_token)
+    end
+
+    subject { described_class.new(deploy_token, group) }
+
+    context 'a deploy token with read_package_registry scope' do
+      let(:deploy_token) { create(:deploy_token, :group, read_package_registry: true) }
+
+      it { is_expected.to be_allowed(:read_package) }
+      it { is_expected.to be_allowed(:read_group) }
+      it { is_expected.to be_disallowed(:create_package) }
+    end
+
+    context 'a deploy token with write_package_registry scope' do
+      let(:deploy_token) { create(:deploy_token, :group, write_package_registry: true) }
+
+      it { is_expected.to be_allowed(:create_package) }
+      it { is_expected.to be_allowed(:read_group) }
+      it { is_expected.to be_disallowed(:destroy_package) }
+    end
+  end
+
+  it_behaves_like 'Self-managed Core resource access tokens'
 end

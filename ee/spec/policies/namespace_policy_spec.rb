@@ -23,29 +23,23 @@ RSpec.describe NamespacePolicy do
     end
   end
 
-  describe 'create_jira_connect_subscription' do
-    context 'admin' do
-      let(:current_user) { build_stubbed(:admin) }
+  context ':over_storage_limit' do
+    let(:current_user) { owner }
 
-      context 'when admin mode enabled', :enable_admin_mode do
-        it { is_expected.to be_allowed(:create_jira_connect_subscription) }
-      end
-
-      context 'when admin mode disabled' do
-        it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
-      end
+    before do
+      allow(namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
     end
 
-    context 'owner' do
-      let(:current_user) { owner }
+    context 'when the namespace has exceeded its storage limit' do
+      let(:over_storage_limit) { true }
 
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+      it { is_expected.to(be_disallowed(:create_projects)) }
     end
 
-    context 'other user' do
-      let(:current_user) { build_stubbed(:user) }
+    context 'when the namespace has not exceeded its storage limit' do
+      let(:over_storage_limit) { false }
 
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+      it { is_expected.to(be_allowed(:create_projects)) }
     end
   end
 

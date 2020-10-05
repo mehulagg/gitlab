@@ -14,6 +14,11 @@ Find more about them [in Audit Events documentation](audit_events.md).
 System log files are typically plain text in a standard log file format.
 This guide talks about how to read and use these system log files.
 
+[Read more about how to customise logging on Omnibus GitLab
+installations](https://docs.gitlab.com/omnibus/settings/logs.html)
+including adjusting log retention, log forwarding,
+switching logs from JSON to plain text logging, and more.
+
 ## `production_json.log`
 
 This file lives in `/var/log/gitlab/gitlab-rails/production_json.log` for
@@ -82,7 +87,7 @@ In addition, the log contains the originating IP address,
 (`remote_ip`), the user's ID (`user_id`), and username (`username`).
 
 Some endpoints such as `/search` may make requests to Elasticsearch if using
-[Advanced Global Search](../user/search/advanced_global_search.md). These will
+[Advanced Search](../user/search/advanced_global_search.md). These will
 additionally log `elasticsearch_calls` and `elasticsearch_call_duration_s`,
 which correspond to:
 
@@ -95,9 +100,9 @@ The ActionCable connection or channel class is used as the `controller`.
 
 ```json
 {
-  "method":{},
-  "path":{},
-  "format":{},
+  "method":null,
+  "path":null,
+  "format":null,
   "controller":"IssuesChannel",
   "action":"subscribe",
   "status":200,
@@ -112,7 +117,8 @@ The ActionCable connection or channel class is used as the `controller`.
 }
 ```
 
-NOTE: **Note:** Starting with GitLab 12.5, if an error occurs, an
+NOTE: **Note:**
+Starting with GitLab 12.5, if an error occurs, an
 `exception` field is included with `class`, `message`, and
 `backtrace`. Previous versions included an `error` field instead of
 `exception.class` and `exception.message`. For example:
@@ -717,10 +723,15 @@ was initiated, such as `1509705644.log`
 
 ## `sidekiq_exporter.log` and `web_exporter.log`
 
-If Prometheus metrics and the Sidekiq Exporter are both enabled, Sidekiq will
-start a Web server and listen to the defined port (default: `8082`). Access logs
-will be generated in `/var/log/gitlab/gitlab-rails/sidekiq_exporter.log` for
-Omnibus GitLab packages or in `/home/git/gitlab/log/sidekiq_exporter.log` for
+If Prometheus metrics and the Sidekiq Exporter are both enabled, Sidekiq
+will start a Web server and listen to the defined port (default:
+`8082`). By default, Sidekiq Exporter access logs are disabled but can
+be enabled via the `sidekiq['exporter_log_enabled'] = true` option in `/etc/gitlab/gitlab.rb`
+for Omnibus installations, or via the `sidekiq_exporter.log_enabled` option
+in `gitlab.yml` for installations from source. When enabled,
+access logs will be generated in
+`/var/log/gitlab/gitlab-rails/sidekiq_exporter.log` for Omnibus GitLab
+packages or in `/home/git/gitlab/log/sidekiq_exporter.log` for
 installations from source.
 
 If Prometheus metrics and the Web Exporter are both enabled, Puma/Unicorn will
@@ -831,6 +842,29 @@ For example:
 
 This message shows that Geo detected that a repository update was needed for project `1`.
 
+## `update_mirror_service_json.log`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/commit/7f637e2af7006dc2b1b2649d9affc0b86cfb33c4) in GitLab 11.12.
+
+This file is stored in:
+
+- `/var/log/gitlab/gitlab-rails/update_mirror_service_json.log` for Omnibus GitLab installations.
+- `/home/git/gitlab/log/update_mirror_service_json.log` for installations from source.
+
+This file contains information about any errors that occurred during project mirroring.
+
+```json
+{
+   "severity":"ERROR",
+   "time":"2020-07-28T23:29:29.473Z",
+   "correlation_id":"5HgIkCJsO53",
+   "user_id":"x",
+   "project_id":"x",
+   "import_url":"https://mirror-source/group/project.git",
+   "error_message":"The LFS objects download list couldn't be imported. Error: Unauthorized"
+}
+```
+
 ## Registry Logs
 
 For Omnibus installations, Container Registry logs reside in `/var/log/gitlab/registry/current`.
@@ -926,3 +960,38 @@ For Omnibus GitLab installations, GitLab Monitor logs reside in `/var/log/gitlab
 ## GitLab Exporter
 
 For Omnibus GitLab installations, GitLab Exporter logs reside in `/var/log/gitlab/gitlab-exporter/`.
+
+## Gathering logs
+
+When [troubleshooting](troubleshooting/index.md) issues that aren't localized to one of the
+previously listed components, it's helpful to simultaneously gather multiple logs and statistics
+from a GitLab instance.
+
+### GitLabSOS
+
+If performance degradations or cascading errors occur that can't readily be attributed to one
+of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/)
+can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
+to run it, see [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
+
+NOTE: **Note:**
+GitLab Support likes to use this custom-made tool.
+
+### Briefly tail the main logs
+
+If the bug or error is readily reproducible bug or error, save the main GitLab logs
+[to a file](troubleshooting/linux_cheat_sheet.md#files--dirs) while reproducing the
+problem once or more times:
+
+```shell
+sudo gitlab-ctl tail | tee /tmp/<case-ID-and-keywords>.log
+```
+
+Conclude the log gathering with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+
+### Fast-stats
+
+[Fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats) is a tool
+for creating and comparing performance statistics from GitLab logs.
+For more details and instructions to run it, see
+[read the documentation for fast-stats](https://gitlab.com/gitlab-com/support/toolbox/fast-stats#usage).

@@ -524,6 +524,26 @@ describe('Notes Store mutations', () => {
     });
   });
 
+  describe('SET_SELECTED_COMMENT_POSITION', () => {
+    it('should set comment position state', () => {
+      const state = {};
+
+      mutations.SET_SELECTED_COMMENT_POSITION(state, {});
+
+      expect(state.selectedCommentPosition).toEqual({});
+    });
+  });
+
+  describe('SET_SELECTED_COMMENT_POSITION_HOVER', () => {
+    it('should set comment hover position state', () => {
+      const state = {};
+
+      mutations.SET_SELECTED_COMMENT_POSITION_HOVER(state, {});
+
+      expect(state.selectedCommentPositionHover).toEqual({});
+    });
+  });
+
   describe('DISABLE_COMMENTS', () => {
     it('should set comments disabled state', () => {
       const state = {};
@@ -660,9 +680,10 @@ describe('Notes Store mutations', () => {
     });
 
     it('sets sort order', () => {
-      mutations.SET_DISCUSSIONS_SORT(state, DESC);
+      mutations.SET_DISCUSSIONS_SORT(state, { direction: DESC, persist: false });
 
       expect(state.discussionSortOrder).toBe(DESC);
+      expect(state.persistSortOrder).toBe(false);
     });
   });
 
@@ -813,10 +834,24 @@ describe('Notes Store mutations', () => {
       state = { noteableData: { confidential: false } };
     });
 
-    it('sets sort order', () => {
+    it('should set issuable as confidential', () => {
       mutations.SET_ISSUE_CONFIDENTIAL(state, true);
 
       expect(state.noteableData.confidential).toBe(true);
+    });
+  });
+
+  describe('SET_ISSUABLE_LOCK', () => {
+    let state;
+
+    beforeEach(() => {
+      state = { noteableData: { discussion_locked: false } };
+    });
+
+    it('should set issuable as locked', () => {
+      mutations.SET_ISSUABLE_LOCK(state, true);
+
+      expect(state.noteableData.discussion_locked).toBe(true);
     });
   });
 
@@ -829,6 +864,22 @@ describe('Notes Store mutations', () => {
       mutations.UPDATE_ASSIGNEES(state, [userDataMock.id]);
 
       expect(state.noteableData.assignees).toEqual([userDataMock.id]);
+    });
+  });
+
+  describe('UPDATE_DISCUSSION_POSITION', () => {
+    it('should upate the discusion position', () => {
+      const discussion1 = { id: 1, position: { line_code: 'abc_1_1' } };
+      const discussion2 = { id: 2, position: { line_code: 'abc_2_2' } };
+      const discussion3 = { id: 3, position: { line_code: 'abc_3_3' } };
+      const state = {
+        discussions: [discussion1, discussion2, discussion3],
+      };
+      const discussion1Position = { ...discussion1.position };
+      const position = { ...discussion1Position, test: true };
+
+      mutations.UPDATE_DISCUSSION_POSITION(state, { discussionId: discussion1.id, position });
+      expect(state.discussions[0].position).toEqual(position);
     });
   });
 });

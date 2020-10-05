@@ -2,51 +2,37 @@
 
 require 'spec_helper'
 
-RSpec.shared_examples_for 'snippet editor' do
-  before do
-    stub_feature_flags(snippets_edit_vue: false)
-  end
+RSpec.describe 'Projects > Snippets > Create Snippet', :js do
+  include DropzoneHelper
+  include Spec::Support::Helpers::Features::SnippetSpecHelpers
 
-  def description_field
-    find('.js-description-input').find('input,textarea')
-  end
-
-  def fill_form
-    fill_in 'project_snippet_title', with: 'My Snippet Title'
-
-    # Click placeholder first to expand full description field
-    description_field.click
-    fill_in 'project_snippet_description', with: 'My Snippet **Description**'
-
-    page.within('.file-editor') do
-      el = find('.inputarea')
-      el.send_keys 'Hello World!'
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) do
+    create(:project, :public, creator: user).tap do |p|
+      p.add_maintainer(user)
     end
   end
 
-  context 'when a user is authenticated' do
-    before do
-      stub_feature_flags(snippets_vue: false)
-      project.add_maintainer(user)
-      sign_in(user)
+  let(:title) { 'My Snippet Title' }
+  let(:file_content) { 'Hello World!' }
+  let(:md_description) { 'My Snippet **Description**' }
+  let(:description) { 'My Snippet Description' }
+  let(:snippet_title_field) { 'project_snippet_title' }
 
-      visit project_snippets_path(project)
-
-      # Wait for the SVG to ensure the button location doesn't shift
-      within('.empty-state') { find('img.js-lazy-loaded') }
-      click_on('New snippet')
-      wait_for_requests
+  shared_examples 'snippet creation' do
+    def fill_form
+      snippet_fill_in_form(title: title, content: file_content, description: md_description)
     end
 
     it 'shows collapsible description input' do
       collapsed = description_field
 
-      expect(page).not_to have_field('project_snippet_description')
+      expect(page).not_to have_field(snippet_description_field)
       expect(collapsed).to be_visible
 
       collapsed.click
 
-      expect(page).to have_field('project_snippet_description')
+      expect(page).to have_field(snippet_description_field)
       expect(collapsed).not_to be_visible
     end
 
@@ -55,10 +41,10 @@ RSpec.shared_examples_for 'snippet editor' do
       click_button('Create snippet')
       wait_for_requests
 
-      expect(page).to have_content('My Snippet Title')
-      expect(page).to have_content('Hello World!')
-      page.within('.snippet-header .description') do
-        expect(page).to have_content('My Snippet Description')
+      expect(page).to have_content(title)
+      expect(page).to have_content(file_content)
+      page.within(snippet_description_view_selector) do
+        expect(page).to have_content(description)
         expect(page).to have_selector('strong')
       end
     end
@@ -67,33 +53,11 @@ RSpec.shared_examples_for 'snippet editor' do
       fill_form
       dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
 
-      expect(page.find_field("project_snippet_description").value).to have_content('banana_sample')
+      expect(snippet_description_value).to have_content('banana_sample')
 
       click_button('Create snippet')
       wait_for_requests
 
-      link = find('a.no-attachment-icon img[alt="banana_sample"]')['src']
-      expect(link).to match(%r{/#{Regexp.escape(project.full_path)}/uploads/\h{32}/banana_sample\.gif\z})
-    end
-
-    it 'creates a snippet when all required fields are filled in after validation failing' do
-      fill_in 'project_snippet_title', with: 'My Snippet Title'
-      click_button('Create snippet')
-
-      expect(page).to have_selector('#error_explanation')
-
-      fill_form
-      dropzone_file Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
-
-      find("input[value='Create snippet']").send_keys(:return)
-      wait_for_requests
-
-      expect(page).to have_content('My Snippet Title')
-      expect(page).to have_content('Hello World!')
-      page.within('.snippet-header .description') do
-        expect(page).to have_content('My Snippet Description')
-        expect(page).to have_selector('strong')
-      end
       link = find('a.no-attachment-icon img[alt="banana_sample"]')['src']
       expect(link).to match(%r{/#{Regexp.escape(project.full_path)}/uploads/\h{32}/banana_sample\.gif\z})
     end
@@ -112,37 +76,56 @@ RSpec.shared_examples_for 'snippet editor' do
         wait_for_requests
       end
 
-      it 'displays the error' do
+      it 'renders the new page and displays the error' do
         expect(page).to have_content(error)
-      end
-
-      it 'renders new page' do
         expect(page).to have_content('New Snippet')
       end
     end
   end
 
-  context 'when a user is not authenticated' do
+  context 'Vue application' do
+    let(:snippet_description_field) { 'snippet-description' }
+    let(:snippet_description_view_selector) { '.snippet-header .snippet-description' }
+
     before do
-      stub_feature_flags(snippets_vue: false)
+      sign_in(user)
+
+      visit new_project_snippet_path(project)
     end
 
-    it 'shows a public snippet on the index page but not the New snippet button' do
-      snippet = create(:project_snippet, :public, :repository, project: project)
+    it_behaves_like 'snippet creation'
 
-      visit project_snippets_path(project)
+    it 'does not allow submitting the form without title and content' do
+      fill_in snippet_title_field, with: title
 
-      expect(page).to have_content(snippet.title)
-      expect(page).not_to have_content('New snippet')
+      expect(page).not_to have_button('Create snippet')
+
+      snippet_fill_in_form(title: title, content: file_content)
+      expect(page).to have_button('Create snippet')
     end
   end
-end
 
-RSpec.describe 'Projects > Snippets > Create Snippet', :js do
-  include DropzoneHelper
+  context 'non-Vue application' do
+    let(:snippet_description_field) { 'project_snippet_description' }
+    let(:snippet_description_view_selector) { '.snippet-header .description' }
 
-  let_it_be(:user) { create(:user) }
-  let_it_be(:project) { create(:project, :public) }
+    before do
+      stub_feature_flags(snippets_vue: false)
+      stub_feature_flags(snippets_edit_vue: false)
 
-  it_behaves_like "snippet editor"
+      sign_in(user)
+
+      visit new_project_snippet_path(project)
+    end
+
+    it_behaves_like 'snippet creation'
+
+    it 'displays validation errors' do
+      fill_in snippet_title_field, with: title
+      click_button('Create snippet')
+      wait_for_requests
+
+      expect(page).to have_selector('#error_explanation')
+    end
+  end
 end

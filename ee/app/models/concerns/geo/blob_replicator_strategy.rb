@@ -13,28 +13,22 @@ module Geo
     end
 
     def handle_after_create_commit
+      return false unless Gitlab::Geo.enabled?
+      return unless self.class.enabled?
+
       publish(:created, **created_params)
-
-      return unless Feature.enabled?(:geo_self_service_framework_replication, default_enabled: true)
-
       schedule_checksum_calculation if needs_checksum?
     end
 
     # Called by Gitlab::Geo::Replicator#consume
     def consume_event_created(**params)
-      return if excluded_by_selective_sync?
+      return unless in_replicables_for_geo_node?
 
       download
     end
 
-    def handle_after_destroy
-      publish(:deleted, **deleted_params)
-    end
-
     # Called by Gitlab::Geo::Replicator#consume
     def consume_event_deleted(**params)
-      return if excluded_by_selective_sync?
-
       replicate_destroy(params)
     end
 
@@ -50,7 +44,7 @@ module Geo
     #
     # @return [String] File path
     def blob_path
-      carrierwave_uploader.class.absolute_path(carrierwave_uploader)
+      carrierwave_uploader.path
     end
 
     def calculate_checksum!
@@ -99,27 +93,17 @@ module Geo
     def replicate_destroy(event_data)
       ::Geo::FileRegistryRemovalService.new(
         replicable_name,
-        model_record.id,
+        model_record_id,
         event_data[:blob_path]
       ).execute
-    end
-
-    def schedule_checksum_calculation
-      Geo::BlobVerificationPrimaryWorker.perform_async(replicable_name, model_record.id)
-    end
-
-    def created_params
-      { model_record_id: model_record.id }
     end
 
     def deleted_params
       { model_record_id: model_record.id, blob_path: blob_path }
     end
 
-    def needs_checksum?
-      return true unless model_record.respond_to?(:needs_checksum?)
-
-      model_record.needs_checksum?
+    def schedule_checksum_calculation
+      Geo::BlobVerificationPrimaryWorker.perform_async(replicable_name, model_record.id)
     end
   end
 end

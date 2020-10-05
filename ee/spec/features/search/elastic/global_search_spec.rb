@@ -146,7 +146,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 
       ensure_elasticsearch_index!
 
-      project_2.destroy
+      project_2.destroy!
 
       visit dashboard_projects_path
 
@@ -230,43 +230,22 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
       expect(page).to have_content('Users 0')
     end
   end
-
-  context 'when no results are returned' do
-    it 'allows basic search without Elasticsearch' do
-      visit dashboard_projects_path
-
-      # Disable sidekiq to ensure it does not end up in the index
-      Sidekiq::Testing.disable! do
-        create(:project, namespace: user.namespace, name: 'Will not be found but searchable')
-      end
-
-      submit_search('searchable')
-
-      expect(page).not_to have_content('Will not be found')
-
-      # Since there are no results you have the option to instead use basic
-      # search
-      click_link 'basic search'
-
-      # Project is found now that we are using basic search
-      expect(page).to have_content('Will not be found')
-    end
-
-    context 'when performing Commits search' do
-      it 'does not allow basic search' do
-        visit dashboard_projects_path
-
-        submit_search('project')
-        select_search_scope('Commits')
-
-        expect(page).not_to have_link('basic search')
-      end
-    end
-  end
 end
 
 RSpec.describe 'Global elastic search redactions', :elastic do
-  it_behaves_like 'a redacted search results page' do
-    let(:search_path) { explore_root_path }
+  context 'when block_anonymous_global_searches is disabled' do
+    before do
+      stub_feature_flags(block_anonymous_global_searches: false)
+    end
+
+    it_behaves_like 'a redacted search results page' do
+      let(:search_path) { explore_root_path }
+    end
+  end
+
+  context 'when block_anonymous_global_searches is enabled' do
+    it_behaves_like 'a redacted search results page', include_anonymous: false do
+      let(:search_path) { explore_root_path }
+    end
   end
 end

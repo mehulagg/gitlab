@@ -7,6 +7,15 @@ module Elastic
       extend Elasticsearch::Model::Indexing::ClassMethods
       extend Elasticsearch::Model::Naming::ClassMethods
 
+      # Regex patterns, Elasticsearch regex requires backslash characters to be escaped
+      # Single quotes are used to store the patterns and ruby will escape the \ appropriately
+      ANY_CASE_WORD_PATTERN = '(\p{Ll}+|\p{Lu}\p{Ll}+|\p{Lu}+)' # match words with any upper/lowercase combination
+      CAMEL_CASE_WORD_PATTERN = '(?=([\p{Lu}]+[\p{L}]+))' # match camel cased words, used to split into smaller tokens
+      CODE_TOKEN_PATTERN = '([\p{L}\d_]+)' # letters, numbers & underscores are the most common tokens in programming. Always capture them greedily regardless of context.
+      DIGIT_PATTERN = '(\d+)' # match digits of any length
+      FILE_NAME_PATTERN = '([\p{L}\p{N}_.-]+)' # some common chars in file names to keep the whole filename intact (eg. my_file-name-01.txt)
+      PERIOD_PATTERN = '\.([^.]+)(?=\.|\s|\Z)' # separate terms on periods
+
       self.index_name = [Rails.application.class.module_parent_name.downcase, Rails.env].join('-')
 
       # ES6 requires a single type per index
@@ -17,7 +26,13 @@ module Elastic
           number_of_shards: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_shards },
           number_of_replicas: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_replicas },
           highlight: {
-            max_analyzed_offset: 1.megabyte
+            # `highlight.max_analyzed_offset` is technically not measured in
+            # bytes, but rather in characters. Since this is an uppper bound on
+            # the number of characters that can be highlighted before
+            # Elasticsearch will error it is fine to use the number of bytes as
+            # the upper limit since you cannot fit more characters than bytes
+            # in a file.
+            max_analyzed_offset: Elastic::AsJSON.new { Gitlab::CurrentSettings.elasticsearch_indexed_file_size_limit_kb.kilobytes }
           },
           codec: 'best_compression',
           analysis: {
@@ -55,14 +70,12 @@ module Elastic
                 type: "pattern_capture",
                 preserve_original: true,
                 patterns: [
-                  "(\\p{Ll}+|\\p{Lu}\\p{Ll}+|\\p{Lu}+)",
-                  "(\\d+)",
-                  "(?=([\\p{Lu}]+[\\p{L}]+))",
-                  '"((?:\\"|[^"]|\\")*)"', # capture terms inside quotes, removing the quotes
-                  "'((?:\\'|[^']|\\')*)'", # same as above, for single quotes
-                  '\.([^.]+)(?=\.|\s|\Z)', # separate terms on periods
-                  '([\p{L}_.-]+)', # some common chars in file names to keep the whole filename intact (eg. my_file-name.txt)
-                  '([\p{L}\d_]+)' # letters, numbers and underscores are the most common tokens in programming. Always capture them greedily regardless of context.
+                  ANY_CASE_WORD_PATTERN,
+                  CAMEL_CASE_WORD_PATTERN,
+                  CODE_TOKEN_PATTERN,
+                  DIGIT_PATTERN,
+                  FILE_NAME_PATTERN,
+                  PERIOD_PATTERN
                 ]
               }
             },

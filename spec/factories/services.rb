@@ -77,13 +77,16 @@ FactoryBot.define do
       username { 'jira_username' }
       password { 'jira_password' }
       jira_issue_transition_id { '56-1' }
+      issues_enabled { false }
+      project_key { nil }
     end
 
-    after(:build) do |service, evaluator|
+    before(:create) do |service, evaluator|
       if evaluator.create_data
         create(:jira_tracker_data, service: service,
                url: evaluator.url, api_url: evaluator.api_url, jira_issue_transition_id: evaluator.jira_issue_transition_id,
-               username: evaluator.username, password: evaluator.password
+               username: evaluator.username, password: evaluator.password, issues_enabled: evaluator.issues_enabled,
+               project_key: evaluator.project_key
         )
       end
     end
@@ -113,7 +116,7 @@ FactoryBot.define do
     issue_tracker
   end
 
-  factory :gitlab_issue_tracker_service do
+  factory :ewm_service do
     project
     active { true }
     issue_tracker
@@ -127,7 +130,7 @@ FactoryBot.define do
       new_issue_url { 'http://new-issue.example.com' }
     end
 
-    after(:build) do |service, evaluator|
+    before(:create) do |service, evaluator|
       if evaluator.create_data
         create(:issue_tracker_data, service: service,
                project_url: evaluator.project_url, issues_url: evaluator.issues_url, new_issue_url: evaluator.new_issue_url
@@ -148,7 +151,7 @@ FactoryBot.define do
       project_identifier_code { 'PRJ-1' }
     end
 
-    after(:build) do |service, evaluator|
+    before(:create) do |service, evaluator|
       create(:open_project_tracker_data, service: service,
         url: evaluator.url, api_url: evaluator.api_url, token: evaluator.token,
         closed_status_id: evaluator.closed_status_id, project_identifier_code: evaluator.project_identifier_code
@@ -193,7 +196,7 @@ FactoryBot.define do
       IssueTrackerService.skip_callback(:validation, :before, :handle_properties)
     end
 
-    to_create { |instance| instance.save(validate: false) }
+    to_create { |instance| instance.save!(validate: false) }
 
     after(:create) do
       IssueTrackerService.set_callback(:validation, :before, :handle_properties)

@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
 import SidebarItemEpicsSelect from 'ee/sidebar/components/sidebar_item_epics_select.vue';
+import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
 
 import {
   mockSidebarStore,
@@ -99,7 +100,7 @@ describe('SidebarItemEpicsSelect', () => {
 
   describe('template', () => {
     it('should render epics-select component', () => {
-      expect(wrapper.is('epics-select-stub')).toBe(true);
+      expect(wrapper.find(EpicsSelect).element).toBe(wrapper.element);
       expect(wrapper.attributes('blocktitle')).toBe('Epic');
       expect(wrapper.text()).toBe('None');
     });

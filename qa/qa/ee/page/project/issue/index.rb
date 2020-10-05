@@ -17,14 +17,14 @@ module QA
                   element :issue_filter_input, /%input.form-control.filtered-search/ # rubocop:disable QA/ElementWithPattern
                 end
 
-                view 'ee/app/views/projects/issues/_issue_weight.html.haml' do
-                  element :issuable_weight
+                view 'app/assets/javascripts/issues_list/components/issuable.vue' do
+                  element :issuable_weight_content
                 end
               end
             end
 
             def issuable_weight
-              find_element(:issuable_weight)
+              find_element(:issuable_weight_content)
             end
 
             def wait_for_issue_replication(issue)

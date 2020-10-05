@@ -5,7 +5,13 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
-      scope :project_id_in, ->(ids) { joins(:project).merge(Project.id_in(ids)) }
+      scope :project_id_in, ->(ids) { joins(:project).merge(::Project.id_in(ids)) }
+    end
+
+    class_methods do
+      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
+        node.container_repositories
+      end
     end
 
     def push_blob(digest, file_path)

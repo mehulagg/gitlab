@@ -32,8 +32,9 @@ RSpec.describe ProjectStatistics do
         repository_size: 2.exabytes,
         wiki_size: 1.exabytes,
         lfs_objects_size: 2.exabytes,
-        build_artifacts_size: 2.exabytes - 1,
-        snippets_size: 1.exabyte
+        build_artifacts_size: 1.exabyte,
+        snippets_size: 1.exabyte,
+        pipeline_artifacts_size: 1.exabyte - 1
       )
 
       statistics.reload
@@ -42,9 +43,10 @@ RSpec.describe ProjectStatistics do
       expect(statistics.repository_size).to eq(2.exabytes)
       expect(statistics.wiki_size).to eq(1.exabytes)
       expect(statistics.lfs_objects_size).to eq(2.exabytes)
-      expect(statistics.build_artifacts_size).to eq(2.exabytes - 1)
+      expect(statistics.build_artifacts_size).to eq(1.exabyte)
       expect(statistics.storage_size).to eq(8.exabytes - 1)
       expect(statistics.snippets_size).to eq(1.exabyte)
+      expect(statistics.pipeline_artifacts_size).to eq(1.exabyte - 1)
     end
   end
 
@@ -199,6 +201,23 @@ RSpec.describe ProjectStatistics do
         statistics.refresh!(only: [:commit_count])
       end
     end
+
+    context 'when the database is read-only' do
+      it 'does nothing' do
+        allow(Gitlab::Database).to receive(:read_only?) { true }
+
+        expect(statistics).not_to receive(:update_commit_count)
+        expect(statistics).not_to receive(:update_repository_size)
+        expect(statistics).not_to receive(:update_wiki_size)
+        expect(statistics).not_to receive(:update_lfs_objects_size)
+        expect(statistics).not_to receive(:update_snippets_size)
+        expect(statistics).not_to receive(:save!)
+        expect(Namespaces::ScheduleAggregationWorker)
+          .not_to receive(:perform_async)
+
+        statistics.refresh!
+      end
+    end
   end
 
   describe '#update_commit_count' do
@@ -282,12 +301,13 @@ RSpec.describe ProjectStatistics do
         repository_size: 2,
         wiki_size: 4,
         lfs_objects_size: 3,
-        snippets_size: 2
+        snippets_size: 2,
+        pipeline_artifacts_size: 3
       )
 
       statistics.reload
 
-      expect(statistics.storage_size).to eq 11
+      expect(statistics.storage_size).to eq 14
     end
 
     it 'works during wiki_size backfill' do
@@ -321,20 +341,55 @@ RSpec.describe ProjectStatistics do
   describe '.increment_statistic' do
     shared_examples 'a statistic that increases storage_size' do
       it 'increases the statistic by that amount' do
-        expect { described_class.increment_statistic(project.id, stat, 13) }
+        expect { described_class.increment_statistic(project, stat, 13) }
           .to change { statistics.reload.send(stat) || 0 }
           .by(13)
       end
 
       it 'increases also storage size by that amount' do
-        expect { described_class.increment_statistic(project.id, stat, 20) }
-         .to change { statistics.reload.storage_size }
-         .by(20)
+        expect { described_class.increment_statistic(project, stat, 20) }
+          .to change { statistics.reload.storage_size }
+          .by(20)
+      end
+    end
+
+    shared_examples 'a statistic that increases storage_size asynchronously' do
+      it 'stores the increment temporarily in Redis', :clean_gitlab_redis_shared_state do
+        described_class.increment_statistic(project, stat, 13)
+
+        Gitlab::Redis::SharedState.with do |redis|
+          increment = redis.get(statistics.counter_key(stat))
+          expect(increment.to_i).to eq(13)
+        end
+      end
+
+      it 'schedules a worker to update the statistic and storage_size async' do
+        expect(FlushCounterIncrementsWorker)
+          .to receive(:perform_in)
+          .with(CounterAttribute::WORKER_DELAY, described_class.name, statistics.id, stat)
+
+        expect(FlushCounterIncrementsWorker)
+          .to receive(:perform_in)
+          .with(CounterAttribute::WORKER_DELAY, described_class.name, statistics.id, :storage_size)
+
+        described_class.increment_statistic(project, stat, 20)
       end
     end
 
     context 'when adjusting :build_artifacts_size' do
       let(:stat) { :build_artifacts_size }
+
+      it_behaves_like 'a statistic that increases storage_size asynchronously'
+
+      it_behaves_like 'a statistic that increases storage_size' do
+        before do
+          stub_feature_flags(efficient_counter_attribute: false)
+        end
+      end
+    end
+
+    context 'when adjusting :pipeline_artifacts_size' do
+      let(:stat) { :pipeline_artifacts_size }
 
       it_behaves_like 'a statistic that increases storage_size'
     end

@@ -80,7 +80,7 @@ RSpec.describe Ci::CreatePipelineService do
       it 'records pipeline size in a prometheus histogram' do
         histogram = spy('pipeline size histogram')
 
-        allow(Gitlab::Ci::Pipeline::Chain::Metrics)
+        allow(Gitlab::Ci::Pipeline::Metrics)
           .to receive(:new).and_return(histogram)
 
         execute_service
@@ -93,6 +93,7 @@ RSpec.describe Ci::CreatePipelineService do
         let(:merge_request_1) do
           create(:merge_request, source_branch: 'feature', target_branch: "master", source_project: project)
         end
+
         let(:merge_request_2) do
           create(:merge_request, source_branch: 'feature', target_branch: "v1.1.0", source_project: project)
         end
@@ -222,7 +223,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'auto-cancel enabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'enabled')
+          project.update!(auto_cancel_pending_pipelines: 'enabled')
         end
 
         it 'does not cancel HEAD pipeline' do
@@ -247,7 +248,7 @@ RSpec.describe Ci::CreatePipelineService do
         end
 
         it 'cancel created outdated pipelines', :sidekiq_might_not_need_inline do
-          pipeline_on_previous_commit.update(status: 'created')
+          pipeline_on_previous_commit.update!(status: 'created')
           pipeline
 
           expect(pipeline_on_previous_commit.reload).to have_attributes(status: 'canceled', auto_canceled_by_id: pipeline.id)
@@ -438,7 +439,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'auto-cancel disabled' do
         before do
-          project.update(auto_cancel_pending_pipelines: 'disabled')
+          project.update!(auto_cancel_pending_pipelines: 'disabled')
         end
 
         it 'does not auto cancel pending non-HEAD pipelines' do
@@ -512,7 +513,7 @@ RSpec.describe Ci::CreatePipelineService do
         it 'pull it from Auto-DevOps' do
           pipeline = execute_service
           expect(pipeline).to be_auto_devops_source
-          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast test])
+          expect(pipeline.builds.map(&:name)).to match_array(%w[build code_quality eslint-sast secret_detection_default_branch test])
         end
       end
 
@@ -730,30 +731,11 @@ RSpec.describe Ci::CreatePipelineService do
             .and_call_original
         end
 
-        context 'when ci_pipeline_rewind_iid is enabled' do
-          before do
-            stub_feature_flags(ci_pipeline_rewind_iid: true)
-          end
+        it 'rewinds iid' do
+          result = execute_service
 
-          it 'rewinds iid' do
-            result = execute_service
-
-            expect(result).not_to be_persisted
-            expect(internal_id.last_value).to eq(0)
-          end
-        end
-
-        context 'when ci_pipeline_rewind_iid is disabled' do
-          before do
-            stub_feature_flags(ci_pipeline_rewind_iid: false)
-          end
-
-          it 'does not rewind iid' do
-            result = execute_service
-
-            expect(result).not_to be_persisted
-            expect(internal_id.last_value).to eq(1)
-          end
+          expect(result).not_to be_persisted
+          expect(internal_id.last_value).to eq(0)
         end
       end
     end
@@ -905,6 +887,7 @@ RSpec.describe Ci::CreatePipelineService do
         stub_ci_pipeline_yaml_file(YAML.dump({
           rspec: { script: 'rspec', retry: retry_value }
         }))
+        rspec_job.update!(options: { retry: retry_value })
       end
 
       context 'as an integer' do
@@ -912,8 +895,6 @@ RSpec.describe Ci::CreatePipelineService do
 
         it 'correctly creates builds with auto-retry value configured' do
           expect(pipeline).to be_persisted
-          expect(rspec_job.options_retry_max).to eq 2
-          expect(rspec_job.options_retry_when).to eq ['always']
         end
       end
 
@@ -922,8 +903,6 @@ RSpec.describe Ci::CreatePipelineService do
 
         it 'correctly creates builds with auto-retry value configured' do
           expect(pipeline).to be_persisted
-          expect(rspec_job.options_retry_max).to eq 2
-          expect(rspec_job.options_retry_when).to eq ['runner_system_failure']
         end
       end
     end
@@ -985,7 +964,6 @@ RSpec.describe Ci::CreatePipelineService do
     context 'with release' do
       shared_examples_for 'a successful release pipeline' do
         before do
-          stub_feature_flags(ci_release_generation: true)
           stub_ci_pipeline_yaml_file(YAML.dump(config))
         end
 
@@ -1684,21 +1662,34 @@ RSpec.describe Ci::CreatePipelineService do
           expect(pipeline).to be_persisted
           expect(pipeline.builds.pluck(:name)).to contain_exactly("build_a", "test_a")
         end
+
+        it 'bulk inserts all needs' do
+          expect(Ci::BuildNeed).to receive(:bulk_insert!).and_call_original
+
+          expect(pipeline).to be_persisted
+        end
       end
 
       context 'when pipeline on feature is created' do
         let(:ref_name) { 'refs/heads/feature' }
+
+        shared_examples 'has errors' do
+          it 'contains the expected errors' do
+            expect(pipeline.builds).to be_empty
+            expect(pipeline.yaml_errors).to eq("test_a: needs 'build_a'")
+            expect(pipeline.error_messages.map(&:content)).to contain_exactly("test_a: needs 'build_a'")
+            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
+          end
+        end
 
         context 'when save_on_errors is enabled' do
           let(:pipeline) { execute_service(save_on_errors: true) }
 
           it 'does create a pipeline as test_a depends on build_a' do
             expect(pipeline).to be_persisted
-            expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to eq("test_a: needs 'build_a'")
-            expect(pipeline.messages.pluck(:content)).to contain_exactly("test_a: needs 'build_a'")
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
           end
+
+          it_behaves_like 'has errors'
         end
 
         context 'when save_on_errors is disabled' do
@@ -1706,11 +1697,9 @@ RSpec.describe Ci::CreatePipelineService do
 
           it 'does not create a pipeline as test_a depends on build_a' do
             expect(pipeline).not_to be_persisted
-            expect(pipeline.builds).to be_empty
-            expect(pipeline.yaml_errors).to be_nil
-            expect(pipeline.messages).not_to be_empty
-            expect(pipeline.errors[:base]).to contain_exactly("test_a: needs 'build_a'")
           end
+
+          it_behaves_like 'has errors'
         end
       end
 

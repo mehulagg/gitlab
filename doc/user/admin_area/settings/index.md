@@ -4,7 +4,7 @@ type: index
 
 # Admin Area settings **(CORE ONLY)**
 
-As an administrator of a GitLab self-managed instance, you can manage the behavior of your deployment. To do so, select **{admin}** **Admin Area > Settings**.
+As an administrator of a GitLab self-managed instance, you can manage the behavior of your deployment. To do so, select **Admin Area > Settings**.
 
 The admin area is not accessible on GitLab.com, and settings can only be changed by the
 GitLab.com administrators. See the [GitLab.com settings](../../gitlab_com/index.md)
@@ -12,8 +12,7 @@ documentation for all current settings and limits on the GitLab.com instance.
 
 ## General
 
-Access the default page for admin area settings by navigating to
-**{admin}** **Admin Area > Settings > General**:
+Access the default page for admin area settings by navigating to **Admin Area > Settings > General**:
 
 | Option | Description |
 | ------ | ----------- |
@@ -31,7 +30,7 @@ Access the default page for admin area settings by navigating to
 
 | Option | Description |
 | ------ | ----------- |
-| [Elasticsearch](../../../integration/elasticsearch.md#enabling-elasticsearch) | Elasticsearch integration. Elasticsearch AWS IAM. |
+| [Elasticsearch](../../../integration/elasticsearch.md#enabling-advanced-search) | Elasticsearch integration. Elasticsearch AWS IAM. |
 | [PlantUML](../../../administration/integration/plantuml.md#gitlab) | Allow rendering of PlantUML diagrams in AsciiDoc documents. |
 | [Slack application](../../../user/project/integrations/gitlab_slack_application.md#configuration) **(FREE ONLY)** | Slack integration allows you to interact with GitLab via slash commands in a chat window. This option is only available on GitLab.com, though it may be [available for self-managed instances in the future](https://gitlab.com/gitlab-org/gitlab/-/issues/28164). |
 | [Third party offers](third_party_offers.md) | Control the display of third party offers. |
@@ -43,6 +42,7 @@ Access the default page for admin area settings by navigating to
 
 | Option | Description |
 | ------ | ----------- |
+| [Repository's custom initial branch name](../../project/repository/branches/index.md#custom-initial-branch-name) | Set a custom branch name rather than master for all the new repositories created within your instance. |
 | [Repository mirror](visibility_and_access_controls.md#allow-mirrors-to-be-set-up-for-projects) | Configure repository mirroring. |
 | [Repository storage](../../../administration/repository_storage_types.md) | Configure storage path settings. |
 | Repository maintenance | ([Repository checks](../../../administration/repository_checks.md) and [Housekeeping](../../../administration/housekeeping.md)). Configure automatic Git checks and housekeeping on repositories. |
@@ -60,8 +60,8 @@ Access the default page for admin area settings by navigating to
 | Option | Description |
 | ------ | ----------- |
 | [Continuous Integration and Deployment](continuous_integration.md) | Auto DevOps, runners and job artifacts. |
-| [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration-premium-only) **(PREMIUM ONLY)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/README.md). This pipeline configuration will be run after the project's own configuration. |
-| [Package Registry](continuous_integration.md#package-registry-configuration-premium-only) **(PREMIUM ONLY)**| Settings related to the use and experience of using GitLab's Package Registry. Note there are [risks involved](./../../packages/container_registry/index.md#use-with-external-container-registries) in enabling some of these settings. |
+| [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration) **(PREMIUM ONLY)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/README.md). This pipeline configuration will be run after the project's own configuration. |
+| [Package Registry](continuous_integration.md#package-registry-configuration) | Settings related to the use and experience of using GitLab's Package Registry. Note there are [risks involved](./../../packages/container_registry/index.md#use-with-external-container-registries) in enabling some of these settings. |
 
 ## Reporting
 
@@ -89,24 +89,24 @@ Access the default page for admin area settings by navigating to
 | [User and IP rate limits](user_and_ip_rate_limits.md) | Configure limits for web and API requests. |
 | [Outbound requests](../../../security/webhooks.md) | Allow requests to the local network from hooks and services. |
 | [Protected Paths](protected_paths.md) | Configure paths to be protected by Rack Attack. |
-| [Incident Management](../../incident_management/index.md) Limits | Configure limits on the number of inbound alerts able to be sent to a project. |
+| [Incident Management](../../../operations/incident_management/index.md) Limits | Configure limits on the number of inbound alerts able to be sent to a project. |
 
 ## Geo
 
 | Option | Description |
 | ------ | ----------- |
-| Geo    | Geo allows you to replicate your GitLab instance to other geographical locations. Redirects to **{admin}** **Admin Area >** **{location-dot}** **Geo >** **{settings}** **Settings**, and will no longer be available at **{admin}** **Admin Area >** **{settings}** **Settings >** **{location-dot}** **Geo** in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/36896). |
+| Geo    | Geo allows you to replicate your GitLab instance to other geographical locations. Redirects to **Admin Area > Geo > Settings**, and will no longer be available at **Admin Area > Settings > Geo** in [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/36896). |
 
 ## Preferences
 
 | Option | Description |
 | ------ | ----------- |
 | [Email](email.md) | Various email settings. |
-| [Help page](../../../customization/help_message.md) | Help page text and support page URL. |
+| [Help page](help_page.md) | Help page text and support page URL. |
 | [Pages](../../../administration/pages/index.md#custom-domain-verification) | Size and domain settings for static websites |
 | [Real-time features](../../../administration/polling.md) | Change this value to influence how frequently the GitLab UI polls for updates. |
 | [Gitaly timeouts](gitaly_timeouts.md) | Configure Gitaly timeouts. |
-| Localization | [Default first day of the week](../../profile/preferences.md) and [Time tracking](../../project/time_tracking.md#limit-displayed-units-to-hours-core-only). |
+| Localization | [Default first day of the week](../../profile/preferences.md) and [Time tracking](../../project/time_tracking.md#limit-displayed-units-to-hours). |
 
 NOTE: **Note:**
 You can change the [Default first day of the week](../../profile/preferences.md) for the entire GitLab instance

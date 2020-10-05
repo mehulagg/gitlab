@@ -43,22 +43,14 @@ module Geo
         def load_pending_resources
           return [] unless valid_shard?
 
-          if Geo::ProjectRegistry.registry_consistency_worker_enabled?
-            project_ids =
-              registry_finder
-                .find_project_ids_pending_verification(batch_size: db_retrieve_batch_size, except_ids: scheduled_project_ids)
+          project_ids =
+            registry_finder
+              .find_project_ids_pending_verification(batch_size: db_retrieve_batch_size, except_ids: scheduled_project_ids)
 
-            Project
-              .id_in(project_ids)
-              .within_shards(shard_name)
-              .pluck_primary_key
-          else
-            Geo::ProjectRegistryPendingVerificationFinder
-              .new(current_node: current_node, shard_name: shard_name, batch_size: db_retrieve_batch_size)
-              .execute
-              .merge(Geo::ProjectRegistry.model_id_not_in(scheduled_project_ids))
-              .pluck(Geo::Fdw::Project.arel_table[:id])
-          end
+          Project
+            .id_in(project_ids)
+            .within_shards(shard_name)
+            .pluck_primary_key
         end
         # rubocop:enable CodeReuse/ActiveRecord
 

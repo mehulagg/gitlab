@@ -21,7 +21,7 @@ RSpec.describe Projects::JobsController do
       end
 
       context 'with shared runner that has quota' do
-        let(:project) { create(:project, :private, shared_runners_enabled: true) }
+        let(:project) { create(:project, :repository, :private, shared_runners_enabled: true) }
 
         before do
           stub_application_setting(shared_runners_minutes: 2)
@@ -54,7 +54,7 @@ RSpec.describe Projects::JobsController do
       end
 
       context 'when shared runner has no quota' do
-        let(:project) { create(:project, :private, shared_runners_enabled: true) }
+        let(:project) { create(:project, :repository, :private, shared_runners_enabled: true) }
 
         before do
           stub_application_setting(shared_runners_minutes: 0)
@@ -70,7 +70,7 @@ RSpec.describe Projects::JobsController do
       end
 
       context 'when project is public' do
-        let(:project) { create(:project, :public, shared_runners_enabled: true) }
+        let(:project) { create(:project, :repository, :public, shared_runners_enabled: true) }
 
         before do
           stub_application_setting(shared_runners_minutes: 2)
@@ -78,10 +78,11 @@ RSpec.describe Projects::JobsController do
           get_show(id: job.id, format: :json)
         end
 
-        it 'does not exposes quota information' do
+        it 'exposes quota information' do
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('job/job_details', dir: 'ee')
-          expect(json_response['runners']).not_to have_key('quota')
+          expect(json_response['runners']['quota']['used']).to eq 0
+          expect(json_response['runners']['quota']['limit']).to eq 2
         end
       end
     end

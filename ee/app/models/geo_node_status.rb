@@ -31,7 +31,25 @@ class GeoNodeStatus < ApplicationRecord
   alias_attribute :last_event_timestamp, :last_event_date_timestamp
   alias_attribute :cursor_last_event_timestamp, :cursor_last_event_date_timestamp
 
-  RESOURCE_STATUS_FIELDS = %w(
+  def self.status_fields_for(replicable_class)
+    {
+      "#{replicable_class.replicable_name_plural}_count".to_sym => "Number of #{replicable_class.replicable_title_plural} on the primary",
+      "#{replicable_class.replicable_name_plural}_checksummed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} checksummed on the primary",
+      "#{replicable_class.replicable_name_plural}_checksum_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to checksum on primary",
+      "#{replicable_class.replicable_name_plural}_synced_count".to_sym => "Number of #{replicable_class.replicable_title_plural} in the registry",
+      "#{replicable_class.replicable_name_plural}_failed_count".to_sym => "Number of #{replicable_class.replicable_title_plural} synced on secondary",
+      "#{replicable_class.replicable_name_plural}_registry_count".to_sym => "Number of #{replicable_class.replicable_title_plural} failed to sync on secondary"
+    }
+  end
+
+  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
+  def self.replicator_class_status_fields
+    Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
+      status_fields_for(replicable_class).keys
+    end.flatten.map(&:to_s)
+  end
+
+  RESOURCE_STATUS_FIELDS = (%w(
     repository_verification_enabled
     repositories_replication_enabled
     repositories_synced_count
@@ -75,13 +93,14 @@ class GeoNodeStatus < ApplicationRecord
     design_repositories_count
     design_repositories_synced_count
     design_repositories_failed_count
-    package_files_count
-    package_files_checksummed_count
-    package_files_checksum_failed_count
-    package_files_synced_count
-    package_files_failed_count
-    package_files_registry_count
-  ).freeze
+  ) + replicator_class_status_fields).freeze
+
+  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
+  def self.replicator_class_prometheus_metrics
+    Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
+      status_fields_for(replicable_class)
+    end.reduce({}, :merge)
+  end
 
   # Be sure to keep this consistent with Prometheus naming conventions
   PROMETHEUS_METRICS = {
@@ -153,14 +172,8 @@ class GeoNodeStatus < ApplicationRecord
     design_repositories_count: 'Total number of syncable design repositories available on primary',
     design_repositories_synced_count: 'Number of syncable design repositories synced on secondary',
     design_repositories_failed_count: 'Number of syncable design repositories failed to sync on secondary',
-    design_repositories_registry_count: 'Number of design repositories in the registry',
-    package_files_count: 'Number of package files on primary',
-    package_files_checksummed_count: 'Number of package files checksummed on primary',
-    package_files_checksum_failed_count: 'Number of package files failed to checksum on primary',
-    package_files_registry_count: 'Number of package files in the registry',
-    package_files_synced_count: 'Number of package files synced on secondary',
-    package_files_failed_count: 'Number of package files failed to sync on secondary'
-  }.freeze
+    design_repositories_registry_count: 'Number of design repositories in the registry'
+  }.merge(replicator_class_prometheus_metrics).freeze
 
   EXPIRATION_IN_MINUTES = 10
   HEALTHY_STATUS = 'Healthy'.freeze
@@ -296,9 +309,6 @@ class GeoNodeStatus < ApplicationRecord
     self.version = Gitlab::VERSION
     self.revision = Gitlab.revision
 
-    self.projects_count = geo_node.projects.count
-    self.package_files_count = Geo::PackageFileReplicator.primary_total_count
-
     load_status_message
     load_event_data
     load_primary_data
@@ -356,9 +366,17 @@ class GeoNodeStatus < ApplicationRecord
     @percentage_methods << method_name
 
     define_method(method_name) do
-      return 0 if self[total].to_i.zero?
+      return 0 if self[total].to_i == 0
 
       (self[count].to_f / self[total].to_f) * 100.0
+    end
+  end
+
+  def self.add_attr_in_percentage_for_replicable_classes
+    Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
+      replicable = replicator.replicable_name_plural
+      attr_in_percentage "#{replicable}_checksummed",  "#{replicable}_checksummed_count",  "#{replicable}_count"
+      attr_in_percentage "#{replicable}_synced",       "#{replicable}_synced_count",       "#{replicable}_registry_count"
     end
   end
 
@@ -375,8 +393,16 @@ class GeoNodeStatus < ApplicationRecord
   attr_in_percentage :replication_slots_used,        :replication_slots_used_count,        :replication_slots_count
   attr_in_percentage :container_repositories_synced, :container_repositories_synced_count, :container_repositories_count
   attr_in_percentage :design_repositories_synced,    :design_repositories_synced_count,    :design_repositories_count
-  attr_in_percentage :package_files_checksummed,     :package_files_checksummed_count,     :package_files_count
-  attr_in_percentage :package_files_synced,          :package_files_synced_count,          :package_files_registry_count
+
+  add_attr_in_percentage_for_replicable_classes
+
+  def synced_in_percentage_for(replicator_class)
+    public_send("#{replicator_class.replicable_name_plural}_synced_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
+  end
+
+  def checksummed_in_percentage_for(replicator_class)
+    public_send("#{replicator_class.replicable_name_plural}_checksummed_in_percentage") # rubocop:disable GitlabSecurity/PublicSend
+  end
 
   def storage_shards_match?
     return true if geo_node.primary?
@@ -416,13 +442,14 @@ class GeoNodeStatus < ApplicationRecord
   def load_primary_data
     return unless Gitlab::Geo.primary?
 
-    self.lfs_objects_count = LfsObject.count
-    self.job_artifacts_count = Ci::JobArtifact.not_expired.count
-    self.attachments_count = Upload.count
-
+    self.projects_count = geo_node.projects.count
     self.replication_slots_count = geo_node.replication_slots_count
     self.replication_slots_used_count = geo_node.replication_slots_used_count
     self.replication_slots_max_retained_wal_bytes = geo_node.replication_slots_max_retained_wal_bytes
+
+    Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
+      public_send("#{replicator.replicable_name_plural}_count=", replicator.primary_total_count) # rubocop:disable GitlabSecurity/PublicSend
+    end
   end
 
   def load_secondary_data
@@ -431,73 +458,79 @@ class GeoNodeStatus < ApplicationRecord
     self.db_replication_lag_seconds = Gitlab::Geo::HealthCheck.new.db_replication_lag_seconds
     self.cursor_last_event_id = current_cursor_last_event_id
     self.cursor_last_event_date = Geo::EventLog.find_by(id: self.cursor_last_event_id)&.created_at
-    self.repositories_synced_count = registries_for_synced_projects(:repository).count
-    self.repositories_failed_count = registries_for_failed_projects(:repository).count
-    self.wikis_synced_count = registries_for_synced_projects(:wiki).count
-    self.wikis_failed_count = registries_for_failed_projects(:wiki).count
 
+    load_repositories_data
     load_lfs_objects_data
     load_job_artifacts_data
     load_attachments_data
     load_container_registry_data
     load_designs_data
-    load_package_files_data
+    load_ssf_replicable_data
+  end
+
+  def load_repositories_data
+    self.projects_count = Geo::ProjectRegistry.count
+    self.repositories_synced_count = Geo::ProjectRegistry.synced(:repository).count
+    self.repositories_failed_count = Geo::ProjectRegistry.sync_failed(:repository).count
+    self.wikis_synced_count = Geo::ProjectRegistry.synced(:wiki).count
+    self.wikis_failed_count = Geo::ProjectRegistry.sync_failed(:wiki).count
   end
 
   def load_lfs_objects_data
     return unless lfs_objects_replication_enabled
 
-    self.lfs_objects_count = lfs_objects_finder.count_syncable
-    self.lfs_objects_synced_count = lfs_objects_finder.count_synced
-    self.lfs_objects_failed_count = lfs_objects_finder.count_failed
-    self.lfs_objects_registry_count = lfs_objects_finder.count_registry
-    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.count_synced_missing_on_primary
+    self.lfs_objects_count = lfs_objects_finder.registry_count
+    self.lfs_objects_synced_count = lfs_objects_finder.synced_count
+    self.lfs_objects_failed_count = lfs_objects_finder.failed_count
+    self.lfs_objects_registry_count = lfs_objects_finder.registry_count
+    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.synced_missing_on_primary_count
   end
 
   def load_job_artifacts_data
     return unless job_artifacts_replication_enabled
 
-    self.job_artifacts_count = job_artifacts_finder.count_syncable
-    self.job_artifacts_synced_count = job_artifacts_finder.count_synced
-    self.job_artifacts_failed_count = job_artifacts_finder.count_failed
-    self.job_artifacts_registry_count = job_artifacts_finder.count_registry
-    self.job_artifacts_synced_missing_on_primary_count = job_artifacts_finder.count_synced_missing_on_primary
+    self.job_artifacts_count = job_artifacts_finder.registry_count
+    self.job_artifacts_synced_count = job_artifacts_finder.synced_count
+    self.job_artifacts_failed_count = job_artifacts_finder.failed_count
+    self.job_artifacts_registry_count = job_artifacts_finder.registry_count
+    self.job_artifacts_synced_missing_on_primary_count = job_artifacts_finder.synced_missing_on_primary_count
   end
 
   def load_attachments_data
     return unless attachments_replication_enabled
 
-    self.attachments_count = attachments_finder.count_syncable
-    self.attachments_synced_count = attachments_finder.count_synced
-    self.attachments_failed_count = attachments_finder.count_failed
-    self.attachments_registry_count = attachments_finder.count_registry
-    self.attachments_synced_missing_on_primary_count = attachments_finder.count_synced_missing_on_primary
+    self.attachments_count = attachments_finder.registry_count
+    self.attachments_synced_count = attachments_finder.synced_count
+    self.attachments_failed_count = attachments_finder.failed_count
+    self.attachments_registry_count = attachments_finder.registry_count
+    self.attachments_synced_missing_on_primary_count = attachments_finder.synced_missing_on_primary_count
   end
 
   def load_container_registry_data
     return unless container_repositories_replication_enabled
 
-    self.container_repositories_count = container_registry_finder.count_syncable
-    self.container_repositories_synced_count = container_registry_finder.count_synced
-    self.container_repositories_failed_count = container_registry_finder.count_failed
-    self.container_repositories_registry_count = container_registry_finder.count_registry
+    self.container_repositories_count = container_registry_finder.registry_count
+    self.container_repositories_synced_count = container_registry_finder.synced_count
+    self.container_repositories_failed_count = container_registry_finder.failed_count
+    self.container_repositories_registry_count = container_registry_finder.registry_count
   end
 
   def load_designs_data
     return unless design_repositories_replication_enabled
 
-    self.design_repositories_count = design_registry_finder.count_syncable
-    self.design_repositories_synced_count = design_registry_finder.count_synced
-    self.design_repositories_failed_count = design_registry_finder.count_failed
-    self.design_repositories_registry_count = design_registry_finder.count_registry
+    self.design_repositories_count = design_registry_finder.registry_count
+    self.design_repositories_synced_count = design_registry_finder.synced_count
+    self.design_repositories_failed_count = design_registry_finder.failed_count
+    self.design_repositories_registry_count = design_registry_finder.registry_count
   end
 
-  def load_package_files_data
-    # return unless package_files_replication_enabled # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/221069
-
-    self.package_files_registry_count = Geo::PackageFileReplicator.registry_count
-    self.package_files_synced_count = Geo::PackageFileReplicator.synced_count
-    self.package_files_failed_count = Geo::PackageFileReplicator.failed_count
+  def load_ssf_replicable_data
+    Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
+      public_send("#{replicator.replicable_name_plural}_count=", replicator.registry_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_registry_count=", replicator.registry_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_synced_count=", replicator.synced_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_failed_count=", replicator.failed_count) # rubocop:disable GitlabSecurity/PublicSend
+    end
   end
 
   def load_repository_check_data
@@ -514,22 +547,33 @@ class GeoNodeStatus < ApplicationRecord
     return unless repository_verification_enabled
 
     if Gitlab::Geo.primary?
-      self.repositories_checksummed_count = repository_verification_finder.count_verified_repositories
-      self.repositories_checksum_failed_count = repository_verification_finder.count_verification_failed_repositories
-      self.wikis_checksummed_count = repository_verification_finder.count_verified_wikis
-      self.wikis_checksum_failed_count = repository_verification_finder.count_verification_failed_wikis
-      self.package_files_checksummed_count = Geo::PackageFileReplicator.checksummed_count
-      self.package_files_checksum_failed_count = Geo::PackageFileReplicator.checksum_failed_count
+      load_primary_verification_data
     elsif Gitlab::Geo.secondary?
-      self.repositories_verified_count = registries_for_verified_projects(:repository).count
-      self.repositories_verification_failed_count = registries_for_verification_failed_projects(:repository).count
-      self.repositories_checksum_mismatch_count = registries_for_mismatch_projects(:repository).count
-      self.wikis_verified_count = registries_for_verified_projects(:wiki).count
-      self.wikis_verification_failed_count = registries_for_verification_failed_projects(:wiki).count
-      self.wikis_checksum_mismatch_count = registries_for_mismatch_projects(:wiki).count
-      self.repositories_retrying_verification_count = registries_retrying_verification(:repository).count
-      self.wikis_retrying_verification_count = registries_retrying_verification(:wiki).count
+      load_secondary_verification_data
     end
+  end
+
+  def load_primary_verification_data
+    self.repositories_checksummed_count = repository_verification_finder.count_verified_repositories
+    self.repositories_checksum_failed_count = repository_verification_finder.count_verification_failed_repositories
+    self.wikis_checksummed_count = repository_verification_finder.count_verified_wikis
+    self.wikis_checksum_failed_count = repository_verification_finder.count_verification_failed_wikis
+
+    Gitlab::Geo::REPLICATOR_CLASSES.each do |replicator|
+      public_send("#{replicator.replicable_name_plural}_checksummed_count=", replicator.checksummed_count) # rubocop:disable GitlabSecurity/PublicSend
+      public_send("#{replicator.replicable_name_plural}_checksum_failed_count=", replicator.checksum_failed_count) # rubocop:disable GitlabSecurity/PublicSend
+    end
+  end
+
+  def load_secondary_verification_data
+    self.repositories_verified_count = Geo::ProjectRegistry.verified(:repository).count
+    self.repositories_verification_failed_count = Geo::ProjectRegistry.verification_failed(:repository).count
+    self.repositories_checksum_mismatch_count = Geo::ProjectRegistry.mismatch(:repository).count
+    self.wikis_verified_count = Geo::ProjectRegistry.verified(:wiki).count
+    self.wikis_verification_failed_count = Geo::ProjectRegistry.verification_failed(:wiki).count
+    self.wikis_checksum_mismatch_count = Geo::ProjectRegistry.mismatch(:wiki).count
+    self.repositories_retrying_verification_count = Geo::ProjectRegistry.retrying_verification(:repository).count
+    self.wikis_retrying_verification_count = Geo::ProjectRegistry.retrying_verification(:wiki).count
   end
 
   def primary_storage_digest
@@ -537,59 +581,23 @@ class GeoNodeStatus < ApplicationRecord
   end
 
   def attachments_finder
-    @attachments_finder ||= Geo::AttachmentRegistryFinder.new(current_node_id: geo_node.id)
+    @attachments_finder ||= Geo::AttachmentRegistryFinder.new
   end
 
   def lfs_objects_finder
-    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new(current_node_id: geo_node.id)
+    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new
   end
 
   def job_artifacts_finder
-    @job_artifacts_finder ||= Geo::JobArtifactRegistryFinder.new(current_node_id: geo_node.id)
+    @job_artifacts_finder ||= Geo::JobArtifactRegistryFinder.new
   end
 
   def container_registry_finder
-    @container_registry_finder ||= Geo::ContainerRepositoryRegistryFinder.new(current_node_id: geo_node.id)
+    @container_registry_finder ||= Geo::ContainerRepositoryRegistryFinder.new
   end
 
   def design_registry_finder
-    @design_registry_finder ||= Geo::DesignRegistryFinder.new(current_node_id: geo_node.id)
-  end
-
-  def registries_for_synced_projects(type)
-    Geo::ProjectRegistrySyncedFinder
-      .new(current_node: geo_node, type: type)
-      .execute
-  end
-
-  def registries_for_failed_projects(type)
-    Geo::ProjectRegistrySyncFailedFinder
-      .new(current_node: geo_node, type: type)
-      .execute
-  end
-
-  def registries_for_verified_projects(type)
-    Geo::ProjectRegistryVerifiedFinder
-      .new(current_node: geo_node, type: type)
-      .execute
-  end
-
-  def registries_for_verification_failed_projects(type)
-    Geo::ProjectRegistryVerificationFailedFinder
-      .new(current_node: geo_node, type: type)
-      .execute
-  end
-
-  def registries_for_mismatch_projects(type)
-    Geo::ProjectRegistryMismatchFinder
-      .new(current_node: geo_node, type: type)
-      .execute
-  end
-
-  def registries_retrying_verification(type)
-    Geo::ProjectRegistryRetryingVerificationFinder
-      .new(current_node: geo_node, type: type)
-      .execute
+    @design_registry_finder ||= Geo::DesignRegistryFinder.new
   end
 
   def repository_verification_finder

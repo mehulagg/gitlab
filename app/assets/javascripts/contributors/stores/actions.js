@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __ } from '~/locale';
 import service from '../services/contributors_service';
 import * as types from './mutation_types';
@@ -15,6 +15,3 @@ export const fetchChartData = ({ commit }, endpoint) => {
     })
     .catch(() => flash(__('An error occurred while loading chart data')));
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

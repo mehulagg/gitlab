@@ -1,5 +1,0 @@
----
-title: Remove SELECT N+1 on software license policies
-merge_request: 34866
-author:
-type: fixed

@@ -15,9 +15,15 @@ export default {
       type: Object,
       required: true,
     },
-    milestonePath: {
-      type: String,
-      required: true,
+    groupId: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    projectId: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     canEdit: {
       type: Boolean,
@@ -71,7 +77,7 @@ export default {
 
 <template>
   <div class="block milestone">
-    <div class="title append-bottom-10">
+    <div class="title gl-mb-3">
       {{ __('Milestone') }}
       <button v-if="canEdit" type="button" class="edit-link btn btn-blank float-right">
         {{ __('Edit') }}
@@ -84,7 +90,8 @@ export default {
         <button
           ref="dropdownButton"
           :data-selected="selected"
-          :data-milestones="milestonePath"
+          :data-project-id="projectId"
+          :data-group-id="groupId"
           :data-show-no="true"
           :data-show-any="true"
           :data-show-started="true"
@@ -97,7 +104,7 @@ export default {
           {{ __('Milestone') }}
           <gl-icon
             name="chevron-down"
-            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-700"
+            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
             :size="16"
           />
         </button>
@@ -111,11 +118,11 @@ export default {
             />
             <gl-icon
               name="search"
-              class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-500 gl-pointer-events-none"
+              class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-300 gl-pointer-events-none"
             />
             <gl-icon
               name="close"
-              class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-700"
+              class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-500"
             />
           </div>
           <div class="dropdown-content"></div>

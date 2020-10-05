@@ -1,5 +1,5 @@
 - if ::Gitlab::CurrentSettings.custom_project_templates_enabled?
-  %section.settings.as-custom-project-templates.no-animate#js-custom-project-templates-settings.qa-custom-project-template-section{ class: ('expanded' if expanded) }
+  %section.settings.as-custom-project-templates.no-animate#js-custom-project-templates-settings{ class: ('expanded' if expanded), data: { qa_selector: 'custom_project_template_content' } }
     .settings-header
       %h4
         = _('Custom project templates')

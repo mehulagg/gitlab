@@ -357,6 +357,21 @@ RSpec.describe Banzai::Filter::IterationReferenceFilter do
           end
         end
       end
+
+      context 'for private subgroups' do
+        let(:sub_group) { create(:group, :private, parent: group) }
+        let(:sub_group_iteration) { create(:iteration, title: 'sub_group_iteration', group: sub_group) }
+
+        it 'links to a valid reference of subgroup and group iterations' do
+          [group_iteration, sub_group_iteration].each do |iteration|
+            reference = "*iteration:#{iteration.title}"
+
+            result = reference_filter("See #{reference}", { project: nil, group: sub_group })
+
+            expect(result.css('a').first.attr('href')).to eq(urls.iteration_url(iteration))
+          end
+        end
+      end
     end
   end
 

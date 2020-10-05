@@ -17,6 +17,14 @@ RSpec.describe ProjectWiki, :elastic do
     end
   end
 
+  describe '#use_elasticsearch?' do
+    it 'delegates to Project#use_elasticsearch?' do
+      expect(project).to receive(:use_elasticsearch?)
+
+      project.wiki.use_elasticsearch?
+    end
+  end
+
   it "searches wiki page" do
     expect(project.wiki.elastic_search('term1', type: 'wiki_blob')[:wiki_blobs][:total_count]).to eq(1)
     expect(project.wiki.elastic_search('term1 | term2', type: 'wiki_blob')[:wiki_blobs][:total_count]).to eq(2)

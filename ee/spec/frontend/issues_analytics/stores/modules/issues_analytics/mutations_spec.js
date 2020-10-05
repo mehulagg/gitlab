@@ -2,7 +2,7 @@ import createState from 'ee/issues_analytics/stores/modules/issue_analytics/stat
 import mutations from 'ee/issues_analytics/stores/modules/issue_analytics/mutations';
 import * as types from 'ee/issues_analytics/stores/modules/issue_analytics/mutation_types';
 
-describe('Issues Analytics mutations', () => {
+describe('Issue Analytics mutations', () => {
   let state;
 
   beforeEach(() => {

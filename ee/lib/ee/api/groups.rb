@@ -43,6 +43,9 @@ module EE
             params.delete(:file_template_project_id) unless
               group.feature_available?(:custom_file_templates_for_namespace)
 
+            params.delete(:prevent_forking_outside_group) unless
+              can?(current_user, :change_prevent_group_forking, group)
+
             super
           end
 
@@ -89,6 +92,7 @@ module EE
             before do
               authorize! :admin_group, user_group
               check_audit_events_available!(user_group)
+              increment_unique_values('a_compliance_audit_events_api', current_user.id)
             end
 
             desc 'Get a list of audit events in this group.' do

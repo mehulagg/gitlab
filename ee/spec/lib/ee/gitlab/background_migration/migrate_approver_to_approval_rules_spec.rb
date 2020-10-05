@@ -157,8 +157,8 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRules do
 
       context 'when approvals_before_merge is nil' do
         it "updates with project's approvals_required" do
-          target.target_project.update(approvals_before_merge: 3)
-          target.update(approvals_before_merge: nil)
+          target.target_project.update!(approvals_before_merge: 3)
+          target.update!(approvals_before_merge: nil)
           create_member_in(create(:user), :old_schema)
 
           described_class.new.perform(target_type, target.id)
@@ -169,8 +169,8 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRules do
 
       context 'when approvals_before_merge is too big' do
         it "caps at allowed maximum" do
-          target.target_project.update(approvals_before_merge: ::ApprovalRuleLike::APPROVALS_REQUIRED_MAX + 1)
-          target.update(approvals_before_merge: nil)
+          target.target_project.update!(approvals_before_merge: ::ApprovalRuleLike::APPROVALS_REQUIRED_MAX + 1)
+          target.update!(approvals_before_merge: nil)
           create_member_in(create(:user), :old_schema)
 
           described_class.new.perform(target_type, target.id)
@@ -221,7 +221,7 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRules do
 
             rule = target.approval_rules.first
 
-            expect(rule.read_attribute(:code_owner)).to eq(true)
+            expect(rule.code_owner).to eq(true)
             expect(rule.users).to contain_exactly(*owners)
           end
         end
@@ -272,7 +272,7 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateApproverToApprovalRules do
     let(:target_type) { 'Project' }
 
     it "does not err" do
-      target.destroy
+      target.destroy!
 
       expect do
         described_class.new.perform(target_type, target.id)

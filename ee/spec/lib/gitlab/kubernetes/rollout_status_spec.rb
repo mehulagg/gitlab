@@ -7,7 +7,6 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
 
   let(:track) { nil }
   let(:specs) { specs_all_finished }
-  let(:legacy_deployments) { [] }
 
   let(:pods) do
     create_pods(name: "one", count: 3, track: 'stable') + create_pods(name: "two", count: 3, track: "canary")
@@ -27,26 +26,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     ]
   end
 
-  subject(:rollout_status) { described_class.from_deployments(*specs, pods: pods, legacy_deployments: legacy_deployments) }
-
-  describe '#has_legacy_app_label?' do
-    let(:specs) { [] }
-    let(:pods)  { [] }
-
-    context 'no legacy deployments' do
-      it { is_expected.not_to be_has_legacy_app_label }
-    end
-
-    context 'with legacy deployment' do
-      let(:legacy_deployments) do
-        [
-          kube_deployment(name: 'legacy')
-        ]
-      end
-
-      it { is_expected.to be_has_legacy_app_label }
-    end
-  end
+  subject(:rollout_status) { described_class.from_deployments(*specs, pods_attrs: pods) }
 
   describe '#deployments' do
     it 'stores the deployments' do
@@ -85,7 +65,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
         create_pods(name: "one", count: 3, track: 'stable') + create_pods(name: "two", count: 3, track: track)
       end
 
-      it 'stores the union of deployment instances' do
+      it 'sorts stable instances last' do
         expected = [
           { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
           { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
@@ -104,6 +84,8 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     subject { rollout_status.completion }
 
     context 'when all instances are finished' do
+      let(:track) { 'canary' }
+
       it { is_expected.to eq(100) }
     end
 
@@ -118,12 +100,83 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
 
       it { is_expected.to eq(50) }
     end
+
+    context 'with one deployment' do
+      it 'sets the completion percentage when a deployment has more running pods than desired' do
+        deployments = [kube_deployment(name: 'one', track: 'one', replicas: 2)]
+        pods = create_pods(name: 'one', track: 'one', count: 3)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+    end
+
+    context 'with two deployments on different tracks' do
+      it 'sets the completion percentage when all pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'one', replicas: 2),
+          kube_deployment(name: 'two', track: 'two', replicas: 2)
+        ]
+        pods = create_pods(name: 'one', track: 'one', count: 2) + create_pods(name: 'two', track: 'two', count: 2)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+    end
+
+    context 'with two deployments that both have track set to "stable"' do
+      it 'sets the completion percentage when all pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 2),
+          kube_deployment(name: 'two', track: 'stable', replicas: 2)
+        ]
+        pods = create_pods(name: 'one', track: 'stable', count: 2) + create_pods(name: 'two', track: 'stable', count: 2)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+
+      it 'sets the completion percentage when no pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 3),
+          kube_deployment(name: 'two', track: 'stable', replicas: 7)
+        ]
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: [])
+
+        expect(rollout_status.completion).to eq(0)
+      end
+    end
+
+    context 'with two deployments, one with track set to "stable" and one with no track label' do
+      it 'sets the completion percentage when all pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 3),
+          kube_deployment(name: 'two', track: nil, replicas: 3)
+        ]
+        pods = create_pods(name: 'one', track: 'stable', count: 3) + create_pods(name: 'two', track: nil, count: 3)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+
+      it 'sets the completion percentage when no pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 1),
+          kube_deployment(name: 'two', track: nil, replicas: 1)
+        ]
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: [])
+
+        expect(rollout_status.completion).to eq(0)
+      end
+    end
   end
 
   describe '#complete?' do
     subject { rollout_status.complete? }
 
     context 'when all instances are finished' do
+      let(:track) { 'canary' }
+
       it { is_expected.to be_truthy }
     end
 

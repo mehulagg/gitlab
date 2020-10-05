@@ -5,4 +5,4 @@
     = f.check_box :delayed_project_removal, checked: group.delayed_project_removal?, class: 'form-check-input'
     = f.label :delayed_project_removal, class: 'form-check-label' do
       %span.gl-display-block= s_('GroupSettings|Enable delayed project removal')
-      %span.gl-text-gray-600= s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day waiting period. This period can be %{customization_link} in instance settings').html_safe % { waiting_period: ::Gitlab::CurrentSettings.deletion_adjourned_period, customization_link: link_to('customized by an admin', general_admin_application_settings_path) }
+      %span.gl-text-gray-400= s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{customization_link} in instance settings').html_safe % { waiting_period: ::Gitlab::CurrentSettings.deletion_adjourned_period, customization_link: link_to('customized by an admin', general_admin_application_settings_path) }

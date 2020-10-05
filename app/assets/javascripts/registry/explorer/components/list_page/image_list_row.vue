@@ -2,7 +2,7 @@
 import { GlTooltipDirective, GlIcon, GlSprintf } from '@gitlab/ui';
 import { n__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import ListItem from '../list_item.vue';
+import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import DeleteButton from '../delete_button.vue';
 
 import {
@@ -42,6 +42,7 @@ export default {
         name: this.item.path,
         tags_path: this.item.tags_path,
         id: this.item.id,
+        cleanup_policy_started_at: this.item.cleanup_policy_started_at,
       });
       return window.btoa(params);
     },
@@ -71,7 +72,7 @@ export default {
   >
     <template #left-primary>
       <router-link
-        class="gl-text-black-normal gl-font-weight-bold"
+        class="gl-text-body gl-font-weight-bold"
         data-testid="detailsLink"
         :to="{ name: 'details', params: { id: encodedItem } }"
       >
@@ -82,7 +83,7 @@ export default {
         :disabled="item.deleting"
         :text="item.location"
         :title="item.location"
-        css-class="btn-default btn-transparent btn-clipboard gl-text-gray-500"
+        category="tertiary"
       />
       <gl-icon
         v-if="item.failedDelete"

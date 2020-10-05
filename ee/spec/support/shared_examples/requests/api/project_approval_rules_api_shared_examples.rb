@@ -38,7 +38,7 @@ RSpec.shared_examples 'an API endpoint for creating project approval rule' do
 
       project.reset_approvals_on_push = false
       project.disable_overriding_approvers_per_merge_request = true
-      project.save
+      project.save!
 
       post api(url, current_user), params: params
 
@@ -144,7 +144,7 @@ RSpec.shared_examples 'an API endpoint for updating project approval rule' do
 
   context 'as a random user' do
     it 'returns 403' do
-      project.approvers.create(user: approver)
+      project.approvers.create!(user: approver)
 
       expect do
         put api(url, user2), params: { users: [], groups: [] }.to_json, headers: { CONTENT_TYPE: 'application/json' }

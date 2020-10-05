@@ -28,7 +28,7 @@ module QA
         end
       end
 
-      it 'locks a directory and tries to push as a second user' do
+      it 'locks a directory and tries to push as a second user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/557' do
         push branch: 'master', file: 'directory/file', as_user: @user_one
 
         sign_out_and_sign_in_as user: @user_one
@@ -39,7 +39,7 @@ module QA
         expect_no_error_on_push for_file: 'directory/file', as_user: @user_one
       end
 
-      it 'locks a file and tries to push as a second user' do
+      it 'locks a file and tries to push as a second user', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/558' do
         sign_out_and_sign_in_as user: @user_one
         go_to_file
         click_lock
@@ -48,7 +48,7 @@ module QA
         expect_no_error_on_push as_user: @user_one
       end
 
-      it 'checks file locked by other user to be disabled' do
+      it 'checks file locked by other user to be disabled', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/556' do
         go_to_file
         click_lock
         sign_out_and_sign_in_as user: @user_one
@@ -59,7 +59,7 @@ module QA
         end
       end
 
-      it 'creates a merge request and fails to merge', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/issues/40125', type: :bug } do
+      it 'creates a merge request and fails to merge', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/issues/40125', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/559' do
         push branch: 'test', as_user: @user_one
 
         merge_request = Resource::MergeRequest.fabricate_via_api! do |merge_request|
@@ -77,7 +77,7 @@ module QA
         expect(page).to have_text("locked by #{admin_username}")
       end
 
-      it 'locks a file and unlocks in list' do
+      it 'locks a file and unlocks in list', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/555' do
         sign_out_and_sign_in_as user: @user_one
         go_to_file
         click_lock

@@ -16,8 +16,6 @@ RSpec.describe Projects::UpdatePagesService do
   subject { described_class.new(project, build) }
 
   before do
-    stub_feature_flags(safezip_use_rubyzip: true)
-
     project.remove_pages
   end
 
@@ -29,8 +27,9 @@ RSpec.describe Projects::UpdatePagesService do
 
   context 'for new artifacts' do
     context "for a valid job" do
+      let!(:artifacts_archive) { create(:ci_job_artifact, file: file, job: build) }
+
       before do
-        create(:ci_job_artifact, file: file, job: build)
         create(:ci_job_artifact, file_type: :metadata, file_format: :gzip, file: metadata, job: build)
 
         build.reload
@@ -49,11 +48,12 @@ RSpec.describe Projects::UpdatePagesService do
         expect(project.pages_deployed?).to be_falsey
         expect(execute).to eq(:success)
         expect(project.pages_metadatum).to be_deployed
+        expect(project.pages_metadatum.artifacts_archive).to eq(artifacts_archive)
         expect(project.pages_deployed?).to be_truthy
 
         # Check that all expected files are extracted
         %w[index.html zero .hidden/file].each do |filename|
-          expect(File.exist?(File.join(project.public_pages_path, filename))).to be_truthy
+          expect(File.exist?(File.join(project.pages_path, 'public', filename))).to be_truthy
         end
       end
 
@@ -65,15 +65,17 @@ RSpec.describe Projects::UpdatePagesService do
       it 'removes pages after destroy' do
         expect(PagesWorker).to receive(:perform_in)
         expect(project.pages_deployed?).to be_falsey
+        expect(Dir.exist?(File.join(project.pages_path))).to be_falsey
 
         expect(execute).to eq(:success)
 
         expect(project.pages_metadatum).to be_deployed
         expect(project.pages_deployed?).to be_truthy
+        expect(Dir.exist?(File.join(project.pages_path))).to be_truthy
 
         project.destroy
 
-        expect(project.pages_deployed?).to be_falsey
+        expect(Dir.exist?(File.join(project.pages_path))).to be_falsey
         expect(ProjectPagesMetadatum.find_by_project_id(project)).to be_nil
       end
 
@@ -100,10 +102,6 @@ RSpec.describe Projects::UpdatePagesService do
         let(:file) { fixture_file_upload("spec/fixtures/pages_non_writeable.zip") }
 
         context 'when using RubyZip' do
-          before do
-            stub_feature_flags(safezip_use_rubyzip: true)
-          end
-
           it 'succeeds to extract' do
             expect(execute).to eq(:success)
             expect(project.pages_metadatum).to be_deployed
@@ -160,19 +158,9 @@ RSpec.describe Projects::UpdatePagesService do
       end
 
       context 'with background jobs running', :sidekiq_inline do
-        where(:ci_atomic_processing) do
-          [true, false]
-        end
-
-        with_them do
-          before do
-            stub_feature_flags(ci_atomic_processing: ci_atomic_processing)
-          end
-
-          it 'succeeds' do
-            expect(project.pages_deployed?).to be_falsey
-            expect(execute).to eq(:success)
-          end
+        it 'succeeds' do
+          expect(project.pages_deployed?).to be_falsey
+          expect(execute).to eq(:success)
         end
       end
     end

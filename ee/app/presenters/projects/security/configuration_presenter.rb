@@ -5,12 +5,14 @@ module Projects
     class ConfigurationPresenter < Gitlab::View::Presenter::Delegated
       include Gitlab::Utils::StrongMemoize
       include AutoDevopsHelper
+      include LatestPipelineInformation
 
       presents :project
 
       SCAN_DOCS = {
         container_scanning: 'user/application_security/container_scanning/index',
         dast: 'user/application_security/dast/index',
+        dast_profiles: 'user/application_security/dast/index',
         dependency_scanning: 'user/application_security/dependency_scanning/index',
         license_management: 'user/compliance/license_compliance/index',
         license_scanning: 'user/compliance/license_compliance/index',
@@ -23,12 +25,13 @@ module Projects
         {
           container_scanning: _('Check your Docker images for known vulnerabilities.'),
           dast: _('Analyze a review version of your web application.'),
+          dast_profiles: _('Saved scan settings and target site settings which are reusable.'),
           dependency_scanning: _('Analyze your dependencies for known vulnerabilities.'),
           license_management: _('Search your project dependencies for their licenses and apply policies.'),
           license_scanning: _('Search your project dependencies for their licenses and apply policies.'),
           sast: _('Analyze your source code for known vulnerabilities.'),
           secret_detection: _('Analyze your source code and git history for secrets.'),
-          coverage_fuzzing: _('Find bugs in your code with coverage-guided fuzzing')
+          coverage_fuzzing: _('Find bugs in your code with coverage-guided fuzzing.')
         }.freeze
       end
 
@@ -36,6 +39,7 @@ module Projects
         {
           container_scanning: _('Container Scanning'),
           dast: _('Dynamic Application Security Testing (DAST)'),
+          dast_profiles: _('DAST Profiles'),
           dependency_scanning: _('Dependency Scanning'),
           license_management: 'License Management',
           license_scanning: _('License Compliance'),
@@ -52,20 +56,33 @@ module Projects
           create_sast_merge_request_path: project_security_configuration_sast_path(project),
           auto_devops_path: auto_devops_settings_path(project),
           can_enable_auto_devops: can_enable_auto_devops?,
-          features: features.to_json,
+          features: features,
           help_page_path: help_page_path('user/application_security/index'),
           latest_pipeline_path: latest_pipeline_path,
-          auto_fix_enabled: {
-            dependency_scanning: project_settings.auto_fix_dependency_scanning,
-            container_scanning: project_settings.auto_fix_container_scanning
-          }.to_json,
+          auto_fix_enabled: autofix_enabled,
           can_toggle_auto_fix_settings: auto_fix_permission,
           gitlab_ci_present: gitlab_ci_present?,
+          gitlab_ci_history_path: gitlab_ci_history_path,
           auto_fix_user_path: '/' # TODO: real link will be updated with https://gitlab.com/gitlab-org/gitlab/-/issues/215669
         }
       end
 
+      def to_html_data_attribute
+        data = to_h
+        data[:features] = data[:features].to_json
+        data[:auto_fix_enabled] = data[:auto_fix_enabled].to_json
+
+        data
+      end
+
       private
+
+      def autofix_enabled
+        {
+          dependency_scanning: project_settings.auto_fix_dependency_scanning,
+          container_scanning: project_settings.auto_fix_container_scanning
+        }
+      end
 
       def can_enable_auto_devops?
         feature_available?(:builds, current_user) &&
@@ -74,45 +91,27 @@ module Projects
       end
 
       def gitlab_ci_present?
-        latest_pipeline_for_ref.try(:config_path) == Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+        latest_pipeline.try(:config_path) == Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+      end
+
+      def gitlab_ci_history_path
+        gitlab_ci = Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch, gitlab_ci))
       end
 
       def features
         scans = scan_types.map do |scan_type|
-          if auto_devops_source?
-            scan(scan_type, configured: true)
-          elsif latest_builds_reports.include?(scan_type)
-            scan(scan_type, configured: true)
+          if scanner_enabled?(scan_type)
+            scan(scan_type, configured: true, status: auto_devops_source? ? s_('SecurityConfiguration|Enabled with Auto DevOps') : s_('SecurityConfiguration|Enabled'))
           else
-            scan(scan_type, configured: false)
+            scan(scan_type, configured: false, status: s_('SecurityConfiguration|Not enabled'))
           end
         end
 
         # TODO: remove this line with #8912
         license_compliance_substitute(scans)
-      end
 
-      def latest_builds_reports
-        strong_memoize(:reports) do
-          latest_security_builds.map do |build|
-            if Feature.enabled?(:ci_build_metadata_config)
-              build.metadata.config_options[:artifacts][:reports].keys.map(&:to_sym)
-            else
-              build.options[:artifacts][:reports].keys
-            end
-          end.flatten
-        end
-      end
-
-      def latest_security_builds
-        return [] unless latest_default_branch_pipeline
-
-        ::Security::SecurityJobsFinder.new(pipeline: latest_default_branch_pipeline).execute +
-          ::Security::LicenseComplianceJobsFinder.new(pipeline: latest_default_branch_pipeline).execute
-      end
-
-      def latest_default_branch_pipeline
-        strong_memoize(:pipeline) { latest_pipeline_for_ref }
+        dast_profiles_insert(scans)
       end
 
       def latest_pipeline_path
@@ -134,23 +133,34 @@ module Projects
         if license_compliance_config
           scans.map do |scan_type|
             scan_type[:configured] = true if scan_type[:name] == _('License Compliance')
+            scan_type[:status] = s_('SecurityConfiguration|Enabled') if scan_type[:name] == _('License Compliance')
           end
         end
 
         scans
       end
 
-      def scan(type, configured: false)
-        {
-          configured: configured,
-          description: self.class.localized_scan_descriptions[type],
-          link: help_page_path(SCAN_DOCS[type]),
-          name: localized_scan_names[type]
-        }
+      # DAST On-demand scans is a static (non job) entry.  Add it manually following DAST
+      def dast_profiles_insert(scans)
+        index = scans.index { |scan| scan[:name] == localized_scan_names[:dast] }
+
+        unless index.nil?
+          scans.insert(index + 1, scan(:dast_profiles, configured: true, status: s_('SecurityConfiguration|Available for on-demand DAST')))
+        end
+
+        scans
       end
 
-      def auto_devops_source?
-        latest_default_branch_pipeline&.auto_devops_source?
+      def scan(type, configured: false, status:)
+        {
+          type: type,
+          configured: configured,
+          status: status,
+          description: self.class.localized_scan_descriptions[type],
+          link: help_page_path(SCAN_DOCS[type]),
+          configuration_path: configuration_path(type),
+          name: localized_scan_names[type]
+        }
       end
 
       def scan_types
@@ -163,6 +173,13 @@ module Projects
 
       def project_settings
         ProjectSecuritySetting.safe_find_or_create_for(project)
+      end
+
+      def configuration_path(type)
+        {
+          sast: project_security_configuration_sast_path(project),
+          dast_profiles: project_security_configuration_dast_profiles_path(project)
+        }[type]
       end
     end
   end

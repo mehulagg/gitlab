@@ -1,0 +1,9 @@
+.merge-request-analytics-wrapper {
+  .merge-request-title {
+    max-width: px-to-rem($issuable-title-max-width);
+  }
+
+  .milestone-title {
+    max-width: px-to-rem($milestone-title-max-width);
+  }
+}

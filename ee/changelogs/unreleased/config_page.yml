@@ -1,5 +1,0 @@
----
-title: Provide CI data to the security configuration page to enable SAST job
-merge_request: 36225
-author:
-type: changed

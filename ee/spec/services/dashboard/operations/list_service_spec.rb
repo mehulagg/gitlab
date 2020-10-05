@@ -52,6 +52,7 @@ RSpec.describe Dashboard::Operations::ListService do
       let(:production_deployment) do
         create(:deployment, :success, project: project, environment: production, ref: 'master')
       end
+
       let(:staging_deployment) do
         create(:deployment, :success, project: project, environment: staging, ref: 'wip')
       end

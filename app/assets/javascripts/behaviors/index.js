@@ -1,7 +1,7 @@
+import $ from 'jquery';
 import './autosize';
 import './bind_in_out';
 import './markdown/render_gfm';
-import initGFMInput from './markdown/gfm_auto_complete';
 import initCopyAsGFM from './markdown/copy_as_gfm';
 import initCopyToClipboard from './copy_to_clipboard';
 import './details_behavior';
@@ -13,11 +13,32 @@ import './toggler_behavior';
 import './preview_markdown';
 import initCollapseSidebarOnWindowResize from './collapse_sidebar_on_window_resize';
 import initSelect2Dropdowns from './select2';
+import { loadStartupCSS } from './load_startup_css';
+
+loadStartupCSS();
 
 installGlEmojiElement();
-initGFMInput();
+
 initCopyAsGFM();
 initCopyToClipboard();
+
 initPageShortcuts();
 initCollapseSidebarOnWindowResize();
 initSelect2Dropdowns();
+
+document.addEventListener('DOMContentLoaded', () => {
+  window.requestIdleCallback(
+    () => {
+      // Check if we have to Load GFM Input
+      const $gfmInputs = $('.js-gfm-input:not(.js-gfm-input-initialized)');
+      if ($gfmInputs.length) {
+        import(/* webpackChunkName: 'initGFMInput' */ './markdown/gfm_auto_complete')
+          .then(({ default: initGFMInput }) => {
+            initGFMInput($gfmInputs);
+          })
+          .catch(() => {});
+      }
+    },
+    { timeout: 500 },
+  );
+});

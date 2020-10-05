@@ -579,9 +579,11 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
       let(:commit_with_old_name) do
         Gitlab::Git::Commit.find(repository, @commit_with_old_name_id)
       end
+
       let(:commit_with_new_name) do
         Gitlab::Git::Commit.find(repository, @commit_with_new_name_id)
       end
+
       let(:rename_commit) do
         Gitlab::Git::Commit.find(repository, @rename_commit_id)
       end
@@ -2077,7 +2079,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:object_pool_rugged) { Rugged::Repository.new(object_pool_path) }
 
     before do
-      object_pool.create
+      object_pool.create # rubocop:disable Rails/SaveBang
     end
 
     it 'does not raise an error when disconnecting a non-linked repository' do
@@ -2178,6 +2180,7 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     let(:new_repository) do
       Gitlab::Git::Repository.new('test_second_storage', TEST_REPO_PATH, '', 'group/project')
     end
+
     let(:new_repository_path) { File.join(TestEnv::SECOND_STORAGE_PATH, new_repository.relative_path) }
 
     subject { new_repository.replicate(repository) }

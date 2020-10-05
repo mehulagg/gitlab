@@ -1,10 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
 
+import testAction from 'helpers/vuex_action_helper';
 import defaultState from '~/vue_shared/components/sidebar/labels_select_vue/store/state';
 import * as types from '~/vue_shared/components/sidebar/labels_select_vue/store/mutation_types';
 import * as actions from '~/vue_shared/components/sidebar/labels_select_vue/store/actions';
 
-import testAction from 'helpers/vuex_action_helper';
 import axios from '~/lib/utils/axios_utils';
 
 describe('LabelsSelect Actions', () => {
@@ -256,6 +256,21 @@ describe('LabelsSelect Actions', () => {
           done,
         );
       });
+    });
+  });
+
+  describe('replaceSelectedLabels', () => {
+    it('replaces `state.selectedLabels`', done => {
+      const selectedLabels = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
+
+      testAction(
+        actions.replaceSelectedLabels,
+        selectedLabels,
+        state,
+        [{ type: types.REPLACE_SELECTED_LABELS, payload: selectedLabels }],
+        [],
+        done,
+      );
     });
   });
 

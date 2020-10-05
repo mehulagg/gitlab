@@ -1,6 +1,6 @@
 <script>
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import eventHub from '~/sidebar/event_hub';
 import weightComponent from './weight.vue';
 

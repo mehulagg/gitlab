@@ -66,7 +66,7 @@ RSpec.xdescribe 'Merge request > User approves', :js do
       before do
         create :approver_group, group: group, target: merge_request
         pipeline = create(:ci_empty_pipeline, project: project, sha: merge_request.diff_head_sha, ref: merge_request.source_branch)
-        merge_request.update(head_pipeline: pipeline)
+        merge_request.update!(head_pipeline: pipeline)
         visit project_merge_request_path(project, merge_request)
       end
 
@@ -97,7 +97,7 @@ RSpec.xdescribe 'Merge request > User approves', :js do
     end
 
     it 'does not show checking ability text' do
-      expect(find('.js-mr-approvals')).not_to have_text('Checking ability to merge automatically')
+      expect(find('.js-mr-approvals')).not_to have_text('Checking if merge request can be merged')
       expect(find('.js-mr-approvals')).to have_selector('.approvals-body')
     end
   end

@@ -1,4 +1,5 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { GlAlert } from '@gitlab/ui';
 import { __, sprintf, s__ } from '~/locale';
 

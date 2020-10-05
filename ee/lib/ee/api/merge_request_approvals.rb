@@ -8,6 +8,8 @@ module EE
       prepended do
         before { authenticate_non_get! }
 
+        helpers ::API::Helpers::MergeRequestsHelpers
+
         helpers do
           params :ee_approval_params do
             optional :approval_password, type: String, desc: 'Current user\'s password if project is set to require explicit auth on approval'
@@ -15,22 +17,6 @@ module EE
 
           def present_approval(merge_request)
             present merge_request.approval_state, with: ::EE::API::Entities::ApprovalState, current_user: current_user
-          end
-
-          def handle_merge_request_errors!(errors)
-            if errors.has_key? :project_access
-              error!(errors[:project_access], 422)
-            elsif errors.has_key? :branch_conflict
-              error!(errors[:branch_conflict], 422)
-            elsif errors.has_key? :validate_fork
-              error!(errors[:validate_fork], 422)
-            elsif errors.has_key? :validate_branches
-              conflict!(errors[:validate_branches])
-            elsif errors.has_key? :base
-              error!(errors[:base], 422)
-            end
-
-            render_api_error!(errors, 400)
           end
 
           def present_merge_request_approval_state(presenter:, target_branch: nil)
@@ -71,6 +57,7 @@ module EE
               present_merge_request_approval_state(presenter: ::EE::API::Entities::MergeRequestApprovalState)
             end
 
+            # Deprecated in favor of approval rules API
             desc 'Change approval-related configuration' do
               detail 'This feature was introduced in 10.6'
               success ::EE::API::Entities::ApprovalState
@@ -85,13 +72,13 @@ module EE
 
               merge_request = ::MergeRequests::UpdateService.new(user_project, current_user, approvals_before_merge: params[:approvals_required]).execute(merge_request)
 
-              if merge_request.valid?
-                present_approval(merge_request)
-              else
-                handle_merge_request_errors! merge_request.errors
-              end
+              # Merge request shouldn't be in an invalid state after the changes, but handling errors to be safe
+              handle_merge_request_errors!(merge_request)
+
+              present_approval(merge_request)
             end
 
+            # Deprecated in favor of approval rules API
             desc 'Update approvers and approver groups' do
               detail 'This feature was introduced in 10.6'
               success ::EE::API::Entities::ApprovalState
@@ -109,11 +96,10 @@ module EE
 
               merge_request = ::MergeRequests::UpdateService.new(user_project, current_user, declared(params, include_parent_namespaces: false).merge(remove_old_approvers: true)).execute(merge_request)
 
-              if merge_request.valid?
-                present_approval(merge_request)
-              else
-                handle_merge_request_errors! merge_request.errors
-              end
+              # Merge request shouldn't be in an invalid state after the changes, but handling errors to be safe
+              handle_merge_request_errors!(merge_request)
+
+              present_approval(merge_request)
             end
           end
         end

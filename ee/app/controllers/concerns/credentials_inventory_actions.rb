@@ -7,7 +7,19 @@ module CredentialsInventoryActions
   def index
     @credentials = filter_credentials.page(params[:page]).preload_users.without_count # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
-    render 'shared/credentials_inventory/index'
+    respond_to do |format|
+      format.html do
+        render 'shared/credentials_inventory/index'
+      end
+    end
+  end
+
+  def revoke
+    personal_access_token = PersonalAccessTokensFinder.new({ user: users, impersonation: false }, current_user).find(params[:id])
+    service = PersonalAccessTokens::RevokeService.new(current_user, token: personal_access_token).execute
+    service.success? ? flash[:notice] = service.message : flash[:alert] = service.message
+
+    redirect_to credentials_inventory_path(page: params[:page])
   end
 
   private

@@ -1,9 +1,16 @@
 <script>
 import { cloneDeep } from 'lodash';
-import { GlBadge, GlIcon, GlLink, GlButton, GlSkeletonLoading, GlTable } from '@gitlab/ui';
+import {
+  GlBadge,
+  GlIcon,
+  GlButton,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlTable,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import DependencyLicenseLinks from './dependency_license_links.vue';
 import DependencyVulnerabilities from './dependency_vulnerabilities.vue';
+import DependencyLocation from './dependency_location.vue';
 
 const tdClass = (value, key, item) => {
   const classes = [];
@@ -26,9 +33,9 @@ export default {
   components: {
     DependencyLicenseLinks,
     DependencyVulnerabilities,
+    DependencyLocation,
     GlBadge,
     GlIcon,
-    GlLink,
     GlButton,
     GlSkeletonLoading,
     GlTable,
@@ -84,16 +91,13 @@ export default {
 </script>
 
 <template>
-  <!-- tbody- and thead-class props can be removed when
-    https://gitlab.com/gitlab-org/gitlab/-/issues/213324 is fixed -->
   <gl-table
     :fields="$options.fields"
     :items="localDependencies"
     :busy="isLoading"
+    data-qa-selector="dependencies_table_content"
     details-td-class="pt-0"
     stacked="md"
-    thead-class="gl-text-gray-900"
-    tbody-class="gl-text-gray-900"
   >
     <!-- toggleDetails and detailsShowing are scoped slot props provided by
       GlTable; they mutate/read the item's _showDetails property, which GlTable
@@ -117,10 +121,7 @@ export default {
     </template>
 
     <template #cell(location)="{ item }">
-      <gl-link :href="item.location.blob_path">
-        <gl-icon name="doc-text" class="align-middle" />
-        {{ item.location.path }}
-      </gl-link>
+      <dependency-location :location="item.location" />
     </template>
 
     <template #cell(license)="{ item }">

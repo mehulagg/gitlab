@@ -1,8 +1,9 @@
 import API from 'ee/api';
 import * as types from './mutation_types';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
+import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 
 export const setProjectId = ({ commit }, projectId) => commit(types.SET_PROJECT_ID, projectId);
 
@@ -10,17 +11,21 @@ export const fetchMergeRequests = ({ commit, state, rootState }) => {
   commit(types.REQUEST_MERGE_REQUESTS);
 
   const { projectId, pageInfo } = state;
+  const {
+    filters: {
+      milestones: { selected: selectedMilestone },
+      labels: { selectedList: selectedLabelList },
+    },
+  } = rootState;
 
-  const { selected: milestoneTitle } = rootState.filters.milestones;
-  const { selected: labelNames } = rootState.filters.labels;
-
+  const filterBarQuery = filterToQueryObject({
+    milestone_title: selectedMilestone,
+    label_name: selectedLabelList,
+  });
   const params = {
     project_id: projectId,
-    milestone_title: milestoneTitle?.operator === '=' ? milestoneTitle.value : null,
-    label_name: labelNames?.filter(l => l.operator === '=').map(l => l.value),
-    'not[label_name]': labelNames?.filter(l => l.operator === '!=').map(l => l.value),
-    'not[milestone_title]': milestoneTitle?.operator === '!=' ? milestoneTitle.value : null,
     page: pageInfo.page,
+    ...filterBarQuery,
   };
 
   return API.codeReviewAnalytics(params)

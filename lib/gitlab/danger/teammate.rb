@@ -3,27 +3,37 @@
 module Gitlab
   module Danger
     class Teammate
-      attr_reader :username, :name, :role, :projects, :available, :tz_offset_hours
+      attr_reader :options, :username, :name, :role, :projects, :available, :hungry, :tz_offset_hours
 
       # The options data are produced by https://gitlab.com/gitlab-org/gitlab-roulette/-/blob/master/lib/team_member.rb
       def initialize(options = {})
+        @options = options
         @username = options['username']
         @name = options['name']
         @markdown_name = options['markdown_name']
         @role = options['role']
         @projects = options['projects']
         @available = options['available']
+        @hungry = options['hungry']
         @tz_offset_hours = options['tz_offset_hours']
+      end
+
+      def to_h
+        options
+      end
+
+      def ==(other)
+        return false unless other.respond_to?(:username)
+
+        other.username == username
       end
 
       def in_project?(name)
         projects&.has_key?(name)
       end
 
-      # Traintainers also count as reviewers
       def reviewer?(project, category, labels)
-        has_capability?(project, category, :reviewer, labels) ||
-          traintainer?(project, category, labels)
+        has_capability?(project, category, :reviewer, labels)
       end
 
       def traintainer?(project, category, labels)
@@ -34,9 +44,7 @@ module Gitlab
         has_capability?(project, category, :maintainer, labels)
       end
 
-      def markdown_name(timezone_experiment: false, author: nil)
-        return @markdown_name unless timezone_experiment
-
+      def markdown_name(author: nil)
         "#{@markdown_name} (#{utc_offset_text(author)})"
       end
 
@@ -69,9 +77,9 @@ module Gitlab
 
       def offset_diff_compared_to_author(author)
         diff = floored_offset_hours - author.floored_offset_hours
-        return "same timezone as `@#{author.username}`" if diff.zero?
+        return "same timezone as `@#{author.username}`" if diff == 0
 
-        ahead_or_behind = diff < 0 ? 'behind' : 'ahead'
+        ahead_or_behind = diff < 0 ? 'behind' : 'ahead of'
         pluralized_hours = pluralize(diff.abs, 'hour', 'hours')
 
         "#{pluralized_hours} #{ahead_or_behind} `@#{author.username}`"

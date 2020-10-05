@@ -8,10 +8,10 @@ module Vulnerabilities
 
     sha_attribute :fingerprint
 
-    has_many :finding_identifiers, class_name: 'Vulnerabilities::FindingIdentifier'
-    has_many :occurrences, through: :finding_identifiers, class_name: 'Vulnerabilities::Occurrence'
+    has_many :finding_identifiers, class_name: 'Vulnerabilities::FindingIdentifier', inverse_of: :identifier, foreign_key: 'identifier_id'
+    has_many :findings, through: :finding_identifiers, class_name: 'Vulnerabilities::Finding'
 
-    has_many :primary_occurrences, class_name: 'Vulnerabilities::Occurrence', inverse_of: :primary_identifier
+    has_many :primary_findings, class_name: 'Vulnerabilities::Finding', inverse_of: :primary_identifier, foreign_key: 'primary_identifier_id'
 
     belongs_to :project
 
@@ -25,5 +25,17 @@ module Vulnerabilities
     validates :name, presence: true
 
     scope :with_fingerprint, -> (fingerprints) { where(fingerprint: fingerprints) }
+
+    def cve?
+      external_type.casecmp?('cve')
+    end
+
+    def cwe?
+      external_type.casecmp?('cwe')
+    end
+
+    def other?
+      !(cve? || cwe?)
+    end
   end
 end

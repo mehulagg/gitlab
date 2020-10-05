@@ -1,5 +1,0 @@
----
-title: Speed up Advanced global search regex for file path segments
-merge_request: 35292
-author:
-type: performance

@@ -69,12 +69,26 @@ RSpec.describe Gitlab::Experimentation do
       end
     end
 
+    describe '#push_frontend_experiment' do
+      it 'pushes an experiment to the frontend' do
+        gon = instance_double('gon')
+        experiments = { experiments: { 'myExperiment' => true } }
+
+        stub_experiment_for_user(my_experiment: true)
+        allow(controller).to receive(:gon).and_return(gon)
+
+        expect(gon).to receive(:push).with(experiments, true)
+
+        controller.push_frontend_experiment(:my_experiment)
+      end
+    end
+
     describe '#experiment_enabled?' do
       subject { controller.experiment_enabled?(:test_experiment) }
 
       context 'cookie is not present' do
-        it 'calls Gitlab::Experimentation.enabled_for_user? with the name of the experiment and an experimentation_subject_index of nil' do
-          expect(Gitlab::Experimentation).to receive(:enabled_for_user?).with(:test_experiment, nil)
+        it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and an experimentation_subject_index of nil' do
+          expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(:test_experiment, nil)
           controller.experiment_enabled?(:test_experiment)
         end
       end
@@ -85,22 +99,22 @@ RSpec.describe Gitlab::Experimentation do
           get :index
         end
 
-        it 'calls Gitlab::Experimentation.enabled_for_user? with the name of the experiment and an experimentation_subject_index of the modulo 100 of the hex value of the uuid' do
+        it 'calls Gitlab::Experimentation.enabled_for_value? with the name of the experiment and an experimentation_subject_index of the modulo 100 of the hex value of the uuid' do
           # 'abcd1234'.hex % 100 = 76
-          expect(Gitlab::Experimentation).to receive(:enabled_for_user?).with(:test_experiment, 76)
+          expect(Gitlab::Experimentation).to receive(:enabled_for_value?).with(:test_experiment, 76)
           controller.experiment_enabled?(:test_experiment)
         end
       end
 
       it 'returns true when DNT: 0 is set in the request' do
-        allow(Gitlab::Experimentation).to receive(:enabled_for_user?) { true }
+        allow(Gitlab::Experimentation).to receive(:enabled_for_value?) { true }
         controller.request.headers['DNT'] = '0'
 
         is_expected.to be_truthy
       end
 
       it 'returns false when DNT: 1 is set in the request' do
-        allow(Gitlab::Experimentation).to receive(:enabled_for_user?) { true }
+        allow(Gitlab::Experimentation).to receive(:enabled_for_value?) { true }
         controller.request.headers['DNT'] = '1'
 
         is_expected.to be_falsy
@@ -233,6 +247,81 @@ RSpec.describe Gitlab::Experimentation do
         end
       end
     end
+
+    describe '#record_experiment_user' do
+      let(:user) { build(:user) }
+
+      context 'when the experiment is enabled' do
+        before do
+          stub_experiment(test_experiment: true)
+          allow(controller).to receive(:current_user).and_return(user)
+        end
+
+        context 'the user is part of the experimental group' do
+          before do
+            stub_experiment_for_user(test_experiment: true)
+          end
+
+          it 'calls add_user on the Experiment model' do
+            expect(::Experiment).to receive(:add_user).with(:test_experiment, :experimental, user)
+
+            controller.record_experiment_user(:test_experiment)
+          end
+        end
+
+        context 'the user is part of the control group' do
+          before do
+            allow_next_instance_of(described_class) do |instance|
+              allow(instance).to receive(:experiment_enabled?).with(:test_experiment).and_return(false)
+            end
+          end
+
+          it 'calls add_user on the Experiment model' do
+            expect(::Experiment).to receive(:add_user).with(:test_experiment, :control, user)
+
+            controller.record_experiment_user(:test_experiment)
+          end
+        end
+      end
+
+      context 'when the experiment is disabled' do
+        before do
+          stub_experiment(test_experiment: false)
+          allow(controller).to receive(:current_user).and_return(user)
+        end
+
+        it 'does not call add_user on the Experiment model' do
+          expect(::Experiment).not_to receive(:add_user)
+
+          controller.record_experiment_user(:test_experiment)
+        end
+      end
+
+      context 'when there is no current_user' do
+        before do
+          stub_experiment(test_experiment: true)
+        end
+
+        it 'does not call add_user on the Experiment model' do
+          expect(::Experiment).not_to receive(:add_user)
+
+          controller.record_experiment_user(:test_experiment)
+        end
+      end
+    end
+
+    describe '#experiment_tracking_category_and_group' do
+      let_it_be(:experiment_key) { :test_something }
+
+      subject { controller.experiment_tracking_category_and_group(experiment_key) }
+
+      it 'returns a string with the experiment tracking category & group joined with a ":"' do
+        expect(controller).to receive(:tracking_category).with(experiment_key).and_return('Experiment::Category')
+        expect(controller).to receive(:tracking_group).with(experiment_key, '_group').and_return('experimental_group')
+
+        expect(subject).to eq('Experiment::Category:experimental_group')
+      end
+    end
   end
 
   describe '.enabled?' do
@@ -261,8 +350,8 @@ RSpec.describe Gitlab::Experimentation do
     end
   end
 
-  describe '.enabled_for_user?' do
-    subject { described_class.enabled_for_user?(:test_experiment, experimentation_subject_index) }
+  describe '.enabled_for_value?' do
+    subject { described_class.enabled_for_value?(:test_experiment, experimentation_subject_index) }
 
     let(:experimentation_subject_index) { 9 }
 
@@ -299,6 +388,34 @@ RSpec.describe Gitlab::Experimentation do
 
           it { is_expected.to be_falsey }
         end
+      end
+    end
+  end
+
+  describe '.enabled_for_attribute?' do
+    subject { described_class.enabled_for_attribute?(:test_experiment, attribute) }
+
+    let(:attribute) { 'abcd' } # Digest::SHA1.hexdigest('abcd').hex % 100 = 7
+
+    context 'experiment is disabled' do
+      before do
+        allow(described_class).to receive(:enabled?).and_return(false)
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'experiment is enabled' do
+      before do
+        allow(described_class).to receive(:enabled?).and_return(true)
+      end
+
+      it { is_expected.to be true }
+
+      context 'outside enabled ratio' do
+        let(:attribute) { 'abc' } # Digest::SHA1.hexdigest('abc').hex % 100 = 17
+
+        it { is_expected.to be false }
       end
     end
   end

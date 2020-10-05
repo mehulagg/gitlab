@@ -1,10 +1,9 @@
 <script>
 import { GlTooltipDirective, GlLink, GlButton, GlCollapse, GlIcon, GlBadge } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { difference, get } from 'lodash';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { ASSET_LINK_TYPE } from '../constants';
 import { __, s__, sprintf } from '~/locale';
-import { difference, get } from 'lodash';
 
 export default {
   name: 'ReleaseBlockAssets',
@@ -13,7 +12,6 @@ export default {
     GlButton,
     GlCollapse,
     GlIcon,
-    Icon,
     GlBadge,
   },
   directives: {
@@ -121,7 +119,7 @@ export default {
               {{ section.title }}
             </h5>
             <ul :key="`section-body-${index}`" class="list-unstyled gl-m-0">
-              <li v-for="link in section.links" :key="link.url">
+              <li v-for="link in section.links" :key="link.url" class="gl-display-flex">
                 <gl-link
                   :href="link.directAssetUrl || link.url"
                   class="gl-display-flex gl-align-items-center gl-line-height-24"
@@ -138,7 +136,7 @@ export default {
                     :aria-label="$options.externalLinkTooltipText"
                     :title="$options.externalLinkTooltipText"
                     data-testid="external-link-indicator"
-                    class="gl-ml-2 gl-flex-shrink-0 gl-flex-grow-0 gl-text-gray-600"
+                    class="gl-ml-2 gl-flex-shrink-0 gl-flex-grow-0 gl-text-gray-400"
                   />
                 </gl-link>
               </li>
@@ -157,7 +155,7 @@ export default {
       <ul v-if="assets.links.length" class="pl-0 mb-0 gl-mt-3 list-unstyled js-assets-list">
         <li v-for="link in assets.links" :key="link.name" class="gl-mb-3">
           <gl-link v-gl-tooltip.bottom :title="__('Download asset')" :href="link.directAssetUrl">
-            <icon name="package" class="align-middle gl-mr-2 align-text-bottom" />
+            <gl-icon name="package" class="align-middle gl-mr-2 align-text-bottom" />
             {{ link.name }}
             <span v-if="link.external" data-testid="external-link-indicator">{{
               __('(external source)')
@@ -174,9 +172,9 @@ export default {
           aria-haspopup="true"
           aria-expanded="false"
         >
-          <icon name="doc-code" class="align-top gl-mr-2" />
+          <gl-icon name="doc-code" class="align-top gl-mr-2" />
           {{ __('Source code') }}
-          <icon name="chevron-down" />
+          <gl-icon name="chevron-down" />
         </button>
 
         <div class="js-sources-dropdown dropdown-menu">

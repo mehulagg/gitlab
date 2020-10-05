@@ -1,13 +1,13 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { throttle, isEmpty } from 'lodash';
 import { mapGetters, mapState, mapActions } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
 import { polyfillSticky } from '~/lib/utils/sticky';
 import CiHeader from '~/vue_shared/components/header_ci_component.vue';
 import Callout from '~/vue_shared/components/callout.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import EmptyState from './empty_state.vue';
 import EnvironmentsBlock from './environments_block.vue';
 import ErasedBlock from './erased_block.vue';
@@ -27,7 +27,7 @@ export default {
     EmptyState,
     EnvironmentsBlock,
     ErasedBlock,
-    Icon,
+    GlIcon,
     Log,
     LogTopBar,
     StuckBlock,
@@ -38,6 +38,11 @@ export default {
   },
   mixins: [delayedJobMixin],
   props: {
+    artifactHelpUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     runnerSettingsUrl: {
       type: String,
       required: false,
@@ -198,17 +203,13 @@ export default {
 </script>
 <template>
   <div>
-    <gl-loading-icon
-      v-if="isLoading"
-      size="lg"
-      class="js-job-loading qa-loading-animation prepend-top-20"
-    />
+    <gl-loading-icon v-if="isLoading" size="lg" class="qa-loading-animation prepend-top-20" />
 
     <template v-else-if="shouldRenderContent">
-      <div class="js-job-content build-page">
+      <div class="build-page" data-testid="job-content">
         <!-- Header Section -->
         <header>
-          <div class="js-build-header build-header top-area">
+          <div class="build-header top-area">
             <ci-header
               :status="job.status"
               :item-id="job.id"
@@ -230,7 +231,6 @@ export default {
         <!-- Body Section -->
         <stuck-block
           v-if="job.stuck"
-          class="js-job-stuck"
           :has-no-runners-for-project="hasRunnersForProject"
           :tags="job.tags"
           :runners-path="runnerSettingsUrl"
@@ -238,13 +238,11 @@ export default {
 
         <unmet-prerequisites-block
           v-if="hasUnmetPrerequisitesFailure"
-          class="js-job-failed"
           :help-path="deploymentHelpUrl"
         />
 
         <shared-runner
           v-if="shouldRenderSharedRunnerLimitWarning"
-          class="js-shared-runner-limit"
           :quota-used="job.runners.quota.used"
           :quota-limit="job.runners.quota.limit"
           :runners-path="runnerHelpUrl"
@@ -254,7 +252,6 @@ export default {
 
         <environments-block
           v-if="hasEnvironment"
-          class="js-job-environment"
           :deployment-status="job.deployment_status"
           :deployment-cluster="job.deployment_cluster"
           :icon-status="job.status"
@@ -262,7 +259,7 @@ export default {
 
         <erased-block
           v-if="job.erased_at"
-          class="js-job-erased-block"
+          data-testid="job-erased-block"
           :user="job.erased_by"
           :erased-at="job.erased_at"
         />
@@ -270,10 +267,11 @@ export default {
         <div
           v-if="job.archived"
           ref="sticky"
-          class="js-archived-job gl-mt-3 archived-job"
+          class="gl-mt-3 archived-job"
           :class="{ 'sticky-top border-bottom-0': hasTrace }"
+          data-testid="archived-job"
         >
-          <icon name="lock" class="align-text-bottom" />
+          <gl-icon name="lock" class="align-text-bottom" />
           {{ __('This job is archived. Only the complete pipeline can be retried.') }}
         </div>
         <!-- job log -->
@@ -305,7 +303,6 @@ export default {
         <!-- empty state -->
         <empty-state
           v-if="!hasTrace"
-          class="js-job-empty-state"
           :illustration-path="emptyStateIllustration.image"
           :illustration-size-class="emptyStateIllustration.size"
           :title="emptyStateTitle"
@@ -323,12 +320,13 @@ export default {
 
     <sidebar
       v-if="shouldRenderContent"
-      class="js-job-sidebar"
       :class="{
         'right-sidebar-expanded': isSidebarOpen,
         'right-sidebar-collapsed': !isSidebarOpen,
       }"
+      :artifact-help-url="artifactHelpUrl"
       :runner-help-url="runnerHelpUrl"
+      data-testid="job-sidebar"
     />
   </div>
 </template>

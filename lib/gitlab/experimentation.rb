@@ -42,9 +42,6 @@ module Gitlab
       ci_notification_dot: {
         tracking_category: 'Growth::Expansion::Experiment::CiNotificationDot'
       },
-      buy_ci_minutes_version_a: {
-        tracking_category: 'Growth::Expansion::Experiment::BuyCiMinutesVersionA'
-      },
       upgrade_link_in_user_menu_a: {
         tracking_category: 'Growth::Expansion::Experiment::UpgradeLinkInUserMenuA'
       },
@@ -53,8 +50,29 @@ module Gitlab
       },
       new_create_project_ui: {
         tracking_category: 'Manage::Import::Experiment::NewCreateProjectUi'
+      },
+      terms_opt_in: {
+        tracking_category: 'Growth::Acquisition::Experiment::TermsOptIn'
+      },
+      contact_sales_btn_in_app: {
+        tracking_category: 'Growth::Conversion::Experiment::ContactSalesInApp'
+      },
+      customize_homepage: {
+        tracking_category: 'Growth::Expansion::Experiment::CustomizeHomepage'
+      },
+      invite_email: {
+        tracking_category: 'Growth::Acquisition::Experiment::InviteEmail'
+      },
+      invitation_reminders: {
+        tracking_category: 'Growth::Acquisition::Experiment::InvitationReminders'
+      },
+      group_only_trials: {
+        tracking_category: 'Growth::Conversion::Experiment::GroupOnlyTrials'
       }
     }.freeze
+
+    GROUP_CONTROL = :control
+    GROUP_EXPERIMENTAL = :experimental
 
     # Controller concern that checks if an `experimentation_subject_id cookie` is present and sets it if absent.
     # Used for A/B testing of experimental features. Exposes the `experiment_enabled?(experiment_name)` method
@@ -66,7 +84,7 @@ module Gitlab
 
       included do
         before_action :set_experimentation_subject_id_cookie, unless: :dnt_enabled?
-        helper_method :experiment_enabled?
+        helper_method :experiment_enabled?, :experiment_tracking_category_and_group
       end
 
       def set_experimentation_subject_id_cookie
@@ -79,10 +97,17 @@ module Gitlab
         }
       end
 
+      def push_frontend_experiment(experiment_key)
+        var_name = experiment_key.to_s.camelize(:lower)
+        enabled = experiment_enabled?(experiment_key)
+
+        gon.push({ experiments: { var_name => enabled } }, true)
+      end
+
       def experiment_enabled?(experiment_key)
         return false if dnt_enabled?
 
-        return true if Experimentation.enabled_for_user?(experiment_key, experimentation_subject_index)
+        return true if Experimentation.enabled_for_value?(experiment_key, experimentation_subject_index)
         return true if forced_enabled?(experiment_key)
 
         false
@@ -90,7 +115,7 @@ module Gitlab
 
       def track_experiment_event(experiment_key, action, value = nil)
         track_experiment_event_for(experiment_key, action, value) do |tracking_data|
-          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), tracking_data)
+          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), **tracking_data)
         end
       end
 
@@ -98,6 +123,16 @@ module Gitlab
         track_experiment_event_for(experiment_key, action, value) do |tracking_data|
           gon.push(tracking_data: tracking_data)
         end
+      end
+
+      def record_experiment_user(experiment_key)
+        return unless Experimentation.enabled?(experiment_key) && current_user
+
+        ::Experiment.add_user(experiment_key, tracking_group(experiment_key), current_user)
+      end
+
+      def experiment_tracking_category_and_group(experiment_key)
+        "#{tracking_category(experiment_key)}:#{tracking_group(experiment_key, '_group')}"
       end
 
       private
@@ -126,7 +161,7 @@ module Gitlab
         {
           category: tracking_category(experiment_key),
           action: action,
-          property: tracking_group(experiment_key),
+          property: tracking_group(experiment_key, "_group"),
           label: experimentation_subject_id,
           value: value
         }.compact
@@ -136,10 +171,12 @@ module Gitlab
         Experimentation.experiment(experiment_key).tracking_category
       end
 
-      def tracking_group(experiment_key)
+      def tracking_group(experiment_key, suffix = nil)
         return unless Experimentation.enabled?(experiment_key)
 
-        experiment_enabled?(experiment_key) ? 'experimental_group' : 'control_group'
+        group = experiment_enabled?(experiment_key) ? GROUP_EXPERIMENTAL : GROUP_CONTROL
+
+        suffix ? "#{group}#{suffix}" : group
       end
 
       def forced_enabled?(experiment_key)
@@ -159,15 +196,20 @@ module Gitlab
         experiment.enabled? && experiment.enabled_for_environment?
       end
 
-      def enabled_for_user?(experiment_key, experimentation_subject_index)
+      def enabled_for_attribute?(experiment_key, attribute)
+        index = Digest::SHA1.hexdigest(attribute).hex % 100
+        enabled_for_value?(experiment_key, index)
+      end
+
+      def enabled_for_value?(experiment_key, experimentation_subject_index)
         enabled?(experiment_key) &&
-          experiment(experiment_key).enabled_for_experimentation_subject?(experimentation_subject_index)
+          experiment(experiment_key).enabled_for_index?(experimentation_subject_index)
       end
     end
 
     Experiment = Struct.new(:key, :environment, :tracking_category, keyword_init: true) do
       def enabled?
-        experiment_percentage.positive?
+        experiment_percentage > 0
       end
 
       def enabled_for_environment?
@@ -176,10 +218,10 @@ module Gitlab
         environment
       end
 
-      def enabled_for_experimentation_subject?(experimentation_subject_index)
-        return false if experimentation_subject_index.blank?
+      def enabled_for_index?(index)
+        return false if index.blank?
 
-        experimentation_subject_index <= experiment_percentage
+        index <= experiment_percentage
       end
 
       private

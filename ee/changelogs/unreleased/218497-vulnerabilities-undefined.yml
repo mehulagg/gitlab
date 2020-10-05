@@ -1,5 +1,0 @@
----
-title: Fixes a bug that would prevent the dependencies list from rendering for user that aren't authorized to see the vulnerabilities
-merge_request: 35171
-author:
-type: fixed

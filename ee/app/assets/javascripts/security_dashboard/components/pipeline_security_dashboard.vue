@@ -28,7 +28,7 @@ export default {
       },
       update(data) {
         const summary = data?.project?.pipeline?.securityReportSummary;
-        return Object.keys(summary).length ? summary : null;
+        return summary && Object.keys(summary).length ? summary : null;
       },
       skip() {
         return !this.glFeatures.pipelinesSecurityReportSummary;
@@ -77,6 +77,11 @@ export default {
       required: false,
       default: '',
     },
+    pipelineJobsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     emptyStateProps() {
@@ -93,9 +98,12 @@ export default {
   },
   created() {
     this.setSourceBranch(this.sourceBranch);
+    this.setPipelineJobsPath(this.pipelineJobsPath);
+    this.setProjectId(this.projectId);
   },
   methods: {
     ...mapActions('vulnerabilities', ['setSourceBranch']),
+    ...mapActions('pipelineJobs', ['setPipelineJobsPath', 'setProjectId']),
   },
 };
 </script>

@@ -15,5 +15,3 @@ export const allCheck = state => {
     message,
   };
 };
-
-export default () => {};

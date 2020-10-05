@@ -38,7 +38,8 @@ RSpec.describe Groups::HooksController do
           tag_push_events: true,
           token: 'TEST TOKEN',
           url: 'http://example.com',
-          wiki_page_events: true
+          wiki_page_events: true,
+          deployment_events: true
         }
 
         post :create, params: { group_id: group.to_param, hook: hook_params }
@@ -78,7 +79,8 @@ RSpec.describe Groups::HooksController do
             tag_push_events: true,
             token: 'TEST TOKEN',
             url: 'http://example.com',
-            wiki_page_events: true
+            wiki_page_events: true,
+            deployment_events: true
           }
         end
 
@@ -152,6 +154,24 @@ RSpec.describe Groups::HooksController do
 
             expect(response).to have_gitlab_http_status(:found)
             expect(flash[:notice]).to eq('Hook executed successfully: HTTP 200')
+          end
+        end
+
+        context 'when the endpoint receives requests above the limit' do
+          before do
+            allow(Gitlab::ApplicationRateLimiter).to receive(:rate_limits)
+              .and_return(group_testing_hook: { threshold: 1, interval: 1.minute })
+          end
+
+          it 'prevents making test requests' do
+            expect_next_instance_of(TestHooks::ProjectService) do |service|
+              expect(service).to receive(:execute).and_return(http_status: 200)
+            end
+
+            2.times { post :test, params: { group_id: group.to_param, id: hook } }
+
+            expect(response.body).to eq(_('This endpoint has been requested too many times. Try again later.'))
+            expect(response).to have_gitlab_http_status(:too_many_requests)
           end
         end
       end

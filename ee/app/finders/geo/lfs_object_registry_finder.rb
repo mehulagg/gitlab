@@ -2,11 +2,7 @@
 
 module Geo
   class LfsObjectRegistryFinder < FileRegistryFinder
-    def replicables
-      current_node(fdw: false).lfs_objects
-    end
-
-    def syncable
+    def registry_class
       Geo::LfsObjectRegistry
     end
   end

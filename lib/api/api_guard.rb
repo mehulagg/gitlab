@@ -7,6 +7,7 @@ require 'rack/oauth2'
 module API
   module APIGuard
     extend ActiveSupport::Concern
+    include Gitlab::Utils::StrongMemoize
 
     included do |base|
       # OAuth2 Resource Server Authentication
@@ -53,8 +54,10 @@ module API
         user = find_user_from_sources
         return unless user
 
-        # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
-        Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Feature.enabled?(:user_mode_in_session)
+        if user.is_a?(User) && Feature.enabled?(:user_mode_in_session)
+          # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
+          Gitlab::Auth::CurrentUserMode.bypass_session!(user.id)
+        end
 
         unless api_access_allowed?(user)
           forbidden!(api_access_denied_message(user))
@@ -64,10 +67,12 @@ module API
       end
 
       def find_user_from_sources
-        deploy_token_from_request ||
-          find_user_from_bearer_token ||
-          find_user_from_job_token ||
-          find_user_from_warden
+        strong_memoize(:find_user_from_sources) do
+          deploy_token_from_request ||
+            find_user_from_bearer_token ||
+            find_user_from_job_token ||
+            user_from_warden
+        end
       end
 
       private
@@ -99,6 +104,25 @@ module API
 
       def user_allowed_or_deploy_token?(user)
         Gitlab::UserAccess.new(user).allowed? || user.is_a?(DeployToken)
+      end
+
+      def user_from_warden
+        user = find_user_from_warden
+
+        return unless user
+        return if two_factor_required_but_not_setup?(user)
+
+        user
+      end
+
+      def two_factor_required_but_not_setup?(user)
+        verifier = Gitlab::Auth::TwoFactorAuthVerifier.new(user)
+
+        if verifier.two_factor_authentication_required? && verifier.current_user_needs_to_setup_two_factor?
+          verifier.two_factor_grace_period_expired?
+        else
+          false
+        end
       end
     end
 

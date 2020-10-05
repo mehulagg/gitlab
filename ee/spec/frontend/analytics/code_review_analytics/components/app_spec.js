@@ -4,8 +4,9 @@ import { GlLoadingIcon, GlEmptyState, GlBadge, GlPagination } from '@gitlab/ui';
 import CodeReviewAnalyticsApp from 'ee/analytics/code_review_analytics/components/app.vue';
 import MergeRequestTable from 'ee/analytics/code_review_analytics/components/merge_request_table.vue';
 import FilterBar from 'ee/analytics/code_review_analytics/components/filter_bar.vue';
+import * as actions from 'ee/analytics/code_review_analytics/store/actions';
 import createMergeRequestsState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
-import createFiltersState from 'ee/analytics/code_review_analytics/store/modules/filters/state';
+import createFiltersState from 'ee/analytics/shared/store/modules/filters/state';
 import { TEST_HOST } from 'helpers/test_constants';
 
 const mockFilterManagerSetup = jest.fn();
@@ -24,8 +25,6 @@ describe('CodeReviewAnalyticsApp component', () => {
 
   let setPage;
   let fetchMergeRequests;
-  let setMilestonesEndpoint;
-  let setLabelsEndpoint;
 
   const pageInfo = {
     page: 1,
@@ -35,6 +34,7 @@ describe('CodeReviewAnalyticsApp component', () => {
 
   const createStore = (initialState = {}, getters = {}) =>
     new Vuex.Store({
+      actions,
       modules: {
         mergeRequests: {
           namespaced: true,
@@ -58,10 +58,6 @@ describe('CodeReviewAnalyticsApp component', () => {
             ...createFiltersState(),
             ...initialState.filters,
           },
-          actions: {
-            setMilestonesEndpoint,
-            setLabelsEndpoint,
-          },
         },
       },
     });
@@ -75,6 +71,7 @@ describe('CodeReviewAnalyticsApp component', () => {
         newMergeRequestUrl: 'new_merge_request',
         emptyStateSvgPath: 'svg',
         milestonePath: `${TEST_HOST}/milestones`,
+        projectPath: TEST_HOST,
         labelsPath: `${TEST_HOST}/labels`,
       },
       provide: {
@@ -87,8 +84,6 @@ describe('CodeReviewAnalyticsApp component', () => {
   beforeEach(() => {
     setPage = jest.fn();
     fetchMergeRequests = jest.fn();
-    setMilestonesEndpoint = jest.fn();
-    setLabelsEndpoint = jest.fn();
   });
 
   afterEach(() => {
@@ -116,14 +111,6 @@ describe('CodeReviewAnalyticsApp component', () => {
       it("calls the filterManager's setup method", () => {
         expect(mockFilterManagerSetup).toHaveBeenCalled();
       });
-
-      it('does not call setMilestonesEndpoint action', () => {
-        expect(setMilestonesEndpoint).not.toHaveBeenCalled();
-      });
-
-      it('does not call setLabelsEndpoint action', () => {
-        expect(setLabelsEndpoint).not.toHaveBeenCalled();
-      });
     });
 
     describe('when "codeReviewAnalyticsHasNewSearch" is enabled', () => {
@@ -139,14 +126,6 @@ describe('CodeReviewAnalyticsApp component', () => {
 
         it("does not call the filterManager's setup method", () => {
           expect(mockFilterManagerSetup).not.toHaveBeenCalled();
-        });
-
-        it('calls setMilestonesEndpoint action', () => {
-          expect(setMilestonesEndpoint).toHaveBeenCalled();
-        });
-
-        it('calls setLabelsEndpoint action', () => {
-          expect(setLabelsEndpoint).toHaveBeenCalled();
         });
       });
     });
@@ -249,7 +228,7 @@ describe('CodeReviewAnalyticsApp component', () => {
     });
 
     it('should call the setPage action', () => {
-      expect(setPage).toHaveBeenCalledWith(expect.anything(), 2, undefined);
+      expect(setPage).toHaveBeenCalledWith(expect.anything(), 2);
     });
 
     it('should call fetchMergeRequests action', () => {

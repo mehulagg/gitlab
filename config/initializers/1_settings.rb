@@ -83,6 +83,7 @@ Settings.omniauth['external_providers'] = [] if Settings.omniauth['external_prov
 Settings.omniauth['block_auto_created_users'] = true if Settings.omniauth['block_auto_created_users'].nil?
 Settings.omniauth['auto_link_ldap_user'] = false if Settings.omniauth['auto_link_ldap_user'].nil?
 Settings.omniauth['auto_link_saml_user'] = false if Settings.omniauth['auto_link_saml_user'].nil?
+Settings.omniauth['auto_link_user'] = false if Settings.omniauth['auto_link_user'].nil?
 
 Settings.omniauth['sync_profile_from_provider'] = false if Settings.omniauth['sync_profile_from_provider'].nil?
 Settings.omniauth['sync_profile_attributes'] = ['email'] if Settings.omniauth['sync_profile_attributes'].nil?
@@ -175,8 +176,8 @@ Settings.gitlab['user'] ||= 'git'
 Settings.gitlab['ssh_user'] ||= Settings.gitlab.user
 Settings.gitlab['user_home'] ||= begin
   Etc.getpwnam(Settings.gitlab['user']).dir
-rescue ArgumentError # no user configured
-  '/home/' + Settings.gitlab['user']
+                                 rescue ArgumentError # no user configured
+                                   '/home/' + Settings.gitlab['user']
 end
 Settings.gitlab['time_zone'] ||= nil
 Settings.gitlab['signup_enabled'] ||= true if Settings.gitlab['signup_enabled'].nil?
@@ -283,6 +284,7 @@ Settings.sentry['clientside_dsn'] ||= nil
 # Pages
 #
 Settings['pages'] ||= Settingslogic.new({})
+Settings['pages'] = ::Gitlab::Pages::Settings.new(Settings.pages) # For path access detection https://gitlab.com/gitlab-org/gitlab/-/issues/230702
 Settings.pages['enabled']           = false if Settings.pages['enabled'].nil?
 Settings.pages['access_control']    = false if Settings.pages['access_control'].nil?
 Settings.pages['path']              = Settings.absolute(Settings.pages['path'] || File.join(Settings.shared['path'], "pages"))
@@ -295,6 +297,10 @@ Settings.pages['external_http'] ||= false unless Settings.pages['external_http']
 Settings.pages['external_https'] ||= false unless Settings.pages['external_https'].present?
 Settings.pages['artifacts_server'] ||= Settings.pages['enabled'] if Settings.pages['artifacts_server'].nil?
 Settings.pages['secret_file'] ||= Rails.root.join('.gitlab_pages_secret')
+# We want pages zip archives to be stored on the same directory as old pages hierarchical structure
+# this will allow us to easier migrate existing instances with NFS
+Settings.pages['storage_path']      = Settings.pages['path']
+Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
 
 #
 # Geo
@@ -422,6 +428,9 @@ Settings.cron_jobs['admin_email_worker']['job_class'] = 'AdminEmailWorker'
 Settings.cron_jobs['personal_access_tokens_expiring_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['personal_access_tokens_expiring_worker']['cron'] ||= '0 1 * * *'
 Settings.cron_jobs['personal_access_tokens_expiring_worker']['job_class'] = 'PersonalAccessTokens::ExpiringWorker'
+Settings.cron_jobs['personal_access_tokens_expired_notification_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['personal_access_tokens_expired_notification_worker']['cron'] ||= '0 2 * * *'
+Settings.cron_jobs['personal_access_tokens_expired_notification_worker']['job_class'] = 'PersonalAccessTokens::ExpiredNotificationWorker'
 Settings.cron_jobs['repository_archive_cache_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['repository_archive_cache_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['repository_archive_cache_worker']['job_class'] = 'RepositoryArchiveCacheWorker'
@@ -440,6 +449,9 @@ Settings.cron_jobs['remove_expired_members_worker']['job_class'] = 'RemoveExpire
 Settings.cron_jobs['remove_expired_group_links_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['remove_expired_group_links_worker']['cron'] ||= '10 0 * * *'
 Settings.cron_jobs['remove_expired_group_links_worker']['job_class'] = 'RemoveExpiredGroupLinksWorker'
+Settings.cron_jobs['remove_unaccepted_member_invites_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['remove_unaccepted_member_invites_worker']['cron'] ||= '10 15 * * *'
+Settings.cron_jobs['remove_unaccepted_member_invites_worker']['job_class'] = 'RemoveUnacceptedMemberInvitesWorker'
 Settings.cron_jobs['prune_old_events_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['prune_old_events_worker']['cron'] ||= '0 */6 * * *'
 Settings.cron_jobs['prune_old_events_worker']['job_class'] = 'PruneOldEventsWorker'
@@ -506,8 +518,20 @@ Settings.cron_jobs['update_container_registry_info_worker']['job_class'] = 'Upda
 Settings.cron_jobs['postgres_dynamic_partitions_creator'] ||= Settingslogic.new({})
 Settings.cron_jobs['postgres_dynamic_partitions_creator']['cron'] ||= '21 */6 * * *'
 Settings.cron_jobs['postgres_dynamic_partitions_creator']['job_class'] ||= 'PartitionCreationWorker'
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['cron'] ||= '47 9 * * *'
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['job_class'] = 'CiPlatformMetricsUpdateCronWorker'
+Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['cron'] ||= '50 23 */1 * *'
+Settings.cron_jobs['analytics_instance_statistics_count_job_trigger_worker']['job_class'] ||= 'Analytics::InstanceStatistics::CountJobTriggerWorker'
+Settings.cron_jobs['member_invitation_reminder_emails_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['member_invitation_reminder_emails_worker']['cron'] ||= '0 0 * * *'
+Settings.cron_jobs['member_invitation_reminder_emails_worker']['job_class'] = 'MemberInvitationReminderEmailsWorker'
 
 Gitlab.ee do
+  Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['active_user_count_threshold_worker']['cron'] ||= '0 12 * * *'
+  Settings.cron_jobs['active_user_count_threshold_worker']['job_class'] = 'ActiveUserCountThresholdWorker'
   Settings.cron_jobs['adjourned_group_deletion_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['adjourned_group_deletion_worker']['cron'] ||= '0 3 * * *'
   Settings.cron_jobs['adjourned_group_deletion_worker']['job_class'] = 'AdjournedGroupDeletionWorker'
@@ -571,6 +595,9 @@ Gitlab.ee do
   Settings.cron_jobs['elastic_cluster_reindexing_cron_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['elastic_cluster_reindexing_cron_worker']['cron'] ||= '*/10 * * * *'
   Settings.cron_jobs['elastic_cluster_reindexing_cron_worker']['job_class'] ||= 'ElasticClusterReindexingCronWorker'
+  Settings.cron_jobs['elastic_remove_expired_namespace_subscriptions_from_index_cron_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['elastic_remove_expired_namespace_subscriptions_from_index_cron_worker']['cron'] ||= '10 3 * * *'
+  Settings.cron_jobs['elastic_remove_expired_namespace_subscriptions_from_index_cron_worker']['job_class'] ||= 'ElasticRemoveExpiredNamespaceSubscriptionsFromIndexCronWorker'
   Settings.cron_jobs['sync_seat_link_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['sync_seat_link_worker']['cron'] ||= "#{rand(60)} 0 * * *"
   Settings.cron_jobs['sync_seat_link_worker']['job_class'] = 'SyncSeatLinkWorker'
@@ -583,6 +610,15 @@ Gitlab.ee do
   Settings.cron_jobs['network_policy_metrics_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['network_policy_metrics_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['network_policy_metrics_worker']['job_class'] = 'NetworkPolicyMetricsWorker'
+  Settings.cron_jobs['iterations_update_status_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['iterations_update_status_worker']['cron'] ||= '5 0 * * *'
+  Settings.cron_jobs['iterations_update_status_worker']['job_class'] = 'IterationsUpdateStatusWorker'
+  Settings.cron_jobs['vulnerability_statistics_schedule_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['vulnerability_statistics_schedule_worker']['cron'] ||= '15 1 * * *'
+  Settings.cron_jobs['vulnerability_statistics_schedule_worker']['job_class'] = 'Vulnerabilities::Statistics::ScheduleWorker'
+  Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['cron'] ||= '15 3 * * *'
+  Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['job_class'] = 'Vulnerabilities::HistoricalStatistics::DeletionWorker'
 end
 
 #
@@ -616,6 +652,12 @@ ObjectStoreSettings.new(Settings).parse!
 #
 Settings['workhorse'] ||= Settingslogic.new({})
 Settings.workhorse['secret_file'] ||= Rails.root.join('.gitlab_workhorse_secret')
+
+#
+# GitLab KAS
+#
+Settings['gitlab_kas'] ||= Settingslogic.new({})
+Settings.gitlab_kas['secret_file'] ||= Rails.root.join('.gitlab_kas_secret')
 
 #
 # Repositories
@@ -695,6 +737,7 @@ Gitlab.ee do
   Settings['kerberos'] ||= Settingslogic.new({})
   Settings.kerberos['enabled'] = false if Settings.kerberos['enabled'].nil?
   Settings.kerberos['keytab'] = nil if Settings.kerberos['keytab'].blank? # nil means use default keytab
+  Settings.kerberos['simple_ldap_linking_allowed_realms'] = [] if Settings.kerberos['simple_ldap_linking_allowed_realms'].blank?
   Settings.kerberos['service_principal_name'] = nil if Settings.kerberos['service_principal_name'].blank? # nil means any SPN in keytab
   Settings.kerberos['use_dedicated_port'] = false if Settings.kerberos['use_dedicated_port'].nil?
   Settings.kerberos['https'] = Settings.gitlab.https if Settings.kerberos['https'].nil?
@@ -755,6 +798,7 @@ Settings.monitoring['ip_whitelist'] ||= ['127.0.0.1/8']
 Settings.monitoring['unicorn_sampler_interval'] ||= 10
 Settings.monitoring['sidekiq_exporter'] ||= Settingslogic.new({})
 Settings.monitoring.sidekiq_exporter['enabled'] ||= false
+Settings.monitoring.sidekiq_exporter['log_enabled'] ||= false
 Settings.monitoring.sidekiq_exporter['address'] ||= 'localhost'
 Settings.monitoring.sidekiq_exporter['port'] ||= 8082
 Settings.monitoring['web_exporter'] ||= Settingslogic.new({})

@@ -1,3 +1,4 @@
+import { merge } from 'lodash';
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import OnDemandScansApp from 'ee/on_demand_scans/components/on_demand_scans_app.vue';
@@ -8,33 +9,41 @@ const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-sca
 const projectPath = 'group/project';
 const defaultBranch = 'master';
 const emptyStateSvgPath = `${TEST_HOST}/assets/illustrations/alert-management-empty-state.svg`;
+const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/security/configuration/dast_profiles`;
 
 describe('OnDemandScansApp', () => {
   let wrapper;
 
-  const findOnDemandScansForm = () => wrapper.find(OnDemandScansForm);
   const findOnDemandScansEmptyState = () => wrapper.find(OnDemandScansEmptyState);
+  const findOnDemandScansForm = () => wrapper.find(OnDemandScansForm);
 
   const expectEmptyState = () => {
-    expect(wrapper.contains(OnDemandScansForm)).toBe(false);
-    expect(wrapper.contains(OnDemandScansEmptyState)).toBe(true);
+    expect(wrapper.find(OnDemandScansForm).exists()).toBe(false);
+    expect(wrapper.find(OnDemandScansEmptyState).exists()).toBe(true);
   };
 
   const expectForm = () => {
-    expect(wrapper.contains(OnDemandScansForm)).toBe(true);
-    expect(wrapper.contains(OnDemandScansEmptyState)).toBe(false);
+    expect(wrapper.find(OnDemandScansForm).exists()).toBe(true);
+    expect(wrapper.find(OnDemandScansEmptyState).exists()).toBe(false);
   };
 
-  const createComponent = (props = {}) => {
-    wrapper = shallowMount(OnDemandScansApp, {
-      propsData: {
-        helpPagePath,
-        projectPath,
-        defaultBranch,
-        emptyStateSvgPath,
-        ...props,
-      },
-    });
+  const createComponent = options => {
+    wrapper = shallowMount(
+      OnDemandScansApp,
+      merge(
+        {},
+        {
+          propsData: {
+            helpPagePath,
+            projectPath,
+            defaultBranch,
+            emptyStateSvgPath,
+            newSiteProfilePath,
+          },
+        },
+        options,
+      ),
+    );
   };
 
   beforeEach(() => {
@@ -69,11 +78,11 @@ describe('OnDemandScansApp', () => {
       expectForm();
     });
 
-    it('passes correct props to GlEmptyState', () => {
+    it('passes correct props to OnDemandScansForm', () => {
       expect(findOnDemandScansForm().props()).toMatchObject({
-        defaultBranch,
         helpPagePath,
         projectPath,
+        defaultBranch,
       });
     });
 

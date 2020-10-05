@@ -5,6 +5,3 @@ export const codequalityIssues = state => {
 };
 
 export const codequalityIssueTotal = state => state.allCodequalityIssues.length;
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

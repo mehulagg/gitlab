@@ -38,6 +38,3 @@ export const timeframeEndDate = (state, getters) => {
   endDate.setDate(endDate.getDate() + DAYS_IN_WEEK);
   return endDate;
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

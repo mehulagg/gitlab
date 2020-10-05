@@ -16,9 +16,9 @@ For more information about Telemetry, see:
 More useful links:
 
 - [Telemetry Direction](https://about.gitlab.com/direction/telemetry/)
-- [Data Analysis Process](https://about.gitlab.com/handbook/business-ops/data-team/#-data-analysis-process)
-- [Data for Product Managers](https://about.gitlab.com/handbook/business-ops/data-team/data-programs/data-for-product-managers/)
-- [Data Infrastructure](https://about.gitlab.com/handbook/business-ops/data-team/data-platform/data-infrastructure/)
+- [Data Analysis Process](https://about.gitlab.com/handbook/business-ops/data-team/#data-analysis-process/)
+- [Data for Product Managers](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/)
+- [Data Infrastructure](https://about.gitlab.com/handbook/business-ops/data-team/platform/infrastructure/)
 
 ## What is Snowplow
 
@@ -40,7 +40,7 @@ Snowplow is an enterprise-grade marketing and product analytics platform which h
 We have many definitions of Snowplow's schema. We have an active issue to [standardize this schema](https://gitlab.com/gitlab-org/gitlab/-/issues/207930) including the following definitions:
 
 - Frontend and backend taxonomy as listed below
-- [Feature instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy)
+- [Feature instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy)
 - [Self describing events](https://github.com/snowplow/snowplow/wiki/Custom-events#self-describing-events)
 - [Iglu schema](https://gitlab.com/gitlab-org/iglu/)
 - [Snowplow authored events](https://github.com/snowplow/snowplow/wiki/Snowplow-authored-events)
@@ -98,13 +98,13 @@ sequenceDiagram
 
 ## Implementing Snowplow JS (Frontend) tracking
 
-GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to utilize tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Feature instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy).
+GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. There are a few ways to utilize tracking, but each generally requires at minimum, a `category` and an `action`. Additional data can be provided that adheres to our [Feature instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy).
 
 | field      | type   | default value              | description                                                                                                                                                                                                    |
 |:-----------|:-------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `category` | string | document.body.dataset.page | Page or subsection of a page that events are being captured within.                                                                                                                                            |
 | `action`   | string | 'generic'                  | Action the user is taking. Clicks should be `click` and activations should be `activate`, so for example, focusing a form field would be `activate_form_input`, and clicking a button would be `click_button`. |
-| `data`     | object | {}                         | Additional data such as `label`, `property`, `value`, and `context` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy). |
+| `data`     | object | {}                         | Additional data such as `label`, `property`, `value`, and `context` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy). |
 
 ### Tracking in HAML (or Vue Templates)
 
@@ -131,10 +131,10 @@ Below is a list of supported `data-track-*` attributes:
 | attribute             | required | description |
 |:----------------------|:---------|:------------|
 | `data-track-event`    | true     | Action the user is taking. Clicks must be prepended with `click` and activations must be prepended with `activate`. For example, focusing a form field would be `activate_form_input` and clicking a button would be `click_button`. |
-| `data-track-label`    | false    | The `label` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy). |
-| `data-track-property` | false    | The `property` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy). |
-| `data-track-value`    | false    | The `value` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy). If omitted, this is the element's `value` property or an empty string. For checkboxes, the default value is the element's checked attribute or `false` when unchecked. |
-| `data-track-context`  | false    | The `context` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/product/product-processes/#taxonomy). |
+| `data-track-label`    | false    | The `label` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy). |
+| `data-track-property` | false    | The `property` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy). |
+| `data-track-value`    | false    | The `value` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy). If omitted, this is the element's `value` property or an empty string. For checkboxes, the default value is the element's checked attribute or `false` when unchecked. |
+| `data-track-context`  | false    | The `context` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy). |
 
 ### Tracking within Vue components
 
@@ -278,7 +278,7 @@ Custom event tracking and instrumentation can be added by directly calling the `
 |:-----------|:-------|:--------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `category` | string | 'application' | Area or aspect of the application. This could be `HealthCheckController` or `Lfs::FileTransformer` for instance.                                                                                                                                                       |
 | `action`   | string | 'generic'     | The action being taken, which can be anything from a controller action like `create` to something like an Active Record callback.                                                                                                                                      |
-| `data`     | object | {}            | Additional data such as `label`, `property`, `value`, and `context` as described [in our Feature Instrumentation taxonomy](https://about.gitlab.com/handbook/product/feature-instrumentation/#taxonomy). These are set as empty strings if you don't provide them. |
+| `data`     | object | {}            | Additional data such as `label`, `property`, `value`, and `context` as described in [Instrumentation at GitLab](https://about.gitlab.com/handbook/business-ops/data-team/programs/data-for-product-managers/#sts=Taxonomy). These are set as empty strings if you don't provide them. |
 
 Tracking can be viewed as either tracking user behavior, or can be utilized for instrumentation to monitor and visualize performance over time in an area or aspect of code.
 
@@ -297,6 +297,11 @@ class Projects::CreateService < BaseService
 end
 ```
 
+### Unit testing
+
+Use the `expect_snowplow_event` helper when testing backend Snowplow events. See [testing best practices](
+https://docs.gitlab.com/ee/development/testing_guide/best_practices.html#test-snowplow-events) for details.
+
 ### Performance
 
 We use the [AsyncEmitter](https://github.com/snowplow/snowplow/wiki/Ruby-Tracker#52-the-asyncemitter-class) when tracking events, which allows for instrumentation calls to be run in a background thread. This is still an active area of development.
@@ -305,12 +310,21 @@ We use the [AsyncEmitter](https://github.com/snowplow/snowplow/wiki/Ruby-Tracker
 
 There are several tools for developing and testing Snowplow Event
 
-| Testing Tool                                 | Frontend Tracking  | Backend Tracking    | Local Development Environment | Production Environment |
-|----------------------------------------------|--------------------|---------------------|-------------------------------|------------------------|
-| Snowplow Analytics Debugger Chrome Extension | **{check-circle}** | **{dotted-circle}** | **{check-circle}**            | **{check-circle}**     |
-| Snowplow Inspector Chrome Extension          | **{check-circle}** | **{dotted-circle}** | **{check-circle}**            | **{check-circle}**     |
-| Snowplow Micro                               | **{check-circle}** | **{check-circle}**  | **{check-circle}**            | **{dotted-circle}**    |
-| Snowplow Mini                                | **{check-circle}** | **{check-circle}**  | **{dotted-circle}**           | **{check-circle}**     |
+| Testing Tool                                 | Frontend Tracking  | Backend Tracking    | Local Development Environment | Production Environment | Production Environment |
+|----------------------------------------------|--------------------|---------------------|-------------------------------|------------------------|------------------------|
+| Snowplow Analytics Debugger Chrome Extension | **{check-circle}** | **{dotted-circle}** | **{check-circle}**            | **{check-circle}**     | **{check-circle}**     |
+| Snowplow Inspector Chrome Extension          | **{check-circle}** | **{dotted-circle}** | **{check-circle}**            | **{check-circle}**     | **{check-circle}**     |
+| Snowplow Micro                               | **{check-circle}** | **{check-circle}**  | **{check-circle}**            | **{dotted-circle}**    | **{dotted-circle}**    |
+| Snowplow Mini                                | **{check-circle}** | **{check-circle}**  | **{dotted-circle}**           | **{status_preparing}** | **{status_preparing}** |
+
+**Legend**
+
+**{check-circle}** Available, **{status_preparing}** In progress, **{dotted-circle}** Not Planned
+
+### Preparing your MR for Review
+
+1. For frontend events, in the MR description section, add a screenshot of the event's relevant section using the [Snowplow Analytics Debugger](https://chrome.google.com/webstore/detail/snowplow-analytics-debugg/jbnlcgeengmijcghameodeaenefieedm) Chrome browser extension.
+1. For backend events, please use Snowplow Micro and add the output of the Snowplow Micro good events  `GET http://localhost:9090/micro/good`.
 
 ### Snowplow Analytics Debugger Chrome Extension
 
@@ -389,7 +403,7 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
 1. Send a test Snowplow event from the Rails console:
 
    ```ruby
-   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', { page_type: ‘MY_TYPE' }, context: nil )
+   Gitlab::Tracking.self_describing_event('iglu:com.gitlab/pageview_context/jsonschema/1-0-0', { page_type: 'MY_TYPE' }, context: nil )
    ```
 
 ### Snowplow Mini

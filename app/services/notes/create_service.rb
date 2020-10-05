@@ -2,6 +2,8 @@
 
 module Notes
   class CreateService < ::Notes::BaseService
+    include IncidentManagement::UsageData
+
     def execute
       note = Notes::BuildService.new(project, current_user, params.except(:merge_request_diff_head_sha)).execute
 
@@ -54,25 +56,27 @@ module Notes
 
     def when_saved(note)
       if note.part_of_discussion? && note.discussion.can_convert_to_discussion?
-        note.discussion.convert_to_discussion!(save: true)
+        note.discussion.convert_to_discussion!.save
+        note.clear_memoization(:discussion)
       end
 
       todo_service.new_note(note, current_user)
       clear_noteable_diffs_cache(note)
       Suggestions::CreateService.new(note).execute
       increment_usage_counter(note)
+      track_event(note, current_user)
 
       if Feature.enabled?(:notes_create_service_tracking, project)
         Gitlab::Tracking.event('Notes::CreateService', 'execute', tracking_data_for(note))
       end
 
-      if Feature.enabled?(:merge_ref_head_comments, project) && note.for_merge_request? && note.diff_note? && note.start_of_discussion?
+      if Feature.enabled?(:merge_ref_head_comments, project, default_enabled: true) && note.for_merge_request? && note.diff_note? && note.start_of_discussion?
         Discussions::CaptureDiffNotePositionService.new(note.noteable, note.diff_file&.paths).execute(note.discussion)
       end
     end
 
     def do_commands(note, update_params, message, only_commands)
-      return if quick_actions_service.commands_executed_count.to_i.zero?
+      return if quick_actions_service.commands_executed_count.to_i == 0
 
       if update_params.present?
         quick_actions_service.apply_updates(update_params, note)
@@ -102,6 +106,12 @@ module Notes
         label: label,
         value: note.id
       }
+    end
+
+    def track_event(note, user)
+      return unless note.noteable.is_a?(Issue) && note.noteable.incident?
+
+      track_usage_event(:incident_management_incident_comment, user.id)
     end
   end
 end

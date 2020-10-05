@@ -1,6 +1,9 @@
 <script>
-import { initEditorLite } from '~/blob/utils';
 import { debounce } from 'lodash';
+import { initEditorLite } from '~/blob/utils';
+import { SNIPPET_MEASURE_BLOBS_CONTENT } from '~/performance_constants';
+
+import eventHub from './eventhub';
 
 export default {
   props: {
@@ -10,6 +13,13 @@ export default {
       default: '',
     },
     fileName: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    // This is used to help uniquely create a monaco model
+    // even if two blob's share a file path.
+    fileGlobalId: {
       type: String,
       required: false,
       default: '',
@@ -30,17 +40,27 @@ export default {
       el: this.$refs.editor,
       blobPath: this.fileName,
       blobContent: this.value,
+      blobGlobalId: this.fileGlobalId,
     });
+
+    this.editor.onDidChangeModelContent(debounce(this.onFileChange.bind(this), 250));
+
+    eventHub.$emit(SNIPPET_MEASURE_BLOBS_CONTENT);
+  },
+  beforeDestroy() {
+    this.editor.dispose();
   },
   methods: {
-    triggerFileChange: debounce(function debouncedFileChange() {
+    onFileChange() {
       this.$emit('input', this.editor.getValue());
-    }, 250),
+    },
   },
 };
 </script>
 <template>
   <div class="file-content code">
-    <pre id="editor" ref="editor" data-editor-loading @keyup="triggerFileChange">{{ value }}</pre>
+    <div id="editor" ref="editor" data-editor-loading>
+      <pre class="editor-loading-content">{{ value }}</pre>
+    </div>
   </div>
 </template>

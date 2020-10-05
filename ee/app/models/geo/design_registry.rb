@@ -10,10 +10,12 @@ class Geo::DesignRegistry < Geo::BaseRegistry
 
   belongs_to :project
 
-  scope :pending, -> { with_state(:pending) }
+  scope :dirty, -> { with_state(:pending).where.not(last_synced_at: nil) }
   scope :failed, -> { with_state(:failed) }
-  scope :synced, -> { with_state(:synced) }
+  scope :needs_sync_again, -> { dirty.or(failed.retry_due) }
+  scope :never_attempted_sync, -> { with_state(:pending).where(last_synced_at: nil) }
   scope :retry_due, -> { where(arel_table[:retry_at].eq(nil).or(arel_table[:retry_at].lt(Time.current))) }
+  scope :synced, -> { with_state(:synced) }
 
   state_machine :state, initial: :pending do
     state :started
@@ -39,12 +41,38 @@ class Geo::DesignRegistry < Geo::BaseRegistry
     end
   end
 
+  def self.delete_for_model_ids(project_ids)
+    # We only need to delete the registry entries here. The design
+    # repository deletion should happen when a project is destroyed.
+    #
+    # See: https://gitlab.com/gitlab-org/gitlab/-/issues/13429
+    where(project_id: project_ids).delete_all
+
+    project_ids
+  end
+
+  def self.find_registry_differences(range)
+    source_ids = Gitlab::Geo.current_node.designs.id_in(range).pluck_primary_key
+    tracked_ids = self.pluck_model_ids_in_range(range)
+
+    untracked_ids = source_ids - tracked_ids
+    unused_tracked_ids = tracked_ids - source_ids
+
+    [untracked_ids, unused_tracked_ids]
+  end
+
+  def self.find_registries_needs_sync_again(batch_size:, except_ids: [])
+    super.order(Gitlab::Database.nulls_first_order(:last_synced_at))
+  end
+
   # Search for a list of projects associated with registries,
   # based on the query given in `query`.
   #
   # @param [String] query term that will search over :path, :name and :description
   def self.with_search_by_project(query)
-    where(project: Geo::Fdw::Project.search(query))
+    return all if query.empty?
+
+    where(project_id: ::Project.search(query).limit(1000).pluck_primary_key)
   end
 
   def self.search(params)
@@ -52,10 +80,6 @@ class Geo::DesignRegistry < Geo::BaseRegistry
     designs_repositories = designs_repositories.with_state(params[:sync_status]) if params[:sync_status].present?
     designs_repositories = designs_repositories.with_search_by_project(params[:search]) if params[:search].present?
     designs_repositories
-  end
-
-  def self.updated_recently
-    pending.or(failed.retry_due)
   end
 
   def fail_sync!(message, error, attrs = {})

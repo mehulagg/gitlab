@@ -12,10 +12,6 @@ resources :merge_requests, only: [], constraints: { id: /\d+/ } do
     get :secret_detection_reports
     get :dast_reports
 
-    get :approvals
-    post :approvals, action: :approve
-    delete :approvals, action: :unapprove
-
     post :rebase
   end
 

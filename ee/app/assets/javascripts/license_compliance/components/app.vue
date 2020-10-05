@@ -10,11 +10,11 @@ import {
   GlDeprecatedBadge as GlBadge,
   GlAlert,
 } from '@gitlab/ui';
-import { LICENSE_LIST } from '../store/constants';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
+import { LICENSE_LIST } from '../store/constants';
 import DetectedLicensesTable from './detected_licenses_table.vue';
 import PipelineInfo from './pipeline_info.vue';
-import LicenseManagement from 'ee/vue_shared/license_compliance/license_management.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { getLocationHash } from '~/lib/utils/url_utility';
 
@@ -107,7 +107,7 @@ export default {
   />
 
   <div v-else>
-    <gl-alert v-if="hasPolicyViolations" class="mt-2" variant="warning" :dismissible="false">
+    <gl-alert v-if="hasPolicyViolations" class="mt-3" variant="warning" :dismissible="false">
       {{
         s__(
           "Licenses|Detected licenses that are out-of-compliance with the project's assigned policies",
@@ -143,7 +143,9 @@ export default {
 
       <gl-tab data-testid="policiesTab">
         <template #title>
-          <span data-testid="policiesTabTitle">{{ s__('Licenses|Policies') }}</span>
+          <span data-qa-selector="policies_tab" data-testid="policiesTabTitle">{{
+            s__('Licenses|Policies')
+          }}</span>
           <gl-badge pill>{{ policyCount }}</gl-badge>
         </template>
 

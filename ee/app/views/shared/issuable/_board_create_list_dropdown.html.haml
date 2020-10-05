@@ -2,10 +2,10 @@
 - milestone_lists_available = board.resource_parent.feature_available?(:board_milestone_lists)
 
 - if assignee_lists_available || milestone_lists_available
-  .dropdown.boards-add-list.prepend-left-10#js-add-list
+  .dropdown.boards-add-list.gl-ml-3#js-add-list
     %button.btn.btn-success.btn-inverted.d-flex.js-new-board-list{ type: "button", data: board_list_data }
       %span Add list
-      = sprite_icon('chevron-down', size: 16, css_class: 'gl-ml-2 btn-success-board-list-chevron')
+      = sprite_icon('chevron-down', css_class: 'gl-ml-2 btn-success-board-list-chevron')
     .dropdown-menu.dropdown-menu-paging.dropdown-menu-right.dropdown-menu-issues-board-new.dropdown-menu-selectable.dropdown-menu-tabs.pt-0
       %ul.nav.nav-tabs.dropdown-tabs-list.d-flex.js-new-board-list-tabs{ role: 'tablist' }
         %li.nav-item.dropdown-tab-item.flex-grow-1.flex-shrink-1.w-0.border-left-0.js-tab-button-labels

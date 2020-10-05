@@ -1,6 +1,6 @@
 - if @registries.any?
   - @registries.each do |project_registry|
-    .card.project-card.prepend-top-15
+    .card.project-card.gl-mt-5
       .card-header{ id: "project-#{project_registry.project_id}-header" }
         .d-flex.align-items-center
           - if project_registry.project.nil?

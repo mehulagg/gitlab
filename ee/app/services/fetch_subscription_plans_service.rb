@@ -21,7 +21,7 @@ class FetchSubscriptionPlansService
 
     Gitlab::Json.parse(response.body).map { |plan| Hashie::Mash.new(plan) }
   rescue => e
-    Rails.logger.info "Unable to connect to GitLab Customers App #{e}" # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.info "Unable to connect to GitLab Customers App #{e}"
 
     nil
   end
@@ -39,6 +39,10 @@ class FetchSubscriptionPlansService
   end
 
   def cache_key
-    "subscription-plans-#{@plan}"
+    if Feature.enabled?(:subscription_plan_cache_key)
+      "subscription-plan-#{@plan}"
+    else
+      "subscription-plans-#{@plan}"
+    end
   end
 end

@@ -76,7 +76,7 @@ module TestEnv
     'png-lfs'                            => 'fe42f41',
     'sha-starting-with-large-number'     => '8426165',
     'invalid-utf8-diff-paths'            => '99e4853',
-    'compare-with-merge-head-source'     => 'b5f4399',
+    'compare-with-merge-head-source'     => 'f20a03d',
     'compare-with-merge-head-target'     => '2f1e176'
   }.freeze
 
@@ -247,8 +247,9 @@ module TestEnv
       'GitLab Workhorse',
       install_dir: workhorse_dir,
       version: Gitlab::Workhorse.version,
-      task: "gitlab:workhorse:install[#{install_workhorse_args}]"
-    )
+      task: "gitlab:workhorse:install[#{install_workhorse_args}]") do
+        Gitlab::SetupHelper::Workhorse.create_configuration(workhorse_dir, nil)
+      end
   end
 
   def workhorse_dir
@@ -259,16 +260,22 @@ module TestEnv
     host = "[#{host}]" if host.include?(':')
     listen_addr = [host, port].join(':')
 
+    config_path = Gitlab::SetupHelper::Workhorse.get_config_path(workhorse_dir)
+
+    # This should be set up in setup_workhorse, but since
+    # component_needs_update? only checks that versions are consistent,
+    # we need to ensure the config file exists. This line can be removed
+    # later after a new Workhorse version is updated.
+    Gitlab::SetupHelper::Workhorse.create_configuration(workhorse_dir, nil) unless File.exist?(config_path)
+
     workhorse_pid = spawn(
+      { 'PATH' => "#{ENV['PATH']}:#{workhorse_dir}" },
       File.join(workhorse_dir, 'gitlab-workhorse'),
       '-authSocket', upstream,
       '-documentRoot', Rails.root.join('public').to_s,
       '-listenAddr', listen_addr,
       '-secretPath', Gitlab::Workhorse.secret_path.to_s,
-      # TODO: Needed for workhorse + redis features.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/209245
-      #
-      # '-config', '',
+      '-config', config_path,
       '-logFile', 'log/workhorse-test.log',
       '-logFormat', 'structured',
       '-developmentMode' # to serve assets and rich error messages
@@ -508,6 +515,8 @@ module TestEnv
     # Allow local overrides of the component for tests during development
     return false if Rails.env.test? && File.symlink?(component_folder)
 
+    return false if component_matches_git_sha?(component_folder, expected_version)
+
     version = File.read(File.join(component_folder, 'VERSION')).strip
 
     # Notice that this will always yield true when using branch versions
@@ -516,6 +525,16 @@ module TestEnv
     version != expected_version
   rescue Errno::ENOENT
     true
+  end
+
+  def component_matches_git_sha?(component_folder, expected_version)
+    # Not a git SHA, so return early
+    return false unless expected_version =~ ::Gitlab::Git::COMMIT_ID
+
+    sha, exit_status = Gitlab::Popen.popen(%W(#{Gitlab.config.git.bin_path} rev-parse HEAD), component_folder)
+    return false if exit_status != 0
+
+    expected_version == sha.chomp
   end
 end
 

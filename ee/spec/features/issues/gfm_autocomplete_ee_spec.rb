@@ -19,7 +19,7 @@ RSpec.describe 'GFM autocomplete EE', :js do
       before do
         stub_feature_flags(tribute_autocomplete: false)
 
-        issue_assignee.update(assignees: [user])
+        issue_assignee.update!(assignees: [user])
 
         sign_in(user)
         visit project_issue_path(project, issue_assignee)
@@ -48,7 +48,7 @@ RSpec.describe 'GFM autocomplete EE', :js do
       before do
         stub_feature_flags(tribute_autocomplete: true)
 
-        issue_assignee.update(assignees: [user])
+        issue_assignee.update!(assignees: [user])
 
         sign_in(user)
         visit project_issue_path(project, issue_assignee)

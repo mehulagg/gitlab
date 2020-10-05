@@ -61,6 +61,10 @@ module PreferencesHelper
     @user_application_theme ||= Gitlab::Themes.for_user(current_user).css_class
   end
 
+  def user_application_theme_css_filename
+    @user_application_theme_css_filename ||= Gitlab::Themes.for_user(current_user).css_filename
+  end
+
   def user_color_scheme
     Gitlab::ColorSchemes.for_user(current_user).css_class
   end
@@ -71,9 +75,16 @@ module PreferencesHelper
 
   def language_choices
     options_for_select(
-      Gitlab::I18n::AVAILABLE_LANGUAGES.map(&:reverse).sort,
+      Gitlab::I18n.selectable_locales.map(&:reverse).sort,
       current_user.preferred_language
     )
+  end
+
+  def integration_views
+    [].tap do |views|
+      views << 'gitpod' if Gitlab::Gitpod.feature_and_settings_enabled?
+      views << 'sourcegraph' if Gitlab::Sourcegraph.feature_available? && Gitlab::CurrentSettings.sourcegraph_enabled
+    end
   end
 
   private

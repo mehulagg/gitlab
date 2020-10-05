@@ -51,9 +51,64 @@ RSpec.describe SearchHelper do
     end
   end
 
+  describe 'search_autocomplete_opts' do
+    context "with a user" do
+      let(:user) { create(:user) }
+
+      before do
+        allow(self).to receive(:current_user).and_return(user)
+      end
+
+      it 'includes the users recently viewed epics' do
+        recent_epics = instance_double(::Gitlab::Search::RecentEpics)
+        expect(::Gitlab::Search::RecentEpics).to receive(:new).with(user: user).and_return(recent_epics)
+        group1 = create(:group, :public, :with_avatar)
+        group2 = create(:group, :public)
+        epic1 = create(:epic, title: 'epic 1', group: group1)
+        epic2 = create(:epic, title: 'epic 2', group: group2)
+
+        expect(recent_epics).to receive(:search).with('the search term').and_return(Epic.id_in_ordered([epic1.id, epic2.id]))
+
+        results = search_autocomplete_opts("the search term")
+
+        expect(results.count).to eq(2)
+
+        expect(results[0]).to include({
+          category: 'Recent epics',
+          id: epic1.id,
+          label: 'epic 1',
+          url: Gitlab::Routing.url_helpers.group_epic_path(epic1.group, epic1),
+          avatar_url: group1.avatar_url
+        })
+
+        expect(results[1]).to include({
+          category: 'Recent epics',
+          id: epic2.id,
+          label: 'epic 2',
+          url: Gitlab::Routing.url_helpers.group_epic_path(epic2.group, epic2),
+          avatar_url: '' # This group didn't have an avatar so set this to ''
+        })
+      end
+    end
+  end
+
+  describe '#project_autocomplete' do
+    let(:user) { create(:user) }
+
+    before do
+      @project = create(:project, :repository)
+      allow(self).to receive(:current_user).and_return(user)
+    end
+
+    context 'with a licensed user' do
+      it "does include feature flags" do
+        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags' }).to be_present
+      end
+    end
+  end
+
   describe '#search_entries_info_template' do
     let(:com_value) { true }
-    let(:flag_enabled) { true }
     let(:elasticsearch_enabled) { true }
     let(:show_snippets) { true }
     let(:collection) { Kaminari.paginate_array([:foo]).page(1).per(10) }
@@ -68,7 +123,6 @@ RSpec.describe SearchHelper do
       @current_user = user
 
       allow(Gitlab).to receive(:com?).and_return(com_value)
-      stub_feature_flags(restricted_snippet_scope_search: flag_enabled)
       stub_ee_application_setting(search_using_elasticsearch: elasticsearch_enabled)
     end
 
@@ -90,12 +144,6 @@ RSpec.describe SearchHelper do
       it_behaves_like 'returns old message'
     end
 
-    context 'when flag restricted_snippet_scope_search is not enabled' do
-      let(:flag_enabled) { false }
-
-      it_behaves_like 'returns old message'
-    end
-
     context 'when elastic search is not enabled' do
       let(:elasticsearch_enabled) { false }
 
@@ -112,50 +160,6 @@ RSpec.describe SearchHelper do
       let(:show_snippets) { nil }
 
       it_behaves_like 'returns old message'
-    end
-  end
-
-  describe '#show_switch_to_basic_search?' do
-    let(:use_elasticsearch) { true }
-    let(:scope) { 'commits' }
-    let(:search_service) { instance_double(Search::GlobalService, use_elasticsearch?: use_elasticsearch, scope: scope) }
-
-    subject { show_switch_to_basic_search?(search_service) }
-
-    before do
-      stub_feature_flags(switch_to_basic_search: true)
-    end
-
-    context 'when :switch_to_basic_search feature is disabled' do
-      before do
-        stub_feature_flags(switch_to_basic_search: false)
-      end
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when not currently using elasticsearch' do
-      let(:use_elasticsearch) { false }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when project scope' do
-      before do
-        @project = create(:project)
-      end
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when commits tab' do
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when issues tab' do
-      let(:scope) { 'issues' }
-
-      it { is_expected.to eq(true) }
     end
   end
 end

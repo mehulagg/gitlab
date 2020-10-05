@@ -1,95 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ComplianceDashboard component when there are merge requests matches the snapshot 1`] = `
+exports[`ComplianceDashboard component when there are merge requests and the show tabs cookie is true matches the snapshot 1`] = `
 <div
   class="compliance-dashboard"
 >
-  <header
-    class="gl-my-5"
-  >
-    <h4>
-      Compliance Dashboard
-    </h4>
+  <header>
+    <div
+      class="gl-mt-5 d-flex"
+    >
+      <h4
+        class="gl-flex-grow-1 gl-my-0"
+      >
+        Compliance Dashboard
+      </h4>
+       
+      <merge-commits-export-button-stub
+        mergecommitscsvexportpath="/csv"
+      />
+    </div>
      
     <p>
       Here you will find recent merge request activity
     </p>
   </header>
    
-  <div
-    class="dashboard-grid"
+  <gl-tabs-stub
+    theme="indigo"
   >
-    <grid-column-heading-stub
-      heading="Merge Request"
-    />
-     
-    <grid-column-heading-stub
-      class="gl-text-center"
-      heading="Pipeline"
-    />
-     
-    <grid-column-heading-stub
-      class="gl-text-right"
-      heading="Updates"
-    />
-     
-    <div
-      data-testid="merge-request"
+    <b-tab-stub
+      tag="div"
+      title=""
+      titlelinkclass="gl-tab-nav-item"
     >
-      Merge request 0
-    </div>
-     
+      <template>
+         
+        <merge-requests-grid-stub
+          mergerequests="[object Object],[object Object]"
+        />
+      </template>
+      <template>
+        <span>
+          Merge Requests
+        </span>
+      </template>
+    </b-tab-stub>
+  </gl-tabs-stub>
+</div>
+`;
+
+exports[`ComplianceDashboard component when there are merge requests matches the snapshot 1`] = `
+<div
+  class="compliance-dashboard"
+>
+  <header>
     <div
-      class="dashboard-pipeline gl-display-flex gl-align-items-center gl-justify-content-center gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
+      class="gl-mt-5 d-flex"
     >
-      <!---->
-    </div>
-     
-    <div
-      class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
-    >
-      <approvers-stub
-        approvers=""
-      />
-       
-      <span
-        class="gl-text-gray-700"
+      <h4
+        class="gl-flex-grow-1 gl-my-0"
       >
-        <time>
-          merged 2 days ago
-        </time>
-      </span>
-    </div>
-    <div
-      data-testid="merge-request"
-    >
-      Merge request 1
-    </div>
-     
-    <div
-      class="dashboard-pipeline gl-display-flex gl-align-items-center gl-justify-content-center gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
-    >
-      <!---->
-    </div>
-     
-    <div
-      class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
-    >
-      <approvers-stub
-        approvers=""
-      />
+        Compliance Dashboard
+      </h4>
        
-      <span
-        class="gl-text-gray-700"
-      >
-        <time>
-          merged 2 days ago
-        </time>
-      </span>
+      <merge-commits-export-button-stub
+        mergecommitscsvexportpath="/csv"
+      />
     </div>
-  </div>
+     
+    <p>
+      Here you will find recent merge request activity
+    </p>
+  </header>
    
-  <pagination-stub />
+  <merge-requests-grid-stub
+    mergerequests="[object Object],[object Object]"
+  />
 </div>
 `;
 

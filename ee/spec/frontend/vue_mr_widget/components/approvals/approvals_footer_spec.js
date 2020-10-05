@@ -1,8 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import ApprovalsList from 'ee/vue_merge_request_widget/components/approvals/approvals_list.vue';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 
 const testSuggestedApprovers = () => Array.from({ length: 11 }, (_, i) => i).map(id => ({ id }));
@@ -22,7 +21,7 @@ describe('EE MRWidget approvals footer', () => {
   };
 
   const findToggle = () => wrapper.find('button');
-  const findToggleIcon = () => findToggle().find(Icon);
+  const findToggleIcon = () => findToggle().find(GlIcon);
   const findToggleLoadingIcon = () => findToggle().find(GlLoadingIcon);
   const findExpandButton = () => wrapper.find(GlDeprecatedButton);
   const findCollapseButton = () => wrapper.find(GlDeprecatedButton);
@@ -142,7 +141,7 @@ describe('EE MRWidget approvals footer', () => {
         button.trigger('click');
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [true] }]);
+          expect(wrapper.emitted().input).toEqual([[true]]);
         });
       });
     });
@@ -188,7 +187,7 @@ describe('EE MRWidget approvals footer', () => {
         wrapper.vm
           .$nextTick()
           .then(() => {
-            expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [true] }]);
+            expect(wrapper.emitted().input).toEqual([[true]]);
           })
           .then(done)
           .catch(done.fail);

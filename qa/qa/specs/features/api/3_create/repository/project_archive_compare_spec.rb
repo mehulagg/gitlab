@@ -28,7 +28,14 @@ module QA
         end
       end
 
-      it 'download archives of each user project then check they are different' do
+      after do
+        # Delete the .netrc file created during this test so that subsequent tests don't try to use the logins
+        Git::Repository.perform do |repository|
+          repository.delete_netrc
+        end
+      end
+
+      it 'download archives of each user project then check they are different', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/427' do
         archive_checksums = {}
 
         users.each do |user_key, user_info|
@@ -51,7 +58,6 @@ module QA
           project.add_name_uuid = false
           project.name = project_name
           project.path_with_namespace = "#{user.username}/#{project_name}"
-          project.user = user
           project.api_client = api_client
         end
 

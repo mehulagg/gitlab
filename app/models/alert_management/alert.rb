@@ -11,6 +11,8 @@ module AlertManagement
     include Noteable
     include Gitlab::SQL::Pattern
     include Presentable
+    include Gitlab::Utils::StrongMemoize
+    include Referable
 
     STATUSES = {
       triggered: 0,
@@ -26,7 +28,10 @@ module AlertManagement
       ignored: :ignore
     }.freeze
 
-    DETAILS_IGNORED_PARAMS = %w(start_time).freeze
+    OPEN_STATUSES = [
+      :triggered,
+      :acknowledged
+    ].freeze
 
     belongs_to :project
     belongs_to :issue, optional: true
@@ -113,14 +118,15 @@ module AlertManagement
     end
 
     delegate :iid, to: :issue, prefix: true, allow_nil: true
+    delegate :details_url, to: :present
 
     scope :for_iid, -> (iid) { where(iid: iid) }
     scope :for_status, -> (status) { where(status: status) }
     scope :for_fingerprint, -> (project, fingerprint) { where(project: project, fingerprint: fingerprint) }
     scope :for_environment, -> (environment) { where(environment: environment) }
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
-    scope :open, -> { with_status(:triggered, :acknowledged) }
-    scope :not_resolved, -> { where.not(status: STATUSES[:resolved]) }
+    scope :open, -> { with_status(OPEN_STATUSES) }
+    scope :not_resolved, -> { without_status(:resolved) }
     scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
 
     scope :order_start_time,    -> (sort_order) { order(started_at: sort_order) }
@@ -131,6 +137,7 @@ module AlertManagement
     # Descending sort order sorts severity from more critical to less critical.
     # https://gitlab.com/gitlab-org/gitlab/-/issues/221242#what-is-the-expected-correct-behavior
     scope :order_severity,      -> (sort_order) { order(severity: sort_order == :asc ? :desc : :asc) }
+    scope :order_severity_with_open_prometheus_alert, -> { open.with_prometheus_alert.order(severity: :asc, started_at: :desc) }
 
     # Ascending sort order sorts statuses: Ignored > Resolved > Acknowledged > Triggered
     # Descending sort order sorts statuses: Triggered > Acknowledged > Resolved > Ignored
@@ -164,24 +171,37 @@ module AlertManagement
       with_prometheus_alert.where(id: ids)
     end
 
-    def details
-      details_payload = payload.except(*attributes.keys, *DETAILS_IGNORED_PARAMS)
+    def self.reference_prefix
+      '^alert#'
+    end
 
-      Gitlab::Utils::InlineHash.merge_keys(details_payload)
+    def self.reference_pattern
+      @reference_pattern ||= %r{
+        (#{Project.reference_pattern})?
+        #{Regexp.escape(reference_prefix)}(?<alert>\d+)
+      }x
+    end
+
+    def self.link_reference_pattern
+      @link_reference_pattern ||= super("alert_management", /(?<alert>\d+)\/details(\#)?/)
+    end
+
+    def self.reference_valid?(reference)
+      reference.to_i > 0 && reference.to_i <= Gitlab::Database::MAX_INT_VALUE
     end
 
     def prometheus?
-      monitoring_tool == Gitlab::AlertManagement::AlertParams::MONITORING_TOOLS[:prometheus]
+      monitoring_tool == Gitlab::AlertManagement::Payload::MONITORING_TOOLS[:prometheus]
     end
 
     def register_new_event!
       increment!(:events)
     end
 
-    # required for todos (typically contains an identifier like issue iid)
-    #  no-op; we could use iid, but we don't have a reference prefix
-    def to_reference(_from = nil, full: false)
-      ''
+    def to_reference(from = nil, full: false)
+      reference = "#{self.class.reference_prefix}#{iid}"
+
+      "#{project.to_reference_base(from, full: full)}#{reference}"
     end
 
     def execute_services
@@ -190,10 +210,12 @@ module AlertManagement
       project.execute_services(hook_data, :alert_hooks)
     end
 
-    def present
-      return super(presenter_class: AlertManagement::PrometheusAlertPresenter) if prometheus?
-
-      super
+    # Representation of the alert's payload. Avoid accessing
+    # #payload attribute directly.
+    def parsed_payload
+      strong_memoize(:parsed_payload) do
+        Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: monitoring_tool)
+      end
     end
 
     private

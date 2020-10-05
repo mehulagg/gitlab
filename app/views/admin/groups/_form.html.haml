@@ -24,8 +24,10 @@
   - if @group.new_record?
     .form-group.row
       .offset-sm-2.col-sm-10
-        .alert.alert-info
-          = render 'shared/group_tips'
+        .gl-alert.gl-alert-info
+          = sprite_icon('information-o', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+          .gl-alert-body
+            = render 'shared/group_tips'
     .form-actions
       = f.submit _('Create group'), class: "btn btn-success"
       = link_to  _('Cancel'), admin_groups_path, class: "btn btn-cancel"
@@ -34,5 +36,3 @@
     .form-actions
       = f.submit _('Save changes'), class: "btn btn-success", data: { qa_selector: 'save_changes_button' }
       = link_to  _('Cancel'), admin_group_path(@group), class: "btn btn-cancel"
-
-= render_if_exists 'ldap_group_links/ldap_syncrhonizations', group: @group

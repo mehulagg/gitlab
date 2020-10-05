@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import CodequalityReportApp from 'ee/codequality_report/codequality_report.vue';
-import Translate from '~/vue_shared/translate';
 import createStore from 'ee/codequality_report/store';
+import Translate from '~/vue_shared/translate';
 
 Vue.use(Translate);
 

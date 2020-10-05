@@ -2,13 +2,12 @@ import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 
+import { TEST_HOST } from 'helpers/test_constants';
+import { listObj } from 'jest/boards/mock_data';
 import BoardListHeader from '~/boards/components/board_list_header.vue';
 import List from '~/boards/models/list';
 import { ListType } from '~/boards/constants';
 import axios from '~/lib/utils/axios_utils';
-
-import { TEST_HOST } from 'helpers/test_constants';
-import { listObj } from 'jest/boards/mock_data';
 
 describe('Board List Header Component', () => {
   let wrapper;
@@ -58,11 +57,11 @@ describe('Board List Header Component', () => {
 
     wrapper = shallowMount(BoardListHeader, {
       propsData: {
-        boardId,
         disabled: false,
-        issueLinkBase: '/',
-        rootPath: '/',
         list,
+      },
+      provide: {
+        boardId,
       },
     });
   };
@@ -107,7 +106,7 @@ describe('Board List Header Component', () => {
       createComponent();
 
       expect(isCollapsed()).toBe(false);
-      wrapper.find('[data-testid="board-list-header"]').vm.$emit('click');
+      wrapper.find('[data-testid="board-list-header"]').trigger('click');
 
       return wrapper.vm.$nextTick().then(() => {
         expect(isCollapsed()).toBe(false);

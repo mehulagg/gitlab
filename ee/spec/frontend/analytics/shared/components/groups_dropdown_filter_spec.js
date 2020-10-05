@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import Api from '~/api';
@@ -109,23 +109,13 @@ describe('GroupsDropdownFilter component', () => {
     it('should emit the "selected" event with the selected group', () => {
       selectDropdownAtIndex(0);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [groups[0]],
-        },
-      ]);
+      expect(wrapper.emitted().selected).toEqual([[groups[0]]]);
     });
 
     it('should change selection when new group is clicked', () => {
       selectDropdownAtIndex(1);
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [groups[1]],
-        },
-      ]);
+      expect(wrapper.emitted().selected).toEqual([[groups[1]]]);
     });
 
     it('renders an avatar in the dropdown button when the group has an avatar_url', () => {
@@ -140,8 +130,16 @@ describe('GroupsDropdownFilter component', () => {
       selectDropdownAtIndex(1);
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(findDropdownButton().contains('img.gl-avatar')).toBe(false);
-        expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(true);
+        expect(
+          findDropdownButton()
+            .find('img.gl-avatar')
+            .exists(),
+        ).toBe(false);
+        expect(
+          findDropdownButton()
+            .find('.gl-avatar-identicon')
+            .exists(),
+        ).toBe(true);
       });
     });
   });

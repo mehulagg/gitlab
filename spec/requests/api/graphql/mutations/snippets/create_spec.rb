@@ -7,22 +7,24 @@ RSpec.describe 'Creating a Snippet' do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
-  let(:content) { 'Initial content' }
+
   let(:description) { 'Initial description' }
   let(:title) { 'Initial title' }
-  let(:file_name) { 'Initial file_name' }
   let(:visibility_level) { 'public' }
+  let(:action) { :create }
+  let(:file_1) { { filePath: 'example_file1', content: 'This is the example file 1' }}
+  let(:file_2) { { filePath: 'example_file2', content: 'This is the example file 2' }}
+  let(:actions) { [{ action: action }.merge(file_1), { action: action }.merge(file_2)] }
   let(:project_path) { nil }
   let(:uploaded_files) { nil }
   let(:mutation_vars) do
     {
-      content: content,
       description: description,
       visibility_level: visibility_level,
-      file_name: file_name,
       title: title,
       project_path: project_path,
-      uploaded_files: uploaded_files
+      uploaded_files: uploaded_files,
+      blob_actions: actions
     }
   end
 
@@ -62,24 +64,49 @@ RSpec.describe 'Creating a Snippet' do
   context 'when the user has permission' do
     let(:current_user) { user }
 
-    context 'with PersonalSnippet' do
-      it 'creates the Snippet' do
+    shared_examples 'does not create snippet' do
+      it 'does not create the Snippet' do
+        expect do
+          subject
+        end.not_to change { Snippet.count }
+      end
+
+      it 'does not return Snippet' do
+        subject
+
+        expect(mutation_response['snippet']).to be_nil
+      end
+    end
+
+    shared_examples 'creates snippet' do
+      it 'returns the created Snippet', :aggregate_failures do
         expect do
           subject
         end.to change { Snippet.count }.by(1)
-      end
 
-      it 'returns the created Snippet' do
-        subject
+        snippet = Snippet.last
+        created_file_1 = snippet.repository.blob_at('HEAD', file_1[:filePath])
+        created_file_2 = snippet.repository.blob_at('HEAD', file_2[:filePath])
 
-        expect(mutation_response['snippet']['blob']['richData']).to be_nil
-        expect(mutation_response['snippet']['blob']['plainData']).to match(content)
+        expect(created_file_1.data).to match(file_1[:content])
+        expect(created_file_2.data).to match(file_2[:content])
         expect(mutation_response['snippet']['title']).to eq(title)
         expect(mutation_response['snippet']['description']).to eq(description)
-        expect(mutation_response['snippet']['fileName']).to eq(file_name)
         expect(mutation_response['snippet']['visibilityLevel']).to eq(visibility_level)
-        expect(mutation_response['snippet']['project']).to be_nil
       end
+
+      context 'when action is invalid' do
+        let(:file_1) { { filePath: 'example_file1' }}
+
+        it_behaves_like 'a mutation that returns errors in the response', errors: ['Snippet actions have invalid data']
+        it_behaves_like 'does not create snippet'
+      end
+
+      it_behaves_like 'snippet edit usage data counters'
+    end
+
+    context 'with PersonalSnippet' do
+      it_behaves_like 'creates snippet'
     end
 
     context 'with ProjectSnippet' do
@@ -89,23 +116,7 @@ RSpec.describe 'Creating a Snippet' do
         project.add_developer(current_user)
       end
 
-      it 'creates the Snippet' do
-        expect do
-          subject
-        end.to change { Snippet.count }.by(1)
-      end
-
-      it 'returns the created Snippet' do
-        subject
-
-        expect(mutation_response['snippet']['blob']['richData']).to be_nil
-        expect(mutation_response['snippet']['blob']['plainData']).to match(content)
-        expect(mutation_response['snippet']['title']).to eq(title)
-        expect(mutation_response['snippet']['description']).to eq(description)
-        expect(mutation_response['snippet']['fileName']).to eq(file_name)
-        expect(mutation_response['snippet']['visibilityLevel']).to eq(visibility_level)
-        expect(mutation_response['snippet']['project']['fullPath']).to eq(project_path)
-      end
+      it_behaves_like 'creates snippet'
 
       context 'when the project path is invalid' do
         let(:project_path) { 'foobar' }
@@ -122,61 +133,8 @@ RSpec.describe 'Creating a Snippet' do
         it_behaves_like 'a mutation that returns top-level errors',
                         errors: [Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR]
       end
-    end
 
-    shared_examples 'does not create snippet' do
-      it 'does not create the Snippet' do
-        expect do
-          subject
-        end.not_to change { Snippet.count }
-      end
-
-      it 'does not return Snippet' do
-        subject
-
-        expect(mutation_response['snippet']).to be_nil
-      end
-    end
-
-    context 'when snippet is created using the files param' do
-      let(:action) { :create }
-      let(:file_1) { { filePath: 'example_file1', content: 'This is the example file 1' }}
-      let(:file_2) { { filePath: 'example_file2', content: 'This is the example file 2' }}
-      let(:actions) { [{ action: action }.merge(file_1), { action: action }.merge(file_2)] }
-      let(:mutation_vars) do
-        {
-          description: description,
-          visibility_level: visibility_level,
-          project_path: project_path,
-          title: title,
-          files: actions
-        }
-      end
-
-      it 'creates the Snippet' do
-        expect do
-          subject
-        end.to change { Snippet.count }.by(1)
-      end
-
-      it 'returns the created Snippet' do
-        subject
-
-        expect(mutation_response['snippet']['title']).to eq(title)
-        expect(mutation_response['snippet']['description']).to eq(description)
-        expect(mutation_response['snippet']['visibilityLevel']).to eq(visibility_level)
-        expect(mutation_response['snippet']['blobs'][0]['plainData']).to match(file_1[:content])
-        expect(mutation_response['snippet']['blobs'][0]['fileName']).to match(file_1[:file_path])
-        expect(mutation_response['snippet']['blobs'][1]['plainData']).to match(file_2[:content])
-        expect(mutation_response['snippet']['blobs'][1]['fileName']).to match(file_2[:file_path])
-      end
-
-      context 'when action is invalid' do
-        let(:file_1) { { filePath: 'example_file1' }}
-
-        it_behaves_like 'a mutation that returns errors in the response', errors: ['Snippet files have invalid data']
-        it_behaves_like 'does not create snippet'
-      end
+      it_behaves_like 'snippet edit usage data counters'
     end
 
     context 'when there are ActiveRecord validation errors' do
@@ -187,7 +145,7 @@ RSpec.describe 'Creating a Snippet' do
     end
 
     context 'when there non ActiveRecord errors' do
-      let(:file_name) { 'invalid://file/path' }
+      let(:file_1) { { filePath: 'invalid://file/path', content: 'foobar' }}
 
       it_behaves_like 'a mutation that returns errors in the response', errors: ['Repository Error creating the snippet - Invalid file name']
       it_behaves_like 'does not create snippet'

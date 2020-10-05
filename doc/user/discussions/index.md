@@ -1,7 +1,8 @@
 ---
-stage: Plan
-group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
 ---
 
 # Threads
@@ -89,14 +90,19 @@ When a link of a commit reference is found in a thread inside a merge
 request, it will be automatically converted to a link in the context of the
 current merge request.
 
-### Jumping between unresolved threads
+### Jumping between unresolved threads (deprecated)
+
+> - [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/199718) in GitLab 13.3.
+> - This button's removal is behind a feature flag enabled by default.
+> - For GitLab self-managed instances, GitLab administrators with access to the
+  [GitLab Rails console](../../administration/feature_flags.md) can opt to disable it by running
+  `Feature.disable(:hide_jump_to_next_unresolved_in_threads)` (for the instance) or
+  `Feature.disable(:hide_jump_to_next_unresolved_in_threads, Project.find(<project id>))`
+  (per project.) **(CORE ONLY)**
 
 When a merge request has a large number of comments it can be difficult to track
 what remains unresolved. You can jump between unresolved threads with the
 Jump button next to the Reply field on a thread.
-
-You can also jump to the next unresolved thread from the button next to the
-resolved threads tracker.
 
 You can also use keyboard shortcuts to navigate among threads:
 
@@ -110,7 +116,7 @@ You can also use keyboard shortcuts to navigate among threads:
 You can mark a thread as resolved by clicking the **Resolve thread**
 button at the bottom of the thread.
 
-!["Resolve thread" button](img/resolve_thread_button.png)
+!["Resolve thread" button](img/resolve_thread_button_v13_3.png)
 
 Alternatively, you can mark each comment as resolved individually.
 
@@ -242,7 +248,7 @@ After you click on the image, a comment form will be displayed that would be the
 of your thread. Once you save your comment, you will see a new badge displayed on
 top of your image. This badge represents your thread.
 
->**Note:**
+NOTE: **Note:**
 This thread badge is typically associated with a number that is only used as a visual
 reference for each thread. In the merge request thread tab,
 this badge will be indicated with a comment icon since each thread will render a new
@@ -492,9 +498,10 @@ introduced by [#25381](https://gitlab.com/gitlab-org/gitlab/-/issues/25381).
 ### Batch Suggestions
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25486) in GitLab 13.1 as an [alpha feature](https://about.gitlab.com/handbook/product/#alpha).
-> - It's deployed behind a feature flag, disabled by default.
-> - It's disabled on GitLab.com.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-batch-suggestions).
+> - It was deployed behind a feature flag, disabled by default.
+> - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/227799) on GitLab 13.2.
+> - It's enabled on GitLab.com.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-batch-suggestions).
 
 You can apply multiple suggestions at once to reduce the number of commits added
 to your branch to address your reviewers' requests.
@@ -515,12 +522,12 @@ to your branch to address your reviewers' requests.
 
    ![A code change suggestion displayed, with the button to apply the batch of suggestions highlighted.](img/apply_batch_of_suggestions_v13_1.jpg "Apply a batch of suggestions")
 
-#### Enable or disable Batch Suggestions
+#### Enable or disable Batch Suggestions **(CORE ONLY)**
 
 Batch Suggestions is
-deployed behind a feature flag that is **disabled by default**.
+deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it for your instance.
+can opt to disable it for your instance.
 
 To enable it:
 

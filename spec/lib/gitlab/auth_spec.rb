@@ -149,7 +149,9 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
     end
 
     context 'build token' do
-      subject { gl_auth.find_for_git_client('gitlab-ci-token', build.token, project: project, ip: 'ip') }
+      subject { gl_auth.find_for_git_client(username, build.token, project: project, ip: 'ip') }
+
+      let(:username) { 'gitlab-ci-token' }
 
       context 'for running build' do
         let!(:build) { create(:ci_build, :running) }
@@ -169,6 +171,14 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           build.update(user: create(:user, :blocked))
 
           expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+        end
+
+        context 'username is not gitlab-ci-token' do
+          let(:username) { 'another_username' }
+
+          it 'fails to authenticate' do
+            expect(subject).to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+          end
         end
       end
 
@@ -348,6 +358,29 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
         end
       end
+
+      context 'when using a project access token' do
+        let_it_be(:project_bot_user) { create(:user, :project_bot) }
+        let_it_be(:project_access_token) { create(:personal_access_token, user: project_bot_user) }
+
+        context 'with valid project access token' do
+          before_all do
+            project.add_maintainer(project_bot_user)
+          end
+
+          it 'succeeds' do
+            expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+              .to eq(Gitlab::Auth::Result.new(project_bot_user, nil, :personal_access_token, described_class.full_authentication_abilities))
+          end
+        end
+
+        context 'with invalid project access token' do
+          it 'fails' do
+            expect(gl_auth.find_for_git_client(project_bot_user.username, project_access_token.token, project: project, ip: 'ip'))
+              .to eq(Gitlab::Auth::Result.new(nil, nil, nil, nil))
+          end
+        end
+      end
     end
 
     context 'while using regular user and password' do
@@ -431,7 +464,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
         end
       end
 
-      shared_examples 'deploy token with disabled registry' do
+      shared_examples 'deploy token with disabled feature' do
         context 'when registry disabled' do
           before do
             stub_container_registry_config(enabled: false)
@@ -439,6 +472,15 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
 
           it 'fails when login and token are valid' do
             expect(gl_auth.find_for_git_client(login, deploy_token.token, project: nil, ip: 'ip'))
+              .to eq(auth_failure)
+          end
+        end
+
+        context 'when repository is disabled' do
+          let(:project) { create(:project, :repository_disabled) }
+
+          it 'fails when login and token are valid' do
+            expect(gl_auth.find_for_git_client(login, deploy_token.token, project: project, ip: 'ip'))
               .to eq(auth_failure)
           end
         end
@@ -541,7 +583,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
 
         it 'fails if token is not related to project' do
           another_deploy_token = create(:deploy_token)
-          expect(gl_auth.find_for_git_client(login, another_deploy_token.token, project: project, ip: 'ip'))
+          expect(gl_auth.find_for_git_client(another_deploy_token.username, another_deploy_token.token, project: project, ip: 'ip'))
             .to eq(auth_failure)
         end
 
@@ -566,6 +608,13 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
 
           expect(subject).to eq(auth_success)
         end
+
+        it 'fails if token is not related to group' do
+          another_deploy_token = create(:deploy_token, :group, read_repository: true)
+
+          expect(gl_auth.find_for_git_client(another_deploy_token.username, another_deploy_token.token, project: project_with_group, ip: 'ip'))
+            .to eq(auth_failure)
+        end
       end
 
       context 'when the deploy token has read_registry as a scope' do
@@ -587,7 +636,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           it_behaves_like 'registry token scope'
         end
 
-        it_behaves_like 'deploy token with disabled registry'
+        it_behaves_like 'deploy token with disabled feature'
       end
 
       context 'when the deploy token has write_registry as a scope' do
@@ -609,7 +658,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
           it_behaves_like 'registry token scope'
         end
 
-        it_behaves_like 'deploy token with disabled registry'
+        it_behaves_like 'deploy token with disabled feature'
       end
     end
   end
@@ -621,6 +670,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
         password: password,
         password_confirmation: password)
     end
+
     let(:username) { 'John' } # username isn't lowercase, test this
     let(:password) { 'my-secret' }
 
@@ -664,10 +714,67 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching do
       expect( gl_auth.find_with_user_password(username, password) ).not_to eql user
     end
 
+    it 'does not find user in locked state' do
+      user.lock_access!
+
+      expect(gl_auth.find_with_user_password(username, password)).not_to eql user
+    end
+
     it "does not find user in ldap_blocked state" do
       user.ldap_block
 
       expect( gl_auth.find_with_user_password(username, password) ).not_to eql user
+    end
+
+    context 'with increment_failed_attempts' do
+      wrong_password = 'incorrect_password'
+
+      it 'increments failed_attempts when true and password is incorrect' do
+        expect do
+          gl_auth.find_with_user_password(username, wrong_password, increment_failed_attempts: true)
+          user.reload
+        end.to change(user, :failed_attempts).from(0).to(1)
+      end
+
+      it 'resets failed_attempts when true and password is correct' do
+        user.failed_attempts = 2
+        user.save
+
+        expect do
+          gl_auth.find_with_user_password(username, password, increment_failed_attempts: true)
+          user.reload
+        end.to change(user, :failed_attempts).from(2).to(0)
+      end
+
+      it 'does not increment failed_attempts by default' do
+        expect do
+          gl_auth.find_with_user_password(username, wrong_password)
+          user.reload
+        end.not_to change(user, :failed_attempts)
+      end
+
+      context 'when the database is read only' do
+        before do
+          allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+        end
+
+        it 'does not increment failed_attempts when true and password is incorrect' do
+          expect do
+            gl_auth.find_with_user_password(username, wrong_password, increment_failed_attempts: true)
+            user.reload
+          end.not_to change(user, :failed_attempts)
+        end
+
+        it 'does not reset failed_attempts when true and password is correct' do
+          user.failed_attempts = 2
+          user.save
+
+          expect do
+            gl_auth.find_with_user_password(username, password, increment_failed_attempts: true)
+            user.reload
+          end.not_to change(user, :failed_attempts)
+        end
+      end
     end
 
     context "with ldap enabled" do

@@ -2,94 +2,6 @@
 
 require 'spec_helper'
 
-RSpec.shared_examples 'approvals' do
-  let!(:approver) { create(:user) }
-  let!(:approval_rule) { create(:approval_project_rule, project: project, users: [approver, user], approvals_required: 2) }
-
-  before do
-    project.add_developer(approver)
-  end
-
-  describe 'approve' do
-    before do
-      post :approve,
-           params: {
-             namespace_id: project.namespace.to_param,
-             project_id: project.to_param,
-             id: merge_request.iid
-           },
-           format: :json
-    end
-
-    it 'approves the merge request' do
-      approvals = json_response
-
-      expect(response).to be_successful
-      expect(approvals['approvals_left']).to eq 1
-      expect(approvals['approved_by'].size).to eq 1
-      expect(approvals['approved_by'][0]['user']['username']).to eq user.username
-      expect(approvals['user_has_approved']).to be true
-      expect(approvals['user_can_approve']).to be false
-      expect(approvals['suggested_approvers'].size).to eq 1
-      expect(approvals['suggested_approvers'][0]['username']).to eq approver.username
-    end
-  end
-
-  describe 'approvals' do
-    let!(:approval) { create(:approval, merge_request: merge_request, user: approver) }
-
-    def get_approvals
-      get :approvals,
-          params: {
-            namespace_id: project.namespace.to_param,
-            project_id: project.to_param,
-            id: merge_request.iid
-          },
-          format: :json
-    end
-
-    it 'shows approval information' do
-      get_approvals
-
-      approvals = json_response
-
-      expect(response).to be_successful
-      expect(approvals['approvals_left']).to eq 1
-      expect(approvals['approved_by'].size).to eq 1
-      expect(approvals['approved_by'][0]['user']['username']).to eq approver.username
-      expect(approvals['user_has_approved']).to be false
-      expect(approvals['user_can_approve']).to be true
-      expect(approvals['suggested_approvers'].size).to eq 1
-      expect(approvals['suggested_approvers'][0]['username']).to eq user.username
-    end
-  end
-
-  describe 'unapprove' do
-    let!(:approval) { create(:approval, merge_request: merge_request, user: user) }
-
-    before do
-      delete :unapprove,
-             params: {
-               namespace_id: project.namespace.to_param,
-               project_id: project.to_param,
-               id: merge_request.iid
-             },
-             format: :json
-    end
-
-    it 'unapproves the merge request' do
-      approvals = json_response
-
-      expect(response).to be_successful
-      expect(approvals['approvals_left']).to eq 2
-      expect(approvals['approved_by']).to be_empty
-      expect(approvals['user_has_approved']).to be false
-      expect(approvals['user_can_approve']).to be true
-      expect(approvals['suggested_approvers'].size).to eq 2
-    end
-  end
-end
-
 RSpec.shared_examples 'authorize read pipeline' do
   context 'public project with private builds' do
     let(:comparison_status) { {} }
@@ -113,6 +25,28 @@ RSpec.shared_examples 'authorize read pipeline' do
   end
 end
 
+RSpec.shared_examples 'pending pipeline response' do
+  context 'when pipeline is pending' do
+    let(:comparison_status) { nil }
+
+    before do
+      merge_request.head_pipeline.run!
+    end
+
+    it 'sends polling interval' do
+      expect(::Gitlab::PollingInterval).to receive(:set_header)
+
+      subject
+    end
+
+    it 'returns 204 HTTP status' do
+      subject
+
+      expect(response).to have_gitlab_http_status(:no_content)
+    end
+  end
+end
+
 RSpec.describe Projects::MergeRequestsController do
   include ProjectForksHelper
 
@@ -125,7 +59,38 @@ RSpec.describe Projects::MergeRequestsController do
     sign_in(viewer)
   end
 
-  it_behaves_like 'approvals'
+  describe 'GET index' do
+    def get_merge_requests
+      get :index,
+        params: {
+          namespace_id: project.namespace.to_param,
+          project_id: project,
+          state: 'opened'
+        }
+    end
+
+    context 'when filtering by opened state' do
+      context 'with opened merge requests' do
+        render_views
+        it 'avoids N+1' do
+          other_user = create(:user)
+          create(:merge_request, :unique_branches, target_project: project, source_project: project)
+          create_list(:approval_merge_request_rule, 5, merge_request: merge_request, users: [user, other_user], approvals_required: 2)
+
+          control_count = ActiveRecord::QueryRecorder.new { get_merge_requests }.count
+
+          create_list(:approval, 10)
+          create_list(:merge_request, 20, :unique_branches, target_project: project, source_project: project).each do |mr|
+            create(:approval_merge_request_rule, merge_request: merge_request, users: [user, other_user], approvals_required: 2)
+          end
+
+          expect do
+            get_merge_requests
+          end.not_to exceed_query_limit(control_count)
+        end
+      end
+    end
+  end
 
   describe 'PUT update' do
     before do
@@ -134,17 +99,17 @@ RSpec.describe Projects::MergeRequestsController do
 
     def update_merge_request(params = {})
       post :update,
-           params: {
-             namespace_id: merge_request.target_project.namespace.to_param,
-             project_id: merge_request.target_project.to_param,
-             id: merge_request.iid,
-             merge_request: params
-           }
+        params: {
+          namespace_id: merge_request.target_project.namespace.to_param,
+          project_id: merge_request.target_project.to_param,
+          id: merge_request.iid,
+          merge_request: params
+        }
     end
 
     context 'when the merge request requires approval' do
       before do
-        project.update(approvals_before_merge: 1)
+        project.update!(approvals_before_merge: 1)
       end
 
       it_behaves_like 'update invalid issuable', MergeRequest
@@ -152,12 +117,12 @@ RSpec.describe Projects::MergeRequestsController do
 
     context 'overriding approvers per MR' do
       before do
-        project.update(approvals_before_merge: 1)
+        project.update!(approvals_before_merge: 1)
       end
 
       context 'enabled' do
         before do
-          project.update(disable_overriding_approvers_per_merge_request: false)
+          project.update!(disable_overriding_approvers_per_merge_request: false)
         end
 
         it 'updates approvals' do
@@ -195,7 +160,7 @@ RSpec.describe Projects::MergeRequestsController do
 
         before do
           project.add_developer(new_approver)
-          project.update(disable_overriding_approvers_per_merge_request: true)
+          project.update!(disable_overriding_approvers_per_merge_request: true)
         end
 
         it 'does not update approvals_before_merge' do
@@ -364,7 +329,7 @@ RSpec.describe Projects::MergeRequestsController do
 
         before do
           upstream.add_developer(user)
-          upstream.update(approvals_before_merge: 2)
+          upstream.update!(approvals_before_merge: 2)
         end
 
         it_behaves_like 'approvals_before_merge param'
@@ -403,19 +368,6 @@ RSpec.describe Projects::MergeRequestsController do
         expect(response).to have_gitlab_http_status(:ok)
       end
     end
-
-    context 'with a forked project' do
-      let(:forked_project) { fork_project(project, fork_owner, repository: true) }
-      let(:fork_owner) { create(:user) }
-
-      before do
-        project.add_developer(fork_owner)
-        merge_request.update!(source_project: forked_project)
-        forked_project.add_reporter(user)
-      end
-
-      it_behaves_like 'approvals'
-    end
   end
 
   describe 'GET #dependency_scanning_reports' do
@@ -434,6 +386,8 @@ RSpec.describe Projects::MergeRequestsController do
       allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
         .with(::Ci::CompareSecurityReportsService, viewer, 'dependency_scanning').and_return(comparison_status)
     end
+
+    it_behaves_like 'pending pipeline response'
 
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
@@ -505,6 +459,8 @@ RSpec.describe Projects::MergeRequestsController do
         .with(::Ci::CompareSecurityReportsService, viewer, 'container_scanning').and_return(comparison_status)
     end
 
+    it_behaves_like 'pending pipeline response'
+
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
 
@@ -574,6 +530,8 @@ RSpec.describe Projects::MergeRequestsController do
       allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
         .with(::Ci::CompareSecurityReportsService, viewer, 'sast').and_return(comparison_status)
     end
+
+    it_behaves_like 'pending pipeline response'
 
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
@@ -646,6 +604,8 @@ RSpec.describe Projects::MergeRequestsController do
         .with(::Ci::CompareSecurityReportsService, viewer, 'secret_detection').and_return(comparison_status)
     end
 
+    it_behaves_like 'pending pipeline response'
+
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
 
@@ -716,6 +676,8 @@ RSpec.describe Projects::MergeRequestsController do
         .with(::Ci::CompareSecurityReportsService, viewer, 'dast').and_return(comparison_status)
     end
 
+    it_behaves_like 'pending pipeline response'
+
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
 
@@ -771,6 +733,7 @@ RSpec.describe Projects::MergeRequestsController do
 
   describe 'GET #license_scanning_reports' do
     let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, author: create(:user)) }
+    let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
 
     let(:params) do
       {
@@ -783,9 +746,12 @@ RSpec.describe Projects::MergeRequestsController do
     subject { get :license_scanning_reports, params: params, format: :json }
 
     before do
+      stub_licensed_features(license_scanning: true)
       allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
         .with(::Ci::CompareLicenseScanningReportsService, viewer).and_return(comparison_status)
     end
+
+    it_behaves_like 'pending pipeline response'
 
     context 'when comparison is being processed' do
       let(:comparison_status) { { status: :parsing } }
@@ -837,8 +803,48 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context "when authorizing access to license scan reports" do
-      it_behaves_like 'authorize read pipeline'
+    context "when a user is NOT authorized to read licenses on a project" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:viewer) { create(:user) }
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context "when a user is authorized to read the licenses" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:viewer) { create(:user) }
+
+      before do
+        project.add_reporter(viewer)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+
+    context "when a maintainer is authorized to read licenses on a merge request from a forked project" do
+      let(:project) { create(:project, :repository, :public, :builds_private) }
+      let(:forked_project) { fork_project(project, nil, repository: true) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: forked_project, target_project: project) }
+      let(:viewer) { create(:user) }
+
+      before do
+        project.add_maintainer(viewer)
+        forked_project.add_maintainer(user)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
     end
   end
 

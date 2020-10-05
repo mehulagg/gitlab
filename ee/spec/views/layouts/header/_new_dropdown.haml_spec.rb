@@ -41,21 +41,6 @@ RSpec.describe 'layouts/header/_new_dropdown' do
             href: new_group_epic_path(group)
           )
         end
-
-        context 'with the create_epic_form feature flag disabled' do
-          before do
-            stub_feature_flags(create_epic_form: false)
-          end
-
-          it 'does not have "New epic" link' do
-            render
-
-            expect(rendered).not_to have_link(
-              'New epic',
-              href: new_group_epic_path(group)
-            )
-          end
-        end
       end
     end
   end

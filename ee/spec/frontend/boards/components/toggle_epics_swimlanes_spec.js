@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { mount } from '@vue/test-utils';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import ToggleEpicsSwimlanes from 'ee/boards/components/toggle_epics_swimlanes.vue';
 
 Vue.use(Vuex);

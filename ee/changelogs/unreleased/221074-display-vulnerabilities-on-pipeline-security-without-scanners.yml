@@ -1,5 +1,0 @@
----
-title: Display occurrences in Pipeline Security view when scanner information is missing
-merge_request: 35795
-author:
-type: fixed

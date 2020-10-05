@@ -210,6 +210,27 @@ RSpec.describe ObjectStorage do
         end
       end
 
+      describe '#use_open_file' do
+        context 'when file is stored locally' do
+          it "returns the file" do
+            expect { |b| uploader.use_open_file(&b) }.to yield_with_args(an_instance_of(ObjectStorage::Concern::OpenFile))
+          end
+        end
+
+        context 'when file is stored remotely' do
+          let(:store) { described_class::Store::REMOTE }
+
+          before do
+            stub_artifacts_object_storage
+            stub_request(:get, %r{s3.amazonaws.com/#{uploader.path}}).to_return(status: 200, body: '')
+          end
+
+          it "returns the file" do
+            expect { |b| uploader.use_open_file(&b) }.to yield_with_args(an_instance_of(ObjectStorage::Concern::OpenFile))
+          end
+        end
+      end
+
       describe '#migrate!' do
         subject { uploader.migrate!(new_store) }
 
@@ -382,34 +403,70 @@ RSpec.describe ObjectStorage do
     it { is_expected.to eq(nil) }
   end
 
+  describe '#fog_attributes' do
+    subject { uploader.fog_attributes }
+
+    it { is_expected.to eq({}) }
+
+    context 'with encryption configured' do
+      let(:raw_options) do
+        {
+          "enabled" => true,
+          "connection" => { "provider" => 'AWS' },
+          "storage_options" => { "server_side_encryption" => "AES256" }
+        }
+      end
+
+      let(:options) { Settingslogic.new(raw_options) }
+
+      before do
+        allow(uploader_class).to receive(:options) do
+          double(object_store: options)
+        end
+      end
+
+      it { is_expected.to eq({ "x-amz-server-side-encryption" => "AES256" }) }
+    end
+  end
+
   describe '.workhorse_authorize' do
     let(:has_length) { true }
     let(:maximum_size) { nil }
 
     subject { uploader_class.workhorse_authorize(has_length: has_length, maximum_size: maximum_size) }
 
-    shared_examples 'uses local storage' do
+    shared_examples 'returns the maximum size given' do
       it "returns temporary path" do
-        is_expected.to have_key(:TempPath)
+        expect(subject[:MaximumSize]).to eq(maximum_size)
+      end
+    end
 
-        expect(subject[:TempPath]).to start_with(uploader_class.root)
-        expect(subject[:TempPath]).to include(described_class::TMP_UPLOAD_PATH)
+    shared_examples 'uses local storage' do
+      it_behaves_like 'returns the maximum size given' do
+        it "returns temporary path" do
+          is_expected.to have_key(:TempPath)
+
+          expect(subject[:TempPath]).to start_with(uploader_class.root)
+          expect(subject[:TempPath]).to include(described_class::TMP_UPLOAD_PATH)
+        end
       end
     end
 
     shared_examples 'uses remote storage' do
-      it "returns remote store" do
-        is_expected.to have_key(:RemoteObject)
+      it_behaves_like 'returns the maximum size given' do
+        it "returns remote store" do
+          is_expected.to have_key(:RemoteObject)
 
-        expect(subject[:RemoteObject]).to have_key(:ID)
-        expect(subject[:RemoteObject]).to include(Timeout: a_kind_of(Integer))
-        expect(subject[:RemoteObject][:Timeout]).to be(ObjectStorage::DirectUpload::TIMEOUT)
-        expect(subject[:RemoteObject]).to have_key(:GetURL)
-        expect(subject[:RemoteObject]).to have_key(:DeleteURL)
-        expect(subject[:RemoteObject]).to have_key(:StoreURL)
-        expect(subject[:RemoteObject][:GetURL]).to include(described_class::TMP_UPLOAD_PATH)
-        expect(subject[:RemoteObject][:DeleteURL]).to include(described_class::TMP_UPLOAD_PATH)
-        expect(subject[:RemoteObject][:StoreURL]).to include(described_class::TMP_UPLOAD_PATH)
+          expect(subject[:RemoteObject]).to have_key(:ID)
+          expect(subject[:RemoteObject]).to include(Timeout: a_kind_of(Integer))
+          expect(subject[:RemoteObject][:Timeout]).to be(ObjectStorage::DirectUpload::TIMEOUT)
+          expect(subject[:RemoteObject]).to have_key(:GetURL)
+          expect(subject[:RemoteObject]).to have_key(:DeleteURL)
+          expect(subject[:RemoteObject]).to have_key(:StoreURL)
+          expect(subject[:RemoteObject][:GetURL]).to include(described_class::TMP_UPLOAD_PATH)
+          expect(subject[:RemoteObject][:DeleteURL]).to include(described_class::TMP_UPLOAD_PATH)
+          expect(subject[:RemoteObject][:StoreURL]).to include(described_class::TMP_UPLOAD_PATH)
+        end
       end
     end
 
@@ -459,13 +516,18 @@ RSpec.describe ObjectStorage do
 
         context 'uses AWS' do
           let(:storage_url) { "https://uploads.s3-eu-central-1.amazonaws.com/" }
+          let(:credentials) do
+            {
+              provider: "AWS",
+              aws_access_key_id: "AWS_ACCESS_KEY_ID",
+              aws_secret_access_key: "AWS_SECRET_ACCESS_KEY",
+              region: "eu-central-1"
+            }
+          end
 
           before do
-            expect(uploader_class).to receive(:object_store_credentials) do
-              { provider: "AWS",
-                aws_access_key_id: "AWS_ACCESS_KEY_ID",
-                aws_secret_access_key: "AWS_SECRET_ACCESS_KEY",
-                region: "eu-central-1" }
+            expect_next_instance_of(ObjectStorage::Config) do |instance|
+              allow(instance).to receive(:credentials).and_return(credentials)
             end
           end
 
@@ -502,12 +564,17 @@ RSpec.describe ObjectStorage do
 
         context 'uses Google' do
           let(:storage_url) { "https://storage.googleapis.com/uploads/" }
+          let(:credentials) do
+            {
+              provider: "Google",
+              google_storage_access_key_id: 'ACCESS_KEY_ID',
+              google_storage_secret_access_key: 'SECRET_ACCESS_KEY'
+            }
+          end
 
           before do
-            expect(uploader_class).to receive(:object_store_credentials) do
-              { provider: "Google",
-                google_storage_access_key_id: 'ACCESS_KEY_ID',
-                google_storage_secret_access_key: 'SECRET_ACCESS_KEY' }
+            expect_next_instance_of(ObjectStorage::Config) do |instance|
+              allow(instance).to receive(:credentials).and_return(credentials)
             end
           end
 
@@ -537,15 +604,18 @@ RSpec.describe ObjectStorage do
 
         context 'uses GDK/minio' do
           let(:storage_url) { "http://minio:9000/uploads/" }
+          let(:credentials) do
+            { provider: "AWS",
+              aws_access_key_id: "AWS_ACCESS_KEY_ID",
+              aws_secret_access_key: "AWS_SECRET_ACCESS_KEY",
+              endpoint: 'http://minio:9000',
+              path_style: true,
+              region: "gdk" }
+          end
 
           before do
-            expect(uploader_class).to receive(:object_store_credentials) do
-              { provider: "AWS",
-                aws_access_key_id: "AWS_ACCESS_KEY_ID",
-                aws_secret_access_key: "AWS_SECRET_ACCESS_KEY",
-                endpoint: 'http://minio:9000',
-                path_style: true,
-                region: "gdk" }
+            expect_next_instance_of(ObjectStorage::Config) do |instance|
+              allow(instance).to receive(:credentials).and_return(credentials)
             end
           end
 
@@ -793,6 +863,21 @@ RSpec.describe ObjectStorage do
           expect(avatars.map(&:upload).uniq).to eq(avatars.map(&:upload))
         end
       end
+    end
+  end
+
+  describe 'OpenFile' do
+    subject { ObjectStorage::Concern::OpenFile.new(file) }
+
+    let(:file) { double(read: true, size: true, path: true) }
+
+    it 'delegates read and size methods' do
+      expect(subject.read).to eq(true)
+      expect(subject.size).to eq(true)
+    end
+
+    it 'does not delegate path method' do
+      expect { subject.path }.to raise_error(NoMethodError)
     end
   end
 end

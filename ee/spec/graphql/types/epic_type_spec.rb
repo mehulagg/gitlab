@@ -12,8 +12,11 @@ RSpec.describe GitlabSchema.types['Epic'] do
       web_path web_url relation_path reference issues user_permissions
       notes discussions relative_position subscribed participants
       descendant_counts descendant_weight_sum upvotes downvotes health_status
+      current_user_todos
     ]
   end
+
+  it { expect(described_class.interfaces).to include(Types::CurrentUserTodos) }
 
   it { expect(described_class).to expose_permissions_using(Types::PermissionTypes::Epic) }
 

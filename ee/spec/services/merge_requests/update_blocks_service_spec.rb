@@ -42,7 +42,7 @@ RSpec.describe MergeRequests::UpdateBlocksService do
       {
         remove_hidden: remove_hidden,
         references: refs,
-        update: update
+        update: update # rubocop: disable Rails/SaveBang
       }
     end
 

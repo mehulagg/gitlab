@@ -10,17 +10,16 @@ import table from './modules/table/index';
 
 Vue.use(Vuex);
 
-const createStore = () =>
-  new Vuex.Store({
-    state: state(),
-    getters,
-    actions,
-    mutations,
-    modules: {
-      filters,
-      charts,
-      table,
-    },
-  });
+export const getStoreConfig = () => ({
+  state: state(),
+  getters,
+  actions,
+  mutations,
+  modules: {
+    filters,
+    charts,
+    table,
+  },
+});
 
-export default createStore();
+export default new Vuex.Store(getStoreConfig());

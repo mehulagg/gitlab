@@ -5,22 +5,7 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
-    READONLY_FEATURES_WHEN_ARCHIVED = %i[
-      board
-      issue_link
-      approvers
-      vulnerability_feedback
-      vulnerability
-      license_management
-      feature_flag
-      feature_flags_client
-      iteration
-    ].freeze
-
     prepended do
-      with_scope :subject
-      condition(:related_issues_disabled) { !@subject.feature_available?(:related_issues) }
-
       with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
@@ -48,60 +33,19 @@ module EE
         !PushRule.global&.commit_committer_check
       end
 
-      with_scope :global
-      condition(:owner_cannot_modify_approvers_rules) do
-        License.feature_available?(:admin_merge_request_approvers_rules) &&
-          ::Gitlab::CurrentSettings.current_application_settings
-            .disable_overriding_approvers_per_merge_request
-      end
-
-      with_scope :global
-      condition(:owner_cannot_modify_merge_request_author_setting) do
-        License.feature_available?(:admin_merge_request_approvers_rules) &&
-          ::Gitlab::CurrentSettings.current_application_settings
-            .prevent_merge_requests_author_approval
-      end
-
-      with_scope :global
-      condition(:owner_cannot_modify_merge_request_committer_setting) do
-        License.feature_available?(:admin_merge_request_approvers_rules) &&
-          ::Gitlab::CurrentSettings.current_application_settings
-            .prevent_merge_requests_committers_approval
-      end
-
       with_scope :subject
       condition(:regulated_merge_request_approval_settings) do
         License.feature_available?(:admin_merge_request_approvers_rules) &&
           @subject.has_regulated_settings?
       end
 
-      condition(:cannot_modify_approvers_rules) do
-        if @subject.project_compliance_mr_approval_settings?
-          regulated_merge_request_approval_settings?
-        else
-          owner_cannot_modify_approvers_rules? && !admin?
-        end
-      end
-
-      condition(:cannot_modify_merge_request_author_setting) do
-        if @subject.project_compliance_mr_approval_settings?
-          regulated_merge_request_approval_settings?
-        else
-          owner_cannot_modify_merge_request_author_setting? && !admin?
-        end
-      end
-
-      condition(:cannot_modify_merge_request_committer_setting) do
-        if @subject.project_compliance_mr_approval_settings?
-          regulated_merge_request_approval_settings?
-        else
-          owner_cannot_modify_merge_request_committer_setting? && !admin?
-        end
+      condition(:project_merge_request_analytics_available) do
+        @subject.feature_available?(:project_merge_request_analytics)
       end
 
       with_scope :subject
       condition(:group_push_rules_enabled) do
-        @subject.group && ::Feature.enabled?(:group_push_rules, @subject.group.root_ancestor)
+        @subject.group && @subject.group.feature_available?(:push_rules)
       end
 
       with_scope :subject
@@ -157,7 +101,7 @@ module EE
 
       with_scope :subject
       condition(:on_demand_scans_enabled) do
-        ::Feature.enabled?(:security_on_demand_scans_feature_flag, project) &&
+        ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true) &&
         @subject.feature_available?(:security_on_demand_scans)
       end
 
@@ -177,11 +121,6 @@ module EE
       end
 
       with_scope :subject
-      condition(:feature_flags_disabled) do
-        !@subject.feature_available?(:feature_flags)
-      end
-
-      with_scope :subject
       condition(:code_review_analytics_enabled) do
         @subject.feature_available?(:code_review_analytics, @user)
       end
@@ -192,6 +131,15 @@ module EE
 
       condition(:group_timelogs_available) do
         @subject.feature_available?(:group_timelogs)
+      end
+
+      condition(:over_storage_limit, scope: :subject) do
+        @subject.root_namespace.over_storage_limit?
+      end
+
+      with_scope :subject
+      condition(:feature_flags_related_issues_disabled) do
+        !@subject.feature_available?(:feature_flags_related_issues)
       end
 
       rule { visual_review_bot }.policy do
@@ -206,23 +154,17 @@ module EE
         prevent :push_code
       end
 
-      rule { related_issues_disabled }.policy do
-        prevent :read_issue_link
-        prevent :admin_issue_link
+      rule { feature_flags_related_issues_disabled | repository_disabled }.policy do
+        prevent :admin_feature_flags_issue_links
       end
 
       rule { ~group_timelogs_available }.prevent :read_group_timelogs
-
-      rule { can?(:read_issue) }.policy do
-        enable :read_issue_link
-      end
 
       rule { can?(:guest_access) & iterations_available }.enable :read_iteration
 
       rule { can?(:reporter_access) }.policy do
         enable :admin_board
         enable :read_deploy_board
-        enable :admin_issue_link
         enable :admin_epic_issue
         enable :read_group_timelogs
       end
@@ -233,14 +175,8 @@ module EE
         enable :create_vulnerability_feedback
         enable :destroy_vulnerability_feedback
         enable :update_vulnerability_feedback
-        enable :read_feature_flag
-        enable :create_feature_flag
-        enable :update_feature_flag
-        enable :destroy_feature_flag
-        enable :admin_feature_flag
-        enable :admin_feature_flags_user_lists
         enable :read_ci_minutes_quota
-        enable :run_ondemand_dast_scan
+        enable :admin_feature_flags_issue_links
       end
 
       rule { can?(:developer_access) & iterations_available }.policy do
@@ -255,7 +191,10 @@ module EE
         enable :read_vulnerability_scanner
       end
 
-      rule { on_demand_scans_enabled & can?(:developer_access) }.enable :read_on_demand_scans
+      rule { on_demand_scans_enabled & can?(:developer_access) }.policy do
+        enable :read_on_demand_scans
+        enable :create_on_demand_dast_scan
+      end
 
       rule { can?(:read_merge_request) & can?(:read_pipeline) }.enable :read_merge_train
 
@@ -283,18 +222,11 @@ module EE
 
       rule { deploy_board_disabled & ~is_development }.prevent :read_deploy_board
 
-      rule { feature_flags_disabled | repository_disabled }.policy do
-        prevent(*create_read_update_admin_destroy(:feature_flag))
-        prevent(:admin_feature_flags_user_lists)
-      end
-
       rule { can?(:maintainer_access) }.policy do
         enable :push_code_to_protected_branches
         enable :admin_path_locks
         enable :update_approvers
-        enable :admin_feature_flags_client
         enable :modify_approvers_rules
-        enable :modify_approvers_list
         enable :modify_auto_fix_setting
         enable :modify_merge_request_author_setting
         enable :modify_merge_request_committer_setting
@@ -348,14 +280,6 @@ module EE
 
       rule { ~admin & owner & owner_cannot_destroy_project }.prevent :remove_project
 
-      rule { archived }.policy do
-        prevent :modify_auto_fix_setting
-
-        READONLY_FEATURES_WHEN_ARCHIVED.each do |feature|
-          prevent(*::ProjectPolicy.create_update_admin_destroy(feature))
-        end
-      end
-
       condition(:needs_new_sso_session) do
         ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject.group)
       end
@@ -381,20 +305,16 @@ module EE
         prevent :read_project
       end
 
-      rule { cannot_modify_approvers_rules }.policy do
+      rule { regulated_merge_request_approval_settings }.policy do
         prevent :modify_approvers_rules
-        prevent :modify_approvers_list
-      end
-
-      rule { cannot_modify_merge_request_author_setting }.policy do
         prevent :modify_merge_request_author_setting
-      end
-
-      rule { cannot_modify_merge_request_committer_setting }.policy do
         prevent :modify_merge_request_committer_setting
       end
 
       rule { can?(:read_merge_request) & code_review_analytics_enabled }.enable :read_code_review_analytics
+
+      rule { reporter & project_merge_request_analytics_available }
+        .enable :read_project_merge_request_analytics
 
       rule { can?(:read_project) & requirements_available }.enable :read_requirement
 
@@ -413,6 +333,14 @@ module EE
       rule { status_page_available & can?(:developer_access) }.enable :publish_status_page
 
       rule { public_project }.enable :view_embedded_analytics_report
+
+      rule { over_storage_limit }.policy do
+        prevent(*readonly_abilities)
+
+        readonly_features.each do |feature|
+          prevent(*create_update_admin(feature))
+        end
+      end
     end
 
     override :lookup_access_level!
@@ -421,6 +349,14 @@ module EE
       return ::Gitlab::Access::NO_ACCESS if visual_review_bot?
 
       super
+    end
+
+    # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
+    override :resource_access_token_available?
+    def resource_access_token_available?
+      return true unless ::Gitlab.com?
+
+      project.namespace.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

@@ -34,7 +34,13 @@ describe('issue_note', () => {
         note,
       },
       localVue,
-      stubs: ['note-header', 'user-avatar-link', 'note-actions', 'note-body'],
+      stubs: [
+        'note-header',
+        'user-avatar-link',
+        'note-actions',
+        'note-body',
+        'multiline-comment-form',
+      ],
     });
   });
 
@@ -74,6 +80,40 @@ describe('issue_note', () => {
 
       return wrapper.vm.$nextTick().then(() => {
         expect(findMultilineComment().text()).toEqual('Comment on lines 1 to 2');
+      });
+    });
+
+    it('should only render if it has everything it needs', () => {
+      const position = {
+        line_range: {
+          start: {
+            line_code: 'abc_1_1',
+            type: null,
+            old_line: '',
+            new_line: '',
+          },
+          end: {
+            line_code: 'abc_2_2',
+            type: null,
+            old_line: '2',
+            new_line: '2',
+          },
+        },
+      };
+      const line = {
+        line_code: 'abc_1_1',
+        type: null,
+        old_line: '1',
+        new_line: '1',
+      };
+      wrapper.setProps({
+        note: { ...note, position },
+        discussionRoot: true,
+        line,
+      });
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findMultilineComment().exists()).toBe(false);
       });
     });
 
@@ -175,6 +215,7 @@ describe('issue_note', () => {
     store.hotUpdate({
       actions: {
         updateNote() {},
+        setSelectedCommentPositionHover() {},
       },
     });
     const noteBodyComponent = wrapper.find(NoteBody);

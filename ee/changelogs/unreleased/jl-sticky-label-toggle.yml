@@ -1,5 +1,0 @@
----
-title: Update the "show labels" toggle on boards to persist using localStorage
-merge_request: 34728
-author:
-type: changed

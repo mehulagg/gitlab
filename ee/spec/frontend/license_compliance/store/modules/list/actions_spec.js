@@ -11,11 +11,11 @@ import {
   SORT_BY,
   SORT_ORDER,
 } from 'ee/license_compliance/store/modules/list/constants';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 import mockLicensesResponse from './data/mock_licenses.json';
 
-jest.mock('~/flash', () => jest.fn());
+jest.mock('~/flash');
 
 describe('Licenses actions', () => {
   const pageInfo = {

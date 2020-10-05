@@ -27,6 +27,12 @@ RSpec.describe Groups::EpicsController do
       it_behaves_like '404 status'
     end
 
+    describe 'GET #new' do
+      subject { get :new, params: { group_id: group } }
+
+      it_behaves_like '404 status'
+    end
+
     describe 'GET #show' do
       subject { get :show, params: { group_id: group, id: epic.to_param } }
 
@@ -186,7 +192,7 @@ RSpec.describe Groups::EpicsController do
         end
 
         context 'using label_name filter' do
-          let(:label) { create(:label) }
+          let(:label) { create(:group_label, group: group) }
           let!(:labeled_epic) { create(:labeled_epic, group: group, labels: [label]) }
 
           it 'returns all epics with given label' do
@@ -248,6 +254,23 @@ RSpec.describe Groups::EpicsController do
       end
     end
 
+    describe 'GET #new' do
+      it 'renders template' do
+        group.add_developer(user)
+        get :new, params: { group_id: group }
+
+        expect(response).to render_template 'groups/epics/new'
+      end
+
+      context 'with unauthorized user' do
+        it 'returns a not found 404 response' do
+          get :new, params: { group_id: group }
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
     describe 'GET #show' do
       def show_epic(format = :html)
         get :show, params: { group_id: group, id: epic.to_param }, format: format
@@ -260,6 +283,18 @@ RSpec.describe Groups::EpicsController do
 
           expect(response.content_type).to eq 'text/html'
           expect(response).to render_template 'groups/epics/show'
+        end
+
+        it 'logs the view with Gitlab::Search::RecentEpics' do
+          group.add_developer(user)
+
+          recent_epics_double = instance_double(::Gitlab::Search::RecentEpics, log_view: nil)
+          expect(::Gitlab::Search::RecentEpics).to receive(:new).with(user: user).and_return(recent_epics_double)
+
+          show_epic
+
+          expect(response).to be_successful
+          expect(recent_epics_double).to have_received(:log_view).with(epic)
         end
 
         context 'with unauthorized user' do
@@ -287,20 +322,6 @@ RSpec.describe Groups::EpicsController do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('entities/epic', dir: 'ee')
-        end
-
-        context 'when confidential_epics flag is disabled' do
-          before do
-            stub_feature_flags(confidential_epics: false)
-          end
-
-          it 'does not include confidential attribute' do
-            group.add_developer(user)
-            show_epic(:json)
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response).not_to include("confidential")
-          end
         end
 
         context 'with unauthorized user' do

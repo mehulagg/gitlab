@@ -2,17 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe Geo::ProjectRegistry, :geo_fdw do
+RSpec.describe Geo::ProjectRegistry, :geo do
   include ::EE::GeoHelpers
   using RSpec::Parameterized::TableSyntax
 
-  let(:project) { create(:project, description: 'kitten mittens') }
-  let(:registry) { create(:geo_project_registry, project_id: project.id) }
+  let(:registry) { create(:geo_project_registry) }
 
   subject { registry }
 
   it_behaves_like 'a BulkInsertSafe model', Geo::ProjectRegistry do
-    let(:valid_items_for_bulk_insertion) { build_list(:geo_project_registry, 10, created_at: Time.zone.now) }
+    let(:valid_items_for_bulk_insertion) do
+      build_list(:geo_project_registry, 10, created_at: Time.zone.now) do |registry|
+        registry.project = create(:project)
+      end
+    end
+
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
 
@@ -297,7 +301,10 @@ RSpec.describe Geo::ProjectRegistry, :geo_fdw do
     end
   end
 
-  describe '.with_search', :geo do
+  describe '.with_search' do
+    let_it_be(:project) { create(:project, description: 'kitten mittens') }
+    let_it_be(:registry) { create(:geo_project_registry, project_id: project.id) }
+
     it 'returns project registries that refers to projects with a matching name' do
       expect(described_class.with_search(project.name)).to eq([registry])
     end
@@ -359,12 +366,13 @@ RSpec.describe Geo::ProjectRegistry, :geo_fdw do
         repository_verification_retry_count: nil,
         repository_retry_count: nil,
         repository_retry_at: nil
-
       )
     end
   end
 
   describe '.repository_replicated_for?' do
+    let_it_be(:project) { create(:project) }
+
     context 'for a non-Geo setup' do
       it 'returns true' do
         expect(described_class.repository_replicated_for?(project.id)).to be_truthy
@@ -514,7 +522,7 @@ RSpec.describe Geo::ProjectRegistry, :geo_fdw do
 
       context 'with a number of syncs' do
         it 'returns the number of syncs' do
-          2.times { Geo::ProjectHousekeepingService.new(project).increment! }
+          2.times { Geo::ProjectHousekeepingService.new(subject.project).increment! }
 
           expect(subject.syncs_since_gc).to eq(2)
         end
@@ -1178,7 +1186,6 @@ RSpec.describe Geo::ProjectRegistry, :geo_fdw do
         repository_verification_retry_count: nil,
         repository_retry_count: nil,
         repository_retry_at: nil
-
       )
     end
   end

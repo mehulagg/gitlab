@@ -33,6 +33,7 @@ RSpec.describe 'Updating an image DiffNote' do
       y: updated_y
     }
   end
+
   let!(:diff_note) do
     create(:image_diff_note_on_merge_request,
            noteable: noteable,
@@ -40,6 +41,7 @@ RSpec.describe 'Updating an image DiffNote' do
            note: original_body,
            position: original_position)
   end
+
   let(:mutation) do
     variables = {
       id: GitlabSchema.id_from_object(diff_note).to_s,
@@ -57,8 +59,7 @@ RSpec.describe 'Updating an image DiffNote' do
   context 'when the user does not have permission' do
     let_it_be(:current_user) { create(:user) }
 
-    it_behaves_like 'a mutation that returns top-level errors',
-                    errors: ['The resource that you are attempting to access does not exist or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not update the DiffNote' do
       post_graphql_mutation(mutation, current_user: current_user)

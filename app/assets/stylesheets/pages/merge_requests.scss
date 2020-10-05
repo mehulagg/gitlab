@@ -64,7 +64,7 @@ $mr-widget-min-height: 69px;
   background-color: $gray-light;
 
   &.clickable:hover {
-    background-color: $gl-gray-100;
+    background-color: $gray-100;
     cursor: pointer;
   }
 }
@@ -311,7 +311,7 @@ $mr-widget-min-height: 69px;
 
     .bold {
       font-weight: $gl-font-weight-bold;
-      color: $gl-gray-light;
+      color: $gray-600;
       margin-left: 10px;
     }
 
@@ -760,11 +760,6 @@ $mr-widget-min-height: 69px;
     color: $gl-text-color;
   }
 
-  .fa-info-circle {
-    color: $orange-500;
-    padding-right: 5px;
-  }
-
   // Shortening button height by 1px to make compare-versions
   // header 56px and fit into our 8px design grid
   button {
@@ -775,8 +770,6 @@ $mr-widget-min-height: 69px;
     position: -webkit-sticky;
     position: sticky;
     top: $header-height + $mr-tabs-height;
-    margin-left: -16px;
-    width: calc(100% + 32px);
 
     .mr-version-menus-container {
       flex-wrap: nowrap;
@@ -873,12 +866,18 @@ $mr-widget-min-height: 69px;
   }
 }
 
+.container-fluid {
+  // Negative margins for mobile/tablet screen
+  .diffs.tab-pane {
+    margin: 0 (-$gl-padding);
+  }
+}
+
 // Wrap MR tabs/buttons so you don't have to scroll on desktop
 @include media-breakpoint-down(md) {
   .merge-request-tabs-container,
   .epic-tabs-container {
     flex-direction: column-reverse;
-    padding-top: $gl-padding-8;
   }
 }
 
@@ -888,7 +887,6 @@ $mr-widget-min-height: 69px;
     .epic-tabs-container {
       flex-direction: column-reverse;
       align-items: flex-start;
-      padding-top: $gl-padding-8;
     }
   }
 }
@@ -985,7 +983,7 @@ $mr-widget-min-height: 69px;
     opacity: 0.65;
 
     &:hover {
-      color: $gl-gray-500;
+      color: $gray-500;
       text-decoration: none;
     }
   }
@@ -1010,7 +1008,7 @@ $mr-widget-min-height: 69px;
 
   .coverage {
     font-size: 12px;
-    color: $gray-700;
+    color: $gray-500;
     line-height: initial;
   }
 
@@ -1034,5 +1032,15 @@ $mr-widget-min-height: 69px;
     .with-performance-bar & {
       top: $performance-bar-height + $header-height + 51px;
     }
+  }
+}
+
+.diff-file-row.is-active {
+  background-color: $gray-50;
+}
+
+.merge-request-container {
+  .flash-container {
+    @include gl-mb-4;
   }
 }

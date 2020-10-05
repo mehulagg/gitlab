@@ -61,12 +61,6 @@ RSpec.describe AuditEventPresenter do
         end
       end
 
-      context 'when author_name is set in the author_name column' do
-        it 'shows the author name as provided in the database column' do
-          expect(presenter.author_name).to eq('Jane Doe')
-        end
-      end
-
       context 'when `author_name` is included in the details and not in the author_name column' do
         before do
           audit_event.update!(author_name: nil)
@@ -116,8 +110,10 @@ RSpec.describe AuditEventPresenter do
     end
   end
 
-  it 'exposes the target' do
-    expect(presenter.target).to eq(details[:target_details])
+  describe '#target' do
+    it 'delegates to the model object' do
+      expect(presenter.target).to equal(audit_event.target_details)
+    end
   end
 
   context 'exposes the ip address' do
@@ -128,17 +124,11 @@ RSpec.describe AuditEventPresenter do
     it 'survives a round trip from JSON' do
       expect(Gitlab::Json.parse(presenter.ip_address.to_json)).to eq(presenter.ip_address)
     end
-
-    it 'falls back to the details hash' do
-      audit_event.update(ip_address:  nil)
-
-      expect(presenter.ip_address).to eq('127.0.0.1')
-    end
   end
 
   context 'exposes the object' do
     it 'returns the object path if it exists' do
-      expect(presenter.object).to eq(details[:entity_path])
+      expect(presenter.object).to eq(audit_event.entity_path)
     end
 
     it 'returns the stored name if it has been deleted' do

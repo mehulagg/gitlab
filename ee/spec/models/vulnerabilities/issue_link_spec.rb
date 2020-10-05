@@ -103,4 +103,14 @@ RSpec.describe Vulnerabilities::IssueLink do
       it { is_expected.to match_array([related_issue_link]) }
     end
   end
+
+  describe '.for_issue' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:created_issue_link) { create(:vulnerabilities_issue_link, :created, issue: issue) }
+    let_it_be(:related_issue_link) { create(:vulnerabilities_issue_link, :related, issue: issue) }
+
+    subject { described_class.for_issue(issue).to_a }
+
+    it { is_expected.to match_array([created_issue_link, related_issue_link]) }
+  end
 end

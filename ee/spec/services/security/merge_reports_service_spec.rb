@@ -14,24 +14,24 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   let(:identifier_cwe) { build(:ci_reports_security_identifier, external_id: '789', external_type: 'cwe') }
   let(:identifier_wasc) { build(:ci_reports_security_identifier, external_id: '13', external_type: 'wasc') }
 
-  let(:occurrence_id_1) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_id_1) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_1_primary, identifier_1_cve],
           scanner: scanner_1,
           severity: :low
          )
   end
 
-  let(:occurrence_id_1_extra) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_id_1_extra) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_1_primary, identifier_1_cve],
           scanner: scanner_1,
           severity: :low
          )
   end
 
-  let(:occurrence_id_2_loc_1) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_id_2_loc_1) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_2_primary, identifier_2_cve],
           location: build(:ci_reports_security_locations_sast, start_line: 32, end_line: 34),
           scanner: scanner_2,
@@ -39,8 +39,8 @@ RSpec.describe Security::MergeReportsService, '#execute' do
          )
   end
 
-  let(:occurrence_id_2_loc_2) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_id_2_loc_2) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_2_primary, identifier_2_cve],
           location: build(:ci_reports_security_locations_sast, start_line: 42, end_line: 44),
           scanner: scanner_2,
@@ -48,70 +48,86 @@ RSpec.describe Security::MergeReportsService, '#execute' do
          )
   end
 
-  let(:occurrence_cwe_1) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_cwe_1) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_cwe],
           scanner: scanner_3,
           severity: :high
          )
   end
 
-  let(:occurrence_cwe_2) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_cwe_2) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_cwe],
           scanner: scanner_1,
           severity: :critical
          )
   end
 
-  let(:occurrence_wasc_1) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_wasc_1) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_wasc],
           scanner: scanner_1,
           severity: :medium
          )
   end
 
-  let(:occurrence_wasc_2) do
-    build(:ci_reports_security_occurrence,
+  let(:finding_wasc_2) do
+    build(:ci_reports_security_finding,
           identifiers: [identifier_wasc],
           scanner: scanner_2,
           severity: :critical
          )
   end
 
-  let(:report_1_occurrences) { [occurrence_id_1, occurrence_id_2_loc_1, occurrence_cwe_2, occurrence_wasc_1] }
+  let(:report_1_findings) { [finding_id_1, finding_id_2_loc_1, finding_cwe_2, finding_wasc_1] }
+
+  let(:scanned_resource) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com'), 'GET')
+  end
+
+  let(:scanned_resource_1) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com'), 'POST')
+  end
+
+  let(:scanned_resource_2) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com/2'), 'GET')
+  end
+
+  let(:scanned_resource_3) do
+    ::Gitlab::Ci::Reports::Security::ScannedResource.new(URI.parse('example.com/3'), 'GET')
+  end
 
   let(:report_1) do
     build(
       :ci_reports_security_report,
       scanners: [scanner_1, scanner_2],
-      occurrences: report_1_occurrences,
-      identifiers: report_1_occurrences.flat_map(&:identifiers),
-      scanned_resources: ['example.com', 'example.com/1', 'example.com/2']
+      findings: report_1_findings,
+      identifiers: report_1_findings.flat_map(&:identifiers),
+      scanned_resources: [scanned_resource, scanned_resource_1, scanned_resource_2]
     )
   end
 
-  let(:report_2_occurrences) { [occurrence_id_2_loc_2, occurrence_wasc_2] }
+  let(:report_2_findings) { [finding_id_2_loc_2, finding_wasc_2] }
 
   let(:report_2) do
     build(
       :ci_reports_security_report,
       scanners: [scanner_2],
-      occurrences: report_2_occurrences,
-      identifiers: occurrence_id_2_loc_2.identifiers,
-      scanned_resources: ['example.com', 'example.com/3']
+      findings: report_2_findings,
+      identifiers: finding_id_2_loc_2.identifiers,
+      scanned_resources: [scanned_resource, scanned_resource_1, scanned_resource_3]
     )
   end
 
-  let(:report_3_occurrences) { [occurrence_id_1_extra, occurrence_cwe_1] }
+  let(:report_3_findings) { [finding_id_1_extra, finding_cwe_1] }
 
   let(:report_3) do
     build(
       :ci_reports_security_report,
       scanners: [scanner_1, scanner_3],
-      occurrences: report_3_occurrences,
-      identifiers: report_3_occurrences.flat_map(&:identifiers)
+      findings: report_3_findings,
+      identifiers: report_3_findings.flat_map(&:identifiers)
     )
   end
 
@@ -137,15 +153,15 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   end
 
   it 'deduplicates (except cwe and wasc) and sorts the vulnerabilities by severity (desc) then by compare key' do
-    expect(subject.occurrences).to(
+    expect(subject.findings).to(
       eq([
-          occurrence_cwe_2,
-          occurrence_wasc_2,
-          occurrence_cwe_1,
-          occurrence_id_2_loc_2,
-          occurrence_id_2_loc_1,
-          occurrence_wasc_1,
-          occurrence_id_1
+          finding_cwe_2,
+          finding_wasc_2,
+          finding_cwe_1,
+          finding_id_2_loc_2,
+          finding_id_2_loc_1,
+          finding_wasc_1,
+          finding_id_1
       ])
     )
   end
@@ -153,10 +169,10 @@ RSpec.describe Security::MergeReportsService, '#execute' do
   it 'deduplicates scanned resources' do
     expect(subject.scanned_resources).to(
       eq([
-        'example.com',
-        'example.com/1',
-        'example.com/2',
-        'example.com/3'
+        scanned_resource,
+        scanned_resource_1,
+        scanned_resource_2,
+        scanned_resource_3
       ])
     )
   end
@@ -170,16 +186,16 @@ RSpec.describe Security::MergeReportsService, '#execute' do
     let(:identifier_cve) { build(:ci_reports_security_identifier, external_id: 'CVE-2019-123', external_type: 'cve') }
     let(:identifier_npm) { build(:ci_reports_security_identifier, external_id: 'NPM-13', external_type: 'npm') }
 
-    let(:occurrence_id_1) { build(:ci_reports_security_occurrence, identifiers: [identifier_gemnasium, identifier_cve, identifier_npm], scanner: gemnasium_scanner, report_type: :dependency_scanning) }
-    let(:occurrence_id_2) { build(:ci_reports_security_occurrence, identifiers: [identifier_cve], scanner: bundler_audit_scanner, report_type: :dependency_scanning) }
-    let(:occurrence_id_3) { build(:ci_reports_security_occurrence, identifiers: [identifier_npm], scanner: retire_js_scaner, report_type: :dependency_scanning ) }
+    let(:finding_id_1) { build(:ci_reports_security_finding, identifiers: [identifier_gemnasium, identifier_cve, identifier_npm], scanner: gemnasium_scanner, report_type: :dependency_scanning) }
+    let(:finding_id_2) { build(:ci_reports_security_finding, identifiers: [identifier_cve], scanner: bundler_audit_scanner, report_type: :dependency_scanning) }
+    let(:finding_id_3) { build(:ci_reports_security_finding, identifiers: [identifier_npm], scanner: retire_js_scaner, report_type: :dependency_scanning ) }
 
     let(:gemnasium_report) do
       build( :ci_reports_security_report,
         type: :dependency_scanning,
         scanners: [gemnasium_scanner],
-        occurrences: [occurrence_id_1],
-        identifiers: occurrence_id_1.identifiers
+        findings: [finding_id_1],
+        identifiers: finding_id_1.identifiers
       )
     end
 
@@ -188,8 +204,8 @@ RSpec.describe Security::MergeReportsService, '#execute' do
         :ci_reports_security_report,
         type: :dependency_scanning,
         scanners: [bundler_audit_scanner],
-        occurrences: [occurrence_id_2],
-        identifiers: occurrence_id_2.identifiers
+        findings: [finding_id_2],
+        identifiers: finding_id_2.identifiers
       )
     end
 
@@ -198,8 +214,8 @@ RSpec.describe Security::MergeReportsService, '#execute' do
         :ci_reports_security_report,
         type: :dependency_scanning,
         scanners: [retire_js_scaner],
-        occurrences: [occurrence_id_3],
-        identifiers: occurrence_id_3.identifiers
+        findings: [finding_id_3],
+        identifiers: finding_id_3.identifiers
       )
     end
 
@@ -208,8 +224,8 @@ RSpec.describe Security::MergeReportsService, '#execute' do
         :ci_reports_security_report,
         type: :dependency_scanning,
         scanners: [scanner_2],
-        occurrences: [occurrence_id_2_loc_1],
-        identifiers: occurrence_id_2_loc_1.identifiers
+        findings: [finding_id_2_loc_1],
+        identifiers: finding_id_2_loc_1.identifiers
       )
     end
 
@@ -217,17 +233,17 @@ RSpec.describe Security::MergeReportsService, '#execute' do
       subject { described_class.new(gemnasium_report, retirejs_report, bundler_audit_report).execute }
 
       specify { expect(subject.scanners.values).to eql([bundler_audit_scanner, retire_js_scaner, gemnasium_scanner]) }
-      specify { expect(subject.occurrences.count).to eq(2) }
-      specify { expect(subject.occurrences.first.identifiers).to contain_exactly(identifier_cve) }
-      specify { expect(subject.occurrences.last.identifiers).to contain_exactly(identifier_npm) }
+      specify { expect(subject.findings.count).to eq(2) }
+      specify { expect(subject.findings.first.identifiers).to contain_exactly(identifier_cve) }
+      specify { expect(subject.findings.last.identifiers).to contain_exactly(identifier_npm) }
     end
 
     context 'when a custom analyzer is completed before the known analyzers' do
       subject { described_class.new(custom_analyzer_report, retirejs_report, bundler_audit_report).execute }
 
       specify { expect(subject.scanners.values).to eql([bundler_audit_scanner, retire_js_scaner, scanner_2]) }
-      specify { expect(subject.occurrences.count).to eq(3) }
-      specify { expect(subject.occurrences.last.identifiers).to match_array(occurrence_id_2_loc_1.identifiers) }
+      specify { expect(subject.findings.count).to eq(3) }
+      specify { expect(subject.findings.last.identifiers).to match_array(finding_id_2_loc_1.identifiers) }
     end
   end
 end

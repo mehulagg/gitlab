@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlTooltip, GlLink } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltip, GlLink, GlIcon } from '@gitlab/ui';
+import { TEST_HOST } from 'jest/helpers/test_constants';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
 import Suggestion from '~/issuable_suggestions/components/item.vue';
 import mockData from '../mock_data';
@@ -34,7 +34,7 @@ describe('Issuable suggestions suggestion component', () => {
 
     const link = vm.find(GlLink);
 
-    expect(link.attributes('href')).toBe(`${gl.TEST_HOST}/test/issue/1`);
+    expect(link.attributes('href')).toBe(`${TEST_HOST}/test/issue/1`);
   });
 
   it('renders IID', () => {
@@ -47,7 +47,7 @@ describe('Issuable suggestions suggestion component', () => {
     it('renders icon', () => {
       createComponent();
 
-      const icon = vm.find(Icon);
+      const icon = vm.find(GlIcon);
 
       expect(icon.props('name')).toBe('issue-open-m');
     });
@@ -70,7 +70,7 @@ describe('Issuable suggestions suggestion component', () => {
         state: 'closed',
       });
 
-      const icon = vm.find(Icon);
+      const icon = vm.find(GlIcon);
 
       expect(icon.props('name')).toBe('issue-close');
     });
@@ -100,7 +100,7 @@ describe('Issuable suggestions suggestion component', () => {
 
       const image = vm.find(UserAvatarImage);
 
-      expect(image.props('imgSrc')).toBe(`${gl.TEST_HOST}/avatar`);
+      expect(image.props('imgSrc')).toBe(`${TEST_HOST}/avatar`);
     });
   });
 
@@ -111,7 +111,7 @@ describe('Issuable suggestions suggestion component', () => {
       const count = vm.findAll('.suggestion-counts span').at(0);
 
       expect(count.text()).toContain('1');
-      expect(count.find(Icon).props('name')).toBe('thumb-up');
+      expect(count.find(GlIcon).props('name')).toBe('thumb-up');
     });
 
     it('renders notes count', () => {
@@ -120,7 +120,7 @@ describe('Issuable suggestions suggestion component', () => {
       const count = vm.findAll('.suggestion-counts span').at(1);
 
       expect(count.text()).toContain('2');
-      expect(count.find(Icon).props('name')).toBe('comment');
+      expect(count.find(GlIcon).props('name')).toBe('comment');
     });
   });
 
@@ -130,7 +130,7 @@ describe('Issuable suggestions suggestion component', () => {
         confidential: true,
       });
 
-      const icon = vm.find(Icon);
+      const icon = vm.find(GlIcon);
 
       expect(icon.props('name')).toBe('eye-slash');
       expect(icon.attributes('title')).toBe('Confidential');

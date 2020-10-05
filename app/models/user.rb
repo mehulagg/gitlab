@@ -58,18 +58,13 @@ class User < ApplicationRecord
   devise :lockable, :recoverable, :rememberable, :trackable,
          :validatable, :omniauthable, :confirmable, :registerable
 
+  include AdminChangedPasswordNotifier
+
   # This module adds async behaviour to Devise emails
   # and should be added after Devise modules are initialized.
   include AsyncDeviseEmail
 
-  BLOCKED_MESSAGE = "Your account has been blocked. Please contact your GitLab " \
-                    "administrator if you think this is an error."
-  LOGIN_FORBIDDEN = "Your account does not have the required permission to login. Please contact your GitLab " \
-                    "administrator if you think this is an error."
-
-  MINIMUM_INACTIVE_DAYS = 180
-
-  ignore_column :bio, remove_with: '13.4', remove_after: '2020-09-22'
+  MINIMUM_INACTIVE_DAYS = 90
 
   # Override Devise::Models::Trackable#update_tracked_fields!
   # to limit database writes to at most once every hour
@@ -104,19 +99,21 @@ class User < ApplicationRecord
   # Profile
   has_many :keys, -> { regular_keys }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :deploy_keys, -> { where(type: 'DeployKey') }, dependent: :nullify # rubocop:disable Cop/ActiveRecordDependent
+  has_many :group_deploy_keys
   has_many :gpg_keys
 
-  has_many :emails, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :emails
   has_many :personal_access_tokens, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :identities, dependent: :destroy, autosave: true # rubocop:disable Cop/ActiveRecordDependent
   has_many :u2f_registrations, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :webauthn_registrations
   has_many :chat_names, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :user_synced_attributes_metadata, autosave: true
   has_one :aws_role, class_name: 'Aws::Role'
 
   # Groups
   has_many :members
-  has_many :group_members, -> { where(requested_at: nil) }, source: 'GroupMember'
+  has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
   has_many :groups, through: :group_members
   has_many :owned_groups, -> { where(members: { access_level: Gitlab::Access::OWNER }) }, through: :group_members, source: :group
   has_many :maintainers_groups, -> { where(members: { access_level: Gitlab::Access::MAINTAINER }) }, through: :group_members, source: :group
@@ -130,6 +127,8 @@ class User < ApplicationRecord
            -> { where(members: { access_level: [Gitlab::Access::REPORTER, Gitlab::Access::DEVELOPER, Gitlab::Access::MAINTAINER, Gitlab::Access::OWNER] }) },
            through: :group_members,
            source: :group
+  has_many :minimal_access_group_members, -> { where(access_level: [Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+  has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
   # Projects
   has_many :groups_projects,          through: :groups, source: :projects
@@ -180,6 +179,7 @@ class User < ApplicationRecord
   has_one :user_detail
   has_one :user_highest_role
   has_one :user_canonical_email
+  has_one :atlassian_identity, class_name: 'Atlassian::Identity'
 
   has_many :reviews, foreign_key: :author_id, inverse_of: :author
 
@@ -271,8 +271,10 @@ class User < ApplicationRecord
             :time_display_relative, :time_display_relative=,
             :time_format_in_24h, :time_format_in_24h=,
             :show_whitespace_in_diffs, :show_whitespace_in_diffs=,
+            :view_diffs_file_by_file, :view_diffs_file_by_file=,
             :tab_width, :tab_width=,
             :sourcegraph_enabled, :sourcegraph_enabled=,
+            :gitpod_enabled, :gitpod_enabled=,
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
@@ -281,6 +283,7 @@ class User < ApplicationRecord
   delegate :path, to: :namespace, allow_nil: true, prefix: true
   delegate :job_title, :job_title=, to: :user_detail, allow_nil: true
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
+  delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
 
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
@@ -349,20 +352,36 @@ class User < ApplicationRecord
             .without_impersonation
             .expiring_and_not_notified(at).select(1))
   end
+  scope :with_personal_access_tokens_expired_today, -> do
+    where('EXISTS (?)',
+          ::PersonalAccessToken
+            .select(1)
+            .where('personal_access_tokens.user_id = users.id')
+            .without_impersonation
+            .expired_today_and_not_notified)
+  end
   scope :order_recent_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'DESC')) }
   scope :order_oldest_sign_in, -> { reorder(Gitlab::Database.nulls_last_order('current_sign_in_at', 'ASC')) }
   scope :order_recent_last_activity, -> { reorder(Gitlab::Database.nulls_last_order('last_activity_on', 'DESC')) }
   scope :order_oldest_last_activity, -> { reorder(Gitlab::Database.nulls_first_order('last_activity_on', 'ASC')) }
+  scope :by_id_and_login, ->(id, login) { where(id: id).where('username = LOWER(:login) OR email = LOWER(:login)', login: login) }
+
+  def preferred_language
+    read_attribute('preferred_language') ||
+      I18n.default_locale.to_s.presence_in(Gitlab::I18n::AVAILABLE_LANGUAGES.keys) ||
+      'en'
+  end
 
   def active_for_authentication?
     super && can?(:log_in)
   end
 
+  # The messages for these keys are defined in `devise.en.yml`
   def inactive_message
     if blocked?
-      BLOCKED_MESSAGE
+      :blocked
     elsif internal?
-      LOGIN_FORBIDDEN
+      :forbidden
     else
       super
     end
@@ -414,14 +433,21 @@ class User < ApplicationRecord
         FROM u2f_registrations AS u2f
         WHERE u2f.user_id = users.id
       ) OR users.otp_required_for_login = ?
+      OR
+      EXISTS (
+        SELECT *
+        FROM webauthn_registrations AS webauthn
+        WHERE webauthn.user_id = users.id
+      )
     SQL
 
     where(with_u2f_registrations, true)
   end
 
   def self.without_two_factor
-    joins("LEFT OUTER JOIN u2f_registrations AS u2f ON u2f.user_id = users.id")
-      .where("u2f.id IS NULL AND users.otp_required_for_login = ?", false)
+    joins("LEFT OUTER JOIN u2f_registrations AS u2f ON u2f.user_id = users.id
+           LEFT OUTER JOIN webauthn_registrations AS webauthn ON webauthn.user_id = users.id")
+      .where("u2f.id IS NULL AND webauthn.id IS NULL AND users.otp_required_for_login = ?", false)
   end
 
   #
@@ -734,11 +760,12 @@ class User < ApplicationRecord
         otp_backup_codes:            nil
       )
       self.u2f_registrations.destroy_all # rubocop: disable Cop/DestroyAll
+      self.webauthn_registrations.destroy_all # rubocop: disable Cop/DestroyAll
     end
   end
 
   def two_factor_enabled?
-    two_factor_otp_enabled? || two_factor_u2f_enabled?
+    two_factor_otp_enabled? || two_factor_webauthn_u2f_enabled?
   end
 
   def two_factor_otp_enabled?
@@ -751,6 +778,16 @@ class User < ApplicationRecord
     else
       u2f_registrations.exists?
     end
+  end
+
+  def two_factor_webauthn_u2f_enabled?
+    two_factor_u2f_enabled? || two_factor_webauthn_enabled?
+  end
+
+  def two_factor_webauthn_enabled?
+    return false unless Feature.enabled?(:webauthn)
+
+    (webauthn_registrations.loaded? && webauthn_registrations.any?) || (!webauthn_registrations.loaded? && webauthn_registrations.exists?)
   end
 
   def namespace_move_dir_allowed
@@ -870,6 +907,12 @@ class User < ApplicationRecord
     all_expanded_groups.where(require_two_factor_authentication: true)
   end
 
+  def source_groups_of_two_factor_authentication_requirement
+    Gitlab::ObjectHierarchy.new(expanded_groups_requiring_two_factor_authentication)
+      .all_objects
+      .where(id: groups)
+  end
+
   # rubocop: disable CodeReuse/ServiceClass
   def refresh_authorized_projects
     Users::RefreshAuthorizedProjectsService.new(self).execute
@@ -947,7 +990,7 @@ class User < ApplicationRecord
   def require_ssh_key?
     count = Users::KeysCountService.new(self).count
 
-    count.zero? && Gitlab::ProtocolAccess.allowed?('ssh')
+    count == 0 && Gitlab::ProtocolAccess.allowed?('ssh')
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -1269,7 +1312,8 @@ class User < ApplicationRecord
       namespace.path = username if username_changed?
       namespace.name = name if name_changed?
     else
-      build_namespace(path: username, name: name)
+      namespace = build_namespace(path: username, name: name)
+      namespace.build_namespace_settings
     end
   end
 
@@ -1434,6 +1478,11 @@ class User < ApplicationRecord
         ns.user = self
       end
     end
+  end
+
+  def notification_settings_for_groups(groups)
+    ids = groups.is_a?(ActiveRecord::Relation) ? groups.select(:id) : groups.map(&:id)
+    notification_settings.for_groups.where(source_id: ids)
   end
 
   # Lazy load global notification setting
@@ -1623,6 +1672,8 @@ class User < ApplicationRecord
   end
 
   def terms_accepted?
+    return true if project_bot?
+
     accepted_term_id.present?
   end
 
@@ -1663,9 +1714,6 @@ class User < ApplicationRecord
     [last_activity, last_sign_in].compact.max
   end
 
-  # Below is used for the signup_flow experiment. Should be removed
-  # when experiment finishes.
-  # See https://gitlab.com/gitlab-org/growth/engineering/issues/64
   REQUIRES_ROLE_VALUE = 99
 
   def role_required?
@@ -1675,7 +1723,6 @@ class User < ApplicationRecord
   def set_role_required!
     update_column(:role, REQUIRES_ROLE_VALUE)
   end
-  # End of signup_flow experiment methods
 
   def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
     callouts = self.callouts.with_feature_name(feature_name)

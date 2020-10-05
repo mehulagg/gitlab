@@ -84,6 +84,7 @@ RSpec.describe Elastic::ClusterReindexingService, :elastic do
         expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false)
 
         expect { subject.execute }.to change { task.reload.state }.from('reindexing').to('success')
+        expect(task.reload.delete_original_index_at).to be_within(1.minute).of(described_class::DELETE_ORIGINAL_INDEX_AFTER.from_now)
       end
     end
   end

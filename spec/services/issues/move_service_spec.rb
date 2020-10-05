@@ -3,15 +3,17 @@
 require 'spec_helper'
 
 RSpec.describe Issues::MoveService do
-  let(:user) { create(:user) }
-  let(:author) { create(:user) }
-  let(:title) { 'Some issue' }
-  let(:description) { "Some issue description with mention to #{user.to_reference}" }
-  let(:group) { create(:group, :private) }
-  let(:sub_group_1) { create(:group, :private, parent: group) }
-  let(:sub_group_2) { create(:group, :private, parent: group) }
-  let(:old_project) { create(:project, namespace: sub_group_1) }
-  let(:new_project) { create(:project, namespace: sub_group_2) }
+  include DesignManagementTestHelpers
+
+  let_it_be(:user) { create(:user) }
+  let_it_be(:author) { create(:user) }
+  let_it_be(:title) { 'Some issue' }
+  let_it_be(:description) { "Some issue description with mention to #{user.to_reference}" }
+  let_it_be(:group) { create(:group, :private) }
+  let_it_be(:sub_group_1) { create(:group, :private, parent: group) }
+  let_it_be(:sub_group_2) { create(:group, :private, parent: group) }
+  let_it_be(:old_project) { create(:project, namespace: sub_group_1) }
+  let_it_be(:new_project) { create(:project, namespace: sub_group_2) }
 
   let(:old_issue) do
     create(:issue, title: title, description: description, project: old_project, author: author)
@@ -30,15 +32,10 @@ RSpec.describe Issues::MoveService do
 
   describe '#execute' do
     shared_context 'issue move executed' do
-      let!(:award_emoji) { create(:award_emoji, awardable: old_issue) }
-
       let!(:new_issue) { move_service.execute(old_issue, new_project) }
     end
 
     context 'issue movable' do
-      let!(:note_with_mention) { create(:note, noteable: old_issue, author: author, project: old_project, note: "note with mention #{user.to_reference}") }
-      let!(:note_with_no_mention) { create(:note, noteable: old_issue, author: author, project: old_project, note: "note without mention") }
-
       include_context 'user can move issue'
 
       context 'generic issue' do
@@ -48,11 +45,11 @@ RSpec.describe Issues::MoveService do
           expect(new_issue.project).to eq new_project
         end
 
-        it 'rewrites issue title' do
+        it 'copies issue title' do
           expect(new_issue.title).to eq title
         end
 
-        it 'rewrites issue description' do
+        it 'copies issue description' do
           expect(new_issue.description).to eq description
         end
 
@@ -93,23 +90,56 @@ RSpec.describe Issues::MoveService do
         it 'preserves create time' do
           expect(old_issue.created_at).to eq new_issue.created_at
         end
+      end
 
-        it 'moves the award emoji' do
+      context 'issue with award emoji' do
+        let!(:award_emoji) { create(:award_emoji, awardable: old_issue) }
+
+        it 'copies the award emoji' do
+          old_issue.reload
+          new_issue = move_service.execute(old_issue, new_project)
+
           expect(old_issue.award_emoji.first.name).to eq new_issue.reload.award_emoji.first.name
         end
+      end
 
-        context 'when issue has notes with mentions' do
-          it 'saves user mentions with actual mentions for new issue' do
-            expect(new_issue.user_mentions.find_by(note_id: nil).mentioned_users_ids).to match_array([user.id])
-            expect(new_issue.user_mentions.where.not(note_id: nil).first.mentioned_users_ids).to match_array([user.id])
-            expect(new_issue.user_mentions.where.not(note_id: nil).count).to eq 1
-            expect(new_issue.user_mentions.count).to eq 2
-          end
+      context 'issue with milestone' do
+        let(:milestone) { create(:milestone, group: sub_group_1) }
+        let(:new_project) { create(:project, namespace: sub_group_1) }
+
+        let(:old_issue) do
+          create(:issue, title: title, description: description, project: old_project, author: author, milestone: milestone)
+        end
+
+        before do
+          create(:resource_milestone_event, issue: old_issue, milestone: milestone, action: :add)
+        end
+
+        it 'does not create extra milestone events' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.resource_milestone_events.count).to eq(old_issue.resource_milestone_events.count)
+        end
+      end
+
+      context 'issue with due date' do
+        let(:old_issue) do
+          create(:issue, title: title, description: description, project: old_project, author: author, due_date: '2020-01-10')
+        end
+
+        before do
+          SystemNoteService.change_due_date(old_issue, old_project, author, old_issue.due_date)
+        end
+
+        it 'does not create extra system notes' do
+          new_issue = move_service.execute(old_issue, new_project)
+
+          expect(new_issue.notes.count).to eq(old_issue.notes.count)
         end
       end
 
       context 'issue with assignee' do
-        let(:assignee) { create(:user) }
+        let_it_be(:assignee) { create(:user) }
 
         before do
           old_issue.assignees = [assignee]
@@ -152,6 +182,73 @@ RSpec.describe Issues::MoveService do
           # actually get to the `after_commit` hook that queues these jobs.
           expect { move_service.execute(old_issue, new_project) }
             .not_to raise_error # Sidekiq::Worker::EnqueueFromTransactionError
+        end
+      end
+
+      # These tests verify that notes are copied. More thorough tests are in
+      # the unit test for Notes::CopyService.
+      context 'issue with notes' do
+        let!(:notes) do
+          [
+            create(:note, noteable: old_issue, project: old_project, created_at: 2.weeks.ago, updated_at: 1.week.ago),
+            create(:note, noteable: old_issue, project: old_project)
+          ]
+        end
+
+        let(:copied_notes) { new_issue.notes.limit(notes.size) } # Remove the system note added by the copy itself
+
+        include_context 'issue move executed'
+
+        it 'copies existing notes in order' do
+          expect(copied_notes.order('id ASC').pluck(:note)).to eq(notes.map(&:note))
+        end
+      end
+
+      context 'issue with a design', :clean_gitlab_redis_shared_state do
+        let!(:design) { create(:design, :with_lfs_file, issue: old_issue) }
+        let!(:note) { create(:diff_note_on_design, noteable: design, issue: old_issue, project: old_issue.project) }
+        let(:subject) { move_service.execute(old_issue, new_project) }
+
+        before do
+          enable_design_management
+        end
+
+        it 'calls CopyDesignCollection::QueueService' do
+          expect(DesignManagement::CopyDesignCollection::QueueService).to receive(:new)
+            .with(user, old_issue, kind_of(Issue))
+            .and_call_original
+
+          subject
+        end
+
+        it 'logs if QueueService returns an error', :aggregate_failures do
+          error_message = 'error'
+
+          expect_next_instance_of(DesignManagement::CopyDesignCollection::QueueService) do |service|
+            expect(service).to receive(:execute).and_return(
+              ServiceResponse.error(message: error_message)
+            )
+          end
+          expect(Gitlab::AppLogger).to receive(:error).with(error_message)
+
+          subject
+        end
+
+        it 'does not call QueueService when the feature flag is disabled' do
+          stub_feature_flags(design_management_copy_designs: false)
+
+          expect(DesignManagement::CopyDesignCollection::QueueService).not_to receive(:new)
+
+          subject
+        end
+
+        # Perform a small integration test to ensure the services and worker
+        # can correctly create designs.
+        it 'copies the design and its notes', :sidekiq_inline, :aggregate_failures do
+          new_issue = subject
+
+          expect(new_issue.designs.size).to eq(1)
+          expect(new_issue.designs.first.notes.size).to eq(1)
         end
       end
     end
@@ -207,6 +304,45 @@ RSpec.describe Issues::MoveService do
         let(:old_issue) { build(:issue, project: old_project, author: author) }
 
         it { expect { move }.to raise_error(StandardError, /permissions/) }
+      end
+    end
+  end
+
+  describe '#rewrite_related_issues' do
+    include_context 'user can move issue'
+
+    let(:admin) { create(:admin) }
+    let(:authorized_project) { create(:project) }
+    let(:authorized_project2) { create(:project) }
+    let(:unauthorized_project) { create(:project) }
+
+    let(:authorized_issue_b) { create(:issue, project: authorized_project) }
+    let(:authorized_issue_c) { create(:issue, project: authorized_project2) }
+    let(:authorized_issue_d) { create(:issue, project: authorized_project2) }
+    let(:unauthorized_issue) { create(:issue, project: unauthorized_project) }
+
+    let!(:issue_link_a) { create(:issue_link, source: old_issue, target: authorized_issue_b) }
+    let!(:issue_link_b) { create(:issue_link, source: old_issue, target: unauthorized_issue) }
+    let!(:issue_link_c) { create(:issue_link, source: old_issue, target: authorized_issue_c) }
+    let!(:issue_link_d) { create(:issue_link, source: authorized_issue_d, target: old_issue) }
+
+    before do
+      authorized_project.add_developer(user)
+      authorized_project2.add_developer(user)
+    end
+
+    context 'multiple related issues' do
+      it 'moves all related issues and retains permissions' do
+        new_issue = move_service.execute(old_issue, new_project)
+
+        expect(new_issue.related_issues(admin))
+          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d, unauthorized_issue])
+
+        expect(new_issue.related_issues(user))
+          .to match_array([authorized_issue_b, authorized_issue_c, authorized_issue_d])
+
+        expect(authorized_issue_d.related_issues(user))
+          .to match_array([new_issue])
       end
     end
   end

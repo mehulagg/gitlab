@@ -1,5 +1,0 @@
----
-title: Dont display subscription banner if auto_renew nil
-merge_request: 33422
-author:
-type: changed

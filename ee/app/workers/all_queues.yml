@@ -3,33 +3,41 @@
 #
 # Do not edit it manually!
 ---
-- :name: cronjob:adjourned_group_deletion
-  :feature_category: :authentication_and_authorization
-  :has_external_dependencies: 
+- :name: cronjob:active_user_count_threshold
+  :feature_category: :provision
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
+  :tags: []
+- :name: cronjob:adjourned_group_deletion
+  :feature_category: :authentication_and_authorization
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
   :tags: []
 - :name: cronjob:adjourned_projects_deletion_cron
   :feature_category: :authentication_and_authorization
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:clear_shared_runners_minutes
   :feature_category: :continuous_integration
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:elastic_cluster_reindexing_cron
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
@@ -37,7 +45,7 @@
   :tags: []
 - :name: cronjob:elastic_index_bulk_cron
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
@@ -45,47 +53,55 @@
   :tags: []
 - :name: cronjob:elastic_index_initial_bulk_cron
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :throttled
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: cronjob:elastic_remove_expired_namespace_subscriptions_from_index_cron
+  :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
   :tags: []
 - :name: cronjob:geo_container_repository_sync_dispatch
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_file_download_dispatch
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_metrics_update
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_prune_event_log
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_registry_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -93,63 +109,63 @@
   :tags: []
 - :name: cronjob:geo_repository_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_repository_verification_primary_batch
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_repository_verification_secondary_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_repository_verification_secondary_shard
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_scheduler_per_shard_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_scheduler_primary_per_shard_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_scheduler_secondary_per_shard_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:geo_secondary_registry_consistency
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -157,27 +173,27 @@
   :tags: []
 - :name: cronjob:geo_sidekiq_cron_config
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:historical_data
-  :feature_category: :license_compliance
-  :has_external_dependencies: 
+  :feature_category: :provision
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:import_software_licenses
   :feature_category: :license_compliance
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:ingress_modsecurity_counter_metrics
   :feature_category: :web_firewall
@@ -185,7 +201,15 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
+  :tags: []
+- :name: cronjob:iterations_update_status
+  :feature_category: :issue_tracking
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: cronjob:ldap_all_groups_sync
   :feature_category: :authentication_and_authorization
@@ -193,7 +217,7 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:ldap_sync
   :feature_category: :authentication_and_authorization
@@ -201,51 +225,67 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:network_policy_metrics
   :feature_category: :container_network_security
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:pseudonymizer
   :feature_category: :integrations
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:sync_seat_link
-  :feature_category: :billing
-  :has_external_dependencies: 
+  :feature_category: :provision
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:update_all_mirrors
   :feature_category: :source_code_management
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: cronjob:update_max_seats_used_for_gitlab_com_subscriptions
   :feature_category: :license_compliance
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
   :weight: 1
-  :idempotent: 
+  :idempotent:
+  :tags: []
+- :name: cronjob:vulnerabilities_historical_statistics_deletion
+  :feature_category: :vulnerability_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: cronjob:vulnerabilities_statistics_schedule
+  :feature_category: :vulnerability_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
   :tags: []
 - :name: dependency_proxy:purge_dependency_proxy_cache
   :feature_category: :dependency_proxy
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -253,31 +293,31 @@
   :tags: []
 - :name: epics:epics_update_epics_dates
   :feature_category: :epics
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_batch_project_registry
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_batch_project_registry_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_blob_verification_primary
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -285,207 +325,175 @@
   :tags: []
 - :name: geo:geo_container_repository_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_design_repository_shard_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_design_repository_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_event
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_file_download
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_file_registry_removal
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_file_removal
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_hashed_storage_attachments_migration
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_hashed_storage_migration
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_project_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_rename_repository
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repositories_clean_up
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repository_cleanup
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repository_destroy
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repository_shard_sync
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repository_verification_primary_shard
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repository_verification_primary_single
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_repository_verification_secondary_single
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_scheduler_primary_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_scheduler_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: geo:geo_scheduler_secondary_scheduler
   :feature_category: :geo_replication
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
-  :tags: []
-- :name: geo:geo_secondary_repository_backfill
-  :feature_category: :geo_replication
-  :has_external_dependencies: 
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: 
-  :tags: []
-- :name: jira_connect:jira_connect_sync_branch
-  :feature_category: :integrations
-  :has_external_dependencies: 
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: 
-  :tags: []
-- :name: jira_connect:jira_connect_sync_merge_request
-  :feature_category: :integrations
-  :has_external_dependencies: 
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: 
-  :tags: []
-- :name: package_repositories:packages_nuget_extraction
-  :feature_category: :package_registry
-  :has_external_dependencies: 
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: personal_access_tokens:personal_access_tokens_groups_policy
   :feature_category: :authentication_and_authorization
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -493,63 +501,63 @@
   :tags: []
 - :name: personal_access_tokens:personal_access_tokens_instance_policy
   :feature_category: :authentication_and_authorization
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: pipeline_default:ci_trigger_downstream_subscriptions
   :feature_category: :continuous_integration
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
   :weight: 3
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: security_scans:store_security_reports
   :feature_category: :static_application_security_testing
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: security_scans:store_security_scans
   :feature_category: :static_application_security_testing
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: security_scans:sync_security_reports_to_report_approval_rules
   :feature_category: :static_application_security_testing
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :high
   :resource_boundary: :cpu
   :weight: 2
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: adjourned_project_deletion
   :feature_category: :authentication_and_authorization
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: admin_emails
   :feature_category: :issue_tracking
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: analytics_code_review_metrics
   :feature_category: :code_analytics
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -557,7 +565,7 @@
   :tags: []
 - :name: ci_batch_reset_minutes
   :feature_category: :continuous_integration
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -569,11 +577,19 @@
   :urgency: :low
   :resource_boundary: :cpu
   :weight: 2
-  :idempotent: 
+  :idempotent:
+  :tags: []
+- :name: dast_site_validation
+  :feature_category: :dynamic_application_security_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: elastic_commit_indexer
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
@@ -581,7 +597,7 @@
   :tags: []
 - :name: elastic_delete_project
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
@@ -589,23 +605,23 @@
   :tags: []
 - :name: elastic_full_index
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: elastic_indexer
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :throttled
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: elastic_indexing_control
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -613,19 +629,19 @@
   :tags: []
 - :name: elastic_namespace_indexer
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: elastic_namespace_rollout
   :feature_category: :global_search
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: ldap_group_sync
   :feature_category: :authentication_and_authorization
@@ -633,51 +649,59 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
-  :idempotent: 
+  :idempotent:
+  :tags: []
+- :name: merge_request_reset_approvals
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 1
+  :idempotent:
   :tags: []
 - :name: new_epic
   :feature_category: :epics
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
   :weight: 2
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: project_import_schedule
   :feature_category: :importers
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: refresh_license_compliance_checks
   :feature_category: :license_compliance
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 2
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: repository_push_audit_event
   :feature_category: :authentication_and_authorization
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: repository_update_mirror
   :feature_category: :source_code_management
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent: 
+  :idempotent:
   :tags: []
 - :name: requirements_management_process_requirements_reports
   :feature_category: :requirements_management
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
@@ -692,16 +716,24 @@
   :idempotent: true
   :tags: []
 - :name: sync_seat_link_request
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: vulnerabilities_statistics_adjustment
+  :feature_category: :vulnerability_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: vulnerability_exports_export
   :feature_category: :vulnerability_management
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
   :weight: 1
@@ -709,7 +741,7 @@
   :tags: []
 - :name: vulnerability_exports_export_deletion
   :feature_category: :vulnerability_management
-  :has_external_dependencies: 
+  :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1

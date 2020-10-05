@@ -64,6 +64,36 @@ the extra jobs will take resources away from jobs from workers that were already
 there, if the resources available to the Sidekiq process handling the namespace
 are not adjusted appropriately.
 
+## Versioning
+
+Version can be specified on each Sidekiq worker class.
+This is then sent along when the job is created.
+
+```ruby
+class FooWorker
+  include ApplicationWorker
+
+  version 2
+
+  def perform(*args)
+    if job_version == 2
+      foo = args.first['foo']
+    else
+      foo = args.first
+    end
+  end
+end
+```
+
+Under this schema, any worker is expected to be able to handle any job that was
+enqueued by an older version of that worker. This means that when changing the
+arguments a worker takes, you must increment the `version` (or set `version 1`
+if this is the first time a worker's arguments are changing), but also make sure
+that the worker is still able to handle jobs that were queued with any earlier
+version of the arguments. From the worker's `perform` method, you can read
+`self.job_version` if you want to specifically branch on job version, or you
+can read the number or type of provided arguments.
+
 ## Idempotent Jobs
 
 It's known that a job can fail for multiple reasons. For example, network outages or bugs.
@@ -145,10 +175,27 @@ authorizations for both projects.
 
 GitLab doesn't skip jobs scheduled in the future, as we assume that
 the state will have changed by the time the job is scheduled to
-execute.
+execute. If you do want to deduplicate jobs scheduled in the future
+this can be specified on the worker as follows:
 
-More [deduplication strategies have been suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If you are implementing a worker that
-could benefit from a different strategy, please comment in the issue.
+```ruby
+module AuthorizedProjectUpdate
+  class UserRefreshOverUserRangeWorker
+    include ApplicationWorker
+
+    deduplicate :until_executing, including_scheduled: true
+    idempotent!
+
+    # ...
+  end
+end
+```
+
+This strategy is called `until_executing`. More [deduplication
+strategies have been
+suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If
+you are implementing a worker that could benefit from a different
+strategy, please comment in the issue.
 
 If the automatic deduplication were to cause issues in certain
 queues. This can be temporarily disabled by enabling a feature flag
@@ -303,7 +350,8 @@ class ExternalDependencyWorker
 end
 ```
 
-NOTE: **Note:** Note that a job cannot be both high urgency and have
+NOTE: **Note:**
+Note that a job cannot be both high urgency and have
 external dependencies.
 
 ## CPU-bound and Memory-bound Workers
@@ -567,42 +615,51 @@ Jobs need to be backward and forward compatible between consecutive versions
 of the application. Adding or removing an argument may cause problems
 during deployment before all Rails and Sidekiq nodes have the updated code.
 
-#### Remove an argument
+#### Deprecate and remove an argument
 
-**Do not remove arguments from the `perform` function.**. Instead, use the
-following approach:
+**Before you remove arguments from the `perform_async` and `perform` methods.**, deprecate them. The 
+following example deprecates and then removes `arg2` from the `perform_async` method:
 
 1. Provide a default value (usually `nil`) and use a comment to mark the
-   argument as deprecated
-1. Stop using the argument in `perform_async`.
-1. Ignore the value in the worker class, but do not remove it until the next
-   major release.
+   argument as deprecated in the coming minor release. (Release M)
 
-In the following example, if you want to remove `arg2`, first set a `nil` default value,
-and then update locations where `ExampleWorker.perform_async` is called.
+    ```ruby
+    class ExampleWorker
+      # Keep arg2 parameter for backwards compatibility.
+      def perform(object_id, arg1, arg2 = nil)
+        # ...
+      end
+    end
+    ```
 
-```ruby
-class ExampleWorker
-  def perform(object_id, arg1, arg2 = nil)
-    # ...
-  end
-end
-```
+1. One minor release later, stop using the argument in `perform_async`. (Release M+1)
+
+    ```ruby
+    ExampleWorker.perform_async(object_id, arg1)
+    ```
+
+1. At the next major release, remove the value from the worker class. (Next major release)
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, arg1)
+        # ...
+      end
+    end
+    ```
 
 #### Add an argument
 
 There are two options for safely adding new arguments to Sidekiq workers:
 
-1. Set up a [multi-step deployment](#multi-step-deployment) in which the new argument is first added to the worker
+1. Set up a [multi-step deployment](#multi-step-deployment) in which the new argument is first added to the worker.
 1. Use a [parameter hash](#parameter-hash) for additional arguments. This is perhaps the most flexible option.
 
 ##### Multi-step deployment
 
-This approach requires multiple merge requests and for the first merge request
-to be merged and deployed before additional changes are merged.
+This approach requires multiple releases.
 
-1. In an initial merge request, add the argument to the worker with a default
-   value:
+1. Add the argument to the worker with a default value (Release M).
 
     ```ruby
     class ExampleWorker
@@ -612,16 +669,28 @@ to be merged and deployed before additional changes are merged.
     end
     ```
 
-1. Merge and deploy the worker with the new argument.
-1. In a further merge request, update `ExampleWorker.perform_async` calls to
-   use the new argument.
+1. Add the new argument to all the invocations of the worker (Release M+1).
+
+    ```ruby
+    ExampleWorker.perform_async(object_id, new_arg)
+    ```
+
+1. Remove the default value (Release M+2).
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, new_arg)
+        # ...
+      end
+    end
+    ```
 
 ##### Parameter hash
 
-This approach will not require multiple deployments if an existing worker already
+This approach will not require multiple releases if an existing worker already
 utilizes a parameter hash.
 
-1. Use a parameter hash in the worker to allow for future flexibility:
+1. Use a parameter hash in the worker to allow future flexibility.
 
     ```ruby
     class ExampleWorker

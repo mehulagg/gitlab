@@ -10,6 +10,7 @@ RSpec.describe Gitlab::Prometheus::Queries::PacketFlowMetricsQuery do
       { "metric" => { "verdict" => "DROPPED" }, "value" => [1582231596.64, "5.002730665588791"] }
     ]
   end
+
   let(:client) { double('prometheus_client', query: query_response) }
 
   subject { described_class.new(client) }

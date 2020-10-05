@@ -1,11 +1,11 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { mapActions } from 'vuex';
-import { GlButtonGroup, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButtonGroup, GlButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
@@ -39,7 +39,6 @@ import { setUrlParams } from '../../lib/utils/url_utility';
 export default {
   components: {
     UserAvatarLink,
-    Icon,
     ClipboardButton,
     TimeAgoTooltip,
     CommitPipelineStatus,
@@ -52,9 +51,24 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
+    isSelectable: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     commit: {
       type: Object,
       required: true,
+    },
+    checked: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    collapsible: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
   },
   computed: {
@@ -77,6 +91,10 @@ export default {
     },
     authorAvatar() {
       return this.author.avatar_url || this.commit.author_gravatar_url;
+    },
+    commitDescription() {
+      // Strip the newline at the beginning
+      return this.commit.description_html.replace(/^&#x000A;/, '');
     },
     nextCommitUrl() {
       return this.commit.next_commit_id
@@ -104,14 +122,23 @@ export default {
 </script>
 
 <template>
-  <li class="commit flex-row js-toggle-container">
-    <user-avatar-link
-      :link-href="authorUrl"
-      :img-src="authorAvatar"
-      :img-alt="authorName"
-      :img-size="40"
-      class="avatar-cell d-none d-sm-block"
-    />
+  <li :class="{ 'js-toggle-container': collapsible }" class="commit flex-row">
+    <div class="d-flex align-items-center align-self-start">
+      <input
+        v-if="isSelectable"
+        class="mr-2"
+        type="checkbox"
+        :checked="checked"
+        @change="$emit('handleCheckboxChange', $event.target.checked)"
+      />
+      <user-avatar-link
+        :link-href="authorUrl"
+        :img-src="authorAvatar"
+        :img-alt="authorName"
+        :img-size="40"
+        class="avatar-cell d-none d-sm-block"
+      />
+    </div>
     <div class="commit-detail flex-list">
       <div class="commit-content qa-commit-content">
         <a
@@ -122,14 +149,13 @@ export default {
 
         <span class="commit-row-message d-block d-sm-none">&middot; {{ commit.short_id }}</span>
 
-        <button
-          v-if="commit.description_html"
-          class="text-expander js-toggle-button"
-          type="button"
+        <gl-button
+          v-if="commit.description_html && collapsible"
+          class="js-toggle-button"
+          size="small"
+          icon="ellipsis_h"
           :aria-label="__('Toggle commit description')"
-        >
-          <icon :size="12" name="ellipsis_h" />
-        </button>
+        />
 
         <div class="committer">
           <a
@@ -144,8 +170,9 @@ export default {
 
         <pre
           v-if="commit.description_html"
-          class="commit-row-description js-toggle-content gl-mb-3"
-          v-html="commit.description_html"
+          :class="{ 'js-toggle-content': collapsible, 'd-block': !collapsible }"
+          class="commit-row-description gl-mb-3 text-dark"
+          v-html="commitDescription"
         ></pre>
       </div>
       <div class="commit-actions flex-row d-none d-sm-flex">
@@ -155,14 +182,14 @@ export default {
           :endpoint="commit.pipeline_status_path"
           class="d-inline-flex"
         />
-        <div class="commit-sha-group">
-          <div class="label label-monospace monospace" v-text="commit.short_id"></div>
+        <gl-button-group class="gl-ml-4" data-testid="commit-sha-group">
+          <gl-button label class="gl-font-monospace" v-text="commit.short_id" />
           <clipboard-button
             :text="commit.id"
             :title="__('Copy commit SHA')"
-            class="btn btn-default"
+            class="input-group-text"
           />
-        </div>
+        </gl-button-group>
         <div
           v-if="hasNeighborCommits && glFeatures.mrCommitNeighborNav"
           class="commit-nav-buttons ml-3"

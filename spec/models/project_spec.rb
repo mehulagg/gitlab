@@ -61,7 +61,7 @@ RSpec.describe Project do
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_service) }
     it { is_expected.to have_one(:bugzilla_service) }
-    it { is_expected.to have_one(:gitlab_issue_tracker_service) }
+    it { is_expected.to have_one(:ewm_service) }
     it { is_expected.to have_one(:external_wiki_service) }
     it { is_expected.to have_one(:confluence_service) }
     it { is_expected.to have_one(:project_feature) }
@@ -72,6 +72,7 @@ RSpec.describe Project do
     it { is_expected.to have_one(:last_event).class_name('Event') }
     it { is_expected.to have_one(:forked_from_project).through(:fork_network_member) }
     it { is_expected.to have_one(:auto_devops).class_name('ProjectAutoDevops') }
+    it { is_expected.to have_one(:tracing_setting).class_name('ProjectTracingSetting') }
     it { is_expected.to have_one(:error_tracking_setting).class_name('ErrorTracking::ProjectErrorTrackingSetting') }
     it { is_expected.to have_one(:project_setting) }
     it { is_expected.to have_one(:alerting_setting).class_name('Alerting::ProjectAlertingSetting') }
@@ -85,7 +86,6 @@ RSpec.describe Project do
     it { is_expected.to have_many(:runners) }
     it { is_expected.to have_many(:variables) }
     it { is_expected.to have_many(:triggers) }
-    it { is_expected.to have_many(:pages_domains) }
     it { is_expected.to have_many(:labels).class_name('ProjectLabel') }
     it { is_expected.to have_many(:users_star_projects) }
     it { is_expected.to have_many(:repository_languages) }
@@ -104,6 +104,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:clusters) }
     it { is_expected.to have_many(:management_clusters).class_name('Clusters::Cluster') }
     it { is_expected.to have_many(:kubernetes_namespaces) }
+    it { is_expected.to have_many(:cluster_agents).class_name('Clusters::Agent') }
     it { is_expected.to have_many(:custom_attributes).class_name('ProjectCustomAttribute') }
     it { is_expected.to have_many(:project_badges).class_name('ProjectBadge') }
     it { is_expected.to have_many(:lfs_file_locks) }
@@ -116,21 +117,30 @@ RSpec.describe Project do
     it { is_expected.to have_many(:prometheus_alert_events) }
     it { is_expected.to have_many(:self_managed_prometheus_alert_events) }
     it { is_expected.to have_many(:alert_management_alerts) }
+    it { is_expected.to have_many(:alert_management_http_integrations) }
     it { is_expected.to have_many(:jira_imports) }
     it { is_expected.to have_many(:metrics_users_starred_dashboards).inverse_of(:project) }
     it { is_expected.to have_many(:repository_storage_moves) }
     it { is_expected.to have_many(:reviews).inverse_of(:project) }
     it { is_expected.to have_many(:packages).class_name('Packages::Package') }
     it { is_expected.to have_many(:package_files).class_name('Packages::PackageFile') }
+    it { is_expected.to have_many(:pipeline_artifacts) }
+    it { is_expected.to have_many(:terraform_states).class_name('Terraform::State').inverse_of(:project) }
+
+    # GitLab Pages
+    it { is_expected.to have_many(:pages_domains) }
+    it { is_expected.to have_one(:pages_metadatum) }
+    it { is_expected.to have_many(:pages_deployments) }
 
     it_behaves_like 'model with repository' do
       let_it_be(:container) { create(:project, :repository, path: 'somewhere') }
       let(:stubbed_container) { build_stubbed(:project) }
       let(:expected_full_path) { "#{container.namespace.full_path}/somewhere" }
+      let(:expected_lfs_enabled) { true }
     end
 
     it_behaves_like 'model with wiki' do
-      let(:container) { create(:project, :wiki_repo) }
+      let_it_be(:container) { create(:project, :wiki_repo) }
       let(:container_without_wiki) { create(:project) }
     end
 
@@ -201,11 +211,11 @@ RSpec.describe Project do
     end
 
     describe '#members & #requesters' do
-      let(:project) { create(:project, :public) }
-      let(:requester) { create(:user) }
-      let(:developer) { create(:user) }
+      let_it_be(:project) { create(:project, :public) }
+      let_it_be(:requester) { create(:user) }
+      let_it_be(:developer) { create(:user) }
 
-      before do
+      before_all do
         project.request_access(requester)
         project.add_developer(developer)
       end
@@ -400,6 +410,7 @@ RSpec.describe Project do
         create(:project,
                pending_delete: true)
       end
+
       let(:new_project) do
         build(:project,
               name: project_pending_deletion.name,
@@ -451,9 +462,9 @@ RSpec.describe Project do
   end
 
   describe '#all_pipelines' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
 
-    before do
+    before_all do
       create(:ci_pipeline, project: project, ref: 'master', source: :web)
       create(:ci_pipeline, project: project, ref: 'master', source: :external)
     end
@@ -474,15 +485,56 @@ RSpec.describe Project do
     end
   end
 
-  describe '#ci_pipelines' do
-    let(:project) { create(:project) }
+  describe '#has_packages?' do
+    let_it_be(:project) { create(:project, :public) }
 
-    before do
-      create(:ci_pipeline, project: project, ref: 'master', source: :web)
-      create(:ci_pipeline, project: project, ref: 'master', source: :external)
+    subject { project.has_packages?(package_type) }
+
+    shared_examples 'returning true examples' do
+      let!(:package) { create("#{package_type}_package", project: project) }
+
+      it { is_expected.to be true }
     end
 
-    it 'has ci pipelines' do
+    shared_examples 'returning false examples' do
+      it { is_expected.to be false }
+    end
+
+    context 'with maven packages' do
+      it_behaves_like 'returning true examples' do
+        let(:package_type) { :maven }
+      end
+    end
+
+    context 'with npm packages' do
+      it_behaves_like 'returning true examples' do
+        let(:package_type) { :npm }
+      end
+    end
+
+    context 'with conan packages' do
+      it_behaves_like 'returning true examples' do
+        let(:package_type) { :conan }
+      end
+    end
+
+    context 'with no package type' do
+      it_behaves_like 'returning false examples' do
+        let(:package_type) { nil }
+      end
+    end
+  end
+
+  describe '#ci_pipelines' do
+    let_it_be(:project) { create(:project) }
+
+    before_all do
+      create(:ci_pipeline, project: project, ref: 'master', source: :web)
+      create(:ci_pipeline, project: project, ref: 'master', source: :external)
+      create(:ci_pipeline, project: project, ref: 'master', source: :webide)
+    end
+
+    it 'excludes dangling pipelines such as :webide' do
       expect(project.ci_pipelines.size).to eq(2)
     end
 
@@ -500,7 +552,7 @@ RSpec.describe Project do
 
   describe '#autoclose_referenced_issues' do
     context 'when DB entry is nil' do
-      let(:project) { create(:project, autoclose_referenced_issues: nil) }
+      let(:project) { build(:project, autoclose_referenced_issues: nil) }
 
       it 'returns true' do
         expect(project.autoclose_referenced_issues).to be_truthy
@@ -508,7 +560,7 @@ RSpec.describe Project do
     end
 
     context 'when DB entry is true' do
-      let(:project) { create(:project, autoclose_referenced_issues: true) }
+      let(:project) { build(:project, autoclose_referenced_issues: true) }
 
       it 'returns true' do
         expect(project.autoclose_referenced_issues).to be_truthy
@@ -516,7 +568,7 @@ RSpec.describe Project do
     end
 
     context 'when DB entry is false' do
-      let(:project) { create(:project, autoclose_referenced_issues: false) }
+      let(:project) { build(:project, autoclose_referenced_issues: false) }
 
       it 'returns false' do
         expect(project.autoclose_referenced_issues).to be_falsey
@@ -638,6 +690,12 @@ RSpec.describe Project do
           end
         end
       end
+
+      context 'when argument is a user' do
+        it 'returns full path to the project' do
+          expect(project.to_reference_base(owner)).to eq 'sample-namespace/sample-project'
+        end
+      end
     end
 
     describe '#to_human_reference' do
@@ -720,8 +778,8 @@ RSpec.describe Project do
   end
 
   describe "#new_issuable_address" do
-    let(:project) { create(:project, path: "somewhere") }
-    let(:user) { create(:user) }
+    let_it_be(:project) { create(:project, path: "somewhere") }
+    let_it_be(:user) { create(:user) }
 
     context 'incoming email enabled' do
       before do
@@ -802,11 +860,11 @@ RSpec.describe Project do
   end
 
   describe '#get_issue' do
-    let(:project) { create(:project) }
-    let!(:issue)  { create(:issue, project: project) }
-    let(:user)    { create(:user) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:user) { create(:user) }
+    let!(:issue) { create(:issue, project: project) }
 
-    before do
+    before_all do
       project.add_developer(user)
     end
 
@@ -878,7 +936,7 @@ RSpec.describe Project do
   end
 
   describe '#issue_exists?' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
 
     it 'is truthy when issue exists' do
       expect(project).to receive(:get_issue).and_return(double)
@@ -971,7 +1029,7 @@ RSpec.describe Project do
   end
 
   describe '#cache_has_external_issue_tracker' do
-    let(:project) { create(:project, has_external_issue_tracker: nil) }
+    let_it_be(:project) { create(:project, has_external_issue_tracker: nil) }
 
     it 'stores true if there is any external_issue_tracker' do
       services = double(:service, external_issue_trackers: [RedmineService.new])
@@ -1001,7 +1059,7 @@ RSpec.describe Project do
   end
 
   describe '#cache_has_external_wiki' do
-    let(:project) { create(:project, has_external_wiki: nil) }
+    let_it_be(:project) { create(:project, has_external_wiki: nil) }
 
     it 'stores true if there is any external_wikis' do
       services = double(:service, external_wikis: [ExternalWikiService.new])
@@ -1042,34 +1100,32 @@ RSpec.describe Project do
     end
   end
 
-  describe '#has_confluence?' do
-    let_it_be(:project) { build_stubbed(:project) }
+  describe '#default_owner' do
+    let_it_be(:owner)     { create(:user) }
+    let_it_be(:namespace) { create(:namespace, owner: owner) }
 
-    it 'returns false when project_setting.has_confluence property is false' do
-      project.project_setting.has_confluence = false
+    context 'the project does not have a group' do
+      let(:project) { build(:project, namespace: namespace) }
 
-      expect(project.has_confluence?).to be(false)
+      it 'is the namespace owner' do
+        expect(project.default_owner).to eq(owner)
+      end
     end
 
-    context 'when project_setting.has_confluence property is true' do
-      before do
-        project.project_setting.has_confluence = true
-      end
+    context 'the project is in a group' do
+      let(:group)   { build(:group) }
+      let(:project) { build(:project, group: group, namespace: namespace) }
 
-      it 'returns true' do
-        expect(project.has_confluence?).to be(true)
-      end
+      it 'is the group owner' do
+        allow(group).to receive(:default_owner).and_return(Object.new)
 
-      it 'returns false when confluence integration feature flag is disabled' do
-        stub_feature_flags(ConfluenceService::FEATURE_FLAG => false)
-
-        expect(project.has_confluence?).to be(false)
+        expect(project.default_owner).to eq(group.default_owner)
       end
     end
   end
 
   describe '#external_wiki' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
 
     context 'with an active external wiki' do
       before do
@@ -1222,60 +1278,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#pipeline_for' do
-    let(:project) { create(:project, :repository) }
-
-    shared_examples 'giving the correct pipeline' do
-      it { is_expected.to eq(pipeline) }
-
-      context 'return latest' do
-        let!(:pipeline2) { create_pipeline(project) }
-
-        it { is_expected.to eq(pipeline2) }
-      end
-    end
-
-    context 'with a matching pipeline' do
-      let!(:pipeline) { create_pipeline(project) }
-
-      context 'with explicit sha' do
-        subject { project.pipeline_for('master', pipeline.sha) }
-
-        it_behaves_like 'giving the correct pipeline'
-
-        context 'with supplied id' do
-          let!(:other_pipeline) { create_pipeline(project) }
-
-          subject { project.pipeline_for('master', pipeline.sha, other_pipeline.id) }
-
-          it { is_expected.to eq(other_pipeline) }
-        end
-      end
-
-      context 'with implicit sha' do
-        subject { project.pipeline_for('master') }
-
-        it_behaves_like 'giving the correct pipeline'
-      end
-    end
-
-    context 'when there is no matching pipeline' do
-      subject { project.pipeline_for('master') }
-
-      it { is_expected.to be_nil }
-    end
-  end
-
-  describe '#pipelines_for' do
-    let(:project) { create(:project, :repository) }
-    let!(:pipeline) { create_pipeline(project) }
-    let!(:other_pipeline) { create_pipeline(project) }
-
-    subject { project.pipelines_for(project.default_branch, project.commit.sha) }
-
-    it { is_expected.to contain_exactly(pipeline, other_pipeline) }
-  end
-
   describe '#builds_enabled' do
     let(:project) { create(:project) }
 
@@ -1313,6 +1315,36 @@ RSpec.describe Project do
       it "returns an empty array" do
         is_expected.to be_empty
       end
+    end
+  end
+
+  describe '.with_active_jira_services' do
+    it 'returns the correct project' do
+      active_jira_service = create(:jira_service)
+      active_service = create(:service, active: true)
+
+      expect(described_class.with_active_jira_services).to include(active_jira_service.project)
+      expect(described_class.with_active_jira_services).not_to include(active_service.project)
+    end
+  end
+
+  describe '.with_jira_dvcs_cloud' do
+    it 'returns the correct project' do
+      jira_dvcs_cloud_project = create(:project, :jira_dvcs_cloud)
+      jira_dvcs_server_project = create(:project, :jira_dvcs_server)
+
+      expect(described_class.with_jira_dvcs_cloud).to include(jira_dvcs_cloud_project)
+      expect(described_class.with_jira_dvcs_cloud).not_to include(jira_dvcs_server_project)
+    end
+  end
+
+  describe '.with_jira_dvcs_server' do
+    it 'returns the correct project' do
+      jira_dvcs_server_project = create(:project, :jira_dvcs_server)
+      jira_dvcs_cloud_project = create(:project, :jira_dvcs_cloud)
+
+      expect(described_class.with_jira_dvcs_server).to include(jira_dvcs_server_project)
+      expect(described_class.with_jira_dvcs_server).not_to include(jira_dvcs_cloud_project)
     end
   end
 
@@ -1434,16 +1466,69 @@ RSpec.describe Project do
   end
 
   describe '#service_desk_address' do
-    let_it_be(:project) { create(:project, service_desk_enabled: true) }
+    let_it_be(:project, reload: true) { create(:project, service_desk_enabled: true) }
 
-    before do
-      allow(Gitlab::ServiceDesk).to receive(:enabled?).and_return(true)
-      allow(Gitlab.config.incoming_email).to receive(:enabled).and_return(true)
-      allow(Gitlab.config.incoming_email).to receive(:address).and_return("test+%{key}@mail.com")
+    subject { project.service_desk_address }
+
+    shared_examples 'with incoming email address' do
+      context 'when incoming email is enabled' do
+        before do
+          config = double(enabled: true, address: 'test+%{key}@mail.com')
+          allow(::Gitlab.config).to receive(:incoming_email).and_return(config)
+        end
+
+        it 'uses project full path as service desk address key' do
+          expect(project.service_desk_address).to eq("test+#{project.full_path_slug}-#{project.project_id}-issue-@mail.com")
+        end
+      end
+
+      context 'when incoming email is disabled' do
+        before do
+          config = double(enabled: false)
+          allow(::Gitlab.config).to receive(:incoming_email).and_return(config)
+        end
+
+        it 'uses project full path as service desk address key' do
+          expect(project.service_desk_address).to be_nil
+        end
+      end
     end
 
-    it 'uses project full path as service desk address key' do
-      expect(project.service_desk_address).to eq("test+#{project.full_path_slug}-#{project.project_id}-issue-@mail.com")
+    context 'when service_desk_email is disabled' do
+      before do
+        allow(::Gitlab::ServiceDeskEmail).to receive(:enabled?).and_return(false)
+      end
+
+      it_behaves_like 'with incoming email address'
+    end
+
+    context 'when service_desk_email is enabled' do
+      before do
+        config = double(enabled: true, address: 'foo+%{key}@bar.com')
+        allow(::Gitlab::ServiceDeskEmail).to receive(:config).and_return(config)
+      end
+
+      context 'when service_desk_custom_address flag is enabled' do
+        before do
+          stub_feature_flags(service_desk_custom_address: true)
+        end
+
+        it 'returns custom address when project_key is set' do
+          create(:service_desk_setting, project: project, project_key: 'key1')
+
+          expect(subject).to eq("foo+#{project.full_path_slug}-key1@bar.com")
+        end
+
+        it_behaves_like 'with incoming email address'
+      end
+
+      context 'when service_desk_custom_address flag is disabled' do
+        before do
+          stub_feature_flags(service_desk_custom_address: false)
+        end
+
+        it_behaves_like 'with incoming email address'
+      end
     end
   end
 
@@ -1660,7 +1745,7 @@ RSpec.describe Project do
   end
 
   describe '#visibility_level_allowed?' do
-    let(:project) { create(:project, :internal) }
+    let_it_be(:project) { create(:project, :internal) }
 
     context 'when checking on non-forked project' do
       it { expect(project.visibility_level_allowed?(Gitlab::VisibilityLevel::PRIVATE)).to be_truthy }
@@ -1669,7 +1754,6 @@ RSpec.describe Project do
     end
 
     context 'when checking on forked project' do
-      let(:project)        { create(:project, :internal) }
       let(:forked_project) { fork_project(project) }
 
       it { expect(forked_project.visibility_level_allowed?(Gitlab::VisibilityLevel::PRIVATE)).to be_truthy }
@@ -1683,9 +1767,9 @@ RSpec.describe Project do
 
     subject { project.pages_deployed? }
 
-    context 'if public folder does exist' do
+    context 'if pages are deployed' do
       before do
-        allow(Dir).to receive(:exist?).with(project.public_pages_path).and_return(true)
+        project.pages_metadatum.update_column(:deployed, true)
       end
 
       it { is_expected.to be_truthy }
@@ -1854,7 +1938,7 @@ RSpec.describe Project do
   end
 
   describe '.optionally_search' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
 
     it 'searches for projects matching the query if one is given' do
       relation = described_class.optionally_search(project.name)
@@ -1911,7 +1995,7 @@ RSpec.describe Project do
   end
 
   describe '.search_by_title' do
-    let(:project) { create(:project, name: 'kittens') }
+    let_it_be(:project) { create(:project, name: 'kittens') }
 
     it 'returns projects with a matching name' do
       expect(described_class.search_by_title(project.name)).to eq([project])
@@ -1927,11 +2011,11 @@ RSpec.describe Project do
   end
 
   context 'when checking projects from groups' do
-    let(:private_group)    { create(:group, visibility_level: 0)  }
-    let(:internal_group)   { create(:group, visibility_level: 10) }
+    let(:private_group)    { build(:group, visibility_level: 0)  }
+    let(:internal_group)   { build(:group, visibility_level: 10) }
 
-    let(:private_project)  { create(:project, :private, group: private_group) }
-    let(:internal_project) { create(:project, :internal, group: internal_group) }
+    let(:private_project)  { build(:project, :private, group: private_group) }
+    let(:internal_project) { build(:project, :internal, group: internal_group) }
 
     context 'when group is private project can not be internal' do
       it { expect(private_project.visibility_level_allowed?(Gitlab::VisibilityLevel::INTERNAL)).to be_falsey }
@@ -1995,7 +2079,7 @@ RSpec.describe Project do
   end
 
   describe '#create_repository' do
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { build(:project, :repository) }
 
     context 'using a regular repository' do
       it 'creates the repository' do
@@ -2021,7 +2105,7 @@ RSpec.describe Project do
   end
 
   describe '#ensure_repository' do
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { build(:project, :repository) }
 
     it 'creates the repository if it not exist' do
       allow(project).to receive(:repository_exists?).and_return(false)
@@ -2075,7 +2159,7 @@ RSpec.describe Project do
   end
 
   describe '#container_registry_url' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { build(:project) }
 
     subject { project.container_registry_url }
 
@@ -2102,7 +2186,7 @@ RSpec.describe Project do
   end
 
   describe '#has_container_registry_tags?' do
-    let(:project) { create(:project) }
+    let(:project) { build(:project) }
 
     context 'when container registry is enabled' do
       before do
@@ -2168,7 +2252,7 @@ RSpec.describe Project do
   describe '#ci_config_path=' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
 
     where(:default_ci_config_path, :project_ci_config_path, :expected_ci_config_path) do
       nil           | :notset            | :default
@@ -2223,8 +2307,8 @@ RSpec.describe Project do
   end
 
   describe '#latest_successful_build_for_ref' do
-    let(:project) { create(:project, :repository) }
-    let(:pipeline) { create_pipeline(project) }
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:pipeline) { create_pipeline(project) }
 
     it_behaves_like 'latest successful build for sha or ref'
 
@@ -2239,46 +2323,95 @@ RSpec.describe Project do
     end
   end
 
-  describe '#latest_pipeline_for_ref' do
-    let(:project) { create(:project, :repository) }
+  describe '#latest_pipeline' do
+    let_it_be(:project) { create(:project, :repository) }
     let(:second_branch) { project.repository.branches[2] }
 
     let!(:pipeline_for_default_branch) do
-      create(:ci_empty_pipeline, project: project, sha: project.commit.id,
-                                 ref: project.default_branch)
-    end
-    let!(:pipeline_for_second_branch) do
-      create(:ci_empty_pipeline, project: project, sha: second_branch.target,
-                                 ref: second_branch.name)
+      create(:ci_pipeline, project: project, sha: project.commit.id,
+                           ref: project.default_branch)
     end
 
-    before do
-      create(:ci_empty_pipeline, project: project, sha: project.commit.parent.id,
-                                 ref: project.default_branch)
+    let!(:pipeline_for_second_branch) do
+      create(:ci_pipeline, project: project, sha: second_branch.target,
+                           ref: second_branch.name)
+    end
+
+    let!(:other_pipeline_for_default_branch) do
+      create(:ci_pipeline, project: project, sha: project.commit.parent.id,
+                           ref: project.default_branch)
     end
 
     context 'default repository branch' do
-      subject { project.latest_pipeline_for_ref(project.default_branch) }
+      context 'when explicitly provided' do
+        subject { project.latest_pipeline(project.default_branch) }
 
-      it { is_expected.to eq(pipeline_for_default_branch) }
+        it { is_expected.to eq(pipeline_for_default_branch) }
+      end
+
+      context 'when not provided' do
+        subject { project.latest_pipeline }
+
+        it { is_expected.to eq(pipeline_for_default_branch) }
+      end
+
+      context 'with provided sha' do
+        subject { project.latest_pipeline(project.default_branch, project.commit.parent.id) }
+
+        it { is_expected.to eq(other_pipeline_for_default_branch) }
+      end
     end
 
     context 'provided ref' do
-      subject { project.latest_pipeline_for_ref(second_branch.name) }
+      subject { project.latest_pipeline(second_branch.name) }
 
       it { is_expected.to eq(pipeline_for_second_branch) }
+
+      context 'with provided sha' do
+        let!(:latest_pipeline_for_ref) do
+          create(:ci_pipeline, project: project, sha: pipeline_for_second_branch.sha,
+                               ref: pipeline_for_second_branch.ref)
+        end
+
+        subject { project.latest_pipeline(second_branch.name, second_branch.target) }
+
+        it { is_expected.to eq(latest_pipeline_for_ref) }
+      end
     end
 
     context 'bad ref' do
-      subject { project.latest_pipeline_for_ref(SecureRandom.uuid) }
+      before do
+        # ensure we don't skip the filter by ref by mistakenly return this pipeline
+        create(:ci_pipeline, project: project)
+      end
+
+      subject { project.latest_pipeline(SecureRandom.uuid) }
 
       it { is_expected.to be_nil }
+    end
+
+    context 'on deleted ref' do
+      let(:branch) { project.repository.branches.last }
+
+      let!(:pipeline_on_deleted_ref) do
+        create(:ci_pipeline, project: project, sha: branch.target, ref: branch.name)
+      end
+
+      before do
+        project.repository.rm_branch(project.owner, branch.name)
+      end
+
+      subject { project.latest_pipeline(branch.name) }
+
+      it 'always returns nil despite a pipeline exists' do
+        expect(subject).to be_nil
+      end
     end
   end
 
   describe '#latest_successful_build_for_sha' do
-    let(:project) { create(:project, :repository) }
-    let(:pipeline) { create_pipeline(project) }
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:pipeline) { create_pipeline(project) }
 
     it_behaves_like 'latest successful build for sha or ref'
 
@@ -2286,8 +2419,8 @@ RSpec.describe Project do
   end
 
   describe '#latest_successful_build_for_ref!' do
-    let(:project) { create(:project, :repository) }
-    let(:pipeline) { create_pipeline(project) }
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:pipeline) { create_pipeline(project) }
 
     context 'with many builds' do
       it 'gives the latest builds from latest pipeline' do
@@ -2360,7 +2493,7 @@ RSpec.describe Project do
   end
 
   describe '#jira_import_status' do
-    let(:project) { create(:project, import_type: 'jira') }
+    let_it_be(:project) { create(:project, import_type: 'jira') }
 
     context 'when no jira imports' do
       it 'returns none' do
@@ -2566,7 +2699,7 @@ RSpec.describe Project do
   end
 
   describe '#remote_mirror_available?' do
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
 
     context 'when remote mirror global setting is enabled' do
       it 'returns true' do
@@ -2607,10 +2740,10 @@ RSpec.describe Project do
   end
 
   describe '#ancestors_upto' do
-    let(:parent) { create(:group) }
-    let(:child) { create(:group, parent: parent) }
-    let(:child2) { create(:group, parent: child) }
-    let(:project) { create(:project, namespace: child2) }
+    let_it_be(:parent) { create(:group) }
+    let_it_be(:child) { create(:group, parent: parent) }
+    let_it_be(:child2) { create(:group, parent: child) }
+    let_it_be(:project) { create(:project, namespace: child2) }
 
     it 'returns all ancestors when no namespace is given' do
       expect(project.ancestors_upto).to contain_exactly(child2, child, parent)
@@ -2655,7 +2788,7 @@ RSpec.describe Project do
   end
 
   describe '#emails_disabled?' do
-    let(:project) { create(:project, emails_disabled: false) }
+    let(:project) { build(:project, emails_disabled: false) }
 
     context 'emails disabled in group' do
       it 'returns true' do
@@ -2683,7 +2816,7 @@ RSpec.describe Project do
   end
 
   describe '#lfs_enabled?' do
-    let(:project) { create(:project) }
+    let(:project) { build(:project) }
 
     shared_examples 'project overrides group' do
       it 'returns true when enabled in project' do
@@ -2745,7 +2878,7 @@ RSpec.describe Project do
   end
 
   describe '#change_head' do
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
 
     it 'returns error if branch does not exist' do
       expect(project.change_head('unexisted-branch')).to be false
@@ -2773,6 +2906,20 @@ RSpec.describe Project do
     it 'reloads the default branch' do
       expect(project).to receive(:reload_default_branch)
       project.change_head(project.default_branch)
+    end
+  end
+
+  describe '#lfs_objects_for_repository_types' do
+    let(:project) { create(:project) }
+
+    it 'returns LFS objects of the specified type only' do
+      none, design, wiki = *[nil, :design, :wiki].map do |type|
+        create(:lfs_objects_project, project: project, repository_type: type).lfs_object
+      end
+
+      expect(project.lfs_objects_for_repository_types(nil)).to contain_exactly(none)
+      expect(project.lfs_objects_for_repository_types(nil, :wiki)).to contain_exactly(none, wiki)
+      expect(project.lfs_objects_for_repository_types(:design)).to contain_exactly(design)
     end
   end
 
@@ -2851,68 +2998,6 @@ RSpec.describe Project do
         expect(project.forks).to contain_exactly(forked_project)
       end
     end
-
-    describe '#lfs_storage_project' do
-      it 'returns self for non-forks' do
-        expect(project.lfs_storage_project).to eq project
-      end
-
-      it 'returns the fork network root for forks' do
-        second_fork = fork_project(forked_project)
-
-        expect(second_fork.lfs_storage_project).to eq project
-      end
-
-      it 'returns self when fork_source is nil' do
-        expect(forked_project).to receive(:fork_source).and_return(nil)
-
-        expect(forked_project.lfs_storage_project).to eq forked_project
-      end
-    end
-
-    describe '#all_lfs_objects' do
-      let(:lfs_object) { create(:lfs_object) }
-
-      context 'when LFS object is only associated to the source' do
-        before do
-          project.lfs_objects << lfs_object
-        end
-
-        it 'returns the lfs object for a project' do
-          expect(project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-
-        it 'returns the lfs object for a fork' do
-          expect(forked_project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-      end
-
-      context 'when LFS object is only associated to the fork' do
-        before do
-          forked_project.lfs_objects << lfs_object
-        end
-
-        it 'returns nothing' do
-          expect(project.all_lfs_objects).to be_empty
-        end
-
-        it 'returns the lfs object for a fork' do
-          expect(forked_project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-      end
-
-      context 'when LFS object is associated to both source and fork' do
-        before do
-          project.lfs_objects << lfs_object
-          forked_project.lfs_objects << lfs_object
-        end
-
-        it 'returns the lfs object for the source and fork' do
-          expect(project.all_lfs_objects).to contain_exactly(lfs_object)
-          expect(forked_project.all_lfs_objects).to contain_exactly(lfs_object)
-        end
-      end
-    end
   end
 
   describe '#set_repository_read_only!' do
@@ -2940,7 +3025,7 @@ RSpec.describe Project do
   end
 
   describe '#pushes_since_gc' do
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
 
     after do
       project.reset_pushes_since_gc
@@ -2962,7 +3047,7 @@ RSpec.describe Project do
   end
 
   describe '#increment_pushes_since_gc' do
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
 
     after do
       project.reset_pushes_since_gc
@@ -2976,7 +3061,7 @@ RSpec.describe Project do
   end
 
   describe '#reset_pushes_since_gc' do
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
 
     after do
       project.reset_pushes_since_gc
@@ -2992,7 +3077,7 @@ RSpec.describe Project do
   end
 
   describe '#deployment_variables' do
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
     let(:environment) { 'production' }
     let(:namespace) { 'namespace' }
 
@@ -3069,7 +3154,7 @@ RSpec.describe Project do
   end
 
   describe '#default_environment' do
-    let(:project) { create(:project) }
+    let(:project) { build(:project) }
 
     it 'returns production environment when it exists' do
       production = create(:environment, name: "production", project: project)
@@ -3091,7 +3176,7 @@ RSpec.describe Project do
   end
 
   describe '#ci_variables_for' do
-    let(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
     let(:environment_scope) { '*' }
 
     let!(:ci_variable) do
@@ -3246,7 +3331,7 @@ RSpec.describe Project do
   end
 
   describe '#ci_instance_variables_for' do
-    let(:project) { create(:project) }
+    let(:project) { build_stubbed(:project) }
 
     let!(:instance_variable) do
       create(:ci_instance_variable, value: 'secret')
@@ -3514,6 +3599,7 @@ RSpec.describe Project do
           public: '\\1'
       MAP
     end
+
     let(:sha) { project.commit.id }
 
     context 'when there is a route map' do
@@ -4111,7 +4197,6 @@ RSpec.describe Project do
     end
 
     it 'removes the pages directory and marks the project as not having pages deployed' do
-      expect_any_instance_of(Projects::UpdatePagesConfigurationService).to receive(:execute)
       expect_any_instance_of(Gitlab::PagesTransfer).to receive(:rename_project).and_return(true)
       expect(PagesWorker).to receive(:perform_in).with(5.minutes, :remove, namespace.full_path, anything)
 
@@ -4248,7 +4333,7 @@ RSpec.describe Project do
       end
 
       it 'schedules HashedStorage::ProjectMigrateWorker with delayed start when the wiki repo is in use' do
-        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project)).increase
+        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project.wiki)).increase
 
         expect(HashedStorage::ProjectMigrateWorker).to receive(:perform_in)
 
@@ -5131,6 +5216,7 @@ RSpec.describe Project do
         allow_collaboration: true
       )
     end
+
     let!(:merge_request) do
       create(
         :merge_request,
@@ -5412,20 +5498,6 @@ RSpec.describe Project do
       expect(services.count).to eq(2)
       expect(services.map(&:title)).to eq(['JetBrains TeamCity CI', 'Pushover'])
     end
-
-    describe 'interaction with the confluence integration feature flag' do
-      it 'contains a ConfluenceService when feature flag is enabled' do
-        stub_feature_flags(ConfluenceService::FEATURE_FLAG => true)
-
-        expect(subject.find_or_initialize_services).to include(ConfluenceService)
-      end
-
-      it 'does not contain a ConfluenceService when the confluence integration feature flag is disabled' do
-        stub_feature_flags(ConfluenceService::FEATURE_FLAG => false)
-
-        expect(subject.find_or_initialize_services).not_to include(ConfluenceService)
-      end
-    end
   end
 
   describe '#find_or_initialize_service' do
@@ -5492,6 +5564,32 @@ RSpec.describe Project do
       project = create(:project, namespace: group)
 
       expect(described_class.for_group(group)).to eq([project])
+    end
+  end
+
+  describe '.for_repository_storage' do
+    it 'returns the projects for a given repository storage' do
+      stub_storage_settings('test_second_storage' => {
+        'path' => TestEnv::SECOND_STORAGE_PATH,
+        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
+      })
+      expected_project = create(:project, repository_storage: 'default')
+      create(:project, repository_storage: 'test_second_storage')
+
+      expect(described_class.for_repository_storage('default')).to eq([expected_project])
+    end
+  end
+
+  describe '.excluding_repository_storage' do
+    it 'returns the projects excluding the given repository storage' do
+      stub_storage_settings('test_second_storage' => {
+        'path' => TestEnv::SECOND_STORAGE_PATH,
+        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
+      })
+      expected_project = create(:project, repository_storage: 'test_second_storage')
+      create(:project, repository_storage: 'default')
+
+      expect(described_class.excluding_repository_storage('default')).to eq([expected_project])
     end
   end
 
@@ -5718,32 +5816,89 @@ RSpec.describe Project do
     end
   end
 
-  context 'pages deployed' do
-    let(:project) { create(:project) }
+  describe 'validation #changing_shared_runners_enabled_is_allowed' do
+    using RSpec::Parameterized::TableSyntax
 
-    {
-      mark_pages_as_deployed: true,
-      mark_pages_as_not_deployed: false
-    }.each do |method_name, flag|
-      describe method_name do
-        it "creates new record and sets deployed to #{flag} if none exists yet" do
-          project.pages_metadatum.destroy!
-          project.reload
+    where(:shared_runners_setting, :project_shared_runners_enabled, :valid_record) do
+      'enabled'                    | true  | true
+      'enabled'                    | false | true
+      'disabled_with_override'     | true  | true
+      'disabled_with_override'     | false | true
+      'disabled_and_unoverridable' | true  | false
+      'disabled_and_unoverridable' | false | true
+    end
 
-          project.send(method_name)
+    with_them do
+      let(:group) { create(:group) }
+      let(:project) { build(:project, namespace: group, shared_runners_enabled: project_shared_runners_enabled) }
 
-          expect(project.pages_metadatum.reload.deployed).to eq(flag)
-        end
-
-        it "updates the existing record and sets deployed to #{flag}" do
-          pages_metadatum = project.pages_metadatum
-          pages_metadatum.update!(deployed: !flag)
-
-          expect { project.send(method_name) }.to change {
-            pages_metadatum.reload.deployed
-          }.from(!flag).to(flag)
+      before do
+        allow_next_found_instance_of(Group) do |group|
+          allow(group).to receive(:shared_runners_setting).and_return(shared_runners_setting)
         end
       end
+
+      it 'validates the configuration' do
+        expect(project.valid?).to eq(valid_record)
+
+        unless valid_record
+          expect(project.errors[:shared_runners_enabled]).to contain_exactly('cannot be enabled because parent group does not allow it')
+        end
+      end
+    end
+  end
+
+  describe '#mark_pages_as_deployed' do
+    let(:project) { create(:project) }
+    let(:artifacts_archive) { create(:ci_job_artifact, project: project) }
+
+    it "works when artifacts_archive is missing" do
+      project.mark_pages_as_deployed
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
+    end
+
+    it "creates new record and sets deployed to true if none exists yet" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.mark_pages_as_deployed(artifacts_archive: artifacts_archive)
+
+      expect(project.pages_metadatum.reload.deployed).to eq(true)
+    end
+
+    it "updates the existing record and sets deployed to true and records artifact archive" do
+      pages_metadatum = project.pages_metadatum
+      pages_metadatum.update!(deployed: false)
+
+      expect do
+        project.mark_pages_as_deployed(artifacts_archive: artifacts_archive)
+      end.to change { pages_metadatum.reload.deployed }.from(false).to(true)
+               .and change { pages_metadatum.reload.artifacts_archive }.from(nil).to(artifacts_archive)
+    end
+  end
+
+  describe '#mark_pages_as_not_deployed' do
+    let(:project) { create(:project) }
+    let(:artifacts_archive) { create(:ci_job_artifact, project: project) }
+
+    it "creates new record and sets deployed to false if none exists yet" do
+      project.pages_metadatum.destroy!
+      project.reload
+
+      project.mark_pages_as_not_deployed
+
+      expect(project.pages_metadatum.reload.deployed).to eq(false)
+    end
+
+    it "updates the existing record and sets deployed to false and clears artifacts_archive" do
+      pages_metadatum = project.pages_metadatum
+      pages_metadatum.update!(deployed: true, artifacts_archive: artifacts_archive)
+
+      expect do
+        project.mark_pages_as_not_deployed
+      end.to change { pages_metadatum.reload.deployed }.from(true).to(false)
+               .and change { pages_metadatum.reload.artifacts_archive }.from(artifacts_archive).to(nil)
     end
   end
 
@@ -5930,6 +6085,18 @@ RSpec.describe Project do
     end
   end
 
+  describe '#jira_subscription_exists?' do
+    let(:project) { create(:project) }
+
+    subject { project.jira_subscription_exists? }
+
+    context 'jira connect subscription exists' do
+      let!(:jira_connect_subscription) { create(:jira_connect_subscription, namespace: project.namespace) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe 'with services and chat names' do
     subject { create(:project) }
 
@@ -5972,53 +6139,6 @@ RSpec.describe Project do
 
     it 'returns limited number of protected branches based on specified limit' do
       expect(subject.count).to eq(1)
-    end
-  end
-
-  describe '#all_lfs_objects_oids' do
-    let(:project) { create(:project) }
-    let(:lfs_object) { create(:lfs_object) }
-    let(:another_lfs_object) { create(:lfs_object) }
-
-    subject { project.all_lfs_objects_oids }
-
-    context 'when project has associated LFS objects' do
-      before do
-        create(:lfs_objects_project, lfs_object: lfs_object, project: project)
-        create(:lfs_objects_project, lfs_object: another_lfs_object, project: project)
-      end
-
-      it 'returns OIDs of LFS objects' do
-        expect(subject).to match_array([lfs_object.oid, another_lfs_object.oid])
-      end
-
-      context 'and there are specified oids' do
-        subject { project.all_lfs_objects_oids(oids: [lfs_object.oid]) }
-
-        it 'returns OIDs of LFS objects that match specified oids' do
-          expect(subject).to eq([lfs_object.oid])
-        end
-      end
-    end
-
-    context 'when fork has associated LFS objects to itself and source' do
-      let(:source) { create(:project) }
-      let(:project) { fork_project(source) }
-
-      before do
-        create(:lfs_objects_project, lfs_object: lfs_object, project: source)
-        create(:lfs_objects_project, lfs_object: another_lfs_object, project: project)
-      end
-
-      it 'returns OIDs of LFS objects' do
-        expect(subject).to match_array([lfs_object.oid, another_lfs_object.oid])
-      end
-    end
-
-    context 'when project has no associated LFS objects' do
-      it 'returns empty array' do
-        expect(subject).to be_empty
-      end
     end
   end
 
@@ -6194,6 +6314,48 @@ RSpec.describe Project do
     end
   end
 
+  describe '#has_packages?' do
+    let(:project) { create(:project, :public) }
+
+    subject { project.has_packages?(package_type) }
+
+    shared_examples 'has_package' do
+      context 'package of package_type exists' do
+        let!(:package) { create("#{package_type}_package", project: project) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'package of package_type does not exist' do
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'with maven packages' do
+      it_behaves_like 'has_package' do
+        let(:package_type) { :maven }
+      end
+    end
+
+    context 'with npm packages' do
+      it_behaves_like 'has_package' do
+        let(:package_type) { :npm }
+      end
+    end
+
+    context 'with conan packages' do
+      it_behaves_like 'has_package' do
+        let(:package_type) { :conan }
+      end
+    end
+
+    context 'calling has_package? with nil' do
+      let(:package_type) { nil }
+
+      it { is_expected.to be false }
+    end
+  end
+
   describe '#environments_for_scope' do
     let_it_be(:project, reload: true) { create(:project) }
 
@@ -6317,6 +6479,49 @@ RSpec.describe Project do
 
     it 'creates setting if it does not exist' do
       expect(project.metrics_setting).to be_an_instance_of(ProjectMetricsSetting)
+    end
+  end
+
+  describe '#enabled_group_deploy_keys' do
+    let_it_be(:project) { create(:project) }
+
+    subject { project.enabled_group_deploy_keys }
+
+    context 'when a project does not have a group' do
+      it { is_expected.to be_empty }
+    end
+
+    context 'when a project has a parent group' do
+      let!(:group) { create(:group, projects: [project]) }
+
+      context 'and this group has a group deploy key enabled' do
+        let!(:group_deploy_key) { create(:group_deploy_key, groups: [group]) }
+
+        it { is_expected.to contain_exactly(group_deploy_key) }
+
+        context 'and this group has parent group which also has a group deploy key enabled' do
+          let(:super_group) { create(:group) }
+
+          it 'returns both group deploy keys' do
+            super_group = create(:group)
+            super_group_deploy_key = create(:group_deploy_key, groups: [super_group])
+            group.update!(parent: super_group)
+
+            expect(subject).to contain_exactly(group_deploy_key, super_group_deploy_key)
+          end
+        end
+      end
+
+      context 'and another group has a group deploy key enabled' do
+        let_it_be(:group_deploy_key) { create(:group_deploy_key) }
+
+        it 'does not return this group deploy key' do
+          another_group = create(:group)
+          create(:group_deploy_key, groups: [another_group])
+
+          expect(subject).to be_empty
+        end
+      end
     end
   end
 

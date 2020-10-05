@@ -4,22 +4,21 @@ module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab wiki HTTP push' do
       context 'wiki commit' do
-        it 'is replicated to the secondary node' do
-          wiki_title = 'Geo Replication Wiki'
+        it 'is replicated to the secondary node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/691' do
           wiki_content = 'This tests replication of wikis via HTTP'
           push_content = 'This is from the Geo wiki push!'
-          project_name = "geo-wiki-project-#{SecureRandom.hex(8)}"
+          project = nil
 
           # Create new wiki and push wiki commit
           QA::Flow::Login.while_signed_in(address: :geo_primary) do
             project = Resource::Project.fabricate_via_api! do |project|
-              project.name = project_name
+              project.name = 'geo-wiki-http-project'
               project.description = 'Geo project for wiki repo test'
             end
 
             wiki = Resource::Wiki::ProjectPage.fabricate_via_api! do |wiki|
               wiki.project = project
-              wiki.title = wiki_title
+              wiki.title = 'Geo Replication Wiki'
               wiki.content = wiki_content
             end
 
@@ -50,8 +49,8 @@ module QA
             end
 
             Page::Dashboard::Projects.perform do |dashboard|
-              dashboard.wait_for_project_replication(project_name)
-              dashboard.go_to_project(project_name)
+              dashboard.wait_for_project_replication(project.name)
+              dashboard.go_to_project(project.name)
             end
 
             Page::Project::Menu.perform(&:click_wiki)

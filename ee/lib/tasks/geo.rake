@@ -50,18 +50,6 @@ namespace :geo do
       Gitlab::Geo::DatabaseTasks.load_seed
     end
 
-    desc 'GitLab | Geo | DB | Refresh Foreign Tables definition in Geo Secondary node'
-    task refresh_foreign_tables: [:environment] do
-      if Gitlab::Geo::GeoTasks.foreign_server_configured?
-        print "\nRefreshing foreign tables for FDW: #{Gitlab::Geo::Fdw::FOREIGN_SCHEMA} ... "
-        Gitlab::Geo::GeoTasks.refresh_foreign_tables!
-        puts 'Done!'
-      else
-        puts "Error: Cannot refresh foreign tables, there is no foreign server configured."
-        exit 1
-      end
-    end
-
     # IMPORTANT: This task won't dump the schema if ActiveRecord::Base.dump_schema_after_migration is set to false
     task _dump: [:environment] do
       if Gitlab::Geo::DatabaseTasks.dump_schema_after_migration?
@@ -147,16 +135,6 @@ namespace :geo do
       task purge: [:environment] do
         Gitlab::Geo::DatabaseTasks::Test.purge
       end
-
-      desc 'GitLab | Geo | DB | Test | Refresh Foreign Tables definition for test environment'
-      task refresh_foreign_tables: [:environment] do
-        old_env = ActiveRecord::Tasks::DatabaseTasks.env
-        ActiveRecord::Tasks::DatabaseTasks.env = 'test'
-
-        ns['geo:db:refresh_foreign_tables'].invoke
-
-        ActiveRecord::Tasks::DatabaseTasks.env = old_env
-      end
     end
   end
 
@@ -212,23 +190,7 @@ namespace :geo do
   task set_secondary_as_primary: :environment do
     abort GEO_LICENSE_ERROR_TEXT unless Gitlab::Geo.license_allows?
 
-    ActiveRecord::Base.transaction do
-      primary_node = GeoNode.primary_node
-
-      unless primary_node
-        abort 'The primary is not set'
-      end
-
-      primary_node.destroy
-
-      current_node = GeoNode.current_node
-
-      unless current_node.secondary?
-        abort 'This is not a secondary node'
-      end
-
-      current_node.update!(primary: true)
-    end
+    Gitlab::Geo::GeoTasks.set_secondary_as_primary
   end
 
   desc 'GitLab | Geo | Update Geo primary node URL'
@@ -236,38 +198,6 @@ namespace :geo do
     abort GEO_LICENSE_ERROR_TEXT unless Gitlab::Geo.license_allows?
 
     Gitlab::Geo::GeoTasks.update_primary_geo_node_url
-  end
-
-  desc "Gitlab | Geo | Check replication/verification status"
-  task check_replication_verification_status: :environment do
-    abort GEO_LICENSE_ERROR_TEXT unless Gitlab::Geo.license_allows?
-
-    current_node_status = GeoNodeStatus.current_node_status
-    geo_node = current_node_status.geo_node
-
-    unless geo_node.secondary?
-      puts 'This command is only available on a secondary node'.color(:red)
-      exit
-    end
-
-    puts
-
-    status_check = Gitlab::Geo::GeoNodeStatusCheck.new(current_node_status, geo_node)
-
-    status_check.print_replication_verification_status
-    complete = status_check.replication_verification_complete?
-
-    if complete
-      puts 'SUCCESS - Replication is up-to-date.'.color(:green)
-      exit 0
-    else
-      puts "ERROR - Replication is not up-to-date. \n"\
-        "Please see documentation to complete replication: "\
-        "https://docs.gitlab.com/ee/administration/geo/disaster_recovery"\
-        "/planned_failover.html#ensure-geo-replication-is-up-to-date"
-        .color(:red)
-      exit 1
-    end
   end
 
   desc 'GitLab | Geo | Print Geo node status'

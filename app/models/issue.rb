@@ -18,6 +18,9 @@ class Issue < ApplicationRecord
   include MilestoneEventable
   include WhereComposite
   include StateEventable
+  include IdInOrdered
+  include Presentable
+  include IssueAvailableFeatures
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -29,7 +32,14 @@ class Issue < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :issues_sort
 
+  # Types of issues that should be displayed on lists across the app
+  # for example, project issues list, group issues list and issue boards.
+  # Some issue types, like test cases, should be hidden by default.
+  TYPES_FOR_LIST = %w(issue incident).freeze
+
   belongs_to :project
+  has_one :namespace, through: :project
+
   belongs_to :duplicated_to, class_name: 'Issue'
   belongs_to :closed_by, class_name: 'User'
   belongs_to :iteration, foreign_key: 'sprint_id'
@@ -46,6 +56,7 @@ class Issue < ApplicationRecord
     dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
   has_many :issue_assignees
+  has_many :issue_email_participants
   has_many :assignees, class_name: "User", through: :issue_assignees
   has_many :zoom_meetings
   has_many :user_mentions, class_name: "IssueUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
@@ -57,6 +68,7 @@ class Issue < ApplicationRecord
     end
   end
 
+  has_one :issuable_severity
   has_one :sentry_issue
   has_one :alert_management_alert, class_name: 'AlertManagement::Alert'
   has_and_belongs_to_many :self_managed_prometheus_alert_events, join_table: :issues_self_managed_prometheus_alert_events # rubocop: disable Rails/HasAndBelongsToMany
@@ -66,6 +78,13 @@ class Issue < ApplicationRecord
   accepts_nested_attributes_for :sentry_issue
 
   validates :project, presence: true
+  validates :issue_type, presence: true
+
+  enum issue_type: {
+    issue: 0,
+    incident: 1,
+    test_case: 2 ## EE-only
+  }
 
   alias_attribute :parent_ids, :project_id
   alias_method :issuing_parent, :project
@@ -85,13 +104,22 @@ class Issue < ApplicationRecord
   scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
   scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
+  scope :order_severity_asc, -> { includes(:issuable_severity).order('issuable_severities.severity ASC NULLS FIRST') }
+  scope :order_severity_desc, -> { includes(:issuable_severity).order('issuable_severities.severity DESC NULLS LAST') }
 
   scope :preload_associated_models, -> { preload(:assignees, :labels, project: :namespace) }
+  scope :with_web_entity_associations, -> { preload(:author, :project) }
   scope :with_api_entity_associations, -> { preload(:timelogs, :assignees, :author, :notes, :labels, project: [:route, { namespace: :route }] ) }
   scope :with_label_attributes, ->(label_attributes) { joins(:labels).where(labels: label_attributes) }
   scope :with_alert_management_alerts, -> { joins(:alert_management_alert) }
   scope :with_prometheus_alert_events, -> { joins(:issues_prometheus_alert_events) }
   scope :with_self_managed_prometheus_alert_events, -> { joins(:issues_self_managed_prometheus_alert_events) }
+  scope :with_api_entity_associations, -> {
+    preload(:timelogs, :closed_by, :assignees, :author, :notes, :labels,
+      milestone: { project: [:route, { namespace: :route }] },
+      project: [:route, { namespace: :route }])
+  }
+  scope :with_issue_type, ->(types) { where(issue_type: types) }
 
   scope :public_only, -> { where(confidential: false) }
   scope :confidential_only, -> { where(confidential: true) }
@@ -99,6 +127,7 @@ class Issue < ApplicationRecord
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
   scope :service_desk, -> { where(author: ::User.support_bot) }
+  scope :inc_relations_for_view, -> { includes(author: :status) }
 
   # An issue can be uniquely identified by project_id and iid
   # Takes one or more sets of composite IDs, expressed as hash-like records of
@@ -122,6 +151,7 @@ class Issue < ApplicationRecord
 
   after_commit :expire_etag_cache, unless: :importing?
   after_save :ensure_metrics, unless: :importing?
+  after_create_commit :record_create_action, unless: :importing?
 
   attr_spammable :title, spam_title: true
   attr_spammable :description, spam_description: true
@@ -145,10 +175,6 @@ class Issue < ApplicationRecord
     before_transition closed: :opened do |issue|
       issue.closed_at = nil
       issue.closed_by = nil
-    end
-
-    after_transition any => :closed do |issue|
-      issue.resolve_associated_alert_management_alert
     end
   end
 
@@ -213,6 +239,8 @@ class Issue < ApplicationRecord
     when 'due_date', 'due_date_asc'                       then order_due_date_asc.with_order_id_desc
     when 'due_date_desc'                                  then order_due_date_desc.with_order_id_desc
     when 'relative_position', 'relative_position_asc'     then order_relative_position_asc.with_order_id_desc
+    when 'severity_asc'                                   then order_severity_asc.with_order_id_desc
+    when 'severity_desc'                                  then order_severity_desc.with_order_id_desc
     else
       super
     end
@@ -294,6 +322,24 @@ class Issue < ApplicationRecord
     end
   end
 
+  def related_issues(current_user, preload: nil)
+    related_issues = ::Issue
+                       .select(['issues.*', 'issue_links.id AS issue_link_id',
+                                'issue_links.link_type as issue_link_type_value',
+                                'issue_links.target_id as issue_link_source_id'])
+                       .joins("INNER JOIN issue_links ON
+	                             (issue_links.source_id = issues.id AND issue_links.target_id = #{id})
+	                             OR
+	                             (issue_links.target_id = issues.id AND issue_links.source_id = #{id})")
+                       .preload(preload)
+                       .reorder('issue_link_id')
+
+    cross_project_filter = -> (issues) { issues.where(project: project) }
+    Ability.issues_readable_by_user(related_issues,
+      current_user,
+      filters: { read_cross_project: cross_project_filter })
+  end
+
   def can_be_worked_on?
     !self.closed? && !self.project.forked?
   end
@@ -363,20 +409,21 @@ class Issue < ApplicationRecord
     @design_collection ||= ::DesignManagement::DesignCollection.new(self)
   end
 
-  def resolve_associated_alert_management_alert
-    return unless alert_management_alert
-    return if alert_management_alert.resolve
-
-    Gitlab::AppLogger.warn(
-      message: 'Cannot resolve an associated Alert Management alert',
-      issue_id: id,
-      alert_id: alert_management_alert.id,
-      alert_errors: alert_management_alert.errors.messages
-    )
-  end
-
   def from_service_desk?
     author.id == User.support_bot.id
+  end
+
+  def issue_link_type
+    return unless respond_to?(:issue_link_type_value) && respond_to?(:issue_link_source_id)
+
+    type = IssueLink.link_types.key(issue_link_type_value) || IssueLink::TYPE_RELATES_TO
+    return type if issue_link_source_id == id
+
+    IssueLink.inverse_link_type(type)
+  end
+
+  def relocation_target
+    moved_to || duplicated_to
   end
 
   private
@@ -384,6 +431,10 @@ class Issue < ApplicationRecord
   def ensure_metrics
     super
     metrics.record!
+  end
+
+  def record_create_action
+    Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_created_action(author: author)
   end
 
   # Returns `true` if the given User can read the current Issue.
@@ -413,6 +464,11 @@ class Issue < ApplicationRecord
   def expire_etag_cache
     key = Gitlab::Routing.url_helpers.realtime_changes_project_issue_path(project, self)
     Gitlab::EtagCaching::Store.new.touch(key)
+  end
+
+  def could_not_move(exception)
+    # Symptom of running out of space - schedule rebalancing
+    IssueRebalancingWorker.perform_async(nil, project_id)
   end
 end
 

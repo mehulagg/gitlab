@@ -5,12 +5,16 @@ type: concepts
 # GitLab release and maintenance policy
 
 GitLab has strict policies governing version naming, as well as release pace for major, minor,
-patch, and security releases. New releases are usually announced on the [GitLab blog](https://about.gitlab.com/releases/categories/releases/).
+patch, and security releases. New releases are announced on the [GitLab blog](https://about.gitlab.com/releases/categories/releases/).
 
 Our current policy is:
 
 - Backporting bug fixes for **only the current stable release** at any given time. (See [patch releases](#patch-releases).)
-- Backporting **to the previous two monthly releases in addition to the current stable release**. (See [security releases](#security-releases).)
+- Backporting security fixes **to the previous two monthly releases in addition to the current stable release**. (See [security releases](#security-releases).)
+
+In rare cases, release managers may make an exception and backport to more than
+the last two monthly releases. See [Backporting to older
+releases](#backporting-to-older-releases) for more information.
 
 ## Versioning
 
@@ -66,10 +70,14 @@ one major version. For example, it is safe to:
   - `9.5.5` -> `9.5.9`
   - `8.9.2` -> `8.9.6`
 
-NOTE: **Note** Version specific changes in Omnibus GitLab Linux packages can be found in [the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/update/README.html#version-specific-changes).
+NOTE: **Note:**
+Version specific changes in Omnibus GitLab Linux packages can be found in [the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/update/README.html#version-specific-changes).
 
 NOTE: **Note:**
 Instructions are available for downloading an Omnibus GitLab Linux package locally and [manually installing](https://docs.gitlab.com/omnibus/manual_install.html) it.
+
+NOTE: **Note:**
+A step-by-step guide to [upgrading the Omnibus-bundled PostgreSQL is documented separately](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
 
 ### Upgrading major versions
 
@@ -85,8 +93,8 @@ It's also important to ensure that any background migrations have been fully com
 before upgrading to a new major version. To see the current size of the `background_migration` queue,
 [Check for background migrations before upgrading](../update/README.md#checking-for-background-migrations-before-upgrading).
 
-If your GitLab instance has any GitLab Runners associated with it, it is very
-important to upgrade the GitLab Runners to match the GitLab minor version that was
+If your GitLab instance has any runners associated with it, it is very
+important to upgrade GitLab Runner to match the GitLab minor version that was
 upgraded to. This is to ensure [compatibility with GitLab versions](https://docs.gitlab.com/runner/#compatibility-with-gitlab-versions).
 
 ### Version 12 onward: Extra step for major upgrades
@@ -107,9 +115,9 @@ Please see the table below for some examples:
 
 | Target version | Your version | Recommended upgrade path | Note |
 | --------------------- | ------------ | ------------------------ | ---- |
-| `13.2.0`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.10.6` -> `13.0.0` -> `13.2.0` | Four intermediate versions are required: the final `11.11`, `12.0`, and `12.10` releases, plus `13.0`. |
-| `13.0.1`              | `11.10.8`      | `11.10.5` -> `11.11.8` -> `12.0.12` -> `12.10.6` -> `13.0.1` | Three intermediate versions are required: `11.11`, `12.0`, and `12.10`. |
-| `12.10.6`             | `11.3.4`       | `11.3.4` -> `11.11.8` -> `12.0.12` -> `12.10.6`             |  Two intermediate versions are required: `11.11` and `12.0` |
+| `13.2.3`                | `11.5.0`      | `11.5.0` -> `11.11.8` -> `12.0.12` -> `12.10.14` -> `13.0.12` -> `13.2.3` | Four intermediate versions are required: the final `11.11`, `12.0`, and `12.10` releases, plus `13.0`. |
+| `13.0.12`              | `11.10.8`      | `11.10.5` -> `11.11.8` -> `12.0.12` -> `12.10.14` -> `13.0.12` | Three intermediate versions are required: `11.11`, `12.0`, and `12.10`. |
+| `12.10.14`             | `11.3.4`       | `11.3.4` -> `11.11.8` -> `12.0.12` -> `12.10.14`             |  Two intermediate versions are required: `11.11` and `12.0` |
 | `12.9.5`             | `10.4.5`       | `10.4.5` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.9.5`   | Three intermediate versions are required: `10.8`, `11.11`, and `12.0`, then `12.9.5` |
 | `12.2.5`              | `9.2.6`        | `9.2.6` -> `9.5.10` -> `10.8.7` -> `11.11.8` -> `12.0.12` -> `12.2.5` | Four intermediate versions are required: `9.5`, `10.8`, `11.11`, `12.0`, then `12.2`. |
 | `11.3.4`              | `8.13.4`       | `8.13.4` -> `8.17.7` -> `9.5.10` -> `10.8.7` -> `11.3.4` | `8.17.7` is the last version in version 8, `9.5.10` is the last version in version 9, `10.8.7` is the last version in version 10. |
@@ -177,7 +185,7 @@ accessible.
 
 ### Backporting to older releases
 
-Backporting to more than one stable release is reserved for [security releases](#security-releases).
+Backporting to more than one stable release is normally reserved for [security releases](#security-releases).
 In some cases, however, we may need to backport *a bug fix* to more than one stable
 release, depending on the severity of the bug.
 
@@ -188,16 +196,13 @@ based on *all* of the following:
 
 1. Estimated [severity](../development/contributing/issue_workflow.md#severity-labels) of the bug:
    Highest possible impact to users based on the current definition of severity.
-
 1. Estimated [priority](../development/contributing/issue_workflow.md#priority-labels) of the bug:
    Immediate impact on all impacted users based on the above estimated severity.
-
 1. Potentially incurring data loss and/or security breach.
-
 1. Potentially affecting one or more strategic accounts due to a proven inability by the user to upgrade to the current stable version.
 
 If *all* of the above are satisfied, the backport releases can be created for
-the current stable release, and two previous monthly releases.
+the current stable release, and two previous monthly releases. In rare cases a release manager may grant an exception to backport to more than two previous monthly releases.
 For instance, if we release `11.2.1` with a fix for a severe bug introduced in
 `11.0.0`, we could backport the fix to a new `11.0.x`, and `11.1.x` patch release.
 

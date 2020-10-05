@@ -15,6 +15,7 @@ GitLab can be integrated with the following external issue trackers:
 - Jira
 - Redmine
 - Bugzilla
+- EWM
 - YouTrack
 
 ## Authentication sources
@@ -25,7 +26,7 @@ GitLab can be configured to authenticate access requests with the following auth
 - Enable sign in with [Bitbucket](bitbucket.md) accounts.
 - Configure GitLab to sign in using [CAS](cas.md).
 - Integrate with [Kerberos](kerberos.md).
-- Enable sign in via [LDAP](ldap.md).
+- Enable sign in via [LDAP](../administration/auth/ldap/index.md).
 - Enable [OAuth2 provider](oauth_provider.md) application creation.
 - Use [OmniAuth](omniauth.md) to enable sign in via Twitter, GitHub, GitLab.com, Google,
 Bitbucket, Facebook, Shibboleth, SAML, Crowd, Azure or Authentiq ID.
@@ -56,7 +57,7 @@ GitLab can be integrated with the following enhancements:
 - Configure [PlantUML](../administration/integration/plantuml.md) to use diagrams in AsciiDoc documents.
 - Attach merge requests to [Trello](trello_power_up.md) cards.
 - Enable integrated code intelligence powered by [Sourcegraph](sourcegraph.md).
-- Add [Elasticsearch](elasticsearch.md) for [Advanced Global Search](../user/search/advanced_global_search.md),
+- Add [Elasticsearch](elasticsearch.md) for [Advanced Search](../user/search/advanced_global_search.md),
   [Advanced System Search](../user/search/advanced_search_syntax.md), and faster searching.
 
 ## Integrations

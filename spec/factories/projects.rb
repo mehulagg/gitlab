@@ -3,8 +3,6 @@
 require_relative '../support/helpers/test_env'
 
 FactoryBot.define do
-  PAGES_ACCESS_LEVEL_SCHEMA_VERSION ||= 20180423204600
-
   # Project without repository
   #
   # Project does not have bare repository.
@@ -31,6 +29,7 @@ FactoryBot.define do
       pages_access_level do
         visibility_level == Gitlab::VisibilityLevel::PUBLIC ? ProjectFeature::ENABLED : ProjectFeature::PRIVATE
       end
+      metrics_dashboard_access_level { ProjectFeature::PRIVATE }
 
       # we can't assign the delegated `#ci_cd_settings` attributes directly, as the
       # `#ci_cd_settings` relation needs to be created first
@@ -42,7 +41,7 @@ FactoryBot.define do
       forward_deployment_enabled { nil }
     end
 
-    after(:create) do |project, evaluator|
+    before(:create) do |project, evaluator|
       # Builds and MRs can't have higher visibility level than repository access level.
       builds_access_level = [evaluator.builds_access_level, evaluator.repository_access_level].min
       merge_requests_access_level = [evaluator.merge_requests_access_level, evaluator.repository_access_level].min
@@ -54,15 +53,15 @@ FactoryBot.define do
         issues_access_level: evaluator.issues_access_level,
         forking_access_level: evaluator.forking_access_level,
         merge_requests_access_level: merge_requests_access_level,
-        repository_access_level: evaluator.repository_access_level
+        repository_access_level: evaluator.repository_access_level,
+        pages_access_level: evaluator.pages_access_level,
+        metrics_dashboard_access_level: evaluator.metrics_dashboard_access_level
       }
 
-      if ActiveRecord::Migrator.current_version >= PAGES_ACCESS_LEVEL_SCHEMA_VERSION
-        hash.store("pages_access_level", evaluator.pages_access_level)
-      end
+      project.build_project_feature(hash)
+    end
 
-      project.project_feature.update(hash)
-
+    after(:create) do |project, evaluator|
       # Normally the class Projects::CreateService is used for creating
       # projects, and this class takes care of making sure the owner and current
       # user have access to the project. Our specs don't use said service class,
@@ -82,7 +81,7 @@ FactoryBot.define do
         import_state.jid = evaluator.import_jid
         import_state.correlation_id_value = evaluator.import_correlation_id
         import_state.last_error = evaluator.import_last_error
-        import_state.save
+        import_state.save!
       end
     end
 
@@ -112,6 +111,18 @@ FactoryBot.define do
 
     trait :import_failed do
       import_status { :failed }
+    end
+
+    trait :jira_dvcs_cloud do
+      before(:create) do |project|
+        create(:project_feature_usage, :dvcs_cloud, project: project)
+      end
+    end
+
+    trait :jira_dvcs_server do
+      before(:create) do |project|
+        create(:project_feature_usage, :dvcs_server, project: project)
+      end
     end
 
     trait :archived do
@@ -274,6 +285,12 @@ FactoryBot.define do
       end
     end
 
+    trait :with_import_url do
+      import_finished
+
+      import_url { generate(:url) }
+    end
+
     trait(:wiki_enabled)            { wiki_access_level { ProjectFeature::ENABLED } }
     trait(:wiki_disabled)           { wiki_access_level { ProjectFeature::DISABLED } }
     trait(:wiki_private)            { wiki_access_level { ProjectFeature::PRIVATE } }
@@ -300,6 +317,9 @@ FactoryBot.define do
     trait(:pages_enabled)           { pages_access_level { ProjectFeature::ENABLED } }
     trait(:pages_disabled)          { pages_access_level { ProjectFeature::DISABLED } }
     trait(:pages_private)           { pages_access_level { ProjectFeature::PRIVATE } }
+    trait(:metrics_dashboard_enabled) { metrics_dashboard_access_level { ProjectFeature::ENABLED } }
+    trait(:metrics_dashboard_disabled) { metrics_dashboard_access_level { ProjectFeature::DISABLED } }
+    trait(:metrics_dashboard_private) { metrics_dashboard_access_level { ProjectFeature::PRIVATE } }
 
     trait :auto_devops do
       association :auto_devops, factory: :project_auto_devops
@@ -381,5 +401,22 @@ FactoryBot.define do
         }
       )
     end
+  end
+
+  factory :ewm_project, parent: :project do
+    has_external_issue_tracker { true }
+
+    ewm_service
+  end
+
+  factory :project_with_design, parent: :project do
+    after(:create) do |project|
+      issue = create(:issue, project: project)
+      create(:design, project: project, issue: issue)
+    end
+  end
+
+  trait :in_subgroup do
+    namespace factory: [:group, :nested]
   end
 end

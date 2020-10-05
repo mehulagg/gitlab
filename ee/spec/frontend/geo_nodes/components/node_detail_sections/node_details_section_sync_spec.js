@@ -82,6 +82,26 @@ describe('NodeDetailsSectionSync', () => {
         );
       });
     });
+
+    describe.each`
+      nodeDetailItem                                        | path
+      ${{ secondaryView: false, itemName: '' }}             | ${''}
+      ${{ secondaryView: true, itemName: 'repositories' }}  | ${`${mockNode.url}admin/geo/replication/projects`}
+      ${{ secondaryView: true, itemName: 'attachments' }}   | ${`${mockNode.url}admin/geo/replication/uploads`}
+      ${{ secondaryView: true, itemName: 'package_files' }} | ${`${mockNode.url}admin/geo/replication/package_files`}
+    `(`detailsPath`, ({ nodeDetailItem, path }) => {
+      describe(`when detail item is ${nodeDetailItem.itemName}`, () => {
+        let detailPath = '';
+
+        beforeEach(() => {
+          detailPath = wrapper.vm.detailsPath(nodeDetailItem);
+        });
+
+        it(`returns the correct path`, () => {
+          expect(detailPath).toBe(path);
+        });
+      });
+    });
   });
 
   describe('template', () => {

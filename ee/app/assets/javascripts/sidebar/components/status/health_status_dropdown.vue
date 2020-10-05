@@ -1,14 +1,19 @@
 <script>
-import { GlButton, GlDropdownItem, GlDropdown, GlDropdownDivider } from '@gitlab/ui';
+import {
+  GlButton,
+  GlDeprecatedDropdownItem,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownDivider,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { healthStatusTextMap } from '../../constants';
 
 export default {
   components: {
     GlButton,
-    GlDropdown,
-    GlDropdownItem,
-    GlDropdownDivider,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
+    GlDeprecatedDropdownDivider,
   },
   props: {
     isEditable: {
@@ -81,26 +86,26 @@ export default {
 
 <template>
   <div class="dropdown dropdown-menu-selectable">
-    <gl-dropdown
+    <gl-deprecated-dropdown
       ref="dropdown"
       class="w-100"
       :text="dropdownText"
       @keydown.esc.native="hideDropdown"
       @hide="hideDropdown"
     >
-      <div class="dropdown-title">
-        <span class="health-title">{{ s__('Sidebar|Assign health status') }}</span>
+      <div class="dropdown-title gl-display-flex">
+        <span class="health-title gl-ml-auto">{{ s__('Sidebar|Assign health status') }}</span>
         <gl-button
           :aria-label="__('Close')"
           variant="link"
-          class="dropdown-title-button dropdown-menu-close"
+          class="dropdown-title-button dropdown-menu-close gl-ml-auto gl-text-gray-200!"
           icon="close"
           @click="hideDropdown"
         />
       </div>
 
       <div class="dropdown-content dropdown-body">
-        <gl-dropdown-item @click="handleDropdownClick(null)">
+        <gl-deprecated-dropdown-item @click="handleDropdownClick(null)">
           <gl-button
             variant="link"
             class="dropdown-item health-dropdown-item"
@@ -108,11 +113,11 @@ export default {
           >
             {{ s__('Sidebar|No status') }}
           </gl-button>
-        </gl-dropdown-item>
+        </gl-deprecated-dropdown-item>
 
-        <gl-dropdown-divider class="divider health-divider" />
+        <gl-deprecated-dropdown-divider class="divider health-divider" />
 
-        <gl-dropdown-item
+        <gl-deprecated-dropdown-item
           v-for="option in statusOptions"
           :key="option.key"
           @click="handleDropdownClick(option.key)"
@@ -124,8 +129,8 @@ export default {
           >
             {{ option.value }}
           </gl-button>
-        </gl-dropdown-item>
+        </gl-deprecated-dropdown-item>
       </div>
-    </gl-dropdown>
+    </gl-deprecated-dropdown>
   </div>
 </template>

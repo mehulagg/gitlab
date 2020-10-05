@@ -7,24 +7,41 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Security Configuration **(ULTIMATE)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20711) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20711) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
+> - SAST configuration was [enabled](https://gitlab.com/groups/gitlab-org/-/epics/3659) in 13.3 and [improved](https://gitlab.com/gitlab-org/gitlab/-/issues/232862) in 13.4.
+> - DAST Profiles feature was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40474) in 13.4.
 
-## Overview
+The Security Configuration page displays the configuration state of each security control in the
+current project.
 
-The security configuration page displays the configuration state of each of the security
-features and can be accessed through a project's sidebar nav.
+To view a project's security configuration, go to the project's home page,
+then in the left sidebar go to **Security & Compliance > Configuration**.
 
-![Screenshot of security configuration page](../img/security_configuration_page_v13_1.png)
+For each security control the page displays:
 
-The page uses the project's latest default branch [CI pipeline](../../../ci/pipelines/index.md) to determine the configuration
-state of each feature. If a job with the expected security report artifact exists in the pipeline,
-the feature is considered configured.
+- **Security Control:** Name, description, and a documentation link.
+- **Status:** The security control's status (enabled, not enabled, or available).
+- **Manage:** A management option or a documentation link.
 
-NOTE: **Note:** if the latest pipeline used [Auto DevOps](../../../topics/autodevops/index.md),
-all security features will be configured by default.
+## Status
 
-## Limitations
+The status of each security control is determined by the project's latest default branch
+[CI pipeline](../../../ci/pipelines/index.md).
+If a job with the expected security report artifact exists in the pipeline, the feature's status is
+_enabled_.
 
-It is not possible to enable or disable a feature using the configuration page.
-However, instructions on how to enable or disable a feature can be found through
-the links next to each feature on that page.
+If the latest pipeline used [Auto DevOps](../../../topics/autodevops/index.md),
+all security features are configured by default.
+
+For SAST, click **View history** to see the `.gitlab-ci.yml` file's history.
+
+## Manage
+
+You can configure the following security controls:
+
+- Auto DevOps
+  - Click **Enable Auto DevOps** to enable it for the current project. For more details, see [Auto DevOps](../../../topics/autodevops/index.md).
+- SAST
+  - Click either **Enable** or **Configure** to use SAST for the current project. For more details, see [Configure SAST in the UI](../sast/index.md#configure-sast-in-the-ui).
+- DAST Profiles
+  - Click **Manage** to manage the available DAST profiles used for on-demand scans. For more details, see [DAST on-demand scans](../dast/index.md#on-demand-scans).

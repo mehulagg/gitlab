@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { LAST_ACTIVITY_AT } from 'ee/analytics/shared/constants';
 import { TEST_HOST } from 'helpers/test_constants';
 import Api from '~/api';
@@ -118,12 +118,28 @@ describe('ProjectsDropdownFilter component', () => {
       });
 
       it('renders an avatar when the project has an avatar_url', () => {
-        expect(findDropdownAtIndex(0).contains('img.gl-avatar')).toBe(true);
-        expect(findDropdownAtIndex(0).contains('div.gl-avatar-identicon')).toBe(false);
+        expect(
+          findDropdownAtIndex(0)
+            .find('img.gl-avatar')
+            .exists(),
+        ).toBe(true);
+        expect(
+          findDropdownAtIndex(0)
+            .find('div.gl-avatar-identicon')
+            .exists(),
+        ).toBe(false);
       });
       it("renders an identicon when the project doesn't have an avatar_url", () => {
-        expect(findDropdownAtIndex(1).contains('img.gl-avatar')).toBe(false);
-        expect(findDropdownAtIndex(1).contains('div.gl-avatar-identicon')).toBe(true);
+        expect(
+          findDropdownAtIndex(1)
+            .find('img.gl-avatar')
+            .exists(),
+        ).toBe(false);
+        expect(
+          findDropdownAtIndex(1)
+            .find('div.gl-avatar-identicon')
+            .exists(),
+        ).toBe(true);
       });
     });
 
@@ -131,47 +147,36 @@ describe('ProjectsDropdownFilter component', () => {
       it('should emit the "selected" event with the selected project', () => {
         selectDropdownItemAtIndex(0);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]]]);
       });
 
       it('should change selection when new project is clicked', () => {
         selectDropdownItemAtIndex(1);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[1]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[1]]]]);
       });
 
       it('selection should be emptied when a project is deselected', () => {
         selectDropdownItemAtIndex(0); // Select the item
         selectDropdownItemAtIndex(0); // deselect it
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]], [[]]]);
       });
 
       it('renders an avatar in the dropdown button when the project has an avatar_url', () => {
         selectDropdownItemAtIndex(0);
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(findDropdownButton().contains('img.gl-avatar')).toBe(true);
-          expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(false);
+          expect(
+            findDropdownButton()
+              .find('img.gl-avatar')
+              .exists(),
+          ).toBe(true);
+          expect(
+            findDropdownButton()
+              .find('.gl-avatar-identicon')
+              .exists(),
+          ).toBe(false);
         });
       });
 
@@ -179,8 +184,16 @@ describe('ProjectsDropdownFilter component', () => {
         selectDropdownItemAtIndex(1);
 
         return wrapper.vm.$nextTick().then(() => {
-          expect(findDropdownButton().contains('img.gl-avatar')).toBe(false);
-          expect(findDropdownButton().contains('.gl-avatar-identicon')).toBe(true);
+          expect(
+            findDropdownButton()
+              .find('img.gl-avatar')
+              .exists(),
+          ).toBe(false);
+          expect(
+            findDropdownButton()
+              .find('.gl-avatar-identicon')
+              .exists(),
+          ).toBe(true);
         });
       });
     });
@@ -197,13 +210,29 @@ describe('ProjectsDropdownFilter component', () => {
       });
 
       it('renders an avatar when the project has an avatar_url', () => {
-        expect(findDropdownAtIndex(0).contains('img.gl-avatar')).toBe(true);
-        expect(findDropdownAtIndex(0).contains('div.gl-avatar-identicon')).toBe(false);
+        expect(
+          findDropdownAtIndex(0)
+            .find('img.gl-avatar')
+            .exists(),
+        ).toBe(true);
+        expect(
+          findDropdownAtIndex(0)
+            .find('div.gl-avatar-identicon')
+            .exists(),
+        ).toBe(false);
       });
 
       it("renders an identicon when the project doesn't have an avatar_url", () => {
-        expect(findDropdownAtIndex(1).contains('img.gl-avatar')).toBe(false);
-        expect(findDropdownAtIndex(1).contains('div.gl-avatar-identicon')).toBe(true);
+        expect(
+          findDropdownAtIndex(1)
+            .find('img.gl-avatar')
+            .exists(),
+        ).toBe(false);
+        expect(
+          findDropdownAtIndex(1)
+            .find('div.gl-avatar-identicon')
+            .exists(),
+        ).toBe(true);
       });
     });
 
@@ -212,32 +241,14 @@ describe('ProjectsDropdownFilter component', () => {
         selectDropdownItemAtIndex(0);
         selectDropdownItemAtIndex(1);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[projects[0], projects[1]]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]], [[projects[0], projects[1]]]]);
       });
 
       it('should remove from selection when clicked again', () => {
         selectDropdownItemAtIndex(0);
         selectDropdownItemAtIndex(0);
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[]],
-          },
-        ]);
+        expect(wrapper.emitted().selected).toEqual([[[projects[0]]], [[]]]);
       });
 
       it('renders the correct placeholder text when multiple projects are selected', () => {

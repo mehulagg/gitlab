@@ -27,14 +27,17 @@ export default {
         :filter="filter"
         @setFilter="setFilter"
       />
-      <div class="ml-lg-auto p-2">
-        <strong>{{ s__('SecurityReports|Hide dismissed') }}</strong>
-        <gl-toggle-vuex
-          class="d-block mt-1 js-toggle"
-          store-module="filters"
-          state-property="hideDismissed"
-          set-action="setToggleValue"
-        />
+      <div class="gl-display-flex ml-lg-auto p-2">
+        <slot name="buttons"></slot>
+        <div class="pl-md-6">
+          <strong>{{ s__('SecurityReports|Hide dismissed') }}</strong>
+          <gl-toggle-vuex
+            class="d-block mt-1 js-toggle"
+            store-module="filters"
+            state-property="hideDismissed"
+            set-action="setToggleValue"
+          />
+        </div>
       </div>
     </div>
   </div>

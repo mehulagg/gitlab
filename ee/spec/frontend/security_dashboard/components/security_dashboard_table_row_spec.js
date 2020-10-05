@@ -3,8 +3,9 @@ import { GlFormCheckbox } from '@gitlab/ui';
 import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
 import createStore from 'ee/security_dashboard/store';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
+import { trimText } from 'helpers/text_helper';
+import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -35,7 +36,7 @@ describe('Security Dashboard Table Row', () => {
 
   const findLoader = () => wrapper.find('.js-skeleton-loader');
   const findContent = i => wrapper.findAll('.table-mobile-content').at(i);
-  const findAllIssueCreated = () => wrapper.findAll('.ic-issue-created');
+  const findAllIssueCreated = () => wrapper.findAll('[data-testid="issues-icon"]');
   const hasSelectedClass = () => wrapper.classes('gl-bg-blue-50');
   const findCheckbox = () => wrapper.find(GlFormCheckbox);
 
@@ -51,6 +52,11 @@ describe('Security Dashboard Table Row', () => {
     it('should render a ` ` for severity', () => {
       expect(wrapper.vm.severity).toEqual(' ');
       expect(findContent(0).text()).toEqual('');
+    });
+
+    it('should render a `` for the report type and scanner', () => {
+      expect(findContent(3).text()).toEqual('');
+      expect(wrapper.find('vulnerability-vendor').exists()).toBeFalsy();
     });
 
     it('should not render action buttons', () => {
@@ -77,8 +83,10 @@ describe('Security Dashboard Table Row', () => {
       ).toContain(vulnerability.severity);
     });
 
-    it('should render the identifier name', () => {
-      expect(findContent(2).text()).toContain(vulnerability.identifiers[0].name);
+    it('should render the identifier cell', () => {
+      const { identifiers } = vulnerability;
+      expect(findContent(2).text()).toContain(identifiers[0].name);
+      expect(trimText(findContent(2).text())).toContain(`${identifiers.length - 1} more`);
     });
 
     it('should render the report type', () => {
@@ -87,6 +95,10 @@ describe('Security Dashboard Table Row', () => {
           .text()
           .toLowerCase(),
       ).toContain(vulnerability.report_type.toLowerCase());
+    });
+
+    it('should render the scanner vendor if the scanner does exist', () => {
+      expect(findContent(3).text()).toContain(vulnerability.scanner.vendor);
     });
 
     describe('the project name', () => {
@@ -161,7 +173,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(mount, { props: { vulnerability } });
     });
 
-    it('should have a `ic-issue-created` class', () => {
+    it('should have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(1);
     });
   });
@@ -173,7 +185,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(mount, { props: { vulnerability } });
     });
 
-    it('should not have a `ic-issue-created` class', () => {
+    it('should not have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(0);
     });
   });
@@ -185,7 +197,7 @@ describe('Security Dashboard Table Row', () => {
       createComponent(shallowMount, { props: { vulnerability } });
     });
 
-    it('should not have a `ic-issue-created` class', () => {
+    it('should not have a `issues` icon', () => {
       expect(findAllIssueCreated()).toHaveLength(0);
     });
 
@@ -228,6 +240,19 @@ describe('Security Dashboard Table Row', () => {
           );
         });
       });
+    });
+  });
+
+  describe('with less than two identifiers', () => {
+    const vulnerability = mockDataVulnerabilities[1];
+
+    beforeEach(() => {
+      createComponent(shallowMount, { props: { vulnerability } });
+    });
+
+    it('should render the identifier cell', () => {
+      const { identifiers } = vulnerability;
+      expect(findContent(2).text()).toBe(identifiers[0].name);
     });
   });
 });

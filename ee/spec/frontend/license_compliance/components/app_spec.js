@@ -41,6 +41,13 @@ const documentationPath = '/';
 
 const noop = () => {};
 
+const transitionStub = () => ({
+  render() {
+    // eslint-disable-next-line no-underscore-dangle
+    return this.$options._renderChildren;
+  },
+});
+
 const createComponent = ({ state, props, options }) => {
   const fakeStore = new Vuex.Store({
     modules: {
@@ -88,6 +95,7 @@ const createComponent = ({ state, props, options }) => {
     },
     ...options,
     store: fakeStore,
+    stubs: { transition: transitionStub() },
   });
 };
 

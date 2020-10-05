@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
 import DropdownValueCollapsed from 'ee/vue_shared/components/sidebar/epics_select/dropdown_value_collapsed.vue';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
 import { mockEpic1 } from '../mock_data';
 
@@ -31,7 +31,7 @@ describe('EpicsSelect', () => {
       });
 
       it('should render Icon component', () => {
-        const iconEl = wrapper.find(Icon);
+        const iconEl = wrapper.find(GlIcon);
 
         expect(iconEl.exists()).toBe(true);
         expect(iconEl.attributes('name')).toBe('epic');

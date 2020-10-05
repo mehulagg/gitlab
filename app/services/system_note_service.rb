@@ -41,8 +41,16 @@ module SystemNoteService
     ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_assignees(old_assignees)
   end
 
-  def change_milestone(noteable, project, author, milestone)
-    ::SystemNotes::IssuablesService.new(noteable: noteable, project: project, author: author).change_milestone(milestone)
+  def change_issuable_reviewers(issuable, project, author, old_reviewers)
+    ::SystemNotes::IssuablesService.new(noteable: issuable, project: project, author: author).change_issuable_reviewers(old_reviewers)
+  end
+
+  def relate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).relate_issue(noteable_ref)
+  end
+
+  def unrelate_issue(noteable, noteable_ref, user)
+    ::SystemNotes::IssuablesService.new(noteable: noteable, project: noteable.project, author: user).unrelate_issue(noteable_ref)
   end
 
   # Called when the due_date of a Noteable is changed
@@ -297,7 +305,15 @@ module SystemNoteService
   end
 
   def new_alert_issue(alert, issue, author)
-    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).new_alert_issue(alert, issue)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project, author: author).new_alert_issue(issue)
+  end
+
+  def create_new_alert(alert, monitoring_tool)
+    ::SystemNotes::AlertManagementService.new(noteable: alert, project: alert.project).create_new_alert(monitoring_tool)
+  end
+
+  def change_incident_severity(incident, author)
+    ::SystemNotes::IncidentService.new(noteable: incident, project: incident.project, author: author).change_incident_severity
   end
 
   private

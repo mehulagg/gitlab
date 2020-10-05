@@ -8,9 +8,6 @@ module IntegrationsActions
 
     before_action :not_found, unless: :integrations_enabled?
     before_action :integration, only: [:edit, :update, :test]
-    before_action only: :edit do
-      push_frontend_feature_flag(:integration_form_refactor, default_enabled: true)
-    end
   end
 
   def edit
@@ -19,12 +16,11 @@ module IntegrationsActions
 
   def update
     saved = integration.update(service_params[:service])
-    overwrite = Gitlab::Utils.to_boolean(params[:overwrite])
 
     respond_to do |format|
       format.html do
         if saved
-          PropagateIntegrationWorker.perform_async(integration.id, overwrite)
+          PropagateIntegrationWorker.perform_async(integration.id)
           redirect_to scoped_edit_integration_path(integration), notice: success_message
         else
           render 'shared/integrations/edit'
@@ -60,9 +56,11 @@ module IntegrationsActions
   end
 
   def success_message
-    message = integration.active? ? _('activated') : _('settings saved, but not activated')
-
-    _('%{service_title} %{message}.') % { service_title: integration.title, message: message }
+    if integration.active?
+      s_('Integrations|%{integration} settings saved and active.') % { integration: integration.title }
+    else
+      s_('Integrations|%{integration} settings saved, but not active.') % { integration: integration.title }
+    end
   end
 
   def serialize_as_json

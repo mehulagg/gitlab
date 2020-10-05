@@ -11,6 +11,13 @@ RSpec.describe ApprovalProjectRule do
     end
   end
 
+  describe 'associations' do
+    subject { build_stubbed(:approval_project_rule) }
+
+    it { is_expected.to have_many(:approval_merge_request_rule_sources) }
+    it { is_expected.to have_many(:approval_merge_request_rules).through(:approval_merge_request_rule_sources) }
+  end
+
   describe '.regular' do
     it 'returns non-report_approver records' do
       rules = create_list(:approval_project_rule, 2)
@@ -149,64 +156,6 @@ RSpec.describe ApprovalProjectRule do
       expect(rule).not_to be_valid
       expect(rule.errors.messages).to eq(rule_type: ['any-approver for the project already exists'])
       expect { rule.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
-    end
-  end
-
-  describe '.applicable_to_branch' do
-    let!(:rule) { create(:approval_project_rule) }
-    let(:branch) { 'stable' }
-
-    subject { described_class.applicable_to_branch(branch) }
-
-    context 'when there are no associated protected branches' do
-      it { is_expected.to eq([rule]) }
-    end
-
-    context 'when there are associated protected branches' do
-      before do
-        rule.update!(protected_branches: protected_branches)
-      end
-
-      context 'and branch matches' do
-        let(:protected_branches) { [create(:protected_branch, name: branch)] }
-
-        it { is_expected.to eq([rule]) }
-      end
-
-      context 'but branch does not match anything' do
-        let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
-
-        it { is_expected.to be_empty }
-      end
-    end
-  end
-
-  describe '.inapplicable_to_branch' do
-    let!(:rule) { create(:approval_project_rule) }
-    let(:branch) { 'stable' }
-
-    subject { described_class.inapplicable_to_branch(branch) }
-
-    context 'when there are no associated protected branches' do
-      it { is_expected.to be_empty }
-    end
-
-    context 'when there are associated protected branches' do
-      before do
-        rule.update!(protected_branches: protected_branches)
-      end
-
-      context 'and branch does not match anything' do
-        let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
-
-        it { is_expected.to eq([rule]) }
-      end
-
-      context 'but branch matches' do
-        let(:protected_branches) { [create(:protected_branch, name: branch)] }
-
-        it { is_expected.to be_empty }
-      end
     end
   end
 

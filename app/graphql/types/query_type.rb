@@ -47,6 +47,14 @@ module Types
           null: false,
           description: 'Fields related to design management'
 
+    field :milestone, ::Types::MilestoneType,
+          null: true,
+          description: 'Find a milestone' do
+      argument :id, ::Types::GlobalIDType[Milestone],
+               required: true,
+               description: 'Find a milestone by its ID'
+    end
+
     field :user, Types::UserType,
           null: true,
           description: 'Find a user',
@@ -61,8 +69,33 @@ module Types
           description: 'Text to echo back',
           resolver: Resolvers::EchoResolver
 
+    field :issue, Types::IssueType,
+          null: true,
+          description: 'Find an issue' do
+            argument :id, ::Types::GlobalIDType[::Issue], required: true, description: 'The global ID of the Issue'
+          end
+
+    field :instance_statistics_measurements, Types::Admin::Analytics::InstanceStatistics::MeasurementType.connection_type,
+          null: true,
+          description: 'Get statistics on the instance',
+          resolver: Resolvers::Admin::Analytics::InstanceStatistics::MeasurementsResolver
+
     def design_management
       DesignManagementObject.new(nil)
+    end
+
+    def issue(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[::Issue].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
+
+    def milestone(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[Milestone].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
     end
   end
 end

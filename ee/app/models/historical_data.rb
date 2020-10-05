@@ -29,5 +29,12 @@ class HistoricalData < ApplicationRecord
 
       HistoricalData.during(from..to).maximum(:active_user_count) || 0
     end
+
+    def in_license_term(license)
+      start_date = license.starts_at
+      expiration_date = license.expires_at || Date.current
+
+      HistoricalData.during(start_date..expiration_date)
+    end
   end
 end

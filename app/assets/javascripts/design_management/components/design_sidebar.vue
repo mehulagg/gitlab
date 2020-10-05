@@ -1,13 +1,15 @@
 <script>
-import { s__ } from '~/locale';
 import Cookies from 'js-cookie';
-import { parseBoolean } from '~/lib/utils/common_utils';
 import { GlCollapse, GlButton, GlPopover } from '@gitlab/ui';
+import { s__ } from '~/locale';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import updateActiveDiscussionMutation from '../graphql/mutations/update_active_discussion.mutation.graphql';
 import { extractDiscussions, extractParticipants } from '../utils/design_management_utils';
 import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../constants';
 import DesignDiscussion from './design_notes/design_discussion.vue';
 import Participants from '~/sidebar/components/participants/participants.vue';
+import DesignTodoButton from './design_todo_button.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
@@ -16,7 +18,9 @@ export default {
     GlCollapse,
     GlButton,
     GlPopover,
+    DesignTodoButton,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     design: {
       type: Object,
@@ -37,6 +41,14 @@ export default {
       discussionWithOpenForm: '',
     };
   },
+  inject: {
+    projectPath: {
+      default: '',
+    },
+    issueIid: {
+      default: '',
+    },
+  },
   computed: {
     discussions() {
       return extractDiscussions(this.design.discussions);
@@ -48,7 +60,7 @@ export default {
       };
     },
     discussionParticipants() {
-      return extractParticipants(this.issue.participants);
+      return extractParticipants(this.issue.participants.nodes);
     },
     resolvedDiscussions() {
       return this.discussions.filter(discussion => discussion.resolved);
@@ -59,6 +71,26 @@ export default {
     resolvedCommentsToggleIcon() {
       return this.resolvedDiscussionsExpanded ? 'chevron-down' : 'chevron-right';
     },
+    showTodoButton() {
+      return this.glFeatures.designManagementTodoButton;
+    },
+    sidebarWrapperClass() {
+      return {
+        'gl-pt-0': this.showTodoButton,
+      };
+    },
+  },
+  watch: {
+    isResolvedCommentsPopoverHidden(newVal) {
+      if (!newVal) {
+        this.$refs.resolvedComments.scrollIntoView();
+      }
+    },
+  },
+  mounted() {
+    if (!this.isResolvedCommentsPopoverHidden && this.$refs.resolvedComments) {
+      this.$refs.resolvedComments.$el.scrollIntoView();
+    }
   },
   methods: {
     handleSidebarClick() {
@@ -89,12 +121,19 @@ export default {
 </script>
 
 <template>
-  <div class="image-notes" @click="handleSidebarClick">
+  <div class="image-notes" :class="sidebarWrapperClass" @click="handleSidebarClick">
+    <div
+      v-if="showTodoButton"
+      class="gl-py-4 gl-mb-4 gl-display-flex gl-justify-content-space-between gl-align-items-center gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
+    >
+      <span>{{ __('To Do') }}</span>
+      <design-todo-button :design="design" @error="$emit('todoError', $event)" />
+    </div>
     <h2 class="gl-font-weight-bold gl-mt-0">
       {{ issue.title }}
     </h2>
     <a
-      class="gl-text-gray-600 gl-text-decoration-none gl-mb-6 gl-display-block"
+      class="gl-text-gray-400 gl-text-decoration-none gl-mb-6 gl-display-block"
       :href="issue.webUrl"
       >{{ issue.webPath }}</a
     >
@@ -120,19 +159,20 @@ export default {
       :resolved-discussions-expanded="resolvedDiscussionsExpanded"
       :discussion-with-open-form="discussionWithOpenForm"
       data-testid="unresolved-discussion"
-      @createNoteError="$emit('onDesignDiscussionError', $event)"
-      @updateNoteError="$emit('updateNoteError', $event)"
-      @resolveDiscussionError="$emit('resolveDiscussionError', $event)"
+      @create-note-error="$emit('onDesignDiscussionError', $event)"
+      @update-note-error="$emit('updateNoteError', $event)"
+      @resolve-discussion-error="$emit('resolveDiscussionError', $event)"
       @click.native.stop="updateActiveDiscussion(discussion.notes[0].id)"
-      @openForm="updateDiscussionWithOpenForm"
+      @open-form="updateDiscussionWithOpenForm"
     />
     <template v-if="resolvedDiscussions.length > 0">
       <gl-button
         id="resolved-comments"
+        ref="resolvedComments"
         data-testid="resolved-comments"
         :icon="resolvedCommentsToggleIcon"
         variant="link"
-        class="link-inherit-color gl-text-black-normal gl-text-decoration-none gl-font-weight-bold gl-mb-4"
+        class="link-inherit-color gl-text-body gl-text-decoration-none gl-font-weight-bold gl-mb-4"
         @click="$emit('toggleResolvedComments')"
         >{{ $options.resolveCommentsToggleText }} ({{ resolvedDiscussions.length }})
       </gl-button>
@@ -151,9 +191,12 @@ export default {
             )
           }}
         </p>
-        <a href="#" rel="noopener noreferrer" target="_blank">{{
-          s__('DesignManagement|Learn more about resolving comments')
-        }}</a>
+        <a
+          href="https://docs.gitlab.com/ee/user/project/issues/design_management.html#resolve-design-threads"
+          rel="noopener noreferrer"
+          target="_blank"
+          >{{ s__('DesignManagement|Learn more about resolving comments') }}</a
+        >
       </gl-popover>
       <gl-collapse :visible="resolvedDiscussionsExpanded" class="gl-mt-3">
         <design-discussion

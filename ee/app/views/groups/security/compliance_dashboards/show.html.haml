@@ -3,4 +3,5 @@
 
 #js-compliance-dashboard{ data: { merge_requests: @merge_requests.to_json,
   is_last_page: @last_page.to_json,
-  empty_state_svg_path: image_path('illustrations/merge_requests.svg') } }
+  empty_state_svg_path: image_path('illustrations/merge_requests.svg'),
+  merge_commits_csv_export_path: group_security_merge_commit_reports_path(@group, format: :csv) } }

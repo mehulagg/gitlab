@@ -10,9 +10,10 @@ RSpec.describe IncidentManagement::CreateIncidentLabelService do
   subject(:execute) { service.execute }
 
   describe 'execute' do
-    let(:title) { described_class::LABEL_PROPERTIES[:title] }
-    let(:color) { described_class::LABEL_PROPERTIES[:color] }
-    let(:description) { described_class::LABEL_PROPERTIES[:description] }
+    let(:incident_label_attributes) { attributes_for(:label, :incident) }
+    let(:title) { incident_label_attributes[:title] }
+    let(:color) { incident_label_attributes[:color] }
+    let(:description) { incident_label_attributes[:description] }
 
     shared_examples 'existing label' do
       it 'returns the existing label' do
@@ -52,7 +53,15 @@ RSpec.describe IncidentManagement::CreateIncidentLabelService do
     end
 
     context 'without label' do
-      it_behaves_like 'new label'
+      context 'when user has permissions to create labels' do
+        it_behaves_like 'new label'
+      end
+
+      context 'when user has no permissions to create labels' do
+        let_it_be(:user) { create(:user) }
+
+        it_behaves_like 'new label'
+      end
     end
   end
 end

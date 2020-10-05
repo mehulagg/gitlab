@@ -9,48 +9,61 @@ module Gitlab
       read_snippet: 'You are not allowed to read this snippet.',
       update_snippet: 'You are not allowed to update this snippet.',
       snippet_not_found: 'The snippet you were looking for could not be found.',
-      repository_not_found: 'The snippet repository you were looking for could not be found.'
+      no_repo: 'The snippet repository you were looking for could not be found.'
     }.freeze
 
-    attr_reader :snippet
-
-    alias_method :container, :snippet
+    alias_method :snippet, :container
 
     def initialize(actor, snippet, protocol, **kwargs)
-      @snippet = snippet
-
-      super(actor, snippet&.project, protocol, **kwargs)
+      super(actor, snippet, protocol, **kwargs)
 
       @auth_result_type = nil
       @authentication_abilities &= [:download_code, :push_code]
     end
 
-    def check(cmd, changes)
-      # TODO: Investigate if expanding actor/authentication types are needed.
-      # https://gitlab.com/gitlab-org/gitlab/issues/202190
-      if actor && !actor.is_a?(User) && !actor.instance_of?(Key)
-        raise ForbiddenError, ERROR_MESSAGES[:authentication_mechanism]
-      end
+    override :project
+    def project
+      container.project if container.is_a?(ProjectSnippet)
+    end
 
+    override :check
+    def check(cmd, changes)
       check_snippet_accessibility!
 
       super
     end
 
+    override :download_ability
+    def download_ability
+      :read_snippet
+    end
+
+    override :push_ability
+    def push_ability
+      :update_snippet
+    end
+
     private
 
-    override :check_namespace!
-    def check_namespace!
-      return unless snippet.is_a?(ProjectSnippet)
+    # TODO: Implement EE/Geo https://gitlab.com/gitlab-org/gitlab/issues/205629
+    override :check_custom_action
+    def check_custom_action
+      # snippets never return custom actions, such as geo replication.
+    end
+
+    override :check_valid_actor!
+    def check_valid_actor!
+      # TODO: Investigate if expanding actor/authentication types are needed.
+      # https://gitlab.com/gitlab-org/gitlab/issues/202190
+      if actor && !allowed_actor?
+        raise ForbiddenError, ERROR_MESSAGES[:authentication_mechanism]
+      end
 
       super
     end
 
-    override :check_project!
-    def check_project!(cmd)
-      return unless snippet.is_a?(ProjectSnippet)
-
-      super
+    def allowed_actor?
+      actor.is_a?(User) || actor.instance_of?(Key)
     end
 
     override :check_push_access!
@@ -82,19 +95,9 @@ module Gitlab
       end
     end
 
-    override :guest_can_download_code?
-    def guest_can_download_code?
-      Guest.can?(:read_snippet, snippet)
-    end
-
-    override :user_can_download_code?
-    def user_can_download_code?
-      authentication_abilities.include?(:download_code) && user_access.can_do_action?(:read_snippet)
-    end
-
     override :check_change_access!
     def check_change_access!
-      unless user_access.can_do_action?(:update_snippet)
+      unless user_can_push?
         raise ForbiddenError, ERROR_MESSAGES[:update_snippet]
       end
 
@@ -109,29 +112,17 @@ module Gitlab
       check_push_size!
     end
 
-    def check_single_change_access(change)
-      Checks::SnippetCheck.new(change, logger: logger).validate!
+    override :check_single_change_access
+    def check_single_change_access(change, _skip_lfs_integrity_check: false)
+      Checks::SnippetCheck.new(change, default_branch: snippet.default_branch, logger: logger).validate!
       Checks::PushFileCountCheck.new(change, repository: repository, limit: Snippet.max_file_limit(user), logger: logger).validate!
     rescue Checks::TimedLogger::TimeoutError
       raise TimeoutError, logger.full_message
     end
 
-    override :check_repository_existence!
-    def check_repository_existence!
-      unless repository.exists?
-        raise NotFoundError, ERROR_MESSAGES[:repository_not_found]
-      end
-    end
-
     override :user_access
     def user_access
       @user_access ||= UserAccessSnippet.new(user, snippet: snippet)
-    end
-
-    # TODO: Implement EE/Geo https://gitlab.com/gitlab-org/gitlab/issues/205629
-    override :check_custom_action
-    def check_custom_action(cmd)
-      nil
     end
 
     override :check_size_limit?
@@ -142,3 +133,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::GitAccessSnippet.prepend_if_ee('EE::Gitlab::GitAccessSnippet')

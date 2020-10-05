@@ -23,7 +23,8 @@ RSpec.describe Integrations::Jira::IssueEntity do
       assignee: double('displayName' => 'assignee'),
       project: double(key: 'GL'),
       key: 'GL-5',
-      client: double(options: { site: 'http://jira.com/' })
+      client: double(options: { site: 'http://jira.com/' }),
+      status: double(name: 'To Do')
     )
   end
 
@@ -36,6 +37,7 @@ RSpec.describe Integrations::Jira::IssueEntity do
       created_at: '2020-06-25T15:39:30.000+0000'.to_datetime.utc,
       updated_at: '2020-06-26T15:38:32.000+0000'.to_datetime.utc,
       closed_at: '2020-06-27T13:23:51.000+0000'.to_datetime.utc,
+      status: 'To Do',
       labels: [
         {
           name: 'backend',

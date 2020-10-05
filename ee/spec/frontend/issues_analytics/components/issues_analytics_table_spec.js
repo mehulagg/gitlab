@@ -5,7 +5,7 @@ import { mount } from '@vue/test-utils';
 import { GlLoadingIcon, GlTable } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { mockIssuesApiResponse, tableHeaders, endpoints } from '../mock_data';
 
 jest.mock('~/flash');

@@ -1,6 +1,6 @@
 import { __ } from '~/locale';
 import Api from '~/api';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import * as types from './mutation_types';
 
@@ -25,5 +25,3 @@ export function fetchPage({ commit, state }, newPage) {
       createFlash(__('An error occurred while loading group members.'));
     });
 }
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

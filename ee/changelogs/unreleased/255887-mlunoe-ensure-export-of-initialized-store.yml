@@ -1,0 +1,7 @@
+---
+title: Fixing an issue on the Productivity Analytics page, where applying filters
+  would not update the results. This should now work as expected; applying a filter
+  updates the results on the page filtered by the filters applied
+merge_request: 43532
+author:
+type: fixed

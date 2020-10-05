@@ -20,6 +20,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
         @title, @description, @cached_markdown_version = args[:title], args[:description], args[:cached_markdown_version]
         @title_html, @description_html = args[:title_html], args[:description_html]
         @author, @project = args[:author], args[:project]
+        @parent_user = args[:parent_user]
       end
 
       attr_accessor :title, :description, :cached_markdown_version
@@ -41,8 +42,8 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
 
   let(:cache_version) { Gitlab::MarkdownCache::CACHE_COMMONMARK_VERSION << 16 }
 
-  def thing_subclass(klass, extra_attribute)
-    Class.new(klass) { attr_accessor(extra_attribute) }
+  def thing_subclass(klass, *extra_attributes)
+    Class.new(klass) { attr_accessor(*extra_attributes) }
   end
 
   shared_examples 'a class with cached markdown fields' do
@@ -192,11 +193,33 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       end
 
       context 'with an author' do
-        let(:thing) { thing_subclass(klass, :author).new(title: markdown, title_html: html, author: :author_value) }
+        let(:user) { build(:user) }
+        let(:thing) { thing_subclass(klass, :author).new(title: markdown, title_html: html, author: user) }
 
         it 'sets the author in the context' do
           is_expected.to have_key(:author)
-          expect(context[:author]).to eq(:author_value)
+          expect(context[:author]).to eq(user)
+        end
+      end
+
+      context 'with a parent_user' do
+        let(:user) { build(:user) }
+        let(:thing) { thing_subclass(klass, :author, :parent_user).new(title: markdown, title_html: html, parent_user: user, author: user) }
+
+        it 'sets the user in the context' do
+          is_expected.to have_key(:user)
+          expect(context[:user]).to eq(user)
+        end
+
+        context 'when the personal_snippet_reference_filters flag is disabled' do
+          before do
+            stub_feature_flags(personal_snippet_reference_filters: false)
+          end
+
+          it 'does not set the user in the context' do
+            is_expected.not_to have_key(:user)
+            expect(context[:user]).to be_nil
+          end
         end
       end
     end
@@ -262,7 +285,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
     it_behaves_like 'a class with cached markdown fields'
 
     describe '#attribute_invalidated?' do
-      let(:thing) { klass.create(description: markdown, description_html: html, cached_markdown_version: cache_version) }
+      let(:thing) { klass.create!(description: markdown, description_html: html, cached_markdown_version: cache_version) }
 
       it 'returns true when cached_markdown_version is different' do
         thing.cached_markdown_version += 1
@@ -295,7 +318,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       let(:thing) do
         # This forces the record to have outdated HTML. We can't use `create` because the `before_create` hook
         # would re-render the HTML to the latest version
-        klass.create.tap do |thing|
+        klass.create!.tap do |thing|
           thing.update_columns(description: markdown, description_html: old_html, cached_markdown_version: old_version)
         end
       end
@@ -303,7 +326,7 @@ RSpec.describe CacheMarkdownField, :clean_gitlab_redis_cache do
       it 'correctly updates cached HTML even if refresh_markdown_cache is called before updating the attribute' do
         thing.refresh_markdown_cache
 
-        thing.update(description: updated_markdown)
+        thing.update!(description: updated_markdown)
 
         expect(thing.description_html).to eq(updated_html)
       end

@@ -32,56 +32,7 @@ export default {
           itemValueType: VALUE_TYPE.CUSTOM,
           customType: CUSTOM_TYPE.SYNC,
         },
-        {
-          itemEnabled: this.nodeDetails.repositories.enabled,
-          itemTitle: s__('GeoNodes|Repositories'),
-          itemValue: this.nodeDetails.repositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-          detailsPath: `${this.node.url}admin/geo/projects`,
-        },
-        {
-          itemEnabled: this.nodeDetails.wikis.enabled,
-          itemTitle: s__('GeoNodes|Wikis'),
-          itemValue: this.nodeDetails.wikis,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemEnabled: this.nodeDetails.lfs.enabled,
-          itemTitle: s__('GeoNodes|LFS objects'),
-          itemValue: this.nodeDetails.lfs,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemEnabled: this.nodeDetails.attachments.enabled,
-          itemTitle: s__('GeoNodes|Attachments'),
-          itemValue: this.nodeDetails.attachments,
-          itemValueType: VALUE_TYPE.GRAPH,
-          detailsPath: `${this.node.url}admin/geo/uploads`,
-        },
-        {
-          itemEnabled: this.nodeDetails.jobArtifacts.enabled,
-          itemTitle: s__('GeoNodes|Job artifacts'),
-          itemValue: this.nodeDetails.jobArtifacts,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemEnabled: this.nodeDetails.containerRepositories.enabled,
-          itemTitle: s__('GeoNodes|Container repositories'),
-          itemValue: this.nodeDetails.containerRepositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemEnabled: this.nodeDetails.designRepositories.enabled,
-          itemTitle: s__('GeoNodes|Design repositories'),
-          itemValue: this.nodeDetails.designRepositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-          detailsPath: `${this.node.url}admin/geo/designs`,
-        },
-        {
-          itemTitle: s__('GeoNodes|Package files'),
-          itemValue: this.nodeDetails.packageFiles,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
+        ...this.nodeDetails.syncStatuses,
         {
           itemTitle: s__('GeoNodes|Data replication lag'),
           itemValue: this.dbReplicationLag(),
@@ -140,6 +91,22 @@ export default {
     handleSectionToggle(toggleState) {
       this.showSectionItems = toggleState;
     },
+    detailsPath(nodeDetailItem) {
+      if (!nodeDetailItem.secondaryView) {
+        return '';
+      }
+
+      // This is due to some legacy coding patterns on the GeoNodeStatus API.
+      // This will be fixed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/228718
+
+      if (nodeDetailItem.itemName === 'repositories') {
+        return `${this.node.url}admin/geo/replication/projects`;
+      } else if (nodeDetailItem.itemName === 'attachments') {
+        return `${this.node.url}admin/geo/replication/uploads`;
+      }
+
+      return `${this.node.url}admin/geo/replication/${nodeDetailItem.itemName}`;
+    },
   },
 };
 </script>
@@ -163,7 +130,7 @@ export default {
         :item-value-type="nodeDetailItem.itemValueType"
         :custom-type="nodeDetailItem.customType"
         :event-type-log-status="nodeDetailItem.eventTypeLogStatus"
-        :details-path="nodeDetailItem.detailsPath"
+        :details-path="detailsPath(nodeDetailItem)"
       />
     </div>
   </div>

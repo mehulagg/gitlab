@@ -33,7 +33,7 @@ module Pseudonymizer
 
       pseudo_extra_fields = pseudonymized - whitelisted
       pseudo_extra_fields.each do |field|
-        Rails.logger.warn("#{self.class.name} extraneous pseudo: #{@table}.#{field} is not whitelisted and will be ignored.") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.warn("#{self.class.name} extraneous pseudo: #{@table}.#{field} is not whitelisted and will be ignored.")
       end
 
       pseudonymized & whitelisted

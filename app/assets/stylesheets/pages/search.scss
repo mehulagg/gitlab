@@ -105,7 +105,7 @@ input[type='checkbox']:hover {
     }
 
     .dropdown-header {
-      // Necessary because glDropdown doesn't support a second style of headers
+      // Necessary because deprecatedJQueryDropdown doesn't support a second style of headers
       font-weight: $gl-font-weight-bold;
       color: $gl-text-color;
       font-size: $gl-font-size;
@@ -249,7 +249,7 @@ input[type='checkbox']:hover {
 .search-clear {
   position: absolute;
   right: 10px;
-  top: 10px;
+  top: 9px;
   padding: 0;
   color: $gray-darkest;
   line-height: 0;
@@ -279,6 +279,10 @@ input[type='checkbox']:hover {
       width: auto;
     }
   }
+}
+
+.ref-truncated {
+  @include str-truncated(10em);
 }
 
 // Disable webkit input icons, link to solution: https://stackoverflow.com/questions/9421551/how-do-i-remove-all-default-webkit-search-field-styling

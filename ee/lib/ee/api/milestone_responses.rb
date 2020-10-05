@@ -10,7 +10,7 @@ module EE
           def milestone_burndown_events_for(parent)
             milestone = parent.milestones.find(params[:milestone_id])
 
-            if milestone.supports_burndown_charts?
+            if milestone.supports_milestone_charts?
               issues = milestone.issues_visible_to_user(current_user)
               present Burndown.new(issues, milestone.start_date, milestone.due_date).as_json
             else
@@ -21,7 +21,7 @@ module EE
           def milestone_burnup_events_for(parent)
             milestone = parent.milestones.find(params[:milestone_id])
 
-            if milestone.supports_burndown_charts?
+            if milestone.supports_milestone_charts?
               present BurnupChartService.new(milestone: milestone, user: current_user).execute
             else
               render_api_error!("Milestone does not support burnup chart", 405)

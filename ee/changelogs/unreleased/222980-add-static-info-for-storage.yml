@@ -1,5 +1,0 @@
----
-title: Add storage_size_limit to plan_limits table
-merge_request: 35219
-author:
-type: added

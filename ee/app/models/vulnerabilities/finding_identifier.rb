@@ -4,10 +4,12 @@ module Vulnerabilities
   class FindingIdentifier < ApplicationRecord
     self.table_name = "vulnerability_occurrence_identifiers"
 
-    belongs_to :occurrence, class_name: 'Vulnerabilities::Occurrence'
-    belongs_to :identifier, class_name: 'Vulnerabilities::Identifier'
+    alias_attribute :finding_id, :occurrence_id
 
-    validates :occurrence, presence: true
+    belongs_to :finding, class_name: 'Vulnerabilities::Finding', inverse_of: :finding_identifiers, foreign_key: 'occurrence_id'
+    belongs_to :identifier, class_name: 'Vulnerabilities::Identifier', inverse_of: :finding_identifiers
+
+    validates :finding, presence: true
     validates :identifier, presence: true
     validates :identifier_id, uniqueness: { scope: [:occurrence_id] }
   end

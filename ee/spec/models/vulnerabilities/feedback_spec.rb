@@ -28,8 +28,10 @@ RSpec.describe Vulnerabilities::Feedback do
     it { is_expected.to validate_presence_of(:category) }
     it { is_expected.to validate_presence_of(:project_fingerprint) }
 
+    let_it_be(:project) { create(:project) }
+
     context 'pipeline is nil' do
-      let(:feedback) { build(:vulnerability_feedback, pipeline_id: nil) }
+      let(:feedback) { build(:vulnerability_feedback, project: project, pipeline_id: nil) }
 
       it 'is valid' do
         expect(feedback).to be_valid
@@ -37,7 +39,7 @@ RSpec.describe Vulnerabilities::Feedback do
     end
 
     context 'pipeline has the same project_id' do
-      let(:feedback) { build(:vulnerability_feedback) }
+      let(:feedback) { build(:vulnerability_feedback, project: project) }
 
       it 'is valid' do
         expect(feedback.project_id).to eq(feedback.pipeline.project_id)
@@ -46,15 +48,15 @@ RSpec.describe Vulnerabilities::Feedback do
     end
 
     context 'pipeline_id does not exist' do
-      let(:feedback) { build(:vulnerability_feedback, pipeline_id: -100) }
+      let(:feedback) { build(:vulnerability_feedback, project: project, pipeline_id: -100) }
 
       it 'is invalid' do
         expect(feedback.project_id).not_to eq(feedback.pipeline_id)
         expect(feedback).not_to be_valid
       end
     end
+
     context 'pipeline has a different project_id' do
-      let(:project) { create(:project) }
       let(:pipeline) { create(:ci_pipeline, project: create(:project)) }
       let(:feedback) { build(:vulnerability_feedback, project: project, pipeline: pipeline) }
 
@@ -65,7 +67,7 @@ RSpec.describe Vulnerabilities::Feedback do
     end
 
     context 'comment is set' do
-      let(:feedback) { build(:vulnerability_feedback, comment: 'a comment' ) }
+      let(:feedback) { build(:vulnerability_feedback, project: project, comment: 'a comment' ) }
 
       it 'validates presence of comment_timestamp' do
         expect(feedback).to validate_presence_of(:comment_timestamp)
@@ -128,7 +130,9 @@ RSpec.describe Vulnerabilities::Feedback do
   end
 
   describe '#has_comment?' do
-    let(:feedback) { build(:vulnerability_feedback, comment: comment, comment_author: comment_author) }
+    let_it_be(:project) { create(:project) }
+
+    let(:feedback) { build(:vulnerability_feedback, project: project, comment: comment, comment_author: comment_author) }
     let(:comment) { 'a comment' }
     let(:comment_author) { build(:user) }
 
@@ -222,14 +226,13 @@ RSpec.describe Vulnerabilities::Feedback do
   end
 
   describe '#occurrence_key' do
-    let(:project_id) { 1 }
+    let(:project) { create(:project) }
     let(:category) { 'sast' }
     let(:project_fingerprint) { Digest::SHA1.hexdigest('foo') }
-    let(:expected_occurrence_key) { { project_id: project_id, category: category, project_fingerprint: project_fingerprint } }
-    let(:feedback) { build(:vulnerability_feedback, expected_occurrence_key) }
+    let(:feedback) { build(:vulnerability_feedback, project: project, category: category, project_fingerprint: project_fingerprint) }
 
-    subject { feedback.occurrence_key }
+    subject { feedback.finding_key }
 
-    it { is_expected.to eq(expected_occurrence_key) }
+    it { is_expected.to eq({ project_id: project.id, category: category, project_fingerprint: project_fingerprint }) }
   end
 end

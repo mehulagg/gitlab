@@ -10,14 +10,17 @@ class RegistrationsController < Devise::RegistrationsController
 
   skip_before_action :required_signup_info, :check_two_factor_requirement, only: [:welcome, :update_registration]
   prepend_before_action :check_captcha, only: :create
-  before_action :whitelist_query_limiting, only: [:destroy]
+  before_action :whitelist_query_limiting, :ensure_destroy_prerequisites_met, only: [:destroy]
   before_action :ensure_terms_accepted,
     if: -> { action_name == 'create' && Gitlab::CurrentSettings.current_application_settings.enforce_terms? }
   before_action :load_recaptcha, only: :new
 
+  feature_category :authentication_and_authorization
+
   def new
     if experiment_enabled?(:signup_flow)
-      track_experiment_event(:signup_flow, 'start') # We want this event to be tracked when the user is _in_ the experimental group
+      track_experiment_event(:terms_opt_in, 'start')
+
       @resource = build_resource
     else
       redirect_to new_user_session_path(anchor: 'register-pane')
@@ -25,19 +28,18 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def create
-    track_experiment_event(:signup_flow, 'end') unless experiment_enabled?(:signup_flow) # We want this event to be tracked when the user is _in_ the control group
-
     accept_pending_invitations
 
     super do |new_user|
       persist_accepted_terms_if_required(new_user)
       set_role_required(new_user)
+      track_terms_experiment(new_user)
       yield new_user if block_given?
     end
 
-    # Do not show the signed_up notice message when the signup_flow experiment is enabled.
-    # Instead, show it after successfully updating the role.
-    flash[:notice] = nil if experiment_enabled?(:signup_flow)
+    # Devise sets a flash message on `create` for a successful signup,
+    # which we don't want to show.
+    flash[:notice] = nil
   rescue Gitlab::Access::AccessDeniedError
     redirect_to(new_user_session_path)
   end
@@ -62,12 +64,13 @@ class RegistrationsController < Devise::RegistrationsController
     result = ::Users::SignupService.new(current_user, user_params).execute
 
     if result[:status] == :success
-      track_experiment_event(:signup_flow, 'end') # We want this event to be tracked when the user is _in_ the experimental group
+      if ::Gitlab.com? && show_onboarding_issues_experiment?
+        track_experiment_event(:onboarding_issues, 'signed_up')
+        record_experiment_user(:onboarding_issues)
+      end
 
-      track_experiment_event(:onboarding_issues, 'signed_up') if ::Gitlab.com? && !helpers.in_subscription_flow? && !helpers.in_invitation_flow?
-      return redirect_to new_users_sign_up_group_path if experiment_enabled?(:onboarding_issues) && !helpers.in_subscription_flow? && !helpers.in_invitation_flow?
+      return redirect_to new_users_sign_up_group_path if experiment_enabled?(:onboarding_issues) && show_onboarding_issues_experiment?
 
-      set_flash_message! :notice, :signed_up
       redirect_to path_for_signed_in_user(current_user)
     else
       render :welcome
@@ -87,7 +90,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def set_role_required(new_user)
-    new_user.set_role_required! if new_user.persisted? && experiment_enabled?(:signup_flow)
+    new_user.set_role_required! if new_user.persisted?
   end
 
   def destroy_confirmation_valid?
@@ -113,9 +116,7 @@ class RegistrationsController < Devise::RegistrationsController
   def after_sign_up_path_for(user)
     Gitlab::AppLogger.info(user_created_message(confirmed: user.confirmed?))
 
-    return users_sign_up_welcome_path if experiment_enabled?(:signup_flow)
-
-    path_for_signed_in_user(user)
+    users_sign_up_welcome_path
   end
 
   def after_inactive_sign_up_path_for(resource)
@@ -124,6 +125,14 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   private
+
+  def ensure_destroy_prerequisites_met
+    if current_user.solo_owned_groups.present?
+      redirect_to profile_account_path,
+        status: :see_other,
+        alert: s_('Profiles|You must transfer ownership or delete groups you are an owner of before you can delete your account')
+    end
+  end
 
   def user_created_message(confirmed: false)
     "User Created: username=#{resource.username} email=#{resource.email} ip=#{request.remote_ip} confirmed:#{confirmed}"
@@ -152,7 +161,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def sign_up_params
-    params.require(:user).permit(:username, :email, :email_confirmation, :name, :first_name, :last_name, :password)
+    params.require(:user).permit(:username, :email, :name, :first_name, :last_name, :password)
   end
 
   def resource_name
@@ -178,6 +187,8 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def terms_accepted?
+    return true if experiment_enabled?(:terms_opt_in)
+
     Gitlab::Utils.to_boolean(params[:terms_opt_in])
   end
 
@@ -197,6 +208,13 @@ class RegistrationsController < Devise::RegistrationsController
     true
   end
 
+  def track_terms_experiment(new_user)
+    return unless new_user.persisted?
+
+    track_experiment_event(:terms_opt_in, 'end')
+    record_experiment_user(:terms_opt_in)
+  end
+
   def load_recaptcha
     Gitlab::Recaptcha.load_configurations!
   end
@@ -204,11 +222,18 @@ class RegistrationsController < Devise::RegistrationsController
   # Part of an experiment to build a new sign up flow. Will be resolved
   # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
   def choose_layout
-    if experiment_enabled?(:signup_flow)
+    if %w(welcome update_registration).include?(action_name) || experiment_enabled?(:signup_flow)
       'devise_experimental_separate_sign_up_flow'
     else
       'devise'
     end
+  end
+
+  def show_onboarding_issues_experiment?
+    !helpers.in_subscription_flow? &&
+      !helpers.in_invitation_flow? &&
+      !helpers.in_oauth_flow? &&
+      !helpers.in_trial_flow?
   end
 end
 

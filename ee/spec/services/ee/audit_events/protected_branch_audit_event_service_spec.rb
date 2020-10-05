@@ -35,9 +35,9 @@ RSpec.describe EE::AuditEvents::ProtectedBranchAuditEventService do
                                                 action => 'protected_branch',
                                                 ip_address: '127.0.0.1')
 
-          expect { service.security_event }.to change(SecurityEvent, :count).by(1)
+          expect { service.security_event }.to change(AuditEvent, :count).by(1)
 
-          security_event = SecurityEvent.last
+          security_event = AuditEvent.last
 
           expect(security_event.details).to eq(action => 'protected_branch',
                                                author_name: author.name,
@@ -73,7 +73,7 @@ RSpec.describe EE::AuditEvents::ProtectedBranchAuditEventService do
       it "doesn't create an event or log to a file" do
         expect(service).not_to receive(:file_logger)
 
-        expect { service.security_event }.not_to change(SecurityEvent, :count)
+        expect { service.security_event }.not_to change(AuditEvent, :count)
       end
     end
   end

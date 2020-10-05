@@ -9,7 +9,7 @@ RSpec.describe Resolvers::EpicsResolver do
   let_it_be(:user2) { create(:user) }
 
   context "with a group" do
-    let(:group)   { create(:group) }
+    let_it_be_with_refind(:group) { create(:group) }
     let(:project) { create(:project, :public, group: group) }
     let(:epic1)   { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago) }
     let(:epic2)   { create(:epic, group: group, author: user2, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago) }
@@ -134,6 +134,28 @@ RSpec.describe Resolvers::EpicsResolver do
         end
       end
 
+      context 'with milestone_title' do
+        let_it_be(:milestone1) { create(:milestone, group: group) }
+
+        it 'filters epics by issues milestone' do
+          create(:issue, project: project, epic: epic2)
+          create(:issue, project: project, milestone: milestone1, epic: epic1)
+
+          epics = resolve_epics(milestone_title: milestone1.title)
+
+          expect(epics).to match_array([epic1])
+        end
+
+        it 'returns empty result if milestone is not assigned to any epic issues' do
+          milestone2 = create(:milestone, group: group)
+          create(:issue, project: project, milestone: milestone1, epic: epic1)
+
+          epics = resolve_epics(milestone_title: milestone2.title)
+
+          expect(epics).to be_empty
+        end
+      end
+
       context 'with sort' do
         let!(:epic1) { create(:epic, group: group, title: 'first created', description: 'description', start_date: 10.days.ago, end_date: 10.days.from_now) }
         let!(:epic2) { create(:epic, group: group, title: 'second created', description: 'text 1', start_date: 20.days.ago, end_date: 20.days.from_now) }
@@ -180,6 +202,15 @@ RSpec.describe Resolvers::EpicsResolver do
 
         it 'return all epics' do
           expect(resolve_epics).to contain_exactly(epic1, epic2, epic3, epic4)
+        end
+
+        it 'filter by milestones in subgroups' do
+          subgroup_project = create(:project, group: sub_group)
+          milestone = create(:milestone, group: sub_group)
+          create(:issue, project: subgroup_project, epic: epic1, milestone: milestone)
+          create(:issue, project: subgroup_project, epic: epic3, milestone: milestone)
+
+          expect(resolve_epics(milestone_title: milestone.title)).to contain_exactly(epic1, epic3)
         end
       end
 

@@ -54,6 +54,7 @@ module API
           @group = find_group(group_path)
 
           scim_not_found!(message: "Group #{group_path} not found") unless @group
+          scim_not_found!(message: "Group #{group_path} does not have SAML SSO configured") unless @group.saml_provider
 
           check_access_to_group!(@group)
 
@@ -96,23 +97,12 @@ module API
 
         def find_user_identity(group, extern_uid)
           return unless group.saml_provider
-          return group.scim_identities.with_extern_uid(extern_uid).first if scim_identities_enabled?
 
-          GroupSamlIdentityFinder.find_by_group_and_uid(group: group, uid: extern_uid)
-        end
-
-        def scim_identities_enabled?
-          strong_memoize(:scim_identities_enabled) do
-            ::EE::Gitlab::Scim::Feature.scim_identities_enabled?(@group)
-          end
+          group.scim_identities.with_extern_uid(extern_uid).first
         end
 
         def deprovision(identity)
-          if scim_identities_enabled?
-            ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
-          else
-            GroupSaml::Identity::DestroyService.new(identity).execute(transactional: true)
-          end
+          ::EE::Gitlab::Scim::DeprovisionService.new(identity).execute
 
           true
         rescue => e

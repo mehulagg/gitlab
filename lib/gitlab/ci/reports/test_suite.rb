@@ -12,23 +12,29 @@ module Gitlab
         def initialize(name = nil)
           @name = name
           @test_cases = {}
+          @all_test_cases = []
           @total_time = 0.0
-          @duplicate_cases = []
         end
 
         def add_test_case(test_case)
-          @duplicate_cases << test_case if existing_key?(test_case)
-
           @test_cases[test_case.status] ||= {}
           @test_cases[test_case.status][test_case.key] = test_case
           @total_time += test_case.execution_time
+        end
+
+        def each_test_case
+          @test_cases.each do |status, test_cases|
+            test_cases.values.each do |test_case|
+              yield test_case
+            end
+          end
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
         def total_count
           return 0 if suite_error
 
-          test_cases.values.sum(&:count)
+          [success_count, failed_count, skipped_count, error_count].sum
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
@@ -78,10 +84,22 @@ module Gitlab
           end
         end
 
+        def sorted
+          sort_by_status
+          sort_by_execution_time_desc
+          self
+        end
+
         private
 
-        def existing_key?(test_case)
-          @test_cases[test_case.status]&.key?(test_case.key)
+        def sort_by_status
+          @test_cases = @test_cases.sort_by { |status, _| Gitlab::Ci::Reports::TestCase::STATUS_TYPES.index(status) }.to_h
+        end
+
+        def sort_by_execution_time_desc
+          @test_cases = @test_cases.keys.each_with_object({}) do |key, hash|
+            hash[key] = @test_cases[key].sort_by { |_key, test_case| -test_case.execution_time }.to_h
+          end
         end
       end
     end

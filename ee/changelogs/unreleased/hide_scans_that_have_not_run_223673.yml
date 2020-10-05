@@ -1,5 +1,0 @@
----
-title: Return null in securityReportSummary when the report didn't run
-merge_request: 35218
-author:
-type: changed

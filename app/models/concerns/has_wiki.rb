@@ -17,16 +17,12 @@ module HasWiki
 
   def wiki
     strong_memoize(:wiki) do
-      Wiki.for_container(self, self.owner)
+      Wiki.for_container(self, self.default_owner)
     end
   end
 
   def wiki_repository_exists?
     wiki.repository_exists?
-  end
-
-  def after_wiki_activity
-    true
   end
 
   private

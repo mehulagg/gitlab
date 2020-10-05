@@ -14,10 +14,9 @@ RSpec.describe Profiles::TwoFactorAuthsController do
     let(:user) { create(:user) }
 
     it 'generates otp_secret for user' do
-      expect(User).to receive(:generate_otp_secret).with(32).and_return('secret').once
+      expect(User).to receive(:generate_otp_secret).with(32).and_call_original.once
 
       get :show
-      get :show # Second hit shouldn't re-generate it
     end
 
     it 'assigns qr_code' do
@@ -26,6 +25,14 @@ RSpec.describe Profiles::TwoFactorAuthsController do
 
       get :show
       expect(assigns[:qr_code]).to eq code
+    end
+
+    it 'generates a unique otp_secret every time the page is loaded' do
+      expect(User).to receive(:generate_otp_secret).with(32).and_call_original.twice
+
+      2.times do
+        get :show
+      end
     end
   end
 
@@ -55,6 +62,12 @@ RSpec.describe Profiles::TwoFactorAuthsController do
         go
 
         expect(assigns[:codes]).to match_array %w(a b c)
+      end
+
+      it 'calls to delete other sessions' do
+        expect(ActiveSession).to receive(:destroy_all_but_current)
+
+        go
       end
 
       it 'renders create' do
@@ -107,18 +120,46 @@ RSpec.describe Profiles::TwoFactorAuthsController do
   end
 
   describe 'DELETE destroy' do
-    let(:user) { create(:user, :two_factor) }
+    subject { delete :destroy }
 
-    it 'disables two factor' do
-      expect(user).to receive(:disable_two_factor!)
+    context 'for a user that has 2FA enabled' do
+      let(:user) { create(:user, :two_factor) }
 
-      delete :destroy
+      it 'disables two factor' do
+        subject
+
+        expect(user.reload.two_factor_enabled?).to eq(false)
+      end
+
+      it 'redirects to profile_account_path' do
+        subject
+
+        expect(response).to redirect_to(profile_account_path)
+      end
+
+      it 'displays a notice on success' do
+        subject
+
+        expect(flash[:notice])
+          .to eq _('Two-factor authentication has been disabled successfully!')
+      end
     end
 
-    it 'redirects to profile_account_path' do
-      delete :destroy
+    context 'for a user that does not have 2FA enabled' do
+      let(:user) { create(:user) }
 
-      expect(response).to redirect_to(profile_account_path)
+      it 'redirects to profile_account_path' do
+        subject
+
+        expect(response).to redirect_to(profile_account_path)
+      end
+
+      it 'displays an alert on failure' do
+        subject
+
+        expect(flash[:alert])
+          .to eq _('Two-factor authentication is not enabled for this user')
+      end
     end
   end
 end

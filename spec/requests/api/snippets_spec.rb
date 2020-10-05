@@ -84,8 +84,8 @@ RSpec.describe API::Snippets do
           public_snippet.id,
           public_snippet_other.id)
         expect(json_response.map { |snippet| snippet['web_url']} ).to contain_exactly(
-          "http://localhost/snippets/#{public_snippet.id}",
-          "http://localhost/snippets/#{public_snippet_other.id}")
+          "http://localhost/-/snippets/#{public_snippet.id}",
+          "http://localhost/-/snippets/#{public_snippet_other.id}")
         expect(json_response[0]['files'].first).to eq snippet_blob_file(public_snippet_other.blobs.first)
         expect(json_response[1]['files'].first).to eq snippet_blob_file(public_snippet.blobs.first)
       end
@@ -111,7 +111,7 @@ RSpec.describe API::Snippets do
     end
 
     it 'returns 404 for invalid snippet id' do
-      snippet.destroy
+      snippet.destroy!
 
       get api("/snippets/#{snippet.id}/raw", author)
 
@@ -201,7 +201,7 @@ RSpec.describe API::Snippets do
       end
 
       it 'returns 404 for invalid snippet id' do
-        private_snippet.destroy
+        private_snippet.destroy!
 
         subject
 
@@ -229,13 +229,16 @@ RSpec.describe API::Snippets do
     let(:base_params) do
       {
         title: 'Test Title',
-        file_name: 'test.rb',
         description: 'test description',
-        content: 'puts "hello world"',
         visibility: 'public'
       }
     end
-    let(:params) { base_params.merge(extra_params) }
+
+    let(:file_path) { 'file_1.rb' }
+    let(:file_content) { 'puts "hello world"' }
+
+    let(:params) { base_params.merge(file_params, extra_params) }
+    let(:file_params) { { files: [{ file_path: file_path, content: file_content }] } }
     let(:extra_params) { {} }
 
     subject { post api("/snippets/", user), params: params }
@@ -251,7 +254,7 @@ RSpec.describe API::Snippets do
         expect(response).to have_gitlab_http_status(:created)
         expect(json_response['title']).to eq(params[:title])
         expect(json_response['description']).to eq(params[:description])
-        expect(json_response['file_name']).to eq(params[:file_name])
+        expect(json_response['file_name']).to eq(file_path)
         expect(json_response['files']).to eq(snippet.blobs.map { |blob| snippet_blob_file(blob) })
         expect(json_response['visibility']).to eq(params[:visibility])
       end
@@ -265,11 +268,30 @@ RSpec.describe API::Snippets do
       it 'commit the files to the repository' do
         subject
 
-        blob = snippet.repository.blob_at('master', params[:file_name])
+        blob = snippet.repository.blob_at('master', file_path)
 
-        expect(blob.data).to eq params[:content]
+        expect(blob.data).to eq file_content
       end
     end
+
+    context 'with files parameter' do
+      it_behaves_like 'snippet creation with files parameter'
+
+      context 'with multiple files' do
+        let(:file_params) do
+          {
+            files: [
+              { file_path: 'file_1.rb', content: 'puts "hello world"' },
+              { file_path: 'file_2.rb', content: 'puts "hello world 2"' }
+            ]
+          }
+        end
+
+        it_behaves_like 'snippet creation'
+      end
+    end
+
+    it_behaves_like 'snippet creation without files parameter'
 
     context 'with restricted visibility settings' do
       before do
@@ -303,15 +325,6 @@ RSpec.describe API::Snippets do
       subject
 
       expect(response).to have_gitlab_http_status(:bad_request)
-    end
-
-    it 'returns 400 if content is blank' do
-      params[:content] = ''
-
-      subject
-
-      expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response['error']).to eq 'content is empty'
     end
 
     it 'returns 400 if title is blank' do
@@ -355,7 +368,7 @@ RSpec.describe API::Snippets do
       context 'when the snippet is public' do
         let(:extra_params) { { visibility: 'public' } }
 
-        it 'rejects the shippet' do
+        it 'rejects the snippet' do
           expect { subject }.not_to change { Snippet.count }
 
           expect(response).to have_gitlab_http_status(:bad_request)
@@ -378,19 +391,16 @@ RSpec.describe API::Snippets do
       create(:personal_snippet, :repository, author: user, visibility_level: visibility_level)
     end
 
-    shared_examples 'snippet updates' do
-      it 'updates a snippet' do
-        new_content = 'New content'
-        new_description = 'New description'
+    it_behaves_like 'snippet file updates'
+    it_behaves_like 'snippet non-file updates'
+    it_behaves_like 'snippet individual non-file updates'
+    it_behaves_like 'invalid snippet updates'
 
-        update_snippet(params: { content: new_content, description: new_description, visibility: 'internal' })
+    it "returns 404 for another user's snippet" do
+      update_snippet(requester: other_user, params: { title: 'foobar' })
 
-        expect(response).to have_gitlab_http_status(:ok)
-        snippet.reload
-        expect(snippet.content).to eq(new_content)
-        expect(snippet.description).to eq(new_description)
-        expect(snippet.visibility).to eq('internal')
-      end
+      expect(response).to have_gitlab_http_status(:not_found)
+      expect(json_response['message']).to eq('404 Snippet Not Found')
     end
 
     context 'with restricted visibility settings' do
@@ -400,43 +410,7 @@ RSpec.describe API::Snippets do
                                     Gitlab::VisibilityLevel::PRIVATE])
       end
 
-      it_behaves_like 'snippet updates'
-    end
-
-    it_behaves_like 'snippet updates'
-
-    it 'returns 404 for invalid snippet id' do
-      update_snippet(snippet_id: non_existing_record_id, params: { title: 'Foo' })
-
-      expect(response).to have_gitlab_http_status(:not_found)
-      expect(json_response['message']).to eq('404 Snippet Not Found')
-    end
-
-    it "returns 404 for another user's snippet" do
-      update_snippet(requester: other_user, params: { title: 'foobar' })
-
-      expect(response).to have_gitlab_http_status(:not_found)
-      expect(json_response['message']).to eq('404 Snippet Not Found')
-    end
-
-    it 'returns 400 for missing parameters' do
-      update_snippet
-
-      expect(response).to have_gitlab_http_status(:bad_request)
-    end
-
-    it 'returns 400 if content is blank' do
-      update_snippet(params: { content: '' })
-
-      expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response['error']).to eq 'content is empty'
-    end
-
-    it 'returns 400 if title is blank' do
-      update_snippet(params: { title: '' })
-
-      expect(response).to have_gitlab_http_status(:bad_request)
-      expect(json_response['error']).to eq 'title is empty'
+      it_behaves_like 'snippet non-file updates'
     end
 
     it_behaves_like 'update with repository actions' do
@@ -462,7 +436,7 @@ RSpec.describe API::Snippets do
       context 'when the snippet is public' do
         let(:visibility_level) { Snippet::PUBLIC }
 
-        it 'rejects the shippet' do
+        it 'rejects the snippet' do
           expect { update_snippet(params: { title: 'Foo' }) }
             .not_to change { snippet.reload.title }
 

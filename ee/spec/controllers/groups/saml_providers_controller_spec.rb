@@ -116,17 +116,27 @@ RSpec.describe Groups::SamlProvidersController do
     end
 
     describe 'PUT #update' do
-      subject { put :update, params: { group_id: group, saml_provider: { enforced_sso: 'true' } } }
+      subject do
+        put :update, params:
+          {
+            group_id: group,
+            saml_provider: {
+              enforced_sso: 'true',
+              default_membership_role: Gitlab::Access::MAINTAINER
+            }
+          }
+      end
 
       before do
         group.add_owner(user)
       end
 
-      it 'updates the setting' do
+      it 'updates the settings' do
         expect do
           subject
           saml_provider.reload
         end.to change { saml_provider.enforced_sso? }.to(true)
+        .and change { saml_provider.default_membership_role }.to(Gitlab::Access::MAINTAINER)
       end
 
       context 'enabling group managed when owner has linked identity' do
@@ -170,7 +180,7 @@ RSpec.describe Groups::SamlProvidersController do
           stub_feature_flags(group_managed_accounts: true)
         end
 
-        it 'does not update update the flags' do
+        it 'does not update the flags' do
           expect do
             subject
             saml_provider.reload

@@ -37,13 +37,13 @@ RSpec.describe 'Query.vulnerabilities.identifiers' do
 
   let_it_be(:finding) do
     create(
-      :vulnerabilities_occurrence,
+      :vulnerabilities_finding,
       vulnerability: vulnerability
     )
   end
 
   let_it_be(:vulnerabilities_finding_identifier) do
-    create(:vulnerabilities_finding_identifier, identifier: finding_identifier, occurrence: finding)
+    create(:vulnerabilities_finding_identifier, identifier: finding_identifier, finding: finding)
   end
 
   subject { graphql_data.dig('vulnerabilities', 'nodes') }

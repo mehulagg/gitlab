@@ -2,8 +2,7 @@ import Vuex from 'vuex';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
-import { GlDropdownItem, GlSegmentedControl } from '@gitlab/ui';
-import createFlash from '~/flash';
+import { GlDeprecatedDropdownItem, GlSegmentedControl } from '@gitlab/ui';
 import TasksByTypeFilters from 'ee/analytics/cycle_analytics/components/tasks_by_type/tasks_by_type_filters.vue';
 import LabelsSelector from 'ee/analytics/cycle_analytics/components/labels_selector.vue';
 import {
@@ -12,15 +11,16 @@ import {
   TASKS_BY_TYPE_FILTERS,
 } from 'ee/analytics/cycle_analytics/constants';
 import waitForPromises from 'helpers/wait_for_promises';
-import { groupLabels } from '../../mock_data';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
+import { groupLabels } from '../../mock_data';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 const selectedLabelIds = [groupLabels[0].id];
 
 const findSubjectFilters = ctx => ctx.find(GlSegmentedControl);
 const findSelectedSubjectFilters = ctx => findSubjectFilters(ctx).attributes('checked');
-const findDropdownLabels = ctx => ctx.find(LabelsSelector).findAll(GlDropdownItem);
+const findDropdownLabels = ctx => ctx.find(LabelsSelector).findAll(GlDeprecatedDropdownItem);
 
 const selectLabelAtIndex = (ctx, index) => {
   findDropdownLabels(ctx)

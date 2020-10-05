@@ -5,6 +5,7 @@ import {
   Selection,
 } from 'monaco-editor';
 import Editor from '~/ide/lib/editor';
+import { createStore } from '~/ide/stores';
 import { defaultEditorOptions } from '~/ide/lib/editor_options';
 import { file } from '../helpers';
 
@@ -12,6 +13,7 @@ describe('Multi-file editor library', () => {
   let instance;
   let el;
   let holder;
+  let store;
 
   const setNodeOffsetWidth = val => {
     Object.defineProperty(instance.instance.getDomNode(), 'offsetWidth', {
@@ -22,13 +24,14 @@ describe('Multi-file editor library', () => {
   };
 
   beforeEach(() => {
+    store = createStore();
     el = document.createElement('div');
     holder = document.createElement('div');
     el.appendChild(holder);
 
     document.body.appendChild(el);
 
-    instance = Editor.create();
+    instance = Editor.create(store);
   });
 
   afterEach(() => {
@@ -44,7 +47,7 @@ describe('Multi-file editor library', () => {
   });
 
   it('creates instance returns cached instance', () => {
-    expect(Editor.create()).toEqual(instance);
+    expect(Editor.create(store)).toEqual(instance);
   });
 
   describe('createInstance', () => {
@@ -196,28 +199,6 @@ describe('Multi-file editor library', () => {
           }),
         ]),
       );
-    });
-  });
-
-  describe('schemas', () => {
-    let originalGon;
-
-    beforeEach(() => {
-      originalGon = window.gon;
-      window.gon = { features: { schemaLinting: true } };
-
-      delete Editor.editorInstance;
-      instance = Editor.create();
-    });
-
-    afterEach(() => {
-      window.gon = originalGon;
-    });
-
-    it('registers custom schemas defined with Monaco', () => {
-      expect(monacoLanguages.yaml.yamlDefaults.diagnosticsOptions).toMatchObject({
-        schemas: [{ fileMatch: ['*.gitlab-ci.yml'] }],
-      });
     });
   });
 

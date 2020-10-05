@@ -1,15 +1,17 @@
 <script>
-import { n__, __ } from '~/locale';
+import Visibility from 'visibilityjs';
 import { mapActions } from 'vuex';
-
 import {
   GlButtonGroup,
   GlButton,
-  GlNewDropdown,
-  GlNewDropdownItem,
-  GlNewDropdownDivider,
+  GlDropdown,
+  GlDropdownItem,
+  GlDropdownDivider,
   GlTooltipDirective,
 } from '@gitlab/ui';
+import { n__, __ } from '~/locale';
+
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const makeInterval = (length = 0, unit = 's') => {
   const shortLabel = `${length}${unit}`;
@@ -46,13 +48,14 @@ export default {
   components: {
     GlButtonGroup,
     GlButton,
-    GlNewDropdown,
-    GlNewDropdownItem,
-    GlNewDropdownDivider,
+    GlDropdown,
+    GlDropdownItem,
+    GlDropdownDivider,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   data() {
     return {
       refreshInterval: null,
@@ -60,6 +63,12 @@ export default {
     };
   },
   computed: {
+    disableMetricDashboardRefreshRate() {
+      // Can refresh rates impact performance?
+      // Add "negative" feature flag called `disable_metric_dashboard_refresh_rate`
+      // See more at: https://gitlab.com/gitlab-org/gitlab/-/issues/229831
+      return this.glFeatures.disableMetricDashboardRefreshRate;
+    },
     dropdownText() {
       return this.refreshInterval?.shortLabel ?? __('Off');
     },
@@ -90,7 +99,8 @@ export default {
       };
 
       this.stopAutoRefresh();
-      if (document.hidden) {
+
+      if (Visibility.hidden()) {
         // Inactive tab? Skip fetch and schedule again
         schedule();
       } else {
@@ -142,22 +152,27 @@ export default {
       icon="retry"
       @click="refresh"
     />
-    <gl-new-dropdown v-gl-tooltip :title="s__('Metrics|Set refresh rate')" :text="dropdownText">
-      <gl-new-dropdown-item
+    <gl-dropdown
+      v-if="!disableMetricDashboardRefreshRate"
+      v-gl-tooltip
+      :title="s__('Metrics|Set refresh rate')"
+      :text="dropdownText"
+    >
+      <gl-dropdown-item
         :is-check-item="true"
         :is-checked="refreshInterval === null"
         @click="removeRefreshInterval()"
-        >{{ __('Off') }}</gl-new-dropdown-item
+        >{{ __('Off') }}</gl-dropdown-item
       >
-      <gl-new-dropdown-divider />
-      <gl-new-dropdown-item
+      <gl-dropdown-divider />
+      <gl-dropdown-item
         v-for="(option, i) in $options.refreshIntervals"
         :key="i"
         :is-check-item="true"
         :is-checked="isChecked(option)"
         @click="setRefreshInterval(option)"
-        >{{ option.label }}</gl-new-dropdown-item
+        >{{ option.label }}</gl-dropdown-item
       >
-    </gl-new-dropdown>
+    </gl-dropdown>
   </gl-button-group>
 </template>

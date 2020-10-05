@@ -9,7 +9,7 @@ RSpec.describe RepositoryUpdateRemoteMirrorWorker, :clean_gitlab_redis_shared_st
   let(:scheduled_time) { Time.current - 5.minutes }
 
   around do |example|
-    Timecop.freeze(Time.current) { example.run }
+    freeze_time { example.run }
   end
 
   def expect_mirror_service_to_return(mirror, result, tries = 0)
@@ -26,7 +26,7 @@ RSpec.describe RepositoryUpdateRemoteMirrorWorker, :clean_gitlab_redis_shared_st
     end
 
     it 'does not do anything if the mirror was already updated' do
-      remote_mirror.update(last_update_started_at: Time.current, update_status: :finished)
+      remote_mirror.update!(last_update_started_at: Time.current, update_status: :finished)
 
       expect(Projects::UpdateRemoteMirrorService).not_to receive(:new)
 

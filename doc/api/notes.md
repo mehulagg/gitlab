@@ -7,7 +7,21 @@ Notes are comments on:
 - Merge requests
 - Epics **(ULTIMATE)**
 
-This includes system notes, which are notes about changes to the object (for example, when a milestone changes, there will be a corresponding system note). Label notes are not part of this API, but recorded as separate events in [resource label events](resource_label_events.md).
+This includes system notes, which are notes about changes to the object (for example, when an
+assignee changes, there will be a corresponding system note).
+
+## Resource events
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/38096) in GitLab 13.3 for state, milestone, and weight events.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40850) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.4 for iteration events.
+
+Some system notes are not part of this API, but are recorded as separate events:
+
+- [Resource label events](resource_label_events.md)
+- [Resource state events](resource_state_events.md)
+- [Resource milestone events](resource_milestone_events.md)
+- [Resource weight events](resource_weight_events.md) **(STARTER)**
+- [Resource iteration events](resource_iteration_events.md) **(STARTER)**
 
 ## Notes pagination
 
@@ -116,6 +130,7 @@ Parameters:
 - `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding)
 - `issue_iid` (required) - The IID of an issue
 - `body` (required) - The content of a note. Limited to 1,000,000 characters.
+- `confidential` (optional) - The confidential flag of a note. Default is false.
 - `created_at` (optional) - Date time string, ISO 8601 formatted, e.g. 2016-03-11T03:45:40Z (requires admin or project/group owner rights)
 
 ```shell
@@ -132,10 +147,11 @@ PUT /projects/:id/issues/:issue_iid/notes/:note_id
 
 Parameters:
 
-- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding)
-- `issue_iid` (required) - The IID of an issue
-- `note_id` (required) - The ID of a note
-- `body` (required) - The content of a note. Limited to 1,000,000 characters.
+- `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).
+- `issue_iid` (required) - The IID of an issue.
+- `note_id` (required) - The ID of a note.
+- `body` (optional) - The content of a note. Limited to 1,000,000 characters.
+- `confidential` (optional) - The confidential flag of a note.
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/issues/11/notes?body=note"

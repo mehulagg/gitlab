@@ -154,6 +154,7 @@ RSpec.describe API::MergeRequestApprovalRules do
         group_ids: group_ids
       }
     end
+
     let(:user_ids) { [] }
     let(:group_ids) { [] }
 

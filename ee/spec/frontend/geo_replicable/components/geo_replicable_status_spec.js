@@ -8,7 +8,7 @@ import {
   STATUS_ICON_CLASS,
   DEFAULT_STATUS,
 } from 'ee/geo_replicable/constants';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -34,7 +34,7 @@ describe('GeoReplicableStatus', () => {
   });
 
   const findGeoReplicableStatusContainer = () => wrapper.find('div');
-  const findIcon = () => findGeoReplicableStatusContainer().find(Icon);
+  const findIcon = () => findGeoReplicableStatusContainer().find(GlIcon);
 
   describe('template', () => {
     beforeEach(() => {
@@ -71,8 +71,8 @@ describe('GeoReplicableStatus', () => {
         expect(wrapper.vm.icon.cssClass).toEqual(iconClass);
       });
 
-      it(`sets svg to ic-${iconName}`, () => {
-        expect(findIcon().classes()).toContain(`ic-${wrapper.vm.icon.name}`);
+      it(`sets svg to icon '${iconName}'`, () => {
+        expect(findIcon().attributes('data-testid')).toBe(`${wrapper.vm.icon.name}-icon`);
       });
     });
   });

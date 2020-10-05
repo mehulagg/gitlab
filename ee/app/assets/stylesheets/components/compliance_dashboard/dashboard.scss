@@ -3,12 +3,6 @@
   min-width: 550px;
 
   .dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    grid-template-rows: auto;
-  }
-
-  .grid-merge-request {
-    grid-column-start: 1;
+    grid-template-columns: 1fr auto auto 35%;
   }
 }

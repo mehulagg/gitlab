@@ -13,6 +13,17 @@ RSpec.describe Notes::UpdateService do
   let(:issue) { create(:issue, project: project) }
   let(:issue2) { create(:issue, project: private_project) }
   let(:note) { create(:note, project: project, noteable: issue, author: user, note: "Old note #{user2.to_reference}") }
+  let(:markdown) do
+    <<-MARKDOWN.strip_heredoc
+      ```suggestion
+        foo
+      ```
+
+      ```suggestion
+        bar
+      ```
+    MARKDOWN
+  end
 
   before do
     project.add_maintainer(user)
@@ -31,23 +42,23 @@ RSpec.describe Notes::UpdateService do
     end
 
     it 'does not update the note when params is blank' do
-      Timecop.freeze(1.day.from_now) do
+      travel_to(1.day.from_now) do
         expect { update_note({}) }.not_to change { note.reload.updated_at }
+      end
+    end
+
+    context 'with system note' do
+      before do
+        note.update_column(:system, true)
+      end
+
+      it 'does not update the note' do
+        expect { update_note(note: 'new text') }.not_to change { note.reload.note }
       end
     end
 
     context 'suggestions' do
       it 'refreshes note suggestions' do
-        markdown = <<-MARKDOWN.strip_heredoc
-          ```suggestion
-            foo
-          ```
-
-          ```suggestion
-            bar
-          ```
-        MARKDOWN
-
         suggestion = create(:suggestion)
         note = suggestion.note
 
@@ -56,6 +67,45 @@ RSpec.describe Notes::UpdateService do
 
         expect(note.suggestions.order(:relative_order).map(&:to_content))
           .to eq(["  foo\n", "  bar\n"])
+      end
+    end
+
+    context 'setting confidentiality' do
+      let(:opts) { { confidential: true } }
+
+      context 'simple note' do
+        it 'updates the confidentiality' do
+          expect { update_note(opts) }.to change { note.reload.confidential }.from(nil).to(true)
+        end
+      end
+
+      context 'discussion notes' do
+        let(:note) { create(:discussion_note, project: project, noteable: issue, author: user, note: "Old note #{user2.to_reference}") }
+        let!(:response_note_1) { create(:discussion_note, project: project, noteable: issue, in_reply_to: note) }
+        let!(:response_note_2) { create(:discussion_note, project: project, noteable: issue, in_reply_to: note, confidential: false) }
+        let!(:other_note) { create(:note, project: project, noteable: issue) }
+
+        context 'when updating the root note' do
+          it 'updates the confidentiality of the root note and all the responses' do
+            update_note(opts)
+
+            expect(note.reload.confidential).to be_truthy
+            expect(response_note_1.reload.confidential).to be_truthy
+            expect(response_note_2.reload.confidential).to be_truthy
+            expect(other_note.reload.confidential).to be_falsey
+          end
+        end
+
+        context 'when updating one of the response notes' do
+          it 'updates only the confidentiality of the note that is being updated' do
+            Notes::UpdateService.new(project, user, opts).execute(response_note_1)
+
+            expect(note.reload.confidential).to be_falsey
+            expect(response_note_1.reload.confidential).to be_truthy
+            expect(response_note_2.reload.confidential).to be_falsey
+            expect(other_note.reload.confidential).to be_falsey
+          end
+        end
       end
     end
 
@@ -150,6 +200,25 @@ RSpec.describe Notes::UpdateService do
             it_behaves_like 'creates one todo'
           end
         end
+      end
+    end
+
+    context 'for a personal snippet' do
+      let_it_be(:snippet) { create(:personal_snippet, :public) }
+      let(:note) { create(:note, project: nil, noteable: snippet, author: user, note: "Note on a snippet with reference #{issue.to_reference}" ) }
+
+      it 'does not create todos' do
+        expect { update_note({ note: "Mentioning user #{user2}" }) }.not_to change { note.todos.count }
+      end
+
+      it 'does not create suggestions' do
+        expect { update_note({ note: "Updated snippet with markdown suggestion #{markdown}" }) }
+          .not_to change { note.suggestions.count }
+      end
+
+      it 'does not create mentions' do
+        expect(note).not_to receive(:create_new_cross_references!)
+        update_note({ note: "Updated with new reference: #{issue.to_reference}" })
       end
     end
   end

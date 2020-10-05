@@ -3,12 +3,17 @@
 require 'spec_helper'
 
 RSpec.describe Geo::DesignRegistry, :geo do
+  include ::EE::GeoHelpers
+
   it_behaves_like 'a BulkInsertSafe model', Geo::DesignRegistry do
-    let(:valid_items_for_bulk_insertion) { build_list(:geo_design_registry, 10, created_at: Time.zone.now) }
+    let(:valid_items_for_bulk_insertion) do
+      build_list(:geo_design_registry, 10, created_at: Time.zone.now) do |registry|
+        registry.project = create(:project)
+      end
+    end
+
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
-
-  let!(:design_registry) { create(:geo_design_registry) }
 
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
@@ -18,7 +23,174 @@ RSpec.describe Geo::DesignRegistry, :geo do
     let(:registry) { create(:geo_design_registry) }
   end
 
-  describe '#search', :geo_fdw do
+  describe '.find_registry_differences' do
+    let_it_be(:secondary) { create(:geo_node) }
+    let_it_be(:synced_group) { create(:group) }
+    let_it_be(:nested_group) { create(:group, parent: synced_group) }
+    let_it_be(:project_1) { create(:project, group: synced_group) }
+    let_it_be(:project_2) { create(:project, group: nested_group) }
+    let_it_be(:project_3) { create(:project) }
+    let_it_be(:project_4) { create(:project) }
+    let_it_be(:project_5) { create(:project, :broken_storage) }
+    let_it_be(:project_6) { create(:project, :broken_storage) }
+    let_it_be(:project_7) { create(:project) }
+
+    before do
+      stub_current_geo_node(secondary)
+    end
+
+    before_all do
+      create(:design, project: project_1)
+      create(:design, project: project_2)
+      create(:design, project: project_3)
+      create(:design, project: project_4)
+      create(:design, project: project_5)
+      create(:design, project: project_6)
+    end
+
+    context 'untracked IDs' do
+      before do
+        create(:geo_design_registry, project_id: project_1.id)
+        create(:geo_design_registry, :sync_failed, project_id: project_3.id)
+        create(:geo_design_registry, project_id: project_5.id)
+      end
+
+      it 'includes project IDs without an entry on the tracking database' do
+        range = Project.minimum(:id)..Project.maximum(:id)
+
+        untracked_ids, _ = described_class.find_registry_differences(range)
+
+        expect(untracked_ids).to match_array([project_2.id, project_4.id, project_6.id])
+      end
+
+      it 'excludes projects outside the ID range' do
+        untracked_ids, _ = described_class.find_registry_differences(project_4.id..project_6.id)
+
+        expect(untracked_ids).to match_array([project_4.id, project_6.id])
+      end
+
+      it 'excludes projects without designs' do
+        range = Project.minimum(:id)..Project.maximum(:id)
+
+        untracked_ids, _ = described_class.find_registry_differences(range)
+
+        expect(untracked_ids).not_to include([project_7])
+      end
+
+      context 'with selective sync by namespace' do
+        let(:secondary) { create(:geo_node, selective_sync_type: 'namespaces', namespaces: [synced_group]) }
+
+        it 'excludes project IDs that are not in selectively synced projects' do
+          range = Project.minimum(:id)..Project.maximum(:id)
+
+          untracked_ids, _ = described_class.find_registry_differences(range)
+
+          expect(untracked_ids).to match_array([project_2.id])
+        end
+      end
+
+      context 'with selective sync by shard' do
+        let(:secondary) { create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: ['broken']) }
+
+        it 'excludes project IDs that are not in selectively synced projects' do
+          range = Project.minimum(:id)..Project.maximum(:id)
+
+          untracked_ids, _ = described_class.find_registry_differences(range)
+
+          expect(untracked_ids).to match_array([project_6.id])
+        end
+      end
+    end
+
+    context 'unused tracked IDs' do
+      context 'with an orphaned registry' do
+        let!(:orphaned) { create(:geo_design_registry, project_id: project_1.id) }
+
+        before do
+          project_1.delete
+        end
+
+        it 'includes tracked IDs that do not exist in the model table' do
+          range = project_1.id..project_1.id
+
+          _, unused_tracked_ids = described_class.find_registry_differences(range)
+
+          expect(unused_tracked_ids).to match_array([project_1.id])
+        end
+
+        it 'excludes IDs outside the ID range' do
+          range = (project_1.id + 1)..Project.maximum(:id)
+
+          _, unused_tracked_ids = described_class.find_registry_differences(range)
+
+          expect(unused_tracked_ids).to be_empty
+        end
+      end
+
+      context 'with selective sync by namespace' do
+        let(:secondary) { create(:geo_node, selective_sync_type: 'namespaces', namespaces: [synced_group]) }
+
+        context 'with a tracked project' do
+          context 'excluded from selective sync' do
+            let!(:registry_entry) { create(:geo_design_registry, project_id: project_3.id) }
+
+            it 'includes tracked project IDs that exist but are not in a selectively synced project' do
+              range = project_3.id..project_3.id
+
+              _, unused_tracked_ids = described_class.find_registry_differences(range)
+
+              expect(unused_tracked_ids).to match_array([project_3.id])
+            end
+          end
+
+          context 'included in selective sync' do
+            let!(:registry_entry) { create(:geo_design_registry, project_id: project_1.id) }
+
+            it 'excludes tracked project IDs that are in selectively synced projects' do
+              range = project_1.id..project_1.id
+
+              _, unused_tracked_ids = described_class.find_registry_differences(range)
+
+              expect(unused_tracked_ids).to be_empty
+            end
+          end
+        end
+      end
+
+      context 'with selective sync by shard' do
+        let(:secondary) { create(:geo_node, selective_sync_type: 'shards', selective_sync_shards: ['broken']) }
+
+        context 'with a tracked project' do
+          let!(:registry_entry) { create(:geo_design_registry, project_id: project_1.id) }
+
+          context 'excluded from selective sync' do
+            it 'includes tracked project IDs that exist but are not in a selectively synced project' do
+              range = project_1.id..project_1.id
+
+              _, unused_tracked_ids = described_class.find_registry_differences(range)
+
+              expect(unused_tracked_ids).to match_array([project_1.id])
+            end
+          end
+
+          context 'included in selective sync' do
+            let!(:registry_entry) { create(:geo_design_registry, project_id: project_5.id) }
+
+            it 'excludes tracked project IDs that are in selectively synced projects' do
+              range = project_5.id..project_5.id
+
+              _, unused_tracked_ids = described_class.find_registry_differences(range)
+
+              expect(unused_tracked_ids).to be_empty
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe '#search' do
+    let!(:design_registry) { create(:geo_design_registry) }
     let!(:failed_registry) { create(:geo_design_registry, :sync_failed) }
     let!(:synced_registry) { create(:geo_design_registry, :synced) }
 
@@ -94,6 +266,8 @@ RSpec.describe Geo::DesignRegistry, :geo do
   end
 
   describe '#should_be_redownloaded?' do
+    let_it_be(:design_registry) { create(:geo_design_registry) }
+
     context 'when force_to_redownload is false' do
       it 'returns false' do
         expect(design_registry.should_be_redownloaded?).to be false

@@ -6,7 +6,7 @@ module Gitlab
       class MembershipUpdater
         attr_reader :user, :saml_provider
 
-        delegate :group, to: :saml_provider
+        delegate :group, :default_membership_role, to: :saml_provider
 
         def initialize(user, saml_provider)
           @user = user
@@ -14,22 +14,18 @@ module Gitlab
         end
 
         def execute
-          return if group.member?(@user)
+          return if group.member?(user)
 
-          member = group.add_user(@user, default_membership_level)
+          member = group.add_user(user, default_membership_role)
 
           log_audit_event(member: member)
         end
 
         private
 
-        def default_membership_level
-          :guest
-        end
-
         def log_audit_event(member:)
           ::AuditEventService.new(
-            @user,
+            user,
             member.source,
             action: :create
           ).for_member(member).security_event

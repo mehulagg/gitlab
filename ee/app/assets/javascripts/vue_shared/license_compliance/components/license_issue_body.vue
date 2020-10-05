@@ -1,8 +1,8 @@
 <script>
 import { mapActions } from 'vuex';
 
-import LicensePackages from './license_packages.vue';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
+import LicensePackages from './license_packages.vue';
 
 export default {
   name: 'LicenseIssueBody',

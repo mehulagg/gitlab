@@ -1238,4 +1238,63 @@ describe('Epic Store Actions', () => {
       });
     });
   });
+
+  describe('updateConfidentialityOnIssuable', () => {
+    let mock;
+    const mockUpdateConfidentialMutationRes = {
+      updateEpic: {
+        clientMutationId: null,
+        errors: [],
+        __typename: 'UpdateEpicPayload',
+      },
+    };
+
+    const data = {
+      confidential: true,
+    };
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+    });
+
+    afterEach(() => {
+      mock.restore();
+    });
+
+    it('commits SET_EPIC_CONFIDENTIAL when request is successful', done => {
+      mock.onPut(/(.*)/).replyOnce(200, {});
+      jest.spyOn(epicUtils.gqClient, 'mutate').mockResolvedValue({
+        data: mockUpdateConfidentialMutationRes,
+      });
+
+      testAction(
+        actions.updateConfidentialityOnIssuable,
+        { ...data },
+        state,
+        [{ payload: true, type: 'SET_EPIC_CONFIDENTIAL' }],
+        [],
+        done,
+      );
+    });
+
+    it("doesn't commit/dispatch and throws error when request fails", done => {
+      mock.onPut(/(.*)/).replyOnce(500, {});
+      const errors = ['bar'];
+
+      jest.spyOn(epicUtils.gqClient, 'mutate').mockResolvedValue({
+        data: {
+          updateEpic: {
+            ...mockUpdateConfidentialMutationRes,
+            errors,
+          },
+        },
+      });
+
+      testAction(actions.updateConfidentialityOnIssuable, { ...data }, state, [], [])
+        .catch(err => {
+          expect(err).toEqual('bar');
+        })
+        .finally(done);
+    });
+  });
 });

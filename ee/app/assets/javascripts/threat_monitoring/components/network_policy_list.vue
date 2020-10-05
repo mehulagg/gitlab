@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlTable,
   GlEmptyState,
@@ -12,9 +12,11 @@ import {
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { getTimeago } from '~/lib/utils/datetime_utility';
-import { setUrlFragment } from '~/lib/utils/url_utility';
+import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import EnvironmentPicker from './environment_picker.vue';
 import NetworkPolicyEditor from './network_policy_editor.vue';
+import PolicyDrawer from './policy_editor/policy_drawer.vue';
+import { CiliumNetworkPolicyKind } from './policy_editor/constants';
 
 export default {
   components: {
@@ -28,9 +30,14 @@ export default {
     GlToggle,
     EnvironmentPicker,
     NetworkPolicyEditor,
+    PolicyDrawer,
   },
   props: {
     documentationPath: {
+      type: String,
+      required: true,
+    },
+    newPolicyPath: {
       type: String,
       required: true,
     },
@@ -40,7 +47,8 @@ export default {
   },
   computed: {
     ...mapState('networkPolicies', ['policies', 'isLoadingPolicies', 'isUpdatingPolicy']),
-    ...mapState('threatMonitoring', ['currentEnvironmentId']),
+    ...mapState('threatMonitoring', ['currentEnvironmentId', 'allEnvironments']),
+    ...mapGetters('networkPolicies', ['policiesWithDefaults']),
     documentationFullPath() {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
     },
@@ -50,7 +58,7 @@ export default {
     selectedPolicy() {
       if (!this.hasSelectedPolicy) return null;
 
-      return this.policies.find(policy => policy.name === this.selectedPolicyName);
+      return this.policiesWithDefaults.find(policy => policy.name === this.selectedPolicyName);
     },
     hasPolicyChanges() {
       if (!this.hasSelectedPolicy) return false;
@@ -61,12 +69,68 @@ export default {
       );
     },
     hasAutoDevopsPolicy() {
-      return this.policies.some(policy => policy.isAutodevops);
+      return this.policiesWithDefaults.some(policy => policy.isAutodevops);
+    },
+    hasCiliumSelectedPolicy() {
+      return this.hasSelectedPolicy
+        ? this.selectedPolicy.manifest.includes(CiliumNetworkPolicyKind)
+        : false;
+    },
+    shouldShowCiliumDrawer() {
+      return this.hasCiliumSelectedPolicy;
+    },
+    shouldShowEditButton() {
+      return this.hasCiliumSelectedPolicy && Boolean(this.selectedPolicy.creationTimestamp);
+    },
+    editPolicyPath() {
+      return this.hasSelectedPolicy
+        ? mergeUrlParams(
+            { environment_id: this.currentEnvironmentId },
+            this.newPolicyPath.replace('new', `${this.selectedPolicyName}/edit`),
+          )
+        : '';
+    },
+    fields() {
+      const namespace = {
+        key: 'namespace',
+        label: s__('NetworkPolicies|Namespace'),
+        thClass: 'font-weight-bold',
+      };
+      const fields = [
+        {
+          key: 'name',
+          label: s__('NetworkPolicies|Name'),
+          thClass: 'w-50 font-weight-bold',
+        },
+        {
+          key: 'status',
+          label: s__('NetworkPolicies|Status'),
+          thClass: 'font-weight-bold',
+        },
+        {
+          key: 'creationTimestamp',
+          label: s__('NetworkPolicies|Last modified'),
+          thClass: 'font-weight-bold',
+        },
+      ];
+      // Adds column 'namespace' only while 'all environments' option is selected
+      if (this.allEnvironments) fields.splice(1, 0, namespace);
+
+      return fields;
     },
   },
+  watch: {
+    currentEnvironmentId(envId) {
+      this.fetchPolicies(envId);
+    },
+  },
+  created() {
+    this.fetchPolicies(this.currentEnvironmentId);
+  },
   methods: {
-    ...mapActions('networkPolicies', ['updatePolicy']),
+    ...mapActions('networkPolicies', ['fetchPolicies', 'createPolicy', 'updatePolicy']),
     getTimeAgoString(creationTimestamp) {
+      if (!creationTimestamp) return '';
       return getTimeago().format(creationTimestamp);
     },
     presentPolicyDrawer(rows) {
@@ -84,32 +148,21 @@ export default {
       bTable.clearSelected();
     },
     savePolicy() {
-      return this.updatePolicy({
+      const promise = this.selectedPolicy.creationTimestamp ? this.updatePolicy : this.createPolicy;
+      return promise({
         environmentId: this.currentEnvironmentId,
         policy: this.selectedPolicy,
-      }).then(() => {
-        this.initialManifest = this.selectedPolicy.manifest;
-        this.initialEnforcementStatus = this.selectedPolicy.isEnabled;
-      });
+      })
+        .then(() => {
+          this.initialManifest = this.selectedPolicy.manifest;
+          this.initialEnforcementStatus = this.selectedPolicy.isEnabled;
+        })
+        .catch(() => {
+          this.selectedPolicy.manifest = this.initialManifest;
+          this.selectedPolicy.isEnabled = this.initialEnforcementStatus;
+        });
     },
   },
-  fields: [
-    {
-      key: 'name',
-      label: s__('NetworkPolicies|Name'),
-      thClass: 'w-75 font-weight-bold',
-    },
-    {
-      key: 'status',
-      label: s__('NetworkPolicies|Status'),
-      thClass: 'font-weight-bold',
-    },
-    {
-      key: 'creationTimestamp',
-      label: s__('NetworkPolicies|Last modified'),
-      thClass: 'font-weight-bold',
-    },
-  ],
   emptyStateDescription: s__(
     `NetworkPolicies|Policies are a specification of how groups of pods are allowed to communicate with each other's network endpoints.`,
   ),
@@ -141,16 +194,25 @@ export default {
     </div>
 
     <div class="pt-3 px-3 bg-gray-light">
-      <div class="row">
-        <environment-picker ref="environmentsPicker" />
+      <div class="row justify-content-between align-items-center">
+        <environment-picker ref="environmentsPicker" :include-all="true" />
+        <div class="col-sm-auto">
+          <gl-button
+            category="secondary"
+            variant="info"
+            :href="newPolicyPath"
+            data-testid="new-policy"
+            >{{ s__('NetworkPolicies|New policy') }}</gl-button
+          >
+        </div>
       </div>
     </div>
 
     <gl-table
       ref="policiesTable"
       :busy="isLoadingPolicies"
-      :items="policies"
-      :fields="$options.fields"
+      :items="policiesWithDefaults"
+      :fields="fields"
       head-variant="white"
       stacked="md"
       thead-class="gl-text-gray-900 border-bottom"
@@ -196,6 +258,14 @@ export default {
           <div>
             <gl-button ref="cancelButton" @click="deselectPolicy">{{ __('Cancel') }}</gl-button>
             <gl-button
+              v-if="shouldShowEditButton"
+              data-testid="edit-button"
+              category="primary"
+              variant="info"
+              :href="editPolicyPath"
+              >{{ s__('NetworkPolicies|Edit policy') }}</gl-button
+            >
+            <gl-button
               ref="applyButton"
               category="primary"
               variant="success"
@@ -209,11 +279,23 @@ export default {
       </template>
       <template>
         <div v-if="hasSelectedPolicy">
-          <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
-          <p>{{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}</p>
-          <network-policy-editor ref="policyEditor" v-model="selectedPolicy.manifest" />
+          <policy-drawer v-if="shouldShowCiliumDrawer" v-model="selectedPolicy.manifest" />
 
-          <h5 class="mt-4">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
+          <div v-else>
+            <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
+            <p>
+              {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
+            </p>
+            <div class="gl-p-3 gl-bg-gray-50">
+              <network-policy-editor
+                ref="policyEditor"
+                v-model="selectedPolicy.manifest"
+                class="network-policy-editor"
+              />
+            </div>
+          </div>
+
+          <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
           <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
           <gl-toggle v-model="selectedPolicy.isEnabled" data-testid="policyToggle" />
         </div>

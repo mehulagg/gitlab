@@ -19,7 +19,7 @@
       %span
         = _('Designs')
   - if Feature.enabled?(:geo_self_service_framework)
-    - Gitlab::Geo.replicator_classes.each do |replicator_class|
+    - Gitlab::Geo.enabled_replicator_classes.each do |replicator_class|
       = nav_link(page: [{ controller: 'admin/geo/replicables', action: 'index', replicable_name_plural: replicator_class.replicable_name_plural }], html_options: { class: 'gl-pr-2' }) do
         = link_to admin_geo_replicables_path(replicable_name_plural: replicator_class.replicable_name_plural), title: replicator_class.replicable_title_plural do
           %span

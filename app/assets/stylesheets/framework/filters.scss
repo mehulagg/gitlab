@@ -134,20 +134,20 @@
     padding-left: 8px;
     padding-right: 0;
 
-    .fa-close {
+    .close-icon {
       color: $gl-text-color-secondary;
     }
 
-    &:hover .fa-close {
+    &:hover .close-icon {
       color: $gl-text-color;
     }
 
     &.inverted {
-      .fa-close {
+      .close-icon {
         color: $gl-text-color-secondary-inverted;
       }
 
-      &:hover .fa-close {
+      &:hover .close-icon {
         color: $gl-text-color-inverted;
       }
     }
@@ -243,7 +243,7 @@
     }
   }
 
-  .fa-times {
+  .clear-search-icon {
     right: 10px;
     color: $gray-darkest;
   }
@@ -255,7 +255,7 @@
     outline: none;
     z-index: 1;
 
-    &:hover .fa-times {
+    &:hover .clear-search-icon {
       color: $common-gray-dark;
     }
   }
@@ -307,23 +307,6 @@
     color: $gl-text-color;
     border-color: $border-color;
   }
-
-  svg {
-    height: 14px;
-    width: 14px;
-    vertical-align: middle;
-    margin-bottom: 4px;
-  }
-
-  .dropdown-toggle-text {
-    display: inline-block;
-    color: inherit;
-
-    .fa {
-      vertical-align: middle;
-      color: inherit;
-    }
-  }
 }
 
 .filtered-search-history-dropdown {
@@ -365,11 +348,11 @@
 }
 
 @include media-breakpoint-down(sm) {
-  .issues-details-filters {
-    padding-top: 0;
-    padding-bottom: 0;
+  .issues-details-filters,
+  .epics-details-filters {
+    padding-top: $gl-padding-8;
+    padding-bottom: $gl-padding-8;
     background-color: $white;
-    border-top: 0;
   }
 
   .boards-switcher {
@@ -458,6 +441,23 @@
 }
 
 .vue-filtered-search-bar-container {
+  .gl-search-box-by-click {
+    // Absolute width is needed to prevent flex to grow
+    // beyond the available width.
+    .gl-filtered-search-scrollable {
+      width: 1px;
+    }
+
+    // There are several styling issues happening while using
+    // `GlFilteredSearch` in roadmap due to some of our global
+    // styles which we need to override until those are fixed
+    // at framework level.
+    // See https://gitlab.com/gitlab-org/gitlab-ui/-/issues/908
+    .input-group-prepend + .gl-filtered-search-scrollable {
+      border-radius: 0;
+    }
+  }
+
   @include media-breakpoint-up(md) {
     .sort-dropdown-container {
       margin-left: 10px;

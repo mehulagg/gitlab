@@ -13,6 +13,7 @@ describe('Alert Details Sidebar Status', () => {
   const findStatusDropdown = () => wrapper.find(GlDropdown);
   const findStatusDropdownItem = () => wrapper.find(GlDropdownItem);
   const findStatusLoadingIcon = () => wrapper.find(GlLoadingIcon);
+  const findStatusDropdownHeader = () => wrapper.find('[data-testid="dropdown-header"]');
 
   function mountComponent({ data, sidebarCollapsed = true, loading = false, stubs = {} } = {}) {
     wrapper = mount(AlertSidebarStatus, {
@@ -56,7 +57,7 @@ describe('Alert Details Sidebar Status', () => {
     });
 
     it('displays the dropdown status header', () => {
-      expect(findStatusDropdown().contains('.dropdown-title')).toBe(true);
+      expect(findStatusDropdownHeader().exists()).toBe(true);
     });
 
     describe('updating the alert status', () => {

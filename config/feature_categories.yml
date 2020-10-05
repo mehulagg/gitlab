@@ -19,7 +19,7 @@
 - auto_devops
 - backup_restore
 - behavior_analytics
-- billing
+- boards
 - chatops
 - cloud_native_installation
 - cluster_cost_optimization
@@ -42,7 +42,6 @@
 - design_management
 - design_system
 - devops_reports
-- digital_experience_management
 - disaster_recovery
 - dynamic_application_security_testing
 - editor_extension
@@ -63,6 +62,8 @@
 - importers
 - incident_management
 - infrastructure_as_code
+- insights
+- instance_statistics
 - integrations
 - interactive_application_security_testing
 - internationalization
@@ -70,9 +71,7 @@
 - jenkins_importer
 - jira_importer
 - jupyter_notebooks
-- kanban_boards
 - kubernetes_management
-- language_specific
 - license_compliance
 - live_preview
 - load_testing
@@ -84,10 +83,13 @@
 - omnibus_package
 - package_registry
 - pages
+- pipeline_authoring
 - pki_management
 - planning_analytics
 - product_analytics
 - projects
+- provision
+- purchase
 - quality_management
 - release_evidence
 - release_orchestration

@@ -1,11 +1,11 @@
 import Vue from 'vue';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import Cookies from 'js-cookie';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import FindFile from '~/vue_shared/components/file_finder/index.vue';
 import eventHub from '../notes/event_hub';
 import diffsApp from './components/app.vue';
 import { TREE_LIST_STORAGE_KEY, DIFF_WHITESPACE_COOKIE_NAME } from './constants';
-import Cookies from 'js-cookie';
 
 export default function initDiffsApp(store) {
   const fileFinderEl = document.getElementById('js-diff-file-finder');
@@ -78,6 +78,7 @@ export default function initDiffsApp(store) {
         dismissEndpoint: dataset.dismissEndpoint,
         showSuggestPopover: parseBoolean(dataset.showSuggestPopover),
         showWhitespaceDefault: parseBoolean(dataset.showWhitespaceDefault),
+        viewDiffsFileByFile: parseBoolean(dataset.fileByFileDefault),
       };
     },
     computed: {
@@ -115,6 +116,7 @@ export default function initDiffsApp(store) {
           isFluidLayout: this.isFluidLayout,
           dismissEndpoint: this.dismissEndpoint,
           showSuggestPopover: this.showSuggestPopover,
+          viewDiffsFileByFile: this.viewDiffsFileByFile,
         },
       });
     },

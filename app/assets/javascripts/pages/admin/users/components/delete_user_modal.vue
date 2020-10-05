@@ -1,13 +1,13 @@
 <script>
-import { escape } from 'lodash';
-import { GlModal, GlDeprecatedButton, GlFormInput } from '@gitlab/ui';
+import { GlModal, GlButton, GlFormInput, GlSprintf } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 
 export default {
   components: {
     GlModal,
-    GlDeprecatedButton,
+    GlButton,
     GlFormInput,
+    GlSprintf,
   },
   props: {
     title: {
@@ -52,27 +52,6 @@ export default {
     modalTitle() {
       return sprintf(this.title, { username: this.username });
     },
-    text() {
-      return sprintf(
-        this.content,
-        {
-          username: `<strong>${escape(this.username)}</strong>`,
-          strong_start: '<strong>',
-          strong_end: '</strong>',
-        },
-        false,
-      );
-    },
-    confirmationTextLabel() {
-      return sprintf(
-        s__('AdminUsers|To confirm, type %{username}'),
-        {
-          username: `<code>${escape(this.username)}</code>`,
-        },
-        false,
-      );
-    },
-
     secondaryButtonLabel() {
       return s__('AdminUsers|Block user');
     },
@@ -107,8 +86,25 @@ export default {
 <template>
   <gl-modal ref="modal" modal-id="delete-user-modal" :title="modalTitle" kind="danger">
     <template>
-      <p v-html="text"></p>
-      <p v-html="confirmationTextLabel"></p>
+      <p>
+        <gl-sprintf :message="content">
+          <template #username>
+            <strong>{{ username }}</strong>
+          </template>
+          <template #strong="props">
+            <strong>{{ props.content }}</strong>
+          </template>
+        </gl-sprintf>
+      </p>
+
+      <p>
+        <gl-sprintf :message="s__('AdminUsers|To confirm, type %{username}')">
+          <template #username>
+            <code>{{ username }}</code>
+          </template>
+        </gl-sprintf>
+      </p>
+
       <form ref="form" :action="deleteUserUrl" method="post" @submit.prevent>
         <input ref="method" type="hidden" name="_method" value="delete" />
         <input :value="csrfToken" type="hidden" name="authenticity_token" />
@@ -122,15 +118,18 @@ export default {
       </form>
     </template>
     <template #modal-footer>
-      <gl-deprecated-button variant="secondary" @click="onCancel">{{
-        s__('Cancel')
-      }}</gl-deprecated-button>
-      <gl-deprecated-button :disabled="!canSubmit" variant="warning" @click="onSecondaryAction">
+      <gl-button @click="onCancel">{{ s__('Cancel') }}</gl-button>
+      <gl-button
+        :disabled="!canSubmit"
+        category="primary"
+        variant="warning"
+        @click="onSecondaryAction"
+      >
         {{ secondaryAction }}
-      </gl-deprecated-button>
-      <gl-deprecated-button :disabled="!canSubmit" variant="danger" @click="onSubmit">{{
+      </gl-button>
+      <gl-button :disabled="!canSubmit" category="primary" variant="danger" @click="onSubmit">{{
         action
-      }}</gl-deprecated-button>
+      }}</gl-button>
     </template>
   </gl-modal>
 </template>

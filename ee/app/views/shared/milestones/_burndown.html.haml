@@ -9,12 +9,12 @@
 - if can_generate_chart?(milestone, burndown)
   .burndown-chart.mb-2{ data: { start_date: burndown.start_date.strftime("%Y-%m-%d"),
     due_date: burndown.due_date.strftime("%Y-%m-%d"),
-    milestone_id: milestone.id,
+    milestone_id: milestone.to_global_id,
     burndown_events_path: expose_url(burndown_endpoint), burnup_events_path: expose_url(burnup_endpoint) } }
 
 - elsif show_burndown_placeholder?(milestone, warning)
   .burndown-hint.content-block.container-fluid
-    = icon("times", class: "dismiss-icon")
+    = sprite_icon('close', size: 16, css_class: 'dismiss-icon')
     .row
       .col-sm-4.col-12.svg-container
         = custom_icon('icon_burndown_chart_splash')
@@ -25,5 +25,5 @@
           View your milestone's progress as a burndown chart.  Add both a start and a due date to
           this milestone and the chart will appear here, always up-to-date.
 
-        = link_to "Add start and due date", edit_milestone_path(milestone), class: 'btn'
+        = link_to "Add start and due date", edit_milestone_path(milestone), class: 'btn gl-button'
 = render 'shared/promotions/promote_burndown_charts', milestone: milestone

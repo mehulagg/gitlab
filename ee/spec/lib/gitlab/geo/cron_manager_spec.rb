@@ -47,7 +47,7 @@ RSpec.describe Gitlab::Geo::CronManager, :geo do
     end
 
     after(:all) do
-      jobs.each { |name| job(name)&.destroy }
+      jobs.each { |name| job(name)&.destroy } # rubocop: disable Rails/SaveBang
     end
 
     def init_cron_job(job_name, class_name)

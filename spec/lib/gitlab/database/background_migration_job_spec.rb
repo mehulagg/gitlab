@@ -25,6 +25,26 @@ RSpec.describe Gitlab::Database::BackgroundMigrationJob do
     end
   end
 
+  describe '.for_partitioning_migration' do
+    let!(:job1) { create(:background_migration_job, arguments: [1, 100, 'other_table']) }
+    let!(:job2) { create(:background_migration_job, arguments: [1, 100, 'audit_events']) }
+    let!(:job3) { create(:background_migration_job, class_name: 'OtherJob', arguments: [1, 100, 'audit_events']) }
+
+    it 'returns jobs matching class_name and the table_name job argument' do
+      relation = described_class.for_partitioning_migration('TestJob', 'audit_events')
+
+      expect(relation.count).to eq(1)
+      expect(relation.first).to have_attributes(class_name: 'TestJob', arguments: [1, 100, 'audit_events'])
+    end
+
+    it 'normalizes class names by removing leading ::' do
+      relation = described_class.for_partitioning_migration('::TestJob', 'audit_events')
+
+      expect(relation.count).to eq(1)
+      expect(relation.first).to have_attributes(class_name: 'TestJob', arguments: [1, 100, 'audit_events'])
+    end
+  end
+
   describe '.mark_all_as_succeeded' do
     let!(:job1) { create(:background_migration_job, arguments: [1, 100]) }
     let!(:job2) { create(:background_migration_job, arguments: [1, 100]) }
@@ -51,12 +71,21 @@ RSpec.describe Gitlab::Database::BackgroundMigrationJob do
       expect(job4.reload).to be_pending
     end
 
+    it 'returns the number of jobs updated' do
+      expect(described_class.succeeded.count).to eq(0)
+
+      jobs_updated = described_class.mark_all_as_succeeded('::TestJob', [1, 100])
+
+      expect(jobs_updated).to eq(2)
+      expect(described_class.succeeded.count).to eq(2)
+    end
+
     context 'when previous matching jobs have already succeeded' do
       let(:initial_time) { Time.now.round }
       let!(:job1) { create(:background_migration_job, :succeeded, created_at: initial_time, updated_at: initial_time) }
 
       it 'does not update non-pending jobs' do
-        Timecop.freeze(initial_time + 1.day) do
+        travel_to(initial_time + 1.day) do
           expect { described_class.mark_all_as_succeeded('TestJob', [1, 100]) }
             .to change { described_class.succeeded.count }.from(1).to(2)
         end

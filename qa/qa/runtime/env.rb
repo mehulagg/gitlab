@@ -61,6 +61,10 @@ module QA
         ENV['QA_ADDITIONAL_REPOSITORY_STORAGE']
       end
 
+      def non_cluster_repository_storage
+        ENV['QA_GITALY_NON_CLUSTER_STORAGE'] || 'gitaly'
+      end
+
       def praefect_repository_storage
         ENV['QA_PRAEFECT_REPOSITORY_STORAGE']
       end
@@ -105,6 +109,10 @@ module QA
 
       def running_in_ci?
         ENV['CI'] || ENV['CI_SERVER']
+      end
+
+      def cluster_api_url
+        ENV['CLUSTER_API_URL']
       end
 
       def qa_cookies
@@ -260,6 +268,10 @@ module QA
         ENV['JIRA_HOSTNAME']
       end
 
+      def cache_namespace_name?
+        enabled?(ENV['CACHE_NAMESPACE_NAME'], default: true)
+      end
+
       def knapsack?
         !!(ENV['KNAPSACK_GENERATE_REPORT'] || ENV['KNAPSACK_REPORT_PATH'] || ENV['KNAPSACK_TEST_FILE_PATTERN'])
       end
@@ -354,6 +366,15 @@ module QA
 
       def mailhog_hostname
         ENV['MAILHOG_HOSTNAME']
+      end
+
+      # Get the version of GitLab currently being tested against
+      # @return String Version
+      # @example
+      #   > Env.deploy_version
+      #   #=> 13.3.4-ee.0
+      def deploy_version
+        ENV['DEPLOY_VERSION']
       end
 
       private

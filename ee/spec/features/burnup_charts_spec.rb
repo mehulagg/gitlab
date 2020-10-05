@@ -30,7 +30,7 @@ RSpec.describe 'Burnup charts', :js do
 
   describe 'licensed feature available' do
     before do
-      stub_licensed_features(group_burndown_charts: true)
+      stub_licensed_features(milestone_charts: true)
     end
 
     it 'shows burnup chart, with a point per day' do
@@ -42,7 +42,7 @@ RSpec.describe 'Burnup charts', :js do
 
   describe 'licensed feature not available' do
     before do
-      stub_licensed_features(group_burndown_charts: false)
+      stub_licensed_features(milestone_charts: false)
     end
 
     it 'does not show burnup chart' do
@@ -54,7 +54,7 @@ RSpec.describe 'Burnup charts', :js do
 
   describe 'feature flag disabled' do
     before do
-      stub_licensed_features(group_burndown_charts: true)
+      stub_licensed_features(milestone_charts: true)
       stub_feature_flags(burnup_charts: false)
     end
 

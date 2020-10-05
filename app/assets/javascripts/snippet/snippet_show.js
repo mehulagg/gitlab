@@ -1,19 +1,48 @@
-import LineHighlighter from '~/line_highlighter';
-import BlobViewer from '~/blob/viewer';
-import ZenMode from '~/zen_mode';
-import initNotes from '~/init_notes';
-import snippetEmbed from '~/snippet/snippet_embed';
-import { SnippetShowInit } from '~/snippets';
+if (!gon.features.snippetsVue) {
+  const LineHighlighterModule = import('~/line_highlighter');
+  const BlobViewerModule = import('~/blob/viewer');
+  const ZenModeModule = import('~/zen_mode');
+  const SnippetEmbedModule = import('~/snippet/snippet_embed');
+  const initNotesModule = import('~/init_notes');
+  const loadAwardsHandlerModule = import('~/awards_handler');
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (!gon.features.snippetsVue) {
-    new LineHighlighter(); // eslint-disable-line no-new
-    new BlobViewer(); // eslint-disable-line no-new
-    initNotes();
-    new ZenMode(); // eslint-disable-line no-new
-    snippetEmbed();
-  } else {
-    SnippetShowInit();
-    initNotes();
-  }
-});
+  Promise.all([
+    LineHighlighterModule,
+    BlobViewerModule,
+    ZenModeModule,
+    SnippetEmbedModule,
+    initNotesModule,
+    loadAwardsHandlerModule,
+  ])
+    .then(
+      ([
+        { default: LineHighlighter },
+        { default: BlobViewer },
+        { default: ZenMode },
+        { default: SnippetEmbed },
+        { default: initNotes },
+        { default: loadAwardsHandler },
+      ]) => {
+        new LineHighlighter(); // eslint-disable-line no-new
+        new BlobViewer(); // eslint-disable-line no-new
+        new ZenMode(); // eslint-disable-line no-new
+        SnippetEmbed();
+        initNotes();
+        loadAwardsHandler();
+      },
+    )
+    .catch(() => {});
+} else {
+  import('~/snippets')
+    .then(({ SnippetShowInit }) => {
+      SnippetShowInit();
+    })
+    .then(() => {
+      return Promise.all([import('~/init_notes'), import('~/awards_handler')]);
+    })
+    .then(([{ default: initNotes }, { default: loadAwardsHandler }]) => {
+      initNotes();
+      loadAwardsHandler();
+    })
+    .catch(() => {});
+}

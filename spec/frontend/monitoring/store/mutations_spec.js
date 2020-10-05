@@ -4,8 +4,8 @@ import mutations from '~/monitoring/stores/mutations';
 import * as types from '~/monitoring/stores/mutation_types';
 import state from '~/monitoring/stores/state';
 import { dashboardEmptyStates, metricStates } from '~/monitoring/constants';
-
 import { deploymentData, dashboardGitResponse, storeTextVariables } from '../mock_data';
+import { prometheusMatrixMultiResult } from '../graph_data';
 import { metricsDashboardPayload } from '../fixture_data';
 
 describe('Monitoring mutations', () => {
@@ -20,7 +20,6 @@ describe('Monitoring mutations', () => {
       mutations[types.REQUEST_METRICS_DASHBOARD](stateCopy);
 
       expect(stateCopy.emptyState).toBe(dashboardEmptyStates.LOADING);
-      expect(stateCopy.showEmptyState).toBe(true);
     });
   });
 
@@ -98,14 +97,12 @@ describe('Monitoring mutations', () => {
       mutations[types.RECEIVE_METRICS_DASHBOARD_FAILURE](stateCopy);
 
       expect(stateCopy.emptyState).toBe(dashboardEmptyStates.NO_DATA);
-      expect(stateCopy.showEmptyState).toBe(true);
     });
 
     it('sets an empty unableToConnect state when an error occurs', () => {
       mutations[types.RECEIVE_METRICS_DASHBOARD_FAILURE](stateCopy, 'myerror');
 
       expect(stateCopy.emptyState).toBe(dashboardEmptyStates.UNABLE_TO_CONNECT);
-      expect(stateCopy.showEmptyState).toBe(true);
     });
   });
 
@@ -262,27 +259,6 @@ describe('Monitoring mutations', () => {
 
   describe('Individual panel/metric results', () => {
     const metricId = 'NO_DB_response_metrics_nginx_ingress_throughput_status_code';
-    const data = {
-      resultType: 'matrix',
-      result: [
-        {
-          metric: {
-            __name__: 'up',
-            job: 'prometheus',
-            instance: 'localhost:9090',
-          },
-          values: [[1435781430.781, '1'], [1435781445.781, '1'], [1435781460.781, '1']],
-        },
-        {
-          metric: {
-            __name__: 'up',
-            job: 'node',
-            instance: 'localhost:9091',
-          },
-          values: [[1435781430.781, '0'], [1435781445.781, '0'], [1435781460.781, '1']],
-        },
-      ],
-    };
 
     const dashboard = metricsDashboardPayload;
     const getMetric = () => stateCopy.dashboard.panelGroups[1].panels[0].metrics[0];
@@ -292,13 +268,10 @@ describe('Monitoring mutations', () => {
         mutations[types.RECEIVE_METRICS_DASHBOARD_SUCCESS](stateCopy, dashboard);
       });
       it('stores a loading state on a metric', () => {
-        expect(stateCopy.showEmptyState).toBe(true);
-
         mutations[types.REQUEST_METRIC_RESULT](stateCopy, {
           metricId,
         });
 
-        expect(stateCopy.showEmptyState).toBe(true);
         expect(getMetric()).toEqual(
           expect.objectContaining({
             loading: true,
@@ -311,19 +284,10 @@ describe('Monitoring mutations', () => {
       beforeEach(() => {
         mutations[types.RECEIVE_METRICS_DASHBOARD_SUCCESS](stateCopy, dashboard);
       });
-      it('clears empty state', () => {
-        expect(stateCopy.showEmptyState).toBe(true);
-
-        mutations[types.RECEIVE_METRIC_RESULT_SUCCESS](stateCopy, {
-          metricId,
-          data,
-        });
-
-        expect(stateCopy.showEmptyState).toBe(false);
-        expect(stateCopy.emptyState).toBe(null);
-      });
 
       it('adds results to the store', () => {
+        const data = prometheusMatrixMultiResult();
+
         expect(getMetric().result).toBe(null);
 
         mutations[types.RECEIVE_METRIC_RESULT_SUCCESS](stateCopy, {
@@ -344,16 +308,6 @@ describe('Monitoring mutations', () => {
     describe('RECEIVE_METRIC_RESULT_FAILURE', () => {
       beforeEach(() => {
         mutations[types.RECEIVE_METRICS_DASHBOARD_SUCCESS](stateCopy, dashboard);
-      });
-      it('maintains the loading state when a metric fails', () => {
-        expect(stateCopy.showEmptyState).toBe(true);
-
-        mutations[types.RECEIVE_METRIC_RESULT_FAILURE](stateCopy, {
-          metricId,
-          error: 'an error',
-        });
-
-        expect(stateCopy.showEmptyState).toBe(true);
       });
 
       it('stores a timeout error in a metric', () => {
@@ -512,6 +466,130 @@ describe('Monitoring mutations', () => {
 
       expect(variable.options).toEqual({
         values: [{ text: 'prometheus', value: 'prometheus' }, { text: 'node', value: 'node' }],
+      });
+    });
+  });
+
+  describe('REQUEST_PANEL_PREVIEW', () => {
+    it('saves yml content and resets other preview data', () => {
+      const mockYmlContent = 'mock yml content';
+      mutations[types.REQUEST_PANEL_PREVIEW](stateCopy, mockYmlContent);
+
+      expect(stateCopy.panelPreviewIsLoading).toBe(true);
+      expect(stateCopy.panelPreviewYml).toBe(mockYmlContent);
+      expect(stateCopy.panelPreviewGraphData).toBe(null);
+      expect(stateCopy.panelPreviewError).toBe(null);
+    });
+  });
+
+  describe('RECEIVE_PANEL_PREVIEW_SUCCESS', () => {
+    it('saves graph data', () => {
+      mutations[types.RECEIVE_PANEL_PREVIEW_SUCCESS](stateCopy, {
+        title: 'My Title',
+        type: 'area-chart',
+      });
+
+      expect(stateCopy.panelPreviewIsLoading).toBe(false);
+      expect(stateCopy.panelPreviewGraphData).toMatchObject({
+        title: 'My Title',
+        type: 'area-chart',
+      });
+      expect(stateCopy.panelPreviewError).toBe(null);
+    });
+  });
+
+  describe('RECEIVE_PANEL_PREVIEW_FAILURE', () => {
+    it('saves graph data', () => {
+      mutations[types.RECEIVE_PANEL_PREVIEW_FAILURE](stateCopy, 'Error!');
+
+      expect(stateCopy.panelPreviewIsLoading).toBe(false);
+      expect(stateCopy.panelPreviewGraphData).toBe(null);
+      expect(stateCopy.panelPreviewError).toBe('Error!');
+    });
+  });
+
+  describe('panel preview metric', () => {
+    const getPreviewMetricAt = i => stateCopy.panelPreviewGraphData.metrics[i];
+
+    beforeEach(() => {
+      stateCopy.panelPreviewGraphData = {
+        title: 'Preview panel title',
+        metrics: [
+          {
+            query: 'query',
+          },
+        ],
+      };
+    });
+
+    describe('REQUEST_PANEL_PREVIEW_METRIC_RESULT', () => {
+      it('sets the metric to loading for the first time', () => {
+        mutations[types.REQUEST_PANEL_PREVIEW_METRIC_RESULT](stateCopy, { index: 0 });
+
+        expect(getPreviewMetricAt(0).loading).toBe(true);
+        expect(getPreviewMetricAt(0).state).toBe(metricStates.LOADING);
+      });
+
+      it('sets the metric to loading and keeps the result', () => {
+        getPreviewMetricAt(0).result = [[0, 1]];
+        getPreviewMetricAt(0).state = metricStates.OK;
+
+        mutations[types.REQUEST_PANEL_PREVIEW_METRIC_RESULT](stateCopy, { index: 0 });
+
+        expect(getPreviewMetricAt(0)).toMatchObject({
+          loading: true,
+          result: [[0, 1]],
+          state: metricStates.OK,
+        });
+      });
+    });
+
+    describe('RECEIVE_PANEL_PREVIEW_METRIC_RESULT_SUCCESS', () => {
+      it('saves the result in the metric', () => {
+        const data = prometheusMatrixMultiResult();
+
+        mutations[types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_SUCCESS](stateCopy, {
+          index: 0,
+          data,
+        });
+
+        expect(getPreviewMetricAt(0)).toMatchObject({
+          loading: false,
+          state: metricStates.OK,
+          result: expect.any(Array),
+        });
+        expect(getPreviewMetricAt(0).result).toHaveLength(data.result.length);
+      });
+    });
+
+    describe('RECEIVE_PANEL_PREVIEW_METRIC_RESULT_FAILURE', () => {
+      it('stores an error in the metric', () => {
+        mutations[types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_FAILURE](stateCopy, {
+          index: 0,
+        });
+
+        expect(getPreviewMetricAt(0).loading).toBe(false);
+        expect(getPreviewMetricAt(0).state).toBe(metricStates.UNKNOWN_ERROR);
+        expect(getPreviewMetricAt(0).result).toBe(null);
+
+        expect(getPreviewMetricAt(0)).toMatchObject({
+          loading: false,
+          result: null,
+          state: metricStates.UNKNOWN_ERROR,
+        });
+      });
+
+      it('stores a timeout error in a metric', () => {
+        mutations[types.RECEIVE_PANEL_PREVIEW_METRIC_RESULT_FAILURE](stateCopy, {
+          index: 0,
+          error: { message: 'BACKOFF_TIMEOUT' },
+        });
+
+        expect(getPreviewMetricAt(0)).toMatchObject({
+          loading: false,
+          result: null,
+          state: metricStates.TIMEOUT,
+        });
       });
     });
   });

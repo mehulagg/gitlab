@@ -1,7 +1,7 @@
 import initTree from '~/repository';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default () => {
   const { router, data } = initTree();

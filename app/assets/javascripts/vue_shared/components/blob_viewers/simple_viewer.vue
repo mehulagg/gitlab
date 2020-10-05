@@ -1,6 +1,7 @@
 <script>
-import ViewerMixin from './mixins';
+/* eslint-disable vue/no-v-html */
 import { GlIcon } from '@gitlab/ui';
+import ViewerMixin from './mixins';
 import { HIGHLIGHT_CLASS_NAME } from './constants';
 
 export default {

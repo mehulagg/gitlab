@@ -3,9 +3,17 @@ import autosize from 'autosize';
 import GfmAutoComplete, { defaultAutocompleteConfig } from 'ee_else_ce/gfm_auto_complete';
 import dropzoneInput from './dropzone_input';
 import { addMarkdownListeners, removeMarkdownListeners } from './lib/utils/text_markdown';
+import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 
 export default class GLForm {
-  constructor(form, enableGFM = {}) {
+  /**
+   * Create a GLForm
+   *
+   * @param {jQuery} form Root element of the GLForm
+   * @param {Object} enableGFM Which autocomplete features should be enabled?
+   * @param {Boolean} forceNew If true, treat the element as a **new** form even if `gfm-form` class already exists.
+   */
+  constructor(form, enableGFM = {}, forceNew = false) {
     this.form = form;
     this.textarea = this.form.find('textarea.js-gfm-input');
     this.enableGFM = { ...defaultAutocompleteConfig, ...enableGFM };
@@ -21,7 +29,7 @@ export default class GLForm {
     // Before we start, we should clean up any previous data for this form
     this.destroy();
     // Set up the form
-    this.setupForm();
+    this.setupForm(forceNew);
     this.form.data('glForm', this);
   }
 
@@ -38,14 +46,14 @@ export default class GLForm {
     this.form.data('glForm', null);
   }
 
-  setupForm() {
-    const isNewForm = this.form.is(':not(.gfm-form)');
+  setupForm(forceNew = false) {
+    const isNewForm = this.form.is(':not(.gfm-form)') || forceNew;
     this.form.removeClass('js-new-note-form');
     if (isNewForm) {
       this.form.find('.div-dropzone').remove();
       this.form.addClass('gfm-form');
       // remove notify commit author checkbox for non-commit notes
-      gl.utils.disableButtonIfEmptyField(
+      disableButtonIfEmptyField(
         this.form.find('.js-note-text'),
         this.form.find('.js-comment-button, .js-note-new-discussion'),
       );

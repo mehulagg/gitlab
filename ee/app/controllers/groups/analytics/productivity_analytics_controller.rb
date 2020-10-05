@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::ApplicationController
-  check_feature_flag Gitlab::Analytics::PRODUCTIVITY_ANALYTICS_FEATURE_FLAG
   increment_usage_counter Gitlab::UsageDataCounters::ProductivityAnalyticsCounter,
     :views, only: :show, if: -> { request.format.html? }
 
@@ -19,6 +18,7 @@ class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::Ap
   }
   before_action -> {
     push_frontend_feature_flag(:productivity_analytics_scatterplot_enabled, default_enabled: true)
+    push_frontend_feature_flag(:analytics_similarity_search, @group, default_enabled: true)
   }
 
   before_action :validate_params, only: :show, if: -> { request.format.json? }

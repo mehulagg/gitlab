@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { __ } from '~/locale';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class CiTemplate {
   constructor() {
@@ -10,7 +11,7 @@ export default class CiTemplate {
   }
 
   initDropdown() {
-    this.$dropdown.glDropdown({
+    initDeprecatedJQueryDropdown(this.$dropdown, {
       data: this.formatDropdownList(),
       selectable: true,
       filterable: true,

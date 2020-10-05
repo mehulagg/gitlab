@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, howto
+---
+
 # PlantUML & GitLab
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/8537) in GitLab 8.16.
@@ -130,7 +137,8 @@ that, login with an Admin account and do following:
 - Check **Enable PlantUML** checkbox.
 - Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`.
 
-NOTE: **Note:** If you are using a PlantUML server running v1.2020.9 and
+NOTE: **Note:**
+If you are using a PlantUML server running v1.2020.9 and
 above (for example, [plantuml.com](https://plantuml.com)), set the `PLANTUML_ENCODING`
 environment variable to enable the `deflate` compression. On Omnibus,
 this can be done set in `/etc/gitlab.rb`:

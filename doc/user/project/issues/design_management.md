@@ -1,9 +1,14 @@
+---
+stage: Create
+group: Knowledge
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+---
+
 # Design Management
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/660) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212566) to GitLab Core in 13.0.
-
-## Overview
+> - Support for SVGs was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12771) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.4.
+> - Design Management was [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/212566) to GitLab Core in 13.0.
 
 Design Management allows you to upload design assets (wireframes, mockups, etc.)
 to GitLab issues and keep them stored in one single place, accessed by the Design
@@ -41,10 +46,9 @@ If the requirements are not met, the **Designs** tab displays a message to the u
 ## Supported files
 
 Files uploaded must have a file extension of either `png`, `jpg`, `jpeg`,
-`gif`, `bmp`, `tiff` or `ico`.
+`gif`, `bmp`, `tiff`, `ico`, or `svg`.
 
-Support for [SVG files](https://gitlab.com/gitlab-org/gitlab/-/issues/12771)
-and [PDFs](https://gitlab.com/gitlab-org/gitlab/-/issues/32811) is planned for a future release.
+Support for [PDF](https://gitlab.com/gitlab-org/gitlab/issues/32811) is planned for a future release.
 
 ## Limitations
 
@@ -60,20 +64,35 @@ and [PDFs](https://gitlab.com/gitlab-org/gitlab/-/issues/32811) is planned for a
 - Only the latest version of the designs can be deleted.
 - Deleted designs cannot be recovered but you can see them on previous designs versions.
 
-## The Design Management page
+## GitLab-Figma plugin
 
-Navigate to the **Design Management** page from any issue by clicking the **Designs** tab:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-figma-plugin/-/issues/2) in GitLab 13.2.
 
-![Designs tab](img/design_management_v12_3.png)
+Connect your design environment with your source code management in a seamless workflow. The GitLab-Figma plugin makes it quick and easy to collaborate in GitLab by bringing the work of product designers directly from Figma to GitLab Issues as uploaded Designs.
+
+To use the plugin, install it from the [Figma Directory](https://www.figma.com/community/plugin/860845891704482356)
+and connect to GitLab through a personal access token. The details are explained in the [plugin documentation](https://gitlab.com/gitlab-org/gitlab-figma-plugin/-/wikis/home).
+
+## The Design Management section
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223193) in GitLab 13.2, Designs are displayed directly on the issue description rather than on a separate tab.
+> - New display's feature flag [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/223197) in GitLab 13.4.
+
+You can find to the **Design Management** section in the issue description:
+
+![Designs section](img/design_management_v13_2.png)
 
 ## Adding designs
 
-To upload design images, click the **Upload Designs** button and select images to upload.
+To upload Design images, drag files from your computer and drop them in the Design Management section,
+or click **upload** to select images from your file browser:
+
+![Designs empty state](img/design_management_upload_v13.3.png)
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34353) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9,
 you can drag and drop designs onto the dedicated drop zone to upload them.
 
-![Drag and drop design uploads](img/design_drag_and_drop_uploads_v12_9.png)
+![Drag and drop design uploads](img/design_drag_and_drop_uploads_v13_2.png)
 
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/202634)
 in GitLab 12.10, you can also copy images from your file system and
@@ -92,9 +111,6 @@ Copy-and-pasting has some limitations:
 Designs with the same filename as an existing uploaded design will create a new version
 of the design, and will replace the previous version. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34353) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.9, dropping a design on an existing uploaded design will also create a new version,
 provided the filenames are the same.
-
-Designs cannot be added if the issue has been moved, or its
-[discussion is locked](../../discussions/#lock-discussions).
 
 ### Skipped designs
 
@@ -155,10 +171,16 @@ Once selected, click the **Delete selected** button to confirm the deletion:
 
 ![Delete multiple designs](img/delete_multiple_designs_v12_4.png)
 
-**Note:**
+NOTE: **Note:**
 Only the latest version of the designs can be deleted.
 Deleted designs are not permanently lost; they can be
 viewed by browsing previous versions.
+
+## Reordering designs
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34382) in GitLab 13.3.
+
+You can change the order of designs by dragging them to a new position.
 
 ## Starting discussions on designs
 
@@ -202,13 +224,44 @@ Note that your resolved comment pins will disappear from the Design to free up s
 However, if you need to revisit or find a resolved discussion, all of your resolved threads will be
 available in the **Resolved Comment** area at the bottom of the right sidebar.
 
+## Add to dos for designs
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/198439) in GitLab 13.4.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-design-to-do-button). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Add a to do for a design by clicking **Add a To-Do** on the design sidebar:
+
+![To-Do button](img/design_todo_button_v13_4.png)
+
+### Enable or disable the design to-do button **(CORE ONLY)**
+
+The **Add a To-Do** button for Designs is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:design_management_todo_button)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:design_management_todo_button)
+```
+
 ## Referring to designs in Markdown
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217160) in **GitLab 13.1**.
-> - It is deployed behind a feature flag, disabled by default.
-> - It is disabled on GitLab.com.
-> - It is not recommended for production use.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-design-references-core-only). **(CORE ONLY)**
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/258662) in **GitLab 13.5**
 
 We support referring to designs in [Markdown](../../markdown.md), which is available
 throughout the application, including in merge request and issue descriptions, in discussions and comments, and in wiki pages.
@@ -224,53 +277,12 @@ This will be rendered as:
 
 > See [#123[homescreen.png]](https://gitlab.com/your-group/your-project/-/issues/123/designs/homescreen.png)
 
-### Enable or disable design references **(CORE ONLY)**
-
-Design reference parsing is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can enable it for your instance.
-
-To enable it:
-
-```ruby
-Feature.enable(:design_management_reference_filter_gfm_pipeline)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:design_management_reference_filter_gfm_pipeline)
-```
-
 ## Design activity records
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33051) in GitLab 13.1
-> - It's deployed behind a feature flag, disabled by default.
-> - It's enabled on GitLab.com.
-> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-design-events-core-only). **(CORE ONLY)**
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33051) in GitLab 13.1.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/225205) in GitLab 13.2.
 
 User activity events on designs (creation, deletion, and updates) are tracked by GitLab and
 displayed on the [user profile](../../profile/index.md#user-profile),
 [group](../../group/index.md#view-group-activity),
 and [project](../index.md#project-activity) activity pages.
-
-### Enable or disable Design Events **(CORE ONLY)**
-
-User activity for designs is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/troubleshooting/navigating_gitlab_via_rails_console.md#starting-a-rails-console-session)
-can enable it for your instance. You're welcome to test it, but use it at your
-own risk.
-
-To enable it:
-
-```ruby
-Feature.enable(:design_activity_events)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:design_activity_events)
-```

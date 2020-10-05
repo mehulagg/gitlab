@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable do
+  RSpec.describe 'Plan' do
     describe 'Configurable issue board' do
       let(:label_board_list) do
         EE::Resource::Board::BoardList::Project::LabelBoardList.fabricate_via_api!
@@ -13,7 +13,7 @@ module QA
         Page::Project::Menu.perform(&:go_to_boards)
       end
 
-      it 'renames the issue board' do
+      it 'renames the issue board', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/609' do
         new_board_name = 'UX'
 
         Page::Component::IssueBoard::Show.perform do |show|

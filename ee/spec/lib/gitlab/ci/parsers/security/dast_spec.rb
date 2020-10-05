@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
     let(:project) { artifact.project }
     let(:pipeline) { artifact.job.pipeline }
     let(:artifact) { create(:ee_ci_job_artifact, :dast) }
-    let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline.sha, 2.weeks.ago) }
+    let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago) }
     let(:parser) { described_class.new }
 
     where(:report_format,
@@ -37,16 +37,15 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
         end
       end
 
-      it 'parses all identifiers, occurrences and scanned resources' do
-        expect(report.occurrences.length).to eq(occurrence_count)
+      it 'parses all identifiers, findings and scanned resources' do
+        expect(report.findings.length).to eq(occurrence_count)
         expect(report.identifiers.length).to eq(identifier_count)
         expect(report.scanners.length).to eq(scanner_count)
         expect(report.scanned_resources.length).to eq(scanned_resources_count)
       end
 
       it 'generates expected location' do
-        location = report.occurrences.last.location
-
+        location = report.findings.last.location
         expect(location).to be_a(::Gitlab::Ci::Reports::Security::Locations::Dast)
         expect(location).to have_attributes(
           hostname: last_occurrence_hostname,
@@ -64,11 +63,48 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
 
         with_them do
           it 'saves properly occurrence' do
-            occurrence = report.occurrences.last
+            occurrence = report.findings.last
 
             expect(occurrence.public_send(attribute)).to eq(value)
           end
         end
+      end
+    end
+
+    describe 'parses scanned_resources' do
+      let(:artifact) { create(:ee_ci_job_artifact, 'dast') }
+
+      before do
+        artifact.each_blob do |blob|
+          parser.parse!(blob, report)
+        end
+      end
+
+      let(:raw_json) do
+        {
+        "vulnerabilities": [],
+        "remediations": [],
+        "dependency_files": [],
+        "scan": {
+          "scanned_resources": [
+            {
+              "method": "GET",
+              "type": "url",
+              "url": "not a URL"
+            }
+          ]
+        }
+      }
+      end
+
+      it 'skips invalid URLs' do
+        parser.parse!(raw_json.to_json, report)
+        expect(report.scanned_resources).to be_empty
+      end
+
+      it 'creates a scanned resource for each URL' do
+        expect(report.scanned_resources.length).to eq(6)
+        expect(report.scanned_resources.first).to be_a(::Gitlab::Ci::Reports::Security::ScannedResource)
       end
     end
   end

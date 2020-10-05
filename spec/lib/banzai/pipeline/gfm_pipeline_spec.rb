@@ -8,6 +8,29 @@ RSpec.describe Banzai::Pipeline::GfmPipeline do
 
     context 'when internal issue tracker is enabled' do
       context 'when shorthand pattern #ISSUE_ID is used' do
+        it 'links an internal issues and keep updated nodes in result[:reference_filter_nodes]', :aggregate_failures do
+          issue = create(:issue, project: project)
+          markdown = "text #{issue.to_reference(project, full: true)}"
+
+          result = described_class.call(markdown, project: project)
+          link = result[:output].css('a').first
+          text = result[:output].children.first
+
+          expect(link['href']).to eq(Gitlab::Routing.url_helpers.project_issue_path(project, issue))
+          expect(result[:reference_filter_nodes]).to eq([text])
+        end
+      end
+
+      it 'executes :each_node only once for first reference filter', :aggregate_failures do
+        issue = create(:issue, project: project)
+        markdown = "text #{issue.to_reference(project, full: true)}"
+
+        expect_any_instance_of(Banzai::Filter::ReferenceFilter).to receive(:each_node).once
+
+        described_class.call(markdown, project: project)
+      end
+
+      context 'when shorthand pattern #ISSUE_ID is used' do
         it 'links an internal issue  if it exists' do
           issue = create(:issue, project: project)
           markdown = issue.to_reference(project, full: true)

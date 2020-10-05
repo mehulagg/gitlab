@@ -13,8 +13,9 @@ module EE
         ::Gitlab::Elastic::ProjectSearchResults.new(
           current_user,
           params[:search],
-          project,
-          repository_ref
+          project: project,
+          repository_ref: repository_ref,
+          filters: { confidential: params[:confidential], state: params[:state] }
         )
       end
 

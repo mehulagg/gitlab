@@ -46,12 +46,18 @@ module Types
     field :issues,
           Types::IssueType.connection_type,
           null: true,
-          description: 'Issues of the group',
-          resolver: Resolvers::IssuesResolver
+          description: 'Issues for projects in this group',
+          resolver: Resolvers::GroupIssuesResolver
+
+    field :merge_requests,
+          Types::MergeRequestType.connection_type,
+          null: true,
+          description: 'Merge requests for projects in this group',
+          resolver: Resolvers::GroupMergeRequestsResolver
 
     field :milestones, Types::MilestoneType.connection_type, null: true,
-          description: 'Find milestones',
-          resolver: Resolvers::MilestoneResolver
+          description: 'Milestones of the group',
+          resolver: Resolvers::GroupMilestonesResolver
 
     field :boards,
           Types::BoardType.connection_type,
@@ -64,7 +70,7 @@ module Types
           Types::BoardType,
           null: true,
           description: 'A single board of the group',
-          resolver: Resolvers::BoardsResolver.single
+          resolver: Resolvers::BoardResolver
 
     field :label,
           Types::LabelType,
@@ -74,6 +80,12 @@ module Types
               required: true,
               description: 'Title of the label'
           end
+
+    field :group_members,
+          Types::GroupMemberType.connection_type,
+          description: 'A membership of a user within this group',
+          extras: [:lookahead],
+          resolver: Resolvers::GroupMembersResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: group) do |titles, loader, args|

@@ -1,5 +1,0 @@
----
-title: Show count of all epics on group page no matter if user can see them or not.
-merge_request: 35129
-author:
-type: performance

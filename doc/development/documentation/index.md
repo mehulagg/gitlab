@@ -1,4 +1,7 @@
 ---
+stage: none
+group: Documentation Guidelines
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 description: Learn how to contribute to GitLab Documentation.
 ---
 
@@ -52,9 +55,9 @@ docs-only merge requests using the following guide:
 
 [Contributions to GitLab docs](workflow.md) are welcome from the entire GitLab community.
 
-To ensure that GitLab docs are current, there are special processes and responsibilities for all [feature changes](feature-change-workflow.md), that is development work that impacts the appearance, usage, or administration of a feature.
+To ensure that GitLab docs are current, there are special processes and responsibilities for all [feature changes](workflow.md), that is development work that impacts the appearance, usage, or administration of a feature.
 
-However, anyone can contribute [documentation improvements](improvement-workflow.md) that are not associated with a feature change. For example, adding a new doc on how to accomplish a use case that's already possible with GitLab or with third-party tools and GitLab.
+However, anyone can contribute [documentation improvements](workflow.md) that are not associated with a feature change. For example, adding a new doc on how to accomplish a use case that's already possible with GitLab or with third-party tools and GitLab.
 
 ## Markdown and styles
 
@@ -105,22 +108,22 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 ---
 ```
 
-### Page type metadata
+### Document type metadata
 
 Originally discussed in [this epic](https://gitlab.com/groups/gitlab-org/-/epics/1280),
-each page should have a `type` metadata. It can be one or more of the following:
+each page should have a metadata tag called `type`. It can be one or more of the
+following:
 
-- `index`: Index/overview pages. They serve as a list to other pages. Doesn't
-  necessarily mean the page should be named `index.md`. [Example page](../../install/README.md).
-- `concepts`: What you need to know before using product. Informational, not
-  instructional. For example, abstract ideas, explain meaning or benefit, support
-  understanding of tasks. They are read for background information, for example
-  "Why X is important". [Example page](../../topics/autodevops/index.md).
-- `howto`: Specific use case instructions. [Example page](../../ssh/README.md).
-- `tutorial`: Learn a process/concept by doing. [Example page](../../gitlab-basics/start-using-git.md).
-- `reference`: Covers what things are/do. Things like specific settings, facts
-  without too much explanation that are read for detailed information.
-  [Example page](../../ci/yaml/README.md).
+- `index`: It consists mostly of a list of links to other pages.
+  [Example page](../../README.md).
+- `concepts`: The background or context of a subject.
+  [Example page](../../topics/autodevops/index.md).
+- `howto`: Specific use case instructions.
+  [Example page](../../ssh/README.md).
+- `tutorial`: Learn a process/concept by doing.
+  [Example page](../../gitlab-basics/start-using-git.md).
+- `reference`: A collection of information used as a reference to use a feature
+  or a functionality. [Example page](../../ci/yaml/README.md).
 
 ### Redirection metadata
 
@@ -128,7 +131,7 @@ The following metadata should be added when a page is moved to another location:
 
 - `redirect_to`: The relative path and filename (with an `.md` extension) of the
   location to which visitors should be redirected for a moved page.
-  [Learn more](#changing-document-location).
+  [Learn more](#move-or-rename-a-page).
 - `disqus_identifier`: Identifier for Disqus commenting system. Used to keep
   comments with a page that's been moved to a new URL.
   [Learn more](#redirections-for-pages-with-disqus-comments).
@@ -147,33 +150,27 @@ comments: false
 
 ### Additional page metadata
 
-Each page can have additional (optional) metadata (set in the
+Each page can have additional, optional metadata (set in the
 [default.html](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/fc3577921343173d589dfa43d837b4307e4e620f/layouts/default.html#L30-52)
-Nanoc layout), which will be shown to the top of the page if defined:
+Nanoc layout), which will be displayed at the top of the page if defined:
 
-- `author`: The name of the author of a page, usually a tutorial. It requires `author_gitlab` in order to be shown.
-- `author_gitlab`: The username of the author on GitLab.com. It requires `author` in order to be shown.
-- `date`: The date the page was created, usually for tutorials.
-- `article_type`: The type of article. Can be either `tutorial` or `user guide`.
-- `level`: The level of complexity of a how-to or tutorial. Can be either `beginner`,
-  `advanced`, or `intermediate`.
-- `last_updated`: The date in ISO format when the page was last updated. For example `2020-02-14`.
 - `reading_time`: If you want to add an indication of the approximate reading
   time of a page, you can set `reading_time` to `true`. This uses a simple
   [algorithm](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/lib/helpers/reading_time.rb)
   to calculate the reading time based on the number of words.
 
-## Changing document location
+## Move or rename a page
 
-Changing a document's location requires specific steps to ensure that
-users can seamlessly access the new doc page, whether they are accessing content
-on a GitLab instance domain at `/help` or at <https://docs.gitlab.com>. Be sure to assign a
-technical writer if you have any questions during the process (such as
-whether the move is necessary), and ensure that a technical writer reviews this
-change prior to merging.
+Moving or renaming a document is the same as changing its location. This process
+requires specific steps to ensure that visitors can find the new
+documentation page, whether they're using `/help` from a GitLab instance or by
+visiting <https://docs.gitlab.com>.
 
-If you indeed need to change a document's location, do not remove the old
-document, but instead replace all of its content with the following:
+Be sure to assign a technical writer to a page move or rename MR. Technical
+Writers can help with any questions and can review your change.
+
+To change a document's location, don't remove the old document, but instead
+replace all of its content with the following:
 
 ```markdown
 ---
@@ -183,14 +180,18 @@ redirect_to: '../path/to/file/index.md'
 This document was moved to [another location](../path/to/file/index.md).
 ```
 
-Where `../path/to/file/index.md` is usually the relative path to the old document.
+Replace `../path/to/file/index.md` with the relative path to the old document.
 
-The `redirect_to` variable supports both full and relative URLs, for example
-`https://docs.gitlab.com/ee/path/to/file.html`, `../path/to/file.html`, `path/to/file.md`.
-It ensures that the redirect will work for <https://docs.gitlab.com> and any `*.md` paths
-will be compiled to `*.html`.
-The new line underneath the front matter informs the user that the document
-changed location and is useful for someone that browses that file from the repository.
+The `redirect_to` variable supports both full and relative URLs; for example:
+
+- `https://docs.gitlab.com/ee/path/to/file.html`
+- `../path/to/file.html`
+- `path/to/file.md`
+
+The redirect works for <https://docs.gitlab.com>, and any `*.md` paths are
+changed to `*.html`. The description line following the `redirect_to` code
+informs the visitor that the document changed location if the redirect process
+doesn't complete successfully.
 
 For example, if you move `doc/workflow/lfs/index.md` to
 `doc/administration/lfs.md`, then the steps would be:
@@ -335,12 +336,12 @@ You can combine one or more of the following:
    = link_to 'Help page', help_page_path('user/permissions'), target: '_blank'
    ```
 
-1. **Linking to a circle icon.** Usually used in settings where a long
+1. **Using a question icon.** Usually used in settings where a long
    description cannot be used, like near checkboxes. You can basically use
-   any font awesome icon, but prefer the `question-circle`:
+   any GitLab SVG icon, but prefer the `question-o`:
 
    ```haml
-   = link_to icon('question-circle'), help_page_path('user/permissions')
+   = link_to sprite_icon('question-o'), help_page_path('user/permissions')
    ```
 
 1. **Using a button link.** Useful in places where text would be out of context
@@ -445,8 +446,8 @@ In case the review app URL returns 404, follow these steps to debug:
 If you want to know the in-depth details, here's what's really happening:
 
 1. You manually run the `review-docs-deploy` job in a merge request.
-1. The job runs the [`scripts/trigger-build-docs`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/trigger-build-docs)
-   script with the `deploy` flag, which in turn:
+1. The job runs the [`scripts/trigger-build`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/trigger-build)
+   script with the `docs deploy` flag, which in turn:
    1. Takes your branch name and applies the following:
       - The `docs-preview-` prefix is added.
       - The product slug is used to know the project the review app originated
@@ -462,17 +463,17 @@ If you want to know the in-depth details, here's what's really happening:
    [skips the test jobs](https://gitlab.com/gitlab-org/gitlab-docs/blob/8d5d5c750c602a835614b02f9db42ead1c4b2f5e/.gitlab-ci.yml#L50-55)
    to lower the build time.
 1. Once the docs site is built, the HTML files are uploaded as artifacts.
-1. A specific Runner tied only to the docs project, runs the Review App job
+1. A specific runner tied only to the docs project, runs the Review App job
    that downloads the artifacts and uses `rsync` to transfer the files over
    to a location where NGINX serves them.
 
 The following GitLab features are used among others:
 
 - [Manual actions](../../ci/yaml/README.md#whenmanual)
-- [Multi project pipelines](../../ci/multi_project_pipeline_graphs.md)
+- [Multi project pipelines](../../ci/multi_project_pipelines.md)
 - [Review Apps](../../ci/review_apps/index.md)
 - [Artifacts](../../ci/yaml/README.md#artifacts)
-- [Specific Runner](../../ci/runners/README.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
+- [Specific runner](../../ci/runners/README.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
 - [Pipelines for merge requests](../../ci/merge_request_pipelines/index.md)
 
 ## Testing
@@ -481,7 +482,7 @@ We treat documentation as code, and so use tests in our CI pipeline to maintain 
 standards and quality of the docs. The current tests, which run in CI jobs when a
 merge request with new or changed docs is submitted, are:
 
-- [`docs lint`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/docs.gitlab-ci.yml#L48):
+- [`docs lint`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L41):
   Runs several tests on the content of the docs themselves:
   - [`lint-doc.sh` script](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/lint-doc.sh)
     runs the following checks and linters:
@@ -492,32 +493,19 @@ merge request with new or changed docs is submitted, are:
     - [markdownlint](#markdownlint).
     - [Vale](#vale).
   - Nanoc tests:
-    - [`internal_links`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/docs.gitlab-ci.yml#L67)
+    - [`internal_links`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L58)
       checks that all internal links (ex: `[link](../index.md)`) are valid.
-    - [`internal_anchors`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/ci/docs.gitlab-ci.yml#L69)
+    - [`internal_anchors`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L60)
       checks that all internal anchors (ex: `[link](../index.md#internal_anchor)`)
       are valid.
+  - [`ui-docs-links lint`](https://gitlab.com/gitlab-org/gitlab/-/blob/0b562014f7b71f98540e682c8d662275f0011f2f/.gitlab/ci/docs.gitlab-ci.yml#L62)
+    checks that all links to docs from UI elements (`app/views` files, for example)
+    are linking to valid docs and anchors.
 
-### Running tests
+### Run tests locally
 
 Apart from [previewing your changes locally](#previewing-the-changes-live), you can also run all lint checks
 and Nanoc tests locally.
-
-#### Nanoc tests
-
-To execute Nanoc tests locally:
-
-1. Navigate to the [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) directory.
-1. Run:
-
-   ```shell
-   # Check for broken internal links
-   bundle exec nanoc check internal_links
-
-   # Check for broken external links (might take a lot of time to complete).
-   # This test is set to be allowed to fail and is run only in the gitlab-docs project CI
-   bundle exec nanoc check internal_anchors
-   ```
 
 #### Lint checks
 
@@ -549,6 +537,57 @@ The output should be similar to:
 
 Note that this requires you to either have the required lint tools installed on your machine,
 or a working Docker installation, in which case an image with these tools pre-installed will be used.
+
+#### Nanoc tests
+
+To execute Nanoc tests locally:
+
+1. Navigate to the [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) directory.
+1. Run:
+
+   ```shell
+   # Check for broken internal links
+   bundle exec nanoc check internal_links
+
+   # Check for broken external links (might take a lot of time to complete).
+   # This test is set to be allowed to fail and is run only in the gitlab-docs project CI
+   bundle exec nanoc check internal_anchors
+   ```
+
+#### `ui-docs-links` test
+
+The `ui-docs-links lint` job uses `haml-lint` to test that all links to docs from
+UI elements (`app/views` files, for example) are linking to valid docs and anchors.
+
+To run the `ui-docs-links` test locally:
+
+1. Open the `gitlab` directory in a terminal window.
+1. Run:
+
+   ```shell
+   bundle exec haml-lint -i DocumentationLinks
+   ```
+
+If you receive an error the first time you run this test, run `bundle install`, which
+installs GitLab's dependencies, and try again.
+
+If you don't want to install all of GitLab's dependencies to test the links, you can:
+
+1. Open the `gitlab` directory in a terminal window.
+1. Install `haml-lint`:
+
+   ```shell
+   gem install haml_lint
+   ```
+
+1. Run:
+
+   ```shell
+   haml-lint -i DocumentationLinks
+   ```
+
+If you manually install `haml-lint` with this process, it will not update automatically
+and you should make sure your version matches the version used by GitLab.
 
 ### Local linters
 
@@ -586,6 +625,7 @@ You can use markdownlint:
 
 - [On the command line](https://github.com/igorshubovych/markdownlint-cli#markdownlint-cli--).
 - [Within a code editor](#configure-editors).
+- [In a `pre-commit` hook](#configure-pre-commit-hooks).
 
 #### Vale
 
@@ -612,6 +652,9 @@ You can use Vale:
 
 - [On the command line](https://errata-ai.gitbook.io/vale/getting-started/usage).
 - [Within a code editor](#configure-editors).
+- [In a `pre-commit` hook](#configure-pre-commit-hooks). Vale only reports errors in the
+  `pre-commit` hook (the same configuration as the CI/CD pipelines), and does not report suggestions
+  or warnings.
 
 #### Install linters
 
@@ -655,13 +698,31 @@ To configure markdownlint within your editor, install one of the following as ap
 - [Sublime Text](https://packagecontrol.io/packages/SublimeLinter-contrib-markdownlint)
 - [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint)
 - [Atom](https://atom.io/packages/linter-node-markdownlint)
+- [Vim](https://github.com/dense-analysis/ale)
 
 To configure Vale within your editor, install one of the following as appropriate:
 
-- The Sublime Text [`SublimeLinter-contrib-vale` plugin](https://packagecontrol.io/packages/SublimeLinter-contrib-vale)
-- The Visual Studio Code [`testthedocs.vale` extension](https://marketplace.visualstudio.com/items?itemName=testthedocs.vale)
+- The Sublime Text [`SublimeLinter-contrib-vale` plugin](https://packagecontrol.io/packages/SublimeLinter-contrib-vale).
+- The Visual Studio Code [`errata-ai.vale-server` extension](https://marketplace.visualstudio.com/items?itemName=errata-ai.vale-server). You don't need Vale Server to use the plugin.
+- [Vim](https://github.com/dense-analysis/ale).
 
 We don't use [Vale Server](https://errata-ai.github.io/vale/#using-vale-with-a-text-editor-or-another-third-party-application).
+
+#### Configure pre-commit hooks
+
+Git [pre-commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) allow Git users to
+run tests or other processes before committing to a branch, with the ability to not commit to the branch if
+failures occur with these tests.
+
+[`overcommit`](https://github.com/sds/overcommit) is a Git hooks manager, making configuring,
+installing, and removing Git hooks easy.
+
+Sample configuration for `overcommit` is available in the
+[`.overcommit.yml.example`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.overcommit.yml.example)
+file for the [`gitlab`](https://gitlab.com/gitlab-org/gitlab) project.
+
+To set up `overcommit` for documentation linting, see
+[Pre-commit static analysis](../contributing/style_guides.md#pre-commit-static-analysis).
 
 #### Disable Vale tests
 
@@ -676,9 +737,7 @@ document:
 - To disable all Vale linting rules, add a `<!-- vale off -->` tag before the text, and a
   `<!-- vale on -->` tag after the text.
 
-Whenever possible, exclude only the problematic rule and line(s). In some cases, such as list items,
-you may need to disable linting for the entire list until
-[Vale issue #175](https://github.com/errata-ai/vale/issues/175) is resolved.
+Whenever possible, exclude only the problematic rule and line(s).
 
 For more information, see
 [Vale's documentation](https://errata-ai.gitbook.io/vale/getting-started/markup#markup-based-configuration).
@@ -690,3 +749,64 @@ code review. For docs changes in merge requests, whenever a change to files unde
 is made, Danger Bot leaves a comment with further instructions about the documentation
 process. This is configured in the `Dangerfile` in the GitLab repository under
 [/danger/documentation/](https://gitlab.com/gitlab-org/gitlab/tree/master/danger/documentation).
+
+## Automatic screenshot generator
+
+You can now set up an automatic screenshot generator to take and compress screenshots, with the
+help of a configuration file known as **screenshot generator**.
+
+### Use the tool
+
+To run the tool on an existing screenshot generator, take the following steps:
+
+1. Set up the [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/gitlab_docs.md).
+1. Navigate to the subdirectory with your cloned GitLab repository, typically `gdk/gitlab`.
+1. Make sure that your GDK database is fully migrated: `bin/rake db:migrate RAILS_ENV=development`.
+1. Install pngquant, see the tool website for more info: [`pngquant`](https://pngquant.org/)
+1. Run `scripts/docs_screenshots.rb spec/docs_screenshots/<name_of_screenshot_generator>.rb <milestone-version>`.
+1. Identify the location of the screenshots, based on the `gitlab/doc` location defined by the `it` parameter in your script.
+1. Commit the newly created screenshots.
+
+### Extending the tool
+
+To add an additional **screenshot generator**, take the following steps:
+
+- Locate the `spec/docs_screenshots` directory.
+- Add a new file with a `_docs.rb` extension.
+- Be sure to include the following bits in the file:
+
+```ruby
+require 'spec_helper'
+
+RSpec.describe '<What I am taking screenshots of>', :js do
+  include DocsScreenshotHelpers # Helper that enables the screenshots taking mechanism
+
+  before do
+    page.driver.browser.manage.window.resize_to(1366, 1024) # length and width of the page
+  end
+```
+
+- In addition, every `it` block must include the path where the screenshot is saved
+
+```ruby
+ it 'user/packages/container_registry/img/project_image_repositories_list'
+```
+
+#### Full page screenshots
+
+To take a full page screenshot simply `visit the page` and perform any expectation on real content (to have capybara wait till the page is ready and not take a white screenshot).
+
+#### Element screenshot
+
+To have the screenshot focuses few more steps are needed:
+
+- **find the area**: `screenshot_area = find('#js-registry-policies')`
+- **scroll the area in focus**: `scroll_to screenshot_area`
+- **wait for the content**: `expect(screenshot_area).to have_content 'Expiration interval'`
+- **set the crop area**: `set_crop_data(screenshot_area, 20)`
+
+In particular `set_crop_data` accepts as arguments: a `DOM` element and a padding, the padding will be added around the element enlarging the screenshot area.
+
+#### Live example
+
+Please use `spec/docs_screenshots/container_registry_docs.rb` as a guide and as an example to create your own scripts.

@@ -26,7 +26,7 @@ To install:
 Then run the following:
 
 ```shell
-fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=/path/to/git-data/testfile --bs=4k --iodepth=64 --size=4G --readwrite=randrw --rwmixread=75
+fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --bs=4k --iodepth=64 --readwrite=randrw --rwmixread=75 --size=4G --filename=/path/to/git-data/testfile
 ```
 
 This will create a 4GB file in `/path/to/git-data/testfile`. It performs
@@ -65,7 +65,8 @@ operations per second.
 
 ### Simple benchmarking
 
-NOTE: **Note:** This test is naive but may be useful if `fio` is not
+NOTE: **Note:**
+This test is naive but may be useful if `fio` is not
 available on the system. It's possible to receive good results on this
 test but still have poor performance due to read speed and various other
 factors.

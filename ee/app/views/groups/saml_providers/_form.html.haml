@@ -23,9 +23,6 @@
         .form-text.text-muted.js-helper-text{ style: "display: #{'none' if saml_provider.enforced_sso?} #{'block' unless saml_provider.enforced_sso?}" }
           %span
             = s_('GroupSAML|To be able to enable group managed accounts, you first need to enable enforced SSO.')
-        - if Feature.enabled?(:gma_member_cleanup)
-          .bs-callout.bs-callout-info.js-callout{ style: "display: #{'block' if saml_provider.enforced_sso?} #{'none' unless saml_provider.enforced_sso?}" }
-            = s_('GroupSAML|With group managed accounts enabled, all the users without a group managed account will be excluded from the group.')
       .form-group
         %label.toggle-wrapper.mb-0.js-group-saml-prohibited-outer-forks-toggle-area
           = render "shared/buttons/project_feature_toggle", is_checked: saml_provider.prohibited_outer_forks, disabled: !saml_provider.enforced_group_managed_accounts?, label: s_("GroupSAML|Prohibit outer forks"), class_list: "js-project-feature-toggle js-group-saml-prohibited-outer-forks-toggle project-feature-toggle d-inline", data: { qa_selector: 'prohibited_outer_forks_toggle_button' } do
@@ -50,7 +47,14 @@
       .form-text.text-muted
         = s_('GroupSAML|SHA1 fingerprint of the SAML token signing certificate. Get this from your identity provider, where it can also be called "Thumbprint".')
 
+    .well-segment.borderless.gl-mb-3.col-12.col-lg-9.gl-p-0
+      = f.label :default_membership_role, class: 'label-bold' do
+        = s_('GroupSAML|Default membership role')
+      = f.select :default_membership_role, options_for_select(group.access_level_roles, saml_provider.default_membership_role), {}, class: 'form-control', data: { qa_selector: 'default_membership_role_dropdown' }
+      .form-text.text-muted
+        = s_('GroupSAML|This will be set as the access level of users added to the group.')
+
     .mt-3
       = f.submit _("Save changes"), class: 'btn btn-success', data: { qa_selector: 'save_changes_button' }
-      #js-saml-test-button.has-tooltip.pull-right
+      #js-saml-test-button.has-tooltip.float-right
         = render 'test_button', saml_provider: @saml_provider

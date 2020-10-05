@@ -89,6 +89,10 @@ namespace :admin do
 
   resources :projects, only: [:index]
 
+  resources :instance_statistics, only: :index
+  resource :dev_ops_report, controller: 'dev_ops_report', only: :show
+  resources :cohorts, only: :index
+
   scope(path: 'projects/*namespace_id',
         as: :namespace,
         constraints: { namespace_id: Gitlab::PathRegex.full_namespace_route_regex }) do
@@ -135,6 +139,8 @@ namespace :admin do
     get :status_delete_self_monitoring_project
   end
 
+  resources :plan_limits, only: :create
+
   resources :labels
 
   resources :runners, only: [:index, :show, :update, :destroy] do
@@ -145,6 +151,7 @@ namespace :admin do
 
     collection do
       get :tag_list, format: :json
+      get :runner_setup_scripts, format: :json
     end
   end
 

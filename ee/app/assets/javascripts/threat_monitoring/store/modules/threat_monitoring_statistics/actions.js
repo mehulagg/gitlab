@@ -1,7 +1,7 @@
 import { s__ } from '~/locale';
 import pollUntilComplete from '~/lib/utils/poll_until_complete';
 import httpStatusCodes from '~/lib/utils/http_status';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import * as types from './mutation_types';
 import { getTimeWindowParams } from '../../utils';
 

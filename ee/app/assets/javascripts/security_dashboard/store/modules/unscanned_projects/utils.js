@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { getDayDifference, isValidDate } from '~/lib/utils/datetime_utility';
 
 /**

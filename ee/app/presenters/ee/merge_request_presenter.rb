@@ -3,18 +3,9 @@
 module EE
   module MergeRequestPresenter
     include ::VisibleApprovable
+    extend ::Gitlab::Utils::Override
 
-    def approvals_path
-      if expose_mr_approval_path?
-        expose_path(approvals_project_merge_request_path(project, merge_request))
-      end
-    end
-
-    def api_approvals_path
-      if expose_mr_approval_path?
-        expose_path(api_v4_projects_merge_requests_approvals_path(id: project.id, merge_request_iid: merge_request.iid))
-      end
-    end
+    APPROVALS_WIDGET_FULL_TYPE = 'full'
 
     def api_approval_settings_path
       if expose_mr_approval_path?
@@ -25,18 +16,6 @@ module EE
     def api_project_approval_settings_path
       if approval_feature_available?
         expose_path(api_v4_projects_approval_settings_path(id: project.id))
-      end
-    end
-
-    def api_approve_path
-      if expose_mr_approval_path?
-        expose_path(api_v4_projects_merge_requests_approve_path(id: project.id, merge_request_iid: merge_request.iid))
-      end
-    end
-
-    def api_unapprove_path
-      if expose_mr_approval_path?
-        expose_path(api_v4_projects_merge_requests_unapprove_path(id: project.id, merge_request_iid: merge_request.iid))
       end
     end
 
@@ -64,10 +43,24 @@ module EE
       merge_request.approval_state.suggested_approvers(current_user: current_user)
     end
 
+    override :approvals_widget_type
+    def approvals_widget_type
+      expose_mr_approval_path? ? APPROVALS_WIDGET_FULL_TYPE : super
+    end
+
+    def missing_security_scan_types
+      merge_request.missing_security_scan_types if expose_missing_security_scan_types?
+    end
+
     private
 
     def expose_mr_approval_path?
       approval_feature_available? && merge_request.iid
+    end
+
+    def expose_missing_security_scan_types?
+      ::Feature.enabled?(:missing_mr_security_scan_types, project) &&
+        can?(current_user, :read_pipeline, merge_request.actual_head_pipeline)
     end
   end
 end

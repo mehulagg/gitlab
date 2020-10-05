@@ -11,7 +11,7 @@ RSpec.describe PostReceive do
   let(:gl_repository) { "project-#{project.id}" }
   let(:key) { create(:key, user: project.owner) }
   let(:key_id) { key.shell_id }
-  let(:project) { create(:project, :repository, :wiki_repo) }
+  let(:project) { create(:project, :repository) }
 
   describe "#process_project_changes" do
     before do
@@ -81,7 +81,9 @@ RSpec.describe PostReceive do
       it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
         allow(Gitlab::Geo).to receive(:primary?) { true }
 
-        expect_any_instance_of(::Geo::RepositoryUpdatedService).to receive(:execute)
+        expect_next_instance_of(::Geo::RepositoryUpdatedService) do |service|
+          expect(service).to receive(:execute)
+        end
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
@@ -89,7 +91,7 @@ RSpec.describe PostReceive do
       it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node' do
         allow(Gitlab::Geo).to receive(:primary?) { false }
 
-        expect_any_instance_of(::Geo::RepositoryUpdatedService).not_to receive(:execute)
+        expect_next_instance_of(::Geo::RepositoryUpdatedService).never
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
@@ -97,23 +99,30 @@ RSpec.describe PostReceive do
   end
 
   describe '#process_wiki_changes' do
-    let(:gl_repository) { "wiki-#{project.id}" }
+    let(:wiki) { build(:project_wiki, project: project) }
+    let(:gl_repository) { wiki.repository.repo_type.identifier_for_container(wiki) }
 
-    it 'calls Git::WikiPushService#process_changes' do
-      expect_any_instance_of(::Git::WikiPushService).to receive(:process_changes)
+    it 'calls Git::WikiPushService#execute' do
+      expect_next_instance_of(::Git::WikiPushService) do |service|
+        expect(service).to receive(:execute)
+      end
 
       described_class.new.perform(gl_repository, key_id, base64_changes)
     end
 
     context 'assuming calls to process_changes are successful' do
       before do
-        allow_any_instance_of(Git::WikiPushService).to receive(:process_changes)
+        allow_next_instance_of(::Git::WikiPushService) do |service|
+          allow(service).to receive(:execute)
+        end
       end
 
       it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
         allow(Gitlab::Geo).to receive(:primary?) { true }
 
-        expect_any_instance_of(::Geo::RepositoryUpdatedService).to receive(:execute)
+        expect_next_instance_of(::Geo::RepositoryUpdatedService) do |service|
+          expect(service).to receive(:execute)
+        end
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
@@ -121,73 +130,30 @@ RSpec.describe PostReceive do
       it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node' do
         allow(Gitlab::Geo).to receive(:primary?) { false }
 
-        expect_any_instance_of(::Geo::RepositoryUpdatedService).not_to receive(:execute)
+        expect_next_instance_of(::Geo::RepositoryUpdatedService).never
+
+        described_class.new.perform(gl_repository, key_id, base64_changes)
+      end
+    end
+
+    context 'with a group wiki' do
+      let_it_be(:group) { create(:group) }
+      let(:wiki) { build(:group_wiki, group: group) }
+
+      it 'calls Git::WikiPushService#execute' do
+        expect_next_instance_of(::Git::WikiPushService) do |service|
+          expect(service).to receive(:execute)
+        end
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
 
-      it 'triggers wiki index update when ElasticSearch is enabled and pushed to master', :elastic do
-        stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
+      it 'does not call Geo::RepositoryUpdatedService when running on a Geo primary node' do
+        allow(Gitlab::Geo).to receive(:primary?) { true }
 
-        expect_any_instance_of(ProjectWiki).to receive(:index_wiki_blobs)
-
-        described_class.new.perform(gl_repository, key_id, base64_changes_with_master)
-      end
-
-      it 'does not trigger wiki index update when Elasticsearch is enabled and not pushed to master', :elastic do
-        stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-
-        expect_any_instance_of(ProjectWiki).not_to receive(:index_wiki_blobs)
+        expect_next_instance_of(::Geo::RepositoryUpdatedService).never
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
-      end
-
-      context 'when limited indexing is on', :elastic do
-        before do
-          stub_ee_application_setting(
-            elasticsearch_search: true,
-            elasticsearch_indexing: true,
-            elasticsearch_limit_indexing: true
-          )
-        end
-
-        context 'when the project is not enabled specifically' do
-          it 'does not trigger wiki index update' do
-            expect_any_instance_of(ProjectWiki).not_to receive(:index_wiki_blobs)
-
-            described_class.new.perform(gl_repository, key_id, base64_changes_with_master)
-          end
-        end
-
-        context 'when a project is enabled specifically' do
-          before do
-            create :elasticsearch_indexed_project, project: project
-          end
-
-          it 'triggers wiki index update' do
-            expect_any_instance_of(ProjectWiki).to receive(:index_wiki_blobs)
-
-            described_class.new.perform(gl_repository, key_id, base64_changes_with_master)
-          end
-        end
-
-        context 'when a group is enabled' do
-          let(:user) { create(:user) }
-          let(:group) { create(:group) }
-          let(:project) { create(:project, :wiki_repo, group: group) }
-          let(:key) { create(:key, user: user) }
-
-          before do
-            create :elasticsearch_indexed_namespace, namespace: group
-            group.add_owner(user)
-          end
-
-          it 'triggers wiki index update' do
-            expect_any_instance_of(ProjectWiki).to receive(:index_wiki_blobs)
-
-            described_class.new.perform(gl_repository, key_id, base64_changes_with_master)
-          end
-        end
       end
     end
   end

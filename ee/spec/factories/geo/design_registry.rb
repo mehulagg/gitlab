@@ -7,8 +7,9 @@ FactoryBot.define do
     last_synced_at { nil }
     state { :pending }
 
-    after(:create) do |registry, evaluator|
-      create(:design, project: registry.project)
+    after(:create) do |registry|
+      issue = create(:issue, project: registry.project)
+      create(:design, project: registry.project, issue: issue)
     end
 
     trait :synced do

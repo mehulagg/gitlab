@@ -1,7 +1,7 @@
 - if merge_request.approval_needed?
 
   - approved = merge_request.approved?
-  - self_approved = merge_request.has_approved?(current_user)
+  - self_approved = merge_request.approved_by?(current_user)
   - given = merge_request.approvals_given
   - total = merge_request.total_approvals_count
 
@@ -16,7 +16,7 @@
   - else
     - approval_tooltip = self_approved ? approved_text : unapproved_text
 
-  - approval_icon = sprite_icon((self_approved ? 'approval-solid' : 'approval'), size: 16, css_class: 'align-middle')
+  - approval_icon = sprite_icon((self_approved ? 'approval-solid' : 'approval'), css_class: 'align-middle')
 
   %li.d-none.d-sm-inline-block.has-tooltip{ title: approval_tooltip, class: ('text-success' if approved) }
     = approval_icon
@@ -25,3 +25,5 @@
       = _("Approved")
     - else
       = _("%{remaining_approvals} left") % { remaining_approvals: merge_request.approvals_left }
+- else
+  = render_ce "projects/merge_requests/approvals_count", merge_request: merge_request

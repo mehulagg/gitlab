@@ -20,8 +20,8 @@ RSpec.describe 'Query.project(fullPath).pipeline(iid).securityReportSummary' do
   let_it_be(:query) do
     %(
       query {
-        project(fullPath:"#{project.full_path}") {
-          pipeline(iid:"#{pipeline.iid}") {
+        project(fullPath: "#{project.full_path}") {
+          pipeline(iid: "#{pipeline.iid}") {
             securityReportSummary {
               dast {
                 scannedResourcesCount

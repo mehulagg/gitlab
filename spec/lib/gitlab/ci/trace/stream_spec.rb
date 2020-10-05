@@ -101,7 +101,7 @@ RSpec.describe Gitlab::Ci::Trace::Stream, :clean_gitlab_redis_cache do
 
   describe '#append' do
     shared_examples_for 'appends' do
-      it "truncates and append content" do
+      it "truncates and appends content" do
         stream.append(+"89", 4)
         stream.seek(0)
 
@@ -150,6 +150,28 @@ RSpec.describe Gitlab::Ci::Trace::Stream, :clean_gitlab_redis_cache do
       end
 
       it_behaves_like 'appends'
+    end
+
+    describe 'metrics' do
+      let(:metrics) { spy('metrics') }
+      let(:io) { StringIO.new }
+      let(:stream) { described_class.new(metrics) { io } }
+
+      it 'increments trace streamed operation' do
+        stream.append(+'123456', 0)
+
+        expect(metrics)
+          .to have_received(:increment_trace_operation)
+          .with(operation: :streamed)
+      end
+
+      it 'increments trace bytes counter' do
+        stream.append(+'123456', 0)
+
+        expect(metrics)
+          .to have_received(:increment_trace_bytes)
+          .with(6)
+      end
     end
   end
 

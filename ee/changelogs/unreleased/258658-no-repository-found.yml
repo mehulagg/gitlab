@@ -1,0 +1,5 @@
+---
+title: Geo - Fix wikis with no repository on the primary trying to sync over and over
+merge_request: 43765
+author:
+type: fixed

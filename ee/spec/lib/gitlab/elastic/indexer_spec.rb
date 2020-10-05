@@ -10,6 +10,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
   end
 
   let(:project) { create(:project, :repository) }
+  let(:user) { project.owner }
+
   let(:expected_from_sha) { Gitlab::Git::EMPTY_TREE_ID }
   let(:to_commit) { project.commit }
   let(:to_sha) { to_commit.try(:sha) }
@@ -83,7 +85,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
 
       it 'runs the indexing command' do
         gitaly_connection_data = {
-          storage: project.repository_storage
+          storage: project.repository_storage,
+          limit_file_size: Gitlab::CurrentSettings.elasticsearch_indexed_file_size_limit_kb.kilobytes
         }.merge(Gitlab::GitalyClient.connection_data(project.repository_storage))
 
         expect_popen.with(
@@ -131,27 +134,12 @@ RSpec.describe Gitlab::Elastic::Indexer do
       it_behaves_like 'index up to the specified commit'
 
       context 'after reverting a change' do
-        let(:user) { project.owner }
         let!(:initial_commit) { project.repository.commit('master').sha }
 
         def change_repository_and_index(project, &blk)
           yield blk if blk
 
-          current_commit = project.repository.commit('master').sha
-
-          described_class.new(project).run(current_commit)
-          ensure_elasticsearch_index!
-        end
-
-        def indexed_file_paths_for(term)
-          blobs = Repository.elastic_search(
-            term,
-            type: 'blob'
-          )[:blobs][:results].response
-
-          blobs.map do |blob|
-            blob['_source']['blob']['path']
-          end
+          index_repository(project)
         end
 
         def indexed_commits_for(term)
@@ -242,8 +230,6 @@ RSpec.describe Gitlab::Elastic::Indexer do
       end
 
       context 'when IndexStatus#last_wiki_commit is no longer in repository' do
-        let(:user) { project.owner }
-
         def change_wiki_and_index(project, &blk)
           yield blk if blk
 
@@ -304,8 +290,10 @@ RSpec.describe Gitlab::Elastic::Indexer do
     let(:cert_dir) { '/fake/cert/dir' }
 
     before do
-      stub_env('SSL_CERT_FILE', cert_file)
-      stub_env('SSL_CERT_DIR', cert_dir)
+      allow(ENV).to receive(:slice).with('SSL_CERT_FILE', 'SSL_CERT_DIR').and_return({
+        'SSL_CERT_FILE' => cert_file,
+        'SSL_CERT_DIR' => cert_dir
+      })
     end
 
     context 'when building env vars for child process' do
@@ -317,19 +305,86 @@ RSpec.describe Gitlab::Elastic::Indexer do
     end
   end
 
-  context 'when AWS_CONTAINER_CREDENTIALS_RELATIVE_URI is set' do
-    let(:aws_cred_relative_uri) { '/ecs/relative/cred/uri'}
+  context 'when no aws credentials available' do
+    subject { envvars }
 
     before do
-      stub_env('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI', aws_cred_relative_uri)
+      allow(Gitlab::Elastic::Client).to receive(:aws_credential_provider).and_return(nil)
     end
 
-    context 'when building env vars for child process' do
-      subject { envvars }
+    it 'credentials env vars will not be included' do
+      expect(subject).not_to include('AWS_ACCESS_KEY_ID')
+      expect(subject).not_to include('AWS_SECRET_ACCESS_KEY')
+      expect(subject).not_to include('AWS_SESSION_TOKEN')
+    end
+  end
 
-      it 'AWS_CONTAINER_CREDENTIALS_RELATIVE_URI env vars will be included' do
-        expect(subject).to include('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI' => aws_cred_relative_uri)
+  context 'when aws credentials are available' do
+    let(:access_key_id) { '012' }
+    let(:secret_access_key) { 'secret' }
+    let(:session_token) { 'token' }
+    let(:credentials) { Aws::Credentials.new(access_key_id, secret_access_key, session_token) }
+
+    subject { envvars }
+
+    before do
+      allow(Gitlab::Elastic::Client).to receive(:aws_credential_provider).and_return(credentials)
+    end
+
+    context 'when AWS config is not enabled' do
+      it 'credentials env vars will not be included' do
+        expect(subject).not_to include('AWS_ACCESS_KEY_ID')
+        expect(subject).not_to include('AWS_SECRET_ACCESS_KEY')
+        expect(subject).not_to include('AWS_SESSION_TOKEN')
       end
+    end
+
+    context 'when AWS config is enabled' do
+      before do
+        stub_application_setting(elasticsearch_aws: true)
+      end
+
+      it 'credentials env vars will be included' do
+        expect(subject).to include({
+          'AWS_ACCESS_KEY_ID' => access_key_id,
+          'AWS_SECRET_ACCESS_KEY' => secret_access_key,
+          'AWS_SESSION_TOKEN' => session_token
+        })
+      end
+    end
+  end
+
+  context 'when a file is larger than elasticsearch_indexed_file_size_limit_kb', :elastic do
+    let(:project) { create(:project, :repository) }
+
+    before do
+      stub_ee_application_setting(elasticsearch_indexed_file_size_limit_kb: 1) # 1 KiB limit
+
+      project.repository.create_file(user, 'small_file.txt', 'Small file contents', message: 'small_file.txt', branch_name: 'master')
+      project.repository.create_file(user, 'large_file.txt', 'Large file' * 1000, message: 'large_file.txt', branch_name: 'master')
+
+      index_repository(project)
+    end
+
+    it 'does not index that file' do
+      files = indexed_file_paths_for('file')
+      expect(files).to include('small_file.txt')
+      expect(files).not_to include('large_file.txt')
+    end
+  end
+
+  context 'when a file path is larger than elasticsearch max size of 512 bytes', :elastic do
+    let(:long_path) { "#{'a' * 1000}_file.txt" }
+
+    before do
+      project.repository.create_file(user, long_path, 'Large path file contents', message: 'long_path.txt', branch_name: 'master')
+
+      index_repository(project)
+    end
+
+    it 'indexes the file' do
+      files = indexed_file_paths_for('file')
+      expect(files).to include(long_path)
     end
   end
 
@@ -356,5 +411,23 @@ RSpec.describe Gitlab::Elastic::Indexer do
                  Gitlab::Git::BLANK_SHA,
                  Gitlab::Git::BLANK_SHA,
                  project.repository.__elasticsearch__.elastic_writing_targets.first)
+  end
+
+  def indexed_file_paths_for(term)
+    blobs = Repository.elastic_search(
+      term,
+      type: 'blob'
+    )[:blobs][:results].response
+
+    blobs.map do |blob|
+      blob['_source']['blob']['path']
+    end
+  end
+
+  def index_repository(project)
+    current_commit = project.repository.commit('master').sha
+
+    described_class.new(project).run(current_commit)
+    ensure_elasticsearch_index!
   end
 end

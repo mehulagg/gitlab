@@ -1,10 +1,10 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 import { setUrlFragment } from '~/lib/utils/url_utility';
 
 export default {
   name: 'SolutionCard',
-  components: { Icon },
+  components: { GlIcon },
   props: {
     solution: {
       type: String,
@@ -69,7 +69,7 @@ export default {
         class="col-auto d-flex align-items-center pl-0"
         :class="{ 'col-md-2': !isStandaloneVulnerability }"
       >
-        <div class="circle-icon-container pr-3" aria-hidden="true"><icon name="bulb" /></div>
+        <div class="circle-icon-container pr-3" aria-hidden="true"><gl-icon name="bulb" /></div>
         <strong class="text-right flex-grow-1">{{ s__('ciReport|Solution') }}:</strong>
       </div>
       <span class="flex-shrink-1 pl-0" :class="{ 'col-md-10': !isStandaloneVulnerability }">{{
@@ -93,7 +93,7 @@ export default {
             class="js-link-vulnerabilityFeedbackHelpPath"
           >
             {{ s__('ciReport|Learn more about interacting with security reports') }}
-            <icon :size="16" name="external-link" class="align-text-top" />
+            <gl-icon :size="16" name="external-link" class="align-text-top" />
           </a>
         </em>
       </div>

@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 
 import Draggable from 'vuedraggable';
 
@@ -410,13 +410,13 @@ describe('RelatedItemsTree', () => {
       });
 
       it('renders `Show more` link', () => {
-        expect(wrapper.find(GlDeprecatedButton).text()).toBe('Show more');
+        expect(wrapper.find(GlButton).text()).toBe('Show more');
       });
 
       it('calls `handleShowMoreClick` when `Show more` link is clicked', () => {
         jest.spyOn(wrapper.vm, 'handleShowMoreClick').mockImplementation(() => {});
 
-        wrapper.find(GlDeprecatedButton).vm.$emit('click');
+        wrapper.find(GlButton).vm.$emit('click');
 
         expect(wrapper.vm.handleShowMoreClick).toHaveBeenCalled();
       });

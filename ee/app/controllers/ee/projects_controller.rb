@@ -77,7 +77,6 @@ module EE
         reset_approvals_on_push
         ci_cd_only
         use_custom_template
-        packages_enabled
         require_password_to_approve
         group_with_project_templates_id
       ]

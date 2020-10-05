@@ -15,12 +15,13 @@ module Vulnerabilities
 
       vulnerability = Vulnerability.new
 
-      Vulnerabilities::Occurrence.transaction(requires_new: true) do
+      Vulnerabilities::Finding.transaction(requires_new: true) do
         # we're using `lock` instead of `with_lock` to avoid extra call to `find` under the hood
         finding = @project.vulnerability_findings.lock_for_confirmation!(@finding_id)
 
         save_vulnerability(vulnerability, finding)
         Statistics::UpdateService.update_for(vulnerability)
+        HistoricalStatistics::UpdateService.update_for(@project)
       rescue ActiveRecord::RecordNotFound
         vulnerability.errors.add(:base, _('finding is not found or is already attached to a vulnerability'))
         raise ActiveRecord::Rollback

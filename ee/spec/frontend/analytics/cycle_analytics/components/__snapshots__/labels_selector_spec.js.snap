@@ -1,25 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Value Stream Analytics LabelsSelector with no item selected will render the label selector 1`] = `
-"<gl-dropdown-stub text=\\"\\" toggle-class=\\"overflow-hidden\\" class=\\"w-100\\">
-  <gl-dropdown-item-stub active=\\"true\\">Select a label
-  </gl-dropdown-item-stub>
+"<gl-deprecated-dropdown-stub text=\\"\\" toggle-class=\\"overflow-hidden\\" class=\\"w-100\\">
+  <gl-deprecated-dropdown-item-stub active=\\"true\\">Select a label
+  </gl-deprecated-dropdown-item-stub>
   <div class=\\"mb-3 px-3\\">
     <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\" class=\\"mb-2\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-deprecated-dropdown-item-stub class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 0, 0);\\"></span>
       roses
-    </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub class=\\"\\">
+    </gl-deprecated-dropdown-item-stub>
+    <gl-deprecated-dropdown-item-stub class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 255, 255);\\"></span>
       some space
-    </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub class=\\"\\">
+    </gl-deprecated-dropdown-item-stub>
+    <gl-deprecated-dropdown-item-stub class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(0, 0, 255);\\"></span>
       violets
-    </gl-dropdown-item-stub>
+    </gl-deprecated-dropdown-item-stub>
     <div class=\\"text-center\\" style=\\"display: none;\\">
       <gl-loading-icon-stub label=\\"Loading\\" size=\\"md\\" color=\\"orange\\" inline=\\"true\\"></gl-loading-icon-stub>
     </div>
@@ -27,29 +27,29 @@ exports[`Value Stream Analytics LabelsSelector with no item selected will render
       No matching labels
     </div>
   </div>
-</gl-dropdown-stub>"
+</gl-deprecated-dropdown-stub>"
 `;
 
 exports[`Value Stream Analytics LabelsSelector with selectedLabelId set will render the label selector 1`] = `
-"<gl-dropdown-stub text=\\"\\" toggle-class=\\"overflow-hidden\\" class=\\"w-100\\">
-  <gl-dropdown-item-stub>Select a label
-  </gl-dropdown-item-stub>
+"<gl-deprecated-dropdown-stub text=\\"\\" toggle-class=\\"overflow-hidden\\" class=\\"w-100\\">
+  <gl-deprecated-dropdown-item-stub>Select a label
+  </gl-deprecated-dropdown-item-stub>
   <div class=\\"mb-3 px-3\\">
     <gl-search-box-by-type-stub value=\\"\\" clearbuttontitle=\\"Clear\\" class=\\"mb-2\\"></gl-search-box-by-type-stub>
   </div>
   <div class=\\"mb-3 px-3\\">
-    <gl-dropdown-item-stub class=\\"\\">
+    <gl-deprecated-dropdown-item-stub class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 0, 0);\\"></span>
       roses
-    </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub class=\\"\\">
+    </gl-deprecated-dropdown-item-stub>
+    <gl-deprecated-dropdown-item-stub class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(255, 255, 255);\\"></span>
       some space
-    </gl-dropdown-item-stub>
-    <gl-dropdown-item-stub active=\\"true\\" class=\\"\\">
+    </gl-deprecated-dropdown-item-stub>
+    <gl-deprecated-dropdown-item-stub active=\\"true\\" class=\\"\\">
       <!----> <span class=\\"d-inline-block dropdown-label-box\\" style=\\"background-color: rgb(0, 0, 255);\\"></span>
       violets
-    </gl-dropdown-item-stub>
+    </gl-deprecated-dropdown-item-stub>
     <div class=\\"text-center\\" style=\\"display: none;\\">
       <gl-loading-icon-stub label=\\"Loading\\" size=\\"md\\" color=\\"orange\\" inline=\\"true\\"></gl-loading-icon-stub>
     </div>
@@ -57,5 +57,5 @@ exports[`Value Stream Analytics LabelsSelector with selectedLabelId set will ren
       No matching labels
     </div>
   </div>
-</gl-dropdown-stub>"
+</gl-deprecated-dropdown-stub>"
 `;

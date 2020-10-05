@@ -10,16 +10,10 @@ module EE
 
       GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/using_a_geo_server.html'.freeze
 
-      protected
-
-      def project_or_wiki
-        project
-      end
-
       private
 
-      def custom_action_for(cmd)
-        return unless custom_action_for?(cmd)
+      def geo_custom_action
+        return unless geo_custom_action?
 
         payload = {
           'action' => 'geo_proxy_to_primary',
@@ -32,15 +26,17 @@ module EE
         ::Gitlab::GitAccessResult::CustomAction.new(payload, messages)
       end
 
-      def custom_action_for?(cmd)
+      def geo_custom_action?
         return unless ::Gitlab::Database.read_only?
         return unless ::Gitlab::Geo.secondary_with_primary?
 
-        receive_pack?(cmd) || upload_pack_and_not_replicated?(cmd)
+        receive_pack? || upload_pack_and_not_replicated?
       end
 
-      def upload_pack_and_not_replicated?(cmd)
-        upload_pack?(cmd) && !::Geo::ProjectRegistry.repository_replicated_for?(project.id)
+      def upload_pack_and_not_replicated?
+        return false unless project
+
+        upload_pack? && !::Geo::ProjectRegistry.repository_replicated_for?(project.id)
       end
 
       def messages
@@ -65,22 +61,22 @@ module EE
       def geo_primary_url_to_repo
         case protocol
         when 'ssh'
-          geo_primary_ssh_url_to_repo(project_or_wiki)
+          geo_primary_ssh_url_to_repo(container)
         else
-          geo_primary_http_url_to_repo(project_or_wiki)
+          geo_primary_http_url_to_repo(container)
         end
       end
 
       def primary_http_repo_url
-        geo_primary_http_url_to_repo(project_or_wiki)
+        geo_primary_http_url_to_repo(container)
       end
 
       def primary_ssh_url_to_repo
-        geo_primary_ssh_url_to_repo(project_or_wiki)
+        geo_primary_ssh_url_to_repo(container)
       end
 
       def current_replication_lag_message
-        return if ::Gitlab::Database.read_write? || current_replication_lag.zero?
+        return if ::Gitlab::Database.read_write? || current_replication_lag == 0
 
         "Current replication lag: #{current_replication_lag} seconds"
       end
@@ -90,7 +86,7 @@ module EE
       end
 
       def custom_action_api_endpoints_for(cmd)
-        receive_pack?(cmd) ? custom_action_push_api_endpoints : custom_action_pull_api_endpoints
+        receive_pack? ? custom_action_push_api_endpoints : custom_action_pull_api_endpoints
       end
 
       def custom_action_pull_api_endpoints

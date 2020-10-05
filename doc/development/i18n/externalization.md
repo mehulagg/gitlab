@@ -7,6 +7,9 @@ For working with internationalization (i18n),
 used tool for this task and there are a lot of applications that will help us to
 work with it.
 
+TIP: **Tip:**
+All `rake` commands described on this page must be run on a GitLab instance, usually GDK.
+
 ## Setting up GitLab Development Kit (GDK)
 
 In order to be able to work on the [GitLab Community Edition](https://gitlab.com/gitlab-org/gitlab-foss)
@@ -95,7 +98,8 @@ Active Record's `:message` option accepts a `Proc`, so we can do this instead:
 validates :group_id, uniqueness: { scope: [:project_id], message: -> (object, data) { _("already shared with this group") } }
 ```
 
-NOTE: **Note:** Messages in the API (`lib/api/` or `app/graphql`) do
+NOTE: **Note:**
+Messages in the API (`lib/api/` or `app/graphql`) do
 not need to be externalised.
 
 ### HAML files
@@ -137,7 +141,90 @@ const label = __('Subscribe');
 ```
 
 In order to test JavaScript translations you have to change the GitLab
-localization to other language than English and you have to generate JSON files
+localization to another language than English and you have to generate JSON files
+using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
+
+### Vue files
+
+In Vue files we make both the `__()` (double underscore parenthesis) function and the `s__()` (namespaced double underscore parenthesis) function available that you can import from the `~/locale` file. For instance:
+
+```javascript
+import { __, s__ } from '~/locale';
+const label = __('Subscribe');
+const nameSpacedlabel = __('Plan|Subscribe');
+```
+
+For the static text strings we suggest two patterns for using these translations in Vue files:
+
+- External constants file:
+
+  ```javascript
+  javascripts
+  │
+  └───alert_settings
+  │   │   constants.js
+  │   └───components
+  │       │   alert_settings_form.vue
+
+
+  // constants.js
+
+  import { s__ } from '~/locale';
+
+  /* Integration constants */
+
+  export const I18N_ALERT_SETTINGS_FORM = {
+    saveBtnLabel: __('Save changes'),
+  };
+
+
+  // alert_settings_form.vue
+
+  import {
+    I18N_ALERT_SETTINGS_FORM,
+  } from '../constants';
+
+  <script>
+    export default {
+      i18n: {
+        I18N_ALERT_SETTINGS_FORM,
+      }
+    }
+  </script>
+
+  <template>
+    <gl-button
+      ref="submitBtn"
+      variant="success"
+      type="submit"
+    >
+      {{ $options.i18n.I18N_ALERT_SETTINGS_FORM }}
+    </gl-button>
+  </template>
+  ```
+
+  When possible, you should opt for this pattern, as this allows you to import these strings directly into your component specs for re-use during testing.
+
+- Internal component `$options` object `:
+
+  ```javascript
+  <script>
+    export default {
+      i18n: {
+        buttonLabel: s__('Plan|Button Label')
+      }
+    },
+  </script>
+
+  <template>
+    <gl-button :aria-label="$options.i18n.buttonLabel">
+      {{ $options.i18n.buttonLabel }}
+    </gl-button>
+  </template>
+  ```
+
+In order to visually test the Vue translations you have to change the GitLab
+localization to another language than English and you have to generate JSON files
 using `bin/rake gettext:po_to_json` or `bin/rake gettext:compile`.
 
 ### Dynamic translations
@@ -195,7 +282,7 @@ For example use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make s
   // => 'This is &lt;strong&gt;&lt;script&gt;alert(&#x27;evil&#x27;)&lt;/script&gt;&lt;/strong&gt;'
 
   // OK:
-  sprintf(__('This is %{value}'), { value: `<strong>${escape(someDynamicValue)}</strong>`, false);
+  sprintf(__('This is %{value}'), { value: `<strong>${escape(someDynamicValue)}</strong>` }, false);
   // => 'This is <strong>&lt;script&gt;alert(&#x27;evil&#x27;)&lt;/script&gt;</strong>'
   ```
 
@@ -294,6 +381,74 @@ Namespaces should be PascalCase.
 
 Note: The namespace should be removed from the translation. See the [translation
 guidelines for more details](translation.md#namespaced-strings).
+
+### HTML
+
+We no longer include HTML directly in the strings that are submitted for translation. This is for a couple of reasons:
+
+1. It introduces a chance for the translated string to accidentally include invalid HTML.
+1. It introduces a security risk where translated strings become an attack vector for XSS, as noted by the
+   [Open Web Application Security Project (OWASP)](https://owasp.org/www-community/attacks/xss/).
+
+To include formatting in the translated string, we can do the following:
+
+- In Ruby/HAML:
+
+  ```ruby
+    html_escape(_('Some %{strongOpen}bold%{strongClose} text.')) % { strongOpen: '<strong>'.html_safe, strongClose: '</strong>'.html_safe }
+
+    # => 'Some <strong>bold</strong> text.'
+  ```
+
+- In JavaScript:
+
+  ```javascript
+    sprintf(__('Some %{strongOpen}bold%{strongClose} text.'), { strongOpen: '<strong>', strongClose: '</strong>'}, false);
+
+    // => 'Some <strong>bold</strong> text.'
+  ```
+
+- In Vue
+
+  See the section on [interpolation](#interpolation).
+
+When [this translation helper issue](https://gitlab.com/gitlab-org/gitlab/-/issues/217935) is complete, we'll update the
+process of including formatting in translated strings.
+
+#### Including Angle Brackets
+
+If a string contains angles brackets (`<`/`>`) that are not used for HTML, it will still be flagged by the
+`rake gettext:lint` linter.
+To avoid this error, use the applicable HTML entity code (`&lt;` or `&gt;`) instead:
+
+- In Ruby/HAML:
+
+   ```ruby
+   html_escape_once(_('In &lt; 1 hour')).html_safe
+
+   # => 'In < 1 hour'
+   ```
+
+- In JavaScript:
+
+  ```javascript
+  import { sanitize } from '~/lib/dompurify';
+
+  const i18n = { LESS_THAN_ONE_HOUR: sanitize(__('In &lt; 1 hour'), { ALLOWED_TAGS: [] }) };
+
+  // ... using the string
+  element.innerHTML = i18n.LESS_THAN_ONE_HOUR;
+
+  // => 'In < 1 hour'
+  ```
+
+- In Vue:
+
+  ```vue
+  <gl-sprintf :message="s__('In &lt; 1 hours')"/>
+
+  // => 'In < 1 hour'
+  ```
 
 ### Dates / times
 
@@ -554,6 +709,7 @@ The linter will take the following into account:
   - There should be no variables used in a translation that aren't in the
     message ID
 - Errors during translation.
+- Presence of angle brackets (`<` or `>`)
 
 The errors are grouped per file, and per message ID:
 
@@ -566,7 +722,7 @@ Errors in `locale/zh_HK/gitlab.po`:
     Syntax error in msgstr
     Syntax error in message_line
     There should be only whitespace until the end of line after the double quote character of a message text.
-    Parsing result before error: '{:msgid=>["", "You are going to remove %{project_name_with_namespace}.\\n", "Removed project CANNOT be restored!\\n", "Are you ABSOLUTELY sure?"]}'
+    Parsing result before error: '{:msgid=>["", "You are going to delete %{project_name_with_namespace}.\\n", "Deleted projects CANNOT be restored!\\n", "Are you ABSOLUTELY sure?"]}'
     SimplePoParser filtered backtrace: SimplePoParser::ParserError
 Errors in `locale/zh_TW/gitlab.po`:
   1 pipeline
@@ -579,6 +735,10 @@ The `locale/zh_TW/gitlab.po` has variables that are used in the translation that
 aren't in the message with ID `1 pipeline`.
 
 ## Adding a new language
+
+NOTE: **Note:**
+[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
+Languages with less than 2% of translations won't be available in the UI.
 
 Let's suppose you want to add translations for a new language, let's say French.
 

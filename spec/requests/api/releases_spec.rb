@@ -259,7 +259,7 @@ RSpec.describe API::Releases do
         end
 
         it '#collected_at' do
-          Timecop.freeze(Time.now.round) do
+          travel_to(Time.now.round) do
             get api("/projects/#{project.id}/releases/v0.1", maintainer)
 
             expect(json_response['evidences'].first['collected_at'].to_datetime.to_i).to be_within(1.minute).of(release.evidences.first.created_at.to_i)
@@ -420,7 +420,17 @@ RSpec.describe API::Releases do
       {
         name: 'New release',
         tag_name: 'v0.1',
-        description: 'Super nice release'
+        description: 'Super nice release',
+        assets: {
+          links: [
+            {
+              name: 'An example runbook link',
+              url: 'https://example.com/runbook',
+              link_type: 'runbook',
+              filepath: '/permanent/path/to/runbook'
+            }
+          ]
+        }
       }
     end
 
@@ -435,9 +445,17 @@ RSpec.describe API::Releases do
         post api("/projects/#{project.id}/releases", maintainer), params: params
       end.to change { Release.count }.by(1)
 
-      expect(project.releases.last.name).to eq('New release')
-      expect(project.releases.last.tag).to eq('v0.1')
-      expect(project.releases.last.description).to eq('Super nice release')
+      release = project.releases.last
+
+      aggregate_failures do
+        expect(release.name).to eq('New release')
+        expect(release.tag).to eq('v0.1')
+        expect(release.description).to eq('Super nice release')
+        expect(release.links.last.name).to eq('An example runbook link')
+        expect(release.links.last.url).to eq('https://example.com/runbook')
+        expect(release.links.last.link_type).to eq('runbook')
+        expect(release.links.last.filepath).to eq('/permanent/path/to/runbook')
+      end
     end
 
     it 'creates a new release without description' do
@@ -458,7 +476,7 @@ RSpec.describe API::Releases do
 
     it 'sets the released_at to the current time if the released_at parameter is not provided' do
       now = Time.zone.parse('2015-08-25 06:00:00Z')
-      Timecop.freeze(now) do
+      travel_to(now) do
         post api("/projects/#{project.id}/releases", maintainer), params: params
 
         expect(project.releases.last.released_at).to eq(now)
@@ -653,11 +671,19 @@ RSpec.describe API::Releases do
       end
 
       context 'when a valid token is provided' do
-        it 'creates the release' do
+        it 'creates the release for a running job' do
+          job.update!(status: :running)
           post api("/projects/#{project.id}/releases"), params: params.merge(job_token: job.token)
 
           expect(response).to have_gitlab_http_status(:created)
           expect(project.releases.last.description).to eq('Another nice release')
+        end
+
+        it 'returns an :unauthorized error for a completed job' do
+          job.success!
+          post api("/projects/#{project.id}/releases"), params: params.merge(job_token: job.token)
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
       end
     end

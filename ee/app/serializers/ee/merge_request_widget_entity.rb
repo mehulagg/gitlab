@@ -6,26 +6,6 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
-      expose :blob_path do
-        expose :head_path, if: -> (mr, _) { mr.head_pipeline_sha } do |merge_request|
-          project_blob_path(merge_request.project, merge_request.head_pipeline_sha)
-        end
-
-        expose :base_path, if: -> (mr, _) { mr.base_pipeline_sha } do |merge_request|
-          project_blob_path(merge_request.project, merge_request.base_pipeline_sha)
-        end
-      end
-
-      expose :codeclimate, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:codequality) } do
-        expose :head_path do |merge_request|
-          head_pipeline_downloadable_path_for_report_type(:codequality)
-        end
-
-        expose :base_path do |merge_request|
-          base_pipeline_downloadable_path_for_report_type(:codequality)
-        end
-      end
-
       expose :browser_performance, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:browser_performance) } do
         expose :degradation_threshold do |merge_request|
           merge_request.head_pipeline&.present(current_user: current_user)
@@ -109,20 +89,8 @@ module EE
         merge_request.approval_feature_available?
       end
 
-      expose :api_approvals_path do |merge_request|
-        presenter(merge_request).api_approvals_path
-      end
-
       expose :api_approval_settings_path do |merge_request|
         presenter(merge_request).api_approval_settings_path
-      end
-
-      expose :api_approve_path do |merge_request|
-        presenter(merge_request).api_approve_path
-      end
-
-      expose :api_unapprove_path do |merge_request|
-        presenter(merge_request).api_unapprove_path
       end
 
       expose :merge_train_when_pipeline_succeeds_docs_path do |merge_request|
@@ -156,16 +124,6 @@ module EE
       blocking_mr_options = options.merge(from_project: object.target_project)
 
       ::BlockingMergeRequestEntity.represent(blocking_mr, blocking_mr_options)
-    end
-
-    def head_pipeline_downloadable_path_for_report_type(file_type)
-      object.head_pipeline&.present(current_user: current_user)
-        &.downloadable_path_for_report_type(file_type)
-    end
-
-    def base_pipeline_downloadable_path_for_report_type(file_type)
-      object.base_pipeline&.present(current_user: current_user)
-        &.downloadable_path_for_report_type(file_type)
     end
   end
 end

@@ -3,31 +3,29 @@
 module QA
   RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab wiki SSH push to secondary' do
-      wiki_title = 'Geo Replication Wiki'
       wiki_content = 'This tests replication of wikis via SSH to secondary'
       push_content = 'This is from the Geo wiki push via SSH to secondary!'
-      project_name = "geo-wiki-project-#{SecureRandom.hex(8)}"
-      key_title = "Geo wiki SSH to 2nd #{Time.now.to_f}"
       wiki = nil
       key = nil
+      project = nil
 
       before do
         QA::Flow::Login.while_signed_in(address: :geo_primary) do
           # Create a new SSH key
           key = Resource::SSHKey.fabricate_via_api! do |resource|
-            resource.title = key_title
+            resource.title = "Geo wiki SSH to 2nd #{Time.now.to_f}"
             resource.expires_at = Date.today + 2
           end
 
           # Create a new project and wiki
           project = Resource::Project.fabricate_via_api! do |project|
-            project.name = project_name
+            project.name = 'geo-wiki-ssh2-project'
             project.description = 'Geo project for wiki SSH spec'
           end
 
           wiki = Resource::Wiki::ProjectPage.fabricate_via_api! do |wiki|
             wiki.project = project
-            wiki.title = wiki_title
+            wiki.title = 'Geo Replication Wiki'
             wiki.content = wiki_content
           end
 
@@ -36,7 +34,11 @@ module QA
         end
       end
 
-      it 'proxies wiki commit to primary node and ultmately replicates to secondary node' do
+      after do
+        key.remove_via_api!
+      end
+
+      it 'proxies wiki commit to primary node and ultmately replicates to secondary node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/694' do
         QA::Runtime::Logger.debug('*****Visiting the secondary geo node*****')
 
         QA::Flow::Login.while_signed_in(address: :geo_secondary) do
@@ -50,8 +52,8 @@ module QA
           Page::Main::Menu.perform(&:go_to_projects)
 
           Page::Dashboard::Projects.perform do |dashboard|
-            dashboard.wait_for_project_replication(project_name)
-            dashboard.go_to_project(project_name)
+            dashboard.wait_for_project_replication(project.name)
+            dashboard.go_to_project(project.name)
           end
 
           Page::Project::Menu.perform(&:click_wiki)

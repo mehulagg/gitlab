@@ -544,6 +544,22 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::DataCollector do
         it_behaves_like 'filter examples'
       end
 
+      context 'when `Any` `label_name` is given' do
+        let(:label) { create(:group_label, group: group) }
+
+        before do
+          MergeRequests::UpdateService.new(
+            merge_request.project,
+            user,
+            label_ids: [label.id]
+          ).execute(merge_request)
+
+          data_collector_params[:label_name] = ['Any']
+        end
+
+        it_behaves_like 'filter examples'
+      end
+
       context 'when two labels are given' do
         let(:label1) { create(:group_label, group: group) }
         let(:label2) { create(:group_label, group: group) }

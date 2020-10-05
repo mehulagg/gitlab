@@ -6,6 +6,10 @@ RSpec.describe 'Groups > Members > List members' do
   let(:user2) { create(:user, name: 'Mary Jane') }
   let(:group) { create(:group) }
 
+  before do
+    stub_feature_flags(vue_group_members_list: false)
+  end
+
   context 'with Group SAML identity linked for a user' do
     let(:saml_provider) { create(:saml_provider) }
     let(:group) { saml_provider.group }

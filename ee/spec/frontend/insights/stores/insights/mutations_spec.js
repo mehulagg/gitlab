@@ -114,6 +114,10 @@ describe('Insights mutations', () => {
       seriesNames: ['Dataset 1', 'Dataset 2'],
     };
 
+    beforeEach(() => {
+      mutations[types.INIT_CHART_DATA](state, [chart.title]);
+    });
+
     it('sets charts loaded state to true on success', () => {
       mutations[types.RECEIVE_CHART_SUCCESS](state, { chart, data: incomingData });
 
@@ -190,16 +194,6 @@ describe('Insights mutations', () => {
       mutations[types.INIT_CHART_DATA](state, keys);
 
       expect(state.chartData).toEqual({ a: {}, b: {} });
-    });
-  });
-
-  describe(types.SET_PAGE_LOADING, () => {
-    const pageLoading = true;
-
-    it('sets pageLoading state', () => {
-      mutations[types.SET_PAGE_LOADING](state, pageLoading);
-
-      expect(state.pageLoading).toBe(pageLoading);
     });
   });
 });

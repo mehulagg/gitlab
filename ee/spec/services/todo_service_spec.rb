@@ -173,10 +173,12 @@ RSpec.describe TodoService do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let!(:second_todo) do
           create(:todo, :assigned,
             user: john_doe, project: nil, group: group, target: epic, author: author)
         end
+
         let(:note) { create(:note, noteable: epic, project: nil, author: john_doe, note: mentions) }
 
         context 'when a note is created for an epic' do

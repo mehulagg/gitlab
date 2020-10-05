@@ -34,7 +34,7 @@ export default () =>
       },
     },
     template: `
-      <div class="board-labels-toggle-wrapper d-flex align-items-center prepend-left-10">
+      <div class="board-labels-toggle-wrapper d-flex align-items-center gl-ml-3">
         <local-storage-sync storage-key="gl-show-board-labels" :value="JSON.stringify(isShowingLabels)" @input="onStorageUpdate" />
         <gl-toggle
           :value="isShowingLabels"

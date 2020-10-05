@@ -1,5 +1,0 @@
----
-title: Fix zero-downtime reindexing docs count
-merge_request: 36173
-author:
-type: fixed

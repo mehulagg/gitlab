@@ -5,9 +5,10 @@ module Groups
     include LabelsAsHash
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def issues(confidential_only: false)
+    def issues(confidential_only: false, issue_types: nil)
       finder_params = { group_id: group.id, include_subgroups: true, state: 'opened' }
       finder_params[:confidential] = true if confidential_only.present?
+      finder_params[:issue_types] = issue_types if issue_types.present?
 
       IssuesFinder.new(current_user, finder_params)
         .execute

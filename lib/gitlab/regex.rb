@@ -3,13 +3,8 @@
 module Gitlab
   module Regex
     module Packages
-      CONAN_RECIPE_FILES = %w[conanfile.py conanmanifest.txt].freeze
+      CONAN_RECIPE_FILES = %w[conanfile.py conanmanifest.txt conan_sources.tgz conan_export.tgz].freeze
       CONAN_PACKAGE_FILES = %w[conaninfo.txt conanmanifest.txt conan_package.tgz].freeze
-
-      def conan_file_name_regex
-        @conan_file_name_regex ||=
-          %r{\A#{(CONAN_RECIPE_FILES + CONAN_PACKAGE_FILES).join("|")}\z}.freeze
-      end
 
       def conan_package_reference_regex
         @conan_package_reference_regex ||= %r{\A[A-Za-z0-9]+\z}.freeze
@@ -51,6 +46,54 @@ module Gitlab
         maven_app_name_regex
       end
 
+      def pypi_version_regex
+        # See the official regex: https://github.com/pypa/packaging/blob/16.7/packaging/version.py#L159
+
+        @pypi_version_regex ||= %r{
+          \A(?:
+            v?
+            (?:([0-9]+)!)?                                                 (?# epoch)
+            ([0-9]+(?:\.[0-9]+)*)                                          (?# release segment)
+            ([-_\.]?((a|b|c|rc|alpha|beta|pre|preview))[-_\.]?([0-9]+)?)?  (?# pre-release)
+            ((?:-([0-9]+))|(?:[-_\.]?(post|rev|r)[-_\.]?([0-9]+)?))?       (?# post release)
+            ([-_\.]?(dev)[-_\.]?([0-9]+)?)?                                (?# dev release)
+            (?:\+([a-z0-9]+(?:[-_\.][a-z0-9]+)*))?                         (?# local version)
+            )\z}xi.freeze
+      end
+
+      def debian_package_name_regex
+        # See official parser
+        # https://git.dpkg.org/cgit/dpkg/dpkg.git/tree/lib/dpkg/parsehelp.c?id=9e0c88ec09475f4d1addde9cdba1ad7849720356#n122
+        # @debian_package_name_regex ||= %r{\A[a-z0-9][-+\._a-z0-9]*\z}i.freeze
+        # But we prefer a more strict version from Lintian
+        # https://salsa.debian.org/lintian/lintian/-/blob/5080c0068ffc4a9ddee92022a91d0c2ff53e56d1/lib/Lintian/Util.pm#L116
+        @debian_package_name_regex ||= %r{\A[a-z0-9][-+\.a-z0-9]+\z}.freeze
+      end
+
+      def debian_version_regex
+        # See official parser: https://git.dpkg.org/cgit/dpkg/dpkg.git/tree/lib/dpkg/parsehelp.c?id=9e0c88ec09475f4d1addde9cdba1ad7849720356#n205
+        @debian_version_regex ||= %r{
+          \A(?:
+            (?:([0-9]{1,9}):)?    (?# epoch)
+            ([0-9][0-9a-z\.+~-]*)  (?# version)
+            (?:(-[0-0a-z\.+~]+))?  (?# revision)
+            )\z}xi.freeze
+      end
+
+      def debian_architecture_regex
+        # See official parser: https://git.dpkg.org/cgit/dpkg/dpkg.git/tree/lib/dpkg/arch.c?id=9e0c88ec09475f4d1addde9cdba1ad7849720356#n43
+        # But we limit to lower case
+        @debian_architecture_regex ||= %r{\A[a-z0-9][-a-z0-9]*\z}.freeze
+      end
+
+      def debian_distribution_regex
+        @debian_distribution_regex ||= %r{\A[a-z0-9][a-z0-9\.-]*\z}i.freeze
+      end
+
+      def debian_component_regex
+        @debian_component_regex ||= %r{#{debian_distribution_regex}}.freeze
+      end
+
       def unbounded_semver_regex
         # See the official regex: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 
@@ -68,6 +111,11 @@ module Gitlab
 
       def semver_regex
         @semver_regex ||= Regexp.new("\\A#{::Gitlab::Regex.unbounded_semver_regex.source}\\z", ::Gitlab::Regex.unbounded_semver_regex.options)
+      end
+
+      def prefixed_semver_regex
+        # identical to semver_regex, except starting with 'v'
+        @prefixed_semver_regex ||= Regexp.new("\\Av#{::Gitlab::Regex.unbounded_semver_regex.source}\\z", ::Gitlab::Regex.unbounded_semver_regex.options)
       end
 
       def go_package_regex
@@ -89,6 +137,18 @@ module Gitlab
           \b (?# word boundary)
         /ix.freeze
       end
+
+      def generic_package_version_regex
+        /\A\d+\.\d+\.\d+\z/
+      end
+
+      def generic_package_name_regex
+        maven_file_name_regex
+      end
+
+      def generic_package_file_name_regex
+        generic_package_name_regex
+      end
     end
 
     extend self
@@ -107,7 +167,11 @@ module Gitlab
     end
 
     def group_name_regex
-      @group_name_regex ||= /\A[\p{Alnum}\u{00A9}-\u{1f9ff}_][\p{Alnum}\p{Pd}\u{00A9}-\u{1f9ff}_()\. ]*\z/.freeze
+      @group_name_regex ||= /\A#{group_name_regex_chars}\z/.freeze
+    end
+
+    def group_name_regex_chars
+      @group_name_regex_chars ||= /[\p{Alnum}\u{00A9}-\u{1f9ff}_][\p{Alnum}\p{Pd}\u{00A9}-\u{1f9ff}_()\. ]*/.freeze
     end
 
     def group_name_regex_message
@@ -160,6 +224,15 @@ module Gitlab
       "can contain only letters, digits, '-', '_', '/', '$', '{', '}', '.', '*' and spaces"
     end
 
+    # https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/identity_and_auth.md#agent-identity-and-name
+    def cluster_agent_name_regex
+      /\A[a-z0-9]([-a-z0-9]*[a-z0-9])?\z/
+    end
+
+    def cluster_agent_name_regex_message
+      %q{can contain only lowercase letters, digits, and '-', but cannot start or end with '-'}
+    end
+
     def kubernetes_namespace_regex
       /\A[a-z0-9]([-a-z0-9]*[a-z0-9])?\z/
     end
@@ -184,8 +257,27 @@ module Gitlab
       "Must start with a letter, and cannot end with '-'"
     end
 
+    # The section start, e.g. section_start:12345678:NAME
+    def logs_section_prefix_regex
+      /section_((?:start)|(?:end)):(\d+):([a-zA-Z0-9_.-]+)/
+    end
+
+    # The optional section options, e.g. [collapsed=true]
+    def logs_section_options_regex
+      /(\[(?:\w+=\w+)(?:, ?(?:\w+=\w+))*\])?/
+    end
+
+    # The region end, always: \r\e\[0K
+    def logs_section_suffix_regex
+      /\r\033\[0K/
+    end
+
     def build_trace_section_regex
-      @build_trace_section_regexp ||= /section_((?:start)|(?:end)):(\d+):([a-zA-Z0-9_.-]+)\r\033\[0K/.freeze
+      @build_trace_section_regexp ||= %r{
+        #{logs_section_prefix_regex}
+        #{logs_section_options_regex}
+        #{logs_section_suffix_regex}
+      }x.freeze
     end
 
     def markdown_code_or_html_blocks
@@ -251,11 +343,11 @@ module Gitlab
     end
 
     def merge_request_wip
-      /(?i)(\[WIP\]\s*|WIP:\s*|WIP\s+|WIP$)/
+      /(?i)(\[WIP\]\s*|WIP:\s*|WIP$)/
     end
 
     def merge_request_draft
-      /(?i)(\[draft\]|\(draft\)|draft:|draft\s\-\s|draft\s|draft$)/
+      /(?i)(\[draft\]|\(draft\)|draft:|draft\s\-\s|draft$)/
     end
 
     def issue
@@ -265,7 +357,14 @@ module Gitlab
     def base64_regex
       @base64_regex ||= /(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?/.freeze
     end
+
+    def feature_flag_regex
+      /\A[a-z]([-_a-z0-9]*[a-z0-9])?\z/
+    end
+
+    def feature_flag_regex_message
+      "can contain only lowercase letters, digits, '_' and '-'. " \
+      "Must start with a letter, and cannot end with '-' or '_'"
+    end
   end
 end
-
-Gitlab::Regex.prepend_if_ee('EE::Gitlab::Regex')

@@ -5,7 +5,7 @@ import MockAdapter from 'axios-mock-adapter';
 import ProductivityApp from 'ee/analytics/productivity_analytics/components/app.vue';
 import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
 import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr_table.vue';
-import store from 'ee/analytics/productivity_analytics/store';
+import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import { TEST_HOST } from 'helpers/test_constants';
 import {
@@ -13,12 +13,15 @@ import {
   GlLoadingIcon,
   GlDropdown,
   GlDropdownItem,
-  GlDeprecatedButton,
+  GlButton,
+  GlAlert,
 } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
+import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
+import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
-import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -26,44 +29,71 @@ localVue.use(Vuex);
 describe('ProductivityApp component', () => {
   let wrapper;
   let mock;
+  let mockStore;
 
   const propsData = {
     emptyStateSvgPath: TEST_HOST,
     noAccessSvgPath: TEST_HOST,
   };
 
-  const actionSpies = {
+  const chartsActionSpies = {
+    resetMainChartSelection: jest.fn(),
+  };
+
+  const tableActionSpies = {
     setSortField: jest.fn(),
     setPage: jest.fn(),
     toggleSortOrder: jest.fn(),
     setColumnMetric: jest.fn(),
-    resetMainChartSelection: jest.fn(),
   };
 
   const mainChartData = { 1: 2, 2: 3 };
 
-  const createComponent = ({ props = {}, scatterplotEnabled = true } = {}) => {
+  const createComponent = ({ props = {}, options = {}, scatterplotEnabled = true } = {}) => {
+    const {
+      modules: { charts, table, ...modules },
+      ...storeConfig
+    } = getStoreConfig();
+    mockStore = new Vuex.Store({
+      ...storeConfig,
+      modules: {
+        charts: {
+          ...charts,
+          actions: {
+            ...charts.actions,
+            ...chartsActionSpies,
+          },
+        },
+        table: {
+          ...table,
+          actions: {
+            ...table.actions,
+            ...tableActionSpies,
+          },
+        },
+        ...modules,
+      },
+    });
     wrapper = shallowMount(ProductivityApp, {
       localVue,
-      store,
+      store: mockStore,
       mixins: [UrlSyncMixin],
       propsData: {
         ...propsData,
         ...props,
       },
-      methods: {
-        ...actionSpies,
-      },
       provide: {
         glFeatures: { productivityAnalyticsScatterplotEnabled: scatterplotEnabled },
       },
+      ...options,
     });
 
-    wrapper.vm.$store.dispatch('setEndpoint', TEST_HOST);
+    mockStore.dispatch('setEndpoint', TEST_HOST);
   };
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
+    createComponent();
   });
 
   afterEach(() => {
@@ -79,7 +109,7 @@ describe('ProductivityApp component', () => {
   const findScatterplotMetricChart = () => wrapper.find({ ref: 'scatterplot' });
   const findMrTableSortSection = () => wrapper.find('.js-mr-table-sort');
   const findSortFieldDropdown = () => findMrTableSortSection().find(GlDropdown);
-  const findSortOrderToggle = () => findMrTableSortSection().find(GlDeprecatedButton);
+  const findSortOrderToggle = () => findMrTableSortSection().find(GlButton);
   const findMrTableSection = () => wrapper.find('.js-mr-table');
   const findMrTable = () => findMrTableSection().find(MergeRequestTable);
 
@@ -96,26 +126,26 @@ describe('ProductivityApp component', () => {
 
     describe('with a group being selected', () => {
       beforeEach(() => {
-        wrapper.vm.$store.dispatch('filters/setInitialData', {
+        mockStore.dispatch('filters/setInitialData', {
           skipFetch: true,
           data: {
             mergedAfter: new Date('2019-09-01'),
             mergedBefore: new Date('2019-09-02'),
           },
         });
-        wrapper.vm.$store.dispatch('filters/setGroupNamespace', 'gitlab-org');
-        mock.onGet(wrapper.vm.$store.state.endpoint).replyOnce(200);
+        mockStore.dispatch('filters/setGroupNamespace', 'gitlab-org');
+        mock.onGet(mockStore.state.endpoint).replyOnce(200);
       });
 
       describe('user has no access to the group', () => {
         beforeEach(() => {
           createComponent();
           const error = { response: { status: 403 } };
-          wrapper.vm.$store.dispatch('charts/receiveChartDataError', {
+          mockStore.dispatch('charts/receiveChartDataError', {
             chartKey: chartKeys.main,
             error,
           });
-          wrapper.vm.$store.state.charts.charts[chartKeys.main].errorCode = 403;
+          mockStore.state.charts.charts[chartKeys.main].errorCode = 403;
         });
 
         it('renders the no access illustration', () => {
@@ -128,7 +158,7 @@ describe('ProductivityApp component', () => {
 
       describe('user has access to the group', () => {
         beforeEach(() => {
-          wrapper.vm.$store.state.charts.charts[chartKeys.main].errorCode = null;
+          mockStore.state.charts.charts[chartKeys.main].errorCode = null;
 
           return wrapper.vm.$nextTick();
         });
@@ -136,7 +166,7 @@ describe('ProductivityApp component', () => {
         describe('when the main chart is loading', () => {
           beforeEach(() => {
             createComponent();
-            wrapper.vm.$store.dispatch('charts/requestChartData', chartKeys.main);
+            mockStore.dispatch('charts/requestChartData', chartKeys.main);
           });
 
           it('renders a metric chart component for the main chart', () => {
@@ -161,7 +191,7 @@ describe('ProductivityApp component', () => {
           describe('and has data', () => {
             beforeEach(() => {
               createComponent();
-              wrapper.vm.$store.dispatch('charts/receiveChartDataSuccess', {
+              mockStore.dispatch('charts/receiveChartDataSuccess', {
                 chartKey: chartKeys.main,
                 data: mainChartData,
               });
@@ -177,7 +207,7 @@ describe('ProductivityApp component', () => {
 
             describe('when an item on the chart is clicked', () => {
               beforeEach(() => {
-                jest.spyOn(store, 'dispatch');
+                jest.spyOn(mockStore, 'dispatch');
 
                 const data = {
                   chart: null,
@@ -194,7 +224,7 @@ describe('ProductivityApp component', () => {
               });
 
               it('dispatches updateSelectedItems action', () => {
-                expect(store.dispatch).toHaveBeenCalledWith('charts/updateSelectedItems', {
+                expect(mockStore.dispatch).toHaveBeenCalledWith('charts/updateSelectedItems', {
                   chartKey: chartKeys.main,
                   item: 0,
                 });
@@ -203,7 +233,7 @@ describe('ProductivityApp component', () => {
 
             describe('when the main chart has selected items', () => {
               beforeEach(() => {
-                wrapper.vm.$store.state.charts.charts[chartKeys.main].selected = [1];
+                mockStore.state.charts.charts[chartKeys.main].selected = [1];
               });
 
               it('renders the "Clear chart data" button', () => {
@@ -213,7 +243,7 @@ describe('ProductivityApp component', () => {
               it('dispatches resetMainChartSelection action when the user clicks on the "Clear chart data" button', () => {
                 findClearFilterButton().vm.$emit('click');
 
-                expect(actionSpies.resetMainChartSelection).toHaveBeenCalled();
+                expect(chartsActionSpies.resetMainChartSelection).toHaveBeenCalled();
               });
             });
 
@@ -225,7 +255,7 @@ describe('ProductivityApp component', () => {
               describe('when chart finished loading', () => {
                 describe('and the chart has data', () => {
                   beforeEach(() => {
-                    wrapper.vm.$store.dispatch('charts/receiveChartDataSuccess', {
+                    mockStore.dispatch('charts/receiveChartDataSuccess', {
                       chartKey: chartKeys.timeBasedHistogram,
                       data: { 1: 2, 2: 3 },
                     });
@@ -241,12 +271,12 @@ describe('ProductivityApp component', () => {
 
                   describe('when the user changes the metric', () => {
                     beforeEach(() => {
-                      jest.spyOn(store, 'dispatch');
+                      jest.spyOn(mockStore, 'dispatch');
                       findTimeBasedMetricChart().vm.$emit('metricTypeChange', 'time_to_merge');
                     });
 
                     it('should call setMetricType  when `metricTypeChange` is emitted on the metric chart', () => {
-                      expect(store.dispatch).toHaveBeenCalledWith('charts/setMetricType', {
+                      expect(mockStore.dispatch).toHaveBeenCalledWith('charts/setMetricType', {
                         metricType: 'time_to_merge',
                         chartKey: chartKeys.timeBasedHistogram,
                       });
@@ -264,7 +294,7 @@ describe('ProductivityApp component', () => {
               describe('when chart finished loading', () => {
                 describe('and the chart has data', () => {
                   beforeEach(() => {
-                    wrapper.vm.$store.dispatch('charts/receiveChartDataSuccess', {
+                    mockStore.dispatch('charts/receiveChartDataSuccess', {
                       chartKey: chartKeys.commitBasedHistogram,
                       data: { 1: 2, 2: 3 },
                     });
@@ -280,13 +310,13 @@ describe('ProductivityApp component', () => {
 
                   describe('when the user changes the metric', () => {
                     beforeEach(() => {
-                      jest.spyOn(store, 'dispatch');
+                      jest.spyOn(mockStore, 'dispatch');
                       findCommitBasedMetricChart().vm.$emit('metricTypeChange', 'loc_per_commit');
                       return wrapper.vm.$nextTick();
                     });
 
                     it('should call setMetricType  when `metricTypeChange` is emitted on the metric chart', () => {
-                      expect(store.dispatch).toHaveBeenCalledWith('charts/setMetricType', {
+                      expect(mockStore.dispatch).toHaveBeenCalledWith('charts/setMetricType', {
                         metricType: 'loc_per_commit',
                         chartKey: chartKeys.commitBasedHistogram,
                       });
@@ -314,7 +344,7 @@ describe('ProductivityApp component', () => {
                 describe('when chart finished loading', () => {
                   describe('and the chart has data', () => {
                     beforeEach(() => {
-                      wrapper.vm.$store.dispatch('charts/receiveChartDataSuccess', {
+                      mockStore.dispatch('charts/receiveChartDataSuccess', {
                         chartKey: chartKeys.scatterplot,
                         data: {
                           1: { metric: 2, merged_at: '2019-09-01T07:06:23.193Z' },
@@ -337,13 +367,13 @@ describe('ProductivityApp component', () => {
 
                     describe('when the user changes the metric', () => {
                       beforeEach(() => {
-                        jest.spyOn(store, 'dispatch');
+                        jest.spyOn(mockStore, 'dispatch');
                         findScatterplotMetricChart().vm.$emit('metricTypeChange', 'loc_per_commit');
                         return wrapper.vm.$nextTick();
                       });
 
                       it('should call setMetricType  when `metricTypeChange` is emitted on the metric chart', () => {
-                        expect(store.dispatch).toHaveBeenCalledWith('charts/setMetricType', {
+                        expect(mockStore.dispatch).toHaveBeenCalledWith('charts/setMetricType', {
                           metricType: 'loc_per_commit',
                           chartKey: chartKeys.scatterplot,
                         });
@@ -376,7 +406,7 @@ describe('ProductivityApp component', () => {
             describe('MR table', () => {
               describe('when table is loading', () => {
                 beforeEach(() => {
-                  wrapper.vm.$store.dispatch('table/requestMergeRequests');
+                  mockStore.dispatch('table/requestMergeRequests');
                 });
 
                 it('renders a loading indicator', () => {
@@ -391,7 +421,7 @@ describe('ProductivityApp component', () => {
               describe('when table finished loading', () => {
                 describe('and the table has data', () => {
                   beforeEach(() => {
-                    wrapper.vm.$store.dispatch('table/receiveMergeRequestsSuccess', {
+                    mockStore.dispatch('table/receiveMergeRequestsSuccess', {
                       headers: {},
                       data: [{ id: 1, title: 'This is a test MR' }],
                     });
@@ -404,22 +434,22 @@ describe('ProductivityApp component', () => {
                   it('doesn’t render a "no data" message', () => {
                     expect(
                       findMrTableSection()
-                        .find('.js-no-data')
+                        .find(GlAlert)
                         .exists(),
                     ).toBe(false);
                   });
 
-                  it('should change the column metric', () => {
+                  it('should change the column metric', async () => {
                     findMrTable().vm.$emit('columnMetricChange', 'time_to_first_comment');
-                    expect(actionSpies.setColumnMetric).toHaveBeenCalledWith(
-                      'time_to_first_comment',
-                    );
+                    const { calls } = tableActionSpies.setColumnMetric.mock;
+                    expect(calls[calls.length - 1][1]).toBe('time_to_first_comment');
                   });
 
                   it('should change the page', () => {
                     const page = 2;
                     findMrTable().vm.$emit('pageChange', page);
-                    expect(actionSpies.setPage).toHaveBeenCalledWith(page);
+                    const { calls } = tableActionSpies.setPage.mock;
+                    expect(calls[calls.length - 1][1]).toBe(page);
                   });
 
                   describe('sort controls', () => {
@@ -434,19 +464,19 @@ describe('ProductivityApp component', () => {
                         .at(0)
                         .vm.$emit('click');
 
-                      expect(actionSpies.setSortField).toHaveBeenCalled();
+                      expect(tableActionSpies.setSortField).toHaveBeenCalled();
                     });
 
                     it('should toggle the sort order', () => {
                       findSortOrderToggle().vm.$emit('click');
-                      expect(actionSpies.toggleSortOrder).toHaveBeenCalled();
+                      expect(tableActionSpies.toggleSortOrder).toHaveBeenCalled();
                     });
                   });
                 });
 
                 describe("and the table doesn't have any data", () => {
                   beforeEach(() => {
-                    wrapper.vm.$store.dispatch('table/receiveMergeRequestsSuccess', {
+                    mockStore.dispatch('table/receiveMergeRequestsSuccess', {
                       headers: {},
                       data: [],
                     });
@@ -455,7 +485,7 @@ describe('ProductivityApp component', () => {
                   it('renders a "no data" message', () => {
                     expect(
                       findMrTableSection()
-                        .find('.js-no-data')
+                        .find(GlAlert)
                         .exists(),
                     ).toBe(true);
                   });
@@ -476,7 +506,7 @@ describe('ProductivityApp component', () => {
           describe('and has no data', () => {
             beforeEach(() => {
               createComponent();
-              wrapper.vm.$store.dispatch('charts/receiveChartDataSuccess', {
+              mockStore.dispatch('charts/receiveChartDataSuccess', {
                 chartKey: chartKeys.main,
                 data: {},
               });
@@ -497,6 +527,42 @@ describe('ProductivityApp component', () => {
             it('does not render the MR table', () => {
               expect(findMrTableSortSection().exists()).toBe(false);
               expect(findMrTableSection().exists()).toBe(false);
+            });
+          });
+
+          describe('with a server error', () => {
+            beforeEach(() => {
+              createComponent({
+                options: {
+                  stubs: {
+                    'metric-chart': MetricChart,
+                  },
+                },
+              });
+              mockStore.dispatch('charts/receiveChartDataError', {
+                chartKey: chartKeys.main,
+                error: { response: { status: httpStatusCodes.INTERNAL_SERVER_ERROR } },
+              });
+            });
+
+            it('sets isLoading=false on the metric chart', () => {
+              expect(findMainMetricChart().props('isLoading')).toBe(false);
+            });
+
+            it('passes a 500 status code to the metric chart', () => {
+              expect(findMainMetricChart().props('errorCode')).toBe(
+                httpStatusCodes.INTERNAL_SERVER_ERROR,
+              );
+            });
+
+            it('does not render any other charts', () => {
+              expect(findSecondaryChartsSection().exists()).toBe(false);
+            });
+
+            it('renders the proper info message', () => {
+              expect(findMainMetricChart().text()).toContain(
+                'There is too much data to calculate. Please change your selection.',
+              );
             });
           });
         });
@@ -531,7 +597,7 @@ describe('ProductivityApp component', () => {
       urlUtils.setUrlParams = jest.fn();
 
       createComponent();
-      wrapper.vm.$store.dispatch('filters/setInitialData', {
+      mockStore.dispatch('filters/setInitialData', {
         skipFetch: true,
         data: {
           mergedAfter: new Date('2019-09-01'),
@@ -550,7 +616,7 @@ describe('ProductivityApp component', () => {
         urlUtils.setUrlParams = jest.fn();
 
         createComponent({ props: { hideGroupDropDown: true } });
-        wrapper.vm.$store.dispatch('filters/setInitialData', {
+        mockStore.dispatch('filters/setInitialData', {
           skipFetch: true,
           data: {
             mergedAfter: new Date('2019-09-01'),
@@ -558,7 +624,7 @@ describe('ProductivityApp component', () => {
           },
         });
 
-        wrapper.vm.$store.dispatch('filters/setGroupNamespace', 'earth-special-forces');
+        mockStore.dispatch('filters/setGroupNamespace', 'earth-special-forces');
       });
 
       it('does not set the group_id', () => {
@@ -570,7 +636,7 @@ describe('ProductivityApp component', () => {
 
     describe('with a group selected', () => {
       beforeEach(() => {
-        wrapper.vm.$store.dispatch('filters/setGroupNamespace', 'earth-special-forces');
+        mockStore.dispatch('filters/setGroupNamespace', 'earth-special-forces');
       });
 
       it('sets the group_id', () => {
@@ -583,7 +649,7 @@ describe('ProductivityApp component', () => {
 
     describe('with a project selected', () => {
       beforeEach(() => {
-        wrapper.vm.$store.dispatch('filters/setProjectPath', 'earth-special-forces/frieza-saga');
+        mockStore.dispatch('filters/setProjectPath', 'earth-special-forces/frieza-saga');
       });
 
       it('sets the project_id', () => {
@@ -601,7 +667,7 @@ describe('ProductivityApp component', () => {
       ${'label_name'}      | ${'label_name[]'}    | ${['who-will-win']}
     `('with the $paramKey filter set', ({ paramKey, resultKey, value }) => {
       beforeEach(() => {
-        wrapper.vm.$store.dispatch('filters/setFilters', {
+        mockStore.dispatch('filters/setFilters', {
           ...defaultFilters,
           [paramKey]: value,
         });

@@ -28,8 +28,6 @@ RSpec.describe 'geo rake tasks', :geo do
 
   it 'Gitlab::Geo::GeoTasks responds to all methods used in Geo rake tasks' do
     %i[
-      foreign_server_configured?
-      refresh_foreign_tables!
       set_primary_geo_node
       update_primary_geo_node_url
     ].each do |method|
@@ -111,15 +109,6 @@ RSpec.describe 'geo rake tasks', :geo do
       expect(Gitlab::Geo::DatabaseTasks).to receive(:load_seed)
 
       run_rake_task('geo:db:seed')
-    end
-  end
-
-  describe 'geo:db:refresh_foreign_tables' do
-    it 'refreshes foreign tables definition on secondary node' do
-      allow(Gitlab::Geo::GeoTasks).to receive(:foreign_server_configured?).and_return(true)
-      expect(Gitlab::Geo::GeoTasks).to receive(:refresh_foreign_tables!)
-
-      run_rake_task('geo:db:refresh_foreign_tables')
     end
   end
 
@@ -230,15 +219,6 @@ RSpec.describe 'geo rake tasks', :geo do
     end
   end
 
-  describe 'geo:db:test:refresh_foreign_tables' do
-    it 'refreshes foreign tables definitions in test environment' do
-      allow(ActiveRecord::Tasks::DatabaseTasks).to receive(:env)
-      expect(Rake::Task['geo:db:refresh_foreign_tables']).to receive(:invoke)
-
-      run_rake_task('geo:db:test:refresh_foreign_tables')
-    end
-  end
-
   describe 'geo:set_primary_node' do
     before do
       stub_config_setting(url: 'https://example.com:1234/relative_part')
@@ -321,48 +301,7 @@ RSpec.describe 'geo rake tasks', :geo do
     end
   end
 
-  describe 'geo:check_replication_verification_status' do
-    let(:run_task) { run_rake_task('geo:check_replication_verification_status') }
-    let!(:current_node) { create(:geo_node) }
-    let!(:geo_node_status) { build(:geo_node_status, :healthy, geo_node: current_node) }
-
-    around do |example|
-      example.run
-    rescue SystemExit
-    end
-
-    before do
-      allow(GeoNodeStatus).to receive(:current_node_status).and_return(geo_node_status)
-      allow(Gitlab.config.geo.registry_replication).to receive(:enabled).and_return(true)
-
-      allow(Gitlab::Geo::GeoNodeStatusCheck).to receive(:replication_verification_complete?)
-        .and_return(complete)
-    end
-
-    context 'when replication is up-to-date' do
-      let(:complete) { true }
-
-      it 'prints a success message' do
-        expect { run_task }.to output(/SUCCESS - Replication is up-to-date/).to_stdout
-      end
-    end
-
-    context 'when replication is not up-to-date' do
-      let(:complete) { false }
-
-      it 'prints an error message' do
-        expect { run_task }.to output(/ERROR - Replication is not up-to-date/).to_stdout
-      end
-
-      it 'exits with a 1' do
-        expect { run_task }.to raise_error(SystemExit) do |error|
-          expect(error.status).to eq(1)
-        end
-      end
-    end
-  end
-
-  describe 'geo:status', :geo_fdw do
+  describe 'geo:status' do
     context 'without a valid license' do
       before do
         stub_licensed_features(geo: false)
@@ -405,27 +344,30 @@ RSpec.describe 'geo rake tasks', :geo do
         end
 
         it 'prints messages for all the checks' do
-          [
-            /Name/,
-            /URL/,
-            /GitLab Version/,
-            /Geo Role/,
-            /Health Status/,
-            /Sync Settings/,
-            /Database replication lag/,
-            /Repositories/,
-            /Verified Repositories/,
-            /Wikis/,
-            /Verified Wikis/,
-            /LFS Objects/,
-            /Attachments/,
-            /CI job artifacts/,
-            /Container repositories/,
-            /Design repositories/,
-            /Repositories Checked/,
-            /Last event ID seen from primary/,
-            /Last status report was/
-          ].each do |text|
+          checks = [
+            /Name: /,
+            /URL: /,
+            /GitLab Version: /,
+            /Geo Role: /,
+            /Health Status: /,
+            /Sync Settings: /,
+            /Database replication lag: /,
+            /Repositories: /,
+            /Verified Repositories: /,
+            /Wikis: /,
+            /Verified Wikis: /,
+            /LFS Objects: /,
+            /Attachments: /,
+            /CI job artifacts: /,
+            /Container repositories: /,
+            /Design repositories: /,
+            /Repositories Checked: /,
+            /Last event ID seen from primary: /,
+            /Last status report was: /
+          ] + Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Checked:/ } +
+              Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+
+          checks.each do |text|
             expect { run_rake_task('geo:status') }.to output(text).to_stdout
           end
         end

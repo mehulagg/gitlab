@@ -1,11 +1,11 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import flash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
 import * as actions from 'ee/geo_node_form/store/actions';
 import * as types from 'ee/geo_node_form/store/mutation_types';
 import createState from 'ee/geo_node_form/store/state';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+import { visitUrl } from '~/lib/utils/url_utility';
 import { MOCK_SYNC_NAMESPACES, MOCK_NODE, MOCK_ERROR_MESSAGE } from '../mock_data';
 
 jest.mock('~/flash');

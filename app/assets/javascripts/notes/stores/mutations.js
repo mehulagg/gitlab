@@ -99,6 +99,10 @@ export default {
     state.noteableData.confidential = data;
   },
 
+  [types.SET_ISSUABLE_LOCK](state, locked) {
+    state.noteableData.discussion_locked = locked;
+  },
+
   [types.SET_USER_DATA](state, data) {
     Object.assign(state, { userData: data });
   },
@@ -274,6 +278,11 @@ export default {
     Object.assign(selectedDiscussion, { ...note });
   },
 
+  [types.UPDATE_DISCUSSION_POSITION](state, { discussionId, position }) {
+    const selectedDiscussion = state.discussions.find(disc => disc.id === discussionId);
+    if (selectedDiscussion) Object.assign(selectedDiscussion.position, { ...position });
+  },
+
   [types.CLOSE_ISSUE](state) {
     Object.assign(state.noteableData, { state: constants.CLOSED });
   },
@@ -304,8 +313,21 @@ export default {
     discussion.truncated_diff_lines = utils.prepareDiffLines(diffLines);
   },
 
-  [types.SET_DISCUSSIONS_SORT](state, sort) {
-    state.discussionSortOrder = sort;
+  [types.SET_DISCUSSIONS_SORT](state, { direction, persist }) {
+    state.discussionSortOrder = direction;
+    state.persistSortOrder = persist;
+  },
+
+  [types.SET_TIMELINE_VIEW](state, value) {
+    state.isTimelineEnabled = value;
+  },
+
+  [types.SET_SELECTED_COMMENT_POSITION](state, position) {
+    state.selectedCommentPosition = position;
+  },
+
+  [types.SET_SELECTED_COMMENT_POSITION_HOVER](state, position) {
+    state.selectedCommentPositionHover = position;
   },
 
   [types.DISABLE_COMMENTS](state, value) {
@@ -361,5 +383,8 @@ export default {
   },
   [types.UPDATE_ASSIGNEES](state, assignees) {
     state.noteableData.assignees = assignees;
+  },
+  [types.SET_FETCHING_DISCUSSIONS](state, value) {
+    state.currentlyFetchingDiscussions = value;
   },
 };

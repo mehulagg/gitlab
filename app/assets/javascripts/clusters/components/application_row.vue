@@ -1,9 +1,8 @@
 <script>
-import { GlLink, GlModalDirective, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlModalDirective, GlSprintf, GlButton, GlAlert } from '@gitlab/ui';
 import { s__, __, sprintf } from '~/locale';
 import eventHub from '../event_hub';
 import identicon from '../../vue_shared/components/identicon.vue';
-import loadingButton from '../../vue_shared/components/loading_button.vue';
 import UninstallApplicationButton from './uninstall_application_button.vue';
 import UninstallApplicationConfirmationModal from './uninstall_application_confirmation_modal.vue';
 import UpdateApplicationConfirmationModal from './update_application_confirmation_modal.vue';
@@ -12,9 +11,10 @@ import { APPLICATION_STATUS, ELASTIC_STACK } from '../constants';
 
 export default {
   components: {
-    loadingButton,
+    GlButton,
     identicon,
     GlLink,
+    GlAlert,
     GlSprintf,
     UninstallApplicationButton,
     UninstallApplicationConfirmationModal,
@@ -51,6 +51,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    installable: {
+      type: Boolean,
+      required: false,
+      default: true,
     },
     uninstallable: {
       type: Boolean,
@@ -141,6 +146,7 @@ export default {
       return (
         this.status === APPLICATION_STATUS.NOT_INSTALLABLE ||
         this.status === APPLICATION_STATUS.INSTALLABLE ||
+        this.status === APPLICATION_STATUS.UNINSTALLED ||
         this.isUnknownStatus
       );
     },
@@ -164,14 +170,20 @@ export default {
       return !this.status || this.isInstalling;
     },
     installButtonDisabled() {
+      // Applications installed through the management project can
+      // only be installed through the CI pipeline. Installation should
+      // be disable in all states.
+      if (!this.installable) return true;
+
       // Avoid the potential for the real-time data to say APPLICATION_STATUS.INSTALLABLE but
       // we already made a request to install and are just waiting for the real-time
       // to sync up.
+      if (this.isInstalling) return true;
+
+      if (!this.isKnownStatus) return false;
+
       return (
-        ((this.status !== APPLICATION_STATUS.INSTALLABLE &&
-          this.status !== APPLICATION_STATUS.ERROR) ||
-          this.isInstalling) &&
-        this.isKnownStatus
+        this.status !== APPLICATION_STATUS.INSTALLABLE && this.status !== APPLICATION_STATUS.ERROR
       );
     },
     installButtonLabel() {
@@ -335,7 +347,7 @@ export default {
         <div>
           <slot name="description"></slot>
         </div>
-        <div v-if="hasError" class="cluster-application-error text-danger prepend-top-10">
+        <div v-if="hasError" class="cluster-application-error text-danger gl-mt-3">
           <p class="js-cluster-application-general-error-message gl-mb-0">
             {{ generalErrorDescription }}
           </p>
@@ -370,24 +382,28 @@ export default {
             </template>
           </div>
 
-          <div
+          <gl-alert
             v-if="updateFailed && !isUpdating"
-            class="bs-callout bs-callout-danger cluster-application-banner mt-2 mb-0 js-cluster-application-update-details"
+            variant="danger"
+            :dismissible="false"
+            class="gl-mt-3 gl-mb-0 js-cluster-application-update-details"
           >
             {{ updateFailureDescription }}
-          </div>
+          </gl-alert>
           <template v-if="updateAvailable || updateFailed || isUpdating">
             <template v-if="updatingNeedsConfirmation">
-              <loading-button
+              <gl-button
                 v-gl-modal-directive="updateModalId"
-                class="btn btn-primary js-cluster-application-update-button mt-2"
+                class="js-cluster-application-update-button mt-2"
+                variant="info"
+                category="primary"
                 :loading="isUpdating"
                 :disabled="isUpdating"
-                :label="updateButtonLabel"
                 data-qa-selector="update_button_with_confirmation"
                 :data-qa-application="id"
-              />
-
+              >
+                {{ updateButtonLabel }}
+              </gl-button>
               <update-application-confirmation-modal
                 :application="id"
                 :application-title="title"
@@ -395,16 +411,19 @@ export default {
               />
             </template>
 
-            <loading-button
+            <gl-button
               v-else
-              class="btn btn-primary js-cluster-application-update-button mt-2"
+              class="js-cluster-application-update-button mt-2"
+              variant="info"
+              category="primary"
               :loading="isUpdating"
               :disabled="isUpdating"
-              :label="updateButtonLabel"
               data-qa-selector="update_button"
               :data-qa-application="id"
               @click="updateConfirmed"
-            />
+            >
+              {{ updateButtonLabel }}
+            </gl-button>
           </template>
         </div>
       </div>
@@ -419,16 +438,18 @@ export default {
           }}</a>
         </div>
         <div class="btn-group table-action-buttons">
-          <loading-button
+          <gl-button
             v-if="displayInstallButton"
             :loading="installButtonLoading"
             :disabled="disabled || installButtonDisabled"
-            :label="installButtonLabel"
             class="js-cluster-application-install-button"
+            variant="default"
             data-qa-selector="install_button"
             :data-qa-application="id"
             @click="installClicked"
-          />
+          >
+            {{ installButtonLabel }}
+          </gl-button>
           <uninstall-application-button
             v-if="displayUninstallButton"
             v-gl-modal-directive="uninstallModalId"

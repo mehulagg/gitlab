@@ -102,6 +102,14 @@ In order to get back all the previous functionality, a new license must be uploa
 To fall back to having only the Core features active, you'll need to delete the
 expired license(s).
 
+### Remove a license
+
+To remove a license from a self-managed instance:
+
+1. Go to the [Admin Area](index.md) (click the wrench in the top navigation bar).
+1. Click **License** in the left sidebar.
+1. Click **Remove License**.
+
 ## License history
 
 It's possible to upload and view more than one license,
@@ -117,7 +125,7 @@ before uploading your license.
 
 GitLab.com users cannot upload and use a self-managed license. If you
 wish to use paid features on GitLab.com, a separate subscription may be
-[purchased](../../subscriptions/index.md#subscribe-to-gitlabcom).
+[purchased](../../subscriptions/gitlab_com/index.md).
 
 ### Users exceed license limit upon renewal
 

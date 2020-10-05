@@ -25,5 +25,3 @@ export const fetchDiff = ({ state, rootState, dispatch }) => {
       dispatch('receiveDiffError');
     });
 };
-
-export default () => {};

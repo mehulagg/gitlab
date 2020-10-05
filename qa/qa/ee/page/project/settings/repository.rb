@@ -19,7 +19,7 @@ module QA
             end
 
             def expand_push_rules(&block)
-              expand_section(:push_rules_content) do
+              expand_content(:push_rules_content) do
                 PushRules.perform(&block)
               end
             end

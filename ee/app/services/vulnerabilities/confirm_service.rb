@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require_dependency 'vulnerabilities/base_service'
+
 module Vulnerabilities
   class ConfirmService < BaseService
-    include Gitlab::Allowable
-
     def execute
       raise Gitlab::Access::AccessDeniedError unless authorized?
 

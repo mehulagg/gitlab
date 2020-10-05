@@ -3,10 +3,10 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/219519', type: :investigating } do
+  RSpec.describe 'Secure', :runner do
     describe 'License merge request widget' do
-      let(:approved_license_name) { "MIT" }
-      let(:blacklisted_license_name) { "Zlib" }
+      let(:approved_license_name) { "MIT License" }
+      let(:denied_license_name) { "zlib License" }
       let(:executor) {"qa-runner-#{Time.now.to_i}"}
 
       after do
@@ -48,62 +48,45 @@ module QA
           mr.file_content =
             <<~FILE_UPDATE
             {
+              "version": "2.1",
               "licenses": [
                 {
-                  "count": 1,
-                  "name": "WTFPL"
+                  "id": "Apache-2.0",
+                  "name": "Apache License 2.0",
+                  "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
                 },
                 {
-                  "count": 1,
-                  "name": "MIT"
+                  "id": "MIT",
+                  "name": "MIT License",
+                  "url": "https://opensource.org/licenses/MIT"
                 },
                 {
-                  "count": 1,
-                  "name": "Zlib"
+                  "id": "Zlib",
+                  "name": "zlib License",
+                  "url": "https://opensource.org/licenses/Zlib"
                 }
               ],
               "dependencies": [
                 {
-                  "license": {
-                      "name": "MIT",
-                      "url": "http://opensource.org/licenses/mit-license"
-                  },
-                  "dependency": {
-                      "name": "actioncable",
-                      "url": "http://rubyonrails.org",
-                      "description": "WebSocket framework for Rails.",
-                      "paths": [
-                          "."
-                      ]
-                  }
+                  "name": "actioncable",
+                  "version": "6.0.3.3",
+                  "package_manager": "bundler",
+                  "path": "Gemfile.lock",
+                  "licenses": ["MIT"]
                 },
                 {
-                  "license": {
-                      "name": "WTFPL",
-                      "url": "http://www.wtfpl.net/"
-                  },
-                  "dependency": {
-                      "name": "wtfpl_init",
-                      "url": "https://rubygems.org/gems/wtfpl_init",
-                      "description": "Download WTFPL license file and rename to LICENSE.md or something",
-                      "paths": [
-                          "."
-                      ]
-                  }
+                  "name": "test_package",
+                  "version": "0.1.0",
+                  "package_manager": "bundler",
+                  "path": "Gemfile.lock",
+                  "licenses": ["Apache-2.0"]
                 },
                 {
-                  "license": {
-                      "name": "Zlib",
-                      "url": "https://www.zlib.net/"
-                  },
-                  "dependency": {
-                      "name": "zlib",
-                      "url": "https://www.zlib.net/",
-                      "description": "Ruby interface for the zlib compression/decompression library",
-                      "paths": [
-                          "."
-                      ]
-                  }
+                  "name": "zlib",
+                  "version": "1.2.11",
+                  "package_manager": "bundler",
+                  "path": "Gemfile.lock",
+                  "licenses": ["Zlib"]
                 }
               ]
             }
@@ -116,17 +99,17 @@ module QA
         Page::Project::Pipeline::Index.perform(&:wait_for_latest_pipeline_success)
       end
 
-      it 'manage licenses from the merge request' do
+      it 'manage licenses from the merge request', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/575' do
         @merge_request.visit!
 
         Page::MergeRequest::Show.perform do |show|
           show.approve_license_with_mr(approved_license_name)
-          show.blacklist_license_with_mr(blacklisted_license_name)
+          show.deny_license_with_mr(denied_license_name)
 
           show.wait_for_license_compliance_report
 
           expect(show).to have_approved_license approved_license_name
-          expect(show).to have_blacklisted_license blacklisted_license_name
+          expect(show).to have_denied_license denied_license_name
         end
       end
     end

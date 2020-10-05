@@ -38,8 +38,9 @@ module QA
             element :delete_snippet_button
           end
 
-          base.view 'app/assets/javascripts/snippets/components/snippet_blob_view.vue' do
+          base.view 'app/assets/javascripts/snippets/components/show.vue' do
             element :clone_button
+            element :snippet_embed_dropdown
           end
 
           base.view 'app/assets/javascripts/vue_shared/components/clone_dropdown.vue' do
@@ -73,6 +74,10 @@ module QA
             element :more_actions_dropdown
             element :delete_comment_button
           end
+
+          base.view 'app/assets/javascripts/snippets/components/embed_dropdown.vue' do
+            element :copy_button
+          end
         end
 
         def has_snippet_title?(snippet_title)
@@ -93,26 +98,51 @@ module QA
           end
         end
 
-        def has_file_name?(file_name)
-          within_element(:file_title_content) do
-            has_text?(file_name)
+        def has_file_name?(file_name, file_number = nil)
+          if file_number
+            within_element_by_index(:file_title_content, file_number - 1) do
+              has_text?(file_name)
+            end
+          else
+            within_element(:file_title_content) do
+              has_text?(file_name)
+            end
           end
         end
 
-        def has_file_content?(file_content)
-          finished_loading?
-          within_element(:file_content) do
-            has_text?(file_content)
+        def has_file_content?(file_content, file_number = nil)
+          if file_number
+            within_element_by_index(:file_content, file_number - 1) do
+              has_text?(file_content)
+            end
+          else
+            within_element(:file_content) do
+              has_text?(file_content)
+            end
           end
+        end
+
+        def has_no_file_content?(file_content, file_number = nil)
+          if file_number
+            within_element_by_index(:file_content, file_number - 1) do
+              has_no_text?(file_content)
+            end
+          else
+            within_element(:file_content) do
+              has_no_text?(file_content)
+            end
+          end
+        end
+
+        def has_embed_dropdown?
+          has_element?(:snippet_embed_dropdown)
         end
 
         def click_edit_button
-          finished_loading?
           click_element(:snippet_action_button, action: 'Edit')
         end
 
         def click_delete_button
-          finished_loading?
           click_element(:snippet_action_button, action: 'Delete')
           click_element(:delete_snippet_button)
           # wait for the page to reload after deletion
@@ -123,46 +153,50 @@ module QA
         end
 
         def get_repository_uri_http
-          finished_loading?
           click_element(:clone_button)
           Git::Location.new(find_element(:copy_http_url_button)['data-clipboard-text']).uri.to_s
         end
 
         def get_repository_uri_ssh
-          finished_loading?
           click_element(:clone_button)
           Git::Location.new(find_element(:copy_ssh_url_button)['data-clipboard-text']).uri.to_s
         end
 
+        def get_sharing_link
+          click_element(:snippet_embed_dropdown)
+          find_element(:copy_button, action: 'Share')['data-clipboard-text']
+        end
+
         def add_comment(comment)
-          finished_loading?
           fill_element(:note_field, comment)
           click_element(:comment_button)
         end
 
         def has_comment_author?(author_username)
-          finished_loading?
           within_element(:note_author_content) do
             has_text?('@' + author_username)
           end
         end
 
         def has_comment_content?(comment_content)
-          finished_loading?
           within_element(:note_content) do
             has_text?(comment_content)
           end
         end
 
+        def has_syntax_highlighting?(language)
+          within_element(:file_content) do
+            find('.line')['lang'].to_s == language
+          end
+        end
+
         def edit_comment(comment)
-          finished_loading?
           click_element(:edit_comment_button)
           fill_element(:edit_note_field, comment)
           click_element(:save_comment_button)
         end
 
         def delete_comment(comment)
-          finished_loading?
           click_element(:more_actions_dropdown)
           accept_alert do
             click_element(:delete_comment_button)

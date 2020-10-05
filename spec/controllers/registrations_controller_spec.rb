@@ -18,16 +18,6 @@ RSpec.describe RegistrationsController do
         stub_experiment_for_user(signup_flow: true)
       end
 
-      it 'tracks the event with the right parameters' do
-        expect(Gitlab::Tracking).to receive(:event).with(
-          'Growth::Acquisition::Experiment::SignUpFlow',
-          'start',
-          label: anything,
-          property: 'experimental_group'
-        )
-        subject
-      end
-
       it 'renders new template and sets the resource variable' do
         expect(subject).to render_template(:new)
         expect(response).to have_gitlab_http_status(:ok)
@@ -41,15 +31,50 @@ RSpec.describe RegistrationsController do
         stub_experiment_for_user(signup_flow: false)
       end
 
-      it 'does not track the event' do
-        expect(Gitlab::Tracking).not_to receive(:event)
-        subject
-      end
-
       it 'renders new template and sets the resource variable' do
         subject
         expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(new_user_session_path(anchor: 'register-pane'))
+      end
+    end
+
+    context 'with sign up flow and terms_opt_in experiment being enabled' do
+      before do
+        stub_experiment(signup_flow: true, terms_opt_in: true)
+      end
+
+      context 'when user is not part of the experiment' do
+        before do
+          stub_experiment_for_user(signup_flow: true, terms_opt_in: false)
+        end
+
+        it 'tracks event with right parameters' do
+          expect(Gitlab::Tracking).to receive(:event).with(
+            'Growth::Acquisition::Experiment::TermsOptIn',
+            'start',
+            label: anything,
+            property: 'control_group'
+          )
+
+          subject
+        end
+      end
+
+      context 'when user is part of the experiment' do
+        before do
+          stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
+        end
+
+        it 'tracks event with right parameters' do
+          expect(Gitlab::Tracking).to receive(:event).with(
+            'Growth::Acquisition::Experiment::TermsOptIn',
+            'start',
+            label: anything,
+            property: 'experimental_group'
+          )
+
+          subject
+        end
       end
     end
   end
@@ -103,7 +128,7 @@ RSpec.describe RegistrationsController do
             post(:create, params: user_params)
 
             expect(ActionMailer::Base.deliveries.last.to.first).to eq(user_params[:user][:email])
-            expect(response).to redirect_to(dashboard_projects_path)
+            expect(response).to redirect_to(users_sign_up_welcome_path)
           end
         end
       end
@@ -139,10 +164,10 @@ RSpec.describe RegistrationsController do
         expect(flash[:alert]).to eq(_('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'))
       end
 
-      it 'redirects to the dashboard when the reCAPTCHA is solved' do
+      it 'redirects to the welcome page when the reCAPTCHA is solved' do
         post(:create, params: user_params)
 
-        expect(flash[:notice]).to eq(I18n.t('devise.registrations.signed_up'))
+        expect(response).to redirect_to(users_sign_up_welcome_path)
       end
     end
 
@@ -250,35 +275,85 @@ RSpec.describe RegistrationsController do
         expect(subject.current_user).to be_present
         expect(subject.current_user.terms_accepted?).to be(true)
       end
+
+      context 'when experiment terms_opt_in is enabled' do
+        before do
+          stub_experiment(terms_opt_in: true)
+        end
+
+        context 'when user is part of the experiment' do
+          before do
+            stub_experiment_for_user(terms_opt_in: true)
+          end
+
+          it 'creates the user with accepted terms' do
+            post :create, params: user_params
+
+            expect(subject.current_user).to be_present
+            expect(subject.current_user.terms_accepted?).to be(true)
+          end
+        end
+
+        context 'when user is not part of the experiment' do
+          before do
+            stub_experiment_for_user(terms_opt_in: false)
+          end
+
+          it 'creates the user without accepted terms' do
+            post :create, params: user_params
+
+            expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
+          end
+        end
+      end
     end
 
     describe 'tracking data' do
-      context 'with the experimental signup flow enabled and the user is part of the control group' do
+      context 'with sign up flow and terms_opt_in experiment being enabled' do
+        subject { post :create, params: user_params }
+
         before do
-          stub_experiment(signup_flow: true)
-          stub_experiment_for_user(signup_flow: false)
+          stub_experiment(signup_flow: true, terms_opt_in: true)
         end
 
-        it 'tracks the event with the right parameters' do
-          expect(Gitlab::Tracking).to receive(:event).with(
-            'Growth::Acquisition::Experiment::SignUpFlow',
-            'end',
-            label: anything,
-            property: 'control_group'
-          )
-          post :create, params: user_params
-        end
-      end
+        it 'records user for the terms_opt_in experiment' do
+          expect(controller).to receive(:record_experiment_user).with(:terms_opt_in)
 
-      context 'with the experimental signup flow enabled and the user is part of the experimental group' do
-        before do
-          stub_experiment(signup_flow: true)
-          stub_experiment_for_user(signup_flow: true)
+          subject
         end
 
-        it 'does not track the event' do
-          expect(Gitlab::Tracking).not_to receive(:event)
-          post :create, params: user_params
+        context 'when user is not part of the experiment' do
+          before do
+            stub_experiment_for_user(signup_flow: true, terms_opt_in: false)
+          end
+
+          it 'tracks event with right parameters' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Growth::Acquisition::Experiment::TermsOptIn',
+              'end',
+              label: anything,
+              property: 'control_group'
+            )
+
+            subject
+          end
+        end
+
+        context 'when user is part of the experiment' do
+          before do
+            stub_experiment_for_user(signup_flow: true, terms_opt_in: true)
+          end
+
+          it 'tracks event with right parameters' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Growth::Acquisition::Experiment::TermsOptIn',
+              'end',
+              label: anything,
+              property: 'experimental_group'
+            )
+
+            subject
+          end
         end
       end
     end
@@ -384,65 +459,58 @@ RSpec.describe RegistrationsController do
         expect_success
       end
     end
-  end
 
-  describe '#update_registration' do
-    before do
-      stub_experiment(signup_flow: true)
-      stub_experiment_for_user(signup_flow: true)
-      sign_in(create(:user))
-    end
+    context 'prerequisites for account deletion' do
+      context 'solo-owned groups' do
+        let(:group) { create(:group) }
 
-    it 'tracks the event with the right parameters' do
-      expect(Gitlab::Tracking).to receive(:event).with(
-        'Growth::Acquisition::Experiment::SignUpFlow',
-        'end',
-        label: anything,
-        property: 'experimental_group'
-      )
-      patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
+        context 'if the user is the sole owner of at least one group' do
+          before do
+            create(:group_member, :owner, group: group, user: user)
+          end
+
+          it 'fails' do
+            delete :destroy, params: { password: '12345678' }
+
+            expect_failure(s_('Profiles|You must transfer ownership or delete groups you are an owner of before you can delete your account'))
+          end
+        end
+      end
     end
   end
 
   describe '#welcome' do
     subject { get :welcome }
 
-    context 'signup_flow experiment enabled' do
-      before do
-        stub_experiment_for_user(signup_flow: true)
-      end
+    it 'renders the devise_experimental_separate_sign_up_flow layout' do
+      sign_in(create(:user))
 
-      it 'renders the devise_experimental_separate_sign_up_flow layout' do
-        sign_in(create(:user))
+      expected_layout = Gitlab.ee? ? :checkout : :devise_experimental_separate_sign_up_flow
 
-        expected_layout = Gitlab.ee? ? :checkout : :devise_experimental_separate_sign_up_flow
-
-        expect(subject).to render_template(expected_layout)
-      end
-
-      context '2FA is required from group' do
-        before do
-          user = create(:user, require_two_factor_authentication_from_group: true)
-          sign_in(user)
-        end
-
-        it 'does not perform a redirect' do
-          expect(subject).not_to redirect_to(profile_two_factor_auth_path)
-        end
-      end
+      expect(subject).to render_template(expected_layout)
     end
 
-    context 'signup_flow experiment disabled' do
+    context '2FA is required from group' do
       before do
-        sign_in(create(:user))
-        stub_experiment_for_user(signup_flow: false)
+        user = create(:user, require_two_factor_authentication_from_group: true)
+        sign_in(user)
       end
 
-      it 'renders the devise layout' do
-        expected_layout = Gitlab.ee? ? :checkout : :devise
-
-        expect(subject).to render_template(expected_layout)
+      it 'does not perform a redirect' do
+        expect(subject).not_to redirect_to(profile_two_factor_auth_path)
       end
     end
+  end
+
+  describe '#update_registration' do
+    subject(:update_registration) do
+      patch :update_registration, params: { user: { role: 'software_developer', setup_for_company: 'false' } }
+    end
+
+    before do
+      sign_in(create(:user))
+    end
+
+    it { is_expected.to redirect_to(dashboard_projects_path)}
   end
 end

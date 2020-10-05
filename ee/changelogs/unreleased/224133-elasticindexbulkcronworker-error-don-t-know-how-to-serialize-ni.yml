@@ -1,5 +1,0 @@
----
-title: Fix BulkIndexer flush returning nil values after failure.
-merge_request: 36716
-author:
-type: fixed

@@ -101,6 +101,25 @@ RSpec.describe API::Issues, :mailer do
         expect(response).to match_response_schema('public_api/v4/issues', dir: 'ee')
       end
 
+      context "blocking issues count" do
+        it 'returns a blocking issues count of 0 if there are no blocking issues' do
+          get api('/issues', user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response.first).to include('blocking_issues_count' => 0)
+        end
+
+        it 'returns a blocking issues count of 1 if there exists a blocking issue' do
+          blocked_issue = build(:issue, author: user2, project: project, created_at: 1.day.ago)
+          create(:issue_link, source: issue, target: blocked_issue, link_type: IssueLink::TYPE_BLOCKS)
+
+          get api('/issues', user)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response.first).to include('blocking_issues_count' => 1)
+        end
+      end
+
       context "filtering by weight" do
         let!(:issue1) { create(:issue, author: user2, project: project, weight: 1, created_at: 3.days.ago) }
         let!(:issue2) { create(:issue, author: user2, project: project, weight: 5, created_at: 2.days.ago) }
@@ -402,24 +421,6 @@ RSpec.describe API::Issues, :mailer do
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['weight']).to be_nil
         expect(issue.reload.read_attribute(:weight)).to be_nil
-      end
-    end
-
-    context 'when issue weight tracking feature flag is not active' do
-      before do
-        stub_feature_flags(track_issue_weight_change_events: false)
-      end
-
-      it 'does not create a ResourceWeightEvent' do
-        expect do
-          put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 9 }
-        end.not_to change { ResourceWeightEvent.count }
-      end
-
-      it 'creates a system note' do
-        expect do
-          put api("/projects/#{project.id}/issues/#{issue.iid}", user), params: { weight: 9 }
-        end.to change { Note.count }.by(1)
       end
     end
   end

@@ -118,7 +118,7 @@ export default {
       v-else-if="isLoading && !hasError"
       :label="s__('SubscriptionTable|Loading subscriptions')"
       size="lg"
-      class="prepend-top-10 append-bottom-10"
+      class="gl-mt-3 gl-mb-3"
     />
   </div>
 </template>

@@ -1,7 +1,6 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import { GlLink, GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
+import { GlLink, GlDeprecatedBadge as GlBadge, GlIcon } from '@gitlab/ui';
 import component from 'ee/environments_dashboard/components/dashboard/environment_header.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 
 describe('Environment Header', () => {
@@ -69,8 +68,8 @@ describe('Environment Header', () => {
     });
 
     it('shows an icon stating the environment is one of many in a folder', () => {
-      expect(wrapper.find(Icon).attributes('name')).toBe('information');
-      expect(wrapper.find(Icon).attributes('title')).toMatch(/last updated environment/);
+      expect(wrapper.find(GlIcon).attributes('name')).toBe('information');
+      expect(wrapper.find(GlIcon).attributes('title')).toMatch(/last updated environment/);
     });
 
     it('matches the snapshot', () => {

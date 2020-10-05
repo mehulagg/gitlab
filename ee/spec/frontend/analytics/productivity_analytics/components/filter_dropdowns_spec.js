@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import FilterDropdowns from 'ee/analytics/productivity_analytics/components/filter_dropdowns.vue';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
-import store from 'ee/analytics/productivity_analytics/store';
+import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import resetStore from '../helpers';
 
 const localVue = createLocalVue();
@@ -11,8 +11,9 @@ localVue.use(Vuex);
 
 describe('FilterDropdowns component', () => {
   let wrapper;
+  let mockStore;
 
-  const actionSpies = {
+  const filtersActionSpies = {
     setGroupNamespace: jest.fn(),
     setProjectPath: jest.fn(),
   };
@@ -23,19 +24,33 @@ describe('FilterDropdowns component', () => {
   const projectId = 10;
 
   beforeEach(() => {
+    const {
+      modules: { filters, ...modules },
+      ...storeConfig
+    } = getStoreConfig();
+    mockStore = new Vuex.Store({
+      ...storeConfig,
+      modules: {
+        filters: {
+          ...filters,
+          actions: {
+            ...filters.actions,
+            ...filtersActionSpies,
+          },
+        },
+        ...modules,
+      },
+    });
     wrapper = shallowMount(FilterDropdowns, {
       localVue,
-      store,
+      store: mockStore,
       propsData: {},
-      methods: {
-        ...actionSpies,
-      },
     });
   });
 
   afterEach(() => {
     wrapper.destroy();
-    resetStore(store);
+    resetStore(mockStore);
   });
 
   describe('template', () => {
@@ -72,7 +87,8 @@ describe('FilterDropdowns component', () => {
 
       it('updates the groupId and invokes setGroupNamespace action', () => {
         expect(wrapper.vm.groupId).toBe(1);
-        expect(actionSpies.setGroupNamespace).toHaveBeenCalledWith(groupNamespace);
+        const { calls } = filtersActionSpies.setGroupNamespace.mock;
+        expect(calls[calls.length - 1][1]).toBe(groupNamespace);
       });
 
       it('emits the "groupSelected" event', () => {
@@ -90,12 +106,13 @@ describe('FilterDropdowns component', () => {
 
       describe('when the list of selected projects is not empty', () => {
         beforeEach(() => {
-          store.state.filters.groupNamespace = groupNamespace;
+          mockStore.state.filters.groupNamespace = groupNamespace;
           wrapper.vm.onProjectsSelected([{ id: projectId, path_with_namespace: `${projectPath}` }]);
         });
 
         it('invokes setProjectPath action', () => {
-          expect(actionSpies.setProjectPath).toHaveBeenCalledWith(projectPath);
+          const { calls } = filtersActionSpies.setProjectPath.mock;
+          expect(calls[calls.length - 1][1]).toBe(projectPath);
         });
 
         it('emits the "projectSelected" event', () => {
@@ -110,12 +127,13 @@ describe('FilterDropdowns component', () => {
 
       describe('when the list of selected projects is empty', () => {
         beforeEach(() => {
-          store.state.filters.groupNamespace = groupNamespace;
+          mockStore.state.filters.groupNamespace = groupNamespace;
           wrapper.vm.onProjectsSelected([]);
         });
 
         it('invokes setProjectPath action with null', () => {
-          expect(actionSpies.setProjectPath).toHaveBeenCalledWith(null);
+          const { calls } = filtersActionSpies.setProjectPath.mock;
+          expect(calls[calls.length - 1][1]).toBe(null);
         });
 
         it('emits the "projectSelected" event', () => {

@@ -1,3 +1,9 @@
+---
+stage: Configure
+group: Configure
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Auto DevOps development guide
 
 This document provides a development guide for contributors to
@@ -32,8 +38,7 @@ Some jobs use images that are built from external projects:
   in which the jobs defined in this template use an image that is built using the
   [`auto-deploy-image`](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image)
   project. By default, the Helm chart defined in
-  [`auto-deploy-app`](https://gitlab.com/gitlab-org/charts/auto-deploy-app)
-  is used to deploy.
+  [`auto-deploy-app`](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app) is used to deploy.
 
 There are extra variables that get passed to the CI jobs when Auto
 DevOps is enabled that are not present in a normal CI job. These can be

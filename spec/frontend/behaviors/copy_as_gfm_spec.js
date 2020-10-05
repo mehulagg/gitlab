@@ -1,3 +1,4 @@
+import * as commonUtils from '~/lib/utils/common_utils';
 import initCopyAsGFM, { CopyAsGFM } from '~/behaviors/markdown/copy_as_gfm';
 
 describe('CopyAsGFM', () => {
@@ -27,7 +28,7 @@ describe('CopyAsGFM', () => {
     }
 
     it('wraps pasted code when not already in code tags', () => {
-      jest.spyOn(window.gl.utils, 'insertText').mockImplementation((el, textFunc) => {
+      jest.spyOn(commonUtils, 'insertText').mockImplementation((el, textFunc) => {
         const insertedText = textFunc('This is code: ', '');
 
         expect(insertedText).toEqual('`code`');
@@ -37,7 +38,7 @@ describe('CopyAsGFM', () => {
     });
 
     it('does not wrap pasted code when already in code tags', () => {
-      jest.spyOn(window.gl.utils, 'insertText').mockImplementation((el, textFunc) => {
+      jest.spyOn(commonUtils, 'insertText').mockImplementation((el, textFunc) => {
         const insertedText = textFunc('This is code: `', '`');
 
         expect(insertedText).toEqual('code');
@@ -120,6 +121,16 @@ describe('CopyAsGFM', () => {
           done();
         });
       });
+    });
+  });
+
+  describe('CopyAsGFM.quoted', () => {
+    const sampleGFM = '* List 1\n* List 2\n\n`Some code`';
+
+    it('adds quote char `> ` to each line', done => {
+      const expectedQuotedGFM = '> * List 1\n> * List 2\n> \n> `Some code`';
+      expect(CopyAsGFM.quoted(sampleGFM)).toEqual(expectedQuotedGFM);
+      done();
     });
   });
 });

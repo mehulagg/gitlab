@@ -1,3 +1,10 @@
+---
+type: reference, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Feature flag controls
 
 ## Access
@@ -140,7 +147,7 @@ run the following in Slack:
 This sets a feature flag to `true` based on the following formula:
 
 ```ruby
-feature_flag_state = Zlib.crc32("some_feature<Actor>:#{actor.id}") % (100 * 1_000) < 25 * 1_000]
+feature_flag_state = Zlib.crc32("some_feature<Actor>:#{actor.id}") % (100 * 1_000) < 25 * 1_000
 # where <Actor>: is a `User`, `Group`, `Project` and actor is an instance
 ```
 

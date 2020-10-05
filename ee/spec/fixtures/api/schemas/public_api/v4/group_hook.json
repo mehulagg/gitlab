@@ -16,7 +16,8 @@
     "confidential_note_events",
     "pipeline_events",
     "wiki_page_events",
-    "job_events"
+    "job_events",
+    "deployment_events"
   ],
   "properties": {
     "id": { "type": "integer" },
@@ -34,7 +35,8 @@
     "confidential_note_events": { "type": ["boolean", "null"] },
     "pipeline_events": { "type": "boolean" },
     "wiki_page_events": { "type": "boolean" },
-    "job_events": { "type": "boolean" }
+    "job_events": { "type": "boolean" },
+    "deployment_events": { "type": "boolean" }
   },
   "additionalProperties": false
 }

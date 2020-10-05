@@ -59,7 +59,7 @@ The rest of this section illustrates how to configure environments and deploymen
 an example scenario. It assumes you have already:
 
 - Created a [project](../../gitlab-basics/create-project.md) in GitLab.
-- Set up [a Runner](../runners/README.md).
+- Set up [a runner](../runners/README.md).
 
 In the scenario:
 
@@ -118,13 +118,11 @@ With this configuration, we:
 - Ensure that our app is able to be built successfully.
 - Lastly we deploy to the staging server.
 
-NOTE: **Note:**
-The `environment` keyword defines where the app is deployed.
-The environment `name` and `url` is exposed in various places
-within GitLab. Each time a job that has an environment specified
-succeeds, a deployment is recorded, along with the Git SHA, and environment name.
+Note that the `environment` keyword defines where the app is deployed. The environment `name` and
+`url` is exposed in various places within GitLab. Each time a job that has an environment specified
+succeeds, a deployment is recorded along with the Git SHA and environment name.
 
-CAUTION: **Caution**:
+CAUTION: **Caution:**
 Some characters are not allowed in environment names. Use only letters,
 numbers, spaces, and `-`, `_`, `/`, `{`, `}`, or `.`. Also, it must not start nor end with `/`.
 
@@ -138,9 +136,9 @@ In summary, with the above `.gitlab-ci.yml` we have achieved the following:
   job will deploy our code to a staging server while the deployment
   will be recorded in an environment named `staging`.
 
-#### Environment variables and Runner
+#### Environment variables and runners
 
-Starting with GitLab 8.15, the environment name is exposed to the Runner in
+Starting with GitLab 8.15, the environment name is exposed to the runner in
 two forms:
 
 - `$CI_ENVIRONMENT_NAME`. The name given in `.gitlab-ci.yml` (with any variables
@@ -154,7 +152,7 @@ If you change the name of an existing environment, the:
 - `$CI_ENVIRONMENT_SLUG` variable will remain unchanged to prevent unintended side
   effects.
 
-Starting with GitLab 9.3, the environment URL is exposed to the Runner via
+Starting with GitLab 9.3, the environment URL is exposed to the runner via
 `$CI_ENVIRONMENT_URL`. The URL is expanded from either:
 
 - `.gitlab-ci.yml`.
@@ -288,12 +286,11 @@ You can find the "play" button in the pipelines, environments, deployments, and 
 | Deployments     | ![Deployments manual action](../img/environments_manual_action_deployments.png)   |
 | Jobs            | ![Builds manual action](../img/environments_manual_action_jobs.png)               |
 
-Clicking on the play button in any view will trigger the `deploy_prod` job, and the
-deployment will be recorded as a new environment named `production`.
+Clicking the play button in any view triggers the `deploy_prod` job. The deployment is recorded as a
+new environment named `production`.
 
-NOTE: **Note:**
-If your environment's name is `production` (all lowercase),
-it will get recorded in [Value Stream Analytics](../../user/project/cycle_analytics.md).
+If your environment's name is `production` (all lowercase), it's recorded in
+[Value Stream Analytics](../../user/analytics/value_stream_analytics.md).
 
 ### Configuring dynamic environments
 
@@ -317,14 +314,14 @@ including:
 However, you cannot use variables defined:
 
 - Under `script`.
-- On the Runner's side.
+- On the runner's side.
 
 There are also other variables that are unsupported in the context of `environment:name`.
 For more information, see [Where variables can be used](../variables/where_variables_can_be_used.md).
 
 #### Example configuration
 
-GitLab Runner exposes various [environment variables](../variables/README.md) when a job runs, so
+Runners expose various [environment variables](../variables/README.md) when a job runs, so
 you can use them as environment names.
 
 In the following example, the job will deploy to all branches except `master`:
@@ -371,9 +368,8 @@ For the value of:
   the example above: `https://$CI_COMMIT_REF_NAME.example.com`, which would give a URL
   of `https://100-do-the-thing.example.com`.
 
-NOTE: **Note:**
-You are not required to use the same prefix or only slashes (`/`) in the dynamic environments'
-names. However, using this format will enable the [grouping similar environments](#grouping-similar-environments)
+You aren't required to use the same prefix or only slashes (`/`) in the dynamic environments' names.
+However, using this format enables the [grouping similar environments](#grouping-similar-environments)
 feature.
 
 ### Configuring Kubernetes deployments
@@ -383,6 +379,12 @@ feature.
 If you are deploying to a [Kubernetes cluster](../../user/project/clusters/index.md)
 associated with your project, you can configure these deployments from your
 `gitlab-ci.yml` file.
+
+NOTE: **Note:**
+Kubernetes configuration isn't supported for Kubernetes clusters that are
+[managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
+To follow progress on support for GitLab-managed clusters, see the
+[relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
 
 The following configuration options are supported:
 
@@ -410,12 +412,6 @@ information about the cluster and namespace will be displayed above the job
 trace on the deployment job page:
 
 ![Deployment cluster information](../img/environments_deployment_cluster_v12_8.png)
-
-NOTE: **Note:**
-Kubernetes configuration is not supported for Kubernetes clusters
-that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
-To follow progress on support for GitLab-managed clusters, see the
-[relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
 
 #### Configuring incremental rollouts
 
@@ -514,9 +510,8 @@ review_app:
 
 This example requires that NGINX and GitLab Runner are set up on the server this job will run on.
 
-NOTE: **Note:**
-See the [limitations](#limitations) section for some edge cases regarding the naming of
-your branches and Review Apps.
+See the [limitations](#limitations) section for some edge cases regarding the naming of your
+branches and Review Apps.
 
 The complete example provides the following workflow to developers:
 
@@ -525,7 +520,7 @@ The complete example provides the following workflow to developers:
 - Push the branch to GitLab.
 - Create a merge request.
 
-Behind the scenes, GitLab Runner will:
+Behind the scenes, the runner will:
 
 - Pick up the changes and start running the jobs.
 - Run the jobs sequentially as defined in `stages`:
@@ -617,13 +612,12 @@ To retry or rollback a deployment:
 
 #### What to expect with a rollback
 
-Pressing the **Rollback** button on a specific commit will trigger a _new_ deployment with its
-own unique job ID.
+Pressing the **Rollback** button on a specific commit triggers a _new_ deployment with its own
+unique job ID. This means that you will see a new deployment that points to the commit you're
+rolling back to.
 
-This means that you will see a new deployment that points to the commit you are rolling back to.
-
-NOTE: **Note:**
-The defined deployment process in the job's `script` determines whether the rollback succeeds or not.
+Note that the defined deployment process in the job's `script` determines whether the rollback
+succeeds.
 
 ### Using the environment URL
 
@@ -662,9 +656,8 @@ Stopping an environment:
 This is often used when multiple developers are working on a project at the same time,
 each of them pushing to their own branches, causing many dynamic environments to be created.
 
-NOTE: **Note:**
-Starting with GitLab 8.14, dynamic environments are stopped automatically
-when their associated branch is deleted.
+Starting with GitLab 8.14, dynamic environments stop automatically when their associated branch is
+deleted.
 
 #### Automatically stopping an environment
 
@@ -700,7 +693,7 @@ stop_review:
 ```
 
 Setting the [`GIT_STRATEGY`](../yaml/README.md#git-strategy) to `none` is necessary in the
-`stop_review` job so that the [GitLab Runner](https://docs.gitlab.com/runner/) won't
+`stop_review` job so that the [runner](https://docs.gitlab.com/runner/) won't
 try to check out the code after the branch is deleted.
 
 When you have an environment that has a stop action defined (typically when
@@ -721,29 +714,25 @@ You can read more in the [`.gitlab-ci.yml` reference](../yaml/README.md#environm
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/20956) in GitLab 12.8.
 
-You can set a expiry time to environments and stop them automatically after a certain period.
+You can set an expiry time for environments and stop them automatically after a certain period.
 
-For example, consider the use of this feature with Review Apps environments.
-When you set up Review Apps, sometimes they keep running for a long time
-because some merge requests are left as open. An example for this situation is when the author of the merge
-request is not actively working on it, due to priority changes or a different approach was decided on, and the merge requests was simply forgotten.
-Idle environments waste resources, therefore they
-should be terminated as soon as possible.
+For example, consider the use of this feature with Review App environments. When you set up Review
+Apps, sometimes they keep running for a long time because some merge requests are left open and
+forgotten. Such idle environments waste resources and should be terminated as soon as possible.
 
-To address this problem, you can specify an optional expiration date for
-Review Apps environments. When the expiry time is reached, GitLab will automatically trigger a job
-to stop the environment, eliminating the need of manually doing so. In case an environment is updated, the expiration is renewed
-ensuring that only active merge requests keep running Review Apps.
+To address this problem, you can specify an optional expiration date for Review App environments.
+When the expiry time is reached, GitLab automatically triggers a job to stop the environment,
+eliminating the need of manually doing so. In case an environment is updated, the expiration is
+renewed ensuring that only active merge requests keep running Review Apps.
 
-To enable this feature, you need to specify the [`environment:auto_stop_in`](../yaml/README.md#environmentauto_stop_in) keyword in `.gitlab-ci.yml`.
-You can specify a human-friendly date as the value, such as `1 hour and 30 minutes` or `1 day`.
-`auto_stop_in` uses the same format of [`artifacts:expire_in` docs](../yaml/README.md#artifactsexpire_in).
+To enable this feature, you must specify the [`environment:auto_stop_in`](../yaml/README.md#environmentauto_stop_in)
+keyword in `.gitlab-ci.yml`. You can specify a human-friendly date as the value, such as
+`1 hour and 30 minutes` or `1 day`. `auto_stop_in` uses the same format of
+[`artifacts:expire_in` docs](../yaml/README.md#artifactsexpire_in).
 
-NOTE: **Note:**
-Due to the resource limitation, a background worker for stopping environments only
-runs once every hour. This means environments will not be stopped at the exact
-timestamp as the specified period, but will be stopped when the hourly cron worker
-detects expired environments.
+Note that due to resource limitation, a background worker for stopping environments only runs once
+every hour. This means that environments aren't stopped at the exact timestamp specified, but are
+instead stopped when the hourly cron worker detects expired environments.
 
 ##### Auto-stop example
 
@@ -811,6 +800,31 @@ stopped environment:
 
 Environments can also be deleted by using the [Environments API](../../api/environments.md#delete-an-environment).
 
+### Prepare an environment
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/208655) in GitLab 13.2.
+
+By default, GitLab creates a [deployment](#viewing-deployment-history) every time a
+build with the specified environment runs. Newer deployments can also
+[cancel older ones](deployment_safety.md#skip-outdated-deployment-jobs).
+
+You may want to specify an environment keyword to
+[protect builds from unauthorized access](protected_environments.md), or to get
+access to [scoped variables](#scoping-environments-with-specs). In these cases,
+you can use the `action: prepare` keyword to ensure deployments won't be created,
+and no builds would be canceled:
+
+```yaml
+build:
+  stage: build
+  script:
+    - echo "Building the app"
+  environment:
+    name: staging
+    action: prepare
+    url: https://staging.example.com
+```
+
 ### Grouping similar environments
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/7015) in GitLab 8.14.
@@ -839,6 +853,38 @@ exist, you should see something like:
 
 ![Environment groups](../img/environments_dynamic_groups.png)
 
+### Environment incident management
+
+You have successfuly setup a Continous Delivery/Deployment workflow in your project.
+Production environments can go down unexpectedly, including for reasons outside
+of your own control. For example, issues with external dependencies, infrastructure,
+or human error can cause major issues with an environment. This could include:
+
+- A dependent cloud service goes down.
+- A 3rd party library is updated and it's not compatible with your application.
+- Someone performs a DDoS attack to a vulnerable endpoint in your server.
+- An operator misconfigures infrastructure.
+- A bug is introduced into the production application code.
+
+You can use [incident management](../../operations/incident_management/index.md)
+to get alerts when there are critical issues that need immediate attention.
+
+#### View the latest alerts for environments **(ULTIMATE)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/214634) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.4.
+
+If you [set up alerts for Prometheus metrics](../../operations/metrics/alerts.md),
+alerts for environments are shown on the environments page. The alert with the highest
+severity is shown, so you can identify which environments need immediate attention.
+
+![Environment alert](img/alert_for_environment.png)
+
+When the issue that triggered the alert is resolved, it is removed and is no
+longer visible on the environment page.
+
+If the alert requires a [rollback](#retrying-and-rolling-back), you can select the
+deployment tab from the environment page and select which deployment to roll back to.
+
 ### Monitoring environments
 
 If you have enabled [Prometheus for monitoring system and response metrics](../../user/project/integrations/prometheus.md),
@@ -846,7 +892,6 @@ you can monitor the behavior of your app running in each environment. For the mo
 dashboard to appear, you need to Configure Prometheus to collect at least one
 [supported metric](../../user/project/integrations/prometheus_library/index.md).
 
-NOTE: **Note:**
 Since GitLab 9.2, all deployments to an environment are shown directly on the monitoring dashboard.
 
 Once configured, GitLab will attempt to retrieve [supported performance metrics](../../user/project/integrations/prometheus_library/index.md)
@@ -881,6 +926,11 @@ This is a powerful feature that allows you to debug issues without leaving the c
 of your web browser. To enable it, just follow the instructions given in the service integration
 documentation.
 
+NOTE: **Note:**
+Container-based deployments often lack basic tools (like an editor), and may
+be stopped or restarted at any time. If this happens, you will lose all your
+changes. Treat this as a debugging tool, not a comprehensive online IDE.
+
 Once enabled, your environments will gain a "terminal" button:
 
 ![Terminal button on environment index](../img/environments_terminal_button_on_index.png)
@@ -903,11 +953,6 @@ by your deployment so you can:
 
 You can open multiple terminals to the same environment, they each get their own shell
 session and even a multiplexer like `screen` or `tmux`.
-
-NOTE: **Note:**
-Container-based deployments often lack basic tools (like an editor), and may
-be stopped or restarted at any time. If this happens, you will lose all your
-changes. Treat this as a debugging tool, not a comprehensive online IDE.
 
 ### Check out deployments locally
 
@@ -967,9 +1012,8 @@ As you can see, you can use specific matching for selecting a particular environ
 and also use wildcard matching (`*`) for selecting a particular environment group,
 such as [Review Apps](../review_apps/index.md) (`review/*`).
 
-NOTE: **Note:**
-The most _specific_ spec takes precedence over the other wildcard matching.
-In this case, `review/feature-1` spec takes precedence over `review/*` and `*` specs.
+Note that the most _specific_ spec takes precedence over the other wildcard matching. In this case,
+the `review/feature-1` spec takes precedence over `review/*` and `*` specs.
 
 ### Environments Dashboard **(PREMIUM)**
 

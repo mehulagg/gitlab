@@ -1,10 +1,14 @@
 <script>
 import Vue from 'vue';
+import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { __ } from '~/locale';
 import SuggestionDiff from './suggestion_diff.vue';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 
 export default {
+  directives: {
+    SafeHtml,
+  },
   props: {
     lineType: {
       type: String,
@@ -33,6 +37,11 @@ export default {
     helpPagePath: {
       type: String,
       required: true,
+    },
+    suggestionsCount: {
+      type: Number,
+      required: false,
+      default: 0,
     },
   },
   data() {
@@ -73,12 +82,12 @@ export default {
       this.isRendered = true;
     },
     generateDiff(suggestionIndex) {
-      const { suggestions, disabled, batchSuggestionsInfo, helpPagePath } = this;
+      const { suggestions, disabled, batchSuggestionsInfo, helpPagePath, suggestionsCount } = this;
       const suggestion =
         suggestions && suggestions[suggestionIndex] ? suggestions[suggestionIndex] : {};
       const SuggestionDiffComponent = Vue.extend(SuggestionDiff);
       const suggestionDiff = new SuggestionDiffComponent({
-        propsData: { disabled, suggestion, batchSuggestionsInfo, helpPagePath },
+        propsData: { disabled, suggestion, batchSuggestionsInfo, helpPagePath, suggestionsCount },
       });
 
       suggestionDiff.$on('apply', ({ suggestionId, callback }) => {
@@ -115,6 +124,6 @@ export default {
 <template>
   <div>
     <div class="flash-container js-suggestions-flash"></div>
-    <div v-show="isRendered" ref="container" class="md" v-html="noteHtml"></div>
+    <div v-show="isRendered" ref="container" v-safe-html="noteHtml" class="md"></div>
   </div>
 </template>

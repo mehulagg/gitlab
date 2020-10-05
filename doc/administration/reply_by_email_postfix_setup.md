@@ -71,7 +71,7 @@ The instructions make the assumption that you will be using the email address `i
    sudo postfix start
    ```
 
-1. Send the new `incoming` user a dummy email to test SMTP, by entering the following into the SMTP prompt:
+1. Send the new `incoming` user an email to test SMTP, by entering the following into the SMTP prompt:
 
    ```plaintext
    ehlo localhost
@@ -112,7 +112,7 @@ The instructions make the assumption that you will be using the email address `i
    q
    ```
 
-1. Log out of the `incoming` account and go back to being `root`:
+1. Sign out of the `incoming` account, and go back to being `root`:
 
    ```shell
    logout
@@ -164,7 +164,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
    try the above steps again, substituting `heirloom-mailx` for the `mail`
    command._
 
-1. Log out of the `incoming` account and go back to being `root`:
+1. Sign out of the `incoming` account, and go back to being `root`:
 
    ```shell
    logout
@@ -251,7 +251,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
       If you get a `Connection refused` error instead, make sure your firewall is set up to allow inbound traffic on port 25.
 
-   1. Send the `incoming` user a dummy email to test SMTP, by entering the following into the SMTP prompt:
+   1. Send the `incoming` user an email to test SMTP, by entering the following into the SMTP prompt:
 
       ```plaintext
       ehlo gitlab.example.com
@@ -288,7 +288,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
       q
       ```
 
-   1. Log out of the `incoming` account and go back to being `root`:
+   1. Sign out of the `incoming` account, and go back to being `root`:
 
       ```shell
       logout
@@ -306,7 +306,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
       ```shell
       Trying 123.123.123.123...
-      Connected to mail.example.gitlab.com.
+      Connected to mail.gitlab.example.com.
       Escape character is '^]'.
       - OK [CAPABILITY IMAP4rev1 UIDPLUS CHILDREN NAMESPACE THREAD=ORDEREDSUBJECT THREAD=REFERENCES SORT QUOTA IDLE ACL ACL2=UNION] Courier-IMAP ready. Copyright 1998-2011 Double Precision, Inc.  See COPYING for distribution information.
       ```

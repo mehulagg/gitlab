@@ -48,7 +48,13 @@ function delete_release() {
     return
   fi
 
-  helm_delete_release "${namespace}" "${release}"
+  # Check if helm release exists before attempting to delete
+  # There may be situation where k8s resources exist, but helm release does not,
+  # for example, following a failed helm install.
+  # In such cases, we still want to continue to clean up k8s resources.
+  if deploy_exists "${namespace}" "${release}"; then
+    helm_delete_release "${namespace}" "${release}"
+  fi
   kubectl_cleanup_release "${namespace}" "${release}"
 }
 
@@ -131,7 +137,7 @@ function run_task() {
   local ruby_cmd="${1}"
   local task_runner_pod=$(get_pod "task-runner")
 
-  kubectl exec -it --namespace "${namespace}" "${task_runner_pod}" -- gitlab-rails runner "${ruby_cmd}"
+  kubectl exec --namespace "${namespace}" "${task_runner_pod}" -- gitlab-rails runner "${ruby_cmd}"
 }
 
 function disable_sign_ups() {
@@ -144,16 +150,15 @@ function disable_sign_ups() {
 
   # Create the root token
   local ruby_cmd="token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api], name: 'Token to disable sign-ups'); token.set_token('${REVIEW_APPS_ROOT_TOKEN}'); begin; token.save!; rescue(ActiveRecord::RecordNotUnique); end"
-  run_task "${ruby_cmd}"
+  retry "run_task \"${ruby_cmd}\""
 
   # Disable sign-ups
-  curl  --silent --show-error --request PUT --header "PRIVATE-TOKEN: ${REVIEW_APPS_ROOT_TOKEN}" "${CI_ENVIRONMENT_URL}/api/v4/application/settings?signup_enabled=false"
+  local signup_enabled=$(retry 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: ${REVIEW_APPS_ROOT_TOKEN}" "${CI_ENVIRONMENT_URL}/api/v4/application/settings?signup_enabled=false" | jq ".signup_enabled"')
 
-  local signup_enabled=$(curl --silent --show-error --request GET --header "PRIVATE-TOKEN: ${REVIEW_APPS_ROOT_TOKEN}" "${CI_ENVIRONMENT_URL}/api/v4/application/settings" | jq ".signup_enabled")
   if [[ "${signup_enabled}" == "false" ]]; then
     echoinfo "Sign-ups have been disabled successfully."
   else
-    echoerr "Sign-ups should be disabled but are still enabled!"
+    echoerr "Sign-ups are still enabled!"
     false
   fi
 }
@@ -291,6 +296,17 @@ function base_config_changed() {
   curl "${CI_API_V4_URL}/projects/${CI_MERGE_REQUEST_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/changes" | jq '.changes | any(.old_path == "scripts/review_apps/base-config.yaml")'
 }
 
+function parse_gitaly_image_tag() {
+  local gitaly_version="${GITALY_VERSION}"
+
+  # prepend semver version with `v`
+  if [[ $gitaly_version =~  ^[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?(-ee)?$ ]]; then
+    echo "v${gitaly_version}"
+  else
+    echo "${gitaly_version}"
+  fi
+}
+
 function deploy() {
   local namespace="${KUBE_NAMESPACE}"
   local release="${CI_ENVIRONMENT_SLUG}"
@@ -306,6 +322,7 @@ function deploy() {
   gitlab_webservice_image_repository="${IMAGE_REPOSITORY}/gitlab-webservice-ee"
   gitlab_task_runner_image_repository="${IMAGE_REPOSITORY}/gitlab-task-runner-ee"
   gitlab_gitaly_image_repository="${IMAGE_REPOSITORY}/gitaly"
+  gitaly_image_tag=$(parse_gitaly_image_tag)
   gitlab_shell_image_repository="${IMAGE_REPOSITORY}/gitlab-shell"
   gitlab_workhorse_image_repository="${IMAGE_REPOSITORY}/gitlab-workhorse-ee"
 
@@ -327,7 +344,7 @@ HELM_CMD=$(cat << EOF
     --set gitlab.migrations.image.repository="${gitlab_migrations_image_repository}" \
     --set gitlab.migrations.image.tag="${CI_COMMIT_REF_SLUG}" \
     --set gitlab.gitaly.image.repository="${gitlab_gitaly_image_repository}" \
-    --set gitlab.gitaly.image.tag="v${GITALY_VERSION}" \
+    --set gitlab.gitaly.image.tag="${gitaly_image_tag}" \
     --set gitlab.gitlab-shell.image.repository="${gitlab_shell_image_repository}" \
     --set gitlab.gitlab-shell.image.tag="v${GITLAB_SHELL_VERSION}" \
     --set gitlab.sidekiq.annotations.commit="${CI_COMMIT_SHORT_SHA}" \

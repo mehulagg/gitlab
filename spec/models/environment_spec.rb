@@ -19,6 +19,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   it { is_expected.to have_many(:deployments) }
   it { is_expected.to have_many(:metrics_dashboard_annotations) }
   it { is_expected.to have_many(:alert_management_alerts) }
+  it { is_expected.to have_one(:latest_opened_most_severe_alert) }
 
   it { is_expected.to delegate_method(:stop_action).to(:last_deployment) }
   it { is_expected.to delegate_method(:manual_actions).to(:last_deployment) }
@@ -853,8 +854,8 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
 
     it 'overrides reactive_cache_limit_enabled? with a FF' do
-      environment_with_enabled_ff = FactoryBot.build(:environment)
-      environment_with_disabled_ff = FactoryBot.build(:environment)
+      environment_with_enabled_ff = build(:environment, project: create(:project))
+      environment_with_disabled_ff = build(:environment, project: create(:project))
 
       stub_feature_flags(reactive_caching_limit_environment: environment_with_enabled_ff.project)
 
@@ -1221,7 +1222,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
       let(:environment) { build(:environment, :will_auto_stop) }
 
       it 'returns when it will expire' do
-        Timecop.freeze { is_expected.to eq(1.day.to_i) }
+        freeze_time { is_expected.to eq(1.day.to_i) }
       end
     end
 
@@ -1247,7 +1248,7 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
     end
     with_them do
       it 'sets correct auto_stop_in' do
-        Timecop.freeze do
+        freeze_time do
           if expected_result.is_a?(Integer) || expected_result.nil?
             subject
 
@@ -1345,6 +1346,29 @@ RSpec.describe Environment, :use_clean_rails_memory_store_caching do
 
     it 'returns zero state counts when environments are empty' do
       expect(project.environments.count_by_state).to eq({ stopped: 0, available: 0 })
+    end
+  end
+
+  describe '#has_opened_alert?' do
+    subject { environment.has_opened_alert? }
+
+    let_it_be(:project) { create(:project) }
+    let_it_be(:environment, reload: true) { create(:environment, project: project) }
+
+    context 'when environment has an triggered alert' do
+      let!(:alert) { create(:alert_management_alert, :triggered, project: project, environment: environment) }
+
+      it { is_expected.to be(true) }
+    end
+
+    context 'when environment has an resolved alert' do
+      let!(:alert) { create(:alert_management_alert, :resolved, project: project, environment: environment) }
+
+      it { is_expected.to be(false) }
+    end
+
+    context 'when environment does not have an alert' do
+      it { is_expected.to be(false) }
     end
   end
 end

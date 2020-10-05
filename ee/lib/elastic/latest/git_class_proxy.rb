@@ -4,19 +4,23 @@ module Elastic
   module Latest
     module GitClassProxy
       SHA_REGEX = /\A[0-9a-f]{5,40}\z/i.freeze
+      HIGHLIGHT_START_TAG = 'gitlabelasticsearch→'
+      HIGHLIGHT_END_TAG = '←gitlabelasticsearch'
 
       def elastic_search(query, type: 'all', page: 1, per: 20, options: {})
         results = { blobs: [], commits: [] }
 
         case type
         when 'all'
-          results[:blobs] = search_blob(query, page: page, per: per, options: options)
-          results[:commits] = search_commit(query, page: page, per: per, options: options)
-          results[:wiki_blobs] = search_blob(query, type: 'wiki_blob', page: page, per: per, options: options)
+          results[:commits] = search_commit(query, page: page, per: per, options: options.merge(features: 'repository'))
+          results[:blobs] = search_blob(query, type: 'blob', page: page, per: per, options: options.merge(features: 'repository'))
+          results[:wiki_blobs] = search_blob(query, type: 'wiki_blob', page: page, per: per, options: options.merge(features: 'wiki'))
         when 'commit'
-          results[:commits] = search_commit(query, page: page, per: per, options: options)
-        when 'blob', 'wiki_blob'
-          results[type.pluralize.to_sym] = search_blob(query, type: type, page: page, per: per, options: options)
+          results[:commits] = search_commit(query, page: page, per: per, options: options.merge(features: 'repository'))
+        when 'blob'
+          results[:blobs] = search_blob(query, type: type, page: page, per: per, options: options.merge(features: 'repository'))
+        when 'wiki_blob'
+          results[:wiki_blobs] = search_blob(query, type: type, page: page, per: per, options: options.merge(features: 'wiki'))
         end
 
         results
@@ -34,8 +38,16 @@ module Elastic
 
       private
 
-      def extract_repository_ids(options)
-        [options[:repository_id]].flatten
+      def options_filter_context(type, options)
+        repository_ids = [options[:repository_id]].flatten
+        languages = [options[:language]].flatten
+
+        filters = []
+        filters << { terms: { "#{type}.rid" => repository_ids } } if repository_ids.any?
+        filters << { terms: { "#{type}.language" => languages } } if languages.any?
+        filters << options[:additional_filter] if options[:additional_filter]
+
+        { filter: filters }
       end
 
       def search_commit(query, page: 1, per: 20, options: {})
@@ -43,40 +55,41 @@ module Elastic
         fields = %w(message^10 sha^5 author.name^2 author.email^2 committer.name committer.email).map {|i| "commit.#{i}"}
         query_with_prefix = query.split(/\s+/).map { |s| s.gsub(SHA_REGEX) { |sha| "#{sha}*" } }.join(' ')
 
+        bool_expr = Gitlab::Elastic::BoolExpr.new
         query_hash = {
-          query: {
-            bool: {
-              must: {
-                simple_query_string: {
-                  fields: fields,
-                  query: query_with_prefix,
-                  default_operator: :and
-                }
-              },
-              filter: [{ term: { 'type' => 'commit' } }]
-            }
-          },
+          query: { bool: bool_expr },
           size: per,
-          from: per * (page - 1)
+          from: per * (page - 1),
+          sort: [:_score]
         }
 
-        if query.blank?
-          query_hash[:query][:bool][:must] = { match_all: {} }
-          query_hash[:track_scores] = true
-        end
+        # If there is a :current_user set in the `options`, we can assume
+        # we need to do a project visibility check.
+        #
+        # Note that `:current_user` might be `nil` for a anonymous user
+        query_hash = project_ids_filter(query_hash, options) if options.key?(:current_user)
 
-        repository_ids = extract_repository_ids(options)
-        if repository_ids.any?
-          query_hash[:query][:bool][:filter] << {
-            terms: {
-              'commit.rid' => repository_ids
+        if query.blank?
+          bool_expr[:must] = { match_all: {} }
+          query_hash[:track_scores] = true
+        else
+          bool_expr[:must] = {
+            simple_query_string: {
+              fields: fields,
+              query: query_with_prefix,
+              default_operator: :and
             }
           }
         end
 
-        if options[:additional_filter]
-          query_hash[:query][:bool][:filter] << options[:additional_filter]
-        end
+        # add the document type filter
+        bool_expr[:filter] << { term: { type: 'commit' } }
+
+        # add filters extracted from the options
+        options_filter_context = options_filter_context(:commit, options)
+        bool_expr[:filter] += options_filter_context[:filter] if options_filter_context[:filter].any?
+
+        options[:order] = :default if options[:order].blank?
 
         if options[:highlight]
           es_fields = fields.map { |field| field.split('^').first }.each_with_object({}) do |field, memo|
@@ -84,15 +97,11 @@ module Elastic
           end
 
           query_hash[:highlight] = {
-            pre_tags: ["gitlabelasticsearch→"],
-            post_tags: ["←gitlabelasticsearch"],
+            pre_tags: [HIGHLIGHT_START_TAG],
+            post_tags: [HIGHLIGHT_END_TAG],
             fields: es_fields
           }
         end
-
-        options[:order] = :default if options[:order].blank?
-
-        query_hash[:sort] = [:_score]
 
         res = search(query_hash, options)
         {
@@ -108,59 +117,51 @@ module Elastic
           filter :filename, field: :file_name
           filter :path, parser: ->(input) { "*#{input.downcase}*" }
           filter :extension, field: :path, parser: ->(input) { '*.' + input.downcase }
+          filter :blob, field: :oid
         end
 
+        bool_expr = ::Gitlab::Elastic::BoolExpr.new
         query_hash = {
-          query: {
-            bool: {
-              must: {
-                simple_query_string: {
-                  query: query.term,
-                  default_operator: :and,
-                  fields: %w[blob.content blob.file_name]
-                }
-              },
-              filter: [
-                { term: { type: type } }
-              ]
-            }
-          },
+          query: { bool: bool_expr },
           size: per,
-          from: per * (page - 1)
+          from: per * (page - 1),
+          sort: [:_score]
         }
 
-        query_hash[:query][:bool][:filter] += query.elasticsearch_filters(:blob)
-
-        repository_ids = extract_repository_ids(options)
-        if repository_ids.any?
-          query_hash[:query][:bool][:filter] << {
-            terms: {
-              'blob.rid' => repository_ids
-            }
+        # add the term matching
+        bool_expr[:must] = {
+          simple_query_string: {
+            query: query.term,
+            default_operator: :and,
+            fields: %w[blob.content blob.file_name]
           }
-        end
+        }
 
-        if options[:additional_filter]
-          query_hash[:query][:bool][:filter] << options[:additional_filter]
-        end
+        # If there is a :current_user set in the `options`, we can assume
+        # we need to do a project visibility check.
+        #
+        # Note that `:current_user` might be `nil` for a anonymous user
+        query_hash = project_ids_filter(query_hash, options) if options.key?(:current_user)
 
-        if options[:language]
-          query_hash[:query][:bool][:filter] << {
-            terms: {
-              'blob.language' => [options[:language]].flatten
-            }
-          }
-        end
+        # add the document type filter
+        bool_expr[:filter] << { term: { type: type } }
+
+        # add filters extracted from the query
+        query_filter_context = query.elasticsearch_filter_context(:blob)
+        bool_expr[:filter] += query_filter_context[:filter] if query_filter_context[:filter].any?
+        bool_expr[:must_not] += query_filter_context[:must_not] if query_filter_context[:must_not].any?
+
+        # add filters extracted from the `options`
+        options_filter_context = options_filter_context(:blob, options)
+        bool_expr[:filter] += options_filter_context[:filter] if options_filter_context[:filter].any?
 
         options[:order] = :default if options[:order].blank?
 
-        query_hash[:sort] = [:_score]
-
         if options[:highlight]
           query_hash[:highlight] = {
-            pre_tags: ["gitlabelasticsearch→"],
-            post_tags: ["←gitlabelasticsearch"],
-            order: "score",
+            pre_tags: [HIGHLIGHT_START_TAG],
+            post_tags: [HIGHLIGHT_END_TAG],
+            number_of_fragments: 0, # highlighted text fragments do not work well for code as we want to show a few whole lines of code. We need to get the whole content to determine the exact line number that was highlighted.
             fields: {
               "blob.content" => {},
               "blob.file_name" => {}
@@ -168,6 +169,8 @@ module Elastic
           }
         end
 
+        # inject the `id` part of repository as project id
+        repository_ids = [options[:repository_id]].flatten
         options[:project_ids] = repository_ids.map { |id| id.to_s[/\d+/].to_i } if type == 'wiki_blob' && repository_ids.any?
 
         res = search(query_hash, options)

@@ -1,7 +1,8 @@
 ---
-stage: Plan
-group: Project Management
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
 ---
 
 # Markdown API
@@ -19,8 +20,8 @@ POST /api/v4/markdown
 | Attribute | Type    | Required      | Description                                |
 | --------- | ------- | ------------- | ------------------------------------------ |
 | `text`    | string  | yes           | The Markdown text to render                |
-| `gfm`     | boolean | no (optional) | Render text using GitLab Flavored Markdown. Default is `false` |
-| `project` | string  | no (optional) | Use `project` as a context when creating references using GitLab Flavored Markdown. [Authentication](README.md#authentication) is required if a project is not public.  |
+| `gfm`     | boolean | no            | Render text using GitLab Flavored Markdown. Default is `false` |
+| `project` | string  | no            | Use `project` as a context when creating references using GitLab Flavored Markdown. [Authentication](README.md#authentication) is required if a project is not public.  |
 
 ```shell
 curl --header Content-Type:application/json --data '{"text":"Hello world! :tada:", "gfm":true, "project":"group_example/project_example"}' "https://gitlab.example.com/api/v4/markdown"

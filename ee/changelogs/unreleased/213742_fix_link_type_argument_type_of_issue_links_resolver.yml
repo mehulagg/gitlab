@@ -1,5 +1,0 @@
----
-title: Change the linkType argument for issueLinks query to enum
-merge_request: 33828
-author:
-type: fixed

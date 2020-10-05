@@ -1,12 +1,11 @@
 <script>
-import { GlDropdown, GlSearchBoxByType } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlDeprecatedDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDropdown,
+    GlDeprecatedDropdown,
     GlSearchBoxByType,
-    Icon,
+    GlIcon,
   },
   props: {
     filter: {
@@ -58,7 +57,7 @@ export default {
 <template>
   <div class="dashboard-filter">
     <strong class="js-name">{{ filter.name }}</strong>
-    <gl-dropdown
+    <gl-deprecated-dropdown
       ref="dropdown"
       class="d-block mt-1"
       menu-class="dropdown-extended-height"
@@ -83,7 +82,7 @@ export default {
           :aria-label="__('Close')"
           @click="closeDropdown"
         >
-          <icon name="close" aria-hidden="true" class="vertical-align-middle" />
+          <gl-icon name="close" aria-hidden="true" class="vertical-align-middle" />
         </button>
       </div>
 
@@ -91,7 +90,7 @@ export default {
         v-if="filter.options.length >= 20"
         ref="searchBox"
         v-model="filterTerm"
-        class="m-2"
+        class="gl-m-3"
         :placeholder="__('Filter...')"
       />
 
@@ -108,7 +107,7 @@ export default {
           @click="clickFilter(option)"
         >
           <span class="d-flex">
-            <icon
+            <gl-icon
               v-if="isSelected(option)"
               class="flex-shrink-0 js-check"
               name="mobile-issue-close"
@@ -127,6 +126,6 @@ export default {
       >
         {{ __('No matching results') }}
       </button>
-    </gl-dropdown>
+    </gl-deprecated-dropdown>
   </div>
 </template>

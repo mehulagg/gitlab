@@ -14,12 +14,14 @@ RSpec.describe 'Search group member' do
   end
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(user)
     visit group_group_members_path(guest_group)
   end
 
   it 'renders member users' do
-    page.within '.user-search-form' do
+    page.within '[data-testid="user-search-form"]' do
       fill_in 'search', with: member.name
       find('.user-search-btn').click
     end

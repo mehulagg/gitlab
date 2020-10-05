@@ -13,9 +13,11 @@ Always use an [Entity](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/api/
 
 ## Documentation
 
-API endpoints must come with [documentation](documentation/styleguide.md#api), unless it is internal or behind a feature flag.
+Each new or updated API endpoint must come with documentation, unless it is internal or behind a feature flag.
 The docs should be in the same merge request, or, if strictly necessary,
 in a follow-up with the same milestone as the original merge request.
+
+See the [Documentation Style Guide RESTful API page](documentation/restful_api_styleguide.md) for details on documenting API resources in Markdown as well as in OpenAPI definition files.
 
 ## Methods and parameters description
 
@@ -85,7 +87,7 @@ User.create(params) # imagine the user submitted `admin=1`... :)
 User.create(declared(params, include_parent_namespaces: false).to_h)
 ```
 
->**Note:**
+NOTE: **Note:**
 `declared(params)` return a `Hashie::Mash` object, on which you will have to
 call `.to_h`.
 
@@ -173,7 +175,8 @@ guide on how you can add a new custom validator.
   validates the parameter value for different cases. Mainly, it checks whether a
   path is relative and does it contain `../../` relative traversal using
   `File::Separator` or not, and whether the path is absolute, for example
-  `/etc/passwd/`.
+  `/etc/passwd/`. By default, absolute paths are not allowed. However, you can optionally pass in an allowlist for allowed absolute paths in the following way:
+  `requires :file_path, type: String, file_path: { allowlist: ['/foo/bar/', '/home/foo/', '/app/home'] }`
 
 - `Git SHA`:
 
@@ -246,7 +249,7 @@ most basic entity, with successive entities building upon that scope.
 
 The `with_api_entity_associations` scope will also [automatically preload
 data](https://gitlab.com/gitlab-org/gitlab/blob/19f74903240e209736c7668132e6a5a735954e7c/app%2Fmodels%2Ftodo.rb#L34)
-for `Todo` _targets_ when returned in the Todos API.
+for `Todo` _targets_ when returned in the [to-dos API](../api/todos.md).
 
 For more context and discussion about preloading see
 [this merge request](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/25711)

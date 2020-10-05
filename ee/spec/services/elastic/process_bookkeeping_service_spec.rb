@@ -22,7 +22,7 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
     it 'enqueues a record' do
       described_class.track!(issue)
 
-      spec, score = redis.zpopmin(zset)
+      spec, score = redis.zrange(zset, 0, 0, with_scores: true).first
 
       expect(spec).to eq(issue_spec)
       expect(score).to eq(1.0)
@@ -33,8 +33,7 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
 
       expect(described_class.queue_size).to eq(fake_refs.size)
 
-      spec1, score1 = redis.zpopmin(zset)
-      _, score2 = redis.zpopmin(zset)
+      (spec1, score1), (_, score2), _ = redis.zrange(zset, 0, -1, with_scores: true)
 
       expect(score1).to be < score2
       expect(spec1).to eq(issue_spec)
@@ -61,7 +60,7 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
 
       expect(described_class.queue_size).to eq(fake_refs.size)
 
-      expect { redis.zpopmin(zset) }.to change(described_class, :queue_size).by(-1)
+      expect { redis.zadd(zset, 0, 'foo') }.to change(described_class, :queue_size).by(1)
     end
   end
 
@@ -116,7 +115,8 @@ RSpec.describe Elastic::ProcessBookkeepingService, :clean_gitlab_redis_shared_st
 
       expect { described_class.new.execute }.to change(described_class, :queue_size).by(-limit + 1)
 
-      serialized, _ = redis.zpopmax(zset)
+      serialized = redis.zrange(zset, -1, -1).first
+
       expect(ref_class.deserialize(serialized)).to eq(failed)
     end
 

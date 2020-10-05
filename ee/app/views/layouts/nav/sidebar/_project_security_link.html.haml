@@ -22,7 +22,7 @@
             %span= _('Security Dashboard')
 
       - if project_nav_tab?(:on_demand_scans)
-        = nav_link(path: ['projects/on_demand_scans#index', 'projects/dast_profiles#index', 'projects/dast_site_profiles#new']) do
+        = nav_link(path: sidebar_on_demand_scans_paths) do
           = link_to project_on_demand_scans_path(@project), title: s_('OnDemandScans|On-demand Scans'), data: { qa_selector: 'on_demand_scans_link' } do
             %span= s_('OnDemandScans|On-demand Scans')
 
@@ -37,7 +37,7 @@
             %span= _('License Compliance')
 
       - if project_nav_tab?(:threat_monitoring)
-        = nav_link(path: 'projects/threat_monitoring#show') do
+        = nav_link(controller: ['projects/threat_monitoring']) do
           = link_to project_threat_monitoring_path(@project), title: _('Threat Monitoring') do
             %span= _('Threat Monitoring')
 

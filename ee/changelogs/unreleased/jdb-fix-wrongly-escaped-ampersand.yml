@@ -1,5 +1,0 @@
----
-title: Fix character escaping on approvals summary
-merge_request: 35564
-author:
-type: fixed

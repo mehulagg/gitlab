@@ -26,6 +26,7 @@ class Repository
 
   delegate :ref_name_for_sha, to: :raw_repository
   delegate :bundle_to_disk, to: :raw_repository
+  delegate :lfs_enabled?, to: :container
 
   CreateTreeError = Class.new(StandardError)
   AmbiguousRefError = Class.new(StandardError)
@@ -43,7 +44,7 @@ class Repository
                       gitlab_ci_yml branch_names tag_names branch_count
                       tag_count avatar exists? root_ref merged_branch_names
                       has_visible_content? issue_template_names merge_request_template_names
-                      metrics_dashboard_paths xcode_project?).freeze
+                      user_defined_metrics_dashboard_paths xcode_project? has_ambiguous_refs?).freeze
 
   # Methods that use cache_method but only memoize the value
   MEMOIZED_CACHED_METHODS = %i(license).freeze
@@ -61,7 +62,7 @@ class Repository
     avatar: :avatar,
     issue_template: :issue_template_names,
     merge_request_template: :merge_request_template_names,
-    metrics_dashboard: :metrics_dashboard_paths,
+    metrics_dashboard: :user_defined_metrics_dashboard_paths,
     xcode_config: :xcode_project?
   }.freeze
 
@@ -196,6 +197,32 @@ class Repository
     tag_exists?(ref) && branch_exists?(ref)
   end
 
+  # It's possible for a tag name to be a prefix (including slash) of a branch
+  # name, or vice versa. For instance, a tag named `foo` means we can't create a
+  # tag `foo/bar`, but we _can_ create a branch `foo/bar`.
+  #
+  # If we know a repository has no refs of this type (which is the common case)
+  # then separating refs from paths - as in ExtractsRef - can be faster.
+  #
+  # This method only checks one level deep, so only prefixes that contain no
+  # slashes are considered. If a repository has a tag `foo/bar` and a branch
+  # `foo/bar/baz`, it will return false.
+  def has_ambiguous_refs?
+    return false unless branch_names.present? && tag_names.present?
+
+    with_slash, no_slash = (branch_names + tag_names).partition { |ref| ref.include?('/') }
+
+    return false if with_slash.empty?
+
+    prefixes = no_slash.map { |ref| Regexp.escape(ref) }.join('|')
+    prefix_regex = %r{^(#{prefixes})/}
+
+    with_slash.any? do |ref|
+      prefix_regex.match?(ref)
+    end
+  end
+  cache_method :has_ambiguous_refs?
+
   def expand_ref(ref)
     if tag_exists?(ref)
       Gitlab::Git::TAG_REF_PREFIX + ref
@@ -286,14 +313,16 @@ class Repository
   end
 
   def expire_tags_cache
-    expire_method_caches(%i(tag_names tag_count))
+    expire_method_caches(%i(tag_names tag_count has_ambiguous_refs?))
     @tags = nil
+    @tag_names_include = nil
   end
 
   def expire_branches_cache
-    expire_method_caches(%i(branch_names merged_branch_names branch_count has_visible_content?))
+    expire_method_caches(%i(branch_names merged_branch_names branch_count has_visible_content? has_ambiguous_refs?))
     @local_branches = nil
     @branch_exists_memo = nil
+    @branch_names_include = nil
   end
 
   def expire_statistics_caches
@@ -576,10 +605,10 @@ class Repository
   end
   cache_method :merge_request_template_names, fallback: []
 
-  def metrics_dashboard_paths
-    Gitlab::Metrics::Dashboard::Finder.find_all_paths_from_source(project)
+  def user_defined_metrics_dashboard_paths
+    Gitlab::Metrics::Dashboard::RepoDashboardFinder.list_dashboards(project)
   end
-  cache_method :metrics_dashboard_paths
+  cache_method :user_defined_metrics_dashboard_paths, fallback: []
 
   def readme
     head_tree&.readme
@@ -713,8 +742,8 @@ class Repository
     "#{name}-#{highest_branch_id + 1}"
   end
 
-  def branches_sorted_by(value)
-    raw_repository.local_branches(sort_by: value)
+  def branches_sorted_by(sort_by, pagination_params = nil)
+    raw_repository.local_branches(sort_by: sort_by, pagination_params: pagination_params)
   end
 
   def tags_sorted_by(value)
@@ -825,7 +854,7 @@ class Repository
   def merge(user, source_sha, merge_request, message)
     with_cache_hooks do
       raw_repository.merge(user, source_sha, merge_request.target_branch, message) do |commit_id|
-        merge_request.update(in_progress_merge_commit_sha: commit_id)
+        merge_request.update_and_mark_in_progress_merge_commit_sha(commit_id)
         nil # Return value does not matter.
       end
     end
@@ -845,14 +874,14 @@ class Repository
     their_commit_id = commit(source)&.id
     raise 'Invalid merge source' if their_commit_id.nil?
 
-    merge_request&.update(in_progress_merge_commit_sha: their_commit_id)
+    merge_request&.update_and_mark_in_progress_merge_commit_sha(their_commit_id)
 
     with_cache_hooks { raw.ff_merge(user, their_commit_id, target_branch) }
   end
 
   def revert(
     user, commit, branch_name, message,
-    start_branch_name: nil, start_project: project)
+    start_branch_name: nil, start_project: project, dry_run: false)
 
     with_cache_hooks do
       raw_repository.revert(
@@ -861,14 +890,15 @@ class Repository
         branch_name: branch_name,
         message: message,
         start_branch_name: start_branch_name,
-        start_repository: start_project.repository.raw_repository
+        start_repository: start_project.repository.raw_repository,
+        dry_run: dry_run
       )
     end
   end
 
   def cherry_pick(
     user, commit, branch_name, message,
-    start_branch_name: nil, start_project: project)
+    start_branch_name: nil, start_project: project, dry_run: false)
 
     with_cache_hooks do
       raw_repository.cherry_pick(
@@ -877,7 +907,8 @@ class Repository
         branch_name: branch_name,
         message: message,
         start_branch_name: start_branch_name,
-        start_repository: start_project.repository.raw_repository
+        start_repository: start_project.repository.raw_repository,
+        dry_run: dry_run
       )
     end
   end
@@ -1112,21 +1143,10 @@ class Repository
   end
 
   def project
-    if repo_type.snippet?
-      container.project
-    elsif container.is_a?(Project)
-      container
-    end
-  end
-
-  # TODO: pass this in directly to `Blob` rather than delegating it to here
-  #
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/201886
-  def lfs_enabled?
     if container.is_a?(Project)
-      container.lfs_enabled?
+      container
     else
-      false # LFS is not supported for snippet or group repositories
+      container.try(:project)
     end
   end
 

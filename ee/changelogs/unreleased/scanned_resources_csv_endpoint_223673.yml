@@ -1,5 +1,0 @@
----
-title: Allow users to download the DAST scanned resources for a pipeline as a CSV
-merge_request: 36019
-author:
-type: added

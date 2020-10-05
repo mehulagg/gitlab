@@ -200,6 +200,37 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
     end
   end
 
+  describe 'wiki tab' do
+    let(:can_read_wiki) { true }
+
+    let_it_be(:current_user) { create(:user) }
+
+    before do
+      group.add_guest(current_user)
+
+      allow(view).to receive(:current_user).and_return(current_user)
+      allow(view).to receive(:can?).with(current_user, :read_wiki, group).and_return(can_read_wiki)
+    end
+
+    describe 'when wiki is available to user' do
+      it 'shows the wiki tab with the wiki internal link' do
+        render
+
+        expect(rendered).to have_link('Wiki', href: group.wiki.web_url)
+      end
+    end
+
+    describe 'when wiki is unavailable to user' do
+      let(:can_read_wiki) { false }
+
+      it 'does not show the wiki tab' do
+        render
+
+        expect(rendered).not_to have_link('Wiki', href: group.wiki.web_url)
+      end
+    end
+  end
+
   describe 'iterations link' do
     let_it_be(:current_user) { create(:user) }
 

@@ -1,5 +1,0 @@
----
-title: Fix N+1 queries for Elastic Search commits scope.
-merge_request: 35449
-author:
-type: performance

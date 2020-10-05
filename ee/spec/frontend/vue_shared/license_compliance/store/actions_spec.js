@@ -60,6 +60,21 @@ describe('License store actions', () => {
     });
   });
 
+  describe('setKnownLicenses', () => {
+    it('commits SET_KNOWN_LICENSES', done => {
+      const payload = [{ name: 'BSD' }, { name: 'Apache' }];
+      testAction(
+        actions.setKnownLicenses,
+        payload,
+        state,
+        [{ type: mutationTypes.SET_KNOWN_LICENSES, payload }],
+        [],
+      )
+        .then(done)
+        .catch(done.fail);
+    });
+  });
+
   describe('setLicenseInModal', () => {
     it('commits SET_LICENSE_IN_MODAL with license', done => {
       testAction(

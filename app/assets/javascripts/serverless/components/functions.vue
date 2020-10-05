@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import EnvironmentRow from './environment_row.vue';
 import EmptyState from './empty_state.vue';
@@ -10,24 +10,14 @@ export default {
   components: {
     EnvironmentRow,
     EmptyState,
+    GlLink,
     GlLoadingIcon,
   },
-  props: {
-    clustersPath: {
-      type: String,
-      required: true,
-    },
-    helpPath: {
-      type: String,
-      required: true,
-    },
-    statusPath: {
-      type: String,
-      required: true,
-    },
+  directives: {
+    SafeHtml,
   },
   computed: {
-    ...mapState(['installed', 'isLoading', 'hasFunctionData']),
+    ...mapState(['installed', 'isLoading', 'hasFunctionData', 'helpPath', 'statusPath']),
     ...mapGetters(['getFunctions']),
 
     checkingInstalled() {
@@ -104,9 +94,9 @@ export default {
             }}
           </p>
           <ul>
-            <li v-html="noServerlessConfigFile"></li>
-            <li v-html="noGitlabYamlConfigured"></li>
-            <li v-html="mismatchedServerlessFunctions"></li>
+            <li v-safe-html="noServerlessConfigFile"></li>
+            <li v-safe-html="noGitlabYamlConfigured"></li>
+            <li v-safe-html="mismatchedServerlessFunctions"></li>
             <li>{{ s__('Serverless|The deploy job has not finished.') }}</li>
           </ul>
 
@@ -118,14 +108,14 @@ export default {
             }}
           </p>
           <div class="text-center">
-            <a :href="helpPath" class="btn btn-success">
-              {{ s__('Serverless|Learn more about Serverless') }}
-            </a>
+            <gl-link :href="helpPath" class="btn btn-success">{{
+              s__('Serverless|Learn more about Serverless')
+            }}</gl-link>
           </div>
         </div>
       </div>
     </div>
 
-    <empty-state v-else :clusters-path="clustersPath" :help-path="helpPath" />
+    <empty-state v-else />
   </section>
 </template>

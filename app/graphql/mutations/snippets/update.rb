@@ -14,14 +14,6 @@ module Mutations
                required: false,
                description: 'Title of the snippet'
 
-      argument :file_name, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'File name of the snippet'
-
-      argument :content, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Content of the snippet'
-
       argument :description, GraphQL::STRING_TYPE,
                required: false,
                description: 'Description of the snippet'
@@ -30,8 +22,8 @@ module Mutations
                description: 'The visibility level of the snippet',
                required: false
 
-      argument :files, [Types::Snippets::FileInputType],
-               description: 'The snippet files to update',
+      argument :blob_actions, [Types::Snippets::BlobActionInputType],
+               description: 'Actions to perform over the snippet repository and blobs',
                required: false
 
       def resolve(args)
@@ -41,6 +33,11 @@ module Mutations
                                                context[:current_user],
                                                update_params(args)).execute(snippet)
         snippet = result.payload[:snippet]
+
+        # Only when the user is not an api user and the operation was successful
+        if !api_user? && result.success?
+          ::Gitlab::UsageDataCounters::EditorUniqueCounter.track_snippet_editor_edit_action(author: current_user)
+        end
 
         {
           snippet: result.success? ? snippet : snippet.reset,
@@ -56,9 +53,9 @@ module Mutations
 
       def update_params(args)
         args.tap do |update_args|
-          # We need to rename `files` into `snippet_files` because
+          # We need to rename `blob_actions` into `snippet_actions` because
           # it's the expected key param
-          update_args[:snippet_files] = update_args.delete(:files)&.map(&:to_h)
+          update_args[:snippet_actions] = update_args.delete(:blob_actions)&.map(&:to_h)
         end
       end
     end

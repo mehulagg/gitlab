@@ -44,10 +44,14 @@ RSpec.describe Deployment do
 
   describe 'modules' do
     it_behaves_like 'AtomicInternalId' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:deployable) { create(:ci_build, project: project) }
+      let_it_be(:environment) { create(:environment, project: project) }
+
       let(:internal_id_attribute) { :iid }
-      let(:instance) { build(:deployment) }
+      let(:instance) { build(:deployment, deployable: deployable, environment: environment) }
       let(:scope) { :project }
-      let(:scope_attrs) { { project: instance.project } }
+      let(:scope_attrs) { { project: project } }
       let(:usage) { :deployments }
     end
   end
@@ -94,15 +98,35 @@ RSpec.describe Deployment do
     context 'when deployment runs' do
       let(:deployment) { create(:deployment) }
 
-      before do
-        deployment.run!
-      end
-
       it 'starts running' do
-        Timecop.freeze do
+        freeze_time do
+          deployment.run!
+
           expect(deployment).to be_running
           expect(deployment.finished_at).to be_nil
         end
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
+
+        deployment.run!
+      end
+
+      it 'does not execute Deployments::ExecuteHooksWorker when feature is disabled' do
+        stub_feature_flags(ci_send_deployment_hook_when_start: false)
+        expect(Deployments::ExecuteHooksWorker)
+            .not_to receive(:perform_async).with(deployment.id)
+
+        deployment.run!
+      end
+
+      it 'executes Deployments::ForwardDeploymentWorker asynchronously' do
+        expect(Deployments::ForwardDeploymentWorker)
+            .to receive(:perform_async).once.with(deployment.id)
+
+        deployment.run!
       end
     end
 
@@ -110,7 +134,7 @@ RSpec.describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.succeed!
 
           expect(deployment).to be_success
@@ -118,15 +142,15 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::SuccessWorker asynchronously' do
-        expect(Deployments::SuccessWorker)
+      it 'executes Deployments::UpdateEnvironmentWorker asynchronously' do
+        expect(Deployments::UpdateEnvironmentWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.succeed!
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
           .to receive(:perform_async).with(deployment.id)
 
         deployment.succeed!
@@ -137,7 +161,7 @@ RSpec.describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.drop!
 
           expect(deployment).to be_failed
@@ -145,9 +169,16 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
           .to receive(:perform_async).with(deployment.id)
+
+        deployment.drop!
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
 
         deployment.drop!
       end
@@ -157,7 +188,7 @@ RSpec.describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.cancel!
 
           expect(deployment).to be_canceled
@@ -165,9 +196,16 @@ RSpec.describe Deployment do
         end
       end
 
-      it 'executes Deployments::FinishedWorker asynchronously' do
-        expect(Deployments::FinishedWorker)
+      it 'executes Deployments::LinkMergeRequestWorker asynchronously' do
+        expect(Deployments::LinkMergeRequestWorker)
           .to receive(:perform_async).with(deployment.id)
+
+        deployment.cancel!
+      end
+
+      it 'executes Deployments::ExecuteHooksWorker asynchronously' do
+        expect(Deployments::ExecuteHooksWorker)
+            .to receive(:perform_async).with(deployment.id)
 
         deployment.cancel!
       end
@@ -576,15 +614,16 @@ RSpec.describe Deployment do
       expect(deploy).to be_success
     end
 
-    it 'schedules SuccessWorker and FinishedWorker when finishing a deploy' do
-      expect(Deployments::SuccessWorker).to receive(:perform_async)
-      expect(Deployments::FinishedWorker).to receive(:perform_async)
+    it 'schedules workers when finishing a deploy' do
+      expect(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
+      expect(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      expect(Deployments::ExecuteHooksWorker).to receive(:perform_async)
 
       deploy.update_status('success')
     end
 
     it 'updates finished_at when transitioning to a finished status' do
-      Timecop.freeze do
+      freeze_time do
         deploy.update_status('success')
 
         expect(deploy.read_attribute(:finished_at)).to eq(Time.current)

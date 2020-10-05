@@ -113,7 +113,7 @@ export default {
         <span class="gl-mr-2 gl-font-weight-bold gl-font-sm">
           {{ storageType.name }}
         </span>
-        <span class="gl-text-gray-700 gl-font-sm">
+        <span class="gl-text-gray-500 gl-font-sm">
           {{ formatSize(storageType.size) }}
         </span>
       </div>

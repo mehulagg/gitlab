@@ -103,7 +103,7 @@ RSpec.describe ProjectsController do
 
     context 'custom project templates' do
       let(:group) { create(:group) }
-      let(:project_template) { create(:project, :repository, :public, namespace: group) }
+      let(:project_template) { create(:project, :repository, :public, :metrics_dashboard_enabled, namespace: group) }
       let(:templates_params) do
         {
           path: 'foo',
@@ -430,7 +430,7 @@ RSpec.describe ProjectsController do
 
     context 'when project export is enabled' do
       it 'logs the audit event' do
-        expect { request }.to change { SecurityEvent.count }.by(1)
+        expect { request }.to change { AuditEvent.count }.by(1)
       end
     end
 
@@ -440,7 +440,7 @@ RSpec.describe ProjectsController do
       end
 
       it 'does not log an audit event' do
-        expect { request }.not_to change { SecurityEvent.count }
+        expect { request }.not_to change { AuditEvent.count }
       end
     end
   end
@@ -459,8 +459,8 @@ RSpec.describe ProjectsController do
         end
 
         it 'logs the audit event' do
-          expect { request }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:custom_message]).to eq('Project archived')
+          expect { request }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:custom_message]).to eq('Project archived')
         end
       end
 
@@ -470,7 +470,7 @@ RSpec.describe ProjectsController do
         end
 
         it 'does not log the audit event' do
-          expect { request }.not_to change { SecurityEvent.count }
+          expect { request }.not_to change { AuditEvent.count }
         end
       end
     end
@@ -484,8 +484,8 @@ RSpec.describe ProjectsController do
         end
 
         it 'logs the audit event' do
-          expect { request }.to change { SecurityEvent.count }.by(1)
-          expect(SecurityEvent.last.details[:custom_message]).to eq('Project unarchived')
+          expect { request }.to change { AuditEvent.count }.by(1)
+          expect(AuditEvent.last.details[:custom_message]).to eq('Project unarchived')
         end
       end
 
@@ -495,7 +495,7 @@ RSpec.describe ProjectsController do
         end
 
         it 'does not log the audit event' do
-          expect { request }.not_to change { SecurityEvent.count }
+          expect { request }.not_to change { AuditEvent.count }
         end
       end
     end
@@ -581,14 +581,6 @@ RSpec.describe ProjectsController do
         let(:project) { create(:project, namespace: owner.namespace)}
 
         it_behaves_like 'deletes project right away'
-      end
-
-      context 'when configure_project_deletion_mode feature is disabled' do
-        before do
-          stub_feature_flags(configure_project_deletion_mode: false)
-        end
-
-        it_behaves_like 'marks project for deletion'
       end
     end
 

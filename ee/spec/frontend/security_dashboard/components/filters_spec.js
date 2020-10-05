@@ -17,6 +17,9 @@ describe('Filter component', () => {
       propsData: {
         ...props,
       },
+      slots: {
+        buttons: '<div class="button-slot"></div>',
+      },
     });
   };
 
@@ -40,6 +43,13 @@ describe('Filter component', () => {
 
     it('should display "Hide dismissed vulnerabilities" toggle', () => {
       expect(wrapper.findAll('.js-toggle')).toHaveLength(1);
+    });
+  });
+
+  describe('buttons slot', () => {
+    it('should exist', () => {
+      createWrapper();
+      expect(wrapper.find('.button-slot').exists()).toBe(true);
     });
   });
 });

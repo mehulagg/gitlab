@@ -14,7 +14,7 @@ RSpec.shared_examples "img upload tags for status page" do
     result_img_tag = Nokogiri::HTML(json[field]).css('img')[0]
     result_link_tag = result_img_tag.parent
 
-    expected_source_path = StatusPage::Storage.upload_path(issue.iid, secret, filename)
+    expected_source_path = Gitlab::StatusPage::Storage.upload_path(issue.iid, secret, filename)
 
     expect(result_img_tag['class']).to eq 'gl-image'
     expect(result_img_tag['src']).to eq expected_source_path

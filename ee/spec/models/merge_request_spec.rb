@@ -24,6 +24,75 @@ RSpec.describe MergeRequest do
     it { is_expected.to have_many(:approver_groups).dependent(:delete_all) }
     it { is_expected.to have_many(:approved_by_users) }
     it { is_expected.to have_one(:merge_train) }
+    it { is_expected.to have_many(:approval_rules) }
+    it { is_expected.to have_many(:approval_merge_request_rule_sources).through(:approval_rules) }
+    it { is_expected.to have_many(:approval_project_rules).through(:approval_merge_request_rule_sources) }
+
+    describe 'approval_rules association' do
+      describe '#applicable_to_branch' do
+        let!(:rule) { create(:approval_merge_request_rule, merge_request: merge_request) }
+        let(:branch) { 'stable' }
+
+        subject { merge_request.approval_rules.applicable_to_branch(branch) }
+
+        shared_examples_for 'with applicable rules to specified branch' do
+          it { is_expected.to eq([rule]) }
+        end
+
+        context 'when there are no associated source rules' do
+          it_behaves_like 'with applicable rules to specified branch'
+        end
+
+        context 'when there are associated source rules' do
+          let(:source_rule) { create(:approval_project_rule, project: merge_request.target_project) }
+
+          before do
+            rule.update!(approval_project_rule: source_rule)
+          end
+
+          context 'and rule is not overridden' do
+            before do
+              rule.update!(
+                name: source_rule.name,
+                approvals_required: source_rule.approvals_required,
+                users: source_rule.users,
+                groups: source_rule.groups
+              )
+            end
+
+            context 'and there are no associated protected branches to source rule' do
+              it_behaves_like 'with applicable rules to specified branch'
+            end
+
+            context 'and there are associated protected branches to source rule' do
+              before do
+                source_rule.update!(protected_branches: protected_branches)
+              end
+
+              context 'and branch matches' do
+                let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+                it_behaves_like 'with applicable rules to specified branch'
+              end
+
+              context 'and branch does not match anything' do
+                let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+                it { is_expected.to be_empty }
+              end
+            end
+          end
+
+          context 'and rule is overridden' do
+            before do
+              rule.update!(name: 'Overridden Rule')
+            end
+
+            it_behaves_like 'with applicable rules to specified branch'
+          end
+        end
+      end
+    end
   end
 
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
@@ -48,6 +117,24 @@ RSpec.describe MergeRequest do
       merge_request = build(:merge_request)
 
       expect(merge_request.allows_multiple_assignees?).to be(true)
+    end
+  end
+
+  describe '#allows_multiple_reviewers?' do
+    it 'returns false without license' do
+      stub_licensed_features(multiple_merge_request_reviewers: false)
+
+      merge_request = build_stubbed(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(false)
+    end
+
+    it 'returns true when licensed' do
+      stub_licensed_features(multiple_merge_request_reviewers: true)
+
+      merge_request = build(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(true)
     end
   end
 
@@ -117,6 +204,26 @@ RSpec.describe MergeRequest do
             end
 
             it { is_expected.to be_falsey }
+          end
+
+          context 'with License-Check enabled' do
+            let!(:license_check) { create(:report_approver_rule, :license_scanning, merge_request: merge_request) }
+
+            context 'when rule is not approved' do
+              before do
+                allow_any_instance_of(ApprovalWrappedRule).to receive(:approved?).and_return(false)
+              end
+
+              it { is_expected.to be_truthy }
+            end
+
+            context 'when rule is approved' do
+              before do
+                allow_any_instance_of(ApprovalWrappedRule).to receive(:approved?).and_return(true)
+              end
+
+              it { is_expected.to be_falsey }
+            end
           end
         end
       end
@@ -621,6 +728,40 @@ RSpec.describe MergeRequest do
         expect(subject[:status_reason]).to eq('This merge request does not have license scanning reports')
       end
     end
+
+    context "when a license scan report is produced from the head pipeline" do
+      where(:pipeline_status, :build_types, :expected_status) do
+        [
+          [:blocked, [:license_scan_v2_1], :parsed],
+          [:blocked, [:container_scanning], :error],
+          [:blocked, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:blocked, [], :error],
+          [:failed, [:container_scanning], :error],
+          [:failed, [:license_scan_v2_1], :parsed],
+          [:failed, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:failed, [], :error],
+          [:running, [:container_scanning], :error],
+          [:running, [:license_scan_v2_1], :parsed],
+          [:running, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:running, [], :error],
+          [:success, [:container_scanning], :error],
+          [:success, [:license_scan_v2_1], :parsed],
+          [:success, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:success, [], :error]
+        ]
+      end
+
+      with_them do
+        let!(:head_pipeline) { create(:ci_pipeline, pipeline_status, project: project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha, builds: builds) }
+        let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        specify { expect(subject[:status]).to eq(expected_status) }
+      end
+    end
   end
 
   describe '#compare_metrics_reports' do
@@ -858,6 +999,116 @@ RSpec.describe MergeRequest do
 
       expect(described_class.order_review_time_desc).to match([mr3, mr4, mr2, mr1, mr5])
       expect(described_class.sort_by_attribute('review_time_desc')).to match([mr3, mr4, mr2, mr1, mr5])
+    end
+  end
+
+  describe '#missing_security_scan_types' do
+    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:merge_request) { create(:ee_merge_request, source_project: project) }
+
+    subject { merge_request.missing_security_scan_types }
+
+    context 'when there is no head pipeline' do
+      context 'when there is no base pipeline' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when there is a base pipeline' do
+        let_it_be(:base_pipeline) do
+          create(:ee_ci_pipeline,
+                 project: project,
+                 ref: merge_request.target_branch,
+                 sha: merge_request.diff_base_sha)
+        end
+
+        context 'when there is no security scan for the base pipeline' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when there are security scans for the base_pipeline' do
+          before do
+            build = create(:ci_build, :success, pipeline: base_pipeline, project: project)
+            create(:security_scan, build: build)
+          end
+
+          it { is_expected.to be_empty }
+        end
+      end
+    end
+
+    context 'when there is a head pipeline' do
+      let_it_be(:head_pipeline) { create(:ee_ci_pipeline, project: project, sha: merge_request.diff_head_sha) }
+
+      before do
+        merge_request.update_head_pipeline
+      end
+
+      context 'when there is no base pipeline' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when there is a base pipeline' do
+        let_it_be(:base_pipeline) do
+          create(:ee_ci_pipeline,
+                 project: project,
+                 ref: merge_request.target_branch,
+                 sha: merge_request.diff_base_sha)
+        end
+
+        let_it_be(:base_pipeline_build) { create(:ci_build, :success, pipeline: base_pipeline, project: project) }
+        let_it_be(:head_pipeline_build) { create(:ci_build, :success, pipeline: head_pipeline, project: project) }
+
+        context 'when the head pipeline does not have security scans' do
+          context 'when the base pipeline does not have security scans' do
+            it { is_expected.to be_empty }
+          end
+
+          context 'when the base pipeline has security scans' do
+            before do
+              create(:security_scan, build: base_pipeline_build, scan_type: 'sast')
+            end
+
+            it { is_expected.to eq(['sast']) }
+          end
+        end
+
+        context 'when the head pipeline has security scans' do
+          before do
+            create(:security_scan, build: head_pipeline_build, scan_type: 'dast')
+          end
+
+          context 'when the base pipeline does not have security scans' do
+            it { is_expected.to be_empty }
+          end
+
+          context 'when the base pipeline has security scans' do
+            before do
+              create(:security_scan, build: base_pipeline_build, scan_type: 'dast')
+            end
+
+            context 'when there are no missing security scans for the head pipeline' do
+              it { is_expected.to be_empty }
+            end
+
+            context 'when there are missing security scans for the head pipeline' do
+              before do
+                create(:security_scan, build: base_pipeline_build, scan_type: 'sast')
+              end
+
+              it { is_expected.to eq(['sast']) }
+
+              context 'when there are multiple scans for the same type for base pipeline' do
+                before do
+                  build = create(:ci_build, :success, pipeline: base_pipeline, project: project)
+                  create(:security_scan, build: build, scan_type: 'sast')
+                end
+
+                it { is_expected.to eq(['sast']) }
+              end
+            end
+          end
+        end
+      end
     end
   end
 end

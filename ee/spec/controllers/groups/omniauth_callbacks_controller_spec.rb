@@ -153,6 +153,19 @@ RSpec.describe Groups::OmniauthCallbacksController do
           expect(group).to be_member(user)
         end
 
+        context 'when a default access level is specified in the SAML provider' do
+          let!(:saml_provider) do
+            create(:saml_provider, group: group, default_membership_role: Gitlab::Access::DEVELOPER)
+          end
+
+          it 'sets the access level of the member as per the specified `default_membership_role`' do
+            post provider, params: { group_id: group }
+
+            created_member = group.members.find_by(user: user)
+            expect(created_member.access_level).to eq(Gitlab::Access::DEVELOPER)
+          end
+        end
+
         it_behaves_like "SAML session initiated"
 
         it "displays a flash indicating the account has been linked" do

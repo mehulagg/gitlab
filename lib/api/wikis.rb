@@ -61,9 +61,10 @@ module API
         post ':id/wikis' do
           authorize! :create_wiki, container
 
-          page = WikiPages::CreateService.new(container: container, current_user: current_user, params: params).execute
+          response = WikiPages::CreateService.new(container: container, current_user: current_user, params: params).execute
+          page = response.payload[:page]
 
-          if page.valid?
+          if response.success?
             present page, with: Entities::WikiPage
           else
             render_validation_error!(page)
@@ -82,11 +83,12 @@ module API
         put ':id/wikis/:slug' do
           authorize! :create_wiki, container
 
-          page = WikiPages::UpdateService
+          response = WikiPages::UpdateService
             .new(container: container, current_user: current_user, params: params)
             .execute(wiki_page)
+          page = response.payload[:page]
 
-          if page.valid?
+          if response.success?
             present page, with: Entities::WikiPage
           else
             render_validation_error!(page)
@@ -100,11 +102,15 @@ module API
         delete ':id/wikis/:slug' do
           authorize! :admin_wiki, container
 
-          WikiPages::DestroyService
+          response = WikiPages::DestroyService
             .new(container: container, current_user: current_user)
             .execute(wiki_page)
 
-          no_content!
+          if response.success?
+            no_content!
+          else
+            render_api_error!(reponse.message)
+          end
         end
 
         desc 'Upload an attachment to the wiki repository' do

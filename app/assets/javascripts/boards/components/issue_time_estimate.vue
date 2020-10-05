@@ -1,12 +1,11 @@
 <script>
-import { GlTooltip } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTooltip, GlIcon } from '@gitlab/ui';
 import { parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
 import boardsStore from '../stores/boards_store';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlTooltip,
   },
   props: {
@@ -34,10 +33,9 @@ export default {
 <template>
   <span>
     <span ref="issueTimeEstimate" class="board-card-info card-number">
-      <icon name="hourglass" class="board-card-info-icon align-top" /><time
-        class="board-card-info-text"
-        >{{ timeEstimate }}</time
-      >
+      <gl-icon name="hourglass" class="board-card-info-icon" /><time class="board-card-info-text">{{
+        timeEstimate
+      }}</time>
     </span>
     <gl-tooltip
       :target="() => $refs.issueTimeEstimate"

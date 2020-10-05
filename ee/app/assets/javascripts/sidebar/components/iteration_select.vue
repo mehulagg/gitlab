@@ -2,10 +2,10 @@
 import {
   GlButton,
   GlLink,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlSearchBoxByType,
-  GlNewDropdownHeader,
+  GlDropdownSectionHeader,
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
@@ -13,7 +13,7 @@ import groupIterationsQuery from '../queries/group_iterations.query.graphql';
 import currentIterationQuery from '../queries/issue_iteration.query.graphql';
 import setIssueIterationMutation from '../queries/set_iteration_on_issue.mutation.graphql';
 import { iterationSelectTextMap } from '../constants';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 export default {
   noIteration: iterationSelectTextMap.noIteration,
@@ -24,10 +24,10 @@ export default {
   components: {
     GlButton,
     GlLink,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlSearchBoxByType,
-    GlNewDropdownHeader,
+    GlDropdownSectionHeader,
     GlIcon,
   },
   props: {
@@ -91,8 +91,13 @@ export default {
   },
   computed: {
     iteration() {
-      // NOTE: Optional chaining guards when search result is empty
-      return this.iterations.find(({ id }) => id === this.currentIteration)?.title;
+      return this.iterations.find(({ id }) => id === this.currentIteration);
+    },
+    iterationTitle() {
+      return this.iteration?.title;
+    },
+    iterationUrl() {
+      return this.iteration?.webUrl;
     },
     showNoIterationContent() {
       return !this.editing && !this.currentIteration;
@@ -156,32 +161,33 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div data-qa-selector="iteration_container">
     <div v-gl-tooltip class="sidebar-collapsed-icon">
       <gl-icon :size="16" :aria-label="$options.iterationText" name="iteration" />
-      <span class="collapse-truncated-title">{{ iteration }}</span>
+      <span class="collapse-truncated-title">{{ iterationTitle }}</span>
     </div>
     <div class="title hide-collapsed mt-3">
       {{ $options.iterationText }}
       <gl-button
         v-if="canEdit"
         variant="link"
-        class="js-sidebar-dropdown-toggle edit-link gl-shadow-none float-right"
+        class="js-sidebar-dropdown-toggle edit-link gl-shadow-none float-right gl-reset-color! btn-link-hover"
         data-testid="iteration-edit-link"
         data-track-label="right_sidebar"
         data-track-property="iteration"
         data-track-event="click_edit_button"
+        data-qa-selector="edit_iteration_link"
         @click.stop="toggleDropdown"
         >{{ __('Edit') }}</gl-button
       >
     </div>
     <div data-testid="select-iteration" class="hide-collapsed">
       <span v-if="showNoIterationContent" class="no-value">{{ $options.noIteration }}</span>
-      <gl-link v-else-if="!editing" href
-        ><strong>{{ iteration }}</strong></gl-link
+      <gl-link v-else-if="!editing" data-qa-selector="iteration_link" :href="iterationUrl"
+        ><strong>{{ iterationTitle }}</strong></gl-link
       >
     </div>
-    <gl-new-dropdown
+    <gl-dropdown
       v-show="editing"
       ref="newDropdown"
       data-toggle="dropdown"
@@ -189,18 +195,18 @@ export default {
       class="dropdown gl-w-full"
       :class="{ show: editing }"
     >
-      <gl-new-dropdown-header class="d-flex justify-content-center">{{
+      <gl-dropdown-section-header class="d-flex justify-content-center">{{
         __('Assign Iteration')
-      }}</gl-new-dropdown-header>
+      }}</gl-dropdown-section-header>
       <gl-search-box-by-type ref="search" v-model="searchTerm" class="gl-m-3" />
-      <gl-new-dropdown-item
+      <gl-dropdown-item
         v-for="iterationItem in iterations"
         :key="iterationItem.id"
         :is-check-item="true"
         :is-checked="isIterationChecked(iterationItem.id)"
         @click="setIteration(iterationItem.id)"
-        >{{ iterationItem.title }}</gl-new-dropdown-item
+        >{{ iterationItem.title }}</gl-dropdown-item
       >
-    </gl-new-dropdown>
+    </gl-dropdown>
   </div>
 </template>

@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: concepts, howto
 ---
 
@@ -25,9 +28,11 @@ For a commit or tag to be *verified* by GitLab:
   which is usually up to three years.
 - The signing time is equal or later then commit time.
 
-NOTE: **Note:** Certificate revocation lists are checked on a daily basis via background worker.
+NOTE: **Note:**
+Certificate revocation lists are checked on a daily basis via background worker.
 
-NOTE: **Note:** Self signed certificates without `authorityKeyIdentifier`,
+NOTE: **Note:**
+Self signed certificates without `authorityKeyIdentifier`,
 `subjectKeyIdentifier`, and `crlDistributionPoints` are not supported. We
 recommend using certificates from a PKI that are in line with
 [RFC 5280](https://tools.ietf.org/html/rfc5280).

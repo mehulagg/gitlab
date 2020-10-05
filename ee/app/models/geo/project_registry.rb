@@ -21,8 +21,9 @@ class Geo::ProjectRegistry < Geo::BaseRegistry
 
   validates :project, presence: true, uniqueness: true
 
-  scope :never_synced, -> { where(last_repository_synced_at: nil) }
   scope :dirty, -> { where(arel_table[:resync_repository].eq(true).or(arel_table[:resync_wiki].eq(true))) }
+  scope :needs_sync_again, -> { dirty.retry_due }
+  scope :never_attempted_sync, -> { where(last_repository_synced_at: nil) }
   scope :synced_repos, -> { where(resync_repository: false) }
   scope :synced_wikis, -> { where(resync_wiki: false) }
   scope :failed_repos, -> { where(arel_table[:repository_retry_count].gt(0)) }
@@ -43,18 +44,8 @@ class Geo::ProjectRegistry < Geo::BaseRegistry
     where(nil).pluck(:project_id)
   end
 
-  def self.registry_consistency_worker_enabled?
-    Feature.enabled?(:geo_project_registry_ssot_sync)
-  end
-
-  def self.find_registry_differences(range)
-    source_ids = Gitlab::Geo.current_node.projects.id_in(range).pluck_primary_key
-    tracked_ids = self.pluck_model_ids_in_range(range)
-
-    untracked_ids = source_ids - tracked_ids
-    unused_tracked_ids = tracked_ids - source_ids
-
-    [untracked_ids, unused_tracked_ids]
+  def self.find_registries_needs_sync_again(batch_size:, except_ids: [])
+    super.order(Gitlab::Database.nulls_first_order(:last_repository_synced_at))
   end
 
   def self.delete_worker_class
@@ -108,7 +99,9 @@ class Geo::ProjectRegistry < Geo::BaseRegistry
   #
   # @param [String] query term that will search over :path, :name and :description
   def self.with_search(query)
-    where(project: Geo::Fdw::Project.search(query))
+    return all if query.empty?
+
+    where(project_id: ::Project.search(query).limit(1000).pluck_primary_key)
   end
 
   def self.synced(type)
@@ -178,31 +171,25 @@ class Geo::ProjectRegistry < Geo::BaseRegistry
   end
 
   def self.repositories_checksummed_pending_verification
-    where(repositories_pending_verification.and(arel_table[:primary_repository_checksummed].eq(true)))
+    repository_exists_on_primary =
+      Arel::Nodes::SqlLiteral.new('project_registry.repository_missing_on_primary IS NOT TRUE')
+
+    where(repository_exists_on_primary)
+      .where(last_repository_verification_failure: nil,
+             primary_repository_checksummed: true,
+             resync_repository: false,
+             repository_verification_checksum_sha: nil)
   end
 
   def self.wikis_checksummed_pending_verification
-    where(wikis_pending_verification.and(arel_table[:primary_wiki_checksummed].eq(true)))
-  end
-
-  def self.repositories_pending_verification
-    repository_exists_on_primary =
-      Arel::Nodes::SqlLiteral.new("project_registry.repository_missing_on_primary IS NOT TRUE")
-
-    arel_table[:repository_verification_checksum_sha].eq(nil)
-      .and(arel_table[:last_repository_verification_failure].eq(nil))
-      .and(arel_table[:resync_repository].eq(false))
-      .and(repository_exists_on_primary)
-  end
-
-  def self.wikis_pending_verification
     wiki_exists_on_primary =
-      Arel::Nodes::SqlLiteral.new("project_registry.wiki_missing_on_primary IS NOT TRUE")
+      Arel::Nodes::SqlLiteral.new('project_registry.wiki_missing_on_primary IS NOT TRUE')
 
-    arel_table[:wiki_verification_checksum_sha].eq(nil)
-      .and(arel_table[:last_wiki_verification_failure].eq(nil))
-      .and(arel_table[:resync_wiki].eq(false))
-      .and(wiki_exists_on_primary)
+    where(wiki_exists_on_primary)
+      .where(last_wiki_verification_failure: nil,
+             primary_wiki_checksummed: true,
+             resync_wiki: false,
+             wiki_verification_checksum_sha: nil)
   end
 
   def self.flag_repositories_for_resync!

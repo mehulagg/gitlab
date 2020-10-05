@@ -25,6 +25,7 @@ RSpec.describe Ci::Build do
   it { is_expected.to have_many(:sourced_pipelines) }
   it { is_expected.to have_many(:job_variables) }
   it { is_expected.to have_many(:report_results) }
+  it { is_expected.to have_many(:pages_deployments) }
 
   it { is_expected.to have_one(:deployment) }
   it { is_expected.to have_one(:runner_session) }
@@ -448,7 +449,7 @@ RSpec.describe Ci::Build do
     end
 
     it 'schedules BuildScheduleWorker at the right time' do
-      Timecop.freeze do
+      freeze_time do
         expect(Ci::BuildScheduleWorker)
           .to receive(:perform_at).with(be_like_time(1.minute.since), build.id)
 
@@ -496,7 +497,7 @@ RSpec.describe Ci::Build do
       let(:option) { { start_in: '1 day' } }
 
       it 'returns date after 1 day' do
-        Timecop.freeze do
+        freeze_time do
           is_expected.to eq(1.day.since)
         end
       end
@@ -506,7 +507,7 @@ RSpec.describe Ci::Build do
       let(:option) { { start_in: '1 week' } }
 
       it 'returns date after 1 week' do
-        Timecop.freeze do
+        freeze_time do
           is_expected.to eq(1.week.since)
         end
       end
@@ -566,18 +567,18 @@ RSpec.describe Ci::Build do
       let(:runner) { create(:ci_runner, :project, projects: [build.project]) }
 
       before do
-        runner.update(contacted_at: 1.second.ago)
+        runner.update!(contacted_at: 1.second.ago)
       end
 
       it { is_expected.to be_truthy }
 
       it 'that is inactive' do
-        runner.update(active: false)
+        runner.update!(active: false)
         is_expected.to be_falsey
       end
 
       it 'that is not online' do
-        runner.update(contacted_at: nil)
+        runner.update!(contacted_at: nil)
         is_expected.to be_falsey
       end
 
@@ -612,6 +613,102 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#locked_artifacts?' do
+    subject(:locked_artifacts) { build.locked_artifacts? }
+
+    context 'when pipeline is artifacts_locked' do
+      before do
+        build.pipeline.artifacts_locked!
+      end
+
+      context 'artifacts archive does not exist' do
+        let(:build) { create(:ci_build) }
+
+        it { is_expected.to be_falsy }
+      end
+
+      context 'artifacts archive exists' do
+        let(:build) { create(:ci_build, :artifacts) }
+
+        it { is_expected.to be_truthy }
+      end
+    end
+
+    context 'when pipeline is unlocked' do
+      before do
+        build.pipeline.unlocked!
+      end
+
+      context 'artifacts archive does not exist' do
+        let(:build) { create(:ci_build) }
+
+        it { is_expected.to be_falsy }
+      end
+
+      context 'artifacts archive exists' do
+        let(:build) { create(:ci_build, :artifacts) }
+
+        it { is_expected.to be_falsy }
+      end
+    end
+  end
+
+  describe '#available_artifacts?' do
+    let(:build) { create(:ci_build) }
+
+    subject { build.available_artifacts? }
+
+    context 'when artifacts are not expired' do
+      before do
+        build.artifacts_expire_at = Date.tomorrow
+      end
+
+      context 'when artifacts exist' do
+        before do
+          create(:ci_job_artifact, :archive, job: build)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+
+      context 'when artifacts do not exist' do
+        it { is_expected.to be_falsey }
+      end
+    end
+
+    context 'when artifacts are expired' do
+      before do
+        build.artifacts_expire_at = Date.yesterday
+      end
+
+      context 'when artifacts are not locked' do
+        before do
+          build.pipeline.locked = :unlocked
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when artifacts are locked' do
+        before do
+          build.pipeline.locked = :artifacts_locked
+        end
+
+        context 'when artifacts exist' do
+          before do
+            create(:ci_job_artifact, :archive, job: build)
+          end
+
+          it { is_expected.to be_truthy }
+        end
+
+        context 'when artifacts do not exist' do
+          it { is_expected.to be_falsey }
+        end
+      end
+    end
+  end
+
   describe '#browsable_artifacts?' do
     subject { build.browsable_artifacts? }
 
@@ -627,7 +724,7 @@ RSpec.describe Ci::Build do
 
     context 'is expired' do
       before do
-        build.update(artifacts_expire_at: Time.current - 7.days)
+        build.update!(artifacts_expire_at: Time.current - 7.days)
       end
 
       it { is_expected.to be_truthy }
@@ -635,7 +732,7 @@ RSpec.describe Ci::Build do
 
     context 'is not expired' do
       before do
-        build.update(artifacts_expire_at: Time.current + 7.days)
+        build.update!(artifacts_expire_at: Time.current + 7.days)
       end
 
       it { is_expected.to be_falsey }
@@ -956,18 +1053,53 @@ RSpec.describe Ci::Build do
   end
 
   describe '#hide_secrets' do
+    let(:metrics) { spy('metrics') }
     let(:subject) { build.hide_secrets(data) }
 
     context 'hide runners token' do
       let(:data) { "new #{project.runners_token} data"}
 
       it { is_expected.to match(/^new x+ data$/) }
+
+      it 'increments trace mutation metric' do
+        build.hide_secrets(data, metrics)
+
+        expect(metrics)
+          .to have_received(:increment_trace_operation)
+          .with(operation: :mutated)
+      end
     end
 
     context 'hide build token' do
       let(:data) { "new #{build.token} data"}
 
       it { is_expected.to match(/^new x+ data$/) }
+
+      it 'increments trace mutation metric' do
+        build.hide_secrets(data, metrics)
+
+        expect(metrics)
+          .to have_received(:increment_trace_operation)
+          .with(operation: :mutated)
+      end
+    end
+
+    context 'when build does not include secrets' do
+      let(:data) { 'my build log' }
+
+      it 'does not mutate trace' do
+        trace = build.hide_secrets(data)
+
+        expect(trace).to eq data
+      end
+
+      it 'does not increment trace mutation metric' do
+        build.hide_secrets(data, metrics)
+
+        expect(metrics)
+          .not_to have_received(:increment_trace_operation)
+          .with(operation: :mutated)
+      end
     end
   end
 
@@ -977,7 +1109,8 @@ RSpec.describe Ci::Build do
     let(:environment) { deployment.environment }
 
     before do
-      allow(Deployments::FinishedWorker).to receive(:perform_async)
+      allow(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
     end
 
     it 'has deployments record with created status' do
@@ -997,7 +1130,8 @@ RSpec.describe Ci::Build do
 
     context 'when transits to success' do
       before do
-        allow(Deployments::SuccessWorker).to receive(:perform_async)
+        allow(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
+        allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
         build.success!
       end
 
@@ -1144,7 +1278,7 @@ RSpec.describe Ci::Build do
 
       context 'when environment is defined' do
         before do
-          build.update(environment: 'review')
+          build.update!(environment: 'review')
         end
 
         it { is_expected.to be_truthy }
@@ -1152,7 +1286,7 @@ RSpec.describe Ci::Build do
 
       context 'when environment is not defined' do
         before do
-          build.update(environment: nil)
+          build.update!(environment: nil)
         end
 
         it { is_expected.to be_falsey }
@@ -1194,18 +1328,6 @@ RSpec.describe Ci::Build do
             expect(build).not_to receive(:simple_variables)
 
             is_expected.to eq('review/host')
-          end
-
-          context 'when ci_persisted_expanded_environment_name feature flag is disabled' do
-            before do
-              stub_feature_flags(ci_persisted_expanded_environment_name: false)
-            end
-
-            it 'returns an expanded environment name with a list of variables' do
-              expect(build).to receive(:simple_variables).once.and_call_original
-
-              is_expected.to eq('review/host')
-            end
           end
         end
       end
@@ -1272,7 +1394,7 @@ RSpec.describe Ci::Build do
 
       context 'when environment is defined' do
         before do
-          build.update(environment: 'review')
+          build.update!(environment: 'review')
         end
 
         context 'no action is defined' do
@@ -1281,7 +1403,7 @@ RSpec.describe Ci::Build do
 
         context 'and start action is defined' do
           before do
-            build.update(options: { environment: { action: 'start' } } )
+            build.update!(options: { environment: { action: 'start' } } )
           end
 
           it { is_expected.to be_truthy }
@@ -1290,7 +1412,7 @@ RSpec.describe Ci::Build do
 
       context 'when environment is not defined' do
         before do
-          build.update(environment: nil)
+          build.update!(environment: nil)
         end
 
         it { is_expected.to be_falsey }
@@ -1302,7 +1424,7 @@ RSpec.describe Ci::Build do
 
       context 'when environment is defined' do
         before do
-          build.update(environment: 'review')
+          build.update!(environment: 'review')
         end
 
         context 'no action is defined' do
@@ -1311,7 +1433,7 @@ RSpec.describe Ci::Build do
 
         context 'and stop action is defined' do
           before do
-            build.update(options: { environment: { action: 'stop' } } )
+            build.update!(options: { environment: { action: 'stop' } } )
           end
 
           it { is_expected.to be_truthy }
@@ -1320,7 +1442,7 @@ RSpec.describe Ci::Build do
 
       context 'when environment is not defined' do
         before do
-          build.update(environment: nil)
+          build.update!(environment: nil)
         end
 
         it { is_expected.to be_falsey }
@@ -1643,7 +1765,7 @@ RSpec.describe Ci::Build do
 
     describe '#action?' do
       before do
-        build.update(when: value)
+        build.update!(when: value)
       end
 
       subject { build.action? }
@@ -1701,112 +1823,6 @@ RSpec.describe Ci::Build do
         it 'returns zero' do
           expect(subject.retries_count).to eq 0
         end
-      end
-    end
-
-    describe '#options_retry_max' do
-      context 'with retries max config option' do
-        subject { create(:ci_build, options: { retry: { max: 1 } }) }
-
-        context 'when build_metadata_config is set' do
-          before do
-            stub_feature_flags(ci_build_metadata_config: true)
-          end
-
-          it 'returns the number of configured max retries' do
-            expect(subject.options_retry_max).to eq 1
-          end
-        end
-
-        context 'when build_metadata_config is not set' do
-          before do
-            stub_feature_flags(ci_build_metadata_config: false)
-          end
-
-          it 'returns the number of configured max retries' do
-            expect(subject.options_retry_max).to eq 1
-          end
-        end
-      end
-
-      context 'without retries max config option' do
-        subject { create(:ci_build) }
-
-        it 'returns nil' do
-          expect(subject.options_retry_max).to be_nil
-        end
-      end
-
-      context 'when build is degenerated' do
-        subject { create(:ci_build, :degenerated) }
-
-        it 'returns nil' do
-          expect(subject.options_retry_max).to be_nil
-        end
-      end
-
-      context 'with integer only config option' do
-        subject { create(:ci_build, options: { retry: 1 }) }
-
-        it 'returns the number of configured max retries' do
-          expect(subject.options_retry_max).to eq 1
-        end
-      end
-    end
-
-    describe '#options_retry_when' do
-      context 'with retries when config option' do
-        subject { create(:ci_build, options: { retry: { when: ['some_reason'] } }) }
-
-        it 'returns the configured when' do
-          expect(subject.options_retry_when).to eq ['some_reason']
-        end
-      end
-
-      context 'without retries when config option' do
-        subject { create(:ci_build) }
-
-        it 'returns always array' do
-          expect(subject.options_retry_when).to eq ['always']
-        end
-      end
-
-      context 'with integer only config option' do
-        subject { create(:ci_build, options: { retry: 1 }) }
-
-        it 'returns always array' do
-          expect(subject.options_retry_when).to eq ['always']
-        end
-      end
-    end
-
-    describe '#retry_failure?' do
-      using RSpec::Parameterized::TableSyntax
-
-      let(:build) { create(:ci_build) }
-
-      subject { build.retry_failure? }
-
-      where(:description, :retry_count, :options, :failure_reason, :result) do
-        "retries are disabled" | 0 | { max: 0 } | nil | false
-        "max equals count" | 2 | { max: 2 } | nil | false
-        "max is higher than count" | 1 | { max: 2 } | nil | true
-        "matching failure reason" | 0 | { when: %w[api_failure], max: 2 } | :api_failure | true
-        "not matching with always" | 0 | { when: %w[always], max: 2 } | :api_failure | true
-        "not matching reason" | 0 | { when: %w[script_error], max: 2 } | :api_failure | false
-        "scheduler failure override" | 1 | { when: %w[scheduler_failure], max: 1 } | :scheduler_failure | false
-        "default for scheduler failure" | 1 | {} | :scheduler_failure | true
-      end
-
-      with_them do
-        before do
-          allow(build).to receive(:retries_count) { retry_count }
-
-          build.options[:retry] = options
-          build.failure_reason = failure_reason
-        end
-
-        it { is_expected.to eq(result) }
       end
     end
   end
@@ -2115,23 +2131,13 @@ RSpec.describe Ci::Build do
       it { is_expected.to be_nil }
     end
 
-    context 'when build has a start environment' do
-      let(:build) { create(:ci_build, :with_deployment, :deploy_to_production, pipeline: pipeline) }
-
-      it 'does not expand environment name' do
-        expect(build).not_to receive(:expanded_environment_name)
-
-        subject
-      end
-    end
-
     context 'when build has a stop environment' do
-      let(:build) { create(:ci_build, :stop_review_app, pipeline: pipeline) }
+      let(:build) { create(:ci_build, :stop_review_app, pipeline: pipeline, environment: "foo-#{project.default_branch}") }
 
       it 'expands environment name' do
-        expect(build).to receive(:expanded_environment_name)
+        expect(build).to receive(:expanded_environment_name).and_call_original
 
-        subject
+        is_expected.to eq(environment)
       end
     end
   end
@@ -2301,10 +2307,58 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#has_expired_locked_archive_artifacts?' do
+    subject { build.has_expired_locked_archive_artifacts? }
+
+    context 'when build does not have artifacts' do
+      it { is_expected.to eq(nil) }
+    end
+
+    context 'when build has artifacts' do
+      before do
+        create(:ci_job_artifact, :archive, job: build)
+      end
+
+      context 'when artifacts are unlocked' do
+        before do
+          build.pipeline.unlocked!
+        end
+
+        it { is_expected.to eq(false) }
+      end
+
+      context 'when artifacts are locked' do
+        before do
+          build.pipeline.artifacts_locked!
+        end
+
+        context 'when artifacts do not expire' do
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when artifacts expire in the future' do
+          before do
+            build.update!(artifacts_expire_at: 1.day.from_now)
+          end
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when artifacts expired in the past' do
+          before do
+            build.update!(artifacts_expire_at: 1.day.ago)
+          end
+
+          it { is_expected.to eq(true) }
+        end
+      end
+    end
+  end
+
   describe '#has_expiring_archive_artifacts?' do
     context 'when artifacts have expiration date set' do
       before do
-        build.update(artifacts_expire_at: 1.day.from_now)
+        build.update!(artifacts_expire_at: 1.day.from_now)
       end
 
       context 'and job artifacts archive record exists' do
@@ -2324,7 +2378,7 @@ RSpec.describe Ci::Build do
 
     context 'when artifacts do not have expiration date set' do
       before do
-        build.update(artifacts_expire_at: nil)
+        build.update!(artifacts_expire_at: nil)
       end
 
       it 'does not have expiring artifacts' do
@@ -2401,6 +2455,7 @@ RSpec.describe Ci::Build do
           { key: 'CI_COMMIT_TITLE', value: pipeline.git_commit_title, public: true, masked: false },
           { key: 'CI_COMMIT_DESCRIPTION', value: pipeline.git_commit_description, public: true, masked: false },
           { key: 'CI_COMMIT_REF_PROTECTED', value: (!!pipeline.protected_ref?).to_s, public: true, masked: false },
+          { key: 'CI_COMMIT_TIMESTAMP', value: pipeline.git_commit_timestamp, public: true, masked: false },
           { key: 'CI_BUILD_REF', value: build.sha, public: true, masked: false },
           { key: 'CI_BUILD_BEFORE_SHA', value: build.before_sha, public: true, masked: false },
           { key: 'CI_BUILD_REF_NAME', value: build.ref, public: true, masked: false },
@@ -2598,7 +2653,7 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        build.update(user: user)
+        build.update!(user: user)
       end
 
       it { user_variables.each { |v| is_expected.to include(v) } }
@@ -2634,7 +2689,7 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        build.update(environment: 'production')
+        build.update!(environment: 'production')
       end
 
       shared_examples 'containing environment variables' do
@@ -2661,7 +2716,7 @@ RSpec.describe Ci::Build do
 
         context 'when the URL was set from the job' do
           before do
-            build.update(options: { environment: { url: url } })
+            build.update!(options: { environment: { url: url } })
           end
 
           it_behaves_like 'containing environment variables'
@@ -2679,7 +2734,7 @@ RSpec.describe Ci::Build do
 
         context 'when the URL was not set from the job, but environment' do
           before do
-            environment.update(external_url: url)
+            environment.update!(external_url: url)
           end
 
           it_behaves_like 'containing environment variables'
@@ -2715,7 +2770,7 @@ RSpec.describe Ci::Build do
 
     context 'when build started manually' do
       before do
-        build.update(when: :manual)
+        build.update!(when: :manual)
       end
 
       let(:manual_variable) do
@@ -2741,8 +2796,8 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        build.update(tag: false)
-        pipeline.update(tag: false)
+        build.update!(tag: false)
+        pipeline.update!(tag: false)
       end
 
       it { is_expected.to include(branch_variable) }
@@ -2754,8 +2809,8 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        build.update(tag: true)
-        pipeline.update(tag: true)
+        build.update!(tag: true)
+        pipeline.update!(tag: true)
       end
 
       it { is_expected.to include(tag_variable) }
@@ -2925,13 +2980,14 @@ RSpec.describe Ci::Build do
       let(:ci_registry) do
         { key: 'CI_REGISTRY', value: 'registry.example.com', public: true, masked: false }
       end
+
       let(:ci_registry_image) do
         { key: 'CI_REGISTRY_IMAGE', value: project.container_registry_url, public: true, masked: false }
       end
 
       context 'and is disabled for project' do
         before do
-          project.update(container_registry_enabled: false)
+          project.update!(container_registry_enabled: false)
         end
 
         it { is_expected.to include(ci_registry) }
@@ -2940,7 +2996,7 @@ RSpec.describe Ci::Build do
 
       context 'and is enabled for project' do
         before do
-          project.update(container_registry_enabled: true)
+          project.update!(container_registry_enabled: true)
         end
 
         it { is_expected.to include(ci_registry) }
@@ -2952,7 +3008,7 @@ RSpec.describe Ci::Build do
       let(:runner) { create(:ci_runner, description: 'description', tag_list: %w(docker linux)) }
 
       before do
-        build.update(runner: runner)
+        build.update!(runner: runner)
       end
 
       it { is_expected.to include({ key: 'CI_RUNNER_ID', value: runner.id.to_s, public: true, masked: false }) }
@@ -3007,25 +3063,46 @@ RSpec.describe Ci::Build do
     end
 
     context 'when build is parallelized' do
-      let(:total) { 5 }
-      let(:index) { 3 }
+      shared_examples 'parallelized jobs config' do
+        let(:index) { 3 }
+        let(:total) { 5 }
 
-      before do
-        build.options[:parallel] = total
-        build.options[:instance] = index
-        build.name = "#{build.name} #{index}/#{total}"
+        before do
+          build.options[:parallel] = config
+          build.options[:instance] = index
+        end
+
+        it 'includes CI_NODE_INDEX' do
+          is_expected.to include(
+            { key: 'CI_NODE_INDEX', value: index.to_s, public: true, masked: false }
+          )
+        end
+
+        it 'includes correct CI_NODE_TOTAL' do
+          is_expected.to include(
+            { key: 'CI_NODE_TOTAL', value: total.to_s, public: true, masked: false }
+          )
+        end
       end
 
-      it 'includes CI_NODE_INDEX' do
-        is_expected.to include(
-          { key: 'CI_NODE_INDEX', value: index.to_s, public: true, masked: false }
-        )
+      context 'when parallel is a number' do
+        let(:config) { 5 }
+
+        it_behaves_like 'parallelized jobs config'
       end
 
-      it 'includes correct CI_NODE_TOTAL' do
-        is_expected.to include(
-          { key: 'CI_NODE_TOTAL', value: total.to_s, public: true, masked: false }
-        )
+      context 'when parallel is hash with the total key' do
+        let(:config) { { total: 5 } }
+
+        it_behaves_like 'parallelized jobs config'
+      end
+
+      context 'when parallel is nil' do
+        let(:config) {}
+
+        it_behaves_like 'parallelized jobs config' do
+          let(:total) { 1 }
+        end
       end
     end
 
@@ -3158,6 +3235,14 @@ RSpec.describe Ci::Build do
       it 'inherits dependent variables' do
         expect(build.scoped_variables.to_hash).to include(job_variable.key => job_variable.value)
       end
+    end
+  end
+
+  describe '#simple_variables_without_dependencies' do
+    it 'does not load dependencies' do
+      expect(build).not_to receive(:dependency_variables)
+
+      build.simple_variables_without_dependencies
     end
   end
 
@@ -3727,7 +3812,7 @@ RSpec.describe Ci::Build do
     subject { described_class.where(id: build).matches_tag_ids(tag_ids) }
 
     before do
-      build.update(tag_list: build_tag_list)
+      build.update!(tag_list: build_tag_list)
     end
 
     context 'when have different tags' do
@@ -3773,7 +3858,7 @@ RSpec.describe Ci::Build do
     subject { described_class.where(id: build).with_any_tags }
 
     before do
-      build.update(tag_list: tag_list)
+      build.update!(tag_list: tag_list)
     end
 
     context 'when does have tags' do
@@ -4129,7 +4214,7 @@ RSpec.describe Ci::Build do
     let(:path) { 'other_artifacts_0.1.2/another-subdirectory/banana_sample.gif' }
 
     around do |example|
-      Timecop.freeze { example.run }
+      freeze_time { example.run }
     end
 
     before do
@@ -4615,6 +4700,26 @@ RSpec.describe Ci::Build do
       end
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#run_on_status_commit' do
+    it 'runs provided hook after status commit' do
+      action = spy('action')
+
+      build.run_on_status_commit { action.perform! }
+      build.success!
+
+      expect(action).to have_received(:perform!).once
+    end
+
+    it 'does not run hooks when status has not changed' do
+      action = spy('action')
+
+      build.run_on_status_commit { action.perform! }
+      build.save!
+
+      expect(action).not_to have_received(:perform!)
     end
   end
 end

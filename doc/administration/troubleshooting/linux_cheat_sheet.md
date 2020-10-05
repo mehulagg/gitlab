@@ -10,7 +10,7 @@ and it may be useful for users with experience with Linux. If you are currently
 having an issue with GitLab, you may want to check your [support options](https://about.gitlab.com/support/)
 first, before attempting to use this information.
 
-CAUTION: **CAUTION:**
+CAUTION: **Caution:**
 If you are administering GitLab you are expected to know these commands for your distribution
 of choice. If you are a GitLab Support Engineer, consider this a cross-reference to
 translate `yum` -> `apt-get` and the like.
@@ -179,11 +179,13 @@ strace -tt -T -f -y -yy -s 1024 -p <pid>
 ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs strace -tt -T -f -y -yy -s 1024 -o /tmp/unicorn.txt
 ```
 
-See the [strace zine](https://wizardzines.com/zines/strace/) for a quick walkthrough.
-
-Brendan Gregg has a more detailed explanation of [how to use strace](http://www.brendangregg.com/blog/2014-05-11/strace-wow-much-syscall.html).
-
 Be aware that strace can have major impacts to system performance when it is running.
+
+#### Strace Resources
+
+- See the [strace zine](https://wizardzines.com/zines/strace/) for a quick walkthrough.
+- Brendan Gregg has a more detailed explanation of [how to use strace](http://www.brendangregg.com/blog/2014-05-11/strace-wow-much-syscall.html).
+- We have a [series of GitLab Unfiltered videos](https://www.youtube.com/playlist?list=PL05JrBw4t0KoC7cIkoAFcRhr4gsVesekg) on using strace to understand GitLab.
 
 ### The Strace Parser tool
 

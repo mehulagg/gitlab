@@ -36,11 +36,11 @@ module QA
                 element :expand_report_button
               end
 
-              view 'ee/app/assets/javascripts/vue_merge_request_widget/components/approvals/approvals.vue' do
+              view 'app/assets/javascripts/vue_merge_request_widget/components/approvals/approvals.vue' do
                 element :approve_button
               end
 
-              view 'ee/app/assets/javascripts/vue_merge_request_widget/components/approvals/approvals_summary.vue' do
+              view 'app/assets/javascripts/vue_merge_request_widget/components/approvals/approvals_summary.vue' do
                 element :approvals_summary_content
               end
 
@@ -119,9 +119,9 @@ module QA
             approve_license(name)
           end
 
-          def blacklist_license_with_mr(name)
+          def deny_license_with_mr(name)
             expand_license_report unless license_report_expanded?
-            blacklist_license(name)
+            deny_license(name)
           end
 
           def expand_vulnerability_report
@@ -144,7 +144,7 @@ module QA
             expand_vulnerability_report
             click_vulnerability(name)
             click_element :dismiss_with_comment_button
-            find_element(:dismiss_comment_field).fill_in with: reason
+            find_element(:dismiss_comment_field).fill_in with: reason, fill_options: { automatic_label_click: true }
             click_element :add_and_dismiss_button
 
             wait_until(reload: false) do
@@ -178,7 +178,6 @@ module QA
 
           def has_vulnerability_report?(timeout: 60)
             wait_until(reload: true, max_duration: timeout, sleep_interval: 1) do
-              finished_loading?
               has_element?(:vulnerability_report_grouped, wait: 10)
             end
             find_element(:vulnerability_report_grouped).has_no_content?("is loading")
@@ -194,11 +193,11 @@ module QA
           end
 
           def has_dependency_vulnerability_count_of?(expected)
-            find_element(:dependency_scan_report).has_content?(/Dependency scanning detected #{expected}( new)? vulnerabilit/)
+            find_element(:dependency_scan_report).has_content?(/Dependency scanning detected #{expected}( new)? vulnerabilit|Dependency scanning detected .* vulnerabilities out of #{expected}/)
           end
 
           def has_container_vulnerability_count_of?(expected)
-            find_element(:container_scan_report).has_content?(/Container scanning detected #{expected}( new)? vulnerabilit/)
+            find_element(:container_scan_report).has_content?(/Container scanning detected #{expected}( new)? vulnerabilit|Container scanning detected .* vulnerabilities out of #{expected}/)
           end
 
           def has_dast_vulnerability_count?

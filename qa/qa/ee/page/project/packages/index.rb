@@ -5,22 +5,14 @@ module QA
     module Page
       module Project
         module Packages
-          class Index < QA::Page::Base
-            view 'ee/app/views/projects/packages/packages/_legacy_package_list.html.haml' do
-              element :package_row
-              element :package_link
-            end
+          module Index
+            extend QA::Page::PageConcern
 
-            def click_package(name)
-              click_element(:package_link, text: name)
-            end
-
-            def has_package?(name)
-              has_element?(:package_link, text: name)
-            end
-
-            def has_no_package?(name)
-              has_no_element?(:package_link, text: name)
+            def wait_for_package_replication(name)
+              QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_package_replication])
+              wait_until(max_duration: Runtime::Geo.max_file_replication_time) do
+                has_package?(name)
+              end
             end
           end
         end

@@ -5,83 +5,40 @@ require 'spec_helper'
 RSpec.describe 'User uploads new design', :js do
   include DesignManagementTestHelpers
 
-  let_it_be(:project) { create(:project_empty_repo, :public) }
-  let_it_be(:user) { project.owner }
-  let_it_be(:issue) { create(:issue, project: project) }
+  let(:project) { create(:project_empty_repo, :public) }
+  let(:user) { project.owner }
+  let(:issue) { create(:issue, project: project) }
 
   before do
     sign_in(user)
+    enable_design_management(feature_enabled)
+    visit project_issue_path(project, issue)
   end
 
-  context 'design_management_moved flag disabled' do
-    before do
-      enable_design_management(feature_enabled)
-      stub_feature_flags(design_management_moved: false)
-      visit project_issue_path(project, issue)
+  context "when the feature is available" do
+    let(:feature_enabled) { true }
 
-      click_link 'Designs'
+    it 'uploads designs' do
+      upload_design(logo_fixture, count: 1)
 
-      wait_for_requests
-    end
+      expect(page).to have_selector('.js-design-list-item', count: 1)
 
-    context "when the feature is available" do
-      let(:feature_enabled) { true }
-
-      it 'uploads designs' do
-        attach_file(:design_file, logo_fixture, make_visible: true)
-
-        expect(page).to have_selector('.js-design-list-item', count: 1)
-
-        within first('#designs-tab .js-design-list-item') do
-          expect(page).to have_content('dk.png')
-        end
-
-        attach_file(:design_file, gif_fixture, make_visible: true)
-
-        expect(page).to have_selector('.js-design-list-item', count: 2)
+      within first('[data-testid="designs-root"] .js-design-list-item') do
+        expect(page).to have_content('dk.png')
       end
-    end
 
-    context 'when the feature is not available' do
-      let(:feature_enabled) { false }
+      upload_design(gif_fixture, count: 2)
 
-      it 'shows the message about requirements' do
-        expect(page).to have_content("To enable design management, you'll need to meet the requirements.")
-      end
+      expect(page).to have_selector('.js-design-list-item', count: 2)
+      expect(page.all('.js-design-list-item').map(&:text)).to eq(['dk.png', 'banana_sample.gif'])
     end
   end
 
-  context 'design_management_moved flag enabled' do
-    before do
-      enable_design_management(feature_enabled)
-      stub_feature_flags(design_management_moved: true)
-      visit project_issue_path(project, issue)
-    end
+  context 'when the feature is not available' do
+    let(:feature_enabled) { false }
 
-    context "when the feature is available" do
-      let(:feature_enabled) { true }
-
-      it 'uploads designs', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225616' do
-        attach_file(:design_file, logo_fixture, make_visible: true)
-
-        expect(page).to have_selector('.js-design-list-item', count: 1)
-
-        within first('[data-testid="designs-root"] .js-design-list-item') do
-          expect(page).to have_content('dk.png')
-        end
-
-        attach_file(:design_file, gif_fixture, make_visible: true)
-
-        expect(page).to have_selector('.js-design-list-item', count: 2)
-      end
-    end
-
-    context 'when the feature is not available' do
-      let(:feature_enabled) { false }
-
-      it 'shows the message about requirements' do
-        expect(page).to have_content("To enable design management, you'll need to meet the requirements.")
-      end
+    it 'shows the message about requirements' do
+      expect(page).to have_content("To upload designs, you'll need to enable LFS and have admin enable hashed storage.")
     end
   end
 
@@ -91,5 +48,13 @@ RSpec.describe 'User uploads new design', :js do
 
   def gif_fixture
     Rails.root.join('spec', 'fixtures', 'banana_sample.gif')
+  end
+
+  def upload_design(fixture, count:)
+    attach_file(:design_file, fixture, match: :first, make_visible: true)
+
+    wait_for('designs uploaded') do
+      issue.reload.designs.count == count
+    end
   end
 end

@@ -46,7 +46,9 @@ class ApprovalWrappedRule
   end
 
   def approvers
-    filter_approvers(@approval_rule.approvers)
+    strong_memoize(:approvers) do
+      filter_approvers(@approval_rule.approvers)
+    end
   end
 
   # @return [Array<User>] of users who have approved the merge request
@@ -61,16 +63,20 @@ class ApprovalWrappedRule
   # - Additional complexity to add update hooks
   # - DB updating many MRs for one project rule change is inefficient
   def approved_approvers
-    if merge_request.merged? && approval_rule.is_a?(ApprovalMergeRequestRule) && approval_rule.approved_approvers.present?
+    if merge_request.merged? && approval_rule.is_a?(ApprovalMergeRequestRule) && approval_rule.approved_approvers.any?
       return approval_rule.approved_approvers
     end
 
     strong_memoize(:approved_approvers) do
-      overall_approver_ids = merge_request.approvals.map(&:user_id).to_set
-
       approvers.select do |approver|
         overall_approver_ids.include?(approver.id)
       end
+    end
+  end
+
+  def commented_approvers
+    strong_memoize(:commented_approvers) do
+      merge_request.note_authors & approvers
     end
   end
 
@@ -106,5 +112,15 @@ class ApprovalWrappedRule
       ApprovalState.filter_author(approvers, merge_request)
 
     ApprovalState.filter_committers(filtered_approvers, merge_request)
+  end
+
+  def overall_approver_ids
+    current_approvals = merge_request.approvals
+
+    if current_approvals.is_a?(ActiveRecord::Relation) && !current_approvals.loaded?
+      current_approvals.distinct.pluck(:user_id)
+    else
+      current_approvals.map(&:user_id).to_set
+    end
   end
 end

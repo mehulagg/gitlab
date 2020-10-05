@@ -7,7 +7,7 @@ RSpec.describe EpicsFinder do
   let_it_be(:search_user) { create(:user) }
   let_it_be(:group) { create(:group, :private) }
   let_it_be(:another_group) { create(:group) }
-  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago) }
+  let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.ago, end_date: 10.days.ago) }
   let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.ago, author: user, start_date: 2.days.ago, end_date: 3.days.from_now) }
   let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.ago, end_date: 3.days.ago) }
   let_it_be(:epic4) { create(:epic, :closed, group: another_group) }
@@ -107,7 +107,7 @@ RSpec.describe EpicsFinder do
         end
 
         context 'by label' do
-          let_it_be(:label) { create(:label) }
+          let_it_be(:label) { create(:group_label, group: group) }
           let_it_be(:labeled_epic) { create(:labeled_epic, group: group, labels: [label]) }
 
           it 'returns all epics with given label' do
@@ -215,8 +215,8 @@ RSpec.describe EpicsFinder do
 
         context 'by parent' do
           before do
-            epic2.update(parent: epic1)
-            epic3.update(parent: epic2)
+            epic2.update!(parent: epic1)
+            epic3.update!(parent: epic2)
           end
 
           it 'returns direct children of the parent' do
@@ -231,7 +231,7 @@ RSpec.describe EpicsFinder do
         context 'by confidential' do
           let_it_be(:confidential_epic) { create(:epic, :confidential, group: group) }
 
-          it 'returns only confdential epics when confidential is true' do
+          it 'returns only confidential epics when confidential is true' do
             params = { confidential: true }
 
             expect(epics(params)).to contain_exactly(confidential_epic)
@@ -258,6 +258,167 @@ RSpec.describe EpicsFinder do
             params = { iids: [epic1.iid] }
 
             expect(epics(params)).to contain_exactly(epic1)
+          end
+        end
+
+        context 'by milestone' do
+          let_it_be(:ancestor_group) { create(:group, :public) }
+          let_it_be(:ancestor_group_project) { create(:project, :public, group: ancestor_group) }
+          let_it_be(:base_group) { create(:group, :public, parent: ancestor_group) }
+          let_it_be(:base_group_project) { create(:project, :public, group: base_group) }
+          let_it_be(:base_epic1) { create(:epic, group: base_group) }
+          let_it_be(:base_epic2) { create(:epic, group: base_group) }
+          let_it_be(:base_group_milestone) { create(:milestone, group: base_group) }
+          let_it_be(:base_project_milestone) { create(:milestone, project: base_group_project) }
+          let_it_be(:project2) { base_group_project }
+
+          shared_examples 'filtered by milestone' do |milestone_type|
+            it 'returns expected epics' do
+              project3 = milestone_type == :group ? project2 : project
+
+              create(:issue, project: project, milestone: milestone, epic: epic)
+              create(:issue, project: project3, milestone: milestone, epic: epic2)
+
+              params[:milestone_title] = milestone.title
+
+              expect(epics(params)).to contain_exactly(epic, epic2)
+            end
+          end
+
+          context 'with no hierarchy' do
+            let_it_be(:project) { base_group_project }
+            let_it_be(:epic) { base_epic1 }
+            let_it_be(:epic2) { base_epic2 }
+            let_it_be(:params) do
+              {
+                  group_id: base_group.id,
+                  include_descendant_groups: false,
+                  include_ancestor_groups: false
+              }
+            end
+
+            it_behaves_like 'filtered by milestone', :group do
+              let_it_be(:milestone) { base_group_milestone }
+            end
+
+            it_behaves_like 'filtered by milestone', :project do
+              let_it_be(:milestone) { base_project_milestone }
+            end
+
+            it 'returns empty result if the milestone is not present' do
+              params[:milestone_title] = 'test milestone title'
+
+              expect(epics(params)).to be_empty
+            end
+          end
+
+          context "with hierarchy" do
+            let_it_be(:subgroup) { create(:group, :public, parent: base_group) }
+            let_it_be(:subgroup_project) { create(:project, :public, group: subgroup) }
+            let_it_be(:subgroup_project_milestone) { create(:milestone, project: subgroup_project) }
+            let_it_be(:ancestor_group_milestone) { create(:milestone, group: ancestor_group) }
+            let_it_be(:ancestor_project_milestone) { create(:milestone, project: ancestor_group_project) }
+            let_it_be(:subgroup_epic1) { create(:epic, group: subgroup) }
+            let_it_be(:subgroup_epic2) { create(:epic, group: subgroup) }
+            let_it_be(:ancestor_epic1) { create(:epic, group: ancestor_group) }
+            let_it_be(:ancestor_epic2) { create(:epic, group: ancestor_group) }
+            let_it_be(:params) { { group_id: base_group.id } }
+
+            context 'when include_descendant_groups is true' do
+              let_it_be(:project) { subgroup_project }
+              let_it_be(:epic) { subgroup_epic1 }
+              let_it_be(:epic2) { subgroup_epic2 }
+
+              before do
+                params[:include_descendant_groups] = true
+                params[:include_ancestor_groups] = false
+              end
+
+              it_behaves_like 'filtered by milestone', :group do
+                let(:milestone) { base_group_milestone }
+              end
+
+              it_behaves_like 'filtered by milestone', :project do
+                let(:milestone) { subgroup_project_milestone }
+              end
+
+              it 'returns results with all milestones matching given title' do
+                project_milestone1 = create(:milestone, project: base_group_project, title: '13.0')
+                project_milestone2 = create(:milestone, project: subgroup_project, title: '13.0')
+                create(:issue, project: base_group_project, milestone: project_milestone1, epic: base_epic1)
+                create(:issue, project: subgroup_project, milestone: project_milestone2, epic: subgroup_epic1)
+
+                params[:milestone_title] = '13.0'
+
+                expect(epics(params)).to contain_exactly(base_epic1, subgroup_epic1)
+              end
+            end
+
+            context 'when include_ancestor_groups is true' do
+              let_it_be(:project) { ancestor_group_project }
+              let_it_be(:epic) { ancestor_epic1 }
+              let_it_be(:epic2) { ancestor_epic2 }
+
+              before do
+                params[:include_descendant_groups] = false
+                params[:include_ancestor_groups] = true
+              end
+
+              it_behaves_like 'filtered by milestone', :group do
+                let(:milestone) { ancestor_group_milestone }
+              end
+
+              it_behaves_like 'filtered by milestone', :project do
+                let(:milestone) { ancestor_project_milestone }
+              end
+
+              context 'when include_descendant_groups is true' do
+                before do
+                  params[:include_descendant_groups] = true
+                end
+
+                it 'returns expected epics when filtering by group milestone' do
+                  create(:issue, project: ancestor_group_project, milestone: ancestor_group_milestone, epic: ancestor_epic1)
+                  create(:issue, project: base_group_project, milestone: ancestor_group_milestone, epic: ancestor_epic1)
+                  create(:issue, project: subgroup_project, milestone: ancestor_group_milestone, epic: subgroup_epic1)
+
+                  params[:milestone_title] = ancestor_group_milestone.title
+
+                  expect(epics(params)).to contain_exactly(ancestor_epic1, ancestor_epic1, subgroup_epic1)
+                end
+
+                it_behaves_like 'filtered by milestone', :project do
+                  let(:milestone) { ancestor_project_milestone }
+                end
+              end
+
+              context 'when a project is restricted' do
+                let_it_be(:issue) do
+                  create(:issue, project: subgroup_project,
+                    epic: subgroup_epic1,
+                    milestone: subgroup_project_milestone
+                  )
+                end
+
+                before do
+                  params[:milestone_title] = subgroup_project_milestone.title
+                end
+
+                it 'does not return epic if user can not access project' do
+                  subgroup_project
+                    .update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+
+                  expect(epics(params)).to be_empty
+                end
+
+                it 'does not return epics if user can not access project issues' do
+                  subgroup_project
+                    .project_feature.update!( issues_access_level: ProjectFeature::DISABLED)
+
+                  expect(epics(params)).to be_empty
+                end
+              end
+            end
           end
         end
 
@@ -300,8 +461,8 @@ RSpec.describe EpicsFinder do
 
         context 'when using group cte for search' do
           context 'and two labels more search string are present' do
-            let_it_be(:label1) { create(:label) }
-            let_it_be(:label2) { create(:label) }
+            let_it_be(:label1) { create(:group_label, group: group) }
+            let_it_be(:label2) { create(:group_label, group: group) }
             let_it_be(:labeled_epic) { create(:labeled_epic, group: group, title: 'filtered epic', labels: [label1, label2]) }
 
             it 'returns correct epics' do
@@ -309,6 +470,11 @@ RSpec.describe EpicsFinder do
                 epics(attempt_group_search_optimizations: true, label_name: [label1.title, label2.title], search: 'filtered')
 
               expect(filtered_epics).to contain_exactly(labeled_epic)
+            end
+
+            it 'filters correctly by short expressions when sorting by due date' do
+              expect(epics(attempt_group_search_optimizations: true, search: 'aw', sort: 'end_date_desc'))
+                .to eq([epic3, epic1])
             end
           end
         end
@@ -337,16 +503,6 @@ RSpec.describe EpicsFinder do
 
             it 'returns all epics' do
               expect(subject).to match_array([base_epic1, base_epic2, private_epic1, private_epic2, public_epic1, public_epic2])
-            end
-
-            context 'when skip_epic_count_visibility_check is disabled' do
-              before do
-                stub_feature_flags(skip_epic_count_visibility_check: false)
-              end
-
-              it 'returns only public epics' do
-                expect(subject).to match_array([base_epic2, public_epic1])
-              end
             end
           end
 
@@ -408,8 +564,8 @@ RSpec.describe EpicsFinder do
         end
 
         context 'with negated labels' do
-          let_it_be(:label) { create(:label) }
-          let_it_be(:label2) { create(:label) }
+          let_it_be(:label) { create(:group_label, group: group) }
+          let_it_be(:label2) { create(:group_label, group: group) }
           let_it_be(:negated_epic) { create(:labeled_epic, group: group, labels: [label]) }
           let_it_be(:negated_epic2) { create(:labeled_epic, group: group, labels: [label2]) }
           let_it_be(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
@@ -479,8 +635,8 @@ RSpec.describe EpicsFinder do
   end
 
   describe '#row_count' do
-    let_it_be(:label) { create(:label) }
-    let_it_be(:label2) { create(:label) }
+    let_it_be(:label) { create(:group_label, group: group) }
+    let_it_be(:label2) { create(:group_label, group: group) }
     let_it_be(:labeled_epic) { create(:labeled_epic, group: group, labels: [label]) }
     let_it_be(:labeled_epic2) { create(:labeled_epic, group: group, labels: [label, label2]) }
 

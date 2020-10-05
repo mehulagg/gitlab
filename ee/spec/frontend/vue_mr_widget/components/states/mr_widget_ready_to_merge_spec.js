@@ -1,6 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import { MERGE_DISABLED_TEXT_UNAPPROVED } from 'ee/vue_merge_request_widget/mixins/ready_to_merge';
 import MergeImmediatelyConfirmationDialog from 'ee/vue_merge_request_widget/components/merge_immediately_confirmation_dialog.vue';
+import MergeTrainHelperText from 'ee/vue_merge_request_widget/components/merge_train_helper_text.vue';
+import { GlLink, GlSprintf } from '@gitlab/ui';
 import ReadyToMerge from '~/vue_merge_request_widget/components/states/ready_to_merge.vue';
 import {
   MWPS_MERGE_STRATEGY,
@@ -11,7 +13,6 @@ import {
   MERGE_DISABLED_TEXT,
   PIPELINE_MUST_SUCCEED_CONFLICT_TEXT,
 } from '~/vue_merge_request_widget/mixins/ready_to_merge';
-import { GlSprintf } from '@gitlab/ui';
 
 describe('ReadyToMerge', () => {
   let wrapper;
@@ -22,9 +23,15 @@ describe('ReadyToMerge', () => {
     poll: () => {},
   };
 
+  const activePipeline = {
+    id: 1,
+    path: 'path/to/pipeline',
+    active: true,
+  };
+
   const mr = {
     isPipelineActive: false,
-    pipeline: null,
+    pipeline: { id: 1, path: 'path/to/pipeline' },
     isPipelineFailed: false,
     isPipelinePassing: false,
     isMergeAllowed: true,
@@ -46,6 +53,8 @@ describe('ReadyToMerge', () => {
     preferredAutoMergeStrategy: MWPS_MERGE_STRATEGY,
     availableAutoMergeStrategies: [MWPS_MERGE_STRATEGY],
     mergeImmediatelyDocsPath: 'path/to/merge/immediately/docs',
+    mergeTrainWhenPipelineSucceedsDocsPath: '/merge-train/docs',
+    mergeTrainsCount: 0,
   };
 
   const factory = (mrUpdates = {}) => {
@@ -56,6 +65,9 @@ describe('ReadyToMerge', () => {
       },
       stubs: {
         MergeImmediatelyConfirmationDialog,
+        MergeTrainHelperText,
+        GlSprintf,
+        GlLink,
       },
     });
 
@@ -63,12 +75,22 @@ describe('ReadyToMerge', () => {
   };
 
   const findResolveItemsMessage = () => wrapper.find(GlSprintf);
+  const findPipelineConflictMessage = () =>
+    wrapper.find('[data-testid="pipeline-succeed-conflict"]');
   const findMergeButton = () => wrapper.find('.qa-merge-button');
   const findMergeButtonDropdown = () => wrapper.find('.js-merge-moment');
   const findMergeImmediatelyButton = () => wrapper.find('.js-merge-immediately-button');
+  const findMergeTrainHelperText = () => wrapper.find(MergeTrainHelperText);
+  const findMergeTrainPipelineLink = () =>
+    findMergeTrainHelperText().find('[data-testid="pipeline-link"]');
+  const findMergeTrainDocumentationLink = () =>
+    findMergeTrainHelperText().find('[data-testid="documentation-link"]');
 
   afterEach(() => {
-    wrapper.destroy();
+    if (wrapper?.destroy) {
+      wrapper.destroy();
+      wrapper = null;
+    }
   });
 
   describe('computed', () => {
@@ -178,6 +200,87 @@ describe('ReadyToMerge', () => {
     });
   });
 
+  describe('shouldRenderMergeTrainHelperText', () => {
+    it('should render the helper text if MTWPS is available and the user has not yet pressed the MTWPS button', () => {
+      factory({
+        onlyAllowMergeIfPipelineSucceeds: true,
+        preferredAutoMergeStrategy: MTWPS_MERGE_STRATEGY,
+        autoMergeEnabled: false,
+      });
+
+      expect(findMergeTrainHelperText().exists()).toBe(true);
+    });
+  });
+
+  describe('merge train helper text', () => {
+    it('does not render the merge train helper text if the MTWPS strategy is not available', () => {
+      factory({
+        availableAutoMergeStrategies: [MT_MERGE_STRATEGY],
+        pipeline: activePipeline,
+      });
+
+      expect(findMergeTrainHelperText().exists()).toBe(false);
+    });
+
+    it('renders the correct merge train helper text when there is an existing merge train', () => {
+      factory({
+        onlyAllowMergeIfPipelineSucceeds: true,
+        preferredAutoMergeStrategy: MTWPS_MERGE_STRATEGY,
+        autoMergeEnabled: false,
+        mergeTrainsCount: 2,
+        pipeline: activePipeline,
+      });
+
+      expect(findMergeTrainHelperText().text()).toContain(
+        `This action will add the merge request to the merge train when pipeline #${activePipeline.id} succeeds.`,
+      );
+    });
+
+    it('renders the correct merge train helper text when there is no existing merge train', () => {
+      factory({
+        onlyAllowMergeIfPipelineSucceeds: true,
+        preferredAutoMergeStrategy: MTWPS_MERGE_STRATEGY,
+        autoMergeEnabled: false,
+        mergeTrainsCount: 0,
+        pipeline: activePipeline,
+      });
+
+      expect(findMergeTrainHelperText().text()).toContain(
+        `This action will start a merge train when pipeline #${activePipeline.id} succeeds.`,
+      );
+    });
+
+    it('renders the correct pipeline link inside the message', () => {
+      factory({
+        onlyAllowMergeIfPipelineSucceeds: true,
+        preferredAutoMergeStrategy: MTWPS_MERGE_STRATEGY,
+        autoMergeEnabled: false,
+        mergeTrainsCount: 0,
+        pipeline: activePipeline,
+      });
+
+      const pipelineLink = findMergeTrainPipelineLink();
+
+      expect(pipelineLink.text()).toContain(activePipeline.id);
+      expect(pipelineLink.attributes('href')).toBe(activePipeline.path);
+    });
+
+    it('renders the documentation link inside the message', () => {
+      factory({
+        onlyAllowMergeIfPipelineSucceeds: true,
+        preferredAutoMergeStrategy: MTWPS_MERGE_STRATEGY,
+        autoMergeEnabled: false,
+        mergeTrainsCount: 0,
+        pipeline: activePipeline,
+      });
+
+      const pipelineLink = findMergeTrainDocumentationLink();
+
+      expect(pipelineLink.text()).toContain('More information');
+      expect(pipelineLink.attributes('href')).toBe(mr.mergeTrainWhenPipelineSucceedsDocsPath);
+    });
+  });
+
   describe('shouldShowMergeImmediatelyDropdown', () => {
     it('should return false if no pipeline is active', () => {
       factory({
@@ -275,7 +378,7 @@ describe('ReadyToMerge', () => {
       });
 
       it('should show cannot merge text', () => {
-        expect(findResolveItemsMessage().attributes('message')).toBe(MERGE_DISABLED_TEXT);
+        expect(findResolveItemsMessage().text()).toBe(MERGE_DISABLED_TEXT);
       });
 
       it('should show disabled merge button', () => {
@@ -298,7 +401,7 @@ describe('ReadyToMerge', () => {
     });
 
     it('should show approvals needed text', () => {
-      expect(findResolveItemsMessage().attributes('message')).toBe(MERGE_DISABLED_TEXT_UNAPPROVED);
+      expect(findResolveItemsMessage().text()).toBe(MERGE_DISABLED_TEXT_UNAPPROVED);
     });
   });
 
@@ -313,9 +416,7 @@ describe('ReadyToMerge', () => {
     });
 
     it('should show a custom message that explains the conflict', () => {
-      expect(findResolveItemsMessage().attributes('message')).toBe(
-        PIPELINE_MUST_SUCCEED_CONFLICT_TEXT,
-      );
+      expect(findPipelineConflictMessage().text()).toBe(PIPELINE_MUST_SUCCEED_CONFLICT_TEXT);
     });
   });
 });

@@ -2,6 +2,38 @@
 
 module SystemNotes
   class IssuablesService < ::SystemNotes::BaseService
+    #
+    # noteable_ref - Referenced noteable object
+    #
+    # Example Note text:
+    #
+    #   "marked this issue as related to gitlab-foss#9001"
+    #
+    # Returns the created Note object
+    def relate_issue(noteable_ref)
+      body = "marked this issue as related to #{noteable_ref.to_reference(noteable.project)}"
+
+      issue_activity_counter.track_issue_related_action(author: author) if noteable.is_a?(Issue)
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'relate'))
+    end
+
+    #
+    # noteable_ref - Referenced noteable object
+    #
+    # Example Note text:
+    #
+    #   "removed the relation with gitlab-foss#9001"
+    #
+    # Returns the created Note object
+    def unrelate_issue(noteable_ref)
+      body = "removed the relation with #{noteable_ref.to_reference(noteable.project)}"
+
+      issue_activity_counter.track_issue_unrelated_action(author: author) if noteable.is_a?(Issue)
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'unrelate'))
+    end
+
     # Called when the assignee of a Noteable is changed or removed
     #
     # assignee - User being assigned, or nil
@@ -15,6 +47,8 @@ module SystemNotes
     # Returns the created Note object
     def change_assignee(assignee)
       body = assignee.nil? ? 'removed assignee' : "assigned to #{assignee.to_reference}"
+
+      issue_activity_counter.track_issue_assignee_changed_action(author: author) if noteable.is_a?(Issue)
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'assignee'))
     end
@@ -46,25 +80,35 @@ module SystemNotes
 
       body = text_parts.join(' and ')
 
+      issue_activity_counter.track_issue_assignee_changed_action(author: author) if noteable.is_a?(Issue)
+
       create_note(NoteSummary.new(noteable, project, author, body, action: 'assignee'))
     end
 
-    # Called when the milestone of a Noteable is changed
+    # Called when the reviewers of an issuable is changed or removed
     #
-    # milestone - Milestone being assigned, or nil
+    # reviewers - Users being requested to review, or nil
     #
     # Example Note text:
     #
-    #   "removed milestone"
+    #   "requested review from @user1 and @user2"
     #
-    #   "changed milestone to 7.11"
+    #   "requested review from @user1, @user2 and @user3 and removed review request for @user4 and @user5"
     #
     # Returns the created Note object
-    def change_milestone(milestone)
-      format = milestone&.group_milestone? ? :name : :iid
-      body = milestone.nil? ? 'removed milestone' : "changed milestone to #{milestone.to_reference(project, format: format)}"
+    def change_issuable_reviewers(old_reviewers)
+      unassigned_users = old_reviewers - noteable.reviewers
+      added_users = noteable.reviewers - old_reviewers
+      text_parts = []
 
-      create_note(NoteSummary.new(noteable, project, author, body, action: 'milestone'))
+      Gitlab::I18n.with_default_locale do
+        text_parts << "requested review from #{added_users.map(&:to_reference).to_sentence}" if added_users.any?
+        text_parts << "removed review request for #{unassigned_users.map(&:to_reference).to_sentence}" if unassigned_users.any?
+      end
+
+      body = text_parts.join(' and ')
+
+      create_note(NoteSummary.new(noteable, project, author, body, action: 'reviewer'))
     end
 
     # Called when the title of a Noteable is changed
@@ -86,6 +130,8 @@ module SystemNotes
 
       body = "changed title from **#{marked_old_title}** to **#{marked_new_title}**"
 
+      issue_activity_counter.track_issue_title_changed_action(author: author) if noteable.is_a?(Issue)
+
       create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
     end
 
@@ -102,6 +148,8 @@ module SystemNotes
     # Returns the created Note object
     def change_description
       body = 'changed the description'
+
+      issue_activity_counter.track_issue_description_changed_action(author: author) if noteable.is_a?(Issue)
 
       create_note(NoteSummary.new(noteable, project, author, body, action: 'description'))
     end
@@ -130,6 +178,8 @@ module SystemNotes
       if noteable.is_a?(ExternalIssue)
         noteable.project.external_issue_tracker.create_cross_reference_note(noteable, mentioner, author)
       else
+        issue_activity_counter.track_issue_cross_referenced_action(author: author) if noteable.is_a?(Issue)
+
         create_note(NoteSummary.new(noteable, noteable.project, author, body, action: 'cross_reference'))
       end
     end
@@ -164,6 +214,8 @@ module SystemNotes
       status_label = new_task.complete? ? Taskable::COMPLETED : Taskable::INCOMPLETE
       body = "marked the task **#{new_task.source}** as #{status_label}"
 
+      issue_activity_counter.track_issue_description_changed_action(author: author) if noteable.is_a?(Issue)
+
       create_note(NoteSummary.new(noteable, project, author, body, action: 'task'))
     end
 
@@ -185,6 +237,8 @@ module SystemNotes
       cross_reference = noteable_ref.to_reference(project)
       body = "moved #{direction} #{cross_reference}"
 
+      issue_activity_counter.track_issue_moved_action(author: author) if noteable.is_a?(Issue)
+
       create_note(NoteSummary.new(noteable, project, author, body, action: 'moved'))
     end
 
@@ -199,9 +253,13 @@ module SystemNotes
       if noteable.confidential
         body = 'made the issue confidential'
         action = 'confidential'
+
+        issue_activity_counter.track_issue_made_confidential_action(author: author) if noteable.is_a?(Issue)
       else
         body = 'made the issue visible to everyone'
         action = 'visible'
+
+        issue_activity_counter.track_issue_made_visible_action(author: author) if noteable.is_a?(Issue)
       end
 
       create_note(NoteSummary.new(noteable, project, author, body, action: action))
@@ -220,17 +278,7 @@ module SystemNotes
     #
     # Returns the created Note object
     def change_status(status, source = nil)
-      body = status.dup
-      body << " via #{source.gfm_reference(project)}" if source
-
-      action = status == 'reopened' ? 'opened' : status
-
-      # A state event which results in a synthetic note will be
-      # created by EventCreateService if change event tracking
-      # is enabled.
-      unless state_change_tracking_enabled?
-        create_note(NoteSummary.new(noteable, project, author, body, action: action))
-      end
+      create_resource_state_event(status: status, mentionable_source: source)
     end
 
     # Check if a cross reference to a noteable from a mentioner already exists
@@ -261,6 +309,9 @@ module SystemNotes
     # Returns the created Note object
     def mark_duplicate_issue(canonical_issue)
       body = "marked this issue as a duplicate of #{canonical_issue.to_reference(project)}"
+
+      issue_activity_counter.track_issue_marked_as_duplicate_action(author: author) if noteable.is_a?(Issue)
+
       create_note(NoteSummary.new(noteable, project, author, body, action: 'duplicate'))
     end
 
@@ -284,19 +335,23 @@ module SystemNotes
       action = noteable.discussion_locked? ? 'locked' : 'unlocked'
       body = "#{action} this #{noteable.class.to_s.titleize.downcase}"
 
+      if noteable.is_a?(Issue)
+        if action == 'locked'
+          issue_activity_counter.track_issue_locked_action(author: author)
+        else
+          issue_activity_counter.track_issue_unlocked_action(author: author)
+        end
+      end
+
       create_note(NoteSummary.new(noteable, project, author, body, action: action))
     end
 
     def close_after_error_tracking_resolve
-      body = _('resolved the corresponding error and closed the issue.')
-
-      create_note(NoteSummary.new(noteable, project, author, body, action: 'closed'))
+      create_resource_state_event(status: 'closed', close_after_error_tracking_resolve: true)
     end
 
     def auto_resolve_prometheus_alert
-      body = 'automatically closed this issue because the alert resolved.'
-
-      create_note(NoteSummary.new(noteable, project, author, body, action: 'closed'))
+      create_resource_state_event(status: 'closed', close_auto_resolve_prometheus_alert: true)
     end
 
     private
@@ -324,9 +379,13 @@ module SystemNotes
       note_text =~ /\A#{cross_reference_note_prefix}/i
     end
 
-    def state_change_tracking_enabled?
-      noteable.respond_to?(:resource_state_events) &&
-        ::Feature.enabled?(:track_resource_state_change_events, noteable.project)
+    def create_resource_state_event(params)
+      ResourceEvents::ChangeStateService.new(resource: noteable, user: author)
+        .execute(params)
+    end
+
+    def issue_activity_counter
+      Gitlab::UsageDataCounters::IssueActivityUniqueCounter
     end
   end
 end

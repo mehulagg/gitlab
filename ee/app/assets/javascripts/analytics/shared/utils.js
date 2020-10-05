@@ -1,6 +1,6 @@
 import dateFormat from 'dateformat';
-import { dateFormats } from './constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { dateFormats } from './constants';
 
 export const toYmd = date => dateFormat(date, dateFormats.isoDate);
 
@@ -79,10 +79,6 @@ export const buildCycleAnalyticsInitialData = ({
   groupFullPath = null,
   groupParentId = null,
   groupAvatarUrl = null,
-  author = null,
-  milestone = null,
-  labels = null,
-  assignees = null,
   labelsPath = '',
   milestonesPath = '',
 } = {}) => ({
@@ -102,10 +98,6 @@ export const buildCycleAnalyticsInitialData = ({
   selectedProjects: projects
     ? buildProjectsFromJSON(projects).map(convertObjectPropsToCamelCase)
     : [],
-  selectedAuthor: author,
-  selectedMilestone: milestone,
-  selectedLabels: labels ? JSON.parse(labels) : [],
-  selectedAssignees: assignees ? JSON.parse(assignees) : [],
   labelsPath,
   milestonesPath,
 });

@@ -12,16 +12,20 @@ RSpec.describe Security::ScannedResourcesCountingService, '#execute' do
 
   context "The Pipeline has security builds" do
     before_all do
-      create_security_scan(project, pipeline, 'dast', 34)
-      create_security_scan(project, pipeline, 'sast', 12)
+      create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) do |job|
+        create(:ee_ci_job_artifact, :dast, job: job, project: project)
+      end
+      create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) do |job|
+        create(:ee_ci_job_artifact, :sast, job: job, project: project)
+      end
     end
 
     context 'All report types are requested' do
       subject { described_class.new(pipeline, %w[sast dast container_scanning dependency_scanning]).execute }
 
       it {
-        is_expected.to match(a_hash_including("sast" => 12,
-                                              "dast" => 34,
+        is_expected.to match(a_hash_including("sast" => 0,
+                                              "dast" => 6,
                                               "container_scanning" => 0,
                                               "dependency_scanning" => 0))
       }
@@ -31,7 +35,7 @@ RSpec.describe Security::ScannedResourcesCountingService, '#execute' do
       subject { described_class.new(pipeline, %w[dast]).execute }
 
       it {
-        is_expected.to eq({ "dast" => 34 })
+        is_expected.to eq({ "dast" => 6 })
       }
     end
   end
@@ -48,18 +52,4 @@ RSpec.describe Security::ScannedResourcesCountingService, '#execute' do
                                             "dependency_scanning" => 0))
     }
   end
-
-  context 'performance' do
-    subject { described_class.new(pipeline, %w[sast dast container_scanning dependency_scanning]).execute }
-
-    it 'performs only one query' do
-      count = ActiveRecord::QueryRecorder.new { subject }.count
-      expect(count).to eq(1)
-    end
-  end
-end
-
-def create_security_scan(project, pipeline, report_type, scanned_resources_count)
-  dast_build = create(:ee_ci_build, :artifacts, project: project, pipeline: pipeline, name: report_type)
-  create(:security_scan, scan_type: report_type, scanned_resources_count: scanned_resources_count, build: dast_build)
 end

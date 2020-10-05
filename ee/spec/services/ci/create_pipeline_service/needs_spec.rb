@@ -80,4 +80,40 @@ RSpec.describe Ci::CreatePipelineService do
       expect(bridge_dag_job.status).to eq('pending')
     end
   end
+
+  context 'with cross pipeline artifacts' do
+    let!(:dependency) { create(:ci_build, :success, name: 'dependency', project: downstream_project) }
+    let!(:dependency_variable) { create(:ci_job_variable, :dotenv_source, job: dependency) }
+
+    let(:config) do
+      <<~EOY
+      regular_job:
+        stage: build
+        variables:
+          DEPENDENCY_PROJECT: #{downstream_project.full_path}
+          DEPENDENCY_REF: #{dependency.ref}
+          DEPENDENCY_NAME: #{dependency.name}
+        script:
+          - echo 'hello'
+        needs:
+          - project: ${DEPENDENCY_PROJECT}
+            ref: ${DEPENDENCY_REF}
+            job: ${DEPENDENCY_NAME}
+            artifacts: true
+      EOY
+    end
+
+    before do
+      stub_ci_pipeline_yaml_file(config)
+      stub_licensed_features(cross_project_pipelines: true)
+    end
+
+    it 'has dependencies and variables', :aggregate_failures do
+      job = execute.builds.first
+
+      expect(job).to be_present
+      expect(job.all_dependencies).to include(dependency)
+      expect(job.scoped_variables_hash).to include(dependency_variable.key => dependency_variable.value)
+    end
+  end
 end

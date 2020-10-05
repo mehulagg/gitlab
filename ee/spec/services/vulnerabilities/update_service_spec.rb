@@ -14,8 +14,9 @@ RSpec.describe Vulnerabilities::UpdateService do
   let!(:vulnerability) { create(:vulnerability, project: project, severity: :low, severity_overridden: severity_overridden, confidence: :ignore, confidence_overridden: confidence_overridden) }
   let(:severity_overridden) { false }
   let(:confidence_overridden) { false }
+  let(:resolved_on_default_branch) { nil }
 
-  subject { described_class.new(project, user, finding: updated_finding).execute }
+  subject { described_class.new(project, user, finding: updated_finding, resolved_on_default_branch: resolved_on_default_branch).execute }
 
   context 'with an authorized user with proper permissions' do
     before do
@@ -23,6 +24,7 @@ RSpec.describe Vulnerabilities::UpdateService do
     end
 
     it_behaves_like 'calls Vulnerabilities::Statistics::UpdateService'
+    it_behaves_like 'calls Vulnerabilities::HistoricalStatistics::UpdateService'
 
     context 'when neither severity nor confidence are overridden' do
       it 'updates the vulnerability from updated finding (title, severity and confidence only)', :aggregate_failures do
@@ -62,6 +64,20 @@ RSpec.describe Vulnerabilities::UpdateService do
             title: 'New title',
             severity: 'critical'
           ))
+      end
+    end
+
+    context 'when the `resolved_on_default_branch` kwarg is provided' do
+      let(:resolved_on_default_branch) { true }
+
+      it 'updates the resolved_on_default_branch attribute of vulnerability' do
+        expect { subject }.to change { vulnerability[:resolved_on_default_branch] }.from(false).to(true)
+      end
+    end
+
+    context 'when the `resolved_on_default_branch` kwarg is not provided' do
+      it 'does not update the resolved_on_default_branch attribute of vulnerability' do
+        expect { subject }.not_to change { vulnerability[:resolved_on_default_branch] }
       end
     end
 

@@ -7,16 +7,10 @@ export const i18n = {
   setupSection: s__(
     "AlertSettings|Review your external service's documentation to learn where to provide this information to your external service, and the %{linkStart}GitLab documentation%{linkEnd} to learn more about configuring your endpoint.",
   ),
-  errorMsg: s__(
-    'AlertSettings|There was an error updating the the alert settings. Please refresh the page to try again.',
-  ),
+  errorMsg: s__('AlertSettings|There was an error updating the alert settings'),
   errorKeyMsg: s__(
     'AlertSettings|There was an error while trying to reset the key. Please refresh the page to try again.',
   ),
-  errorApiUrlMsg: s__(
-    'AlertSettings|There was an error while trying to enable the alert settings. Please ensure you are using a valid URL.',
-  ),
-  prometheusApiPlaceholder: s__('AlertSettings|http://prometheus.example.com/'),
   restKeyInfo: s__(
     'AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in.',
   ),
@@ -29,7 +23,7 @@ export const i18n = {
   resetKey: s__('AlertSettings|Reset key'),
   copyToClipboard: s__('AlertSettings|Copy'),
   integrationsLabel: s__('AlertSettings|Integrations'),
-  apiBaseUrlLabel: s__('AlertSettings|Prometheus API Base URL'),
+  apiBaseUrlLabel: s__('AlertSettings|API URL'),
   authKeyLabel: s__('AlertSettings|Authorization key'),
   urlLabel: s__('AlertSettings|Webhook URL'),
   activeLabel: s__('AlertSettings|Active'),
@@ -41,12 +35,18 @@ export const i18n = {
   testAlertSuccess: s__(
     'AlertSettings|Test alert sent successfully. If you have made other changes, please save them now.',
   ),
-  authKeyRest: s__('AlertSettings|Authorization key has been successfully reset'),
+  authKeyRest: s__(
+    'AlertSettings|Authorization key has been successfully reset. Please save your changes now.',
+  ),
 };
 
 export const serviceOptions = [
   { value: 'generic', text: s__('AlertSettings|Generic') },
   { value: 'prometheus', text: s__('AlertSettings|External Prometheus') },
+  { value: 'opsgenie', text: s__('AlertSettings|Opsgenie') },
 ];
 
 export const JSON_VALIDATE_DELAY = 250;
+
+export const targetPrometheusUrlPlaceholder = 'http://prometheus.example.com/';
+export const targetOpsgenieUrlPlaceholder = 'https://app.opsgenie.com/alert/list/';

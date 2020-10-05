@@ -963,5 +963,21 @@
       "url": "https://cwe.mitre.org/data/definitions/120.html",
       "tool": "flawfinder"
     }
-  ]
+  ],
+  "remediations": [],
+  "scan": {
+    "scanner": {
+      "id": "gosec",
+      "name": "Gosec",
+      "url": "https://github.com/securego/gosec",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "2.3.0"
+    },
+    "type": "sast",
+    "status": "success",
+    "start_time": "placeholder-value",
+    "end_time": "placeholder-value"
+  }
 }

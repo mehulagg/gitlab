@@ -14,8 +14,8 @@ module EE
       prepended do
         include UsageStatistics
 
-        has_many :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline'
-        has_many :vulnerability_findings, source: :occurrence, through: :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::Occurrence'
+        has_many :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::FindingPipeline', inverse_of: :pipeline
+        has_many :vulnerability_findings, source: :finding, through: :vulnerabilities_finding_pipelines, class_name: 'Vulnerabilities::Finding'
 
         has_many :auto_canceled_pipelines, class_name: 'Ci::Pipeline', foreign_key: 'auto_canceled_by_id'
         has_many :auto_canceled_jobs, class_name: 'CommitStatus', foreign_key: 'auto_canceled_by_id'
@@ -94,20 +94,18 @@ module EE
       def batch_lookup_report_artifact_for_file_type(file_type)
         return unless available_licensed_report_type?(file_type)
 
-        latest_report_artifacts
-          .values_at(*::Ci::JobArtifact.associated_file_types_for(file_type.to_s))
-          .flatten
-          .compact
-          .last
+        super
       end
 
       def expose_license_scanning_data?
         batch_lookup_report_artifact_for_file_type(:license_scanning).present?
       end
 
-      def security_reports
-        ::Gitlab::Ci::Reports::Security::Reports.new(sha).tap do |security_reports|
-          builds.latest.with_reports(::Ci::JobArtifact.security_reports).each do |build|
+      def security_reports(report_types: [])
+        reports_scope = report_types.empty? ? ::Ci::JobArtifact.security_reports : ::Ci::JobArtifact.security_reports(file_types: report_types)
+
+        ::Gitlab::Ci::Reports::Security::Reports.new(self).tap do |security_reports|
+          builds.latest.with_reports(reports_scope).each do |build|
             build.collect_security_reports!(security_reports)
           end
         end
@@ -162,45 +160,33 @@ module EE
         merge_request_pipeline? && merge_train_ref?
       end
 
+      def latest_failed_security_builds
+        security_builds.select(&:latest?)
+                       .select(&:failed?)
+      end
+
+      def license_scan_completed?
+        builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).exists?
+      end
+
       private
 
       def project_has_subscriptions?
-        return false unless ::Feature.enabled?(:ci_project_subscriptions, project)
-
-        project.downstream_projects.any?
+        project.beta_feature_available?(:ci_project_subscriptions) &&
+          project.downstream_projects.any?
       end
 
       def merge_train_ref?
         ::MergeRequest.merge_train_ref?(ref)
       end
 
-      # This batch loads the latest reports for each CI job artifact
-      # type (e.g. sast, dast, etc.) in a single SQL query to eliminate
-      # the need to do N different `job_artifacts.where(file_type:
-      # X).last` calls.
-      #
-      # Return a hash of file type => array of 1 job artifact
-      def latest_report_artifacts
-        ::Gitlab::SafeRequestStore.fetch("pipeline:#{self.id}:latest_report_artifacts") do
-          # Note we use read_attribute(:project_id) to read the project
-          # ID instead of self.project_id. The latter appears to load
-          # the Project model. This extra filter doesn't appear to
-          # affect query plan but included to ensure we don't leak the
-          # wrong informaiton.
-          ::Ci::JobArtifact.where(
-            id: job_artifacts.with_reports
-              .select('max(ci_job_artifacts.id) as id')
-              .where(project_id: self.read_attribute(:project_id))
-              .group(:file_type)
-          )
-            .preload(:job)
-            .group_by(&:file_type)
-        end
-      end
-
       def available_licensed_report_type?(file_type)
         feature_names = REPORT_LICENSED_FEATURES.fetch(file_type)
         feature_names.nil? || feature_names.any? { |feature| project.feature_available?(feature) }
+      end
+
+      def security_builds
+        @security_builds ||= ::Security::SecurityJobsFinder.new(pipeline: self).execute
       end
     end
   end

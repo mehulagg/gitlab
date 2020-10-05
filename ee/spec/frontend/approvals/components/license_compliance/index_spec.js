@@ -2,11 +2,11 @@ import Vuex from 'vuex';
 import { mount, createLocalVue } from '@vue/test-utils';
 import { GlIcon } from '@gitlab/ui';
 import LicenseComplianceApprovals from 'ee/approvals/components/license_compliance/index.vue';
-import modalModule from '~/vuex_shared/modules/modal';
 import approvalsLicenceComplianceModule, {
   APPROVALS,
   APPROVALS_MODAL,
 } from 'ee/approvals/stores/modules/license_compliance';
+import modalModule from '~/vuex_shared/modules/modal';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -126,16 +126,17 @@ describe('EE Approvals LicenseCompliance', () => {
       expect(store.modules.approvalsModal.actions.open).toHaveBeenCalledWith(
         expect.any(Object),
         mockLicenseCheckRule,
-        undefined,
       );
     });
   });
 
   describe.each`
-    givenApprovalRule                            | expectedStatus
-    ${{}}                                        | ${'inactive'}
-    ${{ name: 'Foo' }}                           | ${'inactive'}
-    ${{ name: TEST_LOCKED_APPROVALS_RULE_NAME }} | ${'active'}
+    givenApprovalRule                                                  | expectedStatus
+    ${{}}                                                              | ${'inactive'}
+    ${{ name: 'Foo', approvalsRequired: 0 }}                           | ${'inactive'}
+    ${{ name: 'Foo', approvalsRequired: 1 }}                           | ${'inactive'}
+    ${{ name: TEST_LOCKED_APPROVALS_RULE_NAME, approvalsRequired: 0 }} | ${'inactive'}
+    ${{ name: TEST_LOCKED_APPROVALS_RULE_NAME, approvalsRequired: 1 }} | ${'active'}
   `('when approval rule is "$givenApprovalRule.name"', ({ givenApprovalRule, expectedStatus }) => {
     beforeEach(() => {
       store.modules.approvals.state.rules = [givenApprovalRule];

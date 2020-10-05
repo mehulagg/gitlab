@@ -1,89 +1,25 @@
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
-import { mount, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import JiraImportApp from '~/jira_import/components/jira_import_app.vue';
 import JiraImportForm from '~/jira_import/components/jira_import_form.vue';
 import JiraImportProgress from '~/jira_import/components/jira_import_progress.vue';
 import JiraImportSetup from '~/jira_import/components/jira_import_setup.vue';
-import initiateJiraImportMutation from '~/jira_import/queries/initiate_jira_import.mutation.graphql';
-
-const mountComponent = ({
-  isJiraConfigured = true,
-  errorMessage = '',
-  selectedProject = 'MTG',
-  showAlert = false,
-  isInProgress = false,
-  loading = false,
-  mutate = jest.fn(() => Promise.resolve()),
-  mountType,
-} = {}) => {
-  const mountFunction = mountType === 'mount' ? mount : shallowMount;
-
-  return mountFunction(JiraImportApp, {
-    propsData: {
-      inProgressIllustration: 'in-progress-illustration.svg',
-      isJiraConfigured,
-      issuesPath: 'gitlab-org/gitlab-test/-/issues',
-      jiraIntegrationPath: 'gitlab-org/gitlab-test/-/services/jira/edit',
-      projectPath: 'gitlab-org/gitlab-test',
-      setupIllustration: 'setup-illustration.svg',
-    },
-    data() {
-      return {
-        errorMessage,
-        showAlert,
-        selectedProject,
-        jiraImportDetails: {
-          isInProgress,
-          imports: [
-            {
-              jiraProjectKey: 'MTG',
-              scheduledAt: '2020-04-08T10:11:12+00:00',
-              scheduledBy: {
-                name: 'John Doe',
-              },
-            },
-            {
-              jiraProjectKey: 'MSJP',
-              scheduledAt: '2020-04-09T13:14:15+00:00',
-              scheduledBy: {
-                name: 'Jimmy Doe',
-              },
-            },
-            {
-              jiraProjectKey: 'MTG',
-              scheduledAt: '2020-04-09T16:17:18+00:00',
-              scheduledBy: {
-                name: 'Jane Doe',
-              },
-            },
-          ],
-          mostRecentImport: {
-            jiraProjectKey: 'MTG',
-            scheduledAt: '2020-04-09T16:17:18+00:00',
-            scheduledBy: {
-              name: 'Jane Doe',
-            },
-          },
-          projects: [
-            { text: 'My Jira Project (MJP)', value: 'MJP' },
-            { text: 'My Second Jira Project (MSJP)', value: 'MSJP' },
-            { text: 'Migrate to GitLab (MTG)', value: 'MTG' },
-          ],
-        },
-      };
-    },
-    mocks: {
-      $apollo: {
-        loading,
-        mutate,
-      },
-    },
-  });
-};
+import {
+  imports,
+  issuesPath,
+  jiraIntegrationPath,
+  jiraProjects,
+  projectId,
+  projectPath,
+} from '../mock_data';
 
 describe('JiraImportApp', () => {
   let wrapper;
+
+  const inProgressIllustration = 'in-progress-illustration.svg';
+
+  const setupIllustration = 'setup-illustration.svg';
 
   const getFormComponent = () => wrapper.find(JiraImportForm);
 
@@ -94,6 +30,42 @@ describe('JiraImportApp', () => {
   const getAlert = () => wrapper.find(GlAlert);
 
   const getLoadingIcon = () => wrapper.find(GlLoadingIcon);
+
+  const mountComponent = ({
+    isJiraConfigured = true,
+    errorMessage = '',
+    showAlert = false,
+    isInProgress = false,
+    loading = false,
+  } = {}) =>
+    shallowMount(JiraImportApp, {
+      propsData: {
+        inProgressIllustration,
+        isJiraConfigured,
+        issuesPath,
+        jiraIntegrationPath,
+        projectId,
+        projectPath,
+        setupIllustration,
+      },
+      data() {
+        return {
+          errorMessage,
+          showAlert,
+          jiraImportDetails: {
+            isInProgress,
+            imports,
+            mostRecentImport: imports[imports.length - 1],
+            projects: jiraProjects,
+          },
+        };
+      },
+      mocks: {
+        $apollo: {
+          loading,
+        },
+      },
+    });
 
   afterEach(() => {
     wrapper.destroy();
@@ -188,114 +160,96 @@ describe('JiraImportApp', () => {
     });
   });
 
-  describe('import in progress screen', () => {
+  describe('import setup component', () => {
+    beforeEach(() => {
+      wrapper = mountComponent({ isJiraConfigured: false });
+    });
+
+    it('receives the illustration', () => {
+      expect(getSetupComponent().props('illustration')).toBe(setupIllustration);
+    });
+
+    it('receives the path to the Jira integration page', () => {
+      expect(getSetupComponent().props('jiraIntegrationPath')).toBe(jiraIntegrationPath);
+    });
+  });
+
+  describe('import in progress component', () => {
     beforeEach(() => {
       wrapper = mountComponent({ isInProgress: true });
     });
 
-    it('shows the illustration', () => {
-      expect(getProgressComponent().props('illustration')).toBe('in-progress-illustration.svg');
+    it('receives the illustration', () => {
+      expect(getProgressComponent().props('illustration')).toBe(inProgressIllustration);
     });
 
-    it('shows the name of the most recent import initiator', () => {
+    it('receives the name of the most recent import initiator', () => {
       expect(getProgressComponent().props('importInitiator')).toBe('Jane Doe');
     });
 
-    it('shows the name of the most recent imported project', () => {
+    it('receives the name of the most recent imported project', () => {
       expect(getProgressComponent().props('importProject')).toBe('MTG');
     });
 
-    it('shows the time of the most recent import', () => {
+    it('receives the time of the most recent import', () => {
       expect(getProgressComponent().props('importTime')).toBe('2020-04-09T16:17:18+00:00');
     });
 
-    it('has the path to the issues page', () => {
+    it('receives the path to the issues page', () => {
       expect(getProgressComponent().props('issuesPath')).toBe('gitlab-org/gitlab-test/-/issues');
     });
   });
 
-  describe('jira import form screen', () => {
-    describe('when selected project has been imported before', () => {
-      it('shows jira-import::MTG-3 label since project MTG has been imported 2 time before', () => {
-        wrapper = mountComponent();
-
-        expect(getFormComponent().props('importLabel')).toBe('jira-import::MTG-3');
-      });
-
-      it('shows warning alert to explain project MTG has been imported 2 times before', () => {
-        wrapper = mountComponent({ mountType: 'mount' });
-
-        expect(getAlert().text()).toBe(
-          'You have imported from this project 2 times before. Each new import will create duplicate issues.',
-        );
-      });
+  describe('import form component', () => {
+    beforeEach(() => {
+      wrapper = mountComponent();
     });
 
-    describe('when selected project has not been imported before', () => {
-      beforeEach(() => {
-        wrapper = mountComponent({ selectedProject: 'MJP' });
-      });
-
-      it('shows jira-import::MJP-1 label since project MJP has not been imported before', () => {
-        expect(getFormComponent().props('importLabel')).toBe('jira-import::MJP-1');
-      });
-
-      it('does not show warning alert since project MJP has not been imported before', () => {
-        expect(getAlert().exists()).toBe(false);
-      });
-    });
-  });
-
-  describe('initiating a Jira import', () => {
-    it('calls the mutation with the expected arguments', () => {
-      const mutate = jest.fn(() => Promise.resolve());
-
-      wrapper = mountComponent({ mutate });
-
-      const mutationArguments = {
-        mutation: initiateJiraImportMutation,
-        variables: {
-          input: {
-            jiraProjectKey: 'MTG',
-            projectPath: 'gitlab-org/gitlab-test',
-            usersMapping: [],
-          },
-        },
-      };
-
-      getFormComponent().vm.$emit('initiateJiraImport', 'MTG');
-
-      expect(mutate).toHaveBeenCalledWith(expect.objectContaining(mutationArguments));
+    it('receives the illustration', () => {
+      expect(getFormComponent().props('issuesPath')).toBe(issuesPath);
     });
 
-    it('shows alert message with error message on error', () => {
-      const mutate = jest.fn(() => Promise.reject());
+    it('receives the name of the most recent import initiator', () => {
+      expect(getFormComponent().props('jiraImports')).toEqual(imports);
+    });
 
-      wrapper = mountComponent({ mutate });
+    it('receives the name of the most recent imported project', () => {
+      expect(getFormComponent().props('jiraProjects')).toEqual(jiraProjects);
+    });
 
-      getFormComponent().vm.$emit('initiateJiraImport', 'MTG');
+    it('receives the project ID', () => {
+      expect(getFormComponent().props('projectId')).toBe(projectId);
+    });
 
-      // One tick doesn't update the dom to the desired state so we have two ticks here
-      return Vue.nextTick()
-        .then(Vue.nextTick)
-        .then(() => {
-          expect(getAlert().text()).toBe('There was an error importing the Jira project.');
-        });
+    it('receives the project path', () => {
+      expect(getFormComponent().props('projectPath')).toBe(projectPath);
+    });
+
+    it('shows an alert when it emits an error', async () => {
+      expect(getAlert().exists()).toBe(false);
+
+      getFormComponent().vm.$emit('error', 'There was an error');
+
+      await Vue.nextTick();
+
+      expect(getAlert().exists()).toBe(true);
     });
   });
 
-  it('can dismiss alert message', () => {
-    wrapper = mountComponent({
-      errorMessage: 'There was an error importing the Jira project.',
-      showAlert: true,
-      selectedProject: null,
-    });
+  describe('alert', () => {
+    it('can be dismissed', async () => {
+      wrapper = mountComponent({
+        errorMessage: 'There was an error importing the Jira project.',
+        showAlert: true,
+        selectedProject: null,
+      });
 
-    expect(getAlert().exists()).toBe(true);
+      expect(getAlert().exists()).toBe(true);
 
-    getAlert().vm.$emit('dismiss');
+      getAlert().vm.$emit('dismiss');
 
-    return Vue.nextTick().then(() => {
+      await Vue.nextTick();
+
       expect(getAlert().exists()).toBe(false);
     });
   });

@@ -12,6 +12,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       'rack.input' => ''
     }
   end
+
   let(:request) { ActionDispatch::Request.new(env) }
 
   def set_param(key, value)
@@ -36,11 +37,29 @@ RSpec.describe Gitlab::Auth::AuthFinders do
         expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
       end
 
-      it "return user if token is valid" do
-        set_token(job.token)
+      context 'with a running job' do
+        before do
+          job.update!(status: :running)
+        end
 
-        expect(subject).to eq(user)
-        expect(@current_authenticated_job).to eq job
+        it 'return user if token is valid' do
+          set_token(job.token)
+
+          expect(subject).to eq(user)
+          expect(@current_authenticated_job).to eq job
+        end
+      end
+
+      context 'with a job that is not running' do
+        before do
+          job.update!(status: :failed)
+        end
+
+        it 'returns an Unauthorized exception' do
+          set_token(job.token)
+
+          expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
+        end
       end
     end
   end
@@ -400,10 +419,30 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       expect(find_user_from_web_access_token(:ics)).to eq(user)
     end
 
-    it 'returns the user for API requests' do
-      set_header('SCRIPT_NAME', '/api/endpoint')
+    context 'for API requests' do
+      it 'returns the user' do
+        set_header('SCRIPT_NAME', '/api/endpoint')
 
-      expect(find_user_from_web_access_token(:api)).to eq(user)
+        expect(find_user_from_web_access_token(:api)).to eq(user)
+      end
+
+      it 'returns nil if URL does not start with /api/' do
+        set_header('SCRIPT_NAME', '/relative_root/api/endpoint')
+
+        expect(find_user_from_web_access_token(:api)).to be_nil
+      end
+
+      context 'when relative_url_root is set' do
+        before do
+          stub_config_setting(relative_url_root: '/relative_root')
+        end
+
+        it 'returns the user' do
+          set_header('SCRIPT_NAME', '/relative_root/api/endpoint')
+
+          expect(find_user_from_web_access_token(:api)).to eq(user)
+        end
+      end
     end
   end
 
@@ -554,9 +593,9 @@ RSpec.describe Gitlab::Auth::AuthFinders do
     end
 
     context 'with CI username' do
-      let(:username) { ::Ci::Build::CI_REGISTRY_USER }
+      let(:username) { ::Gitlab::Auth::CI_JOB_USER }
       let(:user) { create(:user) }
-      let(:build) { create(:ci_build, user: user) }
+      let(:build) { create(:ci_build, user: user, status: :running) }
 
       it 'returns nil without password' do
         set_basic_auth_header(username, nil)
@@ -575,6 +614,13 @@ RSpec.describe Gitlab::Auth::AuthFinders do
 
         expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
       end
+
+      it 'returns exception if the job is not running' do
+        set_basic_auth_header(username, build.token)
+        build.success!
+
+        expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
+      end
     end
   end
 
@@ -585,7 +631,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
 
     context 'with a job token' do
       let(:route_authentication_setting) { { job_token_allowed: true } }
-      let(:job) { create(:ci_build, user: user) }
+      let(:job) { create(:ci_build, user: user, status: :running) }
 
       before do
         env['HTTP_AUTHORIZATION'] = "Bearer #{job.token}"
@@ -640,7 +686,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
   end
 
   describe '#find_user_from_job_token' do
-    let(:job) { create(:ci_build, user: user) }
+    let(:job) { create(:ci_build, user: user, status: :running) }
     let(:route_authentication_setting) { { job_token_allowed: true } }
 
     subject { find_user_from_job_token }
@@ -661,6 +707,13 @@ RSpec.describe Gitlab::Auth::AuthFinders do
 
       it 'returns exception if invalid job token' do
         set_header(described_class::JOB_TOKEN_HEADER, 'invalid token')
+
+        expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
+      end
+
+      it 'returns exception if the job is not running' do
+        set_header(described_class::JOB_TOKEN_HEADER, job.token)
+        job.success!
 
         expect { subject }.to raise_error(Gitlab::Auth::UnauthorizedError)
       end
@@ -727,7 +780,7 @@ RSpec.describe Gitlab::Auth::AuthFinders do
 
     context 'when the job token is provided via basic auth' do
       let(:route_authentication_setting) { { job_token_allowed: :basic_auth } }
-      let(:username) { Ci::Build::CI_REGISTRY_USER }
+      let(:username) { ::Gitlab::Auth::CI_JOB_USER }
       let(:token) { job.token }
 
       before do
@@ -740,6 +793,56 @@ RSpec.describe Gitlab::Auth::AuthFinders do
         let(:route_authentication_setting) { { job_token_allowed: :unknown } }
 
         it { is_expected.to be_nil }
+      end
+    end
+  end
+
+  describe '#cluster_agent_token_from_authorization_token' do
+    let_it_be(:agent_token) { create(:cluster_agent_token) }
+
+    context 'when route_setting is empty' do
+      it 'returns nil' do
+        expect(cluster_agent_token_from_authorization_token).to be_nil
+      end
+    end
+
+    context 'when route_setting allows cluster agent token' do
+      let(:route_authentication_setting) { { cluster_agent_token_allowed: true } }
+
+      context 'Authorization header is empty' do
+        it 'returns nil' do
+          expect(cluster_agent_token_from_authorization_token).to be_nil
+        end
+      end
+
+      context 'Authorization header is incorrect' do
+        before do
+          request.headers['Authorization'] = 'Bearer ABCD'
+        end
+
+        it 'returns nil' do
+          expect(cluster_agent_token_from_authorization_token).to be_nil
+        end
+      end
+
+      context 'Authorization header is malformed' do
+        before do
+          request.headers['Authorization'] = 'Bearer'
+        end
+
+        it 'returns nil' do
+          expect(cluster_agent_token_from_authorization_token).to be_nil
+        end
+      end
+
+      context 'Authorization header matches agent token' do
+        before do
+          request.headers['Authorization'] = "Bearer #{agent_token.token}"
+        end
+
+        it 'returns the agent token' do
+          expect(cluster_agent_token_from_authorization_token).to eq(agent_token)
+        end
       end
     end
   end

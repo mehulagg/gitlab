@@ -146,6 +146,46 @@ export const updateDependencyScanningIssue = ({ commit }, issue) =>
   commit(types.UPDATE_DEPENDENCY_SCANNING_ISSUE, issue);
 
 /**
+ * COVERAGE FUZZING
+ */
+export const setCoverageFuzzingDiffEndpoint = ({ commit }, path) =>
+  commit(types.SET_COVERAGE_FUZZING_DIFF_ENDPOINT, path);
+
+export const requestCoverageFuzzingDiff = ({ commit }) =>
+  commit(types.REQUEST_COVERAGE_FUZZING_DIFF);
+
+export const receiveCoverageFuzzingDiffSuccess = ({ commit }, response) =>
+  commit(types.RECEIVE_COVERAGE_FUZZING_DIFF_SUCCESS, response);
+
+export const receiveCoverageFuzzingDiffError = ({ commit }) =>
+  commit(types.RECEIVE_COVERAGE_FUZZING_DIFF_ERROR);
+
+export const fetchCoverageFuzzingDiff = ({ state, dispatch }) => {
+  dispatch('requestCoverageFuzzingDiff');
+
+  return Promise.all([
+    pollUntilComplete(state.coverageFuzzing.paths.diffEndpoint),
+    axios.get(state.vulnerabilityFeedbackPath, {
+      params: {
+        category: 'coverage_fuzzing',
+      },
+    }),
+  ])
+    .then(values => {
+      dispatch('receiveCoverageFuzzingDiffSuccess', {
+        diff: values[0].data,
+        enrichData: values[1].data,
+      });
+    })
+    .catch(() => {
+      dispatch('receiveCoverageFuzzingDiffError');
+    });
+};
+
+export const updateCoverageFuzzingIssue = ({ commit }, issue) =>
+  commit(types.UPDATE_COVERAGE_FUZZING_ISSUE, issue);
+
+/**
  * SECRET SCANNING
  */
 
@@ -163,7 +203,7 @@ export const receiveSecretScanningDiffError = ({ commit }) =>
 export const fetchSecretScanningDiff = ({ state, dispatch }) => {
   dispatch('requestSecretScanningDiff');
 
-  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_scanning')
+  return fetchDiffData(state, state.secretScanning.paths.diffEndpoint, 'secret_detection')
     .then(data => {
       dispatch('receiveSecretScanningDiffSuccess', data);
     })
@@ -444,6 +484,3 @@ export const openDismissalCommentBox = ({ commit }) => {
 export const closeDismissalCommentBox = ({ commit }) => {
   commit(types.CLOSE_DISMISSAL_COMMENT_BOX);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
