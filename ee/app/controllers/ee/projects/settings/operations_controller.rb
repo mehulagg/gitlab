@@ -28,8 +28,8 @@ module EE
             project.feature_available?(:status_page, current_user)
           end
 
-          def has_sla_license?
-            ::Feature.enabled?(:incident_sla_dev, project) && project.feature_available?(:incident_sla, current_user)
+          def sla_feature_available?
+            ::Feature.enabled?(:incident_sla_dev, @project) && @project.feature_available?(:incident_sla, current_user)
           end
 
           def track_tracing_external_url
@@ -53,7 +53,7 @@ module EE
             permitted_params.merge!(status_page_setting_params)
           end
 
-          if has_sla_license?
+          if sla_feature_available?
             incident_params = Array(permitted_params[:incident_management_setting_attributes])
             permitted_params[:incident_management_setting_attributes] = incident_params.push(*sla_timer_params)
           end
