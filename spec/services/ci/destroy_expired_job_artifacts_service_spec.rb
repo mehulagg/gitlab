@@ -9,9 +9,9 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
     subject { service.execute }
 
     let(:service) { described_class.new }
-    let!(:artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
+    let_it_be(:artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
 
-    before do
+    before(:all) do
       artifact.job.pipeline.unlocked!
     end
 
@@ -38,7 +38,9 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
     end
 
     context 'when artifact is not expired' do
-      let!(:artifact) { create(:ci_job_artifact, expire_at: 1.day.since) }
+      before do
+        artifact.update_column(:expire_at, 1.day.since)
+      end
 
       it 'does not destroy expired job artifacts' do
         expect { subject }.not_to change { Ci::JobArtifact.count }
@@ -46,7 +48,9 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
     end
 
     context 'when artifact is permanent' do
-      let!(:artifact) { create(:ci_job_artifact, expire_at: nil) }
+      before do
+        artifact.update_column(:expire_at, nil)
+      end
 
       it 'does not destroy expired job artifacts' do
         expect { subject }.not_to change { Ci::JobArtifact.count }
