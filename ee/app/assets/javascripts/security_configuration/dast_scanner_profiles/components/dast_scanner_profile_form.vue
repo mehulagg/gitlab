@@ -73,7 +73,7 @@ export default {
       spiderTimeout = '',
       targetTimeout = '',
       scanType = SCAN_TYPE.PASSIVE,
-      ajaxSpider = false,
+      useAjaxSpider = false,
       showDebugMessages = false,
     } = this.profile;
 
@@ -82,7 +82,7 @@ export default {
       spiderTimeout: initField(spiderTimeout),
       targetTimeout: initField(targetTimeout),
       scanType: initField(scanType),
-      ajaxSpider: initField(ajaxSpider),
+      useAjaxSpider: initField(useAjaxSpider),
       showDebugMessages: initField(showDebugMessages),
     };
 
@@ -361,7 +361,7 @@ export default {
             :title="i18n.tooltips.ajaxSpider"
           />
         </template>
-        <gl-form-checkbox v-model="form.ajaxSpider.value">{{
+        <gl-form-checkbox v-model="form.useAjaxSpider.value">{{
           s__('DastProfiles|Turn on AJAX spider')
         }}</gl-form-checkbox>
       </gl-form-group>

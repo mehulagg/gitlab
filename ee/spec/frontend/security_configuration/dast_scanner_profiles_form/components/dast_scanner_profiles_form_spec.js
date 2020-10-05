@@ -23,7 +23,7 @@ const {
   spiderTimeout,
   targetTimeout,
   scanType,
-  ajaxSpider,
+  useAjaxSpider,
   showDebugMessages,
 } = defaultProfile;
 
@@ -194,7 +194,7 @@ describe('DAST Scanner Profile', () => {
               targetTimeout,
               projectFullPath,
               scanType,
-              ajaxSpider,
+              useAjaxSpider,
               showDebugMessages,
               ...mutationVars,
             },

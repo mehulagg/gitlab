@@ -5,7 +5,7 @@ mutation dastScannerProfileUpdate(
   $spiderTimeout: Int!
   $targetTimeout: Int!
   $scanType: DastScanTypeEnum!
-  $ajaxSpider: Boolean!
+  $useAjaxSpider: Boolean!
   $showDebugMessages: Boolean!
 ) {
   dastScannerProfileUpdate(
@@ -16,7 +16,7 @@ mutation dastScannerProfileUpdate(
       spiderTimeout: $spiderTimeout
       targetTimeout: $targetTimeout
       scanType: $scanType
-      ajaxSpider: $ajaxSpider
+      useAjaxSpider: $useAjaxSpider
       showDebugMessages: $showDebugMessages
     }
   ) {

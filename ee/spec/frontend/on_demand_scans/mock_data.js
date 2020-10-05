@@ -5,7 +5,7 @@ export const scannerProfiles = [
     spiderTimeout: 5,
     targetTimeout: 10,
     scanType: 'PASSIVE',
-    ajaxSpider: false,
+    useAjaxSpider: false,
     showDebugMessages: false,
   },
   {
@@ -14,7 +14,7 @@ export const scannerProfiles = [
     spiderTimeout: 20,
     targetTimeout: 150,
     scanType: 'ACTIVE',
-    ajaxSpider: true,
+    useAjaxSpider: true,
     showDebugMessages: true,
   },
 ];

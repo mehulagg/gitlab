@@ -4,7 +4,7 @@ mutation dastScannerProfileCreate(
   $spiderTimeout: Int!
   $targetTimeout: Int!
   $scanType: DastScanTypeEnum!
-  $ajaxSpider: Boolean!
+  $useAjaxSpider: Boolean!
   $showDebugMessages: Boolean!
 ) {
   dastScannerProfileCreate(
@@ -14,7 +14,7 @@ mutation dastScannerProfileCreate(
       spiderTimeout: $spiderTimeout
       targetTimeout: $targetTimeout
       scanType: $scanType
-      ajaxSpider: $ajaxSpider
+      useAjaxSpider: $useAjaxSpider
       showDebugMessages: $showDebugMessages
     }
   ) {
