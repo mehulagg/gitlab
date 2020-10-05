@@ -46,6 +46,14 @@ module Gitlab
         maven_app_name_regex
       end
 
+      def nuget_version_regex
+        @nuget_version_regex ||= /
+          \A#{semver_major_minor_patch_regex}(\.\d*)?
+          (?:-(?<prerelease>(?:\d*[a-zA-Z-][0-9a-zA-Z-]*|[1-9]\d*|0)(?:\.(?:\d*[a-zA-Z-][0-9a-zA-Z-]*|[1-9]\d*|0))*))?
+          (?:\+(?<build>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?\z
+        /x.freeze
+      end
+
       def pypi_version_regex
         # See the official regex: https://github.com/pypa/packaging/blob/16.7/packaging/version.py#L159
 
@@ -101,9 +109,7 @@ module Gitlab
         # reordered to be greedy. Without this change, the unbounded regex would
         # only partially match "v0.0.0-20201230123456-abcdefabcdef".
         @unbounded_semver_regex ||= /
-          (?<major>0|[1-9]\d*)
-          \.(?<minor>0|[1-9]\d*)
-          \.(?<patch>0|[1-9]\d*)
+          #{semver_major_minor_patch_regex}
           (?:-(?<prerelease>(?:\d*[a-zA-Z-][0-9a-zA-Z-]*|[1-9]\d*|0)(?:\.(?:\d*[a-zA-Z-][0-9a-zA-Z-]*|[1-9]\d*|0))*))?
           (?:\+(?<build>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?
         /x.freeze
@@ -111,6 +117,10 @@ module Gitlab
 
       def semver_regex
         @semver_regex ||= Regexp.new("\\A#{::Gitlab::Regex.unbounded_semver_regex.source}\\z", ::Gitlab::Regex.unbounded_semver_regex.options)
+      end
+
+      def semver_major_minor_patch_regex
+        @semver_major_minor_patch_regex ||= %r{(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)}
       end
 
       def prefixed_semver_regex
