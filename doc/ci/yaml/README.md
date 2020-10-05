@@ -4132,28 +4132,37 @@ Read more on [GitLab Pages user documentation](../../user/project/pages/index.md
 
 > Introduced in GitLab Runner v0.5.0.
 
-Variables are configurable values in the `.gitlab-ci.yml` file. 
-These values are passed to jobs and can be set globally and per-job.
+Variables are configurable values that are passed to jobs. They can be set
+globally and per-job.
 
-Variables are stored in the Git repository and are meant for non-sensitive
-project configuration, for example:
+There are two types of variables.
+
+- [Custom variables](../variables/README.md#gitlab-cicd-environment-variables):
+  You can define their values in the `.gitlab-ci.yml` file, in the GitLab UI,
+  or by using the API.
+- [Predefined variables](../variables/README.md#custom-environment-variables):
+  These values are set by the runner itself.
+  One example is `CI_COMMIT_REF_NAME`, which is the branch or tag the project is built for.
+
+After you define a variable, you can use it in all executed commands and scripts.
+
+Variables are meant for non-sensitive project configuration, for example:
 
 ```yaml
 variables:
   DATABASE_URL: "postgres://postgres@postgres/my_database"
 ```
 
-After you define a variable, you can use it in all executed commands and scripts.
+You can use integers and strings for the variable's name and value.
+You cannot use floats.
 
-Integers and strings can be used for the variable's name and value.
-Floats cannot be used.
+If you define a variable at the top level of the `gitlab-ci.yml` file, it is global,
+meaning it applies to all jobs.
 
-In addition to user-defined variables, there are:
+If you define a variable within a job, it's available to that job only.
 
-- Variables [set up by the runner itself](../variables/README.md#predefined-environment-variables).
-  One example is `CI_COMMIT_REF_NAME`, which is the branch or tag the project is built for.
-- Environment [variables](../variables/README.md#gitlab-cicd-environment-variables),
-  which can be set in the GitLab UI.
+If a variable of the same name is defined globally and for a specific job, the
+[job-specific variable is used](../variables/README.md#priority-of-environment-variables).
 
 The `variables` keyword overrides the global
 YAML variables and predefined ones of the same name.
