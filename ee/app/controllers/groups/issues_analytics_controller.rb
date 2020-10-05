@@ -9,6 +9,8 @@ class Groups::IssuesAnalyticsController < Groups::ApplicationController
 
   track_unique_visits :show, target_id: 'g_analytics_issues'
 
+  feature_category :planning_analytics
+
   def show
     respond_to do |format|
       format.html

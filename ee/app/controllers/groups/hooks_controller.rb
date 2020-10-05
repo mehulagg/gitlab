@@ -14,6 +14,8 @@ class Groups::HooksController < Groups::ApplicationController
 
   layout 'group_settings'
 
+  feature_category :integrations
+
   def index
     @hooks = @group.hooks
     @hook = GroupHook.new
