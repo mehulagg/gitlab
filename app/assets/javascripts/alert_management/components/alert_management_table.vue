@@ -107,20 +107,13 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: [
-    'projectPath',
-    'textQuery',
-    'authorUsernamesQuery',
-    'assigneeUsernamesQuery',
-    'populatingAlertsHelpUrl',
-  ],
+  inject: ['projectPath', 'textQuery', 'assigneeUsernamesQuery', 'populatingAlertsHelpUrl'],
   apollo: {
     alerts: {
       query: getAlerts,
       variables() {
         return {
           searchTerm: this.searchTerm,
-          authorUsername: this.authorUsername,
           assigneeUsernames: this.assigneeUsernames,
           projectPath: this.projectPath,
           statuses: this.statusFilter,
@@ -160,7 +153,6 @@ export default {
       variables() {
         return {
           searchTerm: this.searchTerm,
-          authorUsername: this.authorUsername,
           assigneeUsernames: this.assigneeUsernames,
           projectPath: this.projectPath,
         };
@@ -184,7 +176,6 @@ export default {
       sortDesc: true,
       sortDirection: 'desc',
       searchTerm: this.textQuery,
-      authorUsername: this.authorUsernamesQuery,
       assigneeUsernames: this.assigneeUsernamesQuery,
       pagination: initialPaginationState,
     };
@@ -198,7 +189,7 @@ export default {
         !this.errored &&
         !this.loading &&
         this.alertsCount?.all === 0 &&
-        !this.searchTerm &&
+        !this.searchTerm !== '' &&
         !this.isErrorAlertDismissed
       );
     },
@@ -207,9 +198,6 @@ export default {
     },
     isEmpty() {
       return !this.alerts?.list?.length;
-    },
-    showList() {
-      return !this.isEmpty || this.errored || this.loading;
     },
   },
   methods: {
@@ -246,9 +234,8 @@ export default {
       this.statusFilter = filters;
       this.filteredByStatus = status;
     },
-    filtersChanged({ searchTerm, authorUsername, assigneeUsernames }) {
+    filtersChanged({ searchTerm, assigneeUsernames }) {
       this.searchTerm = searchTerm;
-      this.authorUsername = authorUsername;
       this.assigneeUsernames = assigneeUsernames;
     },
     errorAlertDismissed() {
@@ -272,8 +259,6 @@ export default {
     </gl-alert>
 
     <page-wrapper
-      :loading="loading"
-      :show-items="showList"
       :show-error-msg="showErrorMsg"
       :i18n="$options.i18n"
       :items="alerts.list || []"
@@ -282,6 +267,7 @@ export default {
       :status-tabs="$options.statusTabs"
       :track-views-options="$options.trackAlertListViewsOptions"
       :server-error-message="serverErrorMessage"
+      :filter-search-tokens="['assignee_username']"
       filter-search-key="alerts"
       @page-changed="pageChanged"
       @status-changed="statusChanged"

@@ -93,10 +93,6 @@ module Types
             null: true,
             description: 'Assignees of the alert'
 
-      field :author, Types::UserType, null: false,
-            null: true,
-            description: 'User that created the alert'
-
       field :metrics_dashboard_url,
             GraphQL::STRING_TYPE,
             null: true,

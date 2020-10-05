@@ -9,13 +9,11 @@ query getAlerts(
   $prevPageCursor: String = ""
   $nextPageCursor: String = ""
   $searchTerm: String = ""
-  $authorUsername: String = ""
   $assigneeUsernames: String = ""
 ) {
   project(fullPath: $projectPath) {
     alertManagementAlerts(
       search: $searchTerm
-      authorUsername: $authorUsername
       assigneeUsername: $assigneeUsernames
       statuses: $statuses
       sort: $sort

@@ -8,10 +8,6 @@ module Resolvers
       argument :search, GraphQL::STRING_TYPE,
                 description: 'Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.',
                 required: false
-
-      argument :author_username, GraphQL::STRING_TYPE,
-                required: false,
-                description: 'Username of the author of the issue'
                 
       argument :assignee_username, GraphQL::STRING_TYPE,
                 required: false,

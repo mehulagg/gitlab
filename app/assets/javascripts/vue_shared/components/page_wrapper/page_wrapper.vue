@@ -5,7 +5,7 @@ import Tracking from '~/tracking';
 import { __ } from '~/locale';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
-import { initialPaginationState, defaultI18n } from './constants';
+import { initialPaginationState, defaultI18n, defaultPageSize } from './constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 
@@ -27,7 +27,8 @@ export default {
     },
     itemsCount: {
       type: Object,
-      required: true,
+      required: false,
+      default: () => {},
     },
     pageInfo: {
       type: Object,
@@ -38,13 +39,10 @@ export default {
       type: Array,
       required: true,
     },
-    loading: {
-      type: Boolean,
-      required: true,
-    },
     showItems: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: true,
     },
     showErrorMsg: {
       type: Boolean,
@@ -67,6 +65,11 @@ export default {
       type: String,
       required: true,
     },
+    filterSearchTokens: {
+      type: Array,
+      required: false,
+      default: () => ['author_username', 'assignee_username'],
+    },
   },
   data() {
     return {
@@ -81,7 +84,7 @@ export default {
   },
   computed: {
     filteredSearchTokens() {
-      return [
+      const defaultTokens = [
         {
           type: 'author_username',
           icon: 'user',
@@ -96,7 +99,7 @@ export default {
         {
           type: 'assignee_username',
           icon: 'user',
-          title: __('Assignees'),
+          title: __('Assignee'),
           unique: true,
           symbol: '@',
           token: AuthorToken,
@@ -105,6 +108,8 @@ export default {
           fetchAuthors: Api.projectUsers.bind(Api),
         },
       ];
+
+      return defaultTokens.filter(({ type }) => this.filterSearchTokens.includes(type));
     },
     filteredSearchValue() {
       const value = [];
@@ -140,8 +145,11 @@ export default {
     },
     nextPage() {
       const nextPage = this.pagination.page + 1;
-      return nextPage > Math.ceil(this.itemsForCurrentTab / 10) ? null : nextPage;
+      return nextPage > Math.ceil(this.itemsForCurrentTab / defaultPageSize) ? null : nextPage;
     },
+  },
+  mounted() {
+    this.trackPageViews();
   },
   methods: {
     filterItemsByStatus(tabIndex) {
@@ -163,7 +171,7 @@ export default {
         };
       } else {
         this.pagination = {
-          lastPageSize: 10,
+          lastPageSize: defaultPageSize,
           firstPageSize: null,
           prevPageCursor: startCursor,
           nextPageCursor: '',

@@ -20,8 +20,8 @@ module AlertManagement
       collection = project.alert_management_alerts
       collection = by_status(collection)
       collection = by_iid(collection)
-      # collection = by_author(collection)
-      # collection = by_search(collection)
+      # collection = by_assignee(items)
+      collection = by_search(collection)
 
       sort(collection)
     end
@@ -44,21 +44,6 @@ module AlertManagement
 
     def by_search(collection)
       params[:search].present? ? collection.search(params[:search]) : collection
-    end
-
-    def by_author(collection)
-      return collection unless params[:author_username]
-
-      authors = get_author(username_param)
-      return collection.none unless authors.present?
-
-      collection.with_author(authors)
-    end
-
-    def get_author(username_param)
-      return current_user if username_param == current_user&.username
-
-      User.by_username(username_param)
     end
 
     def sort(collection)

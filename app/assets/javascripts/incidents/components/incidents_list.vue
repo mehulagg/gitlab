@@ -272,7 +272,6 @@ export default {
 <template>
   <div class="incident-management-list">
     <page-wrapper
-      :loading="loading"
       :show-items="showList"
       :show-error-msg="showErrorMsg"
       :i18n="$options.i18n"
@@ -280,7 +279,7 @@ export default {
       :page-info="incidents.pageInfo"
       :items-count="incidentsCount"
       :status-tabs="$options.statusTabs"
-      :track-views-options="trackIncidentListViewsOptions"
+      :track-views-options="$options.trackIncidentListViewsOptions"
       filter-search-key="incidents"
       @page-changed="pageChanged"
       @status-changed="statusChanged"
