@@ -2613,7 +2613,7 @@ stop_review_app:
 
 In the above example we set up the `review_app` job to deploy to the `review`
 environment, and we also defined a new `stop_review_app` job under `on_stop`.
-After the `review_app` job is finishes, it triggers the
+After the `review_app` job is finished, it triggers the
 `stop_review_app` job based on what is defined under `when`. In this case we
 set it up to `manual` so it needs a [manual action](#whenmanual) from
 GitLab's user interface to run.
