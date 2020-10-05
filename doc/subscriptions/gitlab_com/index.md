@@ -149,16 +149,23 @@ as the number of _users over license_, you must pay for the excess number of
 users either before renewal, or at the time of renewal. This is also known the
 _true up_ process.
 
-There is no self-service option for purchasing additional seats. You must
-request a quotation from GitLab Sales. To do so, contact GitLab via our
-[support form](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293).
+Customers can add users to a subscription any time during the subscription period. The cost of additional users added during the subscription
+period is prorated from the date of purchase through the end of the subscription period.
 
-The amount charged per seat is calculated by one of the following methods:
+To add users to a subscription:
 
-- If paid before renewal, the amount per seat is calculated on a prorated basis.
-  For example, if the user was added 3 months before the end of the subscription
-  period, the amount owing is calculated as: (3 / 12) x annual fee.
-- If paid on renewal, the amount per seat is the standard annual fee.
+1. Log in to the [Customers Portal](https://customers.gitlab.com/).
+1. Navigate to the **Manage Purchases** page.
+1. Select **Add more seats** on the relevant subscription card.
+1. Enter the number of additional users.
+1. Select **Proceed to checkout**.
+1. Review the **Subscription Upgrade Detail**. The system lists the total price for all users on the system and a credit for what you've already paid. You will only be charged for the net change.
+1. Select **Confirm Upgrade**.
+
+The following will be emailed to you:
+
+- A payment receipt. You can also access this information in the Customers Portal under [**View invoices**](https://customers.gitlab.com/receipts).
+
 
 ### Renew or change a GitLab.com subscription
 
