@@ -29,7 +29,7 @@ module EE
           end
 
           def has_sla_license?
-            project.feature_available?(:incident_sla, current_user)
+            ::Feature.enabled?(:incident_sla_dev, project) && project.feature_available?(:incident_sla, current_user)
           end
 
           def track_tracing_external_url
