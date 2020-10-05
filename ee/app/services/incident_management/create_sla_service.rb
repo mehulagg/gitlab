@@ -3,7 +3,7 @@
 module IncidentManagement
   class CreateSlaService < BaseService
     def initialize(incident, current_user, project)
-      super(incident.project, current_user) # TODO do we need this?
+      super(incident.project, current_user)
 
       @incident = incident
       @project = project
@@ -18,7 +18,8 @@ module IncidentManagement
       )
 
       return sla if sla.save
-      return error(sla.errors)
+
+      error(sla.errors&.full_messages)
     end
 
     attr_reader :incident

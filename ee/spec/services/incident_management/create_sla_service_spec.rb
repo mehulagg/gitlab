@@ -56,5 +56,24 @@ RSpec.describe IncidentManagement::CreateSlaService do
       offset_time = incident.created_at + setting.sla_timer_minutes.minutes
       expect(incident_sla.due_at).to eq(offset_time)
     end
+
+    it { is_expected.to be_a(IncidentManagement::IncidentSla) }
+
+    context 'errors when saving' do
+      before do
+        allow_next_instance_of(IncidentManagement::IncidentSla) do |incident_sla|
+          allow(incident_sla).to receive(:save).and_return(false)
+
+          errors = ActiveModel::Errors.new(incident_sla).tap { |e| e.add(:issue_id, "error message") }
+          allow(incident_sla).to receive(:errors).and_return(errors)
+        end
+      end
+
+      it 'does not create the incident sla' do
+        expect { subject }.not_to change(IncidentManagement::IncidentSla, :count)
+      end
+
+      it { is_expected.to include(status: :error, message: ["Issue error message"]) }
+    end
   end
 end

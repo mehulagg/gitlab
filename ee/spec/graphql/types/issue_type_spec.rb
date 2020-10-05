@@ -4,14 +4,11 @@ require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['Issue'] do
   it { expect(described_class).to have_graphql_field(:epic) }
-
   it { expect(described_class).to have_graphql_field(:iteration) }
-
   it { expect(described_class).to have_graphql_field(:weight) }
-
   it { expect(described_class).to have_graphql_field(:health_status) }
-
   it { expect(described_class).to have_graphql_field(:blocked) }
+  it { expect(described_class).to have_graphql_field(:sla_due_at) }
 
   context 'N+1 queries' do
     let_it_be(:user) { create(:user) }
