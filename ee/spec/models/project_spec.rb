@@ -2281,10 +2281,10 @@ RSpec.describe Project do
 
     subject { project.repository_size_excess }
 
-    let_it_be(:statistics) { build(:project_statistics) }
+    let_it_be(:statistics) { create(:project_statistics) }
     let_it_be(:project) { statistics.project }
 
-    where(:repository_size, :size_limit, :result) do
+    where(:total_repository_size, :size_limit, :result) do
       50 | nil | 0
       50 | 0   | 0
       50 | 60  | 0
@@ -2295,7 +2295,7 @@ RSpec.describe Project do
     with_them do
       before do
         allow(project).to receive(:actual_size_limit).and_return(size_limit)
-        allow(statistics).to receive(:repository_size).and_return(repository_size)
+        allow(statistics).to receive(:total_repository_size).and_return(total_repository_size)
       end
 
       it { is_expected.to eq(result) }
