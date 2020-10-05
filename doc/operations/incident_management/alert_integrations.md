@@ -14,7 +14,9 @@ GitLab can accept alerts from any source via a webhook receiver. This can be con
 to use this endpoint.
 
 ## Configuration
+
 ### Generic HTTP Endpoint
+
 Enabling the Generic HTTP Endpoint creates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
 [customize the payload](#customizing-the-payload) to your liking.
 
@@ -28,6 +30,7 @@ You will need to activate the endpoint and obtain credentials to set up this int
    for the webhook configuration.
 
 ### External Prometheus integration
+
 For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration. 
 
 
