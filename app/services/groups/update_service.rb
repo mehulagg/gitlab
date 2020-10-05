@@ -4,6 +4,8 @@ module Groups
   class UpdateService < Groups::BaseService
     include UpdateVisibilityLevel
 
+    SETTINGS_PARAMS = [:allow_mfa_for_subgroups].freeze
+
     def execute
       reject_parent_id!
       remove_unallowed_params
@@ -20,7 +22,7 @@ module Groups
       return false unless valid_path_change_with_npm_packages?
 
       return false unless update_shared_runners
-
+      handle_changes
       before_assignment_hook(group, params)
 
       group.assign_attributes(params)
@@ -85,6 +87,21 @@ module Groups
     def remove_unallowed_params
       params.delete(:emails_disabled) unless can?(current_user, :set_emails_disabled, group)
       params.delete(:default_branch_protection) unless can?(current_user, :update_default_branch_protection, group)
+    end
+
+    def handle_changes
+      handle_settings_update
+    end
+
+    def handle_settings_update
+      settings_params = params.slice(*allowed_settings_params)
+      allowed_settings_params.each { |param| params.delete(param) }
+
+      ::NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
+    end
+
+    def allowed_settings_params
+      @allowed_settings_params ||= SETTINGS_PARAMS
     end
 
     def valid_share_with_group_lock_change?

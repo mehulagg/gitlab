@@ -560,12 +560,16 @@ class Group < Namespace
     access_level_roles.values
   end
 
+  def update_two_factor_requirement_for_members
+    members_with_descendants.find_each(&:update_two_factor_requirement)
+  end
+
   private
 
   def update_two_factor_requirement
     return unless saved_change_to_require_two_factor_authentication? || saved_change_to_two_factor_grace_period?
 
-    members_with_descendants.find_each(&:update_two_factor_requirement)
+    update_two_factor_requirement_for_members
   end
 
   def path_changed_hook
