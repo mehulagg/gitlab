@@ -72,6 +72,21 @@ it or creating other branches is not supported.
 Existing snippets will be automatically migrated in 13.0. Their current
 content will be saved as the initial commit to the snippets' repository.
 
+### Migration Bot user
+
+During migration to versioned Snippets, if a Snippet's author cannot be used for the initial repository
+commit (e.g. when the author has been removed), the Migration Bot user will used instead.
+
+This is an internal user that does not count toward a license limit count and has only basic Git access 
+and cannot be used for other actions, such as login or API requests.
+
+For the bot:
+
+- The name is set to  `GitLab Migration Bot`
+- The email is set to `noreply+gitlab-migration-bot@{instance host}`
+
+These details will be visible when viewing the commit history for an applicable Snippet. 
+
 ### File names
 
 Snippets support syntax highlighting based on the filename and
