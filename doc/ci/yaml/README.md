@@ -2382,7 +2382,7 @@ manual action by clicking a _play_ button.
 When a pipeline is blocked, it isn't merged if Merge When Pipeline Succeeds
 is set. Blocked pipelines also have a special status, called _manual_.
 When the `when:manual` syntax is used, manual actions are non-blocking by
-default. If you want to make manual action blocking, add
+default. If you want to make a manual action blocking, add
 `allow_failure: false` to the job's definition in `.gitlab-ci.yml`.
 
 Optional manual actions have `allow_failure: true` set by default and their
