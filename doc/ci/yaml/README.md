@@ -4175,7 +4175,7 @@ May change or be removed completely in future releases.
 
 You can set the `GIT_STRATEGY` used for getting recent application code, either
 globally or per-job in the [`variables`](#variables) section. If left
-unspecified, the default from project settings is used.
+unspecified, the default from the project settings is used.
 
 There are three possible values: `clone`, `fetch`, and `none`.
 
