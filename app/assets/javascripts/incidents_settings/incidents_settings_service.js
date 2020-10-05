@@ -9,7 +9,7 @@ export default class IncidentsSettingsService {
     this.webhookUpdateEndpoint = webhookUpdateEndpoint;
   }
 
-  updateSettings(data, reload) {
+  updateSettings(data) {
     return axios
       .patch(this.settingsEndpoint, {
         project: {
@@ -17,7 +17,7 @@ export default class IncidentsSettingsService {
         },
       })
       .then(() => {
-        if (reload) refreshCurrentPage();
+        refreshCurrentPage();
       })
       .catch(({ response }) => {
         const message = response?.data?.message || '';

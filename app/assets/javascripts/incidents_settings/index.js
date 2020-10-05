@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import ServiceLevelAgreementForm from 'ee_else_ce/incidents_settings/components/service_level_agreement_form.vue';
+import AdditionalTabs from 'ee_else_ce/incidents_settings/components/service_level_agreement_form.vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import SettingsTabs from './components/incidents_settings_tabs.vue';
 import IncidentsSettingsService from './incidents_settings_service';
@@ -51,7 +51,9 @@ export default () => {
       },
     },
     render(createElement) {
-      return createElement(SettingsTabs, [createElement(ServiceLevelAgreementForm)]);
+      return createElement(SettingsTabs, [
+        createElement(AdditionalTabs, { slot: 'additional-tabs' }),
+      ]);
     },
   });
 };
