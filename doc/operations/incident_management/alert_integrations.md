@@ -28,7 +28,7 @@ You will need to activate the endpoint and obtain credentials to set up this int
 1. Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
    for the webhook configuration.
 
-### External Prometheus Integration 
+### External Prometheus integration
 For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration. 
 
 
