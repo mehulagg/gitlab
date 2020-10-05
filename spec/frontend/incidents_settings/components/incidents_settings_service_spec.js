@@ -25,19 +25,11 @@ describe('IncidentsSettingsService', () => {
   });
 
   describe('updateSettings', () => {
-    it('should refresh the page on successful update, when set', () => {
-      mock.onPatch().reply(httpStatusCodes.OK);
-
-      return service.updateSettings({}, true).then(() => {
-        expect(refreshCurrentPage).toHaveBeenCalled();
-      });
-    });
-
-    it('should not refresh the page on successful update by default', () => {
+    it('should refresh the page on successful update', () => {
       mock.onPatch().reply(httpStatusCodes.OK);
 
       return service.updateSettings({}).then(() => {
-        expect(refreshCurrentPage).not.toHaveBeenCalled();
+        expect(refreshCurrentPage).toHaveBeenCalled();
       });
     });
 
