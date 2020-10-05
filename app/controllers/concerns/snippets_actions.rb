@@ -17,14 +17,6 @@ module SnippetsActions
     respond_to :html
   end
 
-  def edit
-    # We need to load some info from the existing blob
-    snippet.content = blob.data
-    snippet.file_name = blob.path
-
-    render 'edit'
-  end
-
   # This endpoint is being replaced by Snippets::BlobController#raw
   # Support for old raw links will be maintainted via this action but
   # it will only return the first blob found,
@@ -55,18 +47,12 @@ module SnippetsActions
   def show
     respond_to do |format|
       format.html do
-        conditionally_expand_blob(blob)
         @note = Note.new(noteable: @snippet, project: @snippet.project)
         @noteable = @snippet
 
         @discussions = @snippet.discussions
         @notes = prepare_notes_for_rendering(@discussions.flat_map(&:notes), @noteable)
         render 'show'
-      end
-
-      format.json do
-        conditionally_expand_blob(blob)
-        render_blob_json(blob)
       end
 
       format.js do

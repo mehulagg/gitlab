@@ -329,12 +329,6 @@ RSpec.describe Projects::SnippetsController do
       expect(assigns(:snippet)).to eq(project_snippet)
       expect(response).to have_gitlab_http_status(:ok)
     end
-
-    it 'renders the blob from the repository' do
-      subject
-
-      expect(assigns(:blob)).to eq(project_snippet.blobs.first)
-    end
   end
 
   %w[show raw].each do |action|

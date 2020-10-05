@@ -86,12 +86,6 @@ RSpec.describe SnippetsController do
         expect(assigns(:snippet)).to eq(personal_snippet)
         expect(response).to have_gitlab_http_status(:ok)
       end
-
-      it 'renders the blob from the repository' do
-        subject
-
-        expect(assigns(:blob)).to eq(personal_snippet.blobs.first)
-      end
     end
 
     context 'when the personal snippet is private' do
