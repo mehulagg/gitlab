@@ -12837,6 +12837,11 @@ type Project {
   """
   alertManagementAlert(
     """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
+
+    """
     IID of the alert. For example, "1"
     """
     iid: String
@@ -12862,6 +12867,11 @@ type Project {
   """
   alertManagementAlertStatusCounts(
     """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
+
+    """
     Search criteria for filtering alerts. This will search on title, description, service, monitoring_tool.
     """
     search: String
@@ -12875,6 +12885,11 @@ type Project {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of a user assigned to the issue
+    """
+    assigneeUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
