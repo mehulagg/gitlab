@@ -72,7 +72,7 @@ curl --request POST \
   <url>
 ```
 
-The `<authorization_key>` and `<url>` values can be found when [setting up generic alerts](#setting-up-generic-alerts).
+The `<authorization_key>` and `<url>` values can be found when configuring an alert integration.
 
 Example payload:
 
@@ -98,8 +98,8 @@ Example payload:
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3066) in GitLab Core in 13.2.
 
-After a [project maintainer or owner](#setting-up-generic-alerts)
-[configures generic alerts](#setting-up-generic-alerts), you can trigger a test
+After a [project maintainer or owner](../../user/permissions.md)
+configures an integration, you can trigger a test
 alert to confirm your integration works properly.
 
 1. Sign in as a user with Developer or greater [permissions](../../user/permissions.md).
