@@ -156,12 +156,12 @@ export default {
         {
           name: s__('AlertSettings|HTTP endpoint'),
           type: s__('AlertsIntegrations|HTTP endpoint'),
-          status: this.prometheus.activated,
+          activated: this.prometheus.activated,
         },
         {
           name: s__('AlertSettings|External Prometheus'),
           type: s__('AlertsIntegrations|Prometheus'),
-          status: this.generic.activated,
+          activated: this.generic.activated,
         },
       ];
     },

@@ -2485,6 +2485,12 @@ msgstr ""
 msgid "Alerts endpoint"
 msgstr ""
 
+msgid "AlertsIntegrations|Alerts will be created through this integration"
+msgstr ""
+
+msgid "AlertsIntegrations|Alerts will not be created through this integration"
+msgstr ""
+
 msgid "AlertsIntegrations|Current integrations"
 msgstr ""
 
