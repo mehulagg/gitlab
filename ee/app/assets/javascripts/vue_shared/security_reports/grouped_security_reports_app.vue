@@ -4,6 +4,7 @@ import { once } from 'lodash';
 import { componentNames } from 'ee/reports/components/issue_body';
 import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
 import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
+import FuzzingArtifactsDownload from 'ee/security_dashboard/components/fuzzing_artifacts_download.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
@@ -17,6 +18,7 @@ import { mrStates } from '~/mr_popover/constants';
 import { fetchPolicies } from '~/lib/graphql';
 import securityReportSummaryQuery from './graphql/mr_security_report_summary.graphql';
 import SecuritySummary from './components/security_summary.vue';
+import Api from '~/api';
 
 export default {
   store: createStore(),
@@ -30,6 +32,7 @@ export default {
     GlLink,
     DastModal,
     GlButton,
+    FuzzingArtifactsDownload,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -191,6 +194,7 @@ export default {
       'isDismissingVulnerability',
       'isCreatingMergeRequest',
     ]),
+    ...mapState('pipelineJobs', ['projectId']),
     ...mapGetters([
       'groupedSummaryText',
       'summaryStatus',
@@ -210,6 +214,7 @@ export default {
       'canDismissVulnerability',
     ]),
     ...mapGetters('sast', ['groupedSastText', 'sastStatusIcon']),
+    ...mapGetters('pipelineJobs', ['hasFuzzingArtifacts', 'fuzzingJobsWithArtifact']),
     securityTab() {
       return `${this.pipelinePath}/security`;
     },
@@ -311,10 +316,16 @@ export default {
     }
 
     const coverageFuzzingDiffEndpoint = gl?.mrWidgetData?.coverage_fuzzing_comparison_path;
+    const pipelineJobsPath = Api.getApiPath(gl?.mrWidgetData?.pipeline_jobs_path, {
+      keys: { ':pipeline_id': gl?.mrWidgetData?.pipeline_id },
+    });
 
     if (coverageFuzzingDiffEndpoint && this.hasCoverageFuzzingReports) {
       this.setCoverageFuzzingDiffEndpoint(coverageFuzzingDiffEndpoint);
       this.fetchCoverageFuzzingDiff();
+      this.setPipelineJobsPath(pipelineJobsPath);
+      this.setProjectId(gl?.mrWidgetData?.project_id);
+      this.fetchPipelineJobs();
     }
   },
   methods: {
@@ -356,6 +367,7 @@ export default {
       setSastDiffEndpoint: 'setDiffEndpoint',
       fetchSastDiff: 'fetchDiff',
     }),
+    ...mapActions('pipelineJobs', ['fetchPipelineJobs', 'setPipelineJobsPath', 'setProjectId']),
   },
   summarySlots: ['success', 'error', 'loading'],
 };
@@ -555,6 +567,12 @@ export default {
             <template #summary>
               <security-summary :message="groupedCoverageFuzzingText" />
             </template>
+            <fuzzing-artifacts-download
+              v-if="hasFuzzingArtifacts"
+              :jobs="fuzzingJobsWithArtifact"
+              :project-id="projectId"
+              :has-label="false"
+            />
           </summary-row>
 
           <grouped-issues-list

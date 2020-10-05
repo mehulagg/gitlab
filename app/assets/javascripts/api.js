@@ -709,6 +709,44 @@ const Api = {
   buildUrl(url) {
     return joinPaths(gon.relative_url_root || '', url.replace(':version', gon.api_version));
   },
+  /**
+   * Generates a dynamic route URL based off a server provided stubbed URL
+   *
+   * Example:
+   *
+   * User provides string from
+   *
+   * expose_path(api_v4_projects_pipelines_jobs_fuzing_artifacts_path(id: project.id, job_ref: ':job_ref'))
+   *
+   * User calls:
+   *
+   *  return getApiPath(this.fuzzingArtifactsPath, {
+   *   keys: { ':job_ref': job.ref },
+   *   params: {job: job.name}
+   *  }
+   *
+   * Output is:
+   *
+   * https://gitlab.com/api/v4/projects/19413496/jobs/artifacts/refs/merge-requests/5/head/download?job=my_fuzz_target
+   *
+   * @param {String} path The stubbed url
+   * @param {Object} keys The rails ID to replace
+   * @param {Object} params The url query params
+   * @returns {String} The dynamically generated URL
+   */
+  getApiPath(path, { keys, params }) {
+    let outputPath = path;
+    Object.entries(keys).forEach(([key, value]) => {
+      outputPath = outputPath.replace(key, value);
+    });
+    return params
+      ? `${outputPath 
+          }?${ 
+          Object.keys(params)
+            .map(key => `${key  }=${  params[key]}`)
+            .join('&')}`
+      : outputPath;
+  },
 };
 
 export default Api;
