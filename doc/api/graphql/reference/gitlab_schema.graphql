@@ -6524,6 +6524,11 @@ type EpicIssue implements CurrentUserTodos & Noteable {
   severity: IssuableSeverity
 
   """
+  Timestamp of when the incident SLA expires
+  """
+  slaDueAt: Time
+
+  """
   State of the issue
   """
   state: IssueState!
@@ -8588,6 +8593,11 @@ type Issue implements CurrentUserTodos & Noteable {
   Severity level of the incident
   """
   severity: IssuableSeverity
+
+  """
+  Timestamp of when the incident SLA expires
+  """
+  slaDueAt: Time
 
   """
   State of the issue
