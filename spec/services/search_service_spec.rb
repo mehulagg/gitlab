@@ -14,9 +14,9 @@ RSpec.describe SearchService do
 
   let_it_be(:inaccessible_project) { create(:project, :repository, :private, name: 'inaccessible_project') }
 
-  let(:snippet) { create(:snippet, author: user) }
-  let(:group_project) { create(:project, group: accessible_group, name: 'group_project') }
-  let(:public_project) { create(:project, :public, name: 'public_project') }
+  let_it_be(:snippet) { create(:snippet, author: user) }
+  let_it_be(:group_project) { create(:project, group: accessible_group, name: 'group_project') }
+  let_it_be(:public_project) { create(:project, :public, name: 'public_project') }
 
   let(:per_page) { described_class::DEFAULT_PER_PAGE }
 
@@ -520,6 +520,42 @@ RSpec.describe SearchService do
           # Users are always visible to everyone
           expect(result).to contain_exactly(user, other_user)
         end
+      end
+    end
+  end
+
+  describe '#single_commit_result?' do
+    let(:search) { accessible_project.commit.sha }
+    let(:scope) { 'issues' }
+    let(:search_service) { described_class.new(user, project_id: project_id, search: search, scope: scope) }
+
+    subject { search_service.single_commit_result? }
+
+    context 'when project_id not present' do
+      let(:project_id) { nil }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when project_id present' do
+      let(:project_id) { accessible_project.id }
+
+      it { is_expected.to eq(true) }
+
+      context 'but more than one commit found' do
+        before do
+          allow(search_service.search_results).to receive(:commits_count).and_return(2)
+        end
+
+        it { is_expected.to eq(false) }
+      end
+
+      context 'but other scopes returned results' do
+        before do
+          allow(search_service.search_results).to receive(:limited_milestones_count).and_return(1)
+        end
+
+        it { is_expected.to eq(false) }
       end
     end
   end

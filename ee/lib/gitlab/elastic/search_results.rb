@@ -111,10 +111,6 @@ module Gitlab
       alias_method :limited_merge_requests_count, :merge_requests_count
       alias_method :limited_milestones_count, :milestones_count
 
-      def single_commit_result?
-        false
-      end
-
       def self.parse_search_result(result, project)
         ref = result["_source"]["blob"]["commit_sha"]
         path = result["_source"]["blob"]["path"]

@@ -103,11 +103,18 @@ class SearchController < ApplicationController
   end
 
   def check_single_commit_result
-    if @search_results.single_commit_result?
-      only_commit = @search_results.objects('commits').first
+    return false if params[:force_search_results]
+
+    if @search_service.single_commit_result?
+      # get single commit from results after redaction
+      only_commit = search_service.single_commit_result
+      return false unless only_commit.present?
+
       query = params[:search].strip.downcase
       found_by_commit_sha = Commit.valid_hash?(query) && only_commit.sha.start_with?(query)
 
+      link = search_path(safe_params.merge(force_search_results: true))
+      flash[:notice] = _("You've been redirected to the only result. Head back to <a href=\"%{link}\"><u>search results</u></a>.").html_safe % { link: link }
       redirect_to project_commit_path(@project, only_commit) if found_by_commit_sha
     end
   end

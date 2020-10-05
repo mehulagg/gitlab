@@ -65,6 +65,20 @@ class SearchService
     @search_objects ||= redact_unauthorized_results(search_results.objects(scope, page: params[:page], per_page: per_page, preload_method: preload_method))
   end
 
+  def single_commit_result?
+    return false unless project.present?
+    return false if search_results.commits_count != 1
+
+    counts = %i(limited_milestones_count limited_notes_count
+                limited_merge_requests_count limited_issues_count
+                limited_blobs_count wiki_blobs_count)
+    counts.all? { |count_method| search_results.public_send(count_method) == 0 } # rubocop:disable GitlabSecurity/PublicSend
+  end
+
+  def single_commit_result
+    redact_unauthorized_results(@search_results.objects('commits')).first
+  end
+
   private
 
   def per_page
