@@ -76,6 +76,7 @@ Are there any other stages or teams involved that need to be kept in the loop?
 - [ ] Enable on GitLab.com by running chatops command in `#production`
 - [ ] Cross post chatops slack command to `#support_gitlab-com` ([more guidance when this is necessary in the dev docs](https://docs.gitlab.com/ee/development/feature_flags/controls.html#where-to-run-commands)) and in your team channel
 - [ ] Announce on the issue that the flag has been enabled
+- [ ] Make the feature flag enabled by default
 
 
 **Cleanup**
