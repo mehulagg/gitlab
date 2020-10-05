@@ -4,20 +4,20 @@ require 'spec_helper'
 
 RSpec.describe OperationsHelper, :routing do
   let_it_be_with_refind(:project) { create(:project, :private) }
+  let_it_be(:user) { create(:user) }
 
   before do
     helper.instance_variable_set(:@project, project)
+    allow(helper).to receive(:current_user) { user }
   end
 
   describe '#status_page_settings_data' do
-    let_it_be(:user) { create(:user) }
     let_it_be(:status_page_setting) { project.build_status_page_setting }
 
     subject { helper.status_page_settings_data }
 
     before do
       allow(helper).to receive(:status_page_setting) { status_page_setting }
-      allow(helper).to receive(:current_user) { user }
       allow(helper)
         .to receive(:can?).with(user, :admin_operations, project) { true }
     end
