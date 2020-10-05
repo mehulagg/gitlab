@@ -1,10 +1,10 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
-import * as actions from 'ee/analytics/shared/store/modules/filters/actions';
-import * as types from 'ee/analytics/shared/store/modules/filters/mutation_types';
-import initialState from 'ee/analytics/shared/store/modules/filters/state';
 import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
+import * as actions from '~/vue_shared/components/filtered_search_bar/store/modules/filters/actions';
+import * as types from '~/vue_shared/components/filtered_search_bar/store/modules/filters/mutation_types';
+import initialState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import Api from '~/api';

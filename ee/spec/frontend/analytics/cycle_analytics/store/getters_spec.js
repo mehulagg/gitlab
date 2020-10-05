@@ -1,5 +1,14 @@
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import {
+  filterMilestones,
+  filterUsers,
+  filterLabels,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/mock_data';
+import {
+  getFilterParams,
+  getFilterValues,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/test_helper';
+import {
   startDate,
   endDate,
   allowedStages,
@@ -8,12 +17,6 @@ import {
   issueStage,
   stageMedians,
 } from '../mock_data';
-import {
-  filterMilestones,
-  filterUsers,
-  filterLabels,
-} from '../../shared/store/modules/filters/mock_data';
-import { getFilterParams, getFilterValues } from '../../shared/store/modules/filters/test_helper';
 
 let state = null;
 

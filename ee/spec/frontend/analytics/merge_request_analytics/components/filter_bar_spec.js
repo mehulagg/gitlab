@@ -4,20 +4,23 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import storeConfig from 'ee/analytics/merge_request_analytics/store';
 import FilterBar from 'ee/analytics/merge_request_analytics/components/filter_bar.vue';
-import initialFiltersState from 'ee/analytics/shared/store/modules/filters/state';
 import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
+import {
+  filterMilestones,
+  filterLabels,
+  filterUsers,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/mock_data';
+import {
+  getFilterParams,
+  getFilterValues,
+} from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/test_helper';
+import initialFiltersState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
 import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
 import { ITEM_TYPE } from '~/groups/constants';
-import {
-  filterMilestones,
-  filterLabels,
-  filterUsers,
-} from '../../shared/store/modules/filters/mock_data';
-import { getFilterParams, getFilterValues } from '../../shared/store/modules/filters/test_helper';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

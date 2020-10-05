@@ -1,8 +1,8 @@
 import { get } from 'lodash';
-import initialState from 'ee/analytics/shared/store/modules/filters/state';
-import mutations from 'ee/analytics/shared/store/modules/filters/mutations';
-import * as types from 'ee/analytics/shared/store/modules/filters/mutation_types';
 import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
+import initialState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
+import mutations from '~/vue_shared/components/filtered_search_bar/store/modules/filters/mutations';
+import * as types from '~/vue_shared/components/filtered_search_bar/store/modules/filters/mutation_types';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { filterMilestones, filterUsers, filterLabels } from './mock_data';
 
