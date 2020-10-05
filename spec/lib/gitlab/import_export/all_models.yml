@@ -29,6 +29,7 @@ issues:
 - merge_requests_closing_issues
 - metrics
 - timelogs
+- incident_sla
 - issuable_severity
 - issue_assignees
 - closed_by
