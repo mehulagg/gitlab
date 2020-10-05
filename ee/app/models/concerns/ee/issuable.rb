@@ -20,5 +20,11 @@ module EE
     def weight_available?
       supports_weight? && project&.feature_available?(:issue_weights)
     end
+
+    def sla_due_at
+      return unless incident?
+
+      incident_sla&.due_at
+    end
   end
 end
