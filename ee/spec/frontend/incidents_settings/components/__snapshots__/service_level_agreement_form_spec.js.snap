@@ -4,7 +4,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
 <gl-tab-stub
   title="Incident Settings"
 >
-  <form
+  <gl-form-stub
     class="gl-pt-3"
   >
     <p
@@ -36,13 +36,13 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
     <gl-form-group-stub
       invalid-feedback=""
       label="Time limit"
-      label-for="sla-time"
+      label-for="sla-duration"
     >
       <div
         class="gl-display-flex gl-flex-direction-row"
       >
         <gl-form-input-stub
-          id="sla-time"
+          id="sla-duration"
           number=""
           size="xs"
           trim=""
@@ -71,6 +71,6 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
       Save changes
     
     </gl-button-stub>
-  </form>
+  </gl-form-stub>
 </gl-tab-stub>
 `;
