@@ -6,7 +6,6 @@ import {
   GlFormInput,
   GlFormSelect,
   GlFormText,
-  GlIcon,
   GlTab,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
@@ -29,10 +28,7 @@ export default {
     description: s__(`IncidentSettings|You may choose to introduce a countdown timer in incident issues
     to better track Service Level Aggreements (SLAs). The timer is automatically started
     when the incident is created, and sets a time limit for the incident to be resolved
-    in. When activated, "time to SLA" countdown will appear on all incidents and it will
-    automatically start counting down as soon as the issue is created. Should the time
-    limit be exceeded, a system note and a label will be added to the issue as a note
-    that the incident was not resolved within the time allotted.`),
+    in. When activated, "time to SLA" countdown will appear on all new incidents.`),
   },
   units: Object.values(units),
   components: {
@@ -42,7 +38,6 @@ export default {
     GlFormInput,
     GlFormSelect,
     GlFormText,
-    GlIcon,
     GlTab,
   },
   inject: ['service', 'serviceLevelAgreementSettings'],
@@ -151,23 +146,9 @@ export default {
           />
         </div>
       </gl-form-group>
-      <gl-button
-        ref="submitBtn"
-        variant="success"
-        type="submit"
-        :disabled="!isValid || loading"
-        :loading="loading"
-        class="js-no-auto-disable"
-      >
+      <gl-button variant="success" type="submit" :disabled="!isValid || loading" :loading="loading">
         {{ __('Save changes') }}
       </gl-button>
-      <!-- TODO: clean up classes -->
-      <gl-icon
-        v-show="success"
-        class="gl-ml-3 gl-text-green-500 gl-vertical-align-middle!"
-        :aria-label="__('Saved successfully')"
-        name="check-circle"
-      />
     </form>
   </gl-tab>
 </template>
