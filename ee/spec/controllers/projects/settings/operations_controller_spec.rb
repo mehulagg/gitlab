@@ -376,7 +376,7 @@ RSpec.describe Projects::Settings::OperationsController do
 
         context 'with existing incident management setting' do
           before do
-            update_project(project, incident_management_params: params)
+            create(:project_incident_management_setting, project: project)
           end
 
           it { is_expected.to be_a(IncidentManagement::ProjectIncidentManagementSetting) }
