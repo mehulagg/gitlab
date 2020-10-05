@@ -1911,7 +1911,7 @@ undesired behavior could result if you don't [also use `only:merge_requests`](#u
 
 You can also use glob patterns to match multiple files in either the root directory
 of the repository, or in _any_ directory within the repository, but they must be wrapped
-in double quotes or GitLab fails to parse the `.gitlab-ci.yml`. For example:
+in double quotes or GitLab can't parse the `.gitlab-ci.yml`. For example:
 
 ```yaml
 test:
