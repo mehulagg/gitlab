@@ -15,7 +15,7 @@ to use this endpoint.
 
 ## Configuration
 ### Generic HTTP Endpoint
-Enabling the Generic HTTP Endpoint, creates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
+Enabling the Generic HTTP Endpoint creates a unique HTTP endpoint that can receive alert payloads in JSON format. You can always
 [customize the payload](#customizing-the-payload) to your liking.
 
 You will need to activate the endpoint and obtain credentials to set up this integration:
