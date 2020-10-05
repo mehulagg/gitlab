@@ -1,3 +1,10 @@
+---
+type: reference, howto
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # SCIM API (INTERNAL ONLY) **(SILVER ONLY)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in [GitLab Silver](https://about.gitlab.com/pricing/) 11.10.
