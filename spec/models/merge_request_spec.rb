@@ -4211,14 +4211,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
         end
       end
     end
-
-    context 'merge request cannot be merged' do
-      it 'returns false' do
-        subject.mark_as_unchecked!
-
-        expect(subject.diffable_merge_ref?).to eq(false)
-      end
-    end
   end
 
   describe '#predefined_variables' do
