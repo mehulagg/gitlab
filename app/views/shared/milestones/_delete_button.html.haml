@@ -4,8 +4,9 @@
   milestone_title: markdown_field(@milestone, :title),
   milestone_url: milestone_url,
   milestone_issue_count: @milestone.issues.count,
-  milestone_merge_request_count: @milestone.merge_requests.count } }
+  milestone_merge_request_count: @milestone.merge_requests.count },
+  disabled: true }
   = _('Delete')
   .spinner.js-loading-icon.hidden
 
-#delete-milestone-modal
+#js-delete-milestone-modal

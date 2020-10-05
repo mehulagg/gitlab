@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
-import deleteMilestoneModal from './components/delete_milestone_modal.vue';
+import DeleteMilestoneModal from './components/delete_milestone_modal.vue';
 import eventHub from './event_hub';
 
 export default () => {
@@ -30,10 +30,7 @@ export default () => {
   };
 
   return new Vue({
-    el: '#delete-milestone-modal',
-    components: {
-      deleteMilestoneModal,
-    },
+    el: '#js-delete-milestone-modal',
     data() {
       return {
         modalProps: {
@@ -47,24 +44,21 @@ export default () => {
     },
     mounted() {
       eventHub.$on('deleteMilestoneModal.props', this.setModalProps);
-      deleteMilestoneButtons.forEach(button => {
+        deleteMilestoneButtons.forEach(button => {
         button.removeAttribute('disabled');
         button.addEventListener('click', () => {
           this.$root.$emit('bv::show::modal', 'delete-milestone-modal');
-          const modalProps = {
+          eventHub.$once('deleteMilestoneModal.requestStarted', onRequestStarted);
+
+          this.setModalProps({
             milestoneId: parseInt(button.dataset.milestoneId, 10),
             milestoneTitle: button.dataset.milestoneTitle,
             milestoneUrl: button.dataset.milestoneUrl,
             issueCount: parseInt(button.dataset.milestoneIssueCount, 10),
             mergeRequestCount: parseInt(button.dataset.milestoneMergeRequestCount, 10),
-          };
-          eventHub.$once('deleteMilestoneModal.requestStarted', onRequestStarted);
-          eventHub.$emit('deleteMilestoneModal.props', modalProps);
+          });
         });
       });
-    },
-    beforeDestroy() {
-      eventHub.$off('deleteMilestoneModal.props', this.setModalProps);
     },
     methods: {
       setModalProps(modalProps) {
@@ -72,7 +66,7 @@ export default () => {
       },
     },
     render(createElement) {
-      return createElement(deleteMilestoneModal, {
+      return createElement(DeleteMilestoneModal, {
         props: this.modalProps,
       });
     },
