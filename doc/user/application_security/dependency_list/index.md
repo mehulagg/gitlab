@@ -46,7 +46,9 @@ vulnerability, its severity and description then appears below it.
 
 ### Dependency Paths
 
-Dependency list shows the path between the dependency and a top-level dependency it's connected to, if any. There are possibly many paths connecting a transient dependency to top-level dependencies, but the UI only shows one of the shortest paths.
+A dependency list shows the path between the dependency and a top-level dependency it's connected
+to, if any. There are possibly many paths connecting a transient dependency to top-level
+dependencies, but the UI only shows one of the shortest paths.
 
 Dependency Paths are supported for the following package managers:
 
