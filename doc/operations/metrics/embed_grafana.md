@@ -17,7 +17,7 @@ The **Direct link rendered image** sharing dialog within Grafana provides the li
 
 ![Grafana Direct Linked Rendered Image](img/grafana_live_embed.png)
 
-NOTE: **Note:**
+NOTE:
 For this embed to display correctly, the Grafana instance must be available to the
 target user, either as a public dashboard or on the same network.
 

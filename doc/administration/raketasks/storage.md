@@ -68,7 +68,7 @@ To have a summary and then a list of projects and their attachments using hashed
 
 ## Migrate to hashed storage
 
-NOTE: **Note:**
+NOTE:
 In GitLab 13.0, [hashed storage](../repository_storage_types.md#hashed-storage)
 is enabled by default and the legacy storage is deprecated.
 Support for legacy storage will be removed in GitLab 14.0. If you're on GitLab
@@ -109,7 +109,7 @@ If you find it necessary, you can run this migration script again to schedule mi
 
 Any error or warning will be logged in Sidekiq's log file.
 
-NOTE: **Note:**
+NOTE:
 If [Geo](../geo/index.md) is enabled, each project that is successfully migrated
 generates an event to replicate the changes on any **secondary** nodes.
 

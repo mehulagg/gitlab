@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10242) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
 
-NOTE: **Note:**
+NOTE:
 The former Vulnerabilities API was renamed to Vulnerability Findings API
 and its documentation was moved to [a different location](vulnerability_findings.md).
 This document now describes the new Vulnerabilities API that provides access to

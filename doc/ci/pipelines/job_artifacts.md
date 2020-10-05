@@ -61,12 +61,12 @@ The `artifacts:reports` keyword is used for collecting test reports, code qualit
 reports, and security reports from jobs. It also exposes these reports in GitLab's
 UI (merge requests, pipeline views, and security dashboards).
 
-NOTE: **Note:**
+NOTE:
 The test reports are collected regardless of the job results (success or failure).
 You can use [`artifacts:expire_in`](../yaml/README.md#artifactsexpire_in) to set up an expiration
 date for their artifacts.
 
-NOTE: **Note:**
+NOTE:
 If you also want the ability to browse the report output files, include the
 [`artifacts:paths`](../yaml/README.md#artifactspaths) keyword.
 
@@ -96,7 +96,7 @@ rspec:
 
 The collected Unit test reports upload to GitLab as an artifact and display in merge requests.
 
-NOTE: **Note:**
+NOTE:
 If the JUnit tool you use exports to multiple XML files, specify
 multiple test report paths within a single job to
 concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml`),
@@ -338,7 +338,7 @@ in the GitLab UI to do this:
 It's possible to download the latest artifacts of a job via a well known URL
 so you can use it for scripting purposes.
 
-NOTE: **Note:**
+NOTE:
 The latest artifacts are created by jobs in the **most recent** successful pipeline
 for the specific ref. If you run two types of pipelines for the same ref, timing determines the latest
 artifact. For example, if a merge request creates a branch pipeline at the same time as a scheduled pipeline, the pipeline that completed most recently creates the latest artifact.

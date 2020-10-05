@@ -1,6 +1,6 @@
 # Jenkins CI service **(STARTER)**
 
-NOTE: **Note:**
+NOTE:
 This documentation focuses only on how to **configure** a Jenkins *integration* with
 GitLab. Learn how to **migrate** from Jenkins to GitLab CI/CD in our
 [Migrating from Jenkins](../ci/migration/jenkins.md) documentation.

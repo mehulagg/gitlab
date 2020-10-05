@@ -40,7 +40,7 @@ and blocked, go to **Admin Area > Overview > Dashboard** and select **Users stat
 in the **Users** section. For more details, see
 [Users statistics](../../user/admin_area/index.md#users-statistics).
 
-NOTE: **Note:**
+NOTE:
 If you have LDAP integration enabled, anyone in the configured domain can sign up for a GitLab account. This can result in an unexpected bill at time of renewal. Consider [disabling new signups](../../user/admin_area/settings/sign_up_restrictions.md) and managing new users manually instead.
 
 ## Obtain a subscription

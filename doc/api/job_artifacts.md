@@ -259,7 +259,7 @@ Example request:
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/jobs/1/artifacts"
 ```
 
-NOTE: **Note:**
+NOTE:
 At least Maintainer role is required to delete artifacts.
 
 If the artifacts were deleted successfully, a response with status `204 No Content` is returned.

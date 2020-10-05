@@ -45,7 +45,7 @@ in order to simplify administration.
 
 ### Jira DVCS configuration
 
-NOTE: **Note:**
+NOTE:
 If you're using GitLab.com and Jira Cloud, we recommend you use the [GitLab for Jira app](#gitlab-for-jira-app), unless you have a specific need for the DVCS Connector.
 
 - If you are using self-managed GitLab, make sure your GitLab instance is accessible by Jira.
@@ -70,7 +70,7 @@ create and use a single-purpose `jira` user in GitLab.
    replacing `<gitlab.example.com>` with your GitLab instance domain. For example, if you are using GitLab.com,
    this would be `https://gitlab.com/login/oauth/callback`.
 
-   NOTE: **Note:**
+   NOTE:
    If using a GitLab version earlier than 11.3, the `Redirect URI` must be
    `https://<gitlab.example.com>/-/jira/login/oauth/callback`. If you want Jira
    to have access to all projects, GitLab recommends that an administrator create the
@@ -85,7 +85,7 @@ create and use a single-purpose `jira` user in GitLab.
 
 #### Jira DVCS Connector setup
 
-NOTE: **Note:**
+NOTE:
 If you're using GitLab.com and Jira Cloud, we recommend you use the [GitLab for Jira app](#gitlab-for-jira-app), unless you have a specific need for the DVCS Connector.
 
 1. Ensure you have completed the [GitLab configuration](#gitlab-account-configuration-for-dvcs).
@@ -106,7 +106,7 @@ If you're using GitLab.com and Jira Cloud, we recommend you use the [GitLab for 
    replacing `<gitlab.example.com>` with your GitLab instance domain. For example, if you are using GitLab.com,
    this would be `https://gitlab.com/`.
 
-   NOTE: **Note:**
+   NOTE:
    If using a GitLab version earlier than 11.3 the **Host URL** value should be `https://<gitlab.example.com>/-/jira`
 
    For the **Client ID** field, use the **Application ID** value from the previous section.
@@ -238,7 +238,7 @@ For a walkthrough of the integration with GitLab for Jira, watch [Configure GitL
    **Link namespace to Jira**. The user setting up *GitLab for Jira* must have
    *Maintainer* access to the GitLab namespace.
 
-NOTE: **Note:**
+NOTE:
 The GitLab user only needs access when adding a new namespace. For syncing with Jira, we do not depend on the user's token.
 
    ![Configure namespace on GitLab Jira App](img/jira_dev_panel_setup_com_3.png)

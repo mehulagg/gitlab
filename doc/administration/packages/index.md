@@ -28,7 +28,7 @@ to GitLab. This [development documentation](../../development/packages.md) will 
 
 ## Enabling the Packages feature
 
-NOTE: **Note:**
+NOTE:
 After the Packages feature is enabled, the repositories are available
 for all new projects by default. To enable it for existing projects, users will
 have to explicitly do so in the project's settings.
@@ -99,7 +99,7 @@ store packages.
 
 [Read more about using object storage with GitLab](../object_storage.md).
 
-NOTE: **Note:**
+NOTE:
 We recommend using the [consolidated object storage settings](../object_storage.md#consolidated-object-storage-configuration). The following instructions apply to the original config format.
 
 **Omnibus GitLab installations**

@@ -13,7 +13,7 @@ cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:list_repos RAILS_ENV=production
 ```
 
-NOTE: **Note:**
+NOTE:
 The results use the default ordering of the GitLab Rails application.
 
 ## Limit search results

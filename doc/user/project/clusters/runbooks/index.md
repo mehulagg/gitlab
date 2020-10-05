@@ -117,7 +117,7 @@ the components outlined above and the pre-loaded demo runbook.
 
 1. To configure the operation of a runbook, create and configure variables:
 
-   NOTE: **Note:**
+   NOTE:
    For this example, we are using the **Run SQL queries in Notebook** section in the
    sample runbook to query a PostgreSQL database. The first four lines of the following
    code block define the variables that are required for this query to function:

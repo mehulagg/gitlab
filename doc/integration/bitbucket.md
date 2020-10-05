@@ -1,6 +1,6 @@
 # Integrate your GitLab server with Bitbucket Cloud
 
-NOTE: **Note:**
+NOTE:
 Starting from GitLab 11.4, OmniAuth is enabled by default. If you're using an
 earlier version, you'll need to explicitly enable it.
 
@@ -21,7 +21,7 @@ Bitbucket.org.
 
 ## Bitbucket OmniAuth provider
 
-NOTE: **Note:**
+NOTE:
 GitLab 8.15 significantly simplified the way to integrate Bitbucket.org with
 GitLab. You are encouraged to upgrade your GitLab instance if you haven't done so
 already. If you're using GitLab 8.14 or below, [use the previous integration

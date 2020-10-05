@@ -410,7 +410,7 @@ otherwise the external file is not included.
 
 The `include` methods do not support [variable expansion](../variables/where_variables_can_be_used.md#variables-usage).
 
-NOTE: **Note:**
+NOTE:
 `.gitlab-ci.yml` configuration included by all methods is evaluated at pipeline creation.
 The configuration is a snapshot in time and persisted in the database. Any changes to
 referenced `.gitlab-ci.yml` configuration is not reflected in GitLab until the next pipeline is created.
@@ -425,7 +425,7 @@ TIP: **Tip:**
 Use merging to customize and override included CI/CD configurations with local
 definitions. Local definitions in `.gitlab-ci.yml` override included definitions.
 
-NOTE: **Note:**
+NOTE:
 Using [YAML anchors](#anchors) across different YAML files sourced by `include` is not
 supported. You must only refer to anchors in the same file. Instead
 of using YAML anchors, you can use the [`extends` keyword](#extends).
@@ -442,7 +442,7 @@ sure that both `.gitlab-ci.yml` and the local file are on the same branch.
 All [nested includes](#nested-includes) are executed in the scope of the same project,
 so it's possible to use local, project, remote, or template includes.
 
-NOTE: **Note:**
+NOTE:
 Including local files through Git submodules paths is not supported.
 
 Example:
@@ -632,7 +632,7 @@ job:
     - bundle exec rspec
 ```
 
-NOTE: **Note:**
+NOTE:
 Sometimes, `script` commands must be wrapped in single or double quotes.
 For example, commands that contain a colon (`:`) must be wrapped in quotes so
 that the YAML parser knows to interpret the whole thing as a string rather than
@@ -923,7 +923,7 @@ For example, the following are equivalent configuration:
     - b
   ```
 
-NOTE: **Note:**
+NOTE:
 A pipeline is not created if all jobs are in `.pre` or `.post` stages.
 
 ### `extends`
@@ -1494,7 +1494,7 @@ job:
         - spec/**.rb
 ```
 
-NOTE: **Note:**
+NOTE:
 For performance reasons, using `exists` with patterns is limited to 10000
 checks. After the 10000th check, rules with patterned globs always match.
 
@@ -1561,14 +1561,14 @@ job1:
     if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
 
-NOTE: **Note:**
+NOTE:
 In GitLab 13.2 and older, the order of operations when mixing `||` and `&&` in a single rule may not have executed
 in the expected order. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/230938)
 in GitLab 13.3.
 
 ### `only`/`except` (basic)
 
-NOTE: **Note:**
+NOTE:
 The [`rules`](#rules) syntax is an improved, more powerful solution for defining
 when jobs should run or not. Consider using `rules` instead of `only/except` to get
 the most out of your pipelines.
@@ -2102,7 +2102,7 @@ can choose a custom limit. For example, to set the limit to 100:
 Plan.default.actual_limits.update!(ci_needs_size_limit: 100)
 ```
 
-NOTE: **Note:**
+NOTE:
 To disable the ability to use DAG, set the limit to `0`.
 
 #### Artifact downloads with `needs`
@@ -2214,7 +2214,7 @@ build_job:
       artifacts: true
 ```
 
-NOTE: **Note:**
+NOTE:
 Downloading artifacts from jobs that are run in [`parallel:`](#parallel) is not supported.
 
 ### `tags`
@@ -2389,7 +2389,7 @@ Optional manual actions have `allow_failure: true` set by default and their
 Statuses don't contribute to the overall pipeline status. So, if a manual
 action fails, the pipeline will eventually succeed.
 
-NOTE: **Note:**
+NOTE:
 When using [`rules:`](#rules), `allow_failure` defaults to `false`, including for manual jobs.
 
 Manual actions are considered to be write actions, so permissions for
@@ -2400,7 +2400,7 @@ have the ability to merge to this branch. It's possible to use protected environ
 to more strictly [protect manual deployments](#protecting-manual-jobs) from being
 run by unauthorized users.
 
-NOTE: **Note:**
+NOTE:
 Using `when:manual` and `trigger` together results in the error `jobs:#{job-name} when
 should be on_success, on_failure or always`, because `when:manual` prevents triggers
 being used.
@@ -2622,7 +2622,7 @@ Also in the example, `GIT_STRATEGY` is set to `none` so that GitLab Runner wonâ€
 try to check out the code after the branch is deleted when the `stop_review_app`
 job is [automatically triggered](../environments/index.md#automatically-stopping-an-environment).
 
-NOTE: **Note:**
+NOTE:
 The above example overwrites global variables. If your stop environment job depends
 on global variables, you can use [anchor variables](#yaml-anchors-for-variables) when setting the `GIT_STRATEGY`
 to change it without overriding the global variables.
@@ -2688,7 +2688,7 @@ environment, using the `production`
 For more information, see
 [Available settings for `kubernetes`](../environments/index.md#configuring-kubernetes-deployments).
 
-NOTE: **Note:**
+NOTE:
 Kubernetes configuration is not supported for Kubernetes clusters
 that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
@@ -2808,7 +2808,7 @@ The `cache:key` variable can use any of the
 set, is just literal `default`, which means everything is shared between
 pipelines and jobs by default, starting from GitLab 9.0.
 
-NOTE: **Note:**
+NOTE:
 The `cache:key` variable can't contain the `/` character, or the equivalent
 URI-encoded `%2F`; a value made only of dots (`.`, `%2E`) is also forbidden.
 
@@ -3127,7 +3127,7 @@ useful when you want to download the archive from GitLab. The `artifacts:name`
 variable can make use of any of the [predefined variables](../variables/README.md).
 The default name is `artifacts`, which becomes `artifacts.zip` when you download it.
 
-NOTE: **Note:**
+NOTE:
 If your branch-name contains forward slashes
 (for example `feature/my-feature`) it's advised to use `$CI_COMMIT_REF_SLUG`
 instead of `$CI_COMMIT_REF_NAME` for proper naming of the artifact.
@@ -3203,7 +3203,7 @@ job:
 `artifacts:untracked` is used to add all Git untracked files as artifacts (along
 to the paths defined in `artifacts:paths`).
 
-NOTE: **Note:**
+NOTE:
 `artifacts:untracked` ignores configuration in the repository's `.gitignore` file.
 
 Send all Git untracked files:
@@ -3294,7 +3294,7 @@ job:
     expire_in: 1 week
 ```
 
-NOTE: **Note:**
+NOTE:
 The latest artifacts for refs are locked against deletion, and kept regardless of
 the expiry time. [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/16267)
 GitLab 13.0 behind a disabled feature flag, and [made the default behavior](https://gitlab.com/gitlab-org/gitlab/-/issues/229936)
@@ -3390,7 +3390,7 @@ If the artifacts of the job that is set as a dependency have been
 [erased](../pipelines/job_artifacts.md#erasing-artifacts), then
 the dependent job will fail.
 
-NOTE: **Note:**
+NOTE:
 You can ask your administrator to
 [flip this switch](../../administration/job_artifacts.md#validation-for-dependencies)
 and bring back the old behavior.
@@ -3631,7 +3631,7 @@ You can use this keyword to create two different types of downstream pipelines:
 see which job triggered a downstream pipeline by hovering your mouse cursor over
 the downstream pipeline job in the [pipeline graph](../pipelines/index.md#visualize-pipelines).
 
-NOTE: **Note:**
+NOTE:
 Using a `trigger` with `when:manual` together results in the error `jobs:#{job-name}
 when should be on_success, on_failure or always`, because `when:manual` prevents
 triggers being used.
@@ -3814,7 +3814,7 @@ In the example above, a new pipeline run will cause an existing running pipeline
 - Canceled, if only `step-1` is running or pending.
 - Not canceled, once `step-2` starts running.
 
-NOTE: **Note:**
+NOTE:
 Once an uninterruptible job is running, the pipeline will never be canceled, regardless of the final job's state.
 
 ### `resource_group`
@@ -3850,7 +3850,7 @@ There can be multiple `resource_group`s defined per environment. A good use case
 is when deploying to physical devices. You may have more than one physical device, and each
 one can be deployed to, but there can be only one deployment per device at any given time.
 
-NOTE: **Note:**
+NOTE:
 This key can only contain letters, digits, `-`, `_`, `/`, `$`, `{`, `}`, `.`, and spaces.
 It can't start or end with `/`.
 
@@ -3995,7 +3995,7 @@ tags. These options cannot be used together, so choose one:
 - To create a release automatically when commits are pushed or merged to the default branch,
   using a new Git tag that is defined with variables:
 
-  NOTE: **Note:**
+  NOTE:
   Environment variables set in `before_script` or `script` are not available for expanding
   in the same job. Read more about
   [potentially making variables available for expanding](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/6400).
@@ -4132,7 +4132,7 @@ Read more on [GitLab Pages user documentation](../../user/project/pages/index.md
 
 > Introduced in GitLab Runner v0.5.0.
 
-NOTE: **Note:**
+NOTE:
 Integers (as well as strings) are legal both for variable's name and value.
 Floats are not legal and can't be used.
 
@@ -4207,7 +4207,7 @@ variables:
   GIT_STRATEGY: none
 ```
 
-NOTE: **Note:**
+NOTE:
 `GIT_STRATEGY` is not supported for
 [Kubernetes executor](https://docs.gitlab.com/runner/executors/kubernetes.html),
 but may be in the future. See the [support Git strategy with Kubernetes executor feature proposal](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3847)
@@ -4373,7 +4373,7 @@ You can set them globally or per-job in the [`variables`](#variables) section.
 
 > Introduced in GitLab 8.9 as an experimental feature.
 
-NOTE: **Note:**
+NOTE:
 As of GitLab 12.0, newly created projects will automatically have a [default `git depth` value of `50`](../pipelines/settings.md#git-shallow-clone).
 
 You can specify the depth of fetching and cloning using `GIT_DEPTH`. This does a
@@ -4381,7 +4381,7 @@ shallow clone of the repository and can significantly speed up cloning for
 repositories with a large number of commits or old, large binaries. The value is
 passed to `git fetch` and `git clone`.
 
-NOTE: **Note:**
+NOTE:
 If you use a depth of 1 and have a queue of jobs or retry
 jobs, jobs may fail.
 
@@ -4408,7 +4408,7 @@ You can set it globally or per-job in the [`variables`](#variables) section.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2211) in GitLab Runner 11.10.
 
-NOTE: **Note:**
+NOTE:
 This can only be used when `custom_build_dir` is enabled in the [runner's
 configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnerscustom_build_dir-section).
 This is the default configuration for `docker` and `kubernetes` executor.
@@ -4633,10 +4633,10 @@ test:mysql:
 
 You can see that the hidden jobs are conveniently used as templates.
 
-NOTE: **Note:**
+NOTE:
 Note that `tags: [dev]` has been overwritten by `tags: [postgres]`.
 
-NOTE: **Note:**
+NOTE:
 You can't use YAML anchors across multiple files when leveraging the [`include`](#include)
 feature. Anchors are only valid within the file they were defined in. Instead
 of using YAML anchors, you can use the [`extends` keyword](#extends).

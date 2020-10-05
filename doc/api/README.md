@@ -227,7 +227,7 @@ To re-enable impersonation, remove this configuration and restart GitLab.
 
 ### Sudo
 
-NOTE: **Note:**
+NOTE:
 Only available to [administrators](../user/permissions.md).
 
 All API requests support performing an API call as if you were another user,
@@ -238,7 +238,7 @@ You need to pass the `sudo` parameter either via query string or a header with a
 the user you want to perform the operation as. If passed as a header, the
 header name must be `Sudo`.
 
-NOTE: **Note:**
+NOTE:
 Usernames are case insensitive.
 
 If a non administrative access token is provided, an error message will
@@ -359,7 +359,7 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 response. They have `rel` set to `prev`/`next`/`first`/`last` and contain the
 relevant URL. Be sure to use these links instead of generating your own URLs.
 
-NOTE: **Note:**
+NOTE:
 For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).
 
 In the cURL example below, we limit the output to 3 items per page (`per_page=3`)
@@ -404,7 +404,7 @@ GitLab also returns the following additional pagination headers:
 | `X-Next-Page`   | The index of the next page                    |
 | `X-Prev-Page`   | The index of the previous page                |
 
-NOTE: **Note:**
+NOTE:
 For GitLab.com users, [some pagination headers may not be returned](../user/gitlab_com/index.md#pagination-response-headers).
 
 ### Keyset-based pagination
@@ -473,7 +473,7 @@ The resulting cURL call for a project with ID `5` and a group ID of `17` is then
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/share/17"
 ```
 
-NOTE: **Note:**
+NOTE:
 Path parameters that are required to be URL-encoded must be followed. If not,
 it will not match an API endpoint and respond with a 404. If there's something
 in front of the API (for example, Apache), ensure that it won't decode the URL-encoded
@@ -490,7 +490,7 @@ For example, `/` is represented by `%2F`:
 GET /api/v4/projects/diaspora%2Fdiaspora
 ```
 
-NOTE: **Note:**
+NOTE:
 A project's **path** is not necessarily the same as its **name**. A
 project's path can be found in the project's URL or in the project's settings
 under **General > Advanced > Change path**.
@@ -579,7 +579,7 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 - `id`: ID that is unique across all projects.
 - `iid`: additional, internal ID that is unique in the scope of a single project.
 
-NOTE: **Note:**
+NOTE:
 The `iid` is displayed in the web UI.
 
 If a resource has the `iid` field and the `id` field, the `iid` field is usually used instead of `id` to fetch the resource.
@@ -589,7 +589,7 @@ For example, suppose a project with `id: 42` has an issue with `id: 46` and `iid
 - A valid API call to retrieve the issue is  `GET /projects/42/issues/5`
 - An invalid API call to retrieve the issue is `GET /projects/42/issues/46`.
 
-NOTE: **Note:**
+NOTE:
 Not all resources with the `iid` field are fetched by `iid`. For guidance on which field to use, see the documentation for the specific resource.
 
 ## Data validation and error reporting

@@ -82,7 +82,7 @@ To make the Unit test report output files browsable, include them with the
 To upload the report even if the job fails (for example if the tests do not pass), use the [`artifacts:when:always`](yaml/README.md#artifactswhen)
 keyword.
 
-NOTE: **Note:**
+NOTE:
 You cannot have multiple tests with the same name and class in your JUnit report format XML file.
 
 ### Ruby example
@@ -144,7 +144,7 @@ java:
       junit: build/test-results/test/**/TEST-*.xml
 ```
 
-NOTE: **Note:**
+NOTE:
 Support for `**` was added in [GitLab Runner 13.0](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2620).
 
 #### Maven

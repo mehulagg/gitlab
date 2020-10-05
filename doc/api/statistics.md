@@ -5,7 +5,7 @@
 List the current statistics of the GitLab instance. You have to be an
 administrator in order to perform this action.
 
-NOTE: **Note:**
+NOTE:
 These statistics are approximate.
 
 ```plaintext

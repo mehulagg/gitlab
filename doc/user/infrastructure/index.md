@@ -82,7 +82,7 @@ local machine, this is a simple way to get started:
        -backend-config="retry_wait_min=5"
    ```
 
-   NOTE: **Note:**
+   NOTE:
    The name of your state can contain only uppercase and lowercase letters,
    decimal digits, hyphens and underscores.
 
@@ -333,7 +333,7 @@ can configure this manually as follows:
      - alias convert_report="jq -r '([.resource_changes[]?.change.actions?]|flatten)|{\"create\":(map(select(.==\"create\"))|length),\"update\":(map(select(.==\"update\"))|length),\"delete\":(map(select(.==\"delete\"))|length)}'"
    ```
 
-   NOTE: **Note:**
+   NOTE:
    In distributions that use Bash (for example, Ubuntu), `alias` statements are not
    expanded in non-interactive mode. If your pipelines fail with the error
    `convert_report: command not found`, alias expansion can be activated explicitly

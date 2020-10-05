@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Distributed Tracing - development guidelines
 
-NOTE: **Note:**
+NOTE:
 Distributed Tracing in GitLab is currently considered **experimental**, as it has not yet been tested at scale on GitLab.com.
 
 GitLab is instrumented for distributed tracing.
@@ -182,7 +182,7 @@ This configuration string uses the Jaeger driver `opentracing://jaeger` with the
 | `sampler` | `probabalistic` | Configures Jaeger to use a probabilistic random sampler. The rate of samples is configured by the `sampler_param` value. |
 | `sampler_param` | `0.01` | Use a ratio of `0.01` to configure the `probabalistic` sampler to randomly sample _1%_ of traces. |
 
-NOTE: **Note:**
+NOTE:
 The same `GITLAB_TRACING` value should to be configured in the environment
 variables for all GitLab processes, including Workhorse, Gitaly, Rails, and Sidekiq.
 

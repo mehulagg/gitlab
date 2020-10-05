@@ -36,7 +36,7 @@ in `.gitlab-ci.yml`.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/28919) in GitLab 12.0.
 
-NOTE: **Note:**
+NOTE:
 As of GitLab 12.0, newly created projects automatically have a default
 `git depth` value of `50`.
 
@@ -171,7 +171,7 @@ Pipeline visibility is determined by:
 - Your current [user access level](../../user/permissions.md).
 - The **Public pipelines** project setting under your project's **Settings > CI/CD > General pipelines**.
 
-NOTE: **Note:**
+NOTE:
 If the project visibility is set to **Private**, the [**Public pipelines** setting has no effect](../enable_or_disable_ci.md#per-project-user-setting).
 
 This also determines the visibility of these related features:
@@ -180,7 +180,7 @@ This also determines the visibility of these related features:
 - Job artifacts
 - The [pipeline security dashboard](../../user/application_security/security_dashboard/index.md#pipeline-security) **(ULTIMATE)**
 
-NOTE: **Note:**
+NOTE:
 Currently, job logs and artifacts are [not yet visible for guest users and non-project members](https://gitlab.com/gitlab-org/gitlab/-/issues/25649).
 
 If **Public pipelines** is enabled (default):

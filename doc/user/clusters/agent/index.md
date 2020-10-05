@@ -73,7 +73,7 @@ The GitLab Kubernetes Agent can only be deployed through our
 have GitLab installed via Helm, please refer to our
 [installation documentation](https://docs.gitlab.com/charts/installation/).
 
-NOTE: **Note:**
+NOTE:
 GitLab plans to include the Agent in the [official Linux Package](https://gitlab.com/gitlab-org/gitlab/-/issues/223060) and on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
 When installing or upgrading the GitLab Helm chart, consider the following Helm 2 example.
@@ -148,7 +148,7 @@ the Agent in subsequent steps. You can create an Agent record either:
   }
   ```
 
-  NOTE: **Note:**
+  NOTE:
   GraphQL only displays the token once, after creating it.
 
   If you are new to using the GitLab GraphQL API, refer to the

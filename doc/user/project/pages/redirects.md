@@ -37,7 +37,7 @@ Redirects are only supported at a basic level, and GitLab Pages doesn't support 
 | Redirect by country or language | **{dotted-circle}** No | `/  /anz     302  Country=au,nz` |
 | Redirect by role | **{dotted-circle}** No | `/admin/*  200!  Role=admin` |
 
-NOTE: **Note:**
+NOTE:
 Supported paths must start with a forward slash `/`.
 
 ## Create redirects
@@ -78,7 +78,7 @@ is ignored because `hello.html` exists:
 /projectname/hello.html /projectname/world.html 302
 ```
 
-NOTE: **Note:**
+NOTE:
 GitLab does not support Netlify's
 [force option](https://docs.netlify.com/routing/redirects/rewrites-proxies/#shadowing)
 to change this behavior.

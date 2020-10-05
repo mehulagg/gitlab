@@ -10,7 +10,7 @@ abstractions in the `Banzai` pipeline: `ReferenceFilter` and `ReferenceParser`.
 This page explains what these are, how they are used, and how you would
 implement a new filter/parser pair.
 
-NOTE: **Note:**
+NOTE:
 Each `ReferenceFilter` must have a corresponding `ReferenceParser`.
 
 It is possible to share reference parsers between filters - if two filters find
@@ -196,6 +196,6 @@ In practice, all reference parsers inherit from [`BaseParser`](https://gitlab.co
   - `#references_relation` an active record relation for objects by ID.
   - `#nodes_user_can_reference(user, nodes)` to filter nodes directly.
 
-NOTE: **Note:**
+NOTE:
 A failure to implement this class for each reference type means that the
 application will raise exceptions during Markdown processing.

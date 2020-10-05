@@ -4,7 +4,7 @@ Uploads represent all user data that may be sent to GitLab as a single file. As 
 
 ## Using local storage
 
-NOTE: **Note:**
+NOTE:
 This is the default configuration
 
 To change the location where the uploads are stored locally, follow the steps
@@ -12,7 +12,7 @@ below.
 
 **In Omnibus installations:**
 
-NOTE: **Note:**
+NOTE:
 For historical reasons, uploads are stored into a base directory, which by default is `uploads/-/system`. It is strongly discouraged to change this configuration option on an existing GitLab installation.
 
 _The uploads are stored by default in `/var/opt/gitlab/gitlab-rails/uploads`._
@@ -57,7 +57,7 @@ This configuration relies on valid AWS credentials to be configured already.
 
 [Read more about using object storage with GitLab](object_storage.md).
 
-NOTE: **Note:**
+NOTE:
 We recommend using the [consolidated object storage settings](object_storage.md#consolidated-object-storage-configuration). The following instructions apply to the original config format.
 
 ## Object Storage Settings
@@ -96,7 +96,7 @@ _The uploads are stored by default in
    }
    ```
 
-   NOTE: **Note:**
+   NOTE:
    If you are using AWS IAM profiles, be sure to omit the AWS access key and secret access key/value pairs.
 
    ```ruby

@@ -66,14 +66,14 @@ source. You must [install it separately](https://www.elastic.co/guide/en/elastic
 Be sure to select your version. Providing detailed information on installing
 Elasticsearch is out of the scope of this document.
 
-NOTE: **Note:**
+NOTE:
 Elasticsearch should be installed on a separate server, whether you install
 it yourself or use a cloud hosted offering like Elastic's [Elasticsearch Service](https://www.elastic.co/elasticsearch/service)
 (available on AWS, GCP, or Azure) or the [Amazon Elasticsearch](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-gsg.html)
 service. Running Elasticsearch on the same server as GitLab is not recommended
 and can cause a degradation in GitLab instance performance.
 
-NOTE: **Note:**
+NOTE:
 **For a single node Elasticsearch cluster the functional cluster health status
 will be yellow** (will never be green) because the primary shard is allocated but
 replicas can not be as there is no other node to which Elasticsearch can assign a
@@ -157,14 +157,14 @@ PREFIX=/usr sudo -E make install
 
 After installation, be sure to [enable Elasticsearch](#enabling-advanced-search).
 
-NOTE: **Note:**
+NOTE:
 If you see an error such as `Permission denied - /home/git/gitlab-elasticsearch-indexer/` while indexing, you
 may need to set the `production -> elasticsearch -> indexer_path` setting in your `gitlab.yml` file to
 `/usr/local/bin/gitlab-elasticsearch-indexer`, which is where the binary is installed.
 
 ## Enabling Advanced Search
 
-NOTE: **Note:**
+NOTE:
 For GitLab instances with more than 50GB repository data you can follow the instructions for [Indexing large
 instances](#indexing-large-instances) below.
 
@@ -173,7 +173,7 @@ To enable Advanced Search, you need to have admin access to GitLab:
 1. Navigate to **Admin Area** (wrench icon), then **Settings > General**
    and expand the **Advanced Search** section.
 
-   NOTE: **Note:**
+   NOTE:
    To see the Advanced Search section, you need an active Starter
    [license](../user/admin_area/license.md).
 
@@ -249,7 +249,7 @@ You can filter the selection dropdown by writing part of the namespace or projec
 
 ![limit namespace filter](img/limit_namespace_filter.png)
 
-NOTE: **Note:**
+NOTE:
 If no namespaces or projects are selected, no Advanced Search indexing will take place.
 
 CAUTION: **Warning:**
@@ -286,7 +286,7 @@ feature to atomically swap between two indices. We'll refer to each index as
 Instead of connecting directly to the `primary` index, we'll setup an index
 alias such as we can change the underlying index at will.
 
-NOTE: **Note:**
+NOTE:
 Any index attached to the production alias is deemed a `primary` and will be
 used by the GitLab Advanced Search integration.
 
@@ -320,7 +320,7 @@ CAUTION: **Caution:**
 It is highly recommended that you take a snapshot of your cluster to ensure
 there is a recovery path if anything goes wrong.
 
-NOTE: **Note:**
+NOTE:
 Due to a technical limitation, there will be a slight downtime because of the
 fact that we need to reclaim the current `primary` index to be used as the alias.
 
@@ -418,7 +418,7 @@ To trigger the re-index from `primary` index:
 
 Under **Admin Area > Settings > General > Advanced Search > Elasticsearch zero-downtime reindexing**, click on **Trigger cluster reindexing**.
 
-NOTE: **Note:**
+NOTE:
 Reindexing can be a lengthy process depending on the size of your Elasticsearch cluster.
 
 CAUTION: **Caution:**
@@ -449,7 +449,7 @@ The following are some available Rake tasks:
 | [`sudo gitlab-rake gitlab:elastic:projects_not_indexed`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)             | Displays which projects are not indexed.                                                                                                                                                  |
 | [`sudo gitlab-rake gitlab:elastic:reindex_cluster`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/tasks/gitlab/elastic.rake)             | Schedules a zero-downtime cluster reindexing task. This feature should be used with an index that was created after GitLab 13.0. |
 
-NOTE: **Note:**
+NOTE:
 The `TARGET_NAME` parameter is optional and will use the default index/alias name from the current `RAILS_ENV` if not set.
 
 ### Environment variables
@@ -551,7 +551,7 @@ Sidekiq processes](../administration/operations/extra_sidekiq_processes.md).
 
    In our experience, you can expect a 20% decrease in indexing time. After completing indexing in a later step, you can return `refresh` and `number_of_replicas` to their desired settings.
 
-   NOTE: **Note:**
+   NOTE:
    This step is optional but may help significantly speed up large indexing operations.
 
    ```shell
@@ -762,7 +762,7 @@ More [complex Elasticsearch API calls](https://www.elastic.co/guide/en/elasticse
 
 It is important to understand at which level the problem is manifesting (UI, Rails code, Elasticsearch side) to be able to [troubleshoot further](../administration/troubleshooting/elasticsearch.md#search-results-workflow).
 
-NOTE: **Note:**
+NOTE:
 The above instructions are not to be used for scenarios that only index a [subset of namespaces](#limiting-namespaces-and-projects).
 
 See [Elasticsearch Index Scopes](#advanced-search-index-scopes) for more information on searching for specific types of data.
@@ -781,7 +781,7 @@ You can run `sudo gitlab-rake gitlab:elastic:projects_not_indexed` to display pr
 
 ### No new data is added to the Elasticsearch index when I push code
 
-NOTE: **Note:**
+NOTE:
 This was [fixed in GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35936) and the Rake task is not available for versions greater than that.
 
 When performing the initial indexing of blobs, we lock all projects until the project finishes indexing. It could happen that an error during the process causes one or multiple projects to remain locked. In order to unlock them, run:

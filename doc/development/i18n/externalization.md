@@ -98,7 +98,7 @@ Active Record's `:message` option accepts a `Proc`, so we can do this instead:
 validates :group_id, uniqueness: { scope: [:project_id], message: -> (object, data) { _("already shared with this group") } }
 ```
 
-NOTE: **Note:**
+NOTE:
 Messages in the API (`lib/api/` or `app/graphql`) do
 not need to be externalised.
 
@@ -736,7 +736,7 @@ aren't in the message with ID `1 pipeline`.
 
 ## Adding a new language
 
-NOTE: **Note:**
+NOTE:
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/221012) in GitLab 13.3:
 Languages with less than 2% of translations won't be available in the UI.
 

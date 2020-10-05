@@ -78,7 +78,7 @@ begins with a dollar sign (`$`), as this likely indicates the password is an env
 For example, `https://username:$password@example.com/path/to/repo` isn't detected, while
 `https://username:password@example.com/path/to/repo` is.
 
-NOTE: **Note:**
+NOTE:
 You don't have to configure Secret Detection manually as shown in this section if you're using
 [Auto Secret Detection](../../../topics/autodevops/stages.md#auto-secret-detection)
 provided by [Auto DevOps](../../../topics/autodevops/index.md).

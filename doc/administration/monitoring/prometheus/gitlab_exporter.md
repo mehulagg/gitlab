@@ -13,7 +13,7 @@ The [GitLab exporter](https://gitlab.com/gitlab-org/gitlab-exporter) enables you
 measure various GitLab metrics pulled from Redis and the database in Omnibus GitLab
 instances.
 
-NOTE: **Note:**
+NOTE:
 For installations from source you must install and configure it yourself.
 
 To enable the GitLab exporter in an Omnibus GitLab instance:

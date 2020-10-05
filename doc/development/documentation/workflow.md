@@ -4,7 +4,7 @@ The process for creating and maintaining GitLab product documentation allows
 anyone to contribute a merge request or create an issue for GitLab's
 documentation.
 
-NOTE: **Note:**
+NOTE:
 Documentation updates relating to new features or feature enhancements must
 use the [feature workflow process](https://about.gitlab.com/handbook/engineering/ux/technical-writing/workflow/#for-a-product-change) described in the GitLab Handbook.
 
@@ -159,6 +159,6 @@ Ensure the following if skipping an initial Technical Writer review:
   - For [directories and files](styleguide.md#work-with-directories-and-files).
   - For [images](styleguide.md#images).
 
-NOTE: **Note:**
+NOTE:
 Merge requests that change the location of documentation must always be reviewed by a Technical
 Writer prior to merging.

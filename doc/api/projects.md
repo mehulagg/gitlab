@@ -67,7 +67,7 @@ GET /projects
 | `with_merge_requests_enabled` | boolean  | no | Limit by enabled merge requests feature |
 | `with_programming_language`   | string   | no | Limit by projects which use the given programming language |
 
-NOTE: **Note:**
+NOTE:
 This endpoint supports [keyset pagination](README.md#keyset-based-pagination) for selected `order_by` options.
 
 When `simple=true` or the user is unauthenticated this returns something like:
@@ -294,7 +294,7 @@ When the user is authenticated and `simple` is not set this returns something li
 ]
 ```
 
-NOTE: **Note:**
+NOTE:
 For users on GitLab [Silver, Premium, or higher](https://about.gitlab.com/pricing/) the `marked_for_deletion_at`
 attribute has been deprecated and will be removed in API v5 in favor of the `marked_for_deletion_on` attribute.
 
@@ -356,7 +356,7 @@ GET /users/:user_id/projects
 | `id_after`                    | integer | no | Limit results to projects with IDs greater than the specified ID |
 | `id_before`                   | integer | no | Limit results to projects with IDs less than the specified ID |
 
-NOTE: **Note:**
+NOTE:
 This endpoint supports [keyset pagination](README.md#keyset-based-pagination) for selected `order_by` options.
 
 ```json
@@ -1088,7 +1088,7 @@ POST /projects
 | `group_with_project_templates_id` | integer | no | **(PREMIUM)** For group-level custom templates, specifies ID of group from which all the custom project templates are sourced. Leave empty for instance-level templates. Requires `use_custom_template` to be true |
 | `packages_enabled` | boolean | no | Enable or disable packages repository feature |
 
-NOTE: **Note:**
+NOTE:
 If your HTTP repository is not publicly accessible,
 add authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git`
 where `password` is a public access key with the `api` scope enabled.
@@ -1159,7 +1159,7 @@ POST /projects/user/:user_id
 | `group_with_project_templates_id` | integer | no | **(PREMIUM)** For group-level custom templates, specifies ID of group from which all the custom project templates are sourced. Leave empty for instance-level templates. Requires `use_custom_template` to be true |
 | `packages_enabled` | boolean | no | Enable or disable packages repository feature |
 
-NOTE: **Note:**
+NOTE:
 If your HTTP repository is not publicly accessible,
 add authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git`
 where `password` is a public access key with the `api` scope enabled.
@@ -1231,7 +1231,7 @@ PUT /projects/:id
 | `packages_enabled` | boolean | no | Enable or disable packages repository feature |
 | `service_desk_enabled` | boolean | no | Enable or disable Service Desk feature |
 
-NOTE: **Note:**
+NOTE:
 If your HTTP repository is not publicly accessible,
 add authentication information to the URL: `https://username:password@gitlab.company.com/group/project.git`
 where `password` is a public access key with the `api` scope enabled.

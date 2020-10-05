@@ -15,7 +15,7 @@ deployed, your application is exposed to a new category of possible attacks,
 such as cross-site scripting or broken authentication flaws. This is where
 Dynamic Application Security Testing (DAST) comes into place.
 
-NOTE: **Note:**
+NOTE:
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
 organization.
@@ -725,7 +725,7 @@ An on-demand DAST scan:
 
 ### Run an on-demand DAST scan
 
-NOTE: **Note:**
+NOTE:
 You must have permission to run an on-demand DAST scan against a protected branch.
 The default branch is automatically protected. For more information, see
 [Pipeline security on protected branches](../../../ci/pipelines/index.md#pipeline-security-on-protected-branches).

@@ -66,7 +66,7 @@ To filter results:
 
 ![Value stream analytics filter bar](img/vsa_filter_bar_v13.3.png "Active filter bar for value stream analytics")
 
-NOTE: **Note:**
+NOTE:
 Filtering is available only for group-level Value Stream Analytics.
 
 ### Date ranges
@@ -188,7 +188,7 @@ to customize their Value Stream Analytics.
 
 GitLab allows users to create multiple value streams, hide default stages and create custom stages that align better to their development workflow.
 
-NOTE: **Note:**
+NOTE:
 Customizability is [only available for group-level](https://gitlab.com/gitlab-org/gitlab/-/issues/35823#note_272558950) Value Stream Analytics.
 
 ### Stage path

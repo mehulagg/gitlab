@@ -26,7 +26,7 @@ sudo gitlab-rake gitlab:import:all_users_to_all_projects
 bundle exec rake gitlab:import:all_users_to_all_projects RAILS_ENV=production
 ```
 
-NOTE: **Note:**
+NOTE:
 Admin users are added as maintainers.
 
 ## Add user as a developer to all groups
@@ -53,7 +53,7 @@ sudo gitlab-rake gitlab:import:all_users_to_all_groups
 bundle exec rake gitlab:import:all_users_to_all_groups RAILS_ENV=production
 ```
 
-NOTE: **Note:**
+NOTE:
 Admin users are added as owners so they can add additional users to the group.
 
 ## Control the number of active users

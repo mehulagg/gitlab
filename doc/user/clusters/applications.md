@@ -143,7 +143,7 @@ The Ingress Controller installed is
 [Ingress-NGINX](https://kubernetes.io/docs/concepts/services-networking/ingress/),
 which is supported by the Kubernetes community.
 
-NOTE: **Note:**
+NOTE:
 With the following procedure, a load balancer must be installed in your cluster
 to obtain the endpoint. You can use either
 Ingress, or Knative's own load balancer ([Istio](https://istio.io)) if using Knative.
@@ -181,7 +181,7 @@ with a DNS name, not an IP address. If GitLab is still unable to
 determine the endpoint of your Ingress or Knative application, you can
 [determine it manually](#determining-the-external-endpoint-manually).
 
-NOTE: **Note:**
+NOTE:
 The [`stable/nginx-ingress`](https://github.com/helm/charts/tree/master/stable/nginx-ingress)
 chart is used to install this application with a
 [`values.yaml`](https://gitlab.com/gitlab-org/gitlab/blob/master/vendor/ingress/values.yaml)
@@ -511,7 +511,7 @@ colocated, and each requires one CPU and 2 GB of RAM, making them
 incompatible with clusters containing fewer than three nodes, or consisting of
 `f1-micro`, `g1-small`, `n1-standard-1`, or `*-highcpu-2` instance types.
 
-NOTE: **Note:**
+NOTE:
 The Elastic Stack cluster application is intended as a log aggregation solution
 and is not related to our [Advanced Search](../search/advanced_global_search.md)
 functionality, which uses a separate Elasticsearch cluster.
@@ -623,7 +623,7 @@ To install applications using GitLab CI/CD:
      - template: Managed-Cluster-Applications.gitlab-ci.yml
    ```
 
-   NOTE: **Note:**
+   NOTE:
    The job provided by this template connects to the cluster using tools provided
    in a custom Docker image. It requires that you have a runner registered with the Docker,
    Kubernetes, or Docker Machine executor.
@@ -677,7 +677,7 @@ management project. Refer to the
 [chart](https://github.com/helm/charts/tree/master/stable/nginx-ingress)
 for the available configuration options.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Ingress managed application is provided by the GitLab Configure group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
 
@@ -718,13 +718,13 @@ management project. Refer to the
 [chart](https://hub.helm.sh/charts/jetstack/cert-manager) for the
 available configuration options.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Cert Manager managed application is provided by the GitLab Configure group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
 
 ### Install Sentry using GitLab CI/CD
 
-NOTE: **Note:**
+NOTE:
 The Sentry Helm chart [recommends](https://github.com/helm/charts/blob/f6e5784f265dd459c5a77430185d0302ed372665/stable/sentry/values.yaml#L284-L285) at least 3GB of available RAM for database migrations.
 
 To install Sentry, define the `.gitlab/managed-apps/config.yaml` file
@@ -750,7 +750,7 @@ We recommend you pay close attention to the following configuration options:
 - `user`. Where you can set the login credentials for the default admin user.
 - `postgresql`. For a PostgreSQL password that can be used when running future updates.
 
-NOTE: **Note:**
+NOTE:
 When upgrading it is important to provide the existing PostgreSQL password (given using the `postgresql.postgresqlPassword` key) or you will receive authentication errors. See the [PostgreSQL chart documentation](https://github.com/helm/charts/tree/master/stable/postgresql#upgrade) for more information.
 
 Here is an example configuration for Sentry:
@@ -783,7 +783,7 @@ postgresql:
   postgresqlPassword: example-postgresql-password
 ```
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Sentry managed application is provided by the GitLab Health group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Health group](https://about.gitlab.com/handbook/product/product-categories/#health-group).
 
@@ -803,7 +803,7 @@ You can customize the installation of PostHog by defining `.gitlab/managed-apps/
 in your cluster management project. Refer to the [Configuration section of the PostHog chart's README](https://github.com/PostHog/charts/tree/master/charts/posthog)
 for the available configuration options.
 
-NOTE: **Note:**
+NOTE:
 You must provide a PostgreSQL password in `postgresql.postgresqlPassword`
 or you will receive authentication errors.
 See the [PostgreSQL chart documentation](https://github.com/helm/charts/tree/master/stable/postgresql#upgrade) for more information.
@@ -832,7 +832,7 @@ redis:
   password: example-redis-password
 ```
 
-NOTE: **Note:**
+NOTE:
 Support for the PostHog managed application is provided by the PostHog team.
 If you run into issues, please [open a support ticket](https://github.com/PostHog/posthog/issues/new/choose) directly.
 
@@ -858,7 +858,7 @@ project. Refer to the
 [Configuration section of the Prometheus chart's README](https://github.com/helm/charts/tree/master/stable/prometheus#configuration)
 for the available configuration options.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Prometheus managed application is provided by the GitLab APM group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [APM group](https://about.gitlab.com/handbook/product/product-categories/#apm-group).
 
@@ -893,7 +893,7 @@ management project. Refer to the
 [chart](https://gitlab.com/gitlab-org/charts/gitlab-runner) for the
 available configuration options.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the GitLab Runner managed application is provided by the GitLab Runner group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Runner group](https://about.gitlab.com/handbook/product/product-categories/#runner-group).
 
@@ -942,7 +942,7 @@ of all affected pods in all namespaces to ensure that they are
 [managed](https://docs.cilium.io/en/stable/troubleshooting/#ensure-pod-is-managed-by-cilium)
 by the correct networking plugin.
 
-NOTE: **Note:**
+NOTE:
 Major upgrades might require additional setup steps, please consult
 the official [upgrade guide](https://docs.cilium.io/en/stable/install/upgrade/) for more
 information.
@@ -1002,7 +1002,7 @@ global:
       - 'flow:sourceContext=namespace;destinationContext=namespace'
 ```
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Cilium managed application is provided by the GitLab Container Security group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
 
@@ -1093,7 +1093,7 @@ You can check these logs with the following command:
 kubectl -n gitlab-managed-apps logs -l app=falco
 ```
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Falco managed application is provided by the GitLab Container Security group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
 
@@ -1186,7 +1186,7 @@ kubectl -n gitlab-managed-apps exec -it vault-0 sh
 This should give you your unseal keys and initial root token. Make sure to note these down
 and keep these safe as you will need them to unseal the Vault throughout its lifecycle.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Vault managed application is provided by the GitLab Release Management group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Release Management group](https://about.gitlab.com/handbook/product/product-categories/#release-management-group).
 
@@ -1239,7 +1239,7 @@ Refer to the
 [chart reference](https://zero-to-jupyterhub.readthedocs.io/en/stable/reference/reference.html) for the
 available configuration options.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the JupyterHub managed application is provided by the GitLab Configure group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
 
@@ -1267,10 +1267,10 @@ management project. Refer to the
 [chart](https://gitlab.com/gitlab-org/charts/elastic-stack) for all
 available configuration options.
 
-NOTE: **Note:**
+NOTE:
 In this alpha implementation of installing Elastic Stack through CI, reading the environment logs through Elasticsearch is unsupported. This is supported if [installed via the UI](#elastic-stack).
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Elastic Stack managed application is provided by the GitLab APM group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [APM group](https://about.gitlab.com/handbook/product/product-categories/#apm-group).
 
@@ -1300,7 +1300,7 @@ management project. Refer to the
 [chart](https://github.com/crossplane/crossplane/tree/master/cluster/charts/crossplane#configuration) for the
 available configuration options. Note that this link points to the documentation for the current development release, which may differ from the version you have installed.
 
-NOTE: **Note:**
+NOTE:
 Support for the Crossplane managed application is provided by the Crossplane team.
 If you run into issues, please [open a support ticket](https://github.com/crossplane/crossplane/issues/new/choose) directly.
 
@@ -1323,12 +1323,12 @@ project. Refer to the
 [configuration chart for the current development release of Fluentd](https://github.com/helm/charts/tree/master/stable/fluentd#configuration)
 for all available configuration options.
 
-NOTE: **Note:**
+NOTE:
 The configuration chart link points to the current development release, which
 may differ from the version you have installed. To ensure compatibility, switch
 to the specific branch or tag you are using.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Fluentd managed application is provided by the GitLab Container Security group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
 
@@ -1354,7 +1354,7 @@ domain: 'my.wildcard.A.record.dns'
 
 If you plan to use GitLab Serverless capabilities, be sure to set an A record wildcard domain on your custom configuration.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the Knative managed application is provided by the GitLab Configure group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Configure group](https://about.gitlab.com/handbook/product/product-categories/#configure-group).
 
@@ -1417,7 +1417,7 @@ The only information to be changed here is the profile name which is `profile-on
 
 #### Using PodSecurityPolicy in your deployments
 
-NOTE: **Note:**
+NOTE:
 To enable AppArmor annotations on a Pod Security Policy you must first
 load the correspondingAppArmor profile.
 
@@ -1454,7 +1454,7 @@ specification, and enables [AppArmor
 annotations](https://kubernetes.io/docs/tutorials/clusters/apparmor/#podsecuritypolicy-annotations)on
 it.
 
-NOTE: **Note:**
+NOTE:
 Support for installing the AppArmor managed application is provided by the GitLab Container Security group.
 If you run into unknown issues, please [open a new issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new) and ping at least 2 people from the [Container Security group](https://about.gitlab.com/handbook/product/product-categories/#container-security-group).
 
@@ -1484,7 +1484,7 @@ To upgrade an application:
 1. Select your cluster.
 1. If an upgrade is available, the **Upgrade** button is displayed. Click the button to upgrade.
 
-NOTE: **Note:**
+NOTE:
 Upgrades will reset values back to the values built into the `runner`
 chart plus the values set by
 [`values.yaml`](https://gitlab.com/gitlab-org/gitlab/blob/master/vendor/runner/values.yaml)

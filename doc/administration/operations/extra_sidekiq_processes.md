@@ -5,7 +5,7 @@ These processes can be used to consume a dedicated set
 of queues. This can be used to ensure certain queues always have dedicated
 workers, no matter the number of jobs that need to be processed.
 
-NOTE: **Note:**
+NOTE:
 The information in this page applies only to Omnibus GitLab.
 
 ## Available Sidekiq queues

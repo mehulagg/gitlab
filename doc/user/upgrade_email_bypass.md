@@ -54,7 +54,7 @@ User.where(confirmed_at: nil).where('LENGTH(confirmation_token) = 32')
 
 A regular user might receive a message that says "You have to confirm your email address before continuing". This message could includes a 404 or 422 error code, when the user tries to sign in.
 
-NOTE: **Note:**
+NOTE:
 We hope to improve the [sign-in experience for an unverified user](https://gitlab.com/gitlab-org/gitlab/-/issues/29279) in a future release.
 
 When an affected user commits code to a Git repository, that user may see the following message:
@@ -112,7 +112,7 @@ LDAP Users will remain confirmed if all of the following conditions are met:
 - The first sign-in is based on user LDAP credentials.
 - The user has added and verified [a secondary email address](profile/index.md#profile-settings) some time later.
 
-NOTE: **Note:**
+NOTE:
 Confirmation timestamps (primary vs. secondary) will be different.
 
 Users will be unconfirmed by the background migration if any of the following conditions are met:

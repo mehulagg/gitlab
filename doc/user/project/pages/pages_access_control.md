@@ -22,7 +22,7 @@ For a demonstration, see [Pages access controls](https://www.youtube.com/watch?v
 1. Navigate to your project's **Settings > General** and expand **Visibility, project features, permissions**.
 1. Toggle the **Pages** button to enable the access control.
 
-   NOTE: **Note:**
+   NOTE:
    If you don't see the toggle button, that means that it's not enabled.
    Ask your administrator to [enable it](../../../administration/pages/index.md#access-control).
 

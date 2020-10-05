@@ -7,7 +7,7 @@ type: reference, index, howto
 
 # Project settings
 
-NOTE: **Note:**
+NOTE:
 Only project Maintainers and Admin users have the [permissions](../../permissions.md#project-members-permissions)
 to access a project settings.
 
@@ -37,7 +37,7 @@ You can select a framework label to identify that your project has certain compl
 - SOC 2 - Service Organization Control 2
 - SOX - Sarbanes-Oxley
 
-NOTE: **Note:**
+NOTE:
 Compliance framework labels do not affect your project settings.
 
 ### Sharing and permissions
@@ -80,7 +80,7 @@ Some features depend on others:
   - **Issue Boards**
   - [**Service Desk**](#service-desk)
 
-  NOTE: **Note:**
+  NOTE:
   When the **Issues** option is disabled, you can still access **Milestones**
   from merge requests.
 
@@ -185,7 +185,7 @@ Next, to unarchive the project:
 
 #### Renaming a repository
 
-NOTE: **Note:**
+NOTE:
 Only project Maintainers and Admin users have the [permissions](../../permissions.md#project-members-permissions) to rename a
 repository. Not to be confused with a project's name where it can also be
 changed from the [general project settings](#general-project-settings).
@@ -206,7 +206,7 @@ old URL won't be able to push or pull. Read more about what happens with the
 
 #### Transferring an existing project into another namespace
 
-NOTE: **Note:**
+NOTE:
 Only project Owners and Admin users have the [permissions](../../permissions.md#project-members-permissions)
 to transfer a project.
 
@@ -228,13 +228,13 @@ Once done, you will be taken to the new project's namespace. At this point,
 read what happens with the
 [redirects from the old project to the new one](../index.md#redirects-when-changing-repository-paths).
 
-NOTE: **Note:**
+NOTE:
 GitLab administrators can use the admin interface to move any project to any
 namespace if needed.
 
 #### Delete a project
 
-NOTE: **Note:**
+NOTE:
 Only project owners and admins have [permissions](../../permissions.md#project-members-permissions) to delete a project.
 
 To delete a project:
@@ -282,7 +282,7 @@ To do so:
 1. Under **Remove fork relationship**, click the likewise-labeled button.
 1. Confirm the action by typing the project's path as instructed.
 
-NOTE: **Note:**
+NOTE:
 Only project owners have the [permissions](../../permissions.md#project-members-permissions)
 to remove a fork relationship.
 

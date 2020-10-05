@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/23922) in GitLab 11.7.
 
-NOTE: **Note:**
+NOTE:
 User will need at least maintainer access to use these endpoints.
 
 ## List project clusters
@@ -287,7 +287,7 @@ Parameters:
 | `platform_kubernetes_attributes[namespace]` | string | no | The unique namespace related to the project |
 | `environment_scope` | string | no | The associated environment to the cluster **(PREMIUM)** |
 
-NOTE: **Note:**
+NOTE:
 `name`, `api_url`, `ca_cert` and `token` can only be updated if the cluster was added
 through the ["Add existing Kubernetes cluster"](../user/project/clusters/add_remove_clusters.md#add-existing-cluster) option or
 through the ["Add existing cluster to project"](#add-existing-cluster-to-project) endpoint.

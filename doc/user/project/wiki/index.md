@@ -31,7 +31,7 @@ message.
 
 ## Creating a new wiki page
 
-NOTE: **Note:**
+NOTE:
 Requires Developer [permissions](../../permissions.md).
 
 Create a new page by clicking the **New page** button that can be found
@@ -93,7 +93,7 @@ Please note that:
 
 ## Editing a wiki page
 
-NOTE: **Note:**
+NOTE:
 Requires Developer [permissions](../../permissions.md).
 
 To edit a page, simply click on the **Edit** button. From there on, you can
@@ -107,7 +107,7 @@ For an example, see [Table of contents](../../markdown.md#table-of-contents).
 
 ## Deleting a wiki page
 
-NOTE: **Note:**
+NOTE:
 Requires Maintainer [permissions](../../permissions.md).
 
 You can find the **Delete** button only when editing a page. Click on it and

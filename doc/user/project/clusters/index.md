@@ -55,7 +55,7 @@ Currently, GitLab supports the following Kubernetes versions:
 - 1.14
 - 1.13 (deprecated, support ends on November 22, 2020)
 
-NOTE: **Note:**
+NOTE:
 Some GitLab features may support versions outside the range provided here.
 
 ### Adding and removing clusters
@@ -195,7 +195,7 @@ To clear the cache:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24580) in GitLab 11.8.
 
-NOTE: **Note:**
+NOTE:
 You do not need to specify a base domain on cluster settings when using GitLab Serverless. The domain in that case
 will be specified as part of the Knative installation. See [Installing Applications](#installing-applications).
 
@@ -227,7 +227,7 @@ Auto Monitoring) you will need the Kubernetes project integration enabled.
 
 [Read more about Auto DevOps](../../../topics/autodevops/index.md)
 
-NOTE: **Note:**
+NOTE:
 Kubernetes clusters can be used without Auto DevOps.
 
 ## Deploying to a Kubernetes cluster
@@ -259,11 +259,11 @@ GitLab CI/CD build environment.
 | `KUBECONFIG` | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This config also embeds the same token defined in `KUBE_TOKEN` so you likely will only need this variable. This variable name is also automatically picked up by `kubectl` so you won't actually need to reference it explicitly if using `kubectl`. |
 | `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](#base-domain) for more information. |
 
-NOTE: **Note:**
+NOTE:
 Prior to GitLab 11.5, `KUBE_TOKEN` was the Kubernetes token of the main
 service account of the cluster integration.
 
-NOTE: **Note:**
+NOTE:
 If your cluster was created before GitLab 12.2, default `KUBE_NAMESPACE` will be set to `<project_name>-<project_id>`.
 
 ### Custom namespace
@@ -290,7 +290,7 @@ You can customize the deployment namespace in a few ways:
   [`environment:kubernetes:namespace`](../../../ci/environments/index.md#configuring-kubernetes-deployments)
   in `.gitlab-ci.yml`.
 
-NOTE: **Note:**
+NOTE:
 When you customize the namespace, existing environments remain linked to their current
 namespaces until you [clear the cluster cache](#clearing-the-cluster-cache).
 
@@ -378,7 +378,7 @@ Reasons for failure include:
   [`environment:name`](../../../ci/environments/index.md#defining-environments). If your job has no
   `environment:name` set, it will not be passed the Kubernetes credentials.
 
-NOTE: **Note:**
+NOTE:
 Project-level clusters upgraded from GitLab 12.0 or older may be configured
 in a way that causes this error. Ensure you deselect the
 [GitLab-managed cluster](#gitlab-managed-clusters) option if you want to manage

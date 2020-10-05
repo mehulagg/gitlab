@@ -117,7 +117,7 @@ The ActionCable connection or channel class is used as the `controller`.
 }
 ```
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 12.5, if an error occurs, an
 `exception` field is included with `class`, `message`, and
 `backtrace`. Previous versions included an `error` field instead of
@@ -363,7 +363,7 @@ This file lives in `/var/log/gitlab/gitlab-rails/git_json.log` for
 Omnibus GitLab packages or in `/home/git/gitlab/log/git_json.log` for
 installations from source.
 
-NOTE: **Note:**
+NOTE:
 After 12.2, this file was renamed from `githost.log` to
 `git_json.log` and stored in JSON format.
 
@@ -384,7 +384,7 @@ only. For example:
 
 ## `audit_json.log`
 
-NOTE: **Note:**
+NOTE:
 Most log entries only exist in [GitLab Starter](https://about.gitlab.com/pricing/), however a few exist in GitLab Core.
 
 This file lives in `/var/log/gitlab/gitlab-rails/audit_json.log` for
@@ -599,7 +599,7 @@ installations from source.
 
 ## Unicorn Logs
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 13.0, Puma is the default web server used in GitLab
 all-in-one package based installations as well as GitLab Helm chart deployments.
 
@@ -675,7 +675,7 @@ This log records:
 - Requests over the [Rate Limit](../user/admin_area/settings/rate_limits_on_raw_endpoints.md) on raw endpoints.
 - [Protected paths](../user/admin_area/settings/protected_paths.md) abusive requests.
 
-NOTE: **Note:**
+NOTE:
 In GitLab versions [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/29239) and greater, user ID and username are also
 recorded on this log, if available.
 
@@ -974,7 +974,7 @@ of the previously listed GitLab components, [GitLabSOS](https://gitlab.com/gitla
 can provide a perspective spanning all of Omnibus GitLab. For more details and instructions
 to run it, see [the GitLabSOS documentation](https://gitlab.com/gitlab-com/support/toolbox/gitlabsos/#gitlabsos).
 
-NOTE: **Note:**
+NOTE:
 GitLab Support likes to use this custom-made tool.
 
 ### Briefly tail the main logs

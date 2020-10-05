@@ -40,7 +40,7 @@ authorization with each flow.
 
 ### Web application flow
 
-NOTE: **Note:**
+NOTE:
 Check the [RFC spec](https://tools.ietf.org/html/rfc6749#section-4.1) for a
 detailed flow description.
 
@@ -86,7 +86,7 @@ The web application flow is:
    }
    ```
 
-NOTE: **Note:**
+NOTE:
 The `redirect_uri` must match the `redirect_uri` used in the original
 authorization request.
 
@@ -94,7 +94,7 @@ You can now make requests to the API with the access token returned.
 
 ### Implicit grant flow
 
-NOTE: **Note:**
+NOTE:
 Check the [RFC spec](https://tools.ietf.org/html/rfc6749#section-4.2) for a
 detailed flow description.
 
@@ -130,11 +130,11 @@ https://example.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_ST
 
 ### Resource owner password credentials flow
 
-NOTE: **Note:**
+NOTE:
 Check the [RFC spec](https://tools.ietf.org/html/rfc6749#section-4.3) for a
 detailed flow description.
 
-NOTE: **Note:**
+NOTE:
 The Resource Owner Password Credentials is disabled for users with [two-factor
 authentication](../user/profile/account/two_factor_authentication.md) turned on.
 These users can access the API using [personal access tokens](../user/profile/personal_access_tokens.md)

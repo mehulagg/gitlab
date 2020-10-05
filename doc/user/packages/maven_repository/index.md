@@ -16,7 +16,7 @@ project can have its own space to store its Maven artifacts.
 
 ## Enabling the Maven Repository
 
-NOTE: **Note:**
+NOTE:
 This option is available only if your GitLab administrator has
 [enabled support for the Maven repository](../../../administration/packages/index.md).
 
@@ -401,7 +401,7 @@ Depending on your workflow and the amount of Maven packages you have, there are
 - **Instance level**: Useful when you have many Maven packages under different
   GitLab groups or on their own namespace.
 
-NOTE: **Note:**
+NOTE:
 In all cases, you need a project specific URL for uploading a package in
 the `distributionManagement` section.
 
@@ -449,7 +449,7 @@ of your project.
 If you have a self-managed GitLab installation, replace `gitlab.com` with your
 domain name.
 
-NOTE: **Note:**
+NOTE:
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the project
 (e.g., `group%2Fproject`) or the project's ID (e.g., `42`). However, only the
@@ -513,7 +513,7 @@ which can be found on the home page of your project.
 If you have a self-managed GitLab installation, replace `gitlab.com` with your
 domain name.
 
-NOTE: **Note:**
+NOTE:
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the group
 (e.g., `group%2Fsubgroup`) or the group's ID (e.g., `12`).
@@ -579,7 +579,7 @@ of your project.
 If you have a self-managed GitLab installation, replace `gitlab.com` with your
 domain name.
 
-NOTE: **Note:**
+NOTE:
 For retrieving artifacts, you can use either the
 [URL encoded](../../../api/README.md#namespaced-path-encoding) path of the project
 (e.g., `group%2Fproject`) or the project's ID (e.g., `42`). However, only the

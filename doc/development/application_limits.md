@@ -27,7 +27,7 @@ It's recommended to create two separate migration script files.
    add_column(:plan_limits, :project_hooks, :integer, default: 100, null: false)
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Plan limits entries set to `0` mean that limits are not enabled. You should
    use this setting only in special and documented circumstances.
 
@@ -58,7 +58,7 @@ It's recommended to create two separate migration script files.
    end
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Some plans exist only on GitLab.com. This will be a no-op for plans
    that do not exist.
 
@@ -97,7 +97,7 @@ can be used to validate that a model does not exceed the limits. It ensures
 that the count of the records for the current model does not exceed the defined
 limit.
 
-NOTE: **Note:**
+NOTE:
 You must specify the limit scope of the object being validated
 and the limit name if it's different from the pluralized model name.
 
@@ -146,5 +146,5 @@ GitLab.com:
 - `silver` - Namespaces and projects with a Silver subscription
 - `gold` - Namespaces and projects with a Gold subscription
 
-NOTE: **Note:**
+NOTE:
 The test environment doesn't have any plans.

@@ -136,7 +136,7 @@ This example code does the following:
 In order to interact with your AWS account, the GitLab CI/CD pipelines require both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to be defined in your GitLab settings under **Settings > CI/CD > Variables**.
 For more information please see [Create a custom variable in the UI](../../../../ci/variables/README.md#create-a-custom-variable-in-the-ui).
 
-NOTE: **Note:**
+NOTE:
    The AWS credentials you provide must include IAM policies that provision correct access control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 
 #### Deploying your function
@@ -155,7 +155,7 @@ endpoints:
 
 Running the following `curl` command should trigger your function.
 
-NOTE: **Note:**
+NOTE:
 Your URL should be the one retrieved from the GitLab deploy stage log.
 
 ```shell
@@ -231,7 +231,7 @@ provider:
 From there, you can reference them in your functions as well.
 Remember to add `A_VARIABLE` to your GitLab CI/CD variables under **Settings > CI/CD > Variables**, and it will get picked up and deployed with your function.
 
-NOTE: **Note:**
+NOTE:
 Anyone with access to the AWS environment may be able to see the values of those
 variables persisted in the lambda definition.
 
@@ -379,7 +379,7 @@ To set these:
    `AWS_SECRET_ACCESS_KEY`.
 1. Mask the credentials so they do not show in logs using the **Masked** toggle.
 
-NOTE: **Note:**
+NOTE:
 The AWS credentials you provide must include IAM policies that provision correct access
 control to AWS Lambda, API Gateway, CloudFormation, and IAM resources.
 

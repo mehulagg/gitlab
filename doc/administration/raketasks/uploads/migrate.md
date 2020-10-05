@@ -12,7 +12,7 @@ uploads, use this task to migrate existing uploads from the local storage to the
 
 Read more about using [object storage with GitLab](../../object_storage.md).
 
-NOTE: **Note:**
+NOTE:
 All of the processing will be done in a background worker and requires **no downtime**.
 
 ### All-in-one Rake task
@@ -50,7 +50,7 @@ The Rake task uses three parameters to find uploads to migrate:
 | `model_class`    | string        | Type of the model to migrate from.                     |
 | `mount_point`    | string/symbol | Name of the model's column the uploader is mounted on. |
 
-NOTE: **Note:**
+NOTE:
 These parameters are mainly internal to GitLab's structure, you may want to refer to the task list
 instead below.
 
@@ -93,7 +93,7 @@ gitlab-rake "gitlab:uploads:migrate[DesignManagement::DesignV432x230Uploader, De
 
 **Source Installation**
 
-NOTE: **Note:**
+NOTE:
 Use `RAILS_ENV=production` for every task.
 
 ```shell

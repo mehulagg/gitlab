@@ -57,7 +57,7 @@ sudo gitlab-rails runner "Service.where(type: ['JenkinsService', 'GithubService'
 bundle exec rails runner "Service.where(type: ['JenkinsService', 'GithubService']).delete_all" production
 ```
 
-NOTE: **Note:**
+NOTE:
 If you are running `GitLab =< v13.0` you need to also remove `JenkinsDeprecatedService` records.
 
 ### Variables environment scopes

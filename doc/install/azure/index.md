@@ -74,7 +74,7 @@ The first items we need to configure are the basic settings of the underlying vi
 1. Enter a `User name` - e.g. `gitlab-admin`
 1. Select an `Authentication type`, either **SSH public key** or **Password**:
 
-   NOTE: **Note:**
+   NOTE:
    If you're unsure which authentication type to use, select **Password**
 
    1. If you chose **SSH public key** - enter your `SSH public key` into the field provided
@@ -103,7 +103,7 @@ Check the settings you have entered, and then click **"OK"** when you're ready t
 Next, you need to choose the size of your VM - selecting features such as the number of CPU cores,
 the amount of RAM, the size of storage (and its speed), etc.
 
-NOTE: **Note:**
+NOTE:
 In common with other cloud vendors, Azure operates a resource/usage pricing model, i.e.
 the more resources your VM consumes the more it will cost you to run, so make your selection
 carefully. You'll see that Azure provides an _estimated_ monthly cost beneath each VM Size to help
@@ -115,7 +115,7 @@ ahead and select this one, but please choose the size which best meets your own 
 
 ![Azure - Create Virtual Machine - Size](img/azure-create-virtual-machine-size.png)
 
-NOTE: **Note:**
+NOTE:
 Be aware that while your VM is active (known as "allocated"), it will incur
 "compute charges" which, ultimately, you will be billed for. So, even if you're using the
 free trial credits, you'll likely want to learn
@@ -142,7 +142,7 @@ new VM. You'll be billed only for the VM itself (e.g. "Standard DS1 v2") because
 
 ![Azure - Create Virtual Machine - Purchase](img/azure-create-virtual-machine-purchase.png)
 
-NOTE: **Note:**
+NOTE:
 At this stage, you can review and modify the any of the settings you have made during all
 previous steps, just click on any of the four steps to re-open them.
 
@@ -202,7 +202,7 @@ Ports are opened by adding _security rules_ to the **"Network security group"** 
 has been assigned to. If you followed the process above, then Azure will have automatically created
 an NSG named `GitLab-CE-nsg` and assigned the `GitLab-CE` VM to it.
 
-NOTE: **Note:**
+NOTE:
 If you gave your VM a different name then the NSG automatically created by Azure will
 also have a different name - the name you have your VM, with `-nsg` appended to it.
 

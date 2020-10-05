@@ -5,10 +5,10 @@ instance entirely offline.
 
 ## Installation
 
-NOTE: **Note:**
+NOTE:
 This guide assumes the server is Ubuntu 18.04. Instructions for other servers may vary.
 
-NOTE: **Note:**
+NOTE:
 This guide assumes the server host resolves as `my-host`, which you should replace with your
 server's name.
 

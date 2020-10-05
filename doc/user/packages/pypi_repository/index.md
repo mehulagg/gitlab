@@ -22,7 +22,7 @@ You need a recent version of [pip](https://pypi.org/project/pip/) and [twine](ht
 
 ## Enabling the PyPi Repository
 
-NOTE: **Note:**
+NOTE:
 This option is available only if your GitLab administrator has
 [enabled support for the Package Registry](../../../administration/packages/index.md).
 

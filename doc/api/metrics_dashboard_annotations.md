@@ -18,7 +18,7 @@ POST /environments/:id/metrics_dashboard/annotations/
 POST /clusters/:id/metrics_dashboard/annotations/
 ```
 
-NOTE: **Note:**
+NOTE:
 The value of `dashboard_path` will be treated as a CGI-escaped path, and automatically un-escaped.
 
 Parameters:

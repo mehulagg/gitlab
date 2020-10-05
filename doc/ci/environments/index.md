@@ -380,7 +380,7 @@ If you are deploying to a [Kubernetes cluster](../../user/project/clusters/index
 associated with your project, you can configure these deployments from your
 `gitlab-ci.yml` file.
 
-NOTE: **Note:**
+NOTE:
 Kubernetes configuration isn't supported for Kubernetes clusters that are
 [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
@@ -926,7 +926,7 @@ This is a powerful feature that allows you to debug issues without leaving the c
 of your web browser. To enable it, just follow the instructions given in the service integration
 documentation.
 
-NOTE: **Note:**
+NOTE:
 Container-based deployments often lack basic tools (like an editor), and may
 be stopped or restarted at any time. If this happens, you will lose all your
 changes. Treat this as a debugging tool, not a comprehensive online IDE.

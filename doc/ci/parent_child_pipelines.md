@@ -71,7 +71,7 @@ microservice_a:
       - template: Security/SAST.gitlab-ci.yml
 ```
 
-NOTE: **Note:**
+NOTE:
 The max number of entries that are accepted for `trigger:include:` is three.
 
 Similar to [multi-project pipelines](multi_project_pipelines.md#mirroring-status-from-triggered-pipeline),

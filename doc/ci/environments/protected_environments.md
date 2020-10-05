@@ -20,7 +20,7 @@ specific environments are "protected" to prevent unauthorized people from affect
 By default, a protected environment does one thing: it ensures that only people
 with the right privileges can deploy to it, thus keeping it safe.
 
-NOTE: **Note:**
+NOTE:
 A GitLab admin is always allowed to use environments, even if they are protected.
 
 To protect, update, or unprotect an environment, you need to have at least
@@ -72,7 +72,7 @@ they have the following privileges:
 Users granted access to a protected environment, but not push or merge access
 to the branch deployed to it, are only granted access to deploy the environment.
 
-NOTE: **Note:**
+NOTE:
 Deployment-only access is the only possible access level for users with
 [Reporter permissions](../../user/permissions.md).
 
@@ -84,7 +84,7 @@ Maintainers can:
   **Allowed to Deploy** dropdown menu.
 - Unprotect a protected environment by clicking the **Unprotect** button for that environment.
 
-NOTE: **Note:**
+NOTE:
 After an environment is unprotected, all access entries are deleted and must
 be re-entered if the environment is re-protected.
 

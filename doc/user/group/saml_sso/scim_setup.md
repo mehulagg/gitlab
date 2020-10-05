@@ -92,14 +92,14 @@ You can then test the connection by clicking on **Test Connection**. If the conn
 
 1. Save your changes. For reference, you can view [an example configuration in the troubleshooting reference](../../../administration/troubleshooting/group_saml_scim.md#azure-active-directory).
 
-   NOTE: **Note:**
+   NOTE:
    If you used a unique identifier **other than** `objectId`, be sure to map it to `externalId`.
 
 1. Below the mapping list click on **Show advanced options > Edit attribute list for AppName**.
 
 1. Ensure the `id` is the primary and required field, and `externalId` is also required.
 
-   NOTE: **Note:**
+   NOTE:
    `username` should neither be primary nor required as we don't support
    that field on GitLab SCIM yet.
 
@@ -108,7 +108,7 @@ You can then test the connection by clicking on **Test Connection**. If the conn
 
    ![Provisioning status toggle switch](img/scim_provisioning_status.png)
 
-   NOTE: **Note:**
+   NOTE:
    You can control what is actually synced by selecting the `Scope`. For example,
    `Sync only assigned users and groups` will only sync the users assigned to
    the application (`Users and groups`), otherwise, it will sync the whole Active Directory.
@@ -190,7 +190,7 @@ provider or users list for the specific app.
 
 Upon the next sync, the user is deprovisioned, which means that the user is removed from the group.
 
-NOTE: **Note:**
+NOTE:
 Deprovisioning does not delete the user account.
 
 ```mermaid

@@ -39,7 +39,7 @@ To configure a GitLab Status Page you must:
 
 To provide GitLab with the AWS account information needed to push content to your Status Page:
 
-NOTE: **Note:**
+NOTE:
 Only AWS S3 is supported as a deploy target.
 
 1. Sign into GitLab as a user with Maintainer or greater [permissions](../../user/permissions.md).
@@ -75,7 +75,7 @@ the necessary CI/CD variables to deploy the Status Page to AWS S3:
 1. Add the following variables from your Amazon Console:
    - `S3_BUCKET_NAME` - The name of the Amazon S3 bucket.
 
-     NOTE: **Note:**
+     NOTE:
      If no bucket with the provided name exists, the first pipeline run creates
      one and configures it for
      [static website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/HostingWebsiteOnS3Setup.html).
@@ -130,7 +130,7 @@ To publish an incident:
    `/publish` [quick action](../../user/project/quick_actions.md) to publish the
    issue to the GitLab Status Page.
 
-   NOTE: **Note:**
+   NOTE:
    Confidential issues can't be published.
 
 A background worker publishes the issue onto the Status Page using the credentials

@@ -13,7 +13,7 @@ GitLab offers integrated cluster creation for the following Kubernetes providers
 
 GitLab can also integrate with any standard Kubernetes provider, either on-premise or hosted.
 
-NOTE: **Note:**
+NOTE:
 Watch the webcast [Scalable app deployment with GitLab and Google Cloud Platform](https://about.gitlab.com/webcast/scalable-app-deploy/)
 and learn how to spin up a Kubernetes cluster managed by Google Cloud Platform (GCP)
 in a few clicks.
@@ -46,7 +46,7 @@ When creating a cluster in GitLab, you will be asked if you would like to create
 - A [Role-based access control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) cluster.
 - An [Attribute-based access control (ABAC)](https://kubernetes.io/docs/reference/access-authn-authz/abac/) cluster.
 
-NOTE: **Note:**
+NOTE:
 [RBAC](#rbac-cluster-resources) is recommended and the GitLab default.
 
 GitLab creates the necessary service accounts and privileges to install and run
@@ -54,7 +54,7 @@ GitLab creates the necessary service accounts and privileges to install and run
 a `gitlab` service account with `cluster-admin` privileges is created in the `default` namespace
 to manage the newly created cluster.
 
-NOTE: **Note:**
+NOTE:
 Restricted service account for deployment was [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/51716) in GitLab 11.5.
 
 The first time you install an application into your cluster, the `tiller` service
@@ -153,7 +153,7 @@ Amazon Elastic Kubernetes Service (EKS) at the project, group, or instance level
 
 If you have an existing Kubernetes cluster, you can add it to a project, group, or instance.
 
-NOTE: **Note:**
+NOTE:
 Kubernetes integration is not supported for arm64 clusters. See the issue
 [Helm Tiller fails to install on arm64 cluster](https://gitlab.com/gitlab-org/gitlab/-/issues/29838) for details.
 
@@ -190,7 +190,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          kubectl get secret <secret name> -o jsonpath="{['data']['ca\.crt']}" | base64 --decode
          ```
 
-         NOTE: **Note:**
+         NOTE:
          If the command returns the entire certificate chain, you must copy the Root CA
          certificate and any intermediate certificates at the bottom of the chain.
          A chain file has following structure:  
@@ -250,7 +250,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          kubectl apply -f gitlab-admin-service-account.yaml --username=admin --password=<password>
          ```
 
-         NOTE: **Note:**
+         NOTE:
          Basic Authentication can be turned on and the password credentials
          can be obtained using the Google Cloud Console.
 
@@ -285,7 +285,7 @@ To add a Kubernetes cluster to your project, group, or instance:
          token:      <authentication_token>
          ```
 
-      NOTE: **Note:**
+      NOTE:
       For GKE clusters, you will need the
       `container.clusterRoleBindings.create` permission to create a cluster
       role binding. You can follow the [Google Cloud
@@ -320,7 +320,7 @@ integration to work properly.
 
 ![rbac](img/rbac_v13_1.png)
 
-NOTE: **Note:**
+NOTE:
 Disabling RBAC means that any application running in the cluster,
 or user who can authenticate to the cluster, has full API access. This is a
 [security concern](index.md#security-implications), and may not be desirable.

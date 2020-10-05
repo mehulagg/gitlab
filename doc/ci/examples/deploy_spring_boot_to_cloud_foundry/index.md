@@ -31,7 +31,7 @@ To follow along, you will need:
   other Cloud Foundry (CF) instance.
 - An account on GitLab.
 
-NOTE: **Note:**
+NOTE:
 You will need to replace the `api.run.pivotal.io` URL in the all below
 commands with the [API
 URL](https://docs.cloudfoundry.org/running/cf-api-endpoint.html) of your CF

@@ -25,7 +25,7 @@ To profile a request:
      curl --header 'X-Profile-Token: <token>' --header 'X-Profile-Mode: <mode>' "https://gitlab.example.com/group/project"
      ```
 
-     NOTE: **Note:**
+     NOTE:
      Profiled requests can take longer than usual.
 
 After the request completes, you can view the profiling output from the

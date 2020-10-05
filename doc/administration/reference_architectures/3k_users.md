@@ -11,7 +11,7 @@ This page describes GitLab reference architecture for up to 3,000 users. For a
 full list of reference architectures, see
 [Available reference architectures](index.md#available-reference-architectures).
 
-NOTE: **Note:**
+NOTE:
 This reference architecture is designed to help your organization achieve a
 highly-available GitLab deployment. If you do not have the expertise or need to
 maintain a highly-available environment, you can have a simpler and less
@@ -109,7 +109,7 @@ The following list includes descriptions of each server and its assigned IP:
 
 ## Configure the external load balancer
 
-NOTE: **Note:**
+NOTE:
 This architecture has been tested and validated with [HAProxy](https://www.haproxy.org/)
 as the load balancer. Although other load balancers with similar feature sets
 could also be used, those load balancers have not been validated.
@@ -279,7 +279,7 @@ The requirements for a Redis setup are the following:
    ([Internet](https://gitlab.com/gitlab-org/gitlab-foss/uploads/c4cc8cd353604bd80315f9384035ff9e/The_Internet_IT_Crowd.png)),
    using a firewall.
 
-NOTE: **Note:**
+NOTE:
 Redis nodes (both primary and replica) will need the same password defined in
 `redis['password']`. At any time during a failover the Sentinels can
 reconfigure a node and change its status from primary to replica and vice versa.
@@ -336,7 +336,7 @@ reconfigure a node and change its status from primary to replica and vice versa.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-NOTE: **Note:**
+NOTE:
 You can specify multiple roles like sentinel and Redis as:
 `roles ['redis_sentinel_role', 'redis_master_role']`.
 Read more about [roles](https://docs.gitlab.com/omnibus/roles/).
@@ -424,7 +424,7 @@ run: redis-exporter: (pid 30075) 76861s; run: log: (pid 29674) 76896s
 1. Go through the steps again for all the other replica nodes, and
    make sure to set up the IPs correctly.
 
-NOTE: **Note:**
+NOTE:
 You can specify multiple roles like sentinel and Redis as:
 `roles ['redis_sentinel_role', 'redis_master_role']`.
 Read more about [roles](https://docs.gitlab.com/omnibus/roles/).
@@ -445,7 +445,7 @@ are supported and can be added if needed.
 
 ## Configure Consul and Sentinel
 
-NOTE: **Note:**
+NOTE:
 If you are using an external Redis Sentinel instance, be sure
 to exclude the `requirepass` parameter from the Sentinel
 configuration. This parameter will cause clients to report `NOAUTH
@@ -558,7 +558,7 @@ To configure the Sentinel:
 1. Go through the steps again for all the other Consul/Sentinel nodes, and
    make sure you set up the correct IPs.
 
-NOTE: **Note:**
+NOTE:
 A Consul leader will be elected when the provisioning of the third Consul server is completed.
 Viewing the Consul logs `sudo gitlab-ctl tail consul` will display
 `...[INFO] consul: New leader elected: ...`
@@ -1253,7 +1253,7 @@ nodes (including the Gitaly node using the certificate) and on all client nodes
 that communicate with it following the procedure described in
 [GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
-NOTE: **Note:**
+NOTE:
 The self-signed certificate must specify the address you use to access the
 Gitaly server. If you are addressing the Gitaly server by a hostname, you can
 either use the Common Name field for this, or add it as a Subject Alternative
@@ -1261,7 +1261,7 @@ Name. If you are addressing the Gitaly server by its IP address, you must add it
 as a Subject Alternative Name to the certificate.
 [gRPC does not support using an IP address as Common Name in a certificate](https://github.com/grpc/grpc/issues/2691).
 
-NOTE: **Note:**
+NOTE:
 It is possible to configure Gitaly servers with both an
 unencrypted listening address `listen_addr` and an encrypted listening
 address `tls_listen_addr` at the same time. This allows you to do a
@@ -1433,7 +1433,7 @@ You can also run [multiple Sidekiq processes](../operations/extra_sidekiq_proces
 
 ## Configure GitLab Rails
 
-NOTE: **Note:**
+NOTE:
 In our architectures we run each GitLab Rails node using the Puma webserver
 and have its number of workers set to 90% of available CPUs along with four threads. For
 nodes that are running Rails with other components the worker value should be reduced
@@ -1607,7 +1607,7 @@ On each node perform the following:
    run: puma: (pid 4936) 8645s; run: log: (pid 29656) 79161s
    ```
 
-NOTE: **Note:**
+NOTE:
 When you specify `https` in the `external_url`, as in the example
 above, GitLab assumes you have SSL certificates in `/etc/gitlab/ssl/`. If
 certificates are not present, NGINX will fail to start. See the
@@ -1622,7 +1622,7 @@ for more information.
    gitlab-rake gitlab:db:configure
    ```
 
-    NOTE: **Note:**
+    NOTE:
     If you encounter a `rake aborted!` error stating that PgBouncer is failing to connect to
     PostgreSQL it may be that your PgBouncer node's IP address is missing from
     PostgreSQL's `trust_auth_cidr_addresses` in `gitlab.rb` on your database nodes. See
@@ -1768,7 +1768,7 @@ work.
 
 ## Configure Advanced Search **(STARTER ONLY)**
 
-NOTE: **Note:**
+NOTE:
 Elasticsearch cluster design and requirements are dependent on your specific data.
 For recommended best practices on how to set up your Elasticsearch cluster
 alongside your instance, read how to

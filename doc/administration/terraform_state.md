@@ -14,7 +14,7 @@ These locations can be configured using the options described below.
 
 ## Using local storage
 
-NOTE: **Note:**
+NOTE:
 This is the default configuration
 
 To change the location where Terraform state files are stored locally, follow the steps
@@ -85,7 +85,7 @@ See [the available connection settings for different providers](object_storage.m
    }
    ```
 
-   NOTE: **Note:**
+   NOTE:
    If you are using AWS IAM profiles, be sure to omit the AWS access key and secret access key/value pairs.
 
    ```ruby

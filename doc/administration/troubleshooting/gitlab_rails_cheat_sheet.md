@@ -274,7 +274,7 @@ pp p.statistics  # compare with earlier values
 
 A Projects Wiki can be recreated by
 
-NOTE: **Note:**
+NOTE:
 This is a destructive operation, the Wiki will be empty.
 
 ```ruby

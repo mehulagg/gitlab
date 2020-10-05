@@ -137,11 +137,11 @@ The following table lists basic ports that must be open between the **primary** 
 
 See the full list of ports used by GitLab in [Package defaults](https://docs.gitlab.com/omnibus/package-information/defaults.html)
 
-NOTE: **Note:**
+NOTE:
 [Web terminal](../../ci/environments/index.md#web-terminals) support requires your load balancer to correctly handle WebSocket connections.
 When using HTTP or HTTPS proxying, your load balancer must be configured to pass through the `Connection` and `Upgrade` hop-by-hop headers. See the [web terminal](../integration/terminal.md) integration guide for more details.
 
-NOTE: **Note:**
+NOTE:
 When using HTTPS protocol for port 443, you will need to add an SSL certificate to the load balancers.
 If you wish to terminate SSL at the GitLab application server instead, use TCP protocol.
 
@@ -149,7 +149,7 @@ If you wish to terminate SSL at the GitLab application server instead, use TCP p
 
 We recommend that if you use LDAP on your **primary** node, you also set up secondary LDAP servers on each **secondary** node. Otherwise, users will not be able to perform Git operations over HTTP(s) on the **secondary** node using HTTP Basic Authentication. However, Git via SSH and personal access tokens will still work.
 
-NOTE: **Note:**
+NOTE:
 It is possible for all **secondary** nodes to share an LDAP server, but additional latency can be an issue. Also, consider what LDAP server will be available in a [disaster recovery](disaster_recovery/index.md) scenario if a **secondary** node is promoted to be a **primary** node.
 
 Check for instructions on how to set up replication in your LDAP service. Instructions will be different depending on the software or service used. For example, OpenLDAP provides [these instructions](https://www.openldap.org/doc/admin24/replication.html).

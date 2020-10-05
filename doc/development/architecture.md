@@ -665,7 +665,7 @@ Sidekiq is a Ruby background job processor that pulls jobs from the Redis queue 
 
 #### Puma
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
 disabled by default.
 
@@ -683,7 +683,7 @@ disabled by default.
 
 #### Unicorn
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 13.0, Puma is the default web server and Unicorn has been
 disabled by default.
 

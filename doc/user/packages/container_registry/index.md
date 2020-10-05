@@ -21,7 +21,7 @@ have its own space to store its Docker images.
 
 You can read more about Docker Registry at <https://docs.docker.com/registry/introduction/>.
 
-NOTE: **Note:**
+NOTE:
 This document is the user guide. To learn how to enable the Container
 Registry for your GitLab instance, visit the
 [administrator documentation](../../../administration/packages/container_registry.md).
@@ -71,7 +71,7 @@ able to log in with:
 docker login registry.example.com
 ```
 
-NOTE: **Note:**
+NOTE:
 If you have [2 Factor Authentication](../../profile/account/two_factor_authentication.md)
 enabled in your account, you need to pass a
 [personal access token](../../profile/personal_access_tokens.md) instead
@@ -119,7 +119,7 @@ registry.example.com/group/project/image:latest
 registry.example.com/group/project/my/image:rc1
 ```
 
-NOTE: **Note:**
+NOTE:
 Currently there is a soft (10GB) size restriction for
 the Container Registry on GitLab.com, as part of the [repository size limit](../../project/repository/index.md).
 
@@ -288,7 +288,7 @@ deploy:
     - master
 ```
 
-NOTE: **Note:**
+NOTE:
 This example explicitly calls `docker pull`. If you prefer to implicitly pull the
 built image using `image:`, and use either the [Docker](https://docs.gitlab.com/runner/executors/docker.html)
 or [Kubernetes](https://docs.gitlab.com/runner/executors/kubernetes.html) executor,
@@ -333,7 +333,7 @@ CAUTION: **Warning:**
 Deleting images is a destructive action and can't be undone. To restore
 a deleted image, you must rebuild and re-upload it.
 
-NOTE: **Note:**
+NOTE:
 Administrators should review how to
 [garbage collect](../../../administration/packages/container_registry.md#container-registry-garbage-collection)
 the deleted images.
@@ -512,7 +512,7 @@ To create a cleanup policy in the UI:
 
 Depending on the interval you chose, the policy is scheduled to run.
 
-NOTE: **Note:**
+NOTE:
 If you edit the policy and click **Set cleanup policy** again, the interval is reset.
 
 ### Regex pattern examples

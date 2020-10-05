@@ -2,7 +2,7 @@
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36001) in GitLab 13.2.
 
-NOTE: **Note:**
+NOTE:
 User will need admin access to use these endpoints.
 
 Use these API endpoints with your instance clusters, which enable you to use the same cluster across multiple projects. [More information](../user/instance/clusters/index.md)
@@ -225,7 +225,7 @@ Parameters:
 | `platform_kubernetes_attributes[ca_cert]` | string | no | TLS certificate. Required if API is using a self-signed TLS certificate. |
 | `platform_kubernetes_attributes[namespace]` | string | no | The unique namespace related to the project |
 
-NOTE: **Note:**
+NOTE:
 `name`, `api_url`, `ca_cert` and `token` can only be updated if the cluster was added
 through the [Add existing Kubernetes cluster](../user/project/clusters/add_remove_clusters.md#add-existing-cluster) option or
 through the [Add existing instance cluster](#add-existing-instance-cluster) endpoint.

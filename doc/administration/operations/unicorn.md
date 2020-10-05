@@ -1,6 +1,6 @@
 # Understanding Unicorn and unicorn-worker-killer
 
-NOTE: **Note:**
+NOTE:
 Starting with GitLab 13.0, Puma is the default web server used in GitLab
 all-in-one package based installations as well as GitLab Helm chart deployments.
 

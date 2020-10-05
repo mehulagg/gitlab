@@ -113,7 +113,7 @@ When finished with something, they move the card to **Frontend**. The Frontend t
 Cards finished by the UX team automatically appear in the **Frontend** column when they are ready
 for them.
 
-NOTE: **Note:**
+NOTE:
 For a broader use case, please see the blog post
 [GitLab Workflow, an Overview](https://about.gitlab.com/blog/2016/10/25/gitlab-workflow-an-overview/#gitlab-workflow-use-case-scenario).
 For a real use case example, you can read why
@@ -280,7 +280,7 @@ group and its descendant subgroups. Similarly, you can only filter by group labe
 boards. When updating milestones and labels for an issue through the sidebar update mechanism, again only
 group-level objects are available.
 
-NOTE: **Note:**
+NOTE:
 Multiple group issue boards were originally [introduced](https://about.gitlab.com/releases/2017/09/22/gitlab-10-0-released/#group-issue-boards) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.0, and one group issue board per group was made available in GitLab Core 10.6.
 
 ![Group issue board](img/group_issue_board.png)

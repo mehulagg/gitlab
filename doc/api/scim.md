@@ -7,12 +7,12 @@ The SCIM API implements the [RFC7644 protocol](https://tools.ietf.org/html/rfc76
 CAUTION: **Caution:**
 This API is for internal system use for connecting with a SCIM provider. While it can be used directly, it is subject to change without notice.
 
-NOTE: **Note:**
+NOTE:
 [Group SSO](../user/group/saml_sso/index.md) must be enabled for the group. For more information, see [SCIM setup documentation](../user/group/saml_sso/scim_setup.md#requirements).
 
 ## Get a list of SAML users
 
-NOTE: **Note:**
+NOTE:
 This endpoint is used as part of the SCIM syncing mechanism and it only returns
 a single user based on a unique ID which should match the `extern_uid` of the user.
 
@@ -29,7 +29,7 @@ Parameters:
 | `startIndex` | integer | no    | The 1-based index indicating where to start returning results from. A value of less than one will be interpreted as 1. |
 | `count` | integer | no    | Desired maximum number of query results. |
 
-NOTE: **Note:**
+NOTE:
 Pagination follows the [SCIM spec](https://tools.ietf.org/html/rfc7644#section-3.4.2.4) rather than GitLab pagination as used elsewhere. If records change between requests it is possible for a page to either be missing records that have moved to a different page or repeat records from a previous request.
 
 Example request:

@@ -117,7 +117,7 @@ After access is requested:
   Email is sent to the most recently active project maintainers.
 - Any project maintainer can approve or decline the request on the members page.
 
-NOTE: **Note:**
+NOTE:
 If a project does not have any maintainers, the notification is sent to the
 most recently active owners of the project's group.
 

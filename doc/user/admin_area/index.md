@@ -11,7 +11,7 @@ To access the Admin Area, either:
 - Click the Admin Area icon (**{admin}**).
 - Visit `/admin` on your self-managed instance.
 
-NOTE: **Note:**
+NOTE:
 Only admin users can access the Admin Area.
 
 ## Admin Area sections
@@ -149,7 +149,7 @@ GitLab billing is based on the number of **Active users**, calculated as **Total
 **Blocked users**. For details of active users, see
 [Choosing the number of users](../../subscriptions/self_managed/index.md#choose-the-number-of-users).
 
-NOTE: **Note:**
+NOTE:
 Users statistics are calculated daily, so user changes made since the last update won't be
 reflected in the statistics.
 

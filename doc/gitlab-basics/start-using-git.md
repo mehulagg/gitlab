@@ -127,7 +127,7 @@ to our computer:
     Create one before cloning.
   - If you don't have 2FA enabled, use your account's password.
 
-NOTE: **Note:**
+NOTE:
 Authenticating via SSH is GitLab's recommended method. You can read more about credential storage
 in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
 
@@ -394,7 +394,7 @@ git add .
 git commit -m "COMMENT TO DESCRIBE THE INTENTION OF THE COMMIT"
 ```
 
-NOTE: **Note:**
+NOTE:
 The `.` character means _all file changes in the current directory and all subdirectories_.
 
 ### Send changes to GitLab.com
@@ -411,7 +411,7 @@ For example, to push your local commits to the _`master`_ branch of the _`origin
 git push origin master
 ```
 
-NOTE: **Note:**
+NOTE:
 To create a merge request from a fork to an upstream repository, see the
 [forking workflow](../user/project/repository/forking_workflow.md).
 

@@ -13,7 +13,7 @@ CAUTION: **Deprecation:**
 > `reference` attribute in response is deprecated in favour of `references`.
 > Introduced [GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20354)
 
-NOTE: **Note:**
+NOTE:
 > `references.relative` is relative to the group / project that the merge request is being requested. When merge request is fetched from its project
 > `relative` format would be the same as `short` format and when requested across groups / projects it is expected to be the same as `full` format.
 
@@ -73,14 +73,14 @@ Parameters:
 | `wip`                           | string         | no       | Filter merge requests against their `wip` status. `yes` to return *only* WIP merge requests, `no` to return *non* WIP merge requests |
 | `not`                           | Hash           | no       | Return merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `my_reaction_emoji` |
 
-NOTE: **Note:**
+NOTE:
 [Starting in GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31890),
 listing merge requests may not proactively update the `merge_status` field
 (which also affects the `has_conflicts` field), as this can be an expensive
 operation. If you are interested in the value of these fields from this
 endpoint, set the `with_merge_status_recheck` parameter to `true` in the query.
 
-NOTE: **Note:**
+NOTE:
 [Starting in GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/29984),
 the mergeability (`merge_status`) of each merge request will be checked
 asynchronously when a request is made to this endpoint. Poll this API endpoint
@@ -560,7 +560,7 @@ Parameters:
 - `include_diverged_commits_count` (optional) - If `true` response includes the commits behind the target branch
 - `include_rebase_in_progress` (optional) - If `true` response includes whether a rebase operation is in progress
 
-NOTE: **Note:**
+NOTE:
 [Starting in GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/29984),
 the mergeability (`merge_status`) of a merge request will be checked
 asynchronously when a request is made to this endpoint. Poll this API endpoint

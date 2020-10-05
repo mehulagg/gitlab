@@ -29,7 +29,7 @@ variables:
   POSTGRES_HOST_AUTH_METHOD: trust
 ```
 
-NOTE: **Note:**
+NOTE:
 The `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` and `POSTGRES_HOST_AUTH_METHOD`
 variables can't be set in the GitLab UI. To set them, assign them to a variable
 [in the UI](../variables/README.md#create-a-custom-variable-in-the-ui), and then assign that

@@ -134,7 +134,7 @@ There are several types of counters which are all found in `usage_data.rb`:
 - **Alternative Counters:** Used for settings and configurations
 - **Redis Counters:** Used for in-memory counts.
 
-NOTE: **Note:**
+NOTE:
 Only use the provided counter methods. Each counter method contains a built in fail safe to isolate each counter to avoid breaking the entire Usage Ping.
 
 ### Why batch counting
@@ -529,7 +529,7 @@ In those cases where operational metrics should be part of Usage Ping, a databas
 to provide useful data. Instead, Prometheus might be more appropriate, since most of GitLab's architectural
 components publish metrics to it that can be queried back, aggregated, and included as usage data.
 
-NOTE: **Note:**
+NOTE:
 Prometheus as a data source for Usage Ping is currently only available for single-node Omnibus installations
 that are running the [bundled Prometheus](../../administration/monitoring/prometheus/index.md) instance.
 

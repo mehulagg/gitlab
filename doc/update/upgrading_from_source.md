@@ -4,7 +4,7 @@ comments: false
 
 # Upgrading Community Edition and Enterprise Edition from source
 
-NOTE: **Note:**
+NOTE:
 Users wishing to upgrade to 12.0.0 will have to take some extra steps. See the
 version specific upgrade instructions for 12.0.0 for more details.
 

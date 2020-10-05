@@ -10,7 +10,7 @@ You can use sign-up restrictions to:
 - Require user email confirmation.
 - Denylist or allowlist email addresses belonging to specific domains.
 
-NOTE: **Note:**
+NOTE:
 These restrictions are only applied during sign-up from an external user. An admin can add a user through the admin panel with a disallowed domain. Also, note that the users can change their email addresses after sign-up to
 disallowed domains.
 

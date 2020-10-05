@@ -138,7 +138,7 @@ one of them will be used:
 Developers can view the performance impact of their changes within the merge
 request workflow.
 
-NOTE: **Note:**
+NOTE:
 Requires [Kubernetes](prometheus_library/kubernetes.md) metrics.
 
 When a source branch has been deployed to an environment, a sparkline and

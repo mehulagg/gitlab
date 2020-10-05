@@ -216,7 +216,7 @@ For example, if you move `doc/workflow/lfs/index.md` to
    git grep -n "lfs/lfs_administration"
    ```
 
-NOTE: **Note:**
+NOTE:
 If the document being moved has any Disqus comments on it, there are extra steps
 to follow documented just [below](#redirections-for-pages-with-disqus-comments).
 
@@ -277,7 +277,7 @@ and is believed to be accurate.
 Further needs for what would make the doc even better should be immediately addressed
 in a follow-up MR or issue.
 
-NOTE: **Note:**
+NOTE:
 If the release version you want to add the documentation to has already been
 frozen or released, use the label `~"Pick into X.Y"` to get it merged into
 the correct release. Avoid picking into a past release as much as you can, as
@@ -385,7 +385,7 @@ on how the left-side navigation menu is built and updated.
 
 ## Previewing the changes live
 
-NOTE: **Note:**
+NOTE:
 To preview your changes to documentation locally, follow this
 [development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/gitlab_docs.md).
 
@@ -400,7 +400,7 @@ You will need at least Maintainer permissions to be able to run it.
 
 ![Manual trigger a docs build](img/manual_build_docs.png)
 
-NOTE: **Note:**
+NOTE:
 You will need to push a branch to those repositories, it doesn't work for forks.
 
 The `review-docs-deploy*` job will:
@@ -423,7 +423,7 @@ Someone with no merge rights to the GitLab projects (think of forks from
 contributors) cannot run the manual job. In that case, you can
 ask someone from the GitLab team who has the permissions to do that for you.
 
-NOTE: **Note:**
+NOTE:
 Make sure that you always delete the branch of the merge request you were
 working on. If you don't, the remote docs branch won't be removed either,
 and the server where the Review Apps are hosted will eventually be out of

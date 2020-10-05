@@ -44,7 +44,7 @@ To configure the pseudonymizer, you need to:
    }
    ```
 
-   NOTE: **Note:**
+   NOTE:
    If you are using AWS IAM profiles, be sure to omit the AWS access key and secret access key/value pairs.
 
    ```ruby

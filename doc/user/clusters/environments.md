@@ -43,6 +43,6 @@ Once you have successful deployments to your group-level or instance-level clust
 1. Navigate to your group's **Kubernetes** page.
 1. Click on the **Environments** tab.
 
-NOTE: **Note:**
+NOTE:
 Only successful deployments to the cluster is included in this page.
 Non-cluster environments will not be included.

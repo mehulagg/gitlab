@@ -72,7 +72,7 @@ Heroku buildpacks, with the following caveats:
 - The `/bin/herokuish` command is not present in the resulting image, and prefixing
   commands with `/bin/herokuish procfile exec` is no longer required (nor possible).
 
-NOTE: **Note:**
+NOTE:
 Auto Test still uses Herokuish, as test suite detection is not
 yet part of the Cloud Native Buildpack specification. For more information, see
 [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/212689).
@@ -90,7 +90,7 @@ Check the [currently supported languages](#currently-supported-languages).
 Auto Test uses tests you already have in your application. If there are no
 tests, it's up to you to add them.
 
-NOTE: **Note:**
+NOTE:
 Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
 Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689), *not*
 Cloud Native Buildpacks, and only buildpacks that implement the
@@ -390,7 +390,7 @@ automatically created.
 If the GitLab Deploy Token can't be found, `CI_REGISTRY_PASSWORD` is
 used.
 
-NOTE: **Note:**
+NOTE:
 `CI_REGISTRY_PASSWORD` is only valid during deployment. Kubernetes will be able
 to successfully pull the container image during deployment, but if the image must
 be pulled again, such as after pod eviction, Kubernetes will fail to do so
@@ -528,7 +528,7 @@ and accept traffic to and from any source. You can use
 [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 to restrict connections to and from selected pods, namespaces, and the Internet.
 
-NOTE: **Note:**
+NOTE:
 You must use a Kubernetes network plugin that implements support for
 `NetworkPolicy`. The default network plugin for Kubernetes (`kubenet`)
 [does not implement](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet)

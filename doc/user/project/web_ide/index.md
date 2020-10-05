@@ -50,7 +50,7 @@ Monaco uses the [Monarch](https://microsoft.github.io/monaco-editor/monarch.html
 
 If you are missing Syntax Highlighting support for any language, we prepared a short guide on how to [add support for a missing language Syntax Highlighting.](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/ide/lib/languages/README.md)
 
-NOTE: **Note:**
+NOTE:
 Single file editing is based on the [Ace Editor](https://ace.c9.io).
 
 ### Themes
@@ -295,7 +295,7 @@ terminal blocks the job from finishing for the duration configured in
 [`[session_server].session_timeout`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-session_server-section)
 until you close the terminal window.
 
-NOTE: **Note:**
+NOTE:
 Not all executors are
 [supported](https://docs.gitlab.com/runner/executors/#compatibility-chart).
 The [File Sync](#file-syncing-to-web-terminal) feature is supported on Kubernetes runners only.
@@ -376,7 +376,7 @@ File changes in the Web IDE can be synced to a running web terminal.
 This enables users to test their code changes in a preconfigured terminal
 environment.
 
-NOTE: **Note:**
+NOTE:
 Only file changes in the Web IDE are synced to the terminal.
 Changes made in the terminal are **not** synced to the Web IDE.
 This feature is only available for Kubernetes runners.

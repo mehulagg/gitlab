@@ -11,7 +11,7 @@ type: reference, howto
 > - Introduced in GitLab 9.1 as [Trigger Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10533).
 > - [Renamed to Pipeline Schedule](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10853) in GitLab 9.2.
 
-NOTE: **Note:**
+NOTE:
 Cron notation is parsed by [Fugit](https://github.com/floraison/fugit).
 
 Pipelines are normally run based on certain conditions being met. For example, when a branch is pushed to repository.
@@ -44,7 +44,7 @@ To schedule a pipeline for project:
 
 ![New Schedule Form](img/pipeline_schedules_new_form.png)
 
-NOTE: **Note:**
+NOTE:
 Pipelines execution [timing is dependent](#advanced-configuration) on Sidekiq's own schedule.
 
 In the **Schedules** index page you can see a list of the pipelines that are
@@ -116,7 +116,7 @@ To trigger a pipeline schedule manually, click the "Play" button:
 This will schedule a background job to run the pipeline schedule. A flash
 message will provide a link to the CI/CD Pipeline index page.
 
-NOTE: **Note:**
+NOTE:
 To help avoid abuse, users are rate limited to triggering a pipeline once per
 minute.
 

@@ -58,7 +58,7 @@ What is not covered:
 
 ### Preparation
 
-NOTE: **Note:**
+NOTE:
 Before following any of those steps, make sure you have `root` access to the
 **secondary** to promote it, since there isn't provided an automated way to
 promote a Geo replica and perform a failover.
@@ -188,12 +188,12 @@ follow these steps to avoid unnecessary data loss:
      sudo systemctl disable gitlab-runsvdir
      ```
 
-     NOTE: **Note:**
+     NOTE:
      (**CentOS only**) In CentOS 6 or older, there is no easy way to prevent GitLab from being
      started if the machine reboots isn't available (see [Omnibus GitLab issue #3058](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3058)).
      It may be safest to uninstall the GitLab package completely with `sudo yum remove gitlab-ee`.
 
-     NOTE: **Note:**
+     NOTE:
      (**Ubuntu 14.04 LTS**) If you are using an older version of Ubuntu
      or any other distribution based on the Upstart init system, you can prevent GitLab
      from starting if the machine reboots as `root` with
@@ -213,7 +213,7 @@ follow these steps to avoid unnecessary data loss:
 
 ### Promoting the **secondary** node
 
-NOTE: **Note:**
+NOTE:
 A new **secondary** should not be added at this time. If you want to add a new
 **secondary**, do this after you have completed the entire process of promoting
 the **secondary** to the **primary**.

@@ -25,7 +25,7 @@ To authenticate using that token, clients read the contents of that
 file, and include the token Base64 encoded in a `secret_token` parameter
 or in the `Gitlab-Shared-Secret` header.
 
-NOTE: **Note:**
+NOTE:
 The internal API used by GitLab Pages, and GitLab Kubernetes Agent Server (kas) uses JSON Web Token (JWT)
 authentication, which is different from GitLab Shell.
 

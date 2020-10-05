@@ -69,7 +69,7 @@ of this page:
   maintained for all projects. **This area contains critical data for projects.
   [Keep a backup](../raketasks/backup_restore.md).**
 
-NOTE: **Note:**
+NOTE:
 The default locations for repositories can be configured in `config/gitlab.yml`
 of GitLab and `config.yml` of GitLab Shell.
 
@@ -101,7 +101,7 @@ apt-get upgrade -y
 apt-get install sudo -y
 ```
 
-NOTE: **Note:**
+NOTE:
 During this installation, some files need to be edited manually. If you are familiar with vim, set it as default editor with the commands below. If you are not familiar with vim, skip this and keep using the default editor.
 
 ```shell
@@ -128,7 +128,7 @@ If you want to use Kerberos for user authentication, install `libkrb5-dev`:
 sudo apt-get install libkrb5-dev
 ```
 
-NOTE: **Note:**
+NOTE:
 If you don't know what Kerberos is, you can assume you don't need it.
 
 Make sure you have the right version of Git installed:
@@ -202,7 +202,7 @@ needs to be installed.
 sudo apt-get install -y graphicsmagick
 ```
 
-NOTE: **Note:**
+NOTE:
 In order to receive mail notifications, make sure to install a mail server. By default, Debian is shipped with exim4 but this [has problems](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/12754) while Ubuntu does not ship with one. The recommended mail server is postfix and you can install it with:
 
 ```shell
@@ -222,7 +222,7 @@ sudo apt-get install -y libimage-exiftool-perl
 
 The Ruby interpreter is required to run GitLab.
 
-NOTE: **Note:**
+NOTE:
 The current supported Ruby (MRI) version is 2.6.x. GitLab 12.2
 dropped support for Ruby 2.5.x.
 
@@ -313,7 +313,7 @@ sudo adduser --disabled-login --gecos 'GitLab' git
 
 ## 6. Database
 
-NOTE: **Note:**
+NOTE:
 Starting from GitLab 12.1, only PostgreSQL is supported. Since GitLab 13.0, we [require PostgreSQL 11+](requirements.md#postgresql-requirements).
 
 1. Install the database packages:
@@ -410,7 +410,7 @@ Starting from GitLab 12.1, only PostgreSQL is supported. Since GitLab 13.0, we [
 
 ## 7. Redis
 
-NOTE: **Note:**
+NOTE:
 See the [requirements page](requirements.md#redis-versions) for the minimum
 Redis requirements.
 
@@ -559,7 +559,7 @@ CAUTION: **Caution:**
 Make sure to edit both `gitlab.yml` and `puma.rb` to match your setup.
 If you want to use the Unicorn web server, see [Using Unicorn](#using-unicorn) for the additional steps.
 
-NOTE: **Note:**
+NOTE:
 If you want to use HTTPS, see [Using HTTPS](#using-https) for the additional steps.
 
 ### Configure GitLab DB Settings
@@ -591,7 +591,7 @@ sudo -u git -H chmod o-rwx config/database.yml
 
 ### Install Gems
 
-NOTE: **Note:**
+NOTE:
 As of Bundler 1.5.2, you can invoke `bundle install -jN` (where `N` is the number of your processor cores) and enjoy parallel gems installation with measurable difference in completion time (~60% faster). Check the number of your cores with `nproc`. For more information, see this [post](https://thoughtbot.com/blog/parallel-gem-installing-using-bundler).
 
 Make sure you have `bundle` (run `bundle -v`):
@@ -603,7 +603,7 @@ Make sure you have `bundle` (run `bundle -v`):
 sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
 ```
 
-NOTE: **Note:**
+NOTE:
 If you want to use Kerberos for user authentication, omit `kerberos` in the `--without` option above.
 
 ### Install GitLab Shell
@@ -619,10 +619,10 @@ sudo -u git -H bundle exec rake gitlab:shell:install RAILS_ENV=production
 sudo -u git -H editor /home/git/gitlab-shell/config.yml
 ```
 
-NOTE: **Note:**
+NOTE:
 If you want to use HTTPS, see [Using HTTPS](#using-https) for the additional steps.
 
-NOTE: **Note:**
+NOTE:
 Make sure your hostname can be resolved on the machine itself by either a proper DNS record or an additional line in `/etc/hosts` ("127.0.0.1 hostname"). This might be necessary, for example, if you set up GitLab behind a reverse proxy. If the hostname cannot be resolved, the final installation check fails with `Check GitLab API access: FAILED. code: 401` and pushing commits are rejected with `[remote rejected] master -> master (hook declined)`.
 
 ### Install GitLab Workhorse
@@ -660,7 +660,7 @@ sudo -u git -H bundle exec rake "gitlab:indexer:install[/home/git/gitlab-elastic
 The source code first is fetched to the path specified by the first parameter. Then a binary is built under its `bin` directory.
 You then need to update `gitlab.yml`'s `production -> elasticsearch -> indexer_path` setting to point to that binary.
 
-NOTE: **Note:**
+NOTE:
 Elasticsearch is a feature of GitLab Enterprise Edition and isn't included in GitLab Community Edition.
 
 ### Install GitLab Pages
@@ -729,7 +729,7 @@ sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production force=yes
 # When done, you see 'Administrator account created:'
 ```
 
-NOTE: **Note:**
+NOTE:
 You can set the Administrator/root password and e-mail by supplying them in environmental variables, `GITLAB_ROOT_PASSWORD` and `GITLAB_ROOT_EMAIL` respectively, as seen below. If you don't set the password (and it is set to the default one), wait to expose GitLab to the public internet until the installation is done and you've logged into the server the first time. During the first login, you'll be forced to change the default password. An Enterprise Edition license may also be installed at this time by supplying a full path in the `GITLAB_LICENSE_FILE` environment variable.
 
 ```shell
@@ -807,7 +807,7 @@ sudo /etc/init.d/gitlab restart
 
 ## 9. NGINX
 
-NOTE: **Note:**
+NOTE:
 NGINX is the officially supported web server for GitLab. If you cannot or do not want to use NGINX as your web server, see [GitLab recipes](https://gitlab.com/gitlab-org/gitlab-recipes/).
 
 ### Installation
@@ -844,7 +844,7 @@ If you intend to enable GitLab Pages, there is a separate NGINX config you need
 to use. Read all about the needed configuration at the
 [GitLab Pages administration guide](../administration/pages/index.md).
 
-NOTE: **Note:**
+NOTE:
 If you want to use HTTPS, replace the `gitlab` NGINX config with `gitlab-ssl`. See [Using HTTPS](#using-https) for HTTPS configuration details.
 
 ### Test Configuration
@@ -857,7 +857,7 @@ sudo nginx -t
 
 You should receive `syntax is okay` and `test is successful` messages. If you receive errors check your `gitlab` or `gitlab-ssl` NGINX config file for typos, etc. as indicated in the error message given.
 
-NOTE: **Note:**
+NOTE:
 Verify that the installed version is greater than 1.12.1 by running `nginx -v`. If it's lower, you may receive the error below:
 `nginx: [emerg] unknown "start$temp=[filtered]$rest" variable
 nginx: configuration file /etc/nginx/nginx.conf test failed`

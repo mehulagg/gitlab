@@ -307,7 +307,7 @@ build:
 The third approach is to bind-mount `/var/run/docker.sock` into the
 container so that Docker is available in the context of that image.
 
-NOTE: **Note:**
+NOTE:
 If you bind the Docker socket [when using GitLab Runner 11.11 or
 newer](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/1261),
 you can no longer use `docker:19.03.12-dind` as a service because volume bindings
@@ -444,7 +444,7 @@ The steps in the `script` section for the `build` stage can be summed up to:
 
 ## Use the OverlayFS driver
 
-NOTE: **Note:**
+NOTE:
 The shared runners on GitLab.com use the `overlay2` driver by default.
 
 By default, when using `docker:dind`, Docker uses the `vfs` storage driver which

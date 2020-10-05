@@ -42,7 +42,7 @@ the swap available when needed.
 For this default reference architecture, to install GitLab use the standard
 [installation instructions](../../install/README.md).
 
-NOTE: **Note:**
+NOTE:
 You can also optionally configure GitLab to use an
 [external PostgreSQL service](../postgresql/external.md) or an
 [external object storage service](../object_storage.md) for
@@ -50,7 +50,7 @@ added performance and reliability at a reduced complexity cost.
 
 ## Configure Advanced Search **(STARTER ONLY)**
 
-NOTE: **Note:**
+NOTE:
 Elasticsearch cluster design and requirements are dependent on your specific data.
 For recommended best practices on how to set up your Elasticsearch cluster
 alongside your instance, read how to

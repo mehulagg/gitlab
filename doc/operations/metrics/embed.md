@@ -17,7 +17,7 @@ metrics to others, and you want to have relevant information directly available.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29691) in GitLab 12.2.
 
-NOTE: **Note:**
+NOTE:
 Requires [Kubernetes](../../user/project/integrations/prometheus_library/kubernetes.md) metrics.
 
 Note: **Note:**

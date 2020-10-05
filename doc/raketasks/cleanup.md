@@ -142,7 +142,7 @@ I, [2018-08-02T10:26:47.764356 #45087]  INFO -- : Moved to lost and found: @hash
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29681) in GitLab 12.1.
 > - [`ionice` support fixed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28023) in GitLab 12.10.
 
-NOTE: **Note:**
+NOTE:
 These commands will not work for artifacts stored on
 [object storage](../administration/object_storage.md).
 

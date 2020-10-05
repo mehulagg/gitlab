@@ -64,7 +64,7 @@ Prerequisites:
 - The project ID, which is on the project's home page.
 - A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
 
-  NOTE: **Note:**
+  NOTE:
   [Deploy tokens](./../../project/deploy_tokens/index.md) are
   [not yet supported](https://gitlab.com/gitlab-org/gitlab/-/issues/240897) for use with Composer.
 
@@ -127,7 +127,7 @@ Prerequisites:
 - The group ID, which is on the group's home page.
 - A [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
 
-  NOTE: **Note:**
+  NOTE:
   [Deploy tokens](./../../project/deploy_tokens/index.md) are
   [not yet supported](https://gitlab.com/gitlab-org/gitlab/-/issues/240897) for use with Composer.
 

@@ -14,7 +14,7 @@ includes a few key metrics, but you can also define your own custom dashboards.
 You may create a [new dashboard from scratch](#add-a-new-dashboard-to-your-project)
 or [duplicate a GitLab-defined Prometheus dashboard](#duplicate-a-gitlab-defined-dashboard).
 
-NOTE: **Note:**
+NOTE:
 The metrics as defined below do not support alerts, unlike
 [custom metrics](../index.md#adding-custom-metrics).
 
@@ -69,7 +69,7 @@ To create a new dashboard from the command line:
 
 Your custom dashboard is available at `https://example.com/project/-/metrics/custom_dashboard_name.yml`.
 
-NOTE: **Note:**
+NOTE:
 Configuration files nested under subdirectories of `.gitlab/dashboards` are not
 supported and won't be available in the UI.
 
@@ -85,7 +85,7 @@ with the **Add Panel** page:
    [permissions](../../../user/permissions.md#project-members-permissions).
 1. Click **Add panel** in the **{ellipsis_v}** **More actions** menu.
 
-   NOTE: **Note:**
+   NOTE:
    You can add panel only to custom dashboards.
 
    ![Monitoring Dashboard actions menu with add panel item](img/actions_menu_create_add_panel_v13_3.png)
@@ -107,7 +107,7 @@ new branch.
 
 1. Click **Duplicate current dashboard** in the **{ellipsis_v}** **More actions** menu.
 
-   NOTE: **Note:**
+   NOTE:
    You can duplicate only GitLab-defined dashboards.
 
 1. Enter the filename and other information, such as the new commit's message, and click **Duplicate**.

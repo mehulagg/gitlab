@@ -90,7 +90,7 @@ Consult the [troubleshooting section](#troubleshooting-consul) if the cluster is
 able to recover after the upgrade. The [outage recovery](#outage-recovery) may
 be of particular interest.
 
-NOTE: **Note:**
+NOTE:
 GitLab uses Consul to store only transient data that is easily regenerated. If
 the bundled Consul was not used by any process other than GitLab itself, then
 [rebuilding the cluster from scratch](#recreate-from-scratch) is fine.

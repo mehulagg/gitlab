@@ -20,7 +20,7 @@ used (less than 1MB) and it will automatically be resized.
 Once you select and upload an image, click **Update appearance settings** at the bottom
 of the page to activate it in the GitLab instance.
 
-NOTE: **Note:**
+NOTE:
 GitLab pipeline emails will also display the custom logo.
 
 ## Favicon
@@ -75,7 +75,7 @@ After you add a message, click **Update appearance settings** at the bottom of t
 to activate it in the GitLab instance. You can also click on the **Sign-in page** button,
 to review the saved appearance settings:
 
-NOTE: **Note:**
+NOTE:
 You can add also add a [customized help message](settings/help_page.md) below the sign in message.
 
 ## New project pages

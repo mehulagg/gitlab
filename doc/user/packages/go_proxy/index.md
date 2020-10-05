@@ -57,13 +57,13 @@ the following:
    [enabled support for the Package Registry](../../../administration/packages/index.md).
 1. The Package Registry is [enabled for your project](../index.md).
 
-NOTE: **Note:**
+NOTE:
 GitLab does not currently display Go modules in the **Packages Registry** of a project.
 Follow [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/213770) for details.
 
 ## Add GitLab as a Go proxy
 
-NOTE: **Note:**
+NOTE:
 To use a Go proxy, you must be using Go 1.13 or later.
 
 The available proxy endpoints are:

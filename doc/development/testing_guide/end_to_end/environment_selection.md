@@ -42,7 +42,7 @@ RSpec.describe 'Area' do
 end
 ```
 
-NOTE: **Note:**
+NOTE:
 If the test has a `before` or `after`, you must add the `only` metadata
 to the outer `RSpec.describe`.
 

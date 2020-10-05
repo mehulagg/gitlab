@@ -106,7 +106,7 @@ this project, where:
 - The email body becomes the issue description.
 - [Markdown](../../markdown.md) and [quick actions](../quick_actions.md) are supported.
 
-NOTE: **Note:**
+NOTE:
 In GitLab 11.7, we updated the format of the generated email address. However the
 older format is still supported, allowing existing aliases or contacts to continue working.
 
@@ -187,7 +187,7 @@ from its list and dropping it into the **Closed** list.
 
 ### Closing issues automatically
 
-NOTE: **Note:**
+NOTE:
 For performance reasons, automatic issue closing is disabled for the very first
 push from an existing repository.
 

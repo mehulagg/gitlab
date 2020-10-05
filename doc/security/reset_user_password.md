@@ -55,7 +55,7 @@ user.save!
 
 Exit the console and try to login with your new password.
 
-NOTE: **Note:**
+NOTE:
 Passwords can also be reset via the [Users API](../api/users.md#user-modification)
 
 ### Reset your root password

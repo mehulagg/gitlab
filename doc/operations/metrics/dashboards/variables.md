@@ -27,7 +27,7 @@ GitLab supports a limited set of [CI variables](../../../ci/variables/README.md)
 - `ci_environment_name`
 - `__range`
 
-NOTE: **Note:**
+NOTE:
 Variables for Prometheus queries must be lowercase.
 
 ### environment_filter

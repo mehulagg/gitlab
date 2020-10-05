@@ -82,7 +82,7 @@ following desktop browsers:
 - Firefox 67+
 - Opera
 
-NOTE: **Note:**
+NOTE:
 For Firefox 47-66, you can enable the FIDO U2F API in
 [about:config](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
 Search for `security.webauth.u2f` and double click on it to toggle to `true`.
@@ -102,7 +102,7 @@ Click on **Register U2F Device** to complete the process.
 
 ## Recovery codes
 
-NOTE: **Note:**
+NOTE:
 Recovery codes are not generated for U2F devices.
 
 CAUTION: **Caution:**
@@ -238,7 +238,7 @@ To regenerate 2FA recovery codes, you need access to a desktop browser:
 1. If you've already configured 2FA, click **Manage two-factor authentication**.
 1. In the **Register Two-Factor Authenticator** pane, click **Regenerate recovery codes**.
 
-NOTE: **Note:**
+NOTE:
 If you regenerate 2FA recovery codes, save them. You won't be able to use any previously created 2FA codes.
 
 ### Ask a GitLab administrator to disable two-factor authentication on your account

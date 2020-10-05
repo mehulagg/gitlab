@@ -378,7 +378,7 @@ When ready to merge:
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
   subsequent revisions for anything that would be spotted after that.
 
-NOTE: **Note:**
+NOTE:
 Thanks to "Pipeline for Merged Results", authors won't have to rebase their
 branch as frequently anymore (only when there are conflicts) since the Merge
 Results Pipeline will already incorporate the latest changes from `master`.

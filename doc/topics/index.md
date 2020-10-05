@@ -17,5 +17,5 @@ tutorials, technical overviews, blog posts) and videos.
 - [GitLab Pages](../user/project/pages/index.md)
 - [Offline GitLab](offline/index.md)
 
-NOTE: **Note:**
+NOTE:
 More topics will be available soon.

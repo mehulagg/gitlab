@@ -108,7 +108,7 @@ In this guide, we will install Ingress and Prometheus:
 - Prometheus - An open-source monitoring and alerting system used to supervise the
   deployed application.
 
-NOTE: **Note:**
+NOTE:
 We won't install GitLab Runner in this quick start guide, as this guide uses the
 shared runners provided by GitLab.com.
 
@@ -173,7 +173,7 @@ The jobs are separated into stages:
     licenses and is allowed to fail
     ([Auto License Compliance](stages.md#auto-license-compliance)) **(ULTIMATE)**
 
-   NOTE: **Note:**
+   NOTE:
    All jobs except `test` are allowed to fail in the test stage.
 
 - **Review** - Pipelines on `master` include this stage with a `dast_environment_deploy` job.

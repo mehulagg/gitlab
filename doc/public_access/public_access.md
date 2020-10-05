@@ -29,7 +29,7 @@ in users.
 Any logged in user will have [Guest permissions](../user/permissions.md)
 on the repository.
 
-NOTE: **Note:**
+NOTE:
 From July 2019, the `Internal` visibility setting is disabled for new projects, groups,
 and snippets on GitLab.com. Existing projects, groups, and snippets using the `Internal`
 visibility setting keep this setting. You can read more about the change in the
@@ -48,7 +48,7 @@ They will appear in the public access directory (`/public`) for project members 
 
 ## Visibility of groups
 
-NOTE: **Note:**
+NOTE:
 [Starting with](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/3323) GitLab 8.6,
 the group visibility has changed and can be configured the same way as projects.
 In previous versions, a group's page was always visible to all users.

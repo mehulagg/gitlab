@@ -252,7 +252,7 @@ of all types of variables.
 
 ## Using cron to trigger nightly pipelines
 
-NOTE: **Note:**
+NOTE:
 The following behavior can also be achieved through GitLab's UI with
 [pipeline schedules](../pipelines/schedules.md).
 

@@ -39,7 +39,7 @@ To change that for installations from source:
 1. [Restart GitLab](../administration/restart_gitlab.md#installations-from-source)
    for the changes to take effect.
 
-NOTE: **Note:**
+NOTE:
 From GitLab 12.6, the minimum password length set in this configuration file will be ignored. Minimum password lengths will now have to be modified via the [GitLab UI](#modify-minimum-password-length-using-gitlab-ui) instead.
 
 ## Modify minimum password length using GitLab UI

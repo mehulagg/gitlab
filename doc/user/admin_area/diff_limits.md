@@ -20,7 +20,7 @@ shown.
 Patches greater than 10% of this size will be automatically collapsed, and a
 link to expand the diff will be presented.
 
-NOTE: **Note:**
+NOTE:
 Merge requests and branch comparison views will be affected.
 
 CAUTION: **Caution:**

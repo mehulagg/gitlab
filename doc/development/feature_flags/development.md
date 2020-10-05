@@ -20,7 +20,7 @@ the feature flag is set to enabled. If the feature contains any database migrati
 CAUTION: **Caution:**
 All newly-introduced feature flags should be [disabled by default](process.md#feature-flags-in-gitlab-development).
 
-NOTE: **Note:**
+NOTE:
 This document is the subject of continued work as part of an epic to [improve internal usage of Feature Flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
 
 ## Types of feature flags
@@ -35,7 +35,7 @@ used so that unfinished code can be deployed in production.
 A `development` feature flag should have a rollout issue,
 ideally created using the [Feature Flag Roll Out template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md).
 
-NOTE: **Note:**
+NOTE:
 This is the default type used when calling `Feature.enabled?`.
 
 ### `ops` type
@@ -318,7 +318,7 @@ a by default enabled feature flag with the same name as the provided argument.
 unless the feature is explicitly disabled or limited to a percentage of users,
 the feature flag check defaults to `true`.**
 
-NOTE: **Note:**
+NOTE:
 Due to limitations with `feature_available?`, the YAML definition for `licensed` feature
 flags accepts only `default_enabled: true`. This is under development as per the
 [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/218667).
@@ -392,7 +392,7 @@ Introducing a feature flag into the codebase creates an additional code path tha
 It is strongly advised to test all code affected by a feature flag, both when **enabled** and **disabled**
 to ensure the feature works properly.
 
-NOTE: **Note:**
+NOTE:
 When using the testing environment, all feature flags are enabled by default.
 
 To disable a feature flag in a test, use the `stub_feature_flags`

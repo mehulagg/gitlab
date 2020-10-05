@@ -9,7 +9,7 @@ Since the charts use a different version number than all the other GitLab
 products, we need to add a
 [version mapping](https://docs.gitlab.com/charts/installation/version_mappings.html):
 
-NOTE: **Note:**
+NOTE:
 The charts stable branch is not created automatically like the other products.
 There's an [issue to track this](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/1442).
 It is usually created on the 21st or the 22nd.
@@ -61,7 +61,7 @@ Visit `http://localhost:4000/12.0/` to see if everything works correctly.
 
 ## 3. Create the release merge request
 
-NOTE: **Note:**
+NOTE:
 To be [automated](https://gitlab.com/gitlab-org/gitlab-docs/-/issues/750).
 
 Now it's time to create the monthly release merge request that adds the new
@@ -120,7 +120,7 @@ versions (stable branches `X.Y` of the `gitlab-docs` project):
    update the dropdowns and will be set to automatically be merged when their
    pipelines succeed:
 
-   NOTE: **Note:**
+   NOTE:
    The `release-X-Y` branch needs to be present locally, otherwise the Rake
    task will abort.
 
@@ -157,7 +157,7 @@ Releasing a new version is a long process that involves many moving parts.
 
 ### `test_internal_links_and_anchors` failing on dropdown merge requests
 
-NOTE: **Note:**
+NOTE:
 We now pin versions in the `.gitlab-ci.yml` of the respective branch,
 so the steps below are deprecated.
 

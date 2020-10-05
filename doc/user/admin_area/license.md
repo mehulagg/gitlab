@@ -16,7 +16,7 @@ The license has the form of a base64 encoded ASCII text with a `.gitlab-license`
 extension and can be obtained when you [purchase one](https://about.gitlab.com/pricing/) or when you sign
 up for a [free trial](https://about.gitlab.com/free-trial/).
 
-NOTE: **Note:**
+NOTE:
 As of GitLab Enterprise Edition 9.4.0, a newly-installed instance without an
 uploaded license will only have the Core features active. A trial license will
 activate all Ultimate features, but after

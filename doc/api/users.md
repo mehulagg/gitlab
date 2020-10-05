@@ -68,7 +68,7 @@ To exclude these users from the users' list, you can use the parameter `exclude_
 GET /users?exclude_internal=true
 ```
 
-NOTE: **Note:**
+NOTE:
 Username search is case insensitive.
 
 ### For admins
@@ -326,7 +326,7 @@ Example Responses:
 }
 ```
 
-NOTE: **Note:**
+NOTE:
 The `plan` and `trial` parameters are only available on GitLab Enterprise Edition.
 
 Users on GitLab [Starter, Bronze, or higher](https://about.gitlab.com/pricing/) will also see
@@ -378,10 +378,10 @@ Note that `force_random_password` and `reset_password` take priority
 over `password`. In addition, `reset_password` and
 `force_random_password` can be used together.
 
-NOTE: **Note:**
+NOTE:
 From [GitLab 12.1](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29888/), `private_profile` will default to `false`.
 
-NOTE: **Note:**
+NOTE:
 From [GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35604), `bio` will default to `""` instead of `null`.
 
 ```plaintext
@@ -817,7 +817,7 @@ Parameters:
 - `key` (required) - new SSH key
 - `expires_at` (optional) - The expiration date of the SSH key in ISO 8601 format (`YYYY-MM-DDTHH:MM:SSZ`)
 
-NOTE: **Note:**
+NOTE:
 This also adds an audit event, as described in [audit instance events](../administration/audit_events.md#instance-events). **(PREMIUM)**
 
 ## Delete SSH key for current user
@@ -1061,7 +1061,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://git
 
 Get a list of currently authenticated user's emails.
 
-NOTE: **Note:**
+NOTE:
 Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
 does not return the primary email address.
 
@@ -1090,7 +1090,7 @@ Parameters:
 
 Get a list of a specified user's emails. Available only for admin
 
-NOTE: **Note:**
+NOTE:
 Due to [a bug](https://gitlab.com/gitlab-org/gitlab/-/issues/25077) this endpoint currently
 does not return the primary email address.
 
@@ -1433,7 +1433,7 @@ Parameters:
 
 ### Get user activities (admin only)
 
-NOTE: **Note:**
+NOTE:
 This API endpoint is only available on 8.15 (EE) and 9.1 (CE) and above.
 
 Get the last activity date for all users, sorted from oldest to newest.

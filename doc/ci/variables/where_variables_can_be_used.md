@@ -38,7 +38,7 @@ There are two places defined variables can be used. On the:
 
 ### `config.toml` file
 
-NOTE: **Note:**
+NOTE:
 You can read more about `config.toml` in the [GitLab Runner docs](https://docs.gitlab.com/runner/configuration/advanced-configuration.html).
 
 | Definition                           | Can be expanded? | Description                                                                                                                                  |
@@ -104,7 +104,7 @@ These restrictions are because `after_script` scripts are executed in a
 
 ## Persisted variables
 
-NOTE: **Note:**
+NOTE:
 Some of the persisted variables contain tokens and cannot be used by some definitions
 due to security reasons.
 

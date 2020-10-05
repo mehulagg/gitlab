@@ -17,7 +17,7 @@ delivery from customer launch.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an example of feature flags in action, see [GitLab for Deploys, Feature Flags, and Error Tracking](https://www.youtube.com/embed/5tw2p6lwXxo).
 
-NOTE: **Note:**
+NOTE:
 The Feature Flags GitLab offer as a feature (described in this document) is not the same method
 used for the [development of GitLab](../development/feature_flags/index.md).
 
@@ -96,7 +96,7 @@ For example, set a value of 15% to enable the feature for 15% of authenticated u
 
 The rollout percentage can be from 0% to 100%.
 
-NOTE: **Note:**
+NOTE:
 Stickiness (consistent application behavior for the same user) is guaranteed for logged-in users, but not anonymous users.
 
 CAUTION: **Caution:**
@@ -115,7 +115,7 @@ activation strategy.
 Enter user IDs as a comma-separated list of values. For example,
 `user@example.com, user2@example.com`, or `username1,username2,username3`, and so on.
 
-NOTE: **Note:**
+NOTE:
 User IDs are identifiers for your application users. They do not need to be GitLab users.
 
 CAUTION: **Caution:**
@@ -254,7 +254,7 @@ To get the access credentials that your application needs to communicate with Gi
      For example, if the application runs for a production server, the **Application name**
      could be `production` or similar. This value is used for the environment spec evaluation.
 
-NOTE: **Note:**
+NOTE:
 The meaning of these fields might change over time. For example, we are not sure
 if **Instance ID** will be single token or multiple tokens, assigned to the
 **Environment**. Also, **Application name** could describe the version of

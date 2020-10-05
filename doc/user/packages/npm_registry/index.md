@@ -14,12 +14,12 @@ project can have its own space to store NPM packages.
 
 ![GitLab NPM Registry](img/npm_package_view_v12_5.png)
 
-NOTE: **Note:**
+NOTE:
 Only [scoped](https://docs.npmjs.com/misc/scope) packages are supported.
 
 ## Enabling the NPM Registry
 
-NOTE: **Note:**
+NOTE:
 This option is available only if your GitLab administrator has
 [enabled support for the NPM registry](../../../administration/packages/index.md).
 
@@ -140,7 +140,7 @@ domain name.
 
 You should now be able to download and upload NPM packages to your project.
 
-NOTE: **Note:**
+NOTE:
 If you encounter an error message with [Yarn](https://classic.yarnpkg.com/en/), see the
 [troubleshooting section](#troubleshooting).
 
@@ -239,7 +239,7 @@ The regex that is used for naming is validating all package names from all packa
 It allows for capital letters, while NPM does not, and allows for almost all of the
 characters NPM allows with a few exceptions (`~` is not allowed).
 
-NOTE: **Note:**
+NOTE:
 Capital letters are needed because the scope is required to be
 identical to the top level namespace of the project. So, for example, if your
 project path is `My-Group/project-foo`, your package must be named `@My-Group/any-package-name`.
@@ -434,7 +434,7 @@ npm dist-tag rm @scope/package@version my-tag  # Delete a tag from the package
 npm install @scope/package@my-tag              # Install a specific tag
 ```
 
-NOTE: **Note:**
+NOTE:
 You cannot use your `CI_JOB_TOKEN` or deploy token with the `npm dist-tag` commands. View [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/258835) for details. 
 
 CAUTION: **Warning:**

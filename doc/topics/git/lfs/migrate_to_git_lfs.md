@@ -57,7 +57,7 @@ To follow this tutorial, you'll need:
    brew install git-lfs
    ```
 
-NOTE: **Note:**
+NOTE:
 This guide was tested on macOS Mojave.
 
 ## Steps

@@ -311,7 +311,7 @@ Use the coverage reports to ensure your tests cover 100% of your code.
 
 ### System / Feature tests
 
-NOTE: **Note:**
+NOTE:
 Before writing a new system test, [please consider **not**
 writing one](testing_levels.md#consider-not-writing-a-system-test)!
 
@@ -579,7 +579,7 @@ this trait should be either fixed to not rely on Sidekiq processing jobs, or the
 `:sidekiq_might_not_need_inline` trait should be updated to `:sidekiq_inline` if
 the processing of background jobs is needed/expected.
 
-NOTE: **Note:**
+NOTE:
 The usage of `perform_enqueued_jobs` is only useful for testing delayed mail
 deliveries since our Sidekiq workers aren't inheriting from `ApplicationJob` / `ActiveJob::Base`.
 

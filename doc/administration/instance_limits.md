@@ -176,7 +176,7 @@ Plan.default.actual_limits.update!(project_hooks: 100)
 Plan.default.actual_limits.update!(group_hooks: 100)
 ```
 
-NOTE: **Note:**
+NOTE:
 Set the limit to `0` to disable it.
 
 ## Incoming emails from auto-responders
@@ -214,7 +214,7 @@ Plan.default.actual_limits.update!(offset_pagination_limit: 10000)
 
 - **Default offset pagination limit:** 50000
 
-NOTE: **Note:**
+NOTE:
 Set the limit to `0` to disable it.
 
 ## CI/CD limits
@@ -247,7 +247,7 @@ To set this limit on a self-managed installation, run the following in the
 Plan.default.actual_limits.update!(ci_active_jobs: 500)
 ```
 
-NOTE: **Note:**
+NOTE:
 Set the limit to `0` to disable it.
 
 ### Number of CI/CD subscriptions to a project
@@ -270,7 +270,7 @@ To set this limit on a self-managed installation, run the following in the
 Plan.default.actual_limits.update!(ci_project_subscriptions: 500)
 ```
 
-NOTE: **Note:**
+NOTE:
 Set the limit to `0` to disable it.
 
 ### Number of pipeline schedules
@@ -458,7 +458,7 @@ Setting a limit helps reduce the memory usage of the indexing processes as well
 as the overall index size. This value defaults to `1024 KiB` (1 MiB) as any
 text files larger than this likely aren't meant to be read by humans.
 
-NOTE: **Note:**
+NOTE:
 You must set a limit, as an unlimited file size is not supported. Setting this
 value to be greater than the amount of memory on GitLab's Sidekiq nodes will
 lead to GitLab's Sidekiq nodes running out of memory as they will pre-allocate
@@ -482,7 +482,7 @@ indexed](#maximum-file-size-indexed)).
 This limit can be configured for self-managed installations when [enabling
 Elasticsearch](../integration/elasticsearch.md#enabling-advanced-search).
 
-NOTE: **Note:**
+NOTE:
 Set the limit to `0` to disable it.
 
 ## Wiki limits

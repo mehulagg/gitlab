@@ -27,7 +27,7 @@ in your project's sidebar. The list contains the following metrics:
   - **{severity-low}** **Low - S4**
   - **{severity-unknown}** **Unknown**
 
-  NOTE: **Note:**
+  NOTE:
   Editing incident severity on the incident details page was
   [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229402) in GitLab 13.4.
 
@@ -49,7 +49,7 @@ TIP: **Tip:**
 For a live example of the incident list in action, visit this
 [demo project](https://gitlab.com/gitlab-examples/ops/incident-setup/everyone/tanuki-inc/-/incidents).
 
-NOTE: **Note:**
+NOTE:
 Incidents share the [Issues API](../../user/project/issues/index.md).
 
 ## Configure incidents

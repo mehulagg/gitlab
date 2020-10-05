@@ -1,6 +1,6 @@
 # End-to-end testing Best Practices
 
-NOTE: **Note:**
+NOTE:
 This is a tailored extension of the Best Practices [found in the testing guide](../best_practices.md).
 
 ## Link a test to its test-case issue
@@ -284,7 +284,7 @@ Resource::Repository::ProjectPush.fabricate! do |push|
 end
 ```
 
-NOTE: **Note:**
+NOTE:
 A few exceptions for using a `ProjectPush` would be when your test calls for testing SSH integration or
 using the Git CLI.
 

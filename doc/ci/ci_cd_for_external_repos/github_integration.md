@@ -14,14 +14,14 @@ GitLab.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 Watch a video on [Using GitLab CI/CD pipelines with GitHub repositories](https://www.youtube.com/watch?v=qgl3F2j-1cI).
 
-NOTE: **Note:**
+NOTE:
 Because of [GitHub limitations](https://gitlab.com/gitlab-org/gitlab/-/issues/9147),
 [GitHub OAuth](../../integration/github.md#enabling-github-oauth)
 cannot be used to authenticate with GitHub as an external CI/CD repository.
 
 ## Connect with Personal Access Token
 
-NOTE: **Note:**
+NOTE:
 Personal access tokens can only be used to connect GitHub.com
 repositories to GitLab, and the GitHub user must have the [owner role](https://docs.github.com/en/github/getting-started-with-github/access-permissions-on-github).
 
@@ -53,7 +53,7 @@ GitLab will:
 
 ## Connect manually
 
-NOTE: **Note:**
+NOTE:
 To use **GitHub Enterprise** with **GitLab.com**, use this method.
 
 To manually enable GitLab CI/CD for your repository:

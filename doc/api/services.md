@@ -1,6 +1,6 @@
 # Services API
 
-NOTE: **Note:**
+NOTE:
 This API requires an access token with Maintainer or Owner permissions
 
 ## List all active services
@@ -649,7 +649,7 @@ Set Hangouts Chat service for a project.
 PUT /projects/:id/services/hangouts-chat
 ```
 
-NOTE: **Note:**
+NOTE:
 Specific event parameters (for example, `push_events` flag) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
@@ -1153,7 +1153,7 @@ Set Slack service for a project.
 PUT /projects/:id/services/slack
 ```
 
-NOTE: **Note:**
+NOTE:
 Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
@@ -1263,7 +1263,7 @@ Set Mattermost service for a project.
 PUT /projects/:id/services/mattermost
 ```
 
-NOTE: **Note:**
+NOTE:
 Specific event parameters (for example, `push_events` flag and `push_channel`) were [introduced in v10.4](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/11435)
 
 Parameters:
@@ -1390,7 +1390,7 @@ GET /projects/:id/services/jenkins
 
 A continuous integration and build server
 
-NOTE: **Note:**
+NOTE:
 This service was [removed in v13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/1600)
 
 ### Create/Edit Jenkins CI (Deprecated) service

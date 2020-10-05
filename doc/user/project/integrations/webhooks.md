@@ -34,7 +34,7 @@ and **per project and per group** for **GitLab Enterprise Edition**.
 Navigate to the webhooks page by going to your project's
 **Settings ➔ Webhooks**.
 
-NOTE: **Note:**
+NOTE:
 On GitLab.com, the [maximum number of webhooks and their size](../../../user/gitlab_com/index.md#webhooks) per project, and per group, is limited.
 
 ## Version history
@@ -108,7 +108,7 @@ Below are described the supported events.
 
 Triggered when you push to the repository except when pushing tags.
 
-NOTE: **Note:**
+NOTE:
 When more than 20 commits are pushed at once, the `commits` webhook
 attribute will only contain the first 20 for performance reasons. Loading
 detailed commit data is expensive. Note that despite only 20 commits being
@@ -203,7 +203,7 @@ X-Gitlab-Event: Push Hook
 
 Triggered when you create (or delete) tags to the repository.
 
-NOTE: **Note:**
+NOTE:
 If a single push includes changes for more than three (by default, depending on
 [`push_event_hooks_limit` setting](../../../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls)) tags, this hook won't be executed.
 
@@ -1401,7 +1401,7 @@ On this page, you can see data that GitLab sends (request headers and body) and 
 
 From this page, you can repeat delivery with the same data by clicking `Resend Request` button.
 
-NOTE: **Note:**
+NOTE:
 If URL or secret token of the webhook were updated, data will be delivered to the new address.
 
 ### Receiving duplicate or multiple webhook requests triggered by one event
@@ -1460,5 +1460,5 @@ example.com - - [14/May/2014:07:45:26 EDT] "POST / HTTP/1.1" 200 0
 - -> /
 ```
 
-NOTE: **Note:**
+NOTE:
 You may need to [allow requests to the local network](../../../security/webhooks.md) for this receiver to be added.

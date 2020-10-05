@@ -75,7 +75,7 @@ To run Knative on GitLab, you will need:
 
 ## Installing Knative via GitLab's Kubernetes integration
 
-NOTE: **Note:**
+NOTE:
 The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.50 GB memory. **RBAC must be enabled.**
 
 1. [Add a Kubernetes cluster](../add_remove_clusters.md).
@@ -87,7 +87,7 @@ The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.
 1. After the Knative installation has finished, you can wait for the IP address or hostname to be displayed in the
    **Knative Endpoint** field or [retrieve the Istio Ingress Endpoint manually](../../../clusters/applications.md#determining-the-external-endpoint-manually).
 
-   NOTE: **Note:**
+   NOTE:
    Running `kubectl` commands on your cluster requires setting up access to the cluster first.
    For clusters created on GKE, see [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl),
    for other platforms [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
@@ -99,7 +99,7 @@ The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.
 
    ![DNS entry](img/dns-entry.png)
 
-NOTE: **Note:**
+NOTE:
 You can deploy either [functions](#deploying-functions) or [serverless applications](#deploying-serverless-applications)
 on a given project but not both. The current implementation makes use of a `serverless.yml` file to signal a FaaS project.
 
@@ -107,7 +107,7 @@ on a given project but not both. The current implementation makes use of a `serv
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/58941) in GitLab 12.0.
 
-NOTE: **Note:**
+NOTE:
 The "invocations" monitoring feature of GitLab serverless will not work when
 adding an existing installation of Knative.
 
@@ -458,7 +458,7 @@ They are useful in scenarios where an existing runtime does not meet the needs o
 such as one written in a language that has no runtime available. Note though that serverless
 applications should be stateless!
 
-NOTE: **Note:**
+NOTE:
 You can reference and import the sample [Knative Ruby App](https://gitlab.com/knative-examples/knative-ruby-app) to get started.
 
 Add the following `.gitlab-ci.yml` to the root of your repository
@@ -567,7 +567,7 @@ must manually obtain and install TLS certificates.
 The simplest way to accomplish this is to
 use [Certbot to manually obtain Let's Encrypt certificates](https://knative.dev/docs/serving/using-a-tls-cert/#using-certbot-to-manually-obtain-let-s-encrypt-certificates). Certbot is a free, open source software tool for automatically using Let’s Encrypt certificates on manually-administrated websites to enable HTTPS.
 
-NOTE: **Note:**
+NOTE:
 The instructions below relate to installing and running Certbot on a Linux server that has Python 3 installed and may not work on other operating systems or with other versions of Python.
 
 1. Install Certbot by running the
@@ -766,7 +766,7 @@ The instructions below relate to installing and running Certbot on a Linux serve
 1. Create a Kubernetes secret to hold your TLS certificate, `cert.pem`, and
    the private key `cert.pk`:
 
-   NOTE: **Note:**
+   NOTE:
    Running `kubectl` commands on your cluster requires setting up access to the cluster first.
    For clusters created on GKE, see
    [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl).

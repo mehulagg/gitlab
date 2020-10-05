@@ -68,7 +68,7 @@ Docker image based on based on the `ruby:alpine` instead of the default `ruby:la
    # ... put your stuff here
    ```
 
-NOTE: **Note:**
+NOTE:
 Use Base64 encoding if you need to pass complex values, such as newlines and
 spaces. Left unencoded, complex values like these can cause escaping issues
 due to how Auto DevOps uses the arguments.
@@ -117,7 +117,7 @@ to `CI_COMMIT_SHA,CI_ENVIRONMENT_NAME`.
      RUN --mount=type=secret,id=auto-devops-build-secrets . /run/secrets/auto-devops-build-secrets && $COMMAND
      ```
 
-NOTE: **Note:**
+NOTE:
 When `AUTO_DEVOPS_BUILD_IMAGE_FORWARDED_CI_VARIABLES` is set, Auto DevOps
 enables the experimental [Docker BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/)
 feature to use the `--secret` flag.
@@ -150,7 +150,7 @@ You can override the default values in the `values.yaml` file in the
   `HELM_UPGRADE_VALUES_FILE` [environment variable](#environment-variables) with
   the path and name.
 
-NOTE: **Note:**
+NOTE:
 For GitLab 12.5 and earlier, use the `HELM_UPGRADE_EXTRA_ARGS` environment variable
 to override the default chart values by setting `HELM_UPGRADE_EXTRA_ARGS` to `--values <my-values.yaml>`.
 
@@ -445,7 +445,7 @@ the updated secrets. To update the secrets, either:
 - Manually delete running pods to cause Kubernetes to create new pods with updated
   secrets.
 
-NOTE: **Note:**
+NOTE:
 Variables with multi-line values are not currently supported due to
 limitations with the current Auto DevOps scripting environment.
 

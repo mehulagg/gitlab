@@ -32,7 +32,7 @@ Some credentials are required to be able to run `aws` commands:
 1. Log in onto the console and create [a new IAM user](https://console.aws.amazon.com/iam/home#/home).
 1. Select your newly created user to access its details. Navigate to **Security credentials > Create a new access key**.
 
-   NOTE: **Note:**
+   NOTE:
    A new **Access key ID** and **Secret access key** pair will be generated. Please take a note of them right away.
 
 1. In your GitLab project, go to **Settings > CI / CD**. Set the following as
@@ -62,7 +62,7 @@ Some credentials are required to be able to run `aws` commands:
        - aws create-deployment ...
    ```
 
-   NOTE: **Note:**
+   NOTE:
    The image used in the example above
    (`registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest`) is hosted on the [GitLab
    Container Registry](../../user/packages/container_registry/index.md) and is
@@ -150,7 +150,7 @@ After you have these prerequisites ready, follow these steps:
    `CI_AWS_ECS_TASK_DEFINITION_FILE` takes precedence over `CI_AWS_ECS_TASK_DEFINITION` if both these environment
    variables are defined within your project.
 
-   NOTE: **Note:**
+   NOTE:
    If the name of the task definition you wrote in your JSON file is the same name
    as an existing task definition on AWS, then a new revision is created for it.
    Otherwise, a brand new task definition is created, starting at revision 1.

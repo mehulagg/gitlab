@@ -383,7 +383,7 @@ Example changes:
 - `change_column_default`
 - `create_table` / `drop_table`
 
-NOTE: **Note:**
+NOTE:
 `with_lock_retries` method **cannot** be used within the `change` method, you must manually define the `up` and `down` methods to make the migration reversible.
 
 ### How the helper method works
@@ -444,7 +444,7 @@ the `with_multiple_threads` block, instead of re-using the global connection
 pool. This ensures each thread has its own connection object, and won't time
 out when trying to obtain one.
 
-NOTE: **Note:**
+NOTE:
 PostgreSQL has a maximum amount of connections that it allows. This
 limit can vary from installation to installation. As a result, it's recommended
 you do not use more than 32 threads in a single migration. Usually, 4-8 threads
@@ -619,7 +619,7 @@ Before PostgreSQL 11, adding a column with a default was problematic as it would
 have caused a full table rewrite. The corresponding helper `add_column_with_default`
 has been deprecated and will be removed in a later release.
 
-NOTE: **Note:**
+NOTE:
 If a backport adding a column with a default value is needed for %12.9 or earlier versions,
 it should use `add_column_with_default` helper. If a [large table](https://gitlab.com/gitlab-org/gitlab/-/blob/master/rubocop/rubocop-migrations.yml#L3)
 is involved, backporting to %12.9 is contraindicated.
@@ -654,7 +654,7 @@ In this particular case, the default value exists and we're just changing the me
 `request_access_enabled` column, which does not imply a rewrite of all the existing records
 in the `namespaces` table. Only when creating a new column with a default, all the records are going be rewritten.
 
-NOTE: **Note:**
+NOTE:
 A faster [ALTER TABLE ADD COLUMN with a non-null default](https://www.depesz.com/2018/04/04/waiting-for-postgresql-11-fast-alter-table-add-column-with-a-non-null-default/)
 was introduced on PostgresSQL 11.0, removing the need of rewriting the table when a new column with a default value is added.
 
@@ -965,7 +965,7 @@ in a previous migration.
 
 ### Example: Add a column `my_column` to the users table
 
-NOTE: **Note:**
+NOTE:
 It is important not to leave out the `User.reset_column_information` command, in order to ensure that the old schema is dropped from the cache and ActiveRecord loads the updated schema information.
 
 ```ruby

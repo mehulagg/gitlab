@@ -54,7 +54,7 @@ rules only if you are invoking/instantiating existing code modules.
 - [`no-new`](https://eslint.org/docs/rules/no-new)
 - [`class-method-use-this`](https://eslint.org/docs/rules/class-methods-use-this)
 
-NOTE: **Note:**
+NOTE:
 Disable these rules on a per-line basis. This makes it easier to refactor
 in the future. E.g. use `eslint-disable-next-line` or `eslint-disable-line`.
 

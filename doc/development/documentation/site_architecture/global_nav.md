@@ -67,7 +67,7 @@ With these groups in mind, the following are general rules for where new items s
 - Other documentation belongs at the top-level, but care must be taken to not create an enormously
   long top-level navigation, which defeats the purpose of it.
 
-NOTE: **Note:**
+NOTE:
 Making all documentation and navigation items adhere to these principles is being progressively
 rolled out.
 
@@ -114,7 +114,7 @@ for clarity.
 To see the improvements planned, check the
 [global nav epic](https://gitlab.com/groups/gitlab-com/-/epics/21).
 
-NOTE: **Note:**
+NOTE:
 **Do not** [add items](#adding-new-items) to the global nav without
 the consent of one of the technical writers.
 

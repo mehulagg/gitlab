@@ -40,7 +40,7 @@ In order to change this option:
 1. Enter the desire hostname in the **Custom hostname (for private commit emails)** field.
 1. Click **Save changes**.
 
-NOTE: **Note:**
+NOTE:
 Once the hostname gets configured, every private commit email using the previous hostname, will not get
 recognized by GitLab. This can directly conflict with certain [Push rules](../../../push_rules/push_rules.md) such as
 `Check whether author is a GitLab user` and `Check whether committer is the current authenticated user`.

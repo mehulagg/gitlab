@@ -18,7 +18,7 @@ Updating Geo nodes involves performing:
 
 ## General update steps
 
-NOTE: **Note:**
+NOTE:
 These general update steps are not intended for [high-availability deployments](https://docs.gitlab.com/omnibus/update/README.html#multi-node--ha-deployment), and will cause downtime. If you want to avoid downtime, consider using [zero downtime updates](https://docs.gitlab.com/omnibus/update/README.html#zero-downtime-updates).
 
 DANGER: **Danger:**

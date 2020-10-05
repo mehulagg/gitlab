@@ -33,7 +33,7 @@ To follow along with this tutorial, we assume you already have:
 Once you have the requirements addressed, follow the instructions
 below to learn how to obtain the certificate.
 
-NOTE: **Note:**
+NOTE:
 The instructions below were tested on macOS Mojave. For other
 operating systems the steps might be slightly different. Follow the
 [CertBot instructions](https://certbot.eff.org/) according to your OS.

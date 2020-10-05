@@ -946,7 +946,7 @@ search engine optimization (SEO), use the imperative, where possible.
 
 For guidelines on capitalizing headings, see the section on [capitalization](#capitalization).
 
-NOTE: **Note:**
+NOTE:
 If you change an existing title, be careful. These changes might affect not
 only [links](#anchor-links) within the page, but might also affect links to the
 GitLab documentation from both the GitLab application and external sites.
@@ -956,7 +956,7 @@ GitLab documentation from both the GitLab application and external sites.
 Headings generate anchor links automatically when rendered. `## This is an example`
 generates the anchor `#this-is-an-example`.
 
-NOTE: **Note:**
+NOTE:
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39717) in GitLab 13.4, [product badges](#product-badges) used in headings aren't included in the
 generated anchor links. For example, when you link to
 `## This is an example **(CORE)**`, use the anchor `#this-is-an-example`.
@@ -1014,7 +1014,7 @@ We include guidance for links in the following categories:
 
 ### Links to internal documentation
 
-NOTE: **Note:**
+NOTE:
 _Internal_ refers to documentation in the same project. When linking to
 documentation in separate projects (for example, linking to Omnibus documentation
 from GitLab documentation), you must use absolute URLs.
@@ -1062,7 +1062,7 @@ To link to internal documentation:
   - `../../issues/tags.md`
   - `../../issues/tags.md#stages`
 
-NOTE: **Note:**
+NOTE:
 Using the Markdown extension is necessary for the [`/help`](index.md#gitlab-help)
 section of GitLab.
 
@@ -1103,7 +1103,7 @@ While many of these sources to avoid can help you learn skills and or features,
 they can become obsolete quickly. Nobody is obliged to maintain any of these
 sites. Therefore, we should avoid using them as reference literature.
 
-NOTE: **Note:**
+NOTE:
 Non-authoritative sources are acceptable only if there is no equivalent
 authoritative source. Even then, focus on non-authoritative sources that are
 extensively cited or peer-reviewed.
@@ -1529,13 +1529,13 @@ Instead of adding a note, try one of these alternatives:
 If you must use a note, use the following formatting:
 
 ```markdown
-NOTE: **Note:**
+NOTE:
 This is something to note.
 ```
 
 How it renders on the GitLab documentation site:
 
-NOTE: **Note:**
+NOTE:
 This is something to note.
 
 ### Tip

@@ -68,7 +68,7 @@ blog about it](https://about.gitlab.com/blog/2015/05/06/why-were-replacing-gitla
 
 ### Creating a simple `.gitlab-ci.yml` file
 
-NOTE: **Note:**
+NOTE:
 A GitLab team member has made an [unofficial visual pipeline editor](https://unofficial.gitlab.tools/visual-pipelines/).
 There is a [plan to make it an official part of GitLab](https://gitlab.com/groups/gitlab-org/-/epics/4069)
 in the future, but it's available for anyone who wants to try it at the above link.
@@ -134,7 +134,7 @@ git push origin master
 Now if you go to the **Pipelines** page you will see that the pipeline is
 pending.
 
-NOTE: **Note:**
+NOTE:
 If you have a [mirrored repository where GitLab pulls from](../../user/project/repository/repository_mirroring.md#pulling-from-a-remote-repository),
 you may need to enable pipeline triggering in your project's
 **Settings > Repository > Pull from a remote repository > Trigger pipelines for mirror updates**.

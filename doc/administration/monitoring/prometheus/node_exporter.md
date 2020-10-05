@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 The [node exporter](https://github.com/prometheus/node_exporter) enables you to measure
 various machine resources such as memory, disk and CPU utilization.
 
-NOTE: **Note:**
+NOTE:
 For installations from source you'll have to install and configure it yourself.
 
 To enable the node exporter:

@@ -21,7 +21,7 @@ GitLab has several features based on receiving incoming emails:
 
 ## Requirements
 
-NOTE: **Note:**
+NOTE:
 It is **not** recommended to use an email address that receives or will receive any
 messages not intended for the GitLab instance. Any incoming emails not intended
 for GitLab will receive a reject notice.
@@ -252,7 +252,7 @@ incoming_email:
 
 Example configuration for Gmail/G Suite. Assumes mailbox `gitlab-incoming@gmail.com`.
 
-NOTE: **Note:**
+NOTE:
 `incoming_email_email` cannot be a Gmail alias account.
 
 Example for Omnibus installs:

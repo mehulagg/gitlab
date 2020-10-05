@@ -153,7 +153,7 @@ Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.
 CAUTION: **Warning:**
 The following operations can disrupt your GitLab performance.
 
-NOTE: **Note:**
+NOTE:
 It is safe to re-execute these commands, especially if you have 1000+ pending jobs which would likely overflow your runtime memory.
 
 **For Omnibus installations**
@@ -201,7 +201,7 @@ Below you can find some guides to help you change editions easily.
 
 ### Community to Enterprise Edition
 
-NOTE: **Note:**
+NOTE:
 The following guides are for subscribers of the Enterprise Edition only.
 
 If you wish to upgrade your GitLab installation from Community to Enterprise

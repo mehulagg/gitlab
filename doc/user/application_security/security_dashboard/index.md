@@ -168,7 +168,7 @@ You can export all your vulnerabilities in CSV (comma separated values) format b
 ready, the CSV report downloads to your local machine. The report contains all vulnerabilities for
 the projects defined in the Security Dashboard, as filters don't apply to the export function.
 
-NOTE: **Note:**
+NOTE:
 It may take several minutes for the download to start if your project contains
 thousands of vulnerabilities. Don't close the page until the download finishes.
 

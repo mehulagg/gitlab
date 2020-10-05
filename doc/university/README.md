@@ -198,7 +198,7 @@ The GitLab University curriculum is composed of GitLab videos, screencasts, pres
 
 ## 5. Resources for GitLab Team Members
 
-NOTE: **Note:**
+NOTE:
 Some content can only be accessed by GitLab team members.
 
 1. [Sales Path](https://about.gitlab.com/handbook/sales/onboarding/)

@@ -57,7 +57,7 @@ Certificate:
 Smartcards with X.509 certificates using SAN extensions can be used to authenticate
 with GitLab.
 
-NOTE: **Note:**
+NOTE:
 This is an experimental feature. Smartcard authentication against local databases may
 change or be removed completely in future releases.
 
@@ -208,7 +208,7 @@ attribute. As a prerequisite, you must use an LDAP server that:
      client_certificate_required_port: 3443
    ```
 
-   NOTE: **Note:**
+   NOTE:
    Assign a value to at least one of the following variables:
    `client_certificate_required_host` or `client_certificate_required_port`.
 

@@ -56,7 +56,7 @@ Find your project's **Burndown Chart** under **Project > Issues > Milestones**,
 and select a milestone from your current ones, while for group's, access the **Groups** dashboard,
 select a group, and go through **Issues > Milestones** on the sidebar.
 
-NOTE: **Note:**
+NOTE:
 You're able to [promote project](index.md#promoting-project-milestones-to-group-milestones) to group milestones and still see the **Burndown Chart** for them, respecting license limitations.
 
 The chart indicates the project's progress throughout that milestone (for issues assigned to it).

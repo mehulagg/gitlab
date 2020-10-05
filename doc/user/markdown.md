@@ -15,7 +15,7 @@ website uses an extended Kramdown gem, [GitLab Kramdown](https://gitlab.com/gitl
 Consult the [GitLab Kramdown Guide](https://about.gitlab.com/handbook/markdown-guide/)
 for a complete Kramdown reference.
 
-NOTE: **Note:**
+NOTE:
 We encourage you to view this document as [rendered by GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md).
 
 ## GitLab Flavored Markdown (GFM)
@@ -78,7 +78,7 @@ character of the top list item (`C` in this case):
    - dark
    - milk
 
-NOTE: **Note:**
+NOTE:
 We flag any significant differences between Redcarpet and CommonMark
   Markdown in this document.
 
@@ -259,13 +259,13 @@ If you're new to this, don't be <img src="https://gitlab.com/gitlab-org/gitlab-f
 
 Consult the [Emoji Cheat Sheet](https://www.webfx.com/tools/emoji-cheat-sheet/) for a list of all supported emoji codes. <img src="https://gitlab.com/gitlab-org/gitlab-foss/raw/master/app/assets/images/emoji/thumbsup.png" width="20px" height="20px" style="display:inline;margin:0">
 
-NOTE: **Note:**
+NOTE:
 The emoji example above uses hard-coded images for this documentation. The emoji,
 when rendered within GitLab, may appear different depending on the OS and browser used.
 
 Most emoji are natively supported on macOS, Windows, iOS, Android, and fall back on image-based emoji where there is no support.
 
-NOTE: **Note:**
+NOTE:
 On Linux, you can download [Noto Color Emoji](https://www.google.com/get/noto/help/emoji/)
 to get full native emoji support. Ubuntu 18.04 (like many modern Linux distributions) has
 this font installed by default.
@@ -402,7 +402,7 @@ a^2+b^2=c^2
 
 _Be advised that KaTeX only supports a [subset](https://katex.org/docs/supported.html) of LaTeX._
 
-NOTE: **Note:**
+NOTE:
 This also works for the Asciidoctor `:stem: latexmath`. For details see
 the [Asciidoctor user manual](https://asciidoctor.org/docs/user-manual/#activating-stem-support).
 
@@ -776,7 +776,7 @@ Combined emphasis with **asterisks and _underscores_**.
 
 Strikethrough uses two tildes. ~~Scratch this.~~
 
-NOTE: **Note:**
+NOTE:
 Strikethrough is not part of the core Markdown standard, but is part of GFM.
 
 #### Multiple underscores in words and mid-word emphasis
@@ -1105,7 +1105,7 @@ These details <em>remain</em> <strong>hidden</strong> until expanded.
 
 Markdown inside these tags is supported as well.
 
-NOTE: **Note:**
+NOTE:
 If your Markdown isn't rendering correctly, try adding
 `{::options parse_block_html="true" /}` to the top of the page, and add
 `markdown="span"` to the opening summary tag like this: `<summary markdown="span">`.
@@ -1244,7 +1244,7 @@ Do not change to reference style links.
 
 Some text to show that the reference links can follow later.
 
-NOTE: **Note:**
+NOTE:
 Relative links do not allow the referencing of project files in a wiki
 page, or a wiki page in a project file. The reason for this is that a wiki is always
 in a separate Git repository in GitLab. For example, `[I'm a reference-style link](style)`
@@ -1437,7 +1437,7 @@ Example:
 Additionally, you can choose the alignment of text within columns by adding colons (`:`)
 to the sides of the "dash" lines in the second row. This affects every cell in the column.
 
-NOTE: **Note:**
+NOTE:
 [Within GitLab itself](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/user/markdown.md#tables),
 the headers are always left-aligned in Chrome and Firefox, and centered in Safari.
 

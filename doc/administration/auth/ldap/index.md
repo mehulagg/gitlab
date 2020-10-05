@@ -21,7 +21,7 @@ Users added through LDAP take a [licensed seat](../../../subscriptions/self_mana
 GitLab Enterprise Editions (EE) include enhanced integration,
 including group membership syncing as well as multiple LDAP servers support.
 
-NOTE: **Note:**
+NOTE:
 [Microsoft Active Directory Trusts](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc771568(v=ws.10)) are not supported.
 
 ## Overview
@@ -55,7 +55,7 @@ are already logged in or are using Git over SSH will still be able to access
 GitLab for up to one hour. Manually block the user in the GitLab Admin Area to
 immediately block all access.
 
-NOTE: **Note:**
+NOTE:
 GitLab Enterprise Edition Starter supports a
 [configurable sync time](#adjusting-ldap-user-sync-schedule).
 
@@ -94,13 +94,13 @@ There is a Rake task to check LDAP configuration. After configuring LDAP
 using the documentation below, see [LDAP check Rake task](../../raketasks/check.md#ldap-check)
 for information on the LDAP check Rake task.
 
-NOTE: **Note:**
+NOTE:
 The `encryption` value `simple_tls` corresponds to 'Simple TLS' in the LDAP
 library. `start_tls` corresponds to StartTLS, not to be confused with regular TLS.
 Normally, if you specify `simple_tls` it will be on port 636, while `start_tls` (StartTLS)
 would be on port 389. `plain` also operates on port 389. Removed values: `tls` was replaced with `start_tls` and `ssl` was replaced with `simple_tls`.
 
-NOTE: **Note:**
+NOTE:
 LDAP users must have an email address set, regardless of whether it is used to sign-in.
 
 ### Example Configurations **(CORE ONLY)**
@@ -430,7 +430,7 @@ gitlab_rails['ldap_servers'] = {
 }
 ```
 
-NOTE: **Note:**
+NOTE:
 Any number of LDAP servers can be configured. However, make sure to use a unique naming convention for the `label` section of each entry as this will be the display name of the tab shown on the sign-in page.
 
 ## User sync **(STARTER ONLY)**
@@ -445,7 +445,7 @@ The process executes the following access checks:
   blocked/disabled state). This will only be checked if
   `active_directory: true` is set in the LDAP configuration.
 
-NOTE: **Note:**
+NOTE:
 In Active Directory, a user is marked as disabled/blocked if the user
 account control attribute (`userAccountControl:1.2.840.113556.1.4.803`)
 has bit 2 set. See <https://ctovswild.com/2009/09/03/bitmask-searches-in-ldap/>
@@ -460,12 +460,12 @@ The process will also update the following user information:
 - If `sync_ssh_keys` is set, SSH public keys.
 - If Kerberos is enabled, Kerberos identity.
 
-NOTE: **Note:**
+NOTE:
 The LDAP sync process updates existing users while new users are created on first sign in.
 
 ### Adjusting LDAP user sync schedule **(STARTER ONLY)**
 
-NOTE: **Note:**
+NOTE:
 These are cron formatted values. You can use a crontab generator to create
 these values, for example <http://www.crontabgenerator.com/>.
 
@@ -559,7 +559,7 @@ administrators. Specify a group CN for `admin_group` and all members of the
 LDAP group will be given administrator privileges. The configuration will look
 like the following.
 
-NOTE: **Note:**
+NOTE:
 Administrators will not be synced unless `group_base` is also
 specified alongside `admin_group`. Also, only specify the CN of the admin
 group, as opposed to the full DN.
@@ -617,7 +617,7 @@ To enable it you need to:
 
 ### Adjusting LDAP group sync schedule **(STARTER ONLY)**
 
-NOTE: **Note:**
+NOTE:
 These are cron formatted values. You can use a crontab generator to create
 these values, for example [Crontab Generator](http://www.crontabgenerator.com/).
 
@@ -727,7 +727,7 @@ Other LDAP servers should work, too.
 Active Directory also supports nested groups. Group sync will recursively
 resolve membership if `active_directory: true` is set in the configuration file.
 
-NOTE: **Note:**
+NOTE:
 Nested group memberships are resolved only if the nested group
 is found within the configured `group_base`. For example, if GitLab sees a
 nested group with DN `cn=nested_group,ou=special_groups,dc=example,dc=com` but

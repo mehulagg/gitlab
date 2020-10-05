@@ -35,7 +35,7 @@ After you add or change an existing common metric, you must [re-run the import s
 
 Or, you can create a database migration:
 
-NOTE: **Note:**
+NOTE:
 If a query metric (which is identified by `id:`) is removed it will not be removed from database by default.
 You might want to add additional database migration that makes a decision what to do with removed one.
 For example: you might be interested in migrating all dependent data to a different metric.

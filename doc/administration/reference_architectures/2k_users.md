@@ -64,7 +64,7 @@ To set up GitLab and its components to accommodate up to 2,000 users:
 
 ## Configure the external load balancer
 
-NOTE: **Note:**
+NOTE:
 This architecture has been tested and validated with [HAProxy](https://www.haproxy.org/).
 Although you can use a load balancer with a similar set of features, GitLab
 hasn't validated other load balancers.
@@ -386,7 +386,7 @@ Be sure to note the following items:
   to restrict access to the Gitaly server. Another option is to
   [use TLS](#gitaly-tls-support).
 
-NOTE: **Note:**
+NOTE:
 The token referred to throughout the Gitaly documentation is an arbitrary
 password selected by the administrator. This token is unrelated to tokens
 created for the GitLab API or other similar web API tokens.
@@ -481,7 +481,7 @@ nodes (including the Gitaly node using the certificate) and on all client nodes
 that communicate with it following the procedure described in
 [GitLab custom certificate configuration](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
-NOTE: **Note:**
+NOTE:
 The self-signed certificate must specify the address you use to access the
 Gitaly server. If you are addressing the Gitaly server by a hostname, you can
 either use the Common Name field for this, or add it as a Subject Alternative
@@ -489,7 +489,7 @@ Name. If you are addressing the Gitaly server by its IP address, you must add it
 as a Subject Alternative Name to the certificate.
 [gRPC does not support using an IP address as Common Name in a certificate](https://github.com/grpc/grpc/issues/2691).
 
-NOTE: **Note:**
+NOTE:
 It is possible to configure Gitaly servers with both an
 unencrypted listening address `listen_addr` and an encrypted listening
 address `tls_listen_addr` at the same time. This allows you to do a
@@ -537,7 +537,7 @@ To configure Gitaly with TLS:
 
 ## Configure GitLab Rails
 
-NOTE: **Note:**
+NOTE:
 In our architectures we run each GitLab Rails node using the Puma webserver
 and have its number of workers set to 90% of available CPUs along with four threads. For
 nodes that are running Rails with other components the worker value should be reduced
@@ -671,7 +671,7 @@ On each node perform the following:
    [Gitaly node](#configure-gitaly) and
    [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
-NOTE: **Note:**
+NOTE:
 When you specify `https` in the `external_url`, as in the example
 above, GitLab assumes you have SSL certificates in `/etc/gitlab/ssl/`. If
 certificates are not present, NGINX will fail to start. See the
@@ -688,7 +688,7 @@ for more information.
    sudo gitlab-rake gitlab:db:configure
    ```
 
-    NOTE: **Note:**
+    NOTE:
     If you encounter a `rake aborted!` error stating that PgBouncer is failing to connect to
     PostgreSQL it may be that your PgBouncer node's IP address is missing from
     PostgreSQL's `trust_auth_cidr_addresses` in `gitlab.rb` on your database nodes. See
@@ -879,7 +879,7 @@ functioning backups is encountered.
 
 ## Configure Advanced Search **(STARTER ONLY)**
 
-NOTE: **Note:**
+NOTE:
 Elasticsearch cluster design and requirements are dependent on your specific data.
 For recommended best practices on how to set up your Elasticsearch cluster
 alongside your instance, read how to

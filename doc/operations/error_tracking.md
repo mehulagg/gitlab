@@ -20,7 +20,7 @@ You can sign up to the cloud hosted <https://sentry.io>, deploy your own [on-pre
 
 ### Enabling Sentry
 
-NOTE: **Note:**
+NOTE:
 You will need at least Maintainer [permissions](../user/permissions.md) to enable the Sentry integration.
 
 GitLab provides an easy way to connect Sentry to your project:
@@ -46,7 +46,7 @@ You may also want to enable Sentry's GitLab integration by following the steps i
 
 ## Error Tracking List
 
-NOTE: **Note:**
+NOTE:
 You will need at least Reporter [permissions](../user/permissions.md) to view the Error Tracking list.
 
 You can find the Error Tracking list at **Operations > Error Tracking** in your project's sidebar.

@@ -136,7 +136,7 @@ curl --data "name=foo" --header "PRIVATE-TOKEN: <your_access_token>" "https://gi
 
 ### Post data using JSON content
 
-NOTE: **Note:**
+NOTE:
 In this example we create a new group. Watch carefully the single and double
 quotes.
 

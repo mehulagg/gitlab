@@ -19,7 +19,7 @@ To access the Compliance Dashboard for a group, navigate to **{shield}** **Secur
 
 ![Compliance Dashboard](img/compliance_dashboard_v13_3_1.png)
 
-NOTE: **Note:**
+NOTE:
 The Compliance Dashboard shows only the latest MR on each project.
 
 ## Use cases
@@ -71,6 +71,6 @@ merge request author, merge request ID, merge user, pipeline ID, group name, pro
 
 To download the Chain of Custody report, navigate to **{shield}** **Security & Compliance > Compliance** on the group's menu and click **List of all merge commits**
 
-NOTE: **Note:**
+NOTE:
 The Chain of Custody report download is a CSV file, with a maximum size of 15 MB.
 The remaining records are truncated when this limit is reached.

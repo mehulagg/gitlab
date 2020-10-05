@@ -91,12 +91,12 @@ Anyone satisfying the [requirements](#requirements) will be able to edit the
 content of the pages without prior knowledge of Git or of your site's
 codebase.
 
-NOTE: **Note:**
+NOTE:
 From GitLab 13.1 onwards, the YAML front matter of Markdown files is hidden on the
 WYSIWYG editor to avoid unintended changes. To edit it, use the Markdown editing mode, the regular
 GitLab file editor, or the Web IDE.
 
-NOTE: **Note:**
+NOTE:
 A new configuration file for the Static Site Editor was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/4267)
 in GitLab 13.4. Beginning in 13.5, the `.gitlab/static-site-editor.yml` file will store additional
 configuration options for the editor. When the functionality of the existing `data/config.yml` file

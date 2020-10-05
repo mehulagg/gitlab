@@ -43,7 +43,7 @@ Available commands:
 [output truncated]
 ```
 
-NOTE: **Note:**
+NOTE:
 GitLab currently only supports NuGet v3. Earlier versions are not supported.
 
 ### macOS support
@@ -60,7 +60,7 @@ mono nuget.exe
 
 ## Enabling the NuGet Repository
 
-NOTE: **Note:**
+NOTE:
 This option is available only if your GitLab administrator has
 [enabled support for the Package Registry](../../../administration/packages/index.md).
 

@@ -40,7 +40,7 @@ in GitLab to examine alerts in action.
 
 ## Enable Alerts
 
-NOTE: **Note:**
+NOTE:
 You need at least Maintainer [permissions](../../user/permissions.md) to enable
 the Alerts feature.
 
@@ -83,7 +83,7 @@ for requests to the alerts endpoint.
 
 You can monitor alerts using a GitLab integration with [Opsgenie](https://www.atlassian.com/software/opsgenie).
 
-NOTE: **Note:**
+NOTE:
 If you enable the Opsgenie integration, you can't have other GitLab alert
 services, such as [Generic Alerts](generic_alerts.md) or Prometheus alerts,
 active at the same time.
@@ -173,7 +173,7 @@ In large teams, where there is shared ownership of an alert, it can be
 difficult to track who is investigating and working on it. The Alert detail
 view enables you to update the Alert assignee:
 
-NOTE: **Note:**
+NOTE:
 GitLab supports only a single assignee per alert.
 
 1. To display the list of current alerts, navigate to **Operations > Alerts**:

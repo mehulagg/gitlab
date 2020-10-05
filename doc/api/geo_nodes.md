@@ -234,7 +234,7 @@ Example response:
 
 Removes the Geo node.
 
-NOTE: **Note:**
+NOTE:
 Only a Geo primary node will accept this request.
 
 ```plaintext
