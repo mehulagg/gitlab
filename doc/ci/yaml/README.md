@@ -2078,7 +2078,7 @@ This example creates four paths of execution:
 
 - If `needs:` is set to point to a job that is not instantiated
   because of `only/except` rules or otherwise does not exist, the
-  pipeline is created with a YAML error.
+  pipeline is not created and a YAML error is shown.
 - The maximum number of jobs that a single job can need in the `needs:` array is limited:
   - For GitLab.com, the limit is 50. For more information, see our
     [infrastructure issue](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/7541).
