@@ -149,7 +149,6 @@ RSpec.describe OperationsHelper, :routing do
     end
 
     context 'incident_sla feature enabled' do
-      # This is implicitly disabled due to it being a beta FF
       before do
         stub_licensed_features(incident_sla: true)
       end
