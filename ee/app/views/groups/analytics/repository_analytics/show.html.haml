@@ -5,4 +5,5 @@
     = _("Repositories Analytics")
 
 #js-group-repository-analytics{ data: { group_analytics_coverage_reports_path: group_analytics_coverage_reports_path(@group, format: :csv, ref_path: "refs/heads/master"),
-  group_full_path: @group.full_path } }
+  group_full_path: @group.full_path,
+  coverage_table_empty_state_svg_path: image_path('illustrations/chart-empty-state.svg') } }

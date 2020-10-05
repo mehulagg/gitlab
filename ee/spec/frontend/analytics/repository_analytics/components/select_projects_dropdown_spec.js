@@ -79,7 +79,9 @@ describe('Select projects dropdown component', () => {
       jest.spyOn(wrapper.vm, '$emit');
       selectAllProjects();
 
-      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-all-projects');
+      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-all-projects', [
+        { id: 1, name: '1', isSelected: false },
+      ]);
     });
   });
 
@@ -118,7 +120,11 @@ describe('Select projects dropdown component', () => {
       jest.spyOn(wrapper.vm, '$emit');
       selectProjectById(1);
 
-      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-project', 1);
+      expect(wrapper.vm.$emit).toHaveBeenCalledWith('select-project', {
+        id: 1,
+        name: '1',
+        isSelected: true,
+      });
     });
   });
 
