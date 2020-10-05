@@ -453,4 +453,30 @@ RSpec.describe AlertManagement::Alert do
       expect { subject }.to change { alert.events }.by(1)
     end
   end
+
+  describe '#status_event_for' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:for_status, :event) do
+      :triggered     | :trigger
+      'triggered'    | :trigger
+      :acknowledged  | :acknowledge
+      'acknowledged' | :acknowledge
+      :resolved      | :resolve
+      'resolved'     | :resolve
+      :ignored       | :ignore
+      'ignored'      | :ignore
+      :unknown       | nil
+      nil            | nil
+      ''             | nil
+    end
+
+    with_them do
+      let(:alert) { build(:alert_management_alert, project: project) }
+
+      it 'returns event by status name' do
+        expect(alert.status_event_for(for_status)).to eq(event)
+      end
+    end
+  end
 end
