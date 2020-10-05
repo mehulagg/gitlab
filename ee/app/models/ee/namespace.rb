@@ -205,21 +205,24 @@ module EE
       end
     end
 
-    def locked_project_count
-      strong_memoize(:locked_project_count) do
+    def repository_size_excess_project_count
+      strong_memoize(:repository_size_excess_project_count) do
         namespace_size_limit = actual_size_limit
 
-        count = all_projects.with_repository_size_greater_than_project_limit.count
-        count += all_projects.with_repository_limit_greater_than(namespace_size_limit).count if namespace_size_limit.to_i > 0
+        count = all_projects.with_total_repository_size_greater_than_project_limit.count
+        count += all_projects.with_total_repository_size_greater_than(namespace_size_limit).count if namespace_size_limit.to_i > 0
         count
       end
     end
 
     def total_repository_size
       strong_memoize(:total_repository_size) do
+        total_repo_size_arel = ::ProjectStatistics.arel_table[:repository_size] + ::ProjectStatistics.arel_table[:lfs_objects_size]
+        pick_arel = Arel::Nodes::NamedFunction.new('SUM', [total_repo_size_arel])
+
         all_projects
           .joins(:statistics)
-          .pick('SUM(project_statistics.repository_size)') || 0
+          .pick(pick_arel) || 0
       end
     end
 
@@ -446,11 +449,16 @@ module EE
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)
-      select_sql = Arel::Nodes::NamedFunction.new('SUM', [::ProjectStatistics.arel_table[:repository_size] - repository_size_limit]).to_sql
+      total_repo_size_arel = ::ProjectStatistics.arel_table[:repository_size] + ::ProjectStatistics.arel_table[:lfs_objects_size]
+      select_arel = Arel::Nodes::NamedFunction.new('SUM', [total_repo_size_arel - repository_size_limit])
 
-      relation = all_projects
-      relation = project_level ? relation.with_repository_size_greater_than_project_limit : relation.with_repository_limit_greater_than(repository_size_limit)
-      relation.pluck(Arel.sql(select_sql)).first || 0 # rubocop:disable Rails/Pick
+      relation = if project_level
+                   all_projects.with_total_repository_size_greater_than_project_limit
+                 else
+                   all_projects.with_total_repository_size_greater_than(repository_size_limit)
+                 end
+
+      relation.pluck(select_arel).first || 0 # rubocop:disable Rails/Pick
     end
   end
 end

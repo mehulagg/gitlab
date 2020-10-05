@@ -1440,24 +1440,28 @@ RSpec.describe Namespace do
 
     context 'projects with a variety of repository sizes and limits' do
       before_all do
-        create_project(repository_size: 100, repository_size_limit: nil)
-        create_project(repository_size: 150, repository_size_limit: nil)
-        create_project(repository_size: 200, repository_size_limit: nil)
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil)
+        create_project(repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil)
+        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil)
 
-        create_project(repository_size: 100, repository_size_limit: 0)
-        create_project(repository_size: 150, repository_size_limit: 0)
-        create_project(repository_size: 200, repository_size_limit: 0)
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
 
-        create_project(repository_size: 300, repository_size_limit: 400)
-        create_project(repository_size: 400, repository_size_limit: 400)
-        create_project(repository_size: 500, repository_size_limit: 300)
+        create_project(repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400)
+        create_project(repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400)
+        create_project(repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400)
+        create_project(repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400)
+        create_project(repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300)
       end
 
       context 'when namespace-level repository_size_limit is not set' do
         it 'returns the total excess size of projects with repositories that exceed the size limit' do
           allow(namespace).to receive(:actual_size_limit).and_return(nil)
 
-          expect(namespace.total_repository_size_excess).to eq(200)
+          expect(namespace.total_repository_size_excess).to eq(400)
         end
       end
 
@@ -1465,7 +1469,7 @@ RSpec.describe Namespace do
         it 'returns the total excess size of projects with repositories that exceed the size limit' do
           allow(namespace).to receive(:actual_size_limit).and_return(0)
 
-          expect(namespace.total_repository_size_excess).to eq(200)
+          expect(namespace.total_repository_size_excess).to eq(400)
         end
       end
 
@@ -1473,16 +1477,16 @@ RSpec.describe Namespace do
         it 'returns the total excess size of projects with repositories that exceed the size limit' do
           allow(namespace).to receive(:actual_size_limit).and_return(150)
 
-          expect(namespace.total_repository_size_excess).to eq(250)
+          expect(namespace.total_repository_size_excess).to eq(560)
         end
       end
     end
 
     context 'when all projects have repository_size_limit of 0 (unlimited)' do
       before do
-        create_project(repository_size: 100, repository_size_limit: 0)
-        create_project(repository_size: 150, repository_size_limit: 0)
-        create_project(repository_size: 200, repository_size_limit: 0)
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
 
         allow(namespace).to receive(:actual_size_limit).and_return(150)
       end
@@ -1493,26 +1497,30 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#locked_project_count' do
+  describe '#repository_size_excess_project_count' do
     let_it_be(:namespace) { create(:namespace) }
 
     before do
-      namespace.clear_memoization(:locked_project_count)
+      namespace.clear_memoization(:repository_size_excess_project_count)
     end
 
     context 'projects with a variety of repository sizes and limits' do
       before_all do
-        create_project(repository_size: 100, repository_size_limit: nil)
-        create_project(repository_size: 150, repository_size_limit: nil)
-        create_project(repository_size: 200, repository_size_limit: nil)
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil)
+        create_project(repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil)
+        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil)
 
-        create_project(repository_size: 100, repository_size_limit: 0)
-        create_project(repository_size: 150, repository_size_limit: 0)
-        create_project(repository_size: 200, repository_size_limit: 0)
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
 
-        create_project(repository_size: 300, repository_size_limit: 400)
-        create_project(repository_size: 400, repository_size_limit: 400)
-        create_project(repository_size: 500, repository_size_limit: 300)
+        create_project(repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400)
+        create_project(repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400)
+        create_project(repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400)
+        create_project(repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400)
+        create_project(repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300)
       end
 
       context 'when namespace-level repository_size_limit is not set' do
@@ -1521,7 +1529,7 @@ RSpec.describe Namespace do
         end
 
         it 'returns the count of projects with repositories that exceed the size limit' do
-          expect(namespace.locked_project_count).to eq(1)
+          expect(namespace.repository_size_excess_project_count).to eq(2)
         end
       end
 
@@ -1531,7 +1539,7 @@ RSpec.describe Namespace do
         end
 
         it 'returns the count of projects with repositories that exceed the size limit' do
-          expect(namespace.locked_project_count).to eq(1)
+          expect(namespace.repository_size_excess_project_count).to eq(2)
         end
       end
 
@@ -1541,22 +1549,22 @@ RSpec.describe Namespace do
         end
 
         it 'returns the count of projects with repositories that exceed the size limit' do
-          expect(namespace.locked_project_count).to eq(2)
+          expect(namespace.repository_size_excess_project_count).to eq(4)
         end
       end
     end
 
     context 'when all projects have repository_size_limit of 0 (unlimited)' do
       before do
-        create_project(repository_size: 100, repository_size_limit: 0)
-        create_project(repository_size: 150, repository_size_limit: 0)
-        create_project(repository_size: 200, repository_size_limit: 0)
+        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: 0)
+        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
 
         allow(namespace).to receive(:actual_size_limit).and_return(150)
       end
 
       it 'returns zero regardless of the namespace or instance-level repository_size_limit' do
-        expect(namespace.locked_project_count).to eq(0)
+        expect(namespace.repository_size_excess_project_count).to eq(0)
       end
     end
   end
@@ -1565,13 +1573,13 @@ RSpec.describe Namespace do
     let(:namespace) { create(:namespace) }
 
     before do
-      create_project(repository_size: 100, repository_size_limit: nil)
-      create_project(repository_size: 150, repository_size_limit: 0)
-      create_project(repository_size: 325, repository_size_limit: 400)
+      create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
+      create_project(repository_size: 150, lfs_objects_size: 100, repository_size_limit: 0)
+      create_project(repository_size: 325, lfs_objects_size: 200, repository_size_limit: 400)
     end
 
     it 'returns the total size of all project repositories' do
-      expect(namespace.total_repository_size).to eq(575)
+      expect(namespace.total_repository_size).to eq(875)
     end
   end
 
@@ -1790,9 +1798,9 @@ RSpec.describe Namespace do
     end
   end
 
-  def create_project(repository_size:, repository_size_limit:)
+  def create_project(repository_size:, lfs_objects_size:, repository_size_limit:)
     create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
-      create(:project_statistics, project: project, repository_size: repository_size)
+      create(:project_statistics, project: project, repository_size: repository_size, lfs_objects_size: lfs_objects_size)
     end
   end
 end
