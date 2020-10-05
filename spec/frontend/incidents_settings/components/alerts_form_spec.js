@@ -45,7 +45,6 @@ describe('Alert integration settings form', () => {
           send_email: wrapper.vm.sendEmailEnabled,
           auto_close_incident: wrapper.vm.autoCloseIncident,
         }),
-        true,
       );
     });
   });
