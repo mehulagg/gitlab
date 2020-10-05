@@ -33,7 +33,6 @@ You will need to activate the endpoint and obtain credentials to set up this int
 
 For GitLab versions 13.1 and greater, please see [External Prometheus Instances](../metrics/alerts.md#external-prometheus-instances) to configure alerts for this integration. 
 
-
 ## Customizing the payload
 
 You can customize the payload by sending the following parameters. This applies to all types of integrations. All fields
