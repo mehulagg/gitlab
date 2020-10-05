@@ -25,11 +25,20 @@ export const severityFilter = {
   options: parseOptions(SEVERITY_LEVELS),
 };
 
+const getScannerFilterOptions = () => {
+  const options = parseOptions(REPORT_TYPES);
+  return options.map(option => ({
+    ...option,
+    queryId: `GitLab:${option.id}`,
+    externalId: 'NO_SCANNERS_FOUND',
+  }));
+};
+
 export const scannerFilter = {
   name: s__('Reports|Scanner'),
   id: 'reportType',
   allOption: BASE_FILTERS.report_type,
-  options: parseOptions(REPORT_TYPES),
+  options: getScannerFilterOptions(),
 };
 
 export const getProjectFilter = projects => {

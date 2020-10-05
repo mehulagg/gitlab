@@ -1,6 +1,6 @@
 <script>
-import { GlDropdownSectionHeader, GlDropdownDivider } from '@gitlab/ui';
-import { groupBy, cloneDeep, assignWith } from 'lodash';
+import { GlDropdownDivider, GlDropdownSectionHeader } from '@gitlab/ui';
+import { assignWith, cloneDeep, groupBy } from 'lodash';
 import { scannerFilter } from 'ee/security_dashboard/helpers';
 import DashboardFilter from './filter.vue';
 import FilterOption from './filter_option.vue';
@@ -15,7 +15,6 @@ export default {
     DashboardFilter,
     FilterOption,
   },
-  extends: DashboardFilter,
   inject: ['dashboardType'],
   apollo: {
     customScanners: {
@@ -26,9 +25,10 @@ export default {
         return { fullPath: this.queryPath };
       },
       update(data) {
-        const { nodes } = Object.values(data)[0].vulnerabilityScanners;
+        let { nodes } = Object.values(data)[0].vulnerabilityScanners;
+        nodes = nodes.map(node => ({ ...node, queryId: `${node.externalId}:${node.reportType}` }));
         const groups = groupBy(nodes, 'vendor');
-        console.log('groups', groups);
+        console.log('custom scanner groups', groups);
         return groups;
       },
     },
@@ -39,9 +39,12 @@ export default {
       required: true,
     },
   },
-  data: () => ({
-    customScanners: {},
-  }),
+  data() {
+    return {
+      customScanners: {},
+      selectedOptions: this.getSelectedOptions(),
+    };
+  },
   computed: {
     queryType() {
       const { dashboardType } = this;
@@ -49,41 +52,75 @@ export default {
       if (dashboardType === 'group') return groupSpecificScanners;
       return instanceSpecificScanners;
     },
-    customScannerOptions() {
-      return Object.values(this.customScanners)
-        .flatMap(x => x)
-        .map(x => ({
-          id: x.externalId,
-          name: x.name,
-        }));
-    },
     filterWithCustomScanners() {
-      const defaultFilter = cloneDeep(scannerFilter);
-      defaultFilter.options = scannerFilter.options.concat(this.customScannerOptions);
-      return scannerFilter;
+      const customScannerOptions = Object.values(this.customScanners).flatMap(x => x);
+
+      const filter = cloneDeep(scannerFilter);
+      filter.options = filter.options.concat(customScannerOptions);
+      return filter;
     },
     groups() {
       const defaultGroup = { GitLab: scannerFilter.options };
+      // If the group already exists, combine the one in defaultGroup with the one in customScanners.
       return assignWith(defaultGroup, this.customScanners, (original = [], updated) =>
         original.concat(updated),
       );
+    },
+  },
+  watch: {
+    selectedOptions() {
+      const reportType = [];
+      const scanner = [];
+      const selectedOptions = Object.values(this.selectedOptions);
+
+      selectedOptions.forEach(option => {
+        reportType.push(option.reportType);
+        scanner.push(option.externalId);
+      });
+
+      this.$router.push({ query: { [scannerFilter.id]: selectedOptions.map(x => x.queryId) } });
+      this.$emit('filter-changed', { reportType, scanner });
+    },
+  },
+  methods: {
+    getSelectedOptions() {
+      const values = this.$route.query[scannerFilter.id];
+      const valueArray = Array.isArray(values) ? values : [values];
+      const definedArray = valueArray.filter(x => x !== undefined);
+      const selected = {};
+
+      definedArray.forEach(x => {
+        selected[x] = true;
+      });
+
+      return selected;
+    },
+    toggleFilter(option) {
+      console.log('option', option);
+      const { queryId } = option;
+      if (this.selectedOptions[queryId]) {
+        this.$delete(this.selectedOptions, queryId);
+      } else {
+        this.$set(this.selectedOptions, queryId, option);
+      }
+    },
+    isSelected(option) {
+      return Boolean(this.selectedOptions[option.queryId]);
     },
   },
 };
 </script>
 
 <template>
-  <dashboard-filter
-    #default="{ isSelected, toggleFilter }"
-    :filter="filterWithCustomScanners"
-    @setFilter="options => $emit('setFilter', options)"
-  >
+  <dashboard-filter :filter="filterWithCustomScanners">
     <template v-for="[groupName, options] in Object.entries(groups)">
-      <gl-dropdown-divider :key="groupName" />
-      <gl-dropdown-section-header :key="groupName">{{ groupName }}</gl-dropdown-section-header>
+      <gl-dropdown-divider :key="`${groupName}:divider`" />
+      <gl-dropdown-section-header :key="`${groupName}:header`">
+        {{ groupName }}
+      </gl-dropdown-section-header>
       <filter-option
         v-for="option in options"
-        :key="option.id || option.externalId"
+        :key="option.queryId"
         :display-name="option.name"
         :is-selected="isSelected(option)"
         @click="toggleFilter(option)"

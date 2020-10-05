@@ -1,5 +1,4 @@
 <script>
-import { isEmpty } from 'lodash';
 import { GlDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
 import FilterOption from './filter_option.vue';
 
@@ -19,7 +18,7 @@ export default {
   data() {
     return {
       filterTerm: '',
-      selectedOptions: {},
+      selectedOptions: this.getSelectedOptions(),
     };
   },
   computed: {
@@ -30,7 +29,7 @@ export default {
       if (this.selectedCount > 0) {
         const id = Object.keys(this.selectedOptions)[0];
         const option = this.filter.options.find(x => x.id === id);
-        return option.name;
+        return option?.name || '-';
       }
 
       return this.filter.allOption.name;
@@ -51,21 +50,24 @@ export default {
     selectedOptions() {
       const { id } = this.filter;
       const selectedFilters = Object.keys(this.selectedOptions);
+      console.log('emit filter-changed', { [id]: selectedFilters });
+      this.$router.push({ query: { [id]: selectedFilters } });
       this.$emit('filter-changed', { [id]: selectedFilters });
-    },
-    '$route.query': {
-      immediate: true,
-      handler(query) {
-        const values = query[this.filter.id];
-        const valueArray = Array.isArray(values) ? values : [values];
-        const definedArray = valueArray.filter(x => x !== undefined);
-        definedArray.forEach(value => {
-          this.$set(this.selectedOptions, value, true);
-        });
-      },
     },
   },
   methods: {
+    getSelectedOptions() {
+      const values = this.$route.query[this.filter.id];
+      const valueArray = Array.isArray(values) ? values : [values];
+      const definedArray = valueArray.filter(x => x !== undefined);
+      const selected = {};
+
+      definedArray.forEach(x => {
+        selected[x] = true;
+      });
+
+      return selected;
+    },
     toggleFilter(option) {
       console.log('toggle', option);
       if (this.selectedOptions[option.id]) {
@@ -140,7 +142,7 @@ export default {
           @click="deselectAllOptions"
         />
 
-        <slot :is-selected="isSelected" :toggleFilter="toggleFilter">
+        <slot>
           <filter-option
             v-for="option in filteredOptions"
             :key="option.id"
