@@ -50,3 +50,5 @@ module Mutations
     end
   end
 end
+
+Mutations::Boards::Lists::Update.prepend_if_ee('::EE::Mutations::Boards::Lists::Update')
