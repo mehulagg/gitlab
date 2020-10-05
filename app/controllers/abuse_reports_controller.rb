@@ -3,6 +3,8 @@
 class AbuseReportsController < ApplicationController
   before_action :set_user, only: [:new]
 
+  feature_category :not_owned
+
   def new
     @abuse_report = AbuseReport.new
     @abuse_report.user_id = @user.id
