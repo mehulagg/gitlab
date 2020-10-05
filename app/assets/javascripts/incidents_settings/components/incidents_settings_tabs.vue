@@ -47,7 +47,7 @@ export default {
         >
           <component :is="tab.component" class="gl-pt-3" :data-testid="`${tab.component}-tab`" />
         </gl-tab>
-        <slot></slot>
+        <slot name="additional-tabs"></slot>
       </gl-tabs>
     </div>
   </section>
