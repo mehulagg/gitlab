@@ -23,8 +23,7 @@ You will need to activate the endpoint and obtain credentials to set up this int
 1. Sign in to GitLab as a user with maintainer [permissions](../../user/permissions.md)
    for a project.
 1. Navigate to **Settings > Operations** in your project.
-1. Expand the **Alerts** section
-1. Select **Generic** from the Integration drop-down
+1. Expand the **Alerts** section, and in the **Integration** dropdown menu, select **Generic**.
 1. Toggle the **Active** alert setting to display the **URL** and **Authorization Key**
    for the webhook configuration.
 
