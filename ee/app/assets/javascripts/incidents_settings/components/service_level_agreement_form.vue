@@ -26,9 +26,9 @@ const units = {
 export default {
   i18n: {
     description: s__(`IncidentSettings|You may choose to introduce a countdown timer in incident issues
-    to better track Service Level Aggreements (SLAs). The timer is automatically started
-    when the incident is created, and sets a time limit for the incident to be resolved
-    in. When activated, "time to SLA" countdown will appear on all new incidents.`),
+    to better track Service Level Agreements (SLAs). The timer is automatically started when the incident
+    is created, and sets a time limit for the incident to be resolved in. When activated, "time to SLA"
+    countdown will appear on all new incidents.`),
   },
   units: Object.values(units),
   components: {
