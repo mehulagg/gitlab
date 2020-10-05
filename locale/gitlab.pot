@@ -13656,7 +13656,7 @@ msgstr ""
 msgid "IncidentSettings|When activated, this will apply to all incidents within the project"
 msgstr ""
 
-msgid "IncidentSettings|You may choose to introduce a countdown timer in incident issues to better track Service Level Aggreements (SLAs). The timer is automatically started when the incident is created, and sets a time limit for the incident to be resolved in. When activated, \"time to SLA\" countdown will appear on all incidents and it will automatically start counting down as soon as the issue is created. Should the time limit be exceeded, a system note and a label will be added to the issue as a note that the incident was not resolved within the time allotted."
+msgid "IncidentSettings|You may choose to introduce a countdown timer in incident issues to better track Service Level Agreements (SLAs). The timer is automatically started when the incident is created, and sets a time limit for the incident to be resolved in. When activated, \"time to SLA\" countdown will appear on all new incidents."
 msgstr ""
 
 msgid "IncidentSettings|hours"
@@ -22430,9 +22430,6 @@ msgid "Save variables"
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
-msgstr ""
-
-msgid "Saved successfully"
 msgstr ""
 
 msgid "Saving"
