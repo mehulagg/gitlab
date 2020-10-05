@@ -1631,7 +1631,7 @@ job:
     - branches
 ```
 
-In this example, `job` run sonly for refs that are tagged, or if a build is
+In this example, `job` runs only for refs that are tagged, or if a build is
 explicitly requested by an API trigger or a [Pipeline Schedule](../pipelines/schedules.md):
 
 ```yaml
