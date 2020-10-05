@@ -2070,7 +2070,7 @@ This example creates four paths of execution:
 - macOS path: the `mac:rspec` and `mac:rubocop` jobs runs as soon
   as the `mac:build` job finishes, without waiting for `linux:build` to finish.
 
-- The `production` job is executed as soon as all previous jobs
+- The `production` job runs as soon as all previous jobs
   finish; in this case: `linux:build`, `linux:rspec`, `linux:rubocop`,
   `mac:build`, `mac:rspec`, `mac:rubocop`.
 
