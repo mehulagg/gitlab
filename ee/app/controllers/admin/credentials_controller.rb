@@ -11,6 +11,8 @@ class Admin::CredentialsController < Admin::ApplicationController
 
   track_unique_visits :index, target_id: 'i_compliance_credential_inventory'
 
+  feature_category :compliance_management
+
   private
 
   def check_license_credentials_inventory_available!
