@@ -116,7 +116,7 @@ To escape and encode an input YAML file (`.gitlab-ci.yml`), and `POST` it to the
 GitLab API using `curl` and `jq`:
 
 ```shell
-jq -n --arg yaml "$(<.gitlab-ci.yaml)" '.content=$yaml' \
+jq --null-input --arg yaml "$(<.gitlab-ci.yaml)" '.content=$yaml' \
 | curl 'https://gitlab.example.com/api/v4/ci/lint?include_merged_yaml=true' \
 --header 'Content-Type: application/json' \
 --data @-
