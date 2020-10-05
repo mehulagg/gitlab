@@ -58,7 +58,7 @@ export default {
           :url="snippet.webUrl"
           data-qa-selector="snippet_embed_dropdown"
         />
-        <clone-dropdown-button
+        <gl-blocking-component
           v-if="canBeCloned"
           class="gl-ml-3"
           :ssh-link="snippet.sshUrlToRepo"

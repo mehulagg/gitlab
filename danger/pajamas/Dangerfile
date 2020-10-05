@@ -13,6 +13,7 @@ PATTERNS = %w[
 ].freeze
 
 BLOCKING_PATTERNS = %w[
+  gl-blocking-component
 ].freeze
 
 def get_added_lines(files)
