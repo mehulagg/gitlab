@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlTab } from '@gitlab/ui';
 import IncidentsSettingTabs from '~/incidents_settings/components/incidents_settings_tabs.vue';
-import { integrationTabsConfig } from '~/incidents_settings/constants';
+import { INTEGRATION_TABS_CONFIG } from '~/incidents_settings/constants';
 
 describe('IncidentsSettingTabs', () => {
   let wrapper;
@@ -41,7 +41,7 @@ describe('IncidentsSettingTabs', () => {
   });
 
   it('should render the tab for each active integration', () => {
-    const activeTabs = integrationTabsConfig(true).filter(tab => tab.active);
+    const activeTabs = INTEGRATION_TABS_CONFIG.filter(tab => tab.active);
 
     expect(findIntegrationTabs().length).toBe(activeTabs.length);
 

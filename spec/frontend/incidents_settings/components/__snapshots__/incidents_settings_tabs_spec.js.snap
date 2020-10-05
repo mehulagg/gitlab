@@ -58,14 +58,7 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
         />
       </gl-tab-stub>
       <!---->
-      <gl-tab-stub
-        title="Incident Settings"
-      >
-        <servicelevelagreementform-stub
-          class="gl-pt-3"
-          data-testid="ServiceLevelAgreementForm-tab"
-        />
-      </gl-tab-stub>
+       
     </gl-tabs-stub>
   </div>
 </section>
