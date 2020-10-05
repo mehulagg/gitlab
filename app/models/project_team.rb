@@ -2,6 +2,7 @@
 
 class ProjectTeam
   include BulkMemberAccessLoad
+  include AddUserRoleMethods
 
   attr_accessor :project
 
@@ -9,21 +10,11 @@ class ProjectTeam
     @project = project
   end
 
-  def add_guest(user, current_user: nil)
-    add_user(user, :guest, current_user: current_user)
-  end
-
-  def add_reporter(user, current_user: nil)
-    add_user(user, :reporter, current_user: current_user)
-  end
-
-  def add_developer(user, current_user: nil)
-    add_user(user, :developer, current_user: current_user)
-  end
-
-  def add_maintainer(user, current_user: nil)
-    add_user(user, :maintainer, current_user: current_user)
-  end
+  # def add_guest(user, **params)
+  # def add_reporter(user, **params)
+  # def add_developer(user, **params)
+  # def add_maintainer(user, **params)
+  add_user_role_methods_for %i[guest reporter developer maintainer]
 
   def add_role(user, role, current_user: nil)
     public_send(:"add_#{role}", user, current_user: current_user) # rubocop:disable GitlabSecurity/PublicSend

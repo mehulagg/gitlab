@@ -16,6 +16,7 @@ class Group < Namespace
   include Gitlab::Utils::StrongMemoize
   include GroupAPICompatibility
   include EachBatch
+  include AddUserRoleMethods
 
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
@@ -259,25 +260,12 @@ class Group < Namespace
     )
   end
 
-  def add_guest(user, current_user = nil)
-    add_user(user, :guest, current_user: current_user)
-  end
-
-  def add_reporter(user, current_user = nil)
-    add_user(user, :reporter, current_user: current_user)
-  end
-
-  def add_developer(user, current_user = nil)
-    add_user(user, :developer, current_user: current_user)
-  end
-
-  def add_maintainer(user, current_user = nil)
-    add_user(user, :maintainer, current_user: current_user)
-  end
-
-  def add_owner(user, current_user = nil)
-    add_user(user, :owner, current_user: current_user)
-  end
+  # def add_guest(user, **params)
+  # def add_reporter(user, **params)
+  # def add_developer(user, **params)
+  # def add_maintainer(user, **params)
+  # def add_owner(user, **params)
+  add_user_role_methods_for %i[guest reporter developer maintainer owner]
 
   def member?(user, min_access_level = Gitlab::Access::GUEST)
     return false unless user
