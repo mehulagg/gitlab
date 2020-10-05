@@ -1,6 +1,8 @@
 <script>
 import ProfileSelector from './profile_selector.vue';
 import SummaryCell from './summary_cell.vue';
+import { __, s__ } from '~/locale';
+import { SCAN_TYPE_OPTIONS } from 'ee/security_configuration/dast_scanner_profiles/constants';
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
@@ -21,6 +23,17 @@ export default {
     },
     newScannerProfilePath: {
       default: '',
+    },
+  },
+  methods: {
+    scanModeText(scanType) {
+      return SCAN_TYPE_OPTIONS.find(({ value }) => scanType === value)?.text;
+    },
+    ajaxSpiderText(isEnabled) {
+      return isEnabled ? __('On') : __('Off');
+    },
+    debugMessageText(isEnabled) {
+      return isEnabled ? s__('Show debug messages') : s__('Hide debug messages');
     },
   },
 };
@@ -44,7 +57,10 @@ export default {
     <template #new-profile>{{ s__('OnDemandScans|Create a new scanner profile') }}</template>
     <template #summary="{ profile }">
       <div class="row">
-        <summary-cell :label="s__('DastProfiles|Scan mode')" :value="s__('DastProfiles|Passive')" />
+        <summary-cell
+          :label="s__('DastProfiles|Scan mode')"
+          :value="scanModeText(profile.scanType)"
+        />
       </div>
       <div class="row">
         <summary-cell
@@ -54,6 +70,16 @@ export default {
         <summary-cell
           :label="s__('DastProfiles|Target timeout')"
           :value="n__('%d second', '%d seconds', profile.targetTimeout)"
+        />
+      </div>
+      <div class="row">
+        <summary-cell
+          :label="s__('DastProfiles|AJAX spider')"
+          :value="ajaxSpiderText(profile.useAjaxSpider)"
+        />
+        <summary-cell
+          :label="s__('DastProfiles|Target timeout')"
+          :value="debugMessageText(profile.showDebugMessages)"
         />
       </div>
     </template>
