@@ -12,4 +12,13 @@ RSpec.describe Security::Finding do
     it { is_expected.to validate_presence_of(:project_fingerprint) }
     it { is_expected.to validate_length_of(:project_fingerprint).is_at_most(40) }
   end
+
+  describe '.by_build_ids' do
+    let!(:finding_1) { create(:security_finding) }
+    let!(:finding_2) { create(:security_finding) }
+
+    subject { described_class.by_build_ids(finding_1.scan.build_id) }
+
+    it { is_expected.to eq([finding_1]) }
+  end
 end
