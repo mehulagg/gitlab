@@ -54,7 +54,6 @@ Dependency Paths are supported for the following package managers:
 
 - [NuGet](https://www.nuget.org/)
 <!-- insert screenshot here -->
-**Note** - Dependency paths are shown only for vulnerable dependencies
 
 ## Licenses
 
