@@ -36,20 +36,27 @@ blocking_components_in_mr = BLOCKING_PATTERNS.select { |s| has_blocking_componen
 
 return if (deprecated_components_in_mr + blocking_components_in_mr).empty?
 
+markdown(<<~MARKDOWN)
+  ## Deprecated components
+
+MARKDOWN
+
 if blocking_components_in_mr.any?
   fail "This merge request contains deprecated components that have been migrated and can no longer be used. Please use Pajamas components instead."
+  markdown(<<~MARKDOWN)
+    These deprecated components have already been migrated and can no longer be used. Please use [Pajamas components](https://design.gitlab.com/components/status/) instead.
+
+    * #{blocking_components_in_mr.join("\n* ")}
+
+  MARKDOWN
 end
 
 if deprecated_components_in_mr.any?
   warn "This merge request contains deprecated components. Please consider using Pajamas components instead."
+  markdown(<<~MARKDOWN)
+    These deprecated components are in the process of being migrated. Please consider using [Pajamas components](https://design.gitlab.com/components/status/) instead.
+
+    * #{deprecated_components_in_mr.join("\n* ")}
+
+  MARKDOWN
 end
-
-markdown(<<~MARKDOWN)
-  ## Deprecated components
-
-  The following components are deprecated:
-
-  * #{(blocking_components_in_mr + deprecated_components_in_mr).join("\n* ")}
-
-  Please use [Pajamas components](https://design.gitlab.com/components/status/) instead.
-MARKDOWN
