@@ -21,13 +21,6 @@ module AlertManagement
       ignored: 3
     }.freeze
 
-    STATUS_EVENTS = {
-      triggered: :trigger,
-      acknowledged: :acknowledge,
-      resolved: :resolve,
-      ignored: :ignore
-    }.freeze
-
     OPEN_STATUSES = [
       :triggered,
       :acknowledged
@@ -194,6 +187,11 @@ module AlertManagement
       return unless status.presence
 
       self.class.state_machines[:status].events.transitions_for(self, to: status.to_sym).first&.event
+    end
+
+    def change_status_to(new_status)
+      event = status_event_for(new_status)
+      event && fire_status_event(event)
     end
 
     def prometheus?
