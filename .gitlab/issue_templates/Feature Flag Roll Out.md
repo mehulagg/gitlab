@@ -55,7 +55,7 @@ Are there any other stages or teams involved that need to be kept in the loop?
 
 <!-- Which dashboards from https://dashboards.gitlab.net are most relevant? -->
 
-## Roll Out Steps
+## Rollout Timeline
 
 <!-- Please check which steps are needed and remove those which don't apply -->
 
