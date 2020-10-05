@@ -3427,7 +3427,8 @@ When a job fails and has `retry` configured, the job is processed again,
 up to the amount of times specified by the `retry` keyword.
 
 If `retry` is set to 2, and a job succeeds in a second run (first retry), it is not tried
-again. The `retry` value can be from 0 to 2 (two retries maximum, three runs in total).
+again. `retry` value has to be a positive integer, equal to or larger than 0, but
+less than or equal to 2 (two retries maximum, three runs in total).
 
 A simple example to retry in all failure cases:
 
@@ -4388,7 +4389,7 @@ Since Git fetching and cloning is based on a ref, such as a branch name, runners
 can't clone a specific commit SHA. If there are multiple jobs in the queue, or
 you're retrying an old job, the commit to be tested must be within the
 Git history that is cloned. Setting too small a value for `GIT_DEPTH` can make
-it impossible to run these old commits. `unresolved reference` is displayed in
+it impossible to run these old commits and `unresolved reference` is displayed in
 job logs. You should then reconsider changing `GIT_DEPTH` to a higher value.
 
 Jobs that rely on `git describe` may not work correctly when `GIT_DEPTH` is
