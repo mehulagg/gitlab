@@ -70,7 +70,7 @@ module WebpackHelper
   end
 
   def webpack_public_path
-    relative_path = Gitlab.config.relative_url_root
+    relative_path = Gitlab.config.gitlab.relative_url_root
     webpack_path = Gitlab.config.webpack.public_path
     File.join(webpack_public_host.to_s, relative_path.to_s, webpack_path.to_s, '')
   end
