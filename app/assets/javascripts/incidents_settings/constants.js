@@ -1,7 +1,7 @@
 import { __, s__ } from '~/locale';
 
 /* Integration tabs constants */
-export const integrationTabsConfig = isSlaActive => [
+export const INTEGRATION_TABS_CONFIG = [
   {
     title: s__('IncidentSettings|Alert integration'),
     component: 'AlertsSettingsForm',
@@ -16,11 +16,6 @@ export const integrationTabsConfig = isSlaActive => [
     title: s__('IncidentSettings|Grafana integration'),
     component: '',
     active: false,
-  },
-  {
-    title: s__('IncidentSettings|Incident Settings'),
-    component: 'ServiceLevelAgreementForm',
-    active: isSlaActive,
   },
 ];
 
