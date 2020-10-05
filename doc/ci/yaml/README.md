@@ -1792,7 +1792,7 @@ The `refs` strategy can take the same values as the
 [simplified only/except configuration](#onlyexcept-basic).
 
 In the example below, the `deploy` job is created only when the
-pipeline has been [scheduled](../pipelines/schedules.md) or runs for the `master` branch:
+pipeline is [scheduled](../pipelines/schedules.md) or runs for the `master` branch:
 
 ```yaml
 deploy:
