@@ -18,12 +18,6 @@
   }
 
   .input-group {
-    .select2-container {
-      display: unset;
-      max-width: unset;
-      flex-grow: 1;
-    }
-
     > div {
       &:last-child {
         padding-right: 0;
@@ -60,7 +54,6 @@
       flex-grow: 1;
     }
 
-    + .select2 a,
     + .btn-default {
       border-radius: 0 $border-radius-base $border-radius-base 0;
     }
@@ -354,10 +347,6 @@
   margin-top: 50px;
   margin-bottom: 50px;
   color: $gray-700;
-}
-
-.transfer-project .select2-container {
-  min-width: 200px;
 }
 
 .deploy-key {
@@ -1286,11 +1275,6 @@ pre.light-well {
     @include media-breakpoint-up(sm) {
       margin-bottom: 0;
     }
-  }
-
-  .select2-choice {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
   }
 }
 

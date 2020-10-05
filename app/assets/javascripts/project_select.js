@@ -4,8 +4,11 @@ import $ from 'jquery';
 import Api from './api';
 import ProjectSelectComboButton from './project_select_combo_button';
 import { s__ } from './locale';
+import { loadCSSFile } from './lib/utils/css_utils';
 
 const projectSelect = () => {
+  console.trace('PROJECT SELECT');
+
   $('.ajax-project-select').each(function(i, select) {
     let placeholder;
     const simpleFilter = $(select).data('simpleFilter') || false;
@@ -113,7 +116,7 @@ const projectSelect = () => {
 export default () => {
   if ($('.ajax-project-select').length) {
     import(/* webpackChunkName: 'select2' */ 'select2/select2')
-      .then(projectSelect)
+      .then(loadCSSFile(gon.select2_css_path).then(projectSelect))
       .catch(() => {});
   }
 };
