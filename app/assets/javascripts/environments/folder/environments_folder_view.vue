@@ -72,7 +72,7 @@ export default {
     <stop-environment-modal :environment="environmentInStopModal" />
     <delete-environment-modal :environment="environmentInDeleteModal" />
 
-    <h4 class="js-folder-name environments-folder-name">
+    <h4 class="js-folder-name gl-font-weight-normal">
       {{ s__('Environments|Environments') }} /
       <b>{{ folderName }}</b>
     </h4>
