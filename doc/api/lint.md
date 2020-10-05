@@ -101,17 +101,19 @@ Example response:
 To `POST` a YAML configuration to the CI Lint endpoint, it must be properly escaped and JSON encoded.
 You can use jq and curl to escape and upload YAML to the GitLab API.
 
-**JSON-Escape a YAML file**
+### Escape YAML for JSON encoding
+
 To escape quotes and encode your YAML in a format suitable for embedding within
-a JSON payload, `jq` can be used as follows (in this example, for a file named `.gitlab-ci.yml`):
+a JSON payload, you can use `jq`. For example, for a file named `.gitlab-ci.yml`:
 
 ```shell
 jq --raw-input --slurp < .gitlab-ci.yaml
 ```
 
-**`POST` a JSON-wrapped YAML file to the CI Lint endpoint**
-The following example will escape and encode an input
-YAML file (`.gitlab-ci.yml`), and `POST` it to the GitLab API using `curl` and `jq`:
+### Escape, encode and post a YAML file
+
+To escape and encode an input YAML file (`.gitlab-ci.yml`), and `POST` it to the
+GitLab API using `curl` and `jq`:
 
 ```shell
 jq -n --arg yaml "$(<.gitlab-ci.yaml)" '.content=$yaml' \
@@ -120,7 +122,8 @@ jq -n --arg yaml "$(<.gitlab-ci.yaml)" '.content=$yaml' \
 --data @-
 ```
 
-**Use `jq` to parse `merged_yaml` response**
+### Parse a CI Lint response
+
 To easily reformat the CI Linter's response, you can again use `jq` (you can pipe in the input from the above example,
 or store the API response as a text file and provide it as an argument):
 
@@ -128,7 +131,7 @@ or store the API response as a text file and provide it as an argument):
 jq -r '.merged_yaml | fromjson' <your_input_here>
 ```
 
-Example:
+Example input:
 
 ```json
 {"status":"valid","errors":[],"merged_yaml":"---\n:.api_test:\n  :rules:\n  - :if: $CI_PIPELINE_SOURCE==\"merge_request_event\"\n    :changes:\n    - src/api/*\n:deploy:\n  :rules:\n  - :when: manual\n    :allow_failure: true\n  :extends:\n  - \".api_test\"\n  :script:\n  - echo \"hello world\"\n"}
