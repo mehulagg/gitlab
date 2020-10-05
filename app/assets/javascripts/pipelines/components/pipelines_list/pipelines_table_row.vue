@@ -1,5 +1,5 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import eventHub from '../../event_hub';
 import PipelinesActionsComponent from './pipelines_actions.vue';
 import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
@@ -17,6 +17,9 @@ import { PIPELINES_TABLE } from '../../constants';
  * Given the received object renders a table row in the pipelines' table.
  */
 export default {
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   components: {
     PipelinesActionsComponent,
     PipelinesArtifactsComponent,
@@ -338,8 +341,11 @@ export default {
 
         <gl-button
           v-if="pipeline.flags.retryable"
-          :loading="isRetrying"
+          v-gl-tooltip.hover
+          :aria-label="__('Re-deploy')"
           :disabled="isRetrying"
+          :loading="isRetrying"
+          :title="__('Re-deploy')"
           class="js-pipelines-retry-button btn-retry"
           data-qa-selector="pipeline_retry_button"
           icon="repeat"
@@ -350,6 +356,9 @@ export default {
 
         <gl-button
           v-if="pipeline.flags.cancelable"
+          v-gl-tooltip.hover
+          :aria-label="__('Cancel')"
+          :title="__('Cancel')"
           :loading="isCancelling"
           :disabled="isCancelling"
           data-toggle="modal"
