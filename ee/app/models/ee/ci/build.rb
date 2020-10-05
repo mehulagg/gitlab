@@ -20,7 +20,7 @@ module EE
       }.with_indifferent_access.freeze
 
       EE_RUNNER_FEATURES = {
-        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets?}
+        vault_secrets: -> (build) { build.ci_secrets_management_available? && build.secrets? }
       }.freeze
 
       prepended do

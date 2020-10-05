@@ -38,7 +38,14 @@ module Ci
 
       return false if artifacts.empty?
 
+      destroy_security_findings_for(artifacts) if klass == Ci::JobArtifact
       artifacts.each(&:destroy!)
+    end
+
+    def destroy_security_findings_for(artifacts)
+      job_ids = artifacts.map(&:job_id)
+
+      Security::Finding.by_build_ids(job_ids).delete_all
     end
   end
 end

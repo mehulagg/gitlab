@@ -10,6 +10,8 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
 
     let(:service) { described_class.new }
     let_it_be(:artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
+    let_it_be(:security_scan) { create(:security_scan, build: artifact.job) }
+    let_it_be(:security_finding) { create(:security_finding, scan: security_scan) }
 
     before(:all) do
       artifact.job.pipeline.unlocked!
@@ -24,15 +26,23 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
         it 'destroys job artifact' do
           expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
         end
+
+        it 'destroys the security finding' do
+          expect { subject }.to change { Security::Finding.count }.from(1).to(0)
+        end
       end
 
       context 'when artifact is locked' do
         before do
-          artifact.job.pipeline.artifacts_locked!
+          artifact.job.pipeline.reload.artifacts_locked!
         end
 
         it 'does not destroy job artifact' do
           expect { subject }.not_to change { Ci::JobArtifact.count }
+        end
+
+        it 'does not destroy the security finding' do
+          expect { subject }.not_to change { Security::Finding.count }.from(1)
         end
       end
     end
@@ -45,6 +55,10 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
       it 'does not destroy expired job artifacts' do
         expect { subject }.not_to change { Ci::JobArtifact.count }
       end
+
+      it 'does not destroy the security finding' do
+        expect { subject }.not_to change { Security::Finding.count }.from(1)
+      end
     end
 
     context 'when artifact is permanent' do
@@ -54,6 +68,10 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
 
       it 'does not destroy expired job artifacts' do
         expect { subject }.not_to change { Ci::JobArtifact.count }
+      end
+
+      it 'does not destroy the security finding' do
+        expect { subject }.not_to change { Security::Finding.count }.from(1)
       end
     end
 
@@ -129,9 +147,15 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
       end
 
       let!(:second_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
+      let!(:second_security_scan) { create(:security_scan, build: second_artifact.job) }
+      let!(:second_security_finding) { create(:security_finding, scan: second_security_scan) }
 
       it 'destroys all expired artifacts' do
         expect { subject }.to change { Ci::JobArtifact.count }.by(-2)
+      end
+
+      it 'destroys all the security findings' do
+        expect { subject }.to change { Security::Finding.count }.from(2).to(0)
       end
     end
 
@@ -168,10 +192,16 @@ RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared
         pipeline = create(:ci_pipeline, locked: :artifacts_locked)
         job = create(:ci_build, pipeline: pipeline)
         create(:ci_job_artifact, expire_at: 1.day.ago, job: job)
+        security_scan = create(:security_scan, build: job)
+        create(:security_finding, scan: security_scan)
       end
 
       it 'destroys only unlocked artifacts' do
         expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
+      end
+
+      it 'destroy the security findings only for unlocked artifacts' do
+        expect { subject }.to change { Security::Finding.count }.from(2).to(1)
       end
     end
   end
