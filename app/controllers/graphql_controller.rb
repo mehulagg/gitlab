@@ -26,6 +26,8 @@ class GraphqlController < ApplicationController
   # callback execution order here
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
 
+  feature_category :not_owned
+
   def execute
     result = multiplex? ? execute_multiplex : execute_query
 

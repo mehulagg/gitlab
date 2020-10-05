@@ -29,15 +29,16 @@ RSpec.describe "Every controller" do
                                                 'H', 'I', 'J', 'K', 'L',
                                                 'M', 'N', 'O', 'Q', 'R',
                                                 'S', 'T', 'U', 'V', 'W',
-                                                'X', 'Y', 'Z', 'A',
+                                                'X', 'Y', 'Z', 'A', 'G',
                                                 'Projects::MergeRequestsController')
 
         "#{controller}##{action}"
       end.compact
     end
 
-    it "has feature categories" do
+    it "has feature categories", :aggregate_failures do
       expect(routes_without_category).to be_empty, "#{routes_without_category} did not have a category"
+      expect(routes_without_category.length).to eq(0)
     end
 
     it "completed controllers don't get new routes without categories" do
