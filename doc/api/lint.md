@@ -128,7 +128,7 @@ To easily reformat the CI Linter's response, you can again use `jq` (you can pip
 or store the API response as a text file and provide it as an argument):
 
 ```shell
-jq -r '.merged_yaml | fromjson' <your_input_here>
+jq --raw-output '.merged_yaml | fromjson' <your_input_here>
 ```
 
 Example input:
