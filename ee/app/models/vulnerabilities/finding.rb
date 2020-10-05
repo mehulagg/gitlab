@@ -29,6 +29,7 @@ module Vulnerabilities
     has_many :pipelines, through: :finding_pipelines, class_name: 'Ci::Pipeline'
 
     attr_writer :sha
+    attr_accessor :scan
 
     CONFIDENCE_LEVELS = {
       # undefined: 0, no longer applicable

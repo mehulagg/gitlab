@@ -3,36 +3,37 @@
 require 'spec_helper'
 
 RSpec.describe Vulnerabilities::FindingEntity do
-  let_it_be(:user) { create(:user) }
-  let_it_be(:project) { create(:project) }
+  let(:user) { build(:user) }
+  let(:project) { build(:project) }
 
-  let(:scanner) do
-    create(:vulnerabilities_scanner, project: project)
-  end
+  let(:scanner) { build(:vulnerabilities_scanner, project: project) }
+
+  let(:scan) { build(:ci_reports_security_scan) }
 
   let(:identifiers) do
     [
-      create(:vulnerabilities_identifier),
-      create(:vulnerabilities_identifier)
+      build(:vulnerabilities_identifier),
+      build(:vulnerabilities_identifier)
     ]
   end
 
   let(:occurrence) do
-    create(
+    build(
       :vulnerabilities_occurrence,
       scanner: scanner,
+      scan: scan,
       project: project,
       identifiers: identifiers
     )
   end
 
-  let!(:dismiss_feedback) do
-    create(:vulnerability_feedback, :sast, :dismissal,
+  let(:dismiss_feedback) do
+    build(:vulnerability_feedback, :sast, :dismissal,
            project: project, project_fingerprint: occurrence.project_fingerprint)
   end
 
-  let!(:issue_feedback) do
-    create(:vulnerability_feedback, :sast, :issue,
+  let(:issue_feedback) do
+    build(:vulnerability_feedback, :sast, :issue,
            project: project, project_fingerprint: occurrence.project_fingerprint)
   end
 
@@ -56,6 +57,7 @@ RSpec.describe Vulnerabilities::FindingEntity do
       expect(subject).to include(:dismissal_feedback, :issue_feedback)
       expect(subject).to include(:description, :links, :location, :remediations, :solution, :evidence)
       expect(subject).to include(:blob_path, :request, :response)
+      expect(subject).to include(:scan)
     end
 
     context 'when not allowed to admin vulnerability feedback' do
