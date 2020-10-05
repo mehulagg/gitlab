@@ -11,38 +11,36 @@ const parseOptions = obj =>
 export const mapProjects = projects =>
   projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
 
-export const filters = {
-  stateFilter: {
-    name: s__('SecurityReports|Status'),
-    id: 'state',
-    allOption: { id: ALL, name: s__('VulnerabilityStatusTypes|All') },
-    options: parseOptions(VULNERABILITY_STATES),
-  },
+export const stateFilter = {
+  name: s__('SecurityReports|Status'),
+  id: 'state',
+  allOption: { id: ALL, name: s__('VulnerabilityStatusTypes|All') },
+  options: parseOptions(VULNERABILITY_STATES),
+};
 
-  severityFilter: {
-    name: s__('SecurityReports|Severity'),
-    id: 'severity',
-    allOption: BASE_FILTERS.severity,
-    options: parseOptions(SEVERITY_LEVELS),
-  },
+export const severityFilter = {
+  name: s__('SecurityReports|Severity'),
+  id: 'severity',
+  allOption: BASE_FILTERS.severity,
+  options: parseOptions(SEVERITY_LEVELS),
+};
 
-  scannerFilter: {
-    name: s__('Reports|Scanner'),
-    id: 'reportType',
-    allOption: BASE_FILTERS.report_type,
-    options: parseOptions(REPORT_TYPES),
-  },
+export const scannerFilter = {
+  name: s__('Reports|Scanner'),
+  id: 'reportType',
+  allOption: BASE_FILTERS.report_type,
+  options: parseOptions(REPORT_TYPES),
+};
 
-  getProjectFilter: projects => {
-    if (!projects?.length) return undefined;
+export const getProjectFilter = projects => {
+  if (!projects?.length) return undefined;
 
-    return {
-      name: s__('SecurityReports|Project'),
-      id: 'projectId',
-      allOption: BASE_FILTERS.project_id,
-      options: mapProjects(projects),
-    };
-  },
+  return {
+    name: s__('SecurityReports|Project'),
+    id: 'projectId',
+    allOption: BASE_FILTERS.project_id,
+    options: mapProjects(projects),
+  };
 };
 
 /**

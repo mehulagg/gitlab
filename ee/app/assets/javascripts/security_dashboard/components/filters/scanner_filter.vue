@@ -1,7 +1,7 @@
 <script>
 import { GlDropdownSectionHeader, GlDropdownDivider } from '@gitlab/ui';
 import { groupBy, cloneDeep, assignWith } from 'lodash';
-import { filters } from 'ee/security_dashboard/helpers';
+import { scannerFilter } from 'ee/security_dashboard/helpers';
 import DashboardFilter from './filter.vue';
 import FilterOption from './filter_option.vue';
 import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
@@ -58,12 +58,12 @@ export default {
         }));
     },
     filterWithCustomScanners() {
-      const scannerFilter = cloneDeep(filters.scannerFilter);
-      scannerFilter.options = scannerFilter.options.concat(this.customScannerOptions);
+      const defaultFilter = cloneDeep(scannerFilter);
+      defaultFilter.options = scannerFilter.options.concat(this.customScannerOptions);
       return scannerFilter;
     },
     groups() {
-      const defaultGroup = { GitLab: filters.scannerFilter.options };
+      const defaultGroup = { GitLab: scannerFilter.options };
       return assignWith(defaultGroup, this.customScanners, (original = [], updated) =>
         original.concat(updated),
       );
