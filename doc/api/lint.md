@@ -98,8 +98,8 @@ Example response:
 
 ### Using jq to create and process YAML & JSON Payloads
 
-In order to `POST` a YAML configuration to the CI Lint endpoint, it must be appropriately escaped and JSON-encoded.
-Here are some handy examples of how to use `jq` and `curl` to easily escape and upload YAML to the GitLab API:
+To `POST` a YAML configuration to the CI Lint endpoint, it must be properly escaped and JSON encoded.
+You can use jq and curl to escape and upload YAML to the GitLab API.
 
 **JSON-Escape a YAML file**
 To escape quotes and encode your YAML in a format suitable for embedding within
