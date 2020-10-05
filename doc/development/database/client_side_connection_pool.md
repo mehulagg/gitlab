@@ -1,3 +1,10 @@
+---
+type: dev, reference
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+---
+
 # Client-side connection-pool
 
 Ruby processes accessing the database through
@@ -7,14 +14,15 @@ process based on the concurrency.
 Because of the way [Ruby on Rails manages database
 connections](#connection-lifecycle), it is important that we have at
 least as many connections as we have threads. While there is a 'pool'
-setting in database.yml, it is not very practical because you need to
+setting in [`database.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/database.yml.postgresql), it is not very practical because you need to
 maintain it in tandem with the number of application threads. Because
-of this we override the number of allowed connections in the database
+maintain it in tandem with the number of application threads. For this
+reason, we override the number of allowed connections in the database
 connection-pool based on the configured number of application threads.
 
-`Gitlab::Runtime.max_threads` is the number of "user facing"
+`Gitlab::Runtime.max_threads` is the number of user-facing
 application threads the process has been configured with. We also have
-auxiliary threads that use database connections. Because it is not
+auxiliary threads that use database connections. As it isn't
 straightforward to keep an accurate count of the number of auxiliary threads as
 the application evolves over time, we just add a fixed headroom to the
 number of user-facing threads. It is OK if this number is too large
@@ -45,7 +53,7 @@ consider raising the default headroom.
 
 ## Connection lifecycle
 
-For web requests, a connection is obtained from the pool the first
+For web requests, a connection is obtained from the pool at the first
 time a database query is made. The connection is returned to the pool
 after the request completes.
 
