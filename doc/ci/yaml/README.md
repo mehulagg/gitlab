@@ -2713,8 +2713,8 @@ deploy as review app:
     url: https://$CI_ENVIRONMENT_SLUG.example.com/
 ```
 
-The `deploy as review app` job is marked as deployment to dynamically
-create the `review/$CI_COMMIT_REF_NAME` environment, where `$CI_COMMIT_REF_NAME`
+The `deploy as review app` job is a deployment that dynamically
+creates the `review/$CI_COMMIT_REF_NAME` environment, where `$CI_COMMIT_REF_NAME`
 is an [environment variable](../variables/README.md) set by the runner. The
 `$CI_ENVIRONMENT_SLUG` variable is based on the environment name, but suitable
 for inclusion in URLs. In this case, if the `deploy as review app` job is run
