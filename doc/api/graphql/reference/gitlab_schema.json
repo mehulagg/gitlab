@@ -18467,6 +18467,20 @@
               "deprecationReason": null
             },
             {
+              "name": "slaDueAt",
+              "description": "Timestamp of when the incident SLA expires",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "state",
               "description": "State of the issue",
               "args": [
@@ -24149,6 +24163,20 @@
               "type": {
                 "kind": "ENUM",
                 "name": "IssuableSeverity",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "slaDueAt",
+              "description": "Timestamp of when the incident SLA expires",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
                 "ofType": null
               },
               "isDeprecated": false,

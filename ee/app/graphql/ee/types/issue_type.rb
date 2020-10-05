@@ -31,6 +31,11 @@ module EE
 
         field :status_page_published_incident, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates whether an issue is published to the status page'
+
+        field :sla_due_at,
+          ::Types::TimeType,
+          null: true,
+          description: 'Timestamp of when the incident SLA expires'
       end
     end
   end
