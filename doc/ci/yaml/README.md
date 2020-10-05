@@ -3427,8 +3427,7 @@ When a job fails and has `retry` configured, the job is processed again,
 up to the amount of times specified by the `retry` keyword.
 
 If `retry` is set to 2, and a job succeeds in a second run (first retry), it is not tried
-again. `retry` value has to be a positive integer, equal to or larger than 0, but
-less than or equal to 2 (two retries maximum, three runs in total).
+again. The `retry` value can be from 0 to 2 (two retries maximum, three runs in total).
 
 A simple example to retry in all failure cases:
 
