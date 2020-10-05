@@ -12,9 +12,6 @@ Documentation on how to use Git LFS are under [Managing large binary files with 
 
 ## Requirements
 
-- LFS is enabled server-wide by default.
-- Git LFS is supported in GitLab starting with version 8.2.
-- Support for object storage, such as AWS S3, was introduced in 10.0.
 - Users need to install [Git LFS client](https://git-lfs.github.com) version 1.0.1 and up.
 
 ## Configuration
