@@ -66,20 +66,23 @@ Images follow this naming convention:
 <registry URL>/<namespace>/<project>/<image>
 ```
 
+If your project is `gitlab.example.com/mynamespace/myproject`, for example,
+then your image must be named `myproject/my-app`.
+
 You can append additional names to the end of an image name, up to three levels deep.
 
-These are all valid image names for images within the project named `project`:
+For example, these are all valid image names for images within the project named `myproject`:
 
 ```plaintext
-registry.example.com/namespace/project:some-tag
+registry.example.com/mynamespace/myproject:some-tag
 ```
 
 ```plaintext
-registry.example.com/namespace/project/image:latest
+registry.example.com/mynamespace/myproject/image:latest
 ```
 
 ```plaintext
-registry.example.com/namespace/project/my/image:rc1
+registry.example.com/mynamespace/myproject/my/image:rc1
 ```
 
 ## Build and push images to the Container Registry
