@@ -19,7 +19,11 @@ RSpec.describe JiraConnect::SyncProjectWorker do
     end
 
     context 'when project has more than 50 MRs to sync' do
-      let!(:merge_requests) { create_list(:merge_request, 51, :unique_branches, description: 'TEST-323', title: 'TEST-123', source_project: project)}
+      let!(:merge_requests) { create_list(:merge_request, 2, :unique_branches, description: 'TEST-323', title: 'TEST-123', source_project: project) }
+
+      before do
+        stub_const("#{described_class}::MERGE_REQUEST_LIMIT", 1)
+      end
 
       specify do
         expect(JiraConnect::SyncService).not_to receive(:new)
