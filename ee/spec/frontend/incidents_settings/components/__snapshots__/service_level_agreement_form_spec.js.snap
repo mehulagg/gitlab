@@ -2,7 +2,7 @@
 
 exports[`Alert integration settings form should match the default snapshot 1`] = `
 <gl-tab-stub
-  title="Incident Settings"
+  title="Incident settings"
 >
   <gl-form-stub
     class="gl-pt-3"
@@ -16,6 +16,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
     </p>
      
     <gl-form-checkbox-stub
+      checked="true"
       class="gl-my-4"
     >
       <span>
@@ -23,7 +24,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
       </span>
        
       <gl-form-text-stub
-        class="gl-text-gray-400 gl-font-base"
+        class="gl-font-base gl-text-gray-400"
         tag="small"
         textvariant="muted"
       >
@@ -37,6 +38,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
       invalid-feedback=""
       label="Time limit"
       label-for="sla-duration"
+      state="true"
     >
       <div
         class="gl-display-flex gl-flex-direction-row"
@@ -45,9 +47,10 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
           id="sla-duration"
           number=""
           size="xs"
+          step="15"
           trim=""
           type="number"
-          value=""
+          value="15"
         />
          
         <gl-form-select-stub
@@ -56,12 +59,21 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
           value="minutes"
         />
       </div>
+       
+      <gl-form-text-stub
+        class="gl-font-base gl-text-gray-400!"
+        tag="small"
+        textvariant="muted"
+      >
+        
+          Time limit must be a multiple of 15 minutes
+        
+      </gl-form-text-stub>
     </gl-form-group-stub>
      
     <gl-button-stub
       buttontextclasses=""
       category="primary"
-      disabled="true"
       icon=""
       size="medium"
       type="submit"

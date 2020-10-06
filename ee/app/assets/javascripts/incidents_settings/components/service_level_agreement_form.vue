@@ -32,6 +32,7 @@ export default {
     to better track Service Level Agreements (SLAs). The timer is automatically started when the incident
     is created, and sets a time limit for the incident to be resolved in. When activated, "time to SLA"
     countdown will appear on all new incidents.`),
+    validFeedback: s__('IncidentSettings|Time limit must be a multiple of 15 minutes'),
   },
   selectOptions: Object.values(units),
   units,
@@ -56,11 +57,8 @@ export default {
     };
   },
   computed: {
-    description() {
-      if (!this.invalidFeedback) {
-        return s__('IncidentSettings|Time limit must be a multiple of 15 minutes');
-      }
-      return '';
+    disableSubmit() {
+      return this.loading || !this.showValidFeedback;
     },
     invalidFeedback() {
       // Don't validate when checkbox is disabled
@@ -68,13 +66,8 @@ export default {
         return '';
       }
 
-      // Don't validate the default state
-      if (this.duration === '') {
-        return '';
-      }
-
       const duration = Number(this.duration);
-      if (Number.isNaN(duration)) {
+      if (this.duration === '' || Number.isNaN(duration)) {
         return s__('IncidentSettings|Time limit must be a valid number');
       }
       if (duration <= 0) {
@@ -87,8 +80,8 @@ export default {
       }
       return '';
     },
-    isValid() {
-      return this.duration !== '' && this.invalidFeedback === '';
+    showValidFeedback() {
+      return !this.invalidFeedback;
     },
   },
   methods: {
@@ -100,7 +93,7 @@ export default {
           sla_timer: this.enabled,
           sla_timer_minutes: this.duration * units[this.unit].multiplier,
         })
-        .finally(() => {
+        .catch(() => {
           this.loading = false;
         });
     },
@@ -120,7 +113,7 @@ export default {
       </p>
       <gl-form-checkbox v-model="enabled" class="gl-my-4">
         <span>{{ s__('IncidentSettings|Activate "time to SLA" countdown timer') }}</span>
-        <gl-form-text class="gl-text-gray-400 gl-font-base">
+        <gl-form-text class="gl-font-base gl-text-gray-400">
           {{
             s__(
               'IncidentSettings|When activated, this will apply to all incidents within the project',
@@ -132,27 +125,31 @@ export default {
         :invalid-feedback="invalidFeedback"
         :label="s__('IncidentSettings|Time limit')"
         label-for="sla-duration"
-        :state="isValid"
-        :description="description"
+        :state="showValidFeedback"
       >
         <div class="gl-display-flex gl-flex-direction-row">
           <gl-form-input
             id="sla-duration"
             v-model="duration"
-            type="number"
             number
             size="xs"
-            trim
             :step="$options.units[unit].step"
+            trim
+            type="number"
           />
           <gl-form-select
             v-model="unit"
-            :options="$options.selectOptions"
             class="gl-w-auto gl-ml-3 gl-line-height-normal gl-border-gray-400"
+            :options="$options.selectOptions"
           />
         </div>
+        <template name="valid-feedback">
+          <gl-form-text v-show="showValidFeedback" class="gl-font-base gl-text-gray-400!">
+            {{ $options.i18n.validFeedback }}
+          </gl-form-text>
+        </template>
       </gl-form-group>
-      <gl-button variant="success" type="submit" :disabled="!isValid || loading" :loading="loading">
+      <gl-button variant="success" type="submit" :disabled="disableSubmit" :loading="loading">
         {{ __('Save changes') }}
       </gl-button>
     </gl-form>
