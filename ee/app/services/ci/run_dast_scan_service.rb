@@ -5,7 +5,10 @@ module Ci
     ENV_MAPPING = {
       spider_timeout: 'DAST_SPIDER_MINS',
       target_timeout: 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-      target_url: 'DAST_WEBSITE'
+      target_url: 'DAST_WEBSITE',
+      use_ajax_spider: 'DAST_USE_AJAX_SPIDER',
+      show_debug_messages: 'DAST_DEBUG',
+      scan_type: 'DAST_FULL_SCAN_ENABLED'
     }.freeze
 
     def self.ci_template_raw
@@ -42,7 +45,15 @@ module Ci
       variables = args.each_with_object({}) do |(key, val), hash|
         next unless val && ENV_MAPPING[key]
 
-        hash[ENV_MAPPING[key]] = val
+        next if !!val == val && !val
+
+        if ENV_MAPPING[key] == 'DAST_FULL_SCAN_ENABLED'
+          next if val != 'active'
+
+          val = true
+        end
+
+        hash[ENV_MAPPING[key]] = !!val == val ? val.to_s : val
         hash
       end
 

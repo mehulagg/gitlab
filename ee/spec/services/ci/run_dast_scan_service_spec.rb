@@ -7,6 +7,9 @@ RSpec.describe Ci::RunDastScanService do
   let(:project) { create(:project, :repository, creator: user) }
   let(:branch) { project.default_branch }
   let(:target_url) { generate(:url) }
+  let(:use_ajax_spider) { true }
+  let(:show_debug_messages) { true }
+  let(:scan_type) { 'active' }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -27,7 +30,7 @@ RSpec.describe Ci::RunDastScanService do
   end
 
   describe '#execute' do
-    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21) }
+    subject { described_class.new(project, user).execute(branch: branch, target_url: target_url, spider_timeout: 42, target_timeout: 21, use_ajax_spider: use_ajax_spider, show_debug_messages: show_debug_messages, scan_type: scan_type) }
 
     let(:status) { subject.status }
     let(:pipeline) { subject.payload }
@@ -126,12 +129,63 @@ RSpec.describe Ci::RunDastScanService do
             'value' => '21',
             'public' => true
           }, {
+            'key' => "DAST_USE_AJAX_SPIDER",
+            'public' => true,
+            'value' => 'true'
+          }, {
+            'key' => "DAST_DEBUG",
+            'public' => true,
+            'value' => 'true'
+          }, {
+            'key' => "DAST_FULL_SCAN_ENABLED",
+            'public' => true,
+            'value' => 'true'
+          }, {
             'key' => 'GIT_STRATEGY',
             'value' => 'none',
             'public' => true
           }
         ]
         expect(build.yaml_variables).to eq(expected_variables)
+      end
+
+      context 'when boolean variables are false' do
+        let(:use_ajax_spider) { false }
+        let(:show_debug_messages) { false }
+        let(:scan_type) { 'passive' }
+
+        it 'omits false variables from the configuration' do
+          build = pipeline.builds.first
+          expected_variables = [
+            {
+              'key' => 'DAST_VERSION',
+              'value' => '1',
+              'public' => true
+            }, {
+              'key' => 'SECURE_ANALYZERS_PREFIX',
+              'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+              'public' => true
+            }, {
+              'key' => 'DAST_WEBSITE',
+              'value' => target_url,
+              'public' => true
+            },
+            {
+              'key' => 'DAST_SPIDER_MINS',
+              'value' => '42',
+              'public' => true
+            }, {
+              'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
+              'value' => '21',
+              'public' => true
+            }, {
+              'key' => 'GIT_STRATEGY',
+              'value' => 'none',
+              'public' => true
+            }
+          ]
+          expect(build.yaml_variables).to eq(expected_variables)
+        end
       end
 
       it 'enqueues a build' do

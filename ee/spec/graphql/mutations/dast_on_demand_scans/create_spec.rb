@@ -103,7 +103,7 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
         end
 
         context 'when dast_scanner_profile_id is provided' do
-          let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, target_timeout: 200, spider_timeout: 5000) }
+          let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, target_timeout: 200, spider_timeout: 5000, use_ajax_spider: true, show_debug_messages: true, scan_type: 'active') }
           let(:dast_scanner_profile_id) { dast_scanner_profile.to_global_id }
 
           subject do
@@ -123,7 +123,10 @@ RSpec.describe Mutations::DastOnDemandScans::Create do
           it 'passes additional arguments to the underlying service object' do
             args = hash_including(
               spider_timeout: dast_scanner_profile.spider_timeout,
-              target_timeout: dast_scanner_profile.target_timeout
+              target_timeout: dast_scanner_profile.target_timeout,
+              use_ajax_spider: dast_scanner_profile.use_ajax_spider,
+              show_debug_messages: dast_scanner_profile.show_debug_messages,
+              scan_type: dast_scanner_profile.scan_type
             )
 
             expect_any_instance_of(::Ci::RunDastScanService).to receive(:execute).with(args).and_call_original
