@@ -1364,43 +1364,38 @@ To configure the Sentinel Queues server:
 
 ## Configure Gitaly
 
-Deploying Gitaly in its own server can benefit GitLab installations that are
-larger than a single machine.
+[Gitaly](../gitaly/index.md) server node requirements are dependent on data,
+specifically the number of projects and those projects' sizes. It's recommended
+that a Gitaly server node stores no more than 5TB of data. Although this
+reference architecture includes a single Gitaly server node, you may require
+additional nodes depending on your repository storage requirements.
 
-The Gitaly node requirements are dependent on customer data, specifically the number of
-projects and their repository sizes. Two nodes are recommended as an absolute minimum.
-Each Gitaly node should store no more than 5TB of data and have the number of
-[`gitaly-ruby` workers](../gitaly/index.md#gitaly-ruby) set to 20% of available CPUs.
-Additional nodes should be considered in conjunction with a review of expected
-data size and spread based on the recommendations above.
+Due to Gitaly having notable input and output requirements, we strongly
+recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs
+should have a throughput of at least 8,000
+input/output operations per second (IOPS) for read operations and 2,000 IOPS
+for write operations. These IOPS values are initial recommendations, and may be
+adjusted to greater or lesser values depending on the scale of your
+environment's workload. If you're running the environment on a Cloud provider,
+refer to their documentation about how to configure IOPS correctly.
 
-It is also strongly recommended that all Gitaly nodes be set up with SSD disks with
-a throughput of at least 8,000 IOPS for read operations and 2,000 IOPS for write,
-as Gitaly has heavy I/O. These IOPS values are recommended only as a starter as with
-time they may be adjusted higher or lower depending on the scale of your environment's workload.
-If you're running the environment on a Cloud provider, you may need to refer to
-their documentation on how to configure IOPS correctly.
+Be sure to note the following items:
 
-Some things to note:
-
-- The GitLab Rails application shards repositories into [repository storages](../repository_storage_paths.md).
-- A Gitaly server can host one or more storages.
-- A GitLab server can use one or more Gitaly servers.
-- Gitaly addresses must be specified in such a way that they resolve
-  correctly for ALL Gitaly clients.
+- The GitLab Rails application shards repositories into
+  [repository storage paths](../repository_storage_paths.md).
+- A Gitaly server can host one or more storage paths.
+- A GitLab server can use one or more Gitaly server nodes.
+- Gitaly addresses must be specified to be correctly resolvable for *all*
+  Gitaly clients.
 - Gitaly servers must not be exposed to the public internet, as Gitaly's network
   traffic is unencrypted by default. The use of a firewall is highly recommended
   to restrict access to the Gitaly server. Another option is to
   [use TLS](#gitaly-tls-support).
 
-TIP: **Tip:**
-For more information about Gitaly's history and network architecture see the
-[standalone Gitaly documentation](../gitaly/index.md).
-
-Note: **Note:**
-The token referred to throughout the Gitaly documentation is
-just an arbitrary password selected by the administrator. It is unrelated to
-tokens created for the GitLab API or other similar web API tokens.
+NOTE: **Note:**
+The token referred to throughout the Gitaly documentation is an arbitrary
+password selected by the administrator. This token is unrelated to tokens
+created for the GitLab API or other similar web API tokens.
 
 Below we describe how to configure two Gitaly servers, with IPs and
 domain names:
