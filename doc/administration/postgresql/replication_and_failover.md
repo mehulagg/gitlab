@@ -1269,7 +1269,7 @@ with:
 sudo gitlab-ctl stop patroni
 ```
 
-Please note that stopping or restarting Patroni service on the leader node will trigger the automatic failover. If you
+Note that stopping or restarting Patroni service on the leader node will trigger the automatic failover. If you
 want to signal Patroni to reload its configuration or restart PostgreSQL process without triggering the failover, you
 must use `reload` or `restart` sub-commands of `gitlab-ctl patroni` instead. These two sub-commands are wrappers of
 the same `patronictl` commands.
