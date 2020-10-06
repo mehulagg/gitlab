@@ -1,0 +1,5 @@
+---
+title: Search API - Allow Issue scope results to be filtered by confidentiality
+merge_request: 44451
+author:
+type: added
