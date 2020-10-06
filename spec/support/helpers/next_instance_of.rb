@@ -19,8 +19,8 @@ module NextInstanceOf
     receive_new = receive(:new)
     receive_new.with(*new_args) if new_args.any?
 
-    target.to receive_new.and_wrap_original do |method, *original_args|
-      method.call(*original_args).tap do |instance|
+    target.to receive_new.and_wrap_original do |method, *original_args, **original_kwargs|
+      method.call(*original_args, **original_kwargs).tap do |instance|
         yield(instance)
       end
     end
