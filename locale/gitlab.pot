@@ -15852,6 +15852,9 @@ msgstr ""
 msgid "Members|Are you sure you want to deny %{usersName}'s request to join \"%{source}\""
 msgstr ""
 
+msgid "Members|Are you sure you want to leave \"%{source}\"?"
+msgstr ""
+
 msgid "Members|Are you sure you want to remove %{usersName} from \"%{source}\""
 msgstr ""
 
@@ -15865,6 +15868,9 @@ msgid "Members|Are you sure you want to withdraw your access request for \"%{sou
 msgstr ""
 
 msgid "Members|Expired"
+msgstr ""
+
+msgid "Members|Leave \"%{source}\""
 msgstr ""
 
 msgid "Members|No expiration set"
