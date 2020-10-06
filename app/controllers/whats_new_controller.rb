@@ -12,7 +12,8 @@ class WhatsNewController < ApplicationController
   def index
     respond_to do |format|
       format.js do
-        render json: whats_new_most_recent_release_items
+        page = params[:page] || 1
+        render json: whats_new_release_items(page: page)
       end
     end
   end

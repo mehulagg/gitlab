@@ -23,7 +23,7 @@ module WhatsNewHelper
 
   def parsed_most_recent_release_items
     Rails.cache.fetch('whats_new:parsed_release_items', expires_in: CACHE_DURATION) do
-      items = Gitlab::Json.parse(whats_new_most_recent_release_items)
+      items = Gitlab::Json.parse(whats_new_release_items)
 
       items if items.is_a?(Array)
     end
