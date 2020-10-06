@@ -411,7 +411,7 @@ For example, to push your local commits to the _`master`_ branch of the _`origin
 git push origin master
 ```
 
-In certain occasions, Git won't allow you to push to your repository, then
+In certain occasions, Git won't allow you to push to your repository, and then
 you'll need to [force an update](../topics/git/git_rebase.md#force-push).
 
 NOTE: **Note:**
@@ -466,7 +466,7 @@ git merge master
 
 For and introduction of more advanced Git techniques, see:
 
-- [Git rebase, force-push, merge conflicts](../topics/git/git_rebase.md).
+- [Git rebase, force-push, and merge conflicts](../topics/git/git_rebase.md).
 
 ## Synchronize changes in a forked repository with the upstream
 
