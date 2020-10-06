@@ -1,6 +1,16 @@
 <script>
 import { mapActions } from 'vuex';
+<<<<<<< HEAD
 import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlIcon, GlButton } from '@gitlab/ui';
+=======
+import {
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
+  GlLoadingIcon,
+  GlIcon,
+  GlButton,
+} from '@gitlab/ui';
+>>>>>>> 0681ed958f6... Update prettier yarn file
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
