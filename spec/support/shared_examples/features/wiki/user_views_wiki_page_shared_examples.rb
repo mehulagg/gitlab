@@ -208,7 +208,7 @@ RSpec.shared_examples 'User views a wiki page' do
     it 'preserves the special characters' do
       visit(wiki_page_path(wiki, wiki_page))
 
-      expect(page).to have_css('.wiki-page-title', text: title)
+      expect(page).to have_css('.js-wiki-page-title', text: title)
       expect(page).to have_css('.wiki-pages li', text: title)
     end
   end
@@ -223,7 +223,7 @@ RSpec.shared_examples 'User views a wiki page' do
     it 'safely displays the page' do
       visit(wiki_page_path(wiki, wiki_page))
 
-      expect(page).to have_css('.wiki-page-title', text: title)
+      expect(page).to have_css('.js-wiki-page-title', text: title)
       expect(page).to have_content('foo bar')
     end
   end
