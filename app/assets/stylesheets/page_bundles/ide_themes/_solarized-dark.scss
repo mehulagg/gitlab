@@ -20,14 +20,17 @@
   --ide-btn-default-background: transparent;
   --ide-btn-default-border: var(--ide-input-border);
   --ide-btn-default-hover-border: #d8d8d8;
+  --ide-btn-default-focus-box-shadow: rgba($black, 0);
 
   --ide-btn-primary-background: #1068bf;
   --ide-btn-primary-border: #428fdc;
   --ide-btn-primary-hover-border: #63a6e9;
+  --ide-btn-primary-focus-box-shadow: rgba($black, 0);
 
   --ide-btn-success-background: #217645;
   --ide-btn-success-border: #108548;
   --ide-btn-success-hover-border: #2da160;
+  --ide-btn-success-focus-box-shadow: rgba($black, 0);
 
   --ide-btn-disabled-border: rgba(223, 223, 223, 0.24);
   --ide-btn-disabled-color: rgba(145, 145, 145, 0.48);

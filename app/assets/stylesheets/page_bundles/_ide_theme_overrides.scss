@@ -321,6 +321,7 @@
     border-color: var(--ide-dropdown-hover-background, $gray-100) !important;
   }
 
+  // todo: remove this block after all primary/info buttons have been migrated to gl-button
   .btn-primary:not(.gl-button),
   .btn-info:not(.gl-button) {
     background-color: var(--ide-btn-primary-background, $blue-500);
@@ -339,6 +340,34 @@
     }
   }
 
+  .btn-info.gl-button.gl-button,
+  .btn-primary.gl-button.gl-button {
+    background-color: var(--ide-btn-primary-background, $blue-500);
+    box-shadow: inset 0 0 0 1px var(--ide-btn-primary-border, $blue-600);
+
+    &:hover,
+    &:focus {
+      background-color: var(--ide-btn-primary-background, $blue-600);
+    }
+
+    &:hover {
+      box-shadow: inset 0 0 0 var(--ide-btn-hover-border-width, 2px) var(--ide-btn-primary-hover-border, $blue-800),
+        0 2px 2px 0 $t-gray-a-08;
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 var(--ide-btn-hover-border-width, 2px) var(--ide-btn-primary-hover-border, $blue-800),
+        0 0 0 4px var(--ide-btn-primary-hover-border, rgba($blue-500, 0.25));
+    }
+
+    &:active:focus {
+      background-color: var(--ide-btn-primary-background, $blue-700);
+      box-shadow: inset 0 0 0 var(--ide-btn-hover-border-width, 2px) var(--ide-btn-primary-hover-border, $blue-900),
+        0 0 0 4px var(--ide-btn-primary-hover-border, rgba($blue-500, 0.25));
+    }
+  }
+
+  // todo: remove this block after all success buttons have been migrated to gl-button
   .btn-success:not(.gl-button) {
     background-color: var(--ide-btn-success-background, $green-500);
     border-color: var(--ide-btn-success-border, $green-600) !important;
@@ -353,6 +382,32 @@
     &.active {
       background-color: var(--ide-btn-success-background, $green-700);
       border-color: var(--ide-btn-success-hover-border, $green-800) !important;
+    }
+  }
+
+  .btn-success.gl-button.gl-button {
+    background-color: var(--ide-btn-primary-background, $green-500);
+    box-shadow: inset 0 0 0 1px var(--ide-btn-primary-border, $green-600);
+
+    &:hover,
+    &:focus {
+      background-color: var(--ide-btn-primary-background, $green-600);
+    }
+
+    &:hover {
+      box-shadow: inset 0 0 0 var(--ide-btn-hover-border-width, 2px) var(--ide-btn-primary-hover-border, $green-800),
+        0 2px 2px 0 $t-gray-a-08;
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 var(--ide-btn-hover-border-width, 2px) var(--ide-btn-primary-hover-border, $green-800),
+        0 0 0 4px var(--ide-btn-primary-hover-border, rgba($green-500, 0.25));
+    }
+
+    &:active:focus {
+      background-color: var(--ide-btn-primary-background, $green-700);
+      box-shadow: inset 0 0 0 var(--ide-btn-hover-border-width, 2px) var(--ide-btn-primary-hover-border, $green-900),
+        0 0 0 4px var(--ide-btn-primary-hover-border, rgba($green-500, 0.25));
     }
   }
 
