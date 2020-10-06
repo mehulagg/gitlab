@@ -9,10 +9,8 @@ module Gitlab
           ATTACHMENT_TAG_REGEX = /\[\[ATTACHMENT\|(?<path>.+?)\]\]/.freeze
 
           def parse!(xml_data, test_suite, **args)
-            root = Hash.from_xml(xml_data)
-
-            all_cases(root) do |test_case|
-              test_case = create_test_case(test_case, args)
+            all_cases(xml_data).each do |test_case_node|
+              test_case = create_test_case(test_case_node, args)
               test_suite.add_test_case(test_case)
             end
           rescue Nokogiri::XML::SyntaxError => e
@@ -23,52 +21,41 @@ module Gitlab
 
           private
 
-          def all_cases(root, parent = nil, &blk)
-            return unless root.present?
+          def all_cases(xml_data)
+            doc = Nokogiri.XML(xml_data)
+            raise doc.errors.first if doc.errors.any?
 
-            [root].flatten.compact.map do |node|
-              next unless node.is_a?(Hash)
-
-              # we allow only one top-level 'testsuites'
-              all_cases(node['testsuites'], root, &blk) unless parent
-
-              # we require at least one level of testsuites or testsuite
-              each_case(node['testcase'], &blk) if parent
-
-              # we allow multiple nested 'testsuite' (eg. PHPUnit)
-              all_cases(node['testsuite'], root, &blk)
-            end
+            doc.xpath("//testcase")
           end
 
-          def each_case(testcase, &blk)
-            return unless testcase.present?
+          def create_test_case(test_case_node, args)
+            non_success = test_case_node.xpath('failure', 'error', 'skipped').first
+            system_out = test_case_node.xpath('system-out').first
 
-            [testcase].flatten.compact.map(&blk)
-          end
-
-          def create_test_case(data, args)
-            if data.key?('failure')
+            case non_success&.name
+            when 'failure'
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_FAILED
-              system_output = data['failure']
-              attachment = attachment_path(data['system_out'])
-            elsif data.key?('error')
+              system_output = non_success.content
+              attachment = attachment_path(system_out&.content)
+            when 'error'
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_ERROR
-              system_output = data['error']
-            elsif data.key?('skipped')
+              system_output = non_success.content
+            when 'skipped'
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_SKIPPED
-              system_output = data['skipped']
+              system_output = non_success.content
             else
               status = ::Gitlab::Ci::Reports::TestCase::STATUS_SUCCESS
               system_output = nil
             end
 
             ::Gitlab::Ci::Reports::TestCase.new(
-              classname: data['classname'],
-              name: data['name'],
-              file: data['file'],
-              execution_time: data['time'],
+              suite_name: test_case_node.parent['name'],
+              classname: test_case_node['classname'],
+              name: test_case_node['name'],
+              file: test_case_node['file'],
+              execution_time: test_case_node['time'],
               status: status,
-              system_output: system_output,
+              system_output: system_output.presence,
               attachment: attachment,
               job: args.fetch(:job)
             )
