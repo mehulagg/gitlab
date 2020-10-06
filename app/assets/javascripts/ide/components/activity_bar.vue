@@ -21,8 +21,6 @@ export default {
 
       this.updateActivityBarView(view);
 
-      // TODO: We must use JQuery here to interact with the Bootstrap tooltip API
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/217577
       this.$root.$emit('bv::hide::tooltip');
     },
   },
