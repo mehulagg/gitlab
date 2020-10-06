@@ -125,28 +125,27 @@ The following will be emailed to you:
 
 Starting 30 days before a subscription expires, GitLab notifies administrators of the date of expiry with a banner in the GitLab user interface.
 
-We recommend following these steps during renewal:
+TIP: **Tip:**
+If you need to change your [GitLab tier](https://about.gitlab.com/pricing/), contact our sales team via `renewals@gitlab.com` for assistance as this can't be done in the Customers Portal.
+
+To renew your subscription:
 
 1. Prune any inactive or unwanted users by [blocking them](../../user/admin_area/blocking_unblocking_users.md#blocking-a-user).
 1. Determine if you have a need for user growth in the upcoming subscription.
 1. Log in to the [Customers Portal](https://customers.gitlab.com/customers/sign_in) and select the **Renew** button beneath your existing subscription.
-
-   TIP: **Tip:**
-   If you need to change your [GitLab tier](https://about.gitlab.com/pricing/), contact our sales team via `renewals@gitlab.com` for assistance as this can't be done in the Customers Portal.
-
 1. In the first box, enter the total number of user licenses you’ll need for the upcoming year. Be sure this number is at least **equal to, or greater than** the number of active users in the system at the time of performing the renewal.
 1. Enter the number of [users over license](#users-over-license) in the second box for the user overage incurred in your previous subscription term.
 
-   TIP: **Tip:**
-   You can find the _users over license_ in your instance's **Admin** dashboard by clicking on the **Admin Area** in the top bar, or going to `/admin`.
+   To find the number of _users over license_, click on the **Admin Area** in the top bar, or go to
+   `/admin`.
 
    The following table describes details of your admin dashboard and renewal terms:
 
-   | Field | Description |
-   |:------|:------------|
-   | Users in License | The number of users you've paid for in the current license loaded on the system. This does not include the amount you've paid for `Users over license` during renewal. |
-   | Active users | The number of current active users on your system. |
-   | Maximum users | The highest number of active users on your system during the term of the loaded license. If this number exceeds your users in license count at any point, you incur users over license. |
+   | Field              | Description |
+   |:-------------------|:------------|
+   | Users in License   | The number of users you've paid for in the current license loaded on the system. This does not include the amount you've paid for `Users over license` during renewal. |
+   | Active users       | The number of current active users on your system. |
+   | Maximum users      | The highest number of active users on your system during the term of the loaded license. If this number exceeds your users in license count at any point, you incur users over license. |
    | Users over license | The number of users that exceed the `Users in License` for the current license term. Charges for this number of users will be incurred at the next renewal. |
 
 1. Review your renewal details and complete the payment process.
