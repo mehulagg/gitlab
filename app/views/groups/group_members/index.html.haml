@@ -69,7 +69,7 @@
               = label_tag :sort_by, _('Sort by'), class: form_item_label_css_class
               = render 'shared/members/sort_dropdown'
         - if vue_members_list_enabled
-          .js-group-members-list{ data: { members: members_data_json(@group, @members), **data_attributes } }
+          .js-group-members-list{ data: { members: members_data_json(@group, @members), ldap_override_path: ldap_override_path(@group), **data_attributes } }
         - else
           %ul.content-list.members-list{ data: { qa_selector: 'members_list' } }
             = render partial: 'shared/members/member', collection: @members, as: :member

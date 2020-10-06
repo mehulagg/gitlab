@@ -5,9 +5,9 @@ require "spec_helper"
 RSpec.describe Groups::GroupMembersHelper do
   include MembersPresentation
 
-  describe '.group_member_select_options' do
-    let(:group) { create(:group) }
+  let_it_be(:group) { create(:group) }
 
+  describe '.group_member_select_options' do
     before do
       helper.instance_variable_set(:@group, group)
     end
@@ -19,7 +19,6 @@ RSpec.describe Groups::GroupMembersHelper do
 
   describe '#members_data' do
     let(:current_user) { create(:user) }
-    let(:group) { create(:group) }
     let(:group_member) { create(:group_member, group: group, created_by: current_user) }
 
     subject { helper.send('members_data', group, present_members([group_member])) }
@@ -45,6 +44,14 @@ RSpec.describe Groups::GroupMembersHelper do
       allow(group_member.user).to receive(:group_managed_account?).and_return(true)
 
       expect(subject.first).to include(group_managed_account: true)
+    end
+  end
+
+  describe '#ldap_override_path' do
+    it 'returns the ldap override path' do
+      expect(helper).to receive(:override_group_group_member_path).with(group, ':id')
+
+      helper.ldap_override_path(group)
     end
   end
 end

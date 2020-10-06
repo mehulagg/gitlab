@@ -8,6 +8,11 @@ module EE::Groups::GroupMembersHelper
     super.merge(skip_ldap: @group.ldap_synced?)
   end
 
+  override :ldap_override_path
+  def ldap_override_path(group)
+    override_group_group_member_path(group, ':id')
+  end
+
   private
 
   override :members_data

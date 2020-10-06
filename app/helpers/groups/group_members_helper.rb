@@ -21,6 +21,11 @@ module Groups::GroupMembersHelper
     members_data(group, members).to_json
   end
 
+  # Overridden in `ee/app/helpers/ee/groups/group_members_helper.rb`
+  def ldap_override_path(group)
+    nil
+  end
+
   private
 
   def members_data(group, members)
