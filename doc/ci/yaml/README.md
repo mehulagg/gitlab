@@ -805,7 +805,7 @@ Second command line.
 ```
 
 When you omit the `>` or `|` block scalar indicators, GitLab forms the command
-by concatenating non-empty lines, so make sure the lines can run when concatenated.
+by concatenating non-empty lines. Make sure the lines can run when concatenated.
 
 Shell [here documents](https://en.wikipedia.org/wiki/Here_document) work with the
 `|` and `>` operators as well. The example below transliterates the lower case letters
@@ -1562,9 +1562,9 @@ job1:
 ```
 
 NOTE: **Note:**
-In GitLab 13.2 and older, the order of operations when mixing `||` and `&&` in a single rule may not have executed
-in the expected order. This is [fixed](https://gitlab.com/gitlab-org/gitlab/-/issues/230938)
-in GitLab 13.3.
+[Before GitLab 13.3]((https://gitlab.com/gitlab-org/gitlab/-/issues/230938)),
+when you used `||` and `&&` in the same rule, the commands
+may not may not have executed in the expected order.
 
 ### `only`/`except` (basic)
 
@@ -1678,16 +1678,15 @@ job:
 
 #### Regular expressions
 
-Because `@` is used to denote the beginning of a ref's repository path,
-matching a ref name containing the `@` character in a regular expression
-requires the use of the hex character code match `\x40`.
+The `@` symbol denotes the beginning of a ref's repository path.
+To match a ref name that contains the `@` character in a regular expression,
+you must use the hex character code match `\x40`.
 
 Only the tag or branch name can be matched by a regular expression.
 The repository path, if given, is always matched literally.
 
-If a regular expression is used to match the tag or branch name,
-the entire ref name part of the pattern has to be a regular expression,
-and must be surrounded by `/`.
+To match the tag or branch name,
+the entire ref name part of the pattern must be a regular expression surrounded by `/`.
 (With regular expression flags appended after the closing `/`.)
 So `issue-/.*/` doesn't work to match all tag names or branch names
 that begin with `issue-`.
