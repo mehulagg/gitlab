@@ -1,12 +1,13 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
-import getSlaDueAt from './graphql/queries/get_sla_due_at.graphql';
+import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import getSlaDueAt from './graphql/queries/get_sla_due_at.graphql';
 
 export default {
-  components: { GlIcon, TimeAgoTooltip },
+  components: { GlIcon, GlLoadingIcon, TimeAgoTooltip },
   inject: ['fullPath', 'iid', 'slaFeatureAvailable'],
   apollo: {
     slaDueAt: {
@@ -34,18 +35,10 @@ export default {
   },
   computed: {
     displayValue() {
-      const hoursInMilliseconds = 60 * 60 * 1000;
-      const difference = new Date(this.slaDueAt) - Date.now();
+      const time = formatTime(calculateRemainingMilliseconds(this.slaDueAt));
 
-      if (difference < 0) {
-        return '00:00';
-      }
-
-      const rawHours = difference / hoursInMilliseconds;
-      const hours = Math.floor(rawHours);
-      const minutes = Math.floor((rawHours * 60) % 60);
-
-      return `${hours}:${minutes}`;
+      // remove the seconds portion of the string
+      return time.substring(0, time.length - 3);
     },
     show() {
       return this.slaFeatureAvailable && this.slaDueAt !== null;
@@ -55,12 +48,12 @@ export default {
 </script>
 
 <template>
-  <div v-if="show">
-    <!-- TODO: add loading state -->
+  <div v-if="slaFeatureAvailable">
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
-    <time-ago-tooltip :time="slaDueAt">
+    <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt">
       <gl-icon name="timer" />
       <span>{{ displayValue }}</span>
     </time-ago-tooltip>
+    <gl-loading-icon v-else inline />
   </div>
 </template>
