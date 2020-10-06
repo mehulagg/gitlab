@@ -6,6 +6,7 @@ module Ci
     include ::Gitlab::ExclusiveLeaseHelpers
 
     Result = Struct.new(:status, :backoff, keyword_init: true)
+    InvalidTraceError = Class.new(StandardError)
 
     ACCEPT_TIMEOUT = 5.minutes.freeze
 
@@ -76,8 +77,18 @@ module Ci
         metrics.increment_trace_operation(operation: :finalized)
       end
 
-      unless ::Gitlab::Ci::Trace::Checksum.new(build).valid?
-        metrics.increment_trace_operation(operation: :invalid)
+      ::Gitlab::Ci::Trace::Checksum.new(build).then do |checksum|
+        unless checksum.valid?
+          metrics.increment_trace_operation(operation: :invalid
+                                           )
+          ::Gitlab::ErrorTracking.log_exception(InvalidTraceError.new,
+            project_path: build.project.full_path,
+            build_id: build.id,
+            state_crc32: checksum.state_crc32,
+            chunks_crc32: checksum.chunks_crc32,
+            chunks_count: checksum.chunks_count
+          ) if log_invalid_chunks?
+        end
       end
     end
 
@@ -181,6 +192,10 @@ module Ci
 
     def chunks_migration_enabled?
       ::Gitlab::Ci::Features.accept_trace?(build.project)
+    end
+
+    def log_invalid_chunks?
+      ::Gitlab::Ci::Feature.log_invalid_trace_chunks?(build.project)
     end
   end
 end
