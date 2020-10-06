@@ -138,6 +138,19 @@ RSpec.describe SystemHook do
         headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'System Hook' }
       ).once
     end
+
+    it "issue_create hook" do
+      system_hook.issues_events = true
+      system_hook.save!
+
+      # create(:issue, project: project)
+      Issues::CreateService.new(project, user).execute
+
+      expect(WebMock).to have_requested(:post, system_hook.url).with(
+        body: /"object_kind":"issue"/,
+        headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'System Hook' }
+      )
+    end
   end
 
   describe '.repository_update_hooks' do

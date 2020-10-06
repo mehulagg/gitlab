@@ -11,7 +11,9 @@ module Issues
       filter_spam_check_params
       filter_resolve_discussion_params
 
-      create(@issue, skip_system_notes: skip_system_notes)
+      issue = create(@issue, skip_system_notes: skip_system_notes)
+      execute_hooks(issue, 'create')
+      issue
     end
 
     def before_create(issue)
