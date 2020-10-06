@@ -31,6 +31,8 @@ export default {
   data() {
     return {
       failureType: null,
+      needsObject: {},
+      highlightedJob: null,
       links: [],
       height: 0,
       width: 0,
@@ -54,16 +56,60 @@ export default {
     lineStyle() {
       return `stroke-width:${this.$options.STROKE_WIDTH}px;`;
     },
+    highlightedJobs() {
+      if (this.highlightedJob) {
+        return [this.highlightedJob, ...this.needsObject[this.highlightedJob]];
+      }
+
+      return [];
+    },
+    highlightedLinks() {
+      if (this.highlightedJob) {
+        return this.needsObject[this.highlightedJob].map(source => {
+          return createUniqueJobId(source, this.highlightedJob);
+        });
+      }
+
+      return [];
+    },
   },
   mounted() {
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
       this.drawJobLinks();
+      this.createNeedsObject();
     }
   },
   methods: {
     createJobId(stageName, jobName) {
       return createUniqueJobId(stageName, jobName);
+    },
+    createNeedsObject() {
+      const { jobs } = this.pipelineData; // this.pipelineData.jobs = {}
+      const arrOfJobNames = Object.keys(jobs); // [job1, job2, job3]
+
+      this.needsObject = arrOfJobNames.reduce((acc, value) => {
+        // return the full list of needs
+        const recursiveNeeds = jobName => {
+          // base case: when there are no more needs, return
+          if (!jobs[jobName]?.needs) {
+            return [];
+          }
+
+          // TODO: If the value already exist in the accumulator,
+          //  use that to spread instead of the recursive call
+
+          // We add the needs we find the in array, then we call
+          // this function again to continue adding more to the arr
+          return jobs[jobName].needs
+            .map(job => [createUniqueJobId(jobs[job].stage, job), ...recursiveNeeds(job)])
+            .flat(Infinity);
+        };
+
+        const uniqueValues = Array.from(new Set(recursiveNeeds(value)));
+
+        return { ...acc, [createUniqueJobId(jobs[value].stage, value)]: uniqueValues };
+      }, {});
     },
     drawJobLinks() {
       const { stages, jobs } = this.pipelineData;
@@ -75,6 +121,12 @@ export default {
       } catch {
         this.reportFailure(DRAW_FAILURE);
       }
+    },
+    highlightNeeds(uniqueJobId) {
+      this.highlightedJob = uniqueJobId;
+    },
+    removeHighlightNeeds() {
+      this.highlightedJob = null;
     },
     unwrapPipelineData(stages) {
       return stages
@@ -94,6 +146,14 @@ export default {
     },
     resetFailure() {
       this.failureType = null;
+    },
+    isJobHighlighted(jobName) {
+      return this.highlightedJobs.includes(jobName);
+    },
+    isLinkHighlighted(linkId) {
+      console.log(this.highlightedLinks, linkId);
+      console.log(this.highlightedLinks.includes(linkId));
+      return this.highlightedLinks.includes(linkId);
     },
   },
 };
@@ -116,8 +176,13 @@ export default {
         <path
           v-for="link in links"
           :key="link.path"
+          :ref="link.ref"
           :d="link.path"
-          class="gl-stroke-gray-200 gl-fill-transparent"
+          class="gl-fill-transparent"
+          :class="{
+            'gl-stroke-blue-400': isLinkHighlighted(link.ref),
+            'gl-stroke-gray-200': !isLinkHighlighted(link.ref),
+          }"
           :style="lineStyle"
         />
       </svg>
@@ -143,6 +208,10 @@ export default {
             :key="group.name"
             :job-id="createJobId(stage.name, group.name)"
             :job-name="group.name"
+            :is-highlighted="isJobHighlighted(createJobId(stage.name, group.name))"
+            :is-dimmed="highlightedJob && !isJobHighlighted(createJobId(stage.name, group.name))"
+            :handle-mouse-over="highlightNeeds"
+            :handle-mouse-leave="removeHighlightNeeds"
           />
         </div>
       </div>

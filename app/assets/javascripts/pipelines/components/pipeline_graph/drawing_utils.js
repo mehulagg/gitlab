@@ -80,6 +80,6 @@ export const generateLinksData = ({ links }, jobs, containerID) => {
       targetNodeY,
     );
 
-    return { ...link, path: path.toString() };
+    return { ...link, ref: createUniqueJobId(sourceId, targetId), path: path.toString() };
   });
 };
