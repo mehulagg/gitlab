@@ -21,15 +21,15 @@ RSpec.describe 'Overview tab on a user profile', :js do
     sign_in user
   end
 
-  describe 'activities section' do
-    shared_context 'visit overview tab' do
-      before do
-        visit user.username
-        page.find('.js-overview-tab a').click
-        wait_for_requests
-      end
+  shared_context 'visit overview tab' do
+    before do
+      visit user.username
+      page.find('.js-overview-tab a').click
+      wait_for_requests
     end
+  end
 
+  describe 'activities section' do
     describe 'user has no activities' do
       include_context 'visit overview tab'
 
@@ -84,14 +84,6 @@ RSpec.describe 'Overview tab on a user profile', :js do
   end
 
   describe 'projects section' do
-    shared_context 'visit overview tab' do
-      before do
-        visit user.username
-        page.find('.js-overview-tab a').click
-        wait_for_requests
-      end
-    end
-
     describe 'user has no personal projects' do
       include_context 'visit overview tab'
 
@@ -156,6 +148,26 @@ RSpec.describe 'Overview tab on a user profile', :js do
           expect(page).not_to have_selector('.gl-pagination')
         end
       end
+    end
+  end
+
+  describe 'with a bot user' do
+    let(:bot_user) { create(:user, user_type: :security_bot) }
+
+    before do
+      visit bot_user.username
+      page.find('.js-overview-tab a').click
+      wait_for_requests
+    end
+
+    it "activity panel's title is 'Bot activity'" do
+      page.within('.activities-block') do
+        expect(page).to have_text('Bot activity')
+      end
+    end
+
+    it 'does not show projects panel' do
+      expect(page).not_to have_selector('.projects-block')
     end
   end
 end

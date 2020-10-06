@@ -174,4 +174,21 @@ RSpec.describe 'User page' do
       end
     end
   end
+
+  context 'with a bot user' do
+    let(:user) { create(:user, user_type: :security_bot) }
+
+    it 'only shows Overview and Activity tabs' do
+      visit(user_path(user))
+
+      page.within '.nav-links' do
+        expect(page).to have_link('Overview')
+        expect(page).to have_link('Activity')
+        expect(page).not_to have_link('Groups')
+        expect(page).not_to have_link('Contributed projects')
+        expect(page).not_to have_link('Personal projects')
+        expect(page).not_to have_link('Snippets')
+      end
+    end
+  end
 end
