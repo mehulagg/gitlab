@@ -2413,9 +2413,6 @@ msgstr ""
 msgid "AlertSettings|Alert test payload"
 msgstr ""
 
-msgid "AlertSettings|Alerts endpoint successfully activated."
-msgstr ""
-
 msgid "AlertSettings|Authorization key"
 msgstr ""
 
@@ -2479,7 +2476,7 @@ msgstr ""
 msgid "AlertSettings|You must provide this URL and authorization key to authorize an external service to send alerts to GitLab. You can provide this URL and key to multiple services. After configuring an external service, alerts from your service will display on the GitLab %{linkStart}Alerts%{linkEnd} page."
 msgstr ""
 
-msgid "AlertSettings|Your changes were successfully updated."
+msgid "AlertSettings|Your integration was successfully updated."
 msgstr ""
 
 msgid "Alerts"

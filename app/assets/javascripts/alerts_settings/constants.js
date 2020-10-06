@@ -14,8 +14,7 @@ export const i18n = {
   restKeyInfo: s__(
     'AlertSettings|Resetting the authorization key for this project will require updating the authorization key in every alert source it is enabled in.',
   ),
-  endPointActivated: s__('AlertSettings|Alerts endpoint successfully activated.'),
-  changesSaved: s__('AlertSettings|Your changes were successfully updated.'),
+  changesSaved: s__('AlertSettings|Your integration was successfully updated.'),
   prometheusInfo: s__('AlertSettings|Add URL and auth key to your Prometheus config file'),
   integrationsInfo: s__(
     'AlertSettings|Learn more about our %{linkStart}upcoming integrations%{linkEnd}',
@@ -50,3 +49,5 @@ export const JSON_VALIDATE_DELAY = 250;
 
 export const targetPrometheusUrlPlaceholder = 'http://prometheus.example.com/';
 export const targetOpsgenieUrlPlaceholder = 'https://app.opsgenie.com/alert/list/';
+
+export const sectionHash = 'js-alert-management-settings';

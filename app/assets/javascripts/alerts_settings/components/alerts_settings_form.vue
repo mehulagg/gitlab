@@ -15,6 +15,7 @@ import {
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { s__ } from '~/locale';
+import { doesHashExistInUrl } from '~/lib/utils/url_utility';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
@@ -27,7 +28,9 @@ import {
   JSON_VALIDATE_DELAY,
   targetPrometheusUrlPlaceholder,
   targetOpsgenieUrlPlaceholder,
+  sectionHash,
 } from '../constants';
+import createFlash, { FLASH_TYPES } from '~/flash';
 
 export default {
   i18n,
@@ -156,12 +159,12 @@ export default {
         {
           name: s__('AlertSettings|HTTP endpoint'),
           type: s__('AlertsIntegrations|HTTP endpoint'),
-          status: this.prometheus.activated,
+          status: this.generic.activated,
         },
         {
           name: s__('AlertSettings|External Prometheus'),
           type: s__('AlertsIntegrations|Prometheus'),
-          status: this.generic.activated,
+          status: this.prometheus.activated,
         },
       ];
     },
@@ -262,25 +265,7 @@ export default {
             ? { service: { opsgenie_mvc_target_url: this.targetUrl, opsgenie_mvc_enabled: value } }
             : { service: { active: value } },
         })
-        .then(() => {
-          this.active = value;
-          this.toggleSuccess(value);
-
-          if (!this.isOpsgenie && value) {
-            if (!this.selectedService.authKey) {
-              return window.location.reload();
-            }
-
-            return this.removeOpsGenieOption();
-          }
-
-          if (this.isOpsgenie && value) {
-            return this.setOpsgenieAsDefault();
-          }
-
-          // eslint-disable-next-line no-return-assign
-          return (this.options = serviceOptions);
-        })
+        .then(() => this.notifySuccessAndReload())
         .catch(({ response: { data: { errors } = {} } = {} }) => {
           this.createUserErrorMessage(errors);
           this.setFeedback({
@@ -292,6 +277,12 @@ export default {
           this.loading = false;
           this.canSaveForm = false;
         });
+    },
+    reload() {
+      if (!doesHashExistInUrl(sectionHash)) {
+        window.location.hash = sectionHash;
+      }
+      window.location.reload();
     },
     togglePrometheusActive(value) {
       this.loading = true;
@@ -305,11 +296,7 @@ export default {
             redirect: window.location,
           },
         })
-        .then(() => {
-          this.active = value;
-          this.toggleSuccess(value);
-          this.removeOpsGenieOption();
-        })
+        .then(() => this.notifySuccessAndReload())
         .catch(({ response: { data: { errors } = {} } = {} }) => {
           this.createUserErrorMessage(errors);
           this.setFeedback({
@@ -322,18 +309,9 @@ export default {
           this.canSaveForm = false;
         });
     },
-    toggleSuccess(value) {
-      if (value) {
-        this.setFeedback({
-          feedbackMessage: this.$options.i18n.endPointActivated,
-          variant: 'info',
-        });
-      } else {
-        this.setFeedback({
-          feedbackMessage: this.$options.i18n.changesSaved,
-          variant: 'info',
-        });
-      }
+    notifySuccessAndReload() {
+      createFlash({ message: this.$options.i18n.changesSaved, type: FLASH_TYPES.NOTICE });
+      setTimeout(() => this.reload(), 1000);
     },
     setFeedback({ feedbackMessage, variant }) {
       this.feedback = { feedbackMessage, variant };
