@@ -1,16 +1,15 @@
 <script>
-import $ from 'jquery';
 import { mapActions, mapState } from 'vuex';
-import { GlIcon } from '@gitlab/ui';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { leftSidebarViews } from '../constants';
 
 export default {
   components: {
     GlIcon,
+    GlTooltipDirective,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   computed: {
     ...mapState(['currentActivityView']),
@@ -24,7 +23,7 @@ export default {
 
       // TODO: We must use JQuery here to interact with the Bootstrap tooltip API
       // https://gitlab.com/gitlab-org/gitlab/-/issues/217577
-      $(e.currentTarget).tooltip('hide');
+      this.$root.$emit('bv::hide::tooltip');
     },
   },
   leftSidebarViews,
@@ -36,7 +35,7 @@ export default {
     <ul class="list-unstyled">
       <li>
         <button
-          v-tooltip
+          v-gl-tooltip
           :class="{
             active: currentActivityView === $options.leftSidebarViews.edit.name,
           }"
@@ -54,7 +53,7 @@ export default {
       </li>
       <li>
         <button
-          v-tooltip
+          v-gl-tooltip
           :class="{
             active: currentActivityView === $options.leftSidebarViews.review.name,
           }"
@@ -71,7 +70,7 @@ export default {
       </li>
       <li>
         <button
-          v-tooltip
+          v-gl-tooltip
           :class="{
             active: currentActivityView === $options.leftSidebarViews.commit.name,
           }"
