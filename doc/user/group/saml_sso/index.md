@@ -87,6 +87,7 @@ You can see more information about how long a session is valid in our [user prof
 We intend to add a similar SSO requirement for [Git and API activity](https://gitlab.com/gitlab-org/gitlab/-/issues/9152).
 
 When SSO enforcement is enabled for a group, users cannot share a project in the group outside the top-level group, even if the project is forked.
+
 ## Providers
 
 NOTE: **Note:**
