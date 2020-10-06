@@ -87,13 +87,11 @@ export default {
         v-for="button in actionButtons"
         :key="button.title"
         v-gl-tooltip
-        class="px-1"
         category="tertiary"
+        :icon="button.iconName"
         :title="button.title"
         @click="button.onClick"
-      >
-        <gl-icon :name="button.iconName" class="link-highlight" />
-      </gl-button>
+      />
     </div>
   </div>
 </template>
