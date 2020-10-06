@@ -1,20 +1,18 @@
 <script>
 import { GlTable } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export const i18n = {
   title: s__('AlertsIntegrations|Current integrations'),
   emptyState: s__('AlertsIntegrations|No integrations have been added yet'),
   status: {
-    enabled: s__('AlertsIntegrations|Enabled'),
-    disabled: s__('AlertsIntegrations|Disabled'),
+    enabled: __('Enabled'),
+    disabled: __('Disabled'),
   },
 };
 
-const thClass = 'gl-bg-transparent! gl-border-1! gl-border-b-solid! gl-border-gray-200!';
-const tdClass = 'gl-border-gray-100! gl-p-5!';
 const bodyTrClass =
-  'gl-border-1 gl-border-t-solid gl-border-gray-100 gl-hover-bg-blue-50 gl-hover-cursor-pointer gl-border-b-solid gl-hover-border-blue-200';
+  'gl-border-1 gl-border-t-solid gl-border-b-solid gl-border-gray-100 gl-hover-cursor-pointer gl-hover-bg-blue-50 gl-hover-border-blue-200';
 
 export default {
   i18n,
@@ -35,20 +33,14 @@ export default {
       formatter(enabled) {
         return enabled ? i18n.status.enabled : i18n.status.disabled;
       },
-      thClass,
-      tdClass,
     },
     {
       key: 'name',
       label: s__('AlertsIntegrations|Integration Name'),
-      thClass,
-      tdClass,
     },
     {
       key: 'type',
       label: s__('AlertsIntegrations|Type'),
-      thClass,
-      tdClass,
     },
   ],
   computed: {

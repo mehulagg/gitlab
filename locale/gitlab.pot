@@ -2488,12 +2488,6 @@ msgstr ""
 msgid "AlertsIntegrations|Current integrations"
 msgstr ""
 
-msgid "AlertsIntegrations|Disabled"
-msgstr ""
-
-msgid "AlertsIntegrations|Enabled"
-msgstr ""
-
 msgid "AlertsIntegrations|HTTP endpoint"
 msgstr ""
 
