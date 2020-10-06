@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Incident details', :js do
+RSpec.describe 'Alert Management index', :js do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:alert) { create(:alert_management_alert, project: project, status: 'triggered') }

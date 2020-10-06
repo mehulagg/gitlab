@@ -19,7 +19,20 @@ export default {
     GlTab,
     FilteredSearchBar,
   },
-  inject: ['projectPath'],
+  inject: {
+    projectPath: {
+      default: '',
+    },
+    textQuery: {
+      default: '',
+    },
+    assigneeUsernamesQuery: {
+      default: '',
+    },
+    authorUsernamesQuery: {
+      default: '',
+    },
+  },
   props: {
     items: {
       type: Array,
@@ -73,9 +86,9 @@ export default {
   },
   data() {
     return {
-      searchTerm: '',
-      authorUsername: '',
-      assigneeUsernames: '',
+      searchTerm: this.textQuery,
+      authorUsername: this.authorUsernamesQuery,
+      assigneeUsernames: this.assigneeUsernamesQuery,
       filterParams: {},
       pagination: initialPaginationState,
       filteredByStatus: '',

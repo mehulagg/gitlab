@@ -20,7 +20,7 @@ module AlertManagement
       collection = project.alert_management_alerts
       collection = by_status(collection)
       collection = by_iid(collection)
-      # collection = by_assignee(items)
+      collection = by_assignee(collection)
       collection = by_search(collection)
 
       sort(collection)
@@ -48,6 +48,10 @@ module AlertManagement
 
     def sort(collection)
       params[:sort] ? collection.sort_by_attribute(params[:sort]) : collection
+    end
+
+    def by_assignee(collection)
+      params[:assignee_username].present? ? collection.for_assignee_username(params[:assignee_username]) : collection
     end
 
     def authorized?

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Incident details', :js do
+RSpec.describe 'Incident Management index', :js do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:incident) { create(:incident, project: project) }

@@ -38,7 +38,6 @@ module AlertManagement
     sha_attribute :fingerprint
 
     HOSTS_MAX_LENGTH = 255
-    
     validates :title,           length: { maximum: 200 }, presence: true
     validates :description,     length: { maximum: 1_000 }
     validates :service,         length: { maximum: 100 }
@@ -112,6 +111,7 @@ module AlertManagement
     scope :for_status, -> (status) { where(status: status) }
     scope :for_fingerprint, -> (project, fingerprint) { where(project: project, fingerprint: fingerprint) }
     scope :for_environment, -> (environment) { where(environment: environment) }
+    scope :for_assignee_username, -> (assignee_username) { joins(:assignees).merge(User.by_username(assignee_username)) }
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
     scope :open, -> { with_status(open_statuses) }
     scope :not_resolved, -> { without_status(:resolved) }

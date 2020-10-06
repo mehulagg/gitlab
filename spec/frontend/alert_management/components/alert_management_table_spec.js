@@ -1,5 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { GlTable, GlAlert, GlLoadingIcon, GlDropdown, GlIcon, GlAvatar } from '@gitlab/ui';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import { visitUrl } from '~/lib/utils/url_utility';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import AlertManagementTable from '~/alert_management/components/alert_management_table.vue';
@@ -14,6 +16,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 
 describe('AlertManagementTable', () => {
   let wrapper;
+  let mock;
 
   const findAlertsTable = () => wrapper.find(GlTable);
   const findAlerts = () => wrapper.findAll('table tbody tr');
@@ -62,11 +65,16 @@ describe('AlertManagementTable', () => {
     });
   }
 
+  beforeEach(() => {
+    mock = new MockAdapter(axios);
+  });
+
   afterEach(() => {
     if (wrapper) {
       wrapper.destroy();
       wrapper = null;
     }
+    mock.restore();
   });
 
   describe('Alerts table', () => {
