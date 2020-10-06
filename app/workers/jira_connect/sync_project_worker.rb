@@ -10,9 +10,9 @@ module JiraConnect
     MERGE_REQUEST_LIMIT = 50
 
     def perform(project_id)
-      project = Project.find(project_id)
+      project = Project.find_by_id(project_id)
 
-      return if merge_request_limit_exceeded?(project)
+      return if project.nil? || merge_request_limit_exceeded?(project)
 
       JiraConnect::SyncService.new(project).execute(merge_requests: merge_requests_to_sync(project))
     end

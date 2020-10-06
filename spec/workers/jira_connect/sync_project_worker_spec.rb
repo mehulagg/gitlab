@@ -18,6 +18,12 @@ RSpec.describe JiraConnect::SyncProjectWorker do
       described_class.new.perform(project.id)
     end
 
+    context 'when the project is not found' do
+      it 'does not raise an error' do
+        expect { described_class.new.perform('non_existing_record_id') }.not_to raise_error
+      end
+    end
+
     context 'when project has more than 50 MRs to sync' do
       let!(:merge_requests) { create_list(:merge_request, 2, :unique_branches, description: 'TEST-323', title: 'TEST-123', source_project: project) }
 
