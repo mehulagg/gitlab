@@ -32,7 +32,7 @@ module FinderWithCrossProjectAccess
   end
 
   override :execute
-  def execute(*args)
+  def execute(**kwargs)
     check = Gitlab::CrossProjectAccess.find_check(self)
     original = -> { super }
 
