@@ -18,7 +18,7 @@
       = link_to _('Manage two-factor authentication'), profile_two_factor_auth_path, class: 'btn btn-info'
     - else
       .gl-mb-3
-        = link_to _('Enable two-factor authentication'), profile_two_factor_auth_path, class: 'btn btn-success'
+        = link_to _('Enable two-factor authentication'), profile_otp_application_path, class: 'btn btn-success'
 
 %hr
 - if display_providers_on_profile?

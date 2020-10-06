@@ -67,6 +67,10 @@ resource :profile, only: [:show, :update] do
       end
     end
 
+    scope module: :two_factor do
+      resource :otp_application, only: [:show]
+    end
+
     resources :u2f_registrations, only: [:destroy]
     resources :webauthn_registrations, only: [:destroy]
   end

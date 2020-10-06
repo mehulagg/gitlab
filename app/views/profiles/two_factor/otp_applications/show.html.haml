@@ -1,0 +1,50 @@
+- page_title _('Authenticator Application'), _('Two-Factor Authentication'), _('Account')
+- add_to_breadcrumbs(_('Authenticator Application'), profile_otp_application_path)
+
+.js-two-factor-auth{ 'data-two-factor-skippable' => "#{two_factor_skippable?}", 'data-two_factor_skip_url' => skip_profile_two_factor_auth_path }
+  .row.gl-mt-3
+    .col-lg-4
+      %h4.gl-mt-0
+        = _('Authenticator application')
+      %p
+        = _('Use an one-time password authenticator on your mobile device or computer to enable two-factor authentication (2FA). This is required before enabling other forms of 2FA.')
+    .col-lg-8
+      - if current_user.two_factor_otp_enabled?
+        .text-warning.prepend-top-20
+          %p
+            = sprite_icon('warning-solid')
+            = _("You've already registered a two-factor authenticator application. Your previous two-factor authenticator will no longer work if you continue.")
+        .gl-mt-3
+          = link_to _('Back to two-factor settings'), profile_two_factor_auth_path, class: 'btn btn-default gl-mr-3', data: { qa_selector: 'proceed_button' }
+
+        %hr
+
+        %p
+          - help_link_start = '<a href="%{url}" target="_blank">' % { url: help_page_path('user/profile/account/two_factor_authentication') }
+          - register_2fa_token = _('Install a soft token authenticator like %{free_otp_link} or Google Authenticator from your application repository and use that app to scan this QR code. More information is available in the %{help_link_start}documentation%{help_link_end}.') % { free_otp_link:'<a href="https://freeotp.github.io/">FreeOTP</a>', help_link_start:help_link_start, help_link_end:'</a>' }
+          = register_2fa_token.html_safe
+      .row.gl-mb-3
+        .col-md-4
+          = raw @qr_code
+        .col-md-8
+          .account-well
+            %p.gl-mt-0.gl-mb-0
+              = _("Can't scan the code?")
+            %p.gl-mt-0.gl-mb-0
+              = _('To add the entry manually, provide the following details to the application on your phone.')
+            %p.gl-mt-0.gl-mb-0
+              = _('Account: %{account}') % { account: @account_string }
+            %p.gl-mt-0.gl-mb-0{ data: { qa_selector: 'otp_secret_content' } }
+              = _('Key: %{key}') %{ key: current_user.otp_secret.scan(/.{4}/).join(' ') }
+            %p.two-factor-new-manual-content
+              = _('Time based: Yes')
+      = form_tag profile_otp_application_path, method: :post do |f|
+        - if @error
+          .gl-alert.gl-alert-danger.gl-mb-5
+            = @error
+        .form-group
+          = label_tag :pin_code, _('Pin code'), class: "label-bold"
+          = text_field_tag :pin_code, nil, class: "form-control", required: true, data: { qa_selector: 'pin_code_field' }
+        .gl-mt-3
+          = submit_tag _('Register application'), class: 'btn btn-success', data: { qa_selector: 'register_2fa_app_button' }
+
