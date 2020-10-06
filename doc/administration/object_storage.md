@@ -233,9 +233,6 @@ The connection settings match those provided by [fog-aws](https://github.com/fog
 | `path_style` | Set to `true` to use `host/bucket_name/object` style paths instead of `bucket_name.host/object`. Leave as `false` for AWS S3. | `false` |
 | `use_iam_profile` | Set to `true` to use IAM profile instead of access keys | `false`
 
-NOTE: **Note:**
-According to the [AWS Go SDK](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html), the SDK detects and uses the built-in providers automatically, without requiring manual configurations. For example, if you use IAM roles for your Amazon EC2 instances, your applications automatically use the instance’s credentials. You don’t need to manually configure credentials in your application.
-
 #### Oracle Cloud S3 connection settings
 
 Note that Oracle Cloud S3 must be sure to use the following settings:

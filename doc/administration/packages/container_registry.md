@@ -380,6 +380,9 @@ GitLab does not back up Docker images that are not stored on the
 filesystem. Enable backups with your object storage provider if
 desired.
 
+NOTE: **Note:**
+According to the [AWS Go SDK](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html), the SDK detects and uses the built-in providers automatically, without requiring manual configurations. For example, if you use IAM roles for your Amazon EC2 instances, your applications automatically use the instance’s credentials. You don’t need to manually configure credentials in your application.
+
 **Omnibus GitLab installations**
 
 To configure the `s3` storage driver in Omnibus:
@@ -389,15 +392,12 @@ To configure the `s3` storage driver in Omnibus:
    ```ruby
    registry['storage'] = {
      's3' => {
-       'accesskey' => 's3-access-key',
-       'secretkey' => 's3-secret-key-for-access-key',
        'bucket' => 'your-s3-bucket',
        'region' => 'your-s3-region',
        'regionendpoint' => 'your-s3-regionendpoint'
      }
    }
    ```
- 
    - `regionendpoint` is only required when configuring an S3 compatible service such as MinIO. It takes a URL such as `http://127.0.0.1:9000`.
    - `your-s3-bucket` should be the name of a bucket that exists, and can't include subdirectories.
 
@@ -413,8 +413,6 @@ when you [deployed your Docker registry](https://docs.docker.com/registry/deploy
 ```yaml
 storage:
   s3:
-    accesskey: 's3-access-key'
-    secretkey: 's3-secret-key-for-access-key'
     bucket: 'your-s3-bucket'
     region: 'your-s3-region'
     regionendpoint: 'your-s3-regionendpoint'
