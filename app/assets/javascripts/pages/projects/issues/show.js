@@ -5,7 +5,7 @@ import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
 import ZenMode from '~/zen_mode';
 import '~/notes/index';
 import { store } from '~/notes/stores';
-import initIssueApp from '~/issue_show/issue';
+import { initIssuableApp, initIssueHeader } from '~/issue_show/issue';
 import initIncidentApp from '~/issue_show/incident';
 import initIssuableHeaderWarning from '~/vue_shared/components/issuable/init_issuable_header_warning';
 import initSentryErrorStackTraceApp from '~/sentry_error_stack_trace';
@@ -19,9 +19,10 @@ export default function() {
   if (issueType === 'incident') {
     initIncidentApp(issuableData);
   } else if (issueType === 'issue') {
-    initIssueApp(issuableData);
+    initIssuableApp(issuableData);
   }
 
+  initIssueHeader(store);
   initIssuableHeaderWarning(store);
   initSentryErrorStackTraceApp();
   initRelatedMergeRequestsApp();
