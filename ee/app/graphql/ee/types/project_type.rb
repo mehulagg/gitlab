@@ -120,10 +120,6 @@ module EE
               null: true,
               description: 'Size of repository that exceeds the limit in bytes'
 
-        def self.requirements_available?(project, user)
-          ::Feature.enabled?(:requirements_management, project, default_enabled: true) && Ability.allowed?(user, :read_requirement, project)
-        end
-
         def self.sast_ci_configuration(project)
           ::Security::CiConfiguration::SastParserService.new(project).configuration
         end
