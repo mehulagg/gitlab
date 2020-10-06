@@ -2,7 +2,7 @@
 
 module IncidentManagement
   class CreateSlaService < BaseService
-    def initialize(incident, current_user, project)
+    def initialize(incident, current_user)
       super(incident.project, current_user)
 
       @incident = incident

@@ -10,7 +10,8 @@ module EE
           EE_OVERRIDES = {
             deploy_access_levels: 'ProtectedEnvironment::DeployAccessLevel',
             unprotect_access_levels: 'ProtectedBranch::UnprotectAccessLevel',
-            security_setting: 'ProjectSecuritySetting'
+            security_setting: 'ProjectSecuritySetting',
+            incident_sla: 'IncidentManagement::IncidentSla'
           }.freeze
 
           class_methods do

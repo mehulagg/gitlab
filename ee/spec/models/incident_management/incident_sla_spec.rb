@@ -3,13 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::IncidentSla do
-  let_it_be(:incident_sla) { create(:incident_sla) }
-  subject { incident_sla }
+  subject(:incident_sla) { build(:incident_sla) }
 
-  it { expect(subject).to be_valid }
+  it { is_expected.to be_valid }
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:due_at) }
-    it { is_expected.to validate_presence_of(:issue) }
+
+    it 'requires an issue' do
+      expect(build(:incident_sla, issue: nil).valid? ).to eq(false)
+    end
   end
 end

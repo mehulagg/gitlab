@@ -712,3 +712,5 @@ system_note_metadata:
 - description_version
 status_page_published_incident:
 - issue
+incident_sla:
+  - issue
