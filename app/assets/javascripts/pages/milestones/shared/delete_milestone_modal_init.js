@@ -44,7 +44,7 @@ export default () => {
     },
     mounted() {
       eventHub.$on('deleteMilestoneModal.props', this.setModalProps);
-        deleteMilestoneButtons.forEach(button => {
+      deleteMilestoneButtons.forEach(button => {
         button.removeAttribute('disabled');
         button.addEventListener('click', () => {
           this.$root.$emit('bv::show::modal', 'delete-milestone-modal');
