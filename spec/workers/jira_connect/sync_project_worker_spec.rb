@@ -8,7 +8,7 @@ RSpec.describe JiraConnect::SyncProjectWorker do
     let!(:mr_with_jira_title) { create(:merge_request, :unique_branches, title: 'TEST-123') }
     let!(:mr_with_jira_description) { create(:merge_request, :unique_branches, description: 'TEST-323') }
     let!(:closed_mr_with_jira_reference) { create(:closed_merge_request, :unique_branches, description: 'TEST-323', title: 'TEST-123') }
-    let!(:merged_mr_with_jira_reference) { create(:closed_merge_request, :unique_branches, description: 'TEST-323', title: 'TEST-123') }
+    let!(:merged_mr_with_jira_reference) { create(:merged_merge_request, :unique_branches, description: 'TEST-323', title: 'TEST-123') }
     let!(:mr_with_other_title) { create(:merge_request, :unique_branches) }
 
     it 'syncs open merge requests with Jira references in title or description' do
