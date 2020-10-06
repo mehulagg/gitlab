@@ -15,6 +15,9 @@ RSpec.describe 'Multiple value streams', :js do
   duration_stage_selector = '.js-dropdown-stages'
   value_stream_selector = '[data-testid="dropdown-value-streams"]'
 
+  let(:value_stream_dropdown) { page.find(value_stream_selector) }
+  let!(:default_value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'default') }
+
   3.times do |i|
     let_it_be("issue_#{i}".to_sym) { create(:issue, title: "New Issue #{i}", project: project, created_at: 2.days.ago) }
   end
@@ -56,10 +59,6 @@ RSpec.describe 'Multiple value streams', :js do
     page.find('[data-testid="dropdown-value-streams"]').all('li button').find { |item| item.text == value_stream_name.to_s }.click
     wait_for_requests
   end
-
-
-  let(:value_stream_dropdown) { page.find(value_stream_selector) }
-  let!(:default_value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'default') }
 
   describe 'Create value stream' do
     before do
