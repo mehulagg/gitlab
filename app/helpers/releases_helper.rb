@@ -29,6 +29,14 @@ module ReleasesHelper
     end
   end
 
+  def data_for_show_page
+    {
+      project_id: @project.id,
+      project_path: @project.full_path,
+      tag_name: @release.tag
+    }
+  end
+
   def data_for_edit_release_page
     new_edit_pages_shared_data.merge(
       tag_name: @release.tag,

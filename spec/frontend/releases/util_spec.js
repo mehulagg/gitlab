@@ -1,6 +1,10 @@
 import { cloneDeep } from 'lodash';
 import { getJSONFixture } from 'helpers/fixtures';
-import { releaseToApiJson, apiJsonToRelease, convertGraphQLResponse } from '~/releases/util';
+import {
+  releaseToApiJson,
+  apiJsonToRelease,
+  convertAllReleasesGraphQLResponse,
+} from '~/releases/util';
 
 const originalGraphqlReleasesResponse = getJSONFixture(
   'graphql/releases/queries/all_releases.query.graphql.json',
@@ -107,13 +111,13 @@ describe('releases/util.js', () => {
     });
   });
 
-  describe('convertGraphQLResponse', () => {
+  describe('convertAllReleasesGraphQLResponse', () => {
     let graphqlReleasesResponse;
     let converted;
 
     beforeEach(() => {
       graphqlReleasesResponse = cloneDeep(originalGraphqlReleasesResponse);
-      converted = convertGraphQLResponse(graphqlReleasesResponse);
+      converted = convertAllReleasesGraphQLResponse(graphqlReleasesResponse);
     });
 
     it('matches snapshot', () => {
@@ -127,7 +131,7 @@ describe('releases/util.js', () => {
         delete graphqlReleasesResponse.data.project.releases.nodes[0].assets.links.nodes[0]
           .linkType;
 
-        converted = convertGraphQLResponse(graphqlReleasesResponse);
+        converted = convertAllReleasesGraphQLResponse(graphqlReleasesResponse);
 
         expect(converted.data[0].assets.links[0].linkType).toBeUndefined();
       });
@@ -139,7 +143,7 @@ describe('releases/util.js', () => {
 
         delete graphqlReleasesResponse.data.project.releases.nodes[0].links;
 
-        converted = convertGraphQLResponse(graphqlReleasesResponse);
+        converted = convertAllReleasesGraphQLResponse(graphqlReleasesResponse);
 
         expect(converted.data[0]._links.selfUrl).toBeUndefined();
       });
@@ -151,7 +155,7 @@ describe('releases/util.js', () => {
 
         delete graphqlReleasesResponse.data.project.releases.nodes[0].commit;
 
-        converted = convertGraphQLResponse(graphqlReleasesResponse);
+        converted = convertAllReleasesGraphQLResponse(graphqlReleasesResponse);
 
         expect(converted.data[0].commit).toBeUndefined();
       });

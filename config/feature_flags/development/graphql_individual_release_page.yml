@@ -1,0 +1,7 @@
+---
+name: graphql_individual_release_page
+introduced_by_url:
+rollout_issue_url:
+type: development
+group: group::release management
+default_enabled: true
