@@ -248,6 +248,9 @@ GitLab global administrator to disable two-factor authentication for your
 account. This will temporarily leave your account in a less secure state.
 Sign in and re-enable two-factor authentication as soon as possible.
 
+CAUTION: **Caution:**
+As of 2020-08-15 GitLab Support is no longer processing requests to disable two-factor authentication for free accounts that do not have a GitLab.com subscription, to safeguard the security of our users. For more information about this change please see our post on the [GitLab Blog](https://about.gitlab.com/blog/2020/08/04/gitlab-support-no-longer-processing-mfa-resets-for-free-users/).
+
 ## Note to GitLab administrators
 
 - You need to take special care to that 2FA keeps working after
