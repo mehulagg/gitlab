@@ -10,4 +10,4 @@
     = _("The repository can be committed to, and issues, comments and other entities can be created.")
     %strong= _('Only active this projects shows up in the search and on the dashboard.')
   = link_to _('Restore project'), namespace_project_restore_path(project.namespace, project),
-      method: :post, class: "btn btn-remove"
+      method: :post, class: "gl-button btn btn-danger"

@@ -5,7 +5,7 @@
     = link_to edit_snippet_path(@snippet), class: "btn btn-grouped" do
       = _("Edit")
   - if can?(current_user, :admin_snippet, @snippet)
-    = link_to gitlab_snippet_path(@snippet), method: :delete, data: { confirm: _("Are you sure?") }, class: "btn btn-grouped btn-inverted btn-remove", title: _('Delete Snippet') do
+    = link_to gitlab_snippet_path(@snippet), method: :delete, data: { confirm: _("Are you sure?") }, class: "gl-button btn btn-grouped btn-danger btn-danger-secondary", title: _('Delete Snippet') do
       = _("Delete")
   - if can?(current_user, :create_snippet)
     = link_to new_snippet_path, class: "btn btn-grouped btn-success btn-inverted", title: _("New snippet") do

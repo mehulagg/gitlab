@@ -5,7 +5,7 @@
     = link_to edit_project_snippet_path(@project, @snippet), class: "btn btn-grouped" do
       = _('Edit')
   - if can?(current_user, :admin_snippet, @snippet)
-    = link_to project_snippet_path(@project, @snippet), method: :delete, data: { confirm: _("Are you sure?") }, class: "btn btn-grouped btn-inverted btn-remove", title: _('Delete Snippet') do
+    = link_to project_snippet_path(@project, @snippet), method: :delete, data: { confirm: _("Are you sure?") }, class: "gl-button btn btn-grouped btn-danger btn-danger-secondary", title: _('Delete Snippet') do
       = _('Delete')
   - if can?(current_user, :create_snippet, @project)
     = link_to new_project_snippet_path(@project), class: 'btn btn-grouped btn-inverted btn-success', title: _("New snippet") do
