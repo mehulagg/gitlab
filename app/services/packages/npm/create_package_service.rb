@@ -18,7 +18,7 @@ module Packages
         package = create_package!(:npm, name: name, version: version)
 
         if build.present?
-          package.create_build_info!(pipeline: build.pipeline)
+          package.build_infos.create!(pipeline: build.pipeline)
         end
 
         ::Packages::CreatePackageFileService.new(package, file_params).execute

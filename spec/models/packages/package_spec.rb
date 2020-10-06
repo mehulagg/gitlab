@@ -557,7 +557,7 @@ RSpec.describe Packages::Package, type: :model do
       let_it_be(:pipeline) { create(:ci_pipeline) }
 
       before do
-        package.create_build_info!(pipeline: pipeline)
+        package.build_infos.create!(pipeline: pipeline)
       end
 
       it 'returns the pipeline' do

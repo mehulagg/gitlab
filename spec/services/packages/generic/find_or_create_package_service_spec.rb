@@ -68,7 +68,7 @@ RSpec.describe Packages::Generic::FindOrCreatePackageService do
         let(:pipeline) { create(:ci_pipeline, project: project) }
 
         before do
-          package.create_build_info!(pipeline: pipeline)
+          package.build_infos.create!(pipeline: pipeline)
         end
 
         it 'finds the package and does not change package build info even if build is provided' do

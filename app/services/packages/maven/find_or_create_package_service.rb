@@ -47,7 +47,7 @@ module Packages
         end
 
         build = params[:build]
-        package.create_build_info!(pipeline: build.pipeline) if build.present?
+        package.build_infos.create!(pipeline: build.pipeline) if build.present?
 
         package
       end

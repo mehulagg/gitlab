@@ -55,7 +55,7 @@ class Packages::Package < ApplicationRecord
   scope :with_version, ->(version) { where(version: version) }
   scope :without_version_like, -> (version) { where.not(arel_table[:version].matches(version)) }
   scope :with_package_type, ->(package_type) { where(package_type: package_type) }
-  scope :including_build_info, -> { includes(build_info: { pipeline: :user }) }
+  scope :including_build_info, -> { includes(build_infos: { pipeline: :user }) }
   scope :including_project_route, -> { includes(project: { namespace: :route }) }
   scope :including_tags, -> { includes(:tags) }
 
@@ -167,7 +167,7 @@ class Packages::Package < ApplicationRecord
   end
 
   def pipeline
-    build_info.first&.pipeline
+    build_info&.pipeline
   end
 
   def tag_names
