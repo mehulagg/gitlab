@@ -191,3 +191,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::UsageDataCounters::HLLRedisCounter.prepend_if_ee('EE::Gitlab::UsageDataCounters::HLLRedisCounter')

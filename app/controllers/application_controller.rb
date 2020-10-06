@@ -43,6 +43,7 @@ class ApplicationController < ActionController::Base
   # Make sure the `auth_user` is memoized so it can be logged, we do this after
   # all other before filters that could have set the user.
   before_action :auth_user
+  before_action :current_namespace
 
   prepend_around_action :set_current_context
 
@@ -136,6 +137,15 @@ class ApplicationController < ActionController::Base
       if (400..599).cover?(response.status) && workhorse_excluded_content_types.include?(response.media_type)
         response.headers['X-GitLab-Custom-Error'] = '1'
       end
+    end
+  end
+
+  def current_namespace
+    strong_memoize(:current_namespace) do
+      # namespace = Namespace.find_by(id: params[:namespace_id]) || current_user.namespace
+      # Rails.logger.info("current_namespace :: #{namespace.name} : #{namespace.actual_plan.name}")
+      # Rails.logger.info("current_namespace :: #{namespace.name} : #{namespace.gitlab_subscription.hosted_plan_id}")
+      namespace
     end
   end
 
