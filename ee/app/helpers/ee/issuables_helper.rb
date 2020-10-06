@@ -34,8 +34,13 @@ module EE
       return {} unless issuable.is_a?(Issue)
 
       super.merge(
-        publishedIncidentUrl: ::Gitlab::StatusPage::Storage.details_url(issuable)
+        publishedIncidentUrl: ::Gitlab::StatusPage::Storage.details_url(issuable),
+        slaFeatureAvailable: sla_feature_available?.to_s
       )
+    end
+
+    def sla_feature_available?
+      ::Feature.enabled?(:incident_sla_dev, @project) && @project.feature_available?(:incident_sla, current_user)
     end
 
     override :issuable_meta_author_slot
