@@ -8,6 +8,9 @@ export default {
     state.open = true;
   },
   [types.SET_FEATURES](state, data) {
-    state.features = data;
+    state.features = state.features.concat(data);
+  },
+  [types.SET_PAGINATION](state, pageInfo) {
+    state.pageInfo = pageInfo;
   },
 };

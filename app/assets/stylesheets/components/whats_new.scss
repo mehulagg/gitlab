@@ -1,6 +1,7 @@
 .whats-new-drawer {
   margin-top: $header-height;
   @include gl-shadow-none;
+  overflow-y: hidden;
 }
 
 .with-performance-bar .whats-new-drawer {

@@ -24,7 +24,7 @@ describe('App', () => {
 
     state = {
       open: true,
-      features: null,
+      features: [],
     };
 
     store = new Vuex.Store({

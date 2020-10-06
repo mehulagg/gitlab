@@ -25,8 +25,15 @@ describe('whats new mutations', () => {
 
   describe('setFeatures', () => {
     it('sets features to data', () => {
-      mutations[types.SET_FEATURES](state, 'bells and whistles');
-      expect(state.features).toBe('bells and whistles');
+      mutations[types.SET_FEATURES](state, ['bells and whistles']);
+      expect(state.features).toMatchObject(['bells and whistles']);
+    });
+  });
+
+  describe('setPagination', () => {
+    it('sets pagination', () => {
+      mutations[types.SET_PAGINATION](state, { nextPage: 8, currentPage: 40 });
+      expect(state.pageInfo).toMatchObject({ nextPage: 8, currentPage: 40 });
     });
   });
 });

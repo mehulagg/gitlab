@@ -5,14 +5,14 @@ class WhatsNewController < ApplicationController
 
   skip_before_action :authenticate_user!
 
-  before_action :check_feature_flag
+  before_action :check_feature_flag, :set_pagination_headers
 
   feature_category :navigation
 
   def index
     respond_to do |format|
       format.js do
-        render json: whats_new_most_recent_release_items
+        render json: whats_new_release_items(page: current_page)
       end
     end
   end
@@ -21,5 +21,21 @@ class WhatsNewController < ApplicationController
 
   def check_feature_flag
     render_404 unless Feature.enabled?(:whats_new_drawer, current_user)
+  end
+
+  def set_pagination_headers
+    response.set_header('X-Page', current_page)
+    response.set_header('X-Next-Page', next_page)
+  end
+
+  def current_page
+    params[:page]&.to_i || 1
+  end
+
+  def next_page
+    next_page = current_page + 1
+    next_index = next_page - 1
+
+    next_page if whats_new_file_paths[next_index]
   end
 end

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe WhatsNewHelper do
+  let(:fixture_dir_glob) { Dir.glob(File.join('spec', 'fixtures', 'whats_new', '*.yml')) }
+
   describe '#whats_new_storage_key' do
     subject { helper.whats_new_storage_key }
 
@@ -27,10 +29,8 @@ RSpec.describe WhatsNewHelper do
     subject { helper.whats_new_most_recent_release_items_count }
 
     context 'when recent release items exist' do
-      let(:fixture_dir_glob) { Dir.glob(File.join('spec', 'fixtures', 'whats_new', '*.yml')) }
-
       it 'returns the count from the most recent file' do
-        expect(Dir).to receive(:glob).with(Rails.root.join('data', 'whats_new', '*.yml')).and_return(fixture_dir_glob)
+        expect(Dir).to receive(:glob).with(Rails.root.join('data', 'whats_new', '*.yml')).twice.and_return(fixture_dir_glob)
 
         expect(subject).to eq(1)
       end
@@ -46,6 +46,15 @@ RSpec.describe WhatsNewHelper do
       it 'fails gracefully and logs an error' do
         expect(subject).to be_nil
       end
+    end
+  end
+
+  # Testing this important private method here because the request spec required multiple confusing mocks and felt wrong and overcomplicated
+  describe '#whats_new_items_cache_key' do
+    it 'returns a key containing the most recent file name and page parameter' do
+      allow(Dir).to receive(:glob).with(Rails.root.join('data', 'whats_new', '*.yml')).and_return(fixture_dir_glob)
+
+      expect(helper.send(:whats_new_items_cache_key, 2)).to eq('whats_new:release_items:file-20201225_01_05:page-2')
     end
   end
 end

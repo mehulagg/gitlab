@@ -23,6 +23,9 @@ RSpec.describe "renders a `whats new` dropdown item", :js do
       find('button', text: "See what's new at GitLab").click
     end
 
+    # Jest/JSDOM mocks clientHeight, so I'm thinly testing this here.
+    expect(find('.whats-new-drawer .gl-infinite-scroll-container').style('max-height')['max-height']).not_to eq('none')
+
     find('.whats-new-drawer .gl-drawer-close-button').click
     find('.header-help-dropdown-toggle').click
 

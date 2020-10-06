@@ -1,4 +1,8 @@
 export default {
   open: false,
-  features: null,
+  features: [],
+  pageInfo: {
+    currentPage: 0,
+    nextPage: null,
+  },
 };

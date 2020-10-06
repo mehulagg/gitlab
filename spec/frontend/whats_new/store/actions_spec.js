@@ -30,7 +30,10 @@ describe('whats new actions', () => {
       axiosMock = new MockAdapter(axios);
       axiosMock
         .onGet('/-/whats_new')
-        .replyOnce(200, [{ title: 'Whats New Drawer', url: 'www.url.com' }]);
+        .replyOnce(200, [{ title: 'Whats New Drawer', url: 'www.url.com' }], {
+          'x-next-page': '2',
+          'x-page': '1',
+        });
 
       await waitForPromises();
     });
@@ -39,10 +42,27 @@ describe('whats new actions', () => {
       axiosMock.restore();
     });
 
-    it('should commit setFeatures', () => {
+    it('should commit setFeatures and setPagination', () => {
       testAction(actions.fetchItems, {}, {}, [
         { type: types.SET_FEATURES, payload: [{ title: 'Whats New Drawer', url: 'www.url.com' }] },
+        { type: types.SET_PAGINATION, payload: { currentPage: 1, nextPage: 2 } },
       ]);
+    });
+  });
+
+  describe('bottomReached', () => {
+    it('when nextPage exists dispatches fetchItems', () => {
+      testAction(
+        actions.bottomReached,
+        {},
+        { pageInfo: { nextPage: 840 } },
+        [],
+        [{ payload: 840, type: 'fetchItems' }],
+      );
+    });
+
+    it('when nextPage does not exist it does not dispatch fetchItems', () => {
+      testAction(actions.bottomReached, {}, { pageInfo: { nextPage: null } }, [], []);
     });
   });
 });
