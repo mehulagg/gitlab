@@ -107,3 +107,15 @@
     }
   }
 }
+
+
+.seats-table {
+  &.table {
+    tr {
+      th {
+        background: none;
+        color: $gl-text-color-secondary;
+      }
+    }
+  }
+}

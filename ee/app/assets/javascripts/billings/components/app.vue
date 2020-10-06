@@ -1,11 +1,13 @@
 <script>
 import { mapActions } from 'vuex';
 import SubscriptionTable from './subscription_table.vue';
+import SubscriptionSeatsTable from './subscription_seats_table.vue';
 
 export default {
   name: 'SubscriptionApp',
   components: {
     SubscriptionTable,
+    SubscriptionSeatsTable,
   },
   props: {
     planUpgradeHref: {
@@ -28,6 +30,12 @@ export default {
       required: true,
     },
   },
+  computed: {
+    // TODO
+    seatsInUse() {
+      return true;
+    },
+  },
   created() {
     this.setNamespaceId(this.namespaceId);
   },
@@ -38,9 +46,17 @@ export default {
 </script>
 
 <template>
-  <subscription-table
-    :namespace-name="namespaceName"
-    :plan-upgrade-href="planUpgradeHref"
-    :customer-portal-url="customerPortalUrl"
-  />
+  <div>
+    <subscription-table
+      :namespace-name="namespaceName"
+      :plan-upgrade-href="planUpgradeHref"
+      :customer-portal-url="customerPortalUrl"
+    />
+    <subscription-seats-table
+      v-if="seatsInUse"
+      :namespace-id="namespaceId"
+      :namespace-name="namespaceName"
+      class="gl-mt-7"
+    />
+  </div>
 </template>

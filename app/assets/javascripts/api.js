@@ -67,6 +67,7 @@ const Api = {
   usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
   featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
   featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
+  billableGroupMembersPath: '/api/:version/groups/:id/billable_members',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -746,6 +747,12 @@ const Api = {
       .replace(':list_iid', listIid);
 
     return axios.delete(url);
+  },
+
+  fetchBillableGroupMembersList(id) {
+    const url = Api.buildUrl(this.billableGroupMembersPath).replace(':id', id);
+
+    return axios.get(url);
   },
 };
 
