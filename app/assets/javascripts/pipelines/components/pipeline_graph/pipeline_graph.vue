@@ -7,7 +7,7 @@ import StagePill from './stage_pill.vue';
 import { generateLinksData } from './drawing_utils';
 import { parseData } from '../parsing_utils';
 import { DRAW_FAILURE, DEFAULT } from '../../constants';
-import { createUniqueJobId } from '../../utils';
+import { generateJobNeedsDict } from '../../utils';
 
 export default {
   components: {
@@ -31,7 +31,9 @@ export default {
   data() {
     return {
       failureType: null,
+      highlightedJob: null,
       links: [],
+      needsObject: {},
       height: 0,
       width: 0,
     };
@@ -42,6 +44,9 @@ export default {
     },
     hasError() {
       return this.failureType;
+    },
+    hasHighlightedJob() {
+      return Boolean(this.highlightedJob);
     },
     failure() {
       const text = this.$options.errorTexts[this.failureType] || this.$options.errorTexts[DEFAULT];
@@ -54,17 +59,37 @@ export default {
     lineStyle() {
       return `stroke-width:${this.$options.STROKE_WIDTH}px;`;
     },
+    highlightedJobs() {
+      // If you are hovering on a job, then the jobs we want to highlight are:
+      // The job you are currently hovering + all of its needs.
+      return this.hasHighlightedJob
+        ? [this.highlightedJob, ...this.needsObject[this.highlightedJob]]
+        : [];
+    },
+    highlightedLinks() {
+      // If you are hovering on a job, then the links we want to highlight are:
+      // All the links whose `source` and `target` are highlighted jobs.
+      if (this.hasHighlightedJob) {
+        const filteredLinks = this.links.filter(link => {
+          return (
+            this.highlightedJobs.includes(link.source) && this.highlightedJobs.includes(link.target)
+          );
+        });
+
+        return filteredLinks.map(link => link.ref);
+      }
+
+      return [];
+    },
   },
   mounted() {
     if (!this.isPipelineDataEmpty) {
       this.getGraphDimensions();
       this.drawJobLinks();
+      this.needsObject = generateJobNeedsDict(this.pipelineData);
     }
   },
   methods: {
-    createJobId(stageName, jobName) {
-      return createUniqueJobId(stageName, jobName);
-    },
     drawJobLinks() {
       const { stages, jobs } = this.pipelineData;
       const unwrappedGroups = this.unwrapPipelineData(stages);
@@ -75,6 +100,12 @@ export default {
       } catch {
         this.reportFailure(DRAW_FAILURE);
       }
+    },
+    highlightNeeds(uniqueJobId) {
+      this.highlightedJob = uniqueJobId;
+    },
+    removeHighlightNeeds() {
+      this.highlightedJob = null;
     },
     unwrapPipelineData(stages) {
       return stages
@@ -95,6 +126,18 @@ export default {
     resetFailure() {
       this.failureType = null;
     },
+    isJobHighlighted(jobName) {
+      return this.highlightedJobs.includes(jobName);
+    },
+    isLinkHighlighted(linkRef) {
+      return this.highlightedLinks.includes(linkRef);
+    },
+    getLinkClasses(link) {
+      return [
+        this.isLinkHighlighted(link.ref) ? 'gl-stroke-blue-400' : 'gl-stroke-gray-200',
+        { 'gl-opacity-3': this.hasHighlightedJob && !this.isLinkHighlighted(link.ref) },
+      ];
+    },
   },
 };
 </script>
@@ -113,13 +156,17 @@ export default {
       class="gl-display-flex gl-bg-gray-50 gl-px-4 gl-overflow-auto gl-relative gl-py-7"
     >
       <svg :viewBox="viewBox" :width="width" :height="height" class="gl-absolute">
-        <path
-          v-for="link in links"
-          :key="link.path"
-          :d="link.path"
-          class="gl-stroke-gray-200 gl-fill-transparent"
-          :style="lineStyle"
-        />
+        <template>
+          <path
+            v-for="link in links"
+            :key="link.path"
+            :ref="link.ref"
+            :d="link.path"
+            class="gl-fill-transparent gl-transition-duration-slow gl-transition-timing-function-ease"
+            :class="getLinkClasses(link)"
+            :style="lineStyle"
+          />
+        </template>
       </svg>
       <div
         v-for="(stage, index) in pipelineData.stages"
@@ -141,8 +188,12 @@ export default {
           <job-pill
             v-for="group in stage.groups"
             :key="group.name"
-            :job-id="createJobId(stage.name, group.name)"
+            :job-id="group.id"
             :job-name="group.name"
+            :is-highlighted="isJobHighlighted(group.id)"
+            :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
+            :handle-mouse-over="highlightNeeds"
+            :handle-mouse-leave="removeHighlightNeeds"
           />
         </div>
       </div>
