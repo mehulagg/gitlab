@@ -228,18 +228,17 @@ describe('ParallelDiffTableRow', () => {
       const findNoteButton = () => wrapper.find({ ref: 'addDiffNoteButtonLeft' });
 
       it.each`
-        hover    | line                        | userData     | query                | mergeRefHeadComments | expectation
-        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${true}
-        ${true}  | ${{ line: { left: null } }} | ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${false}
-        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=true'}  | ${true}              | ${true}
-        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=true'}  | ${false}             | ${false}
-        ${true}  | ${{}}                       | ${null}      | ${''}                | ${true}              | ${false}
-        ${false} | ${{}}                       | ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${false}
+        hover    | line                        | userData     | query                | expectation
+        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=false'} | ${true}
+        ${true}  | ${{ line: { left: null } }} | ${TEST_USER} | ${'diff_head=false'} | ${false}
+        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=true'}  | ${true}
+        ${true}  | ${{}}                       | ${TEST_USER} | ${'diff_head=true'}  | ${false}
+        ${true}  | ${{}}                       | ${null}      | ${''}                | ${false}
+        ${false} | ${{}}                       | ${TEST_USER} | ${'diff_head=false'} | ${false}
       `(
         'exists is $expectation - with userData ($userData) query ($query)',
-        async ({ hover, line, userData, query, mergeRefHeadComments, expectation }) => {
+        async ({ hover, line, userData, query, expectation }) => {
           store.state.notes.userData = userData;
-          gon.features = { mergeRefHeadComments };
           setWindowLocation({ href: `${TEST_HOST}?${query}` });
           createComponent(line, store);
           if (hover) await wrapper.find('.line_holder').trigger('mouseover');

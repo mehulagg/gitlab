@@ -26,18 +26,8 @@ export const isMetaLine = type =>
 export const shouldRenderCommentButton = (
   isLoggedIn,
   isCommentButtonRendered,
-  featureMergeRefHeadComments = false,
 ) => {
-  if (!isCommentButtonRendered) {
-    return false;
-  }
-
-  if (isLoggedIn) {
-    const isDiffHead = parseBoolean(getParameterByName('diff_head'));
-    return !isDiffHead || featureMergeRefHeadComments;
-  }
-
-  return false;
+  return isCommentButtonRendered && isLoggedIn;
 };
 
 export const hasDiscussions = line => line?.discussions?.length > 0;

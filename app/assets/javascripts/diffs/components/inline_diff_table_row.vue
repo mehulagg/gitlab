@@ -84,7 +84,6 @@ export default {
       return utils.shouldRenderCommentButton(
         this.isLoggedIn,
         true,
-        gon.features?.mergeRefHeadComments,
       );
     },
     shouldShowCommentButton() {

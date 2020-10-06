@@ -122,16 +122,15 @@ describe('InlineDiffTableRow', () => {
       const findNoteButton = () => wrapper.find({ ref: 'addDiffNoteButton' });
 
       it.each`
-        userData     | query                | mergeRefHeadComments | expectation
-        ${TEST_USER} | ${'diff_head=false'} | ${false}             | ${true}
-        ${TEST_USER} | ${'diff_head=true'}  | ${true}              | ${true}
-        ${TEST_USER} | ${'diff_head=true'}  | ${false}             | ${false}
-        ${null}      | ${''}                | ${true}              | ${false}
+        userData     | query                | expectation
+        ${TEST_USER} | ${'diff_head=false'} | ${true}
+        ${TEST_USER} | ${'diff_head=true'}  | ${true}
+        ${TEST_USER} | ${'diff_head=true'}  | ${false}
+        ${null}      | ${''}                | ${false}
       `(
         'exists is $expectation - with userData ($userData) query ($query)',
-        ({ userData, query, mergeRefHeadComments, expectation }) => {
+        ({ userData, query, expectation }) => {
           store.state.notes.userData = userData;
-          gon.features = { mergeRefHeadComments };
           setWindowLocation({ href: `${TEST_HOST}?${query}` });
           createComponent({}, store);
 
