@@ -166,7 +166,6 @@ The following will be emailed to you:
 
 - A payment receipt. You can also access this information in the Customers Portal under [**View invoices**](https://customers.gitlab.com/receipts).
 
-
 ### Renew or change a GitLab.com subscription
 
 NOTE: **Note:**
