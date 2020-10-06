@@ -4,7 +4,7 @@ module EE
   class Namespace::RootStorageSize
     CURRENT_SIZE_CACHE_KEY = 'root_storage_current_size'
     LIMIT_CACHE_KEY = 'root_storage_size_limit'
-    EXPIRATION_TIME = 10.minutes
+    EXPIRATION_TIME = 1.seconds
     EFFECTIVE_DATE = 99.years.from_now.to_date
     ENFORCEMENT_DATE = 100.years.from_now.to_date
 
