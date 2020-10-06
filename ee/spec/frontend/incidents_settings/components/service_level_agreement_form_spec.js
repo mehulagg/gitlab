@@ -45,11 +45,8 @@ describe('Alert integration settings form', () => {
   });
 
   it('should match the default snapshot', () => {
-    mountComponent({
-      data() {
-        return {};
-      },
-    });
+    mountComponent();
+
     expect(wrapper.element).toMatchSnapshot();
   });
 
@@ -75,7 +72,9 @@ describe('Alert integration settings form', () => {
 
     describe.each`
       enabled | duration | unit         | isValid  | expectedMessage
-      ${true} | ${''}    | ${'minutes'} | ${false} | ${''}
+      ${true} | ${''}    | ${'minutes'} | ${false} | ${'Time limit must be a valid number'}
+      ${true} | ${'abc'} | ${'minutes'} | ${false} | ${'Time limit must be a valid number'}
+      ${true} | ${-15}   | ${'minutes'} | ${false} | ${'Time limit must be greater than 0'}
       ${true} | ${0}     | ${'minutes'} | ${false} | ${'Time limit must be greater than 0'}
       ${true} | ${0.5}   | ${'minutes'} | ${false} | ${'Time limit must be a multiple of 15 minutes'}
       ${true} | ${5}     | ${'minutes'} | ${false} | ${'Time limit must be a multiple of 15 minutes'}
@@ -86,7 +85,7 @@ describe('Alert integration settings form', () => {
       ${true} | ${1}     | ${'hours'}   | ${true}  | ${''}
       ${true} | ${24}    | ${'hours'}   | ${true}  | ${''}
     `(
-      'Inputs enabled $enabled, $duration $unit',
+      'Inputs enabled "$enabled", "$duration" $unit',
       ({ enabled, duration, unit, isValid, expectedMessage }) => {
         beforeEach(() => {
           mountComponent(

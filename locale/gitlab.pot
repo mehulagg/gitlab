@@ -13629,7 +13629,7 @@ msgstr ""
 msgid "IncidentSettings|Grafana integration"
 msgstr ""
 
-msgid "IncidentSettings|Incident Settings"
+msgid "IncidentSettings|Incident settings"
 msgstr ""
 
 msgid "IncidentSettings|Incidents"
