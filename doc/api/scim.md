@@ -13,7 +13,7 @@ The SCIM API implements the [RFC7644 protocol](https://tools.ietf.org/html/rfc76
 **internal** system use for connecting with a SCIM provider, it is subject to change without notice.
 
 To use this API, [Group SSO](../user/group/saml_sso/index.md) must be enabled for the group.
-For more information, see [SCIM setup documentation](../user/group/saml_sso/scim_setup.md#requirements).
+This API is only in use where [SCIM for Group SSO](../user/group/saml_sso/scim_setup.md) is enabled. It's a prerequisite to the creation of SCIM identities.
 
 ## Get a list of SAML users
 
