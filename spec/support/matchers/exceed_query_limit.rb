@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module ExceedQueryLimitHelpers
+  # test change
   MARGINALIA_ANNOTATION_REGEX = %r{\s*\/\*.*\*\/}.freeze
 
   def with_threshold(threshold)
