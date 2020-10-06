@@ -49,7 +49,7 @@ For example, to be able to tell which repositories exist, the registry has to wa
 
 #### Insights
 
-For similar reasons as highlighted above, currently, it's not feasible to extract valuable information from the registry, such as how much space a repository is using (e.g. to enforce quotas), which repositories are using the most space, which ones are more active, detailed push/pull metrics per image or tag, etc. Not having access to these insights and metrics strongly weakens the ability to make informed decisions in regards to the product strategy.
+For similar reasons as highlighted above, currently, it's not feasible to extract valuable information from the registry, such as how much space a repository is using, which repositories are using the most space, which ones are more active, detailed push/pull metrics for each image or tag, and others. Not having access to these insights and metrics strongly weakens the ability to make informed decisions in regards to the product strategy.
 
 #### Additional Features
 
