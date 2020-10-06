@@ -7622,11 +7622,6 @@ type Group {
   lfsEnabled: Boolean
 
   """
-  Number of projects in the root namespace where the repository size exceeds the limit
-  """
-  lockedProjectCount: Int!
-
-  """
   Indicates if a group is disabled from getting mentioned
   """
   mentionsDisabled: Boolean
@@ -7747,6 +7742,11 @@ type Group {
     """
     sort: NamespaceProjectSort = null
   ): ProjectConnection!
+
+  """
+  Number of projects in the root namespace where the repository size exceeds the limit
+  """
+  repositorySizeExcessProjectCount: Int!
 
   """
   Indicates if users can request access to namespace
@@ -11768,11 +11768,6 @@ type Namespace {
   lfsEnabled: Boolean
 
   """
-  Number of projects in the root namespace where the repository size exceeds the limit
-  """
-  lockedProjectCount: Int!
-
-  """
   Name of the namespace
   """
   name: String!
@@ -11826,6 +11821,11 @@ type Namespace {
     """
     sort: NamespaceProjectSort = null
   ): ProjectConnection!
+
+  """
+  Number of projects in the root namespace where the repository size exceeds the limit
+  """
+  repositorySizeExcessProjectCount: Int!
 
   """
   Indicates if users can request access to namespace

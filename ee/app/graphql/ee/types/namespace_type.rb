@@ -27,7 +27,7 @@ module EE
               description: 'Includes at least one project where the repository size exceeds the limit',
               resolve: -> (obj, _args, _ctx) { obj.contains_locked_projects? }
 
-        field :locked_project_count,
+        field :repository_size_excess_project_count,
               GraphQL::INT_TYPE,
               null: false,
               description: 'Number of projects in the root namespace where the repository size exceeds the limit'
