@@ -226,16 +226,16 @@
     @return calc(#{$original-padding + $original-border} - var(--ide-btn-hover-border-width, #{$original-border}));
   }
 
-  .btn:not(.btn-link):not([disabled]):hover {
+  .btn:not(.gl-button):not(.btn-link):not([disabled]):hover {
     border-width: var(--ide-btn-hover-border-width, 1px);
     padding: calc-btn-hover-padding(6px) calc-btn-hover-padding(10px);
   }
 
-  .btn:not([disabled]).btn-sm:hover {
+  .btn:not(.gl-button):not([disabled]).btn-sm:hover {
     padding: calc-btn-hover-padding(4px) calc-btn-hover-padding(10px);
   }
 
-  .btn:not([disabled]).btn-block:hover {
+  .btn:not(.gl-button):not([disabled]).btn-block:hover {
     padding: calc-btn-hover-padding(6px) 0;
   }
 
@@ -258,7 +258,7 @@
   }
 
   // In IDE, the only inverted buttons are `.btn-remove`
-  .btn-inverted.btn-remove {
+  .btn-inverted.btn-remove:not(.gl-button) {
     color: var(--ide-input-color, $red-500) !important;
     background-color: var(--ide-input-background, $white) !important;
     border-color: var(--ide-btn-default-border, $red-500);
@@ -277,7 +277,7 @@
     }
   }
 
-  .btn-default {
+  .btn-default:not(.gl-button) {
     &:hover,
     &:focus {
       border-color: var(--ide-btn-default-hover-border, $border-white-normal) !important;
@@ -321,8 +321,8 @@
     border-color: var(--ide-dropdown-hover-background, $gray-100) !important;
   }
 
-  .btn-primary,
-  .btn-info {
+  .btn-primary:not(.gl-button),
+  .btn-info:not(.gl-button) {
     background-color: var(--ide-btn-primary-background, $blue-500);
     border-color: var(--ide-btn-primary-border, $blue-600) !important;
 
@@ -339,7 +339,7 @@
     }
   }
 
-  .btn-success {
+  .btn-success:not(.gl-button) {
     background-color: var(--ide-btn-success-background, $green-500);
     border-color: var(--ide-btn-success-border, $green-600) !important;
 
@@ -356,7 +356,7 @@
     }
   }
 
-  .btn[disabled] {
+  .btn[disabled]:not(.gl-button) {
     background-color: var(--ide-btn-default-background, $gray-light) !important;
     border: 1px solid var(--ide-btn-disabled-border, $gray-100) !important;
     color: var(--ide-btn-disabled-color, $gl-text-color-disabled) !important;
