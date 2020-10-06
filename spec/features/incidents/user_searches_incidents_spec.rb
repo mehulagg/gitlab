@@ -33,4 +33,3 @@ RSpec.describe 'User searches Incident Management incidents', :js do
     end
   end
 end
-

@@ -256,12 +256,7 @@ RSpec.describe AlertManagement::AlertsFinder, '#execute' do
   end
 
   context 'assignee username given' do
-    let_it_be(:alert) do
-      create(:alert_management_alert,
-        :with_fingerprint,
-        assignees: [assignee]
-      )
-    end
+    let_it_be(:alert) { create(:alert_management_alert, :with_fingerprint, assignees: [assignee]) }
 
     before do
       alert.project.add_developer(current_user)

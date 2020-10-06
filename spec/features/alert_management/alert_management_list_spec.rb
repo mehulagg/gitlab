@@ -33,11 +33,7 @@ RSpec.describe 'Alert Management index', :js do
   end
 
   context 'when a developer+ displays the alerts list and the alert service is enabled' do
-    let_it_be(:alerts_service) do
-      create(:alerts_service,
-        project: project,
-      )
-    end
+    let_it_be(:alerts_service) { create(:alerts_service, project: project) }
 
     it 'shows the filtered search' do
       expect(page).to have_selector('.filtered-search-wrapper')

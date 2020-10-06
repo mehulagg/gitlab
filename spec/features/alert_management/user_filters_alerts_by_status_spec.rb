@@ -5,11 +5,7 @@ require 'spec_helper'
 RSpec.describe 'User filters Alert Management table by status', :js do
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user) }
-  let_it_be(:alerts_service) do
-    create(:alerts_service,
-      project: project,
-    )
-  end
+  let_it_be(:alerts_service) { create(:alerts_service, project: project) }
   let_it_be(:alert1) { create(:alert_management_alert, project: project, status: 'triggered') }
   let_it_be(:alert2) { create(:alert_management_alert, project: project, status: 'triggered') }
   let_it_be(:alert3) { create(:alert_management_alert, project: project, status: 'triggered') }
