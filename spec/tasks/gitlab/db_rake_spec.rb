@@ -98,6 +98,24 @@ RSpec.describe 'gitlab:db namespace rake task' do
     end
   end
 
+  describe 'unattended' do
+    it 'changes occur when the database is uninitialized' do
+      allow(Rake::Task['gitlab:db:configure']).to receive(:invoke).and_return(true)
+      # return no_database true
+      allow(ActiveRecord::Base.connection.schema_migration).to receive(:table_exists?).and_return(false)
+      # returns needs_migration false
+      allow(ActiveRecord::Base.connection.migration_context).to receive(:needs_migration?).and_return(false)
+      expect { run_rake_task('gitlab:db:unattended') }.to output("changed\n").to_stdout
+    end
+
+    it 'changes occur when the database has migrations to run' do
+      allow(Rake::Task['gitlab:db:configure']).to receive(:invoke).and_return(true)
+      allow(ActiveRecord::Base.connection.schema_migration).to receive(:table_exists?).and_return(true)
+      allow(ActiveRecord::Base.connection.migration_context).to receive(:needs_migration?).and_return(true)
+      expect { run_rake_task('gitlab:db:unattended') }.to output('changed\n').to_stdout
+    end
+  end
+
   describe 'clean_structure_sql' do
     let_it_be(:clean_rake_task) { 'gitlab:db:clean_structure_sql' }
     let_it_be(:test_task_name) { 'gitlab:db:_test_multiple_structure_cleans' }
