@@ -4979,6 +4979,24 @@ RSpec.describe Project do
     context "with an empty repository" do
       let_it_be(:project) { create(:project_empty_repo) }
 
+      context "group.default_branch_name is available" do
+        let(:project_group) { create(:group) }
+        let(:project) { create(:project, path: 'avatar', namespace: project_group) }
+
+        before do
+          expect(Gitlab::CurrentSettings)
+            .not_to receive(:default_branch_name)
+
+          expect(project.group)
+            .to receive(:default_branch_name)
+            .and_return('example_branch')
+        end
+
+        it "returns that value" do
+          expect(project.default_branch).to eq("example_branch")
+        end
+      end
+
       context "Gitlab::CurrentSettings.default_branch_name is unavailable" do
         before do
           expect(Gitlab::CurrentSettings)

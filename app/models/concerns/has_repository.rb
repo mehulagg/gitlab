@@ -84,7 +84,9 @@ module HasRepository
   end
 
   def default_branch_from_preferences
-    empty_repo? ? Gitlab::CurrentSettings.default_branch_name : nil
+    return unless empty_repo?
+
+    group&.default_branch_name || Gitlab::CurrentSettings.default_branch_name
   end
 
   def reload_default_branch
