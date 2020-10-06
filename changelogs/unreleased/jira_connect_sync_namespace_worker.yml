@@ -1,5 +1,5 @@
 ---
-title: Sync MRs when a namespace is added via Jira Connect
+title: Sync Merge Requests when a namespace is added via Jira Connect unless a project has more than 50 MRs to sync.
 merge_request: 43880
 author:
 type: added
