@@ -1072,18 +1072,19 @@ Refer to your preferred Load Balancer's documentation for further guidance.
 
 [Gitaly](../gitaly/index.md) server node requirements are dependent on data,
 specifically the number of projects and those projects' sizes. It's recommended
-that a Gitaly server node stores no more than 5TB of data. Although this
-reference architecture includes a single Gitaly server node, you may require
-additional nodes depending on your repository storage requirements.
+that a Gitaly server node stores no more than 5 TB of data. Although this
+reference architecture includes a recommendation for the number of Gitaly server
+nodes to use, depending on your storage requirements, you may require additional
+Gitaly server nodes.
 
 Due to Gitaly having notable input and output requirements, we strongly
-recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs
-should have a throughput of at least 8,000
-input/output operations per second (IOPS) for read operations and 2,000 IOPS
-for write operations. These IOPS values are initial recommendations, and may be
-adjusted to greater or lesser values depending on the scale of your
-environment's workload. If you're running the environment on a Cloud provider,
-refer to their documentation about how to configure IOPS correctly.
+recommend that all Gitaly nodes use solid-state drives (SSDs). These SSDs should
+have a throughput of at least 8,000 input/output operations per second (IOPS)
+for read operations and 2,000 IOPS for write operations. These IOPS values are
+initial recommendations, and may be adjusted to greater or lesser values
+depending on the scale of your environment's workload. If you're running the
+environment on a Cloud provider, refer to their documentation about how to
+configure IOPS correctly.
 
 Be sure to note the following items:
 
@@ -1091,7 +1092,7 @@ Be sure to note the following items:
   [repository storage paths](../repository_storage_paths.md).
 - A Gitaly server can host one or more storage paths.
 - A GitLab server can use one or more Gitaly server nodes.
-- Gitaly addresses must be specified to be correctly resolvable for *all*
+- Gitaly addresses must be specified to be correctly resolvable for _all_
   Gitaly clients.
 - Gitaly servers must not be exposed to the public internet, as Gitaly's network
   traffic is unencrypted by default. The use of a firewall is highly recommended
@@ -1103,14 +1104,14 @@ The token referred to throughout the Gitaly documentation is an arbitrary
 password selected by the administrator. This token is unrelated to tokens
 created for the GitLab API or other similar web API tokens.
 
-Below we describe how to configure two Gitaly servers, with IPs and
-domain names:
+This section describes how to configure two Gitaly servers, with the following
+IPs and domain names:
 
 - `10.6.0.51`: Gitaly 1 (`gitaly1.internal`)
 - `10.6.0.52`: Gitaly 2 (`gitaly2.internal`)
 
-The secret token is assumed to be `gitalysecret` and that
-your GitLab installation has three repository storages:
+Assumptions about your servers include having the secret token be `gitalysecret`,
+and that your GitLab installation has three repository storages:
 
 - `default` on Gitaly 1
 - `storage1` on Gitaly 1
@@ -1118,11 +1119,11 @@ your GitLab installation has three repository storages:
 
 On each node:
 
-1. [Download/Install](https://about.gitlab.com/install/) the Omnibus GitLab
-   package you want using **steps 1 and 2** from the GitLab downloads page but
-   **without** providing the `EXTERNAL_URL` value.
-1. Edit `/etc/gitlab/gitlab.rb` to configure storage paths, enable
-   the network listener and configure the token:
+1. [Download and install](https://about.gitlab.com/install/) the Omnibus GitLab
+   package you want (based on _steps 1 and 2_ on the GitLab downloads page), but
+   _without_ providing the `EXTERNAL_URL` value.
+1. Edit `/etc/gitlab/gitlab.rb` to configure the storage paths, enable
+   the network listener, and configure the token:
 
    <!--
    updates to following example must also be made at
@@ -1186,35 +1187,35 @@ On each node:
    ```
 
 1. Append the following to `/etc/gitlab/gitlab.rb` for each respective server:
-   1. On `gitaly1.internal`:
+   - On `gitaly1.internal`:
 
-      ```ruby
-      git_data_dirs({
-        'default' => {
-          'path' => '/var/opt/gitlab/git-data'
-        },
-        'storage1' => {
-          'path' => '/mnt/gitlab/git-data'
-        },
-      })
-      ```
+     ```ruby
+     git_data_dirs({
+       'default' => {
+         'path' => '/var/opt/gitlab/git-data'
+       },
+       'storage1' => {
+         'path' => '/mnt/gitlab/git-data'
+       },
+     })
+     ```
 
-   1. On `gitaly2.internal`:
+   - On `gitaly2.internal`:
 
-      ```ruby
-      git_data_dirs({
-        'storage2' => {
-          'path' => '/mnt/gitlab/git-data'
-        },
-      })
-      ```
+     ```ruby
+     git_data_dirs({
+       'storage2' => {
+         'path' => '/mnt/gitlab/git-data'
+       },
+     })
+     ```
 
    <!--
    updates to following example must also be made at
    https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/advanced/external-gitaly/external-omnibus-gitaly.md#configure-omnibus-gitlab
    -->
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Confirm that Gitaly can perform callbacks to the internal API:
 
    ```shell
