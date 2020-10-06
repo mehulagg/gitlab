@@ -2,6 +2,7 @@
 - show_controls = local_assigns.fetch(:show_controls, true)
 - force_mobile_view = local_assigns.fetch(:force_mobile_view, false)
 - member = local_assigns.fetch(:member)
+- is_group_owner = local_assigns.fetch(:is_group_owner, false)
 - user = local_assigns.fetch(:user, member.user)
 - source = member.source
 - override = member.try(:override)
@@ -25,7 +26,7 @@
 
           = render 'shared/members/its_you_badge', user: user, current_user: current_user
 
-          = render_if_exists 'shared/members/ee/license_badge', user: user, group: @group
+          = render_if_exists 'shared/members/ee/license_badge', user: user, group: @group, is_group_owner: is_group_owner
 
           = render 'shared/members/blocked_badge', user: user
 
