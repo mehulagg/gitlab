@@ -153,6 +153,7 @@ module API
       mount ::API::Environments
       mount ::API::ErrorTracking
       mount ::API::Events
+      mount ::API::Experiments
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
