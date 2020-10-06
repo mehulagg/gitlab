@@ -2429,6 +2429,26 @@ Identifier of Clusters::AgentToken
 """
 scalar ClustersAgentTokenID
 
+"""
+Represents the daily code coverage for a project
+"""
+type CodeCoverage {
+  """
+  Percentage of coverage for the project
+  """
+  averageCoverage: Float
+
+  """
+  Number of coverages for the project
+  """
+  coverageCount: Int
+
+  """
+  Latest date of coverage for the project
+  """
+  lastUpdatedAt: Time
+}
+
 type Commit {
   """
   Author of the commit
@@ -12806,6 +12826,11 @@ type Project {
     """
     last: Int
   ): ClusterAgentConnection
+
+  """
+  Code coverages associated with the project
+  """
+  codeCoverage: CodeCoverage
 
   """
   Compliance frameworks associated with the project

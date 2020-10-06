@@ -285,6 +285,12 @@ module Types
           null: true,
           description: 'The container expiration policy of the project'
 
+    field :code_coverage,
+          Types::Ci::CodeCoverageType,
+          null: true,
+          description: 'Code coverages associated with the project',
+          resolver: Resolvers::Ci::CodeCoverageResolver
+
     field :label,
           Types::LabelType,
           null: true,

@@ -12,6 +12,12 @@ module Ci
     validates :data, json_schema: { filename: "daily_build_group_report_result_data" }
 
     scope :with_included_projects, -> { includes(:project) }
+    scope :ordered_by_unique_group_name, -> { order(:group_name).select('DISTINCT ON (group_name) ci_daily_build_group_report_results.*') }
+    scope :average_coverage, -> { average("cast(data ->> 'coverage' as float)").to_f }
+    scope :latest, -> { where(date: Date.yesterday..Date.today) }
+    scope :coverage_count, -> { size }
+
+    store_accessor :data, :coverage
 
     def self.upsert_reports(data)
       upsert_all(data, unique_by: :index_daily_build_group_report_results_unique_columns) if data.any?

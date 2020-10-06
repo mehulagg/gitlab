@@ -33,6 +33,7 @@ class GraphqlController < ApplicationController
   end
 
   rescue_from StandardError do |exception|
+    binding.pry
     log_exception(exception)
 
     render_error("Internal server error")

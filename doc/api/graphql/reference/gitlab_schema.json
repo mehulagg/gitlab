@@ -6612,6 +6612,61 @@
         },
         {
           "kind": "OBJECT",
+          "name": "CodeCoverage",
+          "description": "Represents the daily code coverage for a project",
+          "fields": [
+            {
+              "name": "averageCoverage",
+              "description": "Percentage of coverage for the project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "coverageCount",
+              "description": "Number of coverages for the project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lastUpdatedAt",
+              "description": "Latest date of coverage for the project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Time",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
           "name": "Commit",
           "description": null,
           "fields": [
@@ -37871,6 +37926,20 @@
               "type": {
                 "kind": "OBJECT",
                 "name": "ClusterAgentConnection",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "codeCoverage",
+              "description": "Code coverages associated with the project",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "CodeCoverage",
                 "ofType": null
               },
               "isDeprecated": false,
