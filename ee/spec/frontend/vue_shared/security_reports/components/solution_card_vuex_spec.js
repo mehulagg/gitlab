@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import component from 'ee/vue_shared/security_reports/components/solution_card.vue';
-import { trimText } from 'helpers/text_helper';
 import { shallowMount } from '@vue/test-utils';
 import { s__ } from '~/locale';
 
@@ -12,6 +11,9 @@ describe('Solution Card', () => {
 
   let wrapper;
 
+  const findSolutionTitle = () => wrapper.find('h3');
+  const findSolutionContent = () => wrapper.find({ ref: 'solution-text' });
+
   afterEach(() => {
     wrapper.destroy();
   });
@@ -22,21 +24,21 @@ describe('Solution Card', () => {
         const propsData = { solution };
         wrapper = shallowMount(Component, { propsData });
 
-        expect(wrapper.vm.solutionText).toEqual(solution);
+        expect(findSolutionContent().text()).toBe(solution);
       });
 
       it('takes the summary from a remediation', () => {
         const propsData = { remediation };
         wrapper = shallowMount(Component, { propsData });
 
-        expect(wrapper.vm.solutionText).toEqual(remediation.summary);
+        expect(findSolutionContent().text()).toEqual(remediation.summary);
       });
 
       it('takes the summary from a remediation, if both are defined', () => {
         const propsData = { remediation, solution };
         wrapper = shallowMount(Component, { propsData });
 
-        expect(wrapper.vm.solutionText).toEqual(remediation.summary);
+        expect(findSolutionContent().text()).toEqual(remediation.summary);
       });
     });
   });
@@ -48,16 +50,12 @@ describe('Solution Card', () => {
         wrapper = shallowMount(Component, { propsData });
       });
 
-      it('renders the solution text and label', () => {
-        expect(trimText(wrapper.find('.card-body').text())).toContain(`Solution: ${solution}`);
+      it('renders the solution title', () => {
+        expect(findSolutionTitle().text()).toBe('Solution');
       });
 
-      it('does not render the card footer', () => {
-        expect(wrapper.find('.card-footer').exists()).toBe(false);
-      });
-
-      it('does not render the download link', () => {
-        expect(wrapper.find('a').exists()).toBe(false);
+      it('renders the solution text', () => {
+        expect(findSolutionContent().text()).toBe(solution);
       });
     });
 
@@ -68,13 +66,7 @@ describe('Solution Card', () => {
       });
 
       it('renders the solution text and label', () => {
-        expect(trimText(wrapper.find('.card-body').text())).toContain(
-          `Solution: ${remediation.summary}`,
-        );
-      });
-
-      it('renders the card footer', () => {
-        expect(wrapper.find('.card-footer').exists()).toBe(true);
+        expect(findSolutionContent().text()).toContain(remediation.summary);
       });
 
       describe('with download patch', () => {
@@ -83,21 +75,8 @@ describe('Solution Card', () => {
           return wrapper.vm.$nextTick();
         });
 
-        it('renders the learn more about remediation solutions', () => {
-          expect(wrapper.find('.card-footer').text()).toContain(
-            s__('ciReport|Learn more about interacting with security reports'),
-          );
-        });
-
-        it('does not render the download and apply solution message when there is a file download and a merge request already exists', () => {
-          wrapper.setProps({ hasMr: true });
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.find('.card-footer').exists()).toBe(false);
-          });
-        });
-
         it('renders the create a merge request to implement this solution message', () => {
-          expect(wrapper.find('.card-footer').text()).toContain(
+          expect(findSolutionContent().text()).toContain(
             s__(
               'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
             ),
@@ -106,20 +85,8 @@ describe('Solution Card', () => {
       });
 
       describe('without download patch', () => {
-        it('renders the learn more about remediation solutions', () => {
-          expect(wrapper.find('.card-footer').text()).toContain(
-            s__('ciReport|Learn more about interacting with security reports'),
-          );
-        });
-
-        it('does not render the download and apply solution message', () => {
-          expect(wrapper.find('.card-footer').text()).not.toContain(
-            s__('ciReport|Download and apply the patch manually to resolve.'),
-          );
-        });
-
         it('does not render the create a merge request to implement this solution message', () => {
-          expect(wrapper.find('.card-footer').text()).not.toContain(
+          expect(findSolutionContent().text()).not.toContain(
             s__(
               'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
             ),

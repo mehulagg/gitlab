@@ -74,7 +74,6 @@ export default {
         hasDownload,
         hasMr,
         vulnerabilityFeedbackHelpPath,
-        isStandaloneVulnerability: true,
       };
     },
     hasSolution() {
