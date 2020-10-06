@@ -14,6 +14,7 @@ RSpec.describe EE::IncidentManagement::ProjectIncidentManagementSetting do
           let(:sla_timer) { false }
 
           it { is_expected.not_to validate_numericality_of(:sla_timer_minutes).is_greater_than_or_equal_to(15) }
+          it { is_expected.not_to validate_numericality_of(:sla_timer_minutes).is_less_than_or_equal_to(31556952) } # 1 year
           it { is_expected.not_to validate_presence_of(:sla_timer_minutes) }
         end
 
