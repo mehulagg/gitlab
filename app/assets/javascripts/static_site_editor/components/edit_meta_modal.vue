@@ -37,6 +37,10 @@ export default {
     },
   },
   methods: {
+    onPrimary() {
+      this.$emit('primary', this.mergeRequestMeta);
+      this.$refs.editMetaControls.resetCachedEditable();
+    },
     onUpdateSettings(mergeRequestMeta) {
       this.mergeRequestMeta = { ...mergeRequestMeta };
     },
@@ -51,10 +55,11 @@ export default {
     :title="__('Submit your changes')"
     :action-primary="primaryProps"
     size="sm"
-    @primary="() => $emit('primary', mergeRequestMeta)"
+    @primary="onPrimary"
     @hide="() => $emit('hide')"
   >
     <edit-meta-controls
+      ref="editMetaControls"
       :title="mergeRequestMeta.title"
       :description="mergeRequestMeta.description"
       @updateSettings="onUpdateSettings"

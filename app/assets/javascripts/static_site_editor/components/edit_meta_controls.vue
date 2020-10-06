@@ -1,5 +1,6 @@
 <script>
 import { GlForm, GlFormGroup, GlFormInput, GlFormTextarea } from '@gitlab/ui';
+import AccessorUtilities from '~/lib/utils/accessor';
 
 export default {
   components: {
@@ -26,12 +27,41 @@ export default {
       },
     };
   },
+  computed: {
+    editableStorageKey() {
+      return this.getId('local-storage', 'editable');
+    },
+    hasLocalStorage() {
+      return AccessorUtilities.isLocalStorageAccessSafe();
+    },
+  },
+  mounted() {
+    if (this.hasLocalStorage) {
+      this.initCachedEditable();
+    }
+  },
   methods: {
     getId(type, key) {
       return `sse-merge-request-meta-${type}-${key}`;
     },
+    initCachedEditable() {
+      const cachedEditable = JSON.parse(localStorage.getItem(this.editableStorageKey));
+      if (cachedEditable) {
+        this.editable = cachedEditable;
+      }
+    },
+    resetCachedEditable() {
+      if (this.hasLocalStorage) {
+        window.localStorage.removeItem(this.editableStorageKey);
+      }
+    },
     onUpdate() {
-      this.$emit('updateSettings', { ...this.editable });
+      const payload = { ...this.editable };
+      this.$emit('updateSettings', payload);
+
+      if (this.hasLocalStorage) {
+        window.localStorage.setItem(this.editableStorageKey, JSON.stringify(payload));
+      }
     },
   },
 };
