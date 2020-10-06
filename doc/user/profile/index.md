@@ -53,7 +53,7 @@ From there, you can:
 
 - Update your personal information, including:
   - Full name
-  - Primary email, public email and commit email
+  - Primary email, public email, and commit email
   - Social media handles
   - Website URL
   - Location
