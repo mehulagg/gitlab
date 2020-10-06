@@ -10004,8 +10004,7 @@ CREATE TABLE ci_builds (
     resource_group_id bigint,
     waiting_for_resource_at timestamp with time zone,
     processed boolean,
-    scheduling_type smallint,
-    CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
+    scheduling_type smallint
 );
 
 CREATE SEQUENCE ci_builds_id_seq
@@ -10080,11 +10079,14 @@ ALTER SEQUENCE ci_daily_build_group_report_results_id_seq OWNED BY ci_daily_buil
 CREATE TABLE ci_freeze_periods (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
-    freeze_start character varying(998) NOT NULL,
-    freeze_end character varying(998) NOT NULL,
-    cron_timezone character varying(255) NOT NULL,
+    freeze_start text NOT NULL,
+    freeze_end text NOT NULL,
+    cron_timezone text NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_4a7939e04e CHECK ((char_length(freeze_end) <= 998)),
+    CONSTRAINT check_a92607bd2b CHECK ((char_length(freeze_start) <= 998)),
+    CONSTRAINT check_b14055adc3 CHECK ((char_length(cron_timezone) <= 255))
 );
 
 CREATE SEQUENCE ci_freeze_periods_id_seq
@@ -10339,8 +10341,7 @@ CREATE TABLE ci_pipelines (
     target_sha bytea,
     external_pull_request_id bigint,
     ci_ref_id bigint,
-    locked smallint DEFAULT 1 NOT NULL,
-    CONSTRAINT check_d7e99a025e CHECK ((lock_version IS NOT NULL))
+    locked smallint DEFAULT 1 NOT NULL
 );
 
 CREATE TABLE ci_pipelines_config (
@@ -10543,8 +10544,7 @@ CREATE TABLE ci_stages (
     name character varying,
     status integer,
     lock_version integer DEFAULT 0,
-    "position" integer,
-    CONSTRAINT check_81b431e49b CHECK ((lock_version IS NOT NULL))
+    "position" integer
 );
 
 CREATE SEQUENCE ci_stages_id_seq
@@ -11739,8 +11739,7 @@ CREATE TABLE epics (
     start_date_sourcing_epic_id integer,
     due_date_sourcing_epic_id integer,
     confidential boolean DEFAULT false NOT NULL,
-    external_key character varying(255),
-    CONSTRAINT check_fcfb4a93ff CHECK ((lock_version IS NOT NULL))
+    external_key character varying(255)
 );
 
 CREATE SEQUENCE epics_id_seq
@@ -12857,8 +12856,7 @@ CREATE TABLE issues (
     external_key character varying(255),
     sprint_id bigint,
     issue_type smallint DEFAULT 0 NOT NULL,
-    blocking_issues_count integer DEFAULT 0 NOT NULL,
-    CONSTRAINT check_fba63f706d CHECK ((lock_version IS NOT NULL))
+    blocking_issues_count integer DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE issues_id_seq
@@ -13482,8 +13480,7 @@ CREATE TABLE merge_requests (
     rebase_jid character varying,
     squash_commit_sha bytea,
     sprint_id bigint,
-    merge_ref_sha bytea,
-    CONSTRAINT check_970d272570 CHECK ((lock_version IS NOT NULL))
+    merge_ref_sha bytea
 );
 
 CREATE TABLE merge_requests_closing_issues (
@@ -14459,9 +14456,9 @@ CREATE TABLE plan_limits (
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
     generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
-    project_feature_flags integer DEFAULT 200 NOT NULL,
     golang_max_file_size bigint DEFAULT 104857600 NOT NULL,
     debian_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
+    project_feature_flags integer DEFAULT 200 NOT NULL,
     ci_max_artifact_size_api_fuzzing integer DEFAULT 0 NOT NULL
 );
 
@@ -14742,7 +14739,8 @@ CREATE TABLE project_features (
     repository_access_level integer DEFAULT 20 NOT NULL,
     pages_access_level integer NOT NULL,
     forking_access_level integer,
-    metrics_dashboard_access_level integer
+    metrics_dashboard_access_level integer,
+    requirements_access_level integer DEFAULT 20 NOT NULL
 );
 
 CREATE SEQUENCE project_features_id_seq
@@ -14935,11 +14933,10 @@ CREATE TABLE project_settings (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     push_rule_id bigint,
-    show_default_award_emojis boolean DEFAULT true,
+    show_default_award_emojis boolean DEFAULT true NOT NULL,
     allow_merge_on_skipped_pipeline boolean,
     squash_option smallint DEFAULT 3,
-    has_confluence boolean DEFAULT false NOT NULL,
-    CONSTRAINT check_bde223416c CHECK ((show_default_award_emojis IS NOT NULL))
+    has_confluence boolean DEFAULT false NOT NULL
 );
 
 CREATE TABLE project_statistics (
@@ -19423,7 +19420,7 @@ CREATE INDEX backup_labels_group_id_title_idx ON backup_labels USING btree (grou
 
 CREATE INDEX backup_labels_project_id_idx ON backup_labels USING btree (project_id);
 
-CREATE UNIQUE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
+CREATE INDEX backup_labels_project_id_title_idx ON backup_labels USING btree (project_id, title) WHERE (group_id = NULL::integer);
 
 CREATE INDEX backup_labels_template_idx ON backup_labels USING btree (template) WHERE template;
 
@@ -19440,6 +19437,8 @@ CREATE INDEX commit_id_and_note_id_index ON commit_user_mentions USING btree (co
 CREATE UNIQUE INDEX design_management_designs_versions_uniqueness ON design_management_designs_versions USING btree (design_id, version_id);
 
 CREATE INDEX design_user_mentions_on_design_id_and_note_id_index ON design_user_mentions USING btree (design_id, note_id);
+
+CREATE INDEX dev_index_route_on_path_trigram ON routes USING gin (path gin_trgm_ops);
 
 CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_and_note_id_index ON epic_user_mentions USING btree (epic_id, note_id);
 
@@ -20199,6 +20198,8 @@ CREATE UNIQUE INDEX index_epics_on_group_id_and_external_key ON epics USING btre
 
 CREATE INDEX index_epics_on_group_id_and_iid_varchar_pattern ON epics USING btree (group_id, ((iid)::character varying) varchar_pattern_ops);
 
+CREATE INDEX index_epics_on_id ON epics USING btree (id) WHERE (lock_version IS NULL);
+
 CREATE INDEX index_epics_on_iid ON epics USING btree (iid);
 
 CREATE INDEX index_epics_on_last_edited_by_id ON epics USING btree (last_edited_by_id);
@@ -20472,6 +20473,8 @@ CREATE INDEX index_issues_on_confidential ON issues USING btree (confidential);
 CREATE INDEX index_issues_on_description_trigram ON issues USING gin (description gin_trgm_ops);
 
 CREATE INDEX index_issues_on_duplicated_to_id ON issues USING btree (duplicated_to_id) WHERE (duplicated_to_id IS NOT NULL);
+
+CREATE INDEX index_issues_on_id ON issues USING btree (id) WHERE (lock_version IS NULL);
 
 CREATE INDEX index_issues_on_incident_issue_type ON issues USING btree (issue_type) WHERE (issue_type = 1);
 
@@ -21761,6 +21764,12 @@ CREATE INDEX tmp_idx_blocking_type_links ON issue_links USING btree (source_id) 
 
 CREATE INDEX tmp_idx_index_issues_with_outdate_blocking_count ON issues USING btree (id) WHERE ((state_id = 1) AND (blocking_issues_count = 0));
 
+CREATE INDEX tmp_index_ci_builds_lock_version ON ci_builds USING btree (id) WHERE (lock_version IS NULL);
+
+CREATE INDEX tmp_index_ci_pipelines_lock_version ON ci_pipelines USING btree (id) WHERE (lock_version IS NULL);
+
+CREATE INDEX tmp_index_ci_stages_lock_version ON ci_stages USING btree (id) WHERE (lock_version IS NULL);
+
 CREATE INDEX tmp_index_for_email_unconfirmation_migration ON emails USING btree (id) WHERE (confirmed_at IS NOT NULL);
 
 CREATE UNIQUE INDEX unique_merge_request_metrics_by_merge_request_id ON merge_request_metrics USING btree (merge_request_id);
@@ -22027,7 +22036,7 @@ ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_p
 
 ALTER INDEX product_analytics_events_experimental_pkey ATTACH PARTITION gitlab_partitions_static.product_analytics_events_experimental_63_pkey;
 
-CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE PROCEDURE table_sync_function_2be879775d();
+CREATE TRIGGER table_sync_trigger_ee39a25f9d AFTER INSERT OR DELETE OR UPDATE ON audit_events FOR EACH ROW EXECUTE FUNCTION table_sync_function_2be879775d();
 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;

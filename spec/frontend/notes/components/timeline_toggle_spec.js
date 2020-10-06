@@ -7,6 +7,8 @@ import TimelineToggle, {
 } from '~/notes/components/timeline_toggle.vue';
 import createStore from '~/notes/stores';
 import { ASC, DESC } from '~/notes/constants';
+import { trackToggleTimelineView } from '~/notes/utils';
+import Tracking from '~/tracking';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -18,6 +20,7 @@ describe('Timeline toggle', () => {
 
   const createComponent = () => {
     jest.spyOn(store, 'dispatch').mockImplementation();
+    jest.spyOn(Tracking, 'event').mockImplementation();
 
     wrapper = shallowMount(TimelineToggle, {
       localVue,
@@ -39,6 +42,7 @@ describe('Timeline toggle', () => {
     }
     store.dispatch.mockReset();
     mockEvent.currentTarget.blur.mockReset();
+    Tracking.event.mockReset();
   });
 
   describe('ON state', () => {
@@ -66,6 +70,12 @@ describe('Timeline toggle', () => {
       expect(findGlButton().attributes('selected')).toBe('true');
       expect(mockEvent.currentTarget.blur).toHaveBeenCalled();
     });
+
+    it('should track Snowplow event', () => {
+      findGlButton().trigger('click');
+      const { category, action, label, property, value } = trackToggleTimelineView(false);
+      expect(Tracking.event).toHaveBeenCalledWith(category, action, { label, property, value });
+    });
   });
 
   describe('OFF state', () => {
@@ -88,6 +98,13 @@ describe('Timeline toggle', () => {
       expect(findGlButton().attributes('title')).toBe(timelineDisabledTooltip);
       expect(findGlButton().attributes('selected')).toBe(undefined);
       expect(mockEvent.currentTarget.blur).toHaveBeenCalled();
+    });
+
+    it('should track Snowplow event', () => {
+      store.state.isTimelineEnabled = false;
+      findGlButton().trigger('click');
+      const { category, action, label, property, value } = trackToggleTimelineView(false);
+      expect(Tracking.event).toHaveBeenCalledWith(category, action, { label, property, value });
     });
   });
 });
