@@ -95,7 +95,7 @@ PostgreSQL introduced major improvements for partitioning in [version 12](https:
 - Bulk load (`COPY`) now uses bulk inserts instead of inserting one row at a time;
 - Last but not least, it's now possible for foreign keys to reference partitioned tables, which is a must-have to guarantee consistency and integrity.
 
-To be able to leverage on these performance improvements and features (especially the foreign key constraints) we want to use PostgreSQL 12 from start.
+To be able to leverage these performance improvements and features (especially the foreign key constraints) we want to use PostgreSQL 12 from start.
 
 For self-managed instances, GitLab currently ships with PostgreSQL 11, but GitLab 14.0 and PostgreSQL 12 will most likely land before we ship the metadata database support for self-managed instances.
 
