@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 module JiraConnect
-  class SyncProjectWorker # rubocop:disable Scalability/IdempotentWorker
+  class SyncProjectWorker
     include ApplicationWorker
 
     queue_namespace :jira_connect
     feature_category :integrations
+    idempotent!
 
     MERGE_REQUEST_LIMIT = 50
 

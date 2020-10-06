@@ -809,7 +809,7 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: jira_importer:jira_import_advance_stage
   :feature_category: :importers
