@@ -18,18 +18,6 @@ module NamespaceSettings
       else
         group.build_namespace_settings(settings_params)
       end
-
-      after_update
-    end
-
-    def after_update
-      settings = group.namespace_settings
-      return if settings.allow_mfa_for_subgroups
-
-      if settings.previous_changes.include?(:allow_mfa_for_subgroups)
-        # enque in batches
-        TodosDestroyer::GroupPrivateWorker.perform_in(Todo::WAIT_FOR_DELETE, group.id)
-      end
     end
   end
 end

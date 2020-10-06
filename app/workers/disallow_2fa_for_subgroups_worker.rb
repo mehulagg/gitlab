@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Disallow2FAWorker # rubocop:disable Scalability/IdempotentWorker
+class Disallow2FAForSubgroupsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include ExceptionBacktrace
 
@@ -13,6 +13,6 @@ class Disallow2FAWorker # rubocop:disable Scalability/IdempotentWorker
       return
     end
 
-    group.update_two_factor_requirement_for_members
+    group.update!(require_two_factor_authentication: false)
   end
 end

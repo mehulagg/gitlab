@@ -319,6 +319,12 @@ RSpec.describe Groups::UpdateService do
 
       expect(group.namespace_settings.reload.allow_mfa_for_subgroups).to eq(false)
     end
+
+    it 'enqueues update subgroups and its members' do
+      expect(Disallow2FAWorker).to receive(:perform_async).with(group.id)
+
+      subject
+    end
   end
 
   def update_group(group, user, opts)

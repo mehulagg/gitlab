@@ -77,6 +77,18 @@ module Groups
         # don't enqueue immediately to prevent todos removal in case of a mistake
         TodosDestroyer::GroupPrivateWorker.perform_in(Todo::WAIT_FOR_DELETE, group.id)
       end
+
+      update_two_factor_requirement_for_subgroups
+    end
+
+    def update_two_factor_requirement_for_subgroups
+      settings = group.namespace_settings
+      return if settings.allow_mfa_for_subgroups
+
+      if settings.previous_changes.include?(:allow_mfa_for_subgroups)
+        # enque in batches members update
+        Disallow2FAWorker.perform_async(group.id)
+      end
     end
 
     def reject_parent_id!
