@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapState } from 'vuex';
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlModalDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { PROJECT_BADGE } from '../constants';
 import Badge from './badge.vue';
@@ -11,6 +11,9 @@ export default {
     Badge,
     GlLoadingIcon,
     GlButton,
+  },
+  directives: {
+    GlModal: GlModalDirective,
   },
   props: {
     badge: {
@@ -61,10 +64,9 @@ export default {
           @click="editBadge(badge)"
         />
         <gl-button
+          v-gl-modal.delete-badge-modal
           :disabled="badge.isDeleting"
           variant="danger"
-          data-toggle="modal"
-          data-target="#delete-badge-modal"
           icon="remove"
           size="medium"
           :aria-label="__('Delete')"
