@@ -39,7 +39,8 @@ RSpec.describe 'Alert details', :js do
         sidebar = find('.right-sidebar')
 
         expect(sidebar).to have_selector('.alert-status')
-        expect(sidebar).not_to have_selector('.alert-assignees')
+        expect(sidebar).to have_selector('.alert-assignees')
+        expect(sidebar).to have_content('Triggered')
       end
     end
   end

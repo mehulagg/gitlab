@@ -189,7 +189,7 @@ export default {
         !this.errored &&
         !this.loading &&
         this.alertsCount?.all === 0 &&
-        !this.searchTerm !== '' &&
+        this.searchTerm !== '' &&
         !this.isErrorAlertDismissed
       );
     },
