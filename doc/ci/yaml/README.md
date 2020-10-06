@@ -4164,11 +4164,8 @@ If you define a variable within a job, it's available to that job only.
 If a variable of the same name is defined globally and for a specific job, the
 [job-specific variable is used](../variables/README.md#priority-of-environment-variables).
 
-The `variables` keyword overrides the global
-YAML variables and predefined ones of the same name.
-
-The YAML-defined variables are also set to all created service containers,
-so that you can fine tune them.
+All YAML-defined variables are also set to any linked
+[service containers](../docker/using_docker_images.md#what-is-a-service).
 
 [YAML anchors for variables](#yaml-anchors-for-variables) are available.
 
