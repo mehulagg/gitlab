@@ -97,6 +97,9 @@ As a guideline:
 - For features with significant downstream effects (e.g.: turning on/off
   Elasticsearch indexing) consider coordinating with `#production`
   beforehand.
+- Features that meet the criteria for the
+  [Change Management Process](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#feature-flags-and-the-change-management-process)
+  should be accompanied by a [change management issue](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/new?issuable_template=change_management).
 
 #### Process
 
