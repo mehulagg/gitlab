@@ -39,5 +39,21 @@ The following are required to install and test the app:
 
    If the install was successful, you should see the **GitLab for Jira** app under **Manage apps**.
    You can also click **Getting Started** to open the configuration page rendered from your GitLab instance.
+   If the app install failed, you might need to delete `jira_connect_installations` from your database.
 
    _Note that any changes to the app descriptor requires you to uninstall then reinstall the app._
+
+## Adding a namespace
+
+1. Make sure you are logged in on your GitLab development instance.
+1. On the Jira GitLab app page click **Get started**.
+1. Open your browsers developer tools and navigate to the network tab.
+1. Try adding the namespace.
+1. If the request fails with 401 "not authorized", copy the request as cURL and paste it in your terminal.
+![Example Vulnerability](copy_curl.png)
+1. Go to your development instance (localhost:3000), open developer tools, navigate to the network tab and reload the page.
+1. Copy all cookies from the first request.\
+![Example Vulnerability](copy_cookies.png)
+1. Append the cookies to the cURL command in your terminal `--cookies "PASTE COOKIES HERE"`.
+1. Submit the cURL request.
+1. If the response is `{"success":true}` the namespace was added.
