@@ -10,7 +10,8 @@ module EE
         sort_value_end_date   => sort_title_end_date,
         sort_value_less_weight => sort_title_less_weight,
         sort_value_more_weight => sort_title_more_weight,
-        sort_value_weight      => sort_title_weight
+        sort_value_weight      => sort_title_weight,
+        sort_value_blocking    => sort_title_blocking
       }.merge(super)
     end
 
@@ -95,6 +96,10 @@ module EE
       s_('SortOptions|Weight')
     end
 
+    def sort_title_blocking
+      s_('SortOptions|Blocking')
+    end
+
     def sort_title_project_name
       s_('SortOptions|Project')
     end
@@ -129,6 +134,10 @@ module EE
 
     def sort_value_weight
       'weight'
+    end
+
+    def sort_value_blocking
+      'blocking_issues_desc'
     end
 
     def sort_value_project_name_asc
