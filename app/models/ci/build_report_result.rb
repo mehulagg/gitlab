@@ -4,6 +4,8 @@ module Ci
   class BuildReportResult < ApplicationRecord
     extend Gitlab::Ci::Model
 
+    tags :requires_disk_io
+
     self.primary_key = :build_id
 
     belongs_to :build, class_name: "Ci::Build", inverse_of: :report_results

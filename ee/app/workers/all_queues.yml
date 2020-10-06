@@ -522,7 +522,8 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: security_scans:store_security_scans
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -530,7 +531,8 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: security_scans:sync_security_reports_to_report_approval_rules
   :feature_category: :static_application_security_testing
   :has_external_dependencies:
@@ -706,7 +708,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: status_page_publish
   :feature_category: :incident_management
   :has_external_dependencies: true
