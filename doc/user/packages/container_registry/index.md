@@ -34,7 +34,7 @@ You can view the Container Registry for a project or group.
 
 You can search, sort, filter, and [delete](#delete-images-from-within-gitlab) containers on this page.
 
-Only members of the project or group can access a project's Container Registry.
+Only members of the project or group can access a private project's Container Registry.
 
 If a project is public, so is the Container Registry.
 
