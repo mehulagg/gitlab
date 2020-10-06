@@ -103,7 +103,8 @@ Given that the metadata database will unblock the implementation of the most req
 
 ## Iterations
 
-1. ✓ Design metadata database schema;
+1. Design metadata database schema;
+1. Add support for managing metadata using the database;
 1. ✓ Add support for managing metadata using the database;
 1. Design plans and tools to facilitate the migration of small, medium and large repositories (in progress);
 1. Implement online garbage collection (in progress);
