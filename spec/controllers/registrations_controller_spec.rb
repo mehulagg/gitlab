@@ -83,6 +83,112 @@ RSpec.describe RegistrationsController do
     let(:base_user_params) { { name: 'new_user', username: 'new_username', email: 'new@user.com', password: 'Any_password' } }
     let(:user_params) { { user: base_user_params } }
 
+    context '`blocked_pending_approval` state' do
+      context 'when the feature is enabled' do
+        before do
+          stub_feature_flags(admin_approval_for_new_user_signups: true)
+        end
+
+        context 'when the `require_admin_approval_after_user_signup` setting is turned on' do
+          before do
+            stub_application_setting(require_admin_approval_after_user_signup: true)
+          end
+
+          it 'signs up the user in `blocked_pending_approval` state' do
+            post(:create, params: user_params)
+
+            created_user = User.find_by(email: 'new@user.com')
+            expect(created_user).to be_present
+            expect(created_user.blocked_pending_approval?).to eq(true)
+          end
+
+          it 'does not log in the user after sign up' do
+            post(:create, params: user_params)
+
+            expect(subject.current_user).to be_nil
+          end
+
+          it 'shows flash message after signing up' do
+            post(:create, params: user_params)
+
+            expect(response).to redirect_to(new_user_session_path(anchor: 'login-pane'))
+            expect(flash[:notice])
+              .to eq('You have signed up successfully. However, we could not sign you in because your account is awaiting approval from your administrator.')
+          end
+
+          context 'email confirmation' do
+            around do |example|
+              perform_enqueued_jobs do
+                example.run
+              end
+            end
+
+            context 'when `send_user_confirmation_email` is true' do
+              before do
+                stub_application_setting(send_user_confirmation_email: true)
+              end
+
+              context 'when soft email confirmation is not enabled' do
+                before do
+                  stub_feature_flags(soft_email_confirmation: false)
+                  allow(User).to receive(:allow_unconfirmed_access_for).and_return 0
+                end
+
+                it 'does not send a confirmation email' do
+                  expect { post(:create, params: user_params) }.not_to change { ActionMailer::Base.deliveries.size }
+                end
+              end
+
+              context 'when soft email confirmation is enabled' do
+                before do
+                  stub_feature_flags(soft_email_confirmation: true)
+                  allow(User).to receive(:allow_unconfirmed_access_for).and_return 2.days
+                end
+
+                it 'does not send a confirmation email' do
+                  expect { post(:create, params: user_params) }.not_to change { ActionMailer::Base.deliveries.size }
+                end
+              end
+            end
+          end
+        end
+
+        context 'when the `require_admin_approval_after_user_signup` setting is turned off' do
+          before do
+            stub_application_setting(require_admin_approval_after_user_signup: false)
+          end
+
+          it 'signs up the user in `active` state' do
+            post(:create, params: user_params)
+
+            created_user = User.find_by(email: 'new@user.com')
+            expect(created_user).to be_present
+            expect(created_user.active?).to eq(true)
+          end
+        end
+      end
+
+      context 'when the feature is disabled' do
+        before do
+          stub_feature_flags(admin_approval_for_new_user_signups: false)
+        end
+
+        context 'when the `require_admin_approval_after_user_signup` setting is turned on' do
+          before do
+            stub_application_setting(require_admin_approval_after_user_signup: true)
+          end
+
+          it 'signs up the user in `active` state' do
+            post(:create, params: user_params)
+
+            created_user = User.find_by(email: 'new@user.com')
+            expect(created_user).to be_present
+            expect(created_user.active?).to eq(true)
+          end
+        end
+      end
+    end
+
     context 'email confirmation' do
       around do |example|
         perform_enqueued_jobs do

@@ -6,6 +6,8 @@ class RegistrationsController < Devise::RegistrationsController
   include RecaptchaExperimentHelper
   include InvisibleCaptchaOnSignup
 
+  BLOCKED_PENDING_APPROVAL_STATE = 'blocked_pending_approval'.freeze
+
   layout :choose_layout
 
   skip_before_action :required_signup_info, :check_two_factor_requirement, only: [:welcome, :update_registration]
@@ -26,6 +28,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def create
+    set_user_status
     accept_pending_invitations
 
     super do |new_user|
@@ -35,9 +38,9 @@ class RegistrationsController < Devise::RegistrationsController
       yield new_user if block_given?
     end
 
-    # Devise sets a flash message on `create` for a successful signup,
-    # which we don't want to show.
-    flash[:notice] = nil
+    # Devise sets a flash message on both successful & failed signups,
+    # but do not want to show such messages in case of a successful signup.
+    flash[:notice] = nil unless resource.blocked_pending_approval?
   rescue Gitlab::Access::AccessDeniedError
     redirect_to(new_user_session_path)
   end
@@ -119,6 +122,8 @@ class RegistrationsController < Devise::RegistrationsController
 
   def after_inactive_sign_up_path_for(resource)
     Gitlab::AppLogger.info(user_created_message)
+    return new_user_session_path(anchor: 'login-pane') if resource.blocked_pending_approval?
+
     Feature.enabled?(:soft_email_confirmation) ? dashboard_projects_path : users_almost_there_path
   end
 
@@ -232,6 +237,13 @@ class RegistrationsController < Devise::RegistrationsController
       !helpers.in_invitation_flow? &&
       !helpers.in_oauth_flow? &&
       !helpers.in_trial_flow?
+  end
+
+  def set_user_status
+    return unless Feature.enabled?(:admin_approval_for_new_user_signups)
+    return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
+
+    resource.state = BLOCKED_PENDING_APPROVAL_STATE
   end
 end
 
