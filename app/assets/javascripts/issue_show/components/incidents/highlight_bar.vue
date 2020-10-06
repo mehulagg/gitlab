@@ -43,5 +43,7 @@ export default {
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Alert events:') }}</span>
       <span>{{ alert.eventCount }}</span>
     </div>
+
+    <slot name="incident-sla"></slot>
   </div>
 </template>
