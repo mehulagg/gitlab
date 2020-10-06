@@ -24,13 +24,14 @@ module EE
       override :after_create
       def after_create(issue)
         super
+
         add_incident_sla(issue)
       end
 
       private
 
       def add_incident_sla(issue)
-        ::IncidentManagement::CreateSlaService.new(issue, current_user, project).execute
+        ::IncidentManagement::CreateSlaService.new(issue, current_user).execute
       end
     end
   end

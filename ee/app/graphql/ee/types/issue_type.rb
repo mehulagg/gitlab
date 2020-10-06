@@ -23,18 +23,14 @@ module EE
                 ::Gitlab::Graphql::Aggregations::Issues::LazyBlockAggregate.new(ctx, obj.id)
               }
 
-        field :health_status,
-          ::Types::HealthStatusEnum,
-          null: true,
+        field :health_status, ::Types::HealthStatusEnum, null: true,
           description: 'Current health status. Returns null if `save_issuable_health_status` feature flag is disabled.',
           resolve: -> (obj, _, _) { obj.supports_health_status? ? obj.health_status : nil }
 
         field :status_page_published_incident, GraphQL::BOOLEAN_TYPE, null: true,
           description: 'Indicates whether an issue is published to the status page'
 
-        field :sla_due_at,
-          ::Types::TimeType,
-          null: true,
+        field :sla_due_at, ::Types::TimeType, null: true,
           description: 'Timestamp of when the incident SLA expires'
       end
     end
