@@ -1,6 +1,6 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
-import { n__ } from '~/locale';
+import { n__, __ } from '~/locale';
 
 export default {
   name: 'AssigneeTitle',
@@ -27,10 +27,29 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      editing: false,
+    };
+  },
   computed: {
     assigneeTitle() {
       const assignees = this.numberOfAssignees;
       return n__('Assignee', `%d Assignees`, assignees);
+    },
+    titleCopy() {
+      return this.editing ? __('Apply') : __('Edit');
+    },
+  },
+  mounted() {
+    document.addEventListener('click', this.doSomething);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.doSomething);
+  },
+  methods: {
+    doSomething() {
+      this.editing = !this.editing;
     },
   },
 };
@@ -47,7 +66,7 @@ export default {
       data-track-label="right_sidebar"
       data-track-property="assignee"
     >
-      {{ __('Edit') }}
+      {{ titleCopy }}
     </a>
     <a
       v-if="showToggle"
