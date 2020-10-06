@@ -306,7 +306,7 @@ module EE
     # - Decide if feature flag is enabled or disabled by default
     def beta_feature_available?(feature, default_enabled: false)
       feature_available?(feature) &&
-        ::Feature.enabled?(feature, self, type: :licensed, default_enabled: default_enabled)
+        ::Feature.enabled?(feature, self, default_enabled: default_enabled)
     end
 
     def push_audit_events_enabled?

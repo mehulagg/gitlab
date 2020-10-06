@@ -34,19 +34,6 @@ class Feature
           Feature.enabled?(:my_ops_flag, type: ops)
           push_frontend_feature_flag?(:my_ops_flag, project, type: :ops)
         EOS
-      },
-      licensed: {
-        description: 'Short lived, feature flags used to temporarily enable licensed features.',
-        optional: false,
-        rollout_issue: false,
-        ee_only: true,
-        default_enabled: false,
-        example: <<-EOS
-          License.beta_feature_available?(:my_licensed_feature)
-          project.beta_feature_available?(:my_licensed_feature)
-          namespace.beta_feature_available?(:my_licensed_feature)
-          push_frontend_beta_feature_available?(:my_licensed_feature, project)
-        EOS
       }
     }.freeze
 

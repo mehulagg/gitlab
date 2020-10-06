@@ -61,26 +61,6 @@ Feature.disabled?(:my_ops_flag, project, type: :ops)
 push_frontend_feature_flag(:my_ops_flag, project, type: :ops)
 ```
 
-### `licensed` type
-
-`licensed` feature flags are used to rollout licensed features.
-
-The `licensed` type has a dedicated set of functions to check if a licensed
-feature is available for a project or namespace. This check validates
-if the license is assigned to the namespace and feature flag itself.
-The `licensed` feature flag has the same name as a licensed feature name:
-
-```ruby
-# Good: checks if feature flag is enabled
-project.beta_feature_available?(:my_licensed_feature)
-namespace.beta_feature_available?(:my_licensed_feature)
-push_frontend_beta_feature_available(:my_licensed_feature, project)
-
-# Bad: licensed flag must be accessed via `feature_available?`
-Feature.enabled?(:my_licensed_feature, type: :licensed)
-push_frontend_feature_flag(:my_licensed_feature, type: :licensed)
-```
-
 ## Feature flag definition and validation
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229161) in GitLab 13.3.
@@ -203,18 +183,6 @@ if Feature.disabled?(:my_feature_flag, project, type: :ops)
 end
 ```
 
-There's an exception for `type: :licensed` that requires additionally checking
-if a given project or namespace has the license for such feature. In such cases
-a dedicated method needs to be used:
-
-```ruby
-if project.beta_feature_available?(:licensed_feature)
-  # execute code if licensed feature is available
-else
-  # execute code if licensed feature is not available
-end
-```
-
 ### Frontend
 
 Use the `push_frontend_feature_flag` method for frontend code, which is
@@ -269,16 +237,6 @@ before_action do
 end
 ```
 
-There's an exception for `type: :licensed` that requires additionally checking
-if a given project or namespace has the license for such feature. In such cases
-a dedicated method needs to be used:
-
-```ruby
-before_action do
-  push_frontend_beta_feature_available(:vim_bindings, project)
-end
-```
-
 ### Feature actors
 
 **It is strongly advised to use actors with feature flags.** Actors provide a simple
@@ -322,16 +280,10 @@ used as an actor for `Feature.enabled?`.
 
 ### Feature flags for licensed features
 
-Licensed feature flags are special as the feature flag check is usually not enough
-to know if a given feature is available. Feature availability depends on a project
+In some cases the feature flag needs to be tied with a licensed feature.
+However, the licensed feature availability depends on a project
 or namespace or license assigned to the instance. For that particular reason
-they are handled differently to regular feature flags. These special feature flags
-use a dedicated type the [`type: :licensed`](#licensed-type).
-
-To check a licensed feature with a feature flag a special method needs to be used
-`#beta_feature_available?` as opossed to using `#feature_available?`.
-The `#beta_feature_available?` checks if a given project or namespace has a license
-for a given feature, but also if a feature flag is enabled in a given context.
+this kind of check needs to be handled in a specific way.
 
 This is relevant when developing the feature using
 [several smaller merge requests](https://about.gitlab.com/handbook/values/#make-small-merge-requests),
@@ -341,13 +293,7 @@ and should not be available by default.
 
 As an example, if you were to ship the frontend half of a feature without the
 backend, you'd want to disable the feature entirely until the backend half is
-also ready to be shipped. To make sure this feature is disabled for both
-GitLab.com and self-managed instances, you should use the
-[`Namespace#beta_feature_available?`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/ee/namespace.rb#L100-112)
-method, according to our [definitions](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga).
-This ensures the feature is disabled unless the feature flag is _explicitly_ enabled.
-However, this can be overwritten by specifying the `default_enabled: true` as part of
-method invocation.
+also ready to be shipped. 
 
 A dedicated method can be used depending on a context and purpose:
 

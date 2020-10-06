@@ -387,7 +387,7 @@ class License < ApplicationRecord
   # - Decide if feature flag is enabled or disabled by default
   def beta_feature_available?(feature, default_enabled: false)
     feature_available?(feature) &&
-      ::Feature.enabled?(feature, type: :licensed, default_enabled: default_enabled)
+      ::Feature.enabled?(feature, default_enabled: default_enabled)
   end
 
   def license_id
