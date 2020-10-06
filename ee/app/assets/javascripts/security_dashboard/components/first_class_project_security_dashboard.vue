@@ -1,4 +1,5 @@
 <script>
+import ProjectPipelineStatus from './project_pipeline_status.vue';
 import ProjectVulnerabilitiesApp from './project_vulnerabilities.vue';
 import ReportsNotConfigured from './empty_states/reports_not_configured.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
@@ -10,6 +11,7 @@ export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 
 export default {
   components: {
+    ProjectPipelineStatus,
     ProjectVulnerabilitiesApp,
     ReportsNotConfigured,
     SecurityDashboardLayout,
@@ -61,6 +63,7 @@ export default {
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
+          <project-pipeline-status :project-full-path="projectFullPath" />
           <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
