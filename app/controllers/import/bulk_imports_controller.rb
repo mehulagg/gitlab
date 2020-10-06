@@ -25,6 +25,12 @@ class Import::BulkImportsController < ApplicationController
     end
   end
 
+  def create
+    BulkImport::ImportService.new(current_user, params, credentials).execute
+
+    render json: :ok
+  end
+
   private
 
   def serialized_importable_data
