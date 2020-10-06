@@ -1,6 +1,6 @@
 .d-lg-flex.align-items-end
   #js-search-filter-by-state{ 'v-cloak': true, data: { scope: @scope, filter: params[:state]} }
-  - if Feature.enabled?(:search_filter_by_confidential, @group)
+  - if Feature.enabled?(:search_filter_by_confidential)
     #js-search-filter-by-confidential{ 'v-cloak': true, data: { scope: @scope, filter: params[:confidential] } }
 
   - if %w(issues merge_requests).include?(@scope)
