@@ -28,6 +28,7 @@ describe('User Popover Component', () => {
     wrapper.destroy();
   });
 
+  const findByTestId = testid => wrapper.find(`[data-testid="${testid}"]`);
   const findUserStatus = () => wrapper.find('.js-user-status');
   const findTarget = () => document.querySelector('.js-user-link');
 
@@ -194,6 +195,24 @@ describe('User Popover Component', () => {
       createWrapper({ user });
 
       expect(findUserStatus().exists()).toBe(false);
+    });
+  });
+
+  describe('security bot', () => {
+    const SECURITY_BOT_USER = {
+      ...DEFAULT_PROPS.user,
+      name: 'GitLab Security Bot',
+      username: 'security-bot',
+      websiteUrl: '/security/bot/docs',
+    };
+
+    it("shows a link to the bot's documentation", () => {
+      createWrapper({ user: SECURITY_BOT_USER });
+
+      const securityBotDocsLink = findByTestId('user-popover-security-bot-docs-link');
+
+      expect(securityBotDocsLink.exists()).toBe(true);
+      expect(securityBotDocsLink.attributes('href')).toBe(SECURITY_BOT_USER.websiteUrl);
     });
   });
 });

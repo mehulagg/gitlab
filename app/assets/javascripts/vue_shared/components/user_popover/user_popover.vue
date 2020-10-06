@@ -101,9 +101,9 @@ export default {
           </div>
           <div v-if="isSecurityBot" class="gl-text-blue-500">
             <gl-icon name="question" />
-            <gl-link :href="user.websiteUrl">{{
-              sprintf(__('Learn more about %{username}'), { username: user.name })
-            }}</gl-link>
+            <gl-link data-testid="user-popover-security-bot-docs-link" :href="user.websiteUrl">
+              {{ sprintf(__('Learn more about %{username}'), { username: user.name }) }}
+            </gl-link>
           </div>
         </template>
       </div>
