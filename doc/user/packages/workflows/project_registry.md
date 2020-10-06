@@ -75,7 +75,7 @@ you do this, you will be able to push your NPM package to your project using `np
 
 If you are using Maven, this involves updating your `pom.xml` file with distribution sections, including the
 appropriate URL for your project, as described in the [GitLab Maven Repository documentation](../maven_repository/index.md#project-level-maven-endpoint).
-Then, you need to add a `settings.xml` file and [include your access token](../maven_repository/index.md#authenticating-with-a-personal-access-token).
+Then, you need to add a `settings.xml` file and [include your access token](../maven_repository/index.md#authenticate-with-a-personal-access-token).
 Now you can [deploy Maven packages](../maven_repository/index.md#uploading-packages) to your project.
 
 #### Conan
