@@ -866,13 +866,15 @@ RSpec.describe API::Projects do
       expect(response).to have_gitlab_http_status(:bad_request)
     end
 
-    it "assigns attributes to project" do
+    it "assigns attributes to project", focus: true do
       project = attributes_for(:project, {
         path: 'camelCasePath',
         issues_enabled: false,
         jobs_enabled: false,
         merge_requests_enabled: false,
         forking_access_level: 'disabled',
+        auto_cancel_pending_pipelines: 'disabled',
+        forward_deployment_enabled: false,
         wiki_enabled: false,
         resolve_outdated_diff_discussions: false,
         remove_source_branch_after_merge: true,
@@ -891,6 +893,9 @@ RSpec.describe API::Projects do
 
       project.each_pair do |k, v|
         next if %i[has_external_issue_tracker issues_enabled merge_requests_enabled wiki_enabled storage_version].include?(k)
+
+        puts json_response
+        expect(false).to eq(true)
 
         expect(json_response[k.to_s]).to eq(v)
       end

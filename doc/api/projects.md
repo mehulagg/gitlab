@@ -1072,6 +1072,7 @@ POST /projects
 | `build_git_strategy` | string | no | The Git strategy. Defaults to `fetch` |
 | `build_timeout` | integer | no | The maximum amount of time in minutes that a job is able run (in seconds) |
 | `auto_cancel_pending_pipelines` | string | no | Auto-cancel pending pipelines (Note: this is not a boolean, but enabled/disabled |
+| `forward_deployment_enabled` | boolean | no | When a deployment job is successful, skip older deployment jobs that are still pending |
 | `build_coverage_regex` | string | no | Test coverage parsing |
 | `ci_config_path` | string | no | The path to CI configuration file |
 | `auto_devops_enabled` | boolean | no | Enable Auto DevOps for this project |

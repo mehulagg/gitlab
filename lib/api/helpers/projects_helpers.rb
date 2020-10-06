@@ -102,6 +102,7 @@ module API
           :auto_devops_enabled,
           :auto_devops_deploy_strategy,
           :auto_cancel_pending_pipelines,
+          :forward_deployment_enabled,
           :build_coverage_regex,
           :build_git_strategy,
           :build_timeout,
