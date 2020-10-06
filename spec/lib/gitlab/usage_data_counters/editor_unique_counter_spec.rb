@@ -8,7 +8,7 @@ RSpec.describe Gitlab::UsageDataCounters::EditorUniqueCounter, :clean_gitlab_red
   let(:user3) { build(:user, id: 3) }
   let(:time) { Time.zone.now }
 
-  shared_examples 'tracks and counts action' do
+  shared_examples 'a tracked issue edit event' do
     before do
       stub_application_setting(usage_ping_enabled: true)
     end
@@ -39,7 +39,7 @@ RSpec.describe Gitlab::UsageDataCounters::EditorUniqueCounter, :clean_gitlab_red
   end
 
   context 'for web IDE edit actions' do
-    it_behaves_like 'tracks and counts action' do
+    it_behaves_like 'a tracked issue edit event' do
       def track_action(params)
         described_class.track_web_ide_edit_action(**params)
       end
@@ -51,7 +51,7 @@ RSpec.describe Gitlab::UsageDataCounters::EditorUniqueCounter, :clean_gitlab_red
   end
 
   context 'for SFE edit actions' do
-    it_behaves_like 'tracks and counts action' do
+    it_behaves_like 'a tracked issue edit event' do
       def track_action(params)
         described_class.track_sfe_edit_action(**params)
       end
@@ -63,7 +63,7 @@ RSpec.describe Gitlab::UsageDataCounters::EditorUniqueCounter, :clean_gitlab_red
   end
 
   context 'for snippet editor edit actions' do
-    it_behaves_like 'tracks and counts action' do
+    it_behaves_like 'a tracked issue edit event' do
       def track_action(params)
         described_class.track_snippet_editor_edit_action(**params)
       end

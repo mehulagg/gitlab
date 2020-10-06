@@ -41,6 +41,12 @@ RSpec.describe ::SystemNotes::IssuablesService do
         expect(subject.note).to eq 'removed the health status'
       end
     end
+
+    it 'tracks the issue event in usage ping' do
+      expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_health_status_changed_action).with(author: author)
+
+      subject
+    end
   end
 
   describe '#publish_issue_to_status_page' do

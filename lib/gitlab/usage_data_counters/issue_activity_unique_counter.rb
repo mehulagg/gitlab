@@ -114,3 +114,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::UsageDataCounters::IssueActivityUniqueCounter.prepend_if_ee('EE::Gitlab::UsageDataCounters::IssueActivityUniqueCounter')
