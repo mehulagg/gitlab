@@ -187,6 +187,10 @@ generated for the renewal and available for viewing or download in the
 during the renewal process, contact our
 [support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293) for assistance.
 
+NOTE: **Note:**
+To renew for fewer users than your previous subscription on the GitLab.com plan,
+make sure you [disable the users](https://docs.gitlab.com/ee/user/admin_area/activating_deactivating_users.html#deactivating-a-user) prior to the renewal of a subscription.
+
 ## Upgrade your GitLab.com subscription tier
 
 To upgrade your [GitLab tier](https://about.gitlab.com/pricing/):
