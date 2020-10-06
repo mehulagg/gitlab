@@ -147,7 +147,7 @@ module Projects
 
     def create_readme
       commit_attrs = {
-        branch_name:  Gitlab::CurrentSettings.default_branch_name.presence || 'master',
+        branch_name:  @project.default_branch || 'master',
         commit_message: 'Initial commit',
         file_path: 'README.md',
         file_content: "# #{@project.name}\n\n#{@project.description}"
