@@ -33,8 +33,8 @@ RSpec.describe Projects::AlertManagementHelper do
           'empty-alert-svg-path' => match_asset_path('/assets/illustrations/alert-management-empty-state.svg'),
           'user-can-enable-alert-management' => 'true',
           'alert-management-enabled' => 'false',
-          'text-query': 'search text',
-          'assignee-usernames-query': 'max.power'
+          'text-query': nil,
+          'assignee-usernames-query': nil
         )
       end
     end
