@@ -64,8 +64,15 @@ module DesignManagement
       content = file_content(file, design.full_path)
       return if design_unchanged?(design, content)
 
+      changed_design = existing_blobs[design].present?
+
       action = new_file?(design) ? :create : :update
       on_success do
+        if changed_design
+          ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_designs_modified_action(author: current_user)
+        else
+          ::Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_designs_added_action(author: current_user)
+        end
         ::Gitlab::UsageDataCounters::DesignsCounter.count(action)
       end
 

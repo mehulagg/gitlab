@@ -24,6 +24,9 @@ module Gitlab
       ISSUE_MARKED_AS_DUPLICATE = 'g_project_management_issue_marked_as_duplicate'
       ISSUE_LOCKED = 'g_project_management_issue_locked'
       ISSUE_UNLOCKED = 'g_project_management_issue_unlocked'
+      ISSUE_DESIGNS_ADDED = 'g_project_management_issue_designs_added'
+      ISSUE_DESIGNS_MODIFIED = 'g_project_management_issue_designs_modified'
+      ISSUE_DESIGNS_REMOVED = 'g_project_management_issue_designs_removed'
 
       class << self
         def track_issue_created_action(author:, time: Time.zone.now)
@@ -100,6 +103,18 @@ module Gitlab
 
         def track_issue_unlocked_action(author:, time: Time.zone.now)
           track_unique_action(ISSUE_UNLOCKED, author, time)
+        end
+
+        def track_issue_designs_added_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_DESIGNS_ADDED, author, time)
+        end
+
+        def track_issue_designs_modified_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_DESIGNS_MODIFIED, author, time)
+        end
+
+        def track_issue_designs_removed_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_DESIGNS_REMOVED, author, time)
         end
 
         private

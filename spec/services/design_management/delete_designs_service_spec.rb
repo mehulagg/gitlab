@@ -80,6 +80,12 @@ RSpec.describe DesignManagement::DeleteDesignsService do
           expect { run_service rescue nil }
             .not_to change { [counter.totals, Event.count] }
         end
+
+        it 'does not log any UsageData metrics' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_designs_removed_action)
+
+          run_service rescue nil
+        end
       end
 
       context 'one design is passed' do
@@ -96,6 +102,12 @@ RSpec.describe DesignManagement::DeleteDesignsService do
         it 'logs a deletion event' do
           counter = ::Gitlab::UsageDataCounters::DesignsCounter
           expect { run_service }.to change { counter.read(:delete) }.by(1)
+        end
+
+        it 'updates UsageData for removed designs' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_designs_removed_action).with(author: user)
+
+          run_service
         end
 
         it 'creates an event in the activity stream' do
