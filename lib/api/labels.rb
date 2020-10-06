@@ -19,10 +19,12 @@ module API
                  desc: 'Include issue and merge request counts'
         optional :include_ancestor_groups, type: Boolean, default: true,
                  desc: 'Include ancestor groups'
+        optional :search, type: String,
+                 desc: 'Keyword to filter labels by. This feature was added in GitLab 13.5'
         use :pagination
       end
       get ':id/labels' do
-        get_labels(user_project, Entities::ProjectLabel, include_ancestor_groups: params[:include_ancestor_groups])
+        get_labels(user_project, Entities::ProjectLabel, declared_params)
       end
 
       desc 'Get a single label' do

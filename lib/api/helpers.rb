@@ -89,16 +89,14 @@ module API
       @project ||= find_project!(params[:id])
     end
 
-    def available_labels_for(label_parent, include_ancestor_groups: true)
-      search_params = { include_ancestor_groups: include_ancestor_groups }
-
+    def available_labels_for(label_parent, params = {})
       if label_parent.is_a?(Project)
-        search_params[:project_id] = label_parent.id
+        params[:project_id] = label_parent.id
       else
-        search_params.merge!(group_id: label_parent.id, only_group_labels: true)
+        params.merge!(group_id: label_parent.id, only_group_labels: true)
       end
 
-      LabelsFinder.new(current_user, search_params).execute
+      LabelsFinder.new(current_user, params).execute
     end
 
     def find_user(id)
