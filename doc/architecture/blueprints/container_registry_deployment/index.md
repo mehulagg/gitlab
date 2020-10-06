@@ -83,6 +83,24 @@ The design and development of the registry database adhere to the GitLab [databa
 
 Support for running *online* migrations is already supported by the registry CLI, as described in the [documentation](/container-registry/-/blob/master/docs-gitlab/database-migrations.md). Apart from online migrations, [*post deployment* migrations](/development/post_deployment_migrations.html) are also a requirement to be implemented as outlined in [container-registry#220](https://gitlab.com/gitlab-org/container-registry/-/issues/220).
 
+The registry database will be partitioned from start to achieve greater performance (by limiting the amount of data to act upon and enable parallel execution), easier maintenance (by splitting tables and indexes into smaller units), and high availability (with partition independence). By partitioning the database from start we can also facilitate a sharding implementation later on if necessary.
+
+#### PostgreSQL 12
+
+PostgreSQL introduced major improvements for partitioning in [version 12](https://www.postgresql.org/docs/12/release-12.html#id-1.11.6.9.5)), among which we highlight:
+
+- Major performance improvements for inserts, selects, and updates with less locking and consistent performance for a large number of partitions ([benchmarks](https://www.2ndquadrant.com/en/blog/postgresql-12-partitioning));
+- Major improvements to the planning algorithm for tables with a large number of partitions, with some tests finding speedups of up to 10,000 times ([source](https://aws.amazon.com/blogs/database/postgresql-12-a-deep-dive-into-some-new-functionality/));
+- Attaching new partitions to an existing table no longer requires locking the entire table;
+- Bulk load (`COPY`) now uses bulk inserts instead of inserting one row at a time;
+- Last but not least, it's now possible for foreign keys to reference partitioned tables, which is a must-have to guarantee consistency and integrity.
+
+To be able to leverage on these performance improvements and features (especially the foreign key constraints) we want to use PostgreSQL 12 from start.
+
+For self-managed instances, GitLab currently ships with PostgreSQL 11, but GitLab 14.0 and PostgreSQL 12 will most likely land before we ship the metadata database support for self-managed instances.
+
+Given that the metadata database will unblock the implementation of the most requested features for the GitLab Container Registry integration, most of these features may only be available for those using a GitLab version which ships with PostgreSQL 12. We will continue to support the current version 2 of the registry (with no database) with security backports and bug fixes.
+
 ## Iterations
 
 1. ✓ Design metadata database schema;
