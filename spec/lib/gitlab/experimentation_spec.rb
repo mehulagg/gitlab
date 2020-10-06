@@ -166,6 +166,35 @@ RSpec.describe Gitlab::Experimentation do
             controller.track_experiment_event(:test_experiment, 'start', 'team_id')
           end
         end
+
+        context 'DNT: 0' do
+          before do
+            request.headers['DNT'] = '0'
+          end
+
+          it 'does track the event' do
+            expect(Gitlab::Tracking).to receive(:event).with(
+              'Team',
+              'start',
+              property: 'control_group',
+              value: 'team_id'
+            )
+
+            controller.track_experiment_event(:test_experiment, 'start', 'team_id')
+          end
+        end
+
+        context 'DNT: 1' do
+          before do
+            request.headers['DNT'] = '1'
+          end
+
+          it 'does not track the event' do
+            expect(Gitlab::Tracking).not_to receive(:event)
+
+            controller.track_experiment_event(:test_experiment, 'start', 'team_id')
+          end
+        end
       end
 
       context 'when the experiment is disabled' do
@@ -232,6 +261,36 @@ RSpec.describe Gitlab::Experimentation do
                 property: 'control_group'
               }
             )
+          end
+        end
+
+        context 'DNT: 0' do
+          before do
+            request.headers['DNT'] = '0'
+          end
+
+          it 'pushes the right parameters to gon' do
+            controller.frontend_experimentation_tracking_data(:test_experiment, 'start')
+
+            expect(Gon.tracking_data).to eq(
+              {
+                category: 'Team',
+                action: 'start',
+                property: 'control_group'
+              }
+            )
+          end
+        end
+
+        context 'DNT: 1' do
+          before do
+            request.headers['DNT'] = '1'
+          end
+
+          it 'does not push data to gon' do
+            controller.frontend_experimentation_tracking_data(:test_experiment, 'start')
+
+            expect(Gon.method_defined?(:tracking_data)).to be_falsey
           end
         end
       end
@@ -304,6 +363,40 @@ RSpec.describe Gitlab::Experimentation do
 
         it 'does not call add_user on the Experiment model' do
           expect(::Experiment).not_to receive(:add_user)
+
+          controller.record_experiment_user(:test_experiment)
+        end
+      end
+
+      context 'DNT: 0' do
+        before do
+          request.headers['DNT'] = '0'
+
+          allow(controller).to receive(:current_user).and_return(user)
+          allow_next_instance_of(described_class) do |instance|
+            allow(instance).to receive(:experiment_enabled?).with(:test_experiment).and_return(false)
+          end
+        end
+
+        it 'calls add_user on the Experiment model' do
+          expect(::Experiment).to receive(:add_user).with(:test_experiment, :control, user)
+
+          controller.record_experiment_user(:test_experiment)
+        end
+      end
+
+      context 'DNT: 1' do
+        before do
+          request.headers['DNT'] = '1'
+
+          allow(controller).to receive(:current_user).and_return(user)
+          allow_next_instance_of(described_class) do |instance|
+            allow(instance).to receive(:experiment_enabled?).with(:test_experiment).and_return(false)
+          end
+        end
+
+        it 'does not call add_user on the Experiment model' do
+          expect(::Experiment).not_to receive(:add_user).with(:test_experiment, :control, user)
 
           controller.record_experiment_user(:test_experiment)
         end
