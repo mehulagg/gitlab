@@ -119,7 +119,7 @@ RSpec.describe API::Lint do
       end
     end
 
-    context 'when authenticated as guest' do
+    context 'when authenticated as non-member' do
       let_it_be(:api_user) { create(:user) }
 
       let(:yaml_content) do
@@ -191,7 +191,21 @@ RSpec.describe API::Lint do
       end
     end
 
-    context 'when authenticated as project member' do
+    context 'when authenticated as project guest' do
+      let_it_be(:api_user) { create(:user) }
+
+      before do
+        project.add_guest(api_user)
+      end
+
+      it 'returns authentication error' do
+        ci_lint
+
+        expect(response).to have_gitlab_http_status(:forbidden)
+      end
+    end
+
+    context 'when authenticated as project developer' do
       let_it_be(:api_user) { create(:user) }
 
       before do
