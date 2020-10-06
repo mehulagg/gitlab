@@ -9,6 +9,10 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
     @project = project
   end
 
+  def arbitrary_admin
+    @arbitrary_admin ||= User.admins.first
+  end
+
   def seed!
     used_statuses = []
 
@@ -54,10 +58,8 @@ class Gitlab::Seeder::ComplianceDashboardMergeRequests
       state: :opened
     }
 
-    maintainer = @project.team.maintainers.sample || User.admins.first
-
     Sidekiq::Worker.skipping_transaction_check do
-      merge_request = MergeRequests::CreateService.new(@project, maintainer, opts).execute
+      merge_request = MergeRequests::CreateService.new(@project, arbitrary_admin, opts).execute
       merge_request.save!
       merge_request.approvals.create(approvals)
       merge_request.state = :merged
