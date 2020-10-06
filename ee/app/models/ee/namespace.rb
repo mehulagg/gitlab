@@ -115,22 +115,13 @@ module EE
       project.full_path.sub(/\A#{Regexp.escape(full_path)}/, full_path_before_last_save)
     end
 
-    # This makes the feature disabled by default.
-    #
-    # This allows to:
-    # - To check a licensed feature in conjuction with a feature flag of that same name
-    #   in context of the current namespace.
-    # - Decide if feature flag is enabled or disabled by default
-    def beta_feature_available?(feature, default_enabled: false)
-      feature_available?(feature) &&
-        ::Feature.enabled?(feature, self, type: :licensed, default_enabled: default_enabled)
-    end
-
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
     # being licensed.
     override :feature_available?
-    def feature_available?(feature)
+    def feature_available?(feature, skip_validation: false)
+      Feature.require_absence!(feature, message: 'Use `beta_feature_available?`') unless skip_validation
+
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
           h[f] = load_feature_available(f)
@@ -140,7 +131,18 @@ module EE
       available_features[feature]
     end
 
-    def feature_available_in_plan?(feature)
+    # This makes the feature disabled by default.
+    #
+    # This allows to:
+    # - To check a licensed feature in conjuction with a feature flag of that same name
+    #   in context of the current namespace.
+    # - Decide if feature flag is enabled or disabled by default
+    def beta_feature_available?(feature, default_enabled: false)
+      feature_available?(feature, skip_validation: true) &&
+        ::Feature.enabled?(feature, self, type: :licensed, default_enabled: default_enabled)
+    end
+
+    def feature_available_in_plan?(feature, skip_validation: false)
       available_features = strong_memoize(:features_available_in_plan) do
         Hash.new do |h, f|
           h[f] = (plans.map(&:name) & self.class.plans_with_feature(f)).any?
@@ -148,6 +150,17 @@ module EE
       end
 
       available_features[feature]
+    end
+
+    # This makes the feature disabled by default.
+    #
+    # This allows to:
+    # - To check a licensed feature in conjuction with a feature flag of that same name
+    #   in context of the current namespace.
+    # - Decide if feature flag is enabled or disabled by default
+    def feature_available_in_plan?(feature, default_enabled: false)
+      feature_available_in_plan?(feature, skip_validation: true) &&
+        ::Feature.enabled?(feature, self, type: :licensed, default_enabled: default_enabled)
     end
 
     def feature_available_non_trial?(feature)

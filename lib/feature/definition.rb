@@ -104,6 +104,12 @@ class Feature
         end
       end
 
+      def require_absence!(key, message: nil)
+        if definition = definitions[key.to_sym]
+          raise InvalidFeatureFlagError, "Feature flag `#{key}` cannot be used here. #{message}"
+        end
+      end
+
       def register_hot_reloader!
         # Reload feature flags on change of this file or any `.yml`
         file_watcher = Rails.configuration.file_watcher.new(reload_files, reload_directories) do

@@ -59,14 +59,7 @@ class Feature
     # TODO: remove the `default_enabled:` and read it from the `defintion_yaml`
     # check: https://gitlab.com/gitlab-org/gitlab/-/issues/30228
     def enabled?(key, thing = nil, type: :development, default_enabled: false)
-      if check_feature_flags_definition?
-        if thing && !thing.respond_to?(:flipper_id)
-          raise InvalidFeatureFlagError,
-            "The thing '#{thing.class.name}' for feature flag '#{key}' needs to include `FeatureGate` or implement `flipper_id`"
-        end
-
-        Feature::Definition.valid_usage!(key, type: type, default_enabled: default_enabled)
-      end
+      valid_usage!(key, thing, type: type, default_enabled: default_enabled)
 
       # During setup the database does not exist yet. So we haven't stored a value
       # for the feature yet and return the default.
@@ -145,6 +138,23 @@ class Feature
       return unless check_feature_flags_definition?
 
       Feature::Definition.register_hot_reloader!
+    end
+
+    def valid_usage!(key, thing, type:, default_enabled:)
+      return unless check_feature_flags_definition?
+
+      if thing && !thing.respond_to?(:flipper_id)
+        raise InvalidFeatureFlagError,
+          "The thing '#{thing.class.name}' for feature flag '#{key}' needs to include `FeatureGate` or implement `flipper_id`"
+      end
+
+      Feature::Definition.valid_usage!(key, type: type, default_enabled: default_enabled)
+    end
+
+    def require_absence!(key, message: nil)
+      return unless check_feature_flags_definition?
+
+      Feature::Definition.require_absence!(key, message: message)
     end
 
     private

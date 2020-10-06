@@ -374,8 +374,10 @@ class License < ApplicationRecord
     @features ||= (self.class.features_for_plan(plan) + features_from_add_ons).to_set
   end
 
-  def feature_available?(feature)
+  def feature_available?(feature, skip_validation: false)
     return false if trial? && expired?
+
+    Feature.require_absence!(feature, message: 'Use `beta_feature_available?`') unless skip_validation
 
     features.include?(feature)
   end
@@ -386,7 +388,7 @@ class License < ApplicationRecord
   # - To check a licensed feature in conjuction with a feature flag of that same name
   # - Decide if feature flag is enabled or disabled by default
   def beta_feature_available?(feature, default_enabled: false)
-    feature_available?(feature) &&
+    feature_available?(feature, skip_validation: true) &&
       ::Feature.enabled?(feature, type: :licensed, default_enabled: default_enabled)
   end
 
