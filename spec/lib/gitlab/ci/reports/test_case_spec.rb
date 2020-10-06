@@ -14,6 +14,7 @@ RSpec.describe Gitlab::Ci::Reports::TestCase do
         it 'initializes an instance' do
           expect { test_case }.not_to raise_error
 
+          expect(test_case.suite_name).to eq('rspec')
           expect(test_case.name).to eq('test-1')
           expect(test_case.classname).to eq('trace')
           expect(test_case.file).to eq('spec/trace_spec.rb')
@@ -31,6 +32,7 @@ RSpec.describe Gitlab::Ci::Reports::TestCase do
         it 'initializes an instance' do
           expect { test_case }.not_to raise_error
 
+          expect(test_case.suite_name).to eq('rspec')
           expect(test_case.name).to eq('test-1')
           expect(test_case.classname).to eq('trace')
           expect(test_case.file).to eq('spec/trace_spec.rb')
@@ -51,6 +53,10 @@ RSpec.describe Gitlab::Ci::Reports::TestCase do
 
         expect { test_case }.to raise_error(KeyError)
       end
+    end
+
+    context 'when suite_name is missing' do
+      it_behaves_like 'param is missing', :suite_name
     end
 
     context 'when classname is missing' do
