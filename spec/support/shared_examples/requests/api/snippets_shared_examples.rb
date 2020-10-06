@@ -16,6 +16,12 @@ RSpec.shared_examples 'raw snippet files' do
     end
   end
 
+  context 'with no user' do
+    let(:user) { nil }
+
+    it_behaves_like 'not found'
+  end
+
   context 'when not authorized' do
     let(:user) { unauthorized_user }
 
@@ -262,4 +268,77 @@ RSpec.shared_examples 'snippet access with different users' do
       public_snippet
     end
   end
+end
+
+RSpec.shared_examples 'expected response status' do
+  it 'returns the correct response' do
+    get api(path, user)
+
+    expect(response).to have_gitlab_http_status(status)
+  end
+end
+
+RSpec.shared_examples 'unauthenticated project snippet access' do
+  using RSpec::Parameterized::TableSyntax
+
+  let(:user) { nil }
+
+  where(:project_visibility, :snippet_visibility, :status) do
+    :public   | :public   | :ok
+    :public   | :private  | :not_found
+    :public   | :internal | :not_found
+    :internal | :public   | :not_found
+    :private  | :public   | :not_found
+  end
+
+  with_them do
+    it_behaves_like 'expected response status'
+  end
+end
+
+RSpec.shared_examples 'non-member project snippet access' do
+  using RSpec::Parameterized::TableSyntax
+
+  where(:project_visibility, :snippet_visibility, :status) do
+    :public   | :public   | :ok
+    :public   | :internal | :ok
+    :internal | :public   | :ok
+    :public   | :private  | :not_found
+    :private  | :public   | :not_found
+  end
+
+  with_them do
+    it_behaves_like 'expected response status'
+  end
+end
+
+RSpec.shared_examples 'member project snippet access' do
+  using RSpec::Parameterized::TableSyntax
+
+  before do
+    project.add_guest(user)
+  end
+
+  where(:project_visibility, :snippet_visibility, :status) do
+    :public   | :public   | :ok
+    :public   | :internal | :ok
+    :internal | :public   | :ok
+    :public   | :private  | :ok
+    :private  | :public   | :ok
+  end
+
+  with_them do
+    it_behaves_like 'expected response status'
+  end
+end
+
+RSpec.shared_examples 'project snippet access levels' do
+  let(:project) { create(:project, project_visibility) }
+  let(:snippet) { create(:project_snippet, snippet_visibility, project: project) }
+
+  it_behaves_like 'unauthenticated project snippet access'
+
+  it_behaves_like 'non-member project snippet access'
+
+  it_behaves_like 'member project snippet access'
 end
