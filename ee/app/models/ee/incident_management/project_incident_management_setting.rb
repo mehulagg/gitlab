@@ -8,7 +8,7 @@ module EE
       prepended do
         validates :sla_timer_minutes,
           presence: true,
-          numericality: { greater_than_or_equal_to: 15 },
+          numericality: { greater_than_or_equal_to: 15, less_than_or_equal_to: 1.year },
           if: :sla_timer
       end
     end
