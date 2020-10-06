@@ -70,10 +70,12 @@ namespace :gitlab do
       no_database = !ActiveRecord::Base.connection.schema_migration.table_exists?
       needs_migrations = ActiveRecord::Base.connection.migration_context.needs_migration?
 
-      puts "no_database: #{no_database} -- needs_migrations: #{needs_migrations}"
+      #puts "no_database: #{no_database} -- needs_migrations: #{needs_migrations}"
+      puts "table_exists? returns #{ActiveRecord::Base.connection.schema_migration.table_exists?}"
+      puts "needs_migration? returns #{ActiveRecord::Base.connection.migration_context.needs_migration?}"
       if no_database || needs_migrations
         Rake::Task['gitlab:db:configure'].invoke
-        puts "changed"
+        #puts "changed"
       end
     end
 

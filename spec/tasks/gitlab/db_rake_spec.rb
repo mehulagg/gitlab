@@ -99,20 +99,26 @@ RSpec.describe 'gitlab:db namespace rake task' do
   end
 
   describe 'unattended' do
-    it 'changes occur when the database is uninitialized' do
+    it 'changes occur when the database is uninitialized - false false' do
       allow(Rake::Task['gitlab:db:configure']).to receive(:invoke).and_return(true)
+      allow(ActiveRecord::Base.connection).to receive(:tables).and_return(%w[table1 table2])
       # return no_database true
-      allow(ActiveRecord::Base.connection.schema_migration).to receive(:table_exists?).and_return(false)
+      allow_any_instance_of(ActiveRecord::SchemaMigration).to receive(:table_exists?).and_return(false)
+      #allow_any_instance_of(ActiveRecord).to receive(:table_exists?).and_return(false)
       # returns needs_migration false
-      allow(ActiveRecord::Base.connection.migration_context).to receive(:needs_migration?).and_return(false)
-      expect { run_rake_task('gitlab:db:unattended') }.to output("changed\n").to_stdout
+      allow_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(false)
+      #expect { run_rake_task('gitlab:db:unattended') }.to output("changed\n").to_stdout
+      expect { run_rake_task('gitlab:db:unattended') }. to output("table_exists? returns false\nneeds_migration? returns false\n").to_stdout
     end
 
-    it 'changes occur when the database has migrations to run' do
+    it 'changes occur when the database has migrations to run - true true' do
+      allow(ActiveRecord::Base.connection).to receive(:tables).and_return(%w[table1 table2])
       allow(Rake::Task['gitlab:db:configure']).to receive(:invoke).and_return(true)
-      allow(ActiveRecord::Base.connection.schema_migration).to receive(:table_exists?).and_return(true)
-      allow(ActiveRecord::Base.connection.migration_context).to receive(:needs_migration?).and_return(true)
-      expect { run_rake_task('gitlab:db:unattended') }.to output('changed\n').to_stdout
+      allow_any_instance_of(ActiveRecord::SchemaMigration).to receive(:table_exists?).and_return(true)
+      #allow_any_instance_of(ActiveRecord).to receive(:table_exists?).and_return(true)
+      allow_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(true)
+      #expect { run_rake_task('gitlab:db:unattended') }.to output('changed\n').to_stdout
+      expect { run_rake_task('gitlab:db:unattended') }. to output("table_exists? returns true\nneeds_migration? returns true\n").to_stdout
     end
   end
 
