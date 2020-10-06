@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import PathLastCommitQuery from 'shared_queries/repository/path_last_commit.query.graphql';
 import { escapeFileUrl, joinPaths, webIDEUrl } from '../lib/utils/url_utility';
 import createRouter from './router';
 import App from './components/app.vue';
@@ -12,7 +13,6 @@ import { setTitle } from './utils/title';
 import { updateFormAction } from './utils/dom';
 import { convertObjectPropsToCamelCase, parseBoolean } from '../lib/utils/common_utils';
 import { __ } from '../locale';
-import PathLastCommitQuery from './queries/path_last_commit.query.graphql';
 
 export default function setupVueRepositoryList() {
   const el = document.getElementById('js-tree-list');

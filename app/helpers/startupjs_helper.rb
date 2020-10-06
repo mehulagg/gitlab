@@ -7,7 +7,7 @@ module StartupjsHelper
 
   def add_page_startup_graphql_call(query, variables = {})
     @graphql_startup_calls ||= []
-    file_location = File.join(Rails.root, "app/queries/#{query}.query.graphql")
+    file_location = File.join(Rails.root, "app/graphql/queries/#{query}.query.graphql")
 
     return unless File.exists?(file_location)
 

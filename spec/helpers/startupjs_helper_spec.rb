@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe StartupjsHelper do
   describe '#page_startup_graphql_calls' do
-    let(:query_location) { 'repository/queries/path_last_commit' }
+    let(:query_location) { 'repository/path_last_commit' }
     let(:query_content) do
-      File.read(File.join(Rails.root, 'app/assets/javascripts', "#{query_location}.query.graphql"))
+      File.read(File.join(Rails.root, 'app/graphql/queries', "#{query_location}.query.graphql"))
     end
 
     it 'returns an array containing GraphQL Page Startup Calls' do
