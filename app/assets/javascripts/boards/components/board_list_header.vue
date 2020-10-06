@@ -9,10 +9,8 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import isWipLimitsOn from 'ee_else_ce/boards/mixins/is_wip_limits';
 import { n__, s__ } from '~/locale';
 import AccessorUtilities from '../../lib/utils/accessor';
-import BoardDelete from './board_delete';
 import IssueCount from './issue_count.vue';
 import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
@@ -22,7 +20,6 @@ import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   components: {
-    BoardDelete,
     GlButtonGroup,
     GlButton,
     GlLabel,
@@ -34,7 +31,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [isWipLimitsOn, glFeatureFlagMixin()],
+  mixins: [glFeatureFlagMixin()],
   props: {
     list: {
       type: Object,
@@ -44,11 +41,6 @@ export default {
     disabled: {
       type: Boolean,
       required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     isSwimlanesHeader: {
       type: Boolean,
@@ -114,10 +106,7 @@ export default {
     },
     isSettingsShown() {
       return (
-        this.listType !== ListType.backlog &&
-        this.showListHeaderButton &&
-        this.list.isExpanded &&
-        this.isWipLimitsOn
+        this.listType !== ListType.backlog && this.showListHeaderButton && this.list.isExpanded
       );
     },
     showBoardListAndBoardInfo() {
@@ -279,22 +268,6 @@ export default {
         </div>
       </gl-tooltip>
 
-      <board-delete
-        v-if="canAdminList && !list.preset && list.id"
-        :list="list"
-        inline-template="true"
-      >
-        <gl-button
-          v-gl-tooltip.hover.bottom
-          :class="{ 'gl-display-none': !list.isExpanded }"
-          :aria-label="__('Delete list')"
-          class="board-delete no-drag gl-pr-0 gl-shadow-none! gl-mr-3"
-          :title="__('Delete list')"
-          icon="remove"
-          size="small"
-          @click.stop="deleteBoard"
-        />
-      </board-delete>
       <div
         v-if="showBoardListAndBoardInfo"
         class="issue-count-badge gl-display-inline-flex gl-pr-0 no-drag text-secondary"
