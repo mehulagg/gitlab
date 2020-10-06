@@ -64,6 +64,15 @@ export function bytesToGiB(number) {
 }
 
 /**
+ *
+ * @param {Number} number MiB
+ * @return {Number} bytes
+ */
+export function MiBToBytes(number) {
+  return number * (BYTES_IN_KIB * BYTES_IN_KIB);
+}
+
+/**
  * Port of rails number_to_human_size
  * Formats the bytes in number into a more understandable
  * representation (e.g., giving it 1500 yields 1.5 KB).

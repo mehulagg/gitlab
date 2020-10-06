@@ -1,6 +1,6 @@
 <script>
 import { s__ } from '~/locale';
-import { numberToHumanSize } from '~/lib/utils/number_utils';
+import { numberToHumanSize, MiBToBytes } from '~/lib/utils/number_utils';
 
 export default {
   props: {

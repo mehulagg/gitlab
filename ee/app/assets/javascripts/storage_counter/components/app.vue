@@ -2,6 +2,7 @@
 import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
 import Project from './project.vue';
 import UsageGraph from './usage_graph.vue';
+import StorageInlineAlert from './storage_inline_alert.vue';
 import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
@@ -16,6 +17,7 @@ export default {
     GlIcon,
     UsageGraph,
     TemporaryStorageIncreaseModal,
+    StorageInlineAlert,
   },
   directives: {
     GlModalDirective,
@@ -54,15 +56,24 @@ export default {
        * For that reason we have to verify if `storageSize` is sent or
        * if we should render N/A
        */
-      update: data => ({
-        projects: data.namespace.projects.edges.map(({ node }) => node),
-        totalUsage:
-          data.namespace.rootStorageStatistics && data.namespace.rootStorageStatistics.storageSize
-            ? numberToHumanSize(data.namespace.rootStorageStatistics.storageSize)
-            : 'N/A',
-        rootStorageStatistics: data.namespace.rootStorageStatistics,
-        limit: data.namespace.storageSizeLimit,
-      }),
+      update: data => {
+        console.log({ data });
+        return {
+          projects: data.namespace.projects.edges.map(({ node }) => node),
+          totalUsage:
+            data.namespace.rootStorageStatistics && data.namespace.rootStorageStatistics.storageSize
+              ? numberToHumanSize(data.namespace.rootStorageStatistics.storageSize)
+              : 'N/A',
+          rootStorageStatistics: data.namespace.rootStorageStatistics,
+          limit: data.namespace.storageSizeLimit,
+          containsLockedProjects: data.namespace.containsLockedProjects,
+          lockedProjectCount: data.namespace.lockedProjectCount,
+          totalRepositorySize: data.namespace.totalRepositorySize,
+          totalRepositorySizeExcess: data.namespace.totalRepositorySizeExcess,
+          additionalPurchasedStorageSize: data.namespace.additionalPurchasedStorageSize,
+          repositoryFreeSizeLimit: 10000000000,
+        };
+      },
     },
   },
   data() {
@@ -85,6 +96,15 @@ export default {
 </script>
 <template>
   <div>
+    <storage-inline-alert
+      v-if="$apollo.loading === false"
+      :contains-locked-projects="namespace.containsLockedProjects"
+      :locked-project-count="namespace.lockedProjectCount"
+      :total-repository-size-excess="namespace.totalRepositorySizeExcess"
+      :total-repository-size="namespace.totalRepositorySize"
+      :additional-purchased-storage-size="namespace.additionalPurchasedStorageSize"
+      :repository-free-size-limit="namespace.repositoryFreeSizeLimit"
+    />
     <div class="pipeline-quota container-fluid py-4 px-2 m-0">
       <div class="row py-0 d-flex align-items-center">
         <div class="col-lg-6">
