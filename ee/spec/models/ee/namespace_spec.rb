@@ -1440,21 +1440,7 @@ RSpec.describe Namespace do
 
     context 'projects with a variety of repository sizes and limits' do
       before_all do
-        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
-        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil)
-        create_project(repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil)
-        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil)
-        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil)
-
-        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
-        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0)
-        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
-
-        create_project(repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400)
-        create_project(repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400)
-        create_project(repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400)
-        create_project(repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400)
-        create_project(repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300)
+        create_storage_excess_example_projects
       end
 
       context 'when namespace-level repository_size_limit is not set' do
@@ -1506,21 +1492,7 @@ RSpec.describe Namespace do
 
     context 'projects with a variety of repository sizes and limits' do
       before_all do
-        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil)
-        create_project(repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil)
-        create_project(repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil)
-        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil)
-        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil)
-
-        create_project(repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0)
-        create_project(repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0)
-        create_project(repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0)
-
-        create_project(repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400)
-        create_project(repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400)
-        create_project(repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400)
-        create_project(repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400)
-        create_project(repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300)
+        create_storage_excess_example_projects
       end
 
       context 'when namespace-level repository_size_limit is not set' do
@@ -1802,5 +1774,23 @@ RSpec.describe Namespace do
     create(:project, namespace: namespace, repository_size_limit: repository_size_limit).tap do |project|
       create(:project_statistics, project: project, repository_size: repository_size, lfs_objects_size: lfs_objects_size)
     end
+  end
+
+  def create_storage_excess_example_projects
+    [
+      { repository_size: 100, lfs_objects_size: 0, repository_size_limit: nil },
+      { repository_size: 150, lfs_objects_size: 0, repository_size_limit: nil },
+      { repository_size: 140, lfs_objects_size: 10, repository_size_limit: nil },
+      { repository_size: 150, lfs_objects_size: 10, repository_size_limit: nil },
+      { repository_size: 200, lfs_objects_size: 100, repository_size_limit: nil },
+      { repository_size: 100, lfs_objects_size: 0, repository_size_limit: 0 },
+      { repository_size: 150, lfs_objects_size: 10, repository_size_limit: 0 },
+      { repository_size: 200, lfs_objects_size: 100, repository_size_limit: 0 },
+      { repository_size: 300, lfs_objects_size: 0, repository_size_limit: 400 },
+      { repository_size: 400, lfs_objects_size: 0, repository_size_limit: 400 },
+      { repository_size: 300, lfs_objects_size: 100, repository_size_limit: 400 },
+      { repository_size: 400, lfs_objects_size: 100, repository_size_limit: 400 },
+      { repository_size: 500, lfs_objects_size: 100, repository_size_limit: 300 }
+    ].map { |attrs| create_project(**attrs) }
   end
 end

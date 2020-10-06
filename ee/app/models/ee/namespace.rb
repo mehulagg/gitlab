@@ -217,12 +217,9 @@ module EE
 
     def total_repository_size
       strong_memoize(:total_repository_size) do
-        total_repo_size_arel = ::ProjectStatistics.arel_table[:repository_size] + ::ProjectStatistics.arel_table[:lfs_objects_size]
-        pick_arel = Arel::Nodes::NamedFunction.new('SUM', [total_repo_size_arel])
-
         all_projects
           .joins(:statistics)
-          .pick(pick_arel) || 0
+          .pluck(total_repository_size_arel).first || 0 # rubocop:disable Rails/Pick
       end
     end
 
@@ -448,16 +445,20 @@ module EE
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)
-      total_repo_size_arel = ::ProjectStatistics.arel_table[:repository_size] + ::ProjectStatistics.arel_table[:lfs_objects_size]
-      select_arel = Arel::Nodes::NamedFunction.new('SUM', [total_repo_size_arel - repository_size_limit])
-
       relation = if project_level
                    all_projects.with_total_repository_size_greater_than_project_limit
                  else
                    all_projects.with_total_repository_size_greater_than(repository_size_limit)
                  end
 
-      relation.pluck(select_arel).first || 0 # rubocop:disable Rails/Pick
+      relation.pluck(total_repository_size_arel(repository_size_limit)).first || 0 # rubocop:disable Rails/Pick
+    end
+
+    def total_repository_size_arel(limit = nil)
+      arel_table = ::ProjectStatistics.arel_table
+      values = arel_table[:repository_size] + arel_table[:lfs_objects_size]
+      values -= limit if limit
+      values.sum
     end
   end
 end

@@ -157,14 +157,18 @@ module EE
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
 
       scope :with_total_repository_size_greater_than_project_limit, -> do
+        statistics = ::ProjectStatistics.arel_table
+
         joins(:statistics)
           .where.not(repository_size_limit: 0)
-          .where('(project_statistics.repository_size + project_statistics.lfs_objects_size) > projects.repository_size_limit')
+          .where((statistics[:repository_size] + statistics[:lfs_objects_size]).gt(arel_table[:repository_size_limit]))
       end
       scope :with_total_repository_size_greater_than, -> (repository_limit) do
+        statistics = ::ProjectStatistics.arel_table
+
         joins(:statistics)
           .where(repository_size_limit: nil)
-          .where('(project_statistics.repository_size + project_statistics.lfs_objects_size) > ?', repository_limit)
+          .where((statistics[:repository_size] + statistics[:lfs_objects_size]).gt(repository_limit))
       end
 
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
