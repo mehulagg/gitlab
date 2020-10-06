@@ -1,10 +1,10 @@
 <script>
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
   },
   props: {
@@ -36,21 +36,16 @@ export default {
 </script>
 
 <template>
-  <gl-deprecated-dropdown
+  <gl-dropdown
     v-if="selectedButton"
     :disabled="disabled"
-    no-caret
-    right
-    split
     variant="success"
+    category="secondary"
+    toggle-class="btn-success-secondary"
     :text="selectedButton.name"
     @click="handleClick"
   >
-    <gl-deprecated-dropdown-item
-      v-for="button in buttons"
-      :key="button.action"
-      @click="setButton(button)"
-    >
+    <gl-dropdown-item v-for="button in buttons" :key="button.action" @click="setButton(button)">
       <div class="media">
         <div>
           <gl-icon v-if="selectedButton === button" class="gl-mr-2" name="mobile-issue-close" />
@@ -61,6 +56,6 @@ export default {
           <span>{{ button.tagline }}</span>
         </div>
       </div>
-    </gl-deprecated-dropdown-item>
-  </gl-deprecated-dropdown>
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>
