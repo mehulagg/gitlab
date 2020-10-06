@@ -320,7 +320,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `controller_actions`: controller actions we want to track.
    - `name`: event name.
    - `feature`: feature name, all metrics we track should be under feature flag.
-   - `feature_default_enabled`: feature flag is disabled by default, set to `true` for it to be enabled by default.
+   - `feature_default_enabled`: set to `true` for it to be enabled by default.
 
    Example usage:
 
@@ -443,7 +443,9 @@ Recommendations:
 - If possible, data granularity should be a week. For example a key could be composed from the
   metric's name and week of the year, `2020-33-{metric_name}`.
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
-  adding new metrics.
+  adding new metrics. 
+    - Feature flags should be [default on](https://docs.gitlab.com/ee/development/documentation/feature_flags.html#criteria) 
+    before final release to ensure we receive data from self-managed instances.
 
 ##### Known events in usage data payload
 
