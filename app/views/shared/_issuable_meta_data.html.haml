@@ -19,6 +19,8 @@
     = sprite_icon('thumb-down', css_class: "gl-vertical-align-middle")
     = downvotes
 
+= render_if_exists 'shared/issuable/blocking_issues_count', issuable: issuable
+
 %li.issuable-comments.gl-display-none.gl-display-sm-block
   = link_to issuable_path, class: ['has-tooltip', ('no-comments' if note_count == 0)], title: _('Comments') do
     = sprite_icon('comments', css_class: 'gl-vertical-align-text-bottom')
