@@ -7,42 +7,50 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Cluster Cost Management
 
 NOTE: **Note:**
-GitLab has basic support for cluster cost management. 
+GitLab has basic support for cluster cost management.
 
-Cluster cost management provides insights into cluster resource usage. 
+Cluster cost management provides insights into cluster resource usage. GitLab provides an example
+[`kubecost-cost-model`](https://gitlab.com/gitlab-examples/kubecost-cost-model/)
+project that uses GitLab's Prometheus integration and
+[Kubecost's `cost-model`](https://github.com/kubecost/cost-model).
 
-## Getting Started
+## Configure cluster cost management
 
-For getting started, we provide an example project that uses GitLab's Prometheus integration and [kubecost's `cost-model`](https://github.com/kubecost/cost-model).
+To get started with cluster cost management:
 
-### Clone our example repository
+1. Clone the [`kubecost-cost-model`](https://gitlab.com/gitlab-examples/kubecost-cost-model/)
+   example repository, which contains minor modifications to the upstream kubecost `cost-model`:
 
-Clone our [example repository](https://gitlab.com/gitlab-examples/kubecost-cost-model/). This repository contains minor modifications to the upstream kubecost `cost-model`. Namely, 
+   - Configures your Prometheus endpoint to the GitLab-managed Prometheus. You may
+     need to change this value if you use a non-managed Prometheus. See the next section for details.
+   - Adds the necessary annotations to the deployment manifest to be scraped by
+     GitLab-managed Prometheus.
+   - Changes the Google Pricing API access key to GitLab's access key.
+   - Contains definitions for a custom GitLab Metrics dashboard to show the cost insights.
+1. Connect GitLab with Prometheus, depending on your configuration:
 
-- it configures your Prometheus endpoint to the GitLab Managed Prometheus, you might need to change this if you use a non-managed Prometheus; See the next section for details. 
-- adds the necessary annotations to the deployment manifest to be scraped by GitLab Managed Prometheus
-- it changes the Google Pricing API access key to GitLab's access key.
-- it contains definitions for a custom GitLab Metrics dashboard to show the cost insights.
+   - *If Prometheus is already configured,* navigate to **Settings > Integrations > Prometheus**
+     to provide the API endpoint of your Prometheus server.
+   - *For GitLab-managed Prometheus,* navigate to your cluster's **Details** page,
+     select the **Applications** tab, and install Prometheus. The integration is
+     auto-configured for you.
 
-### Setting up Prometheus integration
+1. Set up the Prometheus integration on the cloned example project.
+1. Add the Kubecost `cost-model` to your cluster:
+   - *For non-managed clusters*, deploy it with GitLab CI/CD.
+   - *To deploy it manually*, use the following commands:
 
-GitLab provides several ways to connect GitLab with Prometheus. If you already have Prometheus set up, it can be added to GitLab under a project's settings. Navigate to Settings / Integrations / Prometheus to provide the API endpoint of your Prometheus server. If you'd prefer to use GitLab Managed Prometheus, navigate to your cluster's details page. You can install Prometheus under the "Applications" tab. This will set up the previously mentioned integration being Auto configured.
+     ```shell
+     kubectl create namespace cost-model
+     kubectl apply -f kubernetes/ --namespace cost-model
+     ```
 
-The Prometheus integration should be set up on the cloned example project.
+To access the cost insights, navigate to **Operations > Metrics** and select
+the "default_costs.yml" dashboard. You can [customize](#customize-the-cost-dashboard)
+this dashboard.
 
-### Deploying `cost-model`
+### Customize the cost dashboard
 
-The kubecost `cost-model` should be added to your cluster either manually or using GitLab CI/CD if you have a non-managed cluster. The following description is for manual deployment.
-
-```
-kubectl create namespace cost-model
-kubectl apply -f kubernetes/ --namespace cost-model
-```
-
-## Accessing cost insights
-
-Navigate to Operations / Metrics and select the "default_costs.yml" dashboard.
-
-### Customizing the Cost Dashboard
-
-The cost dashboard can be customized by editing the `.gitlab/dashboards/default_costs.yml` file or creating similar dashboard configuration files. You can read more on [customizing dashboards in our documentation](/ee/operations/metrics/dashboards/).
+You can customize the cost dashboard by editing the `.gitlab/dashboards/default_costs.yml`
+file or creating similar dashboard configuration files. To learn more, read about
+[customizing dashboards in our documentation](/ee/operations/metrics/dashboards/).
