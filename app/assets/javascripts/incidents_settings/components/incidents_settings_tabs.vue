@@ -2,7 +2,6 @@
 import { GlButton, GlTabs, GlTab } from '@gitlab/ui';
 import AlertsSettingsForm from './alerts_form.vue';
 import PagerDutySettingsForm from './pagerduty_form.vue';
-import ServiceLevelAgreementForm from './service_level_agreement_form.vue';
 import { INTEGRATION_TABS_CONFIG, I18N_INTEGRATION_TABS } from '../constants';
 
 export default {
@@ -12,7 +11,8 @@ export default {
     GlTab,
     AlertsSettingsForm,
     PagerDutySettingsForm,
-    ServiceLevelAgreementForm,
+    ServiceLevelAgreementForm: () =>
+      import('ee_component/incidents_settings/components/service_level_agreement_form.vue'),
   },
   tabs: INTEGRATION_TABS_CONFIG,
   i18n: I18N_INTEGRATION_TABS,
@@ -47,7 +47,7 @@ export default {
         >
           <component :is="tab.component" class="gl-pt-3" :data-testid="`${tab.component}-tab`" />
         </gl-tab>
-        <slot name="additional-tabs"></slot>
+        <service-level-agreement-form />
       </gl-tabs>
     </div>
   </section>
