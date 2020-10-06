@@ -185,6 +185,12 @@ RSpec.describe Issues::UpdateService do
 
             subject
           end
+
+          it 'tracks UsageData for added to epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_added_to_epic_action).with(author: user)
+
+            subject
+          end
         end
 
         context 'when issue belongs to another epic' do
@@ -204,6 +210,12 @@ RSpec.describe Issues::UpdateService do
               .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
               .and_return(link_sevice)
             expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
+
+          it 'tracks UsageData for changed epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_changed_epic_action).with(author: user)
 
             subject
           end
@@ -229,6 +241,12 @@ RSpec.describe Issues::UpdateService do
           it 'does not do anything' do
             expect { subject }.not_to change { issue.reload.epic }
           end
+
+          it 'does not send usage data' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).not_to receive(:track_issue_removed_from_epic_action)
+
+            subject
+          end
         end
 
         context 'when issue belongs to an epic' do
@@ -243,6 +261,12 @@ RSpec.describe Issues::UpdateService do
             expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
               .and_return(link_sevice)
             expect(link_sevice).to receive(:execute).and_return({ status: :success })
+
+            subject
+          end
+
+          it 'tracks UsageData for removed from epic action' do
+            expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter).to receive(:track_issue_removed_from_epic_action).with(author: user)
 
             subject
           end
