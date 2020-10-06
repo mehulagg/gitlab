@@ -24,6 +24,9 @@ module Gitlab
       ISSUE_MARKED_AS_DUPLICATE = 'g_project_management_issue_marked_as_duplicate'
       ISSUE_LOCKED = 'g_project_management_issue_locked'
       ISSUE_UNLOCKED = 'g_project_management_issue_unlocked'
+      ISSUE_DUE_DATE_CHANGED = 'g_project_management_issue_due_date_changed'
+      ISSUE_TIME_ESTIMATE_CHANGED = 'g_project_management_issue_time_estimate_changed'
+      ISSUE_TIME_SPENT_CHANGED = 'g_project_management_issue_time_spent_changed'
 
       class << self
         def track_issue_created_action(author:, time: Time.zone.now)
@@ -100,6 +103,18 @@ module Gitlab
 
         def track_issue_unlocked_action(author:, time: Time.zone.now)
           track_unique_action(ISSUE_UNLOCKED, author, time)
+        end
+
+        def track_issue_due_date_changed_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_DUE_DATE_CHANGED, author, time)
+        end
+
+        def track_issue_time_estimate_changed_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_TIME_ESTIMATE_CHANGED, author, time)
+        end
+
+        def track_issue_time_spent_changed_action(author:, time: Time.zone.now)
+          track_unique_action(ISSUE_TIME_SPENT_CHANGED, author, time)
         end
 
         private
