@@ -6,12 +6,6 @@ class Groups::Analytics::ApplicationController < ApplicationController
 
   private
 
-  def self.check_feature_flag(flag, *args)
-    before_action(*args) do
-      render_404 unless Gitlab::Analytics.feature_enabled?(flag)
-    end
-  end
-
   def self.increment_usage_counter(counter_klass, counter, *args)
     before_action(*args) { counter_klass.count(counter) }
   end
@@ -36,5 +30,5 @@ class Groups::Analytics::ApplicationController < ApplicationController
     @project = find_routable!(@group.projects, params['project_id'])
   end
 
-  private_class_method :check_feature_flag, :increment_usage_counter
+  private_class_method :increment_usage_counter
 end

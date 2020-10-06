@@ -49,6 +49,18 @@ module QA
           element :diffs_tab
         end
 
+        view 'app/assets/javascripts/diffs/components/compare_dropdown_layout.vue' do
+          element :dropdown_content
+        end
+
+        view 'app/assets/javascripts/diffs/components/compare_versions.vue' do
+          element :target_version_dropdown
+        end
+
+        view 'app/assets/javascripts/diffs/components/diff_file_header.vue' do
+          element :file_name_content
+        end
+
         view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
           element :new_diff_line
         end
@@ -63,8 +75,6 @@ module QA
 
         view 'app/assets/javascripts/batch_comments/components/review_bar.vue' do
           element :review_bar
-          element :discard_review
-          element :modal_delete_pending_comments
         end
 
         view 'app/assets/javascripts/notes/components/note_form.vue' do
@@ -79,46 +89,54 @@ module QA
         end
 
         def start_review
-          click_element :start_review_button
+          click_element(:start_review_button)
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
-          has_no_element? :start_review_button
+          has_no_element?(:start_review_button)
+        end
+
+        def click_target_version_dropdown
+          click_element(:target_version_dropdown)
         end
 
         def comment_now
-          click_element :comment_now_button
+          click_element(:comment_now_button)
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
-          has_no_element? :comment_now_button
+          has_no_element?(:comment_now_button)
+        end
+
+        def version_dropdown_content
+          find_element(:dropdown_content).text
         end
 
         def submit_pending_reviews
-          within_element :review_bar do
-            click_element :review_preview_toggle
-            click_element :submit_review
+          within_element(:review_bar) do
+            click_element(:review_preview_toggle)
+            click_element(:submit_review)
 
             # After clicking the button, wait for it to disappear
             # before moving on to the next part of the test
-            has_no_element? :submit_review
+            has_no_element?(:submit_review)
           end
         end
 
         def discard_pending_reviews
-          within_element :review_bar do
-            click_element :discard_review
+          within_element(:review_bar) do
+            click_element(:discard_review)
           end
-          click_element :modal_delete_pending_comments
+          click_element(:modal_delete_pending_comments)
         end
 
         def resolve_review_discussion
-          scroll_to_element :start_review_button
-          check_element :resolve_review_discussion_checkbox
+          scroll_to_element(:start_review_button)
+          check_element(:resolve_review_discussion_checkbox)
         end
 
         def unresolve_review_discussion
-          check_element :unresolve_review_discussion_checkbox
+          check_element(:unresolve_review_discussion_checkbox)
         end
 
         def add_comment_to_diff(text)
@@ -156,6 +174,10 @@ module QA
           has_no_text?('Fast-forward merge is not possible')
         end
 
+        def has_file?(file_name)
+          has_element?(:file_name_content, text: file_name)
+        end
+
         def has_merge_button?
           refresh
 
@@ -164,7 +186,7 @@ module QA
 
         def has_pipeline_status?(text)
           # Pipelines can be slow, so we wait a bit longer than the usual 10 seconds
-          has_element?(:merge_request_pipeline_info_content, text: text, wait: 30)
+          has_element?(:merge_request_pipeline_info_content, text: text, wait: 60)
         end
 
         def has_title?(title)
@@ -186,7 +208,7 @@ module QA
             !find_element(:squash_checkbox).disabled?
           end
 
-          click_element :squash_checkbox
+          click_element(:squash_checkbox)
         end
 
         def merge!
@@ -198,7 +220,7 @@ module QA
         end
 
         def merged?
-          has_element?(:merged_status_content, text: 'The changes were merged into', wait: 30)
+          has_element?(:merged_status_content, text: 'The changes were merged into', wait: 60)
         end
 
         # Check if the MR is able to be merged
@@ -231,7 +253,7 @@ module QA
             !find_element(:mr_rebase_button).disabled?
           end
 
-          click_element :mr_rebase_button
+          click_element(:mr_rebase_button)
 
           success = wait_until do
             has_text?('Fast-forward merge without a merge commit')
@@ -247,12 +269,12 @@ module QA
         end
 
         def view_email_patches
-          click_element :download_dropdown
+          click_element(:download_dropdown)
           visit_link_in_element(:download_email_patches)
         end
 
         def view_plain_diff
-          click_element :download_dropdown
+          click_element(:download_dropdown)
           visit_link_in_element(:download_plain_diff)
         end
 

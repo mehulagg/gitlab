@@ -17,21 +17,21 @@ full list of reference architectures, see
 
 | Service                                 | Nodes       | Configuration           | GCP             | AWS         | Azure    |
 |-----------------------------------------|-------------|-------------------------|-----------------|-------------|----------|
-| External load balancing node            | 1           | 4 vCPU, 3.6GB memory    | n1-highcpu-4    | c5.xlarge   | F4s v2   |
-| Consul                                  | 3           | 2 vCPU, 1.8GB memory    | n1-highcpu-2    | c5.large    | F2s v2   |
-| PostgreSQL                              | 3           | 8 vCPU, 30GB memory     | n1-standard-8   | m5.2xlarge  | D8s v3   |
-| PgBouncer                               | 3           | 2 vCPU, 1.8GB memory    | n1-highcpu-2    | c5.large    | F2s v2   |
-| Internal load balancing node            | 1           | 2 vCPU, 1.8GB memory    | n1-highcpu-2    | c5.large    | F2s v2   |
-| Redis - Cache                           | 3           | 4 vCPU, 15GB memory     | n1-standard-4   | m5.xlarge   | D4s v3   |
-| Redis - Queues / Shared State           | 3           | 4 vCPU, 15GB memory     | n1-standard-4   | m5.xlarge   | D4s v3   |
-| Redis Sentinel - Cache                  | 3           | 1 vCPU, 1.7GB memory    | g1-small        | t2.small    | B1MS     |
-| Redis Sentinel - Queues / Shared State  | 3           | 1 vCPU, 1.7GB memory    | g1-small        | t2.small    | B1MS     |
-| Gitaly                                  | 2 (minimum) | 32 vCPU, 120GB memory   | n1-standard-32  | m5.8xlarge  | D32s v3  |
-| Sidekiq                                 | 4           | 4 vCPU, 15GB memory     | n1-standard-4   | m5.xlarge   | D4s v3   |
-| GitLab Rails                            | 5           | 32 vCPU, 28.8GB memory  | n1-highcpu-32   | c5.9xlarge  | F32s v2  |
-| Monitoring node                         | 1           | 4 vCPU, 3.6GB memory    | n1-highcpu-4    | c5.xlarge   | F4s v2   |
-| Object Storage                          | n/a         | n/a                     | n/a             | n/a         | n/a      |
-| NFS Server                              | 1           | 4 vCPU, 3.6GB memory    | n1-highcpu-4    | c5.xlarge   | F4s v2   |
+| External load balancing node            | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
+| Consul                                  | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
+| PostgreSQL                              | 3           | 8 vCPU, 30 GB memory    | n1-standard-8   | m5.2xlarge  | D8s v3   |
+| PgBouncer                               | 3           | 2 vCPU, 1.8 GB memory   | n1-highcpu-2    | c5.large    | F2s v2   |
+| Internal load balancing node            | 1           | 4 vCPU, 3.6GB memory    | n1-highcpu-4    | c5.large    | F2s v2   |
+| Redis - Cache                           | 3           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
+| Redis - Queues / Shared State           | 3           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
+| Redis Sentinel - Cache                  | 3           | 1 vCPU, 1.7 GB memory   | g1-small        | t2.small    | B1MS     |
+| Redis Sentinel - Queues / Shared State  | 3           | 1 vCPU, 1.7 GB memory   | g1-small        | t2.small    | B1MS     |
+| Gitaly                                  | 2 (minimum) | 32 vCPU, 120 GB memory  | n1-standard-32  | m5.8xlarge  | D32s v3  |
+| Sidekiq                                 | 4           | 4 vCPU, 15 GB memory    | n1-standard-4   | m5.xlarge   | D4s v3   |
+| GitLab Rails                            | 5           | 32 vCPU, 28.8 GB memory | n1-highcpu-32   | c5.9xlarge  | F32s v2  |
+| Monitoring node                         | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
+| Object storage                          | n/a         | n/a                     | n/a             | n/a         | n/a      |
+| NFS server                              | 1           | 4 vCPU, 3.6 GB memory   | n1-highcpu-4    | c5.xlarge   | F4s v2   |
 
 The Google Cloud Platform (GCP) architectures were built and tested using the
 [Intel Xeon E5 v3 (Haswell)](https://cloud.google.com/compute/docs/cpu-platforms)
@@ -40,11 +40,10 @@ or higher, are required for your CPU or node counts. For more information, see
 our [Sysbench](https://github.com/akopytov/sysbench)-based
 [CPU benchmark](https://gitlab.com/gitlab-org/quality/performance/-/wikis/Reference-Architectures/GCP-CPU-Benchmarks).
 
-For data objects (such as LFS, Uploads, or Artifacts), an
-[object storage service](#configure-the-object-storage) is recommended instead
-of NFS where possible, due to better performance and availability. Since this
-doesn't require a node to be set up, *Object Storage* is noted as not
-applicable (n/a) in the previous table.
+Due to better performance and availability, for data objects (such as LFS,
+uploads, or artifacts), using an [object storage service](#configure-the-object-storage)
+is recommended instead of using NFS. Using an object storage service also
+doesn't require you to provision and maintain a node.
 
 ## Setup components
 
@@ -1839,7 +1838,7 @@ On each node perform the following:
 
    1. Specify the necessary NFS mounts in `/etc/fstab`.
       The exact contents of `/etc/fstab` will depend on how you chose
-      to configure your NFS server. See the [NFS documentation](../high_availability/nfs.md)
+      to configure your NFS server. See the [NFS documentation](../nfs.md)
       for examples and the various options.
 
    1. Create the shared directories. These may be different depending on your NFS
@@ -1880,7 +1879,7 @@ On each node perform the following:
 1. Optionally, from the Gitaly servers, confirm that Gitaly can perform callbacks to the internal API:
 
    ```shell
-   sudo /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml
+   sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml
    ```
 
 NOTE: **Note:**
@@ -2065,7 +2064,7 @@ advanced code search across your entire GitLab instance.
 are recommended over NFS wherever possible for improved performance. If you intend
 to use GitLab Pages, this currently [requires NFS](troubleshooting.md#gitlab-pages-requires-nfs).
 
-See how to [configure NFS](../high_availability/nfs.md).
+See how to [configure NFS](../nfs.md).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

@@ -1,0 +1,71 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe 'User searches for epics', :js do
+  let!(:user) { create(:user) }
+  let!(:group) { create(:group) }
+  let!(:epic1) { create(:epic, title: 'Foo', group: group) }
+  let!(:epic2) { create(:epic, :closed, :confidential, title: 'Bar', group: group) }
+
+  def search_for_epic(search)
+    fill_in('dashboard_search', with: search)
+    find('.btn-search').click
+    select_search_scope('Epics')
+  end
+
+  before do
+    stub_feature_flags(epics_search: true)
+    stub_licensed_features(epics: true)
+
+    group.add_maintainer(user)
+    sign_in(user)
+
+    visit(search_path(group_id: group.id))
+  end
+
+  include_examples 'top right search form'
+
+  it 'finds an epic' do
+    search_for_epic(epic1.title)
+
+    page.within('.results') do
+      expect(page).to have_link(epic1.title)
+      expect(page).not_to have_link(epic2.title)
+    end
+  end
+
+  it 'hides confidential icon for non-confidential epics' do
+    search_for_epic(epic1.title)
+
+    page.within('.results') do
+      expect(page).not_to have_css('[data-testid="eye-slash-icon"]')
+    end
+  end
+
+  it 'shows confidential icon for confidential epics' do
+    search_for_epic(epic2.title)
+
+    page.within('.results') do
+      expect(page).to have_css('[data-testid="eye-slash-icon"]')
+    end
+  end
+
+  it 'shows correct badge for open epics' do
+    search_for_epic(epic1.title)
+
+    page.within('.results') do
+      expect(page).to have_css('.badge-success')
+      expect(page).not_to have_css('.badge-info')
+    end
+  end
+
+  it 'shows correct badge for closed epics' do
+    search_for_epic(epic2.title)
+
+    page.within('.results') do
+      expect(page).not_to have_css('.badge-success')
+      expect(page).to have_css('.badge-info')
+    end
+  end
+end

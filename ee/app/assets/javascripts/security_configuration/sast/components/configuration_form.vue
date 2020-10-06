@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/browser';
 import { cloneDeep } from 'lodash';
 import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AnalyzerConfiguration from './analyzer_configuration.vue';
 import DynamicFields from './dynamic_fields.vue';
 import ExpandableSection from './expandable_section.vue';
@@ -24,7 +23,6 @@ export default {
     GlIcon,
     GlLink,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     createSastMergeRequestPath: {
       from: 'createSastMergeRequestPath',
@@ -54,18 +52,14 @@ export default {
     return {
       globalConfiguration: cloneDeep(this.sastCiConfiguration.global.nodes),
       pipelineConfiguration: cloneDeep(this.sastCiConfiguration.pipeline.nodes),
-      analyzersConfiguration: this.glFeatures.sastConfigurationUiAnalyzers
-        ? cloneDeep(this.sastCiConfiguration.analyzers.nodes)
-        : [],
+      analyzersConfiguration: cloneDeep(this.sastCiConfiguration.analyzers.nodes),
       hasSubmissionError: false,
       isSubmitting: false,
     };
   },
   computed: {
     shouldRenderAnalyzersSection() {
-      return Boolean(
-        this.glFeatures.sastConfigurationUiAnalyzers && this.analyzersConfiguration.length > 0,
-      );
+      return this.analyzersConfiguration.length > 0;
     },
   },
   methods: {
@@ -100,18 +94,11 @@ export default {
         });
     },
     getMutationConfiguration() {
-      const configuration = {
+      return {
         global: this.globalConfiguration.map(toSastCiConfigurationEntityInput),
         pipeline: this.pipelineConfiguration.map(toSastCiConfigurationEntityInput),
+        analyzers: this.analyzersConfiguration.map(toSastCiConfigurationAnalyzerEntityInput),
       };
-
-      if (this.glFeatures.sastConfigurationUiAnalyzers) {
-        configuration.analyzers = this.analyzersConfiguration.map(
-          toSastCiConfigurationAnalyzerEntityInput,
-        );
-      }
-
-      return configuration;
     },
     onAnalyzerChange(name, updatedAnalyzer) {
       const index = this.analyzersConfiguration.findIndex(analyzer => analyzer.name === name);

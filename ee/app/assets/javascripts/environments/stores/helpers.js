@@ -18,7 +18,6 @@ export const setDeployBoard = (oldEnvironmentState, environment) => {
         environment.rollout_status.status === 'found' ? environment.rollout_status : {},
       isLoadingDeployBoard: environment.rollout_status.status === 'loading',
       isEmptyDeployBoard: environment.rollout_status.status === 'not_found',
-      hasLegacyAppLabel: environment.rollout_status.has_legacy_app_label,
     };
   }
   return parsedEnvironment;

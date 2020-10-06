@@ -24,6 +24,7 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
         raw_metadata: 'I am a stringified json object',
         report_type: :sast,
         scanner: scanner,
+        scan: nil,
         severity: :high,
         uuid: 'cadf8cf0a8228fa92a0f4897a0314083bb38'
       }
@@ -169,6 +170,14 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
     end
 
     subject { finding.eql?(other_finding) }
+
+    context 'when the primary_identifier is nil' do
+      let(:identifier) { nil }
+
+      it 'does not raise an exception' do
+        expect { subject }.not_to raise_error
+      end
+    end
 
     context 'when the other finding has same `report_type`' do
       let(:report_type) { :sast }

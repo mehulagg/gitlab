@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { union } from 'lodash';
-import mutationsCE from '~/boards/stores/mutations';
+import mutationsCE, { addIssueToList, removeIssueFromList } from '~/boards/stores/mutations';
+import { moveIssueListHelper } from '~/boards/boards_util';
 import { s__ } from '~/locale';
 import * as mutationTypes from './mutation_types';
 
@@ -102,7 +103,31 @@ export default {
     state.epicsSwimlanesFetchInProgress = false;
   },
 
-  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, epics) => {
-    state.epics = epics;
+  [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
+    Vue.set(state, 'epics', union(state.epics || [], epics));
+    state.canAdminEpic = canAdminEpic;
+  },
+
+  [mutationTypes.RESET_EPICS]: state => {
+    Vue.set(state, 'epics', []);
+  },
+
+  [mutationTypes.MOVE_ISSUE]: (
+    state,
+    { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
+  ) => {
+    const fromList = state.boardLists.find(l => l.id === fromListId);
+    const toList = state.boardLists.find(l => l.id === toListId);
+
+    const issue = moveIssueListHelper(originalIssue, fromList, toList);
+
+    if (epicId === null) {
+      Vue.set(state.issues, issue.id, { ...issue, epic: null });
+    } else if (epicId !== undefined) {
+      Vue.set(state.issues, issue.id, { ...issue, epic: { id: epicId } });
+    }
+
+    removeIssueFromList({ state, listId: fromListId, issueId: issue.id });
+    addIssueToList({ state, listId: toListId, issueId: issue.id, moveBeforeId, moveAfterId });
   },
 };

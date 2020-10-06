@@ -31,8 +31,6 @@ module QA
             expect(banner).to have_secondary_read_only_banner
           end
 
-          expect(page).to have_content 'You are on a secondary, read-only Geo node'
-
           Page::Main::Menu.perform do |menu|
             menu.go_to_projects
           end

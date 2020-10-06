@@ -34,6 +34,8 @@ module EE
           end
         end
       end
+      has_many :approval_merge_request_rule_sources, through: :approval_rules
+      has_many :approval_project_rules, through: :approval_merge_request_rule_sources
       has_one :merge_train, inverse_of: :merge_request, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
       has_many :blocks_as_blocker,
@@ -52,23 +54,6 @@ module EE
       delegate :sha, to: :base_pipeline, prefix: :base_pipeline, allow_nil: true
       delegate :merge_requests_author_approval?, to: :target_project, allow_nil: true
       delegate :merge_requests_disable_committers_approval?, to: :target_project, allow_nil: true
-
-      scope :without_approvals, -> { left_outer_joins(:approvals).where(approvals: { id: nil }) }
-      scope :with_approvals, -> { joins(:approvals) }
-      scope :approved_by_users_with_ids, -> (*user_ids) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { id: user_ids })
-          .group(:id)
-          .having("COUNT(users.id) = ?", user_ids.size)
-      end
-      scope :approved_by_users_with_usernames, -> (*usernames) do
-        with_approvals
-          .merge(Approval.with_user)
-          .where(users: { username: usernames })
-          .group(:id)
-          .having("COUNT(users.id) = ?", usernames.size)
-      end
 
       accepts_nested_attributes_for :approval_rules, allow_destroy: true
 
@@ -89,10 +74,6 @@ module EE
     end
 
     class_methods do
-      def select_from_union(relations)
-        where(id: from_union(relations))
-      end
-
       # This is an ActiveRecord scope in CE
       def with_api_entity_associations
         super.preload(:blocking_merge_requests)
@@ -141,6 +122,10 @@ module EE
       project.feature_available?(:multiple_merge_request_assignees)
     end
 
+    def allows_multiple_reviewers?
+      project.feature_available?(:multiple_merge_request_reviewers)
+    end
+
     def visible_blocking_merge_requests(user)
       Ability.merge_requests_readable_by_user(blocking_merge_requests, user)
     end
@@ -164,7 +149,6 @@ module EE
     end
 
     def has_denied_policies?
-      return false if ::Feature.disabled?(:license_compliance_denies_mr, project, default_enabled: true)
       return false unless has_license_scanning_reports?
 
       return false if has_approved_license_check?

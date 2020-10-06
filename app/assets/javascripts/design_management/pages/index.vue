@@ -113,9 +113,7 @@ export default {
       return !this.isSaving && !this.hasDesigns;
     },
     isDesignCollectionCopying() {
-      return (
-        this.designCollection && ['PENDING', 'COPYING'].includes(this.designCollection.copyState)
-      );
+      return this.designCollection && this.designCollection.copyState === 'IN_PROGRESS';
     },
     designDropzoneWrapperClass() {
       return this.isDesignListEmpty
@@ -351,6 +349,7 @@ export default {
               button-category="secondary"
               button-class="gl-mr-3"
               button-size="small"
+              data-qa-selector="archive_button"
               :loading="loading"
               :has-selected-designs="hasSelectedDesigns"
               @deleteSelectedDesigns="mutate()"
@@ -369,11 +368,11 @@ export default {
       </gl-alert>
       <header
         v-else-if="isDesignCollectionCopying"
-        class="card gl-p-3"
+        class="card"
         data-testid="design-collection-is-copying"
       >
         <div class="card-header design-card-header border-bottom-0">
-          <div class="card-title gl-my-0 gl-h-7">
+          <div class="card-title gl-display-flex gl-align-items-center gl-my-0 gl-h-7">
             {{
               s__(
                 'DesignManagement|Your designs are being copied and are on their way… Please refresh to update.',
@@ -417,6 +416,8 @@ export default {
             :checked="isDesignSelected(design.filename)"
             type="checkbox"
             class="design-checkbox"
+            data-qa-selector="design_checkbox"
+            :data-qa-design="design.filename"
             @change="changeSelectedDesigns(design.filename)"
           />
         </li>
@@ -426,6 +427,7 @@ export default {
               :is-dragging-design="isDraggingDesign"
               :class="{ 'design-list-item design-list-item-new': !isDesignListEmpty }"
               :has-designs="hasDesigns"
+              data-qa-selector="design_dropzone_content"
               @change="onUploadDesign"
             />
           </li>

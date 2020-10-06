@@ -33,7 +33,7 @@ RSpec.describe EE::ServicesHelper do
     end
 
     context 'Jira service' do
-      let(:integration) { build(:jira_service, issues_enabled: true, project_key: 'FE') }
+      let(:integration) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE') }
 
       it 'includes Jira specific fields' do
         stub_licensed_features(jira_issues_integration: true)

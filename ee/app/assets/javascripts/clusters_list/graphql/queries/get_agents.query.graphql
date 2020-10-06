@@ -1,0 +1,22 @@
+query getAgents($defaultBranchName: String!, $projectPath: ID!) {
+  project(fullPath: $projectPath) {
+    clusterAgents {
+      nodes {
+        id
+        name
+      }
+    }
+
+    repository {
+      tree(path: ".gitlab/agents", ref: $defaultBranchName) {
+        trees {
+          nodes {
+            name
+            path
+            webPath
+          }
+        }
+      }
+    }
+  }
+}

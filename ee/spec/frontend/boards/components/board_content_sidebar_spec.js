@@ -17,6 +17,9 @@ describe('ee/BoardContentSidebar', () => {
         rootPath: '',
       },
       store,
+      stubs: {
+        'board-sidebar-epic-select': '<div></div>',
+      },
     });
   };
 

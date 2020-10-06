@@ -56,15 +56,6 @@ export default {
     chevronIcon() {
       return this.isExpanded ? 'chevron-down' : 'chevron-right';
     },
-    stateText() {
-      return this.isOpen ? __('Opened') : __('Closed');
-    },
-    epicIcon() {
-      return this.isOpen ? 'epic' : 'epic-closed';
-    },
-    stateIconClass() {
-      return this.isOpen ? 'gl-text-green-500' : 'gl-text-blue-500';
-    },
     issuesCount() {
       return this.lists.reduce(
         (total, list) => total + this.getIssuesByEpic(list.id, this.epic.id).length,
@@ -126,12 +117,6 @@ export default {
           data-testid="epic-lane-chevron"
           @click="toggleExpanded"
         />
-        <gl-icon
-          class="gl-mr-2 gl-flex-shrink-0"
-          :class="stateIconClass"
-          :name="epicIcon"
-          :aria-label="stateText"
-        />
         <h4
           ref="epicTitle"
           class="gl-mr-3 gl-font-weight-bold gl-font-base gl-white-space-nowrap gl-text-overflow-ellipsis gl-overflow-hidden"
@@ -161,7 +146,7 @@ export default {
         <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="isExpanded" class="gl-display-flex">
+    <div v-if="isExpanded" class="gl-display-flex" data-testid="board-epic-lane-issues">
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

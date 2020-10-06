@@ -1109,7 +1109,8 @@ RSpec.describe Ci::Build do
     let(:environment) { deployment.environment }
 
     before do
-      allow(Deployments::FinishedWorker).to receive(:perform_async)
+      allow(Deployments::LinkMergeRequestWorker).to receive(:perform_async)
+      allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
     end
 
     it 'has deployments record with created status' do
@@ -1129,7 +1130,8 @@ RSpec.describe Ci::Build do
 
     context 'when transits to success' do
       before do
-        allow(Deployments::SuccessWorker).to receive(:perform_async)
+        allow(Deployments::UpdateEnvironmentWorker).to receive(:perform_async)
+        allow(Deployments::ExecuteHooksWorker).to receive(:perform_async)
         build.success!
       end
 
@@ -2301,6 +2303,54 @@ RSpec.describe Ci::Build do
         end
 
         it { is_expected.to be_falsey }
+      end
+    end
+  end
+
+  describe '#has_expired_locked_archive_artifacts?' do
+    subject { build.has_expired_locked_archive_artifacts? }
+
+    context 'when build does not have artifacts' do
+      it { is_expected.to eq(nil) }
+    end
+
+    context 'when build has artifacts' do
+      before do
+        create(:ci_job_artifact, :archive, job: build)
+      end
+
+      context 'when artifacts are unlocked' do
+        before do
+          build.pipeline.unlocked!
+        end
+
+        it { is_expected.to eq(false) }
+      end
+
+      context 'when artifacts are locked' do
+        before do
+          build.pipeline.artifacts_locked!
+        end
+
+        context 'when artifacts do not expire' do
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when artifacts expire in the future' do
+          before do
+            build.update!(artifacts_expire_at: 1.day.from_now)
+          end
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'when artifacts expired in the past' do
+          before do
+            build.update!(artifacts_expire_at: 1.day.ago)
+          end
+
+          it { is_expected.to eq(true) }
+        end
       end
     end
   end
@@ -4650,6 +4700,26 @@ RSpec.describe Ci::Build do
       end
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#run_on_status_commit' do
+    it 'runs provided hook after status commit' do
+      action = spy('action')
+
+      build.run_on_status_commit { action.perform! }
+      build.success!
+
+      expect(action).to have_received(:perform!).once
+    end
+
+    it 'does not run hooks when status has not changed' do
+      action = spy('action')
+
+      build.run_on_status_commit { action.perform! }
+      build.save!
+
+      expect(action).not_to have_received(:perform!)
     end
   end
 end

@@ -435,6 +435,16 @@ Values for sorting alerts
 """
 enum AlertManagementAlertSort {
   """
+  Created at ascending order
+  """
+  CREATED_ASC
+
+  """
+  Created at descending order
+  """
+  CREATED_DESC
+
+  """
   Created time by ascending order
   """
   CREATED_TIME_ASC
@@ -495,6 +505,16 @@ enum AlertManagementAlertSort {
   STATUS_DESC
 
   """
+  Updated at ascending order
+  """
+  UPDATED_ASC
+
+  """
+  Updated at descending order
+  """
+  UPDATED_DESC
+
+  """
   Created time by ascending order
   """
   UPDATED_TIME_ASC
@@ -507,22 +527,22 @@ enum AlertManagementAlertSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 """
@@ -1035,7 +1055,7 @@ type Board {
     Returns the last _n_ elements from the list.
     """
     last: Int
-  ): EpicConnection
+  ): BoardEpicConnection
 
   """
   Whether or not backlog list is hidden.
@@ -1131,6 +1151,478 @@ type BoardEdge {
   The item at the end of the edge.
   """
   node: Board
+}
+
+"""
+Represents an epic on an issue board
+"""
+type BoardEpic implements CurrentUserTodos & Noteable {
+  """
+  Author of the epic
+  """
+  author: User!
+
+  """
+  Children (sub-epics) of the epic
+  """
+  children(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Filter epics by author
+    """
+    authorUsername: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    List items within a time frame where items.end_date is between startDate and
+    endDate parameters (startDate parameter must be present)
+    """
+    endDate: Time
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    IID of the epic, e.g., "1"
+    """
+    iid: ID
+
+    """
+    Filter epics by iid for autocomplete
+    """
+    iidStartsWith: String
+
+    """
+    List of IIDs of epics, e.g., [1, 2]
+    """
+    iids: [ID!]
+
+    """
+    Filter epics by labels
+    """
+    labelName: [String!]
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Filter epics by milestone title, computed from epic's issues
+    """
+    milestoneTitle: String
+
+    """
+    Search query for epic title or description
+    """
+    search: String
+
+    """
+    List epics by sort order
+    """
+    sort: EpicSort
+
+    """
+    List items within a time frame where items.start_date is between startDate
+    and endDate parameters (endDate parameter must be present)
+    """
+    startDate: Time
+
+    """
+    Filter epics by state
+    """
+    state: EpicState
+  ): EpicConnection
+
+  """
+  Timestamp of when the epic was closed
+  """
+  closedAt: Time
+
+  """
+  Indicates if the epic is confidential
+  """
+  confidential: Boolean
+
+  """
+  Timestamp of when the epic was created
+  """
+  createdAt: Time
+
+  """
+  Todos for the current user
+  """
+  currentUserTodos(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    State of the todos
+    """
+    state: TodoStateEnum
+  ): TodoConnection!
+
+  """
+  Number of open and closed descendant epics and issues
+  """
+  descendantCounts: EpicDescendantCount
+
+  """
+  Total weight of open and closed issues in the epic and its descendants
+  """
+  descendantWeightSum: EpicDescendantWeights
+
+  """
+  Description of the epic
+  """
+  description: String
+
+  """
+  All discussions on this noteable
+  """
+  discussions(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): DiscussionConnection!
+
+  """
+  Number of downvotes the epic has received
+  """
+  downvotes: Int!
+
+  """
+  Due date of the epic
+  """
+  dueDate: Time
+
+  """
+  Fixed due date of the epic
+  """
+  dueDateFixed: Time
+
+  """
+  Inherited due date of the epic from milestones
+  """
+  dueDateFromMilestones: Time
+
+  """
+  Indicates if the due date has been manually set
+  """
+  dueDateIsFixed: Boolean
+
+  """
+  Group to which the epic belongs
+  """
+  group: Group!
+
+  """
+  Indicates if the epic has children
+  """
+  hasChildren: Boolean!
+
+  """
+  Indicates if the epic has direct issues
+  """
+  hasIssues: Boolean!
+
+  """
+  Indicates if the epic has a parent epic
+  """
+  hasParent: Boolean!
+
+  """
+  Current health status of the epic
+  """
+  healthStatus: EpicHealthStatus
+
+  """
+  ID of the epic
+  """
+  id: ID!
+
+  """
+  Internal ID of the epic
+  """
+  iid: ID!
+
+  """
+  A list of issues associated with the epic
+  """
+  issues(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): EpicIssueConnection
+
+  """
+  Labels assigned to the epic
+  """
+  labels(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): LabelConnection
+
+  """
+  All notes on this noteable
+  """
+  notes(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): NoteConnection!
+
+  """
+  Parent epic of the epic
+  """
+  parent: Epic
+
+  """
+  List of participants for the epic
+  """
+  participants(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): UserConnection
+
+  """
+  Internal reference of the epic. Returned in shortened format by default
+  """
+  reference(
+    """
+    Indicates if the reference should be returned in full
+    """
+    full: Boolean = false
+  ): String!
+
+  """
+  URI path of the epic-issue relationship
+  """
+  relationPath: String
+
+  """
+  The relative position of the epic in the epic tree
+  """
+  relativePosition: Int
+
+  """
+  Start date of the epic
+  """
+  startDate: Time
+
+  """
+  Fixed start date of the epic
+  """
+  startDateFixed: Time
+
+  """
+  Inherited start date of the epic from milestones
+  """
+  startDateFromMilestones: Time
+
+  """
+  Indicates if the start date has been manually set
+  """
+  startDateIsFixed: Boolean
+
+  """
+  State of the epic
+  """
+  state: EpicState!
+
+  """
+  Indicates the currently logged in user is subscribed to the epic
+  """
+  subscribed: Boolean!
+
+  """
+  Title of the epic
+  """
+  title: String
+
+  """
+  Timestamp of when the epic was updated
+  """
+  updatedAt: Time
+
+  """
+  Number of upvotes the epic has received
+  """
+  upvotes: Int!
+
+  """
+  Permissions for the current user on the resource
+  """
+  userPermissions: EpicPermissions!
+
+  """
+  User preferences for the epic on the issue board
+  """
+  userPreferences: BoardEpicUserPreferences
+
+  """
+  Web path of the epic
+  """
+  webPath: String!
+
+  """
+  Web URL of the epic
+  """
+  webUrl: String!
+}
+
+"""
+The connection type for BoardEpic.
+"""
+type BoardEpicConnection {
+  """
+  A list of edges.
+  """
+  edges: [BoardEpicEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [BoardEpic]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type BoardEpicEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: BoardEpic
+}
+
+"""
+Represents user preferences for a board epic
+"""
+type BoardEpicUserPreferences {
+  """
+  Indicates epic should be displayed as collapsed
+  """
+  collapsed: Boolean!
 }
 
 """
@@ -2914,14 +3406,19 @@ input CreateRequirementInput {
   clientMutationId: String
 
   """
-  The project full path the requirement is associated with
+  Description of the requirement
+  """
+  description: String
+
+  """
+  Full project path the requirement is associated with
   """
   projectPath: ID!
 
   """
   Title of the requirement
   """
-  title: String!
+  title: String
 }
 
 """
@@ -2939,7 +3436,7 @@ type CreateRequirementPayload {
   errors: [String!]!
 
   """
-  The requirement after mutation
+  Requirement after mutation
   """
   requirement: Requirement
 }
@@ -4496,6 +4993,41 @@ input DestroyBoardInput {
 }
 
 """
+Autogenerated input type of DestroyBoardList
+"""
+input DestroyBoardListInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Global ID of the list to destroy. Only label lists are accepted.
+  """
+  listId: ListID!
+}
+
+"""
+Autogenerated return type of DestroyBoardList
+"""
+type DestroyBoardListPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The list after mutation.
+  """
+  list: BoardList
+}
+
+"""
 Autogenerated return type of DestroyBoard
 """
 type DestroyBoardPayload {
@@ -5222,7 +5754,7 @@ type Epic implements CurrentUserTodos & Noteable {
   ): EpicConnection
 
   """
-  Timestamp of the epic's closure
+  Timestamp of when the epic was closed
   """
   closedAt: Time
 
@@ -5232,7 +5764,7 @@ type Epic implements CurrentUserTodos & Noteable {
   confidential: Boolean
 
   """
-  Timestamp of the epic's creation
+  Timestamp of when the epic was created
   """
   createdAt: Time
 
@@ -5527,7 +6059,7 @@ type Epic implements CurrentUserTodos & Noteable {
   title: String
 
   """
-  Timestamp of the epic's last activity
+  Timestamp of when the epic was updated
   """
   updatedAt: Time
 
@@ -6353,6 +6885,37 @@ type GeoNode {
   internalUrl: String
 
   """
+  Find merge request diff registries on this Geo node. Available only when
+  feature flag `geo_merge_request_diff_replication` is enabled
+  """
+  mergeRequestDiffRegistries(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Filters registries by their ID
+    """
+    ids: [ID!]
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): MergeRequestDiffRegistryConnection
+
+  """
   The interval (in days) in which the repository verification is valid. Once expired, it will be reverified
   """
   minimumReverificationInterval: Int
@@ -6363,7 +6926,7 @@ type GeoNode {
   name: String
 
   """
-  Package file registries of the GeoNode. Available only when feature flag `geo_package_file_replication` is enabled
+  Package file registries of the GeoNode
   """
   packageFileRegistries(
     """
@@ -6443,10 +7006,9 @@ type GeoNode {
   syncObjectStorage: Boolean
 
   """
-  Find terraform state registries on this Geo node. Available only when feature
-  flag `geo_terraform_state_replication` is enabled
+  Find terraform state version registries on this Geo node
   """
-  terraformStateRegistries(
+  terraformStateVersionRegistries(
     """
     Returns the elements in the list that come after the specified cursor.
     """
@@ -6471,7 +7033,7 @@ type GeoNode {
     Returns the last _n_ elements from the list.
     """
     last: Int
-  ): TerraformStateRegistryConnection
+  ): TerraformStateVersionRegistryConnection
 
   """
   The user-facing URL for this Geo node
@@ -6532,9 +7094,9 @@ type Group {
   """
   board(
     """
-    Find a board by its ID
+    The board's ID
     """
-    id: ID
+    id: ID!
   ): Board
 
   """
@@ -6804,6 +7366,11 @@ type Group {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
 
     """
     Username of the author of the issue
@@ -8647,6 +9214,16 @@ Values for sorting issues
 """
 enum IssueSort {
   """
+  Created at ascending order
+  """
+  CREATED_ASC
+
+  """
+  Created at descending order
+  """
+  CREATED_DESC
+
+  """
   Due date by ascending order
   """
   DUE_DATE_ASC
@@ -8687,9 +9264,39 @@ enum IssueSort {
   PRIORITY_DESC
 
   """
+  Published issues shown last
+  """
+  PUBLISHED_ASC
+
+  """
+  Published issues shown first
+  """
+  PUBLISHED_DESC
+
+  """
   Relative position by ascending order
   """
   RELATIVE_POSITION_ASC
+
+  """
+  Severity from less critical to more critical
+  """
+  SEVERITY_ASC
+
+  """
+  Severity from more critical to less critical
+  """
+  SEVERITY_DESC
+
+  """
+  Updated at ascending order
+  """
+  UPDATED_ASC
+
+  """
+  Updated at descending order
+  """
+  UPDATED_DESC
 
   """
   Weight by ascending order
@@ -8704,22 +9311,22 @@ enum IssueSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 """
@@ -9281,6 +9888,11 @@ Identifier of Label
 scalar LabelID
 
 """
+Identifier of List
+"""
+scalar ListID
+
+"""
 List limit metric setting
 """
 enum ListLimitMetric {
@@ -9347,6 +9959,26 @@ enum MeasurementIdentifier {
   Pipeline count
   """
   PIPELINES
+
+  """
+  Pipeline count with canceled status
+  """
+  PIPELINES_CANCELED
+
+  """
+  Pipeline count with failed status
+  """
+  PIPELINES_FAILED
+
+  """
+  Pipeline count with skipped status
+  """
+  PIPELINES_SKIPPED
+
+  """
+  Pipeline count with success status
+  """
+  PIPELINES_SUCCEEDED
 
   """
   Project count
@@ -10049,6 +10681,86 @@ type MergeRequestCreatePayload {
 }
 
 """
+Represents the Geo sync and verification state of a Merge Request diff
+"""
+type MergeRequestDiffRegistry {
+  """
+  Timestamp when the MergeRequestDiffRegistry was created
+  """
+  createdAt: Time
+
+  """
+  ID of the MergeRequestDiffRegistry
+  """
+  id: ID!
+
+  """
+  Error message during sync of the MergeRequestDiffRegistry
+  """
+  lastSyncFailure: String
+
+  """
+  Timestamp of the most recent successful sync of the MergeRequestDiffRegistry
+  """
+  lastSyncedAt: Time
+
+  """
+  ID of the Merge Request diff
+  """
+  mergeRequestDiffId: ID!
+
+  """
+  Timestamp after which the MergeRequestDiffRegistry should be resynced
+  """
+  retryAt: Time
+
+  """
+  Number of consecutive failed sync attempts of the MergeRequestDiffRegistry
+  """
+  retryCount: Int
+
+  """
+  Sync state of the MergeRequestDiffRegistry
+  """
+  state: RegistryState
+}
+
+"""
+The connection type for MergeRequestDiffRegistry.
+"""
+type MergeRequestDiffRegistryConnection {
+  """
+  A list of edges.
+  """
+  edges: [MergeRequestDiffRegistryEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [MergeRequestDiffRegistry]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type MergeRequestDiffRegistryEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: MergeRequestDiffRegistry
+}
+
+"""
 An edge in a connection.
 """
 type MergeRequestEdge {
@@ -10398,6 +11110,16 @@ Values for sorting merge requests
 """
 enum MergeRequestSort {
   """
+  Created at ascending order
+  """
+  CREATED_ASC
+
+  """
+  Created at descending order
+  """
+  CREATED_DESC
+
+  """
   Label priority by ascending order
   """
   LABEL_PRIORITY_ASC
@@ -10438,24 +11160,34 @@ enum MergeRequestSort {
   PRIORITY_DESC
 
   """
-  Created at ascending order
-  """
-  created_asc
-
-  """
-  Created at descending order
-  """
-  created_desc
-
-  """
   Updated at ascending order
   """
-  updated_asc
+  UPDATED_ASC
 
   """
   Updated at descending order
   """
-  updated_desc
+  UPDATED_DESC
+
+  """
+  Created at ascending order
+  """
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
+
+  """
+  Created at descending order
+  """
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
+
+  """
+  Updated at ascending order
+  """
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
+
+  """
+  Updated at descending order
+  """
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 """
@@ -10835,6 +11567,7 @@ type Mutation {
   designManagementMove(input: DesignManagementMoveInput!): DesignManagementMovePayload
   designManagementUpload(input: DesignManagementUploadInput!): DesignManagementUploadPayload
   destroyBoard(input: DestroyBoardInput!): DestroyBoardPayload
+  destroyBoardList(input: DestroyBoardListInput!): DestroyBoardListPayload
   destroyNote(input: DestroyNoteInput!): DestroyNotePayload
   destroySnippet(input: DestroySnippetInput!): DestroySnippetPayload
 
@@ -10877,6 +11610,7 @@ type Mutation {
   pipelineRetry(input: PipelineRetryInput!): PipelineRetryPayload
   removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2")
   removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
+  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5")
   runDastScan(input: RunDASTScanInput!): RunDASTScanPayload @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4")
   todoMarkDone(input: TodoMarkDoneInput!): TodoMarkDonePayload
   todoRestore(input: TodoRestoreInput!): TodoRestorePayload
@@ -10885,6 +11619,7 @@ type Mutation {
   toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2")
   updateAlertStatus(input: UpdateAlertStatusInput!): UpdateAlertStatusPayload
   updateBoard(input: UpdateBoardInput!): UpdateBoardPayload
+  updateBoardEpicUserPreferences(input: UpdateBoardEpicUserPreferencesInput!): UpdateBoardEpicUserPreferencesPayload
   updateBoardList(input: UpdateBoardListInput!): UpdateBoardListPayload
   updateContainerExpirationPolicy(input: UpdateContainerExpirationPolicyInput!): UpdateContainerExpirationPolicyPayload
   updateEpic(input: UpdateEpicInput!): UpdateEpicPayload
@@ -10908,6 +11643,7 @@ type Mutation {
   vulnerabilityConfirm(input: VulnerabilityConfirmInput!): VulnerabilityConfirmPayload
   vulnerabilityDismiss(input: VulnerabilityDismissInput!): VulnerabilityDismissPayload
   vulnerabilityResolve(input: VulnerabilityResolveInput!): VulnerabilityResolvePayload
+  vulnerabilityRevertToDetected(input: VulnerabilityRevertToDetectedInput!): VulnerabilityRevertToDetectedPayload
 }
 
 """
@@ -11441,7 +12177,7 @@ type PackageEdge {
 }
 
 """
-Represents the sync and verification state of a package file
+Represents the Geo sync and verification state of a package file
 """
 type PackageFileRegistry {
   """
@@ -11522,42 +12258,47 @@ type PackageFileRegistryEdge {
 
 enum PackageTypeEnum {
   """
-  Packages from the composer package manager
+  Packages from the Composer package manager
   """
   COMPOSER
 
   """
-  Packages from the conan package manager
+  Packages from the Conan package manager
   """
   CONAN
 
   """
-  Packages from the generic package manager
+  Packages from the Debian package manager
+  """
+  DEBIAN
+
+  """
+  Packages from the Generic package manager
   """
   GENERIC
 
   """
-  Packages from the golang package manager
+  Packages from the Golang package manager
   """
   GOLANG
 
   """
-  Packages from the maven package manager
+  Packages from the Maven package manager
   """
   MAVEN
 
   """
-  Packages from the npm package manager
+  Packages from the Npm package manager
   """
   NPM
 
   """
-  Packages from the nuget package manager
+  Packages from the Nuget package manager
   """
   NUGET
 
   """
-  Packages from the pypi package manager
+  Packages from the Pypi package manager
   """
   PYPI
 }
@@ -11996,9 +12737,9 @@ type Project {
   """
   board(
     """
-    Find a board by its ID
+    The board's ID
     """
-    id: ID
+    id: ID!
   ): Board
 
   """
@@ -12286,6 +13027,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -12381,6 +13127,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -12464,6 +13215,11 @@ type Project {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
 
     """
     Username of the author of the issue
@@ -13069,7 +13825,7 @@ type Project {
   requestAccessEnabled: Boolean
 
   """
-  Find a single requirement. Available only when feature flag `requirements_management` is enabled.
+  Find a single requirement
   """
   requirement(
     """
@@ -13109,7 +13865,7 @@ type Project {
   requirementStatesCount: RequirementStatesCount
 
   """
-  Find requirements. Available only when feature flag `requirements_management` is enabled.
+  Find requirements
   """
   requirements(
     """
@@ -13307,6 +14063,31 @@ type Project {
   List of project topics (not Git tags)
   """
   tagList: String
+
+  """
+  Terraform states associated with the project
+  """
+  terraformStates(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): TerraformStateConnection
 
   """
   Permissions for the current user on the resource
@@ -14907,6 +15688,16 @@ type Requirement {
   createdAt: Time!
 
   """
+  Description of the requirement
+  """
+  description: String
+
+  """
+  The GitLab Flavored Markdown rendering of `description`
+  """
+  descriptionHtml: String
+
+  """
   ID of the requirement
   """
   id: ID!
@@ -14965,6 +15756,11 @@ type Requirement {
   Title of the requirement
   """
   title: String
+
+  """
+  The GitLab Flavored Markdown rendering of `title`
+  """
+  titleHtml: String
 
   """
   Timestamp of when the requirement was last updated
@@ -15085,6 +15881,41 @@ interface ResolvableInterface {
   User who resolved the object
   """
   resolvedBy: User
+}
+
+"""
+Autogenerated input type of RevertVulnerabilityToDetected
+"""
+input RevertVulnerabilityToDetectedInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  ID of the vulnerability to be reverted
+  """
+  id: VulnerabilityID!
+}
+
+"""
+Autogenerated return type of RevertVulnerabilityToDetected
+"""
+type RevertVulnerabilityToDetectedPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The vulnerability after revert
+  """
+  vulnerability: Vulnerability
 }
 
 type RootStorageStatistics {
@@ -15340,6 +16171,26 @@ type SastCiConfigurationAnalyzersEntityEdge {
 }
 
 """
+Represents the analyzers entity in SAST CI configuration
+"""
+input SastCiConfigurationAnalyzersEntityInput {
+  """
+  State of the analyzer
+  """
+  enabled: Boolean!
+
+  """
+  Name of analyzer
+  """
+  name: String!
+
+  """
+  List of variables for the analyzer
+  """
+  variables: [SastCiConfigurationEntityInput!]
+}
+
+"""
 Represents an entity in SAST CI configuration
 """
 type SastCiConfigurationEntity {
@@ -15463,6 +16314,11 @@ input SastCiConfigurationEntityInput {
 Represents a CI configuration of SAST
 """
 input SastCiConfigurationInput {
+  """
+  List of analyzers and related variables for the SAST configuration
+  """
+  analyzers: [SastCiConfigurationAnalyzersEntityInput!]
+
   """
   List of global entities related to SAST configuration
   """
@@ -16250,7 +17106,32 @@ type Snippet implements Noteable {
   """
   Snippet blobs
   """
-  blobs: [SnippetBlob!]!
+  blobs(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Paths of the blobs
+    """
+    paths: [String!]
+  ): SnippetBlobConnection
 
   """
   Timestamp this snippet was created
@@ -16474,6 +17355,41 @@ input SnippetBlobActionInputType {
 }
 
 """
+The connection type for SnippetBlob.
+"""
+type SnippetBlobConnection {
+  """
+  A list of edges.
+  """
+  edges: [SnippetBlobEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [SnippetBlob]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type SnippetBlobEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: SnippetBlob
+}
+
+"""
 Represents how the blob content should be displayed
 """
 type SnippetBlobViewer {
@@ -16587,22 +17503,42 @@ enum Sort {
   """
   Created at ascending order
   """
-  created_asc
+  CREATED_ASC
 
   """
   Created at descending order
   """
-  created_desc
+  CREATED_DESC
 
   """
   Updated at ascending order
   """
-  updated_asc
+  UPDATED_ASC
 
   """
   Updated at descending order
   """
-  updated_desc
+  UPDATED_DESC
+
+  """
+  Created at ascending order
+  """
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
+
+  """
+  Created at descending order
+  """
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
+
+  """
+  Updated at ascending order
+  """
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
+
+  """
+  Updated at descending order
+  """
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 type Submodule implements Entry {
@@ -16697,64 +17633,51 @@ type TaskCompletionStatus {
   count: Int!
 }
 
-"""
-Represents the sync and verification state of a terraform state
-"""
-type TerraformStateRegistry {
+type TerraformState {
   """
-  Timestamp when the TerraformStateRegistry was created
+  Timestamp the Terraform state was created
   """
-  createdAt: Time
+  createdAt: Time!
 
   """
-  ID of the TerraformStateRegistry
+  ID of the Terraform state
   """
   id: ID!
 
   """
-  Error message during sync of the TerraformStateRegistry
+  Timestamp the Terraform state was locked
   """
-  lastSyncFailure: String
+  lockedAt: Time
 
   """
-  Timestamp of the most recent successful sync of the TerraformStateRegistry
+  The user currently holding a lock on the Terraform state
   """
-  lastSyncedAt: Time
+  lockedByUser: User
 
   """
-  Timestamp after which the TerraformStateRegistry should be resynced
+  Name of the Terraform state
   """
-  retryAt: Time
+  name: String!
 
   """
-  Number of consecutive failed sync attempts of the TerraformStateRegistry
+  Timestamp the Terraform state was updated
   """
-  retryCount: Int
-
-  """
-  Sync state of the TerraformStateRegistry
-  """
-  state: RegistryState
-
-  """
-  ID of the TerraformState
-  """
-  terraformStateId: ID!
+  updatedAt: Time!
 }
 
 """
-The connection type for TerraformStateRegistry.
+The connection type for TerraformState.
 """
-type TerraformStateRegistryConnection {
+type TerraformStateConnection {
   """
   A list of edges.
   """
-  edges: [TerraformStateRegistryEdge]
+  edges: [TerraformStateEdge]
 
   """
   A list of nodes.
   """
-  nodes: [TerraformStateRegistry]
+  nodes: [TerraformState]
 
   """
   Information to aid in pagination.
@@ -16765,7 +17688,7 @@ type TerraformStateRegistryConnection {
 """
 An edge in a connection.
 """
-type TerraformStateRegistryEdge {
+type TerraformStateEdge {
   """
   A cursor for use in pagination.
   """
@@ -16774,7 +17697,87 @@ type TerraformStateRegistryEdge {
   """
   The item at the end of the edge.
   """
-  node: TerraformStateRegistry
+  node: TerraformState
+}
+
+"""
+Represents the Geo sync and verification state of a terraform state version
+"""
+type TerraformStateVersionRegistry {
+  """
+  Timestamp when the TerraformStateVersionRegistry was created
+  """
+  createdAt: Time
+
+  """
+  ID of the TerraformStateVersionRegistry
+  """
+  id: ID!
+
+  """
+  Error message during sync of the TerraformStateVersionRegistry
+  """
+  lastSyncFailure: String
+
+  """
+  Timestamp of the most recent successful sync of the TerraformStateVersionRegistry
+  """
+  lastSyncedAt: Time
+
+  """
+  Timestamp after which the TerraformStateVersionRegistry should be resynced
+  """
+  retryAt: Time
+
+  """
+  Number of consecutive failed sync attempts of the TerraformStateVersionRegistry
+  """
+  retryCount: Int
+
+  """
+  Sync state of the TerraformStateVersionRegistry
+  """
+  state: RegistryState
+
+  """
+  ID of the terraform state version
+  """
+  terraformStateVersionId: ID!
+}
+
+"""
+The connection type for TerraformStateVersionRegistry.
+"""
+type TerraformStateVersionRegistryConnection {
+  """
+  A list of edges.
+  """
+  edges: [TerraformStateVersionRegistryEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [TerraformStateVersionRegistry]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type TerraformStateVersionRegistryEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: TerraformStateVersionRegistry
 }
 
 """
@@ -17474,6 +18477,51 @@ type UpdateAlertStatusPayload {
 }
 
 """
+Autogenerated input type of UpdateBoardEpicUserPreferences
+"""
+input UpdateBoardEpicUserPreferencesInput {
+  """
+  The board global ID
+  """
+  boardId: BoardID!
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Whether the epic should be collapsed in the board
+  """
+  collapsed: Boolean!
+
+  """
+  ID of an epic to set preferences for
+  """
+  epicId: EpicID!
+}
+
+"""
+Autogenerated return type of UpdateBoardEpicUserPreferences
+"""
+type UpdateBoardEpicUserPreferencesPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  User preferences for the epic in the board after mutation
+  """
+  epicUserPreferences: BoardEpicUserPreferences
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
+"""
 Autogenerated input type of UpdateBoard
 """
 input UpdateBoardInput {
@@ -18010,6 +19058,11 @@ input UpdateRequirementInput {
   clientMutationId: String
 
   """
+  Description of the requirement
+  """
+  description: String
+
+  """
   The iid of the requirement to update
   """
   iid: String!
@@ -18020,7 +19073,7 @@ input UpdateRequirementInput {
   lastTestReportState: TestReportState
 
   """
-  The project full path the requirement is associated with
+  Full project path the requirement is associated with
   """
   projectPath: ID!
 
@@ -18050,7 +19103,7 @@ type UpdateRequirementPayload {
   errors: [String!]!
 
   """
-  The requirement after mutation
+  Requirement after mutation
   """
   requirement: Requirement
 }
@@ -19359,6 +20412,41 @@ type VulnerabilityResolvePayload {
 }
 
 """
+Autogenerated input type of VulnerabilityRevertToDetected
+"""
+input VulnerabilityRevertToDetectedInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  ID of the vulnerability to be reverted
+  """
+  id: VulnerabilityID!
+}
+
+"""
+Autogenerated return type of VulnerabilityRevertToDetected
+"""
+type VulnerabilityRevertToDetectedPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The vulnerability after revert
+  """
+  vulnerability: Vulnerability
+}
+
+"""
 Represents a vulnerability scanner
 """
 type VulnerabilityScanner {
@@ -19470,6 +20558,26 @@ Vulnerability sort values
 """
 enum VulnerabilitySort {
   """
+  Detection timestamp in ascending order
+  """
+  detected_asc
+
+  """
+  Detection timestamp in descending order
+  """
+  detected_desc
+
+  """
+  Report Type in ascending order
+  """
+  report_type_asc
+
+  """
+  Report Type in descending order
+  """
+  report_type_desc
+
+  """
   Severity in ascending order
   """
   severity_asc
@@ -19478,6 +20586,16 @@ enum VulnerabilitySort {
   Severity in descending order
   """
   severity_desc
+
+  """
+  Title in ascending order
+  """
+  title_asc
+
+  """
+  Title in descending order
+  """
+  title_desc
 }
 
 """

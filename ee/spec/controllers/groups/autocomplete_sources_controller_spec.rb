@@ -105,5 +105,17 @@ RSpec.describe Groups::AutocompleteSourcesController do
         }
       )
     end
+
+    it 'handles new epics' do
+      get :commands, params: { group_id: group, type: 'Epic', type_id: nil }
+
+      expect(json_response).to be_an(Array)
+      expect(json_response).to include(
+        {
+          'name' => 'cc', 'aliases' => [], 'description' => 'CC',
+          'params' => ['@user'], 'warning' => '', 'icon' => ''
+        }
+      )
+    end
   end
 end

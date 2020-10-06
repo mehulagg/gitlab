@@ -55,21 +55,6 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
       end
     end
 
-    context 'with the feature flag shut off' do
-      before do
-        stub_licensed_features(group_coverage_reports: true)
-        stub_feature_flags(group_coverage_reports: false)
-      end
-
-      describe 'GET index' do
-        it 'responds 403 because the feature is not licensed' do
-          get :index, params: valid_request_params
-
-          expect(response).to have_gitlab_http_status(:forbidden)
-        end
-      end
-    end
-
     describe 'GET index' do
       before do
         stub_licensed_features(group_coverage_reports: true)

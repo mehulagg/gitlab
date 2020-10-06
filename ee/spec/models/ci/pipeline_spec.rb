@@ -377,7 +377,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is not available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: false)
+            stub_licensed_features(ci_project_subscriptions: false)
           end
 
           it 'does not schedule the trigger downstream subscriptions worker' do

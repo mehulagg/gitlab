@@ -25,6 +25,8 @@ RSpec.describe MergeRequest do
     it { is_expected.to have_many(:approved_by_users) }
     it { is_expected.to have_one(:merge_train) }
     it { is_expected.to have_many(:approval_rules) }
+    it { is_expected.to have_many(:approval_merge_request_rule_sources).through(:approval_rules) }
+    it { is_expected.to have_many(:approval_project_rules).through(:approval_merge_request_rule_sources) }
 
     describe 'approval_rules association' do
       describe '#applicable_to_branch' do
@@ -115,6 +117,24 @@ RSpec.describe MergeRequest do
       merge_request = build(:merge_request)
 
       expect(merge_request.allows_multiple_assignees?).to be(true)
+    end
+  end
+
+  describe '#allows_multiple_reviewers?' do
+    it 'returns false without license' do
+      stub_licensed_features(multiple_merge_request_reviewers: false)
+
+      merge_request = build_stubbed(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(false)
+    end
+
+    it 'returns true when licensed' do
+      stub_licensed_features(multiple_merge_request_reviewers: true)
+
+      merge_request = build(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(true)
     end
   end
 

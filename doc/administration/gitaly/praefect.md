@@ -547,14 +547,14 @@ To configure Praefect with TLS:
        storages:
          default:
            gitaly_address: tls://praefect1.internal:3305
-           path: /some/dummy/path
+           path: /some/local/path
          storage1:
            gitaly_address: tls://praefect2.internal:3305
-           path: /some/dummy/path
+           path: /some/local/path
    ```
 
    NOTE: **Note:**
-   `/some/dummy/path` should be set to a local folder that exists, however no
+   `/some/local/path` should be set to a local folder that exists, however no
    data will be stored in this folder. This will no longer be necessary after
    [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/1282) is resolved.
 
@@ -873,10 +873,10 @@ Particular attention should be shown to:
    gitlab-ctl reconfigure
    ```
 
-1. Verify each `gitlab-shell` on each Gitaly node can reach GitLab. On each Gitaly node run:
+1. Verify on each Gitaly node the Git Hooks can reach GitLab. On each Gitaly node run:
 
    ```shell
-   /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml
+   /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml
    ```
 
 1. Verify that GitLab can reach Praefect:
@@ -993,6 +993,8 @@ information, see the [strong consistency epic](https://gitlab.com/groups/gitlab-
 
 To enable strong consistency:
 
+- In GitLab 13.5, you must use Git v2.28.0 or higher on Gitaly nodes to enable
+  strong consistency.
 - In GitLab 13.4 and later, the strong consistency voting strategy has been
   improved. Instead of requiring all nodes to agree, only the primary and half
   of the secondaries need to agree. This strategy is enabled by default. To

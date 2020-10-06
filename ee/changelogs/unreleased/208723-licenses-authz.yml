@@ -1,0 +1,5 @@
+---
+title: Remove N+1 in license scanning report comparison
+merge_request: 42895
+author:
+type: fixed

@@ -34,10 +34,14 @@ module Mutations
       authorize :create_on_demand_dast_scan
 
       def resolve(full_path:, **service_args)
+        # TODO: remove this explicit coercion once the compatibility layer is removed
+        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+        gid = ::Types::GlobalIDType[::DastScannerProfile].coerce_isolated_input(service_args[:id])
+
         project = authorized_find!(full_path: full_path)
 
         service = ::DastScannerProfiles::UpdateService.new(project, current_user)
-        result = service.execute({ **service_args, id: service_args[:id].model_id })
+        result = service.execute({ **service_args, id: gid.model_id })
 
         if result.success?
           { id: result.payload.to_global_id, errors: [] }

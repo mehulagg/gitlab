@@ -24,7 +24,6 @@ GET /projects/:id/registry/repositories
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) accessible by the authenticated user. |
 | `tags`      | boolean | no | If the parameter is included as true, each repository will include an array of `"tags"` in the response. |
-| `name`      | string | no | Returns a list of repositories with a name that matches the value. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29763) in GitLab 13.0). |
 | `tags_count` | boolean | no | If the parameter is included as true, each repository will include `"tags_count"` in the response ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/32141) in GitLab 13.1). |
 
 ```shell
@@ -68,7 +67,6 @@ GET /groups/:id/registry/repositories
 | --------- | ---- | -------- | ----------- |
 | `id`      | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) accessible by the authenticated user. |
 | `tags`      | boolean | no | If the parameter is included as true, each repository will include an array of `"tags"` in the response. |
-| `name`      | string | no | Returns a list of repositories with a name that matches the value. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29763) in GitLab 13.0). |
 | `tags_count` | boolean | no | If the parameter is included as true, each repository will include `"tags_count"` in the response ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/32141) in GitLab 13.1). |
 
 ```shell
@@ -232,7 +230,7 @@ DELETE /projects/:id/registry/repositories/:repository_id/tags/:tag_name
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags/v10.0.0"
 ```
 
-This action does not delete blobs. In order to delete them and recycle disk space,
+This action doesn't delete blobs. To delete them and recycle disk space,
 [run the garbage collection](https://docs.gitlab.com/omnibus/maintenance/README.html#removing-unused-layers-not-referenced-by-manifests).
 
 ## Delete registry repository tags in bulk
@@ -258,18 +256,19 @@ DELETE /projects/:id/registry/repositories/:repository_id/tags
 
 This API call performs the following operations:
 
-1. It orders all tags by creation date. The creation date is the time of the
-   manifest creation, not the time of tag push.
-1. It removes only the tags matching the given `name_regex_delete` (or deprecated `name_regex`), keeping any that match `name_regex_keep`.
-1. It never removes the tag named `latest`.
-1. It keeps N latest matching tags (if `keep_n` is specified).
-1. It only removes tags that are older than X amount of time (if `older_than` is specified).
-1. It schedules the asynchronous job to be executed in the background.
+- It orders all tags by creation date. The creation date is the time of the
+  manifest creation, not the time of tag push.
+- It removes only the tags matching the given `name_regex_delete` (or deprecated
+  `name_regex`), keeping any that match `name_regex_keep`.
+- It never removes the tag named `latest`.
+- It keeps N latest matching tags (if `keep_n` is specified).
+- It only removes tags that are older than X amount of time (if `older_than` is
+  specified).
+- It schedules the asynchronous job to be executed in the background.
 
-These operations are executed asynchronously and it might
-take time to get executed. You can run this at most
-once an hour for a given container repository.
-This action does not delete blobs. In order to delete them and recycle disk space,
+These operations are executed asynchronously and can take time to get executed.
+You can run this at most once an hour for a given container repository. This
+action doesn't delete blobs. To delete them and recycle disk space,
 [run the garbage collection](https://docs.gitlab.com/omnibus/maintenance/README.html#removing-unused-layers-not-referenced-by-manifests).
 
 NOTE: **Note:**

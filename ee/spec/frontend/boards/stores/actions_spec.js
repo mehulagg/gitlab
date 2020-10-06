@@ -6,7 +6,15 @@ import * as types from 'ee/boards/stores/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
 import { ListType } from '~/boards/constants';
 import { formatListIssues } from '~/boards/boards_util';
-import { mockLists, mockIssue, mockEpic } from '../mock_data';
+import {
+  mockLists,
+  mockIssue,
+  mockEpic,
+  rawIssue,
+  mockIssueWithModel,
+  mockIssue2WithModel,
+  mockListsWithModel,
+} from '../mock_data';
 
 const expectNotImplemented = action => {
   it('is not implemented', () => {
@@ -18,6 +26,7 @@ let mock;
 
 beforeEach(() => {
   mock = new MockAdapter(axios);
+  window.gon = { features: {} };
 });
 
 afterEach(() => {
@@ -57,6 +66,99 @@ describe('setFilters', () => {
       state,
       [{ type: types.SET_FILTERS, payload: updatedFilters }],
       [],
+      done,
+    );
+  });
+});
+
+describe('fetchEpicsSwimlanes', () => {
+  const state = {
+    endpoints: {
+      fullPath: 'gitlab-org',
+      boardId: 1,
+    },
+    filterParams: {},
+    boardType: 'group',
+  };
+
+  const queryResponse = {
+    data: {
+      group: {
+        board: {
+          epics: {
+            edges: [{ node: mockEpic }],
+            pageInfo: {},
+          },
+        },
+      },
+    },
+  };
+
+  it('should commit mutation RECEIVE_EPICS_SUCCESS on success without lists', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      { withLists: false },
+      state,
+      [
+        {
+          type: types.RECEIVE_EPICS_SUCCESS,
+          payload: { epics: [mockEpic] },
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit mutation RECEIVE_SWIMLANES_FAILURE on failure', done => {
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(Promise.reject());
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      {},
+      state,
+      [{ type: types.RECEIVE_SWIMLANES_FAILURE }],
+      [],
+      done,
+    );
+  });
+
+  it('should dispatch fetchEpicsSwimlanes when page info hasNextPage', done => {
+    const queryResponseWithNextPage = {
+      data: {
+        group: {
+          board: {
+            epics: {
+              edges: [{ node: mockEpic }],
+              pageInfo: {
+                hasNextPage: true,
+                endCursor: 'ENDCURSOR',
+              },
+            },
+          },
+        },
+      },
+    };
+    jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponseWithNextPage);
+
+    testAction(
+      actions.fetchEpicsSwimlanes,
+      { withLists: false },
+      state,
+      [
+        {
+          type: types.RECEIVE_EPICS_SUCCESS,
+          payload: { epics: [mockEpic] },
+        },
+      ],
+      [
+        {
+          type: 'fetchEpicsSwimlanes',
+          payload: { withLists: false, endCursor: 'ENDCURSOR' },
+        },
+      ],
       done,
     );
   });
@@ -247,6 +349,153 @@ describe('toggleEpicSwimlanes', () => {
       state,
       [{ type: types.TOGGLE_EPICS_SWIMLANES }],
       [],
+    );
+  });
+});
+
+describe('resetEpics', () => {
+  it('commits RESET_EPICS mutation', () => {
+    return testAction(actions.resetEpics, {}, {}, [{ type: types.RESET_EPICS }], []);
+  });
+});
+
+describe('setActiveIssueEpic', () => {
+  const getters = { getActiveIssue: mockIssue };
+  const epicWithData = {
+    id: 'gid://gitlab/Epic/42',
+    iid: 1,
+    title: 'Epic title',
+  };
+  const input = {
+    epicId: epicWithData.id,
+    projectPath: 'h/b',
+  };
+
+  it('should return epic after setting the issue', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { issueSetEpic: { issue: { epic: epicWithData } } } });
+
+    const result = await actions.setActiveIssueEpic({ getters }, input);
+
+    expect(result.id).toEqual(epicWithData.id);
+  });
+
+  it('throws error if fails', async () => {
+    jest
+      .spyOn(gqlClient, 'mutate')
+      .mockResolvedValue({ data: { issueSetEpic: { errors: ['failed mutation'] } } });
+
+    await expect(actions.setActiveIssueEpic({ getters }, input)).rejects.toThrow(Error);
+  });
+});
+
+describe('moveIssue', () => {
+  const epicId = 'gid://gitlab/Epic/1';
+
+  const listIssues = {
+    'gid://gitlab/List/1': [436, 437],
+    'gid://gitlab/List/2': [],
+  };
+
+  const issues = {
+    '436': mockIssueWithModel,
+    '437': mockIssue2WithModel,
+  };
+
+  const state = {
+    endpoints: { fullPath: 'gitlab-org', boardId: '1' },
+    boardType: 'group',
+    disabled: false,
+    boardLists: mockListsWithModel,
+    issuesByListId: listIssues,
+    issues,
+  };
+
+  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_SUCCESS mutation when successful', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        issueMoveList: {
+          issue: rawIssue,
+          errors: [],
+        },
+      },
+    });
+
+    testAction(
+      actions.moveIssue,
+      {
+        issueId: '436',
+        issueIid: mockIssue.iid,
+        issuePath: mockIssue.referencePath,
+        fromListId: 'gid://gitlab/List/1',
+        toListId: 'gid://gitlab/List/2',
+        epicId,
+      },
+      state,
+      [
+        {
+          type: types.MOVE_ISSUE,
+          payload: {
+            originalIssue: mockIssueWithModel,
+            fromListId: 'gid://gitlab/List/1',
+            toListId: 'gid://gitlab/List/2',
+            epicId,
+          },
+        },
+        {
+          type: types.MOVE_ISSUE_SUCCESS,
+          payload: { issue: rawIssue },
+        },
+      ],
+      [],
+      done,
+    );
+  });
+
+  it('should commit MOVE_ISSUE mutation and MOVE_ISSUE_FAILURE mutation when unsuccessful', done => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        issueMoveList: {
+          issue: {},
+          errors: [{ foo: 'bar' }],
+        },
+      },
+    });
+
+    testAction(
+      actions.moveIssue,
+      {
+        issueId: '436',
+        issueIid: mockIssue.iid,
+        issuePath: mockIssue.referencePath,
+        fromListId: 'gid://gitlab/List/1',
+        toListId: 'gid://gitlab/List/2',
+        epicId,
+      },
+      state,
+      [
+        {
+          type: types.MOVE_ISSUE,
+          payload: {
+            originalIssue: mockIssueWithModel,
+            fromListId: 'gid://gitlab/List/1',
+            toListId: 'gid://gitlab/List/2',
+            epicId,
+          },
+        },
+        {
+          type: types.MOVE_ISSUE_FAILURE,
+          payload: {
+            originalIssue: mockIssueWithModel,
+            fromListId: 'gid://gitlab/List/1',
+            toListId: 'gid://gitlab/List/2',
+            originalIndex: 0,
+          },
+        },
+      ],
+      [],
+      done,
     );
   });
 });

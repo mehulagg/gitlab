@@ -3,6 +3,14 @@
 #
 # Do not edit it manually!
 ---
+- :name: cronjob:active_user_count_threshold
+  :feature_category: :provision
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:adjourned_group_deletion
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -172,7 +180,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:historical_data
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -236,7 +244,7 @@
   :idempotent:
   :tags: []
 - :name: cronjob:sync_seat_link
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -571,6 +579,14 @@
   :weight: 2
   :idempotent:
   :tags: []
+- :name: dast_site_validation
+  :feature_category: :dynamic_application_security_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: elastic_commit_indexer
   :feature_category: :global_search
   :has_external_dependencies:
@@ -700,7 +716,7 @@
   :idempotent: true
   :tags: []
 - :name: sync_seat_link_request
-  :feature_category: :billing
+  :feature_category: :provision
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :unknown

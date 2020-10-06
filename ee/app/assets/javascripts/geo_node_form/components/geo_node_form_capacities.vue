@@ -91,7 +91,7 @@ export default {
 
 <template>
   <div>
-    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Performance and resource management') }}</h2>
+    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Tuning settings') }}</h2>
     <p class="gl-mb-5">
       {{ sectionDescription }}
       <gl-link :href="sectionLink" target="_blank">{{ __('More information') }}</gl-link>

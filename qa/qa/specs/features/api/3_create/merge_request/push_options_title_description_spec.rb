@@ -14,7 +14,7 @@ module QA
         end
       end
 
-      it 'sets title and description' do
+      it 'sets title and description', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1038' do
         description = "This is a test of MR push options"
         title = "MR push options test #{SecureRandom.hex(8)}"
 
@@ -29,6 +29,8 @@ module QA
         end
 
         merge_request = project.merge_request_with_title(title)
+
+        expect(merge_request).not_to be_nil, "There was a problem creating the merge request"
 
         aggregate_failures do
           expect(merge_request[:title]).to eq(title)

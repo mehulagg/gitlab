@@ -30,7 +30,7 @@ module EE
       end
 
       condition(:group_activity_analytics_available) do
-        @subject.feature_available?(:group_activity_analytics) && ::Feature.enabled?(:group_activity_analytics, @subject, type: :licensed, default_enabled: true)
+        @subject.feature_available?(:group_activity_analytics)
       end
 
       condition(:can_owners_manage_ldap, scope: :global) do
@@ -122,8 +122,13 @@ module EE
         enable :admin_wiki
       end
 
-      rule { owner }.policy do
+      rule { owner | admin }.policy do
         enable :owner_access
+      end
+
+      rule { can?(:owner_access) }.policy do
+        enable :set_epic_created_at
+        enable :set_epic_updated_at
       end
 
       rule { can?(:read_cluster) & cluster_deployments_available }
@@ -318,6 +323,14 @@ module EE
       return false if user&.admin?
 
       ::Gitlab::Auth::GroupSaml::SsoEnforcer.group_access_restricted?(subject)
+    end
+
+    # Available in Core for self-managed but only paid, non-trial for .com to prevent abuse
+    override :resource_access_token_available?
+    def resource_access_token_available?
+      return true unless ::Gitlab.com?
+
+      group.feature_available_non_trial?(:resource_access_token)
     end
   end
 end

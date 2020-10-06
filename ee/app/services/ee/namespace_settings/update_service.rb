@@ -2,44 +2,37 @@
 
 module EE
   # This class is responsible for updating the namespace settings of a specific group.
-
+  #
   module NamespaceSettings
-    class UpdateService
-      include ::Gitlab::Allowable
+    module UpdateService
+      extend ::Gitlab::Utils::Override
 
-      def initialize(current_user, group, settings)
-        @current_user = current_user
-        @group = group
-        @settings_params = settings
-      end
-
+      override :execute
       def execute
-        unless valid?
-          group.errors.add(:prevent_forking_outside_group, s_('GroupSettings|Prevent forking setting was not saved'))
+        unless can_update_prevent_forking?
+          group.errors.add(
+            :prevent_forking_outside_group,
+            s_('GroupSettings|Prevent forking setting was not saved')
+          )
+
           return
         end
 
-        if group.namespace_settings
-          group.namespace_settings.attributes = settings_params
-        else
-          group.build_namespace_settings(settings_params)
-        end
+        super
       end
 
       private
 
-      attr_reader :current_user, :group, :settings_params
-
-      def valid?
-        if settings_params.key?(:prevent_forking_outside_group)
-          can_update_prevent_forking?
-        else
-          true
-        end
-      end
-
       def can_update_prevent_forking?
-        can?(current_user, :change_prevent_group_forking, group)
+        return true unless settings_params.key?(:prevent_forking_outside_group)
+
+        if can?(current_user, :change_prevent_group_forking, group)
+          true
+        else
+          settings_params.delete(:prevent_forking_outside_group)
+
+          false
+        end
       end
     end
   end

@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon, GlButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton, GlBadge } from '@gitlab/ui';
 import Api from 'ee/api';
 import { CancelToken } from 'axios';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
@@ -20,6 +20,7 @@ export default {
   components: {
     GlLoadingIcon,
     GlButton,
+    GlBadge,
     ResolutionAlert,
     VulnerabilityStateDropdown,
     SplitButton,
@@ -46,7 +47,16 @@ export default {
     };
   },
 
+  badgeVariants: {
+    confirmed: 'danger',
+    resolved: 'success',
+    detected: 'warning',
+  },
+
   computed: {
+    stateVariant() {
+      return this.$options.badgeVariants[this.vulnerability.state] || 'neutral';
+    },
     actionButtons() {
       const buttons = [];
 
@@ -80,10 +90,6 @@ export default {
         Boolean(this.vulnerability.create_mr_url) &&
         this.hasRemediation
       );
-    },
-    statusBoxStyle() {
-      // Get the badge variant based on the vulnerability state, defaulting to 'expired'.
-      return VULNERABILITY_STATE_OBJECTS[this.vulnerability.state]?.statusBoxStyle || 'expired';
     },
     showResolutionAlert() {
       return (
@@ -224,15 +230,9 @@ export default {
     <div class="detail-page-header">
       <div class="detail-page-header-body align-items-center">
         <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
-        <span
-          v-else
-          ref="badge"
-          :class="
-            `text-capitalize align-self-center issuable-status-box status-box status-box-${statusBoxStyle}`
-          "
-        >
+        <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}
-        </span>
+        </gl-badge>
 
         <status-description
           class="issuable-meta"

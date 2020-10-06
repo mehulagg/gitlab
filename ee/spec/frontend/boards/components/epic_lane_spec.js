@@ -58,21 +58,12 @@ describe('EpicLane', () => {
       createComponent();
     });
 
-    it('icon aria label is Opened when epic is opened', () => {
-      expect(wrapper.find(GlIcon).attributes('aria-label')).toEqual('Opened');
-    });
-
-    it('icon aria label is Closed when epic is closed', () => {
-      createComponent({ props: { epic: { ...mockEpic, state: 'closed' } } });
-      expect(wrapper.find(GlIcon).attributes('aria-label')).toEqual('Closed');
-    });
-
     it('displays count of issues in epic which belong to board', () => {
       expect(findByTestId('epic-lane-issue-count').text()).toContain(2);
     });
 
-    it('displays 2 icons', () => {
-      expect(wrapper.findAll(GlIcon)).toHaveLength(2);
+    it('displays 1 icon', () => {
+      expect(wrapper.findAll(GlIcon)).toHaveLength(1);
     });
 
     it('displays epic title', () => {

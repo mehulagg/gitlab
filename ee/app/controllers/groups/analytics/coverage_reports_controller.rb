@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 class Groups::Analytics::CoverageReportsController < Groups::Analytics::ApplicationController
-  check_feature_flag Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG
-
   COVERAGE_PARAM = 'coverage'.freeze
 
   before_action :load_group
   before_action -> { check_feature_availability!(:group_coverage_reports) }
+  before_action :check_feature_flag
 
   def index
     respond_to do |format|
@@ -51,5 +50,9 @@ class Groups::Analytics::CoverageReportsController < Groups::Analytics::Applicat
       label: 'group_id',
       value: @group.id
     }
+  end
+
+  def check_feature_flag
+    render_404 unless @group.feature_available?(:group_coverage_reports)
   end
 end

@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Database
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Database guides
 
 ## Database Reviews
@@ -24,6 +30,7 @@
 - [Background migrations](../background_migrations.md)
 - [Swapping tables](../swapping_tables.md)
 - [Deleting migrations](../deleting_migrations.md)
+- [Partitioning tables](table_partitioning.md)
 
 ## Debugging
 

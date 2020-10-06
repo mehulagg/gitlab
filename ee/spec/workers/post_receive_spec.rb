@@ -137,7 +137,8 @@ RSpec.describe PostReceive do
     end
 
     context 'with a group wiki' do
-      let(:wiki) { build(:group_wiki) }
+      let_it_be(:group) { create(:group) }
+      let(:wiki) { build(:group_wiki, group: group) }
 
       it 'calls Git::WikiPushService#execute' do
         expect_next_instance_of(::Git::WikiPushService) do |service|

@@ -12,7 +12,7 @@ class Gitlab::Seeder::Vulnerabilities
   def seed!
     return unless pipeline
 
-    10.times do |rank|
+    30.times do |rank|
       primary_identifier = create_identifier(rank)
       vulnerability = create_vulnerability
       occurrence = create_occurrence(vulnerability, rank, primary_identifier)

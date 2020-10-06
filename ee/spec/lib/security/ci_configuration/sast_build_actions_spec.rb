@@ -31,6 +31,50 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
       ] }
   end
 
+  let(:params_with_analyzer_info) do
+    params.merge( { 'analyzers' =>
+                    [
+                      {
+                        'name' =>  "bandit",
+                        'enabled' =>  false
+                      },
+                      {
+                        'name' =>  "brakeman",
+                        'enabled' =>  true,
+                        'variables' => [
+                          { 'field' => "SAST_BRAKEMAN_LEVEL",
+                            'defaultValue' => "1",
+                            'value' => "2" }
+                        ]
+                      },
+                      {
+                        'name' =>  "flawfinder",
+                        'enabled' =>  true,
+                        'variables' => [
+                          { 'field' => "SAST_FLAWFINDER_LEVEL",
+                            'defaultValue' => "1",
+                            'value' => "1" }
+                        ]
+                      }
+                    ] }
+                )
+  end
+
+  let(:params_with_all_analyzers_enabled) do
+    params.merge( { 'analyzers' =>
+                    [
+                      {
+                        'name' =>  "brakeman",
+                        'enabled' =>  true
+                      },
+                      {
+                        'name' =>  "flawfinder",
+                        'enabled' =>  true
+                      }
+                    ] }
+                )
+  end
+
   context 'with existing .gitlab-ci.yml' do
     let(:auto_devops_enabled) { false }
 
@@ -85,6 +129,28 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
 
       it 'reports defaults have not been overwritten' do
         expect(result.first[:default_values_overwritten]).to eq(false)
+      end
+
+      context 'analyzer section' do
+        let(:gitlab_ci_content) { existing_gitlab_ci_and_single_template_with_sast_and_default_stage }
+
+        subject(:result) { described_class.new(auto_devops_enabled, params_with_analyzer_info, gitlab_ci_content).generate }
+
+        it 'generates the correct YML' do
+          expect(result.first[:content]).to eq(sast_yaml_with_no_variables_set_but_analyzers)
+        end
+
+        context 'all analyzers are enabled' do
+          let(:gitlab_ci_content) { existing_gitlab_ci_and_single_template_with_sast_and_default_stage }
+
+          subject(:result) { described_class.new(auto_devops_enabled, params_with_all_analyzers_enabled, gitlab_ci_content).generate }
+
+          it 'does not write SAST_DEFAULT_ANALYZERS' do
+            stub_const('Security::CiConfiguration::SastBuildActions::SAST_DEFAULT_ANALYZERS', 'brakeman, flawfinder')
+
+            expect(result.first[:content]).to eq(sast_yaml_with_no_variables_set)
+          end
+        end
       end
     end
 
@@ -243,6 +309,24 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   def fast_auto_devops_stages
     auto_devops_template = YAML.safe_load( File.read('lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml') )
     auto_devops_template['stages']
+  end
+
+  def sast_yaml_with_no_variables_set_but_analyzers
+    <<-CI_YML.strip_heredoc
+    # You can override the included template(s) by including variable overrides
+    # See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+    # Note that environment variables can be set in several places
+    # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+    stages:
+    - test
+    sast:
+      variables:
+        SAST_DEFAULT_ANALYZERS: brakeman, flawfinder
+        SAST_BRAKEMAN_LEVEL: '2'
+      stage: test
+    include:
+    - template: Security/SAST.gitlab-ci.yml
+    CI_YML
   end
 
   def sast_yaml_with_no_variables_set

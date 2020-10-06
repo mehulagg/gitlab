@@ -12,32 +12,6 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   let(:project_2) { create(:project, :public, :repository, :wiki_repo) }
   let(:limit_project_ids) { [project_1.id] }
 
-  describe '#highlight_map' do
-    using RSpec::Parameterized::TableSyntax
-
-    let(:results) { described_class.new(user, 'hello world', limit_project_ids) }
-
-    where(:scope, :results_method, :expected) do
-      'projects'       | :projects       | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'milestones'     | :milestones     | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'notes'          | :notes          | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'issues'         | :issues         | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'merge_requests' | :merge_requests | { 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }
-      'blobs'          | nil             | nil
-      'wiki_blobs'     | nil             | nil
-      'commits'        | nil             | nil
-      'users'          | nil             | nil
-      'unknown'        | nil             | nil
-    end
-
-    with_them do
-      it 'returns the expected highlight map' do
-        expect(results).to receive(results_method).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }]) if results_method
-        expect(results.highlight_map(scope)).to eq(expected)
-      end
-    end
-  end
-
   describe '#formatted_count' do
     using RSpec::Parameterized::TableSyntax
 
@@ -84,11 +58,12 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
   describe 'parse_search_result' do
     let(:project) { double(:project) }
+    let(:content) { "foo\nbar\nbaz\n" }
     let(:blob) do
       {
         'blob' => {
           'commit_sha' => 'sha',
-          'content' => "foo\nbar\nbaz\n",
+          'content' => content,
           'path' => 'path/file.ext'
         }
       }
@@ -109,7 +84,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       result = {
         '_source' => blob,
         'highlight' => {
-          'blob.content' => ["foo\ngitlabelasticsearch→bar←gitlabelasticsearch\nbaz\n"]
+          'blob.content' => ["foo\n#{::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG}bar#{::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG}\nbaz\n"]
         }
       }
 
@@ -126,9 +101,65 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         data: "bar\n"
       )
     end
+
+    context 'when the highlighting finds the same terms multiple times' do
+      let(:content) do
+        <<~END
+        bar
+        bar
+        foo
+        bar # this is the highlighted bar
+        baz
+        boo
+        bar
+        END
+      end
+
+      it 'does not mistake a line that happens to include the same term that was highlighted on a later line' do
+        highlighted_content = <<~END
+        bar
+        bar
+        foo
+        #{::Elastic::Latest::GitClassProxy::HIGHLIGHT_START_TAG}bar#{::Elastic::Latest::GitClassProxy::HIGHLIGHT_END_TAG} # this is the highlighted bar
+        baz
+        boo
+        bar
+        END
+
+        result = {
+          '_source' => blob,
+          'highlight' => {
+            'blob.content' => [highlighted_content]
+          }
+        }
+
+        parsed = described_class.parse_search_result(result, project)
+
+        expected_data = <<~END
+        bar
+        foo
+        bar # this is the highlighted bar
+        baz
+        boo
+        END
+
+        expect(parsed).to be_kind_of(::Gitlab::Search::FoundBlob)
+        expect(parsed).to have_attributes(
+          id: nil,
+          path: 'path/file.ext',
+          basename: 'path/file',
+          ref: 'sha',
+          startline: 2,
+          project: project,
+          data: expected_data
+        )
+      end
+    end
   end
 
   describe 'issues' do
+    let(:scope) { 'issues' }
+
     before do
       @issue_1 = create(
         :issue,
@@ -197,15 +228,34 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:project) { create(:project, :public) }
       let!(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
       let!(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
+      let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
 
-      let(:scope) { 'issues' }
-      let(:results) { described_class.new(user, 'foo', [project], filters: filters) }
+      let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
-      include_examples 'search results filtered by state' do
-        before do
-          ensure_elasticsearch_index!
-        end
+      before do
+        project.add_developer(user)
+
+        ensure_elasticsearch_index!
       end
+
+      include_examples 'search results filtered by state'
+      include_examples 'search results filtered by confidential'
+    end
+
+    context 'ordering' do
+      let(:query) { 'sorted' }
+      let!(:project) { create(:project, :public) }
+      let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
+
+      let(:results) { described_class.new(user, query, [project.id], sort: sort) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted'
     end
   end
 
@@ -448,6 +498,8 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   end
 
   describe 'merge requests' do
+    let(:scope) { 'merge_requests' }
+
     before do
       @merge_request_1 = create(
         :merge_request,
@@ -521,7 +573,6 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
       let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
 
-      let(:scope) { 'merge_requests' }
       let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
       include_examples 'search results filtered by state' do
@@ -529,6 +580,22 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
           ensure_elasticsearch_index!
         end
       end
+    end
+
+    context 'ordering' do
+      let(:query) { 'sorted' }
+      let!(:project) { create(:project, :public) }
+      let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
+
+      let(:results) { described_class.new(user, query, [project.id], sort: sort) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted'
     end
   end
 
@@ -568,7 +635,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     end
   end
 
-  describe 'blobs' do
+  describe 'Blobs' do
     before do
       project_1.repository.index_commits_and_blobs
 
@@ -593,7 +660,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       results = described_class.new(user, 'defau*', limit_project_ids)
       blobs = results.objects('blobs')
 
-      expect(blobs.first.data).to include('default')
+      expect(blobs.first.data).to match(/default/i)
       expect(results.blobs_count).to eq 3
     end
 
@@ -778,7 +845,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     end
   end
 
-  describe 'wikis' do
+  describe 'Wikis' do
     let(:results) { described_class.new(user, 'term', limit_project_ids) }
 
     subject(:wiki_blobs) { results.objects('wiki_blobs') }
@@ -865,7 +932,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     end
   end
 
-  describe 'commits' do
+  describe 'Commits' do
     before do
       project_1.repository.index_commits_and_blobs
       ensure_elasticsearch_index!
@@ -901,7 +968,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
     end
   end
 
-  describe 'visibility levels' do
+  describe 'Visibility levels' do
     let(:internal_project) { create(:project, :internal, :repository, :wiki_repo, description: "Internal project") }
     let(:private_project1) { create(:project, :private, :repository, :wiki_repo, description: "Private project") }
     let(:private_project2) { create(:project, :private, :repository, :wiki_repo, description: "Private project where I'm a member") }
@@ -912,7 +979,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       private_project2.project_members.create(user: user, access_level: ProjectMember::DEVELOPER)
     end
 
-    context 'issues' do
+    context 'Issues' do
       it 'finds right set of issues' do
         issue_1 = create :issue, project: internal_project, title: "Internal project"
         create :issue, project: private_project1, title: "Private project"
@@ -939,7 +1006,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       end
     end
 
-    context 'milestones' do
+    context 'Milestones' do
       let!(:milestone_1) { create(:milestone, project: internal_project, title: "Internal project") }
       let!(:milestone_2) { create(:milestone, project: private_project1, title: "Private project") }
       let!(:milestone_3) { create(:milestone, project: private_project2, title: "Private project which user is member") }
@@ -1059,7 +1126,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       end
     end
 
-    context 'projects' do
+    context 'Projects' do
       it_behaves_like 'a paginated object', 'projects'
 
       it 'finds right set of projects' do
@@ -1088,7 +1155,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       end
     end
 
-    context 'merge requests' do
+    context 'Merge Requests' do
       it 'finds right set of merge requests' do
         merge_request_1 = create :merge_request, target_project: internal_project, source_project: internal_project, title: "Internal project"
         create :merge_request, target_project: private_project1, source_project: private_project1, title: "Private project"
@@ -1115,7 +1182,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       end
     end
 
-    context 'wikis' do
+    context 'Wikis' do
       before do
         [public_project, internal_project, private_project1, private_project2].each do |project|
           project.wiki.create_page('index_page', 'term')
@@ -1142,7 +1209,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       end
     end
 
-    context 'commits' do
+    context 'Commits' do
       it 'finds right set of commits' do
         [internal_project, private_project1, private_project2, public_project].each do |project|
           project.repository.create_file(
@@ -1174,7 +1241,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       end
     end
 
-    context 'blobs' do
+    context 'Blobs' do
       it 'finds right set of blobs' do
         [internal_project, private_project1, private_project2, public_project].each do |project|
           project.repository.create_file(

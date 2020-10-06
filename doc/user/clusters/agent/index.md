@@ -6,7 +6,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Kubernetes Agent **(PREMIUM ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/223061) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
+> - It's disabled on GitLab.com. Rolling this feature out to GitLab.com is [planned](https://gitlab.com/groups/gitlab-org/-/epics/3834).
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
 
 The [GitLab Kubernetes Agent](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent)
 is an active in-cluster component for solving GitLab and Kubernetes integration
@@ -70,15 +74,15 @@ have GitLab installed via Helm, please refer to our
 [installation documentation](https://docs.gitlab.com/charts/installation/).
 
 NOTE: **Note:**
-GitLab plans to [include the Agent](https://gitlab.com/gitlab-org/gitlab/-/issues/223060)
-in the official Linux Package.
+GitLab plans to include the Agent in the [official Linux Package](https://gitlab.com/gitlab-org/gitlab/-/issues/223060) and on [GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/3834).
 
 When installing or upgrading the GitLab Helm chart, consider the following Helm 2 example.
 (If you're using Helm 3, you must modify this example.) You must set `global.kas.enabled=true`
 for the Agent to be properly installed and configured:
 
 ```shell
-helm upgrade --force --install gitlab . \
+helm repo update
+helm upgrade --force --install gitlab gitlab/gitlab \
   --timeout 600 \
   --set global.hosts.domain=<YOUR_DOMAIN> \
   --set global.hosts.externalIP=<YOUR_IP> \
@@ -121,27 +125,27 @@ the Agent in subsequent steps. You can create an Agent record either:
 
 - Through GraphQL: **(PREMIUM ONLY)**
 
-  ```json
-    mutation createAgent {
-      createClusterAgent(input: { projectPath: "path-to/your-awesome-project", name: "<agent-name>" }) {
-        clusterAgent {
-          id
-          name
-        }
-        errors
+  ```graphql
+  mutation createAgent {
+    createClusterAgent(input: { projectPath: "path-to/your-awesome-project", name: "<agent-name>" }) {
+      clusterAgent {
+        id
+        name
       }
+      errors
     }
+  }
 
-    mutation createToken {
-      clusterAgentTokenCreate(input: { clusterAgentId: <cluster-agent-id-taken-from-the-previous-mutation> }) {
-        secret # This is the value you need to use on the next step
-        token {
-          createdAt
-          id
-        }
-        errors
+  mutation createToken {
+    clusterAgentTokenCreate(input: { clusterAgentId: <cluster-agent-id-taken-from-the-previous-mutation> }) {
+      secret # This is the value you need to use on the next step
+      token {
+        createdAt
+        id
       }
+      errors
     }
+  }
   ```
 
   NOTE: **Note:**
@@ -173,10 +177,21 @@ Next, install the in-cluster component of the Agent. This example file contains 
 Kubernetes resources required for the Agent to be installed. You can modify this
 example [`resources.yml` file](#example-resourcesyml-file) in the following ways:
 
-- You can replace `gitlab-agent` with your desired namespace.
-- For the `kas-address` (Kubernetes Agent Server), you can replace
-  `grpc://host.docker.internal:5005` with the address of the `kas` agent initialized
-  in your Helm install.
+- You can replace `gitlab-agent` with `<YOUR-DESIRED-NAMESPACE>`.
+- For the `kas-address` (Kubernetes Agent Server), the agent can use the WebSockets
+  or gRPC protocols to connect to the Agent Server. Depending on your cluster
+  configuration and GitLab architecture, you may need to use one or the other.
+  For the `gitlab-kas` Helm chart, an Ingress is created for the Agent Server using
+  the `/-/kubernetes-agent` endpoint. This can be used for the WebSockets protocol connection.
+  - Specify the `grpc` scheme (such as `grpc://gitlab-kas:5005`) to use gRPC directly.
+    Encrypted gRPC is not supported yet. Follow the
+    [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7)
+    for progress updates.
+  - Specify the `ws` scheme (such as `ws://gitlab-kas-ingress:80/-/kubernetes-agent`)
+    to use an unencrypted WebSockets connection.
+  - Specify the `wss` scheme (such as `wss://gitlab-kas-ingress:443/-/kubernetes-agent`)
+    to use an encrypted WebSockets connection. This is the recommended option if
+    installing the Agent into a separate cluster from your Agent Server.
 - If you defined your own secret name, replace `gitlab-agent-token` with your secret name.
 
 To apply this file, run the following command:
@@ -230,7 +245,7 @@ spec:
         args:
         - --token-file=/config/token
         - --kas-address
-        - grpc://host.docker.internal:5005 # {"$openapi":"kas-address"}
+        - grpc://host.docker.internal:5005  # {"$openapi":"kas-address"}
         volumeMounts:
         - name: token-volume
           mountPath: /config
@@ -322,6 +337,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: gitlab-agent  # Can be any namespace managed by you that the agent has access to.
 spec:
   selector:
     matchLabels:

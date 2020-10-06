@@ -29,7 +29,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'sets merge when pipeline succeeds' do
+      it 'sets merge when pipeline succeeds', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1037' do
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
@@ -60,6 +60,8 @@ module QA
 
         merge_request = project.merge_request_with_title(title)
 
+        expect(merge_request).not_to be_nil, "There was a problem creating the merge request"
+
         merge_request = Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = project
           mr.id = merge_request[:iid]
@@ -70,7 +72,7 @@ module QA
         expect(merge_request.merge_when_pipeline_succeeds).to be true
       end
 
-      it 'merges when pipeline succeeds' do
+      it 'merges when pipeline succeeds', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1036' do
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.commit_message = 'Add .gitlab-ci.yml'
@@ -101,6 +103,7 @@ module QA
 
         merge_request = project.merge_request_with_title(title)
 
+        expect(merge_request).not_to be_nil, "There was a problem creating the merge request"
         expect(merge_request[:merge_when_pipeline_succeeds]).to be true
 
         merge_request = Support::Waiter.wait_until(sleep_interval: 5) do

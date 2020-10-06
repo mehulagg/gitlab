@@ -3,17 +3,21 @@
 module Projects
   module Settings
     class CiCdController < Projects::ApplicationController
+      include RunnerSetupScripts
+
       before_action :authorize_admin_pipeline!
       before_action :define_variables
       before_action do
         push_frontend_feature_flag(:new_variables_ui, @project, default_enabled: true)
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
-        push_frontend_feature_flag(:ci_key_autocomplete, default_enabled: true)
       end
 
-      helper_method :highlight_badge
-
       def show
+        if Feature.enabled?(:ci_pipeline_triggers_settings_vue_ui, @project)
+          @triggers_json = ::Ci::TriggerSerializer.new.represent(
+            @project.triggers, current_user: current_user, project: @project
+          ).to_json
+        end
       end
 
       def update
@@ -50,11 +54,11 @@ module Projects
         redirect_to namespace_project_settings_ci_cd_path
       end
 
-      private
-
-      def highlight_badge(name, content, language = nil)
-        Gitlab::Highlight.highlight(name, content, language: language)
+      def runner_setup_scripts
+        private_runner_setup_scripts(project: @project)
       end
+
+      private
 
       def update_params
         params.require(:project).permit(*permitted_project_params)
@@ -122,6 +126,7 @@ module Projects
       def define_triggers_variables
         @triggers = @project.triggers
           .present(current_user: current_user)
+
         @trigger = ::Ci::Trigger.new
           .present(current_user: current_user)
       end

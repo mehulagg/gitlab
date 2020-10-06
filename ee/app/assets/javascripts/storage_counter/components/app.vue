@@ -1,6 +1,6 @@
 <script>
 import { GlLink, GlSprintf, GlModalDirective, GlButton, GlIcon } from '@gitlab/ui';
-import Project from './project.vue';
+import ProjectsTable from './projects_table.vue';
 import UsageGraph from './usage_graph.vue';
 import query from '../queries/storage.query.graphql';
 import TemporaryStorageIncreaseModal from './temporary_storage_increase_modal.vue';
@@ -8,8 +8,9 @@ import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
 export default {
+  name: 'StorageCounterApp',
   components: {
-    Project,
+    ProjectsTable,
     GlLink,
     GlButton,
     GlSprintf,
@@ -71,6 +72,9 @@ export default {
     };
   },
   computed: {
+    namespaceProjects() {
+      return this.namespace?.projects ?? [];
+    },
     isStorageIncreaseModalVisible() {
       return parseBoolean(this.isTemporaryStorageIncreaseVisible);
     },
@@ -142,21 +146,7 @@ export default {
         </div>
       </div>
     </div>
-    <div class="ci-table" role="grid">
-      <div
-        class="gl-responsive-table-row table-row-header bg-gray-light pl-2 border-top mt-3 lh-100"
-        role="row"
-      >
-        <div class="table-section section-70 font-weight-bold" role="columnheader">
-          {{ __('Project') }}
-        </div>
-        <div class="table-section section-30 font-weight-bold" role="columnheader">
-          {{ __('Usage') }}
-        </div>
-      </div>
-
-      <project v-for="project in namespace.projects" :key="project.id" :project="project" />
-    </div>
+    <projects-table :projects="namespaceProjects" />
     <temporary-storage-increase-modal
       v-if="isStorageIncreaseModalVisible"
       :limit="formatSize(namespace.limit)"

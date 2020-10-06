@@ -307,15 +307,15 @@ in addition to the steps in the
 Below is an example of what your `.gitlab-ci.yml` should look like:
 
 ```yaml
- build:
-   image: $CI_REGISTRY/group/project/docker:19.03.12
-   services:
-     - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
-       alias: docker
-   stage: build
-   script:
-     - docker build -t my-docker-image .
-     - docker run my-docker-image /script/to/run/tests
+build:
+  image: $CI_REGISTRY/group/project/docker:19.03.12
+  services:
+    - name: $CI_REGISTRY/group/project/docker:19.03.12-dind
+      alias: docker
+  stage: build
+  script:
+    - docker build -t my-docker-image .
+    - docker run my-docker-image /script/to/run/tests
 ```
 
 If you forget to set the service alias, the `docker:19.03.12` image is unable to find the
@@ -624,6 +624,13 @@ project or branch name. Special characters can include:
 To get around this, you can [change the group path](../../group/index.md#changing-a-groups-path),
 [change the project path](../../project/settings/index.md#renaming-a-repository) or change the branch
 name.
+
+You may also get a `404 Not Found` or `Unknown Manifest` message if you are using
+a Docker Engine version earlier than 17.12. Later versions of Docker Engine use
+[the v2 API](https://docs.docker.com/registry/spec/manifest-v2-2/).
+
+The images in your GitLab Container Registry must also use the Docker v2 API.
+For information on how to update your images, see the [Docker help](https://docs.docker.com/registry/spec/deprecated-schema-v1).
 
 ### Troubleshoot as a GitLab server admin
 

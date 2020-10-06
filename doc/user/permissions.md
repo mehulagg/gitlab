@@ -116,6 +116,7 @@ The following table depicts the various user permission levels in a project.
 | Create vulnerability from vulnerability finding **(ULTIMATE)** |   |     | ✓           | ✓        | ✓      |
 | Resolve vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
 | Dismiss vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
+| Revert vulnerability to detected state **(ULTIMATE)** |     |            | ✓           | ✓        | ✓      |
 | Apply code change suggestions                     |         |            | ✓           | ✓        | ✓      |
 | Create and edit wiki pages                        |         |            | ✓           | ✓        | ✓      |
 | Rewrite/remove Git tags                           |         |            | ✓           | ✓        | ✓      |
@@ -176,7 +177,7 @@ The following table depicts the various user permission levels in a project.
 
 \* Owner permission is only available at the group or personal namespace level (and for instance admins) and is inherited by its projects.
 
-1. Guest users are able to perform this action on public and internal projects, but not private projects.
+1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [Protected Branches](./project/protected_branches.md).
@@ -196,7 +197,7 @@ which visibility level you select on project settings.
 
 - Disabled: disabled for everyone
 - Only team members: only team members can see even if your project is public or internal
-- Everyone with access: everyone can see depending on your project visibility level
+- Everyone with access: everyone can see depending on your project's visibility level
 - Everyone: enabled for everyone (only available for GitLab Pages)
 
 ### Protected branches
@@ -312,7 +313,7 @@ External users:
 Access can be granted by adding the user as member to the project or group.
 Like usual users, they receive a role in the project or group with all
 the abilities that are mentioned in the [permissions table above](#project-members-permissions).
-For example, if an external user is added as Guest, and your project is
+For example, if an external user is added as Guest, and your project is internal or
 private, they do not have access to the code; you need to grant the external
 user access at the Reporter level or above if you want them to have access to the code. You should
 always take into account the
@@ -384,6 +385,16 @@ An Auditor user should be able to access all projects and groups of a GitLab ins
 with the permissions described on the documentation on [auditor users permissions](../administration/auditor_users.md#permissions-and-restrictions-of-an-auditor-user).
 
 [Read more about Auditor users.](../administration/auditor_users.md)
+
+## Users with minimal access **(PREMIUM ONLY)**
+
+>[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40942) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
+
+Administrators can add members with a "minimal access" role to a parent group. Such users don't
+automatically have access to projects and subgroups underneath. To support such access, administrators must explicitly add these "minimal access" users to the specific subgroups/projects.
+
+Users with minimal access can list the group in the UI and through the API. However, they cannot see
+details such as projects or subgroups. They do not have access to the group's page or list any of itssubgroups or projects.
 
 ## Project features
 

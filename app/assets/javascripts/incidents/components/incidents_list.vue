@@ -19,6 +19,7 @@ import Api from '~/api';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__, __ } from '~/locale';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
@@ -33,9 +34,16 @@ import getIncidents from '../graphql/queries/get_incidents.query.graphql';
 import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
-import { I18N, DEFAULT_PAGE_SIZE, INCIDENT_STATUS_TABS } from '../constants';
+import {
+  I18N,
+  DEFAULT_PAGE_SIZE,
+  INCIDENT_STATUS_TABS,
+  TH_CREATED_AT_TEST_ID,
+  TH_SEVERITY_TEST_ID,
+  TH_PUBLISHED_TEST_ID,
+  INCIDENT_DETAILS_PATH,
+} from '../constants';
 
-const TH_TEST_ID = { 'data-testid': 'incident-management-created-at-sort' };
 const tdClass =
   'table-col gl-display-flex d-md-table-cell gl-align-items-center gl-white-space-nowrap';
 const thClass = 'gl-hover-bg-blue-50';
@@ -57,8 +65,10 @@ export default {
     {
       key: 'severity',
       label: s__('IncidentManagement|Severity'),
-      thClass: `gl-pointer-events-none`,
-      tdClass,
+      thClass,
+      tdClass: `${tdClass} sortable-cell`,
+      sortable: true,
+      thAttr: TH_SEVERITY_TEST_ID,
     },
     {
       key: 'title',
@@ -72,7 +82,7 @@ export default {
       thClass,
       tdClass: `${tdClass} sortable-cell`,
       sortable: true,
-      thAttr: TH_TEST_ID,
+      thAttr: TH_CREATED_AT_TEST_ID,
     },
     {
       key: 'assignees',
@@ -103,6 +113,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: [
     'projectPath',
     'newIssuePath',
@@ -226,7 +237,10 @@ export default {
               {
                 key: 'published',
                 label: s__('IncidentManagement|Published'),
-                thClass: 'gl-pointer-events-none',
+                thClass,
+                tdClass: `${tdClass} sortable-cell`,
+                sortable: true,
+                thAttr: TH_PUBLISHED_TEST_ID,
               },
             ],
           ]
@@ -312,6 +326,7 @@ export default {
   },
   methods: {
     filterIncidentsByStatus(tabIndex) {
+      this.resetPagination();
       const { filters, status } = this.$options.statusTabs[tabIndex];
       this.statusFilter = filters;
       this.filteredByStatus = status;
@@ -320,7 +335,10 @@ export default {
       return Boolean(assignees.nodes?.length);
     },
     navigateToIncidentDetails({ iid }) {
-      return visitUrl(joinPaths(this.issuePath, iid));
+      const path = this.glFeatures.issuesIncidentDetails
+        ? joinPaths(this.issuePath, INCIDENT_DETAILS_PATH)
+        : this.issuePath;
+      return visitUrl(joinPaths(path, iid));
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.incidents.pageInfo;
@@ -345,15 +363,19 @@ export default {
       this.pagination = initialPaginationState;
     },
     fetchSortedData({ sortBy, sortDesc }) {
-      const sortingDirection = sortDesc ? 'desc' : 'asc';
-      const sortingColumn = convertToSnakeCase(sortBy).replace(/_.*/, '');
+      const sortingDirection = sortDesc ? 'DESC' : 'ASC';
+      const sortingColumn = convertToSnakeCase(sortBy)
+        .replace(/_.*/, '')
+        .toUpperCase();
 
+      this.resetPagination();
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
     getSeverity(severity) {
       return INCIDENT_SEVERITY[severity];
     },
     handleFilterIncidents(filters) {
+      this.resetPagination();
       const filterParams = { authorUsername: '', assigneeUsername: '', search: '' };
 
       filters.forEach(filter => {

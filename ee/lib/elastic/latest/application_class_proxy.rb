@@ -44,13 +44,7 @@ module Elastic
           memo[field.to_sym] = {}
         end
 
-        # Adding number_of_fragments: 0 to not split results into snippets.  This way controllers can decide how to handle the highlighted data.
-        {
-            fields: es_fields,
-            number_of_fragments: 0,
-            pre_tags: ['<span class="gl-text-black-normal gl-font-weight-bold">'],
-            post_tags: ['</span>']
-        }
+        { fields: es_fields }
       end
 
       def basic_query_hash(fields, query)
@@ -122,6 +116,25 @@ module Elastic
         }
 
         query_hash
+      end
+
+      def apply_sort(query_hash, options)
+        case options[:sort]
+        when 'oldest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'asc'
+            }
+          })
+        when 'newest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'desc'
+            }
+          })
+        else
+          query_hash
+        end
       end
 
       # Builds an elasticsearch query that will select projects the user is

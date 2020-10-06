@@ -7,7 +7,7 @@
   .settings-header{ :class => "border-top" }
     %h3{ :class => "h4" }
       = _("Jaeger tracing")
-    %button.btn.js-settings-toggle{ type: 'button' }
+    %button.btn.gl-button.js-settings-toggle{ type: 'button' }
       = _('Expand')
     %p
       - if has_jaeger_url
@@ -32,5 +32,4 @@
             - link_start_tag = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: jaeger_help_url }
             - link_end_tag = "#{sprite_icon('external-link', css_class: 'ml-1 vertical-align-middle')}</a>".html_safe
             = _("For more information, please review %{link_start_tag}Jaeger's configuration doc%{link_end_tag}").html_safe % { link_start_tag: link_start_tag, link_end_tag: link_end_tag }
-      .gl-display-flex.gl-justify-content-end
-        = f.submit _('Save changes'), class: 'btn btn-success'
+      = f.submit _('Save changes'), class: 'btn btn-success'

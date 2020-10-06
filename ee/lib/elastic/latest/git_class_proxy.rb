@@ -4,6 +4,8 @@ module Elastic
   module Latest
     module GitClassProxy
       SHA_REGEX = /\A[0-9a-f]{5,40}\z/i.freeze
+      HIGHLIGHT_START_TAG = 'gitlabelasticsearch→'
+      HIGHLIGHT_END_TAG = '←gitlabelasticsearch'
 
       def elastic_search(query, type: 'all', page: 1, per: 20, options: {})
         results = { blobs: [], commits: [] }
@@ -95,8 +97,8 @@ module Elastic
           end
 
           query_hash[:highlight] = {
-            pre_tags: ["gitlabelasticsearch→"],
-            post_tags: ["←gitlabelasticsearch"],
+            pre_tags: [HIGHLIGHT_START_TAG],
+            post_tags: [HIGHLIGHT_END_TAG],
             fields: es_fields
           }
         end
@@ -118,7 +120,7 @@ module Elastic
           filter :blob, field: :oid
         end
 
-        bool_expr = Gitlab::Elastic::BoolExpr.new
+        bool_expr = ::Gitlab::Elastic::BoolExpr.new
         query_hash = {
           query: { bool: bool_expr },
           size: per,
@@ -157,9 +159,9 @@ module Elastic
 
         if options[:highlight]
           query_hash[:highlight] = {
-            pre_tags: ["gitlabelasticsearch→"],
-            post_tags: ["←gitlabelasticsearch"],
-            order: "score",
+            pre_tags: [HIGHLIGHT_START_TAG],
+            post_tags: [HIGHLIGHT_END_TAG],
+            number_of_fragments: 0, # highlighted text fragments do not work well for code as we want to show a few whole lines of code. We need to get the whole content to determine the exact line number that was highlighted.
             fields: {
               "blob.content" => {},
               "blob.file_name" => {}

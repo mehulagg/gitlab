@@ -37,32 +37,6 @@ RSpec.describe 'Group navbar' do
     it_behaves_like 'verified navigation bar'
   end
 
-  context 'when merge request analytics is available' do
-    before do
-      stub_licensed_features(group_merge_request_analytics: true)
-
-      insert_after_sub_nav_item(
-        _('Contribution'),
-        within: _('Analytics'),
-        new_sub_nav_item_name: _('Merge Request')
-      )
-
-      visit group_path(group)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when merge request analytics is unavailable' do
-    before do
-      stub_feature_flags(group_merge_request_analytics: false)
-
-      visit group_path(group)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
   context 'when value stream analytics is available' do
     before do
       stub_licensed_features(cycle_analytics_for_groups: true)
@@ -230,5 +204,16 @@ RSpec.describe 'Group navbar' do
     end
 
     it_behaves_like 'verified navigation bar'
+  end
+
+  context 'when invite team members is available' do
+    it 'includes the div for js-invite-members-trigger' do
+      stub_feature_flags(invite_members_group_modal: true)
+      allow_any_instance_of( InviteMembersHelper ).to receive(:invite_members_allowed?).and_return(true)
+
+      visit group_path(group)
+
+      expect(page).to have_selector('.js-invite-members-trigger')
+    end
   end
 end

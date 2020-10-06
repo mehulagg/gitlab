@@ -232,4 +232,32 @@ RSpec.describe Search::GroupService, :elastic do
       end
     end
   end
+
+  describe '#allowed_scopes' do
+    context 'epics scope' do
+      where(:feature_enabled, :epics_available, :epics_allowed) do
+        false     | false    | false
+        true      | false    | false
+        false     | true     | false
+        true      | true     | true
+      end
+
+      with_them do
+        let(:allowed_scopes) { described_class.new(user, group, {}).allowed_scopes }
+
+        before do
+          stub_feature_flags(epics_search: feature_enabled)
+          stub_licensed_features(epics: epics_available)
+        end
+
+        it 'sets correct allowed_scopes' do
+          if epics_allowed
+            expect(allowed_scopes).to include('epics')
+          else
+            expect(allowed_scopes).not_to include('epics')
+          end
+        end
+      end
+    end
+  end
 end

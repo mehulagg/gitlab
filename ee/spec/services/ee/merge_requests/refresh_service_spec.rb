@@ -190,7 +190,7 @@ RSpec.describe MergeRequests::RefreshService do
         end
 
         before do
-          project.repository.create_file(owner, 'CODEOWNERS', file, { branch_name: 'test', message: 'codeowners' })
+          project.repository.create_file(owner, 'CODEOWNERS', file, branch_name: 'test', message: 'codeowners')
 
           subject
         end

@@ -5,7 +5,9 @@ require 'spec_helper'
 RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:user) { create(:user) }
   let_it_be(:dast_scanner_profile, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
+  let_it_be(:dast_scanner_profile_2, reload: true) { create(:dast_scanner_profile, target_timeout: 200, spider_timeout: 5000) }
   let(:project) { dast_scanner_profile.project }
+  let(:project_2) { dast_scanner_profile_2.project }
 
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
@@ -37,6 +39,26 @@ RSpec.describe DastScannerProfiles::UpdateService do
 
       it 'populates message' do
         expect(message).to eq('You are not authorized to update this scanner profile')
+      end
+    end
+
+    context 'when the dast_scanner_profile exists on a different project' do
+      before do
+        project.add_developer(user)
+        project_2.add_developer(user)
+      end
+
+      subject do
+        described_class.new(project_2, user).execute(
+          id: dast_scanner_profile.id,
+          profile_name: new_profile_name,
+          target_timeout: new_target_timeout,
+          spider_timeout: new_spider_timeout
+        )
+      end
+
+      it 'returns an error status' do
+        expect(status).to eq(:error)
       end
     end
 

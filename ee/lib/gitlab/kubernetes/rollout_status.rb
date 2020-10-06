@@ -22,31 +22,26 @@ module Gitlab
         @status == :not_found
       end
 
-      def has_legacy_app_label?
-        legacy_deployments.present?
-      end
-
       def found?
         @status == :found
       end
 
-      def self.from_deployments(*deployments, pods: {}, legacy_deployments: [])
-        return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments.empty?
+      def self.from_deployments(*deployments, pods_attrs: {})
+        return new([], status: :not_found) if deployments.empty?
 
-        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods) }
+        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods_attrs) }
         deployments.sort_by!(&:order)
-        new(deployments, legacy_deployments: legacy_deployments)
+        new(deployments)
       end
 
       def self.loading
         new([], status: :loading)
       end
 
-      def initialize(deployments, status: :found, legacy_deployments: [])
+      def initialize(deployments, status: :found)
         @status       = status
         @deployments  = deployments
         @instances    = deployments.flat_map(&:instances)
-        @legacy_deployments = legacy_deployments
 
         @completion =
           if @instances.empty?
@@ -58,10 +53,6 @@ module Gitlab
             (finished / @instances.count.to_f * 100).to_i
           end
       end
-
-      private
-
-      attr_reader :legacy_deployments
     end
   end
 end

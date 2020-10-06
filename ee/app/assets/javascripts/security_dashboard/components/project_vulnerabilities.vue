@@ -2,7 +2,6 @@
 import produce from 'immer';
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
 import securityScannersQuery from '../graphql/project_security_scanners.graphql';
@@ -17,7 +16,6 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     projectFullPath: {
       type: String,
@@ -77,9 +75,6 @@ export default {
           enabled: enabled.map(translateScannerName),
           pipelineRun: pipelineRun.map(translateScannerName),
         };
-      },
-      skip() {
-        return !this.glFeatures.scannerAlerts;
       },
     },
   },

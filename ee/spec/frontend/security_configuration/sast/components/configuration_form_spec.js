@@ -71,7 +71,7 @@ describe('ConfigurationForm component', () => {
   const findAnalyzerConfigurations = () => wrapper.findAll(AnalyzerConfiguration);
   const findAnalyzersSection = () => wrapper.find('[data-testid="analyzers-section"]');
 
-  const expectPayloadForEntities = ({ withAnalyzers = false } = {}) => {
+  const expectPayloadForEntities = () => {
     const expectedPayload = {
       mutation: configureSastMutation,
       variables: {
@@ -92,26 +92,23 @@ describe('ConfigurationForm component', () => {
                 value: 'value1',
               },
             ],
+            analyzers: [
+              {
+                name: 'nameValue0',
+                enabled: true,
+                variables: [
+                  {
+                    field: 'field2',
+                    defaultValue: 'defaultValue2',
+                    value: 'value2',
+                  },
+                ],
+              },
+            ],
           },
         },
       },
     };
-
-    if (withAnalyzers) {
-      expectedPayload.variables.input.configuration.analyzers = [
-        {
-          name: 'nameValue0',
-          enabled: true,
-          variables: [
-            {
-              field: 'field2',
-              defaultValue: 'defaultValue2',
-              value: 'value2',
-            },
-          ],
-        },
-      ];
-    }
 
     expect(wrapper.vm.$apollo.mutate.mock.calls).toEqual([[expectedPayload]]);
   };
@@ -162,67 +159,50 @@ describe('ConfigurationForm component', () => {
   });
 
   describe('the analyzers section', () => {
-    describe('given the sastConfigurationUiAnalyzers feature flag is disabled', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      it('does not render', () => {
-        expect(findAnalyzersSection().exists()).toBe(false);
+    beforeEach(() => {
+      createComponent({
+        stubs: {
+          ExpandableSection,
+        },
       });
     });
 
-    describe('given the sastConfigurationUiAnalyzers feature flag is enabled', () => {
+    it('renders', () => {
+      const analyzersSection = findAnalyzersSection();
+      expect(analyzersSection.exists()).toBe(true);
+      expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersHeading);
+      expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersSubHeading);
+    });
+
+    it('has a link to the documentation', () => {
+      const link = findAnalyzersSection().find(GlLink);
+      expect(link.exists()).toBe(true);
+      expect(link.attributes('href')).toBe(sastAnalyzersDocumentationPath);
+    });
+
+    it('renders each analyzer', () => {
+      const analyzerEntities = sastCiConfiguration.analyzers.nodes;
+      const analyzerComponents = findAnalyzerConfigurations();
+      analyzerEntities.forEach((entity, i) => {
+        expect(analyzerComponents.at(i).props()).toEqual({ entity });
+      });
+    });
+
+    describe('when an AnalyzerConfiguration emits an input event', () => {
+      let analyzer;
+      let updatedEntity;
+
       beforeEach(() => {
-        createComponent({
-          provide: {
-            glFeatures: {
-              sastConfigurationUiAnalyzers: true,
-            },
-          },
-          stubs: {
-            ExpandableSection,
-          },
-        });
+        analyzer = findAnalyzerConfigurations().at(0);
+        updatedEntity = {
+          ...sastCiConfiguration.analyzers.nodes[0],
+          value: 'new value',
+        };
+        analyzer.vm.$emit('input', updatedEntity);
       });
 
-      it('renders', () => {
-        const analyzersSection = findAnalyzersSection();
-        expect(analyzersSection.exists()).toBe(true);
-        expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersHeading);
-        expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersSubHeading);
-      });
-
-      it('has a link to the documentation', () => {
-        const link = findAnalyzersSection().find(GlLink);
-        expect(link.exists()).toBe(true);
-        expect(link.attributes('href')).toBe(sastAnalyzersDocumentationPath);
-      });
-
-      it('renders each analyzer', () => {
-        const analyzerEntities = sastCiConfiguration.analyzers.nodes;
-        const analyzerComponents = findAnalyzerConfigurations();
-        analyzerEntities.forEach((entity, i) => {
-          expect(analyzerComponents.at(i).props()).toEqual({ entity });
-        });
-      });
-
-      describe('when an AnalyzerConfiguration emits an input event', () => {
-        let analyzer;
-        let updatedEntity;
-
-        beforeEach(() => {
-          analyzer = findAnalyzerConfigurations().at(0);
-          updatedEntity = {
-            ...sastCiConfiguration.analyzers.nodes[0],
-            value: 'new value',
-          };
-          analyzer.vm.$emit('input', updatedEntity);
-        });
-
-        it('updates the entity binding', () => {
-          expect(analyzer.props('entity')).toBe(updatedEntity);
-        });
+      it('updates the entity binding', () => {
+        expect(analyzer.props('entity')).toBe(updatedEntity);
       });
     });
   });
@@ -233,126 +213,107 @@ describe('ConfigurationForm component', () => {
     });
 
     describe.each`
-      context             | successPath | errors          | sastConfigurationUiAnalyzers
-      ${'no successPath'} | ${''}       | ${[]}           | ${false}
-      ${'any errors'}     | ${''}       | ${['an error']} | ${false}
-      ${'no successPath'} | ${''}       | ${[]}           | ${true}
-      ${'any errors'}     | ${''}       | ${['an error']} | ${true}
-    `(
-      'given an unsuccessful endpoint response due to $context',
-      ({ successPath, errors, sastConfigurationUiAnalyzers }) => {
-        beforeEach(() => {
-          createComponent({
-            mutationResult: {
-              successPath,
-              errors,
-            },
-            provide: {
-              glFeatures: { sastConfigurationUiAnalyzers },
-            },
-          });
-
-          findForm().trigger('submit');
+      context             | successPath | errors
+      ${'no successPath'} | ${''}       | ${[]}
+      ${'any errors'}     | ${''}       | ${['an error']}
+    `('given an unsuccessful endpoint response due to $context', ({ successPath, errors }) => {
+      beforeEach(() => {
+        createComponent({
+          mutationResult: {
+            successPath,
+            errors,
+          },
         });
 
-        it('includes the value of each entity in the payload', () => {
-          expectPayloadForEntities({ withAnalyzers: sastConfigurationUiAnalyzers });
+        findForm().trigger('submit');
+      });
+
+      it('includes the value of each entity in the payload', () => {
+        expectPayloadForEntities();
+      });
+
+      it(`sets the submit button's loading prop to true`, () => {
+        expect(findSubmitButton().props('loading')).toBe(true);
+      });
+
+      describe('after async tasks', () => {
+        beforeEach(fulfillPendingPromises);
+
+        it('does not call redirectTo', () => {
+          expect(redirectTo).not.toHaveBeenCalled();
         });
 
-        it(`sets the submit button's loading prop to true`, () => {
-          expect(findSubmitButton().props('loading')).toBe(true);
+        it('displays an alert message', () => {
+          expect(findErrorAlert().exists()).toBe(true);
         });
 
-        describe('after async tasks', () => {
-          beforeEach(fulfillPendingPromises);
-
-          it('does not call redirectTo', () => {
-            expect(redirectTo).not.toHaveBeenCalled();
-          });
-
-          it('displays an alert message', () => {
-            expect(findErrorAlert().exists()).toBe(true);
-          });
-
-          it('sends the error to Sentry', () => {
-            expect(Sentry.captureException.mock.calls).toMatchObject([
-              [{ message: expect.stringMatching(/merge request.*fail/) }],
-            ]);
-          });
-
-          it(`sets the submit button's loading prop to false`, () => {
-            expect(findSubmitButton().props('loading')).toBe(false);
-          });
-
-          describe('submitting again after a previous error', () => {
-            beforeEach(() => {
-              findForm().trigger('submit');
-            });
-
-            it('hides the alert message', () => {
-              expect(findErrorAlert().exists()).toBe(false);
-            });
-          });
-        });
-      },
-    );
-
-    describe.each([true, false])(
-      'given a successful endpoint response with sastConfigurationUiAnalyzers = %p',
-      sastConfigurationUiAnalyzers => {
-        beforeEach(() => {
-          createComponent({
-            mutationResult: {
-              successPath: newMergeRequestPath,
-              errors: [],
-            },
-            provide: {
-              glFeatures: { sastConfigurationUiAnalyzers },
-            },
-          });
-
-          findForm().trigger('submit');
+        it('sends the error to Sentry', () => {
+          expect(Sentry.captureException.mock.calls).toMatchObject([
+            [{ message: expect.stringMatching(/merge request.*fail/) }],
+          ]);
         });
 
-        // See https://github.com/jest-community/eslint-plugin-jest/issues/229
-        // for a similar reason for disabling the rule on the next line
-        // eslint-disable-next-line jest/no-identical-title
-        it('includes the value of each entity in the payload', () => {
-          expectPayloadForEntities({ withAnalyzers: sastConfigurationUiAnalyzers });
+        it(`sets the submit button's loading prop to false`, () => {
+          expect(findSubmitButton().props('loading')).toBe(false);
         });
 
-        // eslint-disable-next-line jest/no-identical-title
-        it(`sets the submit button's loading prop to true`, () => {
-          expect(findSubmitButton().props().loading).toBe(true);
-        });
-
-        // eslint-disable-next-line jest/no-identical-title
-        describe('after async tasks', () => {
-          beforeEach(fulfillPendingPromises);
-
-          it('calls redirectTo', () => {
-            expect(redirectTo).toHaveBeenCalledWith(newMergeRequestPath);
+        describe('submitting again after a previous error', () => {
+          beforeEach(() => {
+            findForm().trigger('submit');
           });
 
-          it('does not display an alert message', () => {
+          it('hides the alert message', () => {
             expect(findErrorAlert().exists()).toBe(false);
           });
-
-          it('does not call Sentry.captureException', () => {
-            expect(Sentry.captureException).not.toHaveBeenCalled();
-          });
-
-          it('keeps the loading prop set to true', () => {
-            // This is done for UX reasons. If the loading prop is set to false
-            // on success, then there's a period where the button is clickable
-            // again. Instead, we want the button to display a loading indicator
-            // for the remainder of the lifetime of the page (i.e., until the
-            // browser can start painting the new page it's been redirected to).
-            expect(findSubmitButton().props().loading).toBe(true);
-          });
         });
-      },
-    );
+      });
+    });
+
+    describe('given a successful endpoint response', () => {
+      beforeEach(() => {
+        createComponent({
+          mutationResult: {
+            successPath: newMergeRequestPath,
+            errors: [],
+          },
+        });
+
+        findForm().trigger('submit');
+      });
+
+      it('includes the value of each entity in the payload', () => {
+        expectPayloadForEntities();
+      });
+
+      it(`sets the submit button's loading prop to true`, () => {
+        expect(findSubmitButton().props().loading).toBe(true);
+      });
+
+      describe('after async tasks', () => {
+        beforeEach(fulfillPendingPromises);
+
+        it('calls redirectTo', () => {
+          expect(redirectTo).toHaveBeenCalledWith(newMergeRequestPath);
+        });
+
+        it('does not display an alert message', () => {
+          expect(findErrorAlert().exists()).toBe(false);
+        });
+
+        it('does not call Sentry.captureException', () => {
+          expect(Sentry.captureException).not.toHaveBeenCalled();
+        });
+
+        it('keeps the loading prop set to true', () => {
+          // This is done for UX reasons. If the loading prop is set to false
+          // on success, then there's a period where the button is clickable
+          // again. Instead, we want the button to display a loading indicator
+          // for the remainder of the lifetime of the page (i.e., until the
+          // browser can start painting the new page it's been redirected to).
+          expect(findSubmitButton().props().loading).toBe(true);
+        });
+      });
+    });
   });
 
   describe('the cancel button', () => {

@@ -107,7 +107,7 @@ module Gitlab
         def primary_write_location
           read_write do |connection|
             row = connection
-              .select_all("SELECT #{Gitlab::Database.pg_current_wal_insert_lsn}()::text AS location")
+              .select_all("SELECT pg_current_wal_insert_lsn()::text AS location")
               .first
 
             if row

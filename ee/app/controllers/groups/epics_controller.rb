@@ -20,7 +20,9 @@ class Groups::EpicsController < Groups::ApplicationController
     push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
   end
 
-  def new; end
+  def new
+    @noteable = Epic.new
+  end
 
   def index
     @epics = @issuables

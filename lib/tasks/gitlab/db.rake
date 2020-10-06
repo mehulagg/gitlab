@@ -35,6 +35,11 @@ namespace :gitlab do
       # Truncate schema_migrations to ensure migrations re-run
       connection.execute('TRUNCATE schema_migrations') if connection.table_exists? 'schema_migrations'
 
+      # Drop any views
+      connection.views.each do |view|
+        connection.execute("DROP VIEW IF EXISTS #{connection.quote_table_name(view)} CASCADE")
+      end
+
       # Drop tables with cascade to avoid dependent table errors
       # PG: http://www.postgresql.org/docs/current/static/ddl-depend.html
       # Add `IF EXISTS` because cascade could have already deleted a table.
@@ -174,14 +179,16 @@ namespace :gitlab do
         exit
       end
 
-      raise ArgumentError, 'must give the index name to reindex' unless args[:index_name]
+      indexes = if args[:index_name]
+                  Gitlab::Database::PostgresIndex.by_identifier(args[:index_name])
+                else
+                  Gitlab::Database::Reindexing.candidate_indexes.random_few(2)
+                end
 
-      index = Gitlab::Database::Reindexing::Index.find_with_schema(args[:index_name])
-
-      raise ArgumentError, "Given index does not exist: #{args[:index_name]}" unless index
-
-      puts "Rebuilding index #{index}".color(:green)
-      Gitlab::Database::Reindexing::ConcurrentReindex.new(index).perform
+      Gitlab::Database::Reindexing.perform(indexes)
+    rescue => e
+      Gitlab::AppLogger.error(e)
+      raise
     end
   end
 end

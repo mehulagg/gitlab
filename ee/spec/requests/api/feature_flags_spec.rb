@@ -446,7 +446,7 @@ RSpec.describe API::FeatureFlags do
         }])
       end
 
-      it 'creates a new feature flag with strategies with scopes' do
+      it 'creates a new feature flag with gradual rollout strategy with scopes' do
         params = {
           name: 'new-feature',
           version: 'new_version_flag',
@@ -470,6 +470,36 @@ RSpec.describe API::FeatureFlags do
         expect(feature_flag.strategies.map { |s| s.slice(:name, :parameters).deep_symbolize_keys }).to eq([{
           name: 'gradualRolloutUserId',
           parameters: { groupId: 'default', percentage: '50' }
+        }])
+        expect(feature_flag.strategies.first.scopes.map { |s| s.slice(:environment_scope).deep_symbolize_keys }).to eq([{
+          environment_scope: 'staging'
+        }])
+      end
+
+      it 'creates a new feature flag with flexible rollout strategy with scopes' do
+        params = {
+          name: 'new-feature',
+          version: 'new_version_flag',
+          strategies: [{
+            name: 'flexibleRollout',
+            parameters: { groupId: 'default', rollout: '50', stickiness: 'DEFAULT' },
+            scopes: [{
+              environment_scope: 'staging'
+            }]
+          }]
+        }
+
+        post api("/projects/#{project.id}/feature_flags", user), params: params
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(response).to match_response_schema('public_api/v4/feature_flag', dir: 'ee')
+
+        feature_flag = project.operations_feature_flags.last
+        expect(feature_flag.name).to eq(params[:name])
+        expect(feature_flag.version).to eq('new_version_flag')
+        expect(feature_flag.strategies.map { |s| s.slice(:name, :parameters).deep_symbolize_keys }).to eq([{
+          name: 'flexibleRollout',
+          parameters: { groupId: 'default', rollout: '50', stickiness: 'DEFAULT' }
         }])
         expect(feature_flag.strategies.first.scopes.map { |s| s.slice(:environment_scope).deep_symbolize_keys }).to eq([{
           environment_scope: 'staging'
@@ -769,12 +799,34 @@ RSpec.describe API::FeatureFlags do
         expect(feature_flag.reload.description).to eq('old description')
       end
 
-      it 'returns an error for an invalid update' do
+      it 'returns an error for an invalid update of gradual rollout' do
         strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'default', parameters: {})
         params = {
           strategies: [{
             id: strategy.id,
             name: 'gradualRolloutUserId',
+            parameters: { bad: 'params' }
+          }]
+        }
+
+        put api("/projects/#{project.id}/feature_flags/feature1", user), params: params
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['message']).not_to be_nil
+        result = feature_flag.reload.strategies.map { |s| s.slice(:id, :name, :parameters).deep_symbolize_keys }
+        expect(result).to eq([{
+          id: strategy.id,
+          name: 'default',
+          parameters: {}
+        }])
+      end
+
+      it 'returns an error for an invalid update of flexible rollout' do
+        strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'default', parameters: {})
+        params = {
+          strategies: [{
+            id: strategy.id,
+            name: 'flexibleRollout',
             parameters: { bad: 'params' }
           }]
         }
@@ -853,7 +905,7 @@ RSpec.describe API::FeatureFlags do
         })
       end
 
-      it 'updates an existing feature flag strategy' do
+      it 'updates an existing feature flag strategy to be gradual rollout strategy' do
         strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'default', parameters: {})
         params = {
           strategies: [{
@@ -875,7 +927,29 @@ RSpec.describe API::FeatureFlags do
         }])
       end
 
-      it 'creates a new feature flag strategy' do
+      it 'updates an existing feature flag strategy to be flexible rollout strategy' do
+        strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'default', parameters: {})
+        params = {
+          strategies: [{
+            id: strategy.id,
+            name: 'flexibleRollout',
+            parameters: { groupId: 'default', rollout: '10', stickiness: 'DEFAULT' }
+          }]
+        }
+
+        put api("/projects/#{project.id}/feature_flags/feature1", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/feature_flag', dir: 'ee')
+        result = feature_flag.reload.strategies.map { |s| s.slice(:id, :name, :parameters).deep_symbolize_keys }
+        expect(result).to eq([{
+          id: strategy.id,
+          name: 'flexibleRollout',
+          parameters: { groupId: 'default', rollout: '10', stickiness: 'DEFAULT' }
+        }])
+      end
+
+      it 'adds a new gradual rollout strategy to a feature flag' do
         strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'default', parameters: {})
         params = {
           strategies: [{
@@ -898,6 +972,32 @@ RSpec.describe API::FeatureFlags do
         }, {
           name: 'gradualRolloutUserId',
           parameters: { groupId: 'default', percentage: '10' }
+        }])
+      end
+
+      it 'adds a new gradual flexible strategy to a feature flag' do
+        strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'default', parameters: {})
+        params = {
+          strategies: [{
+            name: 'flexibleRollout',
+            parameters: { groupId: 'default', rollout: '10', stickiness: 'DEFAULT' }
+          }]
+        }
+
+        put api("/projects/#{project.id}/feature_flags/feature1", user), params: params
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/feature_flag', dir: 'ee')
+        result = feature_flag.reload.strategies
+          .map { |s| s.slice(:id, :name, :parameters).deep_symbolize_keys }
+          .sort_by { |s| s[:name] }
+        expect(result.first[:id]).to eq(strategy.id)
+        expect(result.map { |s| s.slice(:name, :parameters) }).to eq([{
+          name: 'default',
+          parameters: {}
+        }, {
+          name: 'flexibleRollout',
+          parameters: { groupId: 'default', rollout: '10', stickiness: 'DEFAULT' }
         }])
       end
 

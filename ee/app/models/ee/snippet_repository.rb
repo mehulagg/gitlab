@@ -12,8 +12,14 @@ module EE
     class_methods do
       def replicables_for_geo_node
         # Not implemented yet. Should be responible for selective sync
-        none
+        all
       end
+    end
+
+    # Geo checks this method in FrameworkRepositorySyncService to avoid snapshotting
+    # repositories using object pools
+    def pool_repository
+      nil
     end
   end
 end

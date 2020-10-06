@@ -37,7 +37,6 @@ RSpec.describe Gitlab::UsageData do
       create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:jira_service, project: projects[0], issues_enabled: true, project_key: 'GL')
 
-      create(:project_tracing_setting, project: projects[0])
       create(:operations_feature_flag, project: projects[0])
 
       create(:issue, project: projects[1])
@@ -107,7 +106,6 @@ RSpec.describe Gitlab::UsageData do
         projects_mirrored_with_pipelines_enabled
         projects_reporting_ci_cd_back_to_github
         projects_with_prometheus_alerts
-        projects_with_tracing_enabled
         sast_jobs
         secret_detection_jobs
         status_page_incident_publishes
@@ -283,15 +281,20 @@ RSpec.describe Gitlab::UsageData do
         project = create(:project, :repository_private, :github_imported,
                           :test_repo, creator: user)
         merge_request = create(:merge_request, source_project: project)
+        overridden_merge_request = create(:merge_request, source_project: project, target_branch: "override")
         project_rule = create(:approval_project_rule, project: project)
+        overridden_project_rule = create(:approval_project_rule, project: project, approvals_required: 1)
         merge_rule = create(:approval_merge_request_rule, merge_request: merge_request)
+        overridden_mr_rule = create(:approval_merge_request_rule, merge_request: overridden_merge_request, approvals_required: 5)
         create(:approval_merge_request_rule_source, approval_merge_request_rule: merge_rule, approval_project_rule: project_rule)
+        create(:approval_merge_request_rule_source, approval_merge_request_rule: overridden_mr_rule, approval_project_rule: overridden_project_rule)
         create(:project, creator: user)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: true)
         create(:project, creator: user, disable_overriding_approvers_per_merge_request: false)
-        create(:approval_project_rule, project: project)
+        create(:approval_project_rule, project: project, users: create_list(:user, 2), approvals_required: 1)
+        create(:approval_project_rule, project: project, users: [create(:user)], approvals_required: 1)
         protected_branch = create(:protected_branch, project: project)
-        create(:approval_project_rule, protected_branches: [protected_branch], project: project)
+        create(:approval_project_rule, protected_branches: [protected_branch], users: [create(:user)], approvals_required: 2, project: project)
         create(:suggestion, note: create(:note, project: project))
         create(:code_owner_rule, merge_request: merge_request, approvals_required: 3)
         create(:code_owner_rule, merge_request: merge_request, approvals_required: 7, section: 'new_section')
@@ -316,13 +319,17 @@ RSpec.describe Gitlab::UsageData do
       end
 
       expect(described_class.usage_activity_by_stage_create({})).to include(
-        approval_project_rules: 6,
+        approval_project_rules: 10,
         approval_project_rules_with_target_branch: 2,
+        approval_project_rules_with_more_approvers_than_required: 2,
+        approval_project_rules_with_less_approvers_than_required: 2,
+        approval_project_rules_with_exact_required_approvers: 2,
         projects_enforcing_code_owner_approval: 0,
         projects_with_sectional_code_owner_rules: 2,
         merge_requests_with_added_rules: 12,
         merge_requests_with_optional_codeowners: 4,
         merge_requests_with_required_codeowners: 8,
+        merge_requests_with_overridden_project_rules: 4,
         projects_imported_from_github: 2,
         projects_with_repositories_enabled: 26,
         protected_branches: 2,
@@ -333,8 +340,11 @@ RSpec.describe Gitlab::UsageData do
         total_number_of_locked_files: 14
       )
       expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
-        approval_project_rules: 6,
+        approval_project_rules: 10,
         approval_project_rules_with_target_branch: 2,
+        approval_project_rules_with_more_approvers_than_required: 2,
+        approval_project_rules_with_less_approvers_than_required: 2,
+        approval_project_rules_with_exact_required_approvers: 2,
         projects_enforcing_code_owner_approval: 0,
         projects_with_sectional_code_owner_rules: 1,
         merge_requests_with_added_rules: 6,
@@ -415,20 +425,17 @@ RSpec.describe Gitlab::UsageData do
         create(:users_ops_dashboard_project, user: user)
         create(:prometheus_service, project: project)
         create(:project_error_tracking_setting, project: project)
-        create(:project_tracing_setting, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
         projects_prometheus_active: 2,
-        projects_with_error_tracking_enabled: 2,
-        projects_with_tracing_enabled: 2
+        projects_with_error_tracking_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_prometheus_active: 1,
-        projects_with_error_tracking_enabled: 1,
-        projects_with_tracing_enabled: 1
+        projects_with_error_tracking_enabled: 1
       )
     end
   end
@@ -478,9 +485,10 @@ RSpec.describe Gitlab::UsageData do
   end
 
   describe 'usage_activity_by_stage_secure' do
-    let_it_be(:user) { create(:user, group_view: :security_dashboard) }
-    let_it_be(:user2) { create(:user, group_view: :security_dashboard) }
-    let_it_be(:user3) { create(:user, group_view: :security_dashboard) }
+    let_it_be(:days_ago_within_monthly_time_period) { 3.days.ago }
+    let_it_be(:user) { create(:user, group_view: :security_dashboard, created_at: days_ago_within_monthly_time_period) }
+    let_it_be(:user2) { create(:user, group_view: :security_dashboard, created_at: days_ago_within_monthly_time_period) }
+    let_it_be(:user3) { create(:user, group_view: :security_dashboard, created_at: days_ago_within_monthly_time_period) }
 
     before do
       for_defined_days_back do

@@ -1,7 +1,0 @@
----
-name: store_merge_request_line_metrics
-introduced_by_url: 
-rollout_issue_url: 
-group: 
-type: development
-default_enabled: true

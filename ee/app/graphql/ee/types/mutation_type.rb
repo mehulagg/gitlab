@@ -25,8 +25,10 @@ module EE
         mount_mutation ::Mutations::Vulnerabilities::Dismiss
         mount_mutation ::Mutations::Vulnerabilities::Resolve
         mount_mutation ::Mutations::Vulnerabilities::Confirm
+        mount_mutation ::Mutations::Vulnerabilities::RevertToDetected
         mount_mutation ::Mutations::Boards::Update
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
+        mount_mutation ::Mutations::Boards::UpdateEpicUserPreferences
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
         mount_mutation ::Mutations::DastOnDemandScans::Create

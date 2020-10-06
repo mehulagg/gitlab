@@ -84,8 +84,9 @@ export default () => {
     },
     provide: {
       boardId: $boardApp.dataset.boardId,
-      groupId: Number($boardApp.dataset.groupId) || null,
+      groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
+      canUpdate: $boardApp.dataset.canUpdate,
     },
     store,
     apolloProvider,
@@ -131,6 +132,7 @@ export default () => {
       eventHub.$on('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$on('toggleSubscription', this.toggleSubscription);
       eventHub.$on('performSearch', this.performSearch);
+      eventHub.$on('initialBoardLoad', this.initialBoardLoad);
     },
     beforeDestroy() {
       eventHub.$off('updateTokens', this.updateTokens);
@@ -138,6 +140,7 @@ export default () => {
       eventHub.$off('clearDetailIssue', this.clearDetailIssue);
       sidebarEventHub.$off('toggleSubscription', this.toggleSubscription);
       eventHub.$off('performSearch', this.performSearch);
+      eventHub.$off('initialBoardLoad', this.initialBoardLoad);
     },
     mounted() {
       this.filterManager = new FilteredSearchBoards(boardsStore.filter, true, boardsStore.cantEdit);
@@ -148,6 +151,18 @@ export default () => {
       boardsStore.disabled = this.disabled;
 
       if (!gon.features.graphqlBoardLists) {
+        this.initialBoardLoad();
+      }
+    },
+    methods: {
+      ...mapActions([
+        'setInitialBoardData',
+        'setFilters',
+        'fetchEpicsSwimlanes',
+        'resetIssues',
+        'resetEpics',
+      ]),
+      initialBoardLoad() {
         boardsStore
           .all()
           .then(res => res.data)
@@ -160,17 +175,15 @@ export default () => {
           .catch(() => {
             Flash(__('An error occurred while fetching the board lists. Please try again.'));
           });
-      }
-    },
-    methods: {
-      ...mapActions(['setInitialBoardData', 'setFilters', 'fetchEpicsSwimlanes', 'resetIssues']),
+      },
       updateTokens() {
         this.filterManager.updateTokens();
       },
       performSearch() {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
         if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
-          this.fetchEpicsSwimlanes(false);
+          this.resetEpics();
+          this.fetchEpicsSwimlanes({ withLists: false });
           this.resetIssues();
         }
       },

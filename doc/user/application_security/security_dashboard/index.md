@@ -46,15 +46,19 @@ To use the security dashboards and vulnerability reports:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13496) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.3.
 
-At the pipeline level, the Security section displays the vulnerabilities present in the branch of the project the pipeline was run against.
+At the pipeline level, the Security section displays the vulnerabilities present in the branch of
+the project the pipeline ran against.
 
 ![Pipeline Security Dashboard](img/pipeline_security_dashboard_v13_3.png)
 
 Visit the page for any pipeline that ran any of the [supported reports](#supported-reports). To view
 the pipeline's security findings, select the **Security** tab when viewing the pipeline.
 
-NOTE: **Note:**
-A pipeline consists of multiple jobs, including SAST and DAST scanning. If any job fails to finish for any reason, the security dashboard will not show SAST scanner output. For example, if the SAST job finishes but the DAST job fails, the security dashboard will not show SAST results. The analyzer will output an [exit code](../../../development/integrations/secure.md#exit-code) on failure.
+A pipeline consists of multiple jobs, including SAST and DAST scanning. If any job fails to finish
+for any reason, the security dashboard doesn't show SAST scanner output. For example, if the SAST
+job finishes but the DAST job fails, the security dashboard doesn't show SAST results. On failure,
+the analyzer outputs an
+[exit code](../../../development/integrations/secure.md#exit-code).
 
 ## Project Security Dashboard
 
@@ -70,7 +74,7 @@ Critical, High, Medium, Low, Info, Unknown). Below this, a table shows each vuln
 and description. Clicking a vulnerability takes you to its [Vulnerability Details](../vulnerabilities)
 page to view more information about that vulnerability.
 
-![Project Security Dashboard](img/project_security_dashboard_v13_3.png)
+![Project Security Dashboard](img/project_security_dashboard_v13_4.png)
 
 You can filter the vulnerabilities by one or more of the following:
 
@@ -83,7 +87,7 @@ You can also dismiss vulnerabilities in the table:
 1. Select the checkbox for each vulnerability you want to dismiss.
 1. In the menu that appears, select the reason for dismissal and click **Dismiss Selected**.
 
-![Project Security Dashboard](img/project_security_dashboard_v13_2.png)
+![Project Security Dashboard](img/project_security_dashboard_dismissal_v13_4.png)
 
 ## Group Security Dashboard
 
@@ -95,9 +99,9 @@ after selecting your group. By default, the Security Dashboard displays all dete
 vulnerabilities. If you don't see the vulnerabilities over time graph, the likely cause is that you
 have not selected a group.
 
-NOTE: **Note:**
-The Security Dashboard only shows projects with [security reports](#supported-reports) enabled in a
-group.
+Note that the Security Dashboard only shows projects with
+[security reports](#supported-reports)
+enabled in a group.
 
 ![Dashboard with action buttons and metrics](img/group_security_dashboard_v13_3.png)
 
@@ -159,17 +163,31 @@ found in those projects' default branches.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/213014) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.10.
 
-You can export all your vulnerabilities in CSV format by clicking the **{upload}** **Export**
-button located at top right of the **Security Dashboard**. After the report
-is built, the CSV report downloads to your local machine. The report contains all
-vulnerabilities for the projects defined in the **Security Dashboard**,
-as filters don't apply to the export function.
-
-![Export vulnerabilities](img/instance_security_dashboard_export_csv_v13_4.png)
+You can export all your vulnerabilities in CSV (comma separated values) format by clicking the
+**{upload}** **Export** button located at top right of the Security Dashboard. When the report is
+ready, the CSV report downloads to your local machine. The report contains all vulnerabilities for
+the projects defined in the Security Dashboard, as filters don't apply to the export function.
 
 NOTE: **Note:**
 It may take several minutes for the download to start if your project contains
-thousands of vulnerabilities. Do not close the page until the download finishes.
+thousands of vulnerabilities. Don't close the page until the download finishes.
+
+The fields in the export include:
+
+- Group Name
+- Project Name
+- Scanner Type
+- Scanner Name
+- Status
+- Vulnerability
+- Details
+- Additional Info
+- Severity
+- [CVE](https://cve.mitre.org/)
+- [CWE](https://cwe.mitre.org/)
+- Other Identifiers
+
+![Export vulnerabilities](img/instance_security_dashboard_export_csv_v13_4.png)
 
 ## Keeping the dashboards up to date
 
@@ -222,8 +240,14 @@ To create an issue associated with the vulnerability, click the **Create Issue**
 
 ![Create an issue for the vulnerability](img/vulnerability_page_v13_1.png)
 
-Once you create the issue, the vulnerability list contains a link to the issue and an icon whose
-color indicates the issue's status (green for open issues, blue for closed issues).
+Once you create the issue, the linked issue icon in the vulnerability list:
+
+- Indicates that an issue has been created for that vulnerability.
+- Shows a tooltip that contains a link to the issue and an icon whose
+  color indicates the issue's status:
+
+  - Open issues: green
+  - Closed issues: blue
 
 ![Display attached issues](img/vulnerability_list_table_v13_4.png)
 
