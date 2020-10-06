@@ -13,6 +13,8 @@ module Projects
 
       track_unique_visits :index, target_id: 'p_analytics_code_reviews'
 
+      feature_category :planning_analytics
+
       def index
       end
     end

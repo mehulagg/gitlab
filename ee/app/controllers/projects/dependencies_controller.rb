@@ -8,6 +8,8 @@ module Projects
       push_frontend_feature_flag(:path_to_vulnerable_dependency, project)
     end
 
+    feature_category :dependency_scanning
+
     def index
       respond_to do |format|
         format.html do

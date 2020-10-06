@@ -7,6 +7,8 @@ class Projects::Analytics::MergeRequestAnalyticsController < Projects::Applicati
 
   track_unique_visits :show, target_id: 'p_analytics_merge_request'
 
+  feature_category :planning_analytics
+
   def show
   end
 end
