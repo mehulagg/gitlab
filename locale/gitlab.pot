@@ -27949,7 +27949,7 @@ msgstr ""
 msgid "UsageQuota|Artifacts"
 msgstr ""
 
-msgid "UsageQuota|Build Artifacts"
+msgid "UsageQuota|Artifacts is a sum of build and pipeline artifacts."
 msgstr ""
 
 msgid "UsageQuota|Buy additional minutes"
