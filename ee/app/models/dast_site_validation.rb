@@ -12,8 +12,8 @@ class DastSiteValidation < ApplicationRecord
   end
 
   scope :url_in, -> (urls) do
-    base_urls = urls.map{ |url| DastSiteValidation.get_base_url(url) }
-    paths = urls.map{ |url| DastSiteValidation.get_path(url) }
+    base_urls = urls.map { |url| DastSiteValidation.get_base_url(url) }
+    paths = urls.map { |url| DastSiteValidation.get_path(url) }
     where(url_base: base_urls, url_path: paths)
   end
 

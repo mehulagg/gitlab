@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class DastSiteValidationsFinder
-    def initialize(params = {})
+  def initialize(params = {})
     @params = params
   end
 
