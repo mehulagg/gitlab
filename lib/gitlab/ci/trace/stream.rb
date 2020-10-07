@@ -69,6 +69,8 @@ module Gitlab
 
         def html(last_lines: nil)
           text = raw(last_lines: last_lines)
+          return if text.nil?
+
           buffer = StringIO.new(text)
           ::Gitlab::Ci::Ansi2html.convert(buffer).html
         end

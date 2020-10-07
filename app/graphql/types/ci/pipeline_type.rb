@@ -56,6 +56,55 @@ module Types
             description: 'Specifies if a pipeline can be canceled',
             method: :cancelable?,
             null: false
+
+      field :builds, ::Types::Ci::BuildType.connection_type, null: true,
+            description: 'Builds run in this pipeline' do
+        argument :statuses, [::Types::Ci::BuildStatusEnum], required: false,
+          as: :status,
+          description: 'Only return builds in one of these states'
+      end
+
+      field :build, ::Types::Ci::BuildType, null: true,
+            description: 'A specific build in this pipeline, either by name or ID' do
+        argument :id, ::Types::GlobalIDType[::Ci::Build], required: false,
+          description: 'The ID of the build'
+        argument :name, ::GraphQL::STRING_TYPE, required: false,
+          description: 'The name of the build'
+      end
+
+      def builds(status: nil)
+        # NOTE: This method should be removed once the ci_jobs_finder_refactor FF is
+        # removed. https://gitlab.com/gitlab-org/gitlab/-/issues/245183
+        # rubocop: disable CodeReuse/ActiveRecord
+        if Feature.enabled?(:ci_jobs_finder_refactor)
+          params = { scope: status }
+          ::Ci::JobsFinder
+            .new(current_user: current_user, pipeline: pipeline, params: params)
+            .execute
+        else
+          return ::Ci::Build.none unless can?(current_user, :read_build, pipeline)
+
+          builds = pipeline.builds
+          builds = builds.where(status: status) if status.present?
+          builds
+        end
+      end
+
+      def build(id: nil, name: nil)
+        raise ::Gitlab::Graphql::Errors::ArgumentError, 'One of id or name is required' unless id || name
+
+        id = ::Types::GlobalIDType[::Ci::Build].coerce_isolated_input(id) if id.present?
+        args = { id: id&.model_id, name: name }
+
+        pipeline.builds.find_by(args.compact)
+      end
+
+      alias_method :pipeline, :object
+
+      # TODO: remove when the else branch of builds is removed
+      def can?(object, action, subject = :global)
+        Ability.allowed?(object, action, subject)
+      end
     end
   end
 end
