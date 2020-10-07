@@ -25,6 +25,10 @@ module Mutations
                required: true,
                description: 'Array of action hashes to commit as a batch'
 
+      argument :request_source, GraphQL::STRING_TYPE,
+               required: false,
+               description: 'Request source'
+
       field :commit,
             Types::CommitType,
             null: true,
@@ -32,7 +36,7 @@ module Mutations
 
       authorize :push_code
 
-      def resolve(project_path:, branch:, message:, actions:)
+      def resolve(project_path:, branch:, message:, actions:, request_source: nil)
         project = authorized_find!(full_path: project_path)
 
         attributes = {
@@ -44,6 +48,8 @@ module Mutations
 
         result = ::Files::MultiService.new(project, current_user, attributes).execute
 
+        increase_commit_counter(result, request_source)
+
         {
           commit: (project.repository.commit(result[:result]) if result[:status] == :success),
           errors: Array.wrap(result[:message])
@@ -54,6 +60,13 @@ module Mutations
 
       def find_object(full_path:)
         resolve_project(full_path: full_path)
+      end
+
+      def increase_commit_counter(result, request_source)
+        return unless result[:status] == :success
+        return unless request_source == 'static_site_editor'
+
+        Gitlab::UsageDataCounters::StaticSiteEditorCounter.increment_commits_count
       end
     end
   end

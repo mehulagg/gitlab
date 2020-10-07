@@ -18,7 +18,7 @@ RSpec.describe Mutations::Commits::Create do
   specify { expect(described_class).to require_graphql_authorizations(:push_code) }
 
   describe '#resolve' do
-    subject { mutation.resolve(project_path: project.full_path, branch: branch, message: message, actions: actions) }
+    subject { mutation.resolve(project_path: project.full_path, branch: branch, message: message, actions: actions, request_source: request_source) }
 
     let(:branch) { 'master' }
     let(:message) { 'Commit message' }
@@ -31,6 +31,7 @@ RSpec.describe Mutations::Commits::Create do
         }
       ]
     end
+    let(:request_source) { nil }
 
     let(:mutated_commit) { subject[:commit] }
 
@@ -119,6 +120,40 @@ RSpec.describe Mutations::Commits::Create do
             a_hash_including(new_file: false, new_path: 'VERSION'),
             a_hash_including(a_mode: '100644', b_mode: '100755', new_path: 'CHANGELOG')
           ])
+        end
+      end
+
+      context 'with request source' do
+        let(:counter) { class_double(Gitlab::UsageDataCounters::StaticSiteEditorCounter).as_stubbed_const }
+
+        context 'when request source is static_site_editor' do
+          let(:request_source) { 'static_site_editor' }
+
+          it 'increases a Static Site Editor commit count' do
+            expect(counter).to receive(:increment_commits_count)
+
+            subject
+          end
+
+          context 'when commit creation fails' do
+            let(:branch) { 'unknown' }
+
+            it 'does not count a commit' do
+              expect(counter).not_to receive(:increment_commits_count)
+
+              subject
+            end
+          end
+        end
+
+        context 'when request source is not defined' do
+          let(:request_source) { nil }
+
+          it 'does not count a commit' do
+            expect(counter).not_to receive(:increment_commits_count)
+
+            subject
+          end
         end
       end
 
