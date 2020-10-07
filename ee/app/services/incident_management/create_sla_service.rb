@@ -6,7 +6,6 @@ module IncidentManagement
       super(incident.project, current_user)
 
       @incident = incident
-      @project = project
     end
 
     def execute

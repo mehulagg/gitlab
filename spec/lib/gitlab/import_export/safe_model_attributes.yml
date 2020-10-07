@@ -855,3 +855,7 @@ ProjectSecuritySetting:
   - auto_fix_sast
   - created_at
   - updated_at
+IncidentManagement::IncidentSla:
+  - issue_id
+  - due_at
+

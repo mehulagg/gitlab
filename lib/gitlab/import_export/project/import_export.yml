@@ -410,3 +410,8 @@ ee:
         - :deploy_access_levels
       - :service_desk_setting
       - :security_setting
+
+  included_attributes:
+    incident_sla:
+      - :issue
+      - :due_at
