@@ -154,7 +154,7 @@ To add the GitLab NuGet Repository as a source for .NET, create a file named `nu
 
 When uploading packages, note that:
 
-- The maximum allowed size is 50 Megabytes.
+- The default maximum size is 50 Megabytes but can be configured to be larger as of release 13.4 
 - If you upload the same package with the same version multiple times, each consecutive upload
   is saved as a separate file. When installing a package, GitLab serves the most recent file.
 - When uploading packages to GitLab, they are not displayed in the packages UI of your project
