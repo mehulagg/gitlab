@@ -3520,6 +3520,23 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
   end
 
+  describe '#merge_base_pipeline' do
+    let(:merge_request) do
+      create(:merge_request, :with_merge_request_pipeline)
+    end
+
+    let(:pre_merge_target_pipeline) do
+      create(:ci_pipeline, ref: merge_request.target_branch, sha: merge_request.target_branch_sha)
+    end
+
+    it 'returns a pipeline pointing to a commit on the target ref' do
+      pre_merge_target_pipeline
+      merge_request.update_head_pipeline
+
+      expect(merge_request.merge_base_pipeline).to eq(pre_merge_target_pipeline)
+    end
+  end
+
   describe '#has_commits?' do
     it 'returns true when merge request diff has commits' do
       allow(subject.merge_request_diff).to receive(:commits_count)
