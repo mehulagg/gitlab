@@ -87,7 +87,7 @@ module Groups
 
       if settings.previous_changes.include?(:allow_mfa_for_subgroups)
         # enque in batches members update
-        Disallow2FAWorker.perform_async(group.id)
+        DisallowTwoFaWorker.perform_async(group.id)
       end
     end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Disallow2FAForSubgroupsWorker # rubocop:disable Scalability/IdempotentWorker
+class DisallowTwoFaForSubgroupsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include ExceptionBacktrace
 
@@ -12,7 +12,7 @@ class Disallow2FAForSubgroupsWorker # rubocop:disable Scalability/IdempotentWork
     rescue ActiveRecord::RecordNotFound
       return
     end
-    # binding.pry
+
     group.update!(require_two_factor_authentication: false)
   end
 end

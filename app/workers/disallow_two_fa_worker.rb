@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Disallow2FAWorker # rubocop:disable Scalability/IdempotentWorker
+class DisallowTwoFaWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include ExceptionBacktrace
 
@@ -9,7 +9,6 @@ class Disallow2FAWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :subgroups
 
   def perform(group_id)
-    binding.pry
     begin
       group = Group.find(group_id)
     rescue ActiveRecord::RecordNotFound
@@ -21,7 +20,7 @@ class Disallow2FAWorker # rubocop:disable Scalability/IdempotentWorker
       delay = index * INTERVAL
 
       with_context(namespace: subgroup) do
-        Disallow2FAForSubgroupsWorker.perform_in(delay, subgroup.id)
+        DisallowTwoFaForSubgroupsWorker.perform_in(delay, subgroup.id)
       end
     end
   end
