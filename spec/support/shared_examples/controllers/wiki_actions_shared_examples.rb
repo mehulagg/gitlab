@@ -161,12 +161,19 @@ RSpec.shared_examples 'wiki controller actions' do
         expect(assigns(:sidebar_limited)).to be(false)
       end
 
-      it 'increases the page view counter' do
-        expect do
-          subject
+      context 'page view tracking' do
+        it_behaves_like 'tracking unique hll events', :track_unique_wiki_page_views do
+          let(:target_id) { 'wiki_action' }
+          let(:expected_type) { instance_of(String) }
+        end
 
-          expect(response).to have_gitlab_http_status(:ok)
-        end.to change { Gitlab::UsageDataCounters::WikiPageCounter.read(:view) }.by(1)
+        it 'increases the page view counter' do
+          expect do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+          end.to change { Gitlab::UsageDataCounters::WikiPageCounter.read(:view) }.by(1)
+        end
       end
 
       context 'when page content encoding is invalid' do
