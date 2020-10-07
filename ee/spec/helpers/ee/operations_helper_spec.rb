@@ -153,7 +153,7 @@ RSpec.describe OperationsHelper, :routing do
         stub_licensed_features(incident_sla: true)
       end
 
-      it 'returns the feature as disabled' do
+      it 'returns the feature as enabled' do
         expect(subject[:sla_feature_available]).to eq('true')
       end
     end
