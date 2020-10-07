@@ -377,7 +377,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is not available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: false)
+            stub_licensed_features(ci_project_subscriptions: false)
           end
 
           it 'does not schedule the trigger downstream subscriptions worker' do
@@ -493,6 +493,55 @@ RSpec.describe Ci::Pipeline do
       let(:merge_request) { create(:merge_request, :with_detached_merge_request_pipeline) }
 
       it { is_expected.to eq(:detached) }
+    end
+  end
+
+  describe '#latest_failed_security_builds' do
+    let(:sast_build) { create(:ee_ci_build, :sast, :failed, pipeline: pipeline) }
+    let(:dast_build) { create(:ee_ci_build, :sast, pipeline: pipeline) }
+    let(:retried_sast_build) { create(:ee_ci_build, :sast, :failed, :retried, pipeline: pipeline) }
+    let(:expected_builds) { [sast_build] }
+
+    before do
+      allow_next_instance_of(::Security::SecurityJobsFinder) do |finder|
+        allow(finder).to receive(:execute).and_return([sast_build, dast_build, retried_sast_build])
+      end
+    end
+
+    subject { pipeline.latest_failed_security_builds }
+
+    it { is_expected.to match_array(expected_builds) }
+  end
+
+  describe "#license_scan_completed?" do
+    where(:pipeline_status, :build_types, :expected_status) do
+      [
+        [:blocked, [:container_scanning], false],
+        [:blocked, [:license_scan_v2_1, :container_scanning], true],
+        [:blocked, [:license_scan_v2_1], true],
+        [:blocked, [], false],
+        [:failed, [:container_scanning], false],
+        [:failed, [:license_scan_v2_1, :container_scanning], true],
+        [:failed, [:license_scan_v2_1], true],
+        [:failed, [], false],
+        [:running, [:container_scanning], false],
+        [:running, [:license_scan_v2_1, :container_scanning], true],
+        [:running, [:license_scan_v2_1], true],
+        [:running, [], false],
+        [:success, [:container_scanning], false],
+        [:success, [:license_scan_v2_1, :container_scanning], true],
+        [:success, [:license_scan_v2_1], true],
+        [:success, [], false]
+      ]
+    end
+
+    with_them do
+      subject { pipeline.license_scan_completed? }
+
+      let(:pipeline) { create(:ci_pipeline, pipeline_status, builds: builds) }
+      let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+      specify { expect(subject).to eq(expected_status) }
     end
   end
 end

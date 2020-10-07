@@ -178,7 +178,13 @@ RSpec.describe ProjectsHelper do
             pipeline: {
               id: pipeline.id,
               path: "/#{project.full_path}/-/pipelines/#{pipeline.id}",
-              created_at: pipeline_created_at
+              created_at: pipeline_created_at,
+              security_builds: {
+                failed: {
+                  count: 0,
+                  path: "/#{project.full_path}/-/pipelines/#{pipeline.id}/failures"
+                }
+              }
             }
           }
         end

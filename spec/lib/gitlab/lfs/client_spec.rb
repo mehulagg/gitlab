@@ -8,6 +8,7 @@ RSpec.describe Gitlab::Lfs::Client do
   let(:password) { 'password' }
   let(:credentials) { { user: username, password: password, auth_method: 'password' } }
   let(:git_lfs_content_type) { 'application/vnd.git-lfs+json' }
+  let(:git_lfs_user_agent) { "GitLab #{Gitlab::VERSION} LFS client" }
 
   let(:basic_auth_headers) do
     { 'Authorization' => "Basic #{Base64.strict_encode64("#{username}:#{password}")}" }
@@ -30,6 +31,9 @@ RSpec.describe Gitlab::Lfs::Client do
       }
     }
   end
+
+  let(:authorized_upload_action) { upload_action.tap { |action| action['header']['Authorization'] = 'foo' } }
+  let(:authorized_verify_action) { verify_action.tap { |action| action['header']['Authorization'] = 'foo' } }
 
   subject(:lfs_client) { described_class.new(base_url, credentials: credentials) }
 
@@ -91,7 +95,8 @@ RSpec.describe Gitlab::Lfs::Client do
 
       headers = {
         'Accept' => git_lfs_content_type,
-        'Content-Type' => git_lfs_content_type
+        'Content-Type' => git_lfs_content_type,
+        'User-Agent' => git_lfs_user_agent
       }.merge(headers)
 
       stub_request(:post, base_url + '/info/lfs/objects/batch').with(body: body, headers: headers)
@@ -117,6 +122,19 @@ RSpec.describe Gitlab::Lfs::Client do
         ).to_return(status: 200)
 
         lfs_client.upload!(object, upload_action, authenticated: false)
+
+        expect(stub).to have_been_requested
+      end
+    end
+
+    context 'request is not marked as authenticated but includes an authorization header' do
+      it 'prefers the provided authorization header' do
+        stub = stub_upload(
+          object: object,
+          headers: authorized_upload_action['header']
+        ).to_return(status: 200)
+
+        lfs_client.upload!(object, authorized_upload_action, authenticated: false)
 
         expect(stub).to have_been_requested
       end
@@ -156,7 +174,8 @@ RSpec.describe Gitlab::Lfs::Client do
     def stub_upload(object:, headers:)
       headers = {
         'Content-Type' => 'application/octet-stream',
-        'Content-Length' => object.size.to_s
+        'Content-Length' => object.size.to_s,
+        'User-Agent' => git_lfs_user_agent
       }.merge(headers)
 
       stub_request(:put, upload_action['href']).with(
@@ -190,6 +209,19 @@ RSpec.describe Gitlab::Lfs::Client do
       end
     end
 
+    context 'request is not marked as authenticated but includes an authorization header' do
+      it 'prefers the provided authorization header' do
+        stub = stub_verify(
+          object: object,
+          headers: authorized_verify_action['header']
+        ).to_return(status: 200)
+
+        lfs_client.verify!(object, authorized_verify_action, authenticated: false)
+
+        expect(stub).to have_been_requested
+      end
+    end
+
     context 'server returns 400 error' do
       it 'raises an error' do
         stub_verify(object: object, headers: verify_action['header']).to_return(status: 400)
@@ -209,7 +241,8 @@ RSpec.describe Gitlab::Lfs::Client do
     def stub_verify(object:, headers:)
       headers = {
         'Accept' => git_lfs_content_type,
-        'Content-Type' => git_lfs_content_type
+        'Content-Type' => git_lfs_content_type,
+        'User-Agent' => git_lfs_user_agent
       }.merge(headers)
 
       stub_request(:post, verify_action['href']).with(

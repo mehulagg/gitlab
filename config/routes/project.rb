@@ -93,6 +93,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             post :reset_cache
             put :reset_registration_token
             post :create_deploy_token, path: 'deploy_token/create', to: 'repository#create_deploy_token'
+            get :runner_setup_scripts, format: :json
           end
 
           resource :operations, only: [:show, :update] do
@@ -309,6 +310,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         post 'incidents/integrations/pagerduty', to: 'incident_management/pager_duty_incidents#create'
 
         resources :incidents, only: [:index]
+
+        get 'issues/incident/:id' => 'incidents#show', as: :issues_incident
 
         namespace :error_tracking do
           resources :projects, only: :index

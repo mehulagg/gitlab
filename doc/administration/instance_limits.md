@@ -333,6 +333,7 @@ setting is used:
 | Artifact limit name                         | Default value |
 |---------------------------------------------|---------------|
 | `ci_max_artifact_size_accessibility`        | 0             |
+| `ci_max_artifact_size_api_fuzzing`          | 0             |
 | `ci_max_artifact_size_archive`              | 0             |
 | `ci_max_artifact_size_browser_performance`  | 0             |
 | `ci_max_artifact_size_cluster_applications` | 0             |
@@ -480,7 +481,7 @@ indexed](#maximum-file-size-indexed)).
 - For self-managed installations it is unlimited by default
 
 This limit can be configured for self-managed installations when [enabling
-Elasticsearch](../integration/elasticsearch.md#enabling-elasticsearch).
+Elasticsearch](../integration/elasticsearch.md#enabling-advanced-search).
 
 NOTE: **Note:**
 Set the limit to `0` to disable it.

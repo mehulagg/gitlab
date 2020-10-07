@@ -184,6 +184,11 @@ describe('burndown_chart', () => {
       expect(findBurnupChart().props('issuesSelected')).toBe(false);
     });
 
+    it('shows old/new burndown buttons', () => {
+      expect(findOldBurndownChartButton().exists()).toBe(true);
+      expect(findNewBurndownChartButton().exists()).toBe(true);
+    });
+
     it('uses burndown data computed from burnup data', () => {
       createComponent({
         data: {

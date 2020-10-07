@@ -1,10 +1,10 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
+import { getJSONFixture } from 'helpers/fixtures';
 import { cloneDeep } from 'lodash';
 import * as actions from '~/releases/stores/modules/detail/actions';
 import * as types from '~/releases/stores/modules/detail/mutation_types';
-import { release as originalRelease } from '../../../mock_data';
 import createState from '~/releases/stores/modules/detail/state';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -20,6 +20,8 @@ jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
   joinPaths: jest.requireActual('~/lib/utils/url_utility').joinPaths,
 }));
+
+const originalRelease = getJSONFixture('api/releases/release.json');
 
 describe('Release detail actions', () => {
   let state;
@@ -274,32 +276,14 @@ describe('Release detail actions', () => {
 
     describe('receiveSaveReleaseSuccess', () => {
       it(`commits ${types.RECEIVE_SAVE_RELEASE_SUCCESS}`, () =>
-        testAction(actions.receiveSaveReleaseSuccess, undefined, { ...state, featureFlags: {} }, [
+        testAction(actions.receiveSaveReleaseSuccess, release, state, [
           { type: types.RECEIVE_SAVE_RELEASE_SUCCESS },
         ]));
 
-      describe('when the releaseShowPage feature flag is enabled', () => {
-        beforeEach(() => {
-          const rootState = { featureFlags: { releaseShowPage: true } };
-          actions.receiveSaveReleaseSuccess({ commit: jest.fn(), state, rootState }, release);
-        });
-
-        it("redirects to the release's dedicated page", () => {
-          expect(redirectTo).toHaveBeenCalledTimes(1);
-          expect(redirectTo).toHaveBeenCalledWith(release._links.self);
-        });
-      });
-
-      describe('when the releaseShowPage feature flag is disabled', () => {
-        beforeEach(() => {
-          const rootState = { featureFlags: { releaseShowPage: false } };
-          actions.receiveSaveReleaseSuccess({ commit: jest.fn(), state, rootState }, release);
-        });
-
-        it("redirects to the project's main Releases page", () => {
-          expect(redirectTo).toHaveBeenCalledTimes(1);
-          expect(redirectTo).toHaveBeenCalledWith(state.releasesPagePath);
-        });
+      it("redirects to the release's dedicated page", () => {
+        actions.receiveSaveReleaseSuccess({ commit: jest.fn(), state }, release);
+        expect(redirectTo).toHaveBeenCalledTimes(1);
+        expect(redirectTo).toHaveBeenCalledWith(release._links.self);
       });
     });
 

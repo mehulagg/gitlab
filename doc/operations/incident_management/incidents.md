@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 While no configuration is required to use the [manual features](#create-an-incident-manually)
 of incident management, some simple [configuration](#configure-incidents) is needed to automate incident creation.
 
-For users with at least Reporter [permissions](../../user/permissions.md), the
+For users with at least Guest [permissions](../../user/permissions.md), the
 Incident Management list is available at **Operations > Incidents**
 in your project's sidebar. The list contains the following metrics:
 
@@ -72,7 +72,7 @@ to create issues when alerts are triggered:
    [Trigger actions from alerts](../metrics/alerts.md#trigger-actions-from-alerts) **(ULTIMATE)**.
 1. To create issues from alerts, select the template in the **Issue Template**
    select box.
-1. To send [separate email notifications](index.md#notify-developers-of-alerts) to users
+1. To send [separate email notifications](alert_notifications.md#email-notifications) to users
    with [Developer permissions](../../user/permissions.md), select
    **Send a separate email notification to Developers**.
 1. Click **Save changes**.

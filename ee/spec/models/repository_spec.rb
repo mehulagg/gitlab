@@ -275,4 +275,16 @@ RSpec.describe Repository do
       end
     end
   end
+
+  describe '#lfs_enabled?' do
+    subject { repository.lfs_enabled? }
+
+    context 'for a group wiki repository' do
+      let(:repository) { build_stubbed(:group_wiki).repository }
+
+      it 'returns false' do
+        is_expected.to be_falsy
+      end
+    end
+  end
 end

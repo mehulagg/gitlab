@@ -24,7 +24,7 @@ RSpec.describe SubscriptionPresenter do
     it 'remaining days more than 30 is false' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 4, 9, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to be false
       end
     end
@@ -32,7 +32,7 @@ RSpec.describe SubscriptionPresenter do
     it 'remaining days less than 30 is true' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 3, 9, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to be true
       end
     end
@@ -77,7 +77,7 @@ RSpec.describe SubscriptionPresenter do
       let(:end_date) { today + 1.day }
 
       it 'is false' do
-        Timecop.freeze(today) do
+        travel_to(today) do
           expect(subject).to be false
         end
       end
@@ -88,7 +88,7 @@ RSpec.describe SubscriptionPresenter do
         let(:end_date) { today - 13.days }
 
         it 'is false' do
-          Timecop.freeze(today) do
+          travel_to(today) do
             expect(subject).to be false
           end
         end
@@ -98,7 +98,7 @@ RSpec.describe SubscriptionPresenter do
         let(:end_date) { today - 15.days }
 
         it 'is true' do
-          Timecop.freeze(today) do
+          travel_to(today) do
             expect(subject).to be true
           end
         end
@@ -136,7 +136,7 @@ RSpec.describe SubscriptionPresenter do
     it 'returns the number of days between end_date and today' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 3, 9, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to eq(2)
       end
     end
@@ -144,7 +144,7 @@ RSpec.describe SubscriptionPresenter do
     it 'is 0 if expired' do
       allow(subscription).to receive(:end_date).and_return(Time.utc(2020, 3, 1, 10).to_date)
 
-      Timecop.freeze(today) do
+      travel_to(today) do
         expect(subject).to eq(0)
       end
     end

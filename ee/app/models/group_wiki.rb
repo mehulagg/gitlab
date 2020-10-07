@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class GroupWiki < Wiki
+  self.container_class = ::Group
   alias_method :group, :container
 
   override :create_wiki_repository

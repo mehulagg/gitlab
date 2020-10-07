@@ -1378,4 +1378,37 @@ RSpec.describe ProjectPolicy do
   end
 
   include_examples 'analytics report embedding'
+
+  context 'project access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+      let_it_be(:project) { create(:project, group: group) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with maintainer' do
+        let(:current_user) { maintainer }
+
+        before do
+          project.add_maintainer(maintainer)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          project.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
 end

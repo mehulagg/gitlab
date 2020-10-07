@@ -67,6 +67,16 @@ module EE
             action: :create
           ).for_member(member).security_event
         end
+
+        def paginate_billable_from_user_ids(user_ids)
+          paginated = paginate(::Kaminari.paginate_array(user_ids.sort))
+
+          users_as_hash = ::User.id_in(paginated).index_by(&:id)
+
+          # map! ensures same paginatable array is manipulated
+          # instead of creating a new non-paginatable array
+          paginated.map! { |user_id| users_as_hash[user_id] }
+        end
       end
     end
   end

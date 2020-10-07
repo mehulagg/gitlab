@@ -23,7 +23,7 @@ RSpec.describe 'Rack Attack EE throttles' do
       }
     end
 
-    let(:post_args) { post_args_with_token_headers(path, oauth_token_headers(token)) }
+    let(:post_args) { { headers: oauth_token_headers(token) } }
 
     before do
       stub_application_setting(settings_to_set)
@@ -39,29 +39,29 @@ RSpec.describe 'Rack Attack EE throttles' do
         it 'rejects requests over the rate limit' do
           # At first, allow requests under the rate limit.
           requests_per_period.times do
-            post(*post_args)
+            post(path, **post_args)
             expect(response).to have_gitlab_http_status(:ok)
           end
 
           # the last straw
-          expect_rejection { post(*post_args) }
+          expect_rejection { post(path, **post_args) }
         end
 
         it 'allows requests after throttling and then waiting for the next period' do
           requests_per_period.times do
-            post(*post_args)
+            post(path, **post_args)
             expect(response).to have_gitlab_http_status(:ok)
           end
 
-          expect_rejection { post(*post_args) }
+          expect_rejection { post(path, **post_args) }
 
           Timecop.travel(period.from_now) do
             requests_per_period.times do
-              post(*post_args)
+              post(path, **post_args)
               expect(response).to have_gitlab_http_status(:ok)
             end
 
-            expect_rejection { post(*post_args) }
+            expect_rejection { post(path, **post_args) }
           end
         end
       end
@@ -72,12 +72,12 @@ RSpec.describe 'Rack Attack EE throttles' do
         it 'allows requests over the rate limit' do
           # At first, allow requests under the rate limit.
           requests_per_period.times do
-            post(*post_args)
+            post(path, **post_args)
             expect(response).to have_gitlab_http_status(:ok)
           end
 
           # requests still allowed
-          post(*post_args)
+          post(path, **post_args)
           expect(response).to have_gitlab_http_status(:ok)
         end
       end

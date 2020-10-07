@@ -17,6 +17,7 @@ module EE
       include FromUnion
       include EpicTreeSorting
       include Presentable
+      include IdInOrdered
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],
@@ -126,8 +127,16 @@ module EE
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
 
-      def root_epic_tree_node?
+      def epic_tree_root?
         parent_id.nil?
+      end
+
+      def self.epic_tree_node_query(node)
+        selection = <<~SELECT_LIST
+          id, relative_position, parent_id, parent_id as epic_id, '#{underscore}' as object_type
+        SELECT_LIST
+
+        select(selection).in_parents(node.parent_ids)
       end
 
       private
@@ -146,6 +155,8 @@ module EE
     end
 
     class_methods do
+      extend ::Gitlab::Utils::Override
+
       # We support internal references (&epic_id) and cross-references (group.full_path&epic_id)
       #
       # Escaped versions with `&amp;` will be extracted too
@@ -199,6 +210,18 @@ module EE
         else
           super
         end
+      end
+
+      override :simple_sorts
+      def simple_sorts
+        super.merge(
+          {
+            'start_date_asc' => -> { order_start_date_asc.with_order_id_desc },
+            'start_date_desc' => -> { order_start_date_desc.with_order_id_desc },
+            'end_date_asc' => -> { order_end_date_asc.with_order_id_desc },
+            'end_date_desc' => -> { order_end_date_desc.with_order_id_desc }
+          }
+        )
       end
 
       def parent_class

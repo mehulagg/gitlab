@@ -22,6 +22,12 @@ RSpec.describe GroupPolicy do
       it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
     end
 
+    context 'when user is admin' do
+      let(:current_user) { admin }
+
+      it { is_expected.to be_allowed(:read_epic, :create_epic, :admin_epic, :destroy_epic, :read_confidential_epic, :destroy_epic_link) }
+    end
+
     context 'when user is maintainer' do
       let(:current_user) { maintainer }
 
@@ -176,7 +182,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: true)
       stub_licensed_features(group_activity_analytics: true)
     end
 
@@ -187,7 +192,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: false)
       stub_licensed_features(group_activity_analytics: false)
     end
 
@@ -1111,4 +1115,36 @@ RSpec.describe GroupPolicy do
   it_behaves_like 'update namespace limit policy'
 
   include_examples 'analytics report embedding'
+
+  context 'group access tokens' do
+    it_behaves_like 'GitLab.com Core resource access tokens'
+
+    context 'on GitLab.com paid' do
+      let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      context 'with owner' do
+        let(:current_user) { owner }
+
+        before do
+          group.add_owner(owner)
+        end
+
+        it { is_expected.to be_allowed(:admin_resource_access_tokens) }
+      end
+
+      context 'with developer' do
+        let(:current_user) { developer }
+
+        before do
+          group.add_developer(developer)
+        end
+
+        it { is_expected.not_to be_allowed(:admin_resource_access_tokens)}
+      end
+    end
+  end
 end

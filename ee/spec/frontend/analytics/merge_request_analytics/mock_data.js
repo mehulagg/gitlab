@@ -57,6 +57,13 @@ export const throughputTableHeaders = [
   'Assignees',
 ];
 
+export const pageInfo = {
+  hasNextPage: true,
+  hasPreviousPage: false,
+  startCursor: 'abc',
+  endCursor: 'bcd',
+};
+
 export const throughputTableData = [
   {
     iid: '1',
@@ -77,7 +84,7 @@ export const throughputTableData = [
     },
     diffStatsSummary: { additions: 2, deletions: 1 },
     labels: {
-      nodes: [],
+      count: 0,
     },
     pipelines: {
       nodes: [],

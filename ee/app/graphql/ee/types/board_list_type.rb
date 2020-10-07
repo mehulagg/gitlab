@@ -26,6 +26,10 @@ module EE
         def assignee
           object.assignee? ? object.user : nil
         end
+
+        def total_weight
+          metadata[:total_weight]
+        end
       end
     end
   end

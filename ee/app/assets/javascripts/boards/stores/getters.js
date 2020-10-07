@@ -10,4 +10,8 @@ export default {
   getUnassignedIssues: (state, getters) => listId => {
     return getters.getIssues(listId).filter(i => Boolean(i.epic) === false);
   },
+
+  getEpicById: state => epicId => {
+    return state.epics.find(epic => epic.id === epicId);
+  },
 };

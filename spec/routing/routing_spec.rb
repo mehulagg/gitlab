@@ -119,9 +119,9 @@ RSpec.describe HelpController, "routing" do
                                   path: 'user/markdown',
                                   format: 'md')
 
-    path = '/help/workflow/protected_branches/protected_branches1.png'
+    path = '/help/user/markdown/markdown_logo.png'
     expect(get(path)).to route_to('help#show',
-                                  path: 'workflow/protected_branches/protected_branches1',
+                                  path: 'user/markdown/markdown_logo',
                                   format: 'png')
   end
 end
@@ -372,5 +372,11 @@ RSpec.describe Snippets::BlobsController, "routing" do
   it "to #raw" do
     expect(get('/-/snippets/1/raw/master/lib/version.rb'))
       .to route_to('snippets/blobs#raw', snippet_id: '1', ref: 'master', path: 'lib/version.rb')
+  end
+end
+
+RSpec.describe RunnerSetupController, 'routing' do
+  it 'to #platforms' do
+    expect(get("/-/runner_setup/platforms")).to route_to('runner_setup#platforms')
   end
 end

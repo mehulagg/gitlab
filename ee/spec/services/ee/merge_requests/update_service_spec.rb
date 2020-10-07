@@ -36,6 +36,11 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       let(:parent) { project }
     end
 
+    it_behaves_like 'service with multiple reviewers' do
+      let(:opts) { {} }
+      let(:execute) { update_merge_request(opts) }
+    end
+
     def update_merge_request(opts)
       described_class.new(project, user, opts).execute(merge_request)
     end

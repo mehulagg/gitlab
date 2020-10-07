@@ -3,6 +3,11 @@
 class Groups::AutocompleteSourcesController < Groups::ApplicationController
   before_action :load_autocomplete_service, except: [:members]
 
+  feature_category :subgroups, [:members]
+  feature_category :issue_tracking, [:issues, :labels, :milestones, :commands]
+  feature_category :code_review, [:merge_requests]
+  feature_category :epics, [:epics]
+
   def members
     render json: ::Groups::ParticipantsService.new(@group, current_user).execute(target)
   end

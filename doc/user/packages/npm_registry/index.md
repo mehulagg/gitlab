@@ -294,11 +294,11 @@ To do this, add lines to your `.npmrc` file, replacing `my-org` with the namespa
 
 ```shell
 @foo:registry=https://gitlab.example.com/api/v4/packages/npm/
-//gitlab.com/api/v4/packages/npm/:_authToken=
+//gitlab.com/api/v4/packages/npm/:_authToken= "<your_token>"
 //gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
 
 @my-other-org:registry=https://gitlab.example.com/api/v4/packages/npm/
-//gitlab.com/api/v4/packages/npm/:_authToken=
+//gitlab.com/api/v4/packages/npm/:_authToken= "<your_token>"
 //gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
 ```
 
@@ -354,6 +354,13 @@ with your personal access token or deploy token):
 
 ```plaintext
 //gitlab.com/api/v4/projects/:_authToken=<your_token>
+```
+
+You can also use `yarn config` instead of `npm config` when setting your auth-token dynamically:
+
+```shell
+yarn config set '//gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken' "<your_token>"
+yarn config set '//gitlab.com/api/v4/packages/npm/:_authToken' "<your_token>"
 ```
 
 ### `npm publish` targets default NPM registry (`registry.npmjs.org`)
@@ -433,6 +440,9 @@ npm dist-tag ls @scope/package                 # List all tags under the package
 npm dist-tag rm @scope/package@version my-tag  # Delete a tag from the package
 npm install @scope/package@my-tag              # Install a specific tag
 ```
+
+NOTE: **Note:**
+You cannot use your `CI_JOB_TOKEN` or deploy token with the `npm dist-tag` commands. View [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/258835) for details. 
 
 CAUTION: **Warning:**
 Due to a bug in NPM 6.9.0, deleting dist tags fails. Make sure your NPM version is greater than 6.9.1.

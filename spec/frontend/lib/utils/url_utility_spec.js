@@ -701,6 +701,18 @@ describe('URL utility', () => {
     });
   });
 
+  describe('stripFinalUrlSegment', () => {
+    it.each`
+      path                                                        | expected
+      ${'http://fake.domain/twitter/typeahead-js/-/tags/v0.11.0'} | ${'http://fake.domain/twitter/typeahead-js/-/tags/'}
+      ${'http://fake.domain/bar/cool/-/nested/content'}           | ${'http://fake.domain/bar/cool/-/nested/'}
+      ${'http://fake.domain/bar/cool?q="search"'}                 | ${'http://fake.domain/bar/'}
+      ${'http://fake.domain/bar/cool#link-to-something'}          | ${'http://fake.domain/bar/'}
+    `('stripFinalUrlSegment $path => $expected', ({ path, expected }) => {
+      expect(urlUtils.stripFinalUrlSegment(path)).toBe(expected);
+    });
+  });
+
   describe('escapeFileUrl', () => {
     it('encodes URL excluding the slashes', () => {
       expect(urlUtils.escapeFileUrl('/foo-bar/file.md')).toBe('/foo-bar/file.md');
@@ -812,6 +824,24 @@ describe('URL utility', () => {
       ${'/foo/bar/index.html'} | ${'/foo/bar/'}
     `('strips the filename from $path => $expected', ({ path, expected }) => {
       expect(urlUtils.stripPathTail(path)).toBe(expected);
+    });
+  });
+
+  describe('getURLOrigin', () => {
+    it('when no url passed, returns correct origin from window location', () => {
+      const origin = 'https://foo.bar';
+
+      setWindowLocation({ origin });
+      expect(urlUtils.getURLOrigin()).toBe(origin);
+    });
+
+    it.each`
+      url                          | expectation
+      ${'not-a-url'}               | ${null}
+      ${'wss://example.com'}       | ${'wss://example.com'}
+      ${'https://foo.bar/foo/bar'} | ${'https://foo.bar'}
+    `('returns correct origin for $url', ({ url, expectation }) => {
+      expect(urlUtils.getURLOrigin(url)).toBe(expectation);
     });
   });
 });

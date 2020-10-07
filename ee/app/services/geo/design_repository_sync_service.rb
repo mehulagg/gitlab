@@ -16,12 +16,13 @@ module Geo
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError => e
       # In some cases repository does not exist, the only way to know about this is to parse the error text.
       # If it does not exist we should consider it as successfully downloaded.
-      if e.message.include? Gitlab::GitAccess::ERROR_MESSAGES[:no_repo] # rubocop:disable Cop/LineBreakAroundConditionalBlock
+      if e.message.include? Gitlab::GitAccessDesign.error_message(:no_repo)
         log_info('Design repository is not found, marking it as successfully synced')
         mark_sync_as_successful(missing_on_primary: true)
       else
         fail_registry_sync!('Error syncing design repository', e)
       end
+
     ensure
       expire_repository_caches
     end

@@ -5,27 +5,26 @@ module EpicTreeSorting
   include FromUnion
   include RelativePositioning
 
+  IMPLEMENTATIONS_MUTEX = Mutex.new
+
+  def self.implementations
+    unless defined?(@impls)
+      IMPLEMENTATIONS_MUTEX.synchronize do
+        @impls ||= Set.new
+      end
+    end
+
+    @impls
+  end
+
   class_methods do
     extend ::Gitlab::Utils::Override
 
     def relative_positioning_query_base(object)
       # Only non-root nodes are sortable.
-      return none if object.root_epic_tree_node?
+      return none if object.epic_tree_root?
 
-      issue_type = EpicIssue.underscore
-      epic_type = Epic.underscore
-
-      issue_selection = <<~SELECT_LIST
-        id, relative_position, epic_id as parent_id, epic_id, '#{issue_type}' as object_type
-      SELECT_LIST
-      epic_selection = <<~SELECT_LIST
-        id, relative_position, parent_id, parent_id as epic_id, '#{epic_type}' as object_type
-      SELECT_LIST
-
-      from_union([
-        EpicIssue.select(issue_selection).in_epic(object.parent_ids),
-        Epic.select(epic_selection).in_parents(object.parent_ids)
-      ])
+      from_union(EpicTreeSorting.implementations.map { |model| model.epic_tree_node_query(object) })
     end
 
     def relative_positioning_parent_column
@@ -34,36 +33,38 @@ module EpicTreeSorting
 
     override :move_nulls
     def move_nulls(objects, **args)
-      super(objects&.reject(&:root_epic_tree_node?), **args)
+      super(objects&.reject(&:epic_tree_root?), **args)
     end
   end
 
   included do
     extend ::Gitlab::Utils::Override
 
+    EpicTreeSorting.implementations << self
+
     override :move_between
     def move_between(*)
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_after
     def move_after(*)
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_before
     def move_before(*)
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_to_end
     def move_to_end
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_to_start
     def move_to_start
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :update_relative_siblings

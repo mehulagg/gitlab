@@ -70,10 +70,6 @@
       }
     }
 
-    a:hover {
-      text-decoration: none;
-    }
-
     &:hover {
       background-color: $gray-normal;
     }
@@ -434,10 +430,6 @@
   .discussion-notes .discussion-notes {
     margin-left: 0;
     border-left: 0;
-  }
-
-  .file-actions .dropdown {
-    height: 28px;
   }
 }
 

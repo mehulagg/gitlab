@@ -449,6 +449,9 @@ Settings.cron_jobs['remove_expired_members_worker']['job_class'] = 'RemoveExpire
 Settings.cron_jobs['remove_expired_group_links_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['remove_expired_group_links_worker']['cron'] ||= '10 0 * * *'
 Settings.cron_jobs['remove_expired_group_links_worker']['job_class'] = 'RemoveExpiredGroupLinksWorker'
+Settings.cron_jobs['remove_unaccepted_member_invites_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['remove_unaccepted_member_invites_worker']['cron'] ||= '10 15 * * *'
+Settings.cron_jobs['remove_unaccepted_member_invites_worker']['job_class'] = 'RemoveUnacceptedMemberInvitesWorker'
 Settings.cron_jobs['prune_old_events_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['prune_old_events_worker']['cron'] ||= '0 */6 * * *'
 Settings.cron_jobs['prune_old_events_worker']['job_class'] = 'PruneOldEventsWorker'
@@ -526,6 +529,9 @@ Settings.cron_jobs['member_invitation_reminder_emails_worker']['cron'] ||= '0 0 
 Settings.cron_jobs['member_invitation_reminder_emails_worker']['job_class'] = 'MemberInvitationReminderEmailsWorker'
 
 Gitlab.ee do
+  Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['active_user_count_threshold_worker']['cron'] ||= '0 12 * * *'
+  Settings.cron_jobs['active_user_count_threshold_worker']['job_class'] = 'ActiveUserCountThresholdWorker'
   Settings.cron_jobs['adjourned_group_deletion_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['adjourned_group_deletion_worker']['cron'] ||= '0 3 * * *'
   Settings.cron_jobs['adjourned_group_deletion_worker']['job_class'] = 'AdjournedGroupDeletionWorker'
@@ -731,6 +737,7 @@ Gitlab.ee do
   Settings['kerberos'] ||= Settingslogic.new({})
   Settings.kerberos['enabled'] = false if Settings.kerberos['enabled'].nil?
   Settings.kerberos['keytab'] = nil if Settings.kerberos['keytab'].blank? # nil means use default keytab
+  Settings.kerberos['simple_ldap_linking_allowed_realms'] = [] if Settings.kerberos['simple_ldap_linking_allowed_realms'].blank?
   Settings.kerberos['service_principal_name'] = nil if Settings.kerberos['service_principal_name'].blank? # nil means any SPN in keytab
   Settings.kerberos['use_dedicated_port'] = false if Settings.kerberos['use_dedicated_port'].nil?
   Settings.kerberos['https'] = Settings.gitlab.https if Settings.kerberos['https'].nil?

@@ -6,7 +6,7 @@ require 'uri'
 module ApplicationHelper
   include StartupCssHelper
 
-  # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-app-views
+  # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-appviews
   # rubocop: disable CodeReuse/ActiveRecord
   # We allow partial to be nil so that collection views can be passed in
   # `render partial: 'some/view', collection: @some_collection`
@@ -355,6 +355,12 @@ module ApplicationHelper
       "is#{browser.id.to_s.titlecase}": true,
       "is#{browser.platform.id.to_s.titlecase}": true
     }
+  end
+
+  def add_page_specific_style(path)
+    content_for :page_specific_styles do
+      stylesheet_link_tag_defer path
+    end
   end
 
   def page_startup_api_calls

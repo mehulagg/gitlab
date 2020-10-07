@@ -41,10 +41,8 @@ module API
         note = ::Notes::CreateVisualReviewService.new(
           merge_request,
           current_user,
-          {
-            body: params[:body],
-            position: params[:position]
-          }
+          body: params[:body],
+          position: params[:position]
         ).execute
 
         if note.valid?

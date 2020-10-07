@@ -9,6 +9,7 @@ import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_for
 import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
 import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
 import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
+import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_profiles_form/constants';
 import download from '~/lib/utils/downloader';
 
 jest.mock('~/lib/utils/downloader');
@@ -184,7 +185,7 @@ describe('DastSiteValidation', () => {
       createComponent();
     });
 
-    describe('success', () => {
+    describe('passed', () => {
       beforeEach(() => {
         findValidateButton().vm.$emit('click');
       });
@@ -207,6 +208,24 @@ describe('DastSiteValidation', () => {
         await waitForPromises();
 
         expect(wrapper.emitted('success')).toHaveLength(1);
+      });
+    });
+
+    describe('failed', () => {
+      beforeEach(() => {
+        respondWith({
+          dastSiteValidation: () =>
+            Promise.resolve(responses.dastSiteValidation(DAST_SITE_VALIDATION_STATUS.FAILED)),
+        });
+      });
+
+      it('shows failure message', async () => {
+        expect(findErrorMessage()).toBe(null);
+
+        findValidateButton().vm.$emit('click');
+        await waitForPromises();
+
+        expect(findErrorMessage()).not.toBe(null);
       });
     });
 

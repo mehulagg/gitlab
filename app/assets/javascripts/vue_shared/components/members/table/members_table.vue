@@ -5,6 +5,9 @@ import { FIELDS } from '../constants';
 import initUserPopovers from '~/user_popovers';
 import MemberAvatar from './member_avatar.vue';
 import MemberSource from './member_source.vue';
+import CreatedAt from './created_at.vue';
+import ExpiresAt from './expires_at.vue';
+import MemberActionButtons from './member_action_buttons.vue';
 import MembersTableCell from './members_table_cell.vue';
 
 export default {
@@ -12,8 +15,11 @@ export default {
   components: {
     GlTable,
     MemberAvatar,
+    CreatedAt,
+    ExpiresAt,
     MembersTableCell,
     MemberSource,
+    MemberActionButtons,
   },
   computed: {
     ...mapState(['members', 'tableFields']),
@@ -40,14 +46,45 @@ export default {
     show-empty
   >
     <template #cell(account)="{ item: member }">
-      <members-table-cell #default="{ memberType }" :member="member">
-        <member-avatar :member-type="memberType" :member="member" />
+      <members-table-cell #default="{ memberType, isCurrentUser }" :member="member">
+        <member-avatar
+          :member-type="memberType"
+          :is-current-user="isCurrentUser"
+          :member="member"
+        />
       </members-table-cell>
     </template>
 
     <template #cell(source)="{ item: member }">
       <members-table-cell #default="{ isDirectMember }" :member="member">
         <member-source :is-direct-member="isDirectMember" :member-source="member.source" />
+      </members-table-cell>
+    </template>
+
+    <template #cell(granted)="{ item: { createdAt, createdBy } }">
+      <created-at :date="createdAt" :created-by="createdBy" />
+    </template>
+
+    <template #cell(invited)="{ item: { createdAt, createdBy } }">
+      <created-at :date="createdAt" :created-by="createdBy" />
+    </template>
+
+    <template #cell(requested)="{ item: { createdAt } }">
+      <created-at :date="createdAt" />
+    </template>
+
+    <template #cell(expires)="{ item: { expiresAt } }">
+      <expires-at :date="expiresAt" />
+    </template>
+
+    <template #cell(actions)="{ item: member }">
+      <members-table-cell #default="{ memberType, isCurrentUser, permissions }" :member="member">
+        <member-action-buttons
+          :member-type="memberType"
+          :is-current-user="isCurrentUser"
+          :permissions="permissions"
+          :member="member"
+        />
       </members-table-cell>
     </template>
 

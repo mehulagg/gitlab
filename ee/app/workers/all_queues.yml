@@ -3,6 +3,14 @@
 #
 # Do not edit it manually!
 ---
+- :name: cronjob:active_user_count_threshold
+  :feature_category: :provision
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: cronjob:adjourned_group_deletion
   :feature_category: :authentication_and_authorization
   :has_external_dependencies:
@@ -570,6 +578,14 @@
   :resource_boundary: :cpu
   :weight: 2
   :idempotent:
+  :tags: []
+- :name: dast_site_validation
+  :feature_category: :dynamic_application_security_testing
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: elastic_commit_indexer
   :feature_category: :global_search

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'boot'
 
 # Based on https://github.com/rails/rails/blob/v6.0.1/railties/lib/rails/all.rb
@@ -174,6 +175,8 @@ module Gitlab
     config.assets.paths << Gemojione.images_path
     config.assets.paths << "#{config.root}/vendor/assets/fonts"
 
+    config.assets.precompile << "application_utilities.css"
+    config.assets.precompile << "application_utilities_dark.css"
     config.assets.precompile << "application_dark.css"
 
     config.assets.precompile << "startup/*.css"
@@ -186,12 +189,15 @@ module Gitlab
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
     config.assets.precompile << "page_bundles/boards.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
+    config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/ide.css"
-    config.assets.precompile << "page_bundles/issues.css"
+    config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
     config.assets.precompile << "page_bundles/milestone.css"
+    config.assets.precompile << "page_bundles/pipeline.css"
     config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/xterm.css"
+    config.assets.precompile << "lazy_bundles/cropper.css"
     config.assets.precompile << "performance_bar.css"
     config.assets.precompile << "lib/ace.js"
     config.assets.precompile << "disable_animations.css"

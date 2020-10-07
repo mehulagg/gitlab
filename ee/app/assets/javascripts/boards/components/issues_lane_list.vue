@@ -38,6 +38,11 @@ export default {
       required: false,
       default: false,
     },
+    epicId: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   data() {
     return {
@@ -45,9 +50,9 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId', 'filterParams']),
+    ...mapState(['activeId', 'filterParams', 'canAdminEpic']),
     treeRootWrapper() {
-      return this.canAdminList ? Draggable : 'ul';
+      return this.canAdminList && this.canAdminEpic ? Draggable : 'ul';
     },
     treeRootOptions() {
       const options = {
@@ -56,6 +61,7 @@ export default {
         group: 'board-epics-swimlanes',
         tag: 'ul',
         'ghost-class': 'board-card-drag-active',
+        'data-epic-id': this.epicId,
         'data-list-id': this.list.id,
         value: this.issues,
       };
@@ -81,7 +87,7 @@ export default {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
   },
   methods: {
-    ...mapActions(['setActiveId', 'moveIssue', 'fetchIssuesForList']),
+    ...mapActions(['setActiveId', 'moveIssue', 'moveIssueEpic', 'fetchIssuesForList']),
     toggleForm() {
       this.showIssueForm = !this.showIssueForm;
       if (this.showIssueForm && this.isUnassignedIssuesLane) {
@@ -103,10 +109,10 @@ export default {
 
       // If issue is being moved within the same list
       if (from === to) {
-        if (newIndex > oldIndex) {
+        if (newIndex > oldIndex && children.length > 1) {
           // If issue is being moved down we look for the issue that ends up before
           moveBeforeId = Number(children[newIndex].dataset.issueId);
-        } else if (newIndex < oldIndex) {
+        } else if (newIndex < oldIndex && children.length > 1) {
           // If issue is being moved up we look for the issue that ends up after
           moveAfterId = Number(children[newIndex].dataset.issueId);
         } else {
@@ -132,6 +138,7 @@ export default {
         toListId: to.dataset.listId,
         moveBeforeId,
         moveAfterId,
+        epicId: from.dataset.epicId !== to.dataset.epicId ? to.dataset.epicId || null : undefined,
       });
     },
   },
@@ -140,7 +147,7 @@ export default {
 
 <template>
   <div
-    class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex! gl-flex-shrink-0"
+    class="board gl-px-3 gl-vertical-align-top gl-white-space-normal gl-display-flex gl-flex-shrink-0"
     :class="{ 'is-collapsed': !list.isExpanded }"
   >
     <div class="board-inner gl-rounded-base gl-relative gl-w-full">
@@ -152,7 +159,7 @@ export default {
         :is="treeRootWrapper"
         v-if="list.isExpanded"
         v-bind="treeRootOptions"
-        class="gl-p-2 gl-m-0"
+        class="board-cell gl-p-2 gl-m-0 gl-h-full"
         @end="handleDragOnEnd"
       >
         <board-card-layout
@@ -162,6 +169,7 @@ export default {
           :index="index"
           :list="list"
           :issue="issue"
+          :disabled="disabled || !canAdminEpic"
           :is-active="isActiveIssue(issue)"
           @show="showIssue(issue)"
         />

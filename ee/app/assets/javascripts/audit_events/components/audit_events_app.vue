@@ -29,16 +29,6 @@ export default {
       type: Array,
       required: true,
     },
-    filterQaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    tableQaSelector: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
     exportUrl: {
       type: String,
       required: false,
@@ -68,20 +58,19 @@ export default {
         <audit-events-export-button v-if="hasExportUrl" :export-href="exportHref" />
       </div>
     </header>
-    <div class="row-content-block second-block pb-0">
-      <div class="d-flex justify-content-between audit-controls row">
-        <div class="col-lg-auto flex-fill form-group align-items-lg-center pr-lg-8">
+    <div class="row-content-block second-block gl-pb-0">
+      <div class="gl-display-flex gl-justify-content-space-between audit-controls gl-flex-wrap">
+        <div class="gl-mb-5 gl-w-full">
           <audit-events-filter
             :filter-token-options="filterTokenOptions"
-            :qa-selector="filterQaSelector"
             :value="filterValue"
             @selected="setFilterValue"
             @submit="searchForAuditEvents"
           />
         </div>
-        <div class="d-flex col-lg-auto flex-wrap pl-lg-0">
+        <div class="gl-display-flex gl-flex-wrap gl-w-full">
           <div
-            class="audit-controls d-flex align-items-lg-center flex-column flex-lg-row col-lg-auto px-0"
+            class="audit-controls gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
           >
             <date-range-field
               :start-date="startDate"
@@ -93,10 +82,6 @@ export default {
         </div>
       </div>
     </div>
-    <audit-events-table
-      :events="events"
-      :is-last-page="isLastPage"
-      :qa-selector="tableQaSelector"
-    />
+    <audit-events-table :events="events" :is-last-page="isLastPage" />
   </div>
 </template>

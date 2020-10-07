@@ -72,7 +72,7 @@ review-deploy:
     - download_chart
     - date
     - deploy || (display_deployment_debug && exit 1)
-    - disable_sign_ups
+    - disable_sign_ups || (delete_release && exit 1)
     # When the job is manual, review-qa-smoke is also manual and we don't want people
     # to have to manually start the jobs in sequence, so we do it for them.
     - '[ -z $CI_JOB_MANUAL ] || play_job "review-qa-smoke"'
@@ -81,10 +81,9 @@ review-deploy:
     # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
     # Set DAST_RUN to true when jobs are manually scheduled.
     - if [ "$DAST_RUN" == "true" ]; then source scripts/review_apps/seed-dast-test-data.sh; TRACE=1 trigger_proj_user_creation; fi
-
   artifacts:
     paths: [environment_url.txt]
-    expire_in: 2 days
+    expire_in: 7 days
     when: always
 
 .review-stop-base:

@@ -33,7 +33,7 @@ describe('Vulnerability related issues component', () => {
   const issue1 = { id: 3, vulnerabilityLinkId: 987 };
   const issue2 = { id: 25, vulnerabilityLinkId: 876 };
 
-  const createWrapper = async (data = {}, opts) => {
+  const createWrapper = async ({ data = {}, provide = {}, stubs = {} } = {}) => {
     wrapper = shallowMount(RelatedIssues, {
       propsData,
       data: () => data,
@@ -44,8 +44,9 @@ describe('Vulnerability related issues component', () => {
         reportType,
         issueTrackingHelpPath,
         permissionsHelpPath,
+        ...provide,
       },
-      ...opts,
+      stubs,
     });
     // Need this special check because RelatedIssues creates the store and uses its state in the data function, so we
     // need to set the state of the store, not replace the state property.
@@ -78,7 +79,7 @@ describe('Vulnerability related issues component', () => {
       },
     };
 
-    createWrapper(data);
+    createWrapper({ data });
 
     expect(relatedIssuesBlock().props()).toMatchObject({
       helpPath: propsData.helpPath,
@@ -119,7 +120,7 @@ describe('Vulnerability related issues component', () => {
   describe('add related issue', () => {
     beforeEach(() => {
       mockAxios.onGet(propsData.endpoint).replyOnce(httpStatusCodes.OK, []);
-      createWrapper({ isFormVisible: true });
+      createWrapper({ data: { isFormVisible: true } });
     });
 
     it('adds related issue with vulnerabilityLinkId populated', async () => {
@@ -177,7 +178,7 @@ describe('Vulnerability related issues component', () => {
       ${true}  | ${false}
       ${false} | ${true}
     `('toggles form visibility from $from to $to', async ({ from, to }) => {
-      createWrapper({ isFormVisible: from });
+      createWrapper({ data: { isFormVisible: from } });
 
       blockEmit('toggleAddRelatedIssuesForm');
       await wrapper.vm.$nextTick();
@@ -186,9 +187,11 @@ describe('Vulnerability related issues component', () => {
 
     it('resets form and hides it', async () => {
       createWrapper({
-        inputValue: 'some input value',
-        isFormVisible: true,
-        state: { pendingReferences: ['135', '246'] },
+        data: {
+          inputValue: 'some input value',
+          isFormVisible: true,
+          state: { pendingReferences: ['135', '246'] },
+        },
       });
       blockEmit('addIssuableFormCancel');
       await wrapper.vm.$nextTick();
@@ -204,7 +207,7 @@ describe('Vulnerability related issues component', () => {
       const pendingReferences = ['135', '246'];
       const untouchedRawReferences = ['357', '468'];
       const touchedReference = 'touchedReference';
-      createWrapper({ state: { pendingReferences } });
+      createWrapper({ data: { state: { pendingReferences } } });
       blockEmit('addIssuableFormInput', { untouchedRawReferences, touchedReference });
       await wrapper.vm.$nextTick();
 
@@ -224,7 +227,7 @@ describe('Vulnerability related issues component', () => {
     });
 
     it('removes pending reference', async () => {
-      createWrapper({ state: { pendingReferences: ['135', '246', '357'] } });
+      createWrapper({ data: { state: { pendingReferences: ['135', '246', '357'] } } });
       blockEmit('pendingIssuableRemoveRequest', 1);
       await wrapper.vm.$nextTick();
 
@@ -265,13 +268,13 @@ describe('Vulnerability related issues component', () => {
 
   describe('when linked issue is already created', () => {
     beforeEach(() => {
-      createWrapper(
-        {
+      createWrapper({
+        data: {
           isFetching: false,
           state: { relatedIssues: [issue1, { ...issue2, vulnerabilityLinkType: 'created' }] },
         },
-        { stubs: { RelatedIssuesBlock } },
-      );
+        stubs: { RelatedIssuesBlock },
+      });
     });
 
     it('does not display the create issue button', () => {
@@ -289,7 +292,7 @@ describe('Vulnerability related issues component', () => {
 
     beforeEach(async () => {
       mockAxios.onGet(propsData.endpoint).replyOnce(httpStatusCodes.OK, [issue1, issue2]);
-      createWrapper({}, { stubs: { RelatedIssuesBlock } });
+      createWrapper({ stubs: { RelatedIssuesBlock } });
       await axios.waitForAll();
     });
 
@@ -325,6 +328,18 @@ describe('Vulnerability related issues component', () => {
       findAlert().vm.$emit('dismiss');
       await wrapper.vm.$nextTick();
       expect(findAlert().exists()).toBe(false);
+    });
+  });
+
+  describe('when project issue tracking is disabled', () => {
+    it('hides the "Create Issue" button', () => {
+      createWrapper({
+        provide: {
+          createIssueUrl: undefined,
+        },
+      });
+
+      expect(findCreateIssueButton().exists()).toBe(false);
     });
   });
 });

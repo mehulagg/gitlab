@@ -147,6 +147,7 @@ always take the latest SAST artifact available.
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3659) in GitLab Ultimate 13.3.
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/232862) in GitLab Ultimate 13.4.
+> - [Improved](https://gitlab.com/groups/gitlab-org/-/epics/3635) in GitLab Ultimate 13.5.
 
 You can enable and configure SAST with a basic configuration using the **SAST Configuration**
 page:
@@ -154,9 +155,11 @@ page:
 1. From the project's home page, go to **Security & Compliance** > **Configuration** in the
    left sidebar.
 1. If the project does not have a `gitlab-ci.yml` file, click **Enable** in the Static Application Security Testing (SAST) row, otherwise click **Configure**.
-1. Enter the custom SAST values, then click **Create Merge Request**.
+1. Enter the custom SAST values.
 
     Custom values are stored in the `.gitlab-ci.yml` file. For variables not in the SAST Configuration page, their values are left unchanged. Default values are inherited from the GitLab SAST template.
+1. Optionally, expand the **SAST analyzers** section, select individual [SAST analyzers](./analyzers.md) and enter custom analyzer values.
+1. Click **Create Merge Request**.
 1. Review and merge the merge request.
 
 ### Customizing the SAST settings
@@ -264,7 +267,7 @@ spotbugs-sast:
     - build
   variables:
     MAVEN_REPO_PATH: ./.m2/repository
-    COMPILE: false
+    COMPILE: "false"
   artifacts:
     reports:
       sast: gl-sast-report.json
@@ -551,3 +554,12 @@ affected. Read more in
 ### Getting warning message `gl-sast-report.json: no matching files`
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
+
+### Limitation when using rules:exists
+
+The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml)
+uses the `rules:exists` parameter. For performance reasons, a maximum number of matches are made
+against the given glob pattern. If the number of matches exceeds the maximum, the `rules:exists`
+parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
+triggered even if the scanner doesn't support your project. For more details about this issue, see
+the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).

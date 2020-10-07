@@ -49,6 +49,20 @@ See also:
 - [Exposing Global IDs](#exposing-global-ids).
 - [Mutation arguments](#object-identifier-arguments).
 
+We have a custom scalar type (`Types::GlobalIDType`) which should be used as the
+type of input and output arguments when the value is a `GlobalID`. The benefits
+of using this type instead of `ID` are:
+
+- it validates that the value is a `GlobalID`
+- it parses it into a `GlobalID` before passing it to user code
+- it can be parameterized on the type of the object (e.g.
+  `GlobalIDType[Project]`) which offers even better validation and security.
+  
+Consider using this type for all new arguments and result types. Remember that
+it is perfectly possible to parameterize this type with a concern or a
+supertype, if you want to accept a wider range of objects (e.g.
+`GlobalIDType[Issuable]` vs `GlobalIDType[Issue]`).
+
 ## Types
 
 We use a code-first schema, and we declare what type everything is in Ruby.
@@ -780,6 +794,25 @@ to advertise the need for lookahead:
 For an example of real world use, please
 see [`ResolvesMergeRequests`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/resolvers/concerns/resolves_merge_requests.rb).
 
+### Negated arguments
+
+Negated filters can filter some resources (for example, find all issues that
+have the `bug` label, but don't have the `bug2` label assigned). The `not`
+argument is the preferred syntax to pass negated arguments:
+
+```graphql
+issues(labelName: "bug", not: {labelName: "bug2"}) {
+  nodes {
+    id
+    title
+  }
+}
+```
+
+To avoid duplicated argument definitions, you can place these arguments in a reusable module (or
+class, if the arguments are nested). Alternatively, you can consider to add a
+[helper resolver method](https://gitlab.com/gitlab-org/gitlab/-/issues/258969).
+
 ## Pass a parent object into a child Presenter
 
 Sometimes you need to access the resolved query parent in a child context to compute fields. Usually the parent is only
@@ -1390,5 +1423,4 @@ For information on generating GraphQL documentation and schema files, see
 [updating the schema documentation](rake_tasks.md#update-graphql-documentation-and-schema-definitions).
 
 To help our readers, you should also add a new page to our [GraphQL API](../api/graphql/index.md) documentation.
-For guidance, see the [GraphQL API](documentation/styleguide.md#graphql-api) section
-of our documentation style guide.
+For guidance, see the [GraphQL API](documentation/graphql_styleguide.md) page.

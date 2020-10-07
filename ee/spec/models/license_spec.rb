@@ -3,6 +3,8 @@
 require "spec_helper"
 
 RSpec.describe License do
+  using RSpec::Parameterized::TableSyntax
+
   let(:gl_license) { build(:gitlab_license) }
   let(:license)    { build(:license, data: gl_license.export) }
 
@@ -26,8 +28,6 @@ RSpec.describe License do
     end
 
     describe '#check_users_limit' do
-      using RSpec::Parameterized::TableSyntax
-
       before do
         create(:group_member, :guest)
         create(:group_member, :reporter)
@@ -550,6 +550,39 @@ RSpec.describe License do
         it { is_expected.to be(false) }
       end
     end
+
+    describe '.with_valid_license' do
+      context 'when license trial' do
+        before do
+          allow(license).to receive(:trial?).and_return(true)
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'does not yield block' do
+          expect { |b| License.with_valid_license(&b) }.not_to yield_control
+        end
+      end
+
+      context 'when license nil' do
+        before do
+          allow(License).to receive(:current).and_return(nil)
+        end
+
+        it 'does not yield block' do
+          expect { |b| License.with_valid_license(&b) }.not_to yield_control
+        end
+      end
+
+      context 'when license is valid' do
+        before do
+          allow(License).to receive(:current).and_return(license)
+        end
+
+        it 'yields block' do
+          expect { |b| License.with_valid_license(&b) }.to yield_with_args(license)
+        end
+      end
+    end
   end
 
   describe "#md5" do
@@ -742,8 +775,6 @@ RSpec.describe License do
   end
 
   describe '#maximum_user_count' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { license.maximum_user_count }
 
     where(:current_active_users_count, :historical_max, :expected) do
@@ -907,8 +938,6 @@ RSpec.describe License do
   end
 
   describe '#paid?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:plan, :paid_result) do
       License::STARTER_PLAN  | true
       License::PREMIUM_PLAN  | true
@@ -928,8 +957,6 @@ RSpec.describe License do
   end
 
   describe '#started?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:starts_at, :result) do
       Date.current - 1.month | true
       Date.current           | true
@@ -948,8 +975,6 @@ RSpec.describe License do
   end
 
   describe '#future_dated?' do
-    using RSpec::Parameterized::TableSyntax
-
     where(:starts_at, :result) do
       Date.current - 1.month | false
       Date.current           | false
@@ -983,8 +1008,6 @@ RSpec.describe License do
     end
 
     context 'for license with users' do
-      using RSpec::Parameterized::TableSyntax
-
       where(:restricted_user_count, :active_user_count, :percentage, :threshold_value) do
         3    | 2    | false | 1
         20   | 18   | false | 2
@@ -1006,8 +1029,6 @@ RSpec.describe License do
   end
 
   describe '#active_user_count_threshold_reached?' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { license.active_user_count_threshold_reached? }
 
     where(:restricted_user_count, :current_active_users_count, :result) do

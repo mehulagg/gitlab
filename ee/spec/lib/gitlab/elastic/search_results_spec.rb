@@ -158,6 +158,8 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   end
 
   describe 'issues' do
+    let(:scope) { 'issues' }
+
     before do
       @issue_1 = create(
         :issue,
@@ -228,7 +230,6 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
       let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
 
-      let(:scope) { 'issues' }
       let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
       before do
@@ -239,6 +240,22 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
       include_examples 'search results filtered by state'
       include_examples 'search results filtered by confidential'
+    end
+
+    context 'ordering' do
+      let(:query) { 'sorted' }
+      let!(:project) { create(:project, :public) }
+      let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
+
+      let(:results) { described_class.new(user, query, [project.id], sort: sort) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted'
     end
   end
 
@@ -481,6 +498,8 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
   end
 
   describe 'merge requests' do
+    let(:scope) { 'merge_requests' }
+
     before do
       @merge_request_1 = create(
         :merge_request,
@@ -554,7 +573,6 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
       let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
 
-      let(:scope) { 'merge_requests' }
       let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
       include_examples 'search results filtered by state' do
@@ -562,6 +580,22 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
           ensure_elasticsearch_index!
         end
       end
+    end
+
+    context 'ordering' do
+      let(:query) { 'sorted' }
+      let!(:project) { create(:project, :public) }
+      let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
+
+      let(:results) { described_class.new(user, query, [project.id], sort: sort) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted'
     end
   end
 

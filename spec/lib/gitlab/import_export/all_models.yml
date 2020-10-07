@@ -51,6 +51,7 @@ issues:
 - status_page_published_incident
 - namespace
 - note_authors
+- issue_email_participants
 events:
 - author
 - project
@@ -158,6 +159,8 @@ merge_requests:
 - assignees
 - reviews
 - approval_rules
+- approval_merge_request_rule_sources
+- approval_project_rules
 - approvals
 - approvers
 - approver_users
@@ -466,6 +469,8 @@ project:
 - feature_usage
 - approval_rules
 - approval_merge_request_rules
+- approval_merge_request_rule_sources
+- approval_project_rules
 - approvers
 - approver_users
 - audit_events
@@ -537,6 +542,8 @@ project:
 - vulnerability_historical_statistics
 - product_analytics_events
 - pipeline_artifacts
+- terraform_states
+- alert_management_http_integrations
 award_emoji:
 - awardable
 - user

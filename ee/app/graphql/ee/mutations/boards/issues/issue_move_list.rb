@@ -8,8 +8,10 @@ module EE
           extend ActiveSupport::Concern
           extend ::Gitlab::Utils::Override
 
+          EpicID = ::Types::GlobalIDType[::Epic]
+
           prepended do
-            argument :epic_id, ::Types::GlobalIDType[::Epic],
+            argument :epic_id, EpicID,
                       required: false,
                       description: 'The ID of the parent epic. NULL when removing the association'
           end
@@ -28,10 +30,12 @@ module EE
 
           override :move_arguments
           def move_arguments(args)
-            allowed_args = super
-            allowed_args[:epic_id] = args[:epic_id]&.model_id if args.has_key?(:epic_id)
+            # TODO: remove this line once the compatibility layer is removed
+            # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+            coerce_global_id_arguments!(args)
+            epic_arguments = args.slice(:epic_id).transform_values { |id| id&.model_id }
 
-            allowed_args
+            super.merge!(epic_arguments)
           end
         end
       end

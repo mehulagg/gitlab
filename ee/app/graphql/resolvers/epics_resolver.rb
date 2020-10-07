@@ -67,6 +67,12 @@ module Resolvers
       [:group]
     end
 
+    def preloads
+      {
+        parent: [:parent]
+      }
+    end
+
     def find_epics(args)
       apply_lookahead(EpicsFinder.new(context[:current_user], args).execute)
     end

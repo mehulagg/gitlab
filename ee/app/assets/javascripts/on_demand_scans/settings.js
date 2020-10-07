@@ -20,12 +20,10 @@ export const SCANNER_PROFILES_QUERY = {
   field: 'dastScannerProfileId',
   fetchQuery: dastScannerProfilesQuery,
   fetchError: ERROR_FETCH_SCANNER_PROFILES,
-  queryKind: 'scannerProfiles',
 };
 
 export const SITE_PROFILES_QUERY = {
   field: 'dastSiteProfileId',
   fetchQuery: dastSiteProfilesQuery,
   fetchError: ERROR_FETCH_SITE_PROFILES,
-  queryKind: 'siteProfiles',
 };

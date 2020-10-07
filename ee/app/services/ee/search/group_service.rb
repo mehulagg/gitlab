@@ -36,14 +36,10 @@ module EE
 
       override :allowed_scopes
       def allowed_scopes
+        return super unless ::Feature.enabled?(:epics_search) && group.feature_available?(:epics)
+
         strong_memoize(:ee_group_allowed_scopes) do
-          super.tap do |scopes|
-            if ::Feature.enabled?(:epics_search) && group.feature_available?(:epics)
-              scopes << 'epics'
-            else
-              scopes
-            end
-          end
+          super + %w(epics)
         end
       end
     end

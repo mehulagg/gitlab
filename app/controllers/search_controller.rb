@@ -25,6 +25,8 @@ class SearchController < ApplicationController
 
   layout 'search'
 
+  feature_category :global_search
+
   def show
     @project = search_service.project
     @group = search_service.group
@@ -97,8 +99,6 @@ class SearchController < ApplicationController
   end
 
   def eager_load_user_status
-    return if Feature.disabled?(:users_search, default_enabled: true)
-
     @search_objects = @search_objects.eager_load(:status) # rubocop:disable CodeReuse/ActiveRecord
   end
 

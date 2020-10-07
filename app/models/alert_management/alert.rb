@@ -21,13 +21,6 @@ module AlertManagement
       ignored: 3
     }.freeze
 
-    STATUS_EVENTS = {
-      triggered: :trigger,
-      acknowledged: :acknowledge,
-      resolved: :resolve,
-      ignored: :ignore
-    }.freeze
-
     OPEN_STATUSES = [
       :triggered,
       :acknowledged
@@ -126,7 +119,7 @@ module AlertManagement
     scope :for_environment, -> (environment) { where(environment: environment) }
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
     scope :open, -> { with_status(OPEN_STATUSES) }
-    scope :not_resolved, -> { where.not(status: STATUSES[:resolved]) }
+    scope :not_resolved, -> { without_status(:resolved) }
     scope :with_prometheus_alert, -> { includes(:prometheus_alert) }
 
     scope :order_start_time,    -> (sort_order) { order(started_at: sort_order) }
@@ -188,6 +181,15 @@ module AlertManagement
 
     def self.reference_valid?(reference)
       reference.to_i > 0 && reference.to_i <= Gitlab::Database::MAX_INT_VALUE
+    end
+
+    def status_event_for(status)
+      self.class.state_machines[:status].events.transitions_for(self, to: status.to_s.to_sym).first&.event
+    end
+
+    def change_status_to(new_status)
+      event = status_event_for(new_status)
+      event && fire_status_event(event)
     end
 
     def prometheus?

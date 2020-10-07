@@ -5,6 +5,8 @@ module Groups
     class VulnerabilitiesController < Groups::ApplicationController
       layout 'group'
 
+      feature_category :vulnerability_management
+
       def index
         render :unavailable unless dashboard_available?
       end

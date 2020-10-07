@@ -7,8 +7,6 @@ module Groups
         include CycleAnalyticsParams
         extend ::Gitlab::Utils::Override
 
-        check_feature_flag Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG
-
         before_action :load_group
         before_action :load_value_stream
         before_action :validate_params, only: %i[median records duration_chart]

@@ -14,8 +14,8 @@ module EE
       can?(current_user, :admin_group_saml, group)
     end
 
-    def saml_link_for_provider(text, provider, *args)
-      saml_link(text, provider.group.full_path, *args)
+    def saml_link_for_provider(text, provider, **args)
+      saml_link(text, provider.group.full_path, **args)
     end
 
     def saml_link(text, group_path, redirect: nil, html_class: 'btn')

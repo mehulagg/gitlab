@@ -84,7 +84,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :analytics do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
-          resource :merge_request_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.project_merge_request_analytics_enabled? }
+          resource :merge_request_analytics, only: :show
         end
 
         resources :approvers, only: :destroy

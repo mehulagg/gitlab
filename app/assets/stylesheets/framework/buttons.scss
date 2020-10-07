@@ -244,20 +244,15 @@
   }
 
   &.btn-text-field {
+    color: $gray-500;
+    justify-content: start;
     width: 100%;
     text-align: left;
-    padding: 6px 16px;
-    border-color: $border-color;
-    color: $gray-darkest;
-    background-color: $white;
 
     &:hover,
     &:active,
     &:focus {
       cursor: text;
-      box-shadow: none;
-      border-color: lighten($blue-300, 20%);
-      color: $gray-darkest;
     }
   }
 
@@ -414,12 +409,6 @@
 .btn-inverted {
   &-secondary {
     @include btn-outline($white, $blue-500, $blue-500, $blue-100, $blue-700, $blue-500, $blue-200, $blue-600, $blue-800);
-  }
-}
-
-@include media-breakpoint-down(xs) {
-  .btn-wide-on-xs {
-    width: 100%;
   }
 }
 

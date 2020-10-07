@@ -4,6 +4,7 @@ module EE
     extend ::Gitlab::Utils::Override
 
     SWITCH_TO_BASIC_SEARCHABLE_TABS = %w[projects issues merge_requests milestones users epics].freeze
+    PLACEHOLDER = '_PLACEHOLDER_'
 
     override :search_filter_input_options
     def search_filter_input_options(type, placeholder = _('Search or filter results...'))
@@ -17,6 +18,11 @@ module EE
       end
 
       options
+    end
+
+    override :recent_items_autocomplete
+    def recent_items_autocomplete(term)
+      super + recent_epics_autocomplete(term)
     end
 
     override :search_blob_title
@@ -70,7 +76,55 @@ module EE
       Truncato.truncate(search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
     end
 
+    def advanced_search_status_marker(project)
+      ref = params[:repository_ref]
+      enabled = project.nil? || ref.blank? || ref == project.default_branch
+
+      tags = {}
+      tags[:doc_link_start], tags[:doc_link_end] = tag.a(PLACEHOLDER,
+                                                         href: help_page_path('user/search/advanced_search_syntax.md'),
+                                                         rel: :noopener,
+                                                         target: '_blank')
+                                                     .split(PLACEHOLDER)
+
+      unless enabled
+        tags[:ref_elem] = tag.a(href: '#', class: 'ref-truncated has-tooltip', data: { title: ref }) do
+          tag.code(ref, class: 'gl-white-space-nowrap')
+        end
+        tags[:default_branch] = tag.code(project.default_branch)
+        tags[:default_branch_link_start], tags[:default_branch_link_end] = link_to(PLACEHOLDER,
+                                                                                   search_path(safe_params.except(:repository_ref)),
+                                                                                   data: { testid: 'es-search-default-branch' })
+                                                                             .split(PLACEHOLDER)
+      end
+
+      # making sure all the tags are marked `html_safe`
+      message =
+        if enabled
+          _('%{doc_link_start}Advanced search%{doc_link_end} is enabled.')
+        else
+          _('%{doc_link_start}Advanced search%{doc_link_end} is disabled since %{ref_elem} is not the default branch; %{default_branch_link_start}search on %{default_branch} instead%{default_branch_link_end}.')
+        end % tags.transform_values(&:html_safe)
+
+      # wrap it inside a `div` for testing purposes
+      tag.div(message.html_safe, data: { testid: 'es-status-marker', enabled: enabled })
+    end
+
     private
+
+    def recent_epics_autocomplete(term)
+      return [] unless current_user
+
+      ::Gitlab::Search::RecentEpics.new(user: current_user).search(term).map do |e|
+        {
+          category: "Recent epics",
+          id: e.id,
+          label: search_result_sanitize(e.title),
+          url: epic_path(e),
+          avatar_url: e.group.avatar_url || ''
+        }
+      end
+    end
 
     def search_multiple_assignees?(type)
       context = @project.presence || @group.presence || :dashboard

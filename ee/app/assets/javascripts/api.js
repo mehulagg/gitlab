@@ -40,8 +40,6 @@ export default {
   vulnerabilityPath: '/api/:version/vulnerabilities/:id',
   vulnerabilityActionPath: '/api/:version/vulnerabilities/:id/:action',
   vulnerabilityIssueLinksPath: '/api/:version/vulnerabilities/:id/issue_links',
-  featureFlagUserLists: '/api/:version/projects/:id/feature_flags_user_lists',
-  featureFlagUserList: '/api/:version/projects/:id/feature_flags_user_lists/:list_iid',
   applicationSettingsPath: '/api/:version/application/settings',
 
   userSubscription(namespaceId) {
@@ -316,42 +314,6 @@ export default {
   updateGeoNode(node) {
     const url = Api.buildUrl(this.geoNodesPath);
     return axios.put(`${url}/${node.id}`, node);
-  },
-
-  fetchFeatureFlagUserLists(id, page) {
-    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
-
-    return axios.get(url, { params: { page } });
-  },
-
-  createFeatureFlagUserList(id, list) {
-    const url = Api.buildUrl(this.featureFlagUserLists).replace(':id', id);
-
-    return axios.post(url, list);
-  },
-
-  fetchFeatureFlagUserList(id, listIid) {
-    const url = Api.buildUrl(this.featureFlagUserList)
-      .replace(':id', id)
-      .replace(':list_iid', listIid);
-
-    return axios.get(url);
-  },
-
-  updateFeatureFlagUserList(id, list) {
-    const url = Api.buildUrl(this.featureFlagUserList)
-      .replace(':id', id)
-      .replace(':list_iid', list.iid);
-
-    return axios.put(url, list);
-  },
-
-  deleteFeatureFlagUserList(id, listIid) {
-    const url = Api.buildUrl(this.featureFlagUserList)
-      .replace(':id', id)
-      .replace(':list_iid', listIid);
-
-    return axios.delete(url);
   },
 
   getApplicationSettings() {

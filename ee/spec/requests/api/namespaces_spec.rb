@@ -123,6 +123,24 @@ RSpec.describe API::Namespaces do
         create(:gitlab_subscription, namespace: group1, max_seats_used: 1)
       end
 
+      it "avoids additional N+1 database queries" do
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/namespaces", user) }
+
+        create(:gitlab_subscription, namespace: group2, max_seats_used: 2)
+        group2.add_guest(user)
+
+        group3 = create(:group)
+        create(:gitlab_subscription, namespace: group3, max_seats_used: 3)
+        group3.add_guest(user)
+
+        # We seem to have some N+1 queries.
+        # The saml_provider association adds one for each group (saml_provider is
+        #   an association on group, not namespace).
+        # The route adds one for each namespace.
+        # And more...
+        expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(10)
+      end
+
       it 'includes max_seats_used' do
         get api("/namespaces", user)
 
