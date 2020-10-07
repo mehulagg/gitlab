@@ -82,9 +82,6 @@ export default {
       :title="tooltipLabel"
       class="sidebar-collapsed-icon"
       data-testid="sidebar-collapse-icon"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
       @click="toggleForm"
     >
       <gl-icon :name="lockStatus.icon" class="sidebar-item-icon is-active" />
