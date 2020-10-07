@@ -337,6 +337,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
             # Checking that the size of the bundle is bigger than 0
             puts repo_lines
             expect(repo_lines.first.split[4].to_i > 0).to be true
+            expect(1).to eq 2
           end
         end
 
