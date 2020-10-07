@@ -4,7 +4,7 @@
  * Deploy boards
 */
 .deploy-board {
-  background-color: $gray-light;
+  background-color: var(--gray-50, $gray-50);
   min-height: 20px;
 
   > .loading-icon,
@@ -64,7 +64,7 @@
   }
 
   .deploy-board-legend .legend-text {
-    color: $gl-text-color;
+    color: var(--gray-900, $gray-900);
     font-size: $gl-font-size-small;
     font-weight: $gl-font-weight-bold;
     line-height: $gl-line-height-14;
@@ -81,7 +81,7 @@
 
   i {
     cursor: pointer;
-    color: $layout-link-gray;
+    color: var(--gray-200, $gray-200);
     padding-right: 10px;
   }
 }
@@ -90,7 +90,7 @@
   margin-left: $btn-side-margin;
 
   .dropdown.open & {
-    background: $white-normal;
+    background: var(--white, $white-normal);
     outline: 0;
   }
 
@@ -102,7 +102,7 @@
     }
 
     &.chevron {
-      color: $gl-text-color-secondary;
+      color: var(--gray-500, var(--gray-500, $gray-500));
     }
   }
 }
@@ -114,7 +114,7 @@
 }
 
 .alert-error-message {
-  color: $red-500;
+  color: var(--red-500, $red-500);
   vertical-align: middle;
 }
 
@@ -145,39 +145,39 @@
 
   &-message {
     max-width: 600px;
-    color: $gray-500;
+    color: var(--gray-500, $gray-500);
   }
 
   &-close {
-    color: $gray-500;
+    color: var(--gray-500, $gray-500);
     cursor: pointer;
   }
 
   &-button {
-    border-color: $blue-500;
-    color: $blue-500;
+    border-color: var(--blue-500, $blue-500);
+    color: var(--blue-500, $blue-500);
 
     &:not(:disabled):not(.disabled):active {
-      background-color: $blue-200;
-      border: 2px solid $blue-600;
-      color: $blue-700;
+      background-color: var(--blue-200, $blue-200);
+      border: 2px solid var(--blue-600, $blue-600);
+      color: var(--blue-700, $blue-700);
       height: 34px;
       padding: 5px 9px;
     }
 
     &:focus {
-      background-color: $blue-100;
-      border: 2px solid $blue-500;
-      box-shadow: 0 0 4px 1px $blue-200;
-      color: $blue-600;
+      background-color: var(--blue-500, $blue-500);
+      border: 2px solid var(--blue-500, $blue-500);
+      box-shadow: 0 0 4px 1px var(--blue-200, $blue-200);
+      color: var(--blue-600, $blue-600);
       height: 34px;
       padding: 5px 9px;
     }
 
     &:hover {
-      background-color: $blue-100;
-      border: 2px solid $blue-500;
-      color: $blue-600;
+      background-color: var(--blue-500, $blue-500);
+      border: 2px solid var(--blue-500, $blue-500);
+      color: var(--blue-600, $blue-600);
       height: 34px;
       padding: 5px 9px;
     }
