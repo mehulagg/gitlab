@@ -270,6 +270,7 @@ The following documentation relates to the DevOps **Package** stage:
 | [Conan Repository](user/packages/conan_repository/index.md) | The GitLab Conan Repository enables every project in GitLab to have its own space to store [Conan](https://conan.io/) packages. |
 | [Maven Repository](user/packages/maven_repository/index.md) | The GitLab Maven Repository enables every project in GitLab to have its own space to store [Maven](https://maven.apache.org/) packages. |
 | [NPM Registry](user/packages/npm_registry/index.md) | The GitLab NPM Registry enables every project in GitLab to have its own space to store [NPM](https://www.npmjs.com/) packages. |
+| [Generic Packages Repository](user/packages/generic_packages/index.md) | With the GitLab Generic Packages Repository every project can have its own space to store arbitrary files, like for example release binaries. |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">
