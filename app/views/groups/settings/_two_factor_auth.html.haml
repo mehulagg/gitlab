@@ -1,3 +1,4 @@
+- return unless group.parent_allows_two_factor_authentication?
 - docs_link_url = help_page_path('security/two_factor_authentication', anchor: 'enforcing-2fa-for-all-users-in-a-group')
 - docs_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: docs_link_url }
 
@@ -14,3 +15,9 @@
   = f.label :two_factor_grace_period, _('Time before enforced'), class: 'label-bold'
   = f.text_field :two_factor_grace_period, class: 'form-control form-control-sm w-auto'
   .form-text.text-muted= _('Amount of time (in hours) that users are allowed to skip forced configuration of two-factor authentication')
+- if group.parent_id.nil?
+  .form-group
+    .form-check
+      = f.check_box :allow_mfa_for_subgroups, class: 'form-check-input', checked: group.namespace_settings.allow_mfa_for_subgroups
+      = f.label :allow_mfa_for_subgroups  , class: 'form-check-label' do
+        %span= _('Allow any descendants group to set up their own Two-factor authentication rule')
