@@ -77,6 +77,12 @@ module Gitlab
         ).run(&block)
       end
 
+      def assert_in_transaction_block(scope:)
+        return if transaction_open?
+
+        raise "#{scope} operations can must be run inside a transaction block"
+      end
+
       def assert_not_in_transaction_block(scope:)
         return unless transaction_open?
 

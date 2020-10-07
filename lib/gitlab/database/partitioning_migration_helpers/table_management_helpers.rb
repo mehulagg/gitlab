@@ -177,6 +177,38 @@ module Gitlab
           end
         end
 
+        def finalize_partitioning_migration(table_name, archived_table: nil)
+          assert_table_is_allowed(table_name)
+
+          partitioned_table_name = make_partitioned_table_name(table_name)
+          archived_table_name = archived_table || "#{table_name}_archived"
+          primary_key_name = connection.primary_key(table_name)
+
+          with_lock_retries do
+            replace_table(table_name, partitioned_table_name, archived_table_name, primary_key_name)
+
+            trigger_name = make_sync_trigger_name(table_name)
+            drop_trigger(archived_table_name, trigger_name)
+
+            function_name = make_sync_function_name(table_name)
+            drop_function(function_name)
+          end
+        end
+
+        def rollback_finalize_partitioning_migration(table_name, archived_table: nil)
+          assert_table_is_allowed(table_name)
+
+          partitioned_table_name = make_partitioned_table_name(table_name)
+          archived_table_name = archived_table || "#{table_name}_archived"
+          primary_key_name = connection.primary_key(archived_table_name)
+
+          with_lock_retries do
+            replace_table(table_name, archived_table_name, partitioned_table_name, primary_key_name)
+
+            create_trigger_to_sync_tables(table_name, partitioned_table_name, primary_key_name)
+          end
+        end
+
         private
 
         def assert_table_is_allowed(table_name)
@@ -356,6 +388,15 @@ module Gitlab
                 raise "failed to update tracking record for ids from #{start_id} to #{stop_id}"
               end
             end
+          end
+        end
+
+        def replace_table(original_table_name, replacement_table_name, replaced_table_name, primary_key_name)
+          replace_table = Gitlab::Database::Partitioning::ReplaceTable.new(original_table_name, replacement_table_name,
+              replaced_table_name, primary_key_name)
+
+          replace_table.perform do |sql|
+            say("replace_table(\"#{sql}\")")
           end
         end
       end
