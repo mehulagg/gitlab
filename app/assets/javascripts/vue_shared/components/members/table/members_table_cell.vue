@@ -33,13 +33,16 @@ export default {
       return MEMBER_TYPES.user;
     },
     isDirectMember() {
-      return this.member.source?.id === this.sourceId;
+      return this.isGroup || this.member.source?.id === this.sourceId;
     },
     isCurrentUser() {
       return this.member.user?.id === this.currentUserId;
     },
     canRemove() {
       return this.isDirectMember && this.member.canRemove;
+    },
+    canUpdate() {
+      return !this.isCurrentUser && this.isDirectMember && this.member.canUpdate;
     },
   },
   render() {
@@ -49,6 +52,7 @@ export default {
       isCurrentUser: this.isCurrentUser,
       permissions: {
         canRemove: this.canRemove,
+        canUpdate: this.canUpdate,
       },
     });
   },
