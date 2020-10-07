@@ -8,7 +8,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Project integrations can be configured and enabled by project administrators. As a GitLab instance administrator, you can set default configuration parameters for a given integration that all projects can inherit and use, enabling the integration for all projects that are not already using custom settings.
 
-You can update these default settings at any time, changing the settings in use for all projects that are set to use instance-level or group-level defaults. This also enables the integration for all projects on which it was not already enabled.
+You can update these default settings at any time, changing the settings used for all
+projects that are set to use instance-level or group-level defaults. Updating the
+default settings also enables the integration for all projects that didn't have it
+already enabled.
 
 It is only possible to inherit the complete settings for an integration, per-field inheritance is [planned](https://gitlab.com/groups/gitlab-org/-/epics/2137).
 
