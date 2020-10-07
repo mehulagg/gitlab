@@ -1732,22 +1732,33 @@ GitLab has been tested on a number of object storage providers:
 - On-premises hardware and appliances from various storage vendors.
 - MinIO. We have [a guide to deploying this](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html) within our Helm Chart documentation.
 
-For configuring GitLab to use Object Storage refer to the following guides
-based on what features you intend to use:
+There are two ways of specifying object storage configuration in GitLab:
 
-1. Configure [object storage for backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage).
-1. Configure [object storage for job artifacts](../job_artifacts.md#using-object-storage)
-   including [incremental logging](../job_logs.md#new-incremental-logging-architecture).
-1. Configure [object storage for LFS objects](../lfs/index.md#storing-lfs-objects-in-remote-object-storage).
-1. Configure [object storage for uploads](../uploads.md#using-object-storage).
-1. Configure [object storage for merge request diffs](../merge_request_diffs.md#using-object-storage).
-1. Configure [object storage for Container Registry](../packages/container_registry.md#use-object-storage) (optional feature).
-1. Configure [object storage for Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage) (optional feature).
-1. Configure [object storage for packages](../packages/index.md#using-object-storage) (optional feature). **(PREMIUM ONLY)**
-1. Configure [object storage for Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature). **(PREMIUM ONLY)**
-1. Configure [object storage for Pseudonymizer](../pseudonymizer.md#configuration) (optional feature). **(ULTIMATE ONLY)**
-1. Configure [object storage for autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional - for improved performance).
-1. Configure [object storage for Terraform state files](../terraform_state.md#using-object-storage).
+- [Consolidated form](../object_storage.md#consolidated-object-storage-configuration): A single credential is
+  shared by all supported object types.
+- [Storage-specific form](../object_storage.md#storage-specific-configuration): Every object defines its
+  own object storage [connection and configuration](../object_storage.md#connection-settings).
+
+Starting with GitLab 13.2, consolidated object storage configuration is available. It simplifies your GitLab configuration since the connection details are shared across object types. Refer to [Consolidated object storage configuration](../object_storage.md#consolidated-object-storage-configuration) guide for instructions on how to set it up.
+
+For configuring object storage in GitLab 13.1 and earlier, or for storage types not
+supported by consolidated configuration form, refer to the following guides based
+on what features you intend to use:
+
+|Object storage type|Supported by consolidated configuration?|
+|-------------------|----------------------------------------|
+| [Backups](../../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
+| [Job artifacts](../job_artifacts.md#using-object-storage) including archived job logs | Yes |
+| [LFS objects](../lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
+| [Uploads](../uploads.md#using-object-storage) | Yes |
+| [Container Registry](../packages/container_registry.md#use-object-storage) (optional feature) | No |
+| [Merge request diffs](../merge_request_diffs.md#using-object-storage) | Yes |
+| [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
+| [Packages](../packages/index.md#using-object-storage) (optional feature) | Yes |
+| [Dependency Proxy](../packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
+| [Pseudonymizer](../pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
+| [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
+| [Terraform state files](../terraform_state.md#using-object-storage) | Yes |
 
 Using separate buckets for each data type is the recommended approach for GitLab.
 
