@@ -387,25 +387,6 @@ describe('Cycle Analytics component', () => {
       });
     });
 
-    describe('when analyticsSimilaritySearch feature flag is on', () => {
-      beforeEach(async () => {
-        wrapper = await createComponent({
-          withStageSelected: true,
-          featureFlags: {
-            hasAnalyticsSimilaritySearch: true,
-          },
-        });
-      });
-
-      it('uses similarity as the order param', () => {
-        displaysProjectsDropdownFilter(true);
-
-        expect(wrapper.find(ProjectsDropdownFilter).props().queryParams.order_by).toEqual(
-          'similarity',
-        );
-      });
-    });
-
     it('displays the date range picker', () => {
       displaysDateRangePicker(true);
     });
