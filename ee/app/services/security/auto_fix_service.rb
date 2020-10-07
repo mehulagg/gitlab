@@ -9,6 +9,7 @@ module Security
     end
 
     def execute(vulnerability_ids)
+      return if Feature.disabled?(:security_auto_fix)
       return if auto_fix_enabled_types.empty?
 
       vulnerabilities = Vulnerabilities::Finding.where(id: vulnerability_ids, report_type: auto_fix_enabled_types)
