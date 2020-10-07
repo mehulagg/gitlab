@@ -39,6 +39,21 @@ export default class Editor {
     monacoEditor.setModelLanguage(model, id);
   }
 
+  static loadExtensions(extensions) {
+    if (!extensions) {
+      return Promise.resolve();
+    }
+    const promises = [];
+    const extensionsArray = typeof extensions === 'string' ? extensions.split(',') : extensions;
+
+    extensionsArray.forEach(ext => {
+      const prefix = ext.indexOf('/') === -1 ? 'editor/' : '';
+      promises.push(import(`~/${prefix}${ext.trim()}`));
+    });
+
+    return Promise.all(promises);
+  }
+
   /**
    * Creates a monaco instance with the given options.
    *
@@ -53,6 +68,7 @@ export default class Editor {
     blobPath = '',
     blobContent = '',
     blobGlobalId = '',
+    extensions = [],
     ...instanceOptions
   } = {}) {
     if (!el) {
@@ -80,6 +96,20 @@ export default class Editor {
       model.dispose();
     });
     instance.updateModelLanguage = path => Editor.updateModelLanguage(path, instance);
+    instance.use = args => this.use(args, instance);
+
+    Editor.loadExtensions(extensions, instance)
+      .then(modules => {
+        modules.forEach(module => {
+          instance.use(module.default);
+        });
+      })
+      .catch(e => {
+        throw e;
+      })
+      .finally(() => {
+        el.dispatchEvent(new Event('editor-ready'));
+      });
 
     this.instances.push(instance);
     return instance;
