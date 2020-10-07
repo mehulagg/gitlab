@@ -71,8 +71,7 @@ from:
 
 - A member of your team or group, to check for accuracy. If the changes are
   significant, request review from engineer managers (FE, BE, DB, Security,
-  etc).
-- The Development DRI ([@clefelhocz1](https://gitlab.com/clefelhocz1)): for
+  etc) and from the Development DRI ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
   final approval of the new or changed guidelines.
 - The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
   to check the content and adherence to documentation guidelines.
