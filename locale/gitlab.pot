@@ -733,6 +733,9 @@ msgstr ""
 msgid "%{retryButtonStart}Try again%{retryButtonEnd} or %{newFileButtonStart}attach a new file%{newFileButtonEnd}"
 msgstr ""
 
+msgid "Scanner"
+msgstr ""
+
 msgid "%{seconds}s"
 msgstr ""
 
@@ -774,6 +777,21 @@ msgid "%{start} to %{end}"
 msgstr ""
 
 msgid "%{state} epics"
+msgstr ""
+
+msgid "Star Time"
+msgstr ""
+
+msgid "End Time"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Name"
 msgstr ""
 
 msgid "%{strongStart}Deletes%{strongEnd} source branch"
