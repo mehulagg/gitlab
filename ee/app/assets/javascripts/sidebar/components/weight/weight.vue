@@ -1,10 +1,9 @@
 <script>
 import $ from 'jquery';
-import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import Tracking from '~/tracking';
 import eventHub from '~/sidebar/event_hub';
-import tooltip from '~/vue_shared/directives/tooltip';
 import { MAX_DISPLAY_WEIGHT } from '../../constants';
 
 export default {
@@ -13,7 +12,7 @@ export default {
     GlLoadingIcon,
   },
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [Tracking.mixin({ label: 'right_sidebar' })],
   props: {
@@ -141,7 +140,7 @@ export default {
 <template>
   <div :class="{ 'collapse-after-update': collapsedAfterUpdate }" class="block weight">
     <div
-      v-tooltip
+      v-gl-tooltip
       :title="tooltipTitle"
       class="sidebar-collapsed-icon js-weight-collapsed-block"
       data-container="body"
