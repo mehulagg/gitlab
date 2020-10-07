@@ -153,6 +153,22 @@ default_enabled: false
 TIP: **Tip:**
 To create a feature flag that is only used in EE, add the `--ee` flag: `bin/feature-flag --ee`
 
+## Delete the feature flag
+
+The feature flag should be removed as soon as it is no longer needed. Each additional
+feature flag being part of the codebase increases the complexity of the application
+and reduces confidence in our testing suite covering all possible combinations.
+The feature flag being overwritten in some of the environments can additionally result
+in a undefined and untested behaviour of the system.
+
+The following steps should be taken to remove feature flag:
+
+1. open a new merge request with the ~"feature flag" label
+1. all references in the codebase to the feature flag should be removed
+1. the YAML definition of the feature flag should be removed
+1. feature flag should be cleaned up from all environments using [`/chatops`](controls.html#cleaning-up)
+1. the rollout issue of a feature flag should be closed once feature flag is removed from the codebase
+
 ## Develop with a feature flag
 
 There are two main ways of using Feature Flags in the GitLab codebase:

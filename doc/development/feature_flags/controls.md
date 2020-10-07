@@ -252,7 +252,8 @@ Changes to the issue format can be submitted in the
 
 Once the change is deemed stable, submit a new merge request to remove the
 feature flag. This ensures the change is available to all users and self-managed
-instances. Make sure to add the ~"feature flag" label to this merge request so
+instances. Make sure that YAML definition of a feature flag is removed from
+the repository. Make sure to add the ~"feature flag" label to this merge request so
 release managers are aware the changes are hidden behind a feature flag. If the
 merge request has to be picked into a stable branch, make sure to also add the
 appropriate `~"Pick into X.Y"` label (e.g. `~"Pick into 13.0"`).
