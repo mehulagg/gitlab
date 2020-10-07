@@ -80,7 +80,6 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
   >
     <button
       class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
-      click="button.onClick"
       title="Foo Action"
       type="button"
     >
@@ -99,7 +98,6 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     </button>
     <button
       class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
-      click="button.onClick"
       title="Bar Action"
       type="button"
     >
