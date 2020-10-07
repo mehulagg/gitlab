@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe DastScannerProfilesFinder do
-  let_it_be(:current_user) { create(:user) }
   let_it_be(:dast_scanner_profile1) { create(:dast_scanner_profile) }
   let_it_be(:dast_scanner_profile2) { create(:dast_scanner_profile) }
   let_it_be(:dast_scanner_profile3) { create(:dast_scanner_profile) }
