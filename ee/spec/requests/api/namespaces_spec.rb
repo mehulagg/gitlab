@@ -145,6 +145,17 @@ RSpec.describe API::Namespaces do
         expect { get api("/namespaces", user) }.not_to exceed_all_query_limit(control).with_threshold(10)
       end
 
+      it "avoids N+1 database queries for admins" do
+        control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get api("/namespaces", admin) }
+
+        create(:gitlab_subscription, namespace: group2, max_seats_used: 2)
+
+        group3 = create(:group)
+        create(:gitlab_subscription, namespace: group3, max_seats_used: 3)
+
+        expect { get api("/namespaces", admin) }.not_to exceed_all_query_limit(control)
+      end
+
       it 'includes max_seats_used' do
         get api("/namespaces", user)
 
