@@ -50,10 +50,10 @@ export default {
 <template>
   <div v-if="slaFeatureAvailable">
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
+    <gl-loading-icon v-if="$apollo.queries.slaDueAt.loading" inline />
     <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt" class="gl-white-space-nowrap">
       <gl-icon name="timer" />
       <span>{{ displayValue }}</span>
     </time-ago-tooltip>
-    <gl-loading-icon v-else inline />
   </div>
 </template>
