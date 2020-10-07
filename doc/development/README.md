@@ -74,7 +74,7 @@ from:
   etc).
 - The Development DRI ([@clefelhocz1](https://gitlab.com/clefelhocz1)): for
   final approval of the new or changed guidelines.
-- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#development-guidelines),
+- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
   to check the content and adherence to documentation guidelines.
 
 ## UX and Frontend guides
