@@ -19,6 +19,7 @@ import {
   initialPaginationState,
 } from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
+import Tracking from '~/tracking';
 import { s__ } from '~/locale';
 import { visitUrl, mergeUrlParams, joinPaths } from '~/lib/utils/url_utility';
 import getIncidents from '../graphql/queries/get_incidents.query.graphql';
@@ -33,10 +34,12 @@ import {
   TH_PUBLISHED_TEST_ID,
   INCIDENT_DETAILS_PATH,
   trackIncidentListViewsOptions,
+  trackIncidentCreateNewOptions,
 } from '../constants';
 
 export default {
   trackIncidentListViewsOptions,
+  trackIncidentCreateNewOptions,
   i18n: I18N,
   statusTabs: INCIDENT_STATUS_TABS,
   fields: [
@@ -234,6 +237,11 @@ export default {
     navigateToIncidentDetails({ iid }) {
       return visitUrl(joinPaths(this.issuePath, INCIDENT_DETAILS_PATH, iid));
     },
+    navigateToCreateNewIncident() {
+      const { category, action } = this.$options.trackIncidentCreateNewOptions;
+      Tracking.event(category, action);
+      this.redirecting = true;
+    },
     fetchSortedData({ sortBy, sortDesc }) {
       const sortingDirection = sortDesc ? 'DESC' : 'ASC';
       const sortingColumn = convertToSnakeCase(sortBy)
@@ -292,7 +300,7 @@ export default {
           category="primary"
           variant="success"
           :href="newIncidentPath"
-          @click="redirecting = true"
+          @click="navigateToCreateNewIncident"
         >
           {{ $options.i18n.createIncidentBtnLabel }}
         </gl-button>

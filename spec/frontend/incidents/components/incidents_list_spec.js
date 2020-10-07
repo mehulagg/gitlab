@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon, GlTable, GlAvatar, GlEmptyState } from '@gitlab/ui';
 import { visitUrl, joinPaths, mergeUrlParams } from '~/lib/utils/url_utility';
+import Tracking from '~/tracking';
 import IncidentsList from '~/incidents/components/incidents_list.vue';
 import SeverityToken from '~/sidebar/components/severity/severity.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -9,6 +10,7 @@ import {
   TH_CREATED_AT_TEST_ID,
   TH_SEVERITY_TEST_ID,
   TH_PUBLISHED_TEST_ID,
+  trackIncidentCreateNewOptions,
 } from '~/incidents/constants';
 import mockIncidents from '../mocks/incidents.json';
 
@@ -213,6 +215,14 @@ describe('Incidents List', () => {
         loading: false,
       });
       expect(findCreateIncidentBtn().exists()).toBe(false);
+    });
+
+    it('should track alert list page views', async () => {
+      jest.spyOn(Tracking, 'event');
+      findCreateIncidentBtn().vm.$emit('click');
+      await wrapper.vm.$nextTick();
+      const { category, action } = trackIncidentCreateNewOptions;
+      expect(Tracking.event).toHaveBeenCalledWith(category, action);
     });
   });
 

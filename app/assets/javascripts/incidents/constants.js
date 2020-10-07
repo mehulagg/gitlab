@@ -43,6 +43,14 @@ export const trackIncidentListViewsOptions = {
   action: 'view_incidents_list',
 };
 
+/**
+ * Tracks snowplow event when user clicks create new incident
+ */
+export const trackIncidentCreateNewOptions = {
+  category: 'Incident Management',
+  action: 'create_incident_button_clicks',
+};
+
 export const DEFAULT_PAGE_SIZE = 20;
 export const TH_CREATED_AT_TEST_ID = { 'data-testid': 'incident-management-created-at-sort' };
 export const TH_SEVERITY_TEST_ID = { 'data-testid': 'incident-management-severity-sort' };
