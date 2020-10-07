@@ -15,7 +15,7 @@ We will implement a dynamic image resizing solution. This means image should be 
 
 Content image resizing is a more complex problem to tackle. There are no set size restrictions and there are additional features or requirements to consider.
 
-- Dynamic WebP support
+- Dynamic WebP support - the WebP format typically achieves an average of 30% more compression than JPEG without the loss of image quality. More details [here](https://developers.google.com/speed/webp/docs/c_study)
 - Extract first image of GIF's so we can prevent from loading 10MB pixels
 - Check Device Pixel Ratio to deliver nice images on High DPI screens
 - Blurring
