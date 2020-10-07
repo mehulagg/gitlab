@@ -1600,7 +1600,7 @@ class User < ApplicationRecord
 
   def update_two_factor_requirement
     periods = expanded_groups_requiring_two_factor_authentication.pluck(:two_factor_grace_period)
-
+    # binding.pry
     self.require_two_factor_authentication_from_group = periods.any?
     self.two_factor_grace_period = periods.min || User.column_defaults['two_factor_grace_period']
 
