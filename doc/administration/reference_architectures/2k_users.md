@@ -832,13 +832,16 @@ data, and is recommended over [NFS](#configure-nfs-optional). In general,
 object storage services are better for larger environments, as object storage
 is typically much more performant, reliable, and scalable.
 
-Object storage options that GitLab has either tested or is aware of customers
-using, includes:
+GitLab has been tested on a number of object storage providers:
 
-- SaaS/Cloud solutions (such as [Amazon S3](https://aws.amazon.com/s3/) or
-  [Google Cloud Storage](https://cloud.google.com/storage)).
-- On-premises hardware and appliances, from various storage vendors.
-- MinIO ([Deployment guide](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html)).
+- [Amazon S3](https://aws.amazon.com/s3/)
+- [Google Cloud Storage](https://cloud.google.com/storage)
+- [Digital Ocean Spaces](https://www.digitalocean.com/products/spaces/)
+- [Oracle Cloud Infrastructure](https://docs.cloud.oracle.com/en-us/iaas/Content/Object/Tasks/s3compatibleapi.htm)
+- [Openstack Swift](https://docs.openstack.org/swift/latest/s3_compat.html)
+- [Azure Blob storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)
+- On-premises hardware and appliances from various storage vendors.
+- MinIO. We have [a guide to deploying this](https://docs.gitlab.com/charts/advanced/external-object-storage/minio.html) within our Helm Chart documentation.
 
 To configure GitLab to use object storage, refer to the following guides based
 on the features you intend to use:
