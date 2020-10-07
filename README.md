@@ -1,4 +1,4 @@
-# GitLab sdffsdfsdsdffsd
+# GitLab
 
 ## Canonical source
 
