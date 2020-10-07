@@ -121,7 +121,7 @@ module Ci
     end
 
     def schedule_to_persist!
-      return if persisted?
+      return if flushed?
 
       Ci::BuildTraceChunkFlushWorker.perform_async(id)
     end
@@ -131,13 +131,16 @@ module Ci
     # happen that a chunk gets migrated after being loaded by another worker
     # but before the worker acquires a lock to perform the migration.
     #
-    # We want to reset a chunk in that case and retry migration. If it fails
-    # again, we want to re-raise the exception.
+    # We are using Redis locking to ensure that we perform this operation
+    # inside an exclusive lock, but this does not prevent us from running into
+    # race conditions related to updating a model representation in the
+    # database.
+    #
+    # We are using pessimistic locking combined with Redis locking to ensure
+    # that a chunk gets migrated properly.
     #
     def flush!
-      persist_data!
-    rescue FailedToPersistDataError
-      self.reset.persist_data!
+      with_lock { persist_data! }
     end
 
     ##
@@ -149,8 +152,12 @@ module Ci
       build.pending_state.present? && chunks_max_index == chunk_index
     end
 
-    def persisted?
+    def flushed?
       !redis?
+    end
+
+    def migrated?
+      flushed?
     end
 
     def live?

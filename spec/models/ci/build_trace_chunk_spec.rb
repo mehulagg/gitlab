@@ -791,34 +791,26 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
       end
     end
 
-    context 'when the flush operation fails at first' do
-      it 'retries reloads the chunk' do
-        expect(build_trace_chunk)
-          .to receive(:persist_data!)
-          .and_raise(described_class::FailedToPersistDataError)
-          .ordered
-        expect(build_trace_chunk).to receive(:reset)
-          .and_return(build_trace_chunk)
-          .ordered
-        expect(build_trace_chunk)
-          .to receive(:persist_data!)
-          .ordered
+    context 'when the chunk has been modifed by a different worker' do
+      it 'acquires an exclusive database lock on the row' do
+        build_trace_chunk.save!
+
+        described_class
+          .find(build_trace_chunk.id)
+          .update!(data_store: :fog)
 
         build_trace_chunk.flush!
       end
     end
 
-    context 'when the flush constatly fails' do
+    context 'when the flush fails' do
       before do
         allow(build_trace_chunk)
           .to receive(:persist_data!)
           .and_raise(described_class::FailedToPersistDataError)
       end
 
-      it 'attems to reset the chunk but eventually fails too' do
-        expect(build_trace_chunk).to receive(:reset)
-          .and_return(build_trace_chunk)
-
+      it 'raises an error about invalid migration' do
         expect { build_trace_chunk.flush! }
           .to raise_error(described_class::FailedToPersistDataError)
       end
