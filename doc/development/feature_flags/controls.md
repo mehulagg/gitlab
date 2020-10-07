@@ -90,13 +90,11 @@ This depends on the feature and what sort of impact it might have.
 
 As a guideline:
 
-- For simple features that are low-risk, and easily rolled back, then
+1. Check if the feature meets the requirements for creating a [Change Management](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#feature-flags-and-the-change-management-process) issue. If it does, create a Change Management issue per [criticality guidelines](https://about.gitlab.com/handbook/engineering/infrastructure/change-management/#change-request-workflows).
+1. For simple features that are low-risk, and easily rolled back, then
   just proceed to [enabling the feature in `#production`](#process).
-- For features that will impact user experience consider notifying
+1. For features that will impact user experience consider notifying
   `#support_gitlab-com` beforehand.
-- For features with significant downstream effects (e.g.: turning on/off
-  Elasticsearch indexing) consider coordinating with `#production`
-  beforehand.
 
 #### Process
 
