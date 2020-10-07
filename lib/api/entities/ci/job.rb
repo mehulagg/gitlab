@@ -9,6 +9,7 @@ module API
         expose :job_artifacts, as: :artifacts, using: ::API::Entities::Ci::JobArtifact
         expose :runner, with: ::API::Entities::Runner
         expose :artifacts_expire_at
+	expose :tag_list
       end
     end
   end
