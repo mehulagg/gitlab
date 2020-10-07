@@ -302,7 +302,11 @@
                         %span= _("Got it!")
                         = sprite_icon('thumb-up')
 
-            = render_if_exists 'layouts/nav/sidebar/project_feature_flags_link'
+            - if project_nav_tab? :feature_flags
+              = nav_link(controller: :feature_flags) do
+                = link_to project_feature_flags_path(@project), title: _('Feature Flags'), class: 'shortcuts-feature-flags' do
+                  %span
+                    = _('Feature Flags')
 
       = render_if_exists 'layouts/nav/sidebar/project_packages_link'
 
