@@ -584,9 +584,7 @@ tenses, words, and phrases:
 - Avoid the use of [racially-insensitive terminology or phrases](https://www.marketplace.org/2020/06/17/tech-companies-update-language-to-avoid-offensive-terms/). For example:
   - Use *primary* and *secondary* for database and server relationships.
   - Use *allowlist* and *denylist* to describe access control lists.
-- Avoid using the word *please* when you tell the user to do something. 
-  For an exception, see the discussion of [Please](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please) in the Microsoft style guide.
-  an unnecessary word, English writing is polite enough.
+- Avoid the word *please*. For details, see [the Microsoft style guide](https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/p/please).
 
 ### Word usage clarifications
 
