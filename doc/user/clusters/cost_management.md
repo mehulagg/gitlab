@@ -9,14 +9,13 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Cluster cost management provides insights into cluster resource usage. GitLab provides an example
 [`kubecost-cost-model`](https://gitlab.com/gitlab-examples/kubecost-cost-model/)
 project that uses GitLab's Prometheus integration and
-[Kubecost's `cost-model`](https://github.com/kubecost/cost-model).
+[Kubecost's `cost-model`](https://github.com/kubecost/cost-model) to provide cluster cost insights within GitLab.
 
-NOTE: **Note:**
-GitLab has basic support for cluster cost management.
+![Example dashboard](./img/kubecost.png)
 
 ## Configure cluster cost management
 
-To get started with cluster cost management:
+To get started with cluster cost management you need Maintainer rights in a project or group.
 
 1. Clone the [`kubecost-cost-model`](https://gitlab.com/gitlab-examples/kubecost-cost-model/)
    example repository, which contains minor modifications to the upstream kubecost `cost-model`:
