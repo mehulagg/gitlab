@@ -9,6 +9,10 @@ module Gitlab
         @rpc_response = rpc_response
       end
 
+      def size
+        @rpc_response.size
+      end
+
       def each
         current_diff = nil
 
