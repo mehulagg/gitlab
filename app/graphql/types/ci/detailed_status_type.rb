@@ -39,12 +39,6 @@ module Types
                 nil
               end
             }
-
-      def details_path
-        object.details_path
-      rescue NotImplementedError
-        nil
-      end
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end
