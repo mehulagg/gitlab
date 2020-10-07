@@ -26,6 +26,10 @@ export default {
       required: false,
       default: false,
     },
+    changing: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
@@ -38,18 +42,7 @@ export default {
       return n__('Assignee', `%d Assignees`, assignees);
     },
     titleCopy() {
-      return this.editing ? __('Apply') : __('Edit');
-    },
-  },
-  mounted() {
-    document.addEventListener('click', this.doSomething);
-  },
-  beforeDestroy() {
-    document.removeEventListener('click', this.doSomething);
-  },
-  methods: {
-    doSomething() {
-      this.editing = !this.editing;
+      return this.changing ? __('Apply') : __('Edit');
     },
   },
 };
