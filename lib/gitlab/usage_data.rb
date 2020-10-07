@@ -686,6 +686,14 @@ module Gitlab
         { redis_hll_counters: ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events_data }
       end
 
+      def combined_events
+        return {} unless Feature.enabled?(:product_analytics_combined_events)
+
+        {
+          combined_events: ::Gitlab::UsageDataCounters::HLLRedisCounter.combined_events_data
+        }
+      end
+
       def analytics_unique_visits_data
         results = ::Gitlab::Analytics::UniqueVisits.analytics_events.each_with_object({}) do |target, hash|
           hash[target] = redis_usage_data { unique_visit_service.unique_visits_for(targets: target) }

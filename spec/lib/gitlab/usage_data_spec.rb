@@ -1214,6 +1214,32 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     end
   end
 
+  describe 'combined_events' do
+    subject(:combined_events) { described_class.combined_events }
+
+    context 'with product_analytics_combined_events feature flag on' do
+      before do
+        stub_feature_flags(product_analytics_combined_events: true)
+      end
+
+      it 'uses ::Gitlab::UsageDataCounters::HLLRedisCounter#combined_events_data', :aggregate_failures do
+        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:combined_events_data).and_return(global_search_gmau: 123)
+        expect(combined_events).to eq(combined_events: { global_search_gmau: 123 })
+      end
+    end
+
+    context 'with product_analytics_combined_events feature flag off' do
+      before do
+        stub_feature_flags(product_analytics_combined_events: false)
+      end
+
+      it 'returns empty hash', :aggregate_failures do
+        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:combined_events_data)
+        expect(combined_events).to be {}
+      end
+    end
+  end
+
   describe '.service_desk_counts' do
     subject { described_class.send(:service_desk_counts) }
 
