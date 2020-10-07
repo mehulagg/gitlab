@@ -25,7 +25,7 @@ RSpec.shared_examples 'pushes wip limits to frontend' do
       end
 
       it 'is enabled' do
-        expect(subject).to receive(:push_frontend_beta_feature_available).at_least(:once)
+        expect(subject).to receive(:push_frontend_feature_available).at_least(:once)
 
         get :index, params: params
       end
@@ -33,7 +33,7 @@ RSpec.shared_examples 'pushes wip limits to frontend' do
 
     context 'for group with incorrect or no plan' do
       it 'is not enabled' do
-        expect(subject).not_to receive(:push_frontend_beta_feature_available).with(:wip_limits, anything)
+        expect(subject).not_to receive(:push_frontend_feature_available).with(:wip_limits, anything)
 
         get :index, params: params
       end

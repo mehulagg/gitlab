@@ -139,7 +139,7 @@ module EE
 
       with_scope :subject
       condition(:feature_flags_related_issues_disabled) do
-        !@subject.feature_available?(:feature_flags_related_issues)
+        !(@subject.feature_available?(:feature_flags_related_issues) && Feature.enabled?(:feature_flags_related_issues, subject, type: :licensed, default_enabled: true))
       end
 
       rule { visual_review_bot }.policy do

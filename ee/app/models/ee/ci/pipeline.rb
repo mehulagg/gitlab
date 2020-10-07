@@ -172,7 +172,8 @@ module EE
       private
 
       def project_has_subscriptions?
-        project.beta_feature_available?(:ci_project_subscriptions) &&
+        project.feature_available?(:ci_project_subscriptions) &&
+          Feature.enabled?(:ci_project_subscriptions, project, type: :licensed, default_enabled: false) &&
           project.downstream_projects.any?
       end
 

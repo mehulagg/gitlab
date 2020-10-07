@@ -298,17 +298,6 @@ module EE
       shared_runners_enabled? && shared_runners_limit_namespace.shared_runners_minutes_limit_enabled?
     end
 
-    # This makes the feature disabled by default.
-    #
-    # This allows to:
-    # - To check a licensed feature in conjuction with a feature flag of that same name
-    #   in context of the current project.
-    # - Decide if feature flag is enabled or disabled by default
-    def beta_feature_available?(feature, default_enabled: false)
-      feature_available?(feature) &&
-        ::Feature.enabled?(feature, self, default_enabled: default_enabled)
-    end
-
     def push_audit_events_enabled?
       ::Feature.enabled?(:repository_push_audit_event, self)
     end

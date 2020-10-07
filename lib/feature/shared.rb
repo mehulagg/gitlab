@@ -34,6 +34,17 @@ class Feature
           Feature.enabled?(:my_ops_flag, type: ops)
           push_frontend_feature_flag?(:my_ops_flag, project, type: :ops)
         EOS
+      },
+      licensed: {
+        description: 'Permanent feature flags used to temporarily disable licensed features.',
+        optional: true,
+        rollout_issue: false,
+        ee_only: true,
+        default_enabled: true,
+        example: <<-EOS
+          project.feature_available?(:my_licensed_feature)
+          namespace.feature_available?(:my_licensed_feature)
+        EOS
       }
     }.freeze
 

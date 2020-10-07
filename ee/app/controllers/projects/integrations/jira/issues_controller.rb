@@ -11,7 +11,7 @@ module Projects
         before_action :check_feature_enabled!
 
         before_action do
-          push_frontend_beta_feature_available(:jira_issues_integration, project, default_enabled: true)
+          push_frontend_feature_available(:jira_issues_integration, project)
         end
 
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error

@@ -12,8 +12,10 @@ module EE
 
     def push_licensed_features
       # This is pushing a licensed Feature to the frontend.
-      push_frontend_beta_feature_available(:wip_limits, parent, default_enabled: true)
-      push_frontend_beta_feature_available(:swimlanes, parent, default_enabled: true)
+      push_frontend_feature_available(:wip_limits, parent)
+
+      # it seems to be a valid feature flag
+      push_frontend_feature_available(:swimlanes, parent)
     end
   end
 end

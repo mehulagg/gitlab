@@ -115,17 +115,6 @@ module EE
       project.full_path.sub(/\A#{Regexp.escape(full_path)}/, full_path_before_last_save)
     end
 
-    # This makes the feature disabled by default.
-    #
-    # This allows to:
-    # - To check a licensed feature in conjuction with a feature flag of that same name
-    #   in context of the current namespace.
-    # - Decide if feature flag is enabled or disabled by default
-    def beta_feature_available?(feature, default_enabled: false)
-      feature_available?(feature) &&
-        ::Feature.enabled?(feature, self, default_enabled: default_enabled)
-    end
-
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
     # being licensed.

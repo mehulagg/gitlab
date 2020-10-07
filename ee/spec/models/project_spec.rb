@@ -787,12 +787,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#beta_feature_available?' do
-    it_behaves_like 'an entity with beta licensed feature support' do
-      let(:entity) { create(:project) }
-    end
-  end
-
   describe '#feature_available?' do
     let(:namespace) { build(:namespace) }
     let(:plan_license) { nil }

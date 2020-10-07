@@ -134,7 +134,8 @@ module EE
       end
 
       def ci_secrets_management_available?
-        project.feature_available?(:ci_secrets_management)
+        project.feature_available?(:ci_secrets_management) &&
+          Feature.enabled?(:ci_secrets_management, project, type: :licensed, default_enabled: true)
       end
 
       override :runner_required_feature_names

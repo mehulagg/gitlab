@@ -8,7 +8,8 @@ module PersonalAccessTokens
     end
 
     def execute
-      return unless License.beta_feature_available?(:personal_access_token_expiration_policy, default_enabled: true)
+      return unless License.feature_available?(:personal_access_token_expiration_policy)
+      return unless Feature.enabled?(:personal_access_token_expiration_policy, type: :licensed, default_enabled: true)
       return unless PersonalAccessToken.expiration_enforced?
       return unless expiration_date && user_affected?
 

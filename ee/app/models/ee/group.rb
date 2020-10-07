@@ -392,7 +392,9 @@ module EE
     end
 
     def minimal_access_role_allowed?
-      feature_available?(:minimal_access_role) && !has_parent?
+      feature_available?(:minimal_access_role) &&
+        Feature.enabled(:minimal_access_role, self, type: :licensed, default_enabled: true) &&
+        !has_parent?
     end
 
     override :member?

@@ -253,7 +253,9 @@ module EE
       # TODO: Switch to `feature_enabled?` when we enable the feature flag by default
       # https://gitlab.com/gitlab-org/gitlab/-/issues/207888
       desc "Group has wiki disabled"
-      condition(:wiki_disabled, score: 32) { !@subject.beta_feature_available?(:group_wikis) }
+      condition(:wiki_disabled, score: 32) do
+        !(@subject.feature_available?(:group_wikis) && Feature.enabled?(:group_wikis, @subject, type: :licensed))
+      end
 
       rule { wiki_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:wiki))

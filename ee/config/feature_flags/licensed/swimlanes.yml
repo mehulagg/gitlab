@@ -1,7 +1,0 @@
----
-name: swimlanes
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41543
-rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/239472
-group: group::portfolio management
-type: licensed
-default_enabled: true

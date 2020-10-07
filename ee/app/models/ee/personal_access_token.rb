@@ -47,7 +47,8 @@ module EE
       end
 
       def enforce_pat_expiration_feature_available?
-        License.beta_feature_available?(:enforce_pat_expiration, default_enabled: false)
+        License.feature_available?(:enforce_pat_expiration) &&
+          Feature.enabled?(:enforce_pat_expiration, type: :licensed, default_enabled: false)
       end
     end
 
