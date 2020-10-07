@@ -79,48 +79,42 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
     class="gl-flex-shrink-0 gl-align-self-start"
   >
     <button
-      class="btn px-1 btn-default btn-md gl-button btn-default-tertiary"
+      class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+      click="button.onClick"
       title="Foo Action"
       type="button"
     >
       <!---->
        
-      <!---->
-        
-      <span
-        class="gl-button-text"
+      <svg
+        class="gl-icon s16"
+        data-testid="pencil-icon"
       >
-        <svg
-          class="link-highlight gl-icon s16"
-          data-testid="pencil-icon"
-        >
-          <use
-            href="#pencil"
-          />
-        </svg>
-      </span>
+        <use
+          href="#pencil"
+        />
+      </svg>
+        
+      <!---->
     </button>
     <button
-      class="btn px-1 btn-default btn-md gl-button btn-default-tertiary"
+      class="btn btn-default btn-md gl-button btn-default-tertiary btn-icon"
+      click="button.onClick"
       title="Bar Action"
       type="button"
     >
       <!---->
        
-      <!---->
-        
-      <span
-        class="gl-button-text"
+      <svg
+        class="gl-icon s16"
+        data-testid="remove-icon"
       >
-        <svg
-          class="link-highlight gl-icon s16"
-          data-testid="remove-icon"
-        >
-          <use
-            href="#remove"
-          />
-        </svg>
-      </span>
+        <use
+          href="#remove"
+        />
+      </svg>
+        
+      <!---->
     </button>
   </div>
 </div>
