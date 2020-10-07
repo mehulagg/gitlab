@@ -1687,9 +1687,10 @@ The repository path, if given, is always matched literally.
 
 To match the tag or branch name,
 the entire ref name part of the pattern must be a regular expression surrounded by `/`.
-(With regular expression flags appended after the closing `/`.)
-So `issue-/.*/` doesn't work to match all tag names or branch names
-that begin with `issue-`.
+For example, you can't use `issue-/.*/` to match all tag names or branch names
+that begin with `issue-`, but you can use `/issue-.*/`.
+
+Regular expression flags must be appended after the closing `/`.
 
 TIP: **Tip:**
 Use anchors `^` and `$` to avoid the regular expression
