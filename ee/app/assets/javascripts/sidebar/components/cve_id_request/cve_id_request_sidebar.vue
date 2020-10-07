@@ -43,9 +43,6 @@ export default {
     },
   },
 
-  created() {},
-
-  beforeDestroy() {},
 
   methods: {
     toggleHelpState(show) {
