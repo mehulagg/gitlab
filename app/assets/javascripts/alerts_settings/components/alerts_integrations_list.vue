@@ -1,6 +1,8 @@
 <script>
 import { GlTable } from '@gitlab/ui';
+import Tracking from '~/tracking';
 import { s__, __ } from '~/locale';
+import { trackAlertIntergrationsViewsOptions } from '../constants';
 
 export const i18n = {
   title: s__('AlertsIntegrations|Current integrations'),
@@ -48,6 +50,15 @@ export default {
       return {
         [bodyTrClass]: this.integrations.length,
       };
+    },
+  },
+  mounted() {
+    this.trackPageViews();
+  },
+  methods: {
+    trackPageViews() {
+      const { category, action } = trackAlertIntergrationsViewsOptions;
+      Tracking.event(category, action);
     },
   },
 };
