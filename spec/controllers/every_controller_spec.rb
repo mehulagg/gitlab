@@ -23,16 +23,7 @@ RSpec.describe "Every controller" do
 
     let_it_be(:routes_without_category) do
       controller_actions.map do |controller, action|
-        child_controller = controller.to_s.split('::').second
-
         next if controller.feature_category_for_action(action)
-
-        next if controller.to_s.start_with?('P') &&
-                !child_controller.to_s.start_with?('A', 'B', 'C', 'D',
-                                                   'E', 'F', 'G', 'H',
-                                                   'I', 'J', 'K', 'L',
-                                                   'M', 'N', 'O', 'P',
-                                                   'Q', 'R', 'S', 'T')
 
         "#{controller}##{action}"
       end.compact
