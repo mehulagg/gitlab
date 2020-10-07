@@ -444,7 +444,7 @@ Recommendations:
   metric's name and week of the year, `2020-33-{metric_name}`.
 - Use a [feature flag](../../operations/feature_flags.md) to have a control over the impact when
   adding new metrics. 
-- Feature flags should be [default on](../feature_flags.html#criteria)
+- Feature flags should be [default on](../feature_flags.md#criteria)
   before final release to ensure we receive data from self-managed instances.
 
 ##### Known events in usage data payload
