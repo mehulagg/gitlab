@@ -29,12 +29,14 @@ RSpec.describe 'User filters Alert Management table by status', :js do
 
     it 'shows the alert table items with alert status of Triggered' do
       find('.gl-tab-nav-item', text: 'Triggered').click
+      expect(page).to have_selector('.gl-tab-nav-item-active')
       expect(find('.gl-tab-nav-item-active')).to have_content('Triggered 3')
       expect(all('.dropdown-menu-selectable').count).to be(3)
     end
 
     it 'shows the an empty table for a status with no alerts' do
       find('.gl-tab-nav-item', text: 'Resolved').click
+      expect(page).to have_selector('.gl-tab-nav-item-active')
       expect(find('.gl-tab-nav-item-active')).to have_content('Resolved 0')
       expect(page).to have_content('No alerts to display.')
     end

@@ -74,7 +74,7 @@ RSpec.describe 'Alert details', :js do
 
         expect(alert_assignee).to have_content('None - assign yourself')
         find('[data-testid="unassigned-users"]').click
-        expect(alert_assignee).to have_content('Assignee Edit John Doe3 user2')
+        expect(alert_assignee).to have_content('Assignee Edit John')
       end
     end
   end
