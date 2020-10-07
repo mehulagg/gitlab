@@ -171,6 +171,10 @@ module GraphqlHelpers
     FIELDS
   end
 
+  def a_graphql_object_with(attrs)
+    a_hash_including(attrs.transform_keys { |k| GraphqlHelpers.fieldnamerize(k) })
+  end
+
   def all_graphql_fields_for(class_name, parent_types = Set.new, max_depth: 3, excluded: [])
     # pulling _all_ fields can generate a _huge_ query (like complexity 180,000),
     # and significantly increase spec runtime. so limit the depth by default

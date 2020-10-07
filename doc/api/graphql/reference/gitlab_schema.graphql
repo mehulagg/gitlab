@@ -1990,6 +1990,65 @@ type Branch {
   name: String!
 }
 
+type BuildSection {
+  """
+  End index of the section
+  """
+  byteEnd: Int
+
+  """
+  Start index of the section
+  """
+  byteStart: Int
+
+  """
+  The content of this section
+  """
+  content: String
+
+  """
+  Time that the section ended
+  """
+  dateEnd: Time
+
+  """
+  Time that the section started
+  """
+  dateStart: Time
+
+  """
+  Name of the section
+  """
+  name: String
+}
+
+type BuildTrace {
+  """
+  The trace as HTML
+  """
+  html(
+    """
+    Take only the last N lines
+    """
+    tail: Int
+  ): String
+
+  """
+  The trace as plaintext
+  """
+  raw(
+    """
+    Take only the last N lines
+    """
+    tail: Int
+  ): String
+
+  """
+  The sections in the trace
+  """
+  sections: [BuildSection!]
+}
+
 """
 Represents the total number of issues and their weights for a particular day
 """
@@ -2018,6 +2077,120 @@ type BurnupChartDailyTotals {
   Total weight of issues as of this day
   """
   scopeWeight: Int!
+}
+
+type CiBuild {
+  """
+  Is this build allowed to fail
+  """
+  allowFailure: Boolean!
+
+  """
+  Timestamp of the build's creation
+  """
+  createdAt: Time!
+
+  """
+  Duration of the build in seconds
+  """
+  duration: Int
+
+  """
+  Timestamp of the build's completion
+  """
+  finishedAt: Time
+
+  """
+  ID of the build
+  """
+  id: CiBuildID!
+
+  """
+  Name of the build
+  """
+  name: String
+
+  """
+  Stage of the build
+  """
+  stage: String
+
+  """
+  Timestamp when the build was started
+  """
+  startedAt: Time
+
+  """
+  Status of the build
+  """
+  status: CiBuildStatus
+
+  """
+  Output of the build
+  """
+  trace: BuildTrace
+}
+
+"""
+Identifier of Ci::Build
+"""
+scalar CiBuildID
+
+enum CiBuildStatus {
+  """
+  A build that is canceled
+  """
+  CANCELED
+
+  """
+  A build that is created
+  """
+  CREATED
+
+  """
+  A build that is failed
+  """
+  FAILED
+
+  """
+  A build that is manual
+  """
+  MANUAL
+
+  """
+  A build that is pending
+  """
+  PENDING
+
+  """
+  A build that is preparing
+  """
+  PREPARING
+
+  """
+  A build that is running
+  """
+  RUNNING
+
+  """
+  A build that is scheduled
+  """
+  SCHEDULED
+
+  """
+  A build that is skipped
+  """
+  SKIPPED
+
+  """
+  A build that is success
+  """
+  SUCCESS
+
+  """
+  A build that is waiting for resource
+  """
+  WAITING_FOR_RESOURCE
 }
 
 type CiGroup {
@@ -12978,6 +13151,31 @@ type Pipeline {
   Base SHA of the source branch
   """
   beforeSha: String
+
+  """
+  A specific build in this pipeline, either by name or ID
+  """
+  build(
+    """
+    The ID of the build
+    """
+    id: CiBuildID
+
+    """
+    The name of the build
+    """
+    name: String
+  ): CiBuild
+
+  """
+  Builds run in this pipeline
+  """
+  builds(
+    """
+    A list of build statuses. If non-empty, then filter the build to only those with one of these statuses
+    """
+    statuses: [CiBuildStatus!]
+  ): [CiBuild!]
 
   """
   Specifies if a pipeline can be canceled
