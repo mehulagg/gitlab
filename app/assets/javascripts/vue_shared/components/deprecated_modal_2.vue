@@ -6,11 +6,11 @@ const buttonVariants = ['danger', 'primary', 'success', 'warning'];
 const sizeVariants = ['sm', 'md', 'lg', 'xl'];
 
 export default {
+  name: 'DeprecatedModal2', // use GlModal instead
+
   components: {
     GlButton,
   },
-  name: 'DeprecatedModal2', // use GlModal instead
-
   props: {
     id: {
       type: String,
