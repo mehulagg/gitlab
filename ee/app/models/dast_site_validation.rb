@@ -7,8 +7,14 @@ class DastSiteValidation < ApplicationRecord
   validates :dast_site_token_id, presence: true
   validates :validation_strategy, presence: true
 
-  scope :by_project_id, -> (project_id) do
-    joins(:dast_site_token).where(dast_site_tokens: { project_id: project_id })
+  scope :by_project_id, -> (project_ids) do
+    joins(:dast_site_token).where(dast_site_tokens: { project_id: project_ids })
+  end
+
+  scope :url_in, -> (urls) do
+    base_urls = urls.map{ |url| DastSiteValidation.get_base_url(url) }
+    paths = urls.map{ |url| DastSiteValidation.get_path(url) }
+    where(url_base: base_urls, url_path: paths)
   end
 
   before_create :set_normalized_url_base
@@ -57,11 +63,18 @@ class DastSiteValidation < ApplicationRecord
     end
   end
 
+  def self.get_base_url(url)
+    uri = URI(url)
+    "%{scheme}://%{host}:%{port}" % { scheme: uri.scheme, host: uri.host, port: uri.port }
+  end
+
+  def self.get_path(url)
+    URI(url).path.sub(/^\//, '')
+  end
+
   private
 
   def set_normalized_url_base
-    uri = URI(dast_site_token.url)
-
-    self.url_base = "%{scheme}://%{host}:%{port}" % { scheme: uri.scheme, host: uri.host, port: uri.port }
+    self.url_base = DastSiteValidation.get_base_url(dast_site_token.url)
   end
 end
