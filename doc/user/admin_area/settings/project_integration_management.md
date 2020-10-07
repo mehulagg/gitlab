@@ -49,7 +49,7 @@ integration on all non-configured groups and projects by default.
 
 > [Introduced in](https://gitlab.com/groups/gitlab-org/-/epics/2543) GitLab 13.5.
 
-1. Navigate to the group's Settings > Integrations**.
+1. Navigate to the group's **Settings > Integrations**.
 1. Select an integration.
 1. Enter configuration details and click **Save changes**.
 
