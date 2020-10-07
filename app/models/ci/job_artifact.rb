@@ -66,7 +66,7 @@ module Ci
       lsif: :zip,
 
       # Security reports and license scanning reports are raw artifacts
-      # because they used to be fetched by the frontend, but this is not the case anymore. 
+      # because they used to be fetched by the frontend, but this is not the case anymore.
       sast: :raw,
       secret_detection: :raw,
       dependency_scanning: :raw,
