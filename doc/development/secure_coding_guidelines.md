@@ -394,9 +394,9 @@ In order to prevent Path Traversal vulnerabilities, user-controlled filenames or
 
 The methods `Gitlab::Utils.check_path_traversal!()` and `Gitlab::Utils.check_allowed_absolute_path!()`
 can be used to validate user-supplied paths and prevent vulnerabilities.
-`check_path_traversal!()` will detect Path Traversal payloads included on paths and can accept URL encoded paths.
-`check_allowed_absolute_path!()` will check if a path is absolute and whether or not it is inside the allowed path list. By default, absolute
-paths are not allowed, so you will need to pass a list of allowed absolute paths to the `path_allowlist`
+`check_path_traversal!()` will detect their Path Traversal payloads and accepts URL-encoded paths.
+`check_allowed_absolute_path!()` will check if a path is absolute and whether it is inside the allowed path list. By default, absolute
+paths are not allowed, so you need to pass a list of allowed absolute paths to the `path_allowlist`
 parameter when using `check_allowed_absolute_path!()`.
 
 To use a combination of both checks, follow the example below:
@@ -414,11 +414,11 @@ It can be used as follows:
 requires :file_path, type: String, file_path: { allowlist: ['/foo/bar/', '/home/foo/', '/app/home'] }
 ```
 
-The path traversal check can also be used to forbid any absolute path:
+The Path Traversal check can also be used to forbid any absolute path:
 
 ```ruby
 requires :file_path, type: String, file_path: true
 ```
 
 NOTE: **Note:** Absolute paths are not allowed by default. If allowing an absolute path is required, you
-will need to provide an array of paths to the parameter `allowlist`.  
+need to provide an array of paths to the parameter `allowlist`.  
