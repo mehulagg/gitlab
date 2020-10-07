@@ -11,7 +11,12 @@ module EE
 
       override :scalar_params
       def scalar_params
-        @scalar_params ||= super + [:weight, :epic_id, :include_subepics]
+        @scalar_params ||= super + [:weight, :epic_id, :include_subepics, :iteration_id, :iteration_title]
+      end
+
+      override :negatable_params
+      def negatable_params
+        @negatable_params ||= super + [:iteration_title]
       end
     end
 
@@ -20,6 +25,11 @@ module EE
       issues = by_weight(super)
       issues = by_epic(issues)
       by_iteration(issues)
+    end
+
+    override :filter_negated_items
+    def filter_negated_items(items)
+      by_negated_iteration(super)
     end
 
     private
@@ -64,16 +74,23 @@ module EE
     end
 
     def by_iteration(items)
-      return items unless params.iterations
+      return items unless params.by_iteration?
 
-      case params.iterations.to_s.downcase
-      when ::IssuableFinder::Params::FILTER_NONE
+      if params.filter_by_no_iteration?
         items.no_iteration
-      when ::IssuableFinder::Params::FILTER_ANY
+      elsif params.filter_by_any_iteration?
         items.any_iteration
+      elsif params.filter_by_iteration_title?
+        items.with_iteration_title(params[:iteration_title])
       else
-        items.in_iterations(params.iterations)
+        items.in_iterations(params[:iteration_id])
       end
+    end
+
+    def by_negated_iteration(items)
+      return items unless not_params[:iteration_title].present?
+
+      items.without_iteration_title(not_params[:iteration_title])
     end
   end
 end

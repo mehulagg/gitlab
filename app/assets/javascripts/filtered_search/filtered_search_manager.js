@@ -52,14 +52,22 @@ export default class FilteredSearchManager {
     this.placeholder = placeholder;
     this.anchor = anchor;
 
-    const { multipleAssignees } = this.filteredSearchInput.dataset;
+    const {
+      multipleAssignees,
+      epicsEndpoint,
+      iterationsEndpoint,
+    } = this.filteredSearchInput.dataset;
+
     if (multipleAssignees && this.filteredSearchTokenKeys.enableMultipleAssignees) {
       this.filteredSearchTokenKeys.enableMultipleAssignees();
     }
 
-    const { epicsEndpoint } = this.filteredSearchInput.dataset;
     if (!epicsEndpoint && this.filteredSearchTokenKeys.removeEpicToken) {
       this.filteredSearchTokenKeys.removeEpicToken();
+    }
+
+    if (iterationsEndpoint && this.filteredSearchTokenKeys.enableIteration) {
+      this.filteredSearchTokenKeys.enableIteration();
     }
 
     this.recentSearchesStore = new RecentSearchesStore({
@@ -111,6 +119,7 @@ export default class FilteredSearchManager {
         milestonesEndpoint = '',
         releasesEndpoint = '',
         epicsEndpoint = '',
+        iterationsEndpoint = '',
       } = this.filteredSearchInput.dataset;
 
       this.dropdownManager = new FilteredSearchDropdownManager({
@@ -119,6 +128,7 @@ export default class FilteredSearchManager {
         milestonesEndpoint,
         releasesEndpoint,
         epicsEndpoint,
+        iterationsEndpoint,
         tokenizer: this.tokenizer,
         page: this.page,
         isGroup: this.isGroup,

@@ -17,6 +17,14 @@ module EE
         options[:data]['epics-endpoint'] = group_epics_path(@group)
       end
 
+      if allow_filtering_by_iteration?
+        if @project
+          options[:data]['iterations-endpoint'] = expose_path(api_v4_projects_iterations_path(id: @project.id))
+        elsif @group
+          options[:data]['iterations-endpoint'] = expose_path(api_v4_groups_iterations_path(id: @group.id))
+        end
+      end
+
       options
     end
 
@@ -131,6 +139,16 @@ module EE
 
       type == :issues && (context == :dashboard ||
         context.feature_available?(:multiple_issue_assignees))
+    end
+
+    def allow_filtering_by_iteration?
+      # We currently only have group-level iterations so we hide
+      # this filter for projects under personal namespaces
+      return false if @project && @project.group.nil?
+
+      context = @project.presence || @group.presence
+
+      context&.feature_available?(:iterations)
     end
 
     def gitlab_com_snippet_db_search?

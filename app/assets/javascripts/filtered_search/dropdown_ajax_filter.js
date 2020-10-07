@@ -7,12 +7,13 @@ import { __ } from '~/locale';
 
 export default class DropdownAjaxFilter extends FilteredSearchDropdown {
   constructor(options = {}) {
-    const { tokenKeys, endpoint, symbol } = options;
+    const { tokenKeys, endpoint, params, symbol } = options;
 
     super(options);
 
     this.tokenKeys = tokenKeys;
     this.endpoint = endpoint;
+    this.params = params;
     this.symbol = symbol;
 
     this.config = {
@@ -22,7 +23,8 @@ export default class DropdownAjaxFilter extends FilteredSearchDropdown {
 
   ajaxFilterConfig() {
     return {
-      endpoint: `${gon.relative_url_root || ''}${this.endpoint}`,
+      endpoint: this.endpoint,
+      params: this.params,
       searchKey: 'search',
       searchValueFunction: this.getSearchInput.bind(this),
       loadingTemplate: this.loadingTemplate,
@@ -33,9 +35,11 @@ export default class DropdownAjaxFilter extends FilteredSearchDropdown {
   }
 
   itemClicked(e) {
-    super.itemClicked(e, selected =>
-      selected.querySelector('.dropdown-light-content').innerText.trim(),
-    );
+    super.itemClicked(e, selected => {
+      const title = selected.querySelector('.dropdown-light-content').innerText.trim();
+
+      return DropdownUtils.getEscapedText(title);
+    });
   }
 
   renderContent(forceShowList = false) {
