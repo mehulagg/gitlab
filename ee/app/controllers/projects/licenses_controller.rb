@@ -5,6 +5,8 @@ module Projects
     before_action :authorize_read_licenses!, only: [:index]
     before_action :authorize_admin_software_license_policy!, only: [:create, :update]
 
+    feature_category :license_compliance
+
     def index
       respond_to do |format|
         format.html do

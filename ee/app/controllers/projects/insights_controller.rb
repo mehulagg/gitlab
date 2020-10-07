@@ -10,6 +10,8 @@ class Projects::InsightsController < Projects::ApplicationController
 
   track_unique_visits :show, target_id: 'p_analytics_insights'
 
+  feature_category :insights
+
   private
 
   def insights_entity

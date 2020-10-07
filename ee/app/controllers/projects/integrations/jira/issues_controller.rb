@@ -17,6 +17,8 @@ module Projects
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::RequestError, with: :render_request_error
 
+        feature_category :integrations
+
         def index
           params[:state] = params[:state].presence || default_state
 

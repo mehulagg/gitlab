@@ -4,6 +4,8 @@ class Projects::Iterations::InheritedController < Projects::ApplicationControlle
   before_action :check_iterations_available!
   before_action :authorize_show_iteration!
 
+  feature_category :issue_tracking
+
   def show; end
 
   private
