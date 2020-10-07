@@ -6,5 +6,7 @@ module IncidentManagement
 
     belongs_to :issue, optional: false
     validates :due_at, presence: true
+
+    scope :exceeded, -> { joins(:issue).merge(Issue.opened).where('due_at < ?', Time.current) }
   end
 end
