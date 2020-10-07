@@ -15,7 +15,8 @@ project that uses GitLab's Prometheus integration and
 
 ## Configure cluster cost management
 
-To get started with cluster cost management you need Maintainer rights in a project or group.
+To get started with cluster cost management, you need [Maintainer](../permissions.md)
+permissions in a project or group.
 
 1. Clone the [`kubecost-cost-model`](https://gitlab.com/gitlab-examples/kubecost-cost-model/)
    example repository, which contains minor modifications to the upstream kubecost `cost-model`:
