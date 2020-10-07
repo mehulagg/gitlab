@@ -1563,8 +1563,8 @@ job1:
 
 NOTE: **Note:**
 [Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
-when you used `||` and `&&` in the same rule, the commands
-may not may not have executed in the expected order.
+[Before GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/230938),
+rules that use both `||` and `&&` may evaluate with an unexpected order of operations.
 
 ### `only`/`except` (basic)
 
