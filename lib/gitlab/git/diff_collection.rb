@@ -117,7 +117,7 @@ module Gitlab
       def expand_diff?
         # Force single-entry diff collections to always present as expanded
         #
-        return true if @iterator.length == 1
+        return true if @iterator.size == 1
 
         !@enforce_limits || @expanded
       end
