@@ -647,6 +647,12 @@ module Gitlab
         { redis_hll_counters: ::Gitlab::UsageDataCounters::HLLRedisCounter.unique_events_data }
       end
 
+      def xmaus_data
+        {
+          xmaus_data: ::Gitlab::UsageDataCounters::HLLRedisCounter.xmaus_data
+        }
+      end
+
       def analytics_unique_visits_data
         results = ::Gitlab::Analytics::UniqueVisits.analytics_events.each_with_object({}) do |target, hash|
           hash[target] = redis_usage_data { unique_visit_service.unique_visits_for(targets: target) }

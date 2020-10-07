@@ -11,6 +11,7 @@ module Gitlab
       UnknownAggregation = Class.new(StandardError)
 
       KNOWN_EVENTS_PATH = 'lib/gitlab/usage_data_counters/known_events.yml'.freeze
+      AGGREGATED_XMAUS_PATH = 'lib/gitlab/usage_data_counters/aggregated_xmaus.yml'.freeze
       ALLOWED_AGGREGATIONS = %i(daily weekly).freeze
 
       # Track event on entity_id
@@ -85,6 +86,14 @@ module Gitlab
           end
         end
 
+        def xmaus_data
+          aggregated_xmaus.each_with_object({}) do |xmau, result|
+            raise 'Events should be in same slot' unless xmau[:aggregation_operator] == 'OR'
+
+            result[xmau[:name]] = unique_events(event_names: xmau[:aggregated_metrics], start_date: 7.days.ago.to_date, end_date: Date.current)
+          end
+        end
+
         def known_event?(event_name)
           event_for(event_name).present?
         end
@@ -109,7 +118,15 @@ module Gitlab
         end
 
         def known_events
-          @known_events ||= YAML.load_file(Rails.root.join(KNOWN_EVENTS_PATH)).map(&:with_indifferent_access)
+          @known_events ||= load_yaml_from_path(KNOWN_EVENTS_PATH)
+        end
+
+        def aggregated_xmaus
+          @aggregated_xmaus ||= load_yaml_from_path(AGGREGATED_XMAUS_PATH)
+        end
+
+        def load_yaml_from_path(path)
+          YAML.load_file(Rails.root.join(path)).map(&:with_indifferent_access)
         end
 
         def known_events_names
