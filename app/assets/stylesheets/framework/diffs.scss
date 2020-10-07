@@ -150,17 +150,17 @@
       img {
         border: 1px solid $white;
         background-image: linear-gradient(45deg,
-        $border-color 25%,
-        transparent 25%,
-        transparent 75%,
-        $border-color 75%,
-        $border-color 100%),
-          linear-gradient(45deg,
-        $border-color 25%,
-        transparent 25%,
-        transparent 75%,
-        $border-color 75%,
-        $border-color 100%);
+          $border-color 25%,
+          transparent 25%,
+          transparent 75%,
+          $border-color 75%,
+          $border-color 100%),
+        linear-gradient(45deg,
+            $border-color 25%,
+            transparent 25%,
+            transparent 75%,
+            $border-color 75%,
+            $border-color 100%);
         background-size: 10px 10px;
         background-position: 0 0, 5px 5px;
         max-width: 100%;
@@ -885,25 +885,25 @@ table.code {
     height: 10px;
     background-color: $white;
     background-image: linear-gradient(45deg,
-    transparent,
-    transparent 73%,
-    $diff-jagged-border-gradient-color 75%,
-    $white 80%),
-      linear-gradient(225deg,
-    transparent,
-    transparent 73%,
-    $diff-jagged-border-gradient-color 75%,
-    $white 80%),
-      linear-gradient(135deg,
-    transparent,
-    transparent 73%,
-    $diff-jagged-border-gradient-color 75%,
-    $white 80%),
-      linear-gradient(-45deg,
-    transparent,
-    transparent 73%,
-    $diff-jagged-border-gradient-color 75%,
-    $white 80%);
+      transparent,
+      transparent 73%,
+      $diff-jagged-border-gradient-color 75%,
+      $white 80%),
+    linear-gradient(225deg,
+        transparent,
+        transparent 73%,
+        $diff-jagged-border-gradient-color 75%,
+        $white 80%),
+    linear-gradient(135deg,
+        transparent,
+        transparent 73%,
+        $diff-jagged-border-gradient-color 75%,
+        $white 80%),
+    linear-gradient(-45deg,
+        transparent,
+        transparent 73%,
+        $diff-jagged-border-gradient-color 75%,
+        $white 80%);
     background-position: 5px 5px, 0 5px, 0 5px, 5px 5px;
     background-size: 10px 10px;
     background-repeat: repeat;
@@ -954,15 +954,15 @@ table.code {
 .btn-transparent.image-diff-overlay-add-comment {
   position: relative;
   cursor: image-url('illustrations/image_comment_light_cursor.svg')
-    $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
-    auto;
+  $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
+  auto;
 
   // Retina cursor
   // scss-lint:disable DuplicateProperty
   cursor: image-set(image-url('illustrations/image_comment_light_cursor.svg') 1x,
-  image-url('illustrations/image_comment_light_cursor@2x.svg') 2x)
-    $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
-    auto;
+    image-url('illustrations/image_comment_light_cursor@2x.svg') 2x)
+  $image-comment-cursor-left-offset $image-comment-cursor-top-offset,
+  auto;
 
   .comment-indicator {
     position: absolute;
