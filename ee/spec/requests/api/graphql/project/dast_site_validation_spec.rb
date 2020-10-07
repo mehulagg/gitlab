@@ -28,7 +28,7 @@ RSpec.describe 'Query.project(fullPath).dastSiteValidation' do
       current_user: current_user,
       variables: {
         fullPath: project.full_path,
-        targetUrl: 'http://example.com'
+        targetUrl: dast_site_validation.validation_url
       }
     )
     graphql_data

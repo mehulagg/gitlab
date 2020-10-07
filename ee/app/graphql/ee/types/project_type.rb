@@ -106,7 +106,7 @@ module EE
               ::Types::DastSiteValidationType,
               null: true,
               resolve: -> (obj, args, _ctx) do
-                DastSiteValidation.first
+                DastSiteValidationsFinder.new(project_id: obj.id, urls: [args.target_url]).execute.first
               end,
               description: 'DAST Site Validation associated with the project' do
                 argument :target_url, GraphQL::STRING_TYPE, required: true, description: 'target URL of the DAST Site Validation'
