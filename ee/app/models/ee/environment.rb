@@ -75,6 +75,14 @@ module EE
       result || ::Gitlab::Kubernetes::RolloutStatus.loading
     end
 
+    def get_canary_ingress
+      deployment_platform.get_canary_ingress(self)
+    end
+
+    def patch_ingress(ingress)
+      deployment_platform.patch_ingress(ingress, )
+    end
+
     private
 
     def rollout_status_available?

@@ -38,6 +38,20 @@ module EE
           ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods_attrs: pods, ingresses: ingresses)
         end
 
+        def get_ingresses(environment)
+          namespace = environment.deployment_namespace
+          ingresses = read_ingresses(namespace)
+          ingresses.map { |ingress| ::Gitlab::Kubernetes::Ingress.new(ingress) }
+        end
+
+        def patch_ingress(environment, ingress, data)
+          namespace = environment.deployment_namespace
+          data = { metadata: { annotations: {key: 'value'} } }
+          kubeclient.patch_ingress(ingress.name, data, namespace: namespace).as_json
+        rescue Kubeclient::ResourceNotFoundError
+          []
+        end
+
         private
 
         def read_deployments(namespace)

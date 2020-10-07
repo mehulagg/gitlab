@@ -124,3 +124,5 @@ module API
     end
   end
 end
+
+API::Environments.prepend_if_ee('EE::API::Environments')
