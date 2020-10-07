@@ -92,21 +92,24 @@ RSpec.describe MergeRequestWidgetEntity do
       project.add_developer(user)
 
       allow(resource).to receive_messages(
+        merge_base_pipeline: pipeline,
         base_pipeline: pipeline,
         head_pipeline: pipeline
       )
     end
 
-    context "with report artifacts" do
+    context 'with report artifacts' do
       let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
 
-      it "has data entry" do
-        expect(subject).to include(:codeclimate)
+      it 'has entries for 3 reference artifacts' do
+        expect(subject[:codeclimate][:merge_base_path]).to be_present
+        expect(subject[:codeclimate][:base_path]).to be_present
+        expect(subject[:codeclimate][:head_path]).to be_present
       end
     end
 
-    context "without artifacts" do
-      it "does not have data entry" do
+    context 'without artifacts' do
+      it 'does not have data entry' do
         expect(subject).not_to include(:codeclimate)
       end
     end
