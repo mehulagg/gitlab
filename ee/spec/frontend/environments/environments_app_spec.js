@@ -1,10 +1,11 @@
+import { GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import CanaryDeploymentBoard from 'ee/environments/components/canary_deployment_callout.vue';
 import DeployBoard from 'ee/environments/components/deploy_board_component.vue';
+import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 import axios from '~/lib/utils/axios_utils';
 import { environment } from './mock_data';
-import EnvironmentsComponent from '~/environments/components/environments_app.vue';
 
 describe('Environment', () => {
   let mock;
@@ -23,6 +24,7 @@ describe('Environment', () => {
     userCalloutsPath: '/callouts',
   };
 
+  const findNewEnvironmentButton = () => wrapper.find(GlButton);
   const canaryPromoKeyValue = () =>
     wrapper.find(CanaryDeploymentBoard).attributes('data-js-canary-promo-key');
 
@@ -56,6 +58,7 @@ describe('Environment', () => {
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
     mock.restore();
   });
 
@@ -103,6 +106,32 @@ describe('Environment', () => {
 
       it('should render banner underneath second environment', () => {
         expect(canaryPromoKeyValue()).toBe('1');
+      });
+    });
+  });
+
+  describe('environment button', () => {
+    describe('when user can create environment', () => {
+      beforeEach(() => {
+        mockRequest([environment]);
+        wrapper = mount(EnvironmentsComponent, { propsData: mockData });
+      });
+
+      it('should render', () => {
+        expect(findNewEnvironmentButton().exists()).toBe(true);
+      });
+    });
+
+    describe('when user can not create environment', () => {
+      beforeEach(() => {
+        mockRequest([environment]);
+        wrapper = mount(EnvironmentsComponent, {
+          propsData: { ...mockData, canCreateEnvironment: false },
+        });
+      });
+
+      it('should not render', () => {
+        expect(findNewEnvironmentButton().exists()).toBe(false);
       });
     });
   });
