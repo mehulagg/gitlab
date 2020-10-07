@@ -148,7 +148,7 @@ module BlobHelper
   # mode - File unix mode
   # mode - File name
   def blob_icon(mode, name)
-    icon("#{file_type_icon_class('file', mode, name)} fw")
+    sprite_icon(file_type_icon_class('file', mode, name))
   end
 
   def blob_raw_url(**kwargs)
