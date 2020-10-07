@@ -11,13 +11,13 @@ import {
   GlEmptyState,
 } from '@gitlab/ui';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import PageWrapper from '~/vue_shared/components/page_wrapper/page_wrapper.vue';
+import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
 import {
   tdClass,
   thClass,
   bodyTrClass,
   initialPaginationState,
-} from '~/vue_shared/components/page_wrapper/constants';
+} from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import { s__ } from '~/locale';
 import { visitUrl, mergeUrlParams, joinPaths } from '~/lib/utils/url_utility';
@@ -81,7 +81,7 @@ export default {
     PublishedCell: () => import('ee_component/incidents/components/published_cell.vue'),
     GlEmptyState,
     SeverityToken,
-    PageWrapper,
+    PaginatedTableWithSearchAndTabs,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -266,7 +266,7 @@ export default {
 </script>
 <template>
   <div class="incident-management-list">
-    <page-wrapper
+    <paginated-table-with-search-and-tabs
       :show-items="showList"
       :show-error-msg="showErrorMsg"
       :i18n="$options.i18n"
@@ -394,6 +394,6 @@ export default {
           :primary-button-text="emptyStateData.btnText"
         />
       </template>
-    </page-wrapper>
+    </paginated-table-with-search-and-tabs>
   </div>
 </template>

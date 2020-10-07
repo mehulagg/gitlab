@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { GlAlert, GlBadge, GlPagination, GlTabs, GlTab } from '@gitlab/ui';
-import PageWrapper from '~/vue_shared/components/page_wrapper/page_wrapper.vue';
+import PageWrapper from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import Tracking from '~/tracking';

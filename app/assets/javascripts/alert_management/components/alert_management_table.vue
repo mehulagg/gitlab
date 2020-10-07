@@ -13,13 +13,13 @@ import {
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { joinPaths, visitUrl } from '~/lib/utils/url_utility';
-import PageWrapper from '~/vue_shared/components/page_wrapper/page_wrapper.vue';
+import PaginatedTableWithSearchAndTabs from '~/vue_shared/components/paginated_table_with_search_and_tabs/paginated_table_with_search_and_tabs.vue';
 import {
   tdClass,
   thClass,
   bodyTrClass,
   initialPaginationState,
-} from '~/vue_shared/components/page_wrapper/constants';
+} from '~/vue_shared/components/paginated_table_with_search_and_tabs/constants';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
 import getAlerts from '../graphql/queries/get_alerts.query.graphql';
@@ -102,7 +102,7 @@ export default {
     GlLink,
     GlSprintf,
     AlertStatus,
-    PageWrapper,
+    PaginatedTableWithSearchAndTabs,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -258,7 +258,7 @@ export default {
       </gl-sprintf>
     </gl-alert>
 
-    <page-wrapper
+    <paginated-table-with-search-and-tabs
       :show-error-msg="showErrorMsg"
       :i18n="$options.i18n"
       :items="alerts.list || []"
@@ -386,6 +386,6 @@ export default {
           </template>
         </gl-table>
       </template>
-    </page-wrapper>
+    </paginated-table-with-search-and-tabs>
   </div>
 </template>
