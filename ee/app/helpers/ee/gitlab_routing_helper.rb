@@ -5,24 +5,24 @@ module EE
     include ::ProjectsHelper
     include ::ApplicationSettingsHelper
 
-    def geo_primary_web_url(project_or_wiki)
-      File.join(::Gitlab::Geo.primary_node.url, project_or_wiki.full_path)
+    def geo_primary_web_url(container)
+      File.join(::Gitlab::Geo.primary_node.url, container.full_path)
     end
 
-    def geo_primary_ssh_url_to_repo(project_or_wiki)
-      "#{::Gitlab::Geo.primary_node.clone_url_prefix}#{project_or_wiki.full_path}.git"
+    def geo_primary_ssh_url_to_repo(container)
+      "#{::Gitlab::Geo.primary_node.clone_url_prefix}#{container.full_path}.git"
     end
 
-    def geo_primary_http_url_to_repo(project_or_wiki)
-      geo_primary_web_url(project_or_wiki) + '.git'
+    def geo_primary_http_url_to_repo(container)
+      geo_primary_web_url(container) + '.git'
     end
 
-    def geo_primary_default_url_to_repo(project_or_wiki)
+    def geo_primary_default_url_to_repo(container)
       case default_clone_protocol
       when 'ssh'
-        geo_primary_ssh_url_to_repo(project_or_wiki)
+        geo_primary_ssh_url_to_repo(container)
       else
-        geo_primary_http_url_to_repo(project_or_wiki)
+        geo_primary_http_url_to_repo(container)
       end
     end
 
@@ -36,6 +36,10 @@ module EE
 
     def vulnerability_path(entity, *args)
       project_security_vulnerability_path(entity.project, entity, *args)
+    end
+
+    def vulnerability_url(vulnerability)
+      ::Gitlab::UrlBuilder.build(vulnerability)
     end
 
     def project_vulnerability_path(project, vulnerability, *args)

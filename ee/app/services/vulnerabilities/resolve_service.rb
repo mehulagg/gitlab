@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_dependency 'vulnerabilities/base_service'
+
 module Vulnerabilities
   class ResolveService < BaseService
     def execute

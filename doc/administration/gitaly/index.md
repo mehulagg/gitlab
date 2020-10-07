@@ -90,7 +90,7 @@ When running Gitaly on its own server, note the following regarding GitLab versi
   leveraged for redundancy on block-level Git data, but only has to be mounted on the Gitaly
   servers.
 - From GitLab 11.8 to 12.2, it is possible to use Elasticsearch in a Gitaly setup that doesn't use
-  NFS. In order to use Elasticsearch in these versions, the
+  NFS. To use Elasticsearch in these versions, the
   [repository indexer](../../integration/elasticsearch.md#elasticsearch-repository-indexer)
   must be enabled in your GitLab configuration.
 - [Since GitLab 12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/6481), the new indexer is
@@ -317,7 +317,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml`
+1. Run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 **For installations from source**
@@ -364,7 +364,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the files and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Run `sudo -u git /home/git/gitlab-shell/bin/check -config /home/git/gitlab-shell/config.yml`
+1. Run `sudo -u git /home/git/gitaly/gitaly-hooks check /home/git/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 ### Configure Gitaly clients
@@ -710,6 +710,15 @@ Gitaly Go process. Some examples of things that are implemented in `gitaly-ruby`
 
 - RPCs that deal with wikis.
 - RPCs that create commits on behalf of a user, such as merge commits.
+
+We recommend:
+
+- At least 300MB memory per worker.
+- No more than one worker per core.
+
+NOTE: **Note:**
+`gitaly-ruby` is planned to be eventually removed. To track progress, see the
+[Remove the Gitaly-Ruby sidecar](https://gitlab.com/groups/gitlab-org/-/epics/2862) epic.
 
 ### Configure number of `gitaly-ruby` workers
 

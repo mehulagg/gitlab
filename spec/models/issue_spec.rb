@@ -28,6 +28,7 @@ RSpec.describe Issue do
     it { is_expected.to have_and_belong_to_many(:prometheus_alert_events) }
     it { is_expected.to have_and_belong_to_many(:self_managed_prometheus_alert_events) }
     it { is_expected.to have_many(:prometheus_alerts) }
+    it { is_expected.to have_many(:issue_email_participants) }
 
     describe 'versions.most_recent' do
       it 'returns the most recent version' do
@@ -1236,6 +1237,14 @@ RSpec.describe Issue do
       issue = build_stubbed(:issue)
 
       expect(issue.allows_reviewers?).to be(false)
+    end
+  end
+
+  describe '#issue_type_supports?' do
+    let_it_be(:issue) { create(:issue) }
+
+    it 'raises error when feature is invalid' do
+      expect { issue.issue_type_supports?(:unkown_feature) }.to raise_error(ArgumentError)
     end
   end
 end

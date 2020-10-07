@@ -64,12 +64,7 @@ class User < ApplicationRecord
   # and should be added after Devise modules are initialized.
   include AsyncDeviseEmail
 
-  BLOCKED_MESSAGE = "Your account has been blocked. Please contact your GitLab " \
-                    "administrator if you think this is an error."
-  LOGIN_FORBIDDEN = "Your account does not have the required permission to login. Please contact your GitLab " \
-                    "administrator if you think this is an error."
-
-  MINIMUM_INACTIVE_DAYS = 180
+  MINIMUM_INACTIVE_DAYS = 90
 
   # Override Devise::Models::Trackable#update_tracked_fields!
   # to limit database writes to at most once every hour
@@ -132,6 +127,8 @@ class User < ApplicationRecord
            -> { where(members: { access_level: [Gitlab::Access::REPORTER, Gitlab::Access::DEVELOPER, Gitlab::Access::MAINTAINER, Gitlab::Access::OWNER] }) },
            through: :group_members,
            source: :group
+  has_many :minimal_access_group_members, -> { where(access_level: [Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+  has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
 
   # Projects
   has_many :groups_projects,          through: :groups, source: :projects
@@ -307,13 +304,18 @@ class User < ApplicationRecord
       transition deactivated: :active
       transition blocked: :active
       transition ldap_blocked: :active
+      transition blocked_pending_approval: :active
+    end
+
+    event :block_pending_approval do
+      transition active: :blocked_pending_approval
     end
 
     event :deactivate do
       transition active: :deactivated
     end
 
-    state :blocked, :ldap_blocked do
+    state :blocked, :ldap_blocked, :blocked_pending_approval do
       def blocked?
         true
       end
@@ -336,7 +338,7 @@ class User < ApplicationRecord
 
   # Scopes
   scope :admins, -> { where(admin: true) }
-  scope :blocked, -> { with_states(:blocked, :ldap_blocked) }
+  scope :blocked, -> { with_states(:blocked, :ldap_blocked, :blocked_pending_approval) }
   scope :external, -> { where(external: true) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
   scope :active, -> { with_state(:active).non_internal }
@@ -379,11 +381,14 @@ class User < ApplicationRecord
     super && can?(:log_in)
   end
 
+  # The messages for these keys are defined in `devise.en.yml`
   def inactive_message
-    if blocked?
-      BLOCKED_MESSAGE
+    if blocked_pending_approval?
+      :blocked_pending_approval
+    elsif blocked?
+      :blocked
     elsif internal?
-      LOGIN_FORBIDDEN
+      :forbidden
     else
       super
     end
@@ -1674,6 +1679,8 @@ class User < ApplicationRecord
   end
 
   def terms_accepted?
+    return true if project_bot?
+
     accepted_term_id.present?
   end
 

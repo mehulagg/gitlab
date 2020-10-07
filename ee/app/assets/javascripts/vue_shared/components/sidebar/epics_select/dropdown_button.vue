@@ -29,7 +29,7 @@ export default {
 <template>
   <button
     type="button"
-    class="dropdown-menu-toggle js-epic-select js-extra-options"
+    class="dropdown-menu-toggle js-epic-select js-extra-options gl-w-full"
     data-display="static"
     data-toggle="dropdown"
   >

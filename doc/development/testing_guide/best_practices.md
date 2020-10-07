@@ -151,11 +151,14 @@ In order to reuse a single object for all calls to a named factory in implicit p
 can be used:
 
 ```ruby
+RSpec.describe API::Search, factory_default: :keep do
   let_it_be(:namespace) { create_default(:namespace) }
 ```
 
 Then every project we create will use this `namespace`, without us having to pass
-it as `namespace: namespace`.
+it as `namespace: namespace`. In order to make it work along with `let_it_be`, `factory_default: :keep`
+must be explicitly specified. That will keep the default factory for every example in a suite instead of
+recreating it for each example.
 
 Maybe we don't need to create 208 different projects - we
 can create one and reuse it. In addition, we can see that only about 1/3 of the
@@ -481,17 +484,22 @@ This will result in only one `Project`, `User`, and `ProjectMember` created for 
 is handled automatically using a transaction rollback.
 
 Note that if you modify an object defined inside a `let_it_be` block,
-then you will need to reload the object as needed, or specify the `reload`
-option to reload for every example.
+then you must do one of the following:
+
+- Reload the object as needed.
+- Use the `let_it_be_with_reload` alias.
+- Specify the `reload` option to reload for every example.
 
 ```ruby
+let_it_be_with_reload(:project) { create(:project) }
 let_it_be(:project, reload: true) { create(:project) }
 ```
 
-You can also specify the `refind` option as well to completely load a
-new object.
+You can also use the `let_it_be_with_refind` alias, or specify the `refind`
+option as well to completely load a new object.
 
 ```ruby
+let_it_be_with_refind(:project) { create(:project) }
 let_it_be(:project, refind: true) { create(:project) }
 ```
 
@@ -887,6 +895,10 @@ GitLab uses [factory_bot](https://github.com/thoughtbot/factory_bot) as a test f
   resulting record to pass validation.
 - When instantiating from a factory, don't supply attributes that aren't
   required by the test.
+- Prefer [implicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#implicit-definition)
+  or [explicit](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#explicit-definition)
+  association definitions instead of using `create` / `build` for association setup.
+  See [issue #262624](https://gitlab.com/gitlab-org/gitlab/-/issues/262624) for further context.
 - Factories don't have to be limited to `ActiveRecord` objects.
   [See example](https://gitlab.com/gitlab-org/gitlab-foss/commit/0b8cefd3b2385a21cfed779bd659978c0402766d).
 

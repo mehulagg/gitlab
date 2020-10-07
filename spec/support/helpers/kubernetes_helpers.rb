@@ -153,7 +153,7 @@ module KubernetesHelpers
 
     options[:name] ||= "kubetest"
     options[:domain] ||= "example.com"
-    options[:response] ||= kube_response(kube_knative_services_body(options))
+    options[:response] ||= kube_response(kube_knative_services_body(**options))
 
     stub_kubeclient_discover(service.api_url)
 
@@ -265,7 +265,7 @@ module KubernetesHelpers
       .to_return(kube_response({}))
   end
 
-  def kube_v1_secret_body(**options)
+  def kube_v1_secret_body(options)
     {
       "kind" => "SecretList",
       "apiVersion": "v1",
@@ -517,7 +517,7 @@ module KubernetesHelpers
   def kube_knative_services_body(**options)
     {
       "kind" => "List",
-      "items" => [knative_09_service(options)]
+      "items" => [knative_09_service(**options)]
     }
   end
 

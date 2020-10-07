@@ -81,7 +81,8 @@ When installing or upgrading the GitLab Helm chart, consider the following Helm 
 for the Agent to be properly installed and configured:
 
 ```shell
-helm upgrade --force --install gitlab . \
+helm repo update
+helm upgrade --force --install gitlab gitlab/gitlab \
   --timeout 600 \
   --set global.hosts.domain=<YOUR_DOMAIN> \
   --set global.hosts.externalIP=<YOUR_IP> \
@@ -124,27 +125,27 @@ the Agent in subsequent steps. You can create an Agent record either:
 
 - Through GraphQL: **(PREMIUM ONLY)**
 
-  ```json
-    mutation createAgent {
-      createClusterAgent(input: { projectPath: "path-to/your-awesome-project", name: "<agent-name>" }) {
-        clusterAgent {
-          id
-          name
-        }
-        errors
+  ```graphql
+  mutation createAgent {
+    createClusterAgent(input: { projectPath: "path-to/your-awesome-project", name: "<agent-name>" }) {
+      clusterAgent {
+        id
+        name
       }
+      errors
     }
+  }
 
-    mutation createToken {
-      clusterAgentTokenCreate(input: { clusterAgentId: <cluster-agent-id-taken-from-the-previous-mutation> }) {
-        secret # This is the value you need to use on the next step
-        token {
-          createdAt
-          id
-        }
-        errors
+  mutation createToken {
+    clusterAgentTokenCreate(input: { clusterAgentId: <cluster-agent-id-taken-from-the-previous-mutation> }) {
+      secret # This is the value you need to use on the next step
+      token {
+        createdAt
+        id
       }
+      errors
     }
+  }
   ```
 
   NOTE: **Note:**
@@ -244,7 +245,7 @@ spec:
         args:
         - --token-file=/config/token
         - --kas-address
-        - grpc://host.docker.internal:5005 # {"$openapi":"kas-address"}
+        - grpc://host.docker.internal:5005  # {"$openapi":"kas-address"}
         volumeMounts:
         - name: token-volume
           mountPath: /config
@@ -336,6 +337,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
+  namespace: gitlab-agent  # Can be any namespace managed by you that the agent has access to.
 spec:
   selector:
     matchLabels:

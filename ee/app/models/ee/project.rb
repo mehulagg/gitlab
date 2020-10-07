@@ -42,7 +42,6 @@ module EE
       has_one :github_service
       has_one :gitlab_slack_application_service
 
-      has_one :tracing_setting, class_name: 'ProjectTracingSetting'
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
@@ -136,7 +135,6 @@ module EE
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
       scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
-      scope :with_tracing_enabled, -> { joins(:tracing_setting) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
@@ -188,7 +186,6 @@ module EE
         validates :mirror_user, presence: true
       end
 
-      accepts_nested_attributes_for :tracing_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :status_page_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
 
@@ -233,10 +230,6 @@ module EE
 
     def can_store_security_reports?
       namespace.store_security_reports_available? || public?
-    end
-
-    def tracing_external_url
-      self.tracing_setting.try(:external_url)
     end
 
     def latest_pipeline_with_security_reports(only_successful: false)
@@ -628,11 +621,6 @@ module EE
     def update_root_ref(remote_name)
       root_ref = repository.find_remote_root_ref(remote_name)
       change_head(root_ref) if root_ref.present?
-    end
-
-    def feature_flags_client_token
-      instance = operations_feature_flags_client || create_operations_feature_flags_client!
-      instance.token
     end
 
     override :lfs_http_url_to_repo

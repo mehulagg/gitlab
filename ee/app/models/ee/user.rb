@@ -44,6 +44,9 @@ module EE
       has_many :approvals,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
       has_many :approvers,                dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
 
+      has_many :minimal_access_group_members, -> { where(access_level: [::Gitlab::Access::MINIMAL_ACCESS]) }, source: 'GroupMember', class_name: 'GroupMember'
+      has_many :minimal_access_groups, through: :minimal_access_group_members, source: :group
+
       has_many :users_ops_dashboard_projects
       has_many :ops_dashboard_projects, through: :users_ops_dashboard_projects, source: :project
       has_many :users_security_dashboard_projects
@@ -176,20 +179,9 @@ module EE
     end
 
     def available_custom_project_templates(search: nil, subgroup_id: nil, project_id: nil)
-      templates = ::Gitlab::CurrentSettings.available_custom_project_templates(subgroup_id)
-
-      params = {}
-
-      if project_id
-        templates = templates.where(id: project_id)
-      else
-        params = { search: search, sort: 'name_asc' }
-      end
-
-      ::ProjectsFinder.new(current_user: self,
-                           project_ids_relation: templates,
-                           params: params)
-                      .execute
+      CustomProjectTemplatesFinder
+        .new(current_user: self, search: search, subgroup_id: subgroup_id, project_id: project_id)
+        .execute
     end
 
     def available_subgroups_with_custom_project_templates(group_id = nil)
@@ -364,6 +356,23 @@ module EE
         owns_paid_namespace?(plans: [::Plan::BRONZE, ::Plan::SILVER])
     end
 
+    # Returns the groups a user has access to, either through a membership or a project authorization
+    override :authorized_groups
+    def authorized_groups
+      ::Group.unscoped do
+        ::Group.from_union([
+          groups,
+          available_minimal_access_groups,
+          authorized_projects.joins(:namespace).select('namespaces.*')
+        ])
+      end
+    end
+
+    def find_or_init_board_epic_preference(board_id:, epic_id:)
+      boards_epic_user_preferences.find_or_initialize_by(
+        board_id: board_id, epic_id: epic_id)
+    end
+
     protected
 
     override :password_required?
@@ -393,6 +402,13 @@ module EE
       return true unless License.current.exclude_guests_from_active_count?
 
       highest_role > ::Gitlab::Access::GUEST
+    end
+
+    def available_minimal_access_groups
+      return ::Group.none unless License.feature_available?(:minimal_access_role)
+      return minimal_access_groups unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
+
+      minimal_access_groups.with_feature_available_in_plan(:minimal_access_role)
     end
   end
 end

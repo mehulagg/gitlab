@@ -17,7 +17,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
   describe '#execute' do
     subject do
       described_class.new(project, user).execute(
-        id: dast_site_profile.to_global_id,
+        id: dast_site_profile.id,
         profile_name: new_profile_name,
         target_url: new_target_url
       )

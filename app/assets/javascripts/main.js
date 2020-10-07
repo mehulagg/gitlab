@@ -39,6 +39,8 @@ import initPersistentUserCallouts from './persistent_user_callouts';
 import { initUserTracking, initDefaultTrackers } from './tracking';
 import { __ } from './locale';
 
+import * as tooltips from '~/tooltips';
+
 import 'ee_else_ce/main_ee';
 
 applyGitLabUIConfig();
@@ -77,7 +79,7 @@ document.addEventListener('beforeunload', () => {
   // Unbind scroll events
   $(document).off('scroll');
   // Close any open tooltips
-  $('.has-tooltip, [data-toggle="tooltip"]').tooltip('dispose');
+  tooltips.dispose(document.querySelectorAll('.has-tooltip, [data-toggle="tooltip"]'));
   // Close any open popover
   $('[data-toggle="popover"]').popover('dispose');
 });
@@ -96,6 +98,8 @@ gl.lazyLoader = new LazyLoader({
   scrollContainer: window,
   observerNode: '#content-body',
 });
+
+initRails();
 
 // Put all initialisations here that can also wait after everything is rendered and ready
 function deferredInitialisation() {
@@ -131,8 +135,10 @@ function deferredInitialisation() {
   addSelectOnFocusBehaviour('.js-select-on-focus');
 
   $('.remove-row').on('ajax:success', function removeRowAjaxSuccessCallback() {
+    tooltips.dispose(this);
+
+    // eslint-disable-next-line no-jquery/no-fade
     $(this)
-      .tooltip('dispose')
       .closest('li')
       .fadeOut();
   });
@@ -152,7 +158,7 @@ function deferredInitialisation() {
   const delay = glTooltipDelay ? JSON.parse(glTooltipDelay) : 0;
 
   // Initialize tooltips
-  $body.tooltip({
+  tooltips.initTooltips({
     selector: '.has-tooltip, [data-toggle="tooltip"]',
     trigger: 'hover',
     boundary: 'viewport',
@@ -170,8 +176,6 @@ function deferredInitialisation() {
 
   // Adding a helper class to activate animations only after all is rendered
   setTimeout(() => $body.addClass('page-initialised'), 1000);
-
-  initRails();
 }
 
 document.addEventListener('DOMContentLoaded', () => {

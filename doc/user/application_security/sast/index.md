@@ -11,8 +11,8 @@ type: reference, howto
 
 NOTE: **Note:**
 The whitepaper ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
-explains how **4 of the top 6 attacks were application based**. Download it
-to learn how to protect your organization.
+explains how 4 of the top 6 attacks were application based. Download it to learn how to protect your
+organization.
 
 If you're using [GitLab CI/CD](../../../ci/README.md), you can analyze your source code for known
 vulnerabilities using Static Application Security Testing (SAST). GitLab checks the SAST report and
@@ -31,8 +31,10 @@ The results are sorted by the priority of the vulnerability:
 1. Unknown
 1. Everything else
 
-NOTE: **Note:**
-A pipeline consists of multiple jobs, including SAST and DAST scanning. If any job fails to finish for any reason, the security dashboard doesn't show SAST scanner output. For example, if the SAST job finishes but the DAST job fails, the security dashboard doesn't show SAST results. The analyzer outputs an [exit code](../../../development/integrations/secure.md#exit-code) on failure.
+A pipeline consists of multiple jobs, including SAST and DAST scanning. If any job fails to finish
+for any reason, the security dashboard doesn't show SAST scanner output. For example, if the SAST
+job finishes but the DAST job fails, the security dashboard doesn't show SAST results. On failure,
+the analyzer outputs an [exit code](../../../development/integrations/secure.md#exit-code).
 
 ## Use cases
 
@@ -82,10 +84,10 @@ You can also [view our language roadmap](https://about.gitlab.com/direction/secu
 | Scala ([Ant](https://ant.apache.org/), [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/) and [SBT](https://www.scala-sbt.org/))  | [SpotBugs](https://spotbugs.github.io/) with the [find-sec-bugs](https://find-sec-bugs.github.io/) plugin     | 11.0 (SBT) & 11.9 (Ant, Gradle, Maven)        |
 | TypeScript                                                                                                                                       | [ESLint security plugin](https://github.com/nodesecurity/eslint-plugin-security)                              | 11.9, [merged](https://gitlab.com/gitlab-org/gitlab/-/issues/36059) with ESLint in 13.2                                                                               |
 
-NOTE: **Note:**
-The Java analyzers can also be used for variants like the
+Note that the Java analyzers can also be used for variants like the
 [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html),
-[Grails](https://grails.org/) and the [Maven wrapper](https://github.com/takari/maven-wrapper).
+[Grails](https://grails.org/),
+and the [Maven wrapper](https://github.com/takari/maven-wrapper).
 
 ### Making SAST analyzers available to all GitLab tiers
 
@@ -145,6 +147,7 @@ always take the latest SAST artifact available.
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3659) in GitLab Ultimate 13.3.
 > - [Improved](https://gitlab.com/gitlab-org/gitlab/-/issues/232862) in GitLab Ultimate 13.4.
+> - [Improved](https://gitlab.com/groups/gitlab-org/-/epics/3635) in GitLab Ultimate 13.5.
 
 You can enable and configure SAST with a basic configuration using the **SAST Configuration**
 page:
@@ -152,9 +155,11 @@ page:
 1. From the project's home page, go to **Security & Compliance** > **Configuration** in the
    left sidebar.
 1. If the project does not have a `gitlab-ci.yml` file, click **Enable** in the Static Application Security Testing (SAST) row, otherwise click **Configure**.
-1. Enter the custom SAST values, then click **Create Merge Request**.
+1. Enter the custom SAST values.
 
     Custom values are stored in the `.gitlab-ci.yml` file. For variables not in the SAST Configuration page, their values are left unchanged. Default values are inherited from the GitLab SAST template.
+1. Optionally, expand the **SAST analyzers** section, select individual [SAST analyzers](./analyzers.md) and enter custom analyzer values.
+1. Click **Create Merge Request**.
 1. Review and merge the merge request.
 
 ### Customizing the SAST settings
@@ -262,17 +267,16 @@ spotbugs-sast:
     - build
   variables:
     MAVEN_REPO_PATH: ./.m2/repository
-    COMPILE: false
+    COMPILE: "false"
   artifacts:
     reports:
       sast: gl-sast-report.json
 ```
 
-NOTE: **Note:**
-The path to the vendored directory must be specified explicitly to allow
-the analyzer to recognize the compiled artifacts. This configuration can vary per
-analyzer but in the case of Java above, `MAVEN_REPO_PATH` can be used.
-See [Analyzer settings](#analyzer-settings) for the complete list of available options.
+To allow the analyzer to recognize the compiled artifacts, you must explicitly specify the path to
+the vendored directory. This configuration can vary per analyzer but in the case of Java above, you
+can use `MAVEN_REPO_PATH`. See
+[Analyzer settings](#analyzer-settings) for the complete list of available options.
 
 ### Available variables
 
@@ -478,7 +482,6 @@ To use SAST in an offline environment, you need:
 - A Docker Container Registry with locally available copies of SAST [analyzer](https://gitlab.com/gitlab-org/security-products/analyzers) images.
 - Configure certificate checking of packages (optional).
 
-NOTE: **Note:**
 GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
 copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
@@ -547,3 +550,16 @@ This error occurs when the Docker version that runs the SAST job is `19.03.0`.
 Consider updating to Docker `19.03.1` or greater. Older versions are not
 affected. Read more in
 [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/13830#note_211354992 "Current SAST container fails").
+
+### Getting warning message `gl-sast-report.json: no matching files`
+
+For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).
+
+### Limitation when using rules:exists
+
+The [SAST CI template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml)
+uses the `rules:exists` parameter. For performance reasons, a maximum number of matches are made
+against the given glob pattern. If the number of matches exceeds the maximum, the `rules:exists`
+parameter returns `true`. Depending on the number of files in your repository, a SAST job might be
+triggered even if the scanner doesn't support your project. For more details about this issue, see
+the [`rules:exists` documentation](../../../ci/yaml/README.md#rulesexists).

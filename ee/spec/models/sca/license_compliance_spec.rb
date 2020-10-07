@@ -417,6 +417,18 @@ RSpec.describe SCA::LicenseCompliance do
       specify { expect(subject[:added].count).to eq(3) }
       specify { expect(subject[:removed]).to be_empty }
       specify { expect(subject[:unchanged]).to be_empty }
+
+      context "when a software license record does not have an spdx identifier" do
+        let(:license_name) { 'MIT License' }
+        let!(:policy) { create(:software_license_policy, :allowed, project: project, software_license: create(:software_license, name: license_name)) }
+
+        it "falls back to matching detections based on name rather than spdx id" do
+          mit = subject[:added].find { |item| item.name == license_name }
+
+          expect(mit).to be_present
+          expect(mit.classification).to eql('allowed')
+        end
+      end
     end
   end
 end

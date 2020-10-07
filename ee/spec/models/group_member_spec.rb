@@ -107,6 +107,50 @@ RSpec.describe GroupMember do
         end
       end
     end
+
+    describe 'access level inclusion' do
+      let(:group) { create(:group) }
+
+      context 'when minimal access user feature switched on' do
+        before do
+          stub_licensed_features(minimal_access_role: true)
+        end
+
+        it 'users can have access levels from minimal access to owner' do
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MINIMAL_ACCESS)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::OWNER)).to be_valid
+        end
+
+        context 'when group is a subgroup' do
+          let(:subgroup) { create(:group, parent: group) }
+
+          it 'users cannot have minimal access level' do
+            expect(build(:group_member, group: subgroup, user: create(:user), access_level: ::Gitlab::Access::MINIMAL_ACCESS)).to be_invalid
+          end
+        end
+      end
+
+      context 'when minimal access user feature switched off' do
+        before do
+          stub_licensed_features(minimal_access_role: false)
+        end
+
+        it 'users can have access levels from guest to owner' do
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::NO_ACCESS)).to be_invalid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MINIMAL_ACCESS)).to be_invalid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::GUEST)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::REPORTER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::DEVELOPER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::MAINTAINER)).to be_valid
+          expect(build(:group_member, group: group, user: create(:user), access_level: ::Gitlab::Access::OWNER)).to be_valid
+        end
+      end
+    end
   end
 
   describe 'scopes' do

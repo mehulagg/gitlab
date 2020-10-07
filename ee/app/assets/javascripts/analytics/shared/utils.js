@@ -39,11 +39,11 @@ export const buildGroupFromDataset = dataset => {
  * @returns {Object} - A project object
  */
 export const buildProjectFromDataset = dataset => {
-  const { projectId, projectName, projectPathWithNamespace, projectAvatarUrl } = dataset;
+  const { projectGid, projectName, projectPathWithNamespace, projectAvatarUrl } = dataset;
 
-  if (projectId) {
+  if (projectGid) {
     return {
-      id: Number(projectId),
+      id: projectGid,
       name: projectName,
       path_with_namespace: projectPathWithNamespace,
       avatar_url: projectAvatarUrl,

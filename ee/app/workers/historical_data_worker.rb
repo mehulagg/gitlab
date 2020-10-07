@@ -10,7 +10,7 @@ class HistoricalDataWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :provision
 
   def perform
-    return if License.current.nil? || License.current&.trial?
+    return if License.current.nil? || License.current.trial?
 
     HistoricalData.track!
   end

@@ -227,15 +227,15 @@ RSpec.describe Ci::Build do
   describe '#collect_license_scanning_reports!' do
     subject { job.collect_license_scanning_reports!(license_scanning_report) }
 
-    let(:license_scanning_report) { Gitlab::Ci::Reports::LicenseScanning::Report.new }
-
-    before do
-      stub_licensed_features(license_scanning: true)
-    end
+    let(:license_scanning_report) { build(:license_scanning_report) }
 
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
-    context 'when build has a license scanning report' do
+    context 'when the build has a license scanning report' do
+      before do
+        stub_licensed_features(license_scanning: true)
+      end
+
       context 'when there is a new type report' do
         before do
           create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
@@ -272,19 +272,6 @@ RSpec.describe Ci::Build do
         it 'returns an empty report' do
           expect { subject }.not_to raise_error
           expect(license_scanning_report).to be_empty
-        end
-      end
-
-      context 'when Feature flag is disabled for License Scanning reports parsing' do
-        before do
-          stub_feature_flags(parse_license_management_reports: false)
-          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
-        end
-
-        it 'does NOT parse license scanning report' do
-          subject
-
-          expect(license_scanning_report.licenses.count).to eq(0)
         end
       end
 

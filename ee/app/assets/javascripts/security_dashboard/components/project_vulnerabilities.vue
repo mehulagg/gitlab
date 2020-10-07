@@ -2,7 +2,6 @@
 import produce from 'immer';
 import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import { __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/project_vulnerabilities.graphql';
 import securityScannersQuery from '../graphql/project_security_scanners.graphql';
@@ -17,7 +16,6 @@ export default {
     GlIntersectionObserver,
     VulnerabilityList,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     projectFullPath: {
       type: String,
@@ -50,7 +48,7 @@ export default {
           ...this.filters,
         };
       },
-      update: ({ project }) => project.vulnerabilities.nodes,
+      update: ({ project }) => project?.vulnerabilities.nodes || [],
       result({ data }) {
         this.pageInfo = preparePageInfo(data?.project?.vulnerabilities?.pageInfo);
       },
@@ -68,8 +66,8 @@ export default {
       error() {
         this.securityScanners = {};
       },
-      update({ project: { securityScanners = {} } = {} }) {
-        const { available = [], enabled = [], pipelineRun = [] } = securityScanners;
+      update({ project = {} }) {
+        const { available = [], enabled = [], pipelineRun = [] } = project?.securityScanners || {};
         const translateScannerName = scannerName => this.$options.i18n[scannerName] || scannerName;
 
         return {
@@ -77,9 +75,6 @@ export default {
           enabled: enabled.map(translateScannerName),
           pipelineRun: pipelineRun.map(translateScannerName),
         };
-      },
-      skip() {
-        return !this.glFeatures.scannerAlerts;
       },
     },
   },

@@ -85,7 +85,7 @@ RSpec.describe Geo::WikiSyncService, :geo do
 
       allow(repository).to receive(:fetch_as_mirror)
         .with(url_to_repo, remote_name: 'geo', forced: true)
-        .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccess::ERROR_MESSAGES[:no_repo]))
+        .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccessWiki::ERROR_MESSAGES[:no_repo]))
 
       subject.execute
 
@@ -115,7 +115,7 @@ RSpec.describe Geo::WikiSyncService, :geo do
 
         allow(repository).to receive(:fetch_as_mirror)
           .with(url_to_repo, remote_name: 'geo', forced: true)
-          .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccess::ERROR_MESSAGES[:no_repo]))
+          .and_raise(Gitlab::Shell::Error.new(Gitlab::GitAccessWiki::ERROR_MESSAGES[:no_repo]))
 
         subject.execute
 
@@ -233,7 +233,7 @@ RSpec.describe Geo::WikiSyncService, :geo do
             force_to_redownload_wiki: true
           )
 
-          expect(project.wiki.repository).to receive(:expire_exists_cache).twice.and_call_original
+          expect(project.wiki.repository).to receive(:expire_exists_cache).exactly(3).times.and_call_original
           expect(subject).not_to receive(:fail_registry_sync!)
 
           subject.execute

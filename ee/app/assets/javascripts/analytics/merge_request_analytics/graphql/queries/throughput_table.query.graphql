@@ -1,18 +1,26 @@
-query(
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
+query getThroughputTableData(
   $fullPath: ID!
   $startDate: Time!
   $endDate: Time!
-  $limit: Int!
   $labels: [String!]
   $authorUsername: String
   $assigneeUsername: String
   $milestoneTitle: String
   $sourceBranches: [String!]
   $targetBranches: [String!]
+  $firstPageSize: Int
+  $lastPageSize: Int
+  $prevPageCursor: String = ""
+  $nextPageCursor: String = ""
 ) {
   project(fullPath: $fullPath) {
     mergeRequests(
-      first: $limit
+      first: $firstPageSize
+      last: $lastPageSize
+      after: $nextPageCursor
+      before: $prevPageCursor
       mergedAfter: $startDate
       mergedBefore: $endDate
       sort: MERGED_AT_DESC
@@ -23,6 +31,9 @@ query(
       sourceBranches: $sourceBranches
       targetBranches: $targetBranches
     ) {
+      pageInfo {
+        ...PageInfo
+      }
       nodes {
         iid
         title
@@ -43,10 +54,8 @@ query(
           additions
           deletions
         }
-        labels {
-          nodes {
-            title
-          }
+        labels(first: 0) {
+          count
         }
         pipelines {
           nodes {

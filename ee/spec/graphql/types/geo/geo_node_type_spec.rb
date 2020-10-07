@@ -11,8 +11,8 @@ RSpec.describe GitlabSchema.types['GeoNode'] do
       repos_max_capacity verification_max_capacity
       container_repositories_max_capacity sync_object_storage
       selective_sync_type selective_sync_shards selective_sync_namespaces
-      minimum_reverification_interval package_file_registries
-      terraform_state_registries terraform_state_version_registries
+      minimum_reverification_interval merge_request_diff_registries
+      package_file_registries terraform_state_version_registries
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

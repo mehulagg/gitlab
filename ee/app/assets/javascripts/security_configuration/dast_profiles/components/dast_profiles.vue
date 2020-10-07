@@ -4,7 +4,6 @@ import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
 import { s__ } from '~/locale';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfilesList from './dast_profiles_list.vue';
 import * as cacheUtils from '../graphql/cache_utils';
 import { getProfileSettings } from '../settings/profiles';
@@ -17,7 +16,6 @@ export default {
     GlTabs,
     ProfilesList,
   },
-  mixins: [glFeatureFlagMixin()],
   props: {
     createNewProfilePaths: {
       type: Object,
@@ -37,14 +35,11 @@ export default {
   },
   computed: {
     profileSettings() {
-      const { glFeatures, createNewProfilePaths } = this;
+      const { createNewProfilePaths } = this;
 
-      return getProfileSettings(
-        {
-          createNewProfilePaths,
-        },
-        glFeatures,
-      );
+      return getProfileSettings({
+        createNewProfilePaths,
+      });
     },
     tabIndex: {
       get() {

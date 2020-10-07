@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Geo self-service framework (alpha)
 
 NOTE: **Note:**
@@ -633,7 +639,7 @@ the Admin Area UI, and Prometheus!
          include ::Types::Geo::RegistryType
 
          graphql_name 'WidgetRegistry'
-         description 'Represents the sync and verification state of a widget'
+         description 'Represents the Geo sync and verification state of a widget'
 
          field :widget_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Widget'
        end
@@ -670,6 +676,12 @@ the Admin Area UI, and Prometheus!
      registry_factory: :geo_widget_registry,
      registry_foreign_key_field_name: 'widgetId'
    }
+   ```
+
+1. Update the GraphQL reference documentation:
+
+   ```shell
+   bundle exec rake gitlab:graphql:compile_docs
    ```
 
 Individual widget synchronization and verification data should now be available

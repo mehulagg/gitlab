@@ -9,7 +9,8 @@ class SamlProvider < ApplicationRecord
   validates :group, presence: true, top_level_group: true
   validates :sso_url, presence: true, addressable_url: { schemes: %w(https), ascii_only: true }
   validates :certificate_fingerprint, presence: true, certificate_fingerprint: true
-  validates :default_membership_role, presence: true, inclusion: { in: Gitlab::Access.values }
+  validates :default_membership_role, presence: true
+  validate :access_level_inclusion
 
   after_initialize :set_defaults, if: :new_record?
 
@@ -81,6 +82,15 @@ class SamlProvider < ApplicationRecord
   end
 
   private
+
+  def access_level_inclusion
+    return errors.add(:default_membership_role, "is dependent on a group") unless group
+
+    levels = group.access_level_values
+    return if default_membership_role.in?(levels)
+
+    errors.add(:default_membership_role, "is not included in the list")
+  end
 
   def set_defaults
     self.enabled = true

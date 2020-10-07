@@ -5,5 +5,5 @@
   = link_to operations_path, class: 'dropdown-item', data: { qa_selector: 'operations_link' } do
     = _('Operations')
 - if dashboard_nav_link?(:security)
-  = link_to security_root_path, class: 'dropdown-item', data: { qa_selector: 'security_link' } do
+  = link_to security_dashboard_path, class: 'dropdown-item', data: { qa_selector: 'security_link' } do
     = _('Security')

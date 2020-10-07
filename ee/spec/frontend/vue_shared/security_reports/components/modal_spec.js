@@ -131,7 +131,6 @@ describe('Security Reports modal', () => {
       beforeEach(() => {
         const propsData = {
           modal: createState().modal,
-          vulnerabilityFeedbackHelpPath: 'feedbacksHelpPath',
         };
         propsData.modal.title = 'Arbitrary file existence disclosure in Action Pack';
         mountComponent(propsData, mount);
@@ -139,12 +138,6 @@ describe('Security Reports modal', () => {
 
       it('renders title', () => {
         expect(wrapper.text()).toContain('Arbitrary file existence disclosure in Action Pack');
-      });
-
-      it('renders help link', () => {
-        expect(wrapper.find('.js-link-vulnerabilityFeedbackHelpPath').attributes('href')).toBe(
-          'feedbacksHelpPath#solutions-for-vulnerabilities-auto-remediation',
-        );
       });
     });
 

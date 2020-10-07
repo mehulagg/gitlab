@@ -29,7 +29,7 @@ RSpec.describe SearchHelper do
       end
 
       it "includes Help sections" do
-        expect(search_autocomplete_opts("hel").size).to eq(9)
+        expect(search_autocomplete_opts("hel").size).to eq(8)
       end
 
       it "includes default sections" do
@@ -73,7 +73,7 @@ RSpec.describe SearchHelper do
         expect(result.keys).to match_array(%i[category id label url avatar_url])
       end
 
-      it 'includes the first 5 of the users recent issues' do
+      it 'includes the users recently viewed issues' do
         recent_issues = instance_double(::Gitlab::Search::RecentIssues)
         expect(::Gitlab::Search::RecentIssues).to receive(:new).with(user: user).and_return(recent_issues)
         project1 = create(:project, :with_avatar, namespace: user.namespace)
@@ -81,13 +81,11 @@ RSpec.describe SearchHelper do
         issue1 = create(:issue, title: 'issue 1', project: project1)
         issue2 = create(:issue, title: 'issue 2', project: project2)
 
-        other_issues = create_list(:issue, 5)
-
-        expect(recent_issues).to receive(:search).with('the search term').and_return(Issue.id_in_ordered([issue1.id, issue2.id, *other_issues.map(&:id)]))
+        expect(recent_issues).to receive(:search).with('the search term').and_return(Issue.id_in_ordered([issue1.id, issue2.id]))
 
         results = search_autocomplete_opts("the search term")
 
-        expect(results.count).to eq(5)
+        expect(results.count).to eq(2)
 
         expect(results[0]).to include({
           category: 'Recent issues',
@@ -106,7 +104,7 @@ RSpec.describe SearchHelper do
         })
       end
 
-      it 'includes the first 5 of the users recent merge requests' do
+      it 'includes the users recently viewed merge requests' do
         recent_merge_requests = instance_double(::Gitlab::Search::RecentMergeRequests)
         expect(::Gitlab::Search::RecentMergeRequests).to receive(:new).with(user: user).and_return(recent_merge_requests)
         project1 = create(:project, :with_avatar, namespace: user.namespace)
@@ -114,13 +112,11 @@ RSpec.describe SearchHelper do
         merge_request1 = create(:merge_request, :unique_branches, title: 'Merge request 1', target_project: project1, source_project: project1)
         merge_request2 = create(:merge_request, :unique_branches, title: 'Merge request 2', target_project: project2, source_project: project2)
 
-        other_merge_requests = create_list(:merge_request, 5)
-
-        expect(recent_merge_requests).to receive(:search).with('the search term').and_return(MergeRequest.id_in_ordered([merge_request1.id, merge_request2.id, *other_merge_requests.map(&:id)]))
+        expect(recent_merge_requests).to receive(:search).with('the search term').and_return(MergeRequest.id_in_ordered([merge_request1.id, merge_request2.id]))
 
         results = search_autocomplete_opts("the search term")
 
-        expect(results.count).to eq(5)
+        expect(results.count).to eq(2)
 
         expect(results[0]).to include({
           category: 'Recent merge requests',
@@ -357,14 +353,6 @@ RSpec.describe SearchHelper do
   describe '#show_user_search_tab?' do
     subject { show_user_search_tab? }
 
-    context 'when users_search feature is disabled' do
-      before do
-        stub_feature_flags(users_search: false)
-      end
-
-      it { is_expected.to eq(false) }
-    end
-
     context 'when project search' do
       before do
         @project = :some_project
@@ -397,6 +385,27 @@ RSpec.describe SearchHelper do
 
         it { is_expected.to eq(false) }
       end
+    end
+  end
+
+  describe '#repository_ref' do
+    let_it_be(:project) { create(:project, :repository) }
+    let(:params) { { repository_ref: 'the-repository-ref-param' } }
+
+    subject { repository_ref(project) }
+
+    it { is_expected.to eq('the-repository-ref-param') }
+
+    context 'when the param :repository_ref is not set' do
+      let(:params) { { repository_ref: nil } }
+
+      it { is_expected.to eq(project.default_branch) }
+    end
+
+    context 'when the repository_ref param is a number' do
+      let(:params) { { repository_ref: 111111 } }
+
+      it { is_expected.to eq('111111') }
     end
   end
 end

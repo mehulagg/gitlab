@@ -37,32 +37,6 @@ RSpec.describe 'Group navbar' do
     it_behaves_like 'verified navigation bar'
   end
 
-  context 'when merge request analytics is available' do
-    before do
-      stub_licensed_features(group_merge_request_analytics: true)
-
-      insert_after_sub_nav_item(
-        _('Contribution'),
-        within: _('Analytics'),
-        new_sub_nav_item_name: _('Merge Request')
-      )
-
-      visit group_path(group)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when merge request analytics is unavailable' do
-    before do
-      stub_feature_flags(group_merge_request_analytics: false)
-
-      visit group_path(group)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
   context 'when value stream analytics is available' do
     before do
       stub_licensed_features(cycle_analytics_for_groups: true)

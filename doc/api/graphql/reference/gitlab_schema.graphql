@@ -527,22 +527,22 @@ enum AlertManagementAlertSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 """
@@ -1073,6 +1073,31 @@ type Board {
   id: ID!
 
   """
+  Labels of the board
+  """
+  labels(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): LabelConnection
+
+  """
   Lists of the board
   """
   lists(
@@ -1095,6 +1120,11 @@ type Board {
     Find a list by its global ID
     """
     id: ID
+
+    """
+    Filters applied when getting issue metadata in the board list
+    """
+    issueFilters: BoardIssueInput
 
     """
     Returns the last _n_ elements from the list.
@@ -3406,14 +3436,19 @@ input CreateRequirementInput {
   clientMutationId: String
 
   """
-  The project full path the requirement is associated with
+  Description of the requirement
+  """
+  description: String
+
+  """
+  Full project path the requirement is associated with
   """
   projectPath: ID!
 
   """
   Title of the requirement
   """
-  title: String!
+  title: String
 }
 
 """
@@ -3431,7 +3466,7 @@ type CreateRequirementPayload {
   errors: [String!]!
 
   """
-  The requirement after mutation
+  Requirement after mutation
   """
   requirement: Requirement
 }
@@ -3494,6 +3529,11 @@ type CreateSnippetPayload {
   The snippet after mutation
   """
   snippet: Snippet
+
+  """
+  Indicates whether the operation returns a record detected as spam
+  """
+  spam: Boolean
 }
 
 """
@@ -3625,6 +3665,11 @@ type DastOnDemandScanCreatePayload {
 
 enum DastScanTypeEnum {
   """
+  Active DAST scan. This scan will make active attacks against the target site.
+  """
+  ACTIVE
+
+  """
   Passive DAST scan. This scan will not make active attacks against the target site.
   """
   PASSIVE
@@ -3655,6 +3700,16 @@ type DastScannerProfile {
   profileName: String
 
   """
+  Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
+  """
+  scanType: DastScanTypeEnum
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean!
+
+  """
   The maximum number of minutes allowed for the spider to traverse the site
   """
   spiderTimeout: Int
@@ -3663,6 +3718,13 @@ type DastScannerProfile {
   The maximum number of seconds allowed for the site under test to respond to a request
   """
   targetTimeout: Int
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  useAjaxSpider: Boolean!
 }
 
 """
@@ -3705,6 +3767,16 @@ input DastScannerProfileCreateInput {
   profileName: String!
 
   """
+  Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
+  """
+  scanType: DastScanTypeEnum = PASSIVE
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean = false
+
+  """
   The maximum number of minutes allowed for the spider to traverse the site.
   """
   spiderTimeout: Int
@@ -3713,6 +3785,13 @@ input DastScannerProfileCreateInput {
   The maximum number of seconds allowed for the site under test to respond to a request.
   """
   targetTimeout: Int
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  useAjaxSpider: Boolean = false
 }
 
 """
@@ -3820,6 +3899,16 @@ input DastScannerProfileUpdateInput {
   profileName: String!
 
   """
+  Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
+  """
+  scanType: DastScanTypeEnum
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean
+
+  """
   The maximum number of minutes allowed for the spider to traverse the site.
   """
   spiderTimeout: Int!
@@ -3828,6 +3917,13 @@ input DastScannerProfileUpdateInput {
   The maximum number of seconds allowed for the site under test to respond to a request.
   """
   targetTimeout: Int!
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  useAjaxSpider: Boolean
 }
 
 """
@@ -5113,6 +5209,11 @@ type DestroySnippetPayload {
 }
 
 type DetailedStatus {
+  """
+  Action information for the status. This includes method, button title, icon, path, and title
+  """
+  action: StatusAction
+
   """
   Path of the details for the pipeline status
   """
@@ -6880,6 +6981,37 @@ type GeoNode {
   internalUrl: String
 
   """
+  Find merge request diff registries on this Geo node. Available only when
+  feature flag `geo_merge_request_diff_replication` is enabled
+  """
+  mergeRequestDiffRegistries(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Filters registries by their ID
+    """
+    ids: [ID!]
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): MergeRequestDiffRegistryConnection
+
+  """
   The interval (in days) in which the repository verification is valid. Once expired, it will be reverified
   """
   minimumReverificationInterval: Int
@@ -6970,39 +7102,7 @@ type GeoNode {
   syncObjectStorage: Boolean
 
   """
-  Find terraform state registries on this Geo node. Available only when feature
-  flag `geo_terraform_state_replication` is enabled
-  """
-  terraformStateRegistries(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Filters registries by their ID
-    """
-    ids: [ID!]
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-  ): TerraformStateRegistryConnection
-
-  """
-  Find terraform state version registries on this Geo node. Available only when
-  feature flag `geo_terraform_state_version_replication` is enabled
+  Find terraform state version registries on this Geo node
   """
   terraformStateVersionRegistries(
     """
@@ -7090,9 +7190,9 @@ type Group {
   """
   board(
     """
-    Find a board by its ID
+    The board's ID
     """
-    id: ID
+    id: ID!
   ): Board
 
   """
@@ -7345,7 +7445,7 @@ type Group {
   isTemporaryStorageIncreaseEnabled: Boolean!
 
   """
-  Issues of the group
+  Issues for projects in this group
   """
   issues(
     """
@@ -7362,6 +7462,11 @@ type Group {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
 
     """
     Username of the author of the issue
@@ -7409,7 +7514,7 @@ type Group {
     iids: [String!]
 
     """
-    Include issues belonging to subgroups.
+    Include issues belonging to subgroups
     """
     includeSubgroups: Boolean = false
 
@@ -7575,6 +7680,91 @@ type Group {
   Indicates if a group is disabled from getting mentioned
   """
   mentionsDisabled: Boolean
+
+  """
+  Merge requests for projects in this group
+  """
+  mergeRequests(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Username of the assignee
+    """
+    assigneeUsername: String
+
+    """
+    Username of the author
+    """
+    authorUsername: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Array of IIDs of merge requests, for example `[1, 2]`
+    """
+    iids: [String!]
+
+    """
+    Include merge requests belonging to subgroups
+    """
+    includeSubgroups: Boolean = false
+
+    """
+    Array of label names. All resolved merge requests will have all of these labels.
+    """
+    labels: [String!]
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Merge requests merged after this date
+    """
+    mergedAfter: Time
+
+    """
+    Merge requests merged before this date
+    """
+    mergedBefore: Time
+
+    """
+    Title of the milestone
+    """
+    milestoneTitle: String
+
+    """
+    Sort merge requests by this criteria
+    """
+    sort: MergeRequestSort = created_desc
+
+    """
+    Array of source branch names. All resolved merge requests will have one of these branches as their source.
+    """
+    sourceBranches: [String!]
+
+    """
+    A merge request state. If provided, all resolved merge requests will have this state.
+    """
+    state: MergeRequestState
+
+    """
+    Array of target branch names. All resolved merge requests will have one of these branches as their target.
+    """
+    targetBranches: [String!]
+  ): MergeRequestConnection
 
   """
   Milestones of the group
@@ -9302,22 +9492,22 @@ enum IssueSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 """
@@ -9328,6 +9518,21 @@ enum IssueState {
   closed
   locked
   opened
+}
+
+"""
+Values for issue state events
+"""
+enum IssueStateEvent {
+  """
+  Closes the issue
+  """
+  CLOSE
+
+  """
+  Reopens the issue
+  """
+  REOPEN
 }
 
 """
@@ -9842,6 +10047,11 @@ type Label {
 The connection type for Label.
 """
 type LabelConnection {
+  """
+  Total count of collection
+  """
+  count: Int!
+
   """
   A list of edges.
   """
@@ -10672,6 +10882,86 @@ type MergeRequestCreatePayload {
 }
 
 """
+Represents the Geo sync and verification state of a Merge Request diff
+"""
+type MergeRequestDiffRegistry {
+  """
+  Timestamp when the MergeRequestDiffRegistry was created
+  """
+  createdAt: Time
+
+  """
+  ID of the MergeRequestDiffRegistry
+  """
+  id: ID!
+
+  """
+  Error message during sync of the MergeRequestDiffRegistry
+  """
+  lastSyncFailure: String
+
+  """
+  Timestamp of the most recent successful sync of the MergeRequestDiffRegistry
+  """
+  lastSyncedAt: Time
+
+  """
+  ID of the Merge Request diff
+  """
+  mergeRequestDiffId: ID!
+
+  """
+  Timestamp after which the MergeRequestDiffRegistry should be resynced
+  """
+  retryAt: Time
+
+  """
+  Number of consecutive failed sync attempts of the MergeRequestDiffRegistry
+  """
+  retryCount: Int
+
+  """
+  Sync state of the MergeRequestDiffRegistry
+  """
+  state: RegistryState
+}
+
+"""
+The connection type for MergeRequestDiffRegistry.
+"""
+type MergeRequestDiffRegistryConnection {
+  """
+  A list of edges.
+  """
+  edges: [MergeRequestDiffRegistryEdge]
+
+  """
+  A list of nodes.
+  """
+  nodes: [MergeRequestDiffRegistry]
+
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+An edge in a connection.
+"""
+type MergeRequestDiffRegistryEdge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+
+  """
+  The item at the end of the edge.
+  """
+  node: MergeRequestDiffRegistry
+}
+
+"""
 An edge in a connection.
 """
 type MergeRequestEdge {
@@ -11083,22 +11373,22 @@ enum MergeRequestSort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
 """
@@ -11521,7 +11811,7 @@ type Mutation {
   pipelineRetry(input: PipelineRetryInput!): PipelineRetryPayload
   removeAwardEmoji(input: RemoveAwardEmojiInput!): RemoveAwardEmojiPayload @deprecated(reason: "Use awardEmojiRemove. Deprecated in 13.2")
   removeProjectFromSecurityDashboard(input: RemoveProjectFromSecurityDashboardInput!): RemoveProjectFromSecurityDashboardPayload
-  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload
+  revertVulnerabilityToDetected(input: RevertVulnerabilityToDetectedInput!): RevertVulnerabilityToDetectedPayload @deprecated(reason: "Use vulnerabilityRevertToDetected. Deprecated in 13.5")
   runDastScan(input: RunDASTScanInput!): RunDASTScanPayload @deprecated(reason: "Use DastOnDemandScanCreate. Deprecated in 13.4")
   todoMarkDone(input: TodoMarkDoneInput!): TodoMarkDonePayload
   todoRestore(input: TodoRestoreInput!): TodoRestorePayload
@@ -11530,6 +11820,7 @@ type Mutation {
   toggleAwardEmoji(input: ToggleAwardEmojiInput!): ToggleAwardEmojiPayload @deprecated(reason: "Use awardEmojiToggle. Deprecated in 13.2")
   updateAlertStatus(input: UpdateAlertStatusInput!): UpdateAlertStatusPayload
   updateBoard(input: UpdateBoardInput!): UpdateBoardPayload
+  updateBoardEpicUserPreferences(input: UpdateBoardEpicUserPreferencesInput!): UpdateBoardEpicUserPreferencesPayload
   updateBoardList(input: UpdateBoardListInput!): UpdateBoardListPayload
   updateContainerExpirationPolicy(input: UpdateContainerExpirationPolicyInput!): UpdateContainerExpirationPolicyPayload
   updateEpic(input: UpdateEpicInput!): UpdateEpicPayload
@@ -11553,6 +11844,7 @@ type Mutation {
   vulnerabilityConfirm(input: VulnerabilityConfirmInput!): VulnerabilityConfirmPayload
   vulnerabilityDismiss(input: VulnerabilityDismissInput!): VulnerabilityDismissPayload
   vulnerabilityResolve(input: VulnerabilityResolveInput!): VulnerabilityResolvePayload
+  vulnerabilityRevertToDetected(input: VulnerabilityRevertToDetectedInput!): VulnerabilityRevertToDetectedPayload
 }
 
 """
@@ -12086,7 +12378,7 @@ type PackageEdge {
 }
 
 """
-Represents the sync and verification state of a package file
+Represents the Geo sync and verification state of a package file
 """
 type PackageFileRegistry {
   """
@@ -12167,42 +12459,47 @@ type PackageFileRegistryEdge {
 
 enum PackageTypeEnum {
   """
-  Packages from the composer package manager
+  Packages from the Composer package manager
   """
   COMPOSER
 
   """
-  Packages from the conan package manager
+  Packages from the Conan package manager
   """
   CONAN
 
   """
-  Packages from the generic package manager
+  Packages from the Debian package manager
+  """
+  DEBIAN
+
+  """
+  Packages from the Generic package manager
   """
   GENERIC
 
   """
-  Packages from the golang package manager
+  Packages from the Golang package manager
   """
   GOLANG
 
   """
-  Packages from the maven package manager
+  Packages from the Maven package manager
   """
   MAVEN
 
   """
-  Packages from the npm package manager
+  Packages from the NPM package manager
   """
   NPM
 
   """
-  Packages from the nuget package manager
+  Packages from the Nuget package manager
   """
   NUGET
 
   """
-  Packages from the pypi package manager
+  Packages from the PyPI package manager
   """
   PYPI
 }
@@ -12641,9 +12938,9 @@ type Project {
   """
   board(
     """
-    Find a board by its ID
+    The board's ID
     """
-    id: ID
+    id: ID!
   ): Board
 
   """
@@ -12931,6 +13228,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -13026,6 +13328,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -13109,6 +13416,11 @@ type Project {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
 
     """
     Username of the author of the issue
@@ -13954,6 +14266,31 @@ type Project {
   tagList: String
 
   """
+  Terraform states associated with the project
+  """
+  terraformStates(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): TerraformStateConnection
+
+  """
   Permissions for the current user on the resource
   """
   userPermissions: ProjectPermissions!
@@ -14703,6 +15040,11 @@ type Query {
     Include namespace in project search
     """
     searchNamespaces: Boolean
+
+    """
+    Sort order of results
+    """
+    sort: String
   ): ProjectConnection
 
   """
@@ -15552,6 +15894,16 @@ type Requirement {
   createdAt: Time!
 
   """
+  Description of the requirement
+  """
+  description: String
+
+  """
+  The GitLab Flavored Markdown rendering of `description`
+  """
+  descriptionHtml: String
+
+  """
   ID of the requirement
   """
   id: ID!
@@ -15560,6 +15912,11 @@ type Requirement {
   Internal ID of the requirement
   """
   iid: ID!
+
+  """
+  Indicates if latest test report was created by user
+  """
+  lastTestReportManuallyCreated: Boolean
 
   """
   Latest requirement test report state
@@ -15610,6 +15967,11 @@ type Requirement {
   Title of the requirement
   """
   title: String
+
+  """
+  The GitLab Flavored Markdown rendering of `title`
+  """
+  titleHtml: String
 
   """
   Timestamp of when the requirement was last updated
@@ -16293,6 +16655,11 @@ Represents summary of a security report
 """
 type SecurityReportSummary {
   """
+  Aggregated counts for the api_fuzzing scan
+  """
+  apiFuzzing: SecurityReportSummarySection
+
+  """
   Aggregated counts for the container_scanning scan
   """
   containerScanning: SecurityReportSummarySection
@@ -16372,6 +16739,7 @@ type SecurityReportSummarySection {
 The type of the security scanner
 """
 enum SecurityScannerType {
+  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -17372,22 +17740,49 @@ enum Sort {
   """
   Created at ascending order
   """
-  created_asc
+  created_asc @deprecated(reason: "Use CREATED_ASC. Deprecated in 13.5")
 
   """
   Created at descending order
   """
-  created_desc
+  created_desc @deprecated(reason: "Use CREATED_DESC. Deprecated in 13.5")
 
   """
   Updated at ascending order
   """
-  updated_asc
+  updated_asc @deprecated(reason: "Use UPDATED_ASC. Deprecated in 13.5")
 
   """
   Updated at descending order
   """
-  updated_desc
+  updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
+}
+
+type StatusAction {
+  """
+  Title for the button, for example: Retry this job
+  """
+  buttonTitle: String
+
+  """
+  Icon used in the action button
+  """
+  icon: String
+
+  """
+  Method for the action, for example: :post
+  """
+  method: String
+
+  """
+  Path for the action
+  """
+  path: String
+
+  """
+  Title for the action, for example: Retry
+  """
+  title: String
 }
 
 type Submodule implements Entry {
@@ -17482,64 +17877,51 @@ type TaskCompletionStatus {
   count: Int!
 }
 
-"""
-Represents the sync and verification state of a terraform state
-"""
-type TerraformStateRegistry {
+type TerraformState {
   """
-  Timestamp when the TerraformStateRegistry was created
+  Timestamp the Terraform state was created
   """
-  createdAt: Time
+  createdAt: Time!
 
   """
-  ID of the TerraformStateRegistry
+  ID of the Terraform state
   """
   id: ID!
 
   """
-  Error message during sync of the TerraformStateRegistry
+  Timestamp the Terraform state was locked
   """
-  lastSyncFailure: String
+  lockedAt: Time
 
   """
-  Timestamp of the most recent successful sync of the TerraformStateRegistry
+  The user currently holding a lock on the Terraform state
   """
-  lastSyncedAt: Time
+  lockedByUser: User
 
   """
-  Timestamp after which the TerraformStateRegistry should be resynced
+  Name of the Terraform state
   """
-  retryAt: Time
+  name: String!
 
   """
-  Number of consecutive failed sync attempts of the TerraformStateRegistry
+  Timestamp the Terraform state was updated
   """
-  retryCount: Int
-
-  """
-  Sync state of the TerraformStateRegistry
-  """
-  state: RegistryState
-
-  """
-  ID of the TerraformState
-  """
-  terraformStateId: ID!
+  updatedAt: Time!
 }
 
 """
-The connection type for TerraformStateRegistry.
+The connection type for TerraformState.
 """
-type TerraformStateRegistryConnection {
+type TerraformStateConnection {
   """
   A list of edges.
   """
-  edges: [TerraformStateRegistryEdge]
+  edges: [TerraformStateEdge]
 
   """
   A list of nodes.
   """
-  nodes: [TerraformStateRegistry]
+  nodes: [TerraformState]
 
   """
   Information to aid in pagination.
@@ -17550,7 +17932,7 @@ type TerraformStateRegistryConnection {
 """
 An edge in a connection.
 """
-type TerraformStateRegistryEdge {
+type TerraformStateEdge {
   """
   A cursor for use in pagination.
   """
@@ -17559,7 +17941,7 @@ type TerraformStateRegistryEdge {
   """
   The item at the end of the edge.
   """
-  node: TerraformStateRegistry
+  node: TerraformState
 }
 
 """
@@ -18339,6 +18721,51 @@ type UpdateAlertStatusPayload {
 }
 
 """
+Autogenerated input type of UpdateBoardEpicUserPreferences
+"""
+input UpdateBoardEpicUserPreferencesInput {
+  """
+  The board global ID
+  """
+  boardId: BoardID!
+
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Whether the epic should be collapsed in the board
+  """
+  collapsed: Boolean!
+
+  """
+  ID of an epic to set preferences for
+  """
+  epicId: EpicID!
+}
+
+"""
+Autogenerated return type of UpdateBoardEpicUserPreferences
+"""
+type UpdateBoardEpicUserPreferencesPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  User preferences for the epic in the board after mutation
+  """
+  epicUserPreferences: BoardEpicUserPreferences
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+}
+
+"""
 Autogenerated input type of UpdateBoard
 """
 input UpdateBoardInput {
@@ -18366,6 +18793,16 @@ input UpdateBoardInput {
   The board global id.
   """
   id: ID!
+
+  """
+  The IDs of labels to be added to the board.
+  """
+  labelIds: [LabelID!]
+
+  """
+  Labels of the issue
+  """
+  labels: [String!]
 
   """
   The id of milestone to be assigned to the board.
@@ -18735,6 +19172,11 @@ input UpdateIssueInput {
   removeLabelIds: [ID!]
 
   """
+  Close or reopen an issue.
+  """
+  stateEvent: IssueStateEvent
+
+  """
   Title of the issue
   """
   title: String
@@ -18875,6 +19317,11 @@ input UpdateRequirementInput {
   clientMutationId: String
 
   """
+  Description of the requirement
+  """
+  description: String
+
+  """
   The iid of the requirement to update
   """
   iid: String!
@@ -18885,7 +19332,7 @@ input UpdateRequirementInput {
   lastTestReportState: TestReportState
 
   """
-  The project full path the requirement is associated with
+  Full project path the requirement is associated with
   """
   projectPath: ID!
 
@@ -18915,7 +19362,7 @@ type UpdateRequirementPayload {
   errors: [String!]!
 
   """
-  The requirement after mutation
+  Requirement after mutation
   """
   requirement: Requirement
 }
@@ -18973,6 +19420,11 @@ type UpdateSnippetPayload {
   The snippet after mutation
   """
   snippet: Snippet
+
+  """
+  Indicates whether the operation returns a record detected as spam
+  """
+  spam: Boolean
 }
 
 scalar Upload
@@ -18986,6 +19438,11 @@ type User {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of the author
+    """
+    authorUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -19066,6 +19523,11 @@ type User {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of the assignee
+    """
+    assigneeUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -19717,7 +20179,7 @@ type Vulnerability implements Noteable {
   """
   Type of the security report that found the vulnerability (SAST,
   DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION,
-  COVERAGE_FUZZING)
+  COVERAGE_FUZZING, API_FUZZING)
   """
   reportType: VulnerabilityReportType
 
@@ -19737,7 +20199,7 @@ type Vulnerability implements Noteable {
   severity: VulnerabilitySeverity
 
   """
-  State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)
+  State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)
   """
   state: VulnerabilityState
 
@@ -20180,6 +20642,7 @@ type VulnerabilityPermissions {
 The type of the security scan that found the vulnerability
 """
 enum VulnerabilityReportType {
+  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -20219,6 +20682,41 @@ type VulnerabilityResolvePayload {
 
   """
   The vulnerability after state change
+  """
+  vulnerability: Vulnerability
+}
+
+"""
+Autogenerated input type of VulnerabilityRevertToDetected
+"""
+input VulnerabilityRevertToDetectedInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  ID of the vulnerability to be reverted
+  """
+  id: VulnerabilityID!
+}
+
+"""
+Autogenerated return type of VulnerabilityRevertToDetected
+"""
+type VulnerabilityRevertToDetectedPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The vulnerability after revert
   """
   vulnerability: Vulnerability
 }
@@ -20345,6 +20843,16 @@ enum VulnerabilitySort {
   detected_desc
 
   """
+  Report Type in ascending order
+  """
+  report_type_asc
+
+  """
+  Report Type in descending order
+  """
+  report_type_desc
+
+  """
   Severity in ascending order
   """
   severity_asc
@@ -20353,6 +20861,16 @@ enum VulnerabilitySort {
   Severity in descending order
   """
   severity_desc
+
+  """
+  State in ascending order
+  """
+  state_asc
+
+  """
+  State in descending order
+  """
+  state_desc
 
   """
   Title in ascending order

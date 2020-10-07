@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'boot'
 
 # Based on https://github.com/rails/rails/blob/v6.0.1/railties/lib/rails/all.rb
@@ -127,12 +128,12 @@ module Gitlab
       /^description$/,
       /^note$/,
       /^text$/,
-      /^title$/
+      /^title$/,
+      /^hook$/
     ]
     config.filter_parameters += %i(
       certificate
       encrypted_key
-      hook
       import_url
       elasticsearch_url
       otp_attempt
@@ -151,20 +152,6 @@ module Gitlab
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
 
-    # Configure webpack
-    config.webpack = ActiveSupport::OrderedOptions.new
-    config.webpack.config_file = "config/webpack.config.js"
-    config.webpack.output_dir  = "public/assets/webpack"
-    config.webpack.public_path = "assets/webpack"
-    config.webpack.manifest_filename = "manifest.json"
-
-    # Webpack dev server configuration is handled in initializers/static_files.rb
-    config.webpack.dev_server = ActiveSupport::OrderedOptions.new
-    config.webpack.dev_server.enabled = false
-    config.webpack.dev_server.host = 'localhost'
-    config.webpack.dev_server.port = 3808
-    config.webpack.dev_server.https = false
-
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
     # Enable the asset pipeline
@@ -174,6 +161,8 @@ module Gitlab
     config.assets.paths << Gemojione.images_path
     config.assets.paths << "#{config.root}/vendor/assets/fonts"
 
+    config.assets.precompile << "application_utilities.css"
+    config.assets.precompile << "application_utilities_dark.css"
     config.assets.precompile << "application_dark.css"
 
     config.assets.precompile << "startup/*.css"
@@ -185,12 +174,18 @@ module Gitlab
     config.assets.precompile << "mailers/*.css"
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
     config.assets.precompile << "page_bundles/boards.css"
+    config.assets.precompile << "page_bundles/cycle_analytics.css"
+    config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/ide.css"
-    config.assets.precompile << "page_bundles/issues.css"
+    config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
+    config.assets.precompile << "page_bundles/merge_conflicts.css"
     config.assets.precompile << "page_bundles/milestone.css"
+    config.assets.precompile << "page_bundles/pipeline.css"
+    config.assets.precompile << "page_bundles/pipelines.css"
     config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/xterm.css"
+    config.assets.precompile << "lazy_bundles/cropper.css"
     config.assets.precompile << "performance_bar.css"
     config.assets.precompile << "lib/ace.js"
     config.assets.precompile << "disable_animations.css"
@@ -219,13 +214,6 @@ module Gitlab
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
     config.assets.precompile << "xterm.css"
 
-    # Add EE assets
-    if Gitlab.ee?
-      %w[images javascripts stylesheets].each do |path|
-        config.assets.paths << "#{config.root}/ee/app/assets/#{path}"
-      end
-    end
-
     # Import path for EE specific SCSS entry point
     # In CE it will import a noop file, in EE a functioning file
     # Order is important, so that the ee file takes precedence:
@@ -238,16 +226,6 @@ module Gitlab
     # This path must come last to avoid confusing sprockets
     # See https://gitlab.com/gitlab-org/gitlab-foss/issues/64091#note_194512508
     config.assets.paths << "#{config.root}/node_modules"
-
-    if Gitlab.ee?
-      # Compile non-JS/CSS assets in the ee/app/assets folder by default
-      # Mimic sprockets-rails default: https://github.com/rails/sprockets-rails/blob/v3.2.1/lib/sprockets/railtie.rb#L84-L87
-      LOOSE_EE_APP_ASSETS = lambda do |logical_path, filename|
-        filename.start_with?(config.root.join("ee/app/assets").to_s) &&
-          !['.js', '.css', ''].include?(File.extname(logical_path))
-      end
-      config.assets.precompile << LOOSE_EE_APP_ASSETS
-    end
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
@@ -313,6 +291,34 @@ module Gitlab
       g.factory_bot false
     end
 
+    # sprocket-rails adds some precompile assets we actually do not need.
+    #
+    # It copies all _non_ js and CSS files from the app/assets/ older.
+    #
+    # In our case this copies for example: Vue, Markdown and Graphql, which we do not need
+    # for production.
+    #
+    # We remove this default behavior and then reimplement it in order to consider ee/ as well
+    # and remove those other files we do not need.
+    #
+    # For reference: https://github.com/rails/sprockets-rails/blob/v3.2.1/lib/sprockets/railtie.rb#L84-L87
+    initializer :correct_precompile_targets, after: :set_default_precompile do |app|
+      app.config.assets.precompile.reject! { |entry| entry == Sprockets::Railtie::LOOSE_APP_ASSETS }
+
+      asset_roots = [config.root.join("app/assets").to_s]
+
+      if Gitlab.ee?
+        asset_roots << config.root.join("ee/app/assets").to_s
+      end
+
+      LOOSE_APP_ASSETS = lambda do |logical_path, filename|
+        filename.start_with?(*asset_roots) &&
+          !['.js', '.css', '.md', '.vue', '.graphql', ''].include?(File.extname(logical_path))
+      end
+
+      app.config.assets.precompile << LOOSE_APP_ASSETS
+    end
+
     # This empty initializer forces the :let_zeitwerk_take_over initializer to run before we load
     # initializers in config/initializers. This is done because autoloading before Zeitwerk takes
     # over is deprecated but our initializers do a lot of autoloading.
@@ -324,6 +330,20 @@ module Gitlab
     initializer :before_zeitwerk, before: :let_zeitwerk_take_over, after: :prepend_helpers_path do
       Dir[Rails.root.join('config/initializers_before_autoloader/*.rb')].sort.each do |initializer|
         load_config_initializer(initializer)
+      end
+    end
+
+    # Add EE assets. They should take precedence over CE. This means if two files exist, e.g.:
+    #
+    # ee/app/assets/stylesheets/example.scss
+    # app/assets/stylesheets/example.scss
+    #
+    # The ee/ version will be preferred.
+    initializer :prefer_ee_assets, after: :append_assets_path do |app|
+      if Gitlab.ee?
+        %w[images javascripts stylesheets].each do |path|
+          app.config.assets.paths.unshift("#{config.root}/ee/app/assets/#{path}")
+        end
       end
     end
 

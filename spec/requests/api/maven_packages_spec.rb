@@ -15,10 +15,13 @@ RSpec.describe API::MavenPackages do
   let_it_be(:job, reload: true) { create(:ci_build, user: user, status: :running) }
   let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
   let_it_be(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
+  let_it_be(:deploy_token_for_group) { create(:deploy_token, :group, read_package_registry: true, write_package_registry: true) }
+  let_it_be(:group_deploy_token) { create(:group_deploy_token, deploy_token: deploy_token_for_group, group: group) }
 
   let(:workhorse_token) { JWT.encode({ 'iss' => 'gitlab-workhorse' }, Gitlab::Workhorse.secret, 'HS256') }
   let(:headers) { { 'GitLab-Workhorse' => '1.0', Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER => workhorse_token } }
   let(:headers_with_token) { headers.merge('Private-Token' => personal_access_token.token) }
+  let(:group_deploy_token_headers) { { Gitlab::Auth::AuthFinders::DEPLOY_TOKEN_HEADER => deploy_token_for_group.token } }
 
   let(:headers_with_deploy_token) do
     headers.merge(
@@ -36,7 +39,7 @@ RSpec.describe API::MavenPackages do
     context 'with jar file' do
       let_it_be(:package_file) { jar_file }
 
-      it_behaves_like 'a gitlab tracking event', described_class.name, 'pull_package'
+      it_behaves_like 'a package tracking event', described_class.name, 'pull_package'
     end
   end
 
@@ -342,6 +345,17 @@ RSpec.describe API::MavenPackages do
       it_behaves_like 'downloads with a job token'
 
       it_behaves_like 'downloads with a deploy token'
+
+      context 'with group deploy token' do
+        subject { download_file_with_token(package_file.file_name, {}, group_deploy_token_headers) }
+
+        it 'returns the file' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.media_type).to eq('application/octet-stream')
+        end
+      end
     end
 
     def download_file(file_name, params = {}, request_headers = headers)
@@ -571,7 +585,7 @@ RSpec.describe API::MavenPackages do
       context 'event tracking' do
         subject { upload_file_with_token(params) }
 
-        it_behaves_like 'a gitlab tracking event', described_class.name, 'push_package'
+        it_behaves_like 'a package tracking event', described_class.name, 'push_package'
       end
 
       it 'creates package and stores package file' do

@@ -13,13 +13,16 @@ import {
 } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { isAbsolute, redirectTo } from '~/lib/utils/url_utility';
+import { fetchPolicies } from '~/lib/graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DastSiteValidation from './dast_site_validation.vue';
 import dastSiteProfileCreateMutation from '../graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from '../graphql/dast_site_profile_update.mutation.graphql';
 import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutation.graphql';
 import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
-import { DAST_SITE_VALIDATION_STATUS } from '../constants';
+import { DAST_SITE_VALIDATION_STATUS, DAST_SITE_VALIDATION_POLL_INTERVAL } from '../constants';
+
+const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
 
 const initField = value => ({
   value,
@@ -61,22 +64,25 @@ export default {
   },
   data() {
     const { name = '', targetUrl = '' } = this.siteProfile || {};
-    const isSiteValid = false;
+
     const form = {
       profileName: initField(name),
       targetUrl: initField(targetUrl),
     };
+
     return {
+      fetchValidationTimeout: null,
       form,
       initialFormValues: extractFormValues(form),
       isFetchingValidationStatus: false,
       isValidatingSite: false,
-      loading: false,
-      showAlert: false,
+      isLoading: false,
+      hasAlert: false,
       tokenId: null,
       token: null,
-      isSiteValid,
-      validateSite: isSiteValid,
+      isSiteValidationActive: false,
+      isSiteValidationTouched: false,
+      validationStatus: null,
       errorMessage: '',
       errors: [],
     };
@@ -84,6 +90,9 @@ export default {
   computed: {
     isEdit() {
       return Boolean(this.siteProfile?.id);
+    },
+    isSiteValidationDisabled() {
+      return !this.form.targetUrl.state || this.validationStatusMatches(INPROGRESS);
     },
     i18n() {
       const { isEdit } = this;
@@ -121,32 +130,45 @@ export default {
       return Object.values(this.form).some(({ value }) => !value);
     },
     isSubmitDisabled() {
-      return (this.validateSite && !this.isSiteValid) || this.formHasErrors || this.someFieldEmpty;
+      return (
+        (this.isSiteValidationActive && !this.validationStatusMatches(PASSED)) ||
+        this.formHasErrors ||
+        this.someFieldEmpty ||
+        this.validationStatusMatches(INPROGRESS)
+      );
     },
     showValidationSection() {
-      return this.validateSite && !this.isSiteValid && !this.isValidatingSite;
+      return (
+        this.isSiteValidationActive &&
+        !this.isValidatingSite &&
+        ![INPROGRESS, PASSED].some(this.validationStatusMatches)
+      );
     },
-  },
-  watch: {
-    async validateSite(validate) {
-      this.tokenId = null;
-      this.token = null;
-      if (!validate) {
-        this.isSiteValid = false;
-      } else {
-        try {
-          this.isValidatingSite = true;
-          await this.fetchValidationStatus();
+    siteValidationStatusDescription() {
+      const descriptions = {
+        [PENDING]: { text: s__('DastProfiles|Site must be validated to run an active scan.') },
+        [INPROGRESS]: {
+          text: s__('DastProfiles|Validation is in progress...'),
+        },
+        [PASSED]: {
+          text: s__(
+            'DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site.',
+          ),
+          cssClass: 'gl-text-green-500',
+        },
+        [FAILED]: {
+          text: s__('DastProfiles|Validation failed. Please try again.'),
+          cssClass: 'gl-text-red-500',
+          dismissed: this.isSiteValidationTouched,
+        },
+      };
 
-          if (!this.isSiteValid) {
-            await this.createValidationToken();
-          }
-        } catch (exception) {
-          this.captureException(exception);
-        } finally {
-          this.isValidatingSite = false;
-        }
-      }
+      const defaultDescription = descriptions[PENDING];
+      const currentStatusDescription = descriptions[this.validationStatus];
+
+      return currentStatusDescription && !currentStatusDescription.dismissed
+        ? currentStatusDescription
+        : defaultDescription;
     },
   },
   async created() {
@@ -155,10 +177,46 @@ export default {
 
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
+
+        if ([PASSED, INPROGRESS].some(this.validationStatusMatches)) {
+          this.isSiteValidationActive = true;
+        }
       }
     }
   },
+  destroyed() {
+    clearTimeout(this.fetchValidationTimeout);
+    this.fetchValidationTimeout = null;
+  },
   methods: {
+    async validateSite(validate) {
+      this.isSiteValidationActive = validate;
+      this.isSiteValidationTouched = true;
+      this.tokenId = null;
+      this.token = null;
+
+      if (!validate) {
+        this.validationStatus = null;
+      } else {
+        try {
+          this.isValidatingSite = true;
+
+          await this.fetchValidationStatus();
+
+          if (![PASSED, INPROGRESS].some(this.validationStatusMatches)) {
+            await this.createValidationToken();
+          }
+        } catch (exception) {
+          this.captureException(exception);
+          this.isSiteValidationActive = false;
+        } finally {
+          this.isValidatingSite = false;
+        }
+      }
+    },
+    validationStatusMatches(status) {
+      return this.validationStatus === status;
+    },
     validateTargetUrl() {
       if (!isAbsolute(this.form.targetUrl.value)) {
         this.form.targetUrl.state = false;
@@ -186,14 +244,20 @@ export default {
             fullPath: this.fullPath,
             targetUrl: this.form.targetUrl.value,
           },
+          fetchPolicy: fetchPolicies.NETWORK_ONLY,
         });
-        this.isSiteValid = status === DAST_SITE_VALIDATION_STATUS.VALID;
+        this.validationStatus = status;
+
+        if (this.validationStatusMatches(INPROGRESS)) {
+          this.fetchValidationTimeout = setTimeout(
+            this.fetchValidationStatus,
+            DAST_SITE_VALIDATION_POLL_INTERVAL,
+          );
+        }
       } catch (exception) {
         this.showErrors({
           message: this.i18n.siteValidation.validationStatusFetchError,
         });
-        this.validateSite = false;
-
         throw new Error(exception);
       } finally {
         this.isFetchingValidationStatus = false;
@@ -219,13 +283,12 @@ export default {
         }
       } catch (exception) {
         this.showErrors({ message: errorMessage });
-        this.validateSite = false;
 
         throw new Error(exception);
       }
     },
     onSubmit() {
-      this.loading = true;
+      this.isLoading = true;
       this.hideErrors();
       const { errorMessage } = this.i18n;
 
@@ -248,7 +311,7 @@ export default {
           }) => {
             if (errors.length > 0) {
               this.showErrors({ message: errorMessage, errors });
-              this.loading = false;
+              this.isLoading = false;
             } else {
               redirectTo(this.profilesLibraryPath);
             }
@@ -257,7 +320,7 @@ export default {
         .catch(exception => {
           this.showErrors({ message: errorMessage });
           this.captureException(exception);
-          this.loading = false;
+          this.isLoading = false;
         });
     },
     onCancelClicked() {
@@ -266,6 +329,9 @@ export default {
       } else {
         this.$refs[this.$options.modalId].show();
       }
+    },
+    onValidationSuccess() {
+      this.validationStatus = PASSED;
     },
     discard() {
       redirectTo(this.profilesLibraryPath);
@@ -276,12 +342,12 @@ export default {
     showErrors({ message, errors = [] }) {
       this.errorMessage = message;
       this.errors = errors;
-      this.showAlert = true;
+      this.hasAlert = true;
     },
     hideErrors() {
       this.errorMessage = '';
       this.errors = [];
-      this.showAlert = false;
+      this.hasAlert = false;
     },
   },
   modalId: 'deleteDastProfileModal',
@@ -295,7 +361,7 @@ export default {
     </h2>
 
     <gl-alert
-      v-if="showAlert"
+      v-if="hasAlert"
       variant="danger"
       class="gl-mb-5"
       data-testid="dast-site-profile-form-alert"
@@ -322,7 +388,7 @@ export default {
       data-testid="target-url-input-group"
       :invalid-feedback="form.targetUrl.feedback"
       :description="
-        validateSite && !isValidatingSite
+        isSiteValidationActive && !isValidatingSite
           ? s__('DastProfiles|Validation must be turned off to change the target URL')
           : null
       "
@@ -334,7 +400,7 @@ export default {
         data-testid="target-url-input"
         type="url"
         :state="form.targetUrl.state"
-        :disabled="validateSite"
+        :disabled="isSiteValidationActive"
         @input="validateTargetUrl"
       />
     </gl-form-group>
@@ -342,22 +408,23 @@ export default {
     <template v-if="glFeatures.securityOnDemandScansSiteValidation">
       <gl-form-group :label="s__('DastProfiles|Validate target site')">
         <template #description>
-          <p v-if="!isSiteValid" class="gl-mt-3">
-            {{ s__('DastProfiles|Site must be validated to run an active scan.') }}
-          </p>
-          <p v-else class="gl-text-green-500 gl-mt-3">
-            {{
-              s__(
-                'DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site.',
-              )
-            }}
+          <p
+            v-if="siteValidationStatusDescription.text"
+            class="gl-mt-3"
+            :class="siteValidationStatusDescription.cssClass"
+            data-testid="siteValidationStatusDescription"
+          >
+            {{ siteValidationStatusDescription.text }}
           </p>
         </template>
         <gl-toggle
-          v-model="validateSite"
           data-testid="dast-site-validation-toggle"
-          :disabled="!form.targetUrl.state"
-          :is-loading="isFetchingValidationStatus || isValidatingSite"
+          :value="isSiteValidationActive"
+          :disabled="isSiteValidationDisabled"
+          :is-loading="
+            !isSiteValidationDisabled && (isFetchingValidationStatus || isValidatingSite)
+          "
+          @change="validateSite"
         />
       </gl-form-group>
 
@@ -367,7 +434,7 @@ export default {
           :token-id="tokenId"
           :token="token"
           :target-url="form.targetUrl.value"
-          @success="isSiteValid = true"
+          @success="onValidationSuccess"
         />
       </gl-collapse>
     </template>
@@ -381,7 +448,7 @@ export default {
         class="js-no-auto-disable"
         data-testid="dast-site-profile-form-submit-button"
         :disabled="isSubmitDisabled"
-        :loading="loading"
+        :loading="isLoading"
       >
         {{ s__('DastProfiles|Save profile') }}
       </gl-button>

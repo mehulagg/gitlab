@@ -35,6 +35,11 @@ namespace :gitlab do
       # Truncate schema_migrations to ensure migrations re-run
       connection.execute('TRUNCATE schema_migrations') if connection.table_exists? 'schema_migrations'
 
+      # Drop any views
+      connection.views.each do |view|
+        connection.execute("DROP VIEW IF EXISTS #{connection.quote_table_name(view)} CASCADE")
+      end
+
       # Drop tables with cascade to avoid dependent table errors
       # PG: http://www.postgresql.org/docs/current/static/ddl-depend.html
       # Add `IF EXISTS` because cascade could have already deleted a table.
@@ -177,7 +182,7 @@ namespace :gitlab do
       indexes = if args[:index_name]
                   Gitlab::Database::PostgresIndex.by_identifier(args[:index_name])
                 else
-                  Gitlab::Database::PostgresIndex.regular.random_few(2)
+                  Gitlab::Database::Reindexing.candidate_indexes.random_few(2)
                 end
 
       Gitlab::Database::Reindexing.perform(indexes)

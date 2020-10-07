@@ -22,46 +22,49 @@ module Gitlab
         @status == :not_found
       end
 
-      def has_legacy_app_label?
-        legacy_deployments.present?
-      end
-
       def found?
         @status == :found
       end
 
-      def self.from_deployments(*deployments, pods_attrs: [], legacy_deployments: [])
-        return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments.empty?
+      def self.from_deployments(*deployments_attrs, pods_attrs: [])
+        return new([], status: :not_found) if deployments_attrs.empty?
 
-        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods_attrs) }
+        deployments = deployments_attrs.map do |attrs|
+          ::Gitlab::Kubernetes::Deployment.new(attrs, pods: pods_attrs)
+        end
         deployments.sort_by!(&:order)
-        new(deployments, legacy_deployments: legacy_deployments)
+
+        pods = pods_attrs.map do |attrs|
+          ::Gitlab::Kubernetes::Pod.new(attrs)
+        end
+
+        new(deployments, pods: pods)
       end
 
       def self.loading
         new([], status: :loading)
       end
 
-      def initialize(deployments, status: :found, legacy_deployments: [])
+      def initialize(deployments, pods: [], status: :found)
         @status       = status
         @deployments  = deployments
-        @instances    = deployments.flat_map(&:instances)
-        @legacy_deployments = legacy_deployments
+
+        @instances = if ::Feature.enabled?(:deploy_boards_dedupe_instances)
+                       RolloutInstances.new(deployments, pods).pod_instances
+                     else
+                       deployments.flat_map(&:instances)
+                     end
 
         @completion =
           if @instances.empty?
             100
           else
             # We downcase the pod status in Gitlab::Kubernetes::Deployment#deployment_instance
-            finished = @instances.count { |instance| instance[:status] == Gitlab::Kubernetes::Pod::RUNNING.downcase }
+            finished = @instances.count { |instance| instance[:status] == ::Gitlab::Kubernetes::Pod::RUNNING.downcase }
 
             (finished / @instances.count.to_f * 100).to_i
           end
       end
-
-      private
-
-      attr_reader :legacy_deployments
     end
   end
 end

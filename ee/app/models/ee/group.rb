@@ -408,6 +408,21 @@ module EE
       minimal_access_role_allowed? ? ::Gitlab::Access::MINIMAL_ACCESS : ::Gitlab::Access::GUEST
     end
 
+    override :access_level_roles
+    def access_level_roles
+      levels = ::GroupMember.access_level_roles
+      return levels unless minimal_access_role_allowed?
+
+      levels.merge(::Gitlab::Access::MINIMAL_ACCESS_HASH)
+    end
+
+    override :users_count
+    def users_count
+      return all_group_members.count unless minimal_access_role_allowed?
+
+      members.count
+    end
+
     private
 
     def custom_project_templates_group_allowed

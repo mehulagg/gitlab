@@ -41,6 +41,14 @@ module Mutations
                required: false,
                description: 'The weight value to be assigned to the board.'
 
+      argument :labels, [GraphQL::STRING_TYPE],
+               required: false,
+               description: copy_field_description(Types::IssueType, :labels)
+
+      argument :label_ids, [::Types::GlobalIDType[::Label]],
+               required: false,
+               description: 'The IDs of labels to be added to the board.'
+
       field :board,
             Types::BoardType,
             null: true,
@@ -61,6 +69,15 @@ module Mutations
         }
       end
 
+      def ready?(**args)
+        if args.slice(*mutually_exclusive_args).size > 1
+          arg_str = mutually_exclusive_args.map { |x| x.to_s.camelize(:lower) }.join(' or ')
+          raise Gitlab::Graphql::Errors::ArgumentError, "one and only one of #{arg_str} is required"
+        end
+
+        super
+      end
+
       private
 
       def find_object(id:)
@@ -76,7 +93,15 @@ module Mutations
           args[:milestone_id] = GitlabSchema.parse_gid(args[:milestone_id], expected_type: ::Milestone).model_id
         end
 
+        args[:label_ids] &&= args[:label_ids].map do |label_id|
+          ::GitlabSchema.parse_gid(label_id, expected_type: ::Label).model_id
+        end
+
         args
+      end
+
+      def mutually_exclusive_args
+        [:labels, :label_ids]
       end
     end
   end

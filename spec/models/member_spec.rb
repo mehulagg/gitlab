@@ -17,6 +17,13 @@ RSpec.describe Member do
     it { is_expected.to validate_presence_of(:user) }
     it { is_expected.to validate_presence_of(:source) }
 
+    context 'expires_at' do
+      it { is_expected.not_to allow_value(Date.yesterday).for(:expires_at) }
+      it { is_expected.to allow_value(Date.tomorrow).for(:expires_at) }
+      it { is_expected.to allow_value(Date.today).for(:expires_at) }
+      it { is_expected.to allow_value(nil).for(:expires_at) }
+    end
+
     it_behaves_like 'an object with email-formated attributes', :invite_email do
       subject { build(:project_member) }
     end
@@ -229,12 +236,16 @@ RSpec.describe Member do
     end
 
     describe '.not_expired' do
-      let_it_be(:expiring_yesterday) { create(:group_member, expires_at: 1.day.ago) }
-      let_it_be(:expiring_today) { create(:group_member, expires_at: Date.today) }
-      let_it_be(:expiring_tomorrow) { create(:group_member, expires_at: 1.day.from_now) }
+      let_it_be(:expiring_yesterday) { create(:group_member, expires_at: 1.day.from_now) }
+      let_it_be(:expiring_today) { create(:group_member, expires_at: 2.days.from_now) }
+      let_it_be(:expiring_tomorrow) { create(:group_member, expires_at: 3.days.from_now) }
       let_it_be(:not_expiring) { create(:group_member) }
 
       subject { described_class.not_expired }
+
+      around do |example|
+        travel_to(2.days.from_now) { example.run }
+      end
 
       it { is_expected.not_to include(expiring_yesterday, expiring_today) }
       it { is_expected.to include(expiring_tomorrow, not_expiring) }

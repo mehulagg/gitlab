@@ -44,7 +44,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Delete do
       let(:global_id) { token.id }
 
       it 'raises an error if the cluster agent id is invalid', :aggregate_failures do
-        expect { subject }.to raise_error(NoMethodError)
+        expect { subject }.to raise_error(::GraphQL::CoercionError)
         expect { token.reload }.not_to raise_error
       end
     end

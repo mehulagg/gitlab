@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require_dependency 'vulnerabilities/base_service'
+
 module Vulnerabilities
   class RevertToDetectedService < BaseService
-    include Gitlab::Allowable
-
     REVERT_PARAMS = { resolved_by: nil, resolved_at: nil, dismissed_by: nil, dismissed_at: nil, confirmed_by: nil, confirmed_at: nil }.freeze
 
     def execute

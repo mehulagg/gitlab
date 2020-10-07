@@ -5,6 +5,7 @@ module Elastic
     class ApplicationClassProxy < Elasticsearch::Model::Proxy::ClassMethodsProxy
       include ClassProxyUtil
       include Elastic::Latest::Routing
+      include Elastic::Latest::QueryContext::Aware
 
       def search(query, search_options = {})
         es_options = routing_options(search_options)
@@ -55,13 +56,19 @@ module Elastic
                 bool: {
                   must: [{
                     simple_query_string: {
+                      _name: context.name(self.es_type, :match, :search_terms),
                       fields: fields,
                       query: query,
                       default_operator: default_operator
                     }
                   }],
                   filter: [{
-                    term: { type: self.es_type }
+                    term: {
+                      type: {
+                        _name: context.name(:doc, :is_a, self.es_type),
+                        value: self.es_type
+                      }
+                    }
                   }]
                 }
               }
@@ -87,8 +94,8 @@ module Elastic
           query: {
             bool: {
               filter: [
-                { term: { iid: iid } },
-                { term: { type: self.es_type } }
+                { term: { iid: { _name: context.name(self.es_type, :related, :iid), value: iid } } },
+                { term: { type: { _name: context.name(:doc, :is_a, self.es_type), value: self.es_type } } }
               ]
             }
           }
@@ -98,24 +105,46 @@ module Elastic
       # Builds an elasticsearch query that will select child documents from a
       # set of projects, taking user access rules into account.
       def project_ids_filter(query_hash, options)
-        project_query = project_ids_query(
-          options[:current_user],
-          options[:project_ids],
-          options[:public_and_internal_projects],
-          options[:features]
-        )
+        context.name(:project) do
+          project_query = project_ids_query(
+            options[:current_user],
+            options[:project_ids],
+            options[:public_and_internal_projects],
+            options[:features]
+          )
 
-        query_hash[:query][:bool][:filter] ||= []
-        query_hash[:query][:bool][:filter] << {
-          has_parent: {
-            parent_type: "project",
-            query: {
-              bool: project_query
+          query_hash[:query][:bool][:filter] ||= []
+          query_hash[:query][:bool][:filter] << {
+            has_parent: {
+              _name: context.name,
+              parent_type: "project",
+              query: {
+                bool: project_query
+              }
             }
           }
-        }
+        end
 
         query_hash
+      end
+
+      def apply_sort(query_hash, options)
+        case options[:sort]
+        when 'oldest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'asc'
+            }
+          })
+        when 'newest'
+          query_hash.merge(sort: {
+            created_at: {
+              order: 'desc'
+            }
+          })
+        else
+          query_hash
+        end
       end
 
       # Builds an elasticsearch query that will select projects the user is
@@ -134,17 +163,19 @@ module Elastic
         conditions = pick_projects_by_membership(scoped_project_ids, user, features)
 
         if public_and_internal_projects
-          # Skip internal projects for anonymous and external users.
-          # Others are given access to all internal projects.
-          #
-          # Admins & auditors get access to internal projects even
-          # if the feature is private.
-          conditions += pick_projects_by_visibility(Project::INTERNAL, user, features) if user && !user.external?
+          context.name(:visibility) do
+            # Skip internal projects for anonymous and external users.
+            # Others are given access to all internal projects.
+            #
+            # Admins & auditors get access to internal projects even
+            # if the feature is private.
+            conditions += pick_projects_by_visibility(Project::INTERNAL, user, features) if user && !user.external?
 
-          # All users, including anonymous, can access public projects.
-          # Admins & auditors get access to public projects where the feature is
-          # private.
-          conditions += pick_projects_by_visibility(Project::PUBLIC, user, features)
+            # All users, including anonymous, can access public projects.
+            # Admins & auditors get access to public projects where the feature is
+            # private.
+            conditions += pick_projects_by_visibility(Project::PUBLIC, user, features)
+          end
         end
 
         { should: conditions }
@@ -160,24 +191,32 @@ module Elastic
       def pick_projects_by_membership(project_ids, user, features = nil)
         if features.nil?
           if project_ids == :any
-            return [{ term: { visibility_level: Project::PRIVATE } }]
+            return [{ term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }]
           else
-            return [{ terms: { id: project_ids } }]
+            return [{ terms: { _name: context.name(:membership, :id), id: project_ids } }]
           end
         end
 
         Array(features).map do |feature|
           condition =
             if project_ids == :any
-              { term: { visibility_level: Project::PRIVATE } }
+              { term: { visibility_level: { _name: context.name(:any), value: Project::PRIVATE } } }
             else
-              { terms: { id: filter_ids_by_feature(project_ids, user, feature) } }
+              { terms: { _name: context.name(:membership, :id), id: filter_ids_by_feature(project_ids, user, feature) } }
             end
 
-          limit =
-            { terms: { "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }
+          limit = {
+            terms: {
+              _name: context.name(feature, :enabled_or_private),
+              "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE]
+            }
+          }
 
-          { bool: { filter: [condition, limit] } }
+          {
+            bool: {
+              filter: [condition, limit]
+            }
+          }
         end
       end
 
@@ -186,9 +225,11 @@ module Elastic
       # If a project feature is specified, access is only granted if the feature
       # is enabled or, for admins & auditors, private.
       def pick_projects_by_visibility(visibility, user, features)
-        condition = { term: { visibility_level: visibility } }
+        context.name(visibility) do
+          condition = { term: { visibility_level: { _name: context.name, value: visibility } } }
 
-        limit_by_feature(condition, features, include_members_only: user&.can_read_all_resources?)
+          limit_by_feature(condition, features, include_members_only: user&.can_read_all_resources?)
+        end
       end
 
       # If a project feature(s) is specified, access is dependent on its visibility
@@ -206,14 +247,33 @@ module Elastic
         features = Array(features)
 
         features.map do |feature|
-          limit =
-            if include_members_only
-              { terms: { "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE] } }
-            else
-              { term: { "#{feature}_access_level" => ::ProjectFeature::ENABLED } }
-            end
+          context.name(feature, :access_level) do
+            limit =
+              if include_members_only
+                {
+                  terms: {
+                    _name: context.name(:enabled_or_private),
+                    "#{feature}_access_level" => [::ProjectFeature::ENABLED, ::ProjectFeature::PRIVATE]
+                  }
+                }
+              else
+                {
+                  term: {
+                    "#{feature}_access_level" => {
+                      _name: context.name(:enabled),
+                      value: ::ProjectFeature::ENABLED
+                    }
+                  }
+                }
+              end
 
-          { bool: { filter: [condition, limit] } }
+            {
+              bool: {
+                _name: context.name,
+                filter: [condition, limit]
+              }
+            }
+          end
         end
       end
 

@@ -6,6 +6,4 @@
 #js-group-audit-events-app{ data: { form_path: group_audit_events_path(@group),
   events: @events.to_json,
   is_last_page: @is_last_page.to_json,
-  filter_qa_selector: 'group_audit_log_filter',
-  table_qa_selector: 'group_audit_log_table',
   filter_token_options: group_audit_event_tokens(@group.id).to_json } }

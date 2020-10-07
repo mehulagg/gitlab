@@ -26,7 +26,7 @@
                 Elasticsearch indexing
               - unless Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text.text-muted
-                  = _('Please create an index before enabling indexing')
+                  = _('An empty index will be created if one does not already exist')
               - if Gitlab::CurrentSettings.elasticsearch_indexing?
                 .form-text
                   = link_to _('Index all projects'), admin_elasticsearch_enqueue_index_path,

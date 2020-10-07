@@ -7,7 +7,7 @@ module Gitlab
         def wrap_errors(**args)
           yield
         rescue Aws::Errors::ServiceError => e
-          raise Error, bucket: bucket_name, error: e, **args
+          raise Error.new(bucket: bucket_name, error: e, **args)
         end
       end
     end

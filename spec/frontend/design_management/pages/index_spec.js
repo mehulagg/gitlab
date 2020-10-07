@@ -264,10 +264,10 @@ describe('Design management index page', () => {
 
   describe('handling design collection copy state', () => {
     it.each`
-      copyState    | isRendered | description
-      ${'COPYING'} | ${true}    | ${'renders'}
-      ${'READY'}   | ${false}   | ${'does not render'}
-      ${'ERROR'}   | ${false}   | ${'does not render'}
+      copyState        | isRendered | description
+      ${'IN_PROGRESS'} | ${true}    | ${'renders'}
+      ${'READY'}       | ${false}   | ${'does not render'}
+      ${'ERROR'}       | ${false}   | ${'does not render'}
     `(
       '$description the copying message if design collection copyState is $copyState',
       ({ copyState, isRendered }) => {
@@ -653,7 +653,6 @@ describe('Design management index page', () => {
     it('ensures fullscreen layout is not applied', () => {
       createComponent(true);
 
-      wrapper.vm.$router.push('/');
       expect(mockPageEl.classList.remove).toHaveBeenCalledTimes(1);
       expect(mockPageEl.classList.remove).toHaveBeenCalledWith(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
     });

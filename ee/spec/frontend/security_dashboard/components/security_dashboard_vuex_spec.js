@@ -21,7 +21,6 @@ const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
 const vulnerabilitiesCountEndpoint = `${TEST_HOST}/vulnerabilities_summary`;
 const vulnerabilitiesHistoryEndpoint = `${TEST_HOST}/vulnerabilities_history`;
 const vulnerableProjectsEndpoint = `${TEST_HOST}/vulnerable_projects`;
-const vulnerabilityFeedbackHelpPath = `${TEST_HOST}/vulnerabilities_feedback_help`;
 
 jest.mock('~/lib/utils/url_utility', () => ({
   getParameterValues: jest.fn().mockReturnValue([]),
@@ -53,7 +52,6 @@ describe('Security Dashboard component', () => {
         vulnerabilitiesHistoryEndpoint,
         vulnerableProjectsEndpoint,
         pipelineId,
-        vulnerabilityFeedbackHelpPath,
         ...props,
       },
     });
@@ -127,12 +125,6 @@ describe('Security Dashboard component', () => {
       expect(wrapper.find(IssueModal).exists()).toBe(true);
     });
 
-    it('passes the "vulnerabilityFeedbackHelpPath" prop to the issue modal', () => {
-      expect(wrapper.find(IssueModal).props('vulnerabilityFeedbackHelpPath')).toBe(
-        vulnerabilityFeedbackHelpPath,
-      );
-    });
-
     it.each`
       emittedModalEvent                      | eventPayload | expectedDispatchedAction                        | expectedActionPayload
       ${'addDismissalComment'}               | ${'foo'}     | ${'vulnerabilities/addDismissalComment'}        | ${{ comment: 'foo', vulnerability: 'bar' }}
@@ -166,7 +158,7 @@ describe('Security Dashboard component', () => {
   describe('issue modal', () => {
     it.each`
       givenState                                                                                   | expectedProps
-      ${{ modal: { vulnerability: 'foo' } }}                                                       | ${{ modal: { vulnerability: 'foo' }, vulnerabilityFeedbackHelpPath, canCreateIssue: false, canCreateMergeRequest: false, canDismissVulnerability: false, isCreatingIssue: false, isDismissingVulnerability: false, isCreatingMergeRequest: false }}
+      ${{ modal: { vulnerability: 'foo' } }}                                                       | ${{ modal: { vulnerability: 'foo' }, canCreateIssue: false, canCreateMergeRequest: false, canDismissVulnerability: false, isCreatingIssue: false, isDismissingVulnerability: false, isCreatingMergeRequest: false }}
       ${{ modal: { vulnerability: { create_vulnerability_feedback_issue_path: 'foo' } } }}         | ${expect.objectContaining({ canCreateIssue: true })}
       ${{ modal: { vulnerability: { create_vulnerability_feedback_merge_request_path: 'foo' } } }} | ${expect.objectContaining({ canCreateMergeRequest: true })}
       ${{ modal: { vulnerability: { create_vulnerability_feedback_dismissal_path: 'foo' } } }}     | ${expect.objectContaining({ canDismissVulnerability: true })}

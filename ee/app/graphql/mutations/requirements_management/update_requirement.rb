@@ -2,20 +2,10 @@
 
 module Mutations
   module RequirementsManagement
-    class UpdateRequirement < BaseMutation
-      include ResolvesProject
-
+    class UpdateRequirement < BaseRequirement
       graphql_name 'UpdateRequirement'
 
       authorize :update_requirement
-
-      field :requirement, Types::RequirementsManagement::RequirementType,
-            null: true,
-            description: 'The requirement after mutation'
-
-      argument :title, GraphQL::STRING_TYPE,
-               required: false,
-               description: 'Title of the requirement'
 
       argument :state, Types::RequirementsManagement::RequirementStateEnum,
                required: false,
@@ -25,18 +15,15 @@ module Mutations
                required: true,
                description: 'The iid of the requirement to update'
 
-      argument :project_path, GraphQL::ID_TYPE,
-               required: true,
-               description: 'The project full path the requirement is associated with'
-
       argument :last_test_report_state, Types::RequirementsManagement::TestReportStateEnum,
                required: false,
                description: 'Creates a test report for the requirement with the given state'
 
       def ready?(**args)
-        if args.values_at(:title, :state, :last_test_report_state).compact.blank?
+        update_args = [:title, :state, :last_test_report_state, :description]
+        if args.values_at(*update_args).compact.blank?
           raise Gitlab::Graphql::Errors::ArgumentError,
-            'title, state or last_test_report_state argument is required'
+            "At least one of #{update_args.join(', ')} is required"
         end
 
         super

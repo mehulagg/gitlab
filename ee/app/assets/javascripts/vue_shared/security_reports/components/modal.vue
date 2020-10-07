@@ -27,11 +27,6 @@ export default {
       type: Object,
       required: true,
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
     canCreateIssue: {
       type: Boolean,
       required: false,
@@ -205,7 +200,6 @@ export default {
         :remediation="remediation"
         :has-mr="vulnerability.hasMergeRequest"
         :has-download="canDownloadPatchForThisVulnerability"
-        :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
       />
 
       <div v-if="showFeedbackNotes" class="card my-4">

@@ -9,8 +9,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3672) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.4.
 
-## Overview
-
 Your application's Docker image may itself be based on Docker images that contain known
 vulnerabilities. By including an extra job in your pipeline that scans for those vulnerabilities and
 displays them in a merge request, you can use GitLab to audit your Docker-based apps.
@@ -19,7 +17,6 @@ By default, container scanning in GitLab is based on [Clair](https://github.com/
 containers. [GitLab's Klar analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/klar/)
 scans the containers and serves as a wrapper for Clair.
 
-NOTE: **Note:**
 To integrate security scanners other than Clair and Klar into GitLab, see
 [Security scanner integration](../../../development/integrations/secure.md).
 
@@ -46,7 +43,7 @@ To enable container scanning in your pipeline, you need the following:
   or [`kubernetes`](https://docs.gitlab.com/runner/install/kubernetes.html) executor.
 - Docker `18.09.03` or higher installed on the same computer as the runner. If you're using the
   shared runners on GitLab.com, then this is already the case.
-- [Build and push](../../packages/container_registry/index.md#container-registry-examples-with-gitlab-cicd)
+- [Build and push](../../packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd)
   your Docker image to your project's container registry. The name of the Docker image should use
   the following [predefined environment variables](../../../ci/variables/predefined_variables.md):
 
@@ -219,8 +216,7 @@ To use container scanning in an offline environment, you need:
 - GitLab Runner with the [`docker` or `kubernetes` executor](#requirements).
 - To configure a local Docker container registry with copies of the container scanning [analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/klar) images, found in the [container scanning container registry](https://gitlab.com/gitlab-org/security-products/analyzers/klar/container_registry).
 
-NOTE: **Note:**
-GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
+Note that GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
 meaning the runner tries to pull Docker images from the GitLab container registry even if a local
 copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
 in an offline environment if you prefer using only locally available Docker images. However, we
@@ -433,3 +429,7 @@ This is a result of a bug in Docker which is now [fixed](https://github.com/cont
 To prevent the error, ensure the Docker version that the runner is using is
 `18.09.03` or higher. For more information, see
 [issue #10241](https://gitlab.com/gitlab-org/gitlab/-/issues/10241 "Investigate why Container Scanning is not working with NFS mounts").
+
+### Getting warning message `gl-container-scanning-report.json: no matching files`
+
+For information on this, see the [general Application Security troubleshooting section](../../../ci/pipelines/job_artifacts.md#error-message-no-files-to-upload).

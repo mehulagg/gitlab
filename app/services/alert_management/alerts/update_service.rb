@@ -112,7 +112,7 @@ module AlertManagement
       def filter_status
         return unless params[:status]
 
-        status_event = AlertManagement::Alert::STATUS_EVENTS[status_key]
+        status_event = alert.status_event_for(status_key)
 
         unless status_event
           param_errors << _('Invalid status')
@@ -144,7 +144,7 @@ module AlertManagement
 
       def filter_duplicate
         # Only need to check if changing to an open status
-        return unless params[:status_event] && AlertManagement::Alert::OPEN_STATUSES.include?(status_key)
+        return unless params[:status_event] && AlertManagement::Alert.open_status?(status_key)
 
         param_errors << unresolved_alert_error if duplicate_alert?
       end

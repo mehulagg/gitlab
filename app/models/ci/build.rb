@@ -327,6 +327,8 @@ module Ci
 
       after_transition any => [:success, :failed, :canceled] do |build|
         build.run_after_commit do
+          build.run_status_commit_hooks!
+
           BuildFinishedWorker.perform_async(id)
         end
       end
@@ -780,6 +782,11 @@ module Ci
         end
     end
 
+    def has_expired_locked_archive_artifacts?
+      locked_artifacts? &&
+        artifacts_expire_at.present? && artifacts_expire_at < Time.current
+    end
+
     def has_expiring_archive_artifacts?
       has_expiring_artifacts? && job_artifacts_archive.present?
     end
@@ -963,7 +970,23 @@ module Ci
       pending_state.try(:delete)
     end
 
+    def run_on_status_commit(&block)
+      status_commit_hooks.push(block)
+    end
+
+    protected
+
+    def run_status_commit_hooks!
+      status_commit_hooks.reverse_each do |hook|
+        instance_eval(&hook)
+      end
+    end
+
     private
+
+    def status_commit_hooks
+      @status_commit_hooks ||= []
+    end
 
     def auto_retry
       strong_memoize(:auto_retry) do

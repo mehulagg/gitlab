@@ -31,7 +31,7 @@ More useful links:
 - The usage data is primarily composed of row counts for different tables in the instance’s database. By comparing these counts month over month (or week over week), we can get a rough sense for how an instance is using the different features within the product. In addition to counts, other facts
     that help us classify and understand GitLab installations are collected.
 - Usage ping is important to GitLab as we use it to calculate our Stage Monthly Active Users (SMAU) which helps us measure the success of our stages and features.
-- Once usage ping is enabled, GitLab will gather data from the other instances and will be able to show usage statistics of your instance to your users.
+- While usage ping is enabled, GitLab will gather data from the other instances and will be able to show usage statistics of your instance to your users.
 
 ### Why should we enable Usage Ping?
 
@@ -221,6 +221,25 @@ Examples:
 
 ```ruby
 sum(JiraImportState.finished, :imported_issues_count)
+```
+
+### Grouping & Batch Operations
+
+The `count`, `distinct_count`, and `sum` batch counters can accept an `ActiveRecord::Relation`
+object, which groups by a specified column. With a grouped relation, the methods do batch counting, 
+handle errors, and returns a hash table of key-value pairs.
+
+Examples:
+
+```ruby
+count(Namespace.group(:type))
+# returns => {nil=>179, "Group"=>54}
+
+distinct_count(Project.group(:visibility_level), :creator_id)
+# returns => {0=>1, 10=>1, 20=>11}
+
+sum(Issue.group(:state_id), :weight))
+# returns => {1=>3542, 2=>6820}
 ```
 
 ### Redis Counters
@@ -431,15 +450,6 @@ Recommendations:
 All events added in [`known_events.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml) are automatically added to usage data generation under the `redis_hll_counters` key. This column is stored in [version-app as a JSON](https://gitlab.com/gitlab-services/version-gitlab-com/-/blob/master/db/schema.rb#L209).
 For each event we add metrics for the weekly and monthly time frames, and totals for each where applicable:
 
-- `#{event_name}_weekly` data for 7 days for daily [aggregation](#adding-new-events) events and data for last complete week for weekly [aggregation](#adding-new-events) events.
-- `#{event_name}_monthly` data for 28 days for daily [aggregation](#adding-new-events) events and data for last 4 complete weeks for weekly [aggregation](#adding-new-events) events.
-- `#{category}_total_unique_counts_weekly` total unique counts for events in same category for last 7 days or last complete week, if events are in the same Redis slot and if we have more than one metric.
-- `#{event_name}_weekly` - Data for 7 days for daily [aggregation](#adding-new-events) events and data for the last complete week for weekly [aggregation](#adding-new-events) events.
-- `#{event_name}_monthly` - Data for 28 days for daily [aggregation](#adding-new-events) events and data for the last 4 complete weeks for weekly [aggregation](#adding-new-events) events.
-- `#{category}_total_unique_counts_weekly` - Total unique counts for events in the same category for the last 7 days or the last complete week, if events are in the same Redis slot and we have more than one metric.
-- `#{event_name}_weekly`: Data for 7 days for daily [aggregation](#adding-new-events) events and data for last complete week for weekly [aggregation](#adding-new-events) events.
-- `#{event_name}_monthly`: Data for 28 days for daily [aggregation](#adding-new-events) events and data for last 4 complete weeks for weekly [aggregation](#adding-new-events) events.
-- `#{category}_total_unique_counts_weekly` total unique counts for events in same category for last 7 days or last complete week, if events are in the same Redis slot and if we have more than one metric.
 - `#{event_name}_weekly`: Data for 7 days for daily [aggregation](#adding-new-events) events and data for the last complete week for weekly [aggregation](#adding-new-events) events.
 - `#{event_name}_monthly`: Data for 28 days for daily [aggregation](#adding-new-events) events and data for the last 4 complete weeks for weekly [aggregation](#adding-new-events) events.
 - `#{category}_total_unique_counts_weekly`: Total unique counts for events in the same category for the last 7 days or the last complete week, if events are in the same Redis slot and we have more than one metric.
@@ -640,7 +650,7 @@ build in a [downstream pipeline of the `omnibus-gitlab-mirror` project](https://
 1. In the downstream pipeline, wait for the `gitlab-docker` job to finish.
 1. Open the job logs and locate the full container name including the version. It will take the following form: `registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`.
 1. On your local machine, make sure you are logged in to the GitLab Docker registry. You can find the instructions for this in
-[Authenticating to the GitLab Container Registry](../../user/packages/container_registry/index.md#authenticating-to-the-gitlab-container-registry).
+[Authenticate to the GitLab Container Registry](../../user/packages/container_registry/index.md#authenticate-with-the-container-registry).
 1. Once logged in, download the new image via `docker pull registry.gitlab.com/gitlab-org/build/omnibus-gitlab-mirror/gitlab-ee:<VERSION>`
 1. For more information about working with and running Omnibus GitLab containers in Docker, please refer to [GitLab Docker images](https://docs.gitlab.com/omnibus/docker/README.html) in the Omnibus documentation.
 

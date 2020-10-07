@@ -13,43 +13,13 @@ RSpec.describe 'Clusters', :js do
     gitlab_sign_in(user)
   end
 
-  context 'when clusters_list_redesign feature flag is disabled' do
-    before do
-      stub_feature_flags(clusters_list_redesign: false)
-    end
-
-    context 'when user does not have a cluster and visits cluster index page' do
-      before do
-        visit project_clusters_path(project)
-      end
-
-      it 'sees empty state' do
-        expect(page).to have_link('Add Kubernetes cluster')
-        expect(page).to have_selector('.empty-state')
-      end
-    end
-
-    context 'when user has a cluster and visits cluster index page' do
-      let!(:cluster) { create(:cluster, :project, :provided_by_gcp) }
-      let(:project) { cluster.project }
-
-      before do
-        visit project_clusters_path(project)
-      end
-
-      it 'user sees a table with one cluster' do
-        expect(page).to have_selector('[data-testid="cluster_list_table"] .card-body', count: 1)
-      end
-    end
-  end
-
   context 'when user does not have a cluster and visits cluster index page' do
     before do
       visit project_clusters_path(project)
     end
 
     it 'sees empty state' do
-      expect(page).to have_link('Add Kubernetes cluster')
+      expect(page).to have_link('Integrate with a cluster certificate')
       expect(page).to have_selector('.empty-state')
     end
   end
@@ -71,7 +41,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user filled form with environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Connect existing cluster'
           fill_in 'cluster_name', with: 'staging-cluster'
           fill_in 'cluster_environment_scope', with: 'staging/*'
@@ -100,7 +70,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user updates duplicated environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Connect existing cluster'
           fill_in 'cluster_name', with: 'staging-cluster'
           fill_in 'cluster_environment_scope', with: '*'
@@ -146,7 +116,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user filled form with environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Create new cluster'
           click_link 'Google GKE'
 
@@ -191,7 +161,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user updates duplicated environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Create new cluster'
           click_link 'Google GKE'
 
@@ -244,7 +214,7 @@ RSpec.describe 'Clusters', :js do
     before do
       visit project_clusters_path(project)
 
-      click_link 'Add Kubernetes cluster'
+      click_link 'Integrate with a cluster certificate'
       click_link 'Create new cluster'
     end
 

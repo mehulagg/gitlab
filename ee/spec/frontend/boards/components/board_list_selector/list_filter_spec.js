@@ -74,7 +74,7 @@ describe('ListFilter', () => {
     });
 
     it('renders search input icons', () => {
-      expect(wrapper.find('i.fa.fa-search.dropdown-input-search').exists()).toBe(true);
+      expect(wrapper.find('.dropdown-input-search').exists()).toBe(true);
       expect(wrapper.find('.dropdown-input-clear').exists()).toBe(true);
     });
   });

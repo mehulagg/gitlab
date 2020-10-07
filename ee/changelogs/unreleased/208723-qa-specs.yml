@@ -1,0 +1,5 @@
+---
+title: Fallback to matching policies on license name
+merge_request: 43488
+author:
+type: fixed

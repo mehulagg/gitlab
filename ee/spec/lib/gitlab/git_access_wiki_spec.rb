@@ -5,22 +5,26 @@ require 'spec_helper'
 RSpec.describe Gitlab::GitAccessWiki do
   include WikiHelpers
 
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :wiki_repo) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :wiki_repo) }
+  let(:wiki) { create(:project_wiki, project: project) }
   let(:changes) { ['6f6d7e7ed 570e7b2ab refs/heads/master'] }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
 
-  let(:access) { described_class.new(user, project, 'web', authentication_abilities: authentication_abilities, redirected_path: redirected_path) }
+  let(:access) do
+    described_class.new(user, wiki, 'web',
+                        authentication_abilities: authentication_abilities,
+                        redirected_path: redirected_path)
+  end
+
+  before do
+    stub_group_wikis(true)
+  end
 
   describe 'group wiki access' do
-    let_it_be(:group, reload: true) { create(:group, :private, :wiki_repo) }
-
-    let(:access) do
-      described_class.new(user, group, 'web',
-                          authentication_abilities: authentication_abilities,
-                          redirected_path: redirected_path)
-    end
+    let_it_be(:group) { create(:group, :private, :wiki_repo) }
+    let(:wiki) { create(:group_wiki, group: group) }
 
     describe '#push_access_check' do
       subject { access.check('git-receive-pack', changes) }
@@ -68,7 +72,9 @@ RSpec.describe Gitlab::GitAccessWiki do
           end
 
           context 'when the wiki repository does not exist' do
-            let(:group) { create(:group) }
+            before do
+              allow(wiki.repository).to receive(:exists?).and_return(false)
+            end
 
             it_behaves_like 'not-found git access' do
               let(:message) { 'A repository for this group wiki does not exist yet.' }

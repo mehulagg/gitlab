@@ -55,6 +55,14 @@ RSpec.describe Note, :elastic do
     expect(described_class.elastic_search('bla-bla', options: { project_ids: :any }).records).to contain_exactly(outside_note)
   end
 
+  it "names elasticsearch queries" do
+    described_class.elastic_search('*').total_count
+
+    assert_named_queries("doc:is_a:note",
+                         "note:match:search_terms",
+                         "note:authorized")
+  end
+
   it "indexes && searches diff notes" do
     notes = []
 

@@ -2,6 +2,10 @@
 
 FactoryBot.define do
   factory :group_wiki, parent: :wiki do
-    container { association(:group) }
+    transient do
+      group { association(:group) }
+    end
+
+    container { group }
   end
 end

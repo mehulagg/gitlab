@@ -9,5 +9,9 @@ module EE
     def merge_request_supports_multiple_assignees?
       @merge_request&.allows_multiple_assignees?
     end
+
+    def merge_request_supports_multiple_reviewers?
+      @merge_request&.allows_multiple_reviewers?
+    end
   end
 end

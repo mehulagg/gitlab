@@ -1,0 +1,5 @@
+---
+title: Fix scoped labels padding
+merge_request: 44044
+author:
+type: fixed

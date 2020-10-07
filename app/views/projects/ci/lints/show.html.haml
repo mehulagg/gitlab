@@ -1,13 +1,13 @@
 - page_title _("CI Lint")
 - page_description _("Validate your GitLab CI configuration file")
 - unless Feature.enabled?(:monaco_ci, default_enabled: true)
-  - content_for :library_javascripts do
+  - content_for :page_specific_javascripts do
     = page_specific_javascript_tag('lib/ace.js')
 
 %h2.pt-3.pb-3= _("Validate your GitLab CI configuration")
 
 - if Feature.enabled?(:ci_lint_vue, @project)
-  #js-ci-lint{ data: { endpoint: project_ci_lint_path(@project) } }
+  #js-ci-lint{ data: { endpoint: project_ci_lint_path(@project), help_page_path: help_page_path('ci/lint', anchor: 'pipeline-simulation') } }
 
 - else
   .project-ci-linter

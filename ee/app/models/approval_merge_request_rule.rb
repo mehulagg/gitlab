@@ -37,7 +37,10 @@ class ApprovalMergeRequestRule < ApplicationRecord
   has_and_belongs_to_many :approved_approvers, class_name: 'User', join_table: :approval_merge_request_rules_approved_approvers
   has_one :approval_merge_request_rule_source
   has_one :approval_project_rule, through: :approval_merge_request_rule_source
+  has_one :approval_project_rule_project, through: :approval_project_rule, source: :project
   alias_method :source_rule, :approval_project_rule
+
+  before_update :compare_with_project_rule
 
   validate :validate_approval_project_rule
 
@@ -61,6 +64,11 @@ class ApprovalMergeRequestRule < ApplicationRecord
   scope :with_head_pipeline, -> { includes(merge_request: [:head_pipeline]) }
   scope :open_merge_requests, -> { merge(MergeRequest.opened) }
   scope :for_checks_that_can_be_refreshed, -> { license_compliance.open_merge_requests.with_head_pipeline }
+  scope :with_projects_that_can_override_rules, -> do
+    joins(:approval_project_rule_project)
+      .where(projects: { disable_overriding_approvers_per_merge_request: [false, nil] })
+  end
+  scope :modified_from_project_rule, -> { with_projects_that_can_override_rules.where(modified_from_project_rule: true) }
 
   def self.find_or_create_code_owner_rule(merge_request, entry)
     merge_request.approval_rules.code_owner.where(name: entry.pattern).where(section: entry.section).first_or_create do |rule|
@@ -124,6 +132,10 @@ class ApprovalMergeRequestRule < ApplicationRecord
   end
 
   private
+
+  def compare_with_project_rule
+    self.modified_from_project_rule = overridden? ? true : false
+  end
 
   def validate_approval_project_rule
     return if approval_project_rule.blank?

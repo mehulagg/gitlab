@@ -1,4 +1,5 @@
 <script>
+import { mapState } from 'vuex';
 import { MEMBER_TYPES } from '../constants';
 
 export default {
@@ -10,6 +11,7 @@ export default {
     },
   },
   computed: {
+    ...mapState(['sourceId', 'currentUserId']),
     isGroup() {
       return Boolean(this.member.sharedWithGroup);
     },
@@ -30,10 +32,24 @@ export default {
 
       return MEMBER_TYPES.user;
     },
+    isDirectMember() {
+      return this.member.source?.id === this.sourceId;
+    },
+    isCurrentUser() {
+      return this.member.user?.id === this.currentUserId;
+    },
+    canRemove() {
+      return this.isDirectMember && this.member.canRemove;
+    },
   },
   render() {
     return this.$scopedSlots.default({
       memberType: this.memberType,
+      isDirectMember: this.isDirectMember,
+      isCurrentUser: this.isCurrentUser,
+      permissions: {
+        canRemove: this.canRemove,
+      },
     });
   },
 };

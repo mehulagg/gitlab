@@ -202,7 +202,7 @@ input[type='checkbox']:hover {
   .search-icon {
     position: absolute;
     left: 10px;
-    top: 10px;
+    top: 9px;
     color: $gray-darkest;
     pointer-events: none;
   }
@@ -279,6 +279,10 @@ input[type='checkbox']:hover {
       width: auto;
     }
   }
+}
+
+.ref-truncated {
+  @include str-truncated(10em);
 }
 
 // Disable webkit input icons, link to solution: https://stackoverflow.com/questions/9421551/how-do-i-remove-all-default-webkit-search-field-styling

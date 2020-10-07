@@ -1,7 +1,0 @@
----
-name: feature_flags_legacy_read_only_override
-introduced_by_url: 
-rollout_issue_url: 
-group: 
-type: development
-default_enabled: false

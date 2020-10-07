@@ -142,6 +142,7 @@ Facebook
 failover
 failovers
 failsafe
+Falco
 fastlane
 favicon
 Filebeat
@@ -220,6 +221,7 @@ Kibana
 Kinesis
 Knative
 Kramdown
+Kubecost
 kubectl
 Kubernetes
 Kubesec
@@ -275,6 +277,7 @@ mockups
 ModSecurity
 monorepo
 monorepos
+multiline
 mutex
 nameserver
 nameservers
@@ -512,6 +515,9 @@ unprioritized
 unprotect
 unprotected
 unprotects
+unprovision
+unprovisioned
+unprovisions
 unpublish
 unpublished
 unpublishes

@@ -81,7 +81,7 @@ RSpec.describe 'Updating a Requirement' do
         let(:attributes) { {} }
 
         it_behaves_like 'a mutation that returns top-level errors',
-          errors: ['title, state or last_test_report_state argument is required']
+          errors: ['At least one of title, state, last_test_report_state, description is required']
       end
     end
   end

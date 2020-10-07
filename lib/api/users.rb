@@ -348,7 +348,7 @@ module API
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      desc 'Get the GPG keys of a specified user. Available only for admins.' do
+      desc 'Get the GPG keys of a specified user.' do
         detail 'This feature was added in GitLab 10.0'
         success Entities::GpgKey
       end
@@ -358,12 +358,30 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       get ':id/gpg_keys' do
-        authenticated_as_admin!
-
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
 
         present paginate(user.gpg_keys), with: Entities::GpgKey
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      desc 'Get a specific GPG key for a given user.' do
+        detail 'This feature was added in GitLab 13.5'
+        success Entities::GpgKey
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+        requires :key_id, type: Integer, desc: 'The ID of the GPG key'
+      end
+      # rubocop: disable CodeReuse/ActiveRecord
+      get ':id/gpg_keys/:key_id' do
+        user = User.find_by(id: params[:id])
+        not_found!('User') unless user
+
+        key = user.gpg_keys.find_by(id: params[:key_id])
+        not_found!('GPG Key') unless key
+
+        present key, with: Entities::GpgKey
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

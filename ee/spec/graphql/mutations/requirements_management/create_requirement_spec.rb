@@ -18,7 +18,8 @@ RSpec.describe Mutations::RequirementsManagement::CreateRequirement do
     subject do
       mutation.resolve(
         project_path: project.full_path,
-        title: 'foo'
+        title: 'foo',
+        description: 'some desc'
       )
     end
 
@@ -36,6 +37,7 @@ RSpec.describe Mutations::RequirementsManagement::CreateRequirement do
 
         it 'creates new requirement' do
           expect(subject[:requirement][:title]).to eq('foo')
+          expect(subject[:requirement][:description]).to eq('some desc')
           expect(subject[:errors]).to be_empty
         end
       end

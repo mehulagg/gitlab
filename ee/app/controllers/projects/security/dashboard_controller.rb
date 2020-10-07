@@ -8,8 +8,7 @@ module Projects
       alias_method :vulnerable, :project
 
       before_action only: [:index] do
-        push_frontend_feature_flag(:hide_dismissed_vulnerabilities)
-        push_frontend_feature_flag(:scanner_alerts, default_enabled: true)
+        push_frontend_feature_flag(:security_auto_fix, project, default_enabled: false)
       end
     end
   end

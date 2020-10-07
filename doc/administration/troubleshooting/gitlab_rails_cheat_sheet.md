@@ -411,6 +411,9 @@ user.skip_reconfirmation!
 # Active users on the instance, now
 User.active.count
 
+# Users taking a seat on the instance
+License.current.current_active_users_count
+
 # The historical max on the instance as of the past year
 ::HistoricalData.max_historical_user_count
 ```
@@ -525,8 +528,8 @@ conflicting_permanent_redirects.destroy_all
 ### Close a merge request properly (if merged but still marked as open)
 
 ```ruby
-p = Project.find_by_full_path('')
-m = project.merge_requests.find_by(iid: )
+p = Project.find_by_full_path('<full/path/to/project>')
+m = p.merge_requests.find_by(iid: <iid>)
 u = User.find_by_username('')
 MergeRequests::PostMergeService.new(p, u).execute(m)
 ```

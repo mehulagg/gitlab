@@ -323,6 +323,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: cronjob:remove_unaccepted_member_invites
+  :feature_category: :authentication_and_authorization
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: cronjob:remove_unreferenced_lfs_objects
   :feature_category: :git_lfs
   :has_external_dependencies:
@@ -419,6 +427,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: deployment:deployments_execute_hooks
+  :feature_category: :continuous_delivery
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 3
+  :idempotent:
+  :tags: []
 - :name: deployment:deployments_finished
   :feature_category: :continuous_delivery
   :has_external_dependencies:
@@ -435,6 +451,14 @@
   :weight: 3
   :idempotent:
   :tags: []
+- :name: deployment:deployments_link_merge_request
+  :feature_category: :continuous_delivery
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 3
+  :idempotent: true
+  :tags: []
 - :name: deployment:deployments_success
   :feature_category: :continuous_delivery
   :has_external_dependencies:
@@ -442,6 +466,14 @@
   :resource_boundary: :cpu
   :weight: 3
   :idempotent:
+  :tags: []
+- :name: deployment:deployments_update_environment
+  :feature_category: :continuous_delivery
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 3
+  :idempotent: true
   :tags: []
 - :name: gcp_cluster:cluster_configure_istio
   :feature_category: :kubernetes_management
@@ -914,7 +946,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_background:ci_build_report_result
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -922,7 +955,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_background:ci_build_trace_chunk_flush
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1002,7 +1036,8 @@
   :resource_boundary: :unknown
   :weight: 3
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_default:build_trace_sections
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1010,7 +1045,8 @@
   :resource_boundary: :unknown
   :weight: 3
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pipeline_default:ci_create_cross_project_pipeline
   :feature_category: :continuous_integration
   :has_external_dependencies:
@@ -1267,7 +1303,8 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: create_commit_signature
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -1332,6 +1369,14 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: design_management_copy_design_collection
+  :feature_category: :design_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: design_management_new_version
   :feature_category: :design_management
   :has_external_dependencies:
@@ -1379,7 +1424,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: export_csv
   :feature_category: :issue_tracking
   :has_external_dependencies:
@@ -1443,7 +1489,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: group_export
   :feature_category: :importers
   :has_external_dependencies:
@@ -1540,6 +1587,14 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: metrics_dashboard_sync_dashboards
+  :feature_category: :metrics
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: migrate_external_diffs
   :feature_category: :source_code_management
   :has_external_dependencies:
@@ -1587,7 +1642,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pages_domain_ssl_renewal
   :feature_category: :pages
   :has_external_dependencies:
@@ -1595,7 +1651,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pages_domain_verification
   :feature_category: :pages
   :has_external_dependencies:
@@ -1603,7 +1660,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: pages_remove
   :feature_category: :pages
   :has_external_dependencies:
@@ -1675,7 +1733,8 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
-  :tags: []
+  :tags:
+  - :requires_disk_io
 - :name: project_export
   :feature_category: :importers
   :has_external_dependencies:
@@ -1709,6 +1768,30 @@
   :idempotent: true
   :tags: []
 - :name: propagate_integration
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: propagate_integration_group
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: propagate_integration_inherit
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: propagate_integration_project
   :feature_category: :integrations
   :has_external_dependencies:
   :urgency: :low
@@ -1867,6 +1950,14 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent:
+  :tags: []
+- :name: web_hooks_destroy
+  :feature_category: :integrations
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: x509_certificate_revoke
   :feature_category: :source_code_management
