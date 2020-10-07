@@ -54,6 +54,16 @@ export const getMonthNames = abbreviated => {
   ];
 };
 
+/**
+ * Returns the i18n month name from a given date
+ * @param  {String} dateTime where month is extracted from
+ * @return {String} the i18n month name
+ */
+export function formatDateAsMonth(dateTime) {
+  const month = new Date(dateTime).getMonth();
+  return getMonthNames(true)[month];
+}
+
 export const pad = (val, len = 2) => `0${val}`.slice(-len);
 
 /**

@@ -1,0 +1,30 @@
+query issuesAndMergeRequests($first: Int, $afterIssue: String, $afterMergeRequest: String) {
+  issues: instanceStatisticsMeasurements(identifier: ISSUES, first: $first, after: $afterIssue) {
+    nodes {
+      count
+      recordedAt
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+  }
+  mergeRequests: instanceStatisticsMeasurements(
+    identifier: MERGE_REQUESTS
+    first: $first
+    after: $afterMergeRequest
+  ) {
+    nodes {
+      count
+      recordedAt
+    }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+  }
+}
