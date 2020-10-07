@@ -8,6 +8,8 @@ module Types
 
     field_class Types::BaseField
 
+    HIGH_COMPLEXITY = 10
+
     # All graphql fields exposing an id, should expose a global id.
     def id
       GitlabSchema.id_from_object(object)
