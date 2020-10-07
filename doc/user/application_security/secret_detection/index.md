@@ -191,7 +191,7 @@ For details on saving and transporting Docker images as a file, see Docker's doc
 [`docker save`](https://docs.docker.com/engine/reference/commandline/save/), [`docker load`](https://docs.docker.com/engine/reference/commandline/load/),
 [`docker export`](https://docs.docker.com/engine/reference/commandline/export/), and [`docker import`](https://docs.docker.com/engine/reference/commandline/import/).
 
-#### If support for Custom CAs are needed
+#### If support for Custom Certificate Authorities are needed
 
 Support for custom certificate authorities was introduced in the following versions.
 
