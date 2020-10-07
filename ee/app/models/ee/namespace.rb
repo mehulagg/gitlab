@@ -209,8 +209,8 @@ module EE
       strong_memoize(:repository_size_excess_project_count) do
         namespace_size_limit = actual_size_limit
 
-        count = all_projects.with_total_repository_size_greater_than_project_limit.count
-        count += all_projects.with_total_repository_size_greater_than(namespace_size_limit).count if namespace_size_limit.to_i > 0
+        count = projects_for_repository_size_excess.count
+        count += projects_for_repository_size_excess(namespace_size_limit).count if namespace_size_limit.to_i > 0
         count
       end
     end
@@ -446,12 +446,7 @@ module EE
     end
 
     def total_repository_size_excess_calculation(repository_size_limit, project_level: true)
-      relation = if project_level
-                   all_projects.with_total_repository_size_greater_than_project_limit
-                 else
-                   all_projects.with_total_repository_size_greater_than(repository_size_limit)
-                 end
-
+      relation = projects_for_repository_size_excess((repository_size_limit unless project_level))
       relation.pluck(total_repository_size_arel(repository_size_limit)).first || 0 # rubocop:disable Rails/Pick
     end
 
@@ -460,6 +455,18 @@ module EE
       values = arel_table[:repository_size] + arel_table[:lfs_objects_size]
       values -= limit if limit
       values.sum
+    end
+
+    def projects_for_repository_size_excess(limit = nil)
+      if limit
+        all_projects
+          .with_total_repository_size_greater_than(limit)
+          .without_repository_size_limit
+      else
+        all_projects
+          .with_total_repository_size_greater_than(::Project.arel_table[:repository_size_limit])
+          .without_unlimited_repository_size_limit
+      end
     end
   end
 end
