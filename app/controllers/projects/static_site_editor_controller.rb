@@ -14,6 +14,8 @@ class Projects::StaticSiteEditorController < Projects::ApplicationController
   end
 
   def show
+    Gitlab::UsageDataCounters::StaticSiteEditorCounter.increment_views_count
+
     service_response = ::StaticSiteEditor::ConfigService.new(
       container: project,
       current_user: current_user,
