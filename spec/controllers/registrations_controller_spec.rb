@@ -83,6 +83,8 @@ RSpec.describe RegistrationsController do
     let(:base_user_params) { { name: 'new_user', username: 'new_username', email: 'new@user.com', password: 'Any_password' } }
     let(:user_params) { { user: base_user_params } }
 
+    subject { post(:create, params: user_params) }
+
     context '`blocked_pending_approval` state' do
       context 'when the feature is enabled' do
         before do
@@ -95,21 +97,21 @@ RSpec.describe RegistrationsController do
           end
 
           it 'signs up the user in `blocked_pending_approval` state' do
-            post(:create, params: user_params)
-
+            subject
             created_user = User.find_by(email: 'new@user.com')
+
             expect(created_user).to be_present
             expect(created_user.blocked_pending_approval?).to eq(true)
           end
 
           it 'does not log in the user after sign up' do
-            post(:create, params: user_params)
+            subject
 
-            expect(subject.current_user).to be_nil
+            expect(controller.current_user).to be_nil
           end
 
           it 'shows flash message after signing up' do
-            post(:create, params: user_params)
+            subject
 
             expect(response).to redirect_to(new_user_session_path(anchor: 'login-pane'))
             expect(flash[:notice])
@@ -117,37 +119,14 @@ RSpec.describe RegistrationsController do
           end
 
           context 'email confirmation' do
-            around do |example|
-              perform_enqueued_jobs do
-                example.run
-              end
-            end
-
             context 'when `send_user_confirmation_email` is true' do
               before do
                 stub_application_setting(send_user_confirmation_email: true)
               end
 
-              context 'when soft email confirmation is not enabled' do
-                before do
-                  stub_feature_flags(soft_email_confirmation: false)
-                  allow(User).to receive(:allow_unconfirmed_access_for).and_return 0
-                end
-
-                it 'does not send a confirmation email' do
-                  expect { post(:create, params: user_params) }.not_to change { ActionMailer::Base.deliveries.size }
-                end
-              end
-
-              context 'when soft email confirmation is enabled' do
-                before do
-                  stub_feature_flags(soft_email_confirmation: true)
-                  allow(User).to receive(:allow_unconfirmed_access_for).and_return 2.days
-                end
-
-                it 'does not send a confirmation email' do
-                  expect { post(:create, params: user_params) }.not_to change { ActionMailer::Base.deliveries.size }
-                end
+              it 'does not send a confirmation email' do
+                expect { subject }
+                  .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
               end
             end
           end
@@ -159,11 +138,28 @@ RSpec.describe RegistrationsController do
           end
 
           it 'signs up the user in `active` state' do
-            post(:create, params: user_params)
-
+            subject
             created_user = User.find_by(email: 'new@user.com')
+
             expect(created_user).to be_present
             expect(created_user.active?).to eq(true)
+          end
+
+          it 'does not show any flash message after signing up' do
+            expect(flash[:notice]).to be_nil
+          end
+
+          context 'email confirmation' do
+            context 'when `send_user_confirmation_email` is true' do
+              before do
+                stub_application_setting(send_user_confirmation_email: true)
+              end
+
+              it 'sends a confirmation email' do
+                expect { subject }
+                  .to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+              end
+            end
           end
         end
       end
@@ -179,7 +175,7 @@ RSpec.describe RegistrationsController do
           end
 
           it 'signs up the user in `active` state' do
-            post(:create, params: user_params)
+            subject
 
             created_user = User.find_by(email: 'new@user.com')
             expect(created_user).to be_present
@@ -190,18 +186,12 @@ RSpec.describe RegistrationsController do
     end
 
     context 'email confirmation' do
-      around do |example|
-        perform_enqueued_jobs do
-          example.run
-        end
-      end
-
       context 'when send_user_confirmation_email is false' do
         it 'signs the user in' do
           stub_application_setting(send_user_confirmation_email: false)
 
-          expect { post(:create, params: user_params) }.not_to change { ActionMailer::Base.deliveries.size }
-          expect(subject.current_user).not_to be_nil
+          expect { subject }.not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+          expect(controller.current_user).not_to be_nil
         end
       end
 
@@ -217,10 +207,8 @@ RSpec.describe RegistrationsController do
           end
 
           it 'does not authenticate the user and sends a confirmation email' do
-            post(:create, params: user_params)
-
-            expect(ActionMailer::Base.deliveries.last.to.first).to eq(user_params[:user][:email])
-            expect(subject.current_user).to be_nil
+            expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            expect(controller.current_user).to be_nil
           end
         end
 
@@ -231,9 +219,8 @@ RSpec.describe RegistrationsController do
           end
 
           it 'authenticates the user and sends a confirmation email' do
-            post(:create, params: user_params)
-
-            expect(ActionMailer::Base.deliveries.last.to.first).to eq(user_params[:user][:email])
+            expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            expect(controller.current_user).to be_present
             expect(response).to redirect_to(users_sign_up_welcome_path)
           end
         end
@@ -243,7 +230,7 @@ RSpec.describe RegistrationsController do
         it 'redirects to sign_in' do
           stub_application_setting(signup_enabled: false)
 
-          expect { post(:create, params: user_params) }.not_to change(User, :count)
+          expect { subject }.not_to change(User, :count)
           expect(response).to redirect_to(new_user_session_path)
         end
       end
@@ -264,14 +251,14 @@ RSpec.describe RegistrationsController do
       it 'displays an error when the reCAPTCHA is not solved' do
         allow_any_instance_of(described_class).to receive(:verify_recaptcha).and_return(false)
 
-        post(:create, params: user_params)
+        subject
 
         expect(response).to render_template(:new)
         expect(flash[:alert]).to eq(_('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.'))
       end
 
       it 'redirects to the welcome page when the reCAPTCHA is solved' do
-        post(:create, params: user_params)
+        subject
 
         expect(response).to redirect_to(users_sign_up_welcome_path)
       end
@@ -370,7 +357,7 @@ RSpec.describe RegistrationsController do
       end
 
       it 'redirects back with a notice when the checkbox was not checked' do
-        post :create, params: user_params
+        subject
 
         expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
       end
@@ -378,8 +365,8 @@ RSpec.describe RegistrationsController do
       it 'creates the user with agreement when terms are accepted' do
         post :create, params: user_params.merge(terms_opt_in: '1')
 
-        expect(subject.current_user).to be_present
-        expect(subject.current_user.terms_accepted?).to be(true)
+        expect(controller.current_user).to be_present
+        expect(controller.current_user.terms_accepted?).to be(true)
       end
 
       context 'when experiment terms_opt_in is enabled' do
@@ -393,10 +380,10 @@ RSpec.describe RegistrationsController do
           end
 
           it 'creates the user with accepted terms' do
-            post :create, params: user_params
+            subject
 
-            expect(subject.current_user).to be_present
-            expect(subject.current_user.terms_accepted?).to be(true)
+            expect(controller.current_user).to be_present
+            expect(controller.current_user.terms_accepted?).to be(true)
           end
         end
 
@@ -406,7 +393,7 @@ RSpec.describe RegistrationsController do
           end
 
           it 'creates the user without accepted terms' do
-            post :create, params: user_params
+            subject
 
             expect(flash[:alert]).to eq(_('You must accept our Terms of Service and privacy policy in order to register an account'))
           end
@@ -416,8 +403,6 @@ RSpec.describe RegistrationsController do
 
     describe 'tracking data' do
       context 'with sign up flow and terms_opt_in experiment being enabled' do
-        subject { post :create, params: user_params }
-
         before do
           stub_experiment(signup_flow: true, terms_opt_in: true)
         end
@@ -467,13 +452,13 @@ RSpec.describe RegistrationsController do
     it "logs a 'User Created' message" do
       expect(Gitlab::AppLogger).to receive(:info).with(/\AUser Created: username=new_username email=new@user.com.+\z/).and_call_original
 
-      post(:create, params: user_params)
+      subject
     end
 
     it 'handles when params are new_user' do
       post(:create, params: { new_user: base_user_params })
 
-      expect(subject.current_user).not_to be_nil
+      expect(controller.current_user).not_to be_nil
     end
 
     context 'with the experimental signup flow enabled and the user is part of the experimental group' do

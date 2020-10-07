@@ -28,7 +28,7 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def create
-    set_user_status
+    set_user_state
     accept_pending_invitations
 
     super do |new_user|
@@ -39,7 +39,7 @@ class RegistrationsController < Devise::RegistrationsController
     end
 
     # Devise sets a flash message on both successful & failed signups,
-    # but do not want to show such messages in case of a successful signup.
+    # but we only want to show a message if the resource is blocked by a pending approval.
     flash[:notice] = nil unless resource.blocked_pending_approval?
   rescue Gitlab::Access::AccessDeniedError
     redirect_to(new_user_session_path)
@@ -239,7 +239,7 @@ class RegistrationsController < Devise::RegistrationsController
       !helpers.in_trial_flow?
   end
 
-  def set_user_status
+  def set_user_state
     return unless Feature.enabled?(:admin_approval_for_new_user_signups)
     return unless Gitlab::CurrentSettings.require_admin_approval_after_user_signup
 
