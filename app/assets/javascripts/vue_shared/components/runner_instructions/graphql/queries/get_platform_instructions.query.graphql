@@ -1,0 +1,12 @@
+query getPlatformInstructions {
+  platform @client {
+    name
+    humanReadableName
+    architectures {
+      name
+      downloadLocation
+      installationInstructions
+      registerInstructions
+    }
+  }
+}

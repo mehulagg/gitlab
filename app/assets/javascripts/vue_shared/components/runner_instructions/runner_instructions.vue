@@ -9,8 +9,8 @@ import {
   GlDropdownItem,
   GlIcon,
 } from '@gitlab/ui';
-import { mapActions, mapState, mapGetters } from 'vuex';
 import { __, s__ } from '~/locale';
+import getPlatformInstructions from './graphql/queries/get_platform_instructions.query.graphql';
 
 export default {
   components: {
@@ -25,19 +25,31 @@ export default {
   directives: {
     GlModalDirective,
   },
+  inject: {
+    instructionsPath: {
+      default: '',
+    },
+  },
+  apollo: {
+    platforms: {
+      query: getPlatformInstructions,
+      update(data) {
+        return data.platform;
+      },
+      error() {
+        this.showAlert = true;
+      },
+    },
+  },
+  data() {
+    return {
+      showAlert: false,
+      platforms: [],
+      selectedPlatform: {},
+      selectedArchitecture: {},
+    };
+  },
   computed: {
-    ...mapState('installRunnerPopup', [
-      'availablePlatforms',
-      'instructions',
-      'selectedArchitecture',
-      'showAlert',
-    ]),
-    ...mapGetters('installRunnerPopup', [
-      'getSupportedArchitectures',
-      'instructionsEmpty',
-      'hasDownloadLocationsAvailable',
-      'getDownloadLocation',
-    ]),
     closeButton() {
       return {
         text: __('Close'),
@@ -47,17 +59,32 @@ export default {
     isArchitectureSelected() {
       return this.selectedArchitecture !== '';
     },
-  },
-  mounted() {
-    this.requestPlatforms();
+    currentArchitectures() {
+      return this.selectedPlatform.architectures;
+    },
+    installationInstructions() {
+      return Object.keys(this.selectedArchitecture).length > 0
+        ? this.selectedArchitecture.installationInstructions
+        : '';
+    },
+    registerInstructions() {
+      return Object.keys(this.selectedArchitecture).length > 0
+        ? this.selectedArchitecture.registerInstructions
+        : '';
+    },
   },
   methods: {
-    ...mapActions('installRunnerPopup', [
-      'requestPlatforms',
-      'selectPlatform',
-      'startInstructionsRequest',
-      'toggleAlert',
-    ]),
+    selectPlatform(name) {
+      this.selectedPlatform = this.platforms.find(platform => platform.name === name);
+    },
+    selectArchitecture(name) {
+      this.selectedArchitecture = this.currentArchitectures.find(
+        architecture => architecture.name === name,
+      );
+    },
+    toggleAlert(state) {
+      this.showAlert = state;
+    },
   },
   modalId: 'installation-instructions-modal',
   i18n: {
@@ -68,13 +95,14 @@ export default {
     registerRunner: s__('Runners|Register Runner'),
     method: __('Method'),
     genericError: __('An error has occurred'),
+    instructions: __('Show Runner installation instructions'),
   },
 };
 </script>
 <template>
   <div>
     <gl-button v-gl-modal-directive="$options.modalId" data-testid="show-modal-button">
-      {{ __('Show Runner installation instructions') }}
+      {{ $options.i18n.instructions }}
     </gl-button>
     <gl-modal
       :modal-id="$options.modalId"
@@ -87,49 +115,49 @@ export default {
       <h5>{{ __('Environment') }}</h5>
       <gl-button-group class="gl-mb-5">
         <gl-button
-          v-for="(platform, key) in availablePlatforms"
-          :key="key"
+          v-for="platform in platforms"
+          :key="platform.name"
           data-testid="platform-button"
-          @click="selectPlatform(key)"
+          @click="selectPlatform(platform.name)"
         >
-          {{ platform.human_readable_name }}
+          {{ platform.humanReadableName }}
         </gl-button>
       </gl-button-group>
-      <template v-if="hasDownloadLocationsAvailable">
+      <template>
         <h5>
           {{ $options.i18n.architecture }}
         </h5>
-        <gl-dropdown class="gl-mb-5" :text="selectedArchitecture">
+        <gl-dropdown class="gl-mb-5" :text="selectedArchitecture.name">
           <gl-dropdown-item
-            v-for="(architecture, index) in getSupportedArchitectures"
-            :key="index"
+            v-for="architecture in currentArchitectures"
+            :key="architecture.name"
             data-testid="architecture-dropdown-item"
-            @click="startInstructionsRequest(architecture)"
+            @click="selectArchitecture(architecture.name)"
           >
-            {{ architecture }}
+            {{ architecture.name }}
           </gl-dropdown-item>
         </gl-dropdown>
-        <div v-if="isArchitectureSelected" class="gl-display-flex gl-align-items-center gl-mb-5">
+        <div class="gl-display-flex gl-align-items-center gl-mb-5">
           <h5>{{ $options.i18n.downloadInstallBinary }}</h5>
           <gl-button
             class="gl-ml-auto"
-            :href="getDownloadLocation"
+            :href="selectedArchitecture.downloadLocation"
             data-testid="binary-download-button"
           >
             {{ $options.i18n.downloadLatestBinary }}
           </gl-button>
         </div>
       </template>
-      <template v-if="!instructionsEmpty">
+      <template>
         <div class="gl-display-flex">
           <pre class="bg-light gl-flex-fill-1" data-testid="binary-instructions">
-            {{ instructions.install.trimStart() }}
+            {{ installationInstructions }}
           </pre>
           <gl-button
             class="gl-align-self-start gl-ml-2 gl-mt-2"
             category="tertiary"
             variant="link"
-            :data-clipboard-text="instructions.install"
+            :data-clipboard-text="installationInstructions"
           >
             <gl-icon name="copy-to-clipboard" />
           </gl-button>
@@ -140,13 +168,13 @@ export default {
         <h5 class="gl-mb-5">{{ $options.i18n.method }}</h5>
         <div class="gl-display-flex">
           <pre class="bg-light gl-flex-fill-1" data-testid="runner-instructions">
-            {{ instructions.register.trim() }}
+            {{ registerInstructions }}
           </pre>
           <gl-button
             class="gl-align-self-start gl-ml-2 gl-mt-2"
             category="tertiary"
             variant="link"
-            :data-clipboard-text="instructions.register"
+            :data-clipboard-text="registerInstructions"
           >
             <gl-icon name="copy-to-clipboard" />
           </gl-button>
