@@ -53,7 +53,7 @@
             = link_to merge_request_path(merge_request), class: "has-tooltip", title: _('Cannot be merged automatically') do
               = sprite_icon('warning-solid')
         - if merge_request.assignees.any?
-          %li.d-flex
+          %li.gl-display-flex.gl-align-items-center
             = render 'shared/issuable/assignees', project: merge_request.project, issuable: merge_request
         = render 'projects/merge_requests/approvals_count', merge_request: merge_request
 
