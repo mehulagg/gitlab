@@ -220,6 +220,10 @@ module GraphqlHelpers
     end
   end
 
+  def selection_to_query(selection)
+    "query { #{selection} }"
+  end
+
   def wrap_fields(fields)
     fields = Array.wrap(fields).map do |field|
       case field
@@ -239,6 +243,10 @@ module GraphqlHelpers
     FIELDS
   end
 
+  def a_graphql_object_with(attrs)
+    a_hash_including(attrs.transform_keys { |k| GraphqlHelpers.fieldnamerize(k) })
+  end
+
   def all_graphql_fields_for(class_name, parent_types = Set.new, max_depth: 3, excluded: [])
     # pulling _all_ fields can generate a _huge_ query (like complexity 180,000),
     # and significantly increase spec runtime. so limit the depth by default
@@ -250,7 +258,7 @@ module GraphqlHelpers
     allow_high_graphql_transaction_threshold
 
     type = GitlabSchema.types[class_name.to_s]
-    return "" unless type
+    return "" unless type && type.respond_to?(:fields) # union types do not have fields
 
     # We can't guess arguments, so skip fields that require them
     skip = ->(name, field) { excluded.include?(name) || required_arguments?(field) }

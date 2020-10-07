@@ -2237,6 +2237,65 @@ type Branch {
   name: String!
 }
 
+type BuildSection {
+  """
+  End index of the section.
+  """
+  byteEnd: Int
+
+  """
+  Start index of the section.
+  """
+  byteStart: Int
+
+  """
+  The content of this section.
+  """
+  content: String
+
+  """
+  Time that the section ended.
+  """
+  dateEnd: Time
+
+  """
+  Time that the section started.
+  """
+  dateStart: Time
+
+  """
+  Name of the section.
+  """
+  name: String
+}
+
+type BuildTrace {
+  """
+  The trace as HTML.
+  """
+  html(
+    """
+    Take only the last N lines.
+    """
+    tail: Int
+  ): String
+
+  """
+  The trace as plaintext.
+  """
+  raw(
+    """
+    Take only the last N lines.
+    """
+    tail: Int
+  ): String
+
+  """
+  The sections in the trace.
+  """
+  sections: [BuildSection!]
+}
+
 """
 Represents the total number of issues and their weights for a particular day
 """
@@ -2509,6 +2568,11 @@ type CiJob {
   Schedule for the build
   """
   scheduledAt: Time
+
+  """
+  Output of the job
+  """
+  trace: BuildTrace
 }
 
 type CiJobArtifact {

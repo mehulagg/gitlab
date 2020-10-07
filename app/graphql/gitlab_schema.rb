@@ -7,6 +7,9 @@ class GitlabSchema < GraphQL::Schema
   AUTHENTICATED_COMPLEXITY = 250
   ADMIN_COMPLEXITY         = 300
 
+  # Complexity constants that types can use to categorize their fields
+  HIGH_COMPLEXITY          = 10
+
   DEFAULT_MAX_DEPTH = 15
   AUTHENTICATED_MAX_DEPTH = 20
 
