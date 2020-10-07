@@ -1,11 +1,10 @@
 <script>
-import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 export default {
   components: {
     GlDropdown,
     GlDropdownItem,
-    GlIcon,
   },
   props: {
     buttons: {
@@ -45,17 +44,16 @@ export default {
     :text="selectedButton.name"
     @click="handleClick"
   >
-    <gl-dropdown-item v-for="button in buttons" :key="button.action" @click="setButton(button)">
-      <div class="media">
-        <div>
-          <gl-icon v-if="selectedButton === button" class="gl-mr-2" name="mobile-issue-close" />
-        </div>
-        <div class="media-body" :class="{ 'prepend-left-20': selectedButton !== button }">
-          <strong>{{ button.name }}</strong>
-          <br />
-          <span>{{ button.tagline }}</span>
-        </div>
-      </div>
+    <gl-dropdown-item
+      v-for="button in buttons"
+      :key="button.action"
+      :is-checked="selectedButton === button"
+      is-check-item
+      @click="setButton(button)"
+    >
+      <strong>{{ button.name }}</strong>
+      <br />
+      <span>{{ button.tagline }}</span>
     </gl-dropdown-item>
   </gl-dropdown>
 </template>

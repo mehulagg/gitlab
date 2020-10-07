@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDropdown, GlDropdownItem, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
 
 const buttons = [
@@ -80,8 +80,7 @@ describe('Split Button', () => {
     expect(
       findDropdownItems()
         .at(0)
-        .find(GlIcon)
-        .exists(),
+        .props('isChecked'),
     ).toBe(true);
   });
 });
