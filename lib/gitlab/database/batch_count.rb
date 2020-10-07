@@ -88,6 +88,8 @@ module Gitlab
         while batch_start <= finish
           batch_relation = build_relation_batch(batch_start, batch_start + batch_size, mode)
           begin
+            batch_size = finish + 1 - batch_start if final_batch?(batch_size, batch_start, finish)
+
             results = merge_results(results, batch_relation.send(@operation, *@operation_args)) # rubocop:disable GitlabSecurity/PublicSend
             batch_start += batch_size
           rescue ActiveRecord::QueryCanceled => error
@@ -116,6 +118,10 @@ module Gitlab
       end
 
       private
+
+      def final_batch?(batch_size, batch_start, finish)
+        batch_start + batch_size >= finish
+      end
 
       def build_relation_batch(start, finish, mode)
         @relation.select(@column).public_send(mode).where(between_condition(start, finish)) # rubocop:disable GitlabSecurity/PublicSend

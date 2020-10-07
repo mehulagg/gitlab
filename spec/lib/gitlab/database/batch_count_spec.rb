@@ -130,6 +130,21 @@ RSpec.describe Gitlab::Database::BatchCount do
       expect(described_class.batch_count(model, start: model.minimum(:id), finish: model.maximum(:id))).to eq(5)
     end
 
+    it 'counts with early finish' do
+      stub_const('Gitlab::Database::BatchCounter::MIN_REQUIRED_BATCH_SIZE', 0)
+
+      expect_next_instance_of(Gitlab::Database::BatchCounter) do |batch_counter|
+        expect(batch_counter).to receive(:batch_fetch).once.and_call_original
+      end
+
+      expect(described_class.batch_count(
+        model,
+        start: model.minimum(:id),
+        finish: model.maximum(:id) - 1,
+        batch_size: model.count - 2
+      )).to eq(model.count - 1)
+    end
+
     it "defaults the batch size to #{Gitlab::Database::BatchCounter::DEFAULT_BATCH_SIZE}" do
       min_id = model.minimum(:id)
       relation = instance_double(ActiveRecord::Relation)
@@ -217,6 +232,24 @@ RSpec.describe Gitlab::Database::BatchCount do
 
     it 'counts with a start and finish' do
       expect(described_class.batch_distinct_count(model, column, start: model.minimum(column), finish: model.maximum(column))).to eq(2)
+    end
+
+    it 'counts with early finish' do
+      create(:issue)
+
+      stub_const('Gitlab::Database::BatchCounter::MIN_REQUIRED_BATCH_SIZE', 0)
+
+      expect_next_instance_of(Gitlab::Database::BatchCounter) do |batch_counter|
+        expect(batch_counter).to receive(:batch_fetch).once.and_call_original
+      end
+
+      expect(described_class.batch_distinct_count(
+        model,
+        column,
+        start: model.minimum(:id),
+        finish: model.maximum(:id) - 1,
+        batch_size: model.count - 2
+      )).to eq(2)
     end
 
     it 'counts with User min and max as start and finish' do
