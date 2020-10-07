@@ -50,7 +50,7 @@ export default {
 <template>
   <div v-if="slaFeatureAvailable">
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
-    <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt">
+    <time-ago-tooltip v-if="slaDueAt" :time="slaDueAt" class="gl-white-space-nowrap">
       <gl-icon name="timer" />
       <span>{{ displayValue }}</span>
     </time-ago-tooltip>

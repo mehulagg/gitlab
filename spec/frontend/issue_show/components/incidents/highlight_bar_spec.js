@@ -21,6 +21,11 @@ describe('Highlight Bar', () => {
       propsData: {
         alert,
       },
+      provide: {
+        fullPath: 'test',
+        iid: 1,
+        slaFeatureAvailable: true,
+      },
     });
   };
 
