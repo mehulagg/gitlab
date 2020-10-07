@@ -6,6 +6,8 @@ import {
   GlButton,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlTable,
+  GlPopover,
+  GlLink,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import DependencyLicenseLinks from './dependency_license_links.vue';
@@ -39,6 +41,8 @@ export default {
     GlButton,
     GlSkeletonLoading,
     GlTable,
+    GlPopover,
+    GlLink,
   },
   props: {
     dependencies: {
@@ -99,6 +103,29 @@ export default {
     details-td-class="pt-0"
     stacked="md"
   >
+    <template #head(location)="data">
+      {{ data.label }}
+
+      <gl-icon id="location-info" name="information" class="gl-text-blue-600" />
+      <gl-popover
+        target="location-info"
+        triggers="hover focus"
+        placement="top"
+        :title="s__('Dependencies|Location and dependency path')"
+      >
+        The component dependency path is based on the lock file. There may be several paths, in
+        these cases the longest path will be dispalyed.
+        <div class="gl-mt-4">
+          <gl-link
+            href="https://docs.gitlab.com/ee/user/application_security/dependency_list/#dependency-paths"
+            target="_blank"
+            class="font-size-inherit"
+            >Learn more about dependency path</gl-link
+          >
+        </div>
+      </gl-popover>
+    </template>
+
     <!-- toggleDetails and detailsShowing are scoped slot props provided by
       GlTable; they mutate/read the item's _showDetails property, which GlTable
       uses to show/hide the row-details slot -->
