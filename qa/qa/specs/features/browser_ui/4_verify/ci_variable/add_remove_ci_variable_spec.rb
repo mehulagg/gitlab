@@ -31,6 +31,7 @@ module QA
         Page::Project::Settings::CiVariables.perform do |ci_variable|
           ci_variable.click_edit_ci_variable
           ci_variable.click_ci_variable_delete_button
+          Support::Waiter.wait_until { ci_variable.has_content? 'There are no variables yet' }
 
           expect(ci_variable).not_to have_text('VARIABLE_KEY')
         end
