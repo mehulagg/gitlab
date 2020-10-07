@@ -521,6 +521,8 @@ RSpec.describe Gitlab::Git::DiffCollection, :seed_helper do
         end
 
         it 'prunes diffs that are quite big' do
+          allow(subject).to receive(:expand_diff?).and_return(expanded)
+
           diff = nil
 
           subject.each do |d|
