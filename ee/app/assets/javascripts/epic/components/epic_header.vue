@@ -1,4 +1,4 @@
-===[<script>
+<script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 
