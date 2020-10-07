@@ -139,17 +139,33 @@ RSpec.describe SystemHook do
       ).once
     end
 
-    it "issue_create hook" do
-      system_hook.issues_events = true
-      system_hook.save!
+    describe "issue_create hook" do
+      it "fires when enabled" do
+        issue = build(:issue, project: project)
 
-      # create(:issue, project: project)
-      Issues::CreateService.new(project, user).execute
+        allow(Issue).to receive(:new).and_return(issue)
+        system_hook.issues_events = true
+        system_hook.save!
 
-      expect(WebMock).to have_requested(:post, system_hook.url).with(
-        body: /"object_kind":"issue"/,
-        headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'System Hook' }
-      )
+        Issues::CreateService.new(project, user).execute
+
+        expect(WebMock).to have_requested(:post, system_hook.url).with(
+          body: /"object_kind":"issue".*"action":"create"/,
+          headers: { 'Content-Type' => 'application/json', 'X-Gitlab-Event' => 'System Hook' }
+        )
+      end
+
+      it "doesn't fire when disabled" do
+        issue = build(:issue, project: project)
+
+        allow(Issue).to receive(:new).and_return(issue)
+
+        Issues::CreateService.new(project, user).execute
+
+        expect(WebMock).not_to have_requested(:post, system_hook.url).with(
+          body: /"object_kind":"issue".*"action":"create"/
+        )
+      end
     end
   end
 

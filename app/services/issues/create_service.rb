@@ -11,9 +11,7 @@ module Issues
       filter_spam_check_params
       filter_resolve_discussion_params
 
-      issue = create(@issue, skip_system_notes: skip_system_notes)
-      execute_hooks(issue, 'create')
-      issue
+      create(@issue, skip_system_notes: skip_system_notes)
     end
 
     def before_create(issue)
@@ -34,6 +32,7 @@ module Issues
       resolve_discussions_with_issue(issue)
       delete_milestone_total_issue_counter_cache(issue.milestone)
       track_incident_action(current_user, issue, :incident_created)
+      execute_hooks(issue, 'create')
 
       super
     end
