@@ -1,6 +1,10 @@
 ---
 comments: false
-description: 'Learn how to contribute to GitLab.'
+type: index, dev
+stage: none
+group: Development
+info: "See the Technical Writers assigned to Development Guidelines: https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines"
+description: "Development Guidelines: learn how to contribute to GitLab."
 ---
 
 # Contributor and Development Docs
