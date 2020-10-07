@@ -60,6 +60,19 @@ Complementary reads:
 - [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
 - [Adding a new service component to GitLab](adding_service_component.md)
 
+### Development guidelines review
+
+When you submit a change to GitLab's development guidelines, request a review
+from:
+
+- A member of your team or group, to check for accuracy. If the changes are
+  significant, request review from engineer managers (FE, BE, DB, Security,
+  etc).
+- The Development DRI ([@clefelhocz1](https://gitlab.com/clefelhocz1)): for
+  final approval of the new or changed guidelines.
+- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#development-guidelines),
+  to check the content and adherence to documentation guidelines.
+
 ## UX and Frontend guides
 
 - [GitLab Design System](https://design.gitlab.com/) for building GitLab with existing CSS styles and elements
