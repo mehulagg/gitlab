@@ -31,7 +31,8 @@ RSpec.describe "Every controller" do
                 !child_controller.to_s.start_with?('A', 'B', 'C', 'D',
                                                    'E', 'F', 'G', 'H',
                                                    'I', 'J', 'K', 'L',
-                                                   'M', 'N', 'O', 'P')
+                                                   'M', 'N', 'O', 'P',
+                                                   'Q', 'R', 'S', 'T')
 
         "#{controller}##{action}"
       end.compact

@@ -12,6 +12,8 @@ class Projects::Quality::TestCasesController < Projects::ApplicationController
     push_frontend_feature_flag(:quality_test_cases, project)
   end
 
+  feature_category :quality_management
+
   def index
     respond_to do |format|
       format.html

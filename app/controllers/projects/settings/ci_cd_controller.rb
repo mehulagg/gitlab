@@ -12,6 +12,8 @@ module Projects
         push_frontend_feature_flag(:ajax_new_deploy_token, @project)
       end
 
+      feature_category :continuous_integration
+
       def show
         if Feature.enabled?(:ci_pipeline_triggers_settings_vue_ui, @project)
           @triggers_json = ::Ci::TriggerSerializer.new.represent(

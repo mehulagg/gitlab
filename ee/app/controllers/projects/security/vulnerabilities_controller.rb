@@ -11,6 +11,8 @@ module Projects
 
       alias_method :vulnerable, :project
 
+      feature_category :vulnerability_management
+
       def show
         pipeline = vulnerability.finding.pipelines.first
         @pipeline = pipeline if Ability.allowed?(current_user, :read_pipeline, pipeline)

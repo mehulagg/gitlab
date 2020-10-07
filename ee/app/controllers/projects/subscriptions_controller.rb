@@ -7,6 +7,8 @@ class Projects::SubscriptionsController < Projects::ApplicationController
   before_action :feature_ci_project_subscriptions!
   before_action :authorize_upstream_project!, only: [:create]
 
+  feature_category :continuous_integration
+
   def create
     subscription = project.upstream_project_subscriptions.create(upstream_project: upstream_project)
 

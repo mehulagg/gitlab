@@ -12,6 +12,8 @@ class Projects::TracingsController < Projects::ApplicationController
   before_action :check_license
   before_action :authorize_update_environment!
 
+  feature_category :tracing
+
   def show
   end
 

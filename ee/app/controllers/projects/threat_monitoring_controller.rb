@@ -4,6 +4,8 @@ module Projects
   class ThreatMonitoringController < Projects::ApplicationController
     before_action :authorize_read_threat_monitoring!
 
+    feature_category :web_firewall
+
     def edit
       @environment = project.environments.find(params[:environment_id])
       @policy_name = params[:id]
