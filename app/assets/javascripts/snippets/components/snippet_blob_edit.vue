@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import BlobHeaderEdit from '~/blob/components/blob_edit_header.vue';
-import BlobContentEdit from '~/blob/components/blob_edit_content.vue';
+import EditorLite from '~/vue_shared/components/editor_lite.vue';
 import { getBaseURL, joinPaths } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
 import { SNIPPET_BLOB_CONTENT_FETCH_ERROR } from '~/snippets/constants';
@@ -11,8 +11,8 @@ import { sprintf } from '~/locale';
 export default {
   components: {
     BlobHeaderEdit,
-    BlobContentEdit,
     GlLoadingIcon,
+    EditorLite,
   },
   inheritAttrs: false,
   props: {
@@ -85,12 +85,13 @@ export default {
       size="lg"
       class="loading-animation prepend-top-20 gl-mb-6"
     />
-    <blob-content-edit
-      v-else
-      :value="blob.content"
-      :file-global-id="blob.id"
-      :file-name="blob.path"
-      @input="notifyAboutUpdates({ content: $event })"
-    />
+<editor-lite
+  v-else
+  ref="editor"
+  :value="blob.content"
+  :file-global-id="blob.id"
+  file-name="blob.path"
+  @input="notifyAboutUpdates({ content: $event })"
+/>
   </div>
 </template>
