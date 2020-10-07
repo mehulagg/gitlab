@@ -2569,9 +2569,9 @@ deploy to production:
 >   defined, GitLab automatically triggers a stop action when the associated
 >   branch is deleted.
 
-Closing (stopping) environments can be achieved with the `on_stop` keyword defined under
-`environment`. It declares a different job that runs in order to close
-the environment.
+Closing (stopping) environments can be achieved with the `on_stop` keyword
+defined under `environment`. It declares a different job that runs to close the
+environment.
 
 Read the `environment:action` section for an example.
 
