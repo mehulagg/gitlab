@@ -27,6 +27,9 @@ export const generateVulnerabilities = () => [
     scanner: {
       vendor: 'GitLab',
     },
+    issueLinks: {
+      nodes: [{ issue: { iid: 15 } }],
+    },
   },
   {
     id: 'id_1',
