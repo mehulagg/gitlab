@@ -394,7 +394,7 @@ For details on saving and transporting Docker images as a file, see Docker's doc
 
 #### If support for Custom CAs are needed
 
-Support for custom CAs was introduced in the following versions.
+Support for custom certificate authorities was introduced in the following versions.
 
 | Analyzer | Version |
 | -------- | ------- |

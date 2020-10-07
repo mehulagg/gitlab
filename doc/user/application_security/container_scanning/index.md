@@ -225,7 +225,7 @@ enables the use of updated scanners in your CI/CD pipelines.
 
 ##### If support for Custom CAs are needed
 
-Support for custom CAs was introduced in the following versions.
+Support for custom certificate authorities was introduced in the following versions.
 
 | Analyzer | Version |
 | -------- | ------- |
