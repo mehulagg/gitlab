@@ -374,30 +374,61 @@ RSpec.describe MergeRequestsFinder do
           let(:expected_issuables) { [merge_request1, merge_request2, merge_request3] }
         end
 
-        context 'filtering by group milestone' do
-          let(:group_milestone) { create(:milestone, group: group) }
+        context 'with just reviewews' do
+          it_behaves_like 'assignee username filter' do
+            let_it_be(:user3) { create(:user) }
 
-          before do
-            merge_request1.update!(milestone: group_milestone)
-            merge_request2.update!(milestone: group_milestone)
+            before do
+              project3.add_developer(user3)
+              merge_request4.reviewers = [user3]
+              merge_request4.assignees = []
+            end
+
+            let(:params) { { assignee_username: [user3.username] } }
+            let(:expected_issuables) { [merge_request4] }
           end
+        end
 
-          it 'returns merge requests assigned to that group milestone' do
-            params = { milestone_title: group_milestone.title }
+        context 'with an additional reviewer' do
+          it_behaves_like 'assignee username filter' do
+            let_it_be(:user3) { create(:user) }
 
+            before do
+              project2.add_developer(user3)
+              merge_request3.assignees = [user3]
+              project3.add_developer(user)
+              merge_request4.reviewers = [user3]
+            end
+
+            let(:params) { { assignee_username: [user3.username] } }
+            let(:expected_issuables) { [merge_request3, merge_request4] }
+          end
+        end
+      end
+
+      context 'filtering by group milestone' do
+        let(:group_milestone) { create(:milestone, group: group) }
+
+        before do
+          merge_request1.update!(milestone: group_milestone)
+          merge_request2.update!(milestone: group_milestone)
+        end
+
+        it 'returns merge requests assigned to that group milestone' do
+          params = { milestone_title: group_milestone.title }
+
+          merge_requests = described_class.new(user, params).execute
+
+          expect(merge_requests).to contain_exactly(merge_request1, merge_request2)
+        end
+
+        context 'using NOT' do
+          let(:params) { { not: { milestone_title: group_milestone.title } } }
+
+          it 'returns MRs not assigned to that group milestone' do
             merge_requests = described_class.new(user, params).execute
 
-            expect(merge_requests).to contain_exactly(merge_request1, merge_request2)
-          end
-
-          context 'using NOT' do
-            let(:params) { { not: { milestone_title: group_milestone.title } } }
-
-            it 'returns MRs not assigned to that group milestone' do
-              merge_requests = described_class.new(user, params).execute
-
-              expect(merge_requests).to contain_exactly(merge_request3, merge_request4, merge_request5)
-            end
+            expect(merge_requests).to contain_exactly(merge_request3, merge_request4, merge_request5)
           end
         end
       end

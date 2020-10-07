@@ -55,6 +55,14 @@ RSpec.describe 'Dashboard Merge Requests' do
         author: create(:user))
     end
 
+    let!(:review_requested_merge_request) do
+      create(:merge_request,
+        reviewers: [current_user],
+        source_branch: 'review',
+        source_project: project,
+        author: create(:user))
+    end
+
     let!(:assigned_merge_request_from_fork) do
       create(:merge_request,
               source_branch: 'markdown', assignees: [current_user],
@@ -103,6 +111,10 @@ RSpec.describe 'Dashboard Merge Requests' do
       expect(page).not_to have_content(authored_merge_request_from_fork.title)
       expect(page).not_to have_content(other_merge_request.title)
       expect(page).not_to have_content(labeled_merge_request.title)
+    end
+
+    it 'shows review requested merge requests' do
+      expect(page).to have_content(review_requested_merge_request.title)
     end
 
     it 'shows authored merge requests', :js do
