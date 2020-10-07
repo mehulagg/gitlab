@@ -18,6 +18,9 @@ module API
         snippet.file_name_on_repo || snippet.file_name
       end
       expose :files do |snippet, options|
+        # TODO: Remove this line https://gitlab.com/gitlab-org/gitlab/-/issues/262972
+        break [] unless snippet.repository_exists?
+
         snippet.list_files.map do |file|
           {
             path: file,
