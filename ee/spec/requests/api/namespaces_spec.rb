@@ -133,6 +133,10 @@ RSpec.describe API::Namespaces do
         create(:gitlab_subscription, namespace: group3, max_seats_used: 3)
         group3.add_guest(user)
 
+        # Group that user does not have access to.
+        group4 = create(:group)
+        create(:gitlab_subscription, namespace: group4, max_seats_used: 1)
+
         # We seem to have some N+1 queries.
         # The saml_provider association adds one for each group (saml_provider is
         #   an association on group, not namespace).
