@@ -93,7 +93,7 @@ export default {
         <gl-button
           :disabled="loading"
           icon="remove"
-          class="js-remove-button"
+          class="js-remove-button gl-ml-3"
           v-gl-tooltip
           category="tertiary"
           data-toggle="modal"
