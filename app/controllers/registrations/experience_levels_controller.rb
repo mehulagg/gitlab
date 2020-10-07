@@ -12,7 +12,12 @@ module Registrations
 
       if current_user.save
         hide_advanced_issues
-        redirect_to group_path(params[:namespace_path])
+        if experiment_enabled?(:default_to_issues_board) && learn_gitlab.available?
+          record_experiment_user(:default_to_issues_board)
+          redirect_to namespace_project_board_path(params[:namespace_path], learn_gitlab.project, learn_gitlab.board)
+        else
+          redirect_to group_path(params[:namespace_path])
+        end
       else
         render :show
       end
