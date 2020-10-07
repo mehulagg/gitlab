@@ -1,6 +1,9 @@
 <script>
+import dateFormat from 'dateformat';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { getDateInPast } from '~/lib/utils/datetime_utility';
 import DateRange from '../../shared/components/daterange.vue';
+import { dateFormats } from '../../shared/constants';
 import { DEFAULT_NUMBER_OF_DAYS } from '../constants';
 import FilterBar from './filter_bar.vue';
 import ThroughputChart from './throughput_chart.vue';
@@ -13,12 +16,21 @@ export default {
     FilterBar,
     ThroughputChart,
     ThroughputTable,
+    UrlSync,
   },
   data() {
     return {
       startDate: getDateInPast(new Date(), DEFAULT_NUMBER_OF_DAYS),
       endDate: new Date(),
     };
+  },
+  computed: {
+    query() {
+      return {
+        start_date: dateFormat(this.startDate, dateFormats.isoDate),
+        end_date: dateFormat(this.endDate, dateFormats.isoDate),
+      };
+    },
   },
   methods: {
     setDateRange({ startDate, endDate }) {
@@ -44,5 +56,6 @@ export default {
     </div>
     <throughput-chart :start-date="startDate" :end-date="endDate" />
     <throughput-table :start-date="startDate" :end-date="endDate" class="gl-mt-6" />
+    <url-sync :query="query" />
   </div>
 </template>
