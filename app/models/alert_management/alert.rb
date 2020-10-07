@@ -14,13 +14,6 @@ module AlertManagement
     include Gitlab::Utils::StrongMemoize
     include Referable
 
-    STATUSES = {
-      triggered: 0,
-      acknowledged: 1,
-      resolved: 2,
-      ignored: 3
-    }.freeze
-
     OPEN_STATUSES = [
       :triggered,
       :acknowledged
@@ -70,15 +63,15 @@ module AlertManagement
     }
 
     state_machine :status, initial: :triggered do
-      state :triggered, value: STATUSES[:triggered]
+      state :triggered, value: 0
 
-      state :acknowledged, value: STATUSES[:acknowledged]
+      state :acknowledged, value: 1
 
-      state :resolved, value: STATUSES[:resolved] do
+      state :resolved, value: 2 do
         validates :ended_at, presence: true
       end
 
-      state :ignored, value: STATUSES[:ignored]
+      state :ignored, value: 3
 
       state :triggered, :acknowledged, :ignored do
         validates :ended_at, absence: true
@@ -114,7 +107,7 @@ module AlertManagement
     delegate :details_url, to: :present
 
     scope :for_iid, -> (iid) { where(iid: iid) }
-    scope :for_status, -> (status) { where(status: status) }
+    scope :for_status, -> (status) { with_status(status) }
     scope :for_fingerprint, -> (project, fingerprint) { where(project: project, fingerprint: fingerprint) }
     scope :for_environment, -> (environment) { where(environment: environment) }
     scope :search, -> (query) { fuzzy_search(query, [:title, :description, :monitoring_tool, :service]) }
@@ -137,10 +130,25 @@ module AlertManagement
     # https://gitlab.com/gitlab-org/gitlab/-/issues/221242#what-is-the-expected-correct-behavior
     scope :order_status,        -> (sort_order) { order(status: sort_order == :asc ? :desc : :asc) }
 
-    scope :counts_by_status, -> { group(:status).count }
     scope :counts_by_project_id, -> { group(:project_id).count }
 
     alias_method :state, :status_name
+
+    def self.status_value(name)
+      state_machines[:status].states.find { |s| s.name == name }&.value
+    end
+
+    def self.status_name(raw_status)
+      state_machines[:status].states.find { |s| s.value == raw_status }&.name
+    end
+
+    def self.counts_by_status
+      group(:status).count.map { |k, v| [status_name(k), v] }.to_h
+    end
+
+    def self.statuses
+      state_machines[:status].states.map(&:name)
+    end
 
     def self.sort_by_attribute(method)
       case method.to_s
