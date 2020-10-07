@@ -223,9 +223,9 @@ in an offline environment if you prefer using only locally available Docker imag
 recommend keeping the pull policy setting to `always` if not in an offline environment, as this
 enables the use of updated scanners in your CI/CD pipelines.
 
-##### Custom Certificate Authorities support
+#####  Support for Custom Certificate Authorities
 
-Support for custom certificate authorities was introduced in the following versions.
+Support for custom certificate authorities was introduced in the following versions:
 
 | Analyzer | Version |
 | -------- | ------- |
