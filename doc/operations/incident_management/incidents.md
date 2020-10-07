@@ -155,3 +155,11 @@ tab, the incident must have been created with a linked alert. Incidents
 field populated.
 
 ![Incident alert details](./img/incident_alert_details_v13_4.png)
+
+### Timeline view
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/227836) in GitLab Premium 13.5.
+
+To quickly see the latest updates on the incident you can enable timeline view which will display incidents un-threaded and ordered chronologically (from newest to oldest by default).
+
+![Timeline view toggle](./img/timeline_view_toggle_v13_5.png)
