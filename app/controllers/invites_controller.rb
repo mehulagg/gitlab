@@ -15,13 +15,11 @@ class InvitesController < ApplicationController
   feature_category :authentication_and_authorization
 
   def show
-    track_new_user_invite_experiment('opened')
     accept if skip_invitation_prompt?
   end
 
   def accept
     if member.accept_invite!(current_user)
-      track_new_user_invite_experiment('accepted')
       track_invitation_reminders_experiment('accepted')
       redirect_to invite_details[:path], notice: _("You have been granted %{member_human_access} access to %{title} %{name}.") %
         { member_human_access: member.human_access, title: invite_details[:title], name: invite_details[:name] }
@@ -108,14 +106,6 @@ class InvitesController < ApplicationController
                             path: group_path(member.source)
                           }
                         end
-  end
-
-  def track_new_user_invite_experiment(action)
-    return unless params[:new_user_invite]
-
-    property = params[:new_user_invite] == 'experiment' ? 'experiment_group' : 'control_group'
-
-    track_experiment(:invite_email, action, property)
   end
 
   def track_invitation_reminders_experiment(action)
