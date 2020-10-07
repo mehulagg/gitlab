@@ -17,4 +17,8 @@ export default {
       commit(types.SET_FEATURES, data);
     });
   },
+  bottomReached({ commit }) {
+    alert('bottom!');
+    console.log('bottom!');
+  },
 };
