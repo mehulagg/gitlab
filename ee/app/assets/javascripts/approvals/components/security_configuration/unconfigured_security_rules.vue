@@ -59,7 +59,7 @@ export default {
             'SecurityApprovals|License Scanning must be enabled. %{linkStart}More information%{linkEnd}',
           ),
           enableDescription: s__(
-            'SecurityApprovals|Requires license policy rules for licenses of Allowed, or Denied. %{linkStart}More information%{linkEnd}',
+            'SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More information%{linkEnd}',
           ),
           docsPath: this.licenseCheckHelpPagePath,
         },
