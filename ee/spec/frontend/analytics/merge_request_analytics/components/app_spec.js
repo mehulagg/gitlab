@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import MergeRequestAnalyticsApp from 'ee/analytics/merge_request_analytics/components/app.vue';
+import DateRange from 'ee/analytics/shared/components/daterange.vue';
 import FilterBar from 'ee/analytics/merge_request_analytics/components/filter_bar.vue';
 import ThroughputChart from 'ee/analytics/merge_request_analytics/components/throughput_chart.vue';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
@@ -28,6 +29,10 @@ describe('MergeRequestAnalyticsApp', () => {
 
   it('displays the filter bar component', () => {
     expect(wrapper.find(FilterBar).exists()).toBe(true);
+  });
+
+  it('displays the date range component', () => {
+    expect(wrapper.find(DateRange).exists()).toBe(true);
   });
 
   it('displays the throughput chart component', () => {

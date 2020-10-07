@@ -136,6 +136,7 @@ RSpec.describe Project do
       let_it_be(:container) { create(:project, :repository, path: 'somewhere') }
       let(:stubbed_container) { build_stubbed(:project) }
       let(:expected_full_path) { "#{container.namespace.full_path}/somewhere" }
+      let(:expected_lfs_enabled) { true }
     end
 
     it_behaves_like 'model with wiki' do
@@ -4332,7 +4333,7 @@ RSpec.describe Project do
       end
 
       it 'schedules HashedStorage::ProjectMigrateWorker with delayed start when the wiki repo is in use' do
-        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project)).increase
+        Gitlab::ReferenceCounter.new(Gitlab::GlRepository::WIKI.identifier_for_container(project.wiki)).increase
 
         expect(HashedStorage::ProjectMigrateWorker).to receive(:perform_in)
 
@@ -5563,32 +5564,6 @@ RSpec.describe Project do
       project = create(:project, namespace: group)
 
       expect(described_class.for_group(group)).to eq([project])
-    end
-  end
-
-  describe '.for_repository_storage' do
-    it 'returns the projects for a given repository storage' do
-      stub_storage_settings('test_second_storage' => {
-        'path' => TestEnv::SECOND_STORAGE_PATH,
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
-      })
-      expected_project = create(:project, repository_storage: 'default')
-      create(:project, repository_storage: 'test_second_storage')
-
-      expect(described_class.for_repository_storage('default')).to eq([expected_project])
-    end
-  end
-
-  describe '.excluding_repository_storage' do
-    it 'returns the projects excluding the given repository storage' do
-      stub_storage_settings('test_second_storage' => {
-        'path' => TestEnv::SECOND_STORAGE_PATH,
-        'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address
-      })
-      expected_project = create(:project, repository_storage: 'test_second_storage')
-      create(:project, repository_storage: 'default')
-
-      expect(described_class.excluding_repository_storage('default')).to eq([expected_project])
     end
   end
 

@@ -275,4 +275,21 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
       it { is_expected.to be_truthy }
     end
   end
+
+  describe '#keys' do
+    let(:identifier_1) { build(:ci_reports_security_identifier) }
+    let(:identifier_2) { build(:ci_reports_security_identifier) }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+    let(:finding) { build(:ci_reports_security_finding, identifiers: [identifier_1, identifier_2], location: location) }
+    let(:expected_keys) do
+      [
+        build(:ci_reports_security_finding_key, location_fingerprint: location.fingerprint, identifier_fingerprint: identifier_1.fingerprint),
+        build(:ci_reports_security_finding_key, location_fingerprint: location.fingerprint, identifier_fingerprint: identifier_2.fingerprint)
+      ]
+    end
+
+    subject { finding.keys }
+
+    it { is_expected.to match_array(expected_keys) }
+  end
 end

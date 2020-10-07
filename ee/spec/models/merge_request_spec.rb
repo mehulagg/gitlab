@@ -728,6 +728,40 @@ RSpec.describe MergeRequest do
         expect(subject[:status_reason]).to eq('This merge request does not have license scanning reports')
       end
     end
+
+    context "when a license scan report is produced from the head pipeline" do
+      where(:pipeline_status, :build_types, :expected_status) do
+        [
+          [:blocked, [:license_scan_v2_1], :parsed],
+          [:blocked, [:container_scanning], :error],
+          [:blocked, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:blocked, [], :error],
+          [:failed, [:container_scanning], :error],
+          [:failed, [:license_scan_v2_1], :parsed],
+          [:failed, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:failed, [], :error],
+          [:running, [:container_scanning], :error],
+          [:running, [:license_scan_v2_1], :parsed],
+          [:running, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:running, [], :error],
+          [:success, [:container_scanning], :error],
+          [:success, [:license_scan_v2_1], :parsed],
+          [:success, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:success, [], :error]
+        ]
+      end
+
+      with_them do
+        let!(:head_pipeline) { create(:ci_pipeline, pipeline_status, project: project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha, builds: builds) }
+        let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        specify { expect(subject[:status]).to eq(expected_status) }
+      end
+    end
   end
 
   describe '#compare_metrics_reports' do

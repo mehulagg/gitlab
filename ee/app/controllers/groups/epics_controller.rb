@@ -15,10 +15,13 @@ class Groups::EpicsController < Groups::ApplicationController
   before_action :authorize_update_issuable!, only: :update
   before_action :authorize_create_epic!, only: [:create, :new]
   before_action :verify_group_bulk_edit_enabled!, only: [:bulk_update]
+  after_action :log_epic_show, only: :show
 
   before_action do
     push_frontend_feature_flag(:vue_issuable_epic_sidebar, @group)
   end
+
+  feature_category :epics
 
   def new
     @noteable = Epic.new
@@ -111,6 +114,12 @@ class Groups::EpicsController < Groups::ApplicationController
 
   def preload_for_collection
     @preload_for_collection ||= [:group, :author, :labels]
+  end
+
+  def log_epic_show
+    return unless current_user && @epic
+
+    ::Gitlab::Search::RecentEpics.new(user: current_user).log_view(@epic)
   end
 
   def authorize_create_epic!

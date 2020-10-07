@@ -19,7 +19,6 @@ IF (TG_OP = 'DELETE') THEN
 ELSIF (TG_OP = 'UPDATE') THEN
   UPDATE audit_events_part_5fc467ac26
   SET author_id = NEW.author_id,
-    type = NEW.type,
     entity_id = NEW.entity_id,
     entity_type = NEW.entity_type,
     details = NEW.details,
@@ -34,7 +33,6 @@ ELSIF (TG_OP = 'UPDATE') THEN
 ELSIF (TG_OP = 'INSERT') THEN
   INSERT INTO audit_events_part_5fc467ac26 (id,
     author_id,
-    type,
     entity_id,
     entity_type,
     details,
@@ -47,7 +45,6 @@ ELSIF (TG_OP = 'INSERT') THEN
     created_at)
   VALUES (NEW.id,
     NEW.author_id,
-    NEW.type,
     NEW.entity_id,
     NEW.entity_type,
     NEW.details,
@@ -69,7 +66,6 @@ COMMENT ON FUNCTION table_sync_function_2be879775d() IS 'Partitioning migration:
 CREATE TABLE audit_events_part_5fc467ac26 (
     id bigint NOT NULL,
     author_id integer NOT NULL,
-    type character varying,
     entity_id integer NOT NULL,
     entity_type character varying NOT NULL,
     details text,
@@ -9296,8 +9292,10 @@ CREATE TABLE application_settings (
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
     abuse_notification_email character varying,
     require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
+    help_page_documentation_base_url text,
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
+    CONSTRAINT check_57123c9593 CHECK ((char_length(help_page_documentation_base_url) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
     CONSTRAINT check_d820146492 CHECK ((char_length(spam_check_endpoint_url) <= 255)),
@@ -9539,7 +9537,6 @@ ALTER SEQUENCE atlassian_identities_user_id_seq OWNED BY atlassian_identities.us
 CREATE TABLE audit_events (
     id integer NOT NULL,
     author_id integer NOT NULL,
-    type character varying,
     entity_id integer NOT NULL,
     entity_type character varying NOT NULL,
     details text,
@@ -11214,6 +11211,9 @@ CREATE TABLE dast_scanner_profiles (
     spider_timeout smallint,
     target_timeout smallint,
     name text NOT NULL,
+    scan_type smallint DEFAULT 1 NOT NULL,
+    use_ajax_spider boolean DEFAULT false NOT NULL,
+    show_debug_messages boolean DEFAULT false NOT NULL,
     CONSTRAINT check_568568fabf CHECK ((char_length(name) <= 255))
 );
 
@@ -15446,6 +15446,22 @@ CREATE TABLE repository_languages (
     share double precision NOT NULL
 );
 
+CREATE TABLE required_code_owners_sections (
+    id bigint NOT NULL,
+    protected_branch_id bigint NOT NULL,
+    name text NOT NULL,
+    CONSTRAINT check_e58d53741e CHECK ((char_length(name) <= 1024))
+);
+
+CREATE SEQUENCE required_code_owners_sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE required_code_owners_sections_id_seq OWNED BY required_code_owners_sections.id;
+
 CREATE TABLE requirements (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -17744,6 +17760,8 @@ ALTER TABLE ONLY releases ALTER COLUMN id SET DEFAULT nextval('releases_id_seq':
 
 ALTER TABLE ONLY remote_mirrors ALTER COLUMN id SET DEFAULT nextval('remote_mirrors_id_seq'::regclass);
 
+ALTER TABLE ONLY required_code_owners_sections ALTER COLUMN id SET DEFAULT nextval('required_code_owners_sections_id_seq'::regclass);
+
 ALTER TABLE ONLY requirements ALTER COLUMN id SET DEFAULT nextval('requirements_id_seq'::regclass);
 
 ALTER TABLE ONLY requirements_management_test_reports ALTER COLUMN id SET DEFAULT nextval('requirements_management_test_reports_id_seq'::regclass);
@@ -19025,6 +19043,9 @@ ALTER TABLE ONLY releases
 ALTER TABLE ONLY remote_mirrors
     ADD CONSTRAINT remote_mirrors_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY required_code_owners_sections
+    ADD CONSTRAINT required_code_owners_sections_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT requirements_management_test_reports_pkey PRIMARY KEY (id);
 
@@ -19473,6 +19494,8 @@ CREATE UNIQUE INDEX idx_jira_connect_subscriptions_on_installation_id_namespace_
 CREATE INDEX idx_members_created_at_user_id_invite_token ON members USING btree (created_at) WHERE ((invite_token IS NOT NULL) AND (user_id IS NULL));
 
 CREATE INDEX idx_merge_requests_on_id_and_merge_jid ON merge_requests USING btree (id, merge_jid) WHERE ((merge_jid IS NOT NULL) AND (state_id = 4));
+
+CREATE INDEX idx_merge_requests_on_merged_state ON merge_requests USING btree (id) WHERE (state_id = 3);
 
 CREATE INDEX idx_merge_requests_on_source_project_and_branch_state_opened ON merge_requests USING btree (source_project_id, source_branch) WHERE (state_id = 1);
 
@@ -21200,6 +21223,8 @@ CREATE INDEX index_remote_mirrors_on_project_id ON remote_mirrors USING btree (p
 
 CREATE UNIQUE INDEX index_repository_languages_on_project_and_languages_id ON repository_languages USING btree (project_id, programming_language_id);
 
+CREATE INDEX index_required_code_owners_sections_on_protected_branch_id ON required_code_owners_sections USING btree (protected_branch_id);
+
 CREATE INDEX index_requirements_management_test_reports_on_author_id ON requirements_management_test_reports USING btree (author_id);
 
 CREATE INDEX index_requirements_management_test_reports_on_build_id ON requirements_management_test_reports USING btree (build_id);
@@ -21596,6 +21621,10 @@ CREATE INDEX index_vulnerabilities_on_resolved_by_id ON vulnerabilities USING bt
 
 CREATE INDEX index_vulnerabilities_on_start_date_sourcing_milestone_id ON vulnerabilities USING btree (start_date_sourcing_milestone_id);
 
+CREATE INDEX index_vulnerabilities_on_state_case_id ON vulnerabilities USING btree (array_position(ARRAY[(1)::smallint, (4)::smallint, (3)::smallint, (2)::smallint], state), id DESC);
+
+CREATE INDEX index_vulnerabilities_on_state_case_id_desc ON vulnerabilities USING btree (array_position(ARRAY[(1)::smallint, (4)::smallint, (3)::smallint, (2)::smallint], state) DESC, id DESC);
+
 CREATE INDEX index_vulnerabilities_on_updated_by_id ON vulnerabilities USING btree (updated_by_id);
 
 CREATE INDEX index_vulnerability_exports_on_author_id ON vulnerability_exports USING btree (author_id);
@@ -21747,6 +21776,12 @@ CREATE INDEX terraform_state_versions_verification_checksum_partial ON terraform
 CREATE INDEX terraform_state_versions_verification_failure_partial ON terraform_state_versions USING btree (verification_failure) WHERE (verification_failure IS NOT NULL);
 
 CREATE INDEX tmp_build_stage_position_index ON ci_builds USING btree (stage_id, stage_idx) WHERE (stage_idx IS NOT NULL);
+
+CREATE INDEX tmp_idx_blocked_by_type_links ON issue_links USING btree (target_id) WHERE (link_type = 2);
+
+CREATE INDEX tmp_idx_blocking_type_links ON issue_links USING btree (source_id) WHERE (link_type = 1);
+
+CREATE INDEX tmp_idx_index_issues_with_outdate_blocking_count ON issues USING btree (id) WHERE ((state_id = 1) AND (blocking_issues_count = 0));
 
 CREATE INDEX tmp_index_for_email_unconfirmation_migration ON emails USING btree (id) WHERE (confirmed_at IS NOT NULL);
 
@@ -23296,6 +23331,9 @@ ALTER TABLE ONLY clusters_kubernetes_namespaces
 
 ALTER TABLE ONLY approval_merge_request_rules_users
     ADD CONSTRAINT fk_rails_80e6801803 FOREIGN KEY (approval_merge_request_rule_id) REFERENCES approval_merge_request_rules(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY required_code_owners_sections
+    ADD CONSTRAINT fk_rails_817708cf2d FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dast_site_profiles
     ADD CONSTRAINT fk_rails_83e309d69e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

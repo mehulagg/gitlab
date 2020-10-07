@@ -192,6 +192,9 @@ module EE
                 merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional, :merge_request_id),
                 merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules,
                 merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required, :merge_request_id),
+                merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
+                                                                  start: merge_request_minimum_id,
+                                                                  finish: merge_request_maximum_id),
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
                 projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
@@ -398,6 +401,18 @@ module EE
           end
         end
 
+        def merge_request_minimum_id
+          strong_memoize(:merge_request_minimum_id) do
+            ::MergeRequest.minimum(:id)
+          end
+        end
+
+        def merge_request_maximum_id
+          strong_memoize(:merge_request_maximum_id) do
+            ::MergeRequest.maximum(:id)
+          end
+        end
+
         def ldap_config_present_for_any_provider?(configuration_item)
           ldap_available_servers.any? { |server_config| server_config[configuration_item.to_s] }
         end
@@ -465,6 +480,16 @@ module EE
           )
         end
         # rubocop:enable CodeReuse/ActiveRecord
+
+        override :clear_memoized
+        def clear_memoized
+          super
+
+          clear_memoization(:approval_merge_request_rule_minimum_id)
+          clear_memoization(:approval_merge_request_rule_maximum_id)
+          clear_memoization(:merge_request_minimum_id)
+          clear_memoization(:merge_request_maximum_id)
+        end
       end
     end
   end

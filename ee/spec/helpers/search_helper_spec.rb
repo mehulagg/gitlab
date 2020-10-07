@@ -51,6 +51,47 @@ RSpec.describe SearchHelper do
     end
   end
 
+  describe 'search_autocomplete_opts' do
+    context "with a user" do
+      let(:user) { create(:user) }
+
+      before do
+        allow(self).to receive(:current_user).and_return(user)
+      end
+
+      it 'includes the users recently viewed epics' do
+        recent_epics = instance_double(::Gitlab::Search::RecentEpics)
+        expect(::Gitlab::Search::RecentEpics).to receive(:new).with(user: user).and_return(recent_epics)
+        group1 = create(:group, :public, :with_avatar)
+        group2 = create(:group, :public)
+        epic1 = create(:epic, title: 'epic 1', group: group1)
+        epic2 = create(:epic, title: 'epic 2', group: group2)
+
+        expect(recent_epics).to receive(:search).with('the search term').and_return(Epic.id_in_ordered([epic1.id, epic2.id]))
+
+        results = search_autocomplete_opts("the search term")
+
+        expect(results.count).to eq(2)
+
+        expect(results[0]).to include({
+          category: 'Recent epics',
+          id: epic1.id,
+          label: 'epic 1',
+          url: Gitlab::Routing.url_helpers.group_epic_path(epic1.group, epic1),
+          avatar_url: group1.avatar_url
+        })
+
+        expect(results[1]).to include({
+          category: 'Recent epics',
+          id: epic2.id,
+          label: 'epic 2',
+          url: Gitlab::Routing.url_helpers.group_epic_path(epic2.group, epic2),
+          avatar_url: '' # This group didn't have an avatar so set this to ''
+        })
+      end
+    end
+  end
+
   describe '#project_autocomplete' do
     let(:user) { create(:user) }
 

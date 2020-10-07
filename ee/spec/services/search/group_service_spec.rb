@@ -233,29 +233,65 @@ RSpec.describe Search::GroupService, :elastic do
     end
   end
 
-  describe '#allowed_scopes' do
-    context 'epics scope' do
-      where(:feature_enabled, :epics_available, :epics_allowed) do
-        false     | false    | false
-        true      | false    | false
-        false     | true     | false
-        true      | true     | true
+  context 'issues' do
+    let(:scope) { 'issues' }
+
+    context 'sort by created_at' do
+      let!(:project) { create(:project, :public, group: group) }
+      let!(:old_result) { create(:issue, project: project, title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:issue, project: project, title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:issue, project: project, title: 'sorted very old', created_at: 1.year.ago) }
+
+      before do
+        ensure_elasticsearch_index!
       end
 
-      with_them do
-        let(:allowed_scopes) { described_class.new(user, group, {}).allowed_scopes }
+      include_examples 'search results sorted' do
+        let(:results) { described_class.new(nil, group, search: 'sorted', sort: sort).execute }
+      end
+    end
+  end
 
-        before do
-          stub_feature_flags(epics_search: feature_enabled)
-          stub_licensed_features(epics: epics_available)
+  context 'merge requests' do
+    let(:scope) { 'merge_requests' }
+
+    context 'sort by created_at' do
+      let!(:project) { create(:project, :public, group: group) }
+      let!(:old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'old-1', title: 'sorted old', created_at: 1.month.ago) }
+      let!(:new_result) { create(:merge_request, :opened, source_project: project, source_branch: 'new-1', title: 'sorted recent', created_at: 1.day.ago) }
+      let!(:very_old_result) { create(:merge_request, :opened, source_project: project, source_branch: 'very-old-1', title: 'sorted very old', created_at: 1.year.ago) }
+
+      before do
+        ensure_elasticsearch_index!
+      end
+
+      include_examples 'search results sorted' do
+        let(:results) { described_class.new(nil, group, search: 'sorted', sort: sort).execute }
+      end
+    end
+  end
+
+  describe '#allowed_scopes' do
+    context 'epics scope' do
+      let(:allowed_scopes) { described_class.new(user, group, {}).allowed_scopes }
+
+      before do
+        stub_licensed_features(epics: epics_available)
+      end
+
+      context 'epics available' do
+        let(:epics_available) { true }
+
+        it 'does include epics to allowed_scopes' do
+          expect(allowed_scopes).to include('epics')
         end
+      end
 
-        it 'sets correct allowed_scopes' do
-          if epics_allowed
-            expect(allowed_scopes).to include('epics')
-          else
-            expect(allowed_scopes).not_to include('epics')
-          end
+      context 'epics is no available' do
+        let(:epics_available) { false }
+
+        it 'does not include epics to allowed_scopes' do
+          expect(allowed_scopes).not_to include('epics')
         end
       end
     end

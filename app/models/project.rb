@@ -35,6 +35,7 @@ class Project < ApplicationRecord
   include Integration
   include EachBatch
   extend Gitlab::Cache::RequestCache
+  extend Gitlab::Utils::Override
 
   extend Gitlab::ConfigHelper
 
@@ -366,6 +367,7 @@ class Project < ApplicationRecord
                                 allow_destroy: true,
                                 reject_if: ->(attrs) { attrs[:id].blank? && attrs[:url].blank? }
 
+  accepts_nested_attributes_for :tracing_setting, update_only: true, allow_destroy: true
   accepts_nested_attributes_for :incident_management_setting, update_only: true
   accepts_nested_attributes_for :error_tracking_setting, update_only: true
   accepts_nested_attributes_for :metrics_setting, update_only: true, allow_destroy: true
@@ -602,7 +604,7 @@ class Project < ApplicationRecord
     return public_to_user unless user
 
     if user.is_a?(DeployToken)
-      user.projects
+      user.accessible_projects
     else
       where('EXISTS (?) OR projects.visibility_level IN (?)',
             user.authorizations_for_projects(min_access_level: min_access_level),
@@ -674,8 +676,6 @@ class Project < ApplicationRecord
   scope :joins_import_state, -> { joins("INNER JOIN project_mirror_data import_state ON import_state.project_id = projects.id") }
   scope :for_group, -> (group) { where(group: group) }
   scope :for_group_and_its_subgroups, ->(group) { where(namespace_id: group.self_and_descendants.select(:id)) }
-  scope :for_repository_storage, -> (repository_storage) { where(repository_storage: repository_storage) }
-  scope :excluding_repository_storage, -> (repository_storage) { where.not(repository_storage: repository_storage) }
 
   class << self
     # Searches for a list of projects based on the query given in `query`.
@@ -849,6 +849,7 @@ class Project < ApplicationRecord
     end
   end
 
+  override :lfs_enabled?
   def lfs_enabled?
     return namespace.lfs_enabled? if self[:lfs_enabled].nil?
 

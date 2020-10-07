@@ -87,7 +87,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             </span>
              
             <svg
-              class="dropdown-chevron gl-icon s16"
+              class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
             >
               <use
@@ -195,7 +195,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
               class="col-md-6"
             >
               <div
-                class="row"
+                class="row gl-my-2"
               >
                 <div
                   class="col-md-3"

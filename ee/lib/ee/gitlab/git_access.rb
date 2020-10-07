@@ -25,11 +25,13 @@ module EE
       end
 
       def group?
-        container.is_a?(Group)
+        # Strict nil check, to avoid any surprises with Object#present?
+        # which can delegate to #empty?
+        !group.nil?
       end
 
       def group
-        container if group?
+        container if container.is_a?(::Group)
       end
 
       protected

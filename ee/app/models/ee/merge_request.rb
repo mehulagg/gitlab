@@ -223,7 +223,7 @@ module EE
     end
 
     def compare_license_scanning_reports(current_user)
-      return missing_report_error("license scanning") unless has_license_scanning_reports?
+      return missing_report_error("license scanning") unless actual_head_pipeline&.license_scan_completed?
 
       compare_reports(::Ci::CompareLicenseScanningReportsService, current_user)
     end

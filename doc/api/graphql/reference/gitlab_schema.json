@@ -2855,6 +2855,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "issueFilters",
+                  "description": "Filters applied when getting issue metadata in the board list",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "BoardIssueInput",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -9428,6 +9438,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a record detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -9829,6 +9853,12 @@
               "description": "Passive DAST scan. This scan will not make active attacks against the target site.",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "ACTIVE",
+              "description": "Active DAST scan. This scan will make active attacks against the target site.",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -9903,6 +9933,38 @@
               "deprecationReason": null
             },
             {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "spiderTimeout",
               "description": "The maximum number of minutes allowed for the spider to traverse the site",
               "args": [
@@ -9926,6 +9988,24 @@
                 "kind": "SCALAR",
                 "name": "Int",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -10058,6 +10138,36 @@
                 "ofType": null
               },
               "defaultValue": null
+            },
+            {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "defaultValue": "PASSIVE"
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": "false"
             },
             {
               "name": "clientMutationId",
@@ -10385,6 +10495,36 @@
                   "name": "Int",
                   "ofType": null
                 }
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "scanType",
+              "description": "Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.",
+              "type": {
+                "kind": "ENUM",
+                "name": "DastScanTypeEnum",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "useAjaxSpider",
+              "description": "Indicates if the AJAX spider should be used to crawl the target site. True to run the AJAX spider in addition to the traditional spider, and false to run only the traditional spider.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
+              "name": "showDebugMessages",
+              "description": "Indicates if debug messages should be included in DAST console output. True to include the debug messages.",
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "defaultValue": null
             },
@@ -14070,6 +14210,20 @@
           "name": "DetailedStatus",
           "description": null,
           "fields": [
+            {
+              "name": "action",
+              "description": "Action information for the status. This includes method, button title, icon, path, and title",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "StatusAction",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "detailsPath",
               "description": "Path of the details for the pipeline status",
@@ -20302,7 +20456,7 @@
             },
             {
               "name": "issues",
-              "description": "Issues of the group",
+              "description": "Issues for projects in this group",
               "args": [
                 {
                   "name": "iid",
@@ -20532,7 +20686,7 @@
                 },
                 {
                   "name": "includeSubgroups",
-                  "description": "Include issues belonging to subgroups.",
+                  "description": "Include issues belonging to subgroups",
                   "type": {
                     "kind": "SCALAR",
                     "name": "Boolean",
@@ -20825,6 +20979,211 @@
               "type": {
                 "kind": "SCALAR",
                 "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "mergeRequests",
+              "description": "Merge requests for projects in this group",
+              "args": [
+                {
+                  "name": "iids",
+                  "description": "Array of IIDs of merge requests, for example `[1, 2]`",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sourceBranches",
+                  "description": "Array of source branch names. All resolved merge requests will have one of these branches as their source.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "targetBranches",
+                  "description": "Array of target branch names. All resolved merge requests will have one of these branches as their target.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "state",
+                  "description": "A merge request state. If provided, all resolved merge requests will have this state.",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestState",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "labels",
+                  "description": "Array of label names. All resolved merge requests will have all of these labels.",
+                  "type": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    }
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedAfter",
+                  "description": "Merge requests merged after this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "mergedBefore",
+                  "description": "Merge requests merged before this date",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Time",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "milestoneTitle",
+                  "description": "Title of the milestone",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "sort",
+                  "description": "Sort merge requests by this criteria",
+                  "type": {
+                    "kind": "ENUM",
+                    "name": "MergeRequestSort",
+                    "ofType": null
+                  },
+                  "defaultValue": "created_desc"
+                },
+                {
+                  "name": "includeSubgroups",
+                  "description": "Include merge requests belonging to subgroups",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  },
+                  "defaultValue": "false"
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of the assignee",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "authorUsername",
+                  "description": "Username of the author",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "after",
+                  "description": "Returns the elements in the list that come after the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "before",
+                  "description": "Returns the elements in the list that come before the specified cursor.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "first",
+                  "description": "Returns the first _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "last",
+                  "description": "Returns the last _n_ elements from the list.",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                }
+              ],
+              "type": {
+                "kind": "OBJECT",
+                "name": "MergeRequestConnection",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -25575,6 +25934,29 @@
           "possibleTypes": null
         },
         {
+          "kind": "ENUM",
+          "name": "IssueStateEvent",
+          "description": "Values for issue state events",
+          "fields": null,
+          "inputFields": null,
+          "interfaces": null,
+          "enumValues": [
+            {
+              "name": "REOPEN",
+              "description": "Reopens the issue",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "CLOSE",
+              "description": "Closes the issue",
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "possibleTypes": null
+        },
+        {
           "kind": "OBJECT",
           "name": "IssueStatusCountsType",
           "description": "Represents total number of issues for the represented statuses",
@@ -27142,6 +27524,24 @@
           "name": "LabelConnection",
           "description": "The connection type for Label.",
           "fields": [
+            {
+              "name": "count",
+              "description": "Total count of collection",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
             {
               "name": "edges",
               "description": "A list of edges.",
@@ -36351,7 +36751,7 @@
             },
             {
               "name": "NPM",
-              "description": "Packages from the Npm package manager",
+              "description": "Packages from the NPM package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
@@ -36369,7 +36769,7 @@
             },
             {
               "name": "PYPI",
-              "description": "Packages from the Pypi package manager",
+              "description": "Packages from the PyPI package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
@@ -43208,6 +43608,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "sort",
+                  "description": "Sort order of results",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "after",
                   "description": "Returns the elements in the list that come after the specified cursor.",
                   "type": {
@@ -45530,6 +45940,20 @@
                   "name": "ID",
                   "ofType": null
                 }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "lastTestReportManuallyCreated",
+              "description": "Indicates if latest test report was created by user",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -51092,6 +51516,89 @@
           "possibleTypes": null
         },
         {
+          "kind": "OBJECT",
+          "name": "StatusAction",
+          "description": null,
+          "fields": [
+            {
+              "name": "buttonTitle",
+              "description": "Title for the button, for example: Retry this job",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "icon",
+              "description": "Icon used in the action button",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "method",
+              "description": "Method for the action, for example: :post",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "path",
+              "description": "Path for the action",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "title",
+              "description": "Title for the action, for example: Retry",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
           "kind": "SCALAR",
           "name": "String",
           "description": "Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.",
@@ -55164,6 +55671,16 @@
               "defaultValue": null
             },
             {
+              "name": "stateEvent",
+              "description": "Close or reopen an issue.",
+              "type": {
+                "kind": "ENUM",
+                "name": "IssueStateEvent",
+                "ofType": null
+              },
+              "defaultValue": null
+            },
+            {
               "name": "healthStatus",
               "description": "The desired health status",
               "type": {
@@ -55840,6 +56357,20 @@
               },
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "spam",
+              "description": "Indicates whether the operation returns a record detected as spam",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "inputFields": null,
@@ -56006,6 +56537,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "authorUsername",
+                  "description": "Username of the author",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -56201,6 +56742,16 @@
                   "type": {
                     "kind": "SCALAR",
                     "name": "ID",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "assigneeUsername",
+                  "description": "Username of the assignee",
+                  "type": {
+                    "kind": "SCALAR",
+                    "name": "String",
                     "ofType": null
                   },
                   "defaultValue": null
@@ -57952,7 +58503,7 @@
             },
             {
               "name": "state",
-              "description": "State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)",
+              "description": "State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)",
               "args": [
 
               ],
@@ -59931,6 +60482,18 @@
               "description": "Report Type in ascending order",
               "isDeprecated": false,
               "deprecationReason": null
+            },
+            {
+              "name": "state_desc",
+              "description": "State in descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "state_asc",
+              "description": "State in ascending order",
+              "isDeprecated": false,
+              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -59950,7 +60513,7 @@
               "deprecationReason": null
             },
             {
-              "name": "DISMISSED",
+              "name": "CONFIRMED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -59962,7 +60525,7 @@
               "deprecationReason": null
             },
             {
-              "name": "CONFIRMED",
+              "name": "DISMISSED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null

@@ -38,10 +38,6 @@ export default {
       required: false,
       default: '',
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      required: true,
-    },
     vulnerableProjectsEndpoint: {
       type: String,
       required: false,
@@ -193,7 +189,6 @@ export default {
 
       <issue-modal
         :modal="modal"
-        :vulnerability-feedback-help-path="vulnerabilityFeedbackHelpPath"
         :can-create-issue="canCreateIssue"
         :can-create-merge-request="canCreateMergeRequest"
         :can-dismiss-vulnerability="canDismissVulnerability"

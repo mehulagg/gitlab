@@ -105,17 +105,13 @@ module Gitlab
 
         # Returns the transaction write location of the primary.
         def primary_write_location
-          read_write do |connection|
-            row = connection
-              .select_all("SELECT pg_current_wal_insert_lsn()::text AS location")
-              .first
-
-            if row
-              row['location']
-            else
-              raise 'Failed to determine the write location of the primary database'
-            end
+          location = read_write do |connection|
+            ::Gitlab::Database.get_write_location(connection)
           end
+
+          return location if location
+
+          raise 'Failed to determine the write location of the primary database'
         end
 
         # Returns true if all hosts have caught up to the given transaction

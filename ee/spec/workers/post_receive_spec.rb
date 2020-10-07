@@ -100,7 +100,7 @@ RSpec.describe PostReceive do
 
   describe '#process_wiki_changes' do
     let(:wiki) { build(:project_wiki, project: project) }
-    let(:gl_repository) { wiki.repository.repo_type.identifier_for_container(wiki.container) }
+    let(:gl_repository) { wiki.repository.repo_type.identifier_for_container(wiki) }
 
     it 'calls Git::WikiPushService#execute' do
       expect_next_instance_of(::Git::WikiPushService) do |service|

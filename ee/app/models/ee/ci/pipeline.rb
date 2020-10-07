@@ -60,6 +60,7 @@ module EE
 
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
+              ::Security::StoreScansWorker.perform_async(pipeline.id)
               SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
             end
           end
@@ -160,7 +161,24 @@ module EE
         merge_request_pipeline? && merge_train_ref?
       end
 
+      def latest_failed_security_builds
+        security_builds.select(&:latest?)
+                       .select(&:failed?)
+      end
+
+      def license_scan_completed?
+        builds.latest.with_reports(::Ci::JobArtifact.license_scanning_reports).exists?
+      end
+
+      def can_store_security_reports?
+        project.can_store_security_reports? && has_security_reports?
+      end
+
       private
+
+      def has_security_reports?
+        has_reports?(::Ci::JobArtifact.security_reports.or(::Ci::JobArtifact.license_scanning_reports))
+      end
 
       def project_has_subscriptions?
         project.beta_feature_available?(:ci_project_subscriptions) &&
@@ -174,6 +192,10 @@ module EE
       def available_licensed_report_type?(file_type)
         feature_names = REPORT_LICENSED_FEATURES.fetch(file_type)
         feature_names.nil? || feature_names.any? { |feature| project.feature_available?(feature) }
+      end
+
+      def security_builds
+        @security_builds ||= ::Security::SecurityJobsFinder.new(pipeline: self).execute
       end
     end
   end

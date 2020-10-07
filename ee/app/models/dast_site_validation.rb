@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class DastSiteValidation < ApplicationRecord
+  HEADER = 'Gitlab-On-Demand-DAST'.freeze
+
   belongs_to :dast_site_token
   has_many :dast_sites
 
@@ -13,7 +15,7 @@ class DastSiteValidation < ApplicationRecord
 
   before_create :set_normalized_url_base
 
-  enum validation_strategy: { text_file: 0 }
+  enum validation_strategy: { text_file: 0, header: 1 }
 
   delegate :project, to: :dast_site_token, allow_nil: true
 
@@ -21,7 +23,9 @@ class DastSiteValidation < ApplicationRecord
     "#{url_base}/#{url_path}"
   end
 
-  state_machine :state, initial: :pending do
+  INITIAL_STATE = :pending
+
+  state_machine :state, initial: INITIAL_STATE do
     event :start do
       transition pending: :inprogress
     end

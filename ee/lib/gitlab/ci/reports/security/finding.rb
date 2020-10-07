@@ -87,6 +87,12 @@ module Gitlab
             scanner.present? && primary_identifier.present? && location.present?
           end
 
+          def keys
+            @keys ||= identifiers.map do |identifier|
+              FindingKey.new(location_fingerprint: location&.fingerprint, identifier_fingerprint: identifier.fingerprint)
+            end
+          end
+
           protected
 
           def primary_fingerprint

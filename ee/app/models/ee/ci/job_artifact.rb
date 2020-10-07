@@ -6,6 +6,7 @@ module EE
   # This module is intended to encapsulate EE-specific model logic
   # and be prepended in the `Ci::JobArtifact` model
   module Ci::JobArtifact
+    include ::Gitlab::Utils::StrongMemoize
     extend ActiveSupport::Concern
 
     prepended do
@@ -96,6 +97,30 @@ module EE
 
     def log_geo_deleted_event
       ::Geo::JobArtifactDeletedEventStore.new(self).create!
+    end
+
+    # Ideally we would have a method to return an instance of
+    # parsed report regardless of the `file_type` but this will
+    # require more effort so we can have this security reports
+    # specific method here for now.
+    def security_report
+      strong_memoize(:security_report) do
+        next unless file_type.in?(SECURITY_REPORT_FILE_TYPES)
+
+        ::Gitlab::Ci::Reports::Security::Report.new(file_type, nil, nil).tap do |report|
+          each_blob do |blob|
+            ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, report)
+          end
+        end
+      end
+    end
+
+    # This method is necessary to remove the reference to the
+    # security report object which allows GC to free the memory
+    # slots in vm_heap occupied for the report object and it's
+    # dependents.
+    def clear_security_report
+      clear_memoization(:security_report)
     end
   end
 end

@@ -48,6 +48,12 @@ module Geo
       log_info("Trying to fetch #{type}")
       clean_up_temporary_repository
 
+      # TODO: Remove this as part of
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/9803
+      # This line is a workaround to avoid broken project repos in Geo
+      # secondaries after migrating repos to a different storage.
+      repository.expire_exists_cache
+
       if redownload?
         redownload_repository
         @new_repository = true

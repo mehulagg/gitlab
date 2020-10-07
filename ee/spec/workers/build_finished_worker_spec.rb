@@ -43,12 +43,6 @@ RSpec.describe BuildFinishedWorker do
 
         subject
       end
-
-      it 'stores security scans' do
-        expect(StoreSecurityScansWorker).to receive(:perform_async)
-
-        subject
-      end
     end
 
     context 'when not on .com' do

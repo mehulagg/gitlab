@@ -1097,6 +1097,11 @@ type Board {
     id: ID
 
     """
+    Filters applied when getting issue metadata in the board list
+    """
+    issueFilters: BoardIssueInput
+
+    """
     Returns the last _n_ elements from the list.
     """
     last: Int
@@ -3499,6 +3504,11 @@ type CreateSnippetPayload {
   The snippet after mutation
   """
   snippet: Snippet
+
+  """
+  Indicates whether the operation returns a record detected as spam
+  """
+  spam: Boolean
 }
 
 """
@@ -3630,6 +3640,11 @@ type DastOnDemandScanCreatePayload {
 
 enum DastScanTypeEnum {
   """
+  Active DAST scan. This scan will make active attacks against the target site.
+  """
+  ACTIVE
+
+  """
   Passive DAST scan. This scan will not make active attacks against the target site.
   """
   PASSIVE
@@ -3660,6 +3675,16 @@ type DastScannerProfile {
   profileName: String
 
   """
+  Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
+  """
+  scanType: DastScanTypeEnum
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean!
+
+  """
   The maximum number of minutes allowed for the spider to traverse the site
   """
   spiderTimeout: Int
@@ -3668,6 +3693,13 @@ type DastScannerProfile {
   The maximum number of seconds allowed for the site under test to respond to a request
   """
   targetTimeout: Int
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  useAjaxSpider: Boolean!
 }
 
 """
@@ -3710,6 +3742,16 @@ input DastScannerProfileCreateInput {
   profileName: String!
 
   """
+  Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
+  """
+  scanType: DastScanTypeEnum = PASSIVE
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean = false
+
+  """
   The maximum number of minutes allowed for the spider to traverse the site.
   """
   spiderTimeout: Int
@@ -3718,6 +3760,13 @@ input DastScannerProfileCreateInput {
   The maximum number of seconds allowed for the site under test to respond to a request.
   """
   targetTimeout: Int
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  useAjaxSpider: Boolean = false
 }
 
 """
@@ -3825,6 +3874,16 @@ input DastScannerProfileUpdateInput {
   profileName: String!
 
   """
+  Indicates the type of DAST scan that will run. Either a Passive Scan or an Active Scan.
+  """
+  scanType: DastScanTypeEnum
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean
+
+  """
   The maximum number of minutes allowed for the spider to traverse the site.
   """
   spiderTimeout: Int!
@@ -3833,6 +3892,13 @@ input DastScannerProfileUpdateInput {
   The maximum number of seconds allowed for the site under test to respond to a request.
   """
   targetTimeout: Int!
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  useAjaxSpider: Boolean
 }
 
 """
@@ -5118,6 +5184,11 @@ type DestroySnippetPayload {
 }
 
 type DetailedStatus {
+  """
+  Action information for the status. This includes method, button title, icon, path, and title
+  """
+  action: StatusAction
+
   """
   Path of the details for the pipeline status
   """
@@ -7349,7 +7420,7 @@ type Group {
   isTemporaryStorageIncreaseEnabled: Boolean!
 
   """
-  Issues of the group
+  Issues for projects in this group
   """
   issues(
     """
@@ -7418,7 +7489,7 @@ type Group {
     iids: [String!]
 
     """
-    Include issues belonging to subgroups.
+    Include issues belonging to subgroups
     """
     includeSubgroups: Boolean = false
 
@@ -7584,6 +7655,91 @@ type Group {
   Indicates if a group is disabled from getting mentioned
   """
   mentionsDisabled: Boolean
+
+  """
+  Merge requests for projects in this group
+  """
+  mergeRequests(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Username of the assignee
+    """
+    assigneeUsername: String
+
+    """
+    Username of the author
+    """
+    authorUsername: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Array of IIDs of merge requests, for example `[1, 2]`
+    """
+    iids: [String!]
+
+    """
+    Include merge requests belonging to subgroups
+    """
+    includeSubgroups: Boolean = false
+
+    """
+    Array of label names. All resolved merge requests will have all of these labels.
+    """
+    labels: [String!]
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+
+    """
+    Merge requests merged after this date
+    """
+    mergedAfter: Time
+
+    """
+    Merge requests merged before this date
+    """
+    mergedBefore: Time
+
+    """
+    Title of the milestone
+    """
+    milestoneTitle: String
+
+    """
+    Sort merge requests by this criteria
+    """
+    sort: MergeRequestSort = created_desc
+
+    """
+    Array of source branch names. All resolved merge requests will have one of these branches as their source.
+    """
+    sourceBranches: [String!]
+
+    """
+    A merge request state. If provided, all resolved merge requests will have this state.
+    """
+    state: MergeRequestState
+
+    """
+    Array of target branch names. All resolved merge requests will have one of these branches as their target.
+    """
+    targetBranches: [String!]
+  ): MergeRequestConnection
 
   """
   Milestones of the group
@@ -9340,6 +9496,21 @@ enum IssueState {
 }
 
 """
+Values for issue state events
+"""
+enum IssueStateEvent {
+  """
+  Closes the issue
+  """
+  CLOSE
+
+  """
+  Reopens the issue
+  """
+  REOPEN
+}
+
+"""
 Represents total number of issues for the represented statuses
 """
 type IssueStatusCountsType {
@@ -9851,6 +10022,11 @@ type Label {
 The connection type for Label.
 """
 type LabelConnection {
+  """
+  Total count of collection
+  """
+  count: Int!
+
   """
   A list of edges.
   """
@@ -12288,7 +12464,7 @@ enum PackageTypeEnum {
   MAVEN
 
   """
-  Packages from the Npm package manager
+  Packages from the NPM package manager
   """
   NPM
 
@@ -12298,7 +12474,7 @@ enum PackageTypeEnum {
   NUGET
 
   """
-  Packages from the Pypi package manager
+  Packages from the PyPI package manager
   """
   PYPI
 }
@@ -14839,6 +15015,11 @@ type Query {
     Include namespace in project search
     """
     searchNamespaces: Boolean
+
+    """
+    Sort order of results
+    """
+    sort: String
   ): ProjectConnection
 
   """
@@ -15706,6 +15887,11 @@ type Requirement {
   Internal ID of the requirement
   """
   iid: ID!
+
+  """
+  Indicates if latest test report was created by user
+  """
+  lastTestReportManuallyCreated: Boolean
 
   """
   Latest requirement test report state
@@ -17541,6 +17727,33 @@ enum Sort {
   updated_desc @deprecated(reason: "Use UPDATED_DESC. Deprecated in 13.5")
 }
 
+type StatusAction {
+  """
+  Title for the button, for example: Retry this job
+  """
+  buttonTitle: String
+
+  """
+  Icon used in the action button
+  """
+  icon: String
+
+  """
+  Method for the action, for example: :post
+  """
+  method: String
+
+  """
+  Path for the action
+  """
+  path: String
+
+  """
+  Title for the action, for example: Retry
+  """
+  title: String
+}
+
 type Submodule implements Entry {
   """
   Flat path of the entry
@@ -18918,6 +19131,11 @@ input UpdateIssueInput {
   removeLabelIds: [ID!]
 
   """
+  Close or reopen an issue.
+  """
+  stateEvent: IssueStateEvent
+
+  """
   Title of the issue
   """
   title: String
@@ -19161,6 +19379,11 @@ type UpdateSnippetPayload {
   The snippet after mutation
   """
   snippet: Snippet
+
+  """
+  Indicates whether the operation returns a record detected as spam
+  """
+  spam: Boolean
 }
 
 scalar Upload
@@ -19174,6 +19397,11 @@ type User {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of the author
+    """
+    authorUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -19254,6 +19482,11 @@ type User {
     Returns the elements in the list that come after the specified cursor.
     """
     after: String
+
+    """
+    Username of the assignee
+    """
+    assigneeUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -19925,7 +20158,7 @@ type Vulnerability implements Noteable {
   severity: VulnerabilitySeverity
 
   """
-  State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)
+  State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)
   """
   state: VulnerabilityState
 
@@ -20586,6 +20819,16 @@ enum VulnerabilitySort {
   Severity in descending order
   """
   severity_desc
+
+  """
+  State in ascending order
+  """
+  state_asc
+
+  """
+  State in descending order
+  """
+  state_desc
 
   """
   Title in ascending order

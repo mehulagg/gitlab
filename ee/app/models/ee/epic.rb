@@ -17,6 +17,7 @@ module EE
       include FromUnion
       include EpicTreeSorting
       include Presentable
+      include IdInOrdered
 
       enum state_id: {
         opened: ::Epic.available_states[:opened],
