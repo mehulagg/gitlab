@@ -13,7 +13,7 @@ projects that are set to use instance-level or group-level defaults. Updating th
 default settings also enables the integration for all projects that didn't have it
 already enabled.
 
-It is only possible to inherit the complete settings for an integration, per-field inheritance is [planned](https://gitlab.com/groups/gitlab-org/-/epics/2137).
+Only the complete settings for an integration can be inherited. Per-field inheritance is [planned](https://gitlab.com/groups/gitlab-org/-/epics/2137).
 
 ## Manage instance-level default settings for a project integration **(CORE ONLY)**
 
