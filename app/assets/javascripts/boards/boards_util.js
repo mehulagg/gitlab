@@ -2,9 +2,22 @@ import { sortBy } from 'lodash';
 import ListIssue from 'ee_else_ce/boards/models/issue';
 import { ListType } from './constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import boardsStore from '~/boards/stores/boards_store';
 
 export function getMilestone() {
   return null;
+}
+
+export function formatBoardLists(lists) {
+  const formattedLists = lists.nodes.map(list =>
+    boardsStore.updateListPosition({ ...list, doNotFetchIssues: true }),
+  );
+  return formattedLists.reduce((map, list) => {
+    return {
+      ...map,
+      [list.id]: list,
+    };
+  }, {});
 }
 
 export function formatIssue(issue) {

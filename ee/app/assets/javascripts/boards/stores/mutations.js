@@ -105,7 +105,9 @@ export default {
 
   [mutationTypes.RECEIVE_EPICS_SUCCESS]: (state, { epics, canAdminEpic }) => {
     Vue.set(state, 'epics', union(state.epics || [], epics));
-    state.canAdminEpic = canAdminEpic;
+    if (canAdminEpic !== undefined) {
+      state.canAdminEpic = canAdminEpic;
+    }
   },
 
   [mutationTypes.RESET_EPICS]: state => {
@@ -116,8 +118,8 @@ export default {
     state,
     { originalIssue, fromListId, toListId, moveBeforeId, moveAfterId, epicId },
   ) => {
-    const fromList = state.boardLists.find(l => l.id === fromListId);
-    const toList = state.boardLists.find(l => l.id === toListId);
+    const fromList = state.boardLists[fromListId];
+    const toList = state.boardLists[toListId];
 
     const issue = moveIssueListHelper(originalIssue, fromList, toList);
 

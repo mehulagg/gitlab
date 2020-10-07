@@ -69,11 +69,13 @@ export default {
   methods: {
     ...mapActions(['moveList']),
     handleDragOnEnd(params) {
-      const { newIndex, oldIndex, item } = params;
+      const { newIndex, oldIndex, item, to } = params;
       const { listId } = item.dataset;
+      const replacedListId = to.children[newIndex].dataset.listId;
 
       this.moveList({
         listId,
+        replacedListId,
         newIndex,
         adjustmentValue: newIndex < oldIndex ? 1 : -1,
       });
