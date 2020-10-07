@@ -99,7 +99,7 @@ RSpec.describe DashboardOperationsProjectEntity do
       let(:user) { build(:user, :admin) }
 
       it 'shows the profile upgrade path' do
-        expect(subject[:upgrade_path]).to eq '/profile/billings'
+        expect(subject[:upgrade_path]).to eq ' /-/profile/billings'
       end
     end
 
