@@ -7,7 +7,7 @@ RSpec.describe 'Creation of a new commit' do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
-  let(:input) { { project_path: project.full_path, branch: branch, message: message, actions: actions } }
+  let(:input) { { project_path: project.full_path, branch: branch, message: message, actions: actions, request_source: request_source } }
   let(:branch) { 'master' }
   let(:message) { 'Commit message' }
   let(:actions) do
@@ -19,6 +19,7 @@ RSpec.describe 'Creation of a new commit' do
       }
     ]
   end
+  let(:request_source) { 'static_site_editor' }
 
   let(:mutation) { graphql_mutation(:commit_create, input) }
   let(:mutation_response) { graphql_mutation_response(:commit_create) }
