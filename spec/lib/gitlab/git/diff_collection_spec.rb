@@ -11,8 +11,11 @@ RSpec.describe Gitlab::Git::DiffCollection, :seed_helper do
 
       def initialize(count, value)
         @count = count
+        @size  = count
         @value = value
       end
+
+      attr_reader :size
 
       def each
         return enum_for(:each) unless block_given?
