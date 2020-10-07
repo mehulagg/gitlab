@@ -2841,59 +2841,6 @@
               "deprecationReason": null
             },
             {
-              "name": "labels",
-              "description": "Labels of the board",
-              "args": [
-                {
-                  "name": "after",
-                  "description": "Returns the elements in the list that come after the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "before",
-                  "description": "Returns the elements in the list that come before the specified cursor.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "first",
-                  "description": "Returns the first _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                },
-                {
-                  "name": "last",
-                  "description": "Returns the last _n_ elements from the list.",
-                  "type": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  },
-                  "defaultValue": null
-                }
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "LabelConnection",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "lists",
               "description": "Lists of the board",
               "args": [
@@ -36804,7 +36751,7 @@
             },
             {
               "name": "NPM",
-              "description": "Packages from the NPM package manager",
+              "description": "Packages from the Npm package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
@@ -36822,7 +36769,7 @@
             },
             {
               "name": "PYPI",
-              "description": "Packages from the PyPI package manager",
+              "description": "Packages from the Pypi package manager",
               "isDeprecated": false,
               "deprecationReason": null
             },
@@ -45998,20 +45945,6 @@
               "deprecationReason": null
             },
             {
-              "name": "lastTestReportManuallyCreated",
-              "description": "Indicates if latest test report was created by user",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "SCALAR",
-                "name": "Boolean",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "lastTestReportState",
               "description": "Latest requirement test report state",
               "args": [
@@ -48144,20 +48077,6 @@
           "description": "Represents summary of a security report",
           "fields": [
             {
-              "name": "apiFuzzing",
-              "description": "Aggregated counts for the api_fuzzing scan",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "OBJECT",
-                "name": "SecurityReportSummarySection",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
               "name": "containerScanning",
               "description": "Aggregated counts for the container_scanning scan",
               "args": [
@@ -48397,12 +48316,6 @@
             },
             {
               "name": "COVERAGE_FUZZING",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "API_FUZZING",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -54843,42 +54756,6 @@
               "defaultValue": null
             },
             {
-              "name": "labels",
-              "description": "Labels of the issue",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                }
-              },
-              "defaultValue": null
-            },
-            {
-              "name": "labelIds",
-              "description": "The IDs of labels to be added to the board.",
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "LabelID",
-                    "ofType": null
-                  }
-                }
-              },
-              "defaultValue": null
-            },
-            {
               "name": "clientMutationId",
               "description": "A unique identifier for the client performing the mutation.",
               "type": {
@@ -58552,7 +58429,7 @@
             },
             {
               "name": "reportType",
-              "description": "Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING)",
+              "description": "Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING)",
               "args": [
 
               ],
@@ -58612,7 +58489,7 @@
             },
             {
               "name": "state",
-              "description": "State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)",
+              "description": "State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)",
               "args": [
 
               ],
@@ -60003,12 +59880,6 @@
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "API_FUZZING",
-              "description": null,
-              "isDeprecated": false,
-              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -60597,18 +60468,6 @@
               "description": "Report Type in ascending order",
               "isDeprecated": false,
               "deprecationReason": null
-            },
-            {
-              "name": "state_desc",
-              "description": "State in descending order",
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "state_asc",
-              "description": "State in ascending order",
-              "isDeprecated": false,
-              "deprecationReason": null
             }
           ],
           "possibleTypes": null
@@ -60628,7 +60487,7 @@
               "deprecationReason": null
             },
             {
-              "name": "CONFIRMED",
+              "name": "DISMISSED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -60640,7 +60499,7 @@
               "deprecationReason": null
             },
             {
-              "name": "DISMISSED",
+              "name": "CONFIRMED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null

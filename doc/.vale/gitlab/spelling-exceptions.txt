@@ -221,7 +221,6 @@ Kibana
 Kinesis
 Knative
 Kramdown
-Kubecost
 kubectl
 Kubernetes
 Kubesec

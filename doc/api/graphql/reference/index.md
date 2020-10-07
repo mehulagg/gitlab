@@ -2135,7 +2135,6 @@ Represents a requirement.
 | `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
 | `id` | ID! | ID of the requirement |
 | `iid` | ID! | Internal ID of the requirement |
-| `lastTestReportManuallyCreated` | Boolean | Indicates if latest test report was created by user |
 | `lastTestReportState` | TestReportState | Latest requirement test report state |
 | `project` | Project! | Project to which the requirement belongs |
 | `state` | RequirementState! | State of the requirement |
@@ -2246,7 +2245,6 @@ Represents summary of a security report.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `apiFuzzing` | SecurityReportSummarySection | Aggregated counts for the api_fuzzing scan |
 | `containerScanning` | SecurityReportSummarySection | Aggregated counts for the container_scanning scan |
 | `coverageFuzzing` | SecurityReportSummarySection | Aggregated counts for the coverage_fuzzing scan |
 | `dast` | SecurityReportSummarySection | Aggregated counts for the dast scan |
@@ -2818,11 +2816,11 @@ Represents a vulnerability.
 | `location` | VulnerabilityLocation | Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability |
 | `primaryIdentifier` | VulnerabilityIdentifier | Primary identifier of the vulnerability. |
 | `project` | Project | The project on which the vulnerability was found |
-| `reportType` | VulnerabilityReportType | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING) |
+| `reportType` | VulnerabilityReportType | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING) |
 | `resolvedOnDefaultBranch` | Boolean! | Indicates whether the vulnerability is fixed on the default branch or not |
 | `scanner` | VulnerabilityScanner | Scanner metadata for the vulnerability. |
 | `severity` | VulnerabilitySeverity | Severity of the vulnerability (INFO, UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL) |
-| `state` | VulnerabilityState | State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED) |
+| `state` | VulnerabilityState | State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED) |
 | `title` | String | Title of the vulnerability |
 | `userNotesCount` | Int! | Number of user notes attached to the vulnerability |
 | `userPermissions` | VulnerabilityPermissions! | Permissions for the current user on the resource |
@@ -3460,9 +3458,9 @@ Values for sorting projects.
 | `GENERIC` | Packages from the Generic package manager |
 | `GOLANG` | Packages from the Golang package manager |
 | `MAVEN` | Packages from the Maven package manager |
-| `NPM` | Packages from the NPM package manager |
+| `NPM` | Packages from the Npm package manager |
 | `NUGET` | Packages from the Nuget package manager |
-| `PYPI` | Packages from the PyPI package manager |
+| `PYPI` | Packages from the Pypi package manager |
 
 ### PipelineConfigSourceEnum
 
@@ -3552,7 +3550,6 @@ The type of the security scanner.
 
 | Value | Description |
 | ----- | ----------- |
-| `API_FUZZING` |  |
 | `CONTAINER_SCANNING` |  |
 | `COVERAGE_FUZZING` |  |
 | `DAST` |  |
@@ -3737,7 +3734,6 @@ The type of the security scan that found the vulnerability.
 
 | Value | Description |
 | ----- | ----------- |
-| `API_FUZZING` |  |
 | `CONTAINER_SCANNING` |  |
 | `COVERAGE_FUZZING` |  |
 | `DAST` |  |
@@ -3770,8 +3766,6 @@ Vulnerability sort values.
 | `report_type_desc` | Report Type in descending order |
 | `severity_asc` | Severity in ascending order |
 | `severity_desc` | Severity in descending order |
-| `state_asc` | State in ascending order |
-| `state_desc` | State in descending order |
 | `title_asc` | Title in ascending order |
 | `title_desc` | Title in descending order |
 

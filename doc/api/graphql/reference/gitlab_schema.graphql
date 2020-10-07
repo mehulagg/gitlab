@@ -1073,31 +1073,6 @@ type Board {
   id: ID!
 
   """
-  Labels of the board
-  """
-  labels(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
-    after: String
-
-    """
-    Returns the elements in the list that come before the specified cursor.
-    """
-    before: String
-
-    """
-    Returns the first _n_ elements from the list.
-    """
-    first: Int
-
-    """
-    Returns the last _n_ elements from the list.
-    """
-    last: Int
-  ): LabelConnection
-
-  """
   Lists of the board
   """
   lists(
@@ -12489,7 +12464,7 @@ enum PackageTypeEnum {
   MAVEN
 
   """
-  Packages from the NPM package manager
+  Packages from the Npm package manager
   """
   NPM
 
@@ -12499,7 +12474,7 @@ enum PackageTypeEnum {
   NUGET
 
   """
-  Packages from the PyPI package manager
+  Packages from the Pypi package manager
   """
   PYPI
 }
@@ -15914,11 +15889,6 @@ type Requirement {
   iid: ID!
 
   """
-  Indicates if latest test report was created by user
-  """
-  lastTestReportManuallyCreated: Boolean
-
-  """
   Latest requirement test report state
   """
   lastTestReportState: TestReportState
@@ -16655,11 +16625,6 @@ Represents summary of a security report
 """
 type SecurityReportSummary {
   """
-  Aggregated counts for the api_fuzzing scan
-  """
-  apiFuzzing: SecurityReportSummarySection
-
-  """
   Aggregated counts for the container_scanning scan
   """
   containerScanning: SecurityReportSummarySection
@@ -16739,7 +16704,6 @@ type SecurityReportSummarySection {
 The type of the security scanner
 """
 enum SecurityScannerType {
-  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -18795,16 +18759,6 @@ input UpdateBoardInput {
   id: ID!
 
   """
-  The IDs of labels to be added to the board.
-  """
-  labelIds: [LabelID!]
-
-  """
-  Labels of the issue
-  """
-  labels: [String!]
-
-  """
   The id of milestone to be assigned to the board.
   """
   milestoneId: ID
@@ -20179,7 +20133,7 @@ type Vulnerability implements Noteable {
   """
   Type of the security report that found the vulnerability (SAST,
   DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION,
-  COVERAGE_FUZZING, API_FUZZING)
+  COVERAGE_FUZZING)
   """
   reportType: VulnerabilityReportType
 
@@ -20199,7 +20153,7 @@ type Vulnerability implements Noteable {
   severity: VulnerabilitySeverity
 
   """
-  State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)
+  State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)
   """
   state: VulnerabilityState
 
@@ -20642,7 +20596,6 @@ type VulnerabilityPermissions {
 The type of the security scan that found the vulnerability
 """
 enum VulnerabilityReportType {
-  API_FUZZING
   CONTAINER_SCANNING
   COVERAGE_FUZZING
   DAST
@@ -20861,16 +20814,6 @@ enum VulnerabilitySort {
   Severity in descending order
   """
   severity_desc
-
-  """
-  State in ascending order
-  """
-  state_asc
-
-  """
-  State in descending order
-  """
-  state_desc
 
   """
   Title in ascending order
