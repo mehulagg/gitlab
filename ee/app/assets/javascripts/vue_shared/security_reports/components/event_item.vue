@@ -90,7 +90,7 @@ export default {
         category="tertiary"
         :icon="button.iconName"
         :title="button.title"
-        click="button.onClick"
+        @click="button.onClick"
       />
     </div>
   </div>
