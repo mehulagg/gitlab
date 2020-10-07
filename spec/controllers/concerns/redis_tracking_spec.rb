@@ -42,20 +42,41 @@ RSpec.describe RedisTracking do
     end
 
     context 'when user is logged in' do
-      it 'tracks the event' do
+      before do
         sign_in(user)
+      end
 
+      it 'tracks the event' do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event)
+          .with(instance_of(String), 'i_analytics_dev_ops_score')
 
         get :index
       end
 
       it 'passes default_enabled flag' do
-        sign_in(user)
-
         expect(controller).to receive(:metric_feature_enabled?).with(feature.to_sym, true)
 
         get :index
+      end
+
+      it 'tracks the event if DNT is not enabled' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event)
+        request.headers['DNT'] = '0'
+
+        get :index
+      end
+
+      it 'does not track the event if DNT is enabled' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+        request.headers['DNT'] = '1'
+
+        get :index
+      end
+
+      it 'does not track the event if the format is not HTML' do
+        expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+
+        get :index, format: :json
       end
     end
 
@@ -76,7 +97,7 @@ RSpec.describe RedisTracking do
     end
 
     context 'when user is not logged in and there is no visitor_id' do
-      it 'does not tracks the event' do
+      it 'does not track the event' do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
 
         get :index
@@ -84,7 +105,7 @@ RSpec.describe RedisTracking do
     end
 
     context 'for untracked action' do
-      it 'does not tracks the event' do
+      it 'does not track the event' do
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
 
         get :new

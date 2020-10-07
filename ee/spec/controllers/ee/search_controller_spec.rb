@@ -18,7 +18,7 @@ RSpec.describe SearchController do
 
       context 'i_search_advanced' do
         it_behaves_like 'tracking unique hll events', :search_track_unique_users do
-          subject { get :show, params: { scope: 'projects', search: 'term' }, format: format }
+          subject { get :show, params: { scope: 'projects', search: 'term' } }
 
           let(:target_id) { 'i_search_advanced' }
           let(:expected_type) { instance_of(String) }
@@ -38,7 +38,7 @@ RSpec.describe SearchController do
           end
 
           it_behaves_like 'tracking unique hll events', :search_track_unique_users do
-            subject { get :show, params: request_params, format: format }
+            subject { get :show, params: request_params }
 
             let(:expected_type) { instance_of(String) }
           end
@@ -55,7 +55,7 @@ RSpec.describe SearchController do
             end
 
             it_behaves_like 'tracking unique hll events', :search_track_unique_users do
-              subject { get :show, params: request_params, format: format }
+              subject { get :show, params: request_params }
 
               let(:expected_type) { instance_of(String) }
             end
@@ -63,7 +63,7 @@ RSpec.describe SearchController do
 
           it 'does not track if there is no license available' do
             stub_licensed_features(elastic_search: false)
-            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event).with(instance_of(String), target_id)
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
 
             get :show, params: request_params, format: :html
           end
