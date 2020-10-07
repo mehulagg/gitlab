@@ -83,7 +83,7 @@ integration on all non-configured groups and projects by default.
 
 ## Use custom settings for a group or project integration
 
-1. Navigate to **Project or Group > Settings > Integrations**.
+1. Navigate to project or group's **Settings > Integrations**.
 1. Choose the integration you want to enable or update.
 1. From the drop-down, select **Use custom settings**.
 1. Ensure the toggle is set to **Enable integration** and enter all required settings.
