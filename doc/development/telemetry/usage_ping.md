@@ -320,7 +320,7 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `controller_actions`: controller actions we want to track.
    - `name`: event name.
    - `feature`: feature name, all metrics we track should be under feature flag.
-   - `feature_default_enabled`: set to `true` for it to be enabled by default.
+   - `feature_default_enabled`: feature flag is disabled by default, set to `true` for it to be enabled by default.
 
    Example usage:
 
