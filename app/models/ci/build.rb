@@ -908,7 +908,16 @@ module Ci
     def collect_test_reports!(test_reports)
       test_reports.get_suite(group_name).tap do |test_suite|
         each_report(Ci::JobArtifact::TEST_REPORT_FILE_TYPES) do |file_type, blob|
-          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, test_suite, job: self)
+          # NOTE: This is temporary and will be replaced later by a value
+          # that would come from an actual application limit.
+          max_test_cases = ::Gitlab.com? ? 500_000 : 0
+
+          Gitlab::Ci::Parsers.fabricate!(file_type).parse!(
+            blob,
+            test_suite,
+            job: self,
+            max_test_cases: max_test_cases
+          )
         end
       end
     end
