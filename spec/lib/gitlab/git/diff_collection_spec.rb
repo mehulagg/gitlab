@@ -520,16 +520,30 @@ RSpec.describe Gitlab::Git::DiffCollection, :seed_helper do
             .to yield_with_args(an_instance_of(Gitlab::Git::Diff))
         end
 
-        it 'prunes diffs that are quite big' do
-          allow(subject).to receive(:expand_diff?).and_return(expanded)
+        context 'single-file collections' do
+          it 'does not prune diffs' do
+            diff = nil
 
-          diff = nil
+            subject.each do |d|
+              diff = d
+            end
 
-          subject.each do |d|
-            diff = d
+            expect(diff.diff).not_to eq('')
           end
+        end
 
-          expect(diff.diff).to eq('')
+        context 'multi-file collections' do
+          let(:iterator) { [{ diff: 'b' }, { diff: 'a' * 20480 }]}
+
+          it 'prunes diffs that are quite big' do
+            diff = nil
+
+            subject.each do |d|
+              diff = d
+            end
+
+            expect(diff.diff).to eq('')
+          end
         end
 
         context 'when go over safe limits on files' do
