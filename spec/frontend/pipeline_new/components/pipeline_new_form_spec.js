@@ -141,7 +141,7 @@ describe('Pipeline New Form', () => {
       await waitForPromises();
     });
 
-    it('shows both error and warning', async () => {
+    it('shows both error and warning', () => {
       expect(findErrorAlert().exists()).toBe(true);
       expect(findWarningAlert().exists()).toBe(true);
     });
