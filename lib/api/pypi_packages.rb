@@ -32,11 +32,8 @@ module API
       end
 
       def find_package_versions
-        project_packages = packages_finder
-
-        packages = project_packages.select do |package|
-          normalize(package.name) == params[:package_name]
-        end
+        packages = packages_finder
+          .with_normalized_pypi_name(params[:package_name])
 
         not_found!('Package') if packages.empty?
 
