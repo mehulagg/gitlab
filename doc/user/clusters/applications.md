@@ -13,7 +13,7 @@ applications are needed for [Review Apps](../../ci/review_apps/index.md) and
 You can install them after you [create a cluster](../project/clusters/add_remove_clusters.md). GitLab provides
 GitLab Managed Apps that can installed with [one-click](#installing-using-one-click) or [using CI/CD](#install-using-gitlab-cicd-alpha). 
 
-## Installing Using One-Click
+## Install with one click
 
 Applications managed by GitLab are installed onto the `gitlab-managed-apps`
 namespace. This namespace:
