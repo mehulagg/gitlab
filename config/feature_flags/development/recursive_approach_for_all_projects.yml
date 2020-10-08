@@ -1,0 +1,7 @@
+---
+name: recursive_approach_for_all_projects
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/263442
+type: development
+group: group::access
+default_enabled: false

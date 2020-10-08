@@ -855,13 +855,31 @@ RSpec.describe Namespace do
   end
 
   describe '#all_projects' do
-    let(:group) { create(:group) }
-    let(:child) { create(:group, parent: group) }
-    let!(:project1) { create(:project_empty_repo, namespace: group) }
-    let!(:project2) { create(:project_empty_repo, namespace: child) }
+    shared_examples 'all projects for a namespace' do
+      let(:group) { create(:group) }
+      let(:child) { create(:group, parent: group) }
+      let!(:project1) { create(:project_empty_repo, namespace: group) }
+      let!(:project2) { create(:project_empty_repo, namespace: child) }
 
-    it { expect(group.all_projects.to_a).to match_array([project2, project1]) }
-    it { expect(child.all_projects.to_a).to match_array([project2]) }
+      it { expect(group.all_projects.to_a).to match_array([project2, project1]) }
+      it { expect(child.all_projects.to_a).to match_array([project2]) }
+    end
+
+    context 'with recursive approach' do
+      before do
+        stub_feature_flags(recursive_approach_for_all_projects: true)
+      end
+
+      include_examples 'all projects for a namespace'
+    end
+
+    context 'with route path wildcard approach' do
+      before do
+        stub_feature_flags(recursive_approach_for_all_projects: false)
+      end
+
+      include_examples 'all projects for a namespace'
+    end
   end
 
   describe '#all_pipelines' do
