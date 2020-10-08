@@ -85,6 +85,10 @@ module QA
         ENV['CI_JOB_ID']
       end
 
+      def ci_job_url
+        ENV['CI_JOB_URL']
+      end
+
       def ci_project_name
         ENV['CI_PROJECT_NAME']
       end
