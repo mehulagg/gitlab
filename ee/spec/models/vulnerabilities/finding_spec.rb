@@ -630,13 +630,22 @@ RSpec.describe Vulnerabilities::Finding do
           request: {
             headers: evidence['request']['headers'],
             url: evidence['request']['url'],
-            method: evidence['request']['method']
+            method: evidence['request']['method'],
+            body: evidence['request']['body']
           },
           response: {
             headers: evidence['response']['headers'],
             reason_phrase: evidence['response']['reason_phrase'],
-            status_code: evidence['response']['status_code']
-          })
+            status_code: evidence['response']['status_code'],
+            body: evidence['request']['body']
+          },
+          source: {
+            id: evidence.dig('source', 'id'),
+            name: evidence.dig('source', 'name'),
+            url: evidence.dig('source', 'url')
+          },
+          supporting_messages: evidence['supporting_messages'] || []
+        )
       end
     end
 
@@ -649,12 +658,14 @@ RSpec.describe Vulnerabilities::Finding do
           request: {
             headers: [],
             url: nil,
-            method: nil
+            method: nil,
+            body: nil
           },
           response: {
             headers: [],
             reason_phrase: nil,
-            status_code: nil
+            status_code: nil,
+            body: nil
           })
       end
     end
