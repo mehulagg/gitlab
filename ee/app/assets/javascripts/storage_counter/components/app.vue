@@ -51,6 +51,7 @@ export default {
       variables() {
         return {
           fullPath: this.namespacePath,
+          withExcessStorageData: true,
         };
       },
       /**
@@ -61,6 +62,12 @@ export default {
        */
       update: data => ({
         projects: data.namespace.projects.edges.map(({ node }) => node),
+        actualRepositorySizeLimit: data.namespace.actualRepositorySizeLimit,
+        additionalPurchasedStorageSize: data.namespace.additionalPurchasedStorageSize,
+        containsLockedProjects: data.namespace.containsLockedProjects,
+        repositorySizeExcessProjectCount: data.namespace.repositorySizeExcessProjectCount,
+        totalRepositorySize: data.namespace.totalRepositorySize,
+        totalRepositorySizeExcess: data.namespace.totalRepositorySizeExcess,
         totalUsage:
           data.namespace.rootStorageStatistics && data.namespace.rootStorageStatistics.storageSize
             ? numberToHumanSize(data.namespace.rootStorageStatistics.storageSize)
@@ -85,6 +92,13 @@ export default {
     isAdditionalStorageFlagEnabled() {
       return this.glFeatures.additionalRepoStorageByNamespace;
     },
+    storageStatistics() {
+      return {
+        totalRepositorySize: this.namespace.totalRepositorySize,
+        totalRepositorySizeExcess: this.namespace.totalRepositorySizeExcess,
+        additionalPurchasedStorageSize: this.namespace.additionalPurchasedStorageSize,
+      };
+    },
   },
   methods: {
     formatSize(size) {
@@ -97,7 +111,7 @@ export default {
 <template>
   <div>
     <div v-if="isAdditionalStorageFlagEnabled && namespace.rootStorageStatistics">
-      <usage-statistics :root-storage-statistics="namespace.rootStorageStatistics" />
+      <usage-statistics :root-storage-statistics="storageStatistics" />
     </div>
     <div v-else class="gl-py-4 gl-px-2 gl-m-0">
       <div class="gl-display-flex gl-align-items-center">

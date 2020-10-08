@@ -18,6 +18,26 @@ export default {
       default: '',
     },
   },
+  computed: {
+    hasDenomenator() {
+      return Array.isArray(this.usage.size);
+    },
+    usageSize() {
+      if (this.hasDenomenator) {
+        const [numerator, denomenator] = this.usage.size;
+        return {
+          value: numerator.value,
+          unit: numerator.unit,
+          denomenator,
+        };
+      } else {
+        return {
+          value: this.usage.size.value,
+          unit: this.usage.size.unit,
+        };
+      }
+    },
+  },
 };
 </script>
 <template>
@@ -25,12 +45,25 @@ export default {
     <p class="mb-2">
       <gl-sprintf :message="__('%{size} %{unit}')">
         <template #size>
-          <span class="gl-font-size-h-display gl-font-weight-bold">{{ usage.size.value }}</span>
+          <span class="gl-font-size-h-display gl-font-weight-bold">{{ usageSize.value }}</span>
         </template>
         <template #unit>
-          <span class="gl-font-lg gl-font-weight-bold">{{ usage.size.unit }}</span>
+          <span class="gl-font-lg gl-font-weight-bold">{{ usageSize.unit }}</span>
         </template>
       </gl-sprintf>
+      <template v-if="hasDenomenator">
+        <span class="gl-font-size-h-display gl-font-weight-bold">/</span>
+        <gl-sprintf :message="__('%{size} %{unit}')">
+          <template #size>
+            <span class="gl-font-size-h-display gl-font-weight-bold">{{
+              usageSize.denomenator.value
+            }}</span>
+          </template>
+          <template #unit>
+            <span class="gl-font-lg gl-font-weight-bold">{{ usageSize.denomenator.unit }}</span>
+          </template>
+        </gl-sprintf>
+      </template>
     </p>
     <p class="gl-border-b-2 gl-border-b-solid gl-border-b-gray-100 gl-font-weight-bold gl-pb-3">
       {{ usage.description }}

@@ -42,9 +42,7 @@ export default {
     getStorageUsage(type) {
       const usages = {
         total: {
-          size: this.formatSize(
-            this.rootStorageStatistics.repositorySize + this.rootStorageStatistics.lfsObjectsSize,
-          ),
+          size: this.formatSize(this.rootStorageStatistics.totalRepositorySize),
           description: s__('UsageQuota|Total namespace storage used'),
           link: {
             text: s__('UsageQuota|Learn more about usage quotas'),
@@ -52,7 +50,7 @@ export default {
           },
         },
         excess: {
-          size: this.formatSize(0),
+          size: this.formatSize(this.rootStorageStatistics.totalRepositorySizeExcess),
           description: s__('UsageQuota|Total excess storage used'),
           link: {
             text: s__('UsageQuota|Learn more about excess storage usage'),
@@ -60,7 +58,10 @@ export default {
           },
         },
         purchased: {
-          size: this.formatSize(0),
+          size: [
+            this.formatSize(this.rootStorageStatistics.totalRepositorySizeExcess),
+            this.formatSize(this.rootStorageStatistics.additionalPurchasedStorageSize),
+          ],
           description: s__('UsageQuota|Purchased storage available'),
           link: {
             text: s__('UsageQuota|Purchase more storage'),
