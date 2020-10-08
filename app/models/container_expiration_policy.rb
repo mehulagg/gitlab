@@ -19,6 +19,11 @@ class ContainerExpirationPolicy < ApplicationRecord
   scope :active, -> { where(enabled: true) }
   scope :preloaded, -> { preload(project: [:route]) }
 
+  def self.executable
+    runnable_schedules.joins(project: :container_repositories)
+                      .distinct
+  end
+
   def self.keep_n_options
     {
       1 => _('%{tags} tag per image name') % { tags: 1 },
