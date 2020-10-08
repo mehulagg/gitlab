@@ -129,8 +129,8 @@ export default {
     isSelected(id) {
       return Boolean(this.selectedValueStreamId && this.selectedValueStreamId === id);
     },
-    onSelect(id) {
-      this.setSelectedValueStream(id);
+    onSelect(selectedId) {
+      this.setSelectedValueStream(this.data.find(({ id }) => id === selectedId));
     },
     onDelete() {
       const name = this.selectedValueStreamName;

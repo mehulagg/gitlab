@@ -13,7 +13,7 @@ RSpec.describe Ci::RetryBuildService do
       subject(:service) { described_class.new(project, user) }
 
       let(:new_build) do
-        Timecop.freeze(1.second.from_now) do
+        travel_to(1.second.from_now) do
           service.reprocess!(build)
         end
       end

@@ -21,6 +21,18 @@ describe('EpicsSwimlanes', () => {
         epics: mockEpics,
         issuesByListId: mockIssuesByListId,
         issues,
+        pageInfoByListId: {
+          'gid://gitlab/List/1': {},
+          'gid://gitlab/List/2': {},
+        },
+        listsFlags: {
+          'gid://gitlab/List/1': {
+            unassignedIssuesCount: 1,
+          },
+          'gid://gitlab/List/2': {
+            unassignedIssuesCount: 1,
+          },
+        },
       },
       getters,
     });

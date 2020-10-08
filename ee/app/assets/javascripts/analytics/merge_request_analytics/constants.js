@@ -1,7 +1,7 @@
 import { __ } from '~/locale';
 
 export const DEFAULT_NUMBER_OF_DAYS = 365;
-export const MAX_RECORDS = 100;
+export const PER_PAGE = 20;
 export const ASSIGNEES_VISIBLE = 2;
 export const AVATAR_SIZE = 24;
 

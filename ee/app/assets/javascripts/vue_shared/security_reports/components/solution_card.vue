@@ -1,6 +1,5 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
-import { setUrlFragment } from '~/lib/utils/url_utility';
 
 export default {
   name: 'SolutionCard',
@@ -26,11 +25,6 @@ export default {
       default: false,
       required: false,
     },
-    vulnerabilityFeedbackHelpPath: {
-      type: String,
-      default: '',
-      required: false,
-    },
     isStandaloneVulnerability: {
       type: Boolean,
       required: false,
@@ -41,23 +35,8 @@ export default {
     solutionText() {
       return (this.remediation && this.remediation.summary) || this.solution;
     },
-    helpPath() {
-      return setUrlFragment(
-        this.vulnerabilityFeedbackHelpPath,
-        'solutions-for-vulnerabilities-auto-remediation',
-      );
-    },
     showCreateMergeRequestMsg() {
       return !this.hasMr && Boolean(this.remediation) && this.hasDownload;
-    },
-    showLearnAboutRemedationMsg() {
-      return !this.hasMr;
-    },
-    showMsg() {
-      return (
-        this.vulnerabilityFeedbackHelpPath &&
-        (this.showCreateMergeRequestMsg || this.showLearnAboutRemedationMsg)
-      );
     },
   },
 };
@@ -76,25 +55,14 @@ export default {
         solutionText
       }}</span>
     </div>
-    <template v-if="showMsg">
+    <template v-if="showCreateMergeRequestMsg">
       <div class="card-footer" :class="{ 'border-0': !solutionText }">
         <em class="text-secondary">
-          <template v-if="showCreateMergeRequestMsg">
-            {{
-              s__(
-                'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
-              )
-            }}
-          </template>
-
-          <a
-            v-if="showLearnAboutRemedationMsg"
-            :href="helpPath"
-            class="js-link-vulnerabilityFeedbackHelpPath"
-          >
-            {{ s__('ciReport|Learn more about interacting with security reports') }}
-            <gl-icon :size="16" name="external-link" class="align-text-top" />
-          </a>
+          {{
+            s__(
+              'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
+            )
+          }}
         </em>
       </div>
     </template>

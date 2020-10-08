@@ -651,9 +651,8 @@ describe('Design management index page', () => {
 
   describe('when navigating', () => {
     it('ensures fullscreen layout is not applied', () => {
-      createComponent(true);
+      createComponent({ loading: true });
 
-      wrapper.vm.$router.push('/');
       expect(mockPageEl.classList.remove).toHaveBeenCalledTimes(1);
       expect(mockPageEl.classList.remove).toHaveBeenCalledWith(...DESIGN_DETAIL_LAYOUT_CLASSLIST);
     });
@@ -662,7 +661,7 @@ describe('Design management index page', () => {
       router.replace({
         path: '/designs',
       });
-      createComponent(true);
+      createComponent({ loading: true });
 
       return wrapper.vm.$nextTick().then(() => {
         expect(scrollIntoViewMock).toHaveBeenCalled();

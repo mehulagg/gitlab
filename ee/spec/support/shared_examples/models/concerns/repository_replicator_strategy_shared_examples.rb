@@ -113,6 +113,12 @@ RSpec.shared_examples 'a repository replicator' do
     end
   end
 
+  describe '.git_access_class' do
+    it 'is implemented' do
+      expect(replicator.class.git_access_class).to be < Gitlab::GitAccess
+    end
+  end
+
   describe '#model' do
     let(:invoke_model) { replicator.class.model }
 

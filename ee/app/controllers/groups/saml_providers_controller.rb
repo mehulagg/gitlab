@@ -8,6 +8,8 @@ class Groups::SamlProvidersController < Groups::ApplicationController
   before_action :check_group_saml_available!
   before_action :check_group_saml_configured
 
+  feature_category :authentication_and_authorization
+
   def show
     @saml_provider = @group.saml_provider || @group.build_saml_provider
     @saml_response_check = load_test_response if @saml_provider.persisted?

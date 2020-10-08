@@ -63,7 +63,11 @@ RSpec.describe Members::DestroyService do
     subject { described_class.new(nil) }
 
     context 'for members with expired access' do
-      let(:member) { create(:project_member, user: member_user, expires_at: 1.day.ago) }
+      let!(:member) { create(:project_member, user: member_user, expires_at: 1.day.from_now) }
+
+      before do
+        travel_to(3.days.from_now)
+      end
 
       context 'audit events' do
         it_behaves_like 'logs an audit event' do

@@ -79,7 +79,7 @@ test:
 
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java uses [Maven](https://maven.apache.org/)
 to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
-generate the coverage artifact.  
+generate the coverage artifact.
 You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
 
 GitLab expects the artifact in the Cobertura format, so you have to execute a few
@@ -97,7 +97,10 @@ test-jdk11:
       - target/site/jacoco/jacoco.xml
 
 coverage-jdk11:
-  stage: visualize # Must be in a stage later than test-jdk11's stage. The visualize stage does not exist by default. Please define it first, or chose an existing stage like deploy.
+  # Must be in a stage later than test-jdk11's stage.
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or chose an existing stage like `deploy`.
+  stage: visualize
   image: haynes/jacoco2cobertura:1.0.3
   script:
     # convert report from jacoco to cobertura
@@ -116,7 +119,7 @@ coverage-jdk11:
 
 The following [`gitlab-ci.yml`](../../../ci/yaml/README.md) example for Java uses [Gradle](https://gradle.org/)
 to build the project and [Jacoco](https://www.eclemma.org/jacoco/) coverage-tooling to
-generate the coverage artifact.  
+generate the coverage artifact.
 You can check the [Docker image configuration and scripts](https://gitlab.com/haynes/jacoco2cobertura) if you want to build your own image.
 
 GitLab expects the artifact in the Cobertura format, so you have to execute a few
@@ -134,7 +137,10 @@ test-jdk11:
       - build/jacoco/jacoco.xml
 
 coverage-jdk11:
-  stage: visualize # Must be in a stage later than test-jdk11's stage. The visualize stage does not exist by default. Please define it first, or chose an existing stage like deploy.
+  # Must be in a stage later than test-jdk11's stage.
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or chose an existing stage like `deploy`.
+  stage: visualize
   image: haynes/jacoco2cobertura:1.0.3
   script:
     # convert report from jacoco to cobertura

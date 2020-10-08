@@ -103,7 +103,7 @@ RSpec.describe ProjectsController do
 
     context 'custom project templates' do
       let(:group) { create(:group) }
-      let(:project_template) { create(:project, :repository, :public, namespace: group) }
+      let(:project_template) { create(:project, :repository, :public, :metrics_dashboard_enabled, namespace: group) }
       let(:templates_params) do
         {
           path: 'foo',

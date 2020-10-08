@@ -92,7 +92,7 @@ The following documentation relates to the DevOps **Manage** stage:
 | Manage topics                                                                         | Description                                                                                                                                                                                                                  |
 |:--------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Authentication and<br/>Authorization](administration/auth/README.md) **(CORE ONLY)** | Supported authentication and authorization providers.                                                                                                                                                                        |
-| [GitLab Value Stream Analytics](user/project/cycle_analytics.md)                      | Measure the time it takes to go from an [idea to production](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#from-idea-to-production-with-gitlab) for each project you have. |
+| [GitLab Value Stream Analytics](user/analytics/value_stream_analytics.md)                      | Measure the time it takes to go from an [idea to production](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/#from-idea-to-production-with-gitlab) for each project you have. |
 | [Instance-level Analytics](user/admin_area/analytics/index.md)                              | Discover statistics on how many GitLab features you use and user activity.                                                                                                                                                   |
 
 <div align="right">
@@ -218,7 +218,7 @@ The following documentation relates to the DevOps **Create** stage:
 | [GitLab GraphQL API](api/graphql/index.md)                                    | Integrate with GitLab using our GraphQL API. |
 | [GitLab Integration](integration/README.md)                                   | Integrate with multiple third-party services with GitLab to allow external issue trackers and external authentication. |
 | [GitLab Webhooks](user/project/integrations/webhooks.md)                      | Let GitLab notify you when new code has been pushed to your project.                                                   |
-| [Jira Development Panel](integration/jira_development_panel.md) **(PREMIUM)** | See GitLab information in the Jira Development Panel.                                                                  |
+| [Jira Development Panel](integration/jira_development_panel.md) | See GitLab information in the Jira Development Panel.                                                                  |
 | [Integrations](user/project/integrations/overview.md)             | Integrate a project with external services, such as CI and chat.                                                       |
 | [Trello Power-Up](integration/trello_power_up.md)                             | Integrate with GitLab's Trello Power-Up.                                                                               |
 

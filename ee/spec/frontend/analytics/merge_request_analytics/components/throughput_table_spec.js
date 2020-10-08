@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline, GlPagination } from '@gitlab/ui';
 import store from 'ee/analytics/merge_request_analytics/store';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
 import {
@@ -13,6 +13,7 @@ import {
   endDate,
   fullPath,
   throughputTableHeaders,
+  pageInfo,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -58,12 +59,10 @@ describe('ThroughputTable', () => {
 
   const additionalData = data => {
     wrapper.setData({
-      throughputTableData: [
-        {
-          ...throughputTableData[0],
-          ...data,
-        },
-      ],
+      throughputTableData: {
+        list: [{ ...throughputTableData[0], ...data }],
+        pageInfo,
+      },
     });
   };
 
@@ -76,6 +75,18 @@ describe('ThroughputTable', () => {
 
   const findColSubComponent = (colTestId, childComponent) =>
     findCol(colTestId).find(childComponent);
+
+  const findPagination = () => wrapper.find(GlPagination);
+
+  const findPrevious = () =>
+    findPagination()
+      .findAll('.page-item')
+      .at(0);
+
+  const findNext = () =>
+    findPagination()
+      .findAll('.page-item')
+      .at(1);
 
   afterEach(() => {
     wrapper.destroy();
@@ -100,6 +111,10 @@ describe('ThroughputTable', () => {
 
     it('does not display the table', () => {
       displaysComponent(GlTable, false);
+    });
+
+    it('does not display the pagination', () => {
+      displaysComponent(GlPagination, false);
     });
   });
 
@@ -132,7 +147,12 @@ describe('ThroughputTable', () => {
   describe('with data', () => {
     beforeEach(() => {
       wrapper = createComponent({ func: mount });
-      wrapper.setData({ throughputTableData });
+      wrapper.setData({
+        throughputTableData: {
+          list: throughputTableData,
+          pageInfo,
+        },
+      });
     });
 
     it('displays the table', () => {
@@ -145,6 +165,10 @@ describe('ThroughputTable', () => {
 
     it('does not display the no data message', () => {
       displaysComponent(GlAlert, false);
+    });
+
+    it('displays the pagination', () => {
+      displaysComponent(GlPagination, true);
     });
 
     describe('table fields', () => {
@@ -191,7 +215,7 @@ describe('ThroughputTable', () => {
         it('includes an active label icon and count when available', async () => {
           additionalData({
             labels: {
-              nodes: [{ title: 'Brinix' }],
+              count: 1,
             },
           });
 
@@ -347,6 +371,60 @@ describe('ThroughputTable', () => {
         expect(assignees.exists()).toBe(true);
         expect(assignees.props('avatars')).toBe(throughputTableData[0].assignees.nodes);
       });
+    });
+  });
+
+  describe('pagination', () => {
+    beforeEach(() => {
+      wrapper = createComponent({ func: mount });
+      wrapper.setData({
+        throughputTableData: {
+          list: throughputTableData,
+          pageInfo,
+        },
+      });
+    });
+
+    it('disables the prev button on the first page', () => {
+      expect(findPrevious().classes()).toContain('disabled');
+      expect(findNext().classes()).not.toContain('disabled');
+    });
+
+    it('disables the next button on the last page', async () => {
+      wrapper.setData({
+        pagination: {
+          currentPage: 3,
+        },
+        throughputTableData: {
+          pageInfo: {
+            hasNextPage: false,
+          },
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findPrevious().classes()).not.toContain('disabled');
+      expect(findNext().classes()).toContain('disabled');
+    });
+
+    it('shows the prev and next buttons on middle pages', async () => {
+      wrapper.setData({
+        pagination: {
+          currentPage: 2,
+        },
+        throughputTableData: {
+          pageInfo: {
+            hasNextPage: true,
+            hasPrevPage: true,
+          },
+        },
+      });
+
+      await wrapper.vm.$nextTick();
+
+      expect(findPrevious().classes()).not.toContain('disabled');
+      expect(findNext().classes()).not.toContain('disabled');
     });
   });
 

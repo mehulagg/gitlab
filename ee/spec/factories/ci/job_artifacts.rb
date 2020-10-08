@@ -413,5 +413,16 @@ FactoryBot.define do
           'application/json')
       end
     end
+
+    trait :api_fuzzing do
+      file_format { :raw }
+      file_type { :api_fuzzing }
+
+      after(:build) do |artifact, _|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-api-fuzzing-report.json'),
+          'application/json')
+      end
+    end
   end
 end

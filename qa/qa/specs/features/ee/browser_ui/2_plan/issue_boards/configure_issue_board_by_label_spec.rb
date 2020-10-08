@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/259054', type: :stale } do
+  RSpec.describe 'Plan' do
     describe 'Configure issue board by label' do
       let(:label_board_list) do
         EE::Resource::Board::BoardList::Project::LabelBoardList.fabricate_via_api!
       end
 
-      let(:doing) { 'Doing' }
+      let(:testing) { 'Testing' }
       let(:ready_for_dev) { 'Ready for development' }
 
       let(:issue_1) { 'Issue 1' }
@@ -16,7 +16,7 @@ module QA
       before do
         Flow::Login.sign_in
 
-        fabricate_issue_with_label(label_board_list.project, issue_1, doing)
+        fabricate_issue_with_label(label_board_list.project, issue_1, testing)
         fabricate_issue_with_label(label_board_list.project, issue_2, ready_for_dev)
 
         label_board_list.project.visit!
@@ -25,7 +25,7 @@ module QA
 
       it 'shows only issues that match the configured label', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/646' do
         Page::Component::IssueBoard::Show.perform do |show|
-          show.configure_by_label(doing)
+          show.configure_by_label(testing)
 
           expect(show).not_to have_content(issue_2)
           expect(show.boards_list_cards_area_with_index(1)).to have_content(issue_1)

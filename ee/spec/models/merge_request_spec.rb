@@ -25,6 +25,8 @@ RSpec.describe MergeRequest do
     it { is_expected.to have_many(:approved_by_users) }
     it { is_expected.to have_one(:merge_train) }
     it { is_expected.to have_many(:approval_rules) }
+    it { is_expected.to have_many(:approval_merge_request_rule_sources).through(:approval_rules) }
+    it { is_expected.to have_many(:approval_project_rules).through(:approval_merge_request_rule_sources) }
 
     describe 'approval_rules association' do
       describe '#applicable_to_branch' do
@@ -115,6 +117,24 @@ RSpec.describe MergeRequest do
       merge_request = build(:merge_request)
 
       expect(merge_request.allows_multiple_assignees?).to be(true)
+    end
+  end
+
+  describe '#allows_multiple_reviewers?' do
+    it 'returns false without license' do
+      stub_licensed_features(multiple_merge_request_reviewers: false)
+
+      merge_request = build_stubbed(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(false)
+    end
+
+    it 'returns true when licensed' do
+      stub_licensed_features(multiple_merge_request_reviewers: true)
+
+      merge_request = build(:merge_request)
+
+      expect(merge_request.allows_multiple_reviewers?).to be(true)
     end
   end
 
@@ -706,6 +726,40 @@ RSpec.describe MergeRequest do
       it 'returns status and error message' do
         expect(subject[:status]).to eq(:error)
         expect(subject[:status_reason]).to eq('This merge request does not have license scanning reports')
+      end
+    end
+
+    context "when a license scan report is produced from the head pipeline" do
+      where(:pipeline_status, :build_types, :expected_status) do
+        [
+          [:blocked, [:license_scan_v2_1], :parsed],
+          [:blocked, [:container_scanning], :error],
+          [:blocked, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:blocked, [], :error],
+          [:failed, [:container_scanning], :error],
+          [:failed, [:license_scan_v2_1], :parsed],
+          [:failed, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:failed, [], :error],
+          [:running, [:container_scanning], :error],
+          [:running, [:license_scan_v2_1], :parsed],
+          [:running, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:running, [], :error],
+          [:success, [:container_scanning], :error],
+          [:success, [:license_scan_v2_1], :parsed],
+          [:success, [:license_scan_v2_1, :container_scanning], :parsed],
+          [:success, [], :error]
+        ]
+      end
+
+      with_them do
+        let!(:head_pipeline) { create(:ci_pipeline, pipeline_status, project: project, ref: merge_request.source_branch, sha: merge_request.diff_head_sha, builds: builds) }
+        let(:builds) { build_types.map { |build_type| create(:ee_ci_build, build_type) } }
+
+        before do
+          synchronous_reactive_cache(merge_request)
+        end
+
+        specify { expect(subject[:status]).to eq(expected_status) }
       end
     end
   end

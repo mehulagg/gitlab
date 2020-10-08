@@ -4,7 +4,11 @@ import { GlDaterangePicker } from '@gitlab/ui';
 import DateRangeButtons from 'ee/audit_events/components/date_range_buttons.vue';
 import DateRangeField from 'ee/audit_events/components/date_range_field.vue';
 import { CURRENT_DATE, MAX_DATE_RANGE } from 'ee/audit_events/constants';
-import { dateAtFirstDayOfMonth, parsePikadayDate } from '~/lib/utils/datetime_utility';
+import {
+  dateAtFirstDayOfMonth,
+  getDateInPast,
+  parsePikadayDate,
+} from '~/lib/utils/datetime_utility';
 
 describe('DateRangeField component', () => {
   let wrapper;
@@ -70,6 +74,21 @@ describe('DateRangeField component', () => {
         defaultStartDate: startDate,
         defaultEndDate: endDate,
       });
+    });
+  });
+
+  describe('when a only a endDate is picked', () => {
+    it('emits the "selected" event with the picked endDate and startDate set to the day before', async () => {
+      createComponent();
+      findDatePicker().vm.$emit('input', { endDate });
+
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted().selected[0]).toEqual([
+        {
+          startDate: getDateInPast(endDate, 1),
+          endDate,
+        },
+      ]);
     });
   });
 

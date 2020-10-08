@@ -84,7 +84,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
     end
 
     describe 'validation_status field' do
-      it 'is a placeholder validation status' do
+      it 'is the validation status' do
         expect(first_dast_site_profile['validationStatus']).to eq('PENDING_VALIDATION')
       end
     end

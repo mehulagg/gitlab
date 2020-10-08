@@ -37,7 +37,8 @@ class Packages::Package < ApplicationRecord
   validate :package_already_taken, if: :npm?
   validates :name, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
-  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: -> { npm? || nuget? }
+  validates :version, format: { with: Gitlab::Regex.semver_regex }, if: :npm?
+  validates :version, format: { with: Gitlab::Regex.nuget_version_regex }, if: :nuget?
   validates :version, format: { with: Gitlab::Regex.conan_recipe_component_regex }, if: :conan?
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
   validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
@@ -47,7 +48,7 @@ class Packages::Package < ApplicationRecord
     format: { with: Gitlab::Regex.generic_package_version_regex },
     if: :generic?
 
-  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5, composer: 6, generic: 7, golang: 8 }
+  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, pypi: 5, composer: 6, generic: 7, golang: 8, debian: 9 }
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }

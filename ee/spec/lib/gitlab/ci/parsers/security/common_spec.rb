@@ -57,5 +57,26 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         end
       end
     end
+
+    context 'parsing scan' do
+      it 'returns scan object for each finding' do
+        scans = report.findings.map(&:scan)
+
+        expect(scans.map(&:status).all?('success')).to be(true)
+        expect(scans.map(&:type).all?('dependency_scanning')).to be(true)
+        expect(scans.map(&:start_time).all?('placeholder-value')).to be(true)
+        expect(scans.map(&:end_time).all?('placeholder-value')).to be(true)
+        expect(scans.size).to eq(3)
+        expect(scans.first).to be_a(::Gitlab::Ci::Reports::Security::Scan)
+      end
+
+      it 'returns nil when scan is not a hash' do
+        parser =  described_class.new
+        empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
+        parser.parse!({}.to_json, empty_report)
+
+        expect(empty_report.scan).to be(nil)
+      end
+    end
   end
 end

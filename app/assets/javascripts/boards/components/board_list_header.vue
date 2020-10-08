@@ -58,7 +58,7 @@ export default {
   },
   inject: {
     boardId: {
-      type: String,
+      default: '',
     },
   },
   data() {
@@ -176,7 +176,6 @@ export default {
   <header
     :class="{
       'has-border': list.label && list.label.color,
-      'gl-relative': list.isExpanded,
       'gl-h-full': !list.isExpanded,
       'board-inner gl-rounded-top-left-base gl-rounded-top-right-base': isSwimlanesHeader,
     }"
@@ -188,7 +187,7 @@ export default {
     <h3
       :class="{
         'user-can-drag': !disabled && !list.preset,
-        'gl-py-3 gl-h-full!': !list.isExpanded && !isSwimlanesHeader,
+        'gl-py-3 gl-h-full': !list.isExpanded && !isSwimlanesHeader,
         'gl-border-b-0': !list.isExpanded || isSwimlanesHeader,
         'gl-py-2': !list.isExpanded && isSwimlanesHeader,
       }"

@@ -317,7 +317,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo /opt/gitlab/embedded/service/gitlab-shell/bin/check -config /opt/gitlab/embedded/service/gitlab-shell/config.yml`
+1. Run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 **For installations from source**
@@ -364,7 +364,7 @@ disable enforcement. For more information, see the documentation on configuring
    ```
 
 1. Save the files and [restart GitLab](../restart_gitlab.md#installations-from-source).
-1. Run `sudo -u git /home/git/gitlab-shell/bin/check -config /home/git/gitlab-shell/config.yml`
+1. Run `sudo -u git /home/git/gitaly/gitaly-hooks check /home/git/gitaly/config.toml`
    to confirm that Gitaly can perform callbacks to the GitLab internal API.
 
 ### Configure Gitaly clients
@@ -406,8 +406,8 @@ server (with `gitaly_address`) unless you setup with special
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
-1. Run `sudo gitlab-rake gitlab:gitaly:check` to confirm the Gitaly client can connect to Gitaly
-   servers.
+1. Run `sudo gitlab-rake gitlab:gitaly:check` on the Gitaly client (for example, the
+   Rails application) to confirm it can connect to Gitaly servers.
 1. Tail the logs to see the requests:
 
    ```shell
@@ -710,6 +710,15 @@ Gitaly Go process. Some examples of things that are implemented in `gitaly-ruby`
 
 - RPCs that deal with wikis.
 - RPCs that create commits on behalf of a user, such as merge commits.
+
+We recommend:
+
+- At least 300MB memory per worker.
+- No more than one worker per core.
+
+NOTE: **Note:**
+`gitaly-ruby` is planned to be eventually removed. To track progress, see the
+[Remove the Gitaly-Ruby sidecar](https://gitlab.com/groups/gitlab-org/-/epics/2862) epic.
 
 ### Configure number of `gitaly-ruby` workers
 

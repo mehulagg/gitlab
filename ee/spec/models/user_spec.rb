@@ -316,8 +316,8 @@ RSpec.describe User do
       context 'when group has custom project templates' do
         let!(:private_project) { create :project, :private, namespace: group, name: 'private_project' }
         let!(:internal_project) { create :project, :internal, namespace: group, name: 'internal_project' }
-        let!(:public_project) { create :project, :public, namespace: group, name: 'public_project' }
-        let!(:public_project_two) { create :project, :public, namespace: group, name: 'public_project_second' }
+        let!(:public_project) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public_project' }
+        let!(:public_project_two) { create :project, :metrics_dashboard_enabled, :public, namespace: group, name: 'public_project_second' }
 
         it 'returns public projects' do
           expect(user.available_custom_project_templates).to include public_project
@@ -341,8 +341,22 @@ RSpec.describe User do
           end
         end
 
-        it 'returns internal projects' do
-          expect(user.available_custom_project_templates).to include internal_project
+        context 'returns internal projects if user' do
+          it 'is a member of the project' do
+            expect(user.available_custom_project_templates).not_to include internal_project
+
+            internal_project.add_developer(user)
+
+            expect(user.available_custom_project_templates).to include internal_project
+          end
+
+          it 'is a member of the group' do
+            expect(user.available_custom_project_templates).not_to include internal_project
+
+            group.add_developer(user)
+
+            expect(user.available_custom_project_templates).to include internal_project
+          end
         end
 
         it 'allows to search available project templates by name' do
@@ -369,6 +383,22 @@ RSpec.describe User do
 
           expect(projects.count).to eq 0
         end
+      end
+
+      it 'returns project with disabled features' do
+        public_project = create(:project, :public, :metrics_dashboard_enabled, namespace: group)
+        disabled_issues_project = create(:project, :public, :metrics_dashboard_enabled, :issues_disabled, namespace: group)
+
+        expect(user.available_custom_project_templates).to include public_project
+        expect(user.available_custom_project_templates).to include disabled_issues_project
+      end
+
+      it 'does not return project with private issues' do
+        accessible_project = create(:project, :public, :metrics_dashboard_enabled, namespace: group)
+        restricted_features_project = create(:project, :public, :metrics_dashboard_enabled, :issues_private, namespace: group)
+
+        expect(user.available_custom_project_templates).to include accessible_project
+        expect(user.available_custom_project_templates).not_to include restricted_features_project
       end
     end
   end
@@ -1444,6 +1474,28 @@ RSpec.describe User do
       user.namespace.plans.reload
 
       expect(subject).to be false
+    end
+  end
+
+  describe '#find_or_init_board_epic_preference' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:board) { create(:board) }
+    let_it_be(:epic) { create(:epic) }
+
+    subject(:preference) { user.find_or_init_board_epic_preference(board_id: board.id, epic_id: epic.id) }
+
+    it 'returns new board epic user preference' do
+      expect(preference.persisted?).to be_falsey
+      expect(preference.user).to eq(user)
+    end
+
+    context 'when preference already exists' do
+      let_it_be(:epic_user_preference) { create(:epic_user_preference, board: board, epic: epic, user: user) }
+
+      it 'returns the existing board' do
+        expect(preference.persisted?).to be_truthy
+        expect(preference).to eq(epic_user_preference)
+      end
     end
   end
 end

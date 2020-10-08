@@ -6,8 +6,8 @@ import MergeRequestTable from 'ee/analytics/code_review_analytics/components/mer
 import FilterBar from 'ee/analytics/code_review_analytics/components/filter_bar.vue';
 import * as actions from 'ee/analytics/code_review_analytics/store/actions';
 import createMergeRequestsState from 'ee/analytics/code_review_analytics/store/modules/merge_requests/state';
-import createFiltersState from 'ee/analytics/shared/store/modules/filters/state';
 import { TEST_HOST } from 'helpers/test_constants';
+import createFiltersState from '~/vue_shared/components/filtered_search_bar/store/modules/filters/state';
 
 const mockFilterManagerSetup = jest.fn();
 jest.mock('ee/analytics/code_review_analytics/filtered_search_code_review_analytics', () =>

@@ -2,7 +2,7 @@
 import { GlButton, GlFormSelect } from '@gitlab/ui';
 import { s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import vulnerabilityDismiss from '../graphql/vulnerability_dismiss.mutation.graphql';
 
 const REASON_NONE = s__('SecurityReports|[No reason]');
@@ -48,30 +48,46 @@ export default {
       this.dismissSelectedVulnerabilities();
     },
     dismissSelectedVulnerabilities() {
+      let fulfilledCount = 0;
+      let rejectedCount = 0;
+
       const promises = this.selectedVulnerabilities.map(vulnerability =>
-        this.$apollo.mutate({
-          mutation: vulnerabilityDismiss,
-          variables: { id: vulnerability.id, comment: this.dismissalReason },
-        }),
+        this.$apollo
+          .mutate({
+            mutation: vulnerabilityDismiss,
+            variables: { id: vulnerability.id, comment: this.dismissalReason },
+          })
+          .then(() => {
+            fulfilledCount += 1;
+            this.$emit('vulnerability-updated', vulnerability.id);
+          })
+          .catch(() => {
+            rejectedCount += 1;
+          }),
       );
 
       Promise.all(promises)
         .then(() => {
-          toast(
-            n__(
-              '%d vulnerability dismissed',
-              '%d vulnerabilities dismissed',
-              this.selectedVulnerabilities.length,
-            ),
-          );
+          if (fulfilledCount > 0) {
+            toast(
+              n__('%d vulnerability dismissed', '%d vulnerabilities dismissed', fulfilledCount),
+            );
+          }
 
-          this.$emit('deselect-all-vulnerabilities');
+          if (rejectedCount > 0) {
+            createFlash({
+              message: n__(
+                'SecurityReports|There was an error dismissing %d vulnerability. Please try again later.',
+                'SecurityReports|There was an error dismissing %d vulnerabilities. Please try again later.',
+                rejectedCount,
+              ),
+            });
+          }
         })
         .catch(() => {
-          createFlash(
-            s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
-            'alert',
-          );
+          createFlash({
+            message: s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
+          });
         });
     },
   },
@@ -87,7 +103,7 @@ export default {
 <template>
   <div class="card">
     <form class="card-body d-flex align-items-center" @submit.prevent="handleDismiss">
-      <span ref="dismiss-message">{{ message }}</span>
+      <span data-testid="dismiss-message">{{ message }}</span>
       <gl-form-select
         v-model="dismissalReason"
         class="mx-3 w-auto"

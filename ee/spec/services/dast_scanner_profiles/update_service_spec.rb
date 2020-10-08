@@ -12,6 +12,9 @@ RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
+  let_it_be(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }
+  let_it_be(:new_use_ajax_spider) { !dast_scanner_profile.use_ajax_spider }
+  let_it_be(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -23,7 +26,10 @@ RSpec.describe DastScannerProfiles::UpdateService do
         id: dast_scanner_profile_id,
         profile_name: new_profile_name,
         target_timeout: new_target_timeout,
-        spider_timeout: new_spider_timeout
+        spider_timeout: new_spider_timeout,
+        scan_type: new_scan_type,
+        use_ajax_spider: new_use_ajax_spider,
+        show_debug_messages: new_show_debug_messages
       )
     end
 
@@ -53,7 +59,10 @@ RSpec.describe DastScannerProfiles::UpdateService do
           id: dast_scanner_profile.id,
           profile_name: new_profile_name,
           target_timeout: new_target_timeout,
-          spider_timeout: new_spider_timeout
+          spider_timeout: new_spider_timeout,
+          scan_type: new_scan_type,
+          use_ajax_spider: new_use_ajax_spider,
+          show_debug_messages: new_show_debug_messages
         )
       end
 
@@ -67,6 +76,31 @@ RSpec.describe DastScannerProfiles::UpdateService do
         project.add_developer(user)
       end
 
+      context 'when the user omits unrequired elements' do
+        before do
+          project.add_developer(user)
+        end
+
+        subject do
+          described_class.new(project, user).execute(
+            id: dast_scanner_profile_id,
+            profile_name: new_profile_name,
+            target_timeout: new_target_timeout,
+            spider_timeout: new_spider_timeout
+          )
+        end
+
+        it 'does not update those elements' do
+          updated_dast_scanner_profile = payload.reload
+
+          aggregate_failures do
+            expect(updated_dast_scanner_profile.scan_type).to eq(dast_scanner_profile.scan_type)
+            expect(updated_dast_scanner_profile.use_ajax_spider).to eq(dast_scanner_profile.use_ajax_spider)
+            expect(updated_dast_scanner_profile.show_debug_messages).to eq(dast_scanner_profile.show_debug_messages)
+          end
+        end
+      end
+
       it 'returns a success status' do
         expect(status).to eq(:success)
       end
@@ -78,6 +112,9 @@ RSpec.describe DastScannerProfiles::UpdateService do
           expect(updated_dast_scanner_profile.name).to eq(new_profile_name)
           expect(updated_dast_scanner_profile.target_timeout).to eq(new_target_timeout)
           expect(updated_dast_scanner_profile.spider_timeout).to eq(new_spider_timeout)
+          expect(updated_dast_scanner_profile.scan_type).to eq(new_scan_type)
+          expect(updated_dast_scanner_profile.use_ajax_spider).to eq(new_use_ajax_spider)
+          expect(updated_dast_scanner_profile.show_debug_messages).to eq(new_show_debug_messages)
         end
       end
 

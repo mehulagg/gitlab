@@ -8,7 +8,6 @@ RSpec.describe Groups::Analytics::CycleAnalytics::SummaryController do
   let(:params) { { group_id: group.full_path, created_after: '2010-01-01', created_before: '2010-01-02' } }
 
   before do
-    stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
     stub_licensed_features(cycle_analytics_for_groups: true)
 
     group.add_reporter(user)

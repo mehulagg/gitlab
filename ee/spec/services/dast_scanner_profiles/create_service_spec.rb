@@ -8,6 +8,9 @@ RSpec.describe DastScannerProfiles::CreateService do
   let(:name) { FFaker::Company.catch_phrase }
   let(:target_timeout) { 60 }
   let(:spider_timeout) { 600 }
+  let(:scan_type) { 1 }
+  let(:use_ajax_spider) { true }
+  let(:show_debug_messages) { true }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -18,7 +21,10 @@ RSpec.describe DastScannerProfiles::CreateService do
       described_class.new(project, user).execute(
         name: name,
         target_timeout: target_timeout,
-        spider_timeout: spider_timeout
+        spider_timeout: spider_timeout,
+        scan_type: scan_type,
+        use_ajax_spider: use_ajax_spider,
+        show_debug_messages: show_debug_messages
       )
     end
 
@@ -64,6 +70,18 @@ RSpec.describe DastScannerProfiles::CreateService do
 
       it 'creates a dast_scanner_profile' do
         expect { subject }.to change(DastScannerProfile, :count).by(1)
+      end
+
+      it 'creates a dast_scanner_profile with the given params' do
+        aggregate_failures do
+          expect(payload).to be_persisted
+          expect(payload.spider_timeout).to eq(spider_timeout)
+          expect(payload.target_timeout).to eq(target_timeout)
+          expect(payload.name).to eq(name)
+          expect(DastScannerProfile.scan_types[payload.scan_type]).to eq(scan_type)
+          expect(payload.use_ajax_spider).to eq(use_ajax_spider)
+          expect(payload.show_debug_messages).to eq(show_debug_messages)
+        end
       end
 
       it 'returns a dast_scanner_profile payload' do

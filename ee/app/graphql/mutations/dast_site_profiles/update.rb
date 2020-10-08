@@ -36,7 +36,7 @@ module Mutations
         project = authorized_find_project!(full_path: full_path)
 
         service = ::DastSiteProfiles::UpdateService.new(project, current_user)
-        result = service.execute(service_args)
+        result = service.execute(**service_args)
 
         if result.success?
           { id: result.payload.to_global_id, errors: [] }

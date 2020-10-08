@@ -7,8 +7,7 @@ module SearchHelper
     return unless current_user
 
     resources_results = [
-      recent_merge_requests_autocomplete(term),
-      recent_issues_autocomplete(term),
+      recent_items_autocomplete(term),
       groups_autocomplete(term),
       projects_autocomplete(term)
     ].flatten
@@ -25,6 +24,10 @@ module SearchHelper
     ].flatten.uniq do |item|
       item[:label]
     end
+  end
+
+  def recent_items_autocomplete(term)
+    recent_merge_requests_autocomplete(term) + recent_issues_autocomplete(term)
   end
 
   def search_entries_info(collection, scope, term)
@@ -128,8 +131,7 @@ module SearchHelper
       { category: "Help", label: _("Rake Tasks Help"),    url: help_page_path("raketasks/README") },
       { category: "Help", label: _("SSH Keys Help"),      url: help_page_path("ssh/README") },
       { category: "Help", label: _("System Hooks Help"),  url: help_page_path("system_hooks/system_hooks") },
-      { category: "Help", label: _("Webhooks Help"),      url: help_page_path("user/project/integrations/webhooks") },
-      { category: "Help", label: _("Workflow Help"),      url: help_page_path("workflow/README") }
+      { category: "Help", label: _("Webhooks Help"),      url: help_page_path("user/project/integrations/webhooks") }
     ]
   end
 
@@ -186,10 +188,10 @@ module SearchHelper
     end
   end
 
-  def recent_merge_requests_autocomplete(term, limit = 5)
+  def recent_merge_requests_autocomplete(term)
     return [] unless current_user
 
-    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).limit(limit).map do |mr|
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).map do |mr|
       {
         category: "Recent merge requests",
         id: mr.id,
@@ -200,10 +202,10 @@ module SearchHelper
     end
   end
 
-  def recent_issues_autocomplete(term, limit = 5)
+  def recent_issues_autocomplete(term)
     return [] unless current_user
 
-    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).limit(limit).map do |i|
+    ::Gitlab::Search::RecentIssues.new(user: current_user).search(term).map do |i|
       {
         category: "Recent issues",
         id: i.id,
@@ -299,8 +301,21 @@ module SearchHelper
     sanitize(html, tags: %w(a p ol ul li pre code))
   end
 
+  def simple_search_highlight_and_truncate(text, phrase, options = {})
+    text = Truncato.truncate(
+      text,
+      count_tags: false,
+      count_tail: false,
+      max_length: options.delete(:length) { 200 }
+    )
+
+    highlight(text, phrase.split, options)
+  end
+
   # _search_highlight is used in EE override
   def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    return unless issue.description.present?
+
     simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
   end
 

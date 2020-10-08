@@ -3,6 +3,12 @@
 class Groups::AutocompleteSourcesController < Groups::ApplicationController
   before_action :load_autocomplete_service, except: [:members]
 
+  feature_category :subgroups, [:members]
+  feature_category :issue_tracking, [:issues, :labels, :milestones, :commands]
+  feature_category :code_review, [:merge_requests]
+  feature_category :epics, [:epics]
+  feature_category :vulnerability_management, [:vulnerabilities]
+
   def members
     render json: ::Groups::ParticipantsService.new(@group, current_user).execute(target)
   end
@@ -26,6 +32,10 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
     render json: @autocomplete_service.epics(confidential_only: params[:confidential_only])
   end
 
+  def vulnerabilities
+    render json: issuable_serializer.represent(@autocomplete_service.vulnerabilities, parent_group: @group)
+  end
+
   def commands
     render json: @autocomplete_service.commands(target)
   end
@@ -37,7 +47,7 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
   private
 
   def load_autocomplete_service
-    @autocomplete_service = ::Groups::AutocompleteService.new(@group, current_user)
+    @autocomplete_service = ::Groups::AutocompleteService.new(@group, current_user, params)
   end
 
   def issuable_serializer

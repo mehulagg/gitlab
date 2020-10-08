@@ -6,8 +6,6 @@ module Groups
       class SummaryController < Groups::Analytics::ApplicationController
         include CycleAnalyticsParams
 
-        check_feature_flag Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG
-
         before_action :load_group
         before_action :authorize_access
         before_action :validate_params

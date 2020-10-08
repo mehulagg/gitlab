@@ -31,19 +31,9 @@ RSpec.describe Groups::Analytics::CycleAnalyticsController do
     end
 
     it 'renders `show` template when feature flag is enabled' do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
-
       get(:show, params: { group_id: group })
 
       expect(response).to render_template :show
-    end
-
-    it 'renders `404` when feature flag is disabled' do
-      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => false)
-
-      get(:show, params: { group_id: group })
-
-      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
@@ -60,6 +50,18 @@ RSpec.describe Groups::Analytics::CycleAnalyticsController do
       get(:show, params: { group_id: 'unknown' })
 
       expect(response).to have_gitlab_http_status(:not_found)
+    end
+  end
+
+  context 'with group and value stream params' do
+    let(:value_stream) { create(:cycle_analytics_group_value_stream, group: group) }
+
+    it 'builds request params with group and value stream' do
+      expect_next_instance_of(Gitlab::Analytics::CycleAnalytics::RequestParams) do |instance|
+        expect(instance).to have_attributes(group: group, value_stream: value_stream)
+      end
+
+      get(:show, params: { group_id: group, value_stream_id: value_stream })
     end
   end
 end

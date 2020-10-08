@@ -61,10 +61,6 @@ RSpec.describe Clusters::Platforms::Kubernetes do
 
           expect(rollout_status.deployments).to eq([])
         end
-
-        it 'has the has_legacy_app_label flag' do
-          expect(rollout_status).to be_has_legacy_app_label
-        end
       end
 
       context 'deployment with no pods' do
@@ -88,35 +84,6 @@ RSpec.describe Clusters::Platforms::Kubernetes do
           expect(rollout_status).to be_kind_of(::Gitlab::Kubernetes::RolloutStatus)
 
           expect(rollout_status.deployments.map(&:name)).to contain_exactly('matched-deployment')
-        end
-
-        it 'does have the has_legacy_app_label flag' do
-          expect(rollout_status).to be_has_legacy_app_label
-        end
-      end
-
-      context 'deployment with app label not matching the environment' do
-        let(:other_deployment) do
-          kube_deployment(name: 'other-deployment').tap do |deployment|
-            deployment['metadata']['annotations'].delete('app.gitlab.com/env')
-            deployment['metadata']['annotations'].delete('app.gitlab.com/app')
-            deployment['metadata']['labels']['app'] = 'helm-app-label'
-          end
-        end
-
-        let(:other_pod) do
-          kube_pod(name: 'other-pod').tap do |pod|
-            pod['metadata']['annotations'].delete('app.gitlab.com/env')
-            pod['metadata']['annotations'].delete('app.gitlab.com/app')
-            pod['metadata']['labels']['app'] = environment.slug
-          end
-        end
-
-        let(:deployments) { [other_deployment] }
-        let(:pods) { [other_pod] }
-
-        it 'does not have the has_legacy_app_label flag' do
-          expect(rollout_status).not_to be_has_legacy_app_label
         end
       end
     end
@@ -307,6 +274,28 @@ RSpec.describe Clusters::Platforms::Kubernetes do
           { pod_name: 'Not provided', status: 'pending', track: 'mytrack' },
           { pod_name: 'Not provided', status: 'pending', track: 'mytrack' }
         ])
+      end
+    end
+
+    context 'with multiple matching deployments' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 2),
+          kube_deployment(name: 'deployment-b', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 2)
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug),
+          kube_pod(name: 'pod-a-2', environment_slug: environment.slug, project_slug: project.full_path_slug),
+          kube_pod(name: 'pod-b-1', environment_slug: environment.slug, project_slug: project.full_path_slug),
+          kube_pod(name: 'pod-b-2', environment_slug: environment.slug, project_slug: project.full_path_slug)
+        ]
+      end
+
+      it 'returns each pod once' do
+        expect(rollout_status.instances.map { |p| p[:pod_name] }).to eq(['pod-a-1', 'pod-a-2', 'pod-b-1', 'pod-b-2'])
       end
     end
   end

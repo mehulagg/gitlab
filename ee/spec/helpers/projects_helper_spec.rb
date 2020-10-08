@@ -154,7 +154,8 @@ RSpec.describe ProjectsHelper do
           dashboard_documentation: '/help/user/application_security/security_dashboard/index',
           security_dashboard_help_path: '/help/user/application_security/security_dashboard/index',
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
-          no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new"
+          no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
         }
       end
 
@@ -178,7 +179,13 @@ RSpec.describe ProjectsHelper do
             pipeline: {
               id: pipeline.id,
               path: "/#{project.full_path}/-/pipelines/#{pipeline.id}",
-              created_at: pipeline_created_at
+              created_at: pipeline_created_at,
+              security_builds: {
+                failed: {
+                  count: 0,
+                  path: "/#{project.full_path}/-/pipelines/#{pipeline.id}/failures"
+                }
+              }
             }
           }
         end

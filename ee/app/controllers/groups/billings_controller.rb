@@ -6,6 +6,8 @@ class Groups::BillingsController < Groups::ApplicationController
 
   layout 'group_settings'
 
+  feature_category :purchase
+
   def index
     @top_most_group = @group.root_ancestor if @group.has_parent?
     current_plan = (@top_most_group || @group).plan_name_for_upgrading

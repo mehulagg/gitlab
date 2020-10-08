@@ -35,6 +35,7 @@ class Project < ApplicationRecord
   include Integration
   include EachBatch
   extend Gitlab::Cache::RequestCache
+  extend Gitlab::Utils::Override
 
   extend Gitlab::ConfigHelper
 
@@ -199,6 +200,7 @@ class Project < ApplicationRecord
   has_one :import_export_upload, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :export_jobs, class_name: 'ProjectExportJob'
   has_one :project_repository, inverse_of: :project
+  has_one :tracing_setting, class_name: 'ProjectTracingSetting'
   has_one :incident_management_setting, inverse_of: :project, class_name: 'IncidentManagement::ProjectIncidentManagementSetting'
   has_one :error_tracking_setting, inverse_of: :project, class_name: 'ErrorTracking::ProjectErrorTrackingSetting'
   has_one :metrics_setting, inverse_of: :project, class_name: 'ProjectMetricsSetting'
@@ -269,6 +271,7 @@ class Project < ApplicationRecord
   has_many :metrics_users_starred_dashboards, class_name: 'Metrics::UsersStarredDashboard', inverse_of: :project
 
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :project
+  has_many :alert_management_http_integrations, class_name: 'AlertManagement::HttpIntegration', inverse_of: :project
 
   # Container repositories need to remove data from the container registry,
   # which is not managed by the DB. Hence we're still using dependent: :destroy
@@ -364,6 +367,7 @@ class Project < ApplicationRecord
                                 allow_destroy: true,
                                 reject_if: ->(attrs) { attrs[:id].blank? && attrs[:url].blank? }
 
+  accepts_nested_attributes_for :tracing_setting, update_only: true, allow_destroy: true
   accepts_nested_attributes_for :incident_management_setting, update_only: true
   accepts_nested_attributes_for :error_tracking_setting, update_only: true
   accepts_nested_attributes_for :metrics_setting, update_only: true, allow_destroy: true
@@ -564,6 +568,7 @@ class Project < ApplicationRecord
   }
 
   scope :imported_from, -> (type) { where(import_type: type) }
+  scope :with_tracing_enabled, -> { joins(:tracing_setting) }
 
   enum auto_cancel_pending_pipelines: { disabled: 0, enabled: 1 }
 
@@ -599,7 +604,7 @@ class Project < ApplicationRecord
     return public_to_user unless user
 
     if user.is_a?(DeployToken)
-      user.projects
+      user.accessible_projects
     else
       where('EXISTS (?) OR projects.visibility_level IN (?)',
             user.authorizations_for_projects(min_access_level: min_access_level),
@@ -671,8 +676,6 @@ class Project < ApplicationRecord
   scope :joins_import_state, -> { joins("INNER JOIN project_mirror_data import_state ON import_state.project_id = projects.id") }
   scope :for_group, -> (group) { where(group: group) }
   scope :for_group_and_its_subgroups, ->(group) { where(namespace_id: group.self_and_descendants.select(:id)) }
-  scope :for_repository_storage, -> (repository_storage) { where(repository_storage: repository_storage) }
-  scope :excluding_repository_storage, -> (repository_storage) { where.not(repository_storage: repository_storage) }
 
   class << self
     # Searches for a list of projects based on the query given in `query`.
@@ -846,6 +849,7 @@ class Project < ApplicationRecord
     end
   end
 
+  override :lfs_enabled?
   def lfs_enabled?
     return namespace.lfs_enabled? if self[:lfs_enabled].nil?
 
@@ -995,9 +999,6 @@ class Project < ApplicationRecord
     job_id =
       if forked?
         RepositoryForkWorker.perform_async(id)
-      elsif gitlab_project_import?
-        # Do not retry on Import/Export until https://gitlab.com/gitlab-org/gitlab-foss/issues/26189 is solved.
-        RepositoryImportWorker.set(retry: false).perform_async(self.id)
       else
         RepositoryImportWorker.perform_async(self.id)
       end
@@ -2521,6 +2522,10 @@ class Project < ApplicationRecord
   def feature_flags_client_token
     instance = operations_feature_flags_client || create_operations_feature_flags_client!
     instance.token
+  end
+
+  def tracing_external_url
+    tracing_setting&.external_url
   end
 
   private

@@ -1,0 +1,5 @@
+---
+title: 'Geo: Fix "Project repo not able to resync after storage move"'
+merge_request: 44172
+author:
+type: fixed

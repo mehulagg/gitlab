@@ -22,6 +22,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :autocomplete_sources, only: [] do
           collection do
             get 'epics'
+            get 'vulnerabilities'
           end
         end
 
@@ -84,7 +85,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         namespace :analytics do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
-          resource :merge_request_analytics, only: :show, constraints: -> (req) { Gitlab::Analytics.project_merge_request_analytics_enabled? }
+          resource :merge_request_analytics, only: :show
         end
 
         resources :approvers, only: :destroy
@@ -93,6 +94,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :vulnerability_feedback, only: [:index, :create, :update, :destroy], constraints: { id: /\d+/ }
         resources :dependencies, only: [:index]
         resources :licenses, only: [:index, :create, :update]
+
+        resources :feature_flags, param: :iid do
+          resources :feature_flag_issues, only: [:index, :create, :destroy], as: 'issues', path: 'issues'
+        end
 
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
@@ -121,8 +126,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           post :toggle
         end
       end
-
-      resource :tracing, only: [:show]
 
       post '/restore' => '/projects#restore', as: :restore
 

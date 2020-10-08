@@ -20,8 +20,15 @@ RSpec.describe ProtectedEnvironment::DeployAccessLevel do
   describe '#check_access' do
     subject { deploy_access_level.check_access(user) }
 
+    context 'anonymous access' do
+      let(:user) { nil }
+      let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment) }
+
+      it { is_expected.to be_falsy }
+    end
+
     describe 'admin access' do
-      let(:user) { create(:user, :admin) }
+      let_it_be(:user) { create(:user, :admin) }
 
       context 'when admin user does have specific access' do
         let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, user: user) }
@@ -51,7 +58,7 @@ RSpec.describe ProtectedEnvironment::DeployAccessLevel do
     end
 
     describe 'group access' do
-      let(:group) { create(:group, projects: [project]) }
+      let_it_be(:group) { create(:group, projects: [project]) }
 
       context 'when specific access has been assigned to a group' do
         let(:deploy_access_level) { create(:protected_environment_deploy_access_level, protected_environment: protected_environment, group: group) }
@@ -111,7 +118,7 @@ RSpec.describe ProtectedEnvironment::DeployAccessLevel do
   end
 
   describe '#humanize' do
-    let(:protected_environment) { create(:protected_environment) }
+    let_it_be(:protected_environment) { create(:protected_environment) }
 
     subject { deploy_access_level.humanize }
 

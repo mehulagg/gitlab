@@ -1,3 +1,7 @@
+<% if vulnerability.is_a? Vulnerability %>
+<%= _("Issue created from vulnerability %{vulnerability_link}".html_safe) % { vulnerability_link: link_to(vulnerability.id, vulnerability_url(vulnerability)) } %>
+
+<% end %>
 ### <%= _("Description") %>:
 
 <%= vulnerability.description %>

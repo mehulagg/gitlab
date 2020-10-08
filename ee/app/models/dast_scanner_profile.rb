@@ -7,4 +7,9 @@ class DastScannerProfile < ApplicationRecord
   validates :name, length: { maximum: 255 }, uniqueness: { scope: :project_id }
 
   scope :project_id_in, -> (project_ids) { where(project_id: project_ids) }
+
+  enum scan_type: {
+    passive: 1,
+    active: 2
+  }
 end

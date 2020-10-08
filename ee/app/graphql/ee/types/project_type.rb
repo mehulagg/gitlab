@@ -100,7 +100,7 @@ module EE
               ::Types::DastSiteProfileType.connection_type,
               null: true,
               description: 'DAST Site Profiles associated with the project',
-              resolve: -> (obj, _args, _ctx) { obj.dast_site_profiles.with_dast_site }
+              resolve: -> (obj, _args, _ctx) { DastSiteProfilesFinder.new(project_id: obj.id).execute }
 
         field :cluster_agent,
               ::Types::Clusters::AgentType,

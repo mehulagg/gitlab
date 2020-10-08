@@ -8,7 +8,6 @@ describe('Solution Card', () => {
   const Component = Vue.extend(component);
   const solution = 'Upgrade to XYZ';
   const remediation = { summary: 'Update to 123', fixes: [], diff: 'SGVsbG8gR2l0TGFi' };
-  const vulnerabilityFeedbackHelpPath = '/foo';
 
   let wrapper;
 
@@ -63,7 +62,7 @@ describe('Solution Card', () => {
 
     describe('with remediation', () => {
       beforeEach(() => {
-        const propsData = { remediation, vulnerabilityFeedbackHelpPath, hasRemediation: true };
+        const propsData = { remediation, hasRemediation: true };
         wrapper = shallowMount(Component, { propsData });
       });
 
@@ -73,20 +72,10 @@ describe('Solution Card', () => {
         );
       });
 
-      it('renders the card footer', () => {
-        expect(wrapper.find('.card-footer').exists()).toBe(true);
-      });
-
       describe('with download patch', () => {
         beforeEach(() => {
           wrapper.setProps({ hasDownload: true });
           return wrapper.vm.$nextTick();
-        });
-
-        it('renders the learn more about remediation solutions', () => {
-          expect(wrapper.find('.card-footer').text()).toContain(
-            s__('ciReport|Learn more about interacting with security reports'),
-          );
         });
 
         it('does not render the download and apply solution message when there is a file download and a merge request already exists', () => {
@@ -106,24 +95,8 @@ describe('Solution Card', () => {
       });
 
       describe('without download patch', () => {
-        it('renders the learn more about remediation solutions', () => {
-          expect(wrapper.find('.card-footer').text()).toContain(
-            s__('ciReport|Learn more about interacting with security reports'),
-          );
-        });
-
-        it('does not render the download and apply solution message', () => {
-          expect(wrapper.find('.card-footer').text()).not.toContain(
-            s__('ciReport|Download and apply the patch manually to resolve.'),
-          );
-        });
-
-        it('does not render the create a merge request to implement this solution message', () => {
-          expect(wrapper.find('.card-footer').text()).not.toContain(
-            s__(
-              'ciReport|Create a merge request to implement this solution, or download and apply the patch manually.',
-            ),
-          );
+        it('does not render the card footer', () => {
+          expect(wrapper.find('.card-footer').exists()).toBe(false);
         });
       });
     });

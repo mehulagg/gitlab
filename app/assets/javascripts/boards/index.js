@@ -84,7 +84,7 @@ export default () => {
     },
     provide: {
       boardId: $boardApp.dataset.boardId,
-      groupId: Number($boardApp.dataset.groupId) || null,
+      groupId: Number($boardApp.dataset.groupId),
       rootPath: $boardApp.dataset.rootPath,
       canUpdate: $boardApp.dataset.canUpdate,
     },
@@ -161,6 +161,7 @@ export default () => {
         'fetchEpicsSwimlanes',
         'resetIssues',
         'resetEpics',
+        'fetchLists',
       ]),
       initialBoardLoad() {
         boardsStore
@@ -183,7 +184,10 @@ export default () => {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
         if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
           this.resetEpics();
-          this.fetchEpicsSwimlanes({ withLists: false });
+          this.resetIssues();
+          this.fetchEpicsSwimlanes({});
+        } else if (gon.features.graphqlBoardLists && !this.isShowingEpicsSwimlanes) {
+          this.fetchLists();
           this.resetIssues();
         }
       },

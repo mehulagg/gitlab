@@ -57,7 +57,7 @@ of using this type instead of `ID` are:
 - it parses it into a `GlobalID` before passing it to user code
 - it can be parameterized on the type of the object (e.g.
   `GlobalIDType[Project]`) which offers even better validation and security.
-  
+
 Consider using this type for all new arguments and result types. Remember that
 it is perfectly possible to parameterize this type with a concern or a
 supertype, if you want to accept a wider range of objects (e.g.
@@ -1423,5 +1423,4 @@ For information on generating GraphQL documentation and schema files, see
 [updating the schema documentation](rake_tasks.md#update-graphql-documentation-and-schema-definitions).
 
 To help our readers, you should also add a new page to our [GraphQL API](../api/graphql/index.md) documentation.
-For guidance, see the [GraphQL API](documentation/styleguide.md#graphql-api) section
-of our documentation style guide.
+For guidance, see the [GraphQL API](documentation/graphql_styleguide.md) page.

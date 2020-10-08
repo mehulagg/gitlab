@@ -1,33 +1,13 @@
 import initNotes from '~/init_notes';
 import loadAwardsHandler from '~/awards_handler';
+import { SnippetShowInit } from '~/snippets';
+import ZenMode from '~/zen_mode';
 
-if (!gon.features.snippetsVue) {
-  const LineHighlighterModule = import('~/line_highlighter');
-  const BlobViewerModule = import('~/blob/viewer');
-  const ZenModeModule = import('~/zen_mode');
-  const SnippetEmbedModule = import('~/snippet/snippet_embed');
+document.addEventListener('DOMContentLoaded', () => {
+  SnippetShowInit();
+  initNotes();
+  loadAwardsHandler();
 
-  Promise.all([LineHighlighterModule, BlobViewerModule, ZenModeModule, SnippetEmbedModule])
-    .then(
-      ([
-        { default: LineHighlighter },
-        { default: BlobViewer },
-        { default: ZenMode },
-        { default: SnippetEmbed },
-      ]) => {
-        new LineHighlighter(); // eslint-disable-line no-new
-        new BlobViewer(); // eslint-disable-line no-new
-        new ZenMode(); // eslint-disable-line no-new
-        SnippetEmbed();
-      },
-    )
-    .catch(() => {});
-} else {
-  import('~/snippets')
-    .then(({ SnippetShowInit }) => {
-      SnippetShowInit();
-    })
-    .catch(() => {});
-}
-initNotes();
-loadAwardsHandler();
+  // eslint-disable-next-line no-new
+  new ZenMode();
+});

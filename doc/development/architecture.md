@@ -330,7 +330,7 @@ Consul is a tool for service discovery and configuration. Consul is distributed,
   - [Source](../integration/elasticsearch.md)
   - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/elasticsearch.md)
 - Layer: Core Service (Data)
-- GitLab.com: [Get Advanced Global Search working on GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/153) epic.
+- GitLab.com: [Get Advanced Search working on GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/153) epic.
 
 Elasticsearch is a distributed RESTful search engine built for the cloud.
 
@@ -620,7 +620,7 @@ Redis is packaged to provide a place to store:
   - [Source](../administration/packages/container_registry.md#enable-the-container-registry)
   - [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/registry.md)
 - Layer: Core Service (Processor)
-- GitLab.com: [GitLab Container Registry](../user/packages/container_registry/index.md#build-and-push-images-using-gitlab-cicd)
+- GitLab.com: [GitLab Container Registry](../user/packages/container_registry/index.md#build-and-push-by-using-gitlab-cicd)
 
 The registry is what users use to store their own Docker images. The bundled
 registry uses NGINX as a load balancer and GitLab as an authentication manager.

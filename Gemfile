@@ -25,7 +25,9 @@ gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.9.0'
 
 # Authentication libraries
-gem 'devise', '~> 4.6'
+gem 'devise', '~> 4.7.2'
+# TODO: verify ARM compile issue on 3.1.13+ version (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18828)
+gem 'bcrypt', '3.1.12'
 gem 'doorkeeper', '~> 5.3.0'
 gem 'doorkeeper-openid_connect', '~> 1.7.4'
 gem 'omniauth', '~> 1.8'
@@ -97,6 +99,7 @@ gem 'graphiql-rails', '~> 1.4.10'
 gem 'apollo_upload_server', '~> 2.0.2'
 gem 'graphql-docs', '~> 1.6.0', group: [:development, :test]
 
+gem 'hashie'
 # Disable strong_params so that Mash does not respond to :permitted?
 gem 'hashie-forbidden_attributes'
 
@@ -108,7 +111,7 @@ gem 'hamlit', '~> 2.11.0'
 
 # Files attachments
 gem 'carrierwave', '~> 1.3'
-gem 'mini_magick'
+gem 'mini_magick', '~> 4.10.1'
 
 # for backups
 gem 'fog-aws', '~> 3.5'
@@ -120,7 +123,7 @@ gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
 gem 'fog-aliyun', '~> 0.3'
-gem 'gitlab-fog-azure-rm', '~> 0.9', require: false
+gem 'gitlab-fog-azure-rm', '~> 1.0', require: false
 
 # for Google storage
 gem 'google-api-client', '~> 0.33'
@@ -244,7 +247,7 @@ gem 'atlassian-jwt', '~> 0.2.0'
 gem 'flowdock', '~> 0.7'
 
 # Slack integration
-gem 'slack-messenger', '~> 2.3.3'
+gem 'slack-messenger', '~> 2.3.4'
 
 # Hangouts Chat integration
 gem 'hangouts-chat', '~> 0.0.5'
@@ -335,7 +338,7 @@ end
 
 group :development do
   gem 'brakeman', '~> 4.2', require: false
-  gem 'danger', '~> 8.0', require: false
+  gem 'danger', '~> 8.0.6', require: false
 
   gem 'letter_opener_web', '~> 1.3.4'
 
@@ -514,3 +517,6 @@ gem 'multi_json', '~> 1.14.1'
 gem 'yajl-ruby', '~> 1.4.1', require: 'yajl'
 
 gem 'webauthn', '~> 2.3'
+
+# IPAddress utilities
+gem 'ipaddress', '~> 0.8.3'
