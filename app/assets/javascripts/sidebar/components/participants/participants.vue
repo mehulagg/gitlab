@@ -89,9 +89,6 @@ export default {
       v-gl-tooltip.left.viewport
       :title="participantLabel"
       class="sidebar-collapsed-icon"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
       @click="onClickCollapsedIcon"
     >
       <gl-icon name="users" />
