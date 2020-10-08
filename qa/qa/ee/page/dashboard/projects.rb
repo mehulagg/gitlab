@@ -6,6 +6,7 @@ module QA
       module Dashboard
         module Projects
           extend QA::Page::PageConcern
+          include Support::GeoReplication
 
           def self.prepended(base)
             super
@@ -18,8 +19,7 @@ module QA
           end
 
           def wait_for_project_replication(project_name)
-            QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_project_replication])
-            wait_until(max_duration: Runtime::Geo.max_db_replication_time) do
+            wait_for_geo_replication do
               filter_by_name(project_name)
 
               within_element(:projects_list) do
@@ -35,7 +35,7 @@ module QA
           def project_created?(project_name)
             fill_element(:project_filter_form, project_name)
 
-            wait_until(max_duration: Runtime::Geo.max_db_replication_time) do
+            wait_for_geo_replication do
               within_element(:projects_list) do
                 has_text?(project_name)
               end
@@ -45,7 +45,7 @@ module QA
           def project_deleted?(project_name)
             fill_element(:project_filter_form, project_name)
 
-            wait_until(max_duration: Runtime::Geo.max_db_replication_time) do
+            wait_for_geo_replication do
               within_element(:projects_list) do
                 has_no_text?(project_name)
               end

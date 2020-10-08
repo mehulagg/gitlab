@@ -248,5 +248,9 @@ module QA
         end
       end
     end
+
+    module Support
+      autoload :GeoReplication, 'qa/ee/support/geo_replication'
+    end
   end
 end

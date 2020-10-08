@@ -6,17 +6,16 @@ module QA
       module Project
         module Show
           extend QA::Page::PageConcern
+          include Support::GeoReplication
 
           def wait_for_repository_replication(max_wait: Runtime::Geo.max_file_replication_time)
-            QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_repository_replication])
-            wait_until_geo_max_replication_time(max_wait: max_wait) do
+            wait_for_geo_replication(max_wait: max_wait) do
               has_no_text?(/No repository|The repository for this project is empty/)
             end
           end
 
           def wait_for_repository_replication_with(text, max_wait: Runtime::Geo.max_file_replication_time)
-            QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_repository_replication_with_text "#{text}"])
-            wait_until_geo_max_replication_time(max_wait: max_wait) do
+            wait_for_geo_replication(max_wait: max_wait) do
               page.has_text?(text)
             end
           end

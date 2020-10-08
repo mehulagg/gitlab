@@ -7,6 +7,7 @@ module QA
         module Issue
           module Show
             extend QA::Page::PageConcern
+            include Support::GeoReplication
 
             def self.prepended(base)
               super
@@ -62,8 +63,7 @@ module QA
             end
 
             def wait_for_attachment_replication(image_url, max_wait: Runtime::Geo.max_file_replication_time)
-              QA::Runtime::Logger.debug(%Q[#{self.class.name} - wait_for_attachment_replication])
-              wait_until_geo_max_replication_time(max_wait: max_wait) do
+              wait_for_geo_replication(max_wait: max_wait) do
                 asset_exists?(image_url)
               end
             end
@@ -77,10 +77,6 @@ module QA
             end
 
             private
-
-            def wait_until_geo_max_replication_time(max_wait: Runtime::Geo.max_file_replication_time)
-              wait_until(max_duration: max_wait) { yield }
-            end
 
             def wait_until_iteration_container_loaded
               wait_until(reload: false, max_duration: 10, sleep_interval: 1) do
