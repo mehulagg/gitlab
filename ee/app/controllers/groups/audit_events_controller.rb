@@ -15,6 +15,8 @@ class Groups::AuditEventsController < Groups::ApplicationController
 
   layout 'group_settings'
 
+  feature_category :audit_events
+
   def index
     @is_last_page = events.last_page?
     @events = AuditEventSerializer.new.represent(events)

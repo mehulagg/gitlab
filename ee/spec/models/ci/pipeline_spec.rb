@@ -544,4 +544,48 @@ RSpec.describe Ci::Pipeline do
       specify { expect(subject).to eq(expected_status) }
     end
   end
+
+  describe '#can_store_security_reports?' do
+    subject { pipeline.can_store_security_reports? }
+
+    before do
+      pipeline.succeed!
+    end
+
+    context 'when the security reports can not be stored for the project' do
+      before do
+        allow(project).to receive(:can_store_security_reports?).and_return(false)
+      end
+
+      context 'when the pipeline does not have security reports' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the pipeline has security reports' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
+        end
+
+        it { is_expected.to be_falsy }
+      end
+    end
+
+    context 'when the security reports can be stored for the project' do
+      before do
+        allow(project).to receive(:can_store_security_reports?).and_return(true)
+      end
+
+      context 'when the pipeline does not have security reports' do
+        it { is_expected.to be_falsy }
+      end
+
+      context 'when the pipeline has security reports' do
+        before do
+          create(:ee_ci_build, :sast, pipeline: pipeline, project: project)
+        end
+
+        it { is_expected.to be_truthy }
+      end
+    end
+  end
 end

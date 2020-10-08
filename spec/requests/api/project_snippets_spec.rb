@@ -16,8 +16,8 @@ RSpec.describe API::ProjectSnippets do
   end
 
   describe "GET /projects/:project_id/snippets/:id/user_agent_detail" do
-    let(:snippet) { create(:project_snippet, :public, project: project) }
-    let!(:user_agent_detail) { create(:user_agent_detail, subject: snippet) }
+    let_it_be(:snippet) { create(:project_snippet, :public, project: project) }
+    let_it_be(:user_agent_detail) { create(:user_agent_detail, subject: snippet) }
 
     it 'exposes known attributes' do
       get api("/projects/#{project.id}/snippets/#{snippet.id}/user_agent_detail", admin)
@@ -86,8 +86,8 @@ RSpec.describe API::ProjectSnippets do
   end
 
   describe 'GET /projects/:project_id/snippets/:id' do
-    let_it_be(:user) { create(:user) }
     let_it_be(:snippet) { create(:project_snippet, :public, :repository, project: project) }
+    let_it_be(:private_snippet) { create(:project_snippet, :private, project: project) }
 
     it 'returns snippet json' do
       get api("/projects/#{project.id}/snippets/#{snippet.id}", user)
@@ -117,8 +117,8 @@ RSpec.describe API::ProjectSnippets do
       end
     end
 
-    it_behaves_like 'snippet_multiple_files feature disabled' do
-      subject { get api("/projects/#{project.id}/snippets/#{snippet.id}", user) }
+    it_behaves_like 'project snippet access levels' do
+      let(:path) { "/projects/#{snippet.project.id}/snippets/#{snippet.id}" }
     end
   end
 
@@ -400,7 +400,8 @@ RSpec.describe API::ProjectSnippets do
   end
 
   describe 'GET /projects/:project_id/snippets/:id/raw' do
-    let_it_be(:snippet) { create(:project_snippet, :repository, author: admin, project: project) }
+    let_it_be(:snippet) { create(:project_snippet, :repository, :public, author: admin, project: project) }
+    let_it_be(:private_snippet) { create(:project_snippet, :repository, :private, author: admin, project: project) }
 
     it 'returns raw text' do
       get api("/projects/#{snippet.project.id}/snippets/#{snippet.id}/raw", admin)
@@ -414,6 +415,10 @@ RSpec.describe API::ProjectSnippets do
 
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 Snippet Not Found')
+    end
+
+    it_behaves_like 'project snippet access levels' do
+      let(:path) { "/projects/#{snippet.project.id}/snippets/#{snippet.id}/raw" }
     end
 
     context 'with snippets disabled' do
@@ -434,6 +439,10 @@ RSpec.describe API::ProjectSnippets do
 
     it_behaves_like 'raw snippet files' do
       let(:api_path) { "/projects/#{snippet.project.id}/snippets/#{snippet_id}/files/#{ref}/#{file_path}/raw" }
+    end
+
+    it_behaves_like 'project snippet access levels' do
+      let(:path) { "/projects/#{snippet.project.id}/snippets/#{snippet.id}/files/master/%2Egitattributes/raw" }
     end
   end
 end

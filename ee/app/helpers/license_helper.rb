@@ -54,6 +54,6 @@ module LicenseHelper
   private
 
   def active_user_count
-    User.active.count
+    License.current_active_users.count
   end
 end

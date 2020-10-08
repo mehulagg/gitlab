@@ -1,5 +1,5 @@
 <script>
-import { GlTooltipDirective, GlDeprecatedButton, GlIcon } from '@gitlab/ui';
+import { GlTooltipDirective, GlButton, GlIcon } from '@gitlab/ui';
 import NoteHeader from '~/notes/components/note_header.vue';
 
 export default {
@@ -7,7 +7,7 @@ export default {
   components: {
     GlIcon,
     NoteHeader,
-    GlDeprecatedButton,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -83,17 +83,15 @@ export default {
     <slot v-if="showRightSlot" name="right-content"></slot>
 
     <div v-else-if="showActionButtons" class="gl-flex-shrink-0 gl-align-self-start">
-      <gl-deprecated-button
+      <gl-button
         v-for="button in actionButtons"
         :key="button.title"
         v-gl-tooltip
-        class="px-1"
-        variant="transparent"
+        category="tertiary"
+        :icon="button.iconName"
         :title="button.title"
         @click="button.onClick"
-      >
-        <gl-icon :name="button.iconName" class="link-highlight" />
-      </gl-deprecated-button>
+      />
     </div>
   </div>
 </template>

@@ -10,7 +10,7 @@ RSpec.describe 'Running a DAST Scan' do
   let(:project_path) { project.full_path }
   let(:target_url) { generate(:url) }
   let(:branch) { project.default_branch }
-  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive] }
+  let(:scan_type) { Types::DastScanTypeEnum.enum[:passive].upcase }
 
   let(:mutation) do
     graphql_mutation(

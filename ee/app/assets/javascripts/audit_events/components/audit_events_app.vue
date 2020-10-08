@@ -59,7 +59,7 @@ export default {
       </div>
     </header>
     <div class="row-content-block second-block gl-pb-0">
-      <div class="gl-display-flex gl-justify-content-space-between audit-controls gl-flex-wrap">
+      <div class="gl-display-flex gl-justify-content-space-between gl-flex-wrap">
         <div class="gl-mb-5 gl-w-full">
           <audit-events-filter
             :filter-token-options="filterTokenOptions"
@@ -70,7 +70,7 @@ export default {
         </div>
         <div class="gl-display-flex gl-flex-wrap gl-w-full">
           <div
-            class="audit-controls gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
+            class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between gl-px-0 gl-w-full"
           >
             <date-range-field
               :start-date="startDate"

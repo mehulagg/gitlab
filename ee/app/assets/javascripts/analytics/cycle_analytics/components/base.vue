@@ -65,6 +65,7 @@ export default {
       'medians',
       'isLoadingValueStreams',
       'selectedStageError',
+      'selectedValueStream',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -106,6 +107,7 @@ export default {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
 
       return {
+        value_stream_id: this.selectedValueStream?.id || null,
         project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
@@ -210,6 +212,7 @@ export default {
             :key="currentGroup.id"
             class="js-projects-dropdown-filter project-select"
             :group-id="currentGroup.id"
+            :group-namespace="currentGroupPath"
             :query-params="projectsQueryParams"
             :multi-select="$options.multiProjectSelect"
             :default-projects="selectedProjects"

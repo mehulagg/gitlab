@@ -29,3 +29,26 @@ export const day4 = {
   scopeCount: 11,
   scopeWeight: 22,
 };
+
+export const legacyBurndownEvents = [
+  {
+    action: 'created',
+    created_at: day1.date,
+    weight: 2,
+  },
+  {
+    action: 'created',
+    created_at: day2.date,
+    weight: 1,
+  },
+  {
+    action: 'created',
+    created_at: day3.date,
+    weight: 1,
+  },
+  {
+    action: 'closed',
+    created_at: day4.date,
+    weight: 2,
+  },
+];

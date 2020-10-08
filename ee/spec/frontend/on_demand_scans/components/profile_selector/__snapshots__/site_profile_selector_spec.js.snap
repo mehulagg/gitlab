@@ -195,7 +195,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
               class="col-md-6"
             >
               <div
-                class="row"
+                class="row gl-my-2"
               >
                 <div
                   class="col-md-3"

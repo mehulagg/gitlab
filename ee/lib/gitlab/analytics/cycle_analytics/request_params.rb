@@ -69,7 +69,7 @@ module Gitlab
         def to_data_attributes
           {}.tap do |attrs|
             attrs[:group] = group_data_attributes if group
-            attrs[:value_stream] = value_stream_data_attributes if value_stream
+            attrs[:value_stream] = value_stream_data_attributes.to_json if value_stream
             attrs[:created_after] = created_after.to_date.iso8601
             attrs[:created_before] = created_before.to_date.iso8601
             attrs[:projects] = group_projects(project_ids) if group && project_ids.present?
@@ -94,7 +94,9 @@ module Gitlab
 
         def value_stream_data_attributes
           {
-            id: value_stream.id
+            id: value_stream.id,
+            name: value_stream.name,
+            is_custom: value_stream.custom?
           }
         end
 

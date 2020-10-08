@@ -51,7 +51,7 @@ export default {
   },
   inject: {
     boardId: {
-      type: String,
+      default: '',
     },
   },
   data() {

@@ -1,5 +1,16 @@
 Please view this file on the master branch, on stable branches it's out of date.
 
+## 13.4.3 (2020-10-06)
+
+### Fixed (5 changes)
+
+- 13.4 Port of Geo: Permanently enable package_file_registries field. !43434
+- Limit spam checks to title, description, or confidentiality changes on bot-created issues. !43463
+- Fixing an issue on the Productivity Analytics page, where applying filters would not update the results. This should now work as expected; applying a filter updates the results on the page filtered by the filters applied. !43532
+- Geo - Fix wikis with no repository on the primary trying to sync over and over. !43765
+- Do not try to copy issue weight events when promoting an issue to epic. !43891
+
+
 ## 13.4.0 (2020-09-22)
 
 ### Security (1 change, 1 of them is from the community)

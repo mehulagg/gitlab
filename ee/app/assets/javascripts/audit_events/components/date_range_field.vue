@@ -60,8 +60,8 @@ export default {
       :default-max-date="$options.CURRENT_DATE"
       :max-date-range="$options.MAX_DATE_RANGE"
       :same-day-selection="true"
-      start-picker-class="gl-mb-5 gl-pr-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1"
-      end-picker-class="gl-mb-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1"
+      start-picker-class="gl-mb-5 gl-pr-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1 gl-lg-align-items-baseline"
+      end-picker-class="gl-mb-5 gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-flex-fill-1 gl-lg-align-items-baseline"
       @input="onInput"
     />
   </div>

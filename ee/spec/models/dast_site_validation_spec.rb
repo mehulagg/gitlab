@@ -51,7 +51,7 @@ RSpec.describe DastSiteValidation, type: :model do
 
   describe 'enums' do
     let(:validation_strategies) do
-      { text_file: 0 }
+      { text_file: 0, header: 1 }
     end
 
     it { is_expected.to define_enum_for(:validation_strategy).with_values(validation_strategies) }

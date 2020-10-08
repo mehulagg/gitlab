@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'boot'
 
 # Based on https://github.com/rails/rails/blob/v6.0.1/railties/lib/rails/all.rb
@@ -127,12 +128,12 @@ module Gitlab
       /^description$/,
       /^note$/,
       /^text$/,
-      /^title$/
+      /^title$/,
+      /^hook$/
     ]
     config.filter_parameters += %i(
       certificate
       encrypted_key
-      hook
       import_url
       elasticsearch_url
       otp_attempt
@@ -150,20 +151,6 @@ module Gitlab
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
-
-    # Configure webpack
-    config.webpack = ActiveSupport::OrderedOptions.new
-    config.webpack.config_file = "config/webpack.config.js"
-    config.webpack.output_dir  = "public/assets/webpack"
-    config.webpack.public_path = "assets/webpack"
-    config.webpack.manifest_filename = "manifest.json"
-
-    # Webpack dev server configuration is handled in initializers/static_files.rb
-    config.webpack.dev_server = ActiveSupport::OrderedOptions.new
-    config.webpack.dev_server.enabled = false
-    config.webpack.dev_server.host = 'localhost'
-    config.webpack.dev_server.port = 3808
-    config.webpack.dev_server.https = false
 
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
@@ -188,11 +175,14 @@ module Gitlab
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
     config.assets.precompile << "page_bundles/boards.css"
     config.assets.precompile << "page_bundles/cycle_analytics.css"
+    config.assets.precompile << "page_bundles/environments.css"
     config.assets.precompile << "page_bundles/ide.css"
     config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
+    config.assets.precompile << "page_bundles/merge_conflicts.css"
     config.assets.precompile << "page_bundles/milestone.css"
     config.assets.precompile << "page_bundles/pipeline.css"
+    config.assets.precompile << "page_bundles/pipelines.css"
     config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/xterm.css"
     config.assets.precompile << "lazy_bundles/cropper.css"

@@ -154,7 +154,7 @@ module Epics
     end
 
     def find_object(id)
-      GitlabSchema.object_from_id(id)
+      GitlabSchema.find_by_gid(id)
     end
   end
 end
