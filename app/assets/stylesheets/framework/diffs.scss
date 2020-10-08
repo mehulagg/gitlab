@@ -1070,77 +1070,6 @@ table.code {
   position: relative;
 }
 
-.diff-tree-list {
-  position: -webkit-sticky;
-  position: sticky;
-  $top-pos: $header-height + $mr-tabs-height + $mr-version-controls-height + 15px;
-  top: $top-pos;
-  max-height: calc(100vh - #{$top-pos});
-  z-index: 202;
-
-  .with-performance-bar & {
-    $performance-bar-top-pos: $performance-bar-height + $top-pos;
-    top: $performance-bar-top-pos;
-    max-height: calc(100vh - #{$performance-bar-top-pos});
-  }
-
-  .drag-handle {
-    bottom: 16px;
-    transform: translateX(10px);
-  }
-}
-
-.diff-files-holder {
-  flex: 1;
-  min-width: 0;
-  z-index: 201;
-}
-
-.compare-versions-container {
-  min-width: 0;
-}
-
-.tree-list-holder {
-  height: 100%;
-
-  .file-row {
-    margin-left: 0;
-    margin-right: 0;
-  }
-}
-
-.tree-list-scroll {
-  max-height: 100%;
-  padding-bottom: $grid-size;
-  overflow-y: scroll;
-  overflow-x: auto;
-}
-
-.tree-list-search {
-  flex: 0 0 34px;
-
-  .form-control {
-    padding-left: 30px;
-  }
-}
-
-.tree-list-icon {
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-
-  &,
-  svg {
-    fill: $gl-text-color-tertiary;
-  }
-}
-
-.tree-list-clear-icon {
-  right: 10px;
-  left: auto;
-  line-height: 0;
-}
-
 .discussion-collapsible {
   margin: 0 $gl-padding $gl-padding 71px;
 
@@ -1150,30 +1079,6 @@ table.code {
 }
 
 .parallel {
-  .discussion-collapsible {
-    margin: $gl-padding;
-    margin-top: 0;
-  }
-}
-
-@media (max-width: map-get($grid-breakpoints, md)-1) {
-  .diffs .files {
-    @include fixed-width-container;
-    flex-direction: column;
-
-    .diff-tree-list {
-      position: relative;
-      top: 0;
-      // !important is required to override inline styles of resizable sidebar
-      width: 100% !important;
-    }
-
-    .tree-list-holder {
-      max-height: calc(50px + 50vh);
-      padding-right: 0;
-    }
-  }
-
   .discussion-collapsible {
     margin: $gl-padding;
     margin-top: 0;
@@ -1200,5 +1105,17 @@ table.code {
 
   .popover-header {
     display: none;
+  }
+}
+
+@media (max-width: map-get($grid-breakpoints, md)-1) {
+  .diffs .files {
+    @include fixed-width-container;
+    flex-direction: column;
+  }
+
+  .discussion-collapsible {
+    margin: $gl-padding;
+    margin-top: 0;
   }
 }
