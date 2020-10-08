@@ -50,7 +50,7 @@ export default {
       <template #header>
         <h4 class="page-title my-2" ref="header">{{ __("What's new at GitLab") }}</h4>
       </template>
-      <template v-if="features">
+      <template v-if="features.length">
         <gl-infinite-scroll
           @bottomReached="bottomReached"
           :fetched-items="features.length"
