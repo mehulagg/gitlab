@@ -9,7 +9,7 @@ class GroupWiki < Wiki
     super
 
     storage_record = container.group_wiki_repository || container.build_group_wiki_repository
-    storage_record.update!(shard_name: repository_storage, disk_path: storage.disk_path)
+    storage_record.update!(shard_name: repository.shard, disk_path: storage.disk_path)
   end
 
   override :storage
