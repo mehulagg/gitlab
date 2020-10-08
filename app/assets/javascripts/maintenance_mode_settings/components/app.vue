@@ -34,7 +34,7 @@ export default {
       <gl-form-textarea
         id="maintenanceBannerMessage"
         v-model="bannerMessage"
-        :placeholder="__(`GitLab is undergoing maintenance and is operating in a read-only mode.`)"
+        :placeholder="__(`GitLab is undergoing maintenance and is operating in read-only mode.`)"
       />
     </gl-form-group>
     <div class="mt-4">

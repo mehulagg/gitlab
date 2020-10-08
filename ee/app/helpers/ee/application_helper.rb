@@ -8,11 +8,28 @@ module EE
     LOG_CURSOR_CHECK_TIME = ::Gitlab::Geo::LogCursor::Daemon::SECONDARY_CHECK_INTERVAL
     EVENT_PROCESSING_TIME = 60.seconds
     EVENT_LAG_SHOW_THRESHOLD = DB_LAG_SHOW_THRESHOLD.seconds + LOG_CURSOR_CHECK_TIME + EVENT_PROCESSING_TIME
+    DEFAULT_MAINTENANCE_MODE_MESSAGE = 'This GitLab instance is undergoing maintenance and is operating in <b>read-only</b> mode.'
 
     override :read_only_message
     def read_only_message
-      return super unless ::Gitlab::Geo.secondary?
+      return maintenance_mode_message if maintenance_mode?
+      return geo_secondary_read_only_message if ::Gitlab::Geo.secondary?
 
+      super
+    end
+
+    def maintenance_mode_message
+      html = tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(s_(custom_maintenance_mode_message).html_safe % { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe })
+        end
+      end
+
+      html
+    end
+
+    def geo_secondary_read_only_message
       message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
 
       message = "#{message} #{lag_message}".html_safe if lag_message
@@ -107,6 +124,20 @@ module EE
     end
 
     private
+
+    def maintenance_mode?
+      return unless ::Feature.enabled?(:maintenance_mode)
+
+      application_settings.maintenance_mode
+    end
+
+    def custom_maintenance_mode_message
+      s_(application_settings.maintenance_mode_message || DEFAULT_MAINTENANCE_MODE_MESSAGE)
+    end
+
+    def application_settings
+      ::Gitlab::CurrentSettings.current_application_settings
+    end
 
     def appearance
       ::Appearance.current

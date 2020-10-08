@@ -12336,7 +12336,7 @@ msgstr ""
 msgid "GitLab is obtaining a Let's Encrypt SSL certificate for this domain. This process can take some time. Please try again later."
 msgstr ""
 
-msgid "GitLab is undergoing maintenance and is operating in a read-only mode."
+msgid "GitLab is undergoing maintenance and is operating in read-only mode."
 msgstr ""
 
 msgid "GitLab member or Email address"
