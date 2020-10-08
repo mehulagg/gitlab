@@ -43,9 +43,6 @@ export default {
     loading() {
       return this.$apollo?.queries?.slaDueAt?.loading;
     },
-    show() {
-      return this.slaFeatureAvailable && this.slaDueAt !== null;
-    },
   },
 };
 </script>

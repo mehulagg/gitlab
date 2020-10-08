@@ -61,7 +61,6 @@ describe('Highlight Bar', () => {
   it('renders an incident SLA when sla is present', () => {
     mountComponent();
 
-    expect(findTimer().exists()).toBe(true);
     expect(findTimer().text()).toBe('12:34');
   });
 
