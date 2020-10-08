@@ -433,6 +433,7 @@ incoming_email:
     # Whether the IMAP server uses SSL
     ssl: true
 ```
+
 #### Microsoft Office 365
 
 Example configurations for Microsoft Office 365 with IMAP enabled. 
@@ -446,7 +447,7 @@ must be enabled via Powershell, and is not enabled by default.
 Enable sub-addressing first via Powershell:
 
 NOTE: **Note:**
-This seris of commands will enable sub-addressing at the organization
+This series of commands will enable sub-addressing at the organization
 level in Office 365. This will allow all mailboxes in the organization
 to receive sub-addressed mail.
 
@@ -471,7 +472,6 @@ gitlab_rails['incoming_email_enabled'] = true
 
 # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
 # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
-# Exchange does not support sub-addressing, so a catch-all mailbox must be used.
 gitlab_rails['incoming_email_address'] = "incoming+%{key}@office365.example.com"
 
 # Email account username
@@ -496,7 +496,6 @@ incoming_email:
 
     # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
     # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
-    # Exchange does not support sub-addressing, so a catch-all mailbox must be used.
     address: "incoming+%{key}@office365.example.comm"
 
     # Email account username
@@ -524,7 +523,6 @@ gitlab_rails['incoming_email_enabled'] = true
 
 # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
 # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
-# Exchange does not support sub-addressing, so a catch-all mailbox must be used.
 gitlab_rails['incoming_email_address'] = "incoming-%{key}@office365.example.com"
 
 # Email account username
@@ -549,7 +547,6 @@ incoming_email:
 
     # The email address including the `%{key}` placeholder that will be replaced to reference the item being replied to.
     # The placeholder can be omitted but if present, it must appear in the "user" part of the address (before the `@`).
-    # Exchange does not support sub-addressing, so a catch-all mailbox must be used.
     address: "incoming-%{key}@office365.example.com"
 
     # Email account username
@@ -575,7 +572,6 @@ Example for Omnibus installs:
 ```ruby
 gitlab_rails['incoming_email_enabled'] = true
 
-# Exchange does not support sub-addressing, and we're not using a catch-all mailbox so %{key} is not used here
 gitlab_rails['incoming_email_address'] = "incoming@office365.example.com"
 
 # Email account username
@@ -598,7 +594,6 @@ Example for source installs:
 incoming_email:
     enabled: true
 
-    # Exchange does not support sub-addressing, and we're not using a catch-all mailbox so %{key} is not used here
     address: "incoming@office365.example.com"
 
     # Email account username
