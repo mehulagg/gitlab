@@ -113,7 +113,7 @@ export default {
         {{ __('Viewing commit') }}
         <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
       </div>
-      <div class="inline-parallel-buttons d-none d-md-flex ml-auto" v-if="hasChanges > 0">
+      <div v-if="hasChanges > 0" class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"
