@@ -445,6 +445,11 @@ must be enabled via Powershell, and is not enabled by default.
 
 Enable sub-addressing first via Powershell:
 
+NOTE: **Note:**
+This seris of commands will enable sub-addressing at the organization
+level in Office 365. This will allow all mailboxes in the organization
+to receive sub-addressed mail.
+
 ```powershell
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
