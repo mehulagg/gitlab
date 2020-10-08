@@ -229,6 +229,8 @@ Example response:
 
 Gets a list of group members who counts as billable, including members in the sub group/project.
 
+**NOTE:** Unlike other API endpoints, billable members is updated once per day at 12:00 UTC.
+
 This function takes [pagination](README.md#pagination) parameters `page` and `per_page` to restrict the list of users.
 
 ```plaintext
