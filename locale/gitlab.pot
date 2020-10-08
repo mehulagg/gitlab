@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-08 12:53+1100\n"
+"PO-Revision-Date: 2020-10-08 12:53+1100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -8368,9 +8370,6 @@ msgid "Delete label"
 msgstr ""
 
 msgid "Delete label: %{label_name} ?"
-msgstr ""
-
-msgid "Delete list"
 msgstr ""
 
 msgid "Delete pipeline"
@@ -21442,6 +21441,9 @@ msgid "Remove license"
 msgstr ""
 
 msgid "Remove limit"
+msgstr ""
+
+msgid "Remove list"
 msgstr ""
 
 msgid "Remove member"

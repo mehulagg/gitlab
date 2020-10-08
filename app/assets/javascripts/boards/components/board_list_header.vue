@@ -1,5 +1,5 @@
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import {
   GlButton,
   GlButtonGroup,
@@ -14,7 +14,8 @@ import AccessorUtilities from '../../lib/utils/accessor';
 import IssueCount from './issue_count.vue';
 import boardsStore from '../stores/boards_store';
 import eventHub from '../eventhub';
-import { ListType } from '../constants';
+import sidebarEventHub from '~/sidebar/event_hub';
+import { inactiveId, LIST, ListType } from '../constants';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
@@ -59,6 +60,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['activeId']),
     isLoggedIn() {
       return Boolean(gon.current_user_id);
     },
@@ -124,7 +126,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['updateList']),
+    ...mapActions(['updateList', 'setActiveId']),
+    openSidebarSettings() {
+      if (this.activeId === inactiveId) {
+        sidebarEventHub.$emit('sidebar.closeAll');
+      }
+
+      this.setActiveId({ id: this.list.id, sidebarType: LIST });
+    },
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },

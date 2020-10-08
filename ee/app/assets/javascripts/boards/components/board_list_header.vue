@@ -1,10 +1,8 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import BoardListHeaderFoss from '~/boards/components/board_list_header.vue';
 import { __, sprintf, s__, n__ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
-import { inactiveId, LIST } from '~/boards/constants';
-import eventHub from '~/sidebar/event_hub';
 
 export default {
   extends: BoardListHeaderFoss,
@@ -14,7 +12,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId', 'issuesByListId']),
+    ...mapState(['issuesByListId']),
     ...mapGetters(['isSwimlanesOn']),
     issuesCount() {
       if (this.isSwimlanesOn) {
@@ -47,16 +45,6 @@ export default {
       }
 
       return null;
-    },
-  },
-  methods: {
-    ...mapActions(['setActiveId']),
-    openSidebarSettings() {
-      if (this.activeId === inactiveId) {
-        eventHub.$emit('sidebar.closeAll');
-      }
-
-      this.setActiveId({ id: this.list.id, sidebarType: LIST });
     },
   },
 };
