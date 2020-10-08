@@ -47,7 +47,7 @@ export default {
     },
     primaryProps() {
       return {
-        text: s__('Stop Pipeline'),
+        text: s__('Stop pipeline'),
         attributes: [{ variant: 'danger' }, { category: 'primary' }],
       };
     },
