@@ -1,0 +1,1 @@
+export const UPDATE_FILE_EDITOR = 'UPDATE_FILE_EDITOR';
