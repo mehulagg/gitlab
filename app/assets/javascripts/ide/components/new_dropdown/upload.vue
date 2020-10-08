@@ -44,7 +44,7 @@ export default {
         reader.addEventListener('load', e => emitCreateEvent(e.target.result), { once: true });
         reader.readAsText(file);
       } else {
-        emitCreateEvent(encodedContent);
+        emitCreateEvent(rawContent);
       }
     },
     readFile(file) {

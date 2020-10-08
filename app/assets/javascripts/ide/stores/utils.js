@@ -110,14 +110,19 @@ export const createCommitPayload = ({
 }) => ({
   branch,
   commit_message: state.commitMessage || getters.preBuiltCommitMessage,
-  actions: getCommitFiles(rootState.stagedFiles).map(f => ({
-    action: commitActionForFile(f),
-    file_path: f.path,
-    previous_path: f.prevPath || undefined,
-    content: f.prevPath && !f.changed ? null : f.content || undefined,
-    encoding: isBase64DataUrl(f.rawPath) ? 'base64' : 'text',
-    last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
-  })),
+  actions: getCommitFiles(rootState.stagedFiles).map(f => {
+    const isBase64 = isBase64DataUrl(f.rawPath);
+    const content = isBase64 ? btoa(f.content) : f.content;
+
+    return {
+      action: commitActionForFile(f),
+      file_path: f.path,
+      previous_path: f.prevPath || undefined,
+      content: f.prevPath && !f.changed ? null : content || undefined,
+      encoding: isBase64 ? 'base64' : 'text',
+      last_commit_id: newBranch || f.deleted || f.prevPath ? undefined : f.lastCommitSha,
+    };
+  }),
   start_sha: newBranch ? rootGetters.lastCommit.id : undefined,
 });
 
