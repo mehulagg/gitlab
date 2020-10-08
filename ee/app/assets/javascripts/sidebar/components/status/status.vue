@@ -137,7 +137,7 @@ export default {
 
 <template>
   <div class="block health-status">
-    <div ref="status" v-gl-tooltip.left="statusTooltip" class="sidebar-collapsed-icon">
+    <div ref="status" v-gl-tooltip.left.viewport="statusTooltip" class="sidebar-collapsed-icon">
       <gl-icon name="status-health" :size="14" />
 
       <gl-loading-icon v-if="isFetching" />
