@@ -87,15 +87,15 @@ The registry database will be partitioned from start to achieve greater performa
 
 #### PostgreSQL 12
 
-PostgreSQL introduced major improvements for partitioning in [version 12](https://www.postgresql.org/docs/12/release-12.html#id-1.11.6.9.5)), among which we highlight:
+PostgreSQL introduced major improvements for partitioning in [version 12](https://www.postgresql.org/docs/12/release-12.html#id-1.11.6.9.5), among which we highlight:
 
+- It's now possible for foreign keys to reference partitioned tables. This is a hard requirement for this project not only to guarantee consistency and integrity, but also to enable cascading deletes at the database level;
 - Major performance improvements for inserts, selects, and updates with less locking and consistent performance for a large number of partitions ([benchmarks](https://www.2ndquadrant.com/en/blog/postgresql-12-partitioning));
 - Major improvements to the planning algorithm for tables with a large number of partitions, with some tests finding speedups of up to 10,000 times ([source](https://aws.amazon.com/blogs/database/postgresql-12-a-deep-dive-into-some-new-functionality/));
 - Attaching new partitions to an existing table no longer requires locking the entire table;
 - Bulk load (`COPY`) now uses bulk inserts instead of inserting one row at a time;
-- Last but not least, it's now possible for foreign keys to reference partitioned tables, which is a must-have to guarantee consistency and integrity.
 
-To be able to leverage these performance improvements and features (especially the foreign key constraints) we want to use PostgreSQL 12 from start.
+To be able to leverage these features and performance improvements we need to use PostgreSQL 12 from start.
 
 For self-managed instances, GitLab currently ships with PostgreSQL 11, but GitLab 14.0 and PostgreSQL 12 will most likely land before we ship the metadata database support for self-managed instances.
 
