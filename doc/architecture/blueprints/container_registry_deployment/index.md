@@ -97,7 +97,7 @@ PostgreSQL introduced major improvements for partitioning in [version 12](https:
 
 To be able to leverage these features and performance improvements we need to use PostgreSQL 12 from start.
 
-For self-managed instances, GitLab currently ships with PostgreSQL 11, but GitLab 14.0 and PostgreSQL 12 will most likely land before we ship the metadata database support for self-managed instances.
+For self-managed instances, GitLab currently ships with PostgreSQL 11, but GitLab 14.0 (with PostgreSQL 12 as its minimum required version) will most likely land before we ship the metadata database support for self-managed instances. Regardless, we will continue to support the current version 2 of the registry (with no database) with security backports and bug fixes. We can do so for at least as long as GitLab is not shipped with PostgreSQL 12 as the minimum required version.
 
 Given that the metadata database will unblock the implementation of the most requested features for the GitLab Container Registry integration, most of these features may only be available for those using a GitLab version which ships with PostgreSQL 12. We will continue to support the current version 2 of the registry (with no database) with security backports and bug fixes.
 
