@@ -140,7 +140,7 @@ sidebar, and select an incident from the list.
 When you take any of these actions on an incident, GitLab logs a system note and
 displays it in the Incident Details view:
 
-- [Updating the severity of an incident](#update-an-incidents-severity)
+- Updating the severity of an incident
   ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42358) in GitLab 13.5.)
 
 For live examples of GitLab incidents, visit the `tanuki-inc` project's
