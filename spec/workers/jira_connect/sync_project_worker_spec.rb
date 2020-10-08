@@ -15,6 +15,7 @@ RSpec.describe JiraConnect::SyncProjectWorker do
       expect_next_instance_of(JiraConnect::SyncService) do |sync_service|
         expect(sync_service).to receive(:execute).with(merge_requests: [mr_with_jira_description, mr_with_jira_title])
       end
+
       described_class.new.perform(project.id)
     end
 
@@ -35,6 +36,7 @@ RSpec.describe JiraConnect::SyncProjectWorker do
         expect_next_instance_of(JiraConnect::SyncService) do |sync_service|
           expect(sync_service).to receive(:execute).with(merge_requests: MergeRequest.order(id: :desc).limit(1))
         end
+
         described_class.new.perform(project.id)
       end
     end

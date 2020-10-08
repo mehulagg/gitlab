@@ -38,6 +38,7 @@ RSpec.describe JiraConnectSubscriptions::CreateService do
 
       it 'starts workers to sync projects' do
         expect(JiraConnect::SyncProjectWorker).to receive(:perform_async).with(project.id)
+
         subject
       end
     end
