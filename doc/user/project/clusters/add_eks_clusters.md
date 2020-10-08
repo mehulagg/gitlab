@@ -112,6 +112,7 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
           ]
       }
       ```
+
       If an error is encountered during the creation process, changes will
       not be rolled back and you must remove resources manually. You can do this by deleting
       the relevant [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-delete-stack.html)
