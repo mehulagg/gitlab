@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9388) in [GitLab Silver](https://about.gitlab.com/pricing/) 11.10.
 
 The SCIM API implements the [RFC7644 protocol](https://tools.ietf.org/html/rfc7644). As this API is for
-**internal** system use for connecting with a SCIM provider, it is subject to change without notice.
+**system** use for SCIM provider integration, it is subject to change without notice.
 
 To use this API, [Group SSO](../user/group/saml_sso/index.md) must be enabled for the group.
 This API is only in use where [SCIM for Group SSO](../user/group/saml_sso/scim_setup.md) is enabled. It's a prerequisite to the creation of SCIM identities.
