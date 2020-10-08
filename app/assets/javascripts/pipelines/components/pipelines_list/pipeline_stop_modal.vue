@@ -48,17 +48,14 @@ export default {
     primaryProps() {
       return {
         text: s__('Stop Pipeline'),
-        attributes: [
-          { variant: 'danger' },
-          { category: 'primary' },
-        ],
+        attributes: [{ variant: 'danger' }, { category: 'primary' }],
       };
     },
     cancelProps() {
       return {
         text: s__('Cancel'),
       };
-    }, 
+    },
   },
   methods: {
     emitSubmit(event) {
