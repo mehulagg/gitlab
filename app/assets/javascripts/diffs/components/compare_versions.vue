@@ -53,6 +53,9 @@ export default {
     toggleFileBrowserTitle() {
       return this.showTreeList ? __('Hide file browser') : __('Show file browser');
     },
+    hasChanges() {
+      return this.diffFilesCountText;
+    },
   },
   created() {
     this.CENTERED_LIMITED_CONTAINER_CLASSES = CENTERED_LIMITED_CONTAINER_CLASSES;
@@ -80,6 +83,7 @@ export default {
       }"
     >
       <gl-button
+        v-if="hasChanges > 0"
         v-gl-tooltip.hover
         variant="default"
         icon="file-tree"
@@ -109,7 +113,7 @@ export default {
         {{ __('Viewing commit') }}
         <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
       </div>
-      <div class="inline-parallel-buttons d-none d-md-flex ml-auto">
+      <div class="inline-parallel-buttons d-none d-md-flex ml-auto" v-if="hasChanges > 0">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"
