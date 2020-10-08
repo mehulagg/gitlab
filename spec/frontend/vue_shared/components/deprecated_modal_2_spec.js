@@ -78,9 +78,7 @@ describe('DeprecatedModal2', () => {
       });
 
       it('sets the primary button text', () => {
-        const primaryButton = vm.$el.querySelector(
-          '.js-modal-primary-action .gl-button-text',
-        );
+        const primaryButton = vm.$el.querySelector('.js-modal-primary-action .gl-button-text');
 
         expect(primaryButton.innerHTML.trim()).toBe(props.footerPrimaryButtonText);
       });
