@@ -107,7 +107,12 @@ export default {
       />
       <board-settings-sidebar-wip-limit :max-issue-count="activeList.maxIssueCount" />
       <div v-if="canAdminList && !activeList.preset && activeList.id" class="gl-m-4">
-        <gl-button variant="danger" category="secondary" icon="remove" @click.stop="deleteBoard"
+        <gl-button
+          variant="danger"
+          category="secondary"
+          icon="remove"
+          data-testid="remove-list"
+          @click.stop="deleteBoard"
           >{{ __('Remove list') }}
         </gl-button>
       </div>

@@ -160,7 +160,11 @@ RSpec.describe 'Issue Boards', :js do
 
     it 'allows user to delete board' do
       page.within(find('.board:nth-child(2)')) do
-        accept_confirm { find('.board-delete').click }
+        find('button[title="List settings"]').click
+      end
+       
+      page.within(find('.js-board-settings-sidebar')) do
+        accept_confirm { find('[data-testid="remove-list"]').click }
       end
 
       wait_for_requests
@@ -175,7 +179,11 @@ RSpec.describe 'Issue Boards', :js do
       find('.js-new-board-list').click
 
       page.within(find('.board:nth-child(2)')) do
-        accept_confirm { find('.board-delete').click }
+        find('button[title="List settings"]').click
+      end
+       
+      page.within(find('.js-board-settings-sidebar')) do
+        accept_confirm { find('[data-testid="remove-list"]').click }
       end
 
       wait_for_requests
