@@ -246,7 +246,7 @@ the [SSH keys](../ssh_keys/README.md) to be able to clone it.
 
 ## Use databases or other services
 
-Most of the time, you'll need a running database for your tests to be able to
+Most of the time, you need a running database for your tests to be able to
 run. If you're using the Docker executor, you can leverage Docker's ability to
 link to other containers. With GitLab Runner, this can be achieved by defining
 a `service`.
