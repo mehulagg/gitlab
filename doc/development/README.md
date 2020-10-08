@@ -70,11 +70,11 @@ When you submit a change to GitLab's development guidelines, request a review
 from:
 
 - A member of your team or group, to check for technical accuracy.
-- For significant changes, request review from:
-  - Engineering managers (FE, BE, DB, Security, and others) 
-  - The Development DRI ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
+- For **significant** changes or proposals, request review from:
+  - Engineering managers (FE, BE, DB, Security, UX, and others, according to the subject or process you're proposing).
+  - The VP of Development (DRI) ([@clefelhocz1](https://gitlab.com/clefelhocz1)), for
   final approval of the new or changed guidelines.
-- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-and-api-guidelines),
+- The [Technical Writer assigned to dev guidelines](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments-to-development-guidelines),
   to review the content for consistency and adherence to documentation guidelines.
 
 ## UX and Frontend guides
