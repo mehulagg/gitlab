@@ -28,6 +28,9 @@ describe('Feature flags', () => {
     canUserRotateToken: true,
     newFeatureFlagPath: 'feature-flags/new',
     newUserListPath: '/user-list/new',
+    projectName: 'fakeProjectName',
+    errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
+    featureFlagsHelpPagePath: '/help/feature-flags',
   };
 
   const mockState = {
@@ -40,17 +43,12 @@ describe('Feature flags', () => {
   let mock;
   let store;
 
-  const factory = (propsData = mockData, fn = shallowMount) => {
+  const factory = (provide = mockData, fn = shallowMount) => {
     store = createStore(mockState);
     wrapper = fn(FeatureFlagsComponent, {
       localVue,
       store,
-      propsData,
-      provide: {
-        projectName: 'fakeProjectName',
-        errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
-        featureFlagsHelpPagePath: '/help/feature-flags',
-      },
+      provide,
       stubs: {
         FeatureFlagsTab,
       },
@@ -83,7 +81,7 @@ describe('Feature flags', () => {
   });
 
   describe('without permissions', () => {
-    const propsData = {
+    const provideData = {
       csrfToken: 'testToken',
       errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
       featureFlagsHelpPagePath: '/help/feature-flags',
@@ -92,6 +90,9 @@ describe('Feature flags', () => {
       featureFlagsClientLibrariesHelpPagePath: '/help/feature-flags#unleash-clients',
       featureFlagsClientExampleHelpPagePath: '/help/feature-flags#client-example',
       unleashApiUrl: `${TEST_HOST}/api/unleash`,
+      projectName: 'fakeProjectName',
+      errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
+      featureFlagsHelpPagePath: '/help/feature-flags',
     };
 
     beforeEach(done => {
@@ -99,7 +100,7 @@ describe('Feature flags', () => {
         .onGet(`${TEST_HOST}/endpoint.json`, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
         .reply(200, getRequestData, {});
 
-      factory(propsData);
+      factory(provideData);
 
       setImmediate(() => {
         done();

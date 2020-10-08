@@ -31,37 +31,10 @@ export default {
   directives: {
     GlModal: GlModalDirective,
   },
-  props: {
-    csrfToken: {
-      type: String,
-      required: true,
-    },
-    featureFlagsClientLibrariesHelpPagePath: {
-      type: String,
-      required: true,
-    },
-    featureFlagsClientExampleHelpPagePath: {
-      type: String,
-      required: true,
-    },
-    unleashApiUrl: {
-      type: String,
-      required: true,
-    },
-    canUserConfigure: {
-      type: Boolean,
-      required: true,
-    },
-    newFeatureFlagPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    newUserListPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
+  inject: {
+    newUserListPath: { default: '' },
+    newFeatureFlagPath: { default: '' },
+    canUserConfigure: {},
   },
   data() {
     const scope = getParameterByName('scope') || SCOPES.FEATURE_FLAG_SCOPE;
@@ -191,9 +164,6 @@ export default {
   <div>
     <configure-feature-flags-modal
       v-if="canUserConfigure"
-      :help-client-libraries-path="featureFlagsClientLibrariesHelpPagePath"
-      :help-client-example-path="featureFlagsClientExampleHelpPagePath"
-      :api-url="unleashApiUrl"
       :instance-id="instanceId"
       :is-rotating="isRotating"
       :has-rotate-error="hasRotateError"
@@ -252,7 +222,6 @@ export default {
         >
           <feature-flags-table
             v-if="shouldRenderFeatureFlags"
-            :csrf-token="csrfToken"
             :feature-flags="featureFlags"
             @toggle-flag="toggleFeatureFlag"
           />
