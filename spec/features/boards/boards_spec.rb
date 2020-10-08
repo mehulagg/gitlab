@@ -162,7 +162,7 @@ RSpec.describe 'Issue Boards', :js do
       page.within(find('.board:nth-child(2)')) do
         find('button[title="List settings"]').click
       end
-       
+
       page.within(find('.js-board-settings-sidebar')) do
         accept_confirm { find('[data-testid="remove-list"]').click }
       end
@@ -181,7 +181,7 @@ RSpec.describe 'Issue Boards', :js do
       page.within(find('.board:nth-child(2)')) do
         find('button[title="List settings"]').click
       end
-       
+
       page.within(find('.js-board-settings-sidebar')) do
         accept_confirm { find('[data-testid="remove-list"]').click }
       end
