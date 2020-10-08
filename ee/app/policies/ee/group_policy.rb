@@ -140,7 +140,7 @@ module EE
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
 
-      rule { has_access & group_repository_analytics_available }
+      rule { reporter & group_repository_analytics_available }
         .enable :read_group_repository_analytics
 
       rule { reporter & group_merge_request_analytics_available }
