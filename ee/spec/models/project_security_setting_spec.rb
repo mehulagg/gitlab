@@ -32,4 +32,24 @@ RSpec.describe ProjectSecuritySetting do
       end
     end
   end
+
+  describe '#auto_fix_enabled' do
+    subject { setting.auto_fix_enabled }
+
+    let_it_be(:setting) { build(:project_security_setting) }
+
+    it 'return status only for available features' do
+      is_expected.to eq([:container_scanning, :dependency_scanning])
+    end
+
+    context 'when a auto_fix setting is turned' do
+      before do
+        setting.auto_fix_container_scanning = false
+      end
+
+      it 'return only enabled available features' do
+        is_expected.to eq([:dependency_scanning])
+      end
+    end
+  end
 end

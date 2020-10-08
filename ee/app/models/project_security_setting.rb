@@ -11,8 +11,15 @@ class ProjectSecuritySetting < ApplicationRecord
     retry
   end
 
+  # Note: Even if we store settings for all types of security scanning
+  # Currently, Auto-fix feature is available only for container_scanning and
+  # dependency_scanning features.
   def auto_fix_enabled
-    auto_fix = [ :auto_fix_container_scanning, :auto_fix_dast, :auto_fix_dependency_scanning, :auto_fix_sast ]
-    auto_fix.filter { |setting| !!setting }
+    auto_fix = {
+      container_scanning: auto_fix_container_scanning,
+      dependency_scanning: auto_fix_dependency_scanning
+    }
+
+    auto_fix.select { |_, state| !!state }.keys
   end
 end
