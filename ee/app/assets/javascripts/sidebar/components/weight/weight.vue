@@ -140,7 +140,7 @@ export default {
 <template>
   <div :class="{ 'collapse-after-update': collapsedAfterUpdate }" class="block weight">
     <div
-      v-gl-tooltip
+      v-gl-tooltip.left.viewport
       :title="tooltipTitle"
       class="sidebar-collapsed-icon js-weight-collapsed-block"
       data-container="body"
