@@ -10,10 +10,10 @@
       = sprite_icon('spinner', size: 24, css_class: 'gl-spinner')
 
 - if project.code_owner_approval_required_available?
-  .alert.alert-dismissible.alert-primary.fade.in.show{ role: "alert" }
-    %button.close{ type: "button", 'data-dismiss': "alert", 'aria-label': "Close" }
+  .gl-alert.gl-alert-info.fade.in.show{ role: "alert" }
+    %button.js-close.gl-alert-dismiss{ type: "button", 'data-dismiss': "alert", 'aria-label': "Close" }
       %span
-        = sprite_icon('close')
+        = sprite_icon('close', size: 16, css_class: 'gl-icon')
     %span
       - banner_url = project_settings_repository_path(project, anchor: 'js-protected-branches-settings')
       - banner_link_start = '<a href="%{url}"><strong>'.html_safe % { url: banner_url }
