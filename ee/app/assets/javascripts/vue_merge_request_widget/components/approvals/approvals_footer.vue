@@ -68,14 +68,14 @@ export default {
 <template>
   <div>
     <div class="mr-widget-extension d-flex align-items-center pl-3">
-      <gl-button
-        class="square s32 gl-mr-3"
+       <gl-button
+        class="gl-mr-3"
         :aria-label="ariaLabel"
+        :loading="!isCollapsed && isLoadingRules"
+        :icon="angleIcon"
+        category="tertiary"
         @click="toggle"
-      >
-        <gl-loading-icon v-if="!isCollapsed && isLoadingRules" />
-        <gl-icon v-else :name="angleIcon" :size="16" />
-      </gl-button>
+      />
       <template v-if="isCollapsed">
         <user-avatar-list :items="suggestedApproversTrimmed" :breakpoint="0" empty-text="" />
         <gl-deprecated-button variant="link" @click="toggle">{{
