@@ -1,0 +1,11 @@
+{
+  "description": "CI Runner Features",
+  "type": "object",
+  "maxProperties": 100,
+  "patternProperties": {
+    ".*": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}

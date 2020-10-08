@@ -137,6 +137,7 @@ module Ci
     validate :tag_constraints
     validates :access_level, presence: true
     validates :runner_type, presence: true
+    validates :features, allow_nil: true, json_schema: { filename: 'runner_features' }
 
     validate :no_projects, unless: :project_type?
     validate :no_groups, unless: :group_type?
@@ -147,7 +148,7 @@ module Ci
 
     after_destroy :cleanup_runner_queue
 
-    cached_attr_reader :version, :revision, :platform, :architecture, :ip_address, :contacted_at
+    cached_attr_reader :version, :revision, :platform, :architecture, :ip_address, :contacted_at, :executor, :runner_features
 
     chronic_duration_attr :maximum_timeout_human_readable, :maximum_timeout,
         error_message: 'Maximum job timeout has a value which could not be accepted'
@@ -294,7 +295,15 @@ module Ci
     end
 
     def heartbeat(values)
-      values = values&.slice(:version, :revision, :platform, :architecture, :ip_address) || {}
+      values = values&.slice(
+        :version,
+        :revision,
+        :platform,
+        :architecture,
+        :executor,
+        :ip_address,
+        :features
+      ) || {}
       values[:contacted_at] = Time.current
 
       cache_attributes(values)

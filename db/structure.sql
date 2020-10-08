@@ -10486,7 +10486,9 @@ CREATE TABLE ci_runners (
     runner_type smallint NOT NULL,
     token_encrypted character varying,
     public_projects_minutes_cost_factor double precision DEFAULT 0.0 NOT NULL,
-    private_projects_minutes_cost_factor double precision DEFAULT 1.0 NOT NULL
+    private_projects_minutes_cost_factor double precision DEFAULT 1.0 NOT NULL,
+    executor character varying(255),
+    features jsonb
 );
 
 CREATE SEQUENCE ci_runners_id_seq

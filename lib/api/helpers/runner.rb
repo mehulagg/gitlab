@@ -24,8 +24,14 @@ module API
       def get_runner_details_from_request
         return get_runner_ip unless params['info'].present?
 
-        attributes_for_keys(%w(name version revision platform architecture), params['info'])
-          .merge(get_runner_ip)
+        keys =
+          if Feature.enabled?(:ci_persist_runner_features)
+            %w(name version revision platform architecture executor features)
+          else
+            %w(name version revision platform architecture)
+          end
+
+        attributes_for_keys(keys, params['info']).merge(get_runner_ip)
       end
 
       def get_runner_ip
