@@ -31,9 +31,10 @@ the `author` field. GitLab team members **should not**.
 
 - Any change that introduces a database migration, whether it's regular, post,
   or data migration, **must** have a changelog entry, even if it is behind a
-  disabled feature flag. Since the migration will be executed on FOSS too, the
-  changelog for database schema changes should be in the core folder
-  (`changelogs/unreleased/`) even if the rest of the changes are EE-only.
+  disabled feature flag. Since the migration is executed on [GitLab FOSS](https://gitlab.com/gitlab-org/gitlab-foss/), 
+  the changelog for database schema changes should be written to the
+  `changelogs/unreleased/` directory, even when other elements of that change affect only GitLab EE.
+
 - [Security fixes](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/developer.md)
   **must** have a changelog entry, without `merge_request` value
   and with `type` set to `security`.
