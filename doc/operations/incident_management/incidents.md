@@ -133,7 +133,7 @@ confirm that a GitLab issue is created from the incident.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230847) in GitLab 13.4.
 
-Users with at least Developer [permissions](../../user/permissions.md) can view
+Users with at least Reporter [permissions](../../user/permissions.md) can view
 the Incident Details page. Navigate to **Operations > Incidents** in your project's
 sidebar, and select an incident from the list.
 
