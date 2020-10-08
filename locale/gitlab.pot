@@ -13521,6 +13521,9 @@ msgstr ""
 msgid "Import project"
 msgstr ""
 
+msgid "Import project from"
+msgstr ""
+
 msgid "Import project members"
 msgstr ""
 
