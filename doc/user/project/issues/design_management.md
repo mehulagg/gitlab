@@ -234,13 +234,13 @@ available in the **Resolved Comment** area at the bottom of the right sidebar.
 CAUTION: **Warning:**
 This feature might not be available to you. Check the **version history** note above for details.
 
-Add a to do for a design by clicking **Add a To-Do** on the design sidebar:
+Add a to do for a design by clicking **Add a to do** on the design sidebar:
 
-![To-Do button](img/design_todo_button_v13_4.png)
+![To do button](img/design_todo_button_v13_4.png)
 
-### Enable or disable the design to-do button **(CORE ONLY)**
+### Enable or disable the design to do button **(CORE ONLY)**
 
-The **Add a To-Do** button for Designs is under development but ready for production use. It is
+The **Add a to do** button for Designs is under development but ready for production use. It is
 deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
 can enable it.
