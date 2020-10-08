@@ -38,6 +38,10 @@ RSpec.describe ContainerExpirationPolicy, type: :model do
       it { is_expected.not_to allow_value('foo').for(:keep_n) }
     end
 
+    describe '#name_regex' do
+      it { is_expected.to validate_presence_of(:name_regex) }
+    end
+
     context 'with a set of regexps' do
       valid_regexps = %w[master .* v.+ v10.1.* (?:v.+|master|release)]
       invalid_regexps = ['[', '(?:v.+|master|release']
