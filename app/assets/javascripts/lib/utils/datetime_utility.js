@@ -86,6 +86,16 @@ export const getDayName = date =>
   ][date.getDay()];
 
 /**
+ * Returns the i18n month name from a given date
+ * @param  {String} datetime where month is extracted from
+ * @return {String} the i18n month name
+ */
+export function formatDateAsMonth(datetime) {
+  const month = new Date(datetime).getMonth();
+  return getMonthNames(true)[month];
+}
+
+/**
  * @example
  * dateFormat('2017-12-05','mmm d, yyyy h:MMtt Z' ) -> "Dec 5, 2017 12:00am GMT+0000"
  * @param {date} datetime
