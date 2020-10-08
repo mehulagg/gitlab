@@ -10,6 +10,10 @@ class GitlabSchema < GraphQL::Schema
   DEFAULT_MAX_DEPTH = 15
   AUTHENTICATED_MAX_DEPTH = 20
 
+  use GraphQL::Execution::Interpreter
+  # And, when you have updated your analyzers:
+  use GraphQL::Analysis::AST
+
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
   use Gitlab::Graphql::Authorize
@@ -19,8 +23,8 @@ class GitlabSchema < GraphQL::Schema
   use Gitlab::Graphql::GenericTracing
   use Gitlab::Graphql::Timeout, max_seconds: Gitlab.config.gitlab.graphql_timeout
 
-  query_analyzer Gitlab::Graphql::QueryAnalyzers::LoggerAnalyzer.new
-  query_analyzer Gitlab::Graphql::QueryAnalyzers::RecursionAnalyzer.new
+  # query_analyzer Gitlab::Graphql::QueryAnalyzers::LoggerAnalyzer.new
+  # query_analyzer Gitlab::Graphql::QueryAnalyzers::RecursionAnalyzer.new
 
   max_complexity DEFAULT_MAX_COMPLEXITY
   max_depth DEFAULT_MAX_DEPTH
