@@ -22,12 +22,12 @@ At a glance, you see the current state for the completion a given milestone.
 Without them, you would have to organize the data from the milestone and plot it
 yourself to have the same sense of progress.
 
-GitLab Starter plots it for you and presents it in a clear and beautiful chart.
+GitLab plots it for you and presents it in a clear and beautiful chart.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, check the video demonstration on [Mapping work versus time with Burndown Charts](https://www.youtube.com/watch?v=zJU2MuRChzs).
 
-### Use cases
+### Use cases for burndown charts
 
 Burndown Charts are generally used for tracking and analyzing the completion of
 a milestone. Therefore, their use cases are tied to the
@@ -47,7 +47,7 @@ and you follow this workflow:
 - By the end of the quarter, your team successfully delivered 100% of that milestone, as
   it was taken care of closely throughout the whole quarter.
 
-### How it works
+### How burndown charts work
 
 A Burndown Chart is available for every project or group milestone that has been attributed a **start
 date** and a **due date**.
