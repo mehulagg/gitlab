@@ -29,7 +29,7 @@ To view a list of available applications to install for a:
 - [Group-level cluster](../group/clusters/index.md), navigate to your group's
   **Kubernetes** page.
 
-You can install the following applications with one-click:
+You can install the following applications with one click:
 
 - [Helm](#helm)
 - [Ingress](#ingress)
