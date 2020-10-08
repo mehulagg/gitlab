@@ -159,13 +159,7 @@ RSpec.describe 'Issue Boards', :js do
     end
 
     it 'allows user to delete board' do
-      page.within(find('.board:nth-child(2)')) do
-        find('button[title="List settings"]').click
-      end
-
-      page.within(find('.js-board-settings-sidebar')) do
-        accept_confirm { find('[data-testid="remove-list"]').click }
-      end
+      remove_list
 
       wait_for_requests
 
@@ -178,13 +172,7 @@ RSpec.describe 'Issue Boards', :js do
 
       find('.js-new-board-list').click
 
-      page.within(find('.board:nth-child(2)')) do
-        find('button[title="List settings"]').click
-      end
-
-      page.within(find('.js-board-settings-sidebar')) do
-        accept_confirm { find('[data-testid="remove-list"]').click }
-      end
+      remove_list
 
       wait_for_requests
 
@@ -676,6 +664,16 @@ RSpec.describe 'Issue Boards', :js do
       expect(page).to have_button(link_text)
 
       click_button(link_text)
+    end
+  end
+
+  def remove_list()
+    page.within(find('.board:nth-child(2)')) do
+      find('button[title="List settings"]').click
+    end
+
+    page.within(find('.js-board-settings-sidebar')) do
+      accept_confirm { find('[data-testid="remove-list"]').click }
     end
   end
 end
