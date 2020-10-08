@@ -11,14 +11,10 @@
 .deploy_to_ecs:
   image: 'registry.gitlab.com/gitlab-org/cloud-deploy/aws-ecs:latest'
   dependencies: []
-  script:
-    - ecs update-task-definition
 
 .review_ecs_base:
   stage: review
   extends: .deploy_to_ecs
-  environment:
-    name: review/$CI_COMMIT_REF_NAME
 
 .production_ecs_base:
   stage: production
@@ -28,6 +24,11 @@
 
 review_ecs:
   extends: .review_ecs_base
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    on_stop: stop_review_ecs
+  script:
+    - ecs update-task-definition
   rules:
     - if: '$AUTO_DEVOPS_PLATFORM_TARGET != "ECS"'
       when: never
@@ -38,6 +39,24 @@ review_ecs:
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: never
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+
+stop_review_ecs:
+  extends: .review_ecs_base
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+  script:
+    - ecs stop-task
+  rules:
+    - if: '$AUTO_DEVOPS_PLATFORM_TARGET != "ECS"'
+      when: never
+    - if: '$CI_KUBERNETES_ACTIVE'
+      when: never
+    - if: '$REVIEW_DISABLED'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+      when: manual
 
 review_fargate:
   extends: .review_ecs_base
