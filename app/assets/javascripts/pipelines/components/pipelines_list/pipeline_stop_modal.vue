@@ -55,7 +55,7 @@ export default {
 </script>
 <template>
   <gl-modal
-    id="confirmation-modal"
+    modal-id="confirmation-modal"
     :header-title-text="modalTitle"
     :footer-primary-button-text="s__('Pipeline|Stop pipeline')"
     footer-primary-button-variant="danger"

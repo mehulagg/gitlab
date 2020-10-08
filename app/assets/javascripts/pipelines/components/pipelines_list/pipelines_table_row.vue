@@ -1,5 +1,5 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlButton, GlModalDirective } from '@gitlab/ui';
 import eventHub from '../../event_hub';
 import PipelinesActionsComponent from './pipelines_actions.vue';
 import PipelinesArtifactsComponent from './pipelines_artifacts.vue';
@@ -17,6 +17,9 @@ import { PIPELINES_TABLE } from '../../constants';
  * Given the received object renders a table row in the pipelines' table.
  */
 export default {
+  directives: {
+    GlModalDirective,
+  },
   components: {
     PipelinesActionsComponent,
     PipelinesArtifactsComponent,
@@ -350,10 +353,10 @@ export default {
 
         <gl-button
           v-if="pipeline.flags.cancelable"
+          v-gl-modal-directive="'confirmation-modal'"
           :loading="isCancelling"
           :disabled="isCancelling"
           data-toggle="modal"
-          data-target="#confirmation-modal"
           icon="close"
           variant="danger"
           category="primary"
