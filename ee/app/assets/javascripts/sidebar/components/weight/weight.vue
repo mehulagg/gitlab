@@ -143,9 +143,6 @@ export default {
       v-gl-tooltip.left.viewport
       :title="tooltipTitle"
       class="sidebar-collapsed-icon js-weight-collapsed-block"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
       @click="onCollapsedClick"
     >
       <gl-icon :size="16" name="weight" />
