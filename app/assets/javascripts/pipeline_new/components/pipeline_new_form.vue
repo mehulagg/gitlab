@@ -194,7 +194,7 @@ export default {
 </script>
 
 <template>
-  <gl-form @submit.prevent="createPipeline">
+  <gl-form>
     <gl-alert
       v-if="error"
       :title="$options.errorTitle"
@@ -315,10 +315,11 @@ export default {
       class="gl-border-t-solid gl-border-gray-100 gl-border-t-1 gl-p-5 gl-bg-gray-10 gl-display-flex gl-justify-content-space-between"
     >
       <gl-button
-        type="submit"
         category="primary"
         variant="success"
+        data-testid="run-pipeline-button"
         data-qa-selector="run_pipeline_button"
+        @click="createPipeline"
         >{{ s__('Pipeline|Run Pipeline') }}</gl-button
       >
       <gl-button :href="pipelinesPath">{{ __('Cancel') }}</gl-button>

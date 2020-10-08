@@ -1,5 +1,5 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import { GlDropdown, GlDropdownItem, GlForm, GlSprintf } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSprintf } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
@@ -18,11 +18,6 @@ describe('Pipeline New Form', () => {
   let wrapper;
   let mock;
 
-  const dummySubmitEvent = {
-    preventDefault() {},
-  };
-
-  const findForm = () => wrapper.find(GlForm);
   const findDropdown = () => wrapper.find(GlDropdown);
   const findDropdownItems = () => wrapper.findAll(GlDropdownItem);
   const findVariableRows = () => wrapper.findAll('[data-testid="ci-variable-row"]');
@@ -32,6 +27,7 @@ describe('Pipeline New Form', () => {
   const findWarningAlert = () => wrapper.find('[data-testid="run-pipeline-warning-alert"]');
   const findWarningAlertSummary = () => findWarningAlert().find(GlSprintf);
   const findWarnings = () => wrapper.findAll('[data-testid="run-pipeline-warning"]');
+  const findRunPipelineBtn = () => wrapper.find('[data-testid="run-pipeline-button"]');
   const getExpectedPostParams = () => JSON.parse(mock.history.post[0].data);
 
   const createComponent = (term = '', props = {}, method = shallowMount) => {
@@ -115,7 +111,7 @@ describe('Pipeline New Form', () => {
     });
 
     it('creates a pipeline on submit', async () => {
-      findForm().vm.$emit('submit', dummySubmitEvent);
+      findRunPipelineBtn().trigger('click');
 
       await waitForPromises();
 
@@ -135,28 +131,28 @@ describe('Pipeline New Form', () => {
   });
 
   describe('Form errors and warnings', () => {
-    beforeEach(() => {
-      createComponent();
+    beforeEach(async () => {
+      createComponent('', {}, mount);
 
       mock.onPost(pipelinesPath).reply(400, mockError);
 
-      findForm().vm.$emit('submit', dummySubmitEvent);
+      findRunPipelineBtn().trigger('click');
 
-      return waitForPromises();
+      await waitForPromises();
     });
 
-    it('shows both error and warning', () => {
+    it('shows both error and warning', async () => {
       expect(findErrorAlert().exists()).toBe(true);
       expect(findWarningAlert().exists()).toBe(true);
     });
 
     it('shows the correct error', () => {
-      expect(findErrorAlert().text()).toBe(mockError.errors[0]);
+      expect(findErrorAlert().text()).toContain(mockError.errors[0]);
     });
 
     it('shows the correct warning title', () => {
       const { length } = mockError.warnings;
-      expect(findWarningAlertSummary().attributes('message')).toBe(`${length} warnings found:`);
+      expect(findWarningAlertSummary().text()).toBe(`${length} warnings found:`);
     });
 
     it('shows the correct amount of warnings', () => {
