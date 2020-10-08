@@ -322,7 +322,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
           aggregate_failures do
             expect(policy).to be_an_instance_of(ContainerExpirationPolicy)
             expect(policy).to be_persisted
-            expect(policy.cadence).to eq('3month')
+            expect(policy.cadence).to eq('1d')
           end
         end
 
