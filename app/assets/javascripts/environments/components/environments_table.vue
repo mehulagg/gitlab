@@ -165,8 +165,7 @@ export default {
       </div>
     </div>
     <template v-for="(model, i) in sortedEnvironments" :model="model">
-      <div
-        is="environment-item"
+      <environment-item
         :key="`environment-item-${i}`"
         :model="model"
         :can-read-environment="canReadEnvironment"

@@ -521,7 +521,7 @@ export default {
       'js-child-row environment-child-row': model.isChildren,
       'folder-row': isFolder,
     }"
-    class="gl-responsive-table-row"
+    class="gl-align-items-center gl-border-gray-100 gl-border-solid gl-border-1 gl-display-flex gl-h-11 gl-mb-5 gl-p-5 gl-rounded-base"
     role="row"
   >
     <div
