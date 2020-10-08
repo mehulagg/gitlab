@@ -141,7 +141,7 @@ module Gitlab
         end
 
         def event_for(event_name)
-          known_events.find { |event| event[:name] == event_name }
+          known_events.find { |event| event[:name] == event_name.to_s }
         end
 
         def events_for(event_names)
