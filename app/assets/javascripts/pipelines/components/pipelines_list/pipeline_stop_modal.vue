@@ -45,6 +45,20 @@ export default {
     hasRef() {
       return !isEmpty(this.pipeline.ref);
     },
+    primaryProps() {
+      return {
+        text: s__('Stop Pipeline'),
+        attributes: [
+          { variant: 'danger' },
+          { category: 'primary' },
+        ],
+      };
+    },
+    cancelProps() {
+      return {
+        text: s__('Cancel'),
+      };
+    }, 
   },
   methods: {
     emitSubmit(event) {
@@ -56,9 +70,9 @@ export default {
 <template>
   <gl-modal
     modal-id="confirmation-modal"
-    :header-title-text="modalTitle"
-    :footer-primary-button-text="s__('Pipeline|Stop pipeline')"
-    footer-primary-button-variant="danger"
+    :title="modalTitle"
+    :action-primary="primaryProps"
+    :action-cancel="cancelProps"
     @submit="emitSubmit($event)"
   >
     <p v-html="modalText"></p>
