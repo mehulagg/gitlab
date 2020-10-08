@@ -20,9 +20,8 @@ module EE
     end
 
     def show_burndown_placeholder?(milestone)
-      return false unless milestone.supports_milestone_charts?
-
-      can?(current_user, :admin_milestone, milestone.resource_parent)
+      milestone.supports_milestone_charts? &&
+        can?(current_user, :admin_milestone, milestone.resource_parent)
     end
 
     def milestone_weight_tooltip_text(weight)
@@ -33,9 +32,11 @@ module EE
       end
     end
 
-    def legacy_milestone?(milestone)
-      first_resource_state_event = ::ResourceStateEvent.first
+    def first_resource_state_event
+      strong_memoize(:first_resource_state_event) { ::ResourceStateEvent.first }
+    end
 
+    def legacy_milestone?(milestone)
       first_resource_state_event && milestone.created_at < first_resource_state_event.created_at
     end
   end

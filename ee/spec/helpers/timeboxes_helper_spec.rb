@@ -22,7 +22,7 @@ RSpec.describe TimeboxesHelper do
       let(:milestone) { double('Milestone', supports_milestone_charts?: true, resource_parent: 'board') }
 
       before do
-        expect(helper).to receive(:can?).with(user, :admin_milestone, milestone.resource_parent) { false }
+        stub_can_admin_milestone(false)
       end
 
       it { is_expected.to be false }
@@ -32,7 +32,7 @@ RSpec.describe TimeboxesHelper do
       let(:milestone) { double('Milestone', supports_milestone_charts?: true, resource_parent: 'board') }
 
       before do
-        expect(helper).to receive(:can?).with(user, :admin_milestone, milestone.resource_parent) { true }
+        stub_can_admin_milestone(true)
       end
 
       it { is_expected.to be true }
@@ -52,7 +52,7 @@ RSpec.describe TimeboxesHelper do
       let(:milestone) { double('Milestone', created_at: Date.current) }
 
       before do
-        create(:resource_state_event, created_at: Date.yesterday)
+        create_resource_state_event(Date.yesterday)
       end
 
       it { is_expected.to eq(false) }
@@ -62,7 +62,7 @@ RSpec.describe TimeboxesHelper do
       let(:milestone) { double('Milestone', created_at: Date.current) }
 
       before do
-        create(:resource_state_event, created_at: Date.current)
+        create_resource_state_event
       end
 
       it { is_expected.to eq(false) }
@@ -72,10 +72,18 @@ RSpec.describe TimeboxesHelper do
       let(:milestone) { double('Milestone', created_at: Date.yesterday) }
 
       before do
-        create(:resource_state_event, created_at: Date.current)
+        create_resource_state_event
       end
 
       it { is_expected.to eq(true) }
     end
+  end
+
+  def create_resource_state_event(created_at = Date.current)
+    create(:resource_state_event, created_at: created_at)
+  end
+
+  def stub_can_admin_milestone(ability)
+    allow(helper).to receive(:can?).with(user, :admin_milestone, milestone.resource_parent).and_return(ability)
   end
 end
