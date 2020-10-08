@@ -86,6 +86,9 @@ export const generateJobNeedsDict = ({ jobs }) => {
         .flat(Infinity);
     };
 
+    // To ensure we don't have duplicates job relationship when 2 jobs
+    // needed by another both depends on the same jobs, we remove any
+    // duplicates from the array.
     const uniqueValues = Array.from(new Set(recursiveNeeds(value)));
 
     return { ...acc, [jobs[value].id]: uniqueValues };

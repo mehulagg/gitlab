@@ -192,8 +192,8 @@ export default {
             :job-name="group.name"
             :is-highlighted="isJobHighlighted(group.id)"
             :is-faded-out="hasHighlightedJob && !isJobHighlighted(group.id)"
-            :handle-mouse-over="highlightNeeds"
-            :handle-mouse-leave="removeHighlightNeeds"
+            @on-mouse-enter="highlightNeeds"
+            @on-mouse-leave="removeHighlightNeeds"
           />
         </div>
       </div>
