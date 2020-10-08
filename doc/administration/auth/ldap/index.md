@@ -455,6 +455,7 @@ The process will also update the following user information:
 - If Kerberos is enabled, Kerberos identity.
 
 The LDAP sync process:
+
 - Updates existing users.
 - Creates new users on first sign in.
 
