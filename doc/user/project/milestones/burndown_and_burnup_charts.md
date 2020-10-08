@@ -10,7 +10,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1540) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.1 for project milestones.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5354) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.8 for group milestones.
 > - [Added](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6495) to [GitLab Starter](https://about.gitlab.com/pricing/) 11.2 for group milestones.
-> - Burnup charts [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6903) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5 for milestones and iterations.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6903) burnup charts and fixed burndown charts in [GitLab Starter](https://about.gitlab.com/pricing/) 13.5.
 
 ## Burndown charts
 
@@ -68,27 +68,41 @@ The chart indicates the project's progress throughout that milestone (for issues
 In particular, it shows how many issues were or are still open for a given day in the
 milestone's corresponding period.
 
-The Burndown Chart tracks when issues were created and when they were last closed—not their full history. For each day, it takes the number of issues still open and issues created that day and subtracts the number of issues closed that day.
-**Issues that were created and assigned a milestone before its start date—and remain open as of the start date—are considered as having been opened on the start date**. Therefore, when the milestone start date is changed the number of opened issues on each day may change.
-Reopened issues are
-considered as having been opened on the day after they were last closed.
-
 The Burndown Chart can also be toggled to display the cumulative open issue
 weight for a given day. When using this feature, make sure issue weights have
 been properly assigned, since an open issue with no weight adds zero to the
 cumulative value.
 
+### Fixed burndown charts
+
+For milestones created before GitLab 13.5, burndown charts have an additional toggle to
+switch between Legacy and Fixed views.
+
+| Legacy | Fixed |
+| ----- | ----- |
+| ![Legacy burndown chart, ](img/burndown_chart_legacy.png) | ![Fixed burndown chart, showing a jump when a lot of issues were added to the milestone](img/burndown_chart_fixed.png) |
+
+Fixed burndown charts track the full history of milestone activity, from its creation until the milestone expires. After the milestone due date has passed, issues removed from the milestone will
+not affect the chart.
+
+Legacy burndown charts track when issues were created and when they were last closed—not their full history. For each day, it takes the number of issues still open and issues created that day and subtracts the number of issues closed that day.
+**Issues that were created and assigned a milestone before its start date—and remain open as of the start date—are considered as having been opened on the start date**. Therefore, when the milestone start date is changed the number of opened issues on each day may change.
+Reopened issues are
+considered as having been opened on the day after they were last closed.
+
 ## Burnup charts
 
-Burnup charts are another way of visualising completion progress of a milestone. They
-allow you to track completed work separately from scope. This allows differentiating
-between issues that were completed and issues that were descoped or moved.
+Burnup charts show the assigned and completed work for a milestone. 
 
-TODO:
-- Use cases, how it works, and screenshots sections (or screenshots interspersed)
-- examples showing differences (scope added / scope cut / issue completion)
-- total issues & weight
-- legacy burndown toggle (add to burndown section)
+![burnup chart](img/burnup_chart.png)
+
+Burnup charts have separate lines for total work and completed work. The total line
+shows when scope is reduced or added to a milestone. The completed work is a count
+of issues closed.
+
+Burnup charts can show either the total number of issues or total weight for each
+day of the milestone. Use the toggle above the charts to switch between total
+and weight.
 
 <!-- ## Troubleshooting
 
