@@ -197,21 +197,34 @@ module EE
     def total_repository_size_excess
       strong_memoize(:total_repository_size_excess) do
         namespace_size_limit = actual_size_limit
-
         namespace_limit_arel = Arel::Nodes::SqlLiteral.new(namespace_size_limit.to_s.presence || 'NULL')
-        condition = 'projects.repository_size_limit != 0 AND project_statistics.repository_size > projects.repository_size_limit'
 
-        total_excess = total_repository_size_excess_calculation(condition, ::Project.arel_table[:repository_size_limit])
-
-        if namespace_size_limit.to_i > 0
-          condition = 'projects.repository_size_limit IS NULL AND project_statistics.repository_size > :namespace_size_limit'
-          sanitized_condition = self.class.sanitize_sql_array([condition, namespace_size_limit: namespace_size_limit])
-
-          total_excess += total_repository_size_excess_calculation(sanitized_condition, namespace_limit_arel)
-        end
-
+        total_excess = total_repository_size_excess_calculation(::Project.arel_table[:repository_size_limit])
+        total_excess += total_repository_size_excess_calculation(namespace_limit_arel, project_level: false) if namespace_size_limit.to_i > 0
         total_excess
       end
+    end
+
+    def repository_size_excess_project_count
+      strong_memoize(:repository_size_excess_project_count) do
+        namespace_size_limit = actual_size_limit
+
+        count = projects_for_repository_size_excess.count
+        count += projects_for_repository_size_excess(namespace_size_limit).count if namespace_size_limit.to_i > 0
+        count
+      end
+    end
+
+    def total_repository_size
+      strong_memoize(:total_repository_size) do
+        all_projects
+          .joins(:statistics)
+          .pluck(total_repository_size_arel.sum).first || 0 # rubocop:disable Rails/Pick
+      end
+    end
+
+    def contains_locked_projects?
+      total_repository_size_excess > additional_purchased_storage_size.megabytes
     end
 
     def actual_size_limit
@@ -338,7 +351,8 @@ module EE
       feature_available?(:dependency_scanning) ||
       feature_available?(:container_scanning) ||
       feature_available?(:dast) ||
-      feature_available?(:coverage_fuzzing)
+      feature_available?(:coverage_fuzzing) ||
+      feature_available?(:api_fuzzing)
     end
 
     def free_plan?
@@ -431,14 +445,27 @@ module EE
       [actual_shared_runners_minutes_limit.to_f - shared_runners_minutes.to_f, 0].max
     end
 
-    def total_repository_size_excess_calculation(condition, limit)
-      select_sql = Arel::Nodes::NamedFunction.new('SUM', [::ProjectStatistics.arel_table[:repository_size] - limit]).to_sql
+    def total_repository_size_excess_calculation(repository_size_limit, project_level: true)
+      total_excess = (total_repository_size_arel - repository_size_limit).sum
+      relation = projects_for_repository_size_excess((repository_size_limit unless project_level))
+      relation.pluck(total_excess).first || 0 # rubocop:disable Rails/Pick
+    end
 
-      all_projects
-      .joins(:statistics)
-      .where(condition)
-      .pluck(Arel.sql(select_sql)) # rubocop:disable Rails/Pick
-      .first || 0
+    def total_repository_size_arel
+      arel_table = ::ProjectStatistics.arel_table
+      arel_table[:repository_size] + arel_table[:lfs_objects_size]
+    end
+
+    def projects_for_repository_size_excess(limit = nil)
+      if limit
+        all_projects
+          .with_total_repository_size_greater_than(limit)
+          .without_repository_size_limit
+      else
+        all_projects
+          .with_total_repository_size_greater_than(::Project.arel_table[:repository_size_limit])
+          .without_unlimited_repository_size_limit
+      end
     end
   end
 end

@@ -155,6 +155,15 @@ module EE
 
       scope :with_group_saml_provider, -> { preload(group: :saml_provider) }
 
+      scope :with_total_repository_size_greater_than, -> (value) do
+        statistics = ::ProjectStatistics.arel_table
+
+        joins(:statistics)
+          .where((statistics[:repository_size] + statistics[:lfs_objects_size]).gt(value))
+      end
+      scope :without_unlimited_repository_size_limit, -> { where.not(repository_size_limit: 0) }
+      scope :without_repository_size_limit, -> { where(repository_size_limit: nil) }
+
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         to: :statistics, allow_nil: true
 
@@ -186,7 +195,6 @@ module EE
         validates :mirror_user, presence: true
       end
 
-      accepts_nested_attributes_for :tracing_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :status_page_setting, update_only: true, allow_destroy: true
       accepts_nested_attributes_for :compliance_framework_setting, update_only: true, allow_destroy: true
 
@@ -508,14 +516,26 @@ module EE
       ::Gitlab::UrlSanitizer.new(bare_url, credentials: { user: import_data&.user }).full_url
     end
 
+    def actual_size_limit
+      strong_memoize(:actual_size_limit) do
+        repository_size_limit || namespace.actual_size_limit
+      end
+    end
+
     def repository_size_checker
       strong_memoize(:repository_size_checker) do
         ::Gitlab::RepositorySizeChecker.new(
           current_size_proc: -> { statistics.total_repository_size },
-          limit: (repository_size_limit || namespace.actual_size_limit),
+          limit: actual_size_limit,
           enabled: License.feature_available?(:repository_size_limit)
         )
       end
+    end
+
+    def repository_size_excess
+      return 0 unless actual_size_limit.to_i > 0
+
+      [statistics.total_repository_size - actual_size_limit, 0].max
     end
 
     def username_only_import_url=(value)

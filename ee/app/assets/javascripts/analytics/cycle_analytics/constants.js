@@ -61,3 +61,5 @@ export const OVERVIEW_METRICS = {
   TIME_SUMMARY: 'TIME_SUMMARY',
   RECENT_ACTIVITY: 'RECENT_ACTIVITY',
 };
+
+export const FETCH_VALUE_STREAM_DATA = 'fetchValueStreamData';

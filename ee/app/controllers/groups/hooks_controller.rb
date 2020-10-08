@@ -14,6 +14,8 @@ class Groups::HooksController < Groups::ApplicationController
 
   layout 'group_settings'
 
+  feature_category :integrations
+
   def index
     @hooks = @group.hooks
     @hook = GroupHook.new
@@ -58,7 +60,7 @@ class Groups::HooksController < Groups::ApplicationController
   end
 
   def destroy
-    @hook.destroy
+    destroy_hook(@hook)
 
     redirect_to group_hooks_path(@group), status: :found
   end

@@ -1,0 +1,31 @@
+import { shallowMount } from '@vue/test-utils';
+import { GlBanner } from '@gitlab/ui';
+import AutoFixUserCallout from 'ee/security_dashboard/components/auto_fix_user_callout.vue';
+
+describe('AutoFixUserCallout', () => {
+  let wrapper;
+
+  const helpPagePath = '/help/page/path';
+
+  const createWrapper = () => {
+    wrapper = shallowMount(AutoFixUserCallout, {
+      propsData: {
+        helpPagePath,
+      },
+    });
+  };
+
+  it('renders properly', () => {
+    createWrapper();
+
+    expect(wrapper.find(GlBanner).exists()).toBe(true);
+    expect(wrapper.find(GlBanner).props()).toMatchObject({
+      title: 'Introducing GitLab auto-fix',
+      buttonText: 'Learn more',
+      buttonLink: helpPagePath,
+    });
+    expect(wrapper.text()).toContain(
+      "If you're using dependency and/or container scanning, and auto-fix is enabled, auto-fix automatically creates merge requests with fixes to vulnerabilities.",
+    );
+  });
+});

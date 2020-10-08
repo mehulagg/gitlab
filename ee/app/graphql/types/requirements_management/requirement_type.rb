@@ -30,6 +30,13 @@ module Types
       field :last_test_report_state, RequirementsManagement::TestReportStateEnum, null: true, complexity: 5,
             description: 'Latest requirement test report state'
 
+      field :last_test_report_manually_created,
+            GraphQL::BOOLEAN_TYPE,
+            method: :last_test_report_manually_created?,
+            null: true,
+            complexity: 5,
+            description: 'Indicates if latest test report was created by user'
+
       field :project, ProjectType, null: false,
             description: 'Project to which the requirement belongs',
             resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, obj.project_id).find }

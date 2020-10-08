@@ -72,7 +72,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false, auto_dev_ops_enabled: true),
           security_scan(:license_scanning, configured: false, auto_dev_ops_enabled: true),
           security_scan(:secret_detection, configured: true, auto_dev_ops_enabled: true),
-          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true)
+          security_scan(:coverage_fuzzing, configured: false, auto_dev_ops_enabled: true),
+          security_scan(:api_fuzzing, configured: false, auto_dev_ops_enabled: true)
         )
       end
     end
@@ -95,7 +96,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
     end
@@ -125,7 +127,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -142,7 +145,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -165,7 +169,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 
@@ -180,7 +185,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: true),
           security_scan(:secret_detection, configured: true),
-          security_scan(:coverage_fuzzing, configured: false)
+          security_scan(:coverage_fuzzing, configured: false),
+          security_scan(:api_fuzzing, configured: false)
         )
       end
 

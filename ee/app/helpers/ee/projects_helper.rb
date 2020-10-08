@@ -231,7 +231,8 @@ module EE
           dashboard_documentation: help_page_path('user/application_security/security_dashboard/index'),
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
-          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
+          security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
+          auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests')
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end

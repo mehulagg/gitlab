@@ -59,6 +59,10 @@ module Gitlab
           def merge!(other)
             replace_with!(::Security::MergeReportsService.new(self, other).execute)
           end
+
+          def primary_scanner
+            scanners.first&.second
+          end
         end
       end
     end

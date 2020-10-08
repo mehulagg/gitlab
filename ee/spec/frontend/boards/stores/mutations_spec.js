@@ -206,6 +206,21 @@ describe('RECEIVE_SWIMLANES_FAILURE', () => {
   });
 });
 
+describe('RECEIVE_FIRST_EPICS_SUCCESS', () => {
+  it('populates epics and canAdminEpic with payload', () => {
+    state = {
+      ...state,
+      epics: {},
+      canAdminEpic: false,
+    };
+
+    mutations.RECEIVE_FIRST_EPICS_SUCCESS(state, { epics: mockEpics, canAdminEpic: true });
+
+    expect(state.epics).toEqual(mockEpics);
+    expect(state.canAdminEpic).toEqual(true);
+  });
+});
+
 describe('RECEIVE_EPICS_SUCCESS', () => {
   it('populates epics with payload', () => {
     state = {
@@ -213,7 +228,7 @@ describe('RECEIVE_EPICS_SUCCESS', () => {
       epics: {},
     };
 
-    mutations.RECEIVE_EPICS_SUCCESS(state, { epics: mockEpics });
+    mutations.RECEIVE_EPICS_SUCCESS(state, mockEpics);
 
     expect(state.epics).toEqual(mockEpics);
   });

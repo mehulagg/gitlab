@@ -50,7 +50,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['activeId', 'filterParams', 'canAdminEpic']),
+    ...mapState(['activeId', 'filterParams', 'canAdminEpic', 'listsFlags']),
     treeRootWrapper() {
       return this.canAdminList && this.canAdminEpic ? Draggable : 'ul';
     },
@@ -68,12 +68,15 @@ export default {
 
       return this.canAdminList ? options : {};
     },
+    isLoadingMore() {
+      return this.listsFlags[this.list.id]?.isLoadingMore;
+    },
   },
   watch: {
     filterParams: {
       handler() {
         if (this.isUnassignedIssuesLane) {
-          this.fetchIssuesForList(this.list.id);
+          this.fetchIssuesForList({ listId: this.list.id, noEpicIssues: true });
         }
       },
       deep: true,
@@ -173,6 +176,7 @@ export default {
           :is-active="isActiveIssue(issue)"
           @show="showIssue(issue)"
         />
+        <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
       </component>
     </div>
   </div>

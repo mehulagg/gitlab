@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import Draggable from 'vuedraggable';
 import BoardListHeader from 'ee_else_ce/boards/components/board_list_header.vue';
 import { DRAGGABLE_TAG } from '../constants';
@@ -14,6 +14,7 @@ export default {
     BoardListHeader,
     EpicLane,
     IssuesLaneList,
+    GlButton,
     GlIcon,
   },
   directives: {
@@ -35,14 +36,14 @@ export default {
     },
   },
   computed: {
-    ...mapState(['epics']),
+    ...mapState(['epics', 'pageInfoByListId', 'listsFlags']),
     ...mapGetters(['getUnassignedIssues']),
     unassignedIssues() {
       return listId => this.getUnassignedIssues(listId);
     },
     unassignedIssuesCount() {
       return this.lists.reduce(
-        (total, list) => total + this.getUnassignedIssues(list.id).length,
+        (total, list) => total + this.listsFlags[list.id]?.unassignedIssuesCount || 0,
         0,
       );
     },
@@ -65,9 +66,12 @@ export default {
 
       return this.canAdminList ? options : {};
     },
+    hasMoreUnassignedIssues() {
+      return this.lists.some(list => this.pageInfoByListId[list.id]?.hasNextPage);
+    },
   },
   methods: {
-    ...mapActions(['moveList']),
+    ...mapActions(['moveList', 'fetchIssuesForList']),
     handleDragOnEnd(params) {
       const { newIndex, oldIndex, item } = params;
       const { listId } = item.dataset;
@@ -76,6 +80,13 @@ export default {
         listId,
         newIndex,
         adjustmentValue: newIndex < oldIndex ? 1 : -1,
+      });
+    },
+    fetchMoreUnassignedIssues() {
+      this.lists.forEach(list => {
+        if (this.pageInfoByListId[list.id]?.hasNextPage) {
+          this.fetchIssuesForList({ listId: list.id, fetchNext: true, noEpicIssues: true });
+        }
       });
     },
   },
@@ -142,17 +153,29 @@ export default {
           </span>
         </div>
       </div>
-      <div class="gl-display-flex" data-testid="board-lane-unassigned-issues">
-        <issues-lane-list
-          v-for="list in lists"
-          :key="`${list.id}-issues`"
-          :list="list"
-          :issues="unassignedIssues(list.id)"
-          :is-unassigned-issues-lane="true"
-          :disabled="disabled"
-          :can-admin-list="canAdminList"
-        />
+      <div data-testid="board-lane-unassigned-issues">
+        <div class="gl-display-flex">
+          <issues-lane-list
+            v-for="list in lists"
+            :key="`${list.id}-issues`"
+            :list="list"
+            :issues="unassignedIssues(list.id)"
+            :is-unassigned-issues-lane="true"
+            :disabled="disabled"
+            :can-admin-list="canAdminList"
+          />
+        </div>
       </div>
+    </div>
+    <div v-if="hasMoreUnassignedIssues" class="gl-p-3 gl-pr-0 gl-sticky gl-left-0 gl-max-w-full">
+      <gl-button
+        category="tertiary"
+        variant="info"
+        class="gl-w-full"
+        @click="fetchMoreUnassignedIssues()"
+      >
+        {{ s__('Board|Load more issues') }}
+      </gl-button>
     </div>
   </div>
 </template>

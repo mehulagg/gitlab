@@ -8,7 +8,6 @@ module EE
       # and `Namespace#namespace_statistics` will return stale data.
       ::Ci::Minutes::EmailNotificationService.new(build.project.reset).execute if ::Gitlab.com?
 
-      StoreSecurityScansWorker.perform_async(build.id)
       RequirementsManagement::ProcessRequirementsReportsWorker.perform_async(build.id)
 
       super

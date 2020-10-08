@@ -105,6 +105,7 @@ module EE
       def defaults
         super.merge(
           allow_group_owners_to_manage_ldap: true,
+          automatic_purchased_storage_allocation: false,
           custom_project_templates_group_id: nil,
           default_project_deletion_protection: false,
           deletion_adjourned_period: DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL,
