@@ -105,9 +105,8 @@ Given that the metadata database will unblock the implementation of the most req
 
 1. Design metadata database schema;
 1. Add support for managing metadata using the database;
-1. ✓ Add support for managing metadata using the database;
-1. Design plans and tools to facilitate the migration of small, medium and large repositories (in progress);
-1. Implement online garbage collection (in progress);
+1. Design plans and tools to facilitate the migration of small, medium and large repositories;
+1. Implement online garbage collection;
 1. Create database clusters in staging and production for GitLab.com;
 1. Create automated deployment pipeline for GitLab.com;
 1. Deployment and gradual migration of the existing registry for GitLab.com;
