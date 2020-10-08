@@ -161,9 +161,7 @@ RSpec.describe VulnerabilitiesHelper do
         evidence: kind_of(String),
         scanner: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
         request: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
-        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
-        supporting_messages: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder),
-        assets: king_of(Array)
+        response: kind_of(Grape::Entity::Exposure::NestingExposure::OutputBuilder)
       )
 
       expect(subject[:location]['blob_path']).to match(kind_of(String))
