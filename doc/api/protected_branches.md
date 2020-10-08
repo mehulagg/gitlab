@@ -297,6 +297,8 @@ Example response:
 
 ### Example with allow to push and allow to merge access **(STARTER)**
 
+Example request:
+
 ```shell
 curl --request POST \
      --header "PRIVATE-TOKEN: <your_access_token>" \
