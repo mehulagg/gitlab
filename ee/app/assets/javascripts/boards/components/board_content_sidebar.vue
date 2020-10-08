@@ -5,8 +5,7 @@ import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import IssuableTitle from '~/boards/components/issuable_title.vue';
 import BoardSidebarEpicSelect from './sidebar/board_sidebar_epic_select.vue';
-import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import AssigneesDropdown from '~/vue_shared/components/sidebar/assignees_dropdown.vue';
+import BoardAssigneeDropdown from '~/boards/components/board_assignee_dropdown.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -14,8 +13,7 @@ export default {
     GlDrawer,
     IssuableTitle,
     BoardSidebarEpicSelect,
-    BoardEditableItem,
-    AssigneesDropdown,
+    BoardAssigneeDropdown,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'getActiveIssue']),
@@ -42,18 +40,7 @@ export default {
     </template>
 
     <template>
-      <board-editable-item :title="'Assignee'">
-        <template #collapsed>
-          <issuable-assignees :users="getActiveIssue.assignees" />
-        </template>
-
-        <template #default>
-          <assignees-dropdown />
-        </template>
-      </board-editable-item>
-    </template>
-
-    <template>
+      <board-assignee-dropdown />
       <board-sidebar-epic-select />
     </template>
   </gl-drawer>
