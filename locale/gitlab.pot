@@ -9497,10 +9497,16 @@ msgstr ""
 msgid "Edit this release"
 msgstr ""
 
+msgid "Edit title and description"
+msgstr ""
+
 msgid "Edit wiki page"
 msgstr ""
 
 msgid "Edit your most recent comment in a thread (from an empty textarea)"
+msgstr ""
+
+msgid "Edited"
 msgstr ""
 
 msgid "Edited %{timeago}"
@@ -18156,6 +18162,9 @@ msgid "Opened"
 msgstr ""
 
 msgid "Opened %{epicTimeagoDate}"
+msgstr ""
+
+msgid "Opened %{timeAgo}"
 msgstr ""
 
 msgid "Opened MRs"
