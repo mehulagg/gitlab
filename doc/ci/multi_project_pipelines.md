@@ -163,6 +163,8 @@ have permission to run CI/CD pipelines against the protected branch, the pipelin
 
 ### Passing variables to a downstream pipeline
 
+#### Using `variables` keyword
+
 Sometimes you might want to pass variables to a downstream pipeline.
 You can do that using the `variables` keyword, just like you would when
 defining a regular job.
@@ -215,6 +217,42 @@ NOTE: **Tip:**
 Upstream pipelines take precedence over downstream ones. If there are two
 variables with the same name defined in both upstream and downstream projects,
 the ones defined in the upstream project will take precedence.
+
+#### Using variables inheriting
+
+You can also pass variables to a downstream pipeline with [variables inheriting](variables/README.md#inherit-environment-variables) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
+
+Example:
+
+Upstream pipeline:
+
+```yaml
+build_vars:
+  stage: build
+  script:
+    - echo "BUILD_VERSION=hello" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+deploy:
+  stage: deploy
+  trigger: my/downstream_project
+```
+
+Downstream pipeline:
+
+```yaml
+test:
+  stage: test
+  script:
+    - echo $BUILD_VERSION
+  needs:
+    - project: my/upstream_project
+      job: build_vars
+      ref: master
+      artifacts: true
+```
 
 ### Mirroring status from triggered pipeline
 
