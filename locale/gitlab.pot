@@ -29150,7 +29150,7 @@ msgstr ""
 msgid "When a runner is locked, it cannot be assigned to other projects"
 msgstr ""
 
-msgid "When enabled, any user visiting %{host} and creating an account will have to be explicitly approved by the admin before they can login. This setting is effective only if sign-ups are enabled."
+msgid "When enabled, any user visiting %{host} and creating an account will have to be explicitly approved by the admin before they can sign in. This setting is effective only if sign-ups are enabled."
 msgstr ""
 
 msgid "When enabled, any user visiting %{host} will be able to create an account."
