@@ -41,29 +41,29 @@ module EE
           end
 
           # Overrides API::BoardsResponses authorize_list_type_resource!
-          # rubocop: disable CodeReuse/ActiveRecord
           def authorize_list_type_resource!
+            # rubocop: disable CodeReuse/ActiveRecord
             if params[:label_id] && !available_labels_for(board_parent).exists?(params[:label_id])
               render_api_error!({ error: 'Label not found!' }, 400)
             end
+            # rubocop: enable CodeReuse/ActiveRecord
 
-            if milestone_id = params[:milestone_id]
+            if params[:milestone_id]
               milestones = ::Boards::MilestonesFinder.new(board, current_user).execute
 
-              unless milestones.find_by(id: milestone_id)
+              unless milestones.id_in(params[:milestone_id]).exists?
                 render_api_error!({ error: 'Milestone not found!' }, 400)
               end
             end
 
-            if assignee_id = params[:assignee_id]
+            if params[:assignee_id]
               users = ::Boards::UsersFinder.new(board, current_user).execute
 
-              unless users.find_by(user_id: assignee_id)
+              unless users.for_user(params[:assignee_id])
                 render_api_error!({ error: 'User not found!' }, 400)
               end
             end
           end
-          # rubocop: enable CodeReuse/ActiveRecord
 
           # Overrides API::BoardsResponses list_creation_params
           params :list_creation_params do

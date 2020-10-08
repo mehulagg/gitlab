@@ -4,9 +4,10 @@ require 'spec_helper'
 
 RSpec.describe GroupMember do
   context 'scopes' do
+    let_it_be(:user_1) { create(:user) }
+    let_it_be(:user_2) { create(:user) }
+
     it 'counts users by group ID' do
-      user_1 = create(:user)
-      user_2 = create(:user)
       group_1 = create(:group)
       group_2 = create(:group)
 
@@ -24,6 +25,16 @@ RSpec.describe GroupMember do
 
         expect(described_class.of_ldap_type).to eq([group_member])
       end
+    end
+
+    describe '.for_user' do
+      it 'returns requested user' do
+        group_member = create(:group_member, user: user_2)
+        create(:group_member, user: user_1)
+
+        expect(described_class.for_user(user_2)).to eq([group_member])
+      end
+
     end
   end
 
