@@ -32,12 +32,19 @@ module API
       end
 
       def find_package_versions
-        packages = packages_finder
-          .with_name(params[:package_name])
+        project_packages = packages_finder
+
+        packages = project_packages.select do |package|
+          normalize(package.name) == params[:package_name]
+        end
 
         not_found!('Package') if packages.empty?
 
         packages
+      end
+
+      def normalize(package_name)
+        package_name.gsub(/[-_.]+/, '-').downcase
       end
     end
 
