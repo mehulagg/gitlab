@@ -3,6 +3,9 @@
 class Projects::IterationsController < Projects::ApplicationController
   before_action :check_iterations_available!
   before_action :authorize_show_iteration!
+  before_action do
+    push_frontend_feature_flag(:burnup_charts, project)
+  end
 
   def index; end
 

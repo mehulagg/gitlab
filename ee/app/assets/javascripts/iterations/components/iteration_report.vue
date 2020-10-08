@@ -9,7 +9,9 @@ import {
   GlDropdown,
   GlDropdownItem,
 } from '@gitlab/ui';
+import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { __ } from '~/locale';
 import IterationReportSummary from './iteration_report_summary.vue';
 import IterationForm from './iteration_form.vue';
@@ -30,6 +32,7 @@ const page = {
 
 export default {
   components: {
+    BurnCharts,
     GlAlert,
     GlBadge,
     GlLoadingIcon,
@@ -61,6 +64,7 @@ export default {
       },
     },
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     fullPath: {
       type: String,
@@ -214,6 +218,12 @@ export default {
         :full-path="fullPath"
         :iteration-id="iteration.id"
         :namespace-type="namespaceType"
+      />
+      <burn-charts
+        v-if="glFeatures.burnupCharts"
+        :start-date="iteration.startDate"
+        :due-date="iteration.dueDate"
+        :iteration-id="iteration.id"
       />
       <iteration-report-tabs
         :full-path="fullPath"

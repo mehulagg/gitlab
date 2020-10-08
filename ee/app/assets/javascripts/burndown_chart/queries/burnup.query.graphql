@@ -1,5 +1,16 @@
-query IterationBurnupTimesSeriesData($milestoneId: MilestoneID!) {
-  milestone(id: $milestoneId) {
+query IterationBurnupTimesSeriesData($id: ID!, $isIteration: Boolean = false) {
+  milestone(id: $id) @skip(if: $isIteration) {
+    title
+    id
+    burnupTimeSeries {
+      date
+      scopeCount
+      scopeWeight
+      completedCount
+      completedWeight
+    }
+  }
+  iteration(id: $id) @include(if: $isIteration) {
     title
     id
     burnupTimeSeries {
