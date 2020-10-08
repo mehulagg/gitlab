@@ -1423,7 +1423,7 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    ```shell
    gitlab-ctl patroni check-leader
 
-   # OR 
+   # OR
 
    gitlab-ctl patroni members
    ```

@@ -189,7 +189,7 @@ The following examples make use of regex string boundary characters which match 
 Example: prevent pushing any `.exe` files to any location in the repository. This is an example of a partial match, which can match any filename that contains `.exe` at the end:
 
 ```plaintext
-\.exe$ 
+\.exe$
 ```
 
 Example: prevent a specific configuration file in the repository root from being pushed:
@@ -214,7 +214,7 @@ Example: combining all of the above in a single expression. Note that all of the
 
 ```plaintext
 (\.exe|^config\.yml|^directory-name\/config\.yml|(^|\/)install\.exe)$
-``` 
+```
 
 <!-- ## Troubleshooting
 
