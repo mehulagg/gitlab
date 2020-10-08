@@ -67,6 +67,10 @@ export default {
       'getJsonSchemaForPath',
     ]),
     ...mapGetters('fileTemplates', ['showFileTemplatesBar']),
+    ...mapGetters('editor', ['getFileEditor']),
+    fileEditor() {
+      return this.getFileEditor(this.file.path);
+    },
     shouldHideEditor() {
       return this.file && !isTextFile(this.file);
     },
@@ -80,10 +84,10 @@ export default {
       return this.shouldHideEditor && this.file.mrChange && this.viewer === viewerTypes.mr;
     },
     isEditorViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_EDITOR;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_EDITOR;
     },
     isPreviewViewMode() {
-      return this.file.viewMode === FILE_VIEW_MODE_PREVIEW;
+      return this.fileEditor.viewMode === FILE_VIEW_MODE_PREVIEW;
     },
     editTabCSS() {
       return {
@@ -125,8 +129,7 @@ export default {
         this.initEditor();
 
         if (this.currentActivityView !== leftSidebarViews.edit.name) {
-          this.setFileViewMode({
-            file: this.file,
+          this.updateEditor({
             viewMode: FILE_VIEW_MODE_EDITOR,
           });
         }
@@ -134,8 +137,7 @@ export default {
     },
     currentActivityView() {
       if (this.currentActivityView !== leftSidebarViews.edit.name) {
-        this.setFileViewMode({
-          file: this.file,
+        this.updateEditor({
           viewMode: FILE_VIEW_MODE_EDITOR,
         });
       }
@@ -195,13 +197,11 @@ export default {
       'getFileData',
       'getRawFileData',
       'changeFileContent',
-      'setFileLanguage',
-      'setEditorPosition',
-      'setFileViewMode',
       'removePendingTab',
       'triggerFilesChange',
       'addTempImage',
     ]),
+    ...mapActions('editor', ['updateFileEditor']),
     initEditor() {
       if (this.shouldHideEditor && (this.file.content || this.file.raw)) {
         return;
@@ -283,19 +283,19 @@ export default {
 
       // Handle Cursor Position
       this.editor.onPositionChange((instance, e) => {
-        this.setEditorPosition({
+        this.updateEditor({
           editorRow: e.position.lineNumber,
           editorColumn: e.position.column,
         });
       });
 
       this.editor.setPosition({
-        lineNumber: this.file.editorRow,
-        column: this.file.editorColumn,
+        lineNumber: this.fileEditor.editorRow,
+        column: this.fileEditor.editorColumn,
       });
 
       // Handle File Language
-      this.setFileLanguage({
+      this.updateEditor({
         fileLanguage: this.model.language,
       });
 
@@ -353,6 +353,9 @@ export default {
       const schema = this.getJsonSchemaForPath(this.file.path);
       registerSchema(schema);
     },
+    updateEditor(data) {
+      this.updateFileEditor({ path: this.file.path, data });
+    },
   },
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
@@ -368,7 +371,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_EDITOR })"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_EDITOR })"
           >
             {{ __('Edit') }}
           </a>
@@ -377,7 +380,7 @@ export default {
           <a
             href="javascript:void(0);"
             role="button"
-            @click.prevent="setFileViewMode({ file, viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
+            @click.prevent="updateEditor({ viewMode: $options.FILE_VIEW_MODE_PREVIEW })"
             >{{ previewMode.previewTitle }}</a
           >
         </li>

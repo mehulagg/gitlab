@@ -518,17 +518,6 @@ describe('IDE store file mutations', () => {
     });
   });
 
-  describe('SET_FILE_VIEWMODE', () => {
-    it('updates file view mode', () => {
-      mutations.SET_FILE_VIEWMODE(localState, {
-        file: localFile,
-        viewMode: FILE_VIEW_MODE_PREVIEW,
-      });
-
-      expect(localFile.viewMode).toBe(FILE_VIEW_MODE_PREVIEW);
-    });
-  });
-
   describe('ADD_PENDING_TAB', () => {
     beforeEach(() => {
       const f = { ...file('openFile'), path: 'openFile', active: true, opened: true };

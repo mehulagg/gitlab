@@ -12,6 +12,7 @@ import fileTemplates from './modules/file_templates';
 import paneModule from './modules/pane';
 import clientsideModule from './modules/clientside';
 import routerModule from './modules/router';
+import editorModule from './modules/editor';
 
 Vue.use(Vuex);
 
@@ -29,6 +30,7 @@ export const createStoreOptions = () => ({
     rightPane: paneModule(),
     clientside: clientsideModule(),
     router: routerModule,
+    editor: editorModule,
   },
 });
 
