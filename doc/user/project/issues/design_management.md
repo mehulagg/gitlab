@@ -236,7 +236,7 @@ This feature might not be available to you. Check the **version history** note a
 
 Add a to do for a design by clicking **Add a to do** on the design sidebar:
 
-![To do button](img/design_todo_button_v13_4.png)
+![To do button](img/design_todo_button_v13_5.png)
 
 ### Enable or disable the design to do button **(CORE ONLY)**
 
