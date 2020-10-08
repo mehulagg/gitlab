@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe SubscriptionPresenter do
   let(:subscription) { create(:gitlab_subscription) }
-  let(:presenter) { described_class.new(subscription, {}) }
+  let(:presenter) { described_class.new(subscription) }
 
   describe '#plan' do
     subject { presenter.plan }
