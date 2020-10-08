@@ -22,10 +22,6 @@ At a glance, you see the current state for the completion a given milestone.
 Without them, you would have to organize the data from the milestone and plot it
 yourself to have the same sense of progress.
 
-> - Closed or reopened issues prior to GitLab 9.1 won't have a `closed_at`
->   value, so the burndown chart considers them as closed on the milestone
->  `start_date`. In that case, a warning will be displayed.
-
 GitLab Starter plots it for you and presents it in a clear and beautiful chart.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
