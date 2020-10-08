@@ -2,11 +2,12 @@
 
 module PersonalAccessTokens
   class RevokeService
-    attr_reader :token, :current_user
+    attr_reader :token, :current_user, :group
 
-    def initialize(current_user = nil, params = { token: nil })
+    def initialize(current_user = nil, params = { token: nil, group: nil })
       @current_user = current_user
       @token = params[:token]
+      @group = params[:group]
     end
 
     def execute
@@ -30,7 +31,13 @@ module PersonalAccessTokens
     end
 
     def revocation_permitted?
-      Ability.allowed?(current_user, :revoke_token, token)
+      Ability.allowed?(current_user, :revoke_token, token) ||
+        managed_user_revocation_allowed?
+    end
+
+    def managed_group_revocation_allowed?
+      token.user.group_managed_account? &&
+        Ability.allowed?(current_user, :read_group_credentials_inventory, group)
     end
   end
 end
