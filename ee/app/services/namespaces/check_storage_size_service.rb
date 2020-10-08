@@ -13,14 +13,41 @@ module Namespaces
     end
 
     def execute
-      return ServiceResponse.success unless Feature.enabled?(:namespace_storage_limit, root_namespace)
-      return ServiceResponse.success if alert_level == :none
+      return ServiceResponse.success unless Feature.enabled?(:namespace_storage_limit, root_namespace) || Feature.enabled?(:additional_repo_storage_by_namespace, root_namespace)
+
+      return handle_namespace_storage_limit if Feature.enabled?(:namespace_storage_limit, root_namespace)
+
+      handle_additional_repo_storage_by_namespace
+    end
+
+    def handle_namespace_storage_limit
+      return ServiceResponse.success if alert_level(root_storage_size.usage_ratio) == :none
 
       if root_storage_size.above_size_limit?
         ServiceResponse.error(message: above_size_limit_message, payload: payload)
       else
         ServiceResponse.success(payload: payload)
       end
+    end
+
+    def handle_additional_repo_storage_by_namespace
+      return ServiceResponse.success if alert_level(per_project_usage_ratio) == :none
+
+      payload = {
+          explanation_message: 'This mesage needs to contain CTA and number of projects used',
+          usage_message: 'This message explains what is wrong',
+          alert_level: alert_level(per_project_usage_ratio),
+          root_namespace: root_namespace
+      }
+      ServiceResponse.error(message: "over additional repo storage", payload: payload)
+    end
+
+    def per_project_usage_ratio
+      puts('checking usage ratio')
+      return 1 if root_namespace.additional_purchased_storage_size == 0 && root_namespace.total_repository_size_excess > 0
+      return 0 if root_namespace.additional_purchased_storage_size == 0
+
+      root_namespace.total_repository_size_excess / root_namespace.additional_purchased_storage_size
     end
 
     private
@@ -41,7 +68,7 @@ module Namespaces
       {
         explanation_message: explanation_message,
         usage_message: usage_message,
-        alert_level: alert_level,
+        alert_level: alert_level(root_storage_size.usage_ratio),
         root_namespace: root_namespace
       }
     end
@@ -54,9 +81,8 @@ module Namespaces
       s_("You reached %{usage_in_percent} of %{namespace_name}'s storage capacity (%{used_storage} of %{storage_limit})" % current_usage_params)
     end
 
-    def alert_level
+    def alert_level(usage_ratio)
       strong_memoize(:alert_level) do
-        usage_ratio = root_storage_size.usage_ratio
         current_level = USAGE_THRESHOLDS.each_key.first
 
         USAGE_THRESHOLDS.each do |level, threshold|
