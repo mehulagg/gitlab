@@ -80,7 +80,131 @@ However, there are some cases where we have to use the offset
 pagination connection, `OffsetActiveRecordRelationConnection`, such as when
 sorting by label priority in issues, due to the complexity of the sort.
 
-<!-- ### Keyset pagination -->
+### Keyset pagination
+
+Our keyset pagination implementation is a subclass of `GraphQL::Pagination::ActiveRecordRelationConnection`
+which is a part of the `graphql` gem.  However instead of using a cursor based on an offset 
+(which is the default), we create our own cursor.
+
+The cursor is created by encoding JSON which contains the relevant ordering fields.  
+
+```ruby
+ordering = {"id"=>"72410125", "created_at"=>"2020-10-08 18:05:21.953398000 UTC"}
+json = ordering.to_json
+cursor = Base64Bp.urlsafe_encode64(json, padding: false)
+
+"eyJpZCI6IjcyNDEwMTI1IiwiY3JlYXRlZF9hdCI6IjIwMjAtMTAtMDggMTg6MDU6MjEuOTUzMzk4MDAwIFVUQyJ9"
+
+json = Base64Bp.urlsafe_decode64(cursor)
+Gitlab::Json.parse(json)
+
+{"id"=>"72410125", "created_at"=>"2020-10-08 18:05:21.953398000 UTC"}
+```
+
+Storing the order attribute values in the cursor benefits us in a couple ways:
+
+- If we store only the `id` of the object, you could query that object and obtain it's attributes.
+But that requires an additional query, and if the object is no longer there, then you're stuck.
+- If we know that an attribute is `nil`, then we can use one set of SQL, if it's not `nil` then we
+can use another set of SQL.
+
+Based on whether the main field we're ordering on is NULL in the
+cursor, we can more easily target our query condition.
+We assume that the last ordering field is unique, meaning
+it will not contain NULLs.
+ 
+We currently only support two ordering fields.
+
+```
+ Example of the conditions for
+   relation: Issue.order(relative_position: :asc).order(id: :asc)
+   after cursor: relative_position: 1500, id: 500
+
+   when cursor[relative_position] is not NULL
+
+       ("issues"."relative_position" > 1500)
+       OR (
+         "issues"."relative_position" = 1500
+         AND
+         "issues"."id" > 500
+       )
+       OR ("issues"."relative_position" IS NULL)
+
+   when cursor[relative_position] is NULL
+
+       "issues"."relative_position" IS NULL
+       AND
+       "issues"."id" > 500
+```
+
+Here two examples of psuedo code for a the query
+
+<details>
+<summary>psuedo code for a two condition query</summary>
+
+The type of query needed for a two condition ordering is (roughly):
+
+```
+X represents the values from the cursor
+C represents the columns in the database
+ascending with and :after cursor, nulls sorted last
+
+X1 IS NOT NULL
+  AND
+    (C1 > X1)
+      OR
+    (C1 IS NULL)
+      OR
+    (C1 = X1
+      AND
+     C2 > X2)
+
+
+X1 IS NULL
+  AND
+    (C1 IS NULL
+      AND
+     C2 > X2)
+```
+
+</details> 
+
+<details>
+<summary>psuedo code for a three condition query</summary>
+
+Three conditions is more complicated. The example below is not complete, but
+shows the complexity of adding one more condition.
+
+```
+X represents the values from the cursor
+C represents the columns in the database
+ascending with and :after cursor, nulls sorted last
+
+X1 IS NOT NULL
+  AND
+    (C1 > X1)
+      OR
+    (C1 IS NULL)
+      OR
+    (C1 = X1 AND C2 > X2)
+      OR
+    (C1 = X1
+      AND
+        X2 IS NOT NULL
+          AND
+            ((C2 > X2)
+               OR
+             (C2 IS NULL)
+               OR
+             (C2 = X2 AND C3 > X3)
+      OR
+        X2 IS NULL.....
+```
+</details>
+
+
+By using `Gitlab::Graphql::Pagination::Keyset::QueryBuilder`, we're able to build the
+necessary SQL conditions and apply it to the ActiveRecord relation.
 
 <!-- ### Offset pagination -->
 
