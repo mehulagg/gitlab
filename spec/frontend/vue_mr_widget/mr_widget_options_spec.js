@@ -817,15 +817,12 @@ describe('mrWidgetOptions', () => {
 
   describe('security widget', () => {
     describe.each`
-      context                                  | hasPipeline | reportType | isFlagEnabled | shouldRender
-      ${'security report and flag enabled'}    | ${true}     | ${'sast'}  | ${true}       | ${true}
-      ${'security report and flag disabled'}   | ${true}     | ${'sast'}  | ${false}      | ${false}
-      ${'no security report and flag enabled'} | ${true}     | ${'foo'}   | ${true}       | ${false}
-      ${'no pipeline and flag enabled'}        | ${false}    | ${'sast'}  | ${true}       | ${false}
-    `('given $context', ({ hasPipeline, reportType, isFlagEnabled, shouldRender }) => {
+      context                 | hasPipeline | reportType | shouldRender
+      ${'a security report'}  | ${true}     | ${'sast'}  | ${true}
+      ${'no security report'} | ${true}     | ${'foo'}   | ${false}
+      ${'no pipeline'}        | ${false}    | ${'sast'}  | ${false}
+    `('given $context', ({ hasPipeline, reportType, shouldRender }) => {
       beforeEach(() => {
-        gon.features.coreSecurityMrWidget = isFlagEnabled;
-
         if (hasPipeline) {
           jest.spyOn(Api, 'pipelineJobs').mockResolvedValue({
             data: [{ artifacts: [{ file_type: reportType }] }],
