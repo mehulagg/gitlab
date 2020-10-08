@@ -78,7 +78,7 @@ export default {
 <template>
   <div class="block issuable-sidebar-item lock">
     <div
-      v-gl-tooltip.left
+      v-gl-tooltip.left.viewport
       :title="tooltipLabel"
       class="sidebar-collapsed-icon"
       data-testid="sidebar-collapse-icon"
