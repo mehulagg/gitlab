@@ -6,6 +6,9 @@ module EE
       module MatchingMergeRequest
         extend ::Gitlab::Utils::Override
 
+        TOTAL_METRIC = :gitlab_merge_request_match_total
+        STALE_METRIC = :gitlab_merge_request_match_stale_secondary
+
         override :match?
         def match?
           return super unless ::Feature.enabled?(:matching_merge_request_db_sync)
@@ -24,8 +27,43 @@ module EE
           # sessions, replication lag could erroneously cause step 5 to
           # report no matching merge requests. To avoid this, we check
           # the write location to ensure the replica can make this query.
-          ::Gitlab::Database::LoadBalancing::Sticking.unstick_or_continue_sticking(:project, @project.id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+          track_session_metrics do
+            ::Gitlab::Database::LoadBalancing::Sticking.unstick_or_continue_sticking(:project, @project.id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+          end
+
           super
+        end
+
+        private
+
+        def track_session_metrics(&block)
+          before = ::Gitlab::Database::LoadBalancing::Session.current.use_primary?
+
+          yield
+
+          after = ::Gitlab::Database::LoadBalancing::Session.current.use_primary?
+
+          increment_attempt_count
+
+          if !before && after
+            increment_stale_secondary_count
+          end
+        end
+
+        def increment_attempt_count
+          total_counter.increment
+        end
+
+        def increment_stale_secondary_count
+          stale_counter.increment
+        end
+
+        def total_counter
+          @total_counter ||= ::Gitlab::Metrics.counter(TOTAL_METRIC, 'Total number of merge request match attempts')
+        end
+
+        def stale_counter
+          @stale_counter ||= ::Gitlab::Metrics.counter(STALE_METRIC, 'Total number of merge request match attempts with lagging secondary')
         end
       end
     end
