@@ -420,5 +420,6 @@ The Path Traversal check can also be used to forbid any absolute path:
 requires :file_path, type: String, file_path: true
 ```
 
-NOTE: **Note:** Absolute paths are not allowed by default. If allowing an absolute path is required, you
+NOTE: **Note:**
+Absolute paths are not allowed by default. If allowing an absolute path is required, you
 need to provide an array of paths to the parameter `allowlist`.  
