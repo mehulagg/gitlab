@@ -97,9 +97,12 @@ PostgreSQL introduced major improvements for partitioning in [version 12](https:
 
 To be able to leverage these features and performance improvements we need to use PostgreSQL 12 from start.
 
-For self-managed instances, GitLab currently ships with PostgreSQL 11, but GitLab 14.0 (with PostgreSQL 12 as its minimum required version) will most likely land before we ship the metadata database support for self-managed instances. Regardless, we will continue to support the current version 2 of the registry (with no database) with security backports and bug fixes. We can do so for at least as long as GitLab is not shipped with PostgreSQL 12 as the minimum required version.
+GitLab currently ships with PostgreSQL 11 for self-managed instances. That is _likely_ to change in 14.0, with PostgreSQL 12 becoming the minimum required version, which will likely happen before the upgraded registry becomes available for self-managed instances. If not, self-managed instances will have two options:
 
-Given that the metadata database will unblock the implementation of the most requested features for the GitLab Container Registry integration, most of these features may only be available for those using a GitLab version which ships with PostgreSQL 12. We will continue to support the current version 2 of the registry (with no database) with security backports and bug fixes.
+1. Administrators can manually provision and configure a separate PostgreSQL 12 database for the registry, allowing them to benefit from features provided by the new registry and its metadata database.
+1. Continue to use the current registry without the database, if online garbage collection is not a concern, or provisioning a separate database is not possible. We will continue supporting the current version with security backports and bug fixes for the foreseeable feature.
+
+It's important to note that apart from online garbage collection, the availability of the metadata database will unblock the implementation of many requested features for the GitLab Container Registry, which will only be available for instances using the new version backed by the metadata database.
 
 ## Iterations
 
