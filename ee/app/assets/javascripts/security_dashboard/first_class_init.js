@@ -43,6 +43,8 @@ export default (el, dashboardType) => {
     component = FirstClassProjectSecurityDashboard;
     props.projectFullPath = el.dataset.projectFullPath;
     provide.autoFixDocumentation = el.dataset.autoFixDocumentation;
+    provide.pipelineSecurityBuildsFailedCount = el.dataset.pipelineSecurityBuildsFailedCount;
+    provide.pipelineSecurityBuildsFailedPath = el.dataset.pipelineSecurityBuildsFailedPath;
   } else if (dashboardType === DASHBOARD_TYPES.GROUP) {
     component = FirstClassGroupSecurityDashboard;
     props.groupFullPath = el.dataset.groupFullPath;
