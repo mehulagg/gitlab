@@ -1,5 +1,5 @@
 <script>
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import { GlDropdown, GlDropdownItem, GlTab, GlTabs } from '@gitlab/ui';
 import { camelCase, kebabCase } from 'lodash';
 import { s__ } from '~/locale';

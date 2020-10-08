@@ -1,5 +1,5 @@
 <script>
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import { GlButton } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';

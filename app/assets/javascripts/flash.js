@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import { escape } from 'lodash';
 import { spriteIcon } from './lib/utils/common_utils';
 

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 
 import { GlPagination } from '@gitlab/ui';
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 
 import RequirementsRoot from 'ee/requirements/components/requirements_root.vue';
 import RequirementsTabs from 'ee/requirements/components/requirements_tabs.vue';

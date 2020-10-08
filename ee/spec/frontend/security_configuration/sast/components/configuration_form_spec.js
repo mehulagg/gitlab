@@ -1,5 +1,5 @@
 import { merge } from 'lodash';
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import { GlAlert, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';

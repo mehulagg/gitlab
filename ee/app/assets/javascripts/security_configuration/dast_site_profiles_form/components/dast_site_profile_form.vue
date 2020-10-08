@@ -1,5 +1,5 @@
 <script>
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import { isEqual } from 'lodash';
 import {
   GlAlert,

@@ -1,5 +1,5 @@
 <script>
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import { GlPagination } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import Api from '~/api';

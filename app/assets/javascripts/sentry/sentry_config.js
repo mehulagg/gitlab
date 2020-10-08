@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/browser';
+import * as Sentry from '~/sentry/wrapper';
 import $ from 'jquery';
 import { __ } from '~/locale';
 
