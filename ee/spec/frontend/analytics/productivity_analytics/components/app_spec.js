@@ -8,13 +8,7 @@ import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr
 import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import { TEST_HOST } from 'helpers/test_constants';
-import {
-  GlEmptyState,
-  GlLoadingIcon,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlButton,
-} from '@gitlab/ui';
+import { GlEmptyState, GlLoadingIcon, GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
 import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
@@ -107,7 +101,7 @@ describe('ProductivityApp component', () => {
   const findCommitBasedMetricChart = () => wrapper.find({ ref: 'commitBasedChart' });
   const findScatterplotMetricChart = () => wrapper.find({ ref: 'scatterplot' });
   const findMrTableSortSection = () => wrapper.find('.js-mr-table-sort');
-  const findSortFieldDropdown = () => findMrTableSortSection().find(GlDeprecatedDropdown);
+  const findSortFieldDropdown = () => findMrTableSortSection().find(GlDropdown);
   const findSortOrderToggle = () => findMrTableSortSection().find(GlButton);
   const findMrTableSection = () => wrapper.find('.js-mr-table');
   const findMrTable = () => findMrTableSection().find(MergeRequestTable);
@@ -459,7 +453,7 @@ describe('ProductivityApp component', () => {
 
                     it('should change the sort field', () => {
                       findSortFieldDropdown()
-                        .findAll(GlDeprecatedDropdownItem)
+                        .findAll(GlDropdownItem)
                         .at(0)
                         .vm.$emit('click');
 

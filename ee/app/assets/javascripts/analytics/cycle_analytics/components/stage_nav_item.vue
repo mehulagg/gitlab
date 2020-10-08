@@ -1,14 +1,23 @@
 <script>
-import { GlButton, GlTooltip, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
 import StageCardListItem from './stage_card_list_item.vue';
+
+const ERROR_MESSAGES = {
+  tooMuchData: __('There is too much data to calculate. Please change your selection.'),
+};
+
+const ERROR_NAV_ITEM_CONTENT = {
+  [ERROR_MESSAGES.tooMuchData]: __('Too much data'),
+  fallback: __('Not enough data'),
+};
 
 export default {
   name: 'StageNavItem',
   components: {
     StageCardListItem,
     GlButton,
-    GlTooltip,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -39,6 +48,11 @@ export default {
       type: [String, Number],
       required: true,
     },
+    errorMessage: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
     return {
@@ -55,6 +69,12 @@ export default {
     },
     openMenuClasses() {
       return this.isHover ? 'd-flex justify-content-end' : '';
+    },
+    error() {
+      return ERROR_NAV_ITEM_CONTENT[this.errorMessage] || ERROR_NAV_ITEM_CONTENT.fallback;
+    },
+    stageTitleTooltip() {
+      return this.isTitleOverflowing ? this.title : null;
     },
   },
   mounted() {
@@ -100,15 +120,14 @@ export default {
         class="stage-nav-item-cell stage-name text-truncate w-50 pr-2"
         :class="{ 'font-weight-bold': isActive }"
       >
-        <gl-tooltip v-if="isTitleOverflowing" :target="() => $refs.titleSpan">
-          {{ title }}
-        </gl-tooltip>
-        <span ref="titleSpan">{{ title }}</span>
+        <span v-gl-tooltip="{ title: stageTitleTooltip }" data-testid="stage-title">{{
+          title
+        }}</span>
       </div>
       <div class="stage-nav-item-cell w-50 d-flex justify-content-between">
         <div ref="median" class="stage-median w-75 align-items-start">
           <span v-if="hasValue">{{ median }}</span>
-          <span v-else class="stage-empty">{{ __('Not enough data') }}</span>
+          <span v-else v-gl-tooltip="{ title: errorMessage }" class="stage-empty">{{ error }}</span>
         </div>
         <div v-show="isHover" ref="dropdown" :class="[openMenuClasses]" class="dropdown w-25">
           <gl-button

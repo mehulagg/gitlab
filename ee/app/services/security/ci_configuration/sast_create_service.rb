@@ -25,7 +25,7 @@ module Security
       private
 
       def attributes
-        actions = Security::CiConfiguration::SastBuildActions.new(@project.auto_devops_enabled?, @params, existing_gitlab_ci_content, default_sast_values).generate
+        actions = Security::CiConfiguration::SastBuildActions.new(@project.auto_devops_enabled?, @params, existing_gitlab_ci_content).generate
 
         @project.repository.add_branch(@current_user, @branch_name, @project.default_branch)
         message = _('Set .gitlab-ci.yml to enable or configure SAST')
@@ -41,14 +41,6 @@ module Security
       def existing_gitlab_ci_content
         gitlab_ci_yml = @project.repository.gitlab_ci_yml_for(@project.repository.root_ref_sha)
         YAML.safe_load(gitlab_ci_yml) if gitlab_ci_yml
-      end
-
-      def default_sast_values
-        result = Security::CiConfiguration::SastParserService.new(@project)
-
-        global_defaults = result.configuration["global"].collect { |k| [k["field"], k["default_value"]] }.to_h
-        pipeline_defaults = result.configuration["pipeline"].collect { |k| [k["field"], k["default_value"]] }.to_h
-        global_defaults.merge!(pipeline_defaults)
       end
 
       def successful_change_path

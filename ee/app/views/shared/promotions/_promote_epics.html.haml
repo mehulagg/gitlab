@@ -11,11 +11,11 @@
       = _('Epic')
     .dropdown
       .dropdown-menu.promotion-issue-sidebar-message
-        .dropdown-title
-          %span
+        .dropdown-title.gl-display-flex
+          %span.gl-ml-auto
             = _('Epic')
-          %button.dropdown-title-button.dropdown-menu-close{ "aria-label" => _('Close'), :type => "button" }
-            %i.fa.fa-times.dropdown-menu-close-icon{ "aria-hidden" => "true", "data-hidden" => "true" }
+          %button.dropdown-title-button.dropdown-menu-close.gl-ml-auto{ "aria-label" => _('Close'), :type => "button" }
+            = sprite_icon('close', size: 16, css_class: 'dropdown-menu-close-icon')
         %div
           %p
             = s_('Promotions|Epics let you manage your portfolio of projects more efficiently and with less effort by tracking groups of issues that share a theme, across projects and milestones.')

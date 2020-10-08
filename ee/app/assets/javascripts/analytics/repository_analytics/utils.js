@@ -1,2 +1,2 @@
 export const getProjectIdQueryParams = projects =>
-  projects.map(project => `project_ids[]=${project.id}`).join('&');
+  `project_ids=${projects.map(project => project.id).join(',')}`;

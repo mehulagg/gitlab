@@ -12,7 +12,6 @@ RSpec.describe FeatureFlags::DestroyService do
   let!(:feature_flag) { create(:operations_feature_flag, project: project) }
 
   before do
-    stub_licensed_features(feature_flags: true)
     project.add_developer(developer)
     project.add_reporter(reporter)
   end

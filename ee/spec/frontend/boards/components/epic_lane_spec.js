@@ -29,7 +29,6 @@ describe('EpicLane', () => {
       epic: mockEpic,
       lists: mockListsWithModel,
       disabled: false,
-      rootPath: '/',
     };
 
     wrapper = shallowMount(EpicLane, {

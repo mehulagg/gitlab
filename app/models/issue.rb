@@ -30,6 +30,11 @@ class Issue < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :issues_sort
 
+  # Types of issues that should be displayed on lists across the app
+  # for example, project issues list, group issues list and issue boards.
+  # Some issue types, like test cases, should be hidden by default.
+  TYPES_FOR_LIST = %w(issue incident).freeze
+
   belongs_to :project
   has_one :namespace, through: :project
 
@@ -444,20 +449,9 @@ class Issue < ApplicationRecord
     Gitlab::EtagCaching::Store.new.touch(key)
   end
 
-  def find_next_gap_before
-    super
-  rescue ActiveRecord::QueryCanceled => e
+  def could_not_move(exception)
     # Symptom of running out of space - schedule rebalancing
     IssueRebalancingWorker.perform_async(nil, project_id)
-    raise e
-  end
-
-  def find_next_gap_after
-    super
-  rescue ActiveRecord::QueryCanceled => e
-    # Symptom of running out of space - schedule rebalancing
-    IssueRebalancingWorker.perform_async(nil, project_id)
-    raise e
   end
 end
 

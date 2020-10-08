@@ -9,7 +9,6 @@ RSpec.describe FeatureFlagSerializer do
   let(:feature_flags) { create_list(:operations_feature_flag, 3) }
 
   before do
-    stub_licensed_features(feature_flags: true)
     project.add_developer(user)
   end
 

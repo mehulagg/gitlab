@@ -419,29 +419,11 @@ RSpec.describe Issue do
     let_it_be_with_reload(:issue1) { create(:issue, project: project1, relative_position: issue.relative_position + RelativePositioning::IDEAL_DISTANCE) }
     let(:new_issue) { build(:issue, project: project1, relative_position: nil) }
 
-    describe '#max_relative_position' do
-      it 'returns maximum position' do
-        expect(issue.max_relative_position).to eq issue1.relative_position
-      end
-    end
+    describe '.relative_positioning_query_base' do
+      it 'includes cross project issues in the same group' do
+        siblings = Issue.relative_positioning_query_base(issue)
 
-    describe '#prev_relative_position' do
-      it 'returns previous position if there is an issue above' do
-        expect(issue1.prev_relative_position).to eq issue.relative_position
-      end
-
-      it 'returns nil if there is no issue above' do
-        expect(issue.prev_relative_position).to eq nil
-      end
-    end
-
-    describe '#next_relative_position' do
-      it 'returns next position if there is an issue below' do
-        expect(issue.next_relative_position).to eq issue1.relative_position
-      end
-
-      it 'returns nil if there is no issue below' do
-        expect(issue1.next_relative_position).to eq nil
+        expect(siblings).to include(issue1)
       end
     end
 

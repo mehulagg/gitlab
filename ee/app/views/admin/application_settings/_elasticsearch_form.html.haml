@@ -8,11 +8,11 @@
 %section.settings.as-elasticsearch.no-animate#js-elasticsearch-settings{ class: ('expanded' if expanded), data: { qa_selector: 'elasticsearch_tab' } }
   .settings-header
     %h4
-      = _('Elasticsearch')
+      = _('Advanced Search')
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded ? 'Collapse' : 'Expand'
     %p
-      = _('Elasticsearch integration. Elasticsearch AWS IAM.')
+      = _('Advanced Search with Elasticsearch')
   .settings-content
     = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-elasticsearch-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting) if expanded

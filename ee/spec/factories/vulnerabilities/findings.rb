@@ -121,6 +121,18 @@ FactoryBot.define do
       end
     end
 
+    trait :identifier do
+      after(:build) do |finding|
+        identifier = build(
+          :vulnerabilities_identifier,
+          fingerprint: SecureRandom.hex(20),
+          project: finding.project
+        )
+
+        finding.identifiers = [identifier]
+      end
+    end
+
     ::Vulnerabilities::Finding::REPORT_TYPES.keys.each do |security_report_type|
       trait security_report_type do
         report_type { security_report_type }

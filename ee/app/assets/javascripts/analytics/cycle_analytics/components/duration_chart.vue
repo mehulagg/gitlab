@@ -1,5 +1,6 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import { __ } from '~/locale';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { dateFormats } from '../../shared/constants';
 import Scatterplot from '../../shared/components/scatterplot.vue';
@@ -19,10 +20,15 @@ export default {
     },
   },
   computed: {
-    ...mapState('durationChart', ['isLoading']),
+    ...mapState('durationChart', ['isLoading', 'errorMessage']),
     ...mapGetters('durationChart', ['durationChartPlottableData']),
     hasData() {
       return Boolean(!this.isLoading && this.durationChartPlottableData.length);
+    },
+    error() {
+      return this.errorMessage
+        ? this.errorMessage
+        : __('There is no data available. Please change your selection.');
     },
   },
   methods: {
@@ -53,7 +59,7 @@ export default {
       :scatter-data="durationChartPlottableData"
     />
     <div v-else ref="duration-chart-no-data" class="bs-callout bs-callout-info">
-      {{ __('There is no data available. Please change your selection.') }}
+      {{ error }}
     </div>
   </div>
 </template>

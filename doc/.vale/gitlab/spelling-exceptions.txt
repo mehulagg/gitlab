@@ -284,6 +284,7 @@ namespaces
 namespacing
 namespacings
 Nanoc
+Netlify
 NGINX
 Nokogiri
 npm
@@ -403,6 +404,7 @@ sanitization
 sbt
 scatterplot
 scatterplots
+Schemastore
 Sendmail
 Sentry
 serializer

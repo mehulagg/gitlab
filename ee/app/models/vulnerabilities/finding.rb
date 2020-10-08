@@ -242,6 +242,10 @@ module Vulnerabilities
       metadata.fetch('location', {})
     end
 
+    def file
+      location.dig('file')
+    end
+
     def links
       metadata.fetch('links', [])
     end

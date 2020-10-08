@@ -14,7 +14,7 @@ RSpec.describe EpicTreeSorting do
 
   describe '#relative_siblings' do
     def siblings(obj)
-      obj.send(:relative_siblings).pluck(:id, :object_type)
+      RelativePositioning.mover.context(obj).relative_siblings.pluck(:id, :object_type)
     end
 
     def polymorphic_ident(obj)
@@ -106,9 +106,16 @@ RSpec.describe EpicTreeSorting do
     let!(:epic2) { create(:epic, parent: base_epic, group: group, relative_position: 1003) }
     let!(:epic3) { create(:epic, parent: base_epic, group: group, relative_position: 1005) }
 
+    def move_sequence(range)
+      dx = 500
+      RelativePositioning.mover.context(item).send(:move_sequence, range.first, range.last, dx)
+    end
+
     context 'when self is an epic' do
+      let(:item) { epic1 }
+
       it 'moves all objects correctly' do
-        epic1.move_sequence(1003, 1005, 500)
+        move_sequence(1003..1005)
 
         expect(epic_issue1.reload.relative_position).to eq(1000)
         expect(epic_issue2.reload.relative_position).to eq(1001)
@@ -121,8 +128,10 @@ RSpec.describe EpicTreeSorting do
     end
 
     context 'when self is an epic_issue' do
+      let(:item) { epic_issue1 }
+
       it 'moves all objects correctly' do
-        epic_issue1.move_sequence(1001, 1005, 500)
+        move_sequence(1001..1005)
 
         expect(epic_issue1.reload.relative_position).to eq(1000)
         expect(epic_issue2.reload.relative_position).to eq(1501)

@@ -28,23 +28,10 @@ export default {
       type: Boolean,
       required: true,
     },
-    boardId: {
-      type: String,
-      required: true,
-    },
     canAdminList: {
       type: Boolean,
       required: false,
       default: false,
-    },
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    rootPath: {
-      type: String,
-      required: true,
     },
   },
   computed: {
@@ -125,7 +112,6 @@ export default {
           :can-admin-list="canAdminList"
           :list="list"
           :disabled="disabled"
-          :board-id="boardId"
           :is-swimlanes-header="true"
         />
       </div>
@@ -138,7 +124,6 @@ export default {
         :lists="lists"
         :is-loading-issues="isLoadingIssues"
         :disabled="disabled"
-        :root-path="rootPath"
         :can-admin-list="canAdminList"
       />
       <div class="board-lane-unassigned-issues-title gl-sticky gl-display-inline-block gl-left-0">
@@ -167,11 +152,9 @@ export default {
           :key="`${list.id}-issues`"
           :list="list"
           :issues="unassignedIssues(list.id)"
-          :group-id="groupId"
           :is-unassigned-issues-lane="true"
           :is-loading="isLoadingIssues"
           :disabled="disabled"
-          :root-path="rootPath"
           :can-admin-list="canAdminList"
         />
       </div>

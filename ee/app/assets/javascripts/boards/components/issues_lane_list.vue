@@ -28,11 +28,6 @@ export default {
       required: true,
       default: () => [],
     },
-    groupId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     isUnassignedIssuesLane: {
       type: Boolean,
       required: false,
@@ -42,10 +37,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    rootPath: {
-      type: String,
-      required: true,
     },
     canAdminList: {
       type: Boolean,
@@ -150,7 +141,6 @@ export default {
       <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       <board-new-issue
         v-if="list.type !== 'closed' && showIssueForm && isUnassignedIssuesLane"
-        :group-id="groupId"
         :list="list"
       />
       <component
@@ -167,7 +157,6 @@ export default {
           :index="index"
           :list="list"
           :issue="issue"
-          :root-path="rootPath"
           :is-active="isActiveIssue(issue)"
           @show="showIssue(issue)"
         />

@@ -7,7 +7,14 @@ import createStore from './store';
 
 export default selector => {
   const el = document.querySelector(selector);
-  const { events, isLastPage, filterTokenOptions, filterQaSelector, tableQaSelector } = el.dataset;
+  const {
+    events,
+    isLastPage,
+    filterTokenOptions,
+    filterQaSelector,
+    tableQaSelector,
+    exportUrl,
+  } = el.dataset;
 
   const store = createStore();
   store.dispatch('initializeAuditEvents');
@@ -25,6 +32,7 @@ export default selector => {
           ),
           filterQaSelector,
           tableQaSelector,
+          exportUrl,
         },
       }),
   });

@@ -4,4 +4,5 @@ export default {
   ...recentSearchesStorageKeysCE,
   epics: 'epics-recent-searches',
   requirements: 'requirements-recent-searches',
+  test_cases: 'test-cases-recent-searches',
 };

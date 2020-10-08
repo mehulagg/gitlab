@@ -2139,6 +2139,12 @@ msgstr ""
 msgid "Advanced"
 msgstr ""
 
+msgid "Advanced Search"
+msgstr ""
+
+msgid "Advanced Search with Elasticsearch"
+msgstr ""
+
 msgid "Advanced Settings"
 msgstr ""
 
@@ -2943,6 +2949,9 @@ msgid "An error occurred while unsubscribing to notifications."
 msgstr ""
 
 msgid "An error occurred while updating approvers"
+msgstr ""
+
+msgid "An error occurred while updating labels."
 msgstr ""
 
 msgid "An error occurred while updating the comment"
@@ -8794,7 +8803,7 @@ msgstr ""
 msgid "DesignManagement|The maximum number of designs allowed to be uploaded is %{upload_limit}. Please try again."
 msgstr ""
 
-msgid "DesignManagement|To upload designs, you'll need to enable LFS. %{requirements_link_start}More information%{requirements_link_end}"
+msgid "DesignManagement|To upload designs, you'll need to enable LFS and have admin enable hashed storage. %{requirements_link_start}More information%{requirements_link_end}"
 msgstr ""
 
 msgid "DesignManagement|Unresolve thread"
@@ -9240,9 +9249,6 @@ msgstr ""
 msgid "Edit files in the editor and commit changes here"
 msgstr ""
 
-msgid "Edit fork in Web IDE"
-msgstr ""
-
 msgid "Edit group: %{group_name}"
 msgstr ""
 
@@ -9276,9 +9282,6 @@ msgstr ""
 msgid "Editing"
 msgstr ""
 
-msgid "Elasticsearch"
-msgstr ""
-
 msgid "Elasticsearch AWS IAM credentials"
 msgstr ""
 
@@ -9289,9 +9292,6 @@ msgid "Elasticsearch indexing restrictions"
 msgstr ""
 
 msgid "Elasticsearch indexing started"
-msgstr ""
-
-msgid "Elasticsearch integration. Elasticsearch AWS IAM."
 msgstr ""
 
 msgid "Elasticsearch reindexing is already in progress"
@@ -9420,7 +9420,16 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
+msgid "Enable %{gitpod_link} integration to launch a development environment in your browser directly from GitLab."
+msgstr ""
+
 msgid "Enable Auto DevOps"
+msgstr ""
+
+msgid "Enable Gitpod"
+msgstr ""
+
+msgid "Enable Gitpod?"
 msgstr ""
 
 msgid "Enable HTML emails"
@@ -10368,6 +10377,9 @@ msgstr ""
 msgid "Expand all"
 msgstr ""
 
+msgid "Expand all files"
+msgstr ""
+
 msgid "Expand approvers"
 msgstr ""
 
@@ -11081,6 +11093,12 @@ msgstr ""
 msgid "Filter by status"
 msgstr ""
 
+msgid "Filter by test cases that are currently archived."
+msgstr ""
+
+msgid "Filter by test cases that are currently opened."
+msgstr ""
+
 msgid "Filter by two-factor authentication"
 msgstr ""
 
@@ -11208,6 +11226,9 @@ msgid "Font Color"
 msgstr ""
 
 msgid "Footer message"
+msgstr ""
+
+msgid "For a faster browsing experience, some files are collapsed by default."
 msgstr ""
 
 msgid "For help setting up the Service Desk for your instance, please contact an administrator."
@@ -11994,6 +12015,21 @@ msgid "Gitea Import"
 msgstr ""
 
 msgid "Gitlab Pages"
+msgstr ""
+
+msgid "Gitpod"
+msgstr ""
+
+msgid "Gitpod|Add the URL to your Gitpod instance configured to read your GitLab projects."
+msgstr ""
+
+msgid "Gitpod|Enable Gitpod integration"
+msgstr ""
+
+msgid "Gitpod|Gitpod URL"
+msgstr ""
+
+msgid "Gitpod|e.g. https://gitpod.example.com"
 msgstr ""
 
 msgid "Given access %{time_ago}"
@@ -14594,6 +14630,9 @@ msgstr ""
 msgid "Latest pipeline for the most recent commit on this branch"
 msgstr ""
 
+msgid "Launch a ready-to-code development environment for your project."
+msgstr ""
+
 msgid "Lead"
 msgstr ""
 
@@ -15359,6 +15398,9 @@ msgid "Max access level"
 msgstr ""
 
 msgid "Max seats used"
+msgstr ""
+
+msgid "Max size 15 MB"
 msgstr ""
 
 msgid "Maximum Users:"
@@ -16819,6 +16861,9 @@ msgstr ""
 msgid "New Snippet"
 msgstr ""
 
+msgid "New Test Case"
+msgstr ""
+
 msgid "New User"
 msgstr ""
 
@@ -16916,6 +16961,9 @@ msgid "New subgroup"
 msgstr ""
 
 msgid "New tag"
+msgstr ""
+
+msgid "New test case"
 msgstr ""
 
 msgid "New users set to external"
@@ -18076,6 +18124,9 @@ msgid "Packages & Registries"
 msgstr ""
 
 msgid "Page not found"
+msgstr ""
+
+msgid "Page settings"
 msgstr ""
 
 msgid "Page was successfully deleted"
@@ -20679,6 +20730,9 @@ msgstr ""
 msgid "Quick range"
 msgstr ""
 
+msgid "Quickly and easily edit multiple files in your project."
+msgstr ""
+
 msgid "README"
 msgstr ""
 
@@ -21423,6 +21477,9 @@ msgstr ""
 msgid "Request parameter %{param} is missing."
 msgstr ""
 
+msgid "Request review from"
+msgstr ""
+
 msgid "Request to link SAML account must be authorized"
 msgstr ""
 
@@ -21691,6 +21748,9 @@ msgid "Review time is defined as the time it takes from first comment until merg
 msgstr ""
 
 msgid "ReviewApp|Enable Review App"
+msgstr ""
+
+msgid "Reviewer"
 msgstr ""
 
 msgid "Reviewing"
@@ -22135,6 +22195,9 @@ msgid "Search requirements"
 msgstr ""
 
 msgid "Search results…"
+msgstr ""
+
+msgid "Search test cases"
 msgstr ""
 
 msgid "Search users"
@@ -23213,6 +23276,9 @@ msgstr ""
 msgid "Show all requirements."
 msgstr ""
 
+msgid "Show all test cases."
+msgstr ""
+
 msgid "Show archived projects"
 msgstr ""
 
@@ -23526,6 +23592,9 @@ msgstr ""
 msgid "Solution"
 msgstr ""
 
+msgid "Some changes are not shown"
+msgstr ""
+
 msgid "Some child epics may be hidden due to applied filters"
 msgstr ""
 
@@ -23592,6 +23661,9 @@ msgstr ""
 msgid "Something went wrong while creating a requirement."
 msgstr ""
 
+msgid "Something went wrong while creating a test case."
+msgstr ""
+
 msgid "Something went wrong while deleting description changes. Please try again."
 msgstr ""
 
@@ -23616,6 +23688,9 @@ msgstr ""
 msgid "Something went wrong while fetching comments. Please try again."
 msgstr ""
 
+msgid "Something went wrong while fetching count of test cases."
+msgstr ""
+
 msgid "Something went wrong while fetching description changes. Please try again."
 msgstr ""
 
@@ -23638,6 +23713,9 @@ msgid "Something went wrong while fetching requirements count."
 msgstr ""
 
 msgid "Something went wrong while fetching requirements list."
+msgstr ""
+
+msgid "Something went wrong while fetching test cases list."
 msgstr ""
 
 msgid "Something went wrong while fetching the environments for this merge request. Please try again."
@@ -24309,13 +24387,13 @@ msgstr ""
 msgid "Submit %{humanized_resource_name}"
 msgstr ""
 
-msgid "Submit Changes"
-msgstr ""
-
 msgid "Submit a review"
 msgstr ""
 
 msgid "Submit as spam"
+msgstr ""
+
+msgid "Submit changes"
 msgstr ""
 
 msgid "Submit feedback"
@@ -24328,6 +24406,9 @@ msgid "Submit review"
 msgstr ""
 
 msgid "Submit search"
+msgstr ""
+
+msgid "Submit test case"
 msgstr ""
 
 msgid "Submit the current review."
@@ -25384,6 +25465,9 @@ msgstr ""
 msgid "There are no archived requirements"
 msgstr ""
 
+msgid "There are no archived test cases"
+msgstr ""
+
 msgid "There are no changes"
 msgstr ""
 
@@ -25421,6 +25505,9 @@ msgid "There are no open merge requests"
 msgstr ""
 
 msgid "There are no open requirements"
+msgstr ""
+
+msgid "There are no open test cases"
 msgstr ""
 
 msgid "There are no packages yet"
@@ -26561,6 +26648,9 @@ msgstr ""
 msgid "To update Snippets with multiple files, you must use the `files` parameter"
 msgstr ""
 
+msgid "To use Gitpod you must first enable the feature in the integrations section of your %{user_prefs}."
+msgstr ""
+
 msgid "To view all %{scannedResourcesCount} scanned URLs, please download the CSV file"
 msgstr ""
 
@@ -26661,6 +26751,9 @@ msgid "Too many namespaces enabled. You will need to manage them via the console
 msgstr ""
 
 msgid "Too many projects enabled. You will need to manage them via the console or the API."
+msgstr ""
+
+msgid "Too much data"
 msgstr ""
 
 msgid "Topics (optional)"
@@ -27839,6 +27932,9 @@ msgstr ""
 msgid "Value Stream Name"
 msgstr ""
 
+msgid "ValueStreamAnalyticsStage|We don't have enough data to show this stage."
+msgstr ""
+
 msgid "ValueStreamAnalytics|%{days}d"
 msgstr ""
 
@@ -28721,6 +28817,9 @@ msgstr ""
 msgid "With requirements, you can set criteria to check your products against."
 msgstr ""
 
+msgid "With test cases, you can define conditions for your project to meet in determining quality"
+msgstr ""
+
 msgid "Withdraw Access Request"
 msgstr ""
 
@@ -28902,6 +29001,9 @@ msgid "You can generate an access token scoped to this project for each applicat
 msgstr ""
 
 msgid "You can get started by cloning the repository or start adding files to it with one of the following options."
+msgstr ""
+
+msgid "You can group test cases using labels. To learn about the future direction of this feature, visit %{linkStart}Quality Management direction page%{linkEnd}."
 msgstr ""
 
 msgid "You can invite a new member to %{project_name} or invite another group."
@@ -30890,6 +30992,9 @@ msgid "uploads"
 msgstr ""
 
 msgid "user avatar"
+msgstr ""
+
+msgid "user preferences"
 msgstr ""
 
 msgid "username"

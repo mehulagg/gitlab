@@ -4,7 +4,7 @@ describe('group repository analytics util functions', () => {
   describe('getProjectIdQueryParams', () => {
     it('returns query param string project ids', () => {
       const projects = [{ id: 1 }, { id: 2 }];
-      const expectedString = 'project_ids[]=1&project_ids[]=2';
+      const expectedString = 'project_ids=1,2';
 
       expect(getProjectIdQueryParams(projects)).toBe(expectedString);
     });

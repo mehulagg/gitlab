@@ -27,7 +27,6 @@ module EE
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
-        mount_mutation ::Mutations::Pipelines::RunDastScan
         mount_mutation ::Mutations::DastOnDemandScans::Create
         mount_mutation ::Mutations::DastSiteProfiles::Create
         mount_mutation ::Mutations::DastSiteProfiles::Update
@@ -38,6 +37,8 @@ module EE
         mount_mutation ::Mutations::Security::CiConfiguration::ConfigureSast
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
+
+        prepend(Types::DeprecatedMutations)
       end
     end
   end

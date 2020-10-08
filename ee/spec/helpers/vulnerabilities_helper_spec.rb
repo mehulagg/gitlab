@@ -58,7 +58,7 @@ RSpec.describe VulnerabilitiesHelper do
     it 'has expected vulnerability properties' do
       expect(subject).to include(
         timestamp: Time.now.to_i,
-        create_issue_url: "/#{project.full_path}/-/vulnerability_feedback",
+        create_issue_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/create_issue",
         has_mr: anything,
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",

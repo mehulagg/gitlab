@@ -5,7 +5,7 @@ module Projects
     include IssuableLinks
 
     before_action :ensure_feature_enabled!
-    before_action :authorize_admin_feature_flag!
+    before_action :authorize_admin_feature_flags_issue_links!
 
     private
 

@@ -39,8 +39,8 @@ RSpec.describe EpicIssue do
       let_it_be_with_reload(:middle) { create(:epic, group: epic.group, parent: epic, relative_position: 101) }
       let_it_be_with_reload(:right) { create(:epic_issue, epic: epic, relative_position: 102) }
 
-      it 'can create space by using move_sequence_after' do
-        left.move_sequence_after
+      it 'can create space to the right' do
+        RelativePositioning.mover.context(left).create_space_right
         [left, middle, right].each(&:reset)
 
         expect(middle.relative_position - left.relative_position).to be > 1
@@ -48,8 +48,8 @@ RSpec.describe EpicIssue do
         expect(middle.relative_position).to be < right.relative_position
       end
 
-      it 'can create space by using move_sequence_before' do
-        right.move_sequence_before
+      it 'can create space to the left' do
+        RelativePositioning.mover.context(right).create_space_left
         [left, middle, right].each(&:reset)
 
         expect(right.relative_position - middle.relative_position).to be > 1

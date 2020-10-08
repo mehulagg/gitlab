@@ -4,7 +4,7 @@ import { s__, sprintf } from '~/locale';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import httpStatus from '~/lib/utils/http_status';
 import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
-import { hideFlash } from '~/flash';
+import { hideFlash, deprecatedCreateFlash as createFlash } from '~/flash';
 import {
   newDate,
   dayAfter,
@@ -295,11 +295,44 @@ export const getTasksByTypeData = ({ data = [], startDate = null, endDate = null
   };
 };
 
-export const handleErrorOrRethrow = ({ action, error }) => {
+const buildDataError = ({ status = httpStatus.INTERNAL_SERVER_ERROR, error }) => {
+  const err = new Error(error);
+  err.errorCode = status;
+  return err;
+};
+
+/**
+ * Flashes an error message if the status code is not 200
+ *
+ * @param {Object} error - Axios error object
+ * @param {String} errorMessage - Error message to display
+ */
+export const flashErrorIfStatusNotOk = ({ error, message }) => {
+  if (error?.errorCode !== httpStatus.OK) {
+    createFlash(message);
+  }
+};
+
+/**
+ * Data errors can occur when DB queries for analytics data time out
+ * The server will respond with a status `200` success and include the
+ * relevant error in the response body
+ *
+ * @param {Object} Response - Axios ajax response
+ * @returns {Object} Returns the axios ajax response
+ */
+export const checkForDataError = response => {
+  const { data, status } = response;
+  if (data?.error) {
+    throw buildDataError({ status, error: data.error });
+  }
+  return response;
+};
+
+export const throwIfUserForbidden = error => {
   if (error?.response?.status === httpStatus.FORBIDDEN) {
     throw error;
   }
-  action();
 };
 
 export const isStageNameExistsError = ({ status, errors }) =>

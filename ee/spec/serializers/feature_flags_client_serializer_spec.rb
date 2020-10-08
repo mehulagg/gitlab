@@ -7,10 +7,6 @@ RSpec.describe FeatureFlagsClientSerializer do
   let(:feature_flags_client) { project.create_operations_feature_flags_client! }
   let(:serializer) { described_class.new }
 
-  before do
-    stub_licensed_features(feature_flags: true)
-  end
-
   describe '#represent_token' do
     subject { serializer.represent_token(feature_flags_client).to_json }
 

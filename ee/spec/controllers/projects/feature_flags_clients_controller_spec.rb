@@ -16,7 +16,6 @@ RSpec.describe Projects::FeatureFlagsClientsController do
     end
 
     before do
-      stub_licensed_features(feature_flags: true)
       sign_in(user)
     end
 

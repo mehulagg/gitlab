@@ -17,10 +17,11 @@ describe('Issue card component', () => {
       propsData: {
         list,
         issue,
+        ...props,
+      },
+      provide: {
         groupId: null,
         rootPath: '/',
-        issueLinkBase: '/test',
-        ...props,
       },
     });
   };

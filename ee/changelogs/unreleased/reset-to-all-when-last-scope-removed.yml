@@ -1,0 +1,5 @@
+---
+title: Reset scope to all-environments when last scope removed
+merge_request: 42287
+author:
+type: fixed

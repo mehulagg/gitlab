@@ -1,5 +1,5 @@
 // NOTE: more tests will be added in https://gitlab.com/gitlab-org/gitlab/issues/121613
-import { GlTooltip } from '@gitlab/ui';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { shallowMount } from '@vue/test-utils';
 import StageNavItem from 'ee/analytics/cycle_analytics/components/stage_nav_item.vue';
 import { approximateDuration } from '~/lib/utils/datetime_utility';
@@ -17,16 +17,20 @@ describe('StageNavItem', () => {
         value: median,
         ...props,
       },
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
       ...opts,
     });
   }
 
   let wrapper = null;
-  const findStageTitle = () => wrapper.find({ ref: 'title' });
+  const findStageTitle = () => wrapper.find('[data-testid="stage-title"]');
+  const findStageTooltip = () => getBinding(findStageTitle().element, 'gl-tooltip');
   const findStageMedian = () => wrapper.find({ ref: 'median' });
   const findDropdown = () => wrapper.find({ ref: 'dropdown' });
   const setFakeTitleWidth = value =>
-    Object.defineProperty(wrapper.find({ ref: 'titleSpan' }).element, 'scrollWidth', {
+    Object.defineProperty(findStageTitle().element, 'scrollWidth', {
       value,
     });
 
@@ -50,6 +54,11 @@ describe('StageNavItem', () => {
 
     it('renders the stage title', () => {
       expect(findStageTitle().text()).toEqual(title);
+    });
+
+    it('renders the stage title without a tooltip', () => {
+      const tt = findStageTooltip();
+      expect(tt.value.title).toBeNull();
     });
 
     it('renders the dropdown with edit and remove options', () => {
@@ -93,11 +102,9 @@ describe('StageNavItem', () => {
     });
 
     it('renders the tooltip', () => {
-      expect(wrapper.find(GlTooltip).exists()).toBe(true);
-    });
-
-    it('tooltip has the correct stage title', () => {
-      expect(wrapper.find(GlTooltip).text()).toBe(longTitle);
+      const tt = findStageTooltip();
+      expect(tt.value).toBeDefined();
+      expect(tt.value.title).toBe(longTitle);
     });
   });
 });

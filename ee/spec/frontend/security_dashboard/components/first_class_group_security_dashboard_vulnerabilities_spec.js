@@ -109,6 +109,23 @@ describe('First Class Group Dashboard Vulnerabilities Component', () => {
         vulnerabilities,
       });
     });
+
+    it('defaults to severity column for sorting', () => {
+      expect(wrapper.vm.sortBy).toBe('severity');
+    });
+
+    it('defaults to desc as sorting direction', () => {
+      expect(wrapper.vm.sortDirection).toBe('desc');
+    });
+
+    it('handles sorting', () => {
+      findVulnerabilities().vm.$listeners['sort-changed']({
+        sortBy: 'description',
+        sortDesc: false,
+      });
+      expect(wrapper.vm.sortBy).toBe('description');
+      expect(wrapper.vm.sortDirection).toBe('asc');
+    });
   });
 
   describe('when there is more than a page of vulnerabilities', () => {

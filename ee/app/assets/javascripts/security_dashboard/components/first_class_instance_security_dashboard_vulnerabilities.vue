@@ -1,4 +1,5 @@
 <script>
+import produce from 'immer';
 import { GlAlert, GlButton, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
 import VulnerabilityList from './vulnerability_list.vue';
@@ -27,11 +28,16 @@ export default {
       isFirstResultLoading: true,
       vulnerabilities: [],
       errorLoadingVulnerabilities: false,
+      sortBy: 'severity',
+      sortDirection: 'desc',
     };
   },
   computed: {
     isQueryLoading() {
       return this.$apollo.queries.vulnerabilities.loading;
+    },
+    sort() {
+      return `${this.sortBy}_${this.sortDirection}`;
     },
   },
   apollo: {
@@ -41,6 +47,7 @@ export default {
       variables() {
         return {
           first: VULNERABILITIES_PER_PAGE,
+          sort: this.sort,
           ...this.filters,
         };
       },
@@ -63,11 +70,21 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            fetchMoreResult.vulnerabilities.nodes.unshift(...previousResult.vulnerabilities.nodes);
-            return fetchMoreResult;
+            const results = produce(fetchMoreResult, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.vulnerabilities.nodes = [
+                ...previousResult.vulnerabilities.nodes,
+                ...draftData.vulnerabilities.nodes,
+              ];
+            });
+            return results;
           },
         });
       }
+    },
+    handleSortChange({ sortBy, sortDesc }) {
+      this.sortDirection = sortDesc ? 'desc' : 'asc';
+      this.sortBy = sortBy;
     },
   },
 };
@@ -93,6 +110,7 @@ export default {
       :is-loading="isFirstResultLoading"
       :vulnerabilities="vulnerabilities"
       should-show-project-namespace
+      @sort-changed="handleSortChange"
     />
     <gl-intersection-observer
       v-if="pageInfo.hasNextPage"

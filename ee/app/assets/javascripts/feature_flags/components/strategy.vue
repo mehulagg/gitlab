@@ -148,9 +148,8 @@ export default {
     },
     appliesToAllEnvironments() {
       return (
-        this.filteredEnvironments.length === 0 ||
-        (this.filteredEnvironments.length === 1 &&
-          this.filteredEnvironments[0].environmentScope === '*')
+        this.filteredEnvironments.length === 1 &&
+        this.filteredEnvironments[0].environmentScope === '*'
       );
     },
     filteredEnvironments() {
@@ -202,6 +201,9 @@ export default {
         Vue.set(environment, 'shouldBeDestroyed', true);
       } else {
         this.environments = this.environments.filter(e => e !== environment);
+      }
+      if (this.filteredEnvironments.length === 0) {
+        this.environments.push({ environmentScope: '*' });
       }
       this.onStrategyChange();
     },

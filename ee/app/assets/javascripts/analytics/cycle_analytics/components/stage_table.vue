@@ -5,6 +5,9 @@ import StageEventList from './stage_event_list.vue';
 import StageTableHeader from './stage_table_header.vue';
 
 const MIN_TABLE_HEIGHT = 420;
+const NOT_ENOUGH_DATA_ERROR = s__(
+  "ValueStreamAnalyticsStage|We don't have enough data to show this stage.",
+);
 
 export default {
   name: 'StageTable',
@@ -46,6 +49,11 @@ export default {
     noDataSvgPath: {
       type: String,
       required: true,
+    },
+    emptyStateMessage: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   data() {
@@ -91,6 +99,10 @@ export default {
           displayHeader: !this.customStageFormActive,
         },
       ];
+    },
+    emptyStateTitle() {
+      const { emptyStateMessage } = this;
+      return emptyStateMessage.length ? emptyStateMessage : NOT_ENOUGH_DATA_ERROR;
     },
   },
   updated() {
@@ -139,7 +151,7 @@ export default {
               />
               <gl-empty-state
                 v-if="isEmptyStage"
-                :title="__('We don\'t have enough data to show this stage.')"
+                :title="emptyStateTitle"
                 :description="currentStage.emptyStageText"
                 :svg-path="noDataSvgPath"
               />

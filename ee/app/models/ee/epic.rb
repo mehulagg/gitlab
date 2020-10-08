@@ -12,6 +12,7 @@ module EE
       include Referable
       include Awardable
       include LabelEventable
+      include StateEventable
       include UsageStatistics
       include FromUnion
       include EpicTreeSorting

@@ -28,6 +28,7 @@ export default () => ({
   deleteValueStreamError: null,
 
   stages: [],
+  selectedStageError: '',
   summary: [],
   medians: {},
   valueStreams: [],

@@ -1,4 +1,5 @@
 <script>
+import produce from 'immer';
 import { GlAlert, GlButton, GlIntersectionObserver } from '@gitlab/ui';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/group_vulnerabilities.graphql';
@@ -28,6 +29,8 @@ export default {
       pageInfo: {},
       vulnerabilities: [],
       errorLoadingVulnerabilities: false,
+      sortBy: 'severity',
+      sortDirection: 'desc',
     };
   },
   apollo: {
@@ -37,6 +40,7 @@ export default {
         return {
           fullPath: this.groupFullPath,
           first: VULNERABILITIES_PER_PAGE,
+          sort: this.sort,
           ...this.filters,
         };
       },
@@ -56,6 +60,9 @@ export default {
     isLoadingFirstResult() {
       return this.isLoadingQuery && this.vulnerabilities.length === 0;
     },
+    sort() {
+      return `${this.sortBy}_${this.sortDirection}`;
+    },
   },
   methods: {
     onErrorDismiss() {
@@ -66,13 +73,21 @@ export default {
         this.$apollo.queries.vulnerabilities.fetchMore({
           variables: { after: this.pageInfo.endCursor },
           updateQuery: (previousResult, { fetchMoreResult }) => {
-            fetchMoreResult.group.vulnerabilities.nodes.unshift(
-              ...previousResult.group.vulnerabilities.nodes,
-            );
-            return fetchMoreResult;
+            const results = produce(fetchMoreResult, draftData => {
+              // eslint-disable-next-line no-param-reassign
+              draftData.group.vulnerabilities.nodes = [
+                ...previousResult.group.vulnerabilities.nodes,
+                ...draftData.group.vulnerabilities.nodes,
+              ];
+            });
+            return results;
           },
         });
       }
+    },
+    handleSortChange({ sortBy, sortDesc }) {
+      this.sortDirection = sortDesc ? 'desc' : 'asc';
+      this.sortBy = sortBy;
     },
   },
 };
@@ -98,6 +113,7 @@ export default {
       :is-loading="isLoadingFirstResult"
       :vulnerabilities="vulnerabilities"
       should-show-project-namespace
+      @sort-changed="handleSortChange"
     />
     <gl-intersection-observer
       v-if="pageInfo.hasNextPage"

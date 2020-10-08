@@ -1,0 +1,5 @@
+---
+title: 'Geo: Improve performance of package files queries'
+merge_request: 42294
+author:
+type: performance

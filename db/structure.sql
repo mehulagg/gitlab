@@ -9272,6 +9272,9 @@ CREATE TABLE public.application_settings (
     enforce_namespace_storage_limit boolean DEFAULT false NOT NULL,
     container_registry_delete_tags_service_timeout integer DEFAULT 250 NOT NULL,
     elasticsearch_client_request_timeout integer DEFAULT 0 NOT NULL,
+    gitpod_enabled boolean DEFAULT false NOT NULL,
+    gitpod_url text DEFAULT 'https://gitpod.io/'::text,
+    CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
     CONSTRAINT check_d03919528d CHECK ((char_length(container_registry_vendor) <= 255)),
@@ -11199,12 +11202,59 @@ CREATE SEQUENCE public.dast_site_profiles_id_seq
 
 ALTER SEQUENCE public.dast_site_profiles_id_seq OWNED BY public.dast_site_profiles.id;
 
+CREATE TABLE public.dast_site_tokens (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    expired_at timestamp with time zone,
+    token text NOT NULL,
+    url text NOT NULL,
+    CONSTRAINT check_02a6bf20a7 CHECK ((char_length(token) <= 255)),
+    CONSTRAINT check_69ab8622a6 CHECK ((char_length(url) <= 255))
+);
+
+CREATE SEQUENCE public.dast_site_tokens_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.dast_site_tokens_id_seq OWNED BY public.dast_site_tokens.id;
+
+CREATE TABLE public.dast_site_validations (
+    id bigint NOT NULL,
+    dast_site_token_id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    validation_started_at timestamp with time zone,
+    validation_passed_at timestamp with time zone,
+    validation_failed_at timestamp with time zone,
+    validation_last_retried_at timestamp with time zone,
+    validation_strategy smallint NOT NULL,
+    url_base text NOT NULL,
+    url_path text NOT NULL,
+    CONSTRAINT check_13b34efe4b CHECK ((char_length(url_path) <= 255)),
+    CONSTRAINT check_cd3b538210 CHECK ((char_length(url_base) <= 255))
+);
+
+CREATE SEQUENCE public.dast_site_validations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.dast_site_validations_id_seq OWNED BY public.dast_site_validations.id;
+
 CREATE TABLE public.dast_sites (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     url text NOT NULL,
+    dast_site_validation_id bigint,
     CONSTRAINT check_46df8b449c CHECK ((char_length(url) <= 255))
 );
 
@@ -15492,6 +15542,7 @@ CREATE TABLE public.security_findings (
     severity smallint NOT NULL,
     confidence smallint NOT NULL,
     project_fingerprint text NOT NULL,
+    deduplicated boolean DEFAULT false NOT NULL,
     CONSTRAINT check_b9508c6df8 CHECK ((char_length(project_fingerprint) <= 40))
 );
 
@@ -16277,7 +16328,8 @@ CREATE TABLE public.user_preferences (
     tab_width smallint,
     feature_filter_type bigint,
     experience_level smallint,
-    view_diffs_file_by_file boolean DEFAULT false NOT NULL
+    view_diffs_file_by_file boolean DEFAULT false NOT NULL,
+    gitpod_enabled boolean DEFAULT false NOT NULL
 );
 
 CREATE SEQUENCE public.user_preferences_id_seq
@@ -17160,6 +17212,10 @@ ALTER TABLE ONLY public.custom_emoji ALTER COLUMN id SET DEFAULT nextval('public
 ALTER TABLE ONLY public.dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('public.dast_scanner_profiles_id_seq'::regclass);
 
 ALTER TABLE ONLY public.dast_site_profiles ALTER COLUMN id SET DEFAULT nextval('public.dast_site_profiles_id_seq'::regclass);
+
+ALTER TABLE ONLY public.dast_site_tokens ALTER COLUMN id SET DEFAULT nextval('public.dast_site_tokens_id_seq'::regclass);
+
+ALTER TABLE ONLY public.dast_site_validations ALTER COLUMN id SET DEFAULT nextval('public.dast_site_validations_id_seq'::regclass);
 
 ALTER TABLE ONLY public.dast_sites ALTER COLUMN id SET DEFAULT nextval('public.dast_sites_id_seq'::regclass);
 
@@ -18189,6 +18245,12 @@ ALTER TABLE ONLY public.dast_scanner_profiles
 
 ALTER TABLE ONLY public.dast_site_profiles
     ADD CONSTRAINT dast_site_profiles_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.dast_site_tokens
+    ADD CONSTRAINT dast_site_tokens_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.dast_site_validations
+    ADD CONSTRAINT dast_site_validations_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.dast_sites
     ADD CONSTRAINT dast_sites_pkey PRIMARY KEY (id);
@@ -19780,6 +19842,14 @@ CREATE INDEX index_dast_site_profiles_on_dast_site_id ON public.dast_site_profil
 
 CREATE UNIQUE INDEX index_dast_site_profiles_on_project_id_and_name ON public.dast_site_profiles USING btree (project_id, name);
 
+CREATE INDEX index_dast_site_tokens_on_project_id ON public.dast_site_tokens USING btree (project_id);
+
+CREATE INDEX index_dast_site_validations_on_dast_site_token_id ON public.dast_site_validations USING btree (dast_site_token_id);
+
+CREATE INDEX index_dast_site_validations_on_url_base ON public.dast_site_validations USING btree (url_base);
+
+CREATE INDEX index_dast_sites_on_dast_site_validation_id ON public.dast_sites USING btree (dast_site_validation_id);
+
 CREATE UNIQUE INDEX index_dast_sites_on_project_id_and_url ON public.dast_sites USING btree (project_id, url);
 
 CREATE INDEX index_dependency_proxy_blobs_on_group_id_and_file_name ON public.dependency_proxy_blobs USING btree (group_id, file_name);
@@ -21012,7 +21082,7 @@ CREATE INDEX index_security_findings_on_confidence ON public.security_findings U
 
 CREATE INDEX index_security_findings_on_project_fingerprint ON public.security_findings USING btree (project_fingerprint);
 
-CREATE INDEX index_security_findings_on_scan_id ON public.security_findings USING btree (scan_id);
+CREATE INDEX index_security_findings_on_scan_id_and_deduplicated ON public.security_findings USING btree (scan_id, deduplicated);
 
 CREATE INDEX index_security_findings_on_scanner_id ON public.security_findings USING btree (scanner_id);
 
@@ -21748,6 +21818,9 @@ ALTER TABLE ONLY public.merge_requests
 
 ALTER TABLE ONLY public.user_interacted_projects
     ADD CONSTRAINT fk_0894651f08 FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.dast_sites
+    ADD CONSTRAINT fk_0a57f2271b FOREIGN KEY (dast_site_validation_id) REFERENCES public.dast_site_validations(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.web_hooks
     ADD CONSTRAINT fk_0c8ca6d9d1 FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
@@ -22531,6 +22604,9 @@ ALTER TABLE ONLY public.lfs_file_locks
 
 ALTER TABLE ONLY public.project_alerting_settings
     ADD CONSTRAINT fk_rails_27a84b407d FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.dast_site_validations
+    ADD CONSTRAINT fk_rails_285c617324 FOREIGN KEY (dast_site_token_id) REFERENCES public.dast_site_tokens(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.resource_state_events
     ADD CONSTRAINT fk_rails_29af06892a FOREIGN KEY (issue_id) REFERENCES public.issues(id) ON DELETE CASCADE;
@@ -23458,6 +23534,9 @@ ALTER TABLE ONLY public.merge_request_metrics
 
 ALTER TABLE ONLY public.draft_notes
     ADD CONSTRAINT fk_rails_e753681674 FOREIGN KEY (merge_request_id) REFERENCES public.merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.dast_site_tokens
+    ADD CONSTRAINT fk_rails_e84f721a8e FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.group_deploy_keys_groups
     ADD CONSTRAINT fk_rails_e87145115d FOREIGN KEY (group_id) REFERENCES public.namespaces(id) ON DELETE CASCADE;

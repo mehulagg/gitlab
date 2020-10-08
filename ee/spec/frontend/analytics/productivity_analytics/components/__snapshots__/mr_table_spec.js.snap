@@ -36,15 +36,24 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
               Time to merge
             </span>
              
-            <gl-deprecated-dropdown-stub
+            <gl-dropdown-stub
+              category="tertiary"
               class="w-100 metric-col"
+              headertext=""
               menu-class="w-100 mw-100"
+              size="medium"
               text="Time from first comment to last commit"
-              toggle-class="dropdown-menu-toggle w-100"
+              toggleclass="dropdown-menu-toggle w-100"
+              variant="default"
             >
-              <gl-deprecated-dropdown-item-stub
+              <gl-dropdown-item-stub
                 active-class="is-active"
+                avatarurl=""
                 class="w-100"
+                iconcolor=""
+                iconname=""
+                iconrightname=""
+                secondarytext=""
               >
                 <span
                   class="d-flex"
@@ -58,10 +67,15 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                   Time from first commit until first comment
                 
                 </span>
-              </gl-deprecated-dropdown-item-stub>
-              <gl-deprecated-dropdown-item-stub
+              </gl-dropdown-item-stub>
+              <gl-dropdown-item-stub
                 active-class="is-active"
+                avatarurl=""
                 class="w-100"
+                iconcolor=""
+                iconname=""
+                iconrightname=""
+                secondarytext=""
               >
                 <span
                   class="d-flex"
@@ -75,10 +89,15 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                   Time from first comment to last commit
                 
                 </span>
-              </gl-deprecated-dropdown-item-stub>
-              <gl-deprecated-dropdown-item-stub
+              </gl-dropdown-item-stub>
+              <gl-dropdown-item-stub
                 active-class="is-active"
+                avatarurl=""
                 class="w-100"
+                iconcolor=""
+                iconname=""
+                iconrightname=""
+                secondarytext=""
               >
                 <span
                   class="d-flex"
@@ -92,8 +111,8 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                   Time from last commit to merge
                 
                 </span>
-              </gl-deprecated-dropdown-item-stub>
-            </gl-deprecated-dropdown-stub>
+              </gl-dropdown-item-stub>
+            </gl-dropdown-stub>
           </div>
         </div>
       </div>

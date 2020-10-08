@@ -16,7 +16,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
 
         namespace :quality do
-          resources :test_cases, only: [:index]
+          resources :test_cases, only: [:index, :new]
         end
 
         resources :autocomplete_sources, only: [] do
@@ -68,6 +68,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :vulnerabilities, only: [:show] do
             member do
               get :discussions, format: :json
+              post :create_issue, format: :json
             end
 
             scope module: :vulnerabilities do

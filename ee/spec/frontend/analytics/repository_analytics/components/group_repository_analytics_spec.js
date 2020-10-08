@@ -90,7 +90,7 @@ describe('Group repository analytics app', () => {
         });
 
         it('renders primary action as a link with one project ID as a parameter', () => {
-          const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&project_ids[]=${groupProjectsData[0].id}`;
+          const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&project_ids=${groupProjectsData[0].id}`;
 
           expect(findCodeCoverageDownloadButton().attributes('href')).toBe(expectedPath);
         });
@@ -111,7 +111,7 @@ describe('Group repository analytics app', () => {
     });
 
     describe('when selecting a date range', () => {
-      const projectIdParams = '&project_ids[]=1&project_ids[]=2';
+      const projectIdParams = '&project_ids=1,2';
 
       it.each`
         date  | expected

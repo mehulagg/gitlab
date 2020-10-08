@@ -34,9 +34,7 @@ describe('EpicsSwimlanes', () => {
     const store = createStore();
     const defaultProps = {
       lists: mockListsWithModel,
-      boardId: '1',
       disabled: false,
-      rootPath: '/',
     };
 
     wrapper = shallowMount(EpicsSwimlanes, {

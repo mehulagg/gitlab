@@ -37,10 +37,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    rootPath: {
-      type: String,
-      required: true,
-    },
     canAdminList: {
       type: Boolean,
       required: false,
@@ -157,7 +153,6 @@ export default {
         :issues="getIssuesByEpic(list.id, epic.id)"
         :is-loading="isLoadingIssues"
         :disabled="disabled"
-        :root-path="rootPath"
         :epic-id="epic.id"
         :epic-is-confidential="epic.confidential"
         :can-admin-list="canAdminList"

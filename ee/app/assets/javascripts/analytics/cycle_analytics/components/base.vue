@@ -71,6 +71,7 @@ export default {
       'endDate',
       'medians',
       'isLoadingValueStreams',
+      'selectedStageError',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -296,6 +297,7 @@ export default {
           :custom-stage-form-active="customStageFormActive"
           :current-stage-events="currentStageEvents"
           :no-data-svg-path="noDataSvgPath"
+          :empty-state-message="selectedStageError"
         >
           <template #nav>
             <stage-table-nav

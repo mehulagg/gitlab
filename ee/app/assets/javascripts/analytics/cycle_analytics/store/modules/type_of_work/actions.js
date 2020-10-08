@@ -1,8 +1,7 @@
 import Api from 'ee/api';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import * as types from './mutation_types';
-import { handleErrorOrRethrow } from '../../../utils';
+import { throwIfUserForbidden, checkForDataError, flashErrorIfStatusNotOk } from '../../../utils';
 
 export const setLoading = ({ commit }, loading) => commit(types.SET_LOADING, loading);
 
@@ -12,8 +11,11 @@ export const receiveTopRankedGroupLabelsSuccess = ({ commit, dispatch }, data) =
 };
 
 export const receiveTopRankedGroupLabelsError = ({ commit }, error) => {
+  flashErrorIfStatusNotOk({
+    error,
+    message: __('There was an error fetching the top labels for the selected group'),
+  });
   commit(types.RECEIVE_TOP_RANKED_GROUP_LABELS_ERROR, error);
-  createFlash(__('There was an error fetching the top labels for the selected group'));
 };
 
 export const fetchTopRankedGroupLabels = ({ dispatch, commit, state, rootGetters }) => {
@@ -40,18 +42,20 @@ export const fetchTopRankedGroupLabels = ({ dispatch, commit, state, rootGetters
     milestone_title,
     assignee_username,
   })
+    .then(checkForDataError)
     .then(({ data }) => dispatch('receiveTopRankedGroupLabelsSuccess', data))
-    .catch(error =>
-      handleErrorOrRethrow({
-        error,
-        action: () => dispatch('receiveTopRankedGroupLabelsError', error),
-      }),
-    );
+    .catch(error => {
+      throwIfUserForbidden(error);
+      return dispatch('receiveTopRankedGroupLabelsError', error);
+    });
 };
 
 export const receiveTasksByTypeDataError = ({ commit }, error) => {
+  flashErrorIfStatusNotOk({
+    error,
+    message: __('There was an error fetching data for the tasks by type chart'),
+  });
   commit(types.RECEIVE_TASKS_BY_TYPE_DATA_ERROR, error);
-  createFlash(__('There was an error fetching data for the tasks by type chart'));
 };
 
 export const fetchTasksByTypeData = ({ dispatch, commit, state, rootGetters }) => {
@@ -84,6 +88,7 @@ export const fetchTasksByTypeData = ({ dispatch, commit, state, rootGetters }) =
       // until we resolve: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34524
       label_ids: selectedLabelIds,
     })
+      .then(checkForDataError)
       .then(({ data }) => commit(types.RECEIVE_TASKS_BY_TYPE_DATA_SUCCESS, data))
       .catch(error => dispatch('receiveTasksByTypeDataError', error));
   }

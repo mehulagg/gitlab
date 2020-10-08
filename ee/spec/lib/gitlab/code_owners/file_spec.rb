@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Gitlab::CodeOwners::File do
   include FakeBlobHelpers
 
+  # 'project' is required for the #fake_blob helper
+  #
   let(:project) { build(:project) }
   let(:file_content) do
     File.read(Rails.root.join('ee', 'spec', 'fixtures', 'codeowners_example'))

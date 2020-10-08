@@ -81,6 +81,7 @@ module EE
       has_many :vulnerability_exports, class_name: 'Vulnerabilities::Export'
 
       has_many :dast_site_profiles
+      has_many :dast_site_tokens
       has_many :dast_sites
 
       has_many :protected_environments

@@ -1,5 +1,5 @@
 <script>
-import { GlIcon, GlSearchBoxByType, GlDeprecatedDropdown, GlDeprecatedButton } from '@gitlab/ui';
+import { GlIcon, GlSearchBoxByType, GlDropdown } from '@gitlab/ui';
 import { mapActions, mapState } from 'vuex';
 import { __, n__ } from '~/locale';
 import { SELECTIVE_SYNC_NAMESPACES } from '../constants';
@@ -9,8 +9,7 @@ export default {
   components: {
     GlIcon,
     GlSearchBoxByType,
-    GlDeprecatedDropdown,
-    GlDeprecatedButton,
+    GlDropdown,
   },
   props: {
     selectedNamespaces: {
@@ -48,14 +47,21 @@ export default {
 </script>
 
 <template>
-  <gl-deprecated-dropdown :text="dropdownTitle" @show="fetchSyncNamespaces('')">
-    <gl-search-box-by-type class="gl-m-3" :debounce="500" @input="fetchSyncNamespaces" />
-    <li v-for="namespace in synchronizationNamespaces" :key="namespace.id">
-      <gl-deprecated-button class="d-flex align-items-center" @click="toggleNamespace(namespace)">
-        <gl-icon :class="[{ invisible: !isSelected(namespace) }]" name="mobile-issue-close" />
-        <span class="ml-1">{{ namespace.name }}</span>
-      </gl-deprecated-button>
-    </li>
-    <div v-if="noSyncNamespaces" class="text-secondary p-2">{{ __('Nothing found…') }}</div>
-  </gl-deprecated-dropdown>
+  <gl-dropdown :text="dropdownTitle" @show="fetchSyncNamespaces('')">
+    <gl-search-box-by-type class=".gl-m-3" :debounce="500" @input="fetchSyncNamespaces" />
+    <button
+      v-for="namespace in synchronizationNamespaces"
+      :key="namespace.id"
+      class="dropdown-item"
+      type="button"
+      @click="toggleNamespace(namespace)"
+    >
+      <gl-icon
+        :class="[{ 'gl-visibility-hidden': !isSelected(namespace) }]"
+        name="mobile-issue-close"
+      />
+      <span class="gl-ml-2">{{ namespace.name }}</span>
+    </button>
+    <div v-if="noSyncNamespaces" class="gl-text-gray-500 gl-p-3">{{ __('Nothing found…') }}</div>
+  </gl-dropdown>
 </template>

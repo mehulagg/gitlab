@@ -7,9 +7,8 @@ module Gitlab
 
       SECTION_HEADER_REGEX = /\[(.*?)\]/.freeze
 
-      def initialize(blob, project = nil)
+      def initialize(blob)
         @blob = blob
-        @project = project
       end
 
       def parsed_data

@@ -21,15 +21,11 @@ module EpicTreeSorting
   included do
     extend ::Gitlab::Utils::Override
 
-    override :move_sequence
-    def move_sequence(start_pos, end_pos, delta, include_self = false)
-      items_to_update = scoped_items
+    override :update_relative_siblings
+    def update_relative_siblings(relation, range, delta)
+      items_to_update = relation
         .select(:id, :object_type)
-        .where('relative_position BETWEEN ? AND ?', start_pos, end_pos)
-
-      unless include_self
-        items_to_update = relative_siblings(items_to_update)
-      end
+        .where(relative_position: range)
 
       items_to_update.group_by { |item| item.object_type }.each do |type, group_items|
         ids = group_items.map(&:id)
@@ -38,11 +34,13 @@ module EpicTreeSorting
       end
     end
 
-    private
+    override :exclude_self
+    def exclude_self(relation, excluded: self)
+      return relation unless excluded&.id.present?
 
-    override :relative_siblings
-    def relative_siblings(relation = scoped_items)
-      relation.where.not('object_type = ? AND id = ?', self.class.table_name.singularize, self.id)
+      object_type = excluded.try(:object_type) || excluded.class.table_name.singularize
+
+      relation.where.not('object_type = ? AND id = ?', object_type, excluded.id)
     end
   end
 end

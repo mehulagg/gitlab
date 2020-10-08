@@ -292,15 +292,17 @@ describe('Cycle analytics actions', () => {
   });
 
   describe('receiveStageDataError', () => {
-    beforeEach(() => {});
+    const message = 'fake error';
+
     it(`commits the ${types.RECEIVE_STAGE_DATA_ERROR} mutation`, () => {
       return testAction(
         actions.receiveStageDataError,
-        null,
+        { message },
         state,
         [
           {
             type: types.RECEIVE_STAGE_DATA_ERROR,
+            payload: message,
           },
         ],
         [],
@@ -308,7 +310,7 @@ describe('Cycle analytics actions', () => {
     });
 
     it('will flash an error message', () => {
-      actions.receiveStageDataError({ commit: () => {} });
+      actions.receiveStageDataError({ commit: () => {} }, {});
       shouldFlashAMessage('There was an error fetching data for the selected stage');
     });
   });
@@ -754,11 +756,8 @@ describe('Cycle analytics actions', () => {
         actions.fetchStageMedianValues,
         null,
         state,
-        [],
-        [
-          { type: 'requestStageMedianValues' },
-          { type: 'receiveStageMedianValuesSuccess', payload: fetchMedianResponse },
-        ],
+        [{ type: types.RECEIVE_STAGE_MEDIANS_SUCCESS, payload: fetchMedianResponse }],
+        [{ type: 'requestStageMedianValues' }],
       );
     });
 
@@ -779,6 +778,25 @@ describe('Cycle analytics actions', () => {
             id: hiddenStage.id,
           });
         });
+    });
+
+    describe(`Status ${httpStatusCodes.OK} and error message in response`, () => {
+      const dataError = 'Too much data';
+      const payload = activeStages.map(({ slug: id }) => ({ value: null, id, error: dataError }));
+
+      beforeEach(() => {
+        mock.onGet(endpoints.stageMedian).reply(httpStatusCodes.OK, { error: dataError });
+      });
+
+      it(`dispatches the 'RECEIVE_STAGE_MEDIANS_SUCCESS' with ${dataError}`, () => {
+        return testAction(
+          actions.fetchStageMedianValues,
+          null,
+          state,
+          [{ type: types.RECEIVE_STAGE_MEDIANS_SUCCESS, payload }],
+          [{ type: 'requestStageMedianValues' }],
+        );
+      });
     });
 
     describe('with a failing request', () => {
@@ -805,11 +823,12 @@ describe('Cycle analytics actions', () => {
     it(`commits the ${types.RECEIVE_STAGE_MEDIANS_ERROR} mutation`, () =>
       testAction(
         actions.receiveStageMedianValuesError,
-        null,
+        {},
         state,
         [
           {
             type: types.RECEIVE_STAGE_MEDIANS_ERROR,
+            payload: {},
           },
         ],
         [],
@@ -818,18 +837,6 @@ describe('Cycle analytics actions', () => {
     it('will flash an error message', () => {
       actions.receiveStageMedianValuesError({ commit: () => {} });
       shouldFlashAMessage('There was an error fetching median data for stages');
-    });
-  });
-
-  describe('receiveStageMedianValuesSuccess', () => {
-    it(`commits the ${types.RECEIVE_STAGE_MEDIANS_SUCCESS} mutation`, () => {
-      return testAction(
-        actions.receiveStageMedianValuesSuccess,
-        { ...stageData },
-        state,
-        [{ type: types.RECEIVE_STAGE_MEDIANS_SUCCESS, payload: { events: [] } }],
-        [],
-      );
     });
   });
 

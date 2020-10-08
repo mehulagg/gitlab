@@ -160,7 +160,38 @@ describe('Feature flags strategy', () => {
   });
 
   describe('with a strategy', () => {
-    describe('with scopes defined', () => {
+    describe('with a single environment scope defined', () => {
+      let strategy;
+
+      beforeEach(() => {
+        strategy = {
+          name: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+          parameters: { percentage: '50' },
+          scopes: [{ environmentScope: 'production' }],
+        };
+        const propsData = { strategy, index: 0, endpoint: '' };
+        factory({ propsData, provide });
+      });
+
+      it('should revert to all-environments scope when last scope is removed', () => {
+        const token = wrapper.find(GlToken);
+        token.vm.$emit('close');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.findAll(GlToken)).toHaveLength(0);
+          expect(wrapper.emitted('change')).toEqual([
+            [
+              {
+                name: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+                parameters: { percentage: '50', groupId: PERCENT_ROLLOUT_GROUP_ID },
+                scopes: [{ environmentScope: '*' }],
+              },
+            ],
+          ]);
+        });
+      });
+    });
+
+    describe('with an all-environments scope defined', () => {
       let strategy;
 
       beforeEach(() => {

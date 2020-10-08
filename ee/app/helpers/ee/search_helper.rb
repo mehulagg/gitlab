@@ -30,7 +30,7 @@ module EE
 
     override :project_autocomplete
     def project_autocomplete
-      return super unless @project && @project.feature_available?(:feature_flags)
+      return super unless @project && @project.feature_available?(:repository)
 
       super + [{ category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }]
     end

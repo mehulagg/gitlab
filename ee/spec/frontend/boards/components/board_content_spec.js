@@ -15,9 +15,6 @@ describe('ee/BoardContent', () => {
         lists: [],
         canAdminList: false,
         disabled: false,
-        issueLinkBase: '',
-        rootPath: '',
-        boardId: '',
       },
       stubs: {
         'board-content-sidebar': BoardContentSidebar,

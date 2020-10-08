@@ -11,8 +11,6 @@ RSpec.describe FeatureFlagSummaryEntity do
 
   before do
     project.add_developer(user)
-
-    stub_licensed_features(feature_flags: true)
   end
 
   subject { entity.as_json }

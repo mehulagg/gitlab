@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { __ } from '~/locale';
 import LicenseCardBody from './license_card_body.vue';
@@ -9,8 +9,8 @@ export default {
   name: 'LicenseCard',
   components: {
     LicenseCardBody,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
   },
   props: {
     license: {
@@ -55,26 +55,21 @@ export default {
           }}
         </h4>
 
-        <gl-deprecated-dropdown
-          right
-          class="js-manage-license"
-          :text="__('Manage')"
-          :disabled="isRemoving"
-        >
-          <gl-deprecated-dropdown-item
+        <gl-dropdown right class="js-manage-license" :text="__('Manage')" :disabled="isRemoving">
+          <gl-dropdown-item
             v-if="isCurrentLicense"
             class="js-download-license"
             :href="downloadLicensePath"
           >
             {{ __('Download license') }}
-          </gl-deprecated-dropdown-item>
-          <gl-deprecated-dropdown-item
+          </gl-dropdown-item>
+          <gl-dropdown-item
             class="js-delete-license text-danger"
             @click="confirmDeleteLicense(license)"
           >
             {{ __('Delete license') }}
-          </gl-deprecated-dropdown-item>
-        </gl-deprecated-dropdown>
+          </gl-dropdown-item>
+        </gl-dropdown>
       </div>
     </div>
 

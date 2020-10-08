@@ -72,7 +72,7 @@ class License < ApplicationRecord
     epics
     extended_audit_events
     external_authorization_service_api_management
-    feature_flags
+    feature_flags_related_issues
     file_locks
     geo
     generic_alert_fingerprinting

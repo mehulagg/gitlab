@@ -1,5 +1,6 @@
 mutation dastSiteTokenCreate($projectFullPath: ID!, $targetUrl: String!) {
   dastSiteTokenCreate(input: { projectFullPath: $projectFullPath, targetUrl: $targetUrl }) {
+    id
     token
     errors
   }

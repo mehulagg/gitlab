@@ -6,7 +6,7 @@ module EE
       module NotificationPayloadParser
         extend ::Gitlab::Utils::Override
 
-        EXCLUDED_PAYLOAD_FINGERPRINT_PARAMS = %w(start_time hosts).freeze
+        EXCLUDED_PAYLOAD_FINGERPRINT_PARAMS = %w(start_time end_time hosts).freeze
 
         # Currently we use full payloads, when generating a fingerprint.
         # This results in a quite strict fingerprint.

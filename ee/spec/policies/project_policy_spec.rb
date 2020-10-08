@@ -22,14 +22,14 @@ RSpec.describe ProjectPolicy do
 
     let(:additional_developer_permissions) do
       %i[
-        admin_vulnerability_feedback read_project_security_dashboard read_feature_flag
+        admin_vulnerability_feedback read_project_security_dashboard
         read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
         admin_vulnerability_issue_link read_merge_train
       ]
     end
 
     let(:additional_maintainer_permissions) do
-      %i[push_code_to_protected_branches admin_feature_flags_client modify_auto_fix_setting]
+      %i[push_code_to_protected_branches modify_auto_fix_setting]
     end
 
     let(:auditor_permissions) do
@@ -622,34 +622,47 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'read_feature_flag' do
-    context 'with admin' do
-      let(:current_user) { admin }
+  describe 'admin_feature_flags_issue_links' do
+    before do
+      stub_licensed_features(feature_flags_related_issues: true)
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:admin_feature_flags_issue_links) }
 
       context 'when repository is disabled' do
         before do
           project.project_feature.update!(
-            # Disable merge_requests and builds as well, since merge_requests and
-            # builds cannot have higher visibility than repository.
             merge_requests_access_level: ProjectFeature::DISABLED,
             builds_access_level: ProjectFeature::DISABLED,
-            repository_access_level: ProjectFeature::DISABLED)
+            repository_access_level: ProjectFeature::DISABLED
+          )
         end
 
-        it { is_expected.to be_disallowed(:read_feature_flag) }
+        it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
       end
     end
 
     context 'with developer' do
       let(:current_user) { developer }
 
-      context 'when feature flags features is not available' do
+      it { is_expected.to be_allowed(:admin_feature_flags_issue_links) }
+
+      context 'when feature is unlicensed' do
         before do
-          stub_licensed_features(feature_flags: false)
+          stub_licensed_features(feature_flags_related_issues: false)
         end
 
-        it { is_expected.to be_disallowed(:read_feature_flag) }
+        it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
       end
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_disallowed(:admin_feature_flags_issue_links) }
     end
   end
 
@@ -1336,7 +1349,7 @@ RSpec.describe ProjectPolicy do
     before do
       allow(project.root_namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
       allow(project).to receive(:design_management_enabled?).and_return(true)
-      stub_licensed_features(security_dashboard: true, license_scanning: true, feature_flags: true)
+      stub_licensed_features(security_dashboard: true, license_scanning: true)
     end
 
     context 'when the group has exceeded its storage limit' do
