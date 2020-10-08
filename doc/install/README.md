@@ -89,6 +89,38 @@ the above methods, provided the cloud provider supports it.
 - _Testing only!_ [DigitalOcean and Docker Machine](digitaloceandocker.md):
   Quickly test any version of GitLab on DigitalOcean using Docker Machine.
 
-## Securing your GitLab installation
+## Next steps
 
-After completing your installation, check out our [recommended practices to secure your GitLab instance](../security/README.md#securing-your-gitlab-installation).
+Here are a few resources you might want to check out after completing the
+installation:
+
+- [Secure GitLab](../security/README.md#securing-your-gitlab-installation):
+  Recommended practices to secure your GitLab instance.
+- [Back up and restore GitLab](../raketasks/backup_restore.md): Learn the different
+  ways you can back up or restore GitLab.
+- [Upload a license](../../user/admin_area/license.md):
+  Activate all GitLab Enterprise Edition functionality with a license.
+- [Pricing](https://about.gitlab.com/pricing/): Pricing for the different tiers.
+- [Scaling GitLab](../../administration/reference_architectures/index.md):
+  GitLab supports several different types of clustering.
+- [Geo replication](../../administration/geo/index.md):
+  Geo is the solution for widely distributed development teams.
+- [Advanced Search](../integration/elasticsearch.md): Leverage Elasticsearch for
+  faster, more advanced code search across your entire GitLab instance.
+- [GitLab Pages](../administration/pages/index.md): Configure GitLab Pages to
+  allow hosting of static sites.
+- [Set up runners](https://docs.gitlab.com/runner/): Set up one or more GitLab
+  Runners, the agents that are responsible for all of GitLab's CI/CD features.
+- [LDAP](../administration/auth/ldap/index.md): Configure LDAP to be used as
+  an authentication mechanism for GitLab.
+- [SMTP](https://docs.gitlab.com/omnibus/settings/smtp.html): Configure SMTP
+  for proper email notifications support.
+- [GitLab Registry](../administration/packages/container_registry.md): With the
+  GitLab Container Registry, every project can have its own space to store Docker
+  images.
+- [Upgrade GitLab](../update/README.md): Every 22nd of the month, a new feature
+  rich GitLab version is released. Learn how to upgrade to it, or an interim one
+  that is a security fix.
+- [Release and maintenance policy](../policy/maintenance.md): Learn about GitLab's
+  policies governing version naming, as well as release pace for major, minor, patch,
+  and security releases.
