@@ -17226,9 +17226,6 @@ msgstr ""
 msgid "New branch unavailable"
 msgstr ""
 
-msgid "New burndown chart"
-msgstr ""
-
 msgid "New changes were added. %{linkStart}Reload the page to review them%{linkEnd}"
 msgstr ""
 
@@ -17875,9 +17872,6 @@ msgid "Off"
 msgstr ""
 
 msgid "Oh no!"
-msgstr ""
-
-msgid "Old burndown chart"
 msgstr ""
 
 msgid "Oldest first"

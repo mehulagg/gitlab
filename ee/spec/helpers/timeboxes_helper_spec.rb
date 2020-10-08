@@ -4,7 +4,8 @@ require 'spec_helper'
 
 RSpec.describe TimeboxesHelper do
   describe '#show_burndown_placeholder?' do
-    let(:user) { build(:user) }
+    let_it_be(:user) { build(:user) }
+
     subject { helper.show_burndown_placeholder?(milestone) }
 
     before do

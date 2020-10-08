@@ -184,11 +184,6 @@ describe('burndown_chart', () => {
       expect(findBurnupChart().props('issuesSelected')).toBe(false);
     });
 
-    it('shows old/new burndown buttons', () => {
-      expect(findOldBurndownChartButton().exists()).toBe(true);
-      expect(findNewBurndownChartButton().exists()).toBe(true);
-    });
-
     it('uses burndown data computed from burnup data', () => {
       createComponent({
         data: {
@@ -219,6 +214,13 @@ describe('burndown_chart', () => {
 
       expect(findOldBurndownChartButton().exists()).toBe(false);
       expect(findNewBurndownChartButton().exists()).toBe(false);
+    });
+
+    it('shows old/new burndown buttons if prop true', () => {
+      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
+
+      expect(findOldBurndownChartButton().exists()).toBe(true);
+      expect(findNewBurndownChartButton().exists()).toBe(true);
     });
 
     it('calls fetchLegacyBurndownEvents, but only once', () => {
