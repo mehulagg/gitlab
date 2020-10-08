@@ -16,6 +16,35 @@ RSpec.describe ApplicationHelper do
       it 'returns nil when database is not read_only' do
         expect(helper.read_only_message).to be_nil
       end
+
+      context 'maintenance mode' do
+        context 'enabled' do
+          before do
+            stub_application_setting(maintenance_mode: true)
+          end
+
+          it 'returns a message' do
+            expect(helper.read_only_message).to match('This action is not allowed because this GitLab instance is currently in read-only mode')
+          end
+
+          # fix repitition of strings
+          it 'adds user set custom maintenance mode message' do
+            custom_message = 'Maintenance window ends at 00:00.'
+            stub_application_setting(maintenance_mode_message: custom_message)
+
+            expect(helper.read_only_message).to match(
+              /This action is not allowed because this GitLab instance is currently in read-only mode{...}Maintenance window ends at 00:00/)
+          end
+        end
+
+        context 'disabled' do
+          it 'returns nil' do
+            stub_application_setting(maintenance_mode: false)
+
+            expect(helper.read_only_message).to be_nil
+          end
+        end
+      end
     end
 
     context 'when in a Geo Secondary' do

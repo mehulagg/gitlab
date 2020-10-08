@@ -11,8 +11,27 @@ module EE
 
     override :read_only_message
     def read_only_message
-      return super unless ::Gitlab::Geo.secondary?
+      return maintenance_mode_message if maintenance_mode?
+      return geo_secondary_read_only_message if ::Gitlab::Geo.secondary?
 
+      super
+    end
+
+    def maintenance_mode_message
+      message = @limited_actions_message ? s_('This action is not allowed because this GitLab instance is currently in read-only mode.') : s_(custom_maintenance_mode_message)
+
+      html = tag.div do
+        tag.p(class: 'gl-mb-3') do
+          concat(sprite_icon('information-o', css_class: 'gl-icon gl-mr-3'))
+          concat(s_('This action is not allowed because this GitLab instance is currently in %{b_open}read-only%{b_close} mode.').html_safe % { b_open: '<b>'.html_safe, b_close: '</b>'.html_safe })
+          concat(" #{message}")
+        end
+      end
+
+      html
+    end
+
+    def geo_secondary_read_only_message
       message = @limited_actions_message ? s_('Geo|You may be able to make a limited amount of changes or perform a limited amount of actions on this page.') : s_('Geo|If you want to make changes, you must visit the primary site.')
 
       message = "#{message} #{lag_message}".html_safe if lag_message
@@ -120,6 +139,14 @@ module EE
     end
 
     private
+
+    def maintenance_mode?
+      ::Gitlab::CurrentSettings.current_application_settings.maintenance_mode
+    end
+
+    def custom_maintenance_mode_message
+      ::Gitlab::CurrentSettings.current_application_settings.maintenance_mode_message
+    end
 
     def appearance
       ::Appearance.current
