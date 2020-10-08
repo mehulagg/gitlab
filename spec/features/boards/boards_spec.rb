@@ -667,7 +667,7 @@ RSpec.describe 'Issue Boards', :js do
     end
   end
 
-  def remove_list()
+  def remove_list
     page.within(find('.board:nth-child(2)')) do
       find('button[title="List settings"]').click
     end
