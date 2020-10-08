@@ -156,9 +156,11 @@ have a [start or due date](#start-date-and-due-date), a
 
 ## Permissions
 
-Access to view an epic or an issue allows you to view the issue in the epic issue list.
+If you have access to view an epic and an issue added to that epic, you can view the issue in the
+epic's issue list.
 
-Access to edit an epic or an issue allows you to either add the issue to or remove it from the epic.
+If you have access to edit an epic and an issue added to that epic, you can add the issue to or
+remove it from the epic.
 
 Note that for a given group, the visibility of all projects must be the same as
 the group, or less restrictive. That means if you have access to a group's epic,
