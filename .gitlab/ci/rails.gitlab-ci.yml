@@ -308,6 +308,7 @@ db:rollback:
   script:
     - bundle exec rake db:migrate VERSION=20181228175414
     - bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
+    - source scripts/schema_changed.sh
 
 gitlab:setup:
   extends: .db-job-base
