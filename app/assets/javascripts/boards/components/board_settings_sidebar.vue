@@ -1,5 +1,5 @@
 <script>
-import { GlDrawer, GlLabel } from '@gitlab/ui';
+import { GlButton, GlDrawer, GlLabel } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { __ } from '~/locale';
 import boardsStore from '~/boards/stores/boards_store';
@@ -7,7 +7,6 @@ import eventHub from '~/sidebar/event_hub';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { LIST } from '~/boards/constants';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import BoardDelete from './board_delete';
 
 // NOTE: need to revisit how we handle headerHeight, because we have so many different header and footer options.
 export default {
@@ -18,7 +17,7 @@ export default {
   label: 'label',
   labelListText: __('Label'),
   components: {
-    BoardDelete,
+    GlButton,
     GlDrawer,
     GlLabel,
     BoardSettingsSidebarWipLimit: () =>
@@ -71,6 +70,13 @@ export default {
     showScopedLabels(label) {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
+    deleteBoard() {
+      // eslint-disable-next-line no-alert
+      if (window.confirm(__('Are you sure you want to delete this list?'))) {
+        this.activeList.destroy();
+        this.unsetActiveId();
+      }
+    },
   },
 };
 </script>
@@ -100,16 +106,10 @@ export default {
         :board-list-type="boardListType"
       />
       <board-settings-sidebar-wip-limit :max-issue-count="activeList.maxIssueCount" />
-      <div class="gl-m-4">
-        <board-delete
-          v-if="canAdminList && !activeList.preset && activeList.id"
-          :list="activeList"
-          inline-template="true"
-        >
-          <gl-button variant="danger" category="secondary" icon="remove" @click.stop="deleteBoard"
-            >{{ __('Remove list') }}
-          </gl-button>
-        </board-delete>
+      <div v-if="canAdminList && !activeList.preset && activeList.id" class="gl-m-4">
+        <gl-button variant="danger" category="secondary" icon="remove" @click.stop="deleteBoard"
+          >{{ __('Remove list') }}
+        </gl-button>
       </div>
     </template>
   </gl-drawer>
