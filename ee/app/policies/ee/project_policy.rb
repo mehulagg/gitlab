@@ -6,6 +6,10 @@ module EE
     extend ::Gitlab::Utils::Override
 
     prepended do
+      desc "User is support bot"
+      with_options scope: :user
+      condition(:security_bot) { @user&.security_bot? }
+
       with_scope :subject
       condition(:repository_mirrors_enabled) { @subject.feature_available?(:repository_mirrors) }
 
@@ -204,6 +208,8 @@ module EE
         enable :admin_vulnerability
         enable :admin_vulnerability_issue_link
       end
+
+      rule {  }
 
       rule { issues_disabled & merge_requests_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:iteration))
