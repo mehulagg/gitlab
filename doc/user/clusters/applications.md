@@ -11,7 +11,7 @@ applications which can be added directly to your configured cluster. These
 applications are needed for [Review Apps](../../ci/review_apps/index.md) and
 [deployments](../../ci/environments/index.md) when using [Auto DevOps](../../topics/autodevops/index.md).
 You can install them after you [create a cluster](../project/clusters/add_remove_clusters.md). GitLab provides
-GitLab Managed Apps that can installed with [one-click](#installing-using-one-click) or [using CI/CD](#install-using-gitlab-cicd-alpha). 
+GitLab Managed Apps that can installed with [one-click](#install-with-one-click) or [using CI/CD](#install-using-gitlab-cicd-alpha). 
 
 ## Install with one click
 
