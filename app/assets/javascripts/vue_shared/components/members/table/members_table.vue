@@ -9,6 +9,7 @@ import CreatedAt from './created_at.vue';
 import ExpiresAt from './expires_at.vue';
 import MemberActionButtons from './member_action_buttons.vue';
 import MembersTableCell from './members_table_cell.vue';
+import ExpirationDatepicker from './expiration_datepicker.vue';
 
 export default {
   name: 'MembersTable',
@@ -20,6 +21,7 @@ export default {
     MembersTableCell,
     MemberSource,
     MemberActionButtons,
+    ExpirationDatepicker,
   },
   computed: {
     ...mapState(['members', 'tableFields']),
@@ -75,6 +77,12 @@ export default {
 
     <template #cell(expires)="{ item: { expiresAt } }">
       <expires-at :date="expiresAt" />
+    </template>
+
+    <template #cell(expiration)="{ item: member }">
+      <members-table-cell #default="{ permissions }" :member="member">
+        <expiration-datepicker v-if="permissions.canUpdate" :initial-date="member.expiresAt" />
+      </members-table-cell>
     </template>
 
     <template #cell(actions)="{ item: member }">
