@@ -268,13 +268,21 @@ module Vulnerabilities
         request: {
           headers: metadata.dig('evidence', 'request', 'headers') || [],
           method: metadata.dig('evidence', 'request', 'method'),
-          url: metadata.dig('evidence', 'request', 'url')
+          url: metadata.dig('evidence', 'request', 'url'),
+          body: metadata.dig('evidence', 'request', 'body')
         },
         response: {
           headers: metadata.dig('evidence', 'response', 'headers') || [],
           status_code: metadata.dig('evidence', 'response', 'status_code'),
-          reason_phrase: metadata.dig('evidence', 'response', 'reason_phrase')
-        }
+          reason_phrase: metadata.dig('evidence', 'response', 'reason_phrase'),
+          body: metadata.dig('evidence', 'response', 'body')
+        },
+        source: {
+          id: metadata.dig('evidence', 'source', 'id'),
+          name: metadata.dig('evidence', 'source', 'name'),
+          url: metadata.dig('evidence', 'source', 'url')
+        },
+        supporting_messages: metadata.dig('evidence', 'supporting_messages') || []
       }
     end
 
@@ -292,6 +300,10 @@ module Vulnerabilities
 
     def other_identifier_values
       identifiers.select(&:other?).map(&:name)
+    end
+
+    def assets
+      metadata.dig('assets') || []
     end
 
     alias_method :==, :eql? # eql? is necessary in some cases like array intersection
