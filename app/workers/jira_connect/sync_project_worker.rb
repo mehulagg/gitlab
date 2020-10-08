@@ -8,25 +8,21 @@ module JiraConnect
     feature_category :integrations
     idempotent!
 
-    MERGE_REQUEST_LIMIT = 50
+    MERGE_REQUEST_LIMIT = 400
 
     def perform(project_id)
       project = Project.find_by_id(project_id)
 
-      return if project.nil? || merge_request_limit_exceeded?(project)
+      return if project.nil?
 
       JiraConnect::SyncService.new(project).execute(merge_requests: merge_requests_to_sync(project))
     end
 
     private
 
-    def merge_requests_to_sync(project)
-      project.merge_requests.with_jira_issue_keys.with_states(:opened)
-    end
-
     # rubocop: disable CodeReuse/ActiveRecord
-    def merge_request_limit_exceeded?(project)
-      merge_requests_to_sync(project).limit(MERGE_REQUEST_LIMIT + 1).count > MERGE_REQUEST_LIMIT
+    def merge_requests_to_sync(project)
+      project.merge_requests.with_jira_issue_keys.with_states(:opened).limit(MERGE_REQUEST_LIMIT).order(id: :desc)
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end
