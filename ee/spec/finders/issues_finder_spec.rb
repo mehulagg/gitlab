@@ -121,6 +121,14 @@ RSpec.describe IssuesFinder do
             expect(issues).to contain_exactly(issue_1, issue_2, issue_subepic)
           end
         end
+
+        context 'filter issues not in the epic' do
+          let(:params) { { not: { epic_id: epic_1.id } } }
+
+          it 'returns issues not assigned to the epic' do
+            expect(issues).to contain_exactly(issue_2, issue_subepic)
+          end
+        end
       end
 
       context 'filter by iteration' do

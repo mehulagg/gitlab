@@ -75,5 +75,17 @@ module EE
         items.in_iterations(params.iterations)
       end
     end
+
+    def filter_negated_items(items)
+      items = by_negated_epic(items)
+
+      super(items)
+    end
+
+    def by_negated_epic(items)
+      return items unless not_params[:epic_id].present?
+
+      items.not_in_epics(not_params[:epic_id])
+    end
   end
 end
